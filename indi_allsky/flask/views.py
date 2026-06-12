@@ -5025,6 +5025,12 @@ class AjaxMiniVideoViewerView(BaseView):
         return jsonify(json_data)
 
 
+class ModernAdminView(TemplateView):
+    # Future entry point for the modern admin UI; keep it isolated from classic admin.
+    page_title = 'Modern Admin'
+    decorators = [login_required]
+
+
 class SystemInfoView(TemplateView):
     page_title = 'System Info'
     decorators = [login_required]
@@ -11942,6 +11948,7 @@ bp_allsky.add_url_rule('/config/download', view_func=ConfigDownloadView.as_view(
 bp_allsky.add_url_rule('/config/restore', view_func=ConfigRestoreView.as_view('config_restore_view', template_name='config_restore.html'))
 bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.as_view('ajax_config_restore_view'))
 
+bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
 bp_allsky.add_url_rule('/system', view_func=SystemInfoView.as_view('system_view', template_name='system.html'))
 bp_allsky.add_url_rule('/ajax/system', view_func=AjaxSystemInfoView.as_view('ajax_system_view'))
 bp_allsky.add_url_rule('/ajax/settime', view_func=AjaxSetTimeView.as_view('ajax_settime_view'))

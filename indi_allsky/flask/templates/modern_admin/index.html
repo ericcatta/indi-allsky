@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Future modern admin UI entry point; this placeholder keeps classic admin unchanged. -->
+<div class="container h-100">
+    <h1 class="text-light">Modern Admin Dashboard</h1>
+
+    <p class="text-light">
+        This authenticated placeholder route is reserved for the future read-only modern admin dashboard.
+    </p>
+
+    <p>
+        <a href="{{ url_for('indi_allsky.config_view') }}" class="link-info">Back to classic admin dashboard</a>
+    </p>
+</div>
+{% endblock %}
