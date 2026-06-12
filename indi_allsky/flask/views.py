@@ -5039,6 +5039,7 @@ class ModernAdminView(TemplateView):
         context['modern_admin_camera_name'] = str(camera_name)
         context['modern_admin_camera_model'] = str(camera_model)
         context['modern_admin_capture_status'] = self.get_capture_status_label()
+        context.update(self.get_storage_context())
         context['latest_image_url'] = None
         context['latest_image_updated'] = 'No recent image available'
         context['latest_image_age'] = 'No recent image'
@@ -5091,6 +5092,45 @@ class ModernAdminView(TemplateView):
             return 'Paused'
 
         return 'Unknown'
+
+
+    def get_storage_context(self):
+        # Reuse psutil disk usage for the configured image filesystem; no background scan needed.
+        image_folder = Path(app.config.get('INDI_ALLSKY_IMAGE_FOLDER', self.indi_allsky_config.get('IMAGE_FOLDER', '/')))
+        storage_path = image_folder
+
+        while not storage_path.exists() and storage_path != storage_path.parent:
+            storage_path = storage_path.parent
+
+        try:
+            disk_usage = psutil.disk_usage(str(storage_path))
+        except OSError as e:
+            app.logger.error('Error determining modern admin storage usage: %s', str(e))
+            return {
+                'modern_admin_storage_percent' : 'Unknown',
+                'modern_admin_storage_detail'  : 'Storage information unavailable.',
+                'modern_admin_storage_path'    : str(image_folder),
+            }
+
+        return {
+            'modern_admin_storage_percent' : '{0:0.0f}% Used'.format(disk_usage.percent),
+            'modern_admin_storage_detail'  : 'Total {0:s}. Used {1:s}. Free {2:s}.'.format(
+                self.format_storage_bytes(disk_usage.total),
+                self.format_storage_bytes(disk_usage.used),
+                self.format_storage_bytes(disk_usage.free),
+            ),
+            'modern_admin_storage_path' : str(storage_path),
+        }
+
+
+    def format_storage_bytes(self, size_b):
+        size = float(size_b)
+        for unit in ('B', 'KB', 'MB', 'GB'):
+            if size < 1024.0:
+                return '{0:0.1f} {1:s}'.format(size, unit)
+            size /= 1024.0
+
+        return '{0:0.1f} TB'.format(size)
 
 
 class SystemInfoView(TemplateView):

@@ -38,7 +38,8 @@ The visual dashboard prototype from `allsky-hybrid/prototype/admin-dashboard-v0`
 
 - large latest image hero, now backed by the current latest image when one is available;
 - real camera identity and capture status fields;
-- placeholder storage and upload/sync status cards;
+- real storage capacity, used/free space, and percentage used;
+- placeholder upload/sync status card;
 - recent warnings and activity panels;
 - always-visible links back to the classic admin UI;
 - responsive single-column mobile layout.
@@ -68,13 +69,17 @@ The capture card uses the existing `get_indi_allsky_status()` status source and 
 - `Paused`
 - `Unknown`
 
+The storage card uses the configured Flask image folder from `INDI_ALLSKY_IMAGE_FOLDER`, resolves to the nearest existing filesystem path, and reads capacity with `psutil.disk_usage()`. This matches the existing system-info style of filesystem usage collection and avoids adding a new API or background scan.
+
 This keeps the first data connection server-rendered and avoids adding a new API.
 
 ## Limitations
 
-- The hero image, image age, camera identity, and capture status are connected to real data.
-- Storage, upload/sync, and recent event sections still use placeholder content.
+- The hero image, image age, camera identity, capture status, and image-filesystem storage usage are connected to real data.
+- Upload/sync and recent event sections still use placeholder content.
 - Camera model is represented by the camera driver because there is no dedicated model field in the camera table.
+- Storage reports filesystem capacity for the configured image folder, not per-camera media totals.
+- If the configured image folder does not exist locally, the route measures the nearest existing parent path.
 - The latest image query is inherited from `TemplateView` and only considers recent images in its existing freshness window.
 - If no recent image URL can be resolved, the CSS-only placeholder remains visible.
 
@@ -113,12 +118,14 @@ Then start the existing application normally, sign in, and open:
 http://<host>:<port>/indi-allsky/modern-admin
 ```
 
-Confirm that the modern admin page renders the latest image when one is available, shows image age, camera identity, and capture status, falls back to the CSS placeholder otherwise, and that the classic admin link opens the existing config page.
+Confirm that the modern admin page renders the latest image when one is available, shows image age, camera identity, capture status, and storage usage, falls back to the CSS placeholder otherwise, and that the classic admin link opens the existing config page.
 
 ## Future work
 
 - Replace remaining placeholder values with read-only dashboard data.
 - Add explicit read-only fields for storage, upload/sync, and recent events.
+- Consider adding per-camera media totals from the existing file-space usage queries alongside filesystem capacity.
+- Add storage thresholds and clearer normal/warning/critical labels.
 - Keep all write actions out of the initial modern admin page.
 - Keep modern admin CSS/JS isolated under `indi_allsky/flask/static/modern_admin/`.
 - Decide later whether to expose the route in classic navigation.
