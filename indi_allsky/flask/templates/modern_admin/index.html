@@ -3,6 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -10,15 +11,104 @@ var camera_id = {{ camera_id }};
 
 {% block content %}
 <!-- Future modern admin UI entry point; this placeholder keeps classic admin unchanged. -->
-<div class="container h-100">
-    <h1 class="text-light">Modern Admin Dashboard</h1>
+<main class="modern-admin-shell" aria-labelledby="modern-admin-title">
+    <header class="modern-admin-topbar" aria-label="Dashboard header">
+        <div>
+            <p class="modern-admin-eyebrow">All-Sky Admin</p>
+            <h1 id="modern-admin-title">Modern Admin Dashboard</h1>
+        </div>
+        <a class="modern-admin-classic-link" href="{{ url_for('indi_allsky.config_view') }}">Classic Admin</a>
+    </header>
 
-    <p class="text-light">
-        This authenticated placeholder route is reserved for the future read-only modern admin dashboard.
-    </p>
+    <section class="modern-admin-hero" aria-labelledby="latest-image-title">
+        <div class="modern-admin-hero-copy">
+            <p class="modern-admin-eyebrow">Latest Image</p>
+            <h2 id="latest-image-title">Placeholder sky preview</h2>
+            <p class="modern-admin-hero-meta">
+                Static placeholder only. Live camera data will be connected in a future read-only milestone.
+            </p>
+        </div>
 
-    <p>
-        <a href="{{ url_for('indi_allsky.config_view') }}" class="link-info">Back to classic admin dashboard</a>
-    </p>
-</div>
+        <figure class="modern-admin-sky-frame" aria-label="Placeholder latest all-sky image">
+            <div class="modern-admin-sky-placeholder"></div>
+            <figcaption>
+                <span>Last frame placeholder</span>
+                <span>Capture state placeholder</span>
+            </figcaption>
+        </figure>
+    </section>
+
+    <section class="modern-admin-status-grid" aria-label="Placeholder system status">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Camera</div>
+            <h3>Online</h3>
+            <p>Primary camera status placeholder for the future read-only dashboard.</p>
+            <span class="modern-admin-status-pill modern-admin-status-good">Nominal</span>
+        </article>
+
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Capture</div>
+            <h3>Running</h3>
+            <p>Latest frame freshness and capture cadence will appear here later.</p>
+            <span class="modern-admin-status-pill modern-admin-status-good">Fresh</span>
+        </article>
+
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Storage</div>
+            <h3>62% Used</h3>
+            <p>Storage capacity and retention summaries are placeholder values.</p>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Watch</span>
+        </article>
+
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Upload / Sync</div>
+            <h3>Pending Setup</h3>
+            <p>Upload destination and sync health will remain read-only when connected.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">TBD</span>
+        </article>
+    </section>
+
+    <section class="modern-admin-events-section" aria-labelledby="events-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Recent Events</p>
+            <h2 id="events-title">Nothing urgent needs attention</h2>
+        </div>
+
+        <div class="modern-admin-events-grid">
+            <article class="modern-admin-event-panel">
+                <h3>Warnings</h3>
+                <ul>
+                    <li>
+                        <span class="modern-admin-event-time">21:58</span>
+                        Placeholder warning for future validation.
+                    </li>
+                    <li>
+                        <span class="modern-admin-event-time">20:41</span>
+                        Placeholder note for setup documentation.
+                    </li>
+                </ul>
+            </article>
+
+            <article class="modern-admin-event-panel">
+                <h3>Recent Activity</h3>
+                <ul>
+                    <li>
+                        <span class="modern-admin-event-time">22:14</span>
+                        Latest image placeholder refreshed.
+                    </li>
+                    <li>
+                        <span class="modern-admin-event-time">22:12</span>
+                        Placeholder storage check completed.
+                    </li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    <footer class="modern-admin-footer">
+        <a href="{{ url_for('indi_allsky.config_view') }}" class="modern-admin-footer-link">Open classic admin UI</a>
+        <span>Placeholder dashboard</span>
+        <span>Read-only preview</span>
+    </footer>
+</main>
 {% endblock %}
