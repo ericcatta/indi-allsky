@@ -23,17 +23,21 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-hero" aria-labelledby="latest-image-title">
         <div class="modern-admin-hero-copy">
             <p class="modern-admin-eyebrow">Latest Image</p>
-            <h2 id="latest-image-title">Placeholder sky preview</h2>
+            <h2 id="latest-image-title">Latest camera frame</h2>
             <p class="modern-admin-hero-meta">
-                Static placeholder only. Live camera data will be connected in a future read-only milestone.
+                {{ latest_image_updated }}
             </p>
         </div>
 
-        <figure class="modern-admin-sky-frame" aria-label="Placeholder latest all-sky image">
+        <figure class="modern-admin-sky-frame" aria-label="Latest all-sky image">
+            {% if latest_image_url %}
+            <img class="modern-admin-latest-image" src="{{ latest_image_url }}" alt="Latest all-sky camera frame">
+            {% else %}
             <div class="modern-admin-sky-placeholder"></div>
+            {% endif %}
             <figcaption>
-                <span>Last frame placeholder</span>
-                <span>Capture state placeholder</span>
+                <span>{{ latest_image_updated }}</span>
+                <span>{{ latest_image_status }}</span>
             </figcaption>
         </figure>
     </section>

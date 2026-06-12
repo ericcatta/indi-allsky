@@ -5030,6 +5030,43 @@ class ModernAdminView(TemplateView):
     page_title = 'Modern Admin'
     decorators = [login_required]
 
+    def get_context(self):
+        context = super(ModernAdminView, self).get_context()
+
+        context['latest_image_url'] = None
+        context['latest_image_updated'] = 'No recent image available'
+        context['latest_image_status'] = 'Waiting for latest frame'
+
+        if not self.latest_image_entry:
+            return context
+
+        # Reuse the existing latest image DB entry and URL rules used by classic image views.
+        local = True
+        if self.web_nonlocal_images:
+            if self.web_local_images_admin and self.verify_admin_network():
+                pass
+            else:
+                local = False
+                if not self.latest_image_entry.remote_url and not self.latest_image_entry.s3_key:
+                    return context
+
+        try:
+            context['latest_image_url'] = str(self.latest_image_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
+        except ValueError as e:
+            app.logger.error('Error determining modern admin latest image URL: %s', str(e))
+            return context
+
+        last_update_age_s = int((self.camera_now - self.latest_image_entry.createDate).total_seconds())
+        if last_update_age_s < 60:
+            last_update_age = '{0:d}s ago'.format(last_update_age_s)
+        else:
+            last_update_age = '{0:d}m ago'.format(int(last_update_age_s / 60))
+
+        context['latest_image_updated'] = 'Last frame {0:s}'.format(last_update_age)
+        context['latest_image_status'] = self.latest_image_entry.createDate.strftime('%Y-%m-%d %H:%M:%S')
+
+        return context
+
 
 class SystemInfoView(TemplateView):
     page_title = 'System Info'
