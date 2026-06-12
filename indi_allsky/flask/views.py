@@ -5033,8 +5033,15 @@ class ModernAdminView(TemplateView):
     def get_context(self):
         context = super(ModernAdminView, self).get_context()
 
+        camera_name = self.camera.friendlyName or self.camera.name or 'Unknown camera'
+        camera_model = self.camera.driver or 'Model unavailable'
+
+        context['modern_admin_camera_name'] = str(camera_name)
+        context['modern_admin_camera_model'] = str(camera_model)
+        context['modern_admin_capture_status'] = self.get_capture_status_label()
         context['latest_image_url'] = None
         context['latest_image_updated'] = 'No recent image available'
+        context['latest_image_age'] = 'No recent image'
         context['latest_image_status'] = 'Waiting for latest frame'
 
         if not self.latest_image_entry:
@@ -5062,10 +5069,28 @@ class ModernAdminView(TemplateView):
         else:
             last_update_age = '{0:d}m ago'.format(int(last_update_age_s / 60))
 
+        context['latest_image_age'] = last_update_age
         context['latest_image_updated'] = 'Last frame {0:s}'.format(last_update_age)
         context['latest_image_status'] = self.latest_image_entry.createDate.strftime('%Y-%m-%d %H:%M:%S')
 
         return context
+
+
+    def get_capture_status_label(self):
+        # Reuse the existing indi-allsky status source and normalize it for this read-only card.
+        if self.capture_pause:
+            return 'Paused'
+
+        status_text = re.sub(r'<[^>]+>', '', self.get_indi_allsky_status().get('status', 'UNKNOWN')).strip().upper()
+
+        if status_text in ('RUNNING', 'RELOADING', 'STARTING'):
+            return 'Running'
+        elif status_text in ('SLEEPING', 'STOPPING', 'STOPPED'):
+            return 'Idle'
+        elif status_text == 'PAUSED':
+            return 'Paused'
+
+        return 'Unknown'
 
 
 class SystemInfoView(TemplateView):

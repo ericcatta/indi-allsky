@@ -25,7 +25,7 @@ var camera_id = {{ camera_id }};
             <p class="modern-admin-eyebrow">Latest Image</p>
             <h2 id="latest-image-title">Latest camera frame</h2>
             <p class="modern-admin-hero-meta">
-                {{ latest_image_updated }}
+                {{ latest_image_age }}
             </p>
         </div>
 
@@ -45,15 +45,15 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-status-grid" aria-label="Placeholder system status">
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Camera</div>
-            <h3>Online</h3>
-            <p>Primary camera status placeholder for the future read-only dashboard.</p>
+            <h3>{{ modern_admin_camera_name }}</h3>
+            <p>{{ modern_admin_camera_model }}</p>
             <span class="modern-admin-status-pill modern-admin-status-good">Nominal</span>
         </article>
 
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Capture</div>
-            <h3>Running</h3>
-            <p>Latest frame freshness and capture cadence will appear here later.</p>
+            <h3>{{ modern_admin_capture_status }}</h3>
+            <p>Latest image age: {{ latest_image_age }}. Timestamp: {{ latest_image_status }}.</p>
             <span class="modern-admin-status-pill modern-admin-status-good">Fresh</span>
         </article>
 

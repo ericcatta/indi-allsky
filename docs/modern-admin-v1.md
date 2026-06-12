@@ -37,7 +37,8 @@ The template extends the existing `base.html`, defines the `camera_id` JavaScrip
 The visual dashboard prototype from `allsky-hybrid/prototype/admin-dashboard-v0` has been ported into this template:
 
 - large latest image hero, now backed by the current latest image when one is available;
-- camera, capture, storage, and upload/sync status cards;
+- real camera identity and capture status fields;
+- placeholder storage and upload/sync status cards;
 - recent warnings and activity panels;
 - always-visible links back to the classic admin UI;
 - responsive single-column mobile layout.
@@ -52,14 +53,28 @@ The modern admin route uses `ModernAdminView`, which inherits from `TemplateView
 
 - `latest_image_url`
 - `latest_image_updated`
+- `latest_image_age`
 - `latest_image_status`
+
+The camera card uses the selected camera from `TemplateView.cameraSetup()`:
+
+- `camera.friendlyName` or `camera.name` for the display name
+- `camera.driver` as the model/driver label when available
+
+The capture card uses the existing `get_indi_allsky_status()` status source and normalizes its current state into:
+
+- `Running`
+- `Idle`
+- `Paused`
+- `Unknown`
 
 This keeps the first data connection server-rendered and avoids adding a new API.
 
 ## Limitations
 
-- Only the hero image and last-update text are connected to real data.
-- The camera, capture, storage, upload/sync, and recent event sections still use placeholder content.
+- The hero image, image age, camera identity, and capture status are connected to real data.
+- Storage, upload/sync, and recent event sections still use placeholder content.
+- Camera model is represented by the camera driver because there is no dedicated model field in the camera table.
 - The latest image query is inherited from `TemplateView` and only considers recent images in its existing freshness window.
 - If no recent image URL can be resolved, the CSS-only placeholder remains visible.
 
@@ -98,12 +113,12 @@ Then start the existing application normally, sign in, and open:
 http://<host>:<port>/indi-allsky/modern-admin
 ```
 
-Confirm that the modern admin page renders the latest image when one is available, falls back to the CSS placeholder otherwise, and that the classic admin link opens the existing config page.
+Confirm that the modern admin page renders the latest image when one is available, shows image age, camera identity, and capture status, falls back to the CSS placeholder otherwise, and that the classic admin link opens the existing config page.
 
 ## Future work
 
 - Replace remaining placeholder values with read-only dashboard data.
-- Add explicit read-only fields for camera state, capture freshness, storage, upload/sync, and recent events.
+- Add explicit read-only fields for storage, upload/sync, and recent events.
 - Keep all write actions out of the initial modern admin page.
 - Keep modern admin CSS/JS isolated under `indi_allsky/flask/static/modern_admin/`.
 - Decide later whether to expose the route in classic navigation.
