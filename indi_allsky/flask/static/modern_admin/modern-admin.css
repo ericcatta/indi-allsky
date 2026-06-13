@@ -643,6 +643,36 @@
   margin-bottom: 14px;
 }
 
+.modern-admin-media-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  color: var(--modern-admin-quiet);
+  font-size: 0.82rem;
+}
+
+.modern-admin-media-button {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 999px;
+  color: var(--modern-admin-text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modern-admin-media-button:disabled {
+  cursor: default;
+  color: var(--modern-admin-quiet);
+  opacity: 0.52;
+}
+
+.modern-admin-media-button:not(:disabled):hover {
+  border-color: var(--modern-admin-line-strong);
+  background: rgba(255, 255, 255, 0.09);
+}
+
 .modern-admin-media-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -728,6 +758,7 @@
 }
 
 .modern-admin-media-card {
+  position: relative;
   display: grid;
   min-width: 0;
   overflow: hidden;
@@ -736,6 +767,38 @@
   background: rgba(17, 21, 27, 0.72);
   box-shadow: 0 24px 80px var(--modern-admin-shadow);
   backdrop-filter: blur(18px);
+}
+
+.modern-admin-lightbox-trigger {
+  cursor: zoom-in;
+}
+
+.modern-admin-lightbox-trigger:focus-visible {
+  outline: 2px solid var(--modern-admin-blue);
+  outline-offset: 3px;
+}
+
+.modern-admin-media-select {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  background: rgba(5, 7, 10, 0.62);
+  backdrop-filter: blur(10px);
+}
+
+.modern-admin-media-select-input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--modern-admin-blue);
 }
 
 .modern-admin-media-gallery-grid .modern-admin-media-card {
@@ -847,6 +910,105 @@
 
 .modern-admin-media-open {
   margin-top: 0;
+}
+
+.modern-admin-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+}
+
+.modern-admin-lightbox[aria-hidden="false"] {
+  display: flex;
+}
+
+.modern-admin-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.76);
+}
+
+.modern-admin-lightbox-panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  width: min(1200px, 100%);
+  max-height: calc(100vh - 44px);
+}
+
+.modern-admin-lightbox-frame {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--modern-admin-line-strong);
+  border-radius: 16px;
+  background: #05070a;
+  box-shadow: 0 28px 100px rgba(0, 0, 0, 0.62);
+}
+
+.modern-admin-lightbox-frame img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(100vh - 128px);
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.modern-admin-lightbox-frame figcaption {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: var(--modern-admin-text);
+  background: rgba(5, 7, 10, 0.62);
+}
+
+.modern-admin-lightbox-frame a {
+  color: var(--modern-admin-blue);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.modern-admin-lightbox-close,
+.modern-admin-lightbox-nav {
+  border: 1px solid var(--modern-admin-line-strong);
+  border-radius: 999px;
+  color: var(--modern-admin-text);
+  background: rgba(17, 21, 27, 0.86);
+}
+
+.modern-admin-lightbox-close {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  min-height: 34px;
+  padding: 0 14px;
+}
+
+.modern-admin-lightbox-nav {
+  min-width: 88px;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.modern-admin-lightbox-open {
+  overflow: hidden;
 }
 
 .modern-admin-camera-card-grid {
@@ -1174,5 +1336,37 @@
   .modern-admin-shell .modern-admin-media-viewer-frame video,
   .modern-admin-shell #modern-admin-media-featured-image {
     max-height: 54vh;
+  }
+
+  .modern-admin-lightbox {
+    padding: 12px;
+  }
+
+  .modern-admin-lightbox-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .modern-admin-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    min-width: 42px;
+    width: 42px;
+    overflow: hidden;
+    color: transparent;
+    transform: translateY(-50%);
+  }
+
+  .modern-admin-lightbox-prev {
+    left: 10px;
+  }
+
+  .modern-admin-lightbox-next {
+    right: 10px;
+  }
+
+  .modern-admin-lightbox-frame figcaption {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
