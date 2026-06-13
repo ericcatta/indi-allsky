@@ -10398,7 +10398,7 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
                     return None
 
         try:
-            return str(media_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
+            return self.normalize_media_url(media_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
         except Exception as e:
             app.logger.error('Error determining modern admin media URL: %s', str(e))
             return None
@@ -10406,6 +10406,21 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
 
     def get_media_preview_url(self, media_entry):
         return self.get_media_url(media_entry)
+
+
+    def normalize_media_url(self, media_url):
+        if not media_url:
+            return None
+
+        media_url_str = str(media_url)
+        if media_url_str.startswith(('http://', 'https://', '/')):
+            return media_url_str
+
+        media_url_p = Path(media_url_str)
+        if media_url_p.parts and media_url_p.parts[0] == 'images':
+            return url_for('indi_allsky.images_folder', path=str(Path(*media_url_p.parts[1:])))
+
+        return media_url_str
 
 
     def format_media_title(self, media_entry):
@@ -10480,7 +10495,7 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
                     return self.get_media_url(media_entry)
 
         try:
-            return str(thumbnail_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
+            return self.normalize_media_url(thumbnail_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
         except Exception as e:
             app.logger.error('Error determining modern admin thumbnail URL: %s', str(e))
             return self.get_media_url(media_entry)

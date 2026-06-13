@@ -108,10 +108,7 @@ var camera_id = {{ camera_id }};
                 {% endif %}
             </div>
             {% else %}
-            <div class="modern-admin-media-caption">
-                <span>{{ item.created }}</span>
-                <span>{{ item.age }}</span>
-            </div>
+            <span class="modern-admin-visually-hidden">{{ item.created }}</span>
             {% endif %}
         </article>
         {% endfor %}
