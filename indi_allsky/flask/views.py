@@ -5303,6 +5303,16 @@ class ModernAdminUpdatesView(ModernAdminPlaceholderView):
 class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
     page_title = 'Modern Admin Placeholder'
 
+    modern_page_redirect_map = {
+        'gallery'         : 'indi_allsky.modern_admin_media_gallery_view',
+        'images'          : 'indi_allsky.modern_admin_media_images_view',
+        'timelapses'      : 'indi_allsky.modern_admin_media_timelapses_view',
+        'mini-timelapses' : 'indi_allsky.modern_admin_media_mini_timelapses_view',
+        'panorama'        : 'indi_allsky.modern_admin_media_panorama_view',
+        'panorama-loop'   : 'indi_allsky.modern_admin_media_panorama_loop_view',
+        'fits-viewer'     : 'indi_allsky.modern_admin_media_fits_view',
+    }
+
     classic_page_map = {
         'loop'                  : ('Dashboard', 'Loop is being folded into the modern Dashboard.', 'indi_allsky.modern_admin_view'),
         'gallery'               : ('Media', 'Modern media browsing is coming later.', None),
@@ -5331,6 +5341,9 @@ class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
     }
 
     def dispatch_request(self, classic_page):
+        if classic_page in self.modern_page_redirect_map:
+            return redirect(url_for(self.modern_page_redirect_map[classic_page]))
+
         self.classic_page = classic_page
         section, message, active_endpoint = self.classic_page_map.get(
             classic_page,
