@@ -5371,6 +5371,241 @@ def get_modern_admin_supported_camera_interfaces():
     return supported_interfaces
 
 
+def get_modern_admin_supported_libcamera_interfaces():
+    return [
+        interface for interface in get_modern_admin_supported_camera_interfaces()
+        if interface['value'].startswith('libcamera_')
+    ]
+
+
+def get_modern_admin_libcamera_interface_tokens():
+    interface_tokens = list()
+
+    for interface in get_modern_admin_supported_libcamera_interfaces():
+        token_text = '{0:s} {1:s}'.format(interface['value'], interface['label']).lower()
+        tokens = set(re.findall(r'(imx\d+|ov\d+)', token_text))
+        if interface['value'] == 'libcamera_64mp_hawkeye':
+            tokens.add('imx682')
+        elif interface['value'] == 'libcamera_64mp_owlsight':
+            tokens.add('ov64a40')
+
+        interface_tokens.append({
+            'interface' : interface,
+            'tokens'    : tokens,
+        })
+
+    return interface_tokens
+
+
+def match_modern_admin_libcamera_interface(camera_text):
+    camera_text_l = camera_text.lower()
+
+    for interface_entry in get_modern_admin_libcamera_interface_tokens():
+        for token in interface_entry['tokens']:
+            if token and token in camera_text_l:
+                return interface_entry['interface']
+
+    return None
+
+
+def detect_modern_admin_libcamera_cameras():
+    cameras = list()
+    message = 'No libcamera camera was detected.'
+
+    try:
+        import shutil
+        import subprocess
+
+        libcamera_bin = shutil.which('rpicam-still') or shutil.which('libcamera-still')
+        if not libcamera_bin:
+            return cameras, 'rpicam-still/libcamera-still was not found on this system.'
+
+        libcamera_proc = subprocess.run(
+            [libcamera_bin, '--list-cameras'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=8,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return cameras, 'Timed out while listing libcamera cameras.'
+    except OSError as e:
+        return cameras, 'Unable to list libcamera cameras: {0:s}'.format(str(e))
+
+    output = libcamera_proc.stdout.strip()
+    if libcamera_proc.returncode != 0:
+        if len(output) > 500:
+            output = output[:500] + '...'
+        return cameras, output or 'libcamera camera detection failed.'
+
+    for line in output.splitlines():
+        camera_match = re.match(r'^\s*(\d+)\s*:\s*([^\[\(]+)', line)
+        if not camera_match:
+            continue
+
+        camera_id = int(camera_match.group(1))
+        camera_name = camera_match.group(2).strip()
+        interface = match_modern_admin_libcamera_interface(line)
+        if not interface:
+            cameras.append({
+                'type'        : 'libcamera',
+                'name'        : camera_name or 'libcamera camera {0:d}'.format(camera_id),
+                'driver'      : 'Unsupported libcamera sensor',
+                'interface'   : '',
+                'camera_id'   : camera_id,
+                'device_id'   : 'libcamera:unsupported:{0:d}'.format(camera_id),
+                'properties'  : [line.strip()],
+                'candidate'   : False,
+                'selectable'  : False,
+            })
+            continue
+
+        cameras.append({
+            'type'        : 'libcamera',
+            'name'        : camera_name or interface['label'],
+            'driver'      : interface['value'],
+            'interface'   : interface['value'],
+            'camera_id'   : camera_id,
+            'device_id'   : 'libcamera:{0:s}:{1:d}'.format(interface['value'], camera_id),
+            'properties'  : [interface['label'], line.strip()],
+            'candidate'   : True,
+            'selectable'  : True,
+        })
+
+    if cameras:
+        message = 'Detected {0:d} libcamera camera(s).'.format(len(cameras))
+
+    return cameras, message
+
+
+def get_modern_admin_active_db_camera_id(misc_db):
+    try:
+        return int(misc_db.getState('DB_CAMERA_ID'))
+    except Exception:
+        return None
+
+
+def normalize_modern_admin_camera_name(camera_name):
+    return str(camera_name or '').strip().lower()
+
+
+def get_modern_admin_configured_camera_matches():
+    cameras = IndiAllSkyDbCameraTable.query\
+        .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
+        .all()
+
+    return cameras
+
+
+def annotate_modern_admin_detected_cameras(detected_cameras, active_config, active_db_camera_id, indi_server=None, indi_port=None):
+    configured_cameras = get_modern_admin_configured_camera_matches()
+    active_interface = str(active_config.get('CAMERA_INTERFACE', '') or '')
+    active_indi_name = normalize_modern_admin_camera_name(active_config.get('INDI_CAMERA_NAME', ''))
+    active_indi_server = str(active_config.get('INDI_SERVER', 'localhost')).strip() or 'localhost'
+
+    try:
+        active_indi_port = int(active_config.get('INDI_PORT', 7624))
+    except (TypeError, ValueError):
+        active_indi_port = 7624
+
+    try:
+        active_libcamera_id = int(active_config.get('LIBCAMERA', {}).get('CAMERA_ID', 0))
+    except (TypeError, ValueError):
+        active_libcamera_id = 0
+
+    detected_libcamera_counts = dict()
+    for camera in detected_cameras:
+        if camera.get('type') == 'libcamera' and camera.get('interface'):
+            detected_libcamera_counts[camera['interface']] = detected_libcamera_counts.get(camera['interface'], 0) + 1
+
+    for camera in detected_cameras:
+        camera['db_match'] = ''
+        camera['status_warning'] = ''
+        camera['action_label'] = 'Add camera'
+
+        if not camera.get('selectable', True):
+            camera['status'] = 'Ambiguous match'
+            camera['status_warning'] = 'This camera type is not supported by the current Modern Admin detection flow.'
+            camera['action_label'] = ''
+            camera['selectable'] = False
+            continue
+
+        camera_type = camera.get('type')
+        if camera_type == 'libcamera':
+            camera_interface = str(camera.get('interface') or '')
+            camera_id = camera.get('camera_id')
+            libcamera_db_matches = [
+                db_camera for db_camera in configured_cameras
+                if str(db_camera.driver or '') == camera_interface
+            ]
+
+            if active_interface == camera_interface and active_libcamera_id == camera_id:
+                camera['status'] = 'Active'
+                camera['action_label'] = ''
+                camera['selectable'] = False
+            elif len(libcamera_db_matches) == 1 and detected_libcamera_counts.get(camera_interface, 0) == 1:
+                camera['status'] = 'Already configured'
+                camera['db_match'] = str(libcamera_db_matches[0].friendlyName or libcamera_db_matches[0].name or '')
+                camera['action_label'] = 'Use this camera'
+                camera['selectable'] = True
+            elif len(libcamera_db_matches) > 0:
+                camera['status'] = 'Ambiguous match'
+                camera['status_warning'] = 'A libcamera DB row already uses this interface, but the DB does not store camera_id/USB path yet.'
+                camera['action_label'] = ''
+                camera['selectable'] = False
+            else:
+                camera['status'] = 'New camera'
+                camera['action_label'] = 'Add camera'
+                camera['selectable'] = True
+
+        elif camera_type == 'indi':
+            camera_name = normalize_modern_admin_camera_name(camera.get('name'))
+            camera_driver = str(camera.get('driver') or '')
+            exact_matches = list()
+            name_matches = list()
+
+            for db_camera in configured_cameras:
+                db_names = {
+                    normalize_modern_admin_camera_name(db_camera.name),
+                    normalize_modern_admin_camera_name(db_camera.name_alt1),
+                    normalize_modern_admin_camera_name(db_camera.name_alt2),
+                }
+                if camera_name not in db_names:
+                    continue
+
+                name_matches.append(db_camera)
+                if camera_driver and str(db_camera.driver or '') == camera_driver:
+                    exact_matches.append(db_camera)
+
+            if active_interface == 'indi' and active_indi_name == camera_name and active_indi_server == (indi_server or active_indi_server) and active_indi_port == (indi_port or active_indi_port):
+                camera['status'] = 'Active'
+                camera['action_label'] = ''
+                camera['selectable'] = False
+            elif len(exact_matches) == 1:
+                camera['status'] = 'Already configured'
+                camera['db_match'] = str(exact_matches[0].friendlyName or exact_matches[0].name or '')
+                camera['action_label'] = 'Use this camera'
+                camera['selectable'] = True
+            elif len(exact_matches) > 1 or name_matches:
+                camera['status'] = 'Ambiguous match'
+                camera['status_warning'] = 'A DB camera already has this INDI name, but driver/interface matching is not unique.'
+                camera['action_label'] = ''
+                camera['selectable'] = False
+            else:
+                camera['status'] = 'New camera'
+                camera['action_label'] = 'Add camera'
+                camera['selectable'] = True
+
+        else:
+            camera['status'] = 'Ambiguous match'
+            camera['status_warning'] = 'Unknown detected camera type.'
+            camera['action_label'] = ''
+            camera['selectable'] = False
+
+    return detected_cameras
+
+
 def detect_modern_admin_usb_camera_driver():
     supported_driver_values = {driver['value'] for driver in get_modern_admin_supported_indi_drivers()}
     detection = {
@@ -5447,8 +5682,8 @@ def detect_modern_admin_usb_camera_driver():
 
 
 class ModernAdminCameraAddView(ModernAdminView):
-    # Future modern camera setup entry point; first version only creates a new INDI config.
-    page_title = 'Add INDI Camera'
+    # Future modern camera setup entry point; first version saves one active camera config at a time.
+    page_title = 'Add Camera'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
     methods = ['GET', 'POST']
 
@@ -5462,6 +5697,9 @@ class ModernAdminCameraAddView(ModernAdminView):
             'indi_port'        : int(self.indi_allsky_config.get('INDI_PORT', 7624)),
             'indi_camera_name' : self.indi_allsky_config.get('INDI_CAMERA_NAME', ''),
             'driver_hint'      : usb_detection['driver'],
+            'camera_type'      : '',
+            'camera_interface' : '',
+            'libcamera_id'     : self.indi_allsky_config.get('LIBCAMERA', {}).get('CAMERA_ID', 0),
         }
 
         context['modern_admin_add_camera_error'] = None
@@ -5511,6 +5749,9 @@ class ModernAdminCameraAddView(ModernAdminView):
             'indi_port'        : request.form.get('indi_port', '7624').strip() or '7624',
             'indi_camera_name' : request.form.get('indi_camera_name', '').strip(),
             'driver_hint'      : request.form.get('driver_hint', '').strip(),
+            'camera_type'      : request.form.get('camera_type', '').strip(),
+            'camera_interface' : request.form.get('camera_interface', '').strip(),
+            'libcamera_id'     : request.form.get('libcamera_id', '0').strip() or '0',
         }
 
         result = {
@@ -5533,24 +5774,86 @@ class ModernAdminCameraAddView(ModernAdminView):
             result['modern_admin_add_camera_error'] = 'INDI port must be between 1 and 65535.'
             return result
 
-        if not form_data['indi_camera_name']:
-            result['modern_admin_add_camera_error'] = 'Select or enter an INDI camera name before saving.'
+        if form_data['camera_type'] not in ('indi', 'libcamera'):
+            result['modern_admin_add_camera_error'] = 'Select a detected camera before saving.'
             return result
 
         active_interface = self.indi_allsky_config.get('CAMERA_INTERFACE', '')
-        active_server = str(self.indi_allsky_config.get('INDI_SERVER', 'localhost')).strip() or 'localhost'
-        active_port = int(self.indi_allsky_config.get('INDI_PORT', 7624))
-        active_camera_name = str(self.indi_allsky_config.get('INDI_CAMERA_NAME', '')).strip()
 
-        if active_interface == 'indi' and active_server == form_data['indi_server'] and active_port == indi_port and active_camera_name == form_data['indi_camera_name']:
-            result['modern_admin_add_camera_error'] = 'This INDI camera is already the active configuration. No new config was saved.'
-            return result
+        if form_data['camera_type'] == 'indi':
+            if not form_data['indi_camera_name']:
+                result['modern_admin_add_camera_error'] = 'Select an INDI camera before saving.'
+                return result
+
+            active_server = str(self.indi_allsky_config.get('INDI_SERVER', 'localhost')).strip() or 'localhost'
+            active_port = int(self.indi_allsky_config.get('INDI_PORT', 7624))
+            active_camera_name = str(self.indi_allsky_config.get('INDI_CAMERA_NAME', '')).strip()
+            detected_driver = form_data['driver_hint']
+
+            if active_interface == 'indi' and active_server == form_data['indi_server'] and active_port == indi_port and active_camera_name == form_data['indi_camera_name']:
+                result['modern_admin_add_camera_error'] = 'This INDI camera is already the active configuration. No new config was saved.'
+                return result
+
+            configured_cameras = get_modern_admin_configured_camera_matches()
+            detected_name = normalize_modern_admin_camera_name(form_data['indi_camera_name'])
+            exact_matches = list()
+            name_matches = list()
+            for db_camera in configured_cameras:
+                db_names = {
+                    normalize_modern_admin_camera_name(db_camera.name),
+                    normalize_modern_admin_camera_name(db_camera.name_alt1),
+                    normalize_modern_admin_camera_name(db_camera.name_alt2),
+                }
+                if detected_name not in db_names:
+                    continue
+
+                name_matches.append(db_camera)
+                if detected_driver and str(db_camera.driver or '') == detected_driver:
+                    exact_matches.append(db_camera)
+
+            if len(exact_matches) > 1 or (name_matches and not exact_matches):
+                result['modern_admin_add_camera_error'] = 'This INDI camera matches an existing DB name, but the driver/interface match is ambiguous. No config was saved.'
+                return result
+
+        elif form_data['camera_type'] == 'libcamera':
+            supported_libcamera_values = {interface['value'] for interface in get_modern_admin_supported_libcamera_interfaces()}
+            if form_data['camera_interface'] not in supported_libcamera_values:
+                result['modern_admin_add_camera_error'] = 'Select a supported libcamera camera before saving.'
+                return result
+
+            try:
+                libcamera_id = int(form_data['libcamera_id'])
+            except ValueError:
+                result['modern_admin_add_camera_error'] = 'libcamera camera id must be a number.'
+                return result
+
+            try:
+                active_libcamera_id = int(self.indi_allsky_config.get('LIBCAMERA', {}).get('CAMERA_ID', 0))
+            except ValueError:
+                active_libcamera_id = 0
+
+            if active_interface == form_data['camera_interface'] and active_libcamera_id == libcamera_id:
+                result['modern_admin_add_camera_error'] = 'This libcamera camera is already the active configuration. No new config was saved.'
+                return result
+
+            libcamera_db_matches = [
+                db_camera for db_camera in get_modern_admin_configured_camera_matches()
+                if str(db_camera.driver or '') == form_data['camera_interface']
+            ]
+            if len(libcamera_db_matches) > 1:
+                result['modern_admin_add_camera_error'] = 'Multiple DB cameras already use this libcamera interface, and the DB does not store camera_id/USB path yet. No config was saved.'
+                return result
 
         new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
-        new_config['CAMERA_INTERFACE'] = 'indi'
-        new_config['INDI_SERVER'] = form_data['indi_server']
-        new_config['INDI_PORT'] = indi_port
-        new_config['INDI_CAMERA_NAME'] = form_data['indi_camera_name']
+        if form_data['camera_type'] == 'indi':
+            new_config['CAMERA_INTERFACE'] = 'indi'
+            new_config['INDI_SERVER'] = form_data['indi_server']
+            new_config['INDI_PORT'] = indi_port
+            new_config['INDI_CAMERA_NAME'] = form_data['indi_camera_name']
+        else:
+            new_config['CAMERA_INTERFACE'] = form_data['camera_interface']
+            new_config.setdefault('LIBCAMERA', OrderedDict())
+            new_config['LIBCAMERA']['CAMERA_ID'] = libcamera_id
 
         temp_config_p = None
         try:
@@ -5570,13 +5873,13 @@ class ModernAdminCameraAddView(ModernAdminView):
 
             result['modern_admin_current_config'] = {
                 'id'               : latest_config.id if latest_config else self.indi_allsky_config_id,
-                'camera_interface' : 'indi',
-                'indi_server'      : form_data['indi_server'],
-                'indi_port'        : indi_port,
-                'indi_camera_name' : form_data['indi_camera_name'],
+                'camera_interface' : new_config['CAMERA_INTERFACE'],
+                'indi_server'      : new_config.get('INDI_SERVER', form_data['indi_server']),
+                'indi_port'        : new_config.get('INDI_PORT', indi_port),
+                'indi_camera_name' : new_config.get('INDI_CAMERA_NAME', ''),
             }
             result['modern_admin_add_camera_success'] = (
-                'Saved a new INDI camera configuration. Restart indi-allsky to connect to the camera and create the DB camera row.'
+                'Saved a new camera configuration. Restart indi-allsky to connect to the camera and create the DB camera row if needed.'
             )
 
         except Exception as e:
@@ -5599,9 +5902,12 @@ class ModernAdminIndiCameraDetectView(BaseView):
 
     def dispatch_request(self):
         if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
-            return jsonify({'error' : 'Only an admin user can detect INDI cameras.'}), 403
+            return jsonify({'error' : 'Only an admin user can detect cameras.'}), 403
 
         indi_server = request.json.get('indi_server', 'localhost').strip() or 'localhost'
+        detected_cameras, libcamera_message = detect_modern_admin_libcamera_cameras()
+        usb_detection = detect_modern_admin_usb_camera_driver()
+        driver_hint = usb_detection['driver'] or request.json.get('driver_hint', '').strip()
 
         try:
             indi_port = int(request.json.get('indi_port', 7624))
@@ -5617,7 +5923,13 @@ class ModernAdminIndiCameraDetectView(BaseView):
 
             indi_getprop_bin = shutil.which('indi_getprop')
             if not indi_getprop_bin:
-                return jsonify({'error' : 'indi_getprop was not found on this system.'}), 400
+                detected_cameras = annotate_modern_admin_detected_cameras(detected_cameras, self.indi_allsky_config, get_modern_admin_active_db_camera_id(self._miscDb), indi_server=indi_server, indi_port=indi_port)
+                return jsonify({
+                    'cameras'           : detected_cameras,
+                    'devices'           : detected_cameras,
+                    'libcamera_message' : libcamera_message,
+                    'indi_error'        : 'indi_getprop was not found on this system.',
+                })
 
             detect_proc = subprocess.run(
                 [indi_getprop_bin, '-h', indi_server, '-p', str(indi_port)],
@@ -5628,13 +5940,36 @@ class ModernAdminIndiCameraDetectView(BaseView):
                 check=False,
             )
         except subprocess.TimeoutExpired:
-            return jsonify({'error' : 'Timed out waiting for indi_getprop.'}), 504
+            detected_cameras = annotate_modern_admin_detected_cameras(detected_cameras, self.indi_allsky_config, get_modern_admin_active_db_camera_id(self._miscDb), indi_server=indi_server, indi_port=indi_port)
+            return jsonify({
+                'cameras'           : detected_cameras,
+                'devices'           : detected_cameras,
+                'libcamera_message' : libcamera_message,
+                'indi_error'        : 'Timed out waiting for indi_getprop.',
+            })
         except OSError as e:
-            return jsonify({'error' : 'Unable to run indi_getprop: {0:s}'.format(str(e))}), 400
+            detected_cameras = annotate_modern_admin_detected_cameras(detected_cameras, self.indi_allsky_config, get_modern_admin_active_db_camera_id(self._miscDb), indi_server=indi_server, indi_port=indi_port)
+            return jsonify({
+                'cameras'           : detected_cameras,
+                'devices'           : detected_cameras,
+                'libcamera_message' : libcamera_message,
+                'indi_error'        : 'Unable to run indi_getprop: {0:s}'.format(str(e)),
+            })
 
         if detect_proc.returncode != 0:
             output = detect_proc.stdout.strip()
             if 'connection refused' in output.lower():
+                if detected_cameras:
+                    detected_cameras = annotate_modern_admin_detected_cameras(detected_cameras, self.indi_allsky_config, get_modern_admin_active_db_camera_id(self._miscDb), indi_server=indi_server, indi_port=indi_port)
+                    return jsonify({
+                        'cameras'            : detected_cameras,
+                        'devices'            : detected_cameras,
+                        'libcamera_message'  : libcamera_message,
+                        'indi_error'         : 'INDI server non raggiungibile su {0:s}:{1:d}. Verifica che indiserver sia attivo.'.format(indi_server, indi_port),
+                        'connection_refused' : True,
+                        'indi_server'        : indi_server,
+                        'indi_port'          : indi_port,
+                    })
                 return jsonify({
                     'error'              : 'INDI server non raggiungibile su {0:s}:{1:d}. Verifica che indiserver sia attivo.'.format(indi_server, indi_port),
                     'connection_refused' : True,
@@ -5643,13 +5978,24 @@ class ModernAdminIndiCameraDetectView(BaseView):
                 }), 400
             if len(output) > 500:
                 output = output[:500] + '...'
-            return jsonify({'error' : output or 'indi_getprop failed.'}), 400
+            detected_cameras = annotate_modern_admin_detected_cameras(detected_cameras, self.indi_allsky_config, get_modern_admin_active_db_camera_id(self._miscDb), indi_server=indi_server, indi_port=indi_port)
+            return jsonify({
+                'cameras'           : detected_cameras,
+                'devices'           : detected_cameras,
+                'libcamera_message' : libcamera_message,
+                'indi_error'        : output or 'indi_getprop failed.',
+            })
 
-        devices = self.parse_indi_getprop_devices(detect_proc.stdout)
-        return jsonify({'devices' : devices})
+        detected_cameras.extend(self.parse_indi_getprop_devices(detect_proc.stdout, driver_hint=driver_hint))
+        detected_cameras = annotate_modern_admin_detected_cameras(detected_cameras, self.indi_allsky_config, get_modern_admin_active_db_camera_id(self._miscDb), indi_server=indi_server, indi_port=indi_port)
+        return jsonify({
+            'cameras'           : detected_cameras,
+            'devices'           : detected_cameras,
+            'libcamera_message' : libcamera_message,
+        })
 
 
-    def parse_indi_getprop_devices(self, output):
+    def parse_indi_getprop_devices(self, output, driver_hint=''):
         device_map = OrderedDict()
 
         for line in output.splitlines():
@@ -5668,7 +6014,13 @@ class ModernAdminIndiCameraDetectView(BaseView):
             if device_name not in device_map:
                 device_map[device_name] = {
                     'name'       : device_name,
+                    'type'       : 'indi',
+                    'driver'     : driver_hint or '',
+                    'interface'  : 'indi',
+                    'camera_id'  : '',
+                    'device_id'  : 'indi:{0:s}:{1:s}'.format(driver_hint or 'unknown', device_name),
                     'properties' : list(),
+                    'selectable' : True,
                     'score'      : 0,
                 }
 

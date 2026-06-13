@@ -1338,6 +1338,11 @@ body.modern-admin-lightbox-open {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.modern-admin-camera-card-selected {
+  border-color: rgba(116, 164, 255, 0.72);
+  background: rgba(116, 164, 255, 0.1);
+}
+
 .modern-admin-camera-card-header,
 .modern-admin-camera-card-details {
   display: flex;
@@ -1358,6 +1363,10 @@ body.modern-admin-lightbox-open {
   margin-bottom: 0;
   color: var(--modern-admin-muted);
   overflow-wrap: anywhere;
+}
+
+.modern-admin-warning-note {
+  color: var(--modern-admin-warn) !important;
 }
 
 .modern-admin-camera-card-details {

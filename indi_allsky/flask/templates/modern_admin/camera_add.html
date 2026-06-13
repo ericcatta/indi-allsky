@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-add-camera-v5') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-add-camera-v7') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -12,19 +12,19 @@ var camera_id = {{ camera_id }};
 {% block content %}
 <main class="modern-admin-shell" aria-labelledby="modern-admin-camera-add-title">
     {% set modern_admin_header_label = 'Add camera header' %}
-    {% set modern_admin_heading = 'Add INDI Camera' %}
+    {% set modern_admin_heading = 'Add Camera' %}
     {% set modern_admin_title_id = 'modern-admin-camera-add-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
     <section class="modern-admin-table-panel modern-admin-compact-intro" aria-labelledby="camera-add-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">INDI only</p>
+                <p class="modern-admin-eyebrow">Camera setup</p>
                 <h2 id="camera-add-title">Add Camera</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">Config only</span>
         </div>
-        <p class="modern-admin-note">Detect a camera from a local INDI server, then save a new active config that points indi-allsky to that camera. No multi-capture is enabled and existing camera rows are not changed.</p>
+        <p class="modern-admin-note">Detect a local libcamera camera or a camera exposed by a local INDI server, then save a new active config that points indi-allsky to that camera. No multi-capture is enabled and existing camera rows are not changed.</p>
     </section>
 
     <section class="modern-admin-table-panel modern-admin-compact-intro" aria-labelledby="configured-cameras-title">
@@ -63,15 +63,15 @@ var camera_id = {{ camera_id }};
     </section>
     {% endif %}
 
-    <section class="modern-admin-table-panel" aria-labelledby="indi-detect-title">
+    <section class="modern-admin-table-panel" aria-labelledby="camera-detect-title">
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Detect</p>
-                <h2 id="indi-detect-title">Detect INDI devices</h2>
+                <h2 id="camera-detect-title">Detect cameras</h2>
             </div>
             <button class="modern-admin-media-button" type="button" id="modern-admin-detect-indi">Detect cameras</button>
         </div>
-        <p class="modern-admin-note">Detect INDI shows only devices currently exposed by indiserver. DB cameras already registered above may not appear here unless their INDI server and driver are running now.</p>
+        <p class="modern-admin-note">Detection lists supported local libcamera devices and devices currently exposed by indiserver. DB cameras already registered above may not appear here unless their camera stack is running now.</p>
         <div class="modern-admin-driver-detection" aria-label="USB camera driver detection">
             <div>
                 <span>Detected camera type</span>
@@ -89,6 +89,10 @@ var camera_id = {{ camera_id }};
 
         <form class="modern-admin-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="camera_type" id="modern-admin-camera-type" value="{{ modern_admin_add_camera_form.camera_type }}">
+            <input type="hidden" name="camera_interface" id="modern-admin-camera-interface" value="{{ modern_admin_add_camera_form.camera_interface }}">
+            <input type="hidden" name="libcamera_id" id="modern-admin-libcamera-id" value="{{ modern_admin_add_camera_form.libcamera_id }}">
+            <input type="hidden" name="camera_device_id" id="modern-admin-camera-device-id" value="">
 
             <div class="modern-admin-form-grid">
                 <label>
@@ -101,7 +105,7 @@ var camera_id = {{ camera_id }};
                 </label>
                 <label>
                     <span>INDI Camera Name</span>
-                    <input type="text" name="indi_camera_name" id="modern-admin-indi-camera-name" value="{{ modern_admin_add_camera_form.indi_camera_name }}" autocomplete="off" required>
+                    <input type="text" name="indi_camera_name" id="modern-admin-indi-camera-name" value="{{ modern_admin_add_camera_form.indi_camera_name }}" autocomplete="off">
                 </label>
             </div>
 
@@ -127,11 +131,12 @@ var camera_id = {{ camera_id }};
             {% endif %}
 
             <div class="modern-admin-detected-devices" id="modern-admin-detected-devices" aria-live="polite">
-                <p class="modern-admin-note">Run detection to list cameras exposed by the configured INDI server. You can also type the camera name manually.</p>
+                <p class="modern-admin-note">Run detection, then choose a camera from the unified list.</p>
             </div>
+            <p class="modern-admin-note">Future multi-device matching should persist a stable device_id or USB path; this first version keeps that field UI-only and does not change the camera table.</p>
 
             <div class="modern-admin-action-row">
-                <button class="modern-admin-media-button" type="submit">Save INDI config</button>
+                <button class="modern-admin-media-button" type="submit">Save camera config</button>
             </div>
         </form>
     </section>
@@ -150,6 +155,10 @@ const modernAdminCameraNameInput = document.getElementById('modern-admin-indi-ca
 const modernAdminIndiServerInput = document.getElementById('modern-admin-indi-server');
 const modernAdminIndiPortInput = document.getElementById('modern-admin-indi-port');
 const modernAdminDriverHintInput = document.getElementById('modern-admin-driver-hint');
+const modernAdminCameraTypeInput = document.getElementById('modern-admin-camera-type');
+const modernAdminCameraInterfaceInput = document.getElementById('modern-admin-camera-interface');
+const modernAdminLibcameraIdInput = document.getElementById('modern-admin-libcamera-id');
+const modernAdminCameraDeviceIdInput = document.getElementById('modern-admin-camera-device-id');
 let modernAdminLastStartCommand = '';
 
 function modernAdminRenderDetectMessage(message, isError, clearPanel = true) {
@@ -188,6 +197,10 @@ function modernAdminRenderCommandPanel(command, detail, isError) {
 
 function modernAdminRenderConnectionRefused(payload) {
     modernAdminDetectedDevices.innerHTML = '';
+    modernAdminAppendStartIndiPanel(payload);
+}
+
+function modernAdminAppendStartIndiPanel(payload) {
 
     const panel = document.createElement('div');
     panel.className = 'modern-admin-message-panel modern-admin-message-error';
@@ -206,20 +219,42 @@ function modernAdminRenderConnectionRefused(payload) {
     modernAdminDetectedDevices.appendChild(panel);
 }
 
-function modernAdminSelectIndiCamera(name) {
-    modernAdminCameraNameInput.value = name;
-    modernAdminCameraNameInput.focus();
+function modernAdminSelectCamera(camera, card) {
+    modernAdminCameraTypeInput.value = camera.type || '';
+    modernAdminCameraInterfaceInput.value = camera.interface || '';
+    modernAdminLibcameraIdInput.value = camera.camera_id === undefined ? '' : camera.camera_id;
+    modernAdminCameraDeviceIdInput.value = camera.device_id || '';
+
+    if (camera.type === 'indi') {
+        modernAdminCameraNameInput.value = camera.name || '';
+    } else {
+        modernAdminCameraNameInput.value = '';
+    }
+
+    modernAdminDetectedDevices.querySelectorAll('.modern-admin-camera-card-selected').forEach((card) => {
+        card.classList.remove('modern-admin-camera-card-selected');
+    });
+    if (card) {
+        card.classList.add('modern-admin-camera-card-selected');
+    }
 }
 
-function modernAdminRenderDevices(devices) {
+function modernAdminRenderDevices(devices, payload = {}) {
     modernAdminDetectedDevices.innerHTML = '';
     if (modernAdminLastStartCommand) {
         modernAdminRenderCommandPanel(modernAdminLastStartCommand, '', false);
     }
 
     if (!devices || devices.length === 0) {
-        modernAdminRenderDetectMessage('No INDI devices were returned by indi_getprop.', true, !modernAdminLastStartCommand);
+        modernAdminRenderDetectMessage(payload.indi_error || 'No cameras were detected.', true, !modernAdminLastStartCommand);
         return;
+    }
+
+    if (payload.indi_error) {
+        modernAdminRenderDetectMessage(payload.indi_error, false, false);
+        if (payload.connection_refused) {
+            modernAdminAppendStartIndiPanel(payload);
+        }
     }
 
     const grid = document.createElement('div');
@@ -234,11 +269,22 @@ function modernAdminRenderDevices(devices) {
 
         const eyebrow = document.createElement('p');
         eyebrow.className = 'modern-admin-eyebrow';
-        eyebrow.textContent = device.candidate ? 'Camera candidate' : 'INDI device';
+        eyebrow.textContent = device.type === 'libcamera' ? 'libcamera' : 'INDI';
 
         const badge = document.createElement('span');
-        badge.className = device.candidate ? 'modern-admin-status-pill modern-admin-status-good' : 'modern-admin-status-pill modern-admin-status-muted';
-        badge.textContent = device.candidate ? 'Camera' : 'Device';
+        const status = device.status || (device.selectable ? 'New camera' : 'Ambiguous match');
+        badge.className = 'modern-admin-status-pill';
+        if (status === 'Active') {
+            badge.classList.add('modern-admin-status-good');
+            card.classList.add('modern-admin-camera-card-active');
+        } else if (status === 'Already configured') {
+            badge.classList.add('modern-admin-status-neutral');
+        } else if (status === 'New camera') {
+            badge.classList.add('modern-admin-status-good');
+        } else {
+            badge.classList.add('modern-admin-status-muted');
+        }
+        badge.textContent = status;
 
         header.appendChild(eyebrow);
         header.appendChild(badge);
@@ -250,20 +296,37 @@ function modernAdminRenderDevices(devices) {
         title.textContent = device.name;
 
         const props = document.createElement('p');
-        props.textContent = (device.properties || []).slice(0, 3).join('  ');
+        props.textContent = [device.driver || device.interface, ...(device.properties || []).slice(0, 2)].filter(Boolean).join('  ');
 
         main.appendChild(title);
         main.appendChild(props);
 
-        const action = document.createElement('button');
-        action.className = 'modern-admin-media-button';
-        action.type = 'button';
-        action.textContent = 'Use this camera';
-        action.addEventListener('click', () => modernAdminSelectIndiCamera(device.name));
+        if (device.db_match) {
+            const dbMatch = document.createElement('p');
+            dbMatch.className = 'modern-admin-note';
+            dbMatch.textContent = `DB match: ${device.db_match}`;
+            main.appendChild(dbMatch);
+        }
+
+        if (device.status_warning) {
+            const warning = document.createElement('p');
+            warning.className = 'modern-admin-note modern-admin-warning-note';
+            warning.textContent = device.status_warning;
+            main.appendChild(warning);
+        }
 
         card.appendChild(header);
         card.appendChild(main);
-        card.appendChild(action);
+
+        if (device.selectable && device.action_label) {
+            const action = document.createElement('button');
+            action.className = 'modern-admin-media-button';
+            action.type = 'button';
+            action.textContent = device.action_label;
+            action.addEventListener('click', () => modernAdminSelectCamera(device, card));
+            card.appendChild(action);
+        }
+
         grid.appendChild(card);
     });
 
@@ -282,7 +345,8 @@ function modernAdminDetectIndiDevices() {
         },
         body: JSON.stringify({
             indi_server: modernAdminIndiServerInput.value,
-            indi_port: modernAdminIndiPortInput.value
+            indi_port: modernAdminIndiPortInput.value,
+            driver_hint: modernAdminDriverHintInput.value
         })
     })
     .then((response) => response.json().then((payload) => ({ ok: response.ok, payload })))
@@ -296,7 +360,7 @@ function modernAdminDetectIndiDevices() {
             return;
         }
 
-        modernAdminRenderDevices(payload.devices);
+        modernAdminRenderDevices(payload.cameras || payload.devices, payload);
     })
     .catch(() => {
         modernAdminRenderDetectMessage('INDI detection failed.', true);
