@@ -5077,23 +5077,23 @@ class ModernAdminView(TemplateView):
 
 
     def get_modern_admin_nav(self):
-        # Navigation shell for the future modern admin UI; disabled items stay read-only placeholders.
+        # Navigation shell for the future modern admin UI; unfinished sections render read-only placeholders.
         nav_items = (
-            ('Dashboard', 'indi_allsky.modern_admin_view', True),
-            ('Cameras', 'indi_allsky.modern_admin_cameras_view', True),
-            ('Storage', None, False),
-            ('Uploads', None, False),
-            ('Observatory', None, False),
-            ('System', None, False),
-            ('Updates', None, False),
+            ('Dashboard', 'indi_allsky.modern_admin_view'),
+            ('Cameras', 'indi_allsky.modern_admin_cameras_view'),
+            ('Storage', 'indi_allsky.modern_admin_storage_view'),
+            ('Uploads', 'indi_allsky.modern_admin_uploads_view'),
+            ('Observatory', 'indi_allsky.modern_admin_observatory_view'),
+            ('System', 'indi_allsky.modern_admin_system_view'),
+            ('Updates', 'indi_allsky.modern_admin_updates_view'),
         )
 
         modern_admin_nav = list()
-        for label, endpoint, enabled in nav_items:
+        for label, endpoint in nav_items:
             modern_admin_nav.append({
                 'label'    : label,
                 'endpoint' : endpoint,
-                'enabled'  : enabled,
+                'enabled'  : True,
                 'active'   : endpoint == request.endpoint,
             })
 
@@ -5220,6 +5220,51 @@ class ModernAdminCamerasView(ModernAdminView):
             return 'Offline'
 
         return 'Unknown'
+
+
+class ModernAdminPlaceholderView(ModernAdminView):
+    # Read-only placeholder for future modern admin sections.
+    page_title = 'Modern Admin'
+    modern_admin_section = 'Modern Admin'
+    modern_admin_message = 'This section is coming later.'
+
+    def get_context(self):
+        context = super(ModernAdminPlaceholderView, self).get_context()
+
+        context['modern_admin_section'] = self.modern_admin_section
+        context['modern_admin_message'] = self.modern_admin_message
+
+        return context
+
+
+class ModernAdminStorageView(ModernAdminPlaceholderView):
+    page_title = 'Modern Admin Storage'
+    modern_admin_section = 'Storage'
+    modern_admin_message = 'Storage details and retention controls are coming later.'
+
+
+class ModernAdminUploadsView(ModernAdminPlaceholderView):
+    page_title = 'Modern Admin Uploads'
+    modern_admin_section = 'Uploads'
+    modern_admin_message = 'Upload destinations, queues, and sync health are coming later.'
+
+
+class ModernAdminObservatoryView(ModernAdminPlaceholderView):
+    page_title = 'Modern Admin Observatory'
+    modern_admin_section = 'Observatory'
+    modern_admin_message = 'Sky context, sensors, and observatory conditions are coming later.'
+
+
+class ModernAdminSystemView(ModernAdminPlaceholderView):
+    page_title = 'Modern Admin System'
+    modern_admin_section = 'System'
+    modern_admin_message = 'Read-only system health details are coming later.'
+
+
+class ModernAdminUpdatesView(ModernAdminPlaceholderView):
+    page_title = 'Modern Admin Updates'
+    modern_admin_section = 'Updates'
+    modern_admin_message = 'Update status and release information are coming later.'
 
 
 class ModernAdminModeView(BaseView):
@@ -12154,6 +12199,11 @@ bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.a
 
 bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
+bp_allsky.add_url_rule('/modern-admin/storage', view_func=ModernAdminStorageView.as_view('modern_admin_storage_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/uploads', view_func=ModernAdminUploadsView.as_view('modern_admin_uploads_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/observatory', view_func=ModernAdminObservatoryView.as_view('modern_admin_observatory_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/system', view_func=ModernAdminSystemView.as_view('modern_admin_system_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/placeholder.html'))
 bp_allsky.add_url_rule('/modern-admin/mode/<mode>', view_func=ModernAdminModeView.as_view('modern_admin_mode_view'))
 bp_allsky.add_url_rule('/system', view_func=SystemInfoView.as_view('system_view', template_name='system.html'))
 bp_allsky.add_url_rule('/ajax/system', view_func=AjaxSystemInfoView.as_view('ajax_system_view'))

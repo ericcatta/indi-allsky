@@ -466,6 +466,7 @@
 .modern-admin-management-panel,
 .modern-admin-table-panel,
 .modern-admin-empty-state,
+.modern-admin-placeholder-page,
 .modern-admin-camera-card {
   border: 1px solid var(--modern-admin-line);
   background: rgba(17, 21, 27, 0.72);
@@ -475,14 +476,16 @@
 
 .modern-admin-management-panel,
 .modern-admin-table-panel,
-.modern-admin-empty-state {
+.modern-admin-empty-state,
+.modern-admin-placeholder-page {
   border-radius: 18px;
   padding: 22px;
 }
 
 .modern-admin-management-panel h2,
 .modern-admin-table-panel h2,
-.modern-admin-empty-state h3 {
+.modern-admin-empty-state h3,
+.modern-admin-placeholder-page h2 {
   margin-bottom: 18px;
   font-size: clamp(1.55rem, 2.6vw, 2.6rem);
   line-height: 1.05;
@@ -490,10 +493,28 @@
 }
 
 .modern-admin-placeholder-panel p,
-.modern-admin-empty-state p {
+.modern-admin-empty-state p,
+.modern-admin-placeholder-page p {
   margin-bottom: 0;
   color: var(--modern-admin-muted);
   line-height: 1.55;
+}
+
+.modern-admin-placeholder-page {
+  margin-top: 22px;
+}
+
+.modern-admin-placeholder-link {
+  display: inline-flex;
+  margin-top: 24px;
+  color: var(--modern-admin-blue);
+  text-decoration: none;
+  font-weight: 650;
+}
+
+.modern-admin-placeholder-link:hover {
+  color: var(--modern-admin-text);
+  text-decoration: none;
 }
 
 .modern-admin-future-actions {

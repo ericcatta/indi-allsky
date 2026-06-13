@@ -6,8 +6,6 @@
             <a class="modern-admin-mode-option{% if modern_admin_mode == 'modern' %} modern-admin-mode-option-active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_mode_view', mode='modern') }}">Modern</a>
             <a class="modern-admin-mode-option{% if modern_admin_mode == 'classic' %} modern-admin-mode-option-active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_mode_view', mode='classic') }}">Classic</a>
         </div>
-
-        <a class="modern-admin-classic-link" href="{{ url_for('indi_allsky.config_view') }}">Classic Admin</a>
     </div>
 
     <nav class="modern-admin-nav" aria-label="Modern admin sections">
