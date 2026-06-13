@@ -5262,6 +5262,7 @@ class ModernAdminCameraAddView(ModernAdminView):
             'indi_server'      : self.indi_allsky_config.get('INDI_SERVER', 'localhost'),
             'indi_port'        : int(self.indi_allsky_config.get('INDI_PORT', 7624)),
             'indi_camera_name' : self.indi_allsky_config.get('INDI_CAMERA_NAME', ''),
+            'driver_hint'      : 'indi_asi_ccd',
         }
 
         context['modern_admin_add_camera_error'] = None
@@ -5286,6 +5287,7 @@ class ModernAdminCameraAddView(ModernAdminView):
             'indi_server'      : request.form.get('indi_server', 'localhost').strip() or 'localhost',
             'indi_port'        : request.form.get('indi_port', '7624').strip() or '7624',
             'indi_camera_name' : request.form.get('indi_camera_name', '').strip(),
+            'driver_hint'      : request.form.get('driver_hint', 'indi_asi_ccd').strip() or 'indi_asi_ccd',
         }
 
         result = {
@@ -5410,7 +5412,12 @@ class ModernAdminIndiCameraDetectView(BaseView):
         if detect_proc.returncode != 0:
             output = detect_proc.stdout.strip()
             if 'connection refused' in output.lower():
-                return jsonify({'error' : 'INDI server non raggiungibile su {0:s}:{1:d}. Verifica che indiserver sia attivo.'.format(indi_server, indi_port)}), 400
+                return jsonify({
+                    'error'              : 'INDI server non raggiungibile su {0:s}:{1:d}. Verifica che indiserver sia attivo.'.format(indi_server, indi_port),
+                    'connection_refused' : True,
+                    'indi_server'        : indi_server,
+                    'indi_port'          : indi_port,
+                }), 400
             if len(output) > 500:
                 output = output[:500] + '...'
             return jsonify({'error' : output or 'indi_getprop failed.'}), 400
@@ -5458,6 +5465,94 @@ class ModernAdminIndiCameraDetectView(BaseView):
             del device['score']
 
         return device_list
+
+
+class ModernAdminIndiServerStartView(ModernAdminIndiCameraDetectView):
+    methods = ['POST']
+    decorators = [login_required]
+
+    def dispatch_request(self):
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            return jsonify({'error' : 'Only an admin user can start an INDI server.'}), 403
+
+        indi_server = request.json.get('indi_server', 'localhost').strip() or 'localhost'
+        if indi_server not in ('localhost', '127.0.0.1', '::1'):
+            return jsonify({'error' : 'Starting indiserver is only supported for localhost in this first version.'}), 400
+
+        try:
+            indi_port = int(request.json.get('indi_port', 7624))
+        except ValueError:
+            return jsonify({'error' : 'INDI port must be a number.'}), 400
+
+        if indi_port < 1 or indi_port > 65535:
+            return jsonify({'error' : 'INDI port must be between 1 and 65535.'}), 400
+
+        driver_hint = request.json.get('driver_hint', 'indi_asi_ccd').strip() or 'indi_asi_ccd'
+        if not re.match(r'^indi_[A-Za-z0-9_]+$', driver_hint):
+            return jsonify({'error' : 'Invalid INDI driver name.'}), 400
+
+        try:
+            import shutil
+            import subprocess
+
+            indiserver_bin = shutil.which('indiserver')
+            if not indiserver_bin:
+                return jsonify({'error' : 'indiserver was not found on this system.'}), 400
+
+            if not shutil.which(driver_hint):
+                return jsonify({'error' : 'INDI driver was not found: {0:s}'.format(driver_hint)}), 400
+
+            indi_getprop_bin = shutil.which('indi_getprop')
+            if not indi_getprop_bin:
+                return jsonify({'error' : 'indi_getprop was not found on this system.'}), 400
+
+            # Start only the local INDI server. Capture remains stopped/unchanged until the user restarts indi-allsky.
+            indiserver_proc = subprocess.Popen(
+                [indiserver_bin, '-p', str(indi_port), driver_hint],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+
+            deadline = time.time() + 8
+            last_output = ''
+            while time.time() < deadline:
+                if indiserver_proc.poll() is not None:
+                    return jsonify({'error' : 'indiserver exited before it became reachable.'}), 400
+
+                detect_proc = subprocess.run(
+                    [indi_getprop_bin, '-h', indi_server, '-p', str(indi_port)],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    timeout=3,
+                    check=False,
+                )
+
+                if detect_proc.returncode == 0:
+                    return jsonify({
+                        'success' : 'INDI server started on {0:s}:{1:d}.'.format(indi_server, indi_port),
+                        'devices' : self.parse_indi_getprop_devices(detect_proc.stdout),
+                    })
+
+                last_output = detect_proc.stdout.strip()
+                time.sleep(0.8)
+
+        except subprocess.TimeoutExpired:
+            if 'indiserver_proc' in locals() and indiserver_proc.poll() is None:
+                indiserver_proc.terminate()
+            return jsonify({'error' : 'Timed out waiting for indi_getprop after starting indiserver.'}), 504
+        except OSError as e:
+            return jsonify({'error' : 'Unable to start indiserver: {0:s}'.format(str(e))}), 400
+
+        if len(last_output) > 500:
+            last_output = last_output[:500] + '...'
+
+        if 'indiserver_proc' in locals() and indiserver_proc.poll() is None:
+            indiserver_proc.terminate()
+
+        return jsonify({'error' : last_output or 'Started indiserver, but it did not become reachable before timeout.'}), 504
 
 
 class ModernAdminPlaceholderView(ModernAdminView):
@@ -13494,6 +13589,7 @@ bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('moder
 bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/add', view_func=ModernAdminCameraAddView.as_view('modern_admin_camera_add_view', template_name='modern_admin/camera_add.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/detect-indi', view_func=ModernAdminIndiCameraDetectView.as_view('modern_admin_camera_detect_indi_view'))
+bp_allsky.add_url_rule('/modern-admin/cameras/start-indi', view_func=ModernAdminIndiServerStartView.as_view('modern_admin_start_indi_view'))
 bp_allsky.add_url_rule('/modern-admin/cameras/info', view_func=ModernAdminCameraInfoView.as_view('modern_admin_camera_info_view', template_name='modern_admin/camera_info.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/image-lag', view_func=ModernAdminImageLagView.as_view('modern_admin_image_lag_view', template_name='modern_admin/image_lag.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/adu-history', view_func=ModernAdminAduHistoryView.as_view('modern_admin_adu_history_view', template_name='modern_admin/adu_history.html'))
