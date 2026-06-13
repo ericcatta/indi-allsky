@@ -27,6 +27,30 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-note">Detect a camera from a local INDI server, then save a new active config that points indi-allsky to that camera. No multi-capture is enabled and existing camera rows are not changed.</p>
     </section>
 
+    <section class="modern-admin-table-panel modern-admin-compact-intro" aria-labelledby="configured-cameras-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Inventory</p>
+                <h2 id="configured-cameras-title">Configured cameras</h2>
+            </div>
+        </div>
+        {% if modern_admin_configured_cameras %}
+        <div class="modern-admin-compact-camera-list">
+            {% for camera in modern_admin_configured_cameras %}
+            <article class="modern-admin-compact-camera{% if camera.selected %} modern-admin-compact-camera-active{% endif %}">
+                <div>
+                    <h3>{{ camera.name }}</h3>
+                    <p>{{ camera.driver }}</p>
+                </div>
+                <span class="modern-admin-status-pill {% if camera.selected %}modern-admin-status-good{% else %}modern-admin-status-muted{% endif %}">{{ camera.status }}</span>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="modern-admin-note">No DB camera rows are registered yet.</p>
+        {% endif %}
+    </section>
+
     {% if modern_admin_add_camera_error %}
     <section class="modern-admin-message-panel modern-admin-message-error" aria-label="Add camera error">
         {{ modern_admin_add_camera_error }}
@@ -47,7 +71,7 @@ var camera_id = {{ camera_id }};
             </div>
             <button class="modern-admin-media-button" type="button" id="modern-admin-detect-indi">Detect cameras</button>
         </div>
-        <p class="modern-admin-note">indiserver should already be running and exposing the camera driver. If localhost refuses the connection, Modern Admin can start a local indiserver for this first INDI-only flow.</p>
+        <p class="modern-admin-note">Detect INDI shows only devices currently exposed by indiserver. DB cameras already registered above may not appear here unless their INDI server and driver are running now.</p>
 
         <form class="modern-admin-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

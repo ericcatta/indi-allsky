@@ -5275,11 +5275,32 @@ class ModernAdminCameraAddView(ModernAdminView):
             'indi_port'        : self.indi_allsky_config.get('INDI_PORT', 7624),
             'indi_camera_name' : self.indi_allsky_config.get('INDI_CAMERA_NAME', ''),
         }
+        context['modern_admin_configured_cameras'] = self.get_configured_cameras()
 
         if request.method == 'POST':
             context.update(self.save_indi_camera_config())
 
         return context
+
+
+    def get_configured_cameras(self):
+        cameras = IndiAllSkyDbCameraTable.query\
+            .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
+            .order_by(IndiAllSkyDbCameraTable.connectDate.desc())\
+            .order_by(IndiAllSkyDbCameraTable.createDate.desc())\
+            .all()
+
+        camera_list = list()
+        for camera in cameras:
+            selected = camera.id == self.camera.id
+            camera_list.append({
+                'name'     : str(camera.friendlyName or camera.name or 'Unknown camera'),
+                'driver'   : str(camera.driver or 'Driver unavailable'),
+                'status'   : 'Active' if selected else 'Available',
+                'selected' : selected,
+            })
+
+        return camera_list
 
 
     def save_indi_camera_config(self):

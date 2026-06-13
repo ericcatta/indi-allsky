@@ -832,6 +832,43 @@
   white-space: pre-wrap;
 }
 
+.modern-admin-compact-camera-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.modern-admin-compact-camera {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.modern-admin-compact-camera-active {
+  border-color: rgba(155, 215, 178, 0.34);
+}
+
+.modern-admin-compact-camera h3 {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 680;
+}
+
+.modern-admin-compact-camera p {
+  margin: 0;
+  overflow: hidden;
+  color: var(--modern-admin-quiet);
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .modern-admin-safe-intro .modern-admin-section-heading {
   margin-bottom: 4px;
 }
