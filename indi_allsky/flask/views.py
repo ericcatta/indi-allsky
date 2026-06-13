@@ -10464,12 +10464,32 @@ class ModernAdminRealtimeKeogramView(ModernAdminContextMixin, RealtimeKeogramVie
         return context
 
 
-class ModernAdminLongTermKeogramView(ModernAdminContextMixin, LongTermKeogramView):
+class ModernAdminLongTermKeogramView(ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Long Term Keogram'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
 
     def get_context(self):
         context = super(ModernAdminLongTermKeogramView, self).get_context()
+        context['keogram_age'] = ''
+        context['keogram_uri'] = ''
+
+        longterm_keogram_image_p = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']).joinpath(
+            'ccd_{0:s}'.format(self.camera.uuid),
+            'longterm_keogram.jpg',
+        )
+        if longterm_keogram_image_p.is_file():
+            image_age_s = time.time() - longterm_keogram_image_p.stat().st_mtime
+            image_age_days = int(image_age_s / 86400)
+            image_age_hours = int((image_age_s % 86400) / 3600)
+            image_age_minutes = int(((image_age_s % 86400) % 3600) / 60)
+
+            context['keogram_age'] = 'Generated {0:d} days, {1:d} hours, {2:d} minutes ago'.format(
+                image_age_days,
+                image_age_hours,
+                image_age_minutes,
+            )
+            context['keogram_uri'] = str(Path('images').joinpath('ccd_{0:s}'.format(self.camera.uuid), 'longterm_keogram.jpg'))
+
         keogram_uri = context.get('keogram_uri')
         if keogram_uri:
             context['keogram_uri'] = ModernAdminMediaListView.normalize_media_url(self, keogram_uri)
@@ -10555,7 +10575,7 @@ class ModernAdminDarkLibraryView(ModernAdminContextMixin, TemplateView):
         return row_list
 
 
-class ModernAdminAstroPanelView(ModernAdminContextMixin, AstroPanelView):
+class ModernAdminAstroPanelView(ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Astropanel'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
 
