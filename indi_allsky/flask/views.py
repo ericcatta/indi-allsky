@@ -5032,10 +5032,13 @@ class ModernAdminView(TemplateView):
 
     def get_context(self):
         context = super(ModernAdminView, self).get_context()
+        session['admin_mode'] = 'modern'
 
         camera_name = self.camera.friendlyName or self.camera.name or 'Unknown camera'
         camera_model = self.camera.driver or 'Model unavailable'
 
+        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
+        context['modern_admin_nav'] = self.get_modern_admin_nav()
         context['modern_admin_camera_name'] = str(camera_name)
         context['modern_admin_camera_model'] = str(camera_model)
         context['modern_admin_capture_status'] = self.get_capture_status_label()
@@ -5071,6 +5074,30 @@ class ModernAdminView(TemplateView):
         context['latest_image_status'] = self.latest_image_entry.createDate.strftime('%Y-%m-%d %H:%M:%S')
 
         return context
+
+
+    def get_modern_admin_nav(self):
+        # Navigation shell for the future modern admin UI; disabled items stay read-only placeholders.
+        nav_items = (
+            ('Dashboard', 'indi_allsky.modern_admin_view', True),
+            ('Cameras', 'indi_allsky.modern_admin_cameras_view', True),
+            ('Storage', None, False),
+            ('Uploads', None, False),
+            ('Observatory', None, False),
+            ('System', None, False),
+            ('Updates', None, False),
+        )
+
+        modern_admin_nav = list()
+        for label, endpoint, enabled in nav_items:
+            modern_admin_nav.append({
+                'label'    : label,
+                'endpoint' : endpoint,
+                'enabled'  : enabled,
+                'active'   : endpoint == request.endpoint,
+            })
+
+        return modern_admin_nav
 
 
     def get_capture_status_label(self):
@@ -5193,6 +5220,19 @@ class ModernAdminCamerasView(ModernAdminView):
             return 'Offline'
 
         return 'Unknown'
+
+
+class ModernAdminModeView(BaseView):
+    # Stores the user's preferred admin shell while keeping classic admin fully available.
+    decorators = [login_required]
+
+    def dispatch_request(self, mode):
+        if mode == 'classic':
+            session['admin_mode'] = 'classic'
+            return redirect(url_for('indi_allsky.config_view'))
+
+        session['admin_mode'] = 'modern'
+        return redirect(url_for('indi_allsky.modern_admin_view'))
 
 
 class SystemInfoView(TemplateView):
@@ -12114,6 +12154,7 @@ bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.a
 
 bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
+bp_allsky.add_url_rule('/modern-admin/mode/<mode>', view_func=ModernAdminModeView.as_view('modern_admin_mode_view'))
 bp_allsky.add_url_rule('/system', view_func=SystemInfoView.as_view('system_view', template_name='system.html'))
 bp_allsky.add_url_rule('/ajax/system', view_func=AjaxSystemInfoView.as_view('ajax_system_view'))
 bp_allsky.add_url_rule('/ajax/settime', view_func=AjaxSetTimeView.as_view('ajax_settime_view'))

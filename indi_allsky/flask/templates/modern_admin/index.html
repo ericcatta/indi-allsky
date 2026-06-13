@@ -12,13 +12,11 @@ var camera_id = {{ camera_id }};
 {% block content %}
 <!-- Future modern admin UI entry point; this placeholder keeps classic admin unchanged. -->
 <main class="modern-admin-shell" aria-labelledby="modern-admin-title">
-    <header class="modern-admin-topbar" aria-label="Dashboard header">
-        <div>
-            <p class="modern-admin-eyebrow">All-Sky Admin</p>
-            <h1 id="modern-admin-title">Modern Admin Dashboard</h1>
-        </div>
-        <a class="modern-admin-classic-link" href="{{ url_for('indi_allsky.config_view') }}">Classic Admin</a>
-    </header>
+    {% set modern_admin_header_label = 'Dashboard header' %}
+    {% set modern_admin_eyebrow = 'All-Sky Admin' %}
+    {% set modern_admin_heading = 'Modern Admin Dashboard' %}
+    {% set modern_admin_title_id = 'modern-admin-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
 
     <section class="modern-admin-hero" aria-labelledby="latest-image-title">
         <div class="modern-admin-hero-copy">

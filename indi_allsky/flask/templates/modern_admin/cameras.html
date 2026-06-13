@@ -12,16 +12,11 @@ var camera_id = {{ camera_id }};
 {% block content %}
 <!-- Future camera management UI entry point; this first page is read-only. -->
 <main class="modern-admin-shell" aria-labelledby="modern-admin-cameras-title">
-    <header class="modern-admin-topbar" aria-label="Camera management header">
-        <div>
-            <p class="modern-admin-eyebrow">Modern Admin</p>
-            <h1 id="modern-admin-cameras-title">Camera Management</h1>
-        </div>
-        <div class="modern-admin-action-row">
-            <a class="modern-admin-classic-link" href="{{ url_for('indi_allsky.modern_admin_view') }}">Modern Admin</a>
-            <a class="modern-admin-classic-link" href="{{ url_for('indi_allsky.config_view') }}">Classic Admin</a>
-        </div>
-    </header>
+    {% set modern_admin_header_label = 'Camera management header' %}
+    {% set modern_admin_eyebrow = 'Modern Admin' %}
+    {% set modern_admin_heading = 'Camera Management' %}
+    {% set modern_admin_title_id = 'modern-admin-cameras-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
 
     <section class="modern-admin-management-grid" aria-label="Camera management">
         <article class="modern-admin-management-panel">
