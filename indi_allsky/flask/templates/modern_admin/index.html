@@ -15,6 +15,7 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_header_label = 'Dashboard header' %}
     {% set modern_admin_eyebrow = 'All-Sky Admin' %}
     {% set modern_admin_heading = 'Modern Admin Dashboard' %}
+    {% set modern_admin_description = 'Overview of your AllSky system.' %}
     {% set modern_admin_title_id = 'modern-admin-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
@@ -108,7 +109,6 @@ var camera_id = {{ camera_id }};
     </section>
 
     <footer class="modern-admin-footer">
-        <a href="{{ url_for('indi_allsky.config_view') }}" class="modern-admin-footer-link">Open classic admin UI</a>
         <span>Placeholder dashboard</span>
         <span>Read-only preview</span>
     </footer>

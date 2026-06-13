@@ -60,6 +60,13 @@ Both templates include `modern_admin/_shell_header.html`, which provides:
 
 The navigation structure follows `docs/modern-admin-information-architecture.md`.
 
+The header was refined from the first large control treatment into a calmer product shell inspired by the approved mockup:
+
+- the Modern / Classic control is a compact segmented switch;
+- Dashboard and Cameras are emphasized as application navigation rather than secondary buttons;
+- the header uses a subtle app-frame treatment so the latest image remains the primary visual focus;
+- duplicated classic-admin navigation is reduced while keeping an always-visible fallback link.
+
 The visual dashboard prototype from `allsky-hybrid/prototype/admin-dashboard-v0` has been ported into this template:
 
 - large latest image hero, now backed by the current latest image when one is available;
