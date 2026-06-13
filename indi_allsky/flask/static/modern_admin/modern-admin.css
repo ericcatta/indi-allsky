@@ -762,7 +762,8 @@
   font-weight: 700;
 }
 
-.modern-admin-form input {
+.modern-admin-form input,
+.modern-admin-form select {
   width: 100%;
   min-height: 40px;
   padding: 0 12px;
@@ -772,9 +773,49 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-.modern-admin-form input:focus {
+.modern-admin-form input:focus,
+.modern-admin-form select:focus {
   outline: 2px solid rgba(159, 194, 255, 0.36);
   outline-offset: 2px;
+}
+
+.modern-admin-driver-detection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin: 14px 0 10px;
+}
+
+.modern-admin-driver-detection div,
+.modern-admin-advanced-options {
+  padding: 12px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.modern-admin-driver-detection span,
+.modern-admin-advanced-options summary {
+  color: var(--modern-admin-quiet);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.modern-admin-driver-detection strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.95rem;
+}
+
+.modern-admin-advanced-options {
+  display: grid;
+  gap: 12px;
+}
+
+.modern-admin-advanced-options summary {
+  cursor: pointer;
 }
 
 .modern-admin-message-panel {

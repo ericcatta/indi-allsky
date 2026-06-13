@@ -5326,6 +5326,126 @@ class ModernAdminCamerasView(ModernAdminView):
         return result
 
 
+def get_modern_admin_supported_indi_drivers():
+    setup_p = Path(__file__).resolve().parents[2].joinpath('setup.sh')
+
+    try:
+        setup_text = setup_p.read_text(encoding='utf-8')
+    except OSError as e:
+        app.logger.error('Unable to read supported INDI driver list from setup.sh: %s', str(e))
+        return list()
+
+    order_match = re.search(r'INDI_CCD_DRIVER_ORDER=\((.*?)\)', setup_text, re.S)
+    if not order_match:
+        return list()
+
+    driver_names = re.findall(r'"([^"]+)"', order_match.group(1))
+    driver_labels = dict(re.findall(r'INDI_CCD_DRIVER_MAP\[([^\]]+)\]="([^"]+)"', setup_text))
+
+    supported_drivers = list()
+    for driver_name in driver_names:
+        supported_drivers.append({
+            'value' : driver_name,
+            'label' : driver_labels.get(driver_name, driver_name),
+        })
+
+    return supported_drivers
+
+
+def get_modern_admin_supported_camera_interfaces():
+    try:
+        from .forms import IndiAllskyConfigForm
+    except Exception as e:
+        app.logger.error('Unable to read supported camera interface choices: %s', str(e))
+        return list()
+
+    supported_interfaces = list()
+    for group_name, group_choices in IndiAllskyConfigForm.CAMERA_INTERFACE_choices.items():
+        for interface_value, interface_label in group_choices:
+            supported_interfaces.append({
+                'group' : group_name,
+                'value' : interface_value,
+                'label' : interface_label,
+            })
+
+    return supported_interfaces
+
+
+def detect_modern_admin_usb_camera_driver():
+    supported_driver_values = {driver['value'] for driver in get_modern_admin_supported_indi_drivers()}
+    detection = {
+        'detected'     : False,
+        'camera_type'  : 'Unknown USB camera',
+        'driver'       : '',
+        'message'      : 'No known USB camera driver was auto-detected by lsusb. Choose one of the project-supported INDI drivers below.',
+        'lsusb_output' : '',
+    }
+
+    try:
+        import shutil
+        import subprocess
+
+        lsusb_bin = shutil.which('lsusb')
+        if not lsusb_bin:
+            detection['message'] = 'lsusb was not found on this system.'
+            return detection
+
+        lsusb_proc = subprocess.run(
+            [lsusb_bin],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        detection['message'] = 'Timed out while running lsusb.'
+        return detection
+    except OSError as e:
+        detection['message'] = 'Unable to run lsusb: {0:s}'.format(str(e))
+        return detection
+
+    output = lsusb_proc.stdout.strip()
+    detection['lsusb_output'] = output
+
+    if lsusb_proc.returncode != 0:
+        detection['message'] = output or 'lsusb failed.'
+        return detection
+
+    output_l = output.lower()
+
+    if ('03c3:' in output_l or 'zwo' in output_l) and 'indi_asi_ccd' in supported_driver_values:
+        detection.update({
+            'detected'    : True,
+            'camera_type' : 'ZWO USB camera',
+            'driver'      : 'indi_asi_ccd',
+            'message'     : 'Detected ZWO camera from USB vendor 03c3.',
+        })
+    elif ('04a9:' in output_l or 'canon' in output_l) and 'indi_gphoto_ccd' in supported_driver_values:
+        detection.update({
+            'detected'    : True,
+            'camera_type' : 'Canon USB camera',
+            'driver'      : 'indi_gphoto_ccd',
+            'message'     : 'Detected Canon camera from USB.',
+        })
+    elif ('04b0:' in output_l or 'nikon' in output_l) and 'indi_gphoto_ccd' in supported_driver_values:
+        detection.update({
+            'detected'    : True,
+            'camera_type' : 'Nikon USB camera',
+            'driver'      : 'indi_gphoto_ccd',
+            'message'     : 'Detected Nikon camera from USB.',
+        })
+    elif ('054c:' in output_l or 'sony' in output_l) and 'indi_gphoto_ccd' in supported_driver_values:
+        detection.update({
+            'detected'    : True,
+            'camera_type' : 'Sony USB camera',
+            'driver'      : 'indi_gphoto_ccd',
+            'message'     : 'Detected Sony camera from USB.',
+        })
+
+    return detection
+
+
 class ModernAdminCameraAddView(ModernAdminView):
     # Future modern camera setup entry point; first version only creates a new INDI config.
     page_title = 'Add INDI Camera'
@@ -5334,12 +5454,14 @@ class ModernAdminCameraAddView(ModernAdminView):
 
     def get_context(self):
         context = super(ModernAdminCameraAddView, self).get_context()
+        usb_detection = detect_modern_admin_usb_camera_driver()
+        supported_indi_drivers = get_modern_admin_supported_indi_drivers()
 
         form_data = {
             'indi_server'      : self.indi_allsky_config.get('INDI_SERVER', 'localhost'),
             'indi_port'        : int(self.indi_allsky_config.get('INDI_PORT', 7624)),
             'indi_camera_name' : self.indi_allsky_config.get('INDI_CAMERA_NAME', ''),
-            'driver_hint'      : 'indi_asi_ccd',
+            'driver_hint'      : usb_detection['driver'],
         }
 
         context['modern_admin_add_camera_error'] = None
@@ -5353,6 +5475,9 @@ class ModernAdminCameraAddView(ModernAdminView):
             'indi_camera_name' : self.indi_allsky_config.get('INDI_CAMERA_NAME', ''),
         }
         context['modern_admin_configured_cameras'] = self.get_configured_cameras()
+        context['modern_admin_usb_detection'] = usb_detection
+        context['modern_admin_supported_indi_drivers'] = supported_indi_drivers
+        context['modern_admin_supported_camera_interfaces'] = get_modern_admin_supported_camera_interfaces()
 
         if request.method == 'POST':
             context.update(self.save_indi_camera_config())
@@ -5385,7 +5510,7 @@ class ModernAdminCameraAddView(ModernAdminView):
             'indi_server'      : request.form.get('indi_server', 'localhost').strip() or 'localhost',
             'indi_port'        : request.form.get('indi_port', '7624').strip() or '7624',
             'indi_camera_name' : request.form.get('indi_camera_name', '').strip(),
-            'driver_hint'      : request.form.get('driver_hint', 'indi_asi_ccd').strip() or 'indi_asi_ccd',
+            'driver_hint'      : request.form.get('driver_hint', '').strip(),
         }
 
         result = {
@@ -5585,9 +5710,15 @@ class ModernAdminIndiServerStartView(ModernAdminIndiCameraDetectView):
         if indi_port < 1 or indi_port > 65535:
             return jsonify({'error' : 'INDI port must be between 1 and 65535.'}), 400
 
-        driver_hint = request.json.get('driver_hint', 'indi_asi_ccd').strip() or 'indi_asi_ccd'
-        if not re.match(r'^indi_[A-Za-z0-9_]+$', driver_hint):
-            return jsonify({'error' : 'Invalid INDI driver name.'}), 400
+        usb_detection = detect_modern_admin_usb_camera_driver()
+        driver_hint = usb_detection['driver'] or request.json.get('driver_hint', '').strip()
+        if not driver_hint:
+            return jsonify({'error' : 'No USB camera driver was auto-detected. Choose a project-supported INDI driver in Advanced options.'}), 400
+
+        supported_indi_drivers = get_modern_admin_supported_indi_drivers()
+        supported_driver_values = {driver['value'] for driver in supported_indi_drivers}
+        if driver_hint not in supported_driver_values:
+            return jsonify({'error' : 'Unsupported INDI driver for this project: {0:s}'.format(driver_hint)}), 400
 
         try:
             import shutil

@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-add-camera-v3') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-add-camera-v5') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -72,6 +72,20 @@ var camera_id = {{ camera_id }};
             <button class="modern-admin-media-button" type="button" id="modern-admin-detect-indi">Detect cameras</button>
         </div>
         <p class="modern-admin-note">Detect INDI shows only devices currently exposed by indiserver. DB cameras already registered above may not appear here unless their INDI server and driver are running now.</p>
+        <div class="modern-admin-driver-detection" aria-label="USB camera driver detection">
+            <div>
+                <span>Detected camera type</span>
+                <strong>{{ modern_admin_usb_detection.camera_type }}</strong>
+            </div>
+            <div>
+                <span>Detected driver</span>
+                <strong>{{ modern_admin_usb_detection.driver or 'Manual driver required' }}</strong>
+            </div>
+        </div>
+        <p class="modern-admin-note">{{ modern_admin_usb_detection.message }}</p>
+        {% if modern_admin_supported_camera_interfaces %}
+        <p class="modern-admin-note">indi-allsky camera interfaces remain available through the normal config system. This first Modern Admin flow starts only local INDI CCD drivers.</p>
+        {% endif %}
 
         <form class="modern-admin-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -86,14 +100,31 @@ var camera_id = {{ camera_id }};
                     <input type="number" name="indi_port" id="modern-admin-indi-port" value="{{ modern_admin_add_camera_form.indi_port }}" min="1" max="65535" inputmode="numeric">
                 </label>
                 <label>
-                    <span>Driver Hint</span>
-                    <input type="text" name="driver_hint" id="modern-admin-driver-hint" value="{{ modern_admin_add_camera_form.driver_hint }}" autocomplete="off">
-                </label>
-                <label>
                     <span>INDI Camera Name</span>
                     <input type="text" name="indi_camera_name" id="modern-admin-indi-camera-name" value="{{ modern_admin_add_camera_form.indi_camera_name }}" autocomplete="off" required>
                 </label>
             </div>
+
+            {% if modern_admin_usb_detection.detected %}
+            <input type="hidden" name="driver_hint" id="modern-admin-driver-hint" value="{{ modern_admin_usb_detection.driver }}">
+            {% else %}
+            <details class="modern-admin-advanced-options" open>
+                <summary>Supported INDI drivers</summary>
+                <p class="modern-admin-note">Choose from the same INDI CCD driver list used by the project installer. This avoids inventing unsupported driver names.</p>
+                <label>
+                    <span>INDI Driver</span>
+                    <select name="driver_hint" id="modern-admin-driver-hint">
+                        <option value="">Select a supported driver</option>
+                        {% for driver in modern_admin_supported_indi_drivers %}
+                        <option value="{{ driver.value }}"{% if modern_admin_add_camera_form.driver_hint == driver.value %} selected{% endif %}>{{ driver.label }} ({{ driver.value }})</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                {% if not modern_admin_supported_indi_drivers %}
+                <p class="modern-admin-note">No supported INDI driver list was available from setup.sh.</p>
+                {% endif %}
+            </details>
+            {% endif %}
 
             <div class="modern-admin-detected-devices" id="modern-admin-detected-devices" aria-live="polite">
                 <p class="modern-admin-note">Run detection to list cameras exposed by the configured INDI server. You can also type the camera name manually.</p>
