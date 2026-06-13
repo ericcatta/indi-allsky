@@ -5408,6 +5408,47 @@ def match_modern_admin_libcamera_interface(camera_text):
     return None
 
 
+def get_modern_admin_libcamera_sensor_tokens(camera):
+    token_text = ' '.join([
+        str(camera.get('interface') or ''),
+        str(camera.get('name') or ''),
+        str(camera.get('driver') or ''),
+        ' '.join(str(p) for p in camera.get('properties', [])),
+    ]).lower()
+
+    tokens = set(re.findall(r'(imx\d+|ov\d+)', token_text))
+    if camera.get('interface') == 'libcamera_64mp_hawkeye':
+        tokens.add('imx682')
+    elif camera.get('interface') == 'libcamera_64mp_owlsight':
+        tokens.add('ov64a40')
+
+    return tokens
+
+
+def modern_admin_db_camera_matches_libcamera(db_camera, detected_camera):
+    camera_interface = str(detected_camera.get('interface') or '')
+    detected_tokens = get_modern_admin_libcamera_sensor_tokens(detected_camera)
+
+    db_text = ' '.join([
+        str(db_camera.name or ''),
+        str(db_camera.name_alt1 or ''),
+        str(db_camera.name_alt2 or ''),
+        str(db_camera.friendlyName or ''),
+        str(db_camera.driver or ''),
+    ]).lower()
+
+    if camera_interface and camera_interface in db_text:
+        return True
+
+    if str(db_camera.driver or '') == camera_interface:
+        return True
+
+    if str(db_camera.driver or '') == 'rpicam-still' and any(token in db_text or token in camera_interface for token in detected_tokens):
+        return True
+
+    return False
+
+
 def detect_modern_admin_libcamera_cameras():
     cameras = list()
     message = 'No libcamera camera was detected.'
@@ -5537,7 +5578,7 @@ def annotate_modern_admin_detected_cameras(detected_cameras, active_config, acti
             camera_id = camera.get('camera_id')
             libcamera_db_matches = [
                 db_camera for db_camera in configured_cameras
-                if str(db_camera.driver or '') == camera_interface
+                if modern_admin_db_camera_matches_libcamera(db_camera, camera)
             ]
 
             if active_interface == camera_interface and active_libcamera_id == camera_id:
@@ -5836,9 +5877,17 @@ class ModernAdminCameraAddView(ModernAdminView):
                 result['modern_admin_add_camera_error'] = 'This libcamera camera is already the active configuration. No new config was saved.'
                 return result
 
+            detected_libcamera_camera = {
+                'type'       : 'libcamera',
+                'name'       : form_data['camera_interface'],
+                'driver'     : form_data['camera_interface'],
+                'interface'  : form_data['camera_interface'],
+                'camera_id'  : libcamera_id,
+                'properties' : [form_data['camera_interface']],
+            }
             libcamera_db_matches = [
                 db_camera for db_camera in get_modern_admin_configured_camera_matches()
-                if str(db_camera.driver or '') == form_data['camera_interface']
+                if modern_admin_db_camera_matches_libcamera(db_camera, detected_libcamera_camera)
             ]
             if len(libcamera_db_matches) > 1:
                 result['modern_admin_add_camera_error'] = 'Multiple DB cameras already use this libcamera interface, and the DB does not store camera_id/USB path yet. No config was saved.'
