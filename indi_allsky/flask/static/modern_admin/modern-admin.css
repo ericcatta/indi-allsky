@@ -55,15 +55,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 2px 0 0;
+  gap: 18px;
+  min-height: 48px;
+  padding: 0;
   border-bottom: 1px solid var(--modern-admin-line);
 }
 
 .modern-admin-header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex: 0 0 auto;
 }
 
@@ -89,7 +90,6 @@
   font-weight: 650;
 }
 
-.modern-admin-classic-link,
 .modern-admin-footer-link,
 .modern-admin-mode-option {
   display: inline-flex;
@@ -104,7 +104,6 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
-.modern-admin-classic-link:hover,
 .modern-admin-footer-link:hover,
 .modern-admin-mode-option:hover {
   color: var(--modern-admin-text);
@@ -113,9 +112,14 @@
 }
 
 .modern-admin-classic-link {
-  border-color: transparent;
   color: var(--modern-admin-quiet);
-  background: transparent;
+  text-decoration: none;
+  font-size: 0.72rem;
+}
+
+.modern-admin-classic-link:hover {
+  color: var(--modern-admin-quiet);
+  text-decoration: underline;
 }
 
 .modern-admin-mode-switch {
@@ -146,8 +150,11 @@
 
 .modern-admin-nav {
   display: flex;
-  flex-wrap: wrap;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
   gap: 26px;
+  min-width: 0;
+  overflow-x: auto;
 }
 
 .modern-admin-nav-link {
@@ -638,7 +645,7 @@
   }
 
   .modern-admin-topbar {
-    flex-direction: column-reverse;
+    flex-direction: column;
     gap: 8px;
   }
 
