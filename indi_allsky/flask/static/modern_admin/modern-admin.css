@@ -93,6 +93,13 @@
   background: rgba(255, 255, 255, 0.09);
 }
 
+.modern-admin-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .modern-admin-hero {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.45fr);
@@ -201,6 +208,17 @@
 .modern-admin-status-card {
   min-height: 220px;
   padding: 20px;
+}
+
+.modern-admin-card-link {
+  color: var(--modern-admin-text);
+  text-decoration: none;
+}
+
+.modern-admin-card-link:hover {
+  color: var(--modern-admin-text);
+  border-color: var(--modern-admin-line-strong);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .modern-admin-card-label {
@@ -321,6 +339,108 @@
   font-size: 0.92rem;
 }
 
+.modern-admin-management-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.modern-admin-management-panel,
+.modern-admin-table-panel,
+.modern-admin-empty-state,
+.modern-admin-camera-row {
+  border: 1px solid var(--modern-admin-line);
+  background: rgba(17, 21, 27, 0.72);
+  box-shadow: 0 24px 80px var(--modern-admin-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.modern-admin-management-panel,
+.modern-admin-table-panel,
+.modern-admin-empty-state {
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.modern-admin-management-panel h2,
+.modern-admin-table-panel h2,
+.modern-admin-empty-state h3 {
+  margin-bottom: 18px;
+  font-size: clamp(1.55rem, 2.6vw, 2.6rem);
+  line-height: 1.05;
+  font-weight: 650;
+}
+
+.modern-admin-placeholder-panel p,
+.modern-admin-empty-state p {
+  margin-bottom: 0;
+  color: var(--modern-admin-muted);
+  line-height: 1.55;
+}
+
+.modern-admin-detail-list {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+}
+
+.modern-admin-detail-list div {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.35fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.modern-admin-detail-list dt {
+  color: var(--modern-admin-quiet);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.modern-admin-detail-list dd {
+  margin: 0;
+  color: var(--modern-admin-text);
+  overflow-wrap: anywhere;
+}
+
+.modern-admin-table-panel {
+  margin-top: 18px;
+}
+
+.modern-admin-camera-list {
+  display: grid;
+  gap: 12px;
+}
+
+.modern-admin-camera-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 14px;
+}
+
+.modern-admin-camera-row-selected {
+  border-color: var(--modern-admin-line-strong);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modern-admin-camera-row h3 {
+  margin-bottom: 6px;
+  font-size: 1.08rem;
+  font-weight: 650;
+}
+
+.modern-admin-camera-row p,
+.modern-admin-camera-meta {
+  margin-bottom: 0;
+  color: var(--modern-admin-muted);
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 980px) {
   .modern-admin-hero {
     grid-template-columns: 1fr;
@@ -338,6 +458,10 @@
 
   .modern-admin-status-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .modern-admin-management-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -381,6 +505,15 @@
 
   .modern-admin-status-grid,
   .modern-admin-events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modern-admin-action-row {
+    justify-content: flex-start;
+  }
+
+  .modern-admin-detail-list div,
+  .modern-admin-camera-row {
     grid-template-columns: 1fr;
   }
 

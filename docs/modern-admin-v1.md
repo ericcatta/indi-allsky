@@ -4,6 +4,7 @@
 
 - `indi_allsky/flask/views.py` registers the authenticated route.
 - `indi_allsky/flask/templates/modern_admin/index.html` contains the modern admin page markup.
+- `indi_allsky/flask/templates/modern_admin/cameras.html` contains the read-only camera management page.
 - `indi_allsky/flask/static/modern_admin/modern-admin.css` contains isolated modern admin styling.
 
 ## Prototype port update
@@ -16,12 +17,14 @@ The new route is registered on the existing `indi_allsky` Flask blueprint:
 
 ```text
 /modern-admin
+/modern-admin/cameras
 ```
 
 Because that blueprint uses the `/indi-allsky` URL prefix, the browser path is:
 
 ```text
 /indi-allsky/modern-admin
+/indi-allsky/modern-admin/cameras
 ```
 
 ## Template added
@@ -30,9 +33,10 @@ The route renders:
 
 ```text
 indi_allsky/flask/templates/modern_admin/index.html
+indi_allsky/flask/templates/modern_admin/cameras.html
 ```
 
-The template extends the existing `base.html`, defines the `camera_id` JavaScript variable expected by the inherited shell, and links back to the classic admin dashboard.
+Both templates extend the existing `base.html`, define the `camera_id` JavaScript variable expected by the inherited shell, and link back to the classic admin dashboard.
 
 The visual dashboard prototype from `allsky-hybrid/prototype/admin-dashboard-v0` has been ported into this template:
 
@@ -62,6 +66,8 @@ The camera card uses the selected camera from `TemplateView.cameraSetup()`:
 - `camera.friendlyName` or `camera.name` for the display name
 - `camera.driver` as the model/driver label when available
 
+The camera card links to `/indi-allsky/modern-admin/cameras`, a read-only future camera-management entry point. The camera page uses existing `IndiAllSkyDbCameraTable` rows for the available camera list and existing `IndiAllSkyDbImageTable` latest-image rows for per-camera last image age.
+
 The capture card uses the existing `get_indi_allsky_status()` status source and normalizes its current state into:
 
 - `Running`
@@ -76,7 +82,9 @@ This keeps the first data connection server-rendered and avoids adding a new API
 ## Limitations
 
 - The hero image, image age, camera identity, capture status, and image-filesystem storage usage are connected to real data.
+- The camera management page lists configured non-hidden cameras when existing camera rows are available.
 - Upload/sync and recent event sections still use placeholder content.
+- The camera management page includes a placeholder-only "Add Camera" area; no add, edit, or delete actions exist yet.
 - Camera model is represented by the camera driver because there is no dedicated model field in the camera table.
 - Storage reports filesystem capacity for the configured image folder, not per-camera media totals.
 - If the configured image folder does not exist locally, the route measures the nearest existing parent path.
@@ -99,6 +107,7 @@ Open:
 
 ```text
 http://<host>:<port>/indi-allsky/modern-admin
+http://<host>:<port>/indi-allsky/modern-admin/cameras
 ```
 
 The route requires an authenticated Flask-Login session through `login_required`. Unauthenticated users should be redirected through the existing login flow.
@@ -118,11 +127,12 @@ Then start the existing application normally, sign in, and open:
 http://<host>:<port>/indi-allsky/modern-admin
 ```
 
-Confirm that the modern admin page renders the latest image when one is available, shows image age, camera identity, capture status, and storage usage, falls back to the CSS placeholder otherwise, and that the classic admin link opens the existing config page.
+Confirm that the modern admin page renders the latest image when one is available, shows image age, camera identity, capture status, and storage usage, links the Camera card to the read-only camera management page, falls back to the CSS placeholder otherwise, and that the classic admin link opens the existing config page.
 
 ## Future work
 
 - Replace remaining placeholder values with read-only dashboard data.
+- Design the add/edit/delete camera flows before implementing any write actions.
 - Add explicit read-only fields for storage, upload/sync, and recent events.
 - Consider adding per-camera media totals from the existing file-space usage queries alongside filesystem capacity.
 - Add storage thresholds and clearer normal/warning/critical labels.

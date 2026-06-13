@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Future camera management UI entry point; this first page is read-only. -->
+<main class="modern-admin-shell" aria-labelledby="modern-admin-cameras-title">
+    <header class="modern-admin-topbar" aria-label="Camera management header">
+        <div>
+            <p class="modern-admin-eyebrow">Modern Admin</p>
+            <h1 id="modern-admin-cameras-title">Camera Management</h1>
+        </div>
+        <div class="modern-admin-action-row">
+            <a class="modern-admin-classic-link" href="{{ url_for('indi_allsky.modern_admin_view') }}">Modern Admin</a>
+            <a class="modern-admin-classic-link" href="{{ url_for('indi_allsky.config_view') }}">Classic Admin</a>
+        </div>
+    </header>
+
+    <section class="modern-admin-management-grid" aria-label="Camera management">
+        <article class="modern-admin-management-panel">
+            <p class="modern-admin-eyebrow">Selected Camera</p>
+            <h2>{{ modern_admin_camera_name }}</h2>
+            <dl class="modern-admin-detail-list">
+                <div>
+                    <dt>Driver / Interface</dt>
+                    <dd>{{ modern_admin_camera_model }}</dd>
+                </div>
+                <div>
+                    <dt>Status</dt>
+                    <dd>{{ modern_admin_capture_status }}</dd>
+                </div>
+                <div>
+                    <dt>Last Image</dt>
+                    <dd>{{ latest_image_age }}</dd>
+                </div>
+            </dl>
+        </article>
+
+        <article class="modern-admin-management-panel modern-admin-placeholder-panel">
+            <p class="modern-admin-eyebrow">Future Flow</p>
+            <h2>Add Camera</h2>
+            <p>
+                Camera add, edit, and delete actions will be designed here later. No camera changes can be made from this read-only preview.
+            </p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="available-cameras-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Available Cameras</p>
+            <h2 id="available-cameras-title">Configured camera inventory</h2>
+        </div>
+
+        {% if modern_admin_cameras %}
+        <div class="modern-admin-camera-list">
+            {% for camera in modern_admin_cameras %}
+            <article class="modern-admin-camera-row{% if camera.selected %} modern-admin-camera-row-selected{% endif %}">
+                <div>
+                    <h3>{{ camera.name }}</h3>
+                    <p>{{ camera.driver }}</p>
+                </div>
+                <div>
+                    <span class="modern-admin-status-pill modern-admin-status-good">{{ camera.status }}</span>
+                </div>
+                <div>
+                    <span class="modern-admin-camera-meta">{{ camera.last_image_age }}</span>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="modern-admin-empty-state">
+            <h3>No configured cameras found</h3>
+            <p>The modern camera management page can still render, but there are no camera rows available yet.</p>
+        </div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

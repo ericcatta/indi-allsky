@@ -5064,11 +5064,7 @@ class ModernAdminView(TemplateView):
             app.logger.error('Error determining modern admin latest image URL: %s', str(e))
             return context
 
-        last_update_age_s = int((self.camera_now - self.latest_image_entry.createDate).total_seconds())
-        if last_update_age_s < 60:
-            last_update_age = '{0:d}s ago'.format(last_update_age_s)
-        else:
-            last_update_age = '{0:d}m ago'.format(int(last_update_age_s / 60))
+        last_update_age = self.format_image_age(self.latest_image_entry.createDate)
 
         context['latest_image_age'] = last_update_age
         context['latest_image_updated'] = 'Last frame {0:s}'.format(last_update_age)
@@ -5131,6 +5127,64 @@ class ModernAdminView(TemplateView):
             size /= 1024.0
 
         return '{0:0.1f} TB'.format(size)
+
+
+    def format_image_age(self, create_date):
+        age_s = max(0, int((self.camera_now - create_date).total_seconds()))
+
+        if age_s < 60:
+            return '{0:d}s ago'.format(age_s)
+        elif age_s < 3600:
+            return '{0:d}m ago'.format(int(age_s / 60))
+
+        return '{0:d}h ago'.format(int(age_s / 3600))
+
+
+class ModernAdminCamerasView(ModernAdminView):
+    # Future camera management entry point. This first version is read-only.
+    page_title = 'Modern Admin Cameras'
+
+    def get_context(self):
+        context = super(ModernAdminCamerasView, self).get_context()
+
+        cameras = IndiAllSkyDbCameraTable.query\
+            .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
+            .order_by(IndiAllSkyDbCameraTable.connectDate.desc())\
+            .order_by(IndiAllSkyDbCameraTable.createDate.desc())\
+            .all()
+
+        camera_list = list()
+        for camera in cameras:
+            latest_image = IndiAllSkyDbImageTable.query\
+                .join(IndiAllSkyDbImageTable.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == camera.id)\
+                .order_by(IndiAllSkyDbImageTable.createDate.desc())\
+                .first()
+
+            if latest_image:
+                last_image_age = self.format_image_age(latest_image.createDate)
+            else:
+                last_image_age = 'No image'
+
+            camera_list.append({
+                'id'             : camera.id,
+                'name'           : str(camera.friendlyName or camera.name or 'Unknown camera'),
+                'driver'         : str(camera.driver or 'Driver unavailable'),
+                'status'         : self.get_camera_status_label(camera),
+                'last_image_age' : last_image_age,
+                'selected'       : camera.id == self.camera.id,
+            })
+
+        context['modern_admin_cameras'] = camera_list
+
+        return context
+
+
+    def get_camera_status_label(self, camera):
+        if camera.id != self.camera.id:
+            return 'Available'
+
+        return self.get_capture_status_label()
 
 
 class SystemInfoView(TemplateView):
@@ -12051,6 +12105,7 @@ bp_allsky.add_url_rule('/config/restore', view_func=ConfigRestoreView.as_view('c
 bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.as_view('ajax_config_restore_view'))
 
 bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
+bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
 bp_allsky.add_url_rule('/system', view_func=SystemInfoView.as_view('system_view', template_name='system.html'))
 bp_allsky.add_url_rule('/ajax/system', view_func=AjaxSystemInfoView.as_view('ajax_system_view'))
 bp_allsky.add_url_rule('/ajax/settime', view_func=AjaxSetTimeView.as_view('ajax_settime_view'))

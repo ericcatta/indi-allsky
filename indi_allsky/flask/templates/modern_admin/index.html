@@ -43,12 +43,12 @@ var camera_id = {{ camera_id }};
     </section>
 
     <section class="modern-admin-status-grid" aria-label="Placeholder system status">
-        <article class="modern-admin-status-card">
+        <a class="modern-admin-status-card modern-admin-card-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
             <div class="modern-admin-card-label">Camera</div>
             <h3>{{ modern_admin_camera_name }}</h3>
             <p>{{ modern_admin_camera_model }}</p>
             <span class="modern-admin-status-pill modern-admin-status-good">Nominal</span>
-        </article>
+        </a>
 
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Capture</div>
