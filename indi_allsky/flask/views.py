@@ -5262,7 +5262,6 @@ class ModernAdminCameraAddView(ModernAdminView):
             'indi_server'      : self.indi_allsky_config.get('INDI_SERVER', 'localhost'),
             'indi_port'        : int(self.indi_allsky_config.get('INDI_PORT', 7624)),
             'indi_camera_name' : self.indi_allsky_config.get('INDI_CAMERA_NAME', ''),
-            'driver_hint'      : 'indi_asi_ccd',
         }
 
         context['modern_admin_add_camera_error'] = None
@@ -5287,7 +5286,6 @@ class ModernAdminCameraAddView(ModernAdminView):
             'indi_server'      : request.form.get('indi_server', 'localhost').strip() or 'localhost',
             'indi_port'        : request.form.get('indi_port', '7624').strip() or '7624',
             'indi_camera_name' : request.form.get('indi_camera_name', '').strip(),
-            'driver_hint'      : request.form.get('driver_hint', '').strip(),
         }
 
         result = {
@@ -5312,6 +5310,15 @@ class ModernAdminCameraAddView(ModernAdminView):
 
         if not form_data['indi_camera_name']:
             result['modern_admin_add_camera_error'] = 'Select or enter an INDI camera name before saving.'
+            return result
+
+        active_interface = self.indi_allsky_config.get('CAMERA_INTERFACE', '')
+        active_server = str(self.indi_allsky_config.get('INDI_SERVER', 'localhost')).strip() or 'localhost'
+        active_port = int(self.indi_allsky_config.get('INDI_PORT', 7624))
+        active_camera_name = str(self.indi_allsky_config.get('INDI_CAMERA_NAME', '')).strip()
+
+        if active_interface == 'indi' and active_server == form_data['indi_server'] and active_port == indi_port and active_camera_name == form_data['indi_camera_name']:
+            result['modern_admin_add_camera_error'] = 'This INDI camera is already the active configuration. No new config was saved.'
             return result
 
         new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
@@ -5402,6 +5409,8 @@ class ModernAdminIndiCameraDetectView(BaseView):
 
         if detect_proc.returncode != 0:
             output = detect_proc.stdout.strip()
+            if 'connection refused' in output.lower():
+                return jsonify({'error' : 'INDI server non raggiungibile su {0:s}:{1:d}. Verifica che indiserver sia attivo.'.format(indi_server, indi_port)}), 400
             if len(output) > 500:
                 output = output[:500] + '...'
             return jsonify({'error' : output or 'indi_getprop failed.'}), 400

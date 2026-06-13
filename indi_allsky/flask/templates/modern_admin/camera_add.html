@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-add-camera-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-add-camera-v2') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -16,7 +16,7 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-camera-add-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
-    <section class="modern-admin-table-panel" aria-labelledby="camera-add-title">
+    <section class="modern-admin-table-panel modern-admin-compact-intro" aria-labelledby="camera-add-title">
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">INDI only</p>
@@ -24,7 +24,7 @@ var camera_id = {{ camera_id }};
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">Config only</span>
         </div>
-        <p class="modern-admin-note">This creates a new active configuration from the current configuration and changes only the INDI camera connection fields. The camera row is created after indi-allsky restarts and connects to the selected camera.</p>
+        <p class="modern-admin-note">Detect a camera from an already running INDI server, then save a new active config that points indi-allsky to that camera. No multi-capture is enabled and existing camera rows are not changed.</p>
     </section>
 
     {% if modern_admin_add_camera_error %}
@@ -39,45 +39,15 @@ var camera_id = {{ camera_id }};
     </section>
     {% endif %}
 
-    <section class="modern-admin-management-grid" aria-label="Add INDI camera workflow">
-        <article class="modern-admin-management-panel">
-            <p class="modern-admin-eyebrow">Current Active Config</p>
-            <dl class="modern-admin-detail-list">
-                <div>
-                    <dt>Config ID</dt>
-                    <dd>{{ modern_admin_current_config.id }}</dd>
-                </div>
-                <div>
-                    <dt>Interface</dt>
-                    <dd>{{ modern_admin_current_config.camera_interface }}</dd>
-                </div>
-                <div>
-                    <dt>INDI Server</dt>
-                    <dd>{{ modern_admin_current_config.indi_server }}:{{ modern_admin_current_config.indi_port }}</dd>
-                </div>
-                <div>
-                    <dt>INDI Camera</dt>
-                    <dd>{{ modern_admin_current_config.indi_camera_name or 'First detected camera' }}</dd>
-                </div>
-            </dl>
-        </article>
-
-        <article class="modern-admin-management-panel">
-            <p class="modern-admin-eyebrow">Restart Required</p>
-            <h2>Registration happens on connect</h2>
-            <p class="modern-admin-note">After saving, restart indi-allsky from the classic System page or service manager. When capture connects, indi-allsky will create or update the DB camera row and Modern Admin Cameras will show it.</p>
-            <a class="modern-admin-placeholder-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Back to Cameras</a>
-        </article>
-    </section>
-
     <section class="modern-admin-table-panel" aria-labelledby="indi-detect-title">
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Detect</p>
-                <h2 id="indi-detect-title">INDI devices</h2>
+                <h2 id="indi-detect-title">Detect INDI devices</h2>
             </div>
             <button class="modern-admin-media-button" type="button" id="modern-admin-detect-indi">Detect cameras</button>
         </div>
+        <p class="modern-admin-note">indiserver must already be running and exposing the camera driver before detection can work.</p>
 
         <form class="modern-admin-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -90,10 +60,6 @@ var camera_id = {{ camera_id }};
                 <label>
                     <span>INDI Port</span>
                     <input type="number" name="indi_port" id="modern-admin-indi-port" value="{{ modern_admin_add_camera_form.indi_port }}" min="1" max="65535" inputmode="numeric">
-                </label>
-                <label>
-                    <span>Driver Hint</span>
-                    <input type="text" name="driver_hint" id="modern-admin-driver-hint" value="{{ modern_admin_add_camera_form.driver_hint }}" autocomplete="off">
                 </label>
                 <label>
                     <span>INDI Camera Name</span>
@@ -109,6 +75,12 @@ var camera_id = {{ camera_id }};
                 <button class="modern-admin-media-button" type="submit">Save INDI config</button>
             </div>
         </form>
+    </section>
+
+    <section class="modern-admin-inline-note" aria-label="Current config and restart note">
+        <span>Current: config {{ modern_admin_current_config.id }}, {{ modern_admin_current_config.camera_interface }}, {{ modern_admin_current_config.indi_server }}:{{ modern_admin_current_config.indi_port }}{% if modern_admin_current_config.indi_camera_name %}, {{ modern_admin_current_config.indi_camera_name }}{% endif %}</span>
+        <span>After saving, restart indi-allsky to connect and create the DB camera row.</span>
+        <a href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Back to Cameras</a>
     </section>
 </main>
 

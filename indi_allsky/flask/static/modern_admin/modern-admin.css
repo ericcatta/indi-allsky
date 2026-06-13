@@ -800,6 +800,30 @@
   gap: 12px;
 }
 
+.modern-admin-compact-intro {
+  margin-bottom: 14px;
+}
+
+.modern-admin-inline-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 0 4px;
+  color: var(--modern-admin-quiet);
+  font-size: 0.76rem;
+}
+
+.modern-admin-inline-note a {
+  color: var(--modern-admin-muted);
+  text-decoration: none;
+}
+
+.modern-admin-inline-note a:hover {
+  color: var(--modern-admin-text);
+  text-decoration: underline;
+}
+
 .modern-admin-safe-intro .modern-admin-section-heading {
   margin-bottom: 4px;
 }
