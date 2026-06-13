@@ -146,6 +146,7 @@ var camera_id = {{ camera_id }};
 
 <script>
 const modernAdminMediaItems = {{ modern_admin_media_items | tojson }};
+const modernAdminMediaKind = '{{ modern_admin_media_kind }}';
 const modernAdminLightbox = document.getElementById('modern-admin-lightbox');
 const modernAdminLightboxImage = document.getElementById('modern-admin-lightbox-image');
 const modernAdminLightboxTitle = document.getElementById('modern-admin-lightbox-title');
@@ -158,6 +159,14 @@ function modernAdminLightboxItem(index) {
     return modernAdminMediaItems[index] || null;
 }
 
+function modernAdminLightboxDisplayUrl(item) {
+    if (modernAdminMediaKind === 'fits') {
+        return item.preview_url || item.url;
+    }
+
+    return item.url || item.preview_url;
+}
+
 function modernAdminOpenLightbox(index) {
     const item = modernAdminLightboxItem(index);
     if (!item) {
@@ -165,17 +174,19 @@ function modernAdminOpenLightbox(index) {
     }
 
     modernAdminLightboxIndex = index;
-    modernAdminLightboxImage.src = item.preview_url || item.url;
+    modernAdminLightboxImage.src = modernAdminLightboxDisplayUrl(item);
     modernAdminLightboxImage.alt = item.title;
     modernAdminLightboxTitle.textContent = item.title + ' · ' + item.created;
     modernAdminLightboxDownload.href = item.url || item.preview_url;
     modernAdminLightboxDownload.setAttribute('download', item.filename || '');
     modernAdminLightbox.setAttribute('aria-hidden', 'false');
+    document.documentElement.classList.add('modern-admin-lightbox-open');
     document.body.classList.add('modern-admin-lightbox-open');
 }
 
 function modernAdminCloseLightbox() {
     modernAdminLightbox.setAttribute('aria-hidden', 'true');
+    document.documentElement.classList.remove('modern-admin-lightbox-open');
     document.body.classList.remove('modern-admin-lightbox-open');
     modernAdminLightboxImage.removeAttribute('src');
 }
@@ -205,7 +216,7 @@ document.querySelectorAll('.modern-admin-lightbox-trigger').forEach((trigger) =>
 
 document.querySelectorAll('.modern-admin-lightbox-trigger img[data-original-url]').forEach((image) => {
     image.addEventListener('contextmenu', () => {
-        if (image.dataset.originalUrl) {
+        if (modernAdminMediaKind !== 'fits' && image.dataset.originalUrl) {
             image.src = image.dataset.originalUrl;
         }
     });
@@ -224,10 +235,16 @@ document.addEventListener('keydown', (event) => {
     }
 
     if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
         modernAdminCloseLightbox();
     } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        event.stopPropagation();
         modernAdminStepLightbox(-1);
     } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        event.stopPropagation();
         modernAdminStepLightbox(1);
     }
 });
