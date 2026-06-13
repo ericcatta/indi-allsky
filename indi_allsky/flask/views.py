@@ -10316,6 +10316,7 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
     modern_admin_section = 'Media'
     modern_admin_description = 'Recent media captured by this camera.'
     modern_admin_media_kind = 'image'
+    modern_admin_media_layout = 'grid'
     modern_admin_media_model = None
     modern_admin_media_limit = 24
 
@@ -10334,7 +10335,9 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
         context['modern_admin_section'] = self.modern_admin_section
         context['modern_admin_description'] = self.modern_admin_description
         context['modern_admin_media_kind'] = self.modern_admin_media_kind
+        context['modern_admin_media_layout'] = self.modern_admin_media_layout
         context['modern_admin_media_items'] = media_items
+        context['modern_admin_featured_media'] = media_items[0] if media_items else None
 
         return context
 
@@ -10371,6 +10374,7 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
             'id'          : media_entry.id,
             'title'       : self.format_media_title(media_entry),
             'url'         : self.get_media_url(media_entry),
+            'preview_url' : self.get_media_preview_url(media_entry),
             'filename'    : Path(media_entry.filename).name,
             'created'     : create_date.strftime('%Y-%m-%d %H:%M:%S') if create_date else 'Unknown date',
             'day_date'    : day_date.strftime('%Y-%m-%d') if day_date else 'Unknown day',
@@ -10395,9 +10399,13 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
 
         try:
             return str(media_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
-        except ValueError as e:
+        except Exception as e:
             app.logger.error('Error determining modern admin media URL: %s', str(e))
             return None
+
+
+    def get_media_preview_url(self, media_entry):
+        return self.get_media_url(media_entry)
 
 
     def format_media_title(self, media_entry):
@@ -10449,6 +10457,33 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
     modern_admin_description = 'Recent image gallery from the selected camera.'
     modern_admin_media_model = IndiAllSkyDbImageTable
     modern_admin_media_kind = 'image'
+    modern_admin_media_layout = 'gallery'
+
+    def get_media_preview_url(self, media_entry):
+        if not media_entry.thumbnail_uuid:
+            return self.get_media_url(media_entry)
+
+        try:
+            thumbnail_entry = IndiAllSkyDbThumbnailTable.query\
+                .filter(IndiAllSkyDbThumbnailTable.uuid == media_entry.thumbnail_uuid)\
+                .one()
+        except NoResultFound:
+            return self.get_media_url(media_entry)
+
+        local = True
+        if self.web_nonlocal_images:
+            if self.web_local_images_admin and self.verify_admin_network():
+                pass
+            else:
+                local = False
+                if not thumbnail_entry.remote_url and not thumbnail_entry.s3_key:
+                    return self.get_media_url(media_entry)
+
+        try:
+            return str(thumbnail_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
+        except Exception as e:
+            app.logger.error('Error determining modern admin thumbnail URL: %s', str(e))
+            return self.get_media_url(media_entry)
 
 
 class ModernAdminMediaImagesView(ModernAdminMediaListView):
@@ -10457,6 +10492,7 @@ class ModernAdminMediaImagesView(ModernAdminMediaListView):
     modern_admin_description = 'Latest individual image captures.'
     modern_admin_media_model = IndiAllSkyDbImageTable
     modern_admin_media_kind = 'image'
+    modern_admin_media_layout = 'viewer'
 
 
 class ModernAdminMediaTimelapsesView(ModernAdminMediaListView):
@@ -10481,6 +10517,7 @@ class ModernAdminMediaPanoramaView(ModernAdminMediaListView):
     modern_admin_description = 'Recent panorama image captures.'
     modern_admin_media_model = IndiAllSkyDbPanoramaImageTable
     modern_admin_media_kind = 'image'
+    modern_admin_media_layout = 'viewer'
 
 
 class ModernAdminMediaPanoramaLoopView(ModernAdminMediaListView):
@@ -10489,6 +10526,7 @@ class ModernAdminMediaPanoramaLoopView(ModernAdminMediaListView):
     modern_admin_description = 'Recent panorama frames available for loop review.'
     modern_admin_media_model = IndiAllSkyDbPanoramaImageTable
     modern_admin_media_kind = 'image'
+    modern_admin_media_layout = 'loop'
 
 
 class ModernAdminMediaFitsView(ModernAdminMediaListView):
@@ -10497,6 +10535,10 @@ class ModernAdminMediaFitsView(ModernAdminMediaListView):
     modern_admin_description = 'Recent saved FITS image files.'
     modern_admin_media_model = IndiAllSkyDbFitsImageTable
     modern_admin_media_kind = 'fits'
+    modern_admin_media_layout = 'viewer'
+
+    def get_media_preview_url(self, media_entry):
+        return url_for('indi_allsky.fits2jpeg_view', id=media_entry.id)
 
 
 class LongTermKeogramView(TemplateView):

@@ -24,13 +24,45 @@ var camera_id = {{ camera_id }};
         <p>{{ modern_admin_description }}</p>
     </section>
 
+    {% if modern_admin_featured_media and modern_admin_media_layout in ('viewer', 'loop') %}
+    <section class="modern-admin-media-viewer" aria-labelledby="modern-admin-media-viewer-title">
+        <div class="modern-admin-media-viewer-copy">
+            <p class="modern-admin-eyebrow">{{ modern_admin_featured_media.timeofday }}</p>
+            <h3 id="modern-admin-media-viewer-title">{{ modern_admin_featured_media.title }}</h3>
+            <p>{{ modern_admin_featured_media.created }}</p>
+            {% if modern_admin_featured_media.url %}
+            <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ modern_admin_featured_media.url }}" target="_blank" rel="noopener">Open read-only</a>
+            {% endif %}
+        </div>
+        <figure class="modern-admin-media-viewer-frame">
+            {% if modern_admin_featured_media.preview_url and modern_admin_media_kind in ('image', 'fits') %}
+            <img id="modern-admin-media-featured-image" src="{{ modern_admin_featured_media.preview_url }}" alt="{{ modern_admin_featured_media.title }}">
+            {% elif modern_admin_featured_media.url and modern_admin_media_kind == 'video' %}
+            <video src="{{ modern_admin_featured_media.url }}" controls preload="metadata"></video>
+            {% else %}
+            <div class="modern-admin-media-file">{{ modern_admin_media_kind|upper }}</div>
+            {% endif %}
+            <figcaption>
+                <span>{{ modern_admin_featured_media.filename }}</span>
+                <span>{{ modern_admin_featured_media.age }}</span>
+            </figcaption>
+        </figure>
+    </section>
+    {% endif %}
+
     {% if modern_admin_media_items %}
-    <section class="modern-admin-media-grid" aria-label="{{ modern_admin_section }} items">
+    <section class="modern-admin-media-grid{% if modern_admin_media_layout == 'gallery' %} modern-admin-media-gallery-grid{% endif %}" aria-label="{{ modern_admin_section }} items">
         {% for item in modern_admin_media_items %}
         <article class="modern-admin-media-card">
             <div class="modern-admin-media-preview">
-                {% if item.url and modern_admin_media_kind == 'image' %}
-                <img src="{{ item.url }}" alt="{{ item.title }}">
+                {% if item.preview_url and modern_admin_media_kind in ('image', 'fits') %}
+                {% if item.url %}
+                <a href="{{ item.url }}" target="_blank" rel="noopener">
+                    <img src="{{ item.preview_url }}" alt="{{ item.title }}">
+                </a>
+                {% else %}
+                <img src="{{ item.preview_url }}" alt="{{ item.title }}">
+                {% endif %}
                 {% elif item.url and modern_admin_media_kind == 'video' %}
                 <video src="{{ item.url }}" controls preload="metadata"></video>
                 {% else %}
@@ -38,6 +70,7 @@ var camera_id = {{ camera_id }};
                 {% endif %}
             </div>
 
+            {% if modern_admin_media_layout != 'gallery' %}
             <div class="modern-admin-media-body">
                 <div>
                     <p class="modern-admin-card-label">{{ item.timeofday }}</p>
@@ -74,6 +107,12 @@ var camera_id = {{ camera_id }};
                 <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ item.url }}" target="_blank" rel="noopener">Open read-only</a>
                 {% endif %}
             </div>
+            {% else %}
+            <div class="modern-admin-media-caption">
+                <span>{{ item.created }}</span>
+                <span>{{ item.age }}</span>
+            </div>
+            {% endif %}
         </article>
         {% endfor %}
     </section>
@@ -84,4 +123,27 @@ var camera_id = {{ camera_id }};
     </section>
     {% endif %}
 </main>
+
+{% if modern_admin_media_layout == 'loop' and modern_admin_media_items %}
+<script>
+const modernAdminLoopFrames = {{ modern_admin_media_items | tojson }};
+let modernAdminLoopIndex = 0;
+const modernAdminLoopImage = document.getElementById('modern-admin-media-featured-image');
+
+function modernAdminShowNextLoopFrame() {
+    if (!modernAdminLoopImage || !modernAdminLoopFrames.length) {
+        return;
+    }
+
+    modernAdminLoopIndex = (modernAdminLoopIndex + 1) % modernAdminLoopFrames.length;
+    const frame = modernAdminLoopFrames[modernAdminLoopIndex];
+    if (frame.preview_url) {
+        modernAdminLoopImage.src = frame.preview_url;
+        modernAdminLoopImage.alt = frame.title;
+    }
+}
+
+window.setInterval(modernAdminShowNextLoopFrame, 350);
+</script>
+{% endif %}
 {% endblock %}
