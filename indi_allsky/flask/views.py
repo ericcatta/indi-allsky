@@ -5166,13 +5166,16 @@ class ModernAdminCamerasView(ModernAdminView):
             else:
                 last_image_age = 'No image'
 
+            selected = camera.id == self.camera.id
+            status = self.get_camera_status_label(camera, latest_image=latest_image)
             camera_list.append({
                 'id'             : camera.id,
                 'name'           : str(camera.friendlyName or camera.name or 'Unknown camera'),
                 'driver'         : str(camera.driver or 'Driver unavailable'),
-                'status'         : self.get_camera_status_label(camera),
+                'status'         : status,
                 'last_image_age' : last_image_age,
-                'selected'       : camera.id == self.camera.id,
+                'selected'       : selected,
+                'badge'          : 'Active' if selected else status,
             })
 
         context['modern_admin_cameras'] = camera_list
@@ -5180,11 +5183,16 @@ class ModernAdminCamerasView(ModernAdminView):
         return context
 
 
-    def get_camera_status_label(self, camera):
-        if camera.id != self.camera.id:
-            return 'Available'
+    def get_camera_status_label(self, camera, latest_image=None):
+        if camera.id == self.camera.id:
+            return self.get_capture_status_label()
 
-        return self.get_capture_status_label()
+        if latest_image:
+            return 'Available'
+        elif camera.connectDate:
+            return 'Offline'
+
+        return 'Unknown'
 
 
 class SystemInfoView(TemplateView):

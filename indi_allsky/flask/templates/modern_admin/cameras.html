@@ -25,7 +25,7 @@ var camera_id = {{ camera_id }};
 
     <section class="modern-admin-management-grid" aria-label="Camera management">
         <article class="modern-admin-management-panel">
-            <p class="modern-admin-eyebrow">Selected Camera</p>
+            <p class="modern-admin-eyebrow">Active Camera</p>
             <h2>{{ modern_admin_camera_name }}</h2>
             <dl class="modern-admin-detail-list">
                 <div>
@@ -44,11 +44,17 @@ var camera_id = {{ camera_id }};
         </article>
 
         <article class="modern-admin-management-panel modern-admin-placeholder-panel">
-            <p class="modern-admin-eyebrow">Future Flow</p>
-            <h2>Add Camera</h2>
-            <p>
-                Camera add, edit, and delete actions will be designed here later. No camera changes can be made from this read-only preview.
-            </p>
+            <p class="modern-admin-eyebrow">Future Actions</p>
+            <div class="modern-admin-future-actions">
+                <div>
+                    <h2>Add Camera</h2>
+                    <p>Coming later. No setup flow is active in this read-only preview.</p>
+                </div>
+                <div>
+                    <h2>Configure Camera</h2>
+                    <p>Coming later. Existing classic admin remains the safe configuration path.</p>
+                </div>
+            </div>
         </article>
     </section>
 
@@ -59,18 +65,28 @@ var camera_id = {{ camera_id }};
         </div>
 
         {% if modern_admin_cameras %}
-        <div class="modern-admin-camera-list">
+        <div class="modern-admin-camera-card-grid">
             {% for camera in modern_admin_cameras %}
-            <article class="modern-admin-camera-row{% if camera.selected %} modern-admin-camera-row-selected{% endif %}">
-                <div>
+            <article class="modern-admin-camera-card{% if camera.selected %} modern-admin-camera-card-active{% endif %}">
+                <div class="modern-admin-camera-card-header">
+                    <p class="modern-admin-eyebrow">Camera</p>
+                    <span class="modern-admin-status-pill {% if camera.selected %}modern-admin-status-good{% else %}modern-admin-status-muted{% endif %}">{{ camera.badge }}</span>
+                </div>
+
+                <div class="modern-admin-camera-card-main">
                     <h3>{{ camera.name }}</h3>
-                    <p>{{ camera.driver }}</p>
+                    <p>Driver: {{ camera.driver }}</p>
                 </div>
-                <div>
-                    <span class="modern-admin-status-pill modern-admin-status-good">{{ camera.status }}</span>
-                </div>
-                <div>
-                    <span class="modern-admin-camera-meta">{{ camera.last_image_age }}</span>
+
+                <div class="modern-admin-camera-card-details">
+                    <div>
+                        <span>Status</span>
+                        <strong>{{ camera.status }}</strong>
+                    </div>
+                    <div>
+                        <span>Last Image</span>
+                        <strong>{{ camera.last_image_age }}</strong>
+                    </div>
                 </div>
             </article>
             {% endfor %}
