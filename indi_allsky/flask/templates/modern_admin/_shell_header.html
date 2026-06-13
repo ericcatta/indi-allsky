@@ -1,22 +1,5 @@
 <header class="modern-admin-topbar" aria-label="{{ modern_admin_header_label }}">
-    <div class="modern-admin-title-row">
-        <div>
-            <p class="modern-admin-eyebrow">{{ modern_admin_eyebrow }}</p>
-            <h1 id="{{ modern_admin_title_id }}">{{ modern_admin_heading }}</h1>
-            {% if modern_admin_description %}
-            <p class="modern-admin-page-summary">{{ modern_admin_description }}</p>
-            {% endif %}
-        </div>
-
-        <div class="modern-admin-header-actions">
-            <div class="modern-admin-mode-switch" role="group" aria-label="Admin mode">
-                <a class="modern-admin-mode-option{% if modern_admin_mode == 'modern' %} modern-admin-mode-option-active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_mode_view', mode='modern') }}">Modern</a>
-                <a class="modern-admin-mode-option{% if modern_admin_mode == 'classic' %} modern-admin-mode-option-active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_mode_view', mode='classic') }}">Classic</a>
-            </div>
-
-            <a class="modern-admin-classic-link" href="{{ url_for('indi_allsky.config_view') }}">Open Classic Admin</a>
-        </div>
-    </div>
+    <h1 class="modern-admin-visually-hidden" id="{{ modern_admin_title_id }}">{{ modern_admin_heading }}</h1>
 
     <nav class="modern-admin-nav" aria-label="Modern admin sections">
         {% for item in modern_admin_nav %}
@@ -27,4 +10,13 @@
         {% endif %}
         {% endfor %}
     </nav>
+
+    <div class="modern-admin-header-actions">
+        <div class="modern-admin-mode-switch" role="group" aria-label="Admin mode">
+            <a class="modern-admin-mode-option{% if modern_admin_mode == 'modern' %} modern-admin-mode-option-active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_mode_view', mode='modern') }}">Modern</a>
+            <a class="modern-admin-mode-option{% if modern_admin_mode == 'classic' %} modern-admin-mode-option-active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_mode_view', mode='classic') }}">Classic</a>
+        </div>
+
+        <a class="modern-admin-classic-link" href="{{ url_for('indi_allsky.config_view') }}">Classic Admin</a>
+    </div>
 </header>
