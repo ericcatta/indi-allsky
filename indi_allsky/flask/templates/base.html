@@ -44,6 +44,17 @@
     {% block head %}{% endblock %}
   </head>
   <body class="bg-dark bg-opacity-75">
+{% macro admin_nav_url(classic_endpoint, modern_endpoint, modern_page=None) -%}
+{%- if session.get('admin_mode') == 'modern' -%}
+    {%- if modern_page -%}
+        {{- url_for(modern_endpoint, classic_page=modern_page) -}}
+    {%- else -%}
+        {{- url_for(modern_endpoint) -}}
+    {%- endif -%}
+{%- else -%}
+    {{- url_for(classic_endpoint) -}}
+{%- endif -%}
+{%- endmacro %}
 <div class="container-fluid overflow-hidden">
     <div class="row vh-100 overflow-auto">
         <div class="col-12 col-sm-3 col-xl-2 px-sm-2 px-0 bg-dark d-flex sticky-top">
@@ -83,12 +94,12 @@
 
                 <ul class="nav nav-pills flex-sm-column flex-row flex-nowrap flex-shrink-1 flex-sm-grow-0 flex-grow-1 mb-sm-auto mb-0 justify-content-center align-items-center align-items-sm-start" id="menu">
                     <li class="nav-item">
-                        <a href="{{ url_for('indi_allsky.index_view') }}" class="nav-link link-info px-sm-0 px-2">
+                        <a href="{{ admin_nav_url('indi_allsky.index_view', 'indi_allsky.modern_admin_view') }}" class="nav-link link-info px-sm-0 px-2">
                             <img src="{{ url_for('indi_allsky.static', filename='svg/house-fill.svg') }}" width="16" height="16" alt="Latest"><span class="ms-1 d-none d-sm-inline">Latest</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ url_for('indi_allsky.image_loop_view') }}" class="nav-link link-info px-sm-0 px-2">
+                        <a href="{{ admin_nav_url('indi_allsky.image_loop_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'loop') }}" class="nav-link link-info px-sm-0 px-2">
                             <img src="{{ url_for('indi_allsky.static', filename='svg/repeat.svg') }}" width="16" height="16" alt="Loop"><span class="ms-1 d-none d-sm-inline">Loop</span></a>
                     </li>
 
@@ -100,40 +111,40 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdown">
                             <li>
-                                <a href="{{ url_for('indi_allsky.gallery_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.gallery_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'gallery') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/grid-3x2-gap-fill.svg') }}" width="16" height="16" alt="Image Viewer"><span class="ms-1 d-none d-sm-inline">Gallery</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.imageviewer_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.imageviewer_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'images') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/image-fill.svg') }}" width="16" height="16" alt="Image Viewer"><span class="ms-1 d-none d-sm-inline">Images</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.videoviewer_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.videoviewer_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'timelapses') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/film.svg') }}" width="16" height="16" alt="Timelapse Viewer"><span class="ms-1 d-none d-sm-inline">Timelapses</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.mini_videoviewer_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.mini_videoviewer_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'mini-timelapses') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/film.svg') }}" width="16" height="16" alt="Mini Timelapse Viewer"><span class="ms-1 d-none d-sm-inline">Mini-Timelapses</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.latest_panorama_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.latest_panorama_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'panorama') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/aspect-ratio.svg') }}" width="16" height="16" alt="Panorama"><span class="ms-1 d-none d-sm-inline">Panorama</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.panorama_loop_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.panorama_loop_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'panorama-loop') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/repeat.svg') }}" width="16" height="16" alt="Panorama Loop"><span class="ms-1 d-none d-sm-inline">Panorama Loop</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.realtime_keogram_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.realtime_keogram_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'realtime-keogram') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/input-cursor.svg') }}" width="16" height="16" alt="Realtime Keogram"><span class="ms-1 d-none d-sm-inline">Realtime Keogram</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.longterm_keogram_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.longterm_keogram_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'long-term-keogram') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/distribute-horizontal.svg') }}" width="16" height="16" alt="Long Term Keogram"><span class="ms-1 d-none d-sm-inline">Long Term Keogram</span></a>
                             </li>
                             {% if current_user.is_authenticated or login_disabled %}
                             <li>
-                                <a href="{{ url_for('indi_allsky.fitsimageviewer_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.fitsimageviewer_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'fits-viewer') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/image-fill.svg') }}" width="16" height="16" alt="FITS Viewer"><span class="ms-1 d-none d-sm-inline">FITS Viewer</span></a>
                             </li>
                             {% endif %}
@@ -148,36 +159,36 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdown">
                             <li>
-                                <a href="{{ url_for('indi_allsky.sqm_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.sqm_view', 'indi_allsky.modern_admin_sqm_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/cloud-moon-fill.svg') }}" width="16" height="16" alt="SQM"><span class="ms-1 d-none d-sm-inline">SQM</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.chart_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.chart_view', 'indi_allsky.modern_admin_charts_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/graph-up.svg') }}" width="16" height="16" alt="Charts"><span class="ms-1 d-none d-sm-inline">Charts</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.sensor_panel_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.sensor_panel_view', 'indi_allsky.modern_admin_sensor_panel_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/journal-medical.svg') }}" width="16" height="16" alt="Sensor Panel"><span class="ms-1 d-none d-sm-inline">Sensor Panel</span></a>
                             </li>
                             {% if current_user.is_authenticated or login_disabled %}
                             <li>
-                                <a href="{{ url_for('indi_allsky.darks_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.darks_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'dark-library') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/subtract.svg') }}" width="16" height="16" alt="Dark Library"><span class="ms-1 d-none d-sm-inline">Dark Library</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.rolling_adu_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.rolling_adu_view', 'indi_allsky.modern_admin_adu_history_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/info-square.svg') }}" width="16" height="16" alt="ADU History"><span class="ms-1 d-none d-sm-inline">ADU History</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.image_lag_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.image_lag_view', 'indi_allsky.modern_admin_image_lag_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/stopwatch.svg') }}" width="16" height="16" alt="Image Lag"><span class="ms-1 d-none d-sm-inline">Image Lag</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.filespaceusage_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.filespaceusage_view', 'indi_allsky.modern_admin_file_space_usage_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/flag.svg') }}" width="16" height="16" alt="File Space Usage"><span class="ms-1 d-none d-sm-inline">File Space Usage</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.camera_lens_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.camera_lens_view', 'indi_allsky.modern_admin_camera_info_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/camera-fill.svg') }}" width="16" height="16" alt="Camera Info"><span class="ms-1 d-none d-sm-inline">Camera Info</span></a>
                             </li>
                             {% endif %}
@@ -192,44 +203,44 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdown">
                             <li>
-                                <a href="{{ url_for('indi_allsky.virtualsky_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.virtualsky_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'virtualsky') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/globe2.svg') }}" width="16" height="16" alt="VirtualSky"><span class="ms-1 d-none d-sm-inline">VirtualSky</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.camera_simulator_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.camera_simulator_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'camera-simulator') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/circle.svg') }}" width="16" height="16" alt="Camera Simulator"><span class="ms-1 d-none d-sm-inline">Camera Simulator</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.astropanel_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.astropanel_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'astropanel') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/newspaper.svg') }}" width="16" height="16" alt="Astropanel"><span class="ms-1 d-none d-sm-inline">Astropanel</span></a>
                             </li>
                             {% if current_user.is_authenticated or login_disabled %}
                             <li>
-                                <a href="{{ url_for('indi_allsky.generate_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.generate_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'generate') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/plus-square-dotted.svg') }}" width="16" height="16" alt="Generate"><span class="ms-1 d-none d-sm-inline">Generate</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.focus_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.focus_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'focus') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/stars.svg') }}" width="16" height="16" alt="Focus"><span class="ms-1 d-none d-sm-inline">Focus</span></a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.image_processing_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.image_processing_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'process-fits') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/magic.svg') }}" width="16" height="16" alt="FITS Processing"><span class="ms-1 d-none d-sm-inline">Process FITS</span> </a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.image_circle_helper_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.image_circle_helper_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'image-circle-helper') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/circle.svg') }}" width="16" height="16" alt="Image Circle Helper"><span class="ms-1 d-none d-sm-inline">Image Circle Helper</span> </a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.mask_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.mask_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'mask-base') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/layers.svg') }}" width="16" height="16" alt="Mask"><span class="ms-1 d-none d-sm-inline">Mask Base</span> </a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.log_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.log_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'log') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/terminal.svg') }}" width="16" height="16" alt="Log"><span class="ms-1 d-none d-sm-inline">Log</span> </a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.support_info_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.support_info_view', 'indi_allsky.modern_admin_support_info_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/info-circle.svg') }}" width="16" height="16" alt="Log"><span class="ms-1 d-none d-sm-inline">Support Info</span> </a>
                             </li>
                             {% endif %}
@@ -247,23 +258,23 @@
 
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdown">
                             <li>
-                                <a href="{{ url_for('indi_allsky.config_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.config_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'config') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/toggles.svg') }}" width="16" height="16" alt="Config"><span class="ms-1 d-none d-sm-inline">Config</span> </a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.network_manager_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.network_manager_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'network') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/wifi.svg') }}" width="16" height="16" alt="Log"><span class="ms-1 d-none d-sm-inline">Network</span> </a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.drive_manager_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.drive_manager_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'drives') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/hdd-fill.svg') }}" width="16" height="16" alt="Log"><span class="ms-1 d-none d-sm-inline">Drives</span> </a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.manual_gpio_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.manual_gpio_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'gpio-control') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/lightning-charge-fill.svg') }}" width="16" height="16" alt="Log"><span class="ms-1 d-none d-sm-inline">GPIO Control</span> </a>
                             </li>
                             <li>
-                                <a href="{{ url_for('indi_allsky.system_view') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.system_view', 'indi_allsky.modern_admin_system_info_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/gear-fill.svg') }}" width="16" height="16" alt="System Info"><span class="ms-1 d-none d-sm-inline">System Info</span> </a>
                             </li>
                         </ul>

@@ -5300,6 +5300,48 @@ class ModernAdminUpdatesView(ModernAdminPlaceholderView):
     modern_admin_message = 'Update status and release information are coming later.'
 
 
+class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
+    page_title = 'Modern Admin Placeholder'
+
+    classic_page_map = {
+        'loop'                  : ('Dashboard', 'Loop is being folded into the modern Dashboard.', 'indi_allsky.modern_admin_view'),
+        'gallery'               : ('Media', 'Modern media browsing is coming later.', None),
+        'images'                : ('Media', 'Modern image browsing is coming later.', None),
+        'timelapses'            : ('Media', 'Modern timelapse browsing is coming later.', None),
+        'mini-timelapses'       : ('Media', 'Modern mini-timelapse browsing is coming later.', None),
+        'panorama'              : ('Media', 'Modern panorama viewing is coming later.', None),
+        'panorama-loop'         : ('Media', 'Modern panorama loop viewing is coming later.', None),
+        'realtime-keogram'      : ('Observatory', 'Modern realtime keogram viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
+        'long-term-keogram'     : ('Observatory', 'Modern long term keogram viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
+        'fits-viewer'           : ('Media', 'Modern FITS viewing is coming later.', None),
+        'dark-library'          : ('Cameras', 'Modern dark library viewing is coming later.', 'indi_allsky.modern_admin_cameras_view'),
+        'virtualsky'            : ('Observatory', 'Modern VirtualSky viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
+        'camera-simulator'      : ('Advanced', 'Camera simulator controls remain classic-only for now.', None),
+        'astropanel'            : ('Observatory', 'Modern AstroPanel viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
+        'generate'              : ('Media', 'Modern media generation is coming later.', None),
+        'focus'                 : ('Cameras', 'Focus controls remain classic-only for now.', 'indi_allsky.modern_admin_cameras_view'),
+        'process-fits'          : ('Advanced', 'Modern FITS processing is coming later.', None),
+        'image-circle-helper'   : ('Cameras', 'Modern image circle tooling is coming later.', 'indi_allsky.modern_admin_cameras_view'),
+        'mask-base'             : ('Cameras', 'Modern mask tooling is coming later.', 'indi_allsky.modern_admin_cameras_view'),
+        'log'                   : ('System', 'Modern log viewing is coming later.', 'indi_allsky.modern_admin_system_view'),
+        'config'                : ('Advanced', 'Configuration remains classic-only until explicitly modernized.', None),
+        'network'               : ('System', 'Network management remains classic-only for now.', 'indi_allsky.modern_admin_system_view'),
+        'drives'                : ('Storage', 'Drive management remains classic-only for now.', 'indi_allsky.modern_admin_storage_view'),
+        'gpio-control'          : ('System', 'GPIO controls remain classic-only for now.', 'indi_allsky.modern_admin_system_view'),
+    }
+
+    def dispatch_request(self, classic_page):
+        self.classic_page = classic_page
+        section, message, active_endpoint = self.classic_page_map.get(
+            classic_page,
+            ('Modern Admin', 'This classic page has not been mapped yet.', None),
+        )
+        self.modern_admin_section = section
+        self.modern_admin_message = message
+        self.modern_admin_active_endpoint = active_endpoint
+        return super(ModernAdminClassicPlaceholderView, self).dispatch_request()
+
+
 class ModernAdminModeView(BaseView):
     # Stores the user's preferred admin shell while keeping classic admin fully available.
     decorators = [login_required]
@@ -12301,6 +12343,7 @@ bp_allsky.add_url_rule('/modern-admin/system', view_func=ModernAdminSystemView.a
 bp_allsky.add_url_rule('/modern-admin/system/info', view_func=ModernAdminSystemInfoView.as_view('modern_admin_system_info_view', template_name='modern_admin/system_info.html'))
 bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupportInfoView.as_view('modern_admin_support_info_view', template_name='modern_admin/support_info.html'))
 bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminClassicPlaceholderView.as_view('modern_admin_classic_placeholder_view', template_name='modern_admin/placeholder.html'))
 bp_allsky.add_url_rule('/modern-admin/mode/<mode>', view_func=ModernAdminModeView.as_view('modern_admin_mode_view'))
 bp_allsky.add_url_rule('/system', view_func=SystemInfoView.as_view('system_view', template_name='system.html'))
 bp_allsky.add_url_rule('/ajax/system', view_func=AjaxSystemInfoView.as_view('ajax_system_view'))
