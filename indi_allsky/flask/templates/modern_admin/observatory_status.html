@@ -19,8 +19,8 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Current sky quality">
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Sky Quality</div>
-            <h3>{{ modern_admin_sqm }}</h3>
-            <p>Latest SQM value from the current image metadata when available.</p>
+            <h3>{{ "%0.2f"|format(modern_admin_sqm | float) }}</h3>
+            <p>Latest SQM value from the current image metadata.</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
         <article class="modern-admin-status-card">
@@ -31,10 +31,44 @@ var camera_id = {{ camera_id }};
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Moon Phase</div>
-            <h3>{{ modern_admin_moon_phase }}</h3>
+            <h3>{{ "%0.1f"|format(modern_admin_moon_phase | float) }}%</h3>
             <p>Current moon phase context from existing status helpers.</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="sqm-summary-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Last 30 Minutes</p>
+            <h2 id="sqm-summary-title">Sky quality summary</h2>
+        </div>
+
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Min</th>
+                        <th>Average</th>
+                        <th>Max</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>SQM</td>
+                        <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_min | float) }}</td>
+                        <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_avg | float) }}</td>
+                        <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_max | float) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Stars</td>
+                        <td>{{ "%0.0f"|format(modern_admin_sqm_summary.stars_min | float) }}</td>
+                        <td>{{ "%0.1f"|format(modern_admin_sqm_summary.stars_avg | float) }}</td>
+                        <td>{{ "%0.0f"|format(modern_admin_sqm_summary.stars_max | float) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 </main>
 {% endblock %}

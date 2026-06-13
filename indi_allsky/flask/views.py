@@ -10254,10 +10254,26 @@ class ModernAdminSqmView(ModernAdminContextMixin, SqmView):
     def get_context(self):
         context = super(ModernAdminSqmView, self).get_context()
         image_data = self.get_image_data()
+        camera_now_minus_30m = self.camera_now - timedelta(minutes=30)
 
-        context['modern_admin_sqm'] = image_data.get('sqm', 'Unknown')
-        context['modern_admin_stars'] = image_data.get('stars', 'Unknown')
-        context['modern_admin_moon_phase'] = image_data.get('moon_phase', 'Unknown')
+        sqm_summary = IndiAllSkyDbImageTable.query\
+            .with_entities(
+                func.max(IndiAllSkyDbImageTable.sqm).label('sqm_max'),
+                func.min(IndiAllSkyDbImageTable.sqm).label('sqm_min'),
+                func.avg(IndiAllSkyDbImageTable.sqm).label('sqm_avg'),
+                func.max(IndiAllSkyDbImageTable.stars).label('stars_max'),
+                func.min(IndiAllSkyDbImageTable.stars).label('stars_min'),
+                func.avg(IndiAllSkyDbImageTable.stars).label('stars_avg'),
+            )\
+            .join(IndiAllSkyDbImageTable.camera)\
+            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+            .filter(IndiAllSkyDbImageTable.createDate > camera_now_minus_30m)\
+            .first()
+
+        context['modern_admin_sqm'] = image_data.get('sqm', 0.0)
+        context['modern_admin_stars'] = image_data.get('stars', 0)
+        context['modern_admin_moon_phase'] = image_data.get('moon_phase', 0.0)
+        context['modern_admin_sqm_summary'] = sqm_summary
 
         return context
 
