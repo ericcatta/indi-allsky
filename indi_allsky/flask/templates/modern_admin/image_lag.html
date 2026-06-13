@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-nav-v2') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-image-lag-title">
+    {% set modern_admin_header_label = 'Image lag header' %}
+    {% set modern_admin_heading = 'Image Lag' %}
+    {% set modern_admin_title_id = 'modern-admin-image-lag-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="image-lag-table-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Cameras</p>
+            <h2 id="image-lag-table-title">Recent capture timing</h2>
+        </div>
+
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Exposure</th>
+                        <th>Elapsed</th>
+                        <th>Delta</th>
+                        <th>Period</th>
+                        <th>Processing</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in image_lag_q %}
+                    <tr>
+                        <td>{{ row.createDate.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ "%0.7f"|format(row.exposure) }}</td>
+                        <td>{{ "%0.2f"|format(row.exp_elapsed | float) }}</td>
+                        <td>{{ "%+0.3f"|format(row.delta | float) }}</td>
+                        <td>{{ row.lag_diff }}</td>
+                        <td>{{ "%0.2f"|format(row.process_elapsed | float) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6">No image lag rows are available for the current time window.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+{% endblock %}

@@ -317,6 +317,10 @@
   margin-top: 18px;
 }
 
+.modern-admin-status-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .modern-admin-status-card,
 .modern-admin-event-panel {
   border-radius: 18px;
@@ -517,6 +521,32 @@
   text-decoration: none;
 }
 
+.modern-admin-link-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.modern-admin-link-grid a,
+.modern-admin-link-grid span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 999px;
+  color: var(--modern-admin-text);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.modern-admin-link-grid a:hover {
+  border-color: var(--modern-admin-line-strong);
+  color: var(--modern-admin-text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .modern-admin-future-actions {
   display: grid;
   gap: 18px;
@@ -560,8 +590,53 @@
   overflow-wrap: anywhere;
 }
 
+.modern-admin-detail-list-wide {
+  gap: 12px;
+}
+
+.modern-admin-detail-list-wide div {
+  grid-template-columns: minmax(150px, 0.28fr) minmax(0, 1fr);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--modern-admin-line);
+}
+
 .modern-admin-table-panel {
   margin-top: 18px;
+}
+
+.modern-admin-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.modern-admin-data-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  color: var(--modern-admin-text);
+}
+
+.modern-admin-data-table th,
+.modern-admin-data-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--modern-admin-line);
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.9rem;
+}
+
+.modern-admin-data-table th {
+  color: var(--modern-admin-quiet);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.modern-admin-note {
+  margin: 16px 0 0;
+  color: var(--modern-admin-quiet);
+  font-size: 0.84rem;
 }
 
 .modern-admin-camera-card-grid {
@@ -648,6 +723,10 @@
 
   .modern-admin-status-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .modern-admin-status-grid-three {
+    grid-template-columns: 1fr;
   }
 
   .modern-admin-management-grid {

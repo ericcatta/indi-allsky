@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-nav-v2') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-system-info-title">
+    {% set modern_admin_header_label = 'System info header' %}
+    {% set modern_admin_heading = 'System Info' %}
+    {% set modern_admin_title_id = 'modern-admin-system-info-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="System overview">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Release</div>
+            <h3>{{ release }}</h3>
+            <p>{{ system_type }}. Python {{ python_version }} on {{ python_platform }}.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">CPU</div>
+            <h3>{{ "%0.1f"|format(cpu_usage | float) }}%</h3>
+            <p>{{ cpu_count }} cores. Load: {{ "%0.2f"|format(cpu_load5 | float) }}, {{ "%0.2f"|format(cpu_load10 | float) }}, {{ "%0.2f"|format(cpu_load15 | float) }}.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Memory</div>
+            <h3>{{ "%0.1f"|format(mem_usage | float) }}%</h3>
+            <p>Uptime: {{ uptime_str }}. Swap usage: {{ "%0.1f"|format(swap_usage | float) }}%.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="services-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Services</p>
+            <h2 id="services-title">Service state</h2>
+        </div>
+        <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
+            <div><dt>INDI Server</dt><dd>{{ indiserver_service_activestate }} / {{ indiserver_service_unitstate }}</dd></div>
+            <div><dt>indi-allsky</dt><dd>{{ indi_allsky_service_activestate }} / {{ indi_allsky_service_unitstate }}</dd></div>
+            <div><dt>Gunicorn</dt><dd>{{ gunicorn_indi_allsky_service_activestate }} / {{ gunicorn_indi_allsky_service_unitstate }}</dd></div>
+            <div><dt>Gunicorn Socket</dt><dd>{{ gunicorn_indi_allsky_socket_activestate }} / {{ gunicorn_indi_allsky_socket_unitstate }}</dd></div>
+        </dl>
+    </section>
+</main>
+{% endblock %}

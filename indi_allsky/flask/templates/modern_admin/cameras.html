@@ -17,6 +17,15 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-cameras-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
+    <section class="modern-admin-placeholder-page" aria-label="Camera pages">
+        <p class="modern-admin-eyebrow">Camera Views</p>
+        <div class="modern-admin-link-grid">
+            {% for label, endpoint in modern_admin_section_links %}
+            <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="modern-admin-management-grid" aria-label="Camera management">
         <article class="modern-admin-management-panel">
             <p class="modern-admin-eyebrow">Active Camera</p>

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-nav-v2') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-sensor-title">
+    {% set modern_admin_header_label = 'Sensor panel header' %}
+    {% set modern_admin_heading = 'Sensor Panel' %}
+    {% set modern_admin_title_id = 'modern-admin-sensor-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-management-grid" aria-label="Sensor values">
+        <article class="modern-admin-table-panel">
+            <div class="modern-admin-section-heading">
+                <p class="modern-admin-eyebrow">User Sensors</p>
+                <h2>Current values</h2>
+            </div>
+            <div class="modern-admin-table-scroll">
+                <table class="modern-admin-data-table">
+                    <thead><tr><th>Sensor</th><th>Value</th></tr></thead>
+                    <tbody>
+                        {% for row in user_rows %}
+                        <tr><td>{{ row.label }}</td><td>{{ row.value }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2">No user sensor values are available.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="modern-admin-table-panel">
+            <div class="modern-admin-section-heading">
+                <p class="modern-admin-eyebrow">Temperature Sensors</p>
+                <h2>Current values</h2>
+            </div>
+            <div class="modern-admin-table-scroll">
+                <table class="modern-admin-data-table">
+                    <thead><tr><th>Sensor</th><th>Value</th></tr></thead>
+                    <tbody>
+                        {% for row in temp_rows %}
+                        <tr><td>{{ row.label }}</td><td>{{ row.value }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2">No temperature sensor values are available.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+</main>
+{% endblock %}

@@ -5094,7 +5094,7 @@ class ModernAdminView(TemplateView):
                 'label'    : label,
                 'endpoint' : endpoint,
                 'enabled'  : True,
-                'active'   : endpoint == request.endpoint,
+                'active'   : endpoint == getattr(self, 'modern_admin_active_endpoint', request.endpoint),
             })
 
         return modern_admin_nav
@@ -5167,6 +5167,20 @@ class ModernAdminView(TemplateView):
         return '{0:d}h ago'.format(int(age_s / 3600))
 
 
+class ModernAdminContextMixin(object):
+    decorators = [login_required]
+    modern_admin_active_endpoint = None
+
+    def get_context(self):
+        context = super(ModernAdminContextMixin, self).get_context()
+        session['admin_mode'] = 'modern'
+
+        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
+        context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
+
+        return context
+
+
 class ModernAdminCamerasView(ModernAdminView):
     # Future camera management entry point. This first version is read-only.
     page_title = 'Modern Admin Cameras'
@@ -5206,6 +5220,11 @@ class ModernAdminCamerasView(ModernAdminView):
             })
 
         context['modern_admin_cameras'] = camera_list
+        context['modern_admin_section_links'] = (
+            ('Camera Info', 'indi_allsky.modern_admin_camera_info_view'),
+            ('Image Lag', 'indi_allsky.modern_admin_image_lag_view'),
+            ('ADU History', 'indi_allsky.modern_admin_adu_history_view'),
+        )
 
         return context
 
@@ -5227,12 +5246,14 @@ class ModernAdminPlaceholderView(ModernAdminView):
     page_title = 'Modern Admin'
     modern_admin_section = 'Modern Admin'
     modern_admin_message = 'This section is coming later.'
+    modern_admin_links = tuple()
 
     def get_context(self):
         context = super(ModernAdminPlaceholderView, self).get_context()
 
         context['modern_admin_section'] = self.modern_admin_section
         context['modern_admin_message'] = self.modern_admin_message
+        context['modern_admin_links'] = self.modern_admin_links
 
         return context
 
@@ -5240,7 +5261,10 @@ class ModernAdminPlaceholderView(ModernAdminView):
 class ModernAdminStorageView(ModernAdminPlaceholderView):
     page_title = 'Modern Admin Storage'
     modern_admin_section = 'Storage'
-    modern_admin_message = 'Storage details and retention controls are coming later.'
+    modern_admin_message = 'Storage details are being modernized read-only first.'
+    modern_admin_links = (
+        ('File Space Usage', 'indi_allsky.modern_admin_file_space_usage_view'),
+    )
 
 
 class ModernAdminUploadsView(ModernAdminPlaceholderView):
@@ -5252,13 +5276,22 @@ class ModernAdminUploadsView(ModernAdminPlaceholderView):
 class ModernAdminObservatoryView(ModernAdminPlaceholderView):
     page_title = 'Modern Admin Observatory'
     modern_admin_section = 'Observatory'
-    modern_admin_message = 'Sky context, sensors, and observatory conditions are coming later.'
+    modern_admin_message = 'Sky context, sensors, and observatory conditions are being modernized read-only first.'
+    modern_admin_links = (
+        ('SQM', 'indi_allsky.modern_admin_sqm_view'),
+        ('Charts', 'indi_allsky.modern_admin_charts_view'),
+        ('Sensor Panel', 'indi_allsky.modern_admin_sensor_panel_view'),
+    )
 
 
 class ModernAdminSystemView(ModernAdminPlaceholderView):
     page_title = 'Modern Admin System'
     modern_admin_section = 'System'
-    modern_admin_message = 'Read-only system health details are coming later.'
+    modern_admin_message = 'Read-only system health details are available first.'
+    modern_admin_links = (
+        ('System Info', 'indi_allsky.modern_admin_system_info_view'),
+        ('Support Info', 'indi_allsky.modern_admin_support_info_view'),
+    )
 
 
 class ModernAdminUpdatesView(ModernAdminPlaceholderView):
@@ -10152,6 +10185,61 @@ class FileSpaceUsageView(TemplateView):
         return total_size, total_count
 
 
+class ModernAdminCameraInfoView(ModernAdminContextMixin, CameraLensView):
+    page_title = 'Modern Admin Camera Info'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+
+
+class ModernAdminImageLagView(ModernAdminContextMixin, ImageLagView):
+    page_title = 'Modern Admin Image Lag'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+
+
+class ModernAdminAduHistoryView(ModernAdminContextMixin, RollingAduView):
+    page_title = 'Modern Admin ADU History'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+
+
+class ModernAdminFileSpaceUsageView(ModernAdminContextMixin, FileSpaceUsageView):
+    page_title = 'Modern Admin File Space Usage'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+
+class ModernAdminSqmView(ModernAdminContextMixin, SqmView):
+    page_title = 'Modern Admin SQM'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+
+    def get_context(self):
+        context = super(ModernAdminSqmView, self).get_context()
+        image_data = self.get_image_data()
+
+        context['modern_admin_sqm'] = image_data.get('sqm', 'Unknown')
+        context['modern_admin_stars'] = image_data.get('stars', 'Unknown')
+        context['modern_admin_moon_phase'] = image_data.get('moon_phase', 'Unknown')
+
+        return context
+
+
+class ModernAdminChartsView(ModernAdminContextMixin, ChartView):
+    page_title = 'Modern Admin Charts'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+
+
+class ModernAdminSensorPanelView(ModernAdminContextMixin, SensorPanelView):
+    page_title = 'Modern Admin Sensor Panel'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+
+
+class ModernAdminSystemInfoView(ModernAdminContextMixin, SystemInfoView):
+    page_title = 'Modern Admin System Info'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+
+class ModernAdminSupportInfoView(ModernAdminContextMixin, SupportInfoView):
+    page_title = 'Modern Admin Support Info'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+
 class LongTermKeogramView(TemplateView):
     page_title = 'Long Term Keogram'
 
@@ -12199,10 +12287,19 @@ bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.a
 
 bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
+bp_allsky.add_url_rule('/modern-admin/cameras/info', view_func=ModernAdminCameraInfoView.as_view('modern_admin_camera_info_view', template_name='modern_admin/camera_info.html'))
+bp_allsky.add_url_rule('/modern-admin/cameras/image-lag', view_func=ModernAdminImageLagView.as_view('modern_admin_image_lag_view', template_name='modern_admin/image_lag.html'))
+bp_allsky.add_url_rule('/modern-admin/cameras/adu-history', view_func=ModernAdminAduHistoryView.as_view('modern_admin_adu_history_view', template_name='modern_admin/adu_history.html'))
 bp_allsky.add_url_rule('/modern-admin/storage', view_func=ModernAdminStorageView.as_view('modern_admin_storage_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/storage/file-space-usage', view_func=ModernAdminFileSpaceUsageView.as_view('modern_admin_file_space_usage_view', template_name='modern_admin/file_space_usage.html'))
 bp_allsky.add_url_rule('/modern-admin/uploads', view_func=ModernAdminUploadsView.as_view('modern_admin_uploads_view', template_name='modern_admin/placeholder.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory', view_func=ModernAdminObservatoryView.as_view('modern_admin_observatory_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/observatory/sqm', view_func=ModernAdminSqmView.as_view('modern_admin_sqm_view', template_name='modern_admin/observatory_status.html'))
+bp_allsky.add_url_rule('/modern-admin/observatory/charts', view_func=ModernAdminChartsView.as_view('modern_admin_charts_view', template_name='modern_admin/charts.html'))
+bp_allsky.add_url_rule('/modern-admin/observatory/sensor-panel', view_func=ModernAdminSensorPanelView.as_view('modern_admin_sensor_panel_view', template_name='modern_admin/sensor_panel.html'))
 bp_allsky.add_url_rule('/modern-admin/system', view_func=ModernAdminSystemView.as_view('modern_admin_system_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/system/info', view_func=ModernAdminSystemInfoView.as_view('modern_admin_system_info_view', template_name='modern_admin/system_info.html'))
+bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupportInfoView.as_view('modern_admin_support_info_view', template_name='modern_admin/support_info.html'))
 bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/placeholder.html'))
 bp_allsky.add_url_rule('/modern-admin/mode/<mode>', view_func=ModernAdminModeView.as_view('modern_admin_mode_view'))
 bp_allsky.add_url_rule('/system', view_func=SystemInfoView.as_view('system_view', template_name='system.html'))

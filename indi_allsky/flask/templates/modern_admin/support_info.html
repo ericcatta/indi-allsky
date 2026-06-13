@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-nav-v2') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-support-title">
+    {% set modern_admin_header_label = 'Support info header' %}
+    {% set modern_admin_heading = 'Support Info' %}
+    {% set modern_admin_title_id = 'modern-admin-support-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-placeholder-page" aria-labelledby="support-coming-title">
+        <p class="modern-admin-eyebrow">System</p>
+        <h2 id="support-coming-title">Coming later</h2>
+        <p>The classic support page generates a diagnostic bundle through an AJAX action. The modern page keeps this as a placeholder until that workflow has a safe read-only design.</p>
+        <a class="modern-admin-placeholder-link" href="{{ url_for('indi_allsky.modern_admin_system_view') }}">Back to System</a>
+    </section>
+</main>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-nav-v2') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-sqm-title">
+    {% set modern_admin_header_label = 'SQM header' %}
+    {% set modern_admin_heading = 'SQM' %}
+    {% set modern_admin_title_id = 'modern-admin-sqm-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Current sky quality">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Sky Quality</div>
+            <h3>{{ modern_admin_sqm }}</h3>
+            <p>Latest SQM value from the current image metadata when available.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Stars</div>
+            <h3>{{ modern_admin_stars }}</h3>
+            <p>Latest detected star count from the existing image metadata source.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Moon Phase</div>
+            <h3>{{ modern_admin_moon_phase }}</h3>
+            <p>Current moon phase context from existing status helpers.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+    </section>
+</main>
+{% endblock %}

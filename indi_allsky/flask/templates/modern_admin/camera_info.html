@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-nav-v2') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-camera-info-title">
+    {% set modern_admin_header_label = 'Camera info header' %}
+    {% set modern_admin_heading = 'Camera Info' %}
+    {% set modern_admin_title_id = 'modern-admin-camera-info-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="camera-overview-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Cameras</p>
+            <h2 id="camera-overview-title">{{ camera.friendlyName or camera.name or 'Camera' }}</h2>
+        </div>
+
+        <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
+            <div><dt>Name</dt><dd>{{ camera.name }}</dd></div>
+            <div><dt>Friendly Name</dt><dd>{{ camera.friendlyName }}</dd></div>
+            <div><dt>Driver</dt><dd>{{ camera.driver }}</dd></div>
+            <div><dt>Resolution</dt><dd>{{ camera.width }} x {{ camera.height }}</dd></div>
+            <div><dt>Sensor Size</dt><dd>{{ "%0.1f"|format(camera_width_mm | float) }}mm x {{ "%0.1f"|format(camera_height_mm | float) }}mm</dd></div>
+            <div><dt>Pixel Size</dt><dd>{{ "%0.2f"|format(camera.pixelSize | float) }}um</dd></div>
+            <div><dt>CFA</dt><dd>{{ camera_cfa }}</dd></div>
+            <div><dt>Bits</dt><dd>{{ camera.bits | int }}</dd></div>
+            <div><dt>Gain</dt><dd>{{ "%0.2f"|format(camera.minGain | float) }} - {{ "%0.2f"|format(camera.maxGain | float) }}</dd></div>
+            <div><dt>Exposure</dt><dd>{{ "%0.6f"|format(camera.minExposure | float) }} - {{ camera.maxExposure | int }}s</dd></div>
+            <div><dt>Lens</dt><dd>{{ camera.lensName }}</dd></div>
+            <div><dt>Focal Length</dt><dd>{{ "%0.2f"|format(camera.lensFocalLength | float) }}mm</dd></div>
+            <div><dt>Focal Ratio</dt><dd>f/{{ "%0.2f"|format(camera.lensFocalRatio | float) }}</dd></div>
+            <div><dt>Field of View</dt><dd>{{ "%0.1f"|format(deg_fov_width | float) }} deg x {{ "%0.1f"|format(deg_fov_height | float) }} deg</dd></div>
+            <div><dt>Owner</dt><dd>{{ owner }}</dd></div>
+        </dl>
+    </section>
+</main>
+{% endblock %}

@@ -20,6 +20,13 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-eyebrow">{{ modern_admin_section }}</p>
         <h2 id="modern-admin-coming-later-title">Coming later</h2>
         <p>{{ modern_admin_message }}</p>
+        {% if modern_admin_links %}
+        <div class="modern-admin-link-grid" aria-label="{{ modern_admin_section }} pages">
+            {% for label, endpoint in modern_admin_links %}
+            <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
         <a class="modern-admin-placeholder-link" href="{{ url_for('indi_allsky.modern_admin_view') }}">Back to Dashboard</a>
     </section>
 </main>

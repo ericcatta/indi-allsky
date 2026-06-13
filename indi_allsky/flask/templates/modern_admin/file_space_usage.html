@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-nav-v2') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-file-space-title">
+    {% set modern_admin_header_label = 'File space usage header' %}
+    {% set modern_admin_heading = 'File Space Usage' %}
+    {% set modern_admin_title_id = 'modern-admin-file-space-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="file-space-table-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Storage</p>
+            <h2 id="file-space-table-title">Media storage by day</h2>
+        </div>
+
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Images</th>
+                        <th>Panoramas</th>
+                        <th>Timelapses</th>
+                        <th>FITS</th>
+                        <th>Raw</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day, day_data in days_fileSize_dict.items() %}
+                    {% for tod, tod_data in day_data.items() %}
+                    <tr>
+                        <td>{{ day }}</td>
+                        <td>{{ tod }}</td>
+                        {% for asset in ['Images', 'Panoramas', 'Timelapses', 'FITS', 'Raw Images'] %}
+                        {% if tod_data[asset]['fileSize'] < 805306368 %}
+                        <td>{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024) }} MB [{{ tod_data[asset]['count'] }}]</td>
+                        {% else %}
+                        <td>{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024 / 1024) }} GB [{{ tod_data[asset]['count'] }}]</td>
+                        {% endif %}
+                        {% endfor %}
+                        {% if tod_data['tod_fileSize'] < 805306368 %}
+                        <td>{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024) }} MB</td>
+                        {% else %}
+                        <td>{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024 / 1024) }} GB</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="8">No file usage rows are available yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="modern-admin-note">Reported space is the sum of individual file sizes. Filesystems may allocate additional disk space.</p>
+    </section>
+</main>
+{% endblock %}
