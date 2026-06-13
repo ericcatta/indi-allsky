@@ -207,7 +207,7 @@
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/globe2.svg') }}" width="16" height="16" alt="VirtualSky"><span class="ms-1 d-none d-sm-inline">VirtualSky</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.camera_simulator_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'camera-simulator') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.camera_simulator_view', 'indi_allsky.modern_admin_camera_simulator_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/circle.svg') }}" width="16" height="16" alt="Camera Simulator"><span class="ms-1 d-none d-sm-inline">Camera Simulator</span></a>
                             </li>
                             <li>
@@ -216,19 +216,19 @@
                             </li>
                             {% if current_user.is_authenticated or login_disabled %}
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.generate_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'generate') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.generate_view', 'indi_allsky.modern_admin_generate_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/plus-square-dotted.svg') }}" width="16" height="16" alt="Generate"><span class="ms-1 d-none d-sm-inline">Generate</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.focus_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'focus') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.focus_view', 'indi_allsky.modern_admin_focus_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/stars.svg') }}" width="16" height="16" alt="Focus"><span class="ms-1 d-none d-sm-inline">Focus</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.image_processing_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'process-fits') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.image_processing_view', 'indi_allsky.modern_admin_image_processing_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/magic.svg') }}" width="16" height="16" alt="FITS Processing"><span class="ms-1 d-none d-sm-inline">Process FITS</span> </a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.image_circle_helper_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'image-circle-helper') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.image_circle_helper_view', 'indi_allsky.modern_admin_image_circle_helper_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/circle.svg') }}" width="16" height="16" alt="Image Circle Helper"><span class="ms-1 d-none d-sm-inline">Image Circle Helper</span> </a>
                             </li>
                             <li>
@@ -258,19 +258,19 @@
 
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdown">
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.config_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'config') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.config_view', 'indi_allsky.modern_admin_config_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/toggles.svg') }}" width="16" height="16" alt="Config"><span class="ms-1 d-none d-sm-inline">Config</span> </a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.network_manager_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'network') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.network_manager_view', 'indi_allsky.modern_admin_network_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/wifi.svg') }}" width="16" height="16" alt="Log"><span class="ms-1 d-none d-sm-inline">Network</span> </a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.drive_manager_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'drives') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.drive_manager_view', 'indi_allsky.modern_admin_drive_manager_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/hdd-fill.svg') }}" width="16" height="16" alt="Log"><span class="ms-1 d-none d-sm-inline">Drives</span> </a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.manual_gpio_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'gpio-control') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.manual_gpio_view', 'indi_allsky.modern_admin_manual_gpio_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/lightning-charge-fill.svg') }}" width="16" height="16" alt="Log"><span class="ms-1 d-none d-sm-inline">GPIO Control</span> </a>
                             </li>
                             <li>

@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-safe-controls-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-safe-title">
+    {% set modern_admin_header_label = modern_admin_safe_title ~ ' header' %}
+    {% set modern_admin_heading = modern_admin_safe_title %}
+    {% set modern_admin_title_id = 'modern-admin-safe-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-safe-intro" aria-label="Safe mode">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Safe mode</p>
+                <h2>{{ modern_admin_safe_title }}</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+        <p class="modern-admin-note">{{ modern_admin_safe_note }}</p>
+    </section>
+
+    {% if modern_admin_preview_url %}
+    <section class="modern-admin-table-panel" aria-label="Preview">
+        <figure class="modern-admin-live-frame">
+            <img src="{{ modern_admin_preview_url }}" alt="{{ modern_admin_safe_title }} preview">
+        </figure>
+    </section>
+    {% endif %}
+
+    {% if modern_admin_focus_monitor %}
+    <section class="modern-admin-table-panel" aria-labelledby="focus-monitor-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Live endpoint</p>
+                <h2 id="focus-monitor-title">Focus preview</h2>
+            </div>
+            <button class="modern-admin-media-button" id="modern-admin-focus-refresh" type="button">Refresh</button>
+        </div>
+        <figure class="modern-admin-live-frame">
+            <img id="modern-admin-focus-image" alt="Focus preview">
+        </figure>
+        <p class="modern-admin-note" id="modern-admin-focus-message">Waiting for focus preview.</p>
+    </section>
+    {% endif %}
+
+    {% for section in modern_admin_safe_sections %}
+    <section class="modern-admin-table-panel" aria-labelledby="safe-section-{{ loop.index }}">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Classic data</p>
+                <h2 id="safe-section-{{ loop.index }}">{{ section.title }}</h2>
+            </div>
+        </div>
+        <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
+            {% for row in section.rows %}
+            <div>
+                <dt>{{ row.label }}</dt>
+                <dd>{{ row.value }}</dd>
+            </div>
+            {% endfor %}
+        </dl>
+    </section>
+    {% endfor %}
+
+    {% if modern_admin_safe_actions %}
+    <section class="modern-admin-table-panel" aria-labelledby="safe-actions-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Actions</p>
+                <h2 id="safe-actions-title">Disabled controls</h2>
+            </div>
+        </div>
+        <div class="modern-admin-safe-action-grid">
+            {% for action in modern_admin_safe_actions %}
+            <div class="modern-admin-safe-action">
+                <button class="modern-admin-media-button" type="button" disabled>{{ action.label }}</button>
+                <p>{{ action.reason }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% for table in modern_admin_safe_tables %}
+    <section class="modern-admin-table-panel" aria-labelledby="safe-table-{{ loop.index }}">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Classic data</p>
+                <h2 id="safe-table-{{ loop.index }}">{{ table.title }}</h2>
+            </div>
+        </div>
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        {% for header in table.headers %}
+                        <th>{{ header }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in table.rows %}
+                    <tr>
+                        {% for cell in row %}
+                        <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="{{ table.headers | length }}">No rows available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endfor %}
+</main>
+
+{% if modern_admin_focus_monitor %}
+<script>
+function modernAdminLoadFocusPreview() {
+    const message = document.getElementById('modern-admin-focus-message');
+    const image = document.getElementById('modern-admin-focus-image');
+    const params = new URLSearchParams({zoom: 2, x_offset: 0, y_offset: 0});
+
+    fetch('{{ url_for('indi_allsky.js_focus_view') }}?' + params.toString())
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Focus preview unavailable');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            if (!data.image_b64) {
+                message.textContent = 'No focus preview image is available.';
+                return;
+            }
+            image.src = 'data:image/jpeg;base64,' + data.image_b64;
+            message.textContent = 'Score ' + Number(data.blur_score || 0).toFixed(2) + ' · Stars ' + (data.star_count || 0) + ' · Focus mode ' + Boolean(data.focus_mode);
+        })
+        .catch((error) => {
+            message.textContent = error.message;
+        });
+}
+
+document.getElementById('modern-admin-focus-refresh').addEventListener('click', modernAdminLoadFocusPreview);
+modernAdminLoadFocusPreview();
+</script>
+{% endif %}
+{% endblock %}

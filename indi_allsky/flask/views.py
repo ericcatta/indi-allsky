@@ -5226,6 +5226,11 @@ class ModernAdminCamerasView(ModernAdminView):
             ('Camera Info', 'indi_allsky.modern_admin_camera_info_view'),
             ('Image Lag', 'indi_allsky.modern_admin_image_lag_view'),
             ('ADU History', 'indi_allsky.modern_admin_adu_history_view'),
+            ('Focus', 'indi_allsky.modern_admin_focus_view'),
+            ('Image Circle Helper', 'indi_allsky.modern_admin_image_circle_helper_view'),
+            ('Camera Simulator', 'indi_allsky.modern_admin_camera_simulator_view'),
+            ('Dark Library', 'indi_allsky.modern_admin_dark_library_view'),
+            ('Mask Base', 'indi_allsky.modern_admin_mask_view'),
         )
 
         return context
@@ -5269,9 +5274,12 @@ class ModernAdminStorageView(ModernAdminView):
 
         context['modern_admin_section_links'] = (
             ('File Space Usage', 'indi_allsky.modern_admin_file_space_usage_view'),
+            ('Drives', 'indi_allsky.modern_admin_drive_manager_view'),
             ('Gallery', 'indi_allsky.modern_admin_media_gallery_view'),
             ('Images', 'indi_allsky.modern_admin_media_images_view'),
             ('FITS Viewer', 'indi_allsky.modern_admin_media_fits_view'),
+            ('Generate', 'indi_allsky.modern_admin_generate_view'),
+            ('Process FITS', 'indi_allsky.modern_admin_image_processing_view'),
         )
         context['modern_admin_storage_counts'] = self.get_media_count_summary()
 
@@ -5400,6 +5408,9 @@ class ModernAdminSystemView(ModernAdminView):
             ('System Info', 'indi_allsky.modern_admin_system_info_view'),
             ('Support Info', 'indi_allsky.modern_admin_support_info_view'),
             ('Log', 'indi_allsky.modern_admin_log_view'),
+            ('Config', 'indi_allsky.modern_admin_config_view'),
+            ('Network', 'indi_allsky.modern_admin_network_view'),
+            ('GPIO Control', 'indi_allsky.modern_admin_manual_gpio_view'),
             ('Updates', 'indi_allsky.modern_admin_updates_view'),
         )
         context['modern_admin_system_metrics'] = (
@@ -5447,6 +5458,15 @@ class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
         'astropanel'        : 'indi_allsky.modern_admin_astropanel_view',
         'log'               : 'indi_allsky.modern_admin_log_view',
         'mask-base'         : 'indi_allsky.modern_admin_mask_view',
+        'camera-simulator'  : 'indi_allsky.modern_admin_camera_simulator_view',
+        'generate'          : 'indi_allsky.modern_admin_generate_view',
+        'focus'             : 'indi_allsky.modern_admin_focus_view',
+        'process-fits'      : 'indi_allsky.modern_admin_image_processing_view',
+        'image-circle-helper' : 'indi_allsky.modern_admin_image_circle_helper_view',
+        'config'            : 'indi_allsky.modern_admin_config_view',
+        'network'           : 'indi_allsky.modern_admin_network_view',
+        'drives'            : 'indi_allsky.modern_admin_drive_manager_view',
+        'gpio-control'      : 'indi_allsky.modern_admin_manual_gpio_view',
     }
 
     classic_page_map = {
@@ -5462,18 +5482,18 @@ class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
         'fits-viewer'           : ('Media', 'Modern FITS viewing is coming later.', None),
         'dark-library'          : ('Cameras', 'Modern dark library viewing is coming later.', 'indi_allsky.modern_admin_cameras_view'),
         'virtualsky'            : ('Observatory', 'Modern VirtualSky viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
-        'camera-simulator'      : ('Advanced', 'Camera simulator controls remain classic-only for now.', None),
+        'camera-simulator'      : ('Cameras', 'Modern camera simulator safe view is available.', 'indi_allsky.modern_admin_camera_simulator_view'),
         'astropanel'            : ('Observatory', 'Modern AstroPanel viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
-        'generate'              : ('Media', 'Modern media generation is coming later.', None),
-        'focus'                 : ('Cameras', 'Focus controls remain classic-only for now.', 'indi_allsky.modern_admin_cameras_view'),
-        'process-fits'          : ('Advanced', 'Modern FITS processing is coming later.', None),
-        'image-circle-helper'   : ('Cameras', 'Modern image circle tooling is coming later.', 'indi_allsky.modern_admin_cameras_view'),
+        'generate'              : ('Storage', 'Modern generate safe view is available.', 'indi_allsky.modern_admin_generate_view'),
+        'focus'                 : ('Cameras', 'Modern focus safe view is available.', 'indi_allsky.modern_admin_focus_view'),
+        'process-fits'          : ('Storage', 'Modern FITS processing safe view is available.', 'indi_allsky.modern_admin_image_processing_view'),
+        'image-circle-helper'   : ('Cameras', 'Modern image circle helper safe view is available.', 'indi_allsky.modern_admin_image_circle_helper_view'),
         'mask-base'             : ('Cameras', 'Modern mask tooling is coming later.', 'indi_allsky.modern_admin_cameras_view'),
         'log'                   : ('System', 'Modern log viewing is coming later.', 'indi_allsky.modern_admin_system_view'),
-        'config'                : ('Advanced', 'Configuration remains classic-only until explicitly modernized.', None),
-        'network'               : ('System', 'Network management remains classic-only for now.', 'indi_allsky.modern_admin_system_view'),
-        'drives'                : ('Storage', 'Drive management remains classic-only for now.', 'indi_allsky.modern_admin_storage_view'),
-        'gpio-control'          : ('System', 'GPIO controls remain classic-only for now.', 'indi_allsky.modern_admin_system_view'),
+        'config'                : ('System', 'Modern config safe view is available.', 'indi_allsky.modern_admin_config_view'),
+        'network'               : ('System', 'Modern network safe view is available.', 'indi_allsky.modern_admin_network_view'),
+        'drives'                : ('Storage', 'Modern drives safe view is available.', 'indi_allsky.modern_admin_drive_manager_view'),
+        'gpio-control'          : ('System', 'Modern GPIO safe view is available.', 'indi_allsky.modern_admin_manual_gpio_view'),
     }
 
     def dispatch_request(self, classic_page):
@@ -12411,6 +12431,362 @@ class ImageCircleHelperView(TemplateView):
         return context
 
 
+class ModernAdminSafeControlsMixin(ModernAdminContextMixin):
+    page_title = 'Modern Admin'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    secret_field_tokens = ('PASSWORD', 'PSK', 'SECRET', 'TOKEN', 'KEY')
+
+    def get_context(self):
+        context = super(ModernAdminSafeControlsMixin, self).get_context()
+        context.setdefault('modern_admin_safe_title', self.page_title.replace('Modern Admin ', ''))
+        context.setdefault('modern_admin_safe_note', 'Controls are shown in safe mode. Operational actions remain disabled in Modern Admin.')
+        context.setdefault('modern_admin_safe_sections', tuple())
+        context.setdefault('modern_admin_safe_actions', tuple())
+        context.setdefault('modern_admin_safe_tables', tuple())
+        return context
+
+
+    def field_value(self, field):
+        field_name = getattr(field, 'name', '').upper()
+        if any(token in field_name for token in self.secret_field_tokens):
+            return 'Configured' if field.data else 'Not configured'
+
+        if isinstance(field.data, bool):
+            return 'Enabled' if field.data else 'Disabled'
+        elif field.data in (None, ''):
+            return 'Not configured'
+
+        return str(field.data)
+
+
+    def field_rows(self, form, field_names):
+        rows = list()
+        for field_name in field_names:
+            field = getattr(form, field_name, None)
+            if not field:
+                continue
+
+            rows.append({
+                'label' : str(field.label.text),
+                'value' : self.field_value(field),
+            })
+
+        return rows
+
+
+    def disabled_action(self, label, reason='Disabled in Modern Admin safe mode.'):
+        return {
+            'label'  : label,
+            'reason' : reason,
+        }
+
+
+class ModernAdminCameraSimulatorView(ModernAdminSafeControlsMixin, CameraSimulatorView):
+    page_title = 'Modern Admin Camera Simulator'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+
+    def get_context(self):
+        context = super(ModernAdminCameraSimulatorView, self).get_context()
+        form = context['form_camera_simulator']
+
+        context['modern_admin_safe_title'] = 'Camera Simulator'
+        context['modern_admin_safe_note'] = 'Camera and lens inputs mirror the classic simulator. The modern page keeps the simulator read-only until the interactive canvas is ported safely.'
+        context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'Simulator inputs',
+                'rows'  : self.field_rows(form, ('LENS_SELECT', 'SENSOR_SELECT', 'OFFSET_X', 'OFFSET_Y')),
+            },
+        )
+        context['modern_admin_safe_actions'] = (
+            self.disabled_action('Run simulator', 'The classic simulator is client-side and interactive; Modern Admin shows the selected inputs without applying calculations yet.'),
+        )
+        return context
+
+
+class ModernAdminGenerateView(ModernAdminSafeControlsMixin, TimelapseGeneratorView):
+    page_title = 'Modern Admin Generate'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+    def get_context(self):
+        context = super(ModernAdminGenerateView, self).get_context()
+        form = context['form_timelapsegen']
+
+        context['modern_admin_safe_title'] = 'Generate'
+        context['modern_admin_safe_note'] = 'Recent generation tasks are real. Creating new media tasks is disabled in Modern Admin safe mode.'
+        context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'Generation request',
+                'rows'  : self.field_rows(form, ('ACTION_SELECT', 'DAY_SELECT')),
+            },
+        )
+        context['modern_admin_safe_actions'] = (
+            self.disabled_action('Generate', 'This queues processing jobs and remains disabled in Modern Admin.'),
+        )
+        context['modern_admin_safe_tables'] = (
+            {
+                'title'   : 'Recent tasks',
+                'headers' : ('ID', 'Date', 'Queue', 'Action', 'State', 'Result'),
+                'rows'    : [
+                    (
+                        task['id'],
+                        task['createDate'].strftime('%Y-%m-%d %H:%M:%S'),
+                        task['queue'],
+                        task['action'],
+                        task['state'],
+                        task['result'] or '',
+                    )
+                    for task in context.get('task_list', tuple())
+                ],
+            },
+        )
+        return context
+
+
+class ModernAdminFocusView(ModernAdminSafeControlsMixin, FocusView):
+    page_title = 'Modern Admin Focus'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+
+    def get_context(self):
+        context = super(ModernAdminFocusView, self).get_context()
+
+        context['modern_admin_safe_title'] = 'Focus'
+        context['modern_admin_safe_note'] = 'The focus monitor uses the existing read-only focus image endpoint. Focuser movement controls remain disabled.'
+        context['modern_admin_focus_monitor'] = True
+        context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'Focus status',
+                'rows'  : (
+                    {'label' : 'Focus mode', 'value' : 'Enabled' if self.indi_allsky_config.get('FOCUS_MODE', False) else 'Disabled'},
+                    {'label' : 'Focuser device', 'value' : 'Configured' if context.get('focuser_device') else 'Not configured'},
+                    {'label' : 'Refresh interval', 'value' : 'Manual preview load'},
+                ),
+            },
+        )
+        context['modern_admin_safe_actions'] = (
+            self.disabled_action('Move counter-clockwise', 'Moves hardware and remains disabled in Modern Admin.'),
+            self.disabled_action('Move clockwise', 'Moves hardware and remains disabled in Modern Admin.'),
+        )
+        return context
+
+
+class ModernAdminImageProcessingView(ModernAdminSafeControlsMixin, ImageProcessingView):
+    page_title = 'Modern Admin Process FITS'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+    def get_context(self):
+        context = super(ModernAdminImageProcessingView, self).get_context()
+        form = context['form_image_processing']
+
+        context['modern_admin_safe_title'] = 'Process FITS'
+        context['modern_admin_safe_note'] = 'The selected FITS frame and processing parameters are real. Processing preview generation remains disabled in Modern Admin safe mode.'
+        context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'Selected frame',
+                'rows'  : self.field_rows(form, ('FRAME_TYPE', 'FITS_ID', 'CCD_BIT_DEPTH')),
+            },
+            {
+                'title' : 'Core processing',
+                'rows'  : self.field_rows(form, (
+                    'NIGHT_CONTRAST_ENHANCE',
+                    'CONTRAST_ENHANCE_16BIT',
+                    'IMAGE_STRETCH__CLASSNAME',
+                    'IMAGE_DENOISE',
+                    'IMAGE_STACK_METHOD',
+                    'IMAGE_STACK_COUNT',
+                )),
+            },
+            {
+                'title' : 'Lens geometry',
+                'rows'  : self.field_rows(form, ('LENS_IMAGE_CIRCLE', 'LENS_OFFSET_X', 'LENS_OFFSET_Y', 'LENS_AZIMUTH')),
+            },
+        )
+        context['modern_admin_safe_actions'] = (
+            self.disabled_action('Process preview', 'This calls the FITS processing endpoint and remains disabled in Modern Admin.'),
+        )
+        return context
+
+
+class ModernAdminImageCircleHelperView(ModernAdminSafeControlsMixin, ImageCircleHelperView):
+    page_title = 'Modern Admin Image Circle Helper'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+
+    def get_context(self):
+        context = super(ModernAdminImageCircleHelperView, self).get_context()
+        form = context['form_imagecircle']
+        latest_image_url = context.get('latest_image_url')
+        if latest_image_url:
+            context['latest_image_url'] = ModernAdminMediaListView.normalize_media_url(self, latest_image_url)
+
+        context['modern_admin_safe_title'] = 'Image Circle Helper'
+        context['modern_admin_safe_note'] = 'Latest image and circle parameters come from the classic helper. Modern Admin keeps this as a read-only reference view.'
+        context['modern_admin_preview_url'] = context.get('latest_image_url')
+        context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'Circle parameters',
+                'rows'  : self.field_rows(form, ('IMAGE_CIRCLE_DIAMETER', 'OFFSET_X', 'OFFSET_Y', 'KEOGRAM_ANGLE')),
+            },
+        )
+        context['modern_admin_safe_actions'] = (
+            self.disabled_action('Apply helper values', 'Saving camera geometry is a configuration action and remains disabled in Modern Admin.'),
+        )
+        return context
+
+
+class ModernAdminConfigView(ModernAdminSafeControlsMixin, ConfigView):
+    page_title = 'Modern Admin Config'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    def get_context(self):
+        context = super(ModernAdminConfigView, self).get_context()
+        form = context['form_config']
+
+        context['modern_admin_safe_title'] = 'Config'
+        context['modern_admin_safe_note'] = 'Configuration values are loaded from the existing classic config form. Saving configuration remains disabled in Modern Admin.'
+        context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'Camera',
+                'rows'  : self.field_rows(form, (
+                    'CAMERA_INTERFACE',
+                    'INDI_SERVER',
+                    'INDI_PORT',
+                    'INDI_CAMERA_NAME',
+                    'LENS_NAME',
+                    'LENS_FOCAL_LENGTH',
+                    'LENS_FOCAL_RATIO',
+                )),
+            },
+            {
+                'title' : 'Exposure',
+                'rows'  : self.field_rows(form, (
+                    'CCD_EXPOSURE_MAX',
+                    'CCD_EXPOSURE_DEF',
+                    'CCD_EXPOSURE_MIN',
+                    'EXPOSURE_PERIOD',
+                    'CCD_BIT_DEPTH',
+                    'FOCUS_MODE',
+                )),
+            },
+            {
+                'title' : 'System controls',
+                'rows'  : (
+                    {'label' : 'Config ID', 'value' : context.get('config_id')},
+                    {'label' : 'Timezone validation', 'value' : 'Warning' if context.get('longitude_validation_message') else 'OK'},
+                    {'label' : 'Dew heater status', 'value' : context.get('dh_status_str')},
+                    {'label' : 'Fan status', 'value' : context.get('fan_status_str')},
+                ),
+            },
+        )
+        context['modern_admin_safe_actions'] = (
+            self.disabled_action('Save config', 'Writes configuration and may reload services; disabled in Modern Admin.'),
+            self.disabled_action('Restore config', 'Restores configuration state; disabled in Modern Admin.'),
+        )
+        return context
+
+
+class ModernAdminNetworkView(ModernAdminSafeControlsMixin, NetworkManagerView):
+    page_title = 'Modern Admin Network'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    def get_context(self):
+        context = super(ModernAdminNetworkView, self).get_context()
+        form = context['form_connections']
+
+        context['modern_admin_safe_title'] = 'Network'
+        context['modern_admin_safe_note'] = 'Network Manager status and available selectors are real. Connection changes remain disabled in Modern Admin.'
+        context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'Host',
+                'rows'  : (
+                    {'label' : 'Hostname', 'value' : context.get('hostname')},
+                    {'label' : 'Network Manager', 'value' : 'Available' if context.get('nm_installed') else 'Unavailable'},
+                ),
+            },
+            {
+                'title' : 'Connections',
+                'rows'  : self.field_rows(form, ('CONNECTIONS_SELECT', 'WIFI_DEVICES_SELECT', 'SSID_SELECT', 'HOTSPOT_DEVICES_SELECT', 'HOTSPOT_SSID')),
+            },
+        )
+        context['modern_admin_safe_actions'] = (
+            self.disabled_action('Activate connection', 'May interrupt remote access; disabled in Modern Admin.'),
+            self.disabled_action('Deactivate connection', 'May disconnect the web session; disabled in Modern Admin.'),
+            self.disabled_action('Delete connection', 'Destructive network action; disabled in Modern Admin.'),
+            self.disabled_action('Create hotspot', 'Changes network state; disabled in Modern Admin.'),
+        )
+        return context
+
+
+class ModernAdminDriveManagerView(ModernAdminSafeControlsMixin, DriveManagerView):
+    page_title = 'Modern Admin Drives'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+    def get_context(self):
+        context = super(ModernAdminDriveManagerView, self).get_context()
+        form = context['form_drives']
+
+        context['modern_admin_safe_title'] = 'Drives'
+        context['modern_admin_safe_note'] = 'Drive and mount selectors come from the existing drive manager. Mount, unmount, and power-off remain disabled in Modern Admin.'
+        context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'Drive manager',
+                'rows'  : (
+                    {'label' : 'UDisks2', 'value' : 'Available' if context.get('udisks2_installed') else 'Unavailable'},
+                ),
+            },
+            {
+                'title' : 'Available devices',
+                'rows'  : self.field_rows(form, ('DRIVES_SELECT', 'DEVICES_SELECT')),
+            },
+        )
+        context['modern_admin_safe_actions'] = (
+            self.disabled_action('Power off drive', 'Can disconnect storage; disabled in Modern Admin.'),
+            self.disabled_action('Mount device', 'Changes system mount state; disabled in Modern Admin.'),
+            self.disabled_action('Unmount device', 'Can interrupt media storage; disabled in Modern Admin.'),
+        )
+        return context
+
+
+class ModernAdminManualGpioView(ModernAdminSafeControlsMixin, ManualGpioView):
+    page_title = 'Modern Admin GPIO Control'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    def get_context(self):
+        context = super(ModernAdminManualGpioView, self).get_context()
+
+        pin_rows = list()
+        for index, pin_name in enumerate(context.get('pin_names', tuple())):
+            pin_state = context.get('pin_states', [-1, -1, -1])[index]
+            if pin_state == -1:
+                state_label = 'Unavailable'
+            elif pin_state:
+                state_label = 'On'
+            else:
+                state_label = 'Off'
+
+            pin_rows.append({'label' : 'Pin {0:s}'.format(pin_name), 'value' : state_label})
+
+        context['modern_admin_safe_title'] = 'GPIO Control'
+        context['modern_admin_safe_note'] = 'GPIO class and pin states are read from the existing manual GPIO view. Toggling pins remains disabled in Modern Admin.'
+        context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'GPIO interface',
+                'rows'  : (
+                    {'label' : 'GPIO class', 'value' : context.get('gpio_class') or 'Not configured'},
+                ),
+            },
+            {
+                'title' : 'Pins',
+                'rows'  : pin_rows,
+            },
+        )
+        context['modern_admin_safe_actions'] = (
+            self.disabled_action('Toggle pin 1', 'Manual GPIO control can affect hardware and remains disabled in Modern Admin.'),
+            self.disabled_action('Toggle pin 2', 'Manual GPIO control can affect hardware and remains disabled in Modern Admin.'),
+            self.disabled_action('Toggle pin 3', 'Manual GPIO control can affect hardware and remains disabled in Modern Admin.'),
+        )
+        return context
+
+
 class AstroPanelView(TemplateView):
     page_title = 'astropanel'
 
@@ -12924,6 +13300,15 @@ bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupp
 bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.as_view('modern_admin_log_view', template_name='modern_admin/log.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
+bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/safe_controls.html'))
+bp_allsky.add_url_rule('/modern-admin/tools/generate', view_func=ModernAdminGenerateView.as_view('modern_admin_generate_view', template_name='modern_admin/safe_controls.html'))
+bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusView.as_view('modern_admin_focus_view', template_name='modern_admin/safe_controls.html'))
+bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))
+bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))
+bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))
+bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/safe_controls.html'))
+bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/safe_controls.html'))
+bp_allsky.add_url_rule('/modern-admin/system/gpio-control', view_func=ModernAdminManualGpioView.as_view('modern_admin_manual_gpio_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
 bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))
 bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminClassicPlaceholderView.as_view('modern_admin_classic_placeholder_view', template_name='modern_admin/placeholder.html'))
