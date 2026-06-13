@@ -5223,6 +5223,7 @@ class ModernAdminCamerasView(ModernAdminView):
 
         context['modern_admin_cameras'] = camera_list
         context['modern_admin_section_links'] = (
+            ('Add Camera', 'indi_allsky.modern_admin_camera_add_view'),
             ('Camera Info', 'indi_allsky.modern_admin_camera_info_view'),
             ('Image Lag', 'indi_allsky.modern_admin_image_lag_view'),
             ('ADU History', 'indi_allsky.modern_admin_adu_history_view'),
@@ -5246,6 +5247,208 @@ class ModernAdminCamerasView(ModernAdminView):
             return 'Offline'
 
         return 'Unknown'
+
+
+class ModernAdminCameraAddView(ModernAdminView):
+    # Future modern camera setup entry point; first version only creates a new INDI config.
+    page_title = 'Add INDI Camera'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+    methods = ['GET', 'POST']
+
+    def get_context(self):
+        context = super(ModernAdminCameraAddView, self).get_context()
+
+        form_data = {
+            'indi_server'      : self.indi_allsky_config.get('INDI_SERVER', 'localhost'),
+            'indi_port'        : int(self.indi_allsky_config.get('INDI_PORT', 7624)),
+            'indi_camera_name' : self.indi_allsky_config.get('INDI_CAMERA_NAME', ''),
+            'driver_hint'      : 'indi_asi_ccd',
+        }
+
+        context['modern_admin_add_camera_error'] = None
+        context['modern_admin_add_camera_success'] = None
+        context['modern_admin_add_camera_form'] = form_data
+        context['modern_admin_current_config'] = {
+            'id'               : self.indi_allsky_config_id,
+            'camera_interface' : self.indi_allsky_config.get('CAMERA_INTERFACE', 'Unknown'),
+            'indi_server'      : self.indi_allsky_config.get('INDI_SERVER', 'localhost'),
+            'indi_port'        : self.indi_allsky_config.get('INDI_PORT', 7624),
+            'indi_camera_name' : self.indi_allsky_config.get('INDI_CAMERA_NAME', ''),
+        }
+
+        if request.method == 'POST':
+            context.update(self.save_indi_camera_config())
+
+        return context
+
+
+    def save_indi_camera_config(self):
+        form_data = {
+            'indi_server'      : request.form.get('indi_server', 'localhost').strip() or 'localhost',
+            'indi_port'        : request.form.get('indi_port', '7624').strip() or '7624',
+            'indi_camera_name' : request.form.get('indi_camera_name', '').strip(),
+            'driver_hint'      : request.form.get('driver_hint', '').strip(),
+        }
+
+        result = {
+            'modern_admin_add_camera_form'    : form_data,
+            'modern_admin_add_camera_error'   : None,
+            'modern_admin_add_camera_success' : None,
+        }
+
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            result['modern_admin_add_camera_error'] = 'Only an admin user can create a new camera configuration.'
+            return result
+
+        try:
+            indi_port = int(form_data['indi_port'])
+        except ValueError:
+            result['modern_admin_add_camera_error'] = 'INDI port must be a number.'
+            return result
+
+        if indi_port < 1 or indi_port > 65535:
+            result['modern_admin_add_camera_error'] = 'INDI port must be between 1 and 65535.'
+            return result
+
+        if not form_data['indi_camera_name']:
+            result['modern_admin_add_camera_error'] = 'Select or enter an INDI camera name before saving.'
+            return result
+
+        new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
+        new_config['CAMERA_INTERFACE'] = 'indi'
+        new_config['INDI_SERVER'] = form_data['indi_server']
+        new_config['INDI_PORT'] = indi_port
+        new_config['INDI_CAMERA_NAME'] = form_data['indi_camera_name']
+
+        temp_config_p = None
+        try:
+            from ..config import IndiAllSkyConfigUtil
+
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json', encoding='utf-8') as temp_config_f:
+                json.dump(new_config, temp_config_f, indent=4)
+                temp_config_p = Path(temp_config_f.name)
+
+            with io.open(str(temp_config_p), 'r', encoding='utf-8') as temp_config_f:
+                # Match config.py --force load behavior: load a complete config into a new active config row.
+                IndiAllSkyConfigUtil().load(config=temp_config_f, force=True)
+
+            latest_config = IndiAllSkyDbConfigTable.query\
+                .order_by(IndiAllSkyDbConfigTable.createDate.desc())\
+                .first()
+
+            result['modern_admin_current_config'] = {
+                'id'               : latest_config.id if latest_config else self.indi_allsky_config_id,
+                'camera_interface' : 'indi',
+                'indi_server'      : form_data['indi_server'],
+                'indi_port'        : indi_port,
+                'indi_camera_name' : form_data['indi_camera_name'],
+            }
+            result['modern_admin_add_camera_success'] = (
+                'Saved a new INDI camera configuration. Restart indi-allsky to connect to the camera and create the DB camera row.'
+            )
+
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error('Error saving modern admin INDI camera config: %s', str(e))
+            result['modern_admin_add_camera_error'] = 'Unable to save the INDI camera configuration: {0:s}'.format(str(e))
+        finally:
+            if temp_config_p:
+                try:
+                    temp_config_p.unlink()
+                except FileNotFoundError:
+                    pass
+
+        return result
+
+
+class ModernAdminIndiCameraDetectView(BaseView):
+    methods = ['POST']
+    decorators = [login_required]
+
+    def dispatch_request(self):
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            return jsonify({'error' : 'Only an admin user can detect INDI cameras.'}), 403
+
+        indi_server = request.json.get('indi_server', 'localhost').strip() or 'localhost'
+
+        try:
+            indi_port = int(request.json.get('indi_port', 7624))
+        except ValueError:
+            return jsonify({'error' : 'INDI port must be a number.'}), 400
+
+        if indi_port < 1 or indi_port > 65535:
+            return jsonify({'error' : 'INDI port must be between 1 and 65535.'}), 400
+
+        try:
+            import shutil
+            import subprocess
+
+            indi_getprop_bin = shutil.which('indi_getprop')
+            if not indi_getprop_bin:
+                return jsonify({'error' : 'indi_getprop was not found on this system.'}), 400
+
+            detect_proc = subprocess.run(
+                [indi_getprop_bin, '-h', indi_server, '-p', str(indi_port)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=8,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return jsonify({'error' : 'Timed out waiting for indi_getprop.'}), 504
+        except OSError as e:
+            return jsonify({'error' : 'Unable to run indi_getprop: {0:s}'.format(str(e))}), 400
+
+        if detect_proc.returncode != 0:
+            output = detect_proc.stdout.strip()
+            if len(output) > 500:
+                output = output[:500] + '...'
+            return jsonify({'error' : output or 'indi_getprop failed.'}), 400
+
+        devices = self.parse_indi_getprop_devices(detect_proc.stdout)
+        return jsonify({'devices' : devices})
+
+
+    def parse_indi_getprop_devices(self, output):
+        device_map = OrderedDict()
+
+        for line in output.splitlines():
+            line = line.strip()
+            if not line or line.startswith('#') or '.' not in line:
+                continue
+
+            prop_key, _, prop_value = line.partition('=')
+            device_name, _, property_name = prop_key.partition('.')
+            device_name = device_name.strip()
+            property_name = property_name.strip()
+
+            if not device_name or not property_name:
+                continue
+
+            if device_name not in device_map:
+                device_map[device_name] = {
+                    'name'       : device_name,
+                    'properties' : list(),
+                    'score'      : 0,
+                }
+
+            device_entry = device_map[device_name]
+            if len(device_entry['properties']) < 8:
+                device_entry['properties'].append('{0:s}={1:s}'.format(property_name, prop_value.strip()))
+
+            score_text = '{0:s}.{1:s}'.format(device_name, property_name).upper()
+            if any(token in score_text for token in ('ASI', 'ZWO', 'CCD_EXPOSURE', 'CCD_INFO', 'CCD_FRAME', 'CCD1')):
+                device_entry['score'] += 1
+
+        device_list = list(device_map.values())
+        device_list.sort(key=lambda d: (d['score'] == 0, d['name'].lower()))
+
+        for device in device_list:
+            device['candidate'] = device['score'] > 0
+            del device['score']
+
+        return device_list
 
 
 class ModernAdminPlaceholderView(ModernAdminView):
@@ -13280,6 +13483,8 @@ bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.a
 
 bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
+bp_allsky.add_url_rule('/modern-admin/cameras/add', view_func=ModernAdminCameraAddView.as_view('modern_admin_camera_add_view', template_name='modern_admin/camera_add.html'))
+bp_allsky.add_url_rule('/modern-admin/cameras/detect-indi', view_func=ModernAdminIndiCameraDetectView.as_view('modern_admin_camera_detect_indi_view'))
 bp_allsky.add_url_rule('/modern-admin/cameras/info', view_func=ModernAdminCameraInfoView.as_view('modern_admin_camera_info_view', template_name='modern_admin/camera_info.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/image-lag', view_func=ModernAdminImageLagView.as_view('modern_admin_image_lag_view', template_name='modern_admin/image_lag.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/adu-history', view_func=ModernAdminAduHistoryView.as_view('modern_admin_adu_history_view', template_name='modern_admin/adu_history.html'))

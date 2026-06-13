@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-add-camera-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-camera-add-title">
+    {% set modern_admin_header_label = 'Add camera header' %}
+    {% set modern_admin_heading = 'Add INDI Camera' %}
+    {% set modern_admin_title_id = 'modern-admin-camera-add-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="camera-add-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">INDI only</p>
+                <h2 id="camera-add-title">Add Camera</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Config only</span>
+        </div>
+        <p class="modern-admin-note">This creates a new active configuration from the current configuration and changes only the INDI camera connection fields. The camera row is created after indi-allsky restarts and connects to the selected camera.</p>
+    </section>
+
+    {% if modern_admin_add_camera_error %}
+    <section class="modern-admin-message-panel modern-admin-message-error" aria-label="Add camera error">
+        {{ modern_admin_add_camera_error }}
+    </section>
+    {% endif %}
+
+    {% if modern_admin_add_camera_success %}
+    <section class="modern-admin-message-panel modern-admin-message-success" aria-label="Add camera success">
+        {{ modern_admin_add_camera_success }}
+    </section>
+    {% endif %}
+
+    <section class="modern-admin-management-grid" aria-label="Add INDI camera workflow">
+        <article class="modern-admin-management-panel">
+            <p class="modern-admin-eyebrow">Current Active Config</p>
+            <dl class="modern-admin-detail-list">
+                <div>
+                    <dt>Config ID</dt>
+                    <dd>{{ modern_admin_current_config.id }}</dd>
+                </div>
+                <div>
+                    <dt>Interface</dt>
+                    <dd>{{ modern_admin_current_config.camera_interface }}</dd>
+                </div>
+                <div>
+                    <dt>INDI Server</dt>
+                    <dd>{{ modern_admin_current_config.indi_server }}:{{ modern_admin_current_config.indi_port }}</dd>
+                </div>
+                <div>
+                    <dt>INDI Camera</dt>
+                    <dd>{{ modern_admin_current_config.indi_camera_name or 'First detected camera' }}</dd>
+                </div>
+            </dl>
+        </article>
+
+        <article class="modern-admin-management-panel">
+            <p class="modern-admin-eyebrow">Restart Required</p>
+            <h2>Registration happens on connect</h2>
+            <p class="modern-admin-note">After saving, restart indi-allsky from the classic System page or service manager. When capture connects, indi-allsky will create or update the DB camera row and Modern Admin Cameras will show it.</p>
+            <a class="modern-admin-placeholder-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Back to Cameras</a>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="indi-detect-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Detect</p>
+                <h2 id="indi-detect-title">INDI devices</h2>
+            </div>
+            <button class="modern-admin-media-button" type="button" id="modern-admin-detect-indi">Detect cameras</button>
+        </div>
+
+        <form class="modern-admin-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="modern-admin-form-grid">
+                <label>
+                    <span>INDI Server</span>
+                    <input type="text" name="indi_server" id="modern-admin-indi-server" value="{{ modern_admin_add_camera_form.indi_server }}" autocomplete="off">
+                </label>
+                <label>
+                    <span>INDI Port</span>
+                    <input type="number" name="indi_port" id="modern-admin-indi-port" value="{{ modern_admin_add_camera_form.indi_port }}" min="1" max="65535" inputmode="numeric">
+                </label>
+                <label>
+                    <span>Driver Hint</span>
+                    <input type="text" name="driver_hint" id="modern-admin-driver-hint" value="{{ modern_admin_add_camera_form.driver_hint }}" autocomplete="off">
+                </label>
+                <label>
+                    <span>INDI Camera Name</span>
+                    <input type="text" name="indi_camera_name" id="modern-admin-indi-camera-name" value="{{ modern_admin_add_camera_form.indi_camera_name }}" autocomplete="off" required>
+                </label>
+            </div>
+
+            <div class="modern-admin-detected-devices" id="modern-admin-detected-devices" aria-live="polite">
+                <p class="modern-admin-note">Run detection to list cameras exposed by the configured INDI server. You can also type the camera name manually.</p>
+            </div>
+
+            <div class="modern-admin-action-row">
+                <button class="modern-admin-media-button" type="submit">Save INDI config</button>
+            </div>
+        </form>
+    </section>
+</main>
+
+<script>
+const modernAdminDetectButton = document.getElementById('modern-admin-detect-indi');
+const modernAdminDetectedDevices = document.getElementById('modern-admin-detected-devices');
+const modernAdminCameraNameInput = document.getElementById('modern-admin-indi-camera-name');
+
+function modernAdminRenderDetectMessage(message, isError) {
+    modernAdminDetectedDevices.innerHTML = '';
+    const panel = document.createElement('div');
+    panel.className = isError ? 'modern-admin-message-panel modern-admin-message-error' : 'modern-admin-message-panel';
+    panel.textContent = message;
+    modernAdminDetectedDevices.appendChild(panel);
+}
+
+function modernAdminSelectIndiCamera(name) {
+    modernAdminCameraNameInput.value = name;
+    modernAdminCameraNameInput.focus();
+}
+
+modernAdminDetectButton.addEventListener('click', () => {
+    modernAdminDetectButton.disabled = true;
+    modernAdminRenderDetectMessage('Detecting INDI devices...', false);
+
+    fetch('{{ url_for("indi_allsky.modern_admin_camera_detect_indi_view") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            indi_server: document.getElementById('modern-admin-indi-server').value,
+            indi_port: document.getElementById('modern-admin-indi-port').value
+        })
+    })
+    .then((response) => response.json().then((payload) => ({ ok: response.ok, payload })))
+    .then(({ ok, payload }) => {
+        if (!ok) {
+            modernAdminRenderDetectMessage(payload.error || 'INDI detection failed.', true);
+            return;
+        }
+
+        modernAdminDetectedDevices.innerHTML = '';
+        if (!payload.devices || payload.devices.length === 0) {
+            modernAdminRenderDetectMessage('No INDI devices were returned by indi_getprop.', true);
+            return;
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'modern-admin-camera-card-grid';
+
+        payload.devices.forEach((device) => {
+            const card = document.createElement('article');
+            card.className = 'modern-admin-camera-card';
+
+            const header = document.createElement('div');
+            header.className = 'modern-admin-camera-card-header';
+
+            const eyebrow = document.createElement('p');
+            eyebrow.className = 'modern-admin-eyebrow';
+            eyebrow.textContent = device.candidate ? 'Camera candidate' : 'INDI device';
+
+            const badge = document.createElement('span');
+            badge.className = device.candidate ? 'modern-admin-status-pill modern-admin-status-good' : 'modern-admin-status-pill modern-admin-status-muted';
+            badge.textContent = device.candidate ? 'Camera' : 'Device';
+
+            header.appendChild(eyebrow);
+            header.appendChild(badge);
+
+            const main = document.createElement('div');
+            main.className = 'modern-admin-camera-card-main';
+
+            const title = document.createElement('h3');
+            title.textContent = device.name;
+
+            const props = document.createElement('p');
+            props.textContent = (device.properties || []).slice(0, 3).join('  ');
+
+            main.appendChild(title);
+            main.appendChild(props);
+
+            const action = document.createElement('button');
+            action.className = 'modern-admin-media-button';
+            action.type = 'button';
+            action.textContent = 'Use this camera';
+            action.addEventListener('click', () => modernAdminSelectIndiCamera(device.name));
+
+            card.appendChild(header);
+            card.appendChild(main);
+            card.appendChild(action);
+            grid.appendChild(card);
+        });
+
+        modernAdminDetectedDevices.appendChild(grid);
+    })
+    .catch(() => {
+        modernAdminRenderDetectMessage('INDI detection failed.', true);
+    })
+    .finally(() => {
+        modernAdminDetectButton.disabled = false;
+    });
+});
+</script>
+{% endblock %}
