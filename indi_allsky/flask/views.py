@@ -5446,6 +5446,7 @@ class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
         'virtualsky'        : 'indi_allsky.modern_admin_virtualsky_view',
         'astropanel'        : 'indi_allsky.modern_admin_astropanel_view',
         'log'               : 'indi_allsky.modern_admin_log_view',
+        'mask-base'         : 'indi_allsky.modern_admin_mask_view',
     }
 
     classic_page_map = {
@@ -10590,6 +10591,19 @@ class ModernAdminLogView(ModernAdminContextMixin, LogView):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
+class ModernAdminMaskView(ModernAdminContextMixin, MaskView):
+    page_title = 'Modern Admin Mask Base'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+
+    def get_context(self):
+        context = super(ModernAdminMaskView, self).get_context()
+        mask_image_uri = context.get('mask_image_uri')
+        if mask_image_uri:
+            context['mask_image_uri'] = ModernAdminMediaListView.normalize_media_url(self, mask_image_uri)
+
+        return context
+
+
 class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Media'
     modern_admin_section = 'Media'
@@ -12909,6 +12923,7 @@ bp_allsky.add_url_rule('/modern-admin/system/info', view_func=ModernAdminSystemI
 bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupportInfoView.as_view('modern_admin_support_info_view', template_name='modern_admin/support_info.html'))
 bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.as_view('modern_admin_log_view', template_name='modern_admin/log.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
+bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
 bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
 bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))
 bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminClassicPlaceholderView.as_view('modern_admin_classic_placeholder_view', template_name='modern_admin/placeholder.html'))

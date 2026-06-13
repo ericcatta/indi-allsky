@@ -38,6 +38,19 @@ var timestamp = {{ timestamp | int }};
 <script>
 let modernAdminLoopData = { image_list: [], message: '' };
 let modernAdminLoopIndex = 0;
+const modernAdminImagesBaseUrl = '{{ url_for('indi_allsky.images_folder', path='__modern_admin_path__') }}'.replace('__modern_admin_path__', '');
+
+function modernAdminResolveImageUrl(url) {
+    if (!url || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+        return url;
+    }
+
+    if (url.startsWith('images/')) {
+        return modernAdminImagesBaseUrl + url.substring('images/'.length);
+    }
+
+    return url;
+}
 
 function modernAdminLoopDelay() {
     return Number(document.getElementById('FRAMEDELAY_SELECT').value || 100);
@@ -50,6 +63,15 @@ function modernAdminLoopHistory() {
 function modernAdminLoopRock() {
     const checkbox = document.getElementById('ROCK_CHECKBOX');
     return checkbox ? checkbox.checked : false;
+}
+
+function modernAdminLoopSequence() {
+    const imageList = modernAdminLoopData.image_list || [];
+    if (modernAdminLoopRock()) {
+        return imageList.concat([...imageList].reverse());
+    }
+
+    return [...imageList].reverse();
 }
 
 function modernAdminLoadLoop() {
@@ -76,15 +98,17 @@ function modernAdminShowLoopFrame() {
         return;
     }
 
-    const imageList = modernAdminLoopData.image_list;
+    const imageList = modernAdminLoopSequence();
     const image = document.getElementById('modern-admin-loop-image');
-    image.src = imageList[modernAdminLoopIndex].url;
+    const preloadImage = new Image();
+    preloadImage.onload = function() {
+        image.src = this.src;
+    };
+    preloadImage.src = modernAdminResolveImageUrl(imageList[modernAdminLoopIndex % imageList.length].url);
 
-    modernAdminLoopIndex += modernAdminLoopRock() ? 1 : -1;
+    modernAdminLoopIndex += 1;
     if (modernAdminLoopIndex >= imageList.length) {
-        modernAdminLoopIndex = imageList.length - 1;
-    } else if (modernAdminLoopIndex < 0) {
-        modernAdminLoopIndex = imageList.length - 1;
+        modernAdminLoopIndex = 0;
     }
 
     window.setTimeout(modernAdminShowLoopFrame, modernAdminLoopDelay());

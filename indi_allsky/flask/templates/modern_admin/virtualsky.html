@@ -47,13 +47,27 @@ var timestamp = {{ timestamp | int }};
 </main>
 
 <script>
+const modernAdminImagesBaseUrl = '{{ url_for('indi_allsky.images_folder', path='__modern_admin_path__') }}'.replace('__modern_admin_path__', '');
+
+function modernAdminResolveImageUrl(url) {
+    if (!url || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+        return url;
+    }
+
+    if (url.startsWith('images/')) {
+        return modernAdminImagesBaseUrl + url.substring('images/'.length);
+    }
+
+    return url;
+}
+
 function modernAdminLoadVirtualSkyImage() {
     const params = new URLSearchParams({camera_id: camera_id, limit_s: 900, timestamp: timestamp});
     fetch('{{ url_for(image_loop_view) }}?' + params.toString())
         .then((response) => response.json())
         .then((data) => {
             if (data.image_list && data.image_list.length) {
-                document.getElementById('modern-admin-virtualsky-image').src = data.image_list[0].url;
+                document.getElementById('modern-admin-virtualsky-image').src = modernAdminResolveImageUrl(data.image_list[0].url);
                 document.getElementById('modern-admin-virtualsky-message').textContent = data.message || '';
             } else {
                 document.getElementById('modern-admin-virtualsky-message').textContent = 'No latest image is available for VirtualSky.';

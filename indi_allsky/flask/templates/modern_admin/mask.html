@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-mask-title">
+    {% set modern_admin_header_label = 'Mask base header' %}
+    {% set modern_admin_heading = 'Mask Base' %}
+    {% set modern_admin_title_id = 'modern-admin-mask-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="mask-base-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Cameras</p>
+            <h2 id="mask-base-title">Mask base image</h2>
+        </div>
+        {% if mask_date %}
+        <figure class="modern-admin-live-frame">
+            <img src="{{ mask_image_uri }}?t={{ mask_date | urlencode }}" alt="Mask base">
+        </figure>
+        <p class="modern-admin-note">Generated: {{ mask_date }} <a class="modern-admin-placeholder-link" href="{{ mask_image_uri }}" download="mask_base.png">Download Mask Base</a></p>
+        {% else %}
+        <div class="modern-admin-empty-state">
+            <h3>No mask base available</h3>
+            <p>The mask base image has not been generated yet.</p>
+        </div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}
