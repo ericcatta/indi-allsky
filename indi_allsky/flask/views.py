@@ -5506,12 +5506,29 @@ class ModernAdminIndiServerStartView(ModernAdminIndiCameraDetectView):
             if not indi_getprop_bin:
                 return jsonify({'error' : 'indi_getprop was not found on this system.'}), 400
 
+            indiserver_socket_p = Path('/tmp/indiserver-modern-admin-{0:d}'.format(indi_port))
+            try:
+                indiserver_socket_p.unlink()
+            except FileNotFoundError:
+                pass
+
+            indiserver_cmd = [
+                indiserver_bin,
+                '-v',
+                '-p',
+                str(indi_port),
+                '-u',
+                str(indiserver_socket_p),
+                driver_hint,
+            ]
+
             # Start only the local INDI server. Capture remains stopped/unchanged until the user restarts indi-allsky.
             indiserver_proc = subprocess.Popen(
-                [indiserver_bin, '-p', str(indi_port), driver_hint],
+                indiserver_cmd,
                 stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
                 start_new_session=True,
             )
 
@@ -5519,7 +5536,12 @@ class ModernAdminIndiServerStartView(ModernAdminIndiCameraDetectView):
             last_output = ''
             while time.time() < deadline:
                 if indiserver_proc.poll() is not None:
-                    return jsonify({'error' : 'indiserver exited before it became reachable.'}), 400
+                    stdout, stderr = indiserver_proc.communicate(timeout=1)
+                    return jsonify({
+                        'error'   : 'indiserver exited before it became reachable.',
+                        'command' : ' '.join(indiserver_cmd),
+                        'stderr'  : (stderr or stdout or '').strip(),
+                    }), 400
 
                 detect_proc = subprocess.run(
                     [indi_getprop_bin, '-h', indi_server, '-p', str(indi_port)],
@@ -5533,6 +5555,7 @@ class ModernAdminIndiServerStartView(ModernAdminIndiCameraDetectView):
                 if detect_proc.returncode == 0:
                     return jsonify({
                         'success' : 'INDI server started on {0:s}:{1:d}.'.format(indi_server, indi_port),
+                        'command' : ' '.join(indiserver_cmd),
                         'devices' : self.parse_indi_getprop_devices(detect_proc.stdout),
                     })
 
@@ -5552,7 +5575,10 @@ class ModernAdminIndiServerStartView(ModernAdminIndiCameraDetectView):
         if 'indiserver_proc' in locals() and indiserver_proc.poll() is None:
             indiserver_proc.terminate()
 
-        return jsonify({'error' : last_output or 'Started indiserver, but it did not become reachable before timeout.'}), 504
+        return jsonify({
+            'error'   : last_output or 'Started indiserver, but it did not become reachable before timeout.',
+            'command' : ' '.join(indiserver_cmd) if 'indiserver_cmd' in locals() else '',
+        }), 504
 
 
 class ModernAdminPlaceholderView(ModernAdminView):

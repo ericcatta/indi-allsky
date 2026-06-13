@@ -95,12 +95,39 @@ const modernAdminCameraNameInput = document.getElementById('modern-admin-indi-ca
 const modernAdminIndiServerInput = document.getElementById('modern-admin-indi-server');
 const modernAdminIndiPortInput = document.getElementById('modern-admin-indi-port');
 const modernAdminDriverHintInput = document.getElementById('modern-admin-driver-hint');
+let modernAdminLastStartCommand = '';
 
-function modernAdminRenderDetectMessage(message, isError) {
-    modernAdminDetectedDevices.innerHTML = '';
+function modernAdminRenderDetectMessage(message, isError, clearPanel = true) {
+    if (clearPanel) {
+        modernAdminDetectedDevices.innerHTML = '';
+    }
     const panel = document.createElement('div');
     panel.className = isError ? 'modern-admin-message-panel modern-admin-message-error' : 'modern-admin-message-panel';
     panel.textContent = message;
+    modernAdminDetectedDevices.appendChild(panel);
+}
+
+function modernAdminRenderCommandPanel(command, detail, isError) {
+    const panel = document.createElement('div');
+    panel.className = isError ? 'modern-admin-message-panel modern-admin-message-error' : 'modern-admin-message-panel modern-admin-message-success';
+
+    const label = document.createElement('p');
+    label.textContent = 'Command';
+
+    const commandText = document.createElement('pre');
+    commandText.className = 'modern-admin-inline-command';
+    commandText.textContent = command || 'Command unavailable';
+
+    panel.appendChild(label);
+    panel.appendChild(commandText);
+
+    if (detail) {
+        const detailText = document.createElement('pre');
+        detailText.className = 'modern-admin-inline-command';
+        detailText.textContent = detail;
+        panel.appendChild(detailText);
+    }
+
     modernAdminDetectedDevices.appendChild(panel);
 }
 
@@ -131,8 +158,12 @@ function modernAdminSelectIndiCamera(name) {
 
 function modernAdminRenderDevices(devices) {
     modernAdminDetectedDevices.innerHTML = '';
+    if (modernAdminLastStartCommand) {
+        modernAdminRenderCommandPanel(modernAdminLastStartCommand, '', false);
+    }
+
     if (!devices || devices.length === 0) {
-        modernAdminRenderDetectMessage('No INDI devices were returned by indi_getprop.', true);
+        modernAdminRenderDetectMessage('No INDI devices were returned by indi_getprop.', true, !modernAdminLastStartCommand);
         return;
     }
 
@@ -240,10 +271,15 @@ function modernAdminStartIndiServer(event) {
     .then((response) => response.json().then((payload) => ({ ok: response.ok, payload })))
     .then(({ ok, payload }) => {
         if (!ok) {
-            modernAdminRenderDetectMessage(payload.error || 'Unable to start INDI server.', true);
+            modernAdminDetectedDevices.innerHTML = '';
+            if (payload.command) {
+                modernAdminRenderCommandPanel(payload.command, payload.stderr || payload.error || '', true);
+            }
+            modernAdminRenderDetectMessage(payload.error || 'Unable to start INDI server.', true, !payload.command);
             return;
         }
 
+        modernAdminLastStartCommand = payload.command || '';
         modernAdminRenderDetectMessage(payload.success || 'INDI server started. Detecting devices...', false);
         return modernAdminDetectIndiDevices();
     })

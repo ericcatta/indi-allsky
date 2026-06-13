@@ -824,6 +824,14 @@
   text-decoration: underline;
 }
 
+.modern-admin-inline-command {
+  margin: 8px 0 0;
+  overflow-x: auto;
+  color: var(--modern-admin-text);
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+}
+
 .modern-admin-safe-intro .modern-admin-section-heading {
   margin-bottom: 4px;
 }
