@@ -10323,13 +10323,18 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
         context = super(ModernAdminMediaListView, self).get_context()
 
         media_entries = self.get_media_entries()
+        media_items = list()
+
+        for media_entry in media_entries:
+            try:
+                media_items.append(self.serialize_media_entry(media_entry))
+            except Exception as e:
+                app.logger.error('Error serializing modern admin media entry %s: %s', getattr(media_entry, 'id', 'unknown'), str(e))
 
         context['modern_admin_section'] = self.modern_admin_section
         context['modern_admin_description'] = self.modern_admin_description
         context['modern_admin_media_kind'] = self.modern_admin_media_kind
-        context['modern_admin_media_items'] = [
-            self.serialize_media_entry(media_entry) for media_entry in media_entries
-        ]
+        context['modern_admin_media_items'] = media_items
 
         return context
 
@@ -10338,13 +10343,20 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
         if not self.modern_admin_media_model:
             return list()
 
+        if not getattr(self, 'camera', None):
+            return list()
+
         # Read-only media inventory; reuses the existing DB models behind classic viewers.
-        return self.modern_admin_media_model.query\
-            .join(self.modern_admin_media_model.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-            .order_by(self.modern_admin_media_model.createDate.desc())\
-            .limit(self.modern_admin_media_limit)\
-            .all()
+        try:
+            return self.modern_admin_media_model.query\
+                .join(self.modern_admin_media_model.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(self.modern_admin_media_model.createDate.desc())\
+                .limit(self.modern_admin_media_limit)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error querying modern admin media entries: %s', str(e))
+            return list()
 
 
     def serialize_media_entry(self, media_entry):
@@ -10362,9 +10374,9 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
             'filename'    : Path(media_entry.filename).name,
             'created'     : create_date.strftime('%Y-%m-%d %H:%M:%S') if create_date else 'Unknown date',
             'day_date'    : day_date.strftime('%Y-%m-%d') if day_date else 'Unknown day',
-            'age'         : self.format_image_age(create_date) if create_date else 'Unknown age',
+            'age'         : self.format_media_age(create_date) if create_date else 'Unknown age',
             'timeofday'   : self.format_media_timeofday(media_entry),
-            'size'        : self.format_storage_bytes(file_size) if file_size else 'Unknown size',
+            'size'        : self.format_media_size(file_size) if file_size else 'Unknown size',
             'dimensions'  : '{0:d} x {1:d}'.format(width, height) if width and height else 'Unknown dimensions',
             'frames'      : '{0:d} frames'.format(frames) if frames else None,
             'success'     : getattr(media_entry, 'success', None),
@@ -10408,6 +10420,27 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
             return 'Night'
 
         return 'Day'
+
+
+    def format_media_age(self, create_date):
+        age_s = max(0, int((self.camera_now - create_date).total_seconds()))
+
+        if age_s < 60:
+            return '{0:d}s ago'.format(age_s)
+        elif age_s < 3600:
+            return '{0:d}m ago'.format(int(age_s / 60))
+
+        return '{0:d}h ago'.format(int(age_s / 3600))
+
+
+    def format_media_size(self, size_b):
+        size = float(size_b)
+        for unit in ('B', 'KB', 'MB', 'GB'):
+            if size < 1024.0:
+                return '{0:0.1f} {1:s}'.format(size, unit)
+            size /= 1024.0
+
+        return '{0:0.1f} TB'.format(size)
 
 
 class ModernAdminMediaGalleryView(ModernAdminMediaListView):
