@@ -51,7 +51,7 @@
   backdrop-filter: blur(18px);
 }
 
-.modern-admin-topbar {
+.modern-admin-shell .modern-admin-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -59,9 +59,12 @@
   min-height: 48px;
   padding: 0;
   border-bottom: 1px solid var(--modern-admin-line);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
-.modern-admin-header-actions {
+.modern-admin-shell .modern-admin-header-actions {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -111,23 +114,23 @@
   background: rgba(255, 255, 255, 0.09);
 }
 
-.modern-admin-classic-link {
+.modern-admin-shell .modern-admin-classic-link {
   color: var(--modern-admin-quiet);
   text-decoration: none;
   font-size: 0.72rem;
 }
 
-.modern-admin-classic-link:hover {
+.modern-admin-shell .modern-admin-classic-link:hover {
   color: var(--modern-admin-quiet);
   text-decoration: underline;
 }
 
-.modern-admin-mode-switch {
+.modern-admin-shell .modern-admin-mode-switch {
   display: flex;
   gap: 2px;
 }
 
-.modern-admin-mode-switch {
+.modern-admin-shell .modern-admin-mode-switch {
   flex: 0 0 auto;
   padding: 2px;
   border: 1px solid var(--modern-admin-line);
@@ -135,20 +138,20 @@
   background: rgba(255, 255, 255, 0.025);
 }
 
-.modern-admin-mode-option {
+.modern-admin-shell .modern-admin-mode-option {
   min-height: 22px;
   border-color: transparent;
   color: var(--modern-admin-quiet);
   background: transparent;
 }
 
-.modern-admin-mode-option-active {
+.modern-admin-shell .modern-admin-mode-option-active {
   color: var(--modern-admin-text);
   border-color: transparent;
   background: rgba(255, 255, 255, 0.09);
 }
 
-.modern-admin-nav {
+.modern-admin-shell .modern-admin-nav {
   display: flex;
   flex: 1 1 auto;
   flex-wrap: nowrap;
@@ -159,11 +162,11 @@
   white-space: nowrap;
 }
 
-.modern-admin-nav::-webkit-scrollbar {
+.modern-admin-shell .modern-admin-nav::-webkit-scrollbar {
   display: none;
 }
 
-.modern-admin-nav-link {
+.modern-admin-shell .modern-admin-nav-link {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -177,16 +180,16 @@
   line-height: 1;
 }
 
-.modern-admin-nav-link:hover {
+.modern-admin-shell .modern-admin-nav-link:hover {
   color: var(--modern-admin-text);
   text-decoration: none;
 }
 
-.modern-admin-nav-link-active {
+.modern-admin-shell .modern-admin-nav-link-active {
   color: var(--modern-admin-blue);
 }
 
-.modern-admin-nav-link-active::after {
+.modern-admin-shell .modern-admin-nav-link-active::after {
   position: absolute;
   right: 16px;
   bottom: -1px;
@@ -197,13 +200,13 @@
   background: var(--modern-admin-blue);
 }
 
-.modern-admin-nav-link-disabled {
+.modern-admin-shell .modern-admin-nav-link-disabled {
   cursor: default;
   color: var(--modern-admin-quiet);
   opacity: 0.72;
 }
 
-.modern-admin-nav-link-disabled:hover {
+.modern-admin-shell .modern-admin-nav-link-disabled:hover {
   color: var(--modern-admin-quiet);
   text-decoration: none;
 }
