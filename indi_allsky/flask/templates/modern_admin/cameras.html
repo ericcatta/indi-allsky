@@ -29,51 +29,6 @@ var camera_id = {{ camera_id }};
     </section>
     {% endif %}
 
-    <section class="modern-admin-placeholder-page" aria-label="Camera pages">
-        <p class="modern-admin-eyebrow">Camera Views</p>
-        <div class="modern-admin-link-grid">
-            {% for label, endpoint in modern_admin_section_links %}
-            <a href="{{ url_for(endpoint) }}">{{ label }}</a>
-            {% endfor %}
-        </div>
-    </section>
-
-    <section class="modern-admin-management-grid" aria-label="Camera management">
-        <article class="modern-admin-management-panel">
-            <p class="modern-admin-eyebrow">Active Camera</p>
-            <h2>{{ modern_admin_camera_name }}</h2>
-            <dl class="modern-admin-detail-list">
-                <div>
-                    <dt>Driver / Interface</dt>
-                    <dd>{{ modern_admin_camera_model }}</dd>
-                </div>
-                <div>
-                    <dt>Status</dt>
-                    <dd>{{ modern_admin_capture_status }}</dd>
-                </div>
-                <div>
-                    <dt>Last Image</dt>
-                    <dd>{{ latest_image_age }}</dd>
-                </div>
-            </dl>
-        </article>
-
-        <article class="modern-admin-management-panel modern-admin-placeholder-panel">
-            <p class="modern-admin-eyebrow">Future Actions</p>
-            <div class="modern-admin-future-actions">
-                <div>
-                    <h2>Add Camera</h2>
-                    <p>Create a new INDI camera configuration from the current active config.</p>
-                    <a class="modern-admin-placeholder-link" href="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">Add INDI camera</a>
-                </div>
-                <div>
-                    <h2>Configure Camera</h2>
-                    <p>Coming later. Existing classic admin remains the safe configuration path.</p>
-                </div>
-            </div>
-        </article>
-    </section>
-
     <section class="modern-admin-table-panel" aria-labelledby="available-cameras-title">
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">Available Cameras</p>
@@ -122,6 +77,24 @@ var camera_id = {{ camera_id }};
             <p>The modern camera management page can still render, but there are no camera rows available yet.</p>
         </div>
         {% endif %}
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="camera-actions-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Camera Actions</p>
+            <h2 id="camera-actions-title">Add Camera</h2>
+        </div>
+        <p class="modern-admin-note">Create a new INDI camera configuration from the current active config.</p>
+        <a class="modern-admin-placeholder-link" href="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">Add INDI camera</a>
+    </section>
+
+    <section class="modern-admin-placeholder-page" aria-label="Camera pages">
+        <p class="modern-admin-eyebrow">Camera Views</p>
+        <div class="modern-admin-link-grid">
+            {% for label, endpoint in modern_admin_section_links %}
+            <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+            {% endfor %}
+        </div>
     </section>
 </main>
 {% endblock %}
