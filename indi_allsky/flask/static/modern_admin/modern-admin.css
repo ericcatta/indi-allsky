@@ -639,6 +639,73 @@
   font-size: 0.84rem;
 }
 
+.modern-admin-live-frame {
+  display: grid;
+  place-items: center;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid var(--modern-admin-line-strong);
+  border-radius: 18px;
+  background: #05070a;
+}
+
+.modern-admin-live-frame img,
+.modern-admin-live-frame canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.modern-admin-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.modern-admin-chart-card {
+  min-height: 280px;
+}
+
+.modern-admin-log-output {
+  max-height: 62vh;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 14px;
+  color: #d9e2ef;
+  background: #05070a;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.modern-admin-control-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.modern-admin-control-strip label {
+  display: grid;
+  gap: 6px;
+  color: var(--modern-admin-muted);
+  font-size: 0.78rem;
+}
+
+.modern-admin-control-strip select,
+.modern-admin-control-strip input {
+  min-height: 34px;
+  border: 1px solid var(--modern-admin-line-strong);
+  border-radius: 10px;
+  color: var(--modern-admin-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .modern-admin-media-page {
   margin-bottom: 14px;
 }
@@ -1138,6 +1205,10 @@ body.modern-admin-lightbox-open {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .modern-admin-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
   .modern-admin-status-grid-three {
     grid-template-columns: 1fr;
   }
@@ -1239,6 +1310,7 @@ body.modern-admin-lightbox-open {
   }
 
   .modern-admin-status-grid,
+  .modern-admin-chart-grid,
   .modern-admin-events-grid {
     grid-template-columns: 1fr;
   }

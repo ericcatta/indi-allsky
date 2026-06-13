@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+var refreshInterval = {{ refreshInterval | int }};
+var timestamp = {{ timestamp | int }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-virtualsky-title">
+    {% set modern_admin_header_label = 'VirtualSky header' %}
+    {% set modern_admin_heading = 'VirtualSky' %}
+    {% set modern_admin_title_id = 'modern-admin-virtualsky-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="virtualsky-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Observatory</p>
+            <h2 id="virtualsky-title">Latest frame for sky overlay reference</h2>
+        </div>
+        <figure class="modern-admin-live-frame">
+            <img id="modern-admin-virtualsky-image" alt="Latest image for VirtualSky reference">
+        </figure>
+        <p class="modern-admin-note" id="modern-admin-virtualsky-message">Loading latest frame...</p>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="virtualsky-config-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">VirtualSky</p>
+            <h2 id="virtualsky-config-title">Current overlay settings</h2>
+        </div>
+        <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
+            <div><dt>Latitude</dt><dd>{{ camera_latitude }}</dd></div>
+            <div><dt>Longitude</dt><dd>{{ camera_longitude }}</dd></div>
+            <div><dt>Magnitude</dt><dd>{{ form_virtualsky.MAGNITUDE.data }}</dd></div>
+            <div><dt>Azimuth Angle</dt><dd>{{ form_virtualsky.AZIMUTH_ANGLE.data }}</dd></div>
+            <div><dt>Image Circle Diameter</dt><dd>{{ form_virtualsky.IMAGE_CIRCLE_DIAMETER.data }}</dd></div>
+            <div><dt>Offset</dt><dd>{{ form_virtualsky.OFFSET_X.data }}, {{ form_virtualsky.OFFSET_Y.data }}</dd></div>
+        </dl>
+        <p class="modern-admin-note">The classic interactive overlay controls are read-only here until they have a safe modern configuration flow.</p>
+    </section>
+</main>
+
+<script>
+function modernAdminLoadVirtualSkyImage() {
+    const params = new URLSearchParams({camera_id: camera_id, limit_s: 900, timestamp: timestamp});
+    fetch('{{ url_for(image_loop_view) }}?' + params.toString())
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.image_list && data.image_list.length) {
+                document.getElementById('modern-admin-virtualsky-image').src = data.image_list[0].url;
+                document.getElementById('modern-admin-virtualsky-message').textContent = data.message || '';
+            } else {
+                document.getElementById('modern-admin-virtualsky-message').textContent = 'No latest image is available for VirtualSky.';
+            }
+        })
+        .catch(() => {
+            document.getElementById('modern-admin-virtualsky-message').textContent = 'Error loading VirtualSky image.';
+        });
+}
+
+modernAdminLoadVirtualSkyImage();
+window.setInterval(modernAdminLoadVirtualSkyImage, refreshInterval);
+</script>
+{% endblock %}

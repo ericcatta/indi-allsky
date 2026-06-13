@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-log-title">
+    {% set modern_admin_header_label = 'Log header' %}
+    {% set modern_admin_heading = 'Log' %}
+    {% set modern_admin_title_id = 'modern-admin-log-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="log-viewer-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">System</p>
+            <h2 id="log-viewer-title">Application log</h2>
+        </div>
+        {% if docker %}
+        <p class="modern-admin-note">Containerized environment detected. Direct log access may be unavailable.</p>
+        {% endif %}
+        <div class="modern-admin-control-strip">
+            <label>Refresh {{ form_logviewer.REFRESH_SELECT() }}</label>
+            <label>Lines {{ form_logviewer.LINES_SELECT() }}</label>
+            <label>Filter {{ form_logviewer.FILTER() }}</label>
+        </div>
+        <pre class="modern-admin-log-output" id="modern-admin-log-output">Loading log...</pre>
+        <div class="modern-admin-link-grid" aria-label="Log downloads">
+            <a href="{{ url_for('indi_allsky.log_download_view') }}">Capture Log Download</a>
+            <a href="{{ url_for('indi_allsky.log_webapp_download_view') }}">Webapp Log Download</a>
+            <a href="{{ url_for('indi_allsky.log_syslog_download_view') }}">OS System Log Download</a>
+            <a href="{{ url_for('indi_allsky.log_kern_download_view') }}">Kernel Log Download</a>
+        </div>
+    </section>
+</main>
+
+<script>
+function modernAdminLogRefreshMs() {
+    return Number(document.getElementById('REFRESH_SELECT').value || 15) * 1000;
+}
+
+function modernAdminLoadLog() {
+    fetch('{{ url_for('indi_allsky.js_log_view') }}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            lines: document.getElementById('LINES_SELECT').value,
+            filter: document.getElementById('FILTER').value
+        })
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            document.getElementById('modern-admin-log-output').textContent = data.log || '[No log data]';
+        })
+        .catch(() => {
+            document.getElementById('modern-admin-log-output').textContent = 'Error loading log data.';
+        });
+}
+
+let modernAdminLogTimer;
+function modernAdminRestartLogTimer() {
+    window.clearInterval(modernAdminLogTimer);
+    modernAdminLoadLog();
+    modernAdminLogTimer = window.setInterval(modernAdminLoadLog, modernAdminLogRefreshMs());
+}
+
+document.getElementById('REFRESH_SELECT').addEventListener('change', modernAdminRestartLogTimer);
+document.getElementById('LINES_SELECT').addEventListener('change', modernAdminLoadLog);
+document.getElementById('FILTER').addEventListener('input', modernAdminLoadLog);
+modernAdminRestartLogTimer();
+</script>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-dark-library-title">
+    {% set modern_admin_header_label = 'Dark library header' %}
+    {% set modern_admin_heading = 'Dark Library' %}
+    {% set modern_admin_title_id = 'modern-admin-dark-library-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    {% for title, rows in [('Dark Frames', darkframe_list), ('Bad Pixel Maps', bpm_list)] %}
+    <section class="modern-admin-table-panel" aria-labelledby="dark-library-{{ loop.index }}-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Cameras</p>
+            <h2 id="dark-library-{{ loop.index }}-title">{{ title }}</h2>
+        </div>
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Date</th><th>Active</th><th>Resolution</th><th>Bits</th><th>Gain</th><th>Exposure</th><th>Bin</th><th>Temp</th><th>ADU</th><th>Hot Pixels</th><th>Size</th><th>File</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.createDate.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ row.active }}</td>
+                        <td>{{ row.resolution }}</td>
+                        <td>{{ row.bitdepth }}</td>
+                        <td>{{ "%0.2f"|format(row.gain | float) }}</td>
+                        <td>{{ row.exposure }}</td>
+                        <td>{{ row.binmode }}</td>
+                        <td>{{ "%0.2f"|format(row.temp | float) }}</td>
+                        <td>{{ "%0.1f"|format(row.adu | float) }}</td>
+                        <td>{{ row.hot_pixels }}</td>
+                        <td>{{ "%0.1f"|format(row.size_mb | float) }} MB</td>
+                        <td>{% if row.url %}<a class="modern-admin-placeholder-link" href="{{ row.url }}">Download</a>{% else %}Unavailable{% endif %}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="13">No {{ title|lower }} are available for the active camera.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="modern-admin-note">Processing actions from the classic page are intentionally omitted here.</p>
+    </section>
+    {% endfor %}
+</main>
+{% endblock %}

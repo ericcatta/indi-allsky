@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-nav-v2') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -16,11 +16,36 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-support-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
-    <section class="modern-admin-placeholder-page" aria-labelledby="support-coming-title">
-        <p class="modern-admin-eyebrow">System</p>
-        <h2 id="support-coming-title">Coming later</h2>
-        <p>The classic support page generates a diagnostic bundle through an AJAX action. The modern page keeps this as a placeholder until that workflow has a safe read-only design.</p>
-        <a class="modern-admin-placeholder-link" href="{{ url_for('indi_allsky.modern_admin_system_view') }}">Back to System</a>
+    <section class="modern-admin-table-panel" aria-labelledby="support-info-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">System</p>
+            <h2 id="support-info-title">Diagnostic support output</h2>
+        </div>
+        <p class="modern-admin-note">This runs the same read-only support information collector used by the classic page.</p>
+        <div class="modern-admin-control-strip">
+            <button class="modern-admin-media-button" type="button" id="modern-admin-load-support">Load support info</button>
+        </div>
+        <pre class="modern-admin-log-output" id="modern-admin-support-output">Support info has not been loaded yet.</pre>
     </section>
 </main>
+
+<script>
+document.getElementById('modern-admin-load-support').addEventListener('click', () => {
+    const output = document.getElementById('modern-admin-support-output');
+    output.textContent = 'Loading support info...';
+    fetch('{{ url_for('indi_allsky.js_support_info_view') }}')
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Support info request failed');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            output.textContent = data.support_info || '[No support info returned]';
+        })
+        .catch(() => {
+            output.textContent = 'Error loading support info.';
+        });
+});
+</script>
 {% endblock %}

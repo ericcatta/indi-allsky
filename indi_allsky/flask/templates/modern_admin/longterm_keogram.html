@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-longterm-keogram-title">
+    {% set modern_admin_header_label = 'Long term keogram header' %}
+    {% set modern_admin_heading = 'Long Term Keogram' %}
+    {% set modern_admin_title_id = 'modern-admin-longterm-keogram-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="longterm-keogram-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Observatory</p>
+            <h2 id="longterm-keogram-title">Cached long term keogram</h2>
+        </div>
+        {% if keogram_uri %}
+        <figure class="modern-admin-live-frame">
+            <img src="{{ keogram_uri }}" alt="Long term keogram">
+        </figure>
+        <p class="modern-admin-note">{{ keogram_age }} <a class="modern-admin-placeholder-link" href="{{ keogram_uri }}" download>Download</a></p>
+        {% else %}
+        <div class="modern-admin-empty-state"><h3>No cached long term keogram</h3><p>The classic generation workflow remains unavailable from Modern Admin because it creates new media.</p></div>
+        {% endif %}
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="longterm-keogram-samples-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Database</p>
+            <h2 id="longterm-keogram-samples-title">Recent long term samples</h2>
+        </div>
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead><tr><th>Timestamp</th><th>RGB 1</th><th>RGB 2</th><th>RGB 3</th><th>RGB 4</th><th>RGB 5</th></tr></thead>
+                <tbody>
+                    {% for row in modern_admin_longterm_rows %}
+                    <tr>
+                        <td>{{ row.ts }}</td>
+                        <td>{{ row.r1 }}, {{ row.g1 }}, {{ row.b1 }}</td>
+                        <td>{{ row.r2 }}, {{ row.g2 }}, {{ row.b2 }}</td>
+                        <td>{{ row.r3 }}, {{ row.g3 }}, {{ row.b3 }}</td>
+                        <td>{{ row.r4 }}, {{ row.g4 }}, {{ row.b4 }}</td>
+                        <td>{{ row.r5 }}, {{ row.g5 }}, {{ row.b5 }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6">No long term keogram samples are available.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+{% endblock %}

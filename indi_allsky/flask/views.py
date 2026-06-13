@@ -57,6 +57,7 @@ from .models import IndiAllSkyDbRawImageTable
 from .models import IndiAllSkyDbFitsImageTable
 from .models import IndiAllSkyDbPanoramaImageTable
 from .models import IndiAllSkyDbPanoramaVideoTable
+from .models import IndiAllSkyDbLongTermKeogramTable
 from .models import IndiAllSkyDbThumbnailTable
 from .models import IndiAllSkyDbTaskQueueTable
 from .models import IndiAllSkyDbNotificationTable
@@ -66,6 +67,7 @@ from .models import IndiAllSkyDbTleDataTable
 
 from .models import TaskQueueQueue
 from .models import TaskQueueState
+from .models import NotificationCategory
 
 from sqlalchemy import func
 from sqlalchemy import literal_column
@@ -5258,46 +5260,172 @@ class ModernAdminPlaceholderView(ModernAdminView):
         return context
 
 
-class ModernAdminStorageView(ModernAdminPlaceholderView):
+class ModernAdminStorageView(ModernAdminView):
     page_title = 'Modern Admin Storage'
-    modern_admin_section = 'Storage'
-    modern_admin_message = 'Storage details are being modernized read-only first.'
-    modern_admin_links = (
-        ('File Space Usage', 'indi_allsky.modern_admin_file_space_usage_view'),
-    )
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+    def get_context(self):
+        context = super(ModernAdminStorageView, self).get_context()
+
+        context['modern_admin_section_links'] = (
+            ('File Space Usage', 'indi_allsky.modern_admin_file_space_usage_view'),
+            ('Gallery', 'indi_allsky.modern_admin_media_gallery_view'),
+            ('Images', 'indi_allsky.modern_admin_media_images_view'),
+            ('FITS Viewer', 'indi_allsky.modern_admin_media_fits_view'),
+        )
+        context['modern_admin_storage_counts'] = self.get_media_count_summary()
+
+        return context
 
 
-class ModernAdminUploadsView(ModernAdminPlaceholderView):
+    def get_media_count_summary(self):
+        count_models = (
+            ('Images', IndiAllSkyDbImageTable),
+            ('Panoramas', IndiAllSkyDbPanoramaImageTable),
+            ('FITS', IndiAllSkyDbFitsImageTable),
+            ('Timelapses', IndiAllSkyDbVideoTable),
+        )
+
+        summary = list()
+        for label, model in count_models:
+            try:
+                count = model.query\
+                    .join(model.camera)\
+                    .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                    .count()
+            except Exception as e:
+                app.logger.error('Error counting modern admin storage rows for %s: %s', label, str(e))
+                count = 0
+
+            summary.append({'label' : label, 'count' : count})
+
+        return summary
+
+
+class ModernAdminUploadsView(ModernAdminView):
     page_title = 'Modern Admin Uploads'
-    modern_admin_section = 'Uploads'
-    modern_admin_message = 'Upload destinations, queues, and sync health are coming later.'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_uploads_view'
+
+    def get_context(self):
+        context = super(ModernAdminUploadsView, self).get_context()
+        filetransfer_config = self.indi_allsky_config.get('FILETRANSFER', {})
+        s3_config = self.indi_allsky_config.get('S3UPLOAD', {})
+        youtube_config = self.indi_allsky_config.get('YOUTUBE', {})
+
+        context['modern_admin_upload_targets'] = (
+            {
+                'label'  : 'File Transfer',
+                'detail' : filetransfer_config.get('CLASSNAME', 'Not configured'),
+                'status' : 'Configured' if filetransfer_config.get('HOST') else 'No host',
+            },
+            {
+                'label'  : 'S3 Upload',
+                'detail' : s3_config.get('CLASSNAME', 'Not configured'),
+                'status' : 'Enabled' if s3_config.get('ENABLE') else 'Disabled',
+            },
+            {
+                'label'  : 'YouTube',
+                'detail' : 'Video uploads',
+                'status' : 'Enabled' if youtube_config.get('UPLOAD_VIDEO') else 'Disabled',
+            },
+        )
+        context['modern_admin_upload_tasks'] = self.get_task_queue_summary()
+        context['modern_admin_upload_notifications'] = self.get_upload_notifications()
+
+        return context
 
 
-class ModernAdminObservatoryView(ModernAdminPlaceholderView):
+    def get_task_queue_summary(self):
+        summary = list()
+        for state in TaskQueueState:
+            try:
+                count = IndiAllSkyDbTaskQueueTable.query\
+                    .filter(IndiAllSkyDbTaskQueueTable.state == state)\
+                    .count()
+            except Exception as e:
+                app.logger.error('Error counting modern admin upload task queue rows: %s', str(e))
+                count = 0
+
+            summary.append({'label' : state.value, 'count' : count})
+
+        return summary
+
+
+    def get_upload_notifications(self):
+        try:
+            return IndiAllSkyDbNotificationTable.query\
+                .filter(IndiAllSkyDbNotificationTable.category == NotificationCategory.UPLOAD)\
+                .order_by(IndiAllSkyDbNotificationTable.createDate.desc())\
+                .limit(6)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin upload notifications: %s', str(e))
+            return list()
+
+
+class ModernAdminObservatoryView(ModernAdminView):
     page_title = 'Modern Admin Observatory'
-    modern_admin_section = 'Observatory'
-    modern_admin_message = 'Sky context, sensors, and observatory conditions are being modernized read-only first.'
-    modern_admin_links = (
-        ('SQM', 'indi_allsky.modern_admin_sqm_view'),
-        ('Charts', 'indi_allsky.modern_admin_charts_view'),
-        ('Sensor Panel', 'indi_allsky.modern_admin_sensor_panel_view'),
-    )
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+
+    def get_context(self):
+        context = super(ModernAdminObservatoryView, self).get_context()
+        image_data = self.get_image_data()
+
+        context['modern_admin_section_links'] = (
+            ('SQM', 'indi_allsky.modern_admin_sqm_view'),
+            ('Charts', 'indi_allsky.modern_admin_charts_view'),
+            ('Sensor Panel', 'indi_allsky.modern_admin_sensor_panel_view'),
+            ('Astropanel', 'indi_allsky.modern_admin_astropanel_view'),
+            ('VirtualSky', 'indi_allsky.modern_admin_virtualsky_view'),
+            ('Realtime Keogram', 'indi_allsky.modern_admin_realtime_keogram_view'),
+            ('Long Term Keogram', 'indi_allsky.modern_admin_longterm_keogram_view'),
+        )
+        context['modern_admin_observatory_metrics'] = (
+            {'label' : 'SQM', 'value' : image_data.get('sqm', 'Unknown')},
+            {'label' : 'Stars', 'value' : image_data.get('stars', 'Unknown')},
+            {'label' : 'Moon Phase', 'value' : '{0:0.1f}%'.format(float(image_data.get('moon_phase', 0.0)))},
+        )
+
+        return context
 
 
-class ModernAdminSystemView(ModernAdminPlaceholderView):
+class ModernAdminSystemView(ModernAdminView):
     page_title = 'Modern Admin System'
-    modern_admin_section = 'System'
-    modern_admin_message = 'Read-only system health details are available first.'
-    modern_admin_links = (
-        ('System Info', 'indi_allsky.modern_admin_system_info_view'),
-        ('Support Info', 'indi_allsky.modern_admin_support_info_view'),
-    )
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    def get_context(self):
+        context = super(ModernAdminSystemView, self).get_context()
+
+        context['modern_admin_section_links'] = (
+            ('System Info', 'indi_allsky.modern_admin_system_info_view'),
+            ('Support Info', 'indi_allsky.modern_admin_support_info_view'),
+            ('Log', 'indi_allsky.modern_admin_log_view'),
+            ('Updates', 'indi_allsky.modern_admin_updates_view'),
+        )
+        context['modern_admin_system_metrics'] = (
+            {'label' : 'CPU', 'value' : '{0:0.1f}%'.format(psutil.cpu_percent(interval=None))},
+            {'label' : 'Memory', 'value' : '{0:0.1f}%'.format(psutil.virtual_memory().percent)},
+            {'label' : 'Version', 'value' : __version__},
+        )
+
+        return context
 
 
-class ModernAdminUpdatesView(ModernAdminPlaceholderView):
+class ModernAdminUpdatesView(ModernAdminView):
     page_title = 'Modern Admin Updates'
-    modern_admin_section = 'Updates'
-    modern_admin_message = 'Update status and release information are coming later.'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_updates_view'
+
+    def get_context(self):
+        context = super(ModernAdminUpdatesView, self).get_context()
+
+        context['modern_admin_version'] = __version__
+        context['modern_admin_update_rows'] = (
+            {'label' : 'Installed Version', 'value' : __version__},
+            {'label' : 'Update Mode', 'value' : 'Read-only'},
+            {'label' : 'Classic Fallback', 'value' : 'Available'},
+        )
+
+        return context
 
 
 class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
@@ -5311,6 +5439,13 @@ class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
         'panorama'        : 'indi_allsky.modern_admin_media_panorama_view',
         'panorama-loop'   : 'indi_allsky.modern_admin_media_panorama_loop_view',
         'fits-viewer'     : 'indi_allsky.modern_admin_media_fits_view',
+        'loop'            : 'indi_allsky.modern_admin_loop_view',
+        'realtime-keogram'  : 'indi_allsky.modern_admin_realtime_keogram_view',
+        'long-term-keogram' : 'indi_allsky.modern_admin_longterm_keogram_view',
+        'dark-library'      : 'indi_allsky.modern_admin_dark_library_view',
+        'virtualsky'        : 'indi_allsky.modern_admin_virtualsky_view',
+        'astropanel'        : 'indi_allsky.modern_admin_astropanel_view',
+        'log'               : 'indi_allsky.modern_admin_log_view',
     }
 
     classic_page_map = {
@@ -10311,6 +10446,130 @@ class ModernAdminSupportInfoView(ModernAdminContextMixin, SupportInfoView):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
+class ModernAdminLoopView(ModernAdminContextMixin, ImageLoopImgView):
+    page_title = 'Modern Admin Loop'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_view'
+
+
+class ModernAdminRealtimeKeogramView(ModernAdminContextMixin, RealtimeKeogramView):
+    page_title = 'Modern Admin Realtime Keogram'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+
+    def get_context(self):
+        context = super(ModernAdminRealtimeKeogramView, self).get_context()
+        keogram_uri = context.get('keogram_uri')
+        if keogram_uri:
+            context['keogram_uri'] = ModernAdminMediaListView.normalize_media_url(self, keogram_uri)
+
+        return context
+
+
+class ModernAdminLongTermKeogramView(ModernAdminContextMixin, LongTermKeogramView):
+    page_title = 'Modern Admin Long Term Keogram'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+
+    def get_context(self):
+        context = super(ModernAdminLongTermKeogramView, self).get_context()
+        keogram_uri = context.get('keogram_uri')
+        if keogram_uri:
+            context['keogram_uri'] = ModernAdminMediaListView.normalize_media_url(self, keogram_uri)
+
+        try:
+            context['modern_admin_longterm_rows'] = IndiAllSkyDbLongTermKeogramTable.query\
+                .join(IndiAllSkyDbLongTermKeogramTable.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(IndiAllSkyDbLongTermKeogramTable.ts.desc())\
+                .limit(8)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin long term keogram rows: %s', str(e))
+            context['modern_admin_longterm_rows'] = list()
+
+        return context
+
+
+class ModernAdminDarkLibraryView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Dark Library'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+
+    def get_context(self):
+        context = super(ModernAdminDarkLibraryView, self).get_context()
+
+        context['darkframe_list'] = self.serialize_calibration_rows(
+            IndiAllSkyDbDarkFrameTable,
+            order_model=IndiAllSkyDbDarkFrameTable,
+        )
+        context['bpm_list'] = self.serialize_calibration_rows(
+            IndiAllSkyDbBadPixelMapTable,
+            order_model=IndiAllSkyDbBadPixelMapTable,
+        )
+
+        return context
+
+
+    def serialize_calibration_rows(self, model, order_model):
+        try:
+            rows = model.query\
+                .join(model.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(
+                    IndiAllSkyDbCameraTable.id.desc(),
+                    order_model.gain.asc(),
+                    order_model.exposure.asc(),
+                )\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin calibration rows: %s', str(e))
+            return list()
+
+        row_list = list()
+        for row in rows:
+            try:
+                file_size = row.getFilesystemPath().stat().st_size
+            except Exception:
+                file_size = 0
+
+            try:
+                row_url = ModernAdminMediaListView.normalize_media_url(self, row.getUrl())
+            except Exception as e:
+                app.logger.error('Error determining modern admin calibration URL: %s', str(e))
+                row_url = None
+
+            row_list.append({
+                'id'         : row.id,
+                'createDate' : row.createDate,
+                'active'     : row.active,
+                'resolution' : '{0:d}x{1:d}'.format(row.width, row.height) if row.width and row.height else 'Unknown',
+                'bitdepth'   : row.bitdepth,
+                'gain'       : row.gain,
+                'exposure'   : row.exposure,
+                'binmode'    : row.binmode,
+                'temp'       : row.temp,
+                'adu'        : row.adu,
+                'hot_pixels' : row.data.get('hot_pixels', -1) if row.data else -1,
+                'method'     : row.data.get('method', '') if row.data else '',
+                'url'        : row_url,
+                'size_mb'    : file_size / 1024 / 1024,
+            })
+
+        return row_list
+
+
+class ModernAdminAstroPanelView(ModernAdminContextMixin, AstroPanelView):
+    page_title = 'Modern Admin Astropanel'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+
+
+class ModernAdminVirtualSkyView(ModernAdminContextMixin, VirtualSkyView):
+    page_title = 'Modern Admin VirtualSky'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+
+
+class ModernAdminLogView(ModernAdminContextMixin, LogView):
+    page_title = 'Modern Admin Log'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+
 class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Media'
     modern_admin_section = 'Media'
@@ -12614,17 +12873,24 @@ bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView
 bp_allsky.add_url_rule('/modern-admin/cameras/info', view_func=ModernAdminCameraInfoView.as_view('modern_admin_camera_info_view', template_name='modern_admin/camera_info.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/image-lag', view_func=ModernAdminImageLagView.as_view('modern_admin_image_lag_view', template_name='modern_admin/image_lag.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/adu-history', view_func=ModernAdminAduHistoryView.as_view('modern_admin_adu_history_view', template_name='modern_admin/adu_history.html'))
-bp_allsky.add_url_rule('/modern-admin/storage', view_func=ModernAdminStorageView.as_view('modern_admin_storage_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/storage', view_func=ModernAdminStorageView.as_view('modern_admin_storage_view', template_name='modern_admin/storage.html'))
 bp_allsky.add_url_rule('/modern-admin/storage/file-space-usage', view_func=ModernAdminFileSpaceUsageView.as_view('modern_admin_file_space_usage_view', template_name='modern_admin/file_space_usage.html'))
-bp_allsky.add_url_rule('/modern-admin/uploads', view_func=ModernAdminUploadsView.as_view('modern_admin_uploads_view', template_name='modern_admin/placeholder.html'))
-bp_allsky.add_url_rule('/modern-admin/observatory', view_func=ModernAdminObservatoryView.as_view('modern_admin_observatory_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/uploads', view_func=ModernAdminUploadsView.as_view('modern_admin_uploads_view', template_name='modern_admin/uploads.html'))
+bp_allsky.add_url_rule('/modern-admin/observatory', view_func=ModernAdminObservatoryView.as_view('modern_admin_observatory_view', template_name='modern_admin/observatory.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory/sqm', view_func=ModernAdminSqmView.as_view('modern_admin_sqm_view', template_name='modern_admin/observatory_status.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory/charts', view_func=ModernAdminChartsView.as_view('modern_admin_charts_view', template_name='modern_admin/charts.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory/sensor-panel', view_func=ModernAdminSensorPanelView.as_view('modern_admin_sensor_panel_view', template_name='modern_admin/sensor_panel.html'))
-bp_allsky.add_url_rule('/modern-admin/system', view_func=ModernAdminSystemView.as_view('modern_admin_system_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/observatory/astropanel', view_func=ModernAdminAstroPanelView.as_view('modern_admin_astropanel_view', template_name='modern_admin/astropanel.html'))
+bp_allsky.add_url_rule('/modern-admin/observatory/virtualsky', view_func=ModernAdminVirtualSkyView.as_view('modern_admin_virtualsky_view', template_name='modern_admin/virtualsky.html'))
+bp_allsky.add_url_rule('/modern-admin/observatory/realtime-keogram', view_func=ModernAdminRealtimeKeogramView.as_view('modern_admin_realtime_keogram_view', template_name='modern_admin/realtime_keogram.html'))
+bp_allsky.add_url_rule('/modern-admin/observatory/long-term-keogram', view_func=ModernAdminLongTermKeogramView.as_view('modern_admin_longterm_keogram_view', template_name='modern_admin/longterm_keogram.html'))
+bp_allsky.add_url_rule('/modern-admin/system', view_func=ModernAdminSystemView.as_view('modern_admin_system_view', template_name='modern_admin/system.html'))
 bp_allsky.add_url_rule('/modern-admin/system/info', view_func=ModernAdminSystemInfoView.as_view('modern_admin_system_info_view', template_name='modern_admin/system_info.html'))
 bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupportInfoView.as_view('modern_admin_support_info_view', template_name='modern_admin/support_info.html'))
-bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/placeholder.html'))
+bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.as_view('modern_admin_log_view', template_name='modern_admin/log.html'))
+bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
+bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
+bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))
 bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminClassicPlaceholderView.as_view('modern_admin_classic_placeholder_view', template_name='modern_admin/placeholder.html'))
 bp_allsky.add_url_rule('/modern-admin/mode/<mode>', view_func=ModernAdminModeView.as_view('modern_admin_mode_view'))
 bp_allsky.add_url_rule('/system', view_func=SystemInfoView.as_view('system_view', template_name='system.html'))

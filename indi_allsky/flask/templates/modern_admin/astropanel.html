@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-astropanel-title">
+    {% set modern_admin_header_label = 'Astropanel header' %}
+    {% set modern_admin_heading = 'Astropanel' %}
+    {% set modern_admin_title_id = 'modern-admin-astropanel-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Astropanel overview">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Moon</div>
+            <h3 id="modern-admin-moon-phase">Loading</h3>
+            <p id="modern-admin-moon-times">Waiting for astropanel data.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Sun</div>
+            <h3 id="modern-admin-sun-alt">Loading</h3>
+            <p id="modern-admin-sun-times">Waiting for astropanel data.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Polaris</div>
+            <h3 id="modern-admin-polaris-ha">Loading</h3>
+            <p id="modern-admin-polaris-alt">Waiting for astropanel data.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="planet-table-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Planets</p>
+            <h2 id="planet-table-title">Rise, transit, set</h2>
+        </div>
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead><tr><th>Body</th><th>Rise</th><th>Transit</th><th>Set</th><th>Altitude</th><th>Azimuth</th></tr></thead>
+                <tbody id="modern-admin-planet-rows"><tr><td colspan="6">Loading astropanel data...</td></tr></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="satellite-table-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Satellites</p>
+            <h2 id="satellite-table-title">Visible satellite context</h2>
+        </div>
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead><tr><th>Name</th><th>Altitude</th><th>Azimuth</th><th>Rise</th><th>Transit</th><th>Set</th></tr></thead>
+                <tbody id="modern-admin-satellite-rows"><tr><td colspan="6">Loading satellite data...</td></tr></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script>
+function modernAdminCell(text) {
+    const cell = document.createElement('td');
+    cell.textContent = text == null ? 'Unknown' : text;
+    return cell;
+}
+
+function modernAdminLoadAstropanel() {
+    fetch('{{ url_for('indi_allsky.ajax_astropanel_view') }}?camera_id=' + camera_id)
+        .then((response) => response.json())
+        .then((data) => {
+            document.getElementById('modern-admin-moon-phase').textContent = data.moon_phase + ' (' + data.moon_light + '%)';
+            document.getElementById('modern-admin-moon-times').textContent = 'Rise ' + data.moon_rise + ' · Set ' + data.moon_set;
+            document.getElementById('modern-admin-sun-alt').textContent = data.sun_alt + ' deg';
+            document.getElementById('modern-admin-sun-times').textContent = 'Rise ' + data.sun_rise + ' · Set ' + data.sun_set;
+            document.getElementById('modern-admin-polaris-ha').textContent = data.polaris_hour_angle;
+            document.getElementById('modern-admin-polaris-alt').textContent = 'Altitude ' + data.polaris_alt + ' deg';
+
+            const planetBody = document.getElementById('modern-admin-planet-rows');
+            planetBody.replaceChildren();
+            ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].forEach((planet) => {
+                const row = document.createElement('tr');
+                row.appendChild(modernAdminCell(planet.charAt(0).toUpperCase() + planet.slice(1)));
+                row.appendChild(modernAdminCell(data[planet + '_rise']));
+                row.appendChild(modernAdminCell(data[planet + '_transit']));
+                row.appendChild(modernAdminCell(data[planet + '_set']));
+                row.appendChild(modernAdminCell(data[planet + '_alt'] + ' deg'));
+                row.appendChild(modernAdminCell(data[planet + '_az'] + ' deg'));
+                planetBody.appendChild(row);
+            });
+
+            const satelliteBody = document.getElementById('modern-admin-satellite-rows');
+            satelliteBody.replaceChildren();
+            (data.satellite_list || []).slice(0, 12).forEach((satellite) => {
+                const row = document.createElement('tr');
+                row.appendChild(modernAdminCell(satellite.name));
+                row.appendChild(modernAdminCell(satellite.alt + ' deg'));
+                row.appendChild(modernAdminCell(satellite.az + ' deg'));
+                row.appendChild(modernAdminCell(satellite.rise));
+                row.appendChild(modernAdminCell(satellite.transit));
+                row.appendChild(modernAdminCell(satellite.set));
+                satelliteBody.appendChild(row);
+            });
+            if (!satelliteBody.children.length) {
+                const row = document.createElement('tr');
+                row.appendChild(modernAdminCell('No satellite rows available'));
+                row.firstChild.colSpan = 6;
+                satelliteBody.appendChild(row);
+            }
+        })
+        .catch(() => {
+            document.getElementById('modern-admin-planet-rows').innerHTML = '<tr><td colspan="6">Error loading astropanel data.</td></tr>';
+        });
+}
+
+modernAdminLoadAstropanel();
+window.setInterval(modernAdminLoadAstropanel, 60000);
+</script>
+{% endblock %}

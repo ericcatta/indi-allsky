@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-observatory-title">
+    {% set modern_admin_header_label = 'Observatory header' %}
+    {% set modern_admin_heading = 'Observatory' %}
+    {% set modern_admin_title_id = 'modern-admin-observatory-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory overview">
+        {% for metric in modern_admin_observatory_metrics %}
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">{{ metric.label }}</div>
+            <h3>{{ metric.value }}</h3>
+            <p>Latest value from existing indi-allsky image/status data.</p>
+        </article>
+        {% endfor %}
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="observatory-pages-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Observatory</p>
+            <h2 id="observatory-pages-title">Sky and sensor views</h2>
+        </div>
+        <div class="modern-admin-link-grid">
+            {% for label, endpoint in modern_admin_section_links %}
+            <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

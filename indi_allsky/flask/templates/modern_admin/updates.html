@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-updates-title">
+    {% set modern_admin_header_label = 'Updates header' %}
+    {% set modern_admin_heading = 'Updates' %}
+    {% set modern_admin_title_id = 'modern-admin-updates-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="updates-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Updates</p>
+            <h2 id="updates-title">Installed version</h2>
+        </div>
+        <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
+            {% for row in modern_admin_update_rows %}
+            <div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+            {% endfor %}
+        </dl>
+        <p class="modern-admin-note">Network update checks and package operations are intentionally not implemented in Modern Admin yet.</p>
+    </section>
+</main>
+{% endblock %}

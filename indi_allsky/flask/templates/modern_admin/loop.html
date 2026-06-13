@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+var refreshInterval = {{ refreshInterval | int }};
+var timestamp = {{ timestamp | int }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-loop-title">
+    {% set modern_admin_header_label = 'Loop header' %}
+    {% set modern_admin_heading = 'Loop' %}
+    {% set modern_admin_title_id = 'modern-admin-loop-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="loop-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Dashboard</p>
+            <h2 id="loop-title">Recent image loop</h2>
+        </div>
+        <div class="modern-admin-control-strip">
+            <label>History {{ form_history.HISTORY_SELECT() }}</label>
+            <label>Frame Delay {{ form_history.FRAMEDELAY_SELECT() }}</label>
+            <label>Rock {{ form_history.ROCK_CHECKBOX() }}</label>
+        </div>
+        <figure class="modern-admin-live-frame">
+            <img id="modern-admin-loop-image" alt="Latest loop frame">
+        </figure>
+        <p class="modern-admin-note" id="modern-admin-loop-message">Loading loop frames...</p>
+    </section>
+</main>
+
+<script>
+let modernAdminLoopData = { image_list: [], message: '' };
+let modernAdminLoopIndex = 0;
+
+function modernAdminLoopDelay() {
+    return Number(document.getElementById('FRAMEDELAY_SELECT').value || 100);
+}
+
+function modernAdminLoopHistory() {
+    return Number(document.getElementById('HISTORY_SELECT').value || 900);
+}
+
+function modernAdminLoopRock() {
+    const checkbox = document.getElementById('ROCK_CHECKBOX');
+    return checkbox ? checkbox.checked : false;
+}
+
+function modernAdminLoadLoop() {
+    const params = new URLSearchParams({
+        camera_id: camera_id,
+        limit_s: modernAdminLoopHistory(),
+        timestamp: timestamp
+    });
+
+    fetch('{{ url_for(image_loop_view) }}?' + params.toString())
+        .then((response) => response.json())
+        .then((data) => {
+            modernAdminLoopData = data;
+            document.getElementById('modern-admin-loop-message').textContent = data.message || '';
+        })
+        .catch(() => {
+            document.getElementById('modern-admin-loop-message').textContent = 'Error loading loop frames.';
+        });
+}
+
+function modernAdminShowLoopFrame() {
+    if (!modernAdminLoopData.image_list.length) {
+        window.setTimeout(modernAdminShowLoopFrame, 500);
+        return;
+    }
+
+    const imageList = modernAdminLoopData.image_list;
+    const image = document.getElementById('modern-admin-loop-image');
+    image.src = imageList[modernAdminLoopIndex].url;
+
+    modernAdminLoopIndex += modernAdminLoopRock() ? 1 : -1;
+    if (modernAdminLoopIndex >= imageList.length) {
+        modernAdminLoopIndex = imageList.length - 1;
+    } else if (modernAdminLoopIndex < 0) {
+        modernAdminLoopIndex = imageList.length - 1;
+    }
+
+    window.setTimeout(modernAdminShowLoopFrame, modernAdminLoopDelay());
+}
+
+modernAdminLoadLoop();
+window.setInterval(modernAdminLoadLoop, refreshInterval);
+modernAdminShowLoopFrame();
+</script>
+{% endblock %}

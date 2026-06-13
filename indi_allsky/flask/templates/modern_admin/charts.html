@@ -3,9 +3,12 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-nav-v2') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script src="{{ url_for('indi_allsky.static', filename='js/chart.umd.js') }}"></script>
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
+var refreshInterval = {{ refreshInterval | int }};
+var timestamp = {{ timestamp | int }};
 </script>
 {% endblock %}
 
@@ -16,11 +19,30 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-charts-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
-    <section class="modern-admin-placeholder-page" aria-labelledby="modern-admin-charts-coming-title">
-        <p class="modern-admin-eyebrow">Observatory</p>
-        <h2 id="modern-admin-charts-coming-title">Charts are coming later</h2>
-        <p>The classic chart data source is available, but the modern interactive chart UI has not been rebuilt yet.</p>
-        <div class="modern-admin-link-grid" aria-label="Available chart labels">
+    <section class="modern-admin-table-panel" aria-labelledby="charts-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Observatory</p>
+            <h2 id="charts-title">Recent sensor charts</h2>
+        </div>
+        <div class="modern-admin-control-strip">
+            <label>History {{ form_history.HISTORY_SELECT() }}</label>
+        </div>
+        <p class="modern-admin-note" id="modern-admin-chart-message">Loading chart data...</p>
+    </section>
+
+    <section class="modern-admin-chart-grid" aria-label="Charts">
+        <article class="modern-admin-table-panel modern-admin-chart-card"><canvas id="modern-admin-chart-jsqm"></canvas></article>
+        <article class="modern-admin-table-panel modern-admin-chart-card"><canvas id="modern-admin-chart-stars"></canvas></article>
+        <article class="modern-admin-table-panel modern-admin-chart-card"><canvas id="modern-admin-chart-temp"></canvas></article>
+        <article class="modern-admin-table-panel modern-admin-chart-card"><canvas id="modern-admin-chart-exp"></canvas></article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="custom-chart-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Custom Slots</p>
+            <h2 id="custom-chart-title">Configured labels</h2>
+        </div>
+        <div class="modern-admin-link-grid">
             <span>{{ label_custom_chart_1 }}</span>
             <span>{{ label_custom_chart_2 }}</span>
             <span>{{ label_custom_chart_3 }}</span>
@@ -28,7 +50,61 @@ var camera_id = {{ camera_id }};
             <span>{{ label_custom_chart_5 }}</span>
             <span>{{ label_custom_chart_6 }}</span>
         </div>
-        <a class="modern-admin-placeholder-link" href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Back to Observatory</a>
     </section>
 </main>
+
+<script>
+const modernAdminCharts = {};
+
+function modernAdminCreateChart(id, label, color) {
+    return new Chart(document.getElementById(id), {
+        type: 'line',
+        data: {datasets: [{label: label, data: [], borderColor: color, backgroundColor: color, pointRadius: 2, tension: 0.15}]},
+        options: {
+            animation: false,
+            maintainAspectRatio: false,
+            plugins: {legend: {labels: {color: '#a9b0ba'}}},
+            scales: {
+                x: {ticks: {color: '#777f8b'}, grid: {color: 'rgba(255,255,255,0.08)'}},
+                y: {ticks: {color: '#777f8b'}, grid: {color: 'rgba(255,255,255,0.08)'}}
+            }
+        }
+    });
+}
+
+function modernAdminSetChartData(chart, data) {
+    chart.data.datasets[0].data = data || [];
+    chart.update();
+}
+
+function modernAdminLoadCharts() {
+    const params = new URLSearchParams({
+        camera_id: camera_id,
+        limit_s: document.getElementById('HISTORY_SELECT').value || 900,
+        timestamp: timestamp
+    });
+
+    fetch('{{ url_for('indi_allsky.js_chart_view') }}?' + params.toString())
+        .then((response) => response.json())
+        .then((data) => {
+            const chartData = data.chart_data || {};
+            modernAdminSetChartData(modernAdminCharts.jsqm, chartData.jsqm);
+            modernAdminSetChartData(modernAdminCharts.stars, chartData.stars);
+            modernAdminSetChartData(modernAdminCharts.temp, chartData.temp);
+            modernAdminSetChartData(modernAdminCharts.exp, chartData.exp);
+            document.getElementById('modern-admin-chart-message').textContent = data.message || 'Charts updated from existing chart data.';
+        })
+        .catch(() => {
+            document.getElementById('modern-admin-chart-message').textContent = 'Error loading chart data.';
+        });
+}
+
+modernAdminCharts.jsqm = modernAdminCreateChart('modern-admin-chart-jsqm', 'jSQM', '#9fc2ff');
+modernAdminCharts.stars = modernAdminCreateChart('modern-admin-chart-stars', 'Stars', '#f4f1eb');
+modernAdminCharts.temp = modernAdminCreateChart('modern-admin-chart-temp', 'Temperature', '#9bd7b2');
+modernAdminCharts.exp = modernAdminCreateChart('modern-admin-chart-exp', 'Exposure', '#e7c87c');
+document.getElementById('HISTORY_SELECT').addEventListener('change', modernAdminLoadCharts);
+modernAdminLoadCharts();
+window.setInterval(modernAdminLoadCharts, refreshInterval);
+</script>
 {% endblock %}

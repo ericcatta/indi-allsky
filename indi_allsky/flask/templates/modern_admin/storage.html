@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-pages-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-storage-title">
+    {% set modern_admin_header_label = 'Storage header' %}
+    {% set modern_admin_heading = 'Storage' %}
+    {% set modern_admin_title_id = 'modern-admin-storage-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Storage overview">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Disk Usage</div>
+            <h3>{{ modern_admin_storage_percent }}</h3>
+            <p>{{ modern_admin_storage_detail }}</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Storage Path</div>
+            <h3>{{ modern_admin_storage_path }}</h3>
+            <p>Current filesystem used for indi-allsky media.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Inventory</div>
+            <h3>{{ modern_admin_storage_counts | sum(attribute='count') }}</h3>
+            <p>Tracked media rows for the active camera.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="storage-pages-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Storage</p>
+            <h2 id="storage-pages-title">Storage views</h2>
+        </div>
+        <div class="modern-admin-link-grid">
+            {% for label, endpoint in modern_admin_section_links %}
+            <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="storage-counts-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Active Camera</p>
+            <h2 id="storage-counts-title">Media inventory</h2>
+        </div>
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead><tr><th>Type</th><th>Rows</th></tr></thead>
+                <tbody>
+                    {% for row in modern_admin_storage_counts %}
+                    <tr><td>{{ row.label }}</td><td>{{ row.count }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+{% endblock %}

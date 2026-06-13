@@ -99,7 +99,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ admin_nav_url('indi_allsky.image_loop_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'loop') }}" class="nav-link link-info px-sm-0 px-2">
+                        <a href="{{ admin_nav_url('indi_allsky.image_loop_view', 'indi_allsky.modern_admin_loop_view') }}" class="nav-link link-info px-sm-0 px-2">
                             <img src="{{ url_for('indi_allsky.static', filename='svg/repeat.svg') }}" width="16" height="16" alt="Loop"><span class="ms-1 d-none d-sm-inline">Loop</span></a>
                     </li>
 
@@ -135,11 +135,11 @@
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/repeat.svg') }}" width="16" height="16" alt="Panorama Loop"><span class="ms-1 d-none d-sm-inline">Panorama Loop</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.realtime_keogram_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'realtime-keogram') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.realtime_keogram_view', 'indi_allsky.modern_admin_realtime_keogram_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/input-cursor.svg') }}" width="16" height="16" alt="Realtime Keogram"><span class="ms-1 d-none d-sm-inline">Realtime Keogram</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.longterm_keogram_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'long-term-keogram') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.longterm_keogram_view', 'indi_allsky.modern_admin_longterm_keogram_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/distribute-horizontal.svg') }}" width="16" height="16" alt="Long Term Keogram"><span class="ms-1 d-none d-sm-inline">Long Term Keogram</span></a>
                             </li>
                             {% if current_user.is_authenticated or login_disabled %}
@@ -172,7 +172,7 @@
                             </li>
                             {% if current_user.is_authenticated or login_disabled %}
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.darks_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'dark-library') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.darks_view', 'indi_allsky.modern_admin_dark_library_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/subtract.svg') }}" width="16" height="16" alt="Dark Library"><span class="ms-1 d-none d-sm-inline">Dark Library</span></a>
                             </li>
                             <li>
@@ -203,7 +203,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdown">
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.virtualsky_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'virtualsky') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.virtualsky_view', 'indi_allsky.modern_admin_virtualsky_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/globe2.svg') }}" width="16" height="16" alt="VirtualSky"><span class="ms-1 d-none d-sm-inline">VirtualSky</span></a>
                             </li>
                             <li>
@@ -211,7 +211,7 @@
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/circle.svg') }}" width="16" height="16" alt="Camera Simulator"><span class="ms-1 d-none d-sm-inline">Camera Simulator</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.astropanel_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'astropanel') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.astropanel_view', 'indi_allsky.modern_admin_astropanel_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/newspaper.svg') }}" width="16" height="16" alt="Astropanel"><span class="ms-1 d-none d-sm-inline">Astropanel</span></a>
                             </li>
                             {% if current_user.is_authenticated or login_disabled %}
@@ -236,7 +236,7 @@
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/layers.svg') }}" width="16" height="16" alt="Mask"><span class="ms-1 d-none d-sm-inline">Mask Base</span> </a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.log_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'log') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.log_view', 'indi_allsky.modern_admin_log_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/terminal.svg') }}" width="16" height="16" alt="Log"><span class="ms-1 d-none d-sm-inline">Log</span> </a>
                             </li>
                             <li>
