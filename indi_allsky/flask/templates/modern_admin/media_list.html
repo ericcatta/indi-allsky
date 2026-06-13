@@ -26,14 +26,6 @@ var camera_id = {{ camera_id }};
 
     {% if modern_admin_featured_media and modern_admin_media_layout in ('viewer', 'loop') %}
     <section class="modern-admin-media-viewer" aria-labelledby="modern-admin-media-viewer-title">
-        <div class="modern-admin-media-viewer-copy">
-            <p class="modern-admin-eyebrow">{{ modern_admin_featured_media.timeofday }}</p>
-            <h3 id="modern-admin-media-viewer-title">{{ modern_admin_featured_media.title }}</h3>
-            <p>{{ modern_admin_featured_media.created }}</p>
-            {% if modern_admin_featured_media.url %}
-            <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ modern_admin_featured_media.url }}" target="_blank" rel="noopener">Open read-only</a>
-            {% endif %}
-        </div>
         <figure class="modern-admin-media-viewer-frame">
             {% if modern_admin_featured_media.preview_url and modern_admin_media_kind in ('image', 'fits') %}
             <img id="modern-admin-media-featured-image" src="{{ modern_admin_featured_media.preview_url }}" alt="{{ modern_admin_featured_media.title }}">
@@ -47,6 +39,14 @@ var camera_id = {{ camera_id }};
                 <span>{{ modern_admin_featured_media.age }}</span>
             </figcaption>
         </figure>
+        <div class="modern-admin-media-viewer-copy">
+            <p class="modern-admin-eyebrow">{{ modern_admin_featured_media.timeofday }}</p>
+            <h3 id="modern-admin-media-viewer-title">{{ modern_admin_featured_media.title }}</h3>
+            <p>{{ modern_admin_featured_media.created }}</p>
+            {% if modern_admin_featured_media.url %}
+            <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ modern_admin_featured_media.url }}" target="_blank" rel="noopener">Open read-only</a>
+            {% endif %}
+        </div>
     </section>
     {% endif %}
 
