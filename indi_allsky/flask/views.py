@@ -10298,6 +10298,161 @@ class ModernAdminSupportInfoView(ModernAdminContextMixin, SupportInfoView):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
+class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Media'
+    modern_admin_section = 'Media'
+    modern_admin_description = 'Recent media captured by this camera.'
+    modern_admin_media_kind = 'image'
+    modern_admin_media_model = None
+    modern_admin_media_limit = 24
+
+    def get_context(self):
+        context = super(ModernAdminMediaListView, self).get_context()
+
+        media_entries = self.get_media_entries()
+
+        context['modern_admin_section'] = self.modern_admin_section
+        context['modern_admin_description'] = self.modern_admin_description
+        context['modern_admin_media_kind'] = self.modern_admin_media_kind
+        context['modern_admin_media_items'] = [
+            self.serialize_media_entry(media_entry) for media_entry in media_entries
+        ]
+
+        return context
+
+
+    def get_media_entries(self):
+        if not self.modern_admin_media_model:
+            return list()
+
+        # Read-only media inventory; reuses the existing DB models behind classic viewers.
+        return self.modern_admin_media_model.query\
+            .join(self.modern_admin_media_model.camera)\
+            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+            .order_by(self.modern_admin_media_model.createDate.desc())\
+            .limit(self.modern_admin_media_limit)\
+            .all()
+
+
+    def serialize_media_entry(self, media_entry):
+        create_date = getattr(media_entry, 'createDate', None)
+        day_date = getattr(media_entry, 'dayDate', None)
+        file_size = getattr(media_entry, 'fileSize', None)
+        width = getattr(media_entry, 'width', None)
+        height = getattr(media_entry, 'height', None)
+        frames = getattr(media_entry, 'frames', None)
+
+        return {
+            'id'          : media_entry.id,
+            'title'       : self.format_media_title(media_entry),
+            'url'         : self.get_media_url(media_entry),
+            'filename'    : Path(media_entry.filename).name,
+            'created'     : create_date.strftime('%Y-%m-%d %H:%M:%S') if create_date else 'Unknown date',
+            'day_date'    : day_date.strftime('%Y-%m-%d') if day_date else 'Unknown day',
+            'age'         : self.format_image_age(create_date) if create_date else 'Unknown age',
+            'timeofday'   : self.format_media_timeofday(media_entry),
+            'size'        : self.format_storage_bytes(file_size) if file_size else 'Unknown size',
+            'dimensions'  : '{0:d} x {1:d}'.format(width, height) if width and height else 'Unknown dimensions',
+            'frames'      : '{0:d} frames'.format(frames) if frames else None,
+            'success'     : getattr(media_entry, 'success', None),
+        }
+
+
+    def get_media_url(self, media_entry):
+        local = True
+        if self.web_nonlocal_images:
+            if self.web_local_images_admin and self.verify_admin_network():
+                pass
+            else:
+                local = False
+                if not media_entry.remote_url and not media_entry.s3_key:
+                    return None
+
+        try:
+            return str(media_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
+        except ValueError as e:
+            app.logger.error('Error determining modern admin media URL: %s', str(e))
+            return None
+
+
+    def format_media_title(self, media_entry):
+        create_date = getattr(media_entry, 'createDate', None)
+        if create_date:
+            return create_date.strftime('%b %d, %H:%M')
+
+        day_date = getattr(media_entry, 'dayDate', None)
+        if day_date:
+            return day_date.strftime('%Y-%m-%d')
+
+        return Path(media_entry.filename).name
+
+
+    def format_media_timeofday(self, media_entry):
+        if not hasattr(media_entry, 'night'):
+            return 'Captured'
+
+        if media_entry.night:
+            return 'Night'
+
+        return 'Day'
+
+
+class ModernAdminMediaGalleryView(ModernAdminMediaListView):
+    page_title = 'Modern Admin Gallery'
+    modern_admin_section = 'Gallery'
+    modern_admin_description = 'Recent image gallery from the selected camera.'
+    modern_admin_media_model = IndiAllSkyDbImageTable
+    modern_admin_media_kind = 'image'
+
+
+class ModernAdminMediaImagesView(ModernAdminMediaListView):
+    page_title = 'Modern Admin Images'
+    modern_admin_section = 'Images'
+    modern_admin_description = 'Latest individual image captures.'
+    modern_admin_media_model = IndiAllSkyDbImageTable
+    modern_admin_media_kind = 'image'
+
+
+class ModernAdminMediaTimelapsesView(ModernAdminMediaListView):
+    page_title = 'Modern Admin Timelapses'
+    modern_admin_section = 'Timelapses'
+    modern_admin_description = 'Recent generated timelapse videos.'
+    modern_admin_media_model = IndiAllSkyDbVideoTable
+    modern_admin_media_kind = 'video'
+
+
+class ModernAdminMediaMiniTimelapsesView(ModernAdminMediaListView):
+    page_title = 'Modern Admin Mini-Timelapses'
+    modern_admin_section = 'Mini-Timelapses'
+    modern_admin_description = 'Recent short capture-window timelapses.'
+    modern_admin_media_model = IndiAllSkyDbMiniVideoTable
+    modern_admin_media_kind = 'video'
+
+
+class ModernAdminMediaPanoramaView(ModernAdminMediaListView):
+    page_title = 'Modern Admin Panorama'
+    modern_admin_section = 'Panorama'
+    modern_admin_description = 'Recent panorama image captures.'
+    modern_admin_media_model = IndiAllSkyDbPanoramaImageTable
+    modern_admin_media_kind = 'image'
+
+
+class ModernAdminMediaPanoramaLoopView(ModernAdminMediaListView):
+    page_title = 'Modern Admin Panorama Loop'
+    modern_admin_section = 'Panorama Loop'
+    modern_admin_description = 'Recent panorama frames available for loop review.'
+    modern_admin_media_model = IndiAllSkyDbPanoramaImageTable
+    modern_admin_media_kind = 'image'
+
+
+class ModernAdminMediaFitsView(ModernAdminMediaListView):
+    page_title = 'Modern Admin FITS Viewer'
+    modern_admin_section = 'FITS Viewer'
+    modern_admin_description = 'Recent saved FITS image files.'
+    modern_admin_media_model = IndiAllSkyDbFitsImageTable
+    modern_admin_media_kind = 'fits'
+
+
 class LongTermKeogramView(TemplateView):
     page_title = 'Long Term Keogram'
 
@@ -12318,6 +12473,14 @@ bp_allsky.add_url_rule('/ajax/videoviewer', view_func=AjaxVideoViewerView.as_vie
 
 bp_allsky.add_url_rule('/minivideoviewer', view_func=MiniVideoViewerView.as_view('mini_videoviewer_view', template_name='minivideoviewer.html'))
 bp_allsky.add_url_rule('/ajax/minivideoviewer', view_func=AjaxMiniVideoViewerView.as_view('ajax_mini_videoviewer_view'))
+
+bp_allsky.add_url_rule('/modern-admin/media/gallery', view_func=ModernAdminMediaGalleryView.as_view('modern_admin_media_gallery_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/images', view_func=ModernAdminMediaImagesView.as_view('modern_admin_media_images_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/timelapses', view_func=ModernAdminMediaTimelapsesView.as_view('modern_admin_media_timelapses_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))
 
 bp_allsky.add_url_rule('/view_image', view_func=TimelapseImageView.as_view('timelapse_image_view', template_name='view_image.html'))
 bp_allsky.add_url_rule('/view_panorama', view_func=PanoramaImageView.as_view('panorama_image_view', template_name='view_image.html'))

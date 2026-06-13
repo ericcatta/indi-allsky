@@ -111,27 +111,27 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdown">
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.gallery_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'gallery') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.gallery_view', 'indi_allsky.modern_admin_media_gallery_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/grid-3x2-gap-fill.svg') }}" width="16" height="16" alt="Image Viewer"><span class="ms-1 d-none d-sm-inline">Gallery</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.imageviewer_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'images') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.imageviewer_view', 'indi_allsky.modern_admin_media_images_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/image-fill.svg') }}" width="16" height="16" alt="Image Viewer"><span class="ms-1 d-none d-sm-inline">Images</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.videoviewer_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'timelapses') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.videoviewer_view', 'indi_allsky.modern_admin_media_timelapses_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/film.svg') }}" width="16" height="16" alt="Timelapse Viewer"><span class="ms-1 d-none d-sm-inline">Timelapses</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.mini_videoviewer_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'mini-timelapses') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.mini_videoviewer_view', 'indi_allsky.modern_admin_media_mini_timelapses_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/film.svg') }}" width="16" height="16" alt="Mini Timelapse Viewer"><span class="ms-1 d-none d-sm-inline">Mini-Timelapses</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.latest_panorama_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'panorama') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.latest_panorama_view', 'indi_allsky.modern_admin_media_panorama_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/aspect-ratio.svg') }}" width="16" height="16" alt="Panorama"><span class="ms-1 d-none d-sm-inline">Panorama</span></a>
                             </li>
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.panorama_loop_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'panorama-loop') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.panorama_loop_view', 'indi_allsky.modern_admin_media_panorama_loop_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/repeat.svg') }}" width="16" height="16" alt="Panorama Loop"><span class="ms-1 d-none d-sm-inline">Panorama Loop</span></a>
                             </li>
                             <li>
@@ -144,7 +144,7 @@
                             </li>
                             {% if current_user.is_authenticated or login_disabled %}
                             <li>
-                                <a href="{{ admin_nav_url('indi_allsky.fitsimageviewer_view', 'indi_allsky.modern_admin_classic_placeholder_view', 'fits-viewer') }}" class="dropdown-item">
+                                <a href="{{ admin_nav_url('indi_allsky.fitsimageviewer_view', 'indi_allsky.modern_admin_media_fits_view') }}" class="dropdown-item">
                                     <img src="{{ url_for('indi_allsky.static', filename='svg/image-fill.svg') }}" width="16" height="16" alt="FITS Viewer"><span class="ms-1 d-none d-sm-inline">FITS Viewer</span></a>
                             </li>
                             {% endif %}
