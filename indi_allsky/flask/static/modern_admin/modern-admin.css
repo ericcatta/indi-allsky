@@ -1343,6 +1343,10 @@ body.modern-admin-lightbox-open {
   overflow-wrap: anywhere;
 }
 
+.modern-admin-camera-switch-form {
+  margin: 0;
+}
+
 @media (max-width: 980px) {
   .modern-admin-hero {
     grid-template-columns: 1fr;

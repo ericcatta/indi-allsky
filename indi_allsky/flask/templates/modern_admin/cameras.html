@@ -17,6 +17,18 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-cameras-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
+    {% if modern_admin_camera_switch_error %}
+    <section class="modern-admin-message-panel modern-admin-message-error" aria-label="Camera switch error">
+        {{ modern_admin_camera_switch_error }}
+    </section>
+    {% endif %}
+
+    {% if modern_admin_camera_switch_success %}
+    <section class="modern-admin-message-panel modern-admin-message-success" aria-label="Camera switch success">
+        {{ modern_admin_camera_switch_success }}
+    </section>
+    {% endif %}
+
     <section class="modern-admin-placeholder-page" aria-label="Camera pages">
         <p class="modern-admin-eyebrow">Camera Views</p>
         <div class="modern-admin-link-grid">
@@ -74,7 +86,7 @@ var camera_id = {{ camera_id }};
             <article class="modern-admin-camera-card{% if camera.selected %} modern-admin-camera-card-active{% endif %}">
                 <div class="modern-admin-camera-card-header">
                     <p class="modern-admin-eyebrow">Camera</p>
-                    <span class="modern-admin-status-pill {% if camera.selected %}modern-admin-status-good{% else %}modern-admin-status-muted{% endif %}">{{ camera.badge }}</span>
+                    <span class="modern-admin-status-pill {% if camera.selected %}modern-admin-status-good{% else %}modern-admin-status-muted{% endif %}">{% if camera.selected %}Active{% else %}Available{% endif %}</span>
                 </div>
 
                 <div class="modern-admin-camera-card-main">
@@ -92,6 +104,15 @@ var camera_id = {{ camera_id }};
                         <strong>{{ camera.last_image_age }}</strong>
                     </div>
                 </div>
+                {% if camera.switch_enabled %}
+                <form class="modern-admin-camera-switch-form" method="post" action="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="camera_id" value="{{ camera.id }}">
+                    <button class="modern-admin-media-button" type="submit">Use this camera</button>
+                </form>
+                {% else %}
+                <p class="modern-admin-note">Current active camera.</p>
+                {% endif %}
             </article>
             {% endfor %}
         </div>

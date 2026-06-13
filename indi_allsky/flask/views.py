@@ -5186,9 +5186,15 @@ class ModernAdminContextMixin(object):
 class ModernAdminCamerasView(ModernAdminView):
     # Future camera management entry point. This first version is read-only.
     page_title = 'Modern Admin Cameras'
+    methods = ['GET', 'POST']
 
     def get_context(self):
         context = super(ModernAdminCamerasView, self).get_context()
+        context['modern_admin_camera_switch_error'] = None
+        context['modern_admin_camera_switch_success'] = None
+
+        if request.method == 'POST':
+            context.update(self.save_camera_switch_config())
 
         cameras = IndiAllSkyDbCameraTable.query\
             .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
@@ -5219,6 +5225,7 @@ class ModernAdminCamerasView(ModernAdminView):
                 'last_image_age' : last_image_age,
                 'selected'       : selected,
                 'badge'          : 'Active' if selected else status,
+                'switch_enabled' : not selected,
             })
 
         context['modern_admin_cameras'] = camera_list
@@ -5247,6 +5254,76 @@ class ModernAdminCamerasView(ModernAdminView):
             return 'Offline'
 
         return 'Unknown'
+
+
+    def save_camera_switch_config(self):
+        result = {
+            'modern_admin_camera_switch_error'   : None,
+            'modern_admin_camera_switch_success' : None,
+        }
+
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            result['modern_admin_camera_switch_error'] = 'Only an admin user can switch the active camera configuration.'
+            return result
+
+        try:
+            switch_camera_id = int(request.form.get('camera_id', 0))
+        except ValueError:
+            result['modern_admin_camera_switch_error'] = 'Invalid camera id.'
+            return result
+
+        camera = IndiAllSkyDbCameraTable.query\
+            .filter(IndiAllSkyDbCameraTable.id == switch_camera_id)\
+            .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
+            .first()
+
+        if not camera:
+            result['modern_admin_camera_switch_error'] = 'Camera not found.'
+            return result
+
+        if camera.id == self.camera.id:
+            result['modern_admin_camera_switch_error'] = 'This camera is already active.'
+            return result
+
+        new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
+        driver = str(camera.driver or '')
+        camera_name = str(camera.name or '')
+
+        if driver.startswith('libcamera_') or driver.startswith('mqtt_') or driver in ('indi_passive', 'indi_accumulator'):
+            new_config['CAMERA_INTERFACE'] = driver
+        else:
+            new_config['CAMERA_INTERFACE'] = 'indi'
+            new_config['INDI_CAMERA_NAME'] = camera_name
+
+        temp_config_p = None
+        try:
+            from ..config import IndiAllSkyConfigUtil
+
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json', encoding='utf-8') as temp_config_f:
+                json.dump(new_config, temp_config_f, indent=4)
+                temp_config_p = Path(temp_config_f.name)
+
+            with io.open(str(temp_config_p), 'r', encoding='utf-8') as temp_config_f:
+                # Reuse the Add Camera/config.py --force load behavior: save a complete config as a new active row.
+                IndiAllSkyConfigUtil().load(config=temp_config_f, force=True)
+
+            camera_label = camera.friendlyName or camera.name or 'selected camera'
+            result['modern_admin_camera_switch_success'] = (
+                'Saved a new active configuration for {0:s}. Restart indi-allsky to start capture with this camera.'.format(str(camera_label))
+            )
+
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error('Error saving modern admin camera switch config: %s', str(e))
+            result['modern_admin_camera_switch_error'] = 'Unable to save camera switch configuration: {0:s}'.format(str(e))
+        finally:
+            if temp_config_p:
+                try:
+                    temp_config_p.unlink()
+                except FileNotFoundError:
+                    pass
+
+        return result
 
 
 class ModernAdminCameraAddView(ModernAdminView):
