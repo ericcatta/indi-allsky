@@ -89,7 +89,10 @@ class ImageWorker(Process):
         self.name = 'Image-{0:d}'.format(idx)
 
         self.config = config
+        # MULTI_CAMERA_PREP: default route context for the current
+        # single-camera runtime. It is refreshed from each image_q payload.
         self.profile_id = 'default'
+        self.current_camera_id = None
 
         self.error_q = error_q
         self.image_q = image_q
@@ -170,6 +173,41 @@ class ImageWorker(Process):
 
 
         self._shutdown = False
+
+
+    def _validate_profile_id(self, i_dict):
+        # MULTI_CAMERA_PREP: accept a stable route id without changing image
+        # routing. Missing/blank profile ids fall back to the legacy default.
+        raw_profile_id = i_dict.get('profile_id', 'default')
+        profile_id = str(raw_profile_id or 'default')
+
+        if profile_id != raw_profile_id and raw_profile_id is not None:
+            logger.warning('Invalid image profile_id, using default')
+            return 'default'
+
+        return profile_id
+
+
+    def _set_queue_context(self, profile_id, camera_id):
+        # MULTI_CAMERA_PREP: mirror the active image route on this worker and
+        # on helpers that enqueue follow-up upload tasks.
+        self.profile_id = profile_id
+        self.current_camera_id = camera_id
+        self._miscUpload.profile_id = profile_id
+
+
+    def _queue_upload_task(self, task, camera_id=None, profile_id=None):
+        # MULTI_CAMERA_PREP: passive route metadata; FileUploader still loads
+        # and executes the existing DB task by task_id.
+        payload = {
+            'task_id'    : task.id,
+            'profile_id' : profile_id or self.profile_id,
+        }
+
+        if camera_id:
+            payload['camera_id'] = camera_id
+
+        self.upload_q.put(payload)
 
 
     @property
@@ -296,7 +334,8 @@ class ImageWorker(Process):
         camera_id = i_dict['camera_id']
         # MULTI_CAMERA_PREP: passive route id; image processing still uses the
         # existing camera_id and shared state behavior.
-        profile_id = i_dict.get('profile_id', 'default')
+        profile_id = self._validate_profile_id(i_dict)
+        self._set_queue_context(profile_id, camera_id)
         filename_t = i_dict.get('filename_t')
         sqm_exposure = i_dict.get('sqm_exposure')
         logger.debug('Image queue route: profile=%s camera_id=%s', profile_id, camera_id)
@@ -1224,7 +1263,7 @@ class ImageWorker(Process):
         db.session.commit()
 
         # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
-        self.upload_q.put({'task_id' : upload_task.id, 'profile_id' : self.profile_id})
+        self._queue_upload_task(upload_task, camera_id=i_ref.camera_id)
 
 
     def getSqmData(self, camera_id):
