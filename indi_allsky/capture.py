@@ -39,6 +39,7 @@ from .exceptions import TimeOutException
 from .exceptions import TemperatureException
 
 from .camera_runtime_state import CameraRuntimeState
+from .camera_shared_state import CameraSharedState
 from .capture_profiles import derive_capture_profiles
 
 from .flask import create_app
@@ -222,6 +223,7 @@ class CaptureWorker(Process):
         night_av,
         astro_av,
         capture_profile=None,
+        camera_shared_state=None,
     ):
 
         super(CaptureWorker, self).__init__()
@@ -248,15 +250,33 @@ class CaptureWorker(Process):
         self.video_q = video_q
         self.upload_q = upload_q
 
-        self.position_av = position_av
-        self.exposure_av = exposure_av
-        self.gain_av = gain_av
-        self.binning_av = binning_av
+        # MULTI_CAMERA_PREP: adapter mirrors the legacy shared arrays. The
+        # worker still uses the same attribute names and array objects.
+        if camera_shared_state is None:
+            camera_shared_state = CameraSharedState(
+                profile_id=self.capture_profile.profile_id,
+                position_av=position_av,
+                exposure_av=exposure_av,
+                gain_av=gain_av,
+                binning_av=binning_av,
+                sensors_temp_av=sensors_temp_av,
+                sensors_user_av=sensors_user_av,
+                night_av=night_av,
+                astro_av=astro_av,
+            )
 
-        self.sensors_temp_av = sensors_temp_av  # 0 ccd_temp
-        self.sensors_user_av = sensors_user_av  # 0 ccd_temp
-        self.night_av = night_av
-        self.astro_av = astro_av
+        self.camera_shared_state = camera_shared_state
+        logger.debug('Capture worker shared state: %s', self.camera_shared_state.summary())
+
+        self.position_av = self.camera_shared_state.position_av
+        self.exposure_av = self.camera_shared_state.exposure_av
+        self.gain_av = self.camera_shared_state.gain_av
+        self.binning_av = self.camera_shared_state.binning_av
+
+        self.sensors_temp_av = self.camera_shared_state.sensors_temp_av  # 0 ccd_temp
+        self.sensors_user_av = self.camera_shared_state.sensors_user_av  # 0 ccd_temp
+        self.night_av = self.camera_shared_state.night_av
+        self.astro_av = self.camera_shared_state.astro_av
 
         self._miscDb = miscDb(self.config)
         self._dateCalcs = IndiAllSkyDateCalcs(self.config, self.position_av)

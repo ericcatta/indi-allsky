@@ -24,6 +24,7 @@ from .version import __version__
 from .version import __config_level__
 
 from .config import IndiAllSkyConfig
+from .camera_shared_state import CameraSharedState
 from .capture_profiles import derive_capture_profiles
 
 from . import constants
@@ -208,6 +209,21 @@ class IndiAllSky(object):
             0.0,  # moon alt
             0.0,  # moon percent
         ])
+
+        # MULTI_CAMERA_PREP: one adapter object wraps the existing global
+        # shared arrays. Runtime still reads/writes the same arrays directly.
+        self.camera_shared_state = CameraSharedState(
+            profile_id=self.capture_profiles[0].profile_id,
+            position_av=self.position_av,
+            exposure_av=self.exposure_av,
+            gain_av=self.gain_av,
+            binning_av=self.binning_av,
+            sensors_temp_av=self.sensors_temp_av,
+            sensors_user_av=self.sensors_user_av,
+            night_av=self.night_av,
+            astro_av=self.astro_av,
+        )
+        logger.debug('Camera shared state initialized: %s', self.camera_shared_state.summary())
 
 
         self.capture_q = Queue()
@@ -449,6 +465,7 @@ class IndiAllSky(object):
             # MULTI_CAMERA_PREP: still start exactly one worker, bound to the
             # first profile derived from the legacy single-camera config.
             self.capture_profiles[0],
+            self.camera_shared_state,
         )
         self.capture_worker.start()
 
