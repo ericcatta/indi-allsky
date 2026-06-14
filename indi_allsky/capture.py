@@ -38,6 +38,7 @@ from .exceptions import CameraException
 from .exceptions import TimeOutException
 from .exceptions import TemperatureException
 
+from .camera_runtime_state import CameraRuntimeState
 from .capture_profiles import derive_capture_profiles
 
 from .flask import create_app
@@ -235,7 +236,11 @@ class CaptureWorker(Process):
 
         self.capture_profile = capture_profile
         self.capture_camera_interface = capture_profile.camera_interface
+        # MULTI_CAMERA_PREP: passive mirror for future per-camera runtime
+        # state. Existing variables/shared arrays remain authoritative.
+        self.camera_runtime_state = CameraRuntimeState()
         logger.debug('Capture worker profile: %s', self.capture_profile.as_dict())
+        logger.debug('Camera runtime state initialized: %s', self.camera_runtime_state.as_dict())
 
         self.error_q = error_q
         self.capture_q = capture_q
@@ -402,11 +407,16 @@ class CaptureWorker(Process):
 
 
             if self.indiclient.disconnected:
+                self.camera_runtime_state.connected = False
+                self.camera_runtime_state.ready = False
+                self.camera_runtime_state.busy = False
                 logger.error('indiclient indicates indiserver disconnected, restarting capture process')
                 return
 
 
             if self.indiclient.ccd_removed:
+                self.camera_runtime_state.ready = False
+                self.camera_runtime_state.busy = False
                 # INDI >= 2.1.7 supports hotplugging cameras
                 # If a [USB] camera is disconnected, it should automatically be detected when reconnected
                 # Older than 2.1.7 requires indiserver to be restarted
@@ -624,6 +634,12 @@ class CaptureWorker(Process):
                         waiting_for_sqm_frame = False
 
 
+                    # MULTI_CAMERA_PREP: mirror local loop state without
+                    # changing the existing control flow.
+                    self.camera_runtime_state.ready = bool(camera_ready)
+                    self.camera_runtime_state.busy = not bool(camera_ready)
+
+
                     if not camera_ready:
                         continue
 
@@ -640,6 +656,7 @@ class CaptureWorker(Process):
 
                         waiting_for_frame = False
                         waiting_for_sqm_frame = False
+                        self.camera_runtime_state.last_frame_ts = now_time
 
                         logger.info('Exposure received in %0.4fs (%+0.4fs)', frame_elapsed, frame_delta)
 
@@ -859,6 +876,7 @@ class CaptureWorker(Process):
         # connect to indi server
         logger.info("Connecting to indiserver")
         if not self.indiclient.connectServer():
+            self.camera_runtime_state.connected = False
             host = self.indiclient.getHost()
             port = self.indiclient.getPort()
 
@@ -874,6 +892,8 @@ class CaptureWorker(Process):
             )
 
             raise IndiServerException('indiserver not available')
+
+        self.camera_runtime_state.connected = True
 
 
         # give devices a chance to register
@@ -915,9 +935,11 @@ class CaptureWorker(Process):
 
         # add driver name to config
         self.camera_name = self.indiclient.ccd_device.getDeviceName()
+        self.camera_runtime_state.camera_name = self.camera_name
         self._miscDb.setState('CAMERA_NAME', self.camera_name)
 
         self.camera_server = self.indiclient.ccd_device.getDriverExec()
+        self.camera_runtime_state.camera_server = self.camera_server
         self._miscDb.setState('CAMERA_SERVER', self.camera_server)
 
 
@@ -1146,6 +1168,7 @@ class CaptureWorker(Process):
 
 
         self.camera_id = camera.id
+        self.camera_runtime_state.camera_id = camera.id
         self.indiclient.camera_id = camera.id
 
         self._miscDb.setState('DB_CAMERA_ID', camera.id)
@@ -1476,6 +1499,7 @@ class CaptureWorker(Process):
                 self.exposure_av[constants.EXPOSURE_NEXT] = float(ccd_exposure_default)
                 self.exposure_av[constants.EXPOSURE_DELTA] = 0.0
 
+        self.camera_runtime_state.current_exposure = float(self.exposure_av[constants.EXPOSURE_CURRENT])
 
         logger.info('Default CCD exposure: %0.8f', ccd_exposure_default)
 
@@ -1500,6 +1524,7 @@ class CaptureWorker(Process):
                 self.gain_av[constants.GAIN_MIN_NIGHT] = float(gain_night)
                 self.gain_av[constants.GAIN_MIN_MOONMODE] = float(gain_moonmode)
 
+        self.camera_runtime_state.current_gain = float(self.gain_av[constants.GAIN_CURRENT])
 
         logger.info('Minimum CCD gain: %0.2f (day)', self.gain_av[constants.GAIN_MIN_DAY])
         logger.info('Maximum CCD gain: %0.2f (day)', self.gain_av[constants.GAIN_MAX_DAY])
@@ -1519,6 +1544,7 @@ class CaptureWorker(Process):
             self.binning_av[constants.BINNING_MOONMODE] = int(binning_moonmode)
             self.binning_av[constants.BINNING_SQM] = int(binning_sqm)
 
+        self.camera_runtime_state.current_binning = int(self.binning_av[constants.BINNING_CURRENT])
 
         logger.info('CCD binning: %d (day)', self.binning_av[constants.BINNING_DAY])
         logger.info('CCD binning: %d (night)', self.binning_av[constants.BINNING_NIGHT])
@@ -1617,6 +1643,7 @@ class CaptureWorker(Process):
             else:
                 self.sensors_user_av[constants.SENSOR_USER_CCD_TEMP] = temp_c_float
 
+        self.camera_runtime_state.current_temperature = temp_c_float
 
         return temp_c_float
 
@@ -2264,6 +2291,13 @@ class CaptureWorker(Process):
         # sqm used for an image taking at a specific exposure/gain for a controlled SQM measurement
         logger.info('Taking %0.8fs exposure (gain %0.2f / bin %d)', exposure, gain, binning)
 
+        # MULTI_CAMERA_PREP: mirror requested capture parameters; the camera
+        # driver call below remains the only behavior-changing operation.
+        self.camera_runtime_state.current_exposure = float(exposure)
+        self.camera_runtime_state.current_gain = float(gain)
+        self.camera_runtime_state.current_binning = int(binning)
+        self.camera_runtime_state.ready = False
+        self.camera_runtime_state.busy = True
         self.indiclient.setCcdExposure(exposure, gain, binning, sync=sync, timeout=timeout, sqm_exposure=sqm_exposure)
 
 
