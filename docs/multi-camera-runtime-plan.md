@@ -829,6 +829,229 @@ Rollback:
 - restart service
 - default single-camera behavior resumes
 
+## 12. MVP Images-Only Implementation Plan
+
+This section defines the first practical implementation target for simultaneous IMX708 + ASI678MC capture. It is intentionally narrower than the long-term architecture: capture still runs inside one indi-allsky service, no DB schema changes are required, no Modern Admin UI changes are required, and default behavior stays single-camera.
+
+### Feature Flag
+
+Add one top-level feature flag, default off:
+
+```json
+"MULTI_CAMERA_CAPTURE_ENABLE": false
+```
+
+Behavior:
+
+- `false`: start exactly one `CaptureWorker`, using the first/default `CaptureProfile`, preserving current runtime behavior.
+- `true`: start one `CaptureWorker` per enabled capture profile, but only for profiles explicitly marked enabled.
+
+The flag should be treated as experimental. It should not be enabled automatically by camera registration, config migration, or Modern Admin camera switching.
+
+### Proposed Config Format
+
+The MVP should keep the current single-camera config as the source of truth for normal installs and add an optional `MULTI_CAMERA` section. If the section is missing or the feature flag is off, runtime behavior remains unchanged.
+
+Example shape:
+
+```json
+{
+  "MULTI_CAMERA_CAPTURE_ENABLE": false,
+  "MULTI_CAMERA": {
+    "profiles": [
+      {
+        "profile_id": "imx708-wide",
+        "enabled": true,
+        "primary": true,
+        "label": "Camera Module V3 Wide",
+        "camera_interface": "libcamera_imx708",
+        "camera_name": "libcamera_imx708",
+        "camera_id_hint": 0,
+        "libcamera": {
+          "camera_id": 0
+        },
+        "outputs": {
+          "images": true,
+          "timelapse": true,
+          "keogram": true,
+          "realtime_keogram": true,
+          "longterm_keogram": true,
+          "startrails": true,
+          "panorama": true,
+          "extra_uploads": true
+        }
+      },
+      {
+        "profile_id": "asi678mc",
+        "enabled": false,
+        "primary": false,
+        "label": "ASI678MC",
+        "camera_interface": "indi",
+        "camera_name": "ZWO CCD ASI678MC",
+        "indi": {
+          "server": "localhost",
+          "port": 7625,
+          "camera_name": "ZWO CCD ASI678MC"
+        },
+        "outputs": {
+          "images": true,
+          "timelapse": false,
+          "keogram": false,
+          "realtime_keogram": false,
+          "longterm_keogram": false,
+          "startrails": false,
+          "panorama": false,
+          "extra_uploads": false
+        }
+      }
+    ]
+  }
+}
+```
+
+Notes:
+
+- `profile_id` is the runtime routing key.
+- `camera_id` from the DB remains the media ownership key.
+- `primary=true` identifies the camera that preserves existing dashboard/latest-output expectations.
+- `enabled=true` means the profile may be started when the feature flag is on.
+- The secondary ASI678MC profile should remain disabled until Eric intentionally enables the experiment.
+
+### Profiles For Eric's MVP
+
+Primary profile:
+
+- `profile_id`: `imx708-wide`
+- interface: `libcamera_imx708`
+- camera: Raspberry Pi Camera Module V3 Wide / IMX708
+- output behavior: unchanged from the current working setup
+- purpose: keep the existing all-sky workflow stable
+
+Secondary profile:
+
+- `profile_id`: `asi678mc`
+- interface: `indi`
+- camera: `ZWO CCD ASI678MC`
+- INDI host/port: `localhost:7625`
+- output behavior: images only
+- purpose: prove simultaneous capture and DB/media separation without enabling expensive generated products
+
+### Disabled In The First MVP
+
+For the secondary ASI678MC profile, keep these disabled:
+
+- timelapse
+- mini timelapse
+- keogram
+- realtime keogram
+- longterm keogram
+- startrails
+- panorama
+- panorama loop
+- extra upload tasks
+- automatic end-of-night generated products
+
+The primary IMX708 profile can keep existing behavior. The MVP should not attempt to make every generated product multi-camera-safe in the first simultaneous capture test.
+
+### Image Routing
+
+The first MVP should route images using metadata that already exists or has been prepared:
+
+- `profile_id`: stable runtime profile id, used by worker logs and future routing
+- `camera_id`: DB camera id, used for media ownership and queries
+
+Capture flow:
+
+```text
+CaptureWorker(profile_id=imx708-wide) -> image_q payload with profile_id + camera_id
+CaptureWorker(profile_id=asi678mc)    -> image_q payload with profile_id + camera_id
+ImageWorker                           -> stores/updates image rows by camera_id
+```
+
+`ImageWorker` may remain shared for the MVP. It should validate `profile_id`, log it, and continue using `camera_id` for DB/media operations. This keeps processing serialized and avoids starting two independent image processing pipelines too early.
+
+### Avoiding Mixing In Gallery And Images
+
+The DB/media model already links image rows to `camera_id`. The MVP should rely on that and avoid any new global latest-image assumption for the secondary camera.
+
+Rules:
+
+- Gallery and Images must always filter or label by `camera_id` when a camera context is selected.
+- The primary dashboard/latest image can continue to use the primary camera.
+- Secondary ASI678MC images should appear under their own camera identity.
+- Any "all cameras" view must show camera labels clearly.
+- Do not infer camera ownership from file path alone.
+- Do not merge secondary camera images into primary latest-image widgets unless explicitly requested later.
+
+If an existing page cannot safely distinguish cameras, keep it primary-camera-only for the MVP rather than mixing records.
+
+### Rollback Plan
+
+Safe rollback should be config-only:
+
+1. Set `"MULTI_CAMERA_CAPTURE_ENABLE": false`.
+2. Ensure the ASI678MC profile has `"enabled": false`.
+3. Restart `indi-allsky`.
+4. Confirm only the IMX708 `CaptureWorker` starts.
+5. Leave existing ASI678MC DB camera rows and images in place; do not delete media or DB rows.
+6. Stop the ASI678MC `indiserver` user service if it is not needed.
+
+Expected result:
+
+- IMX708 behavior returns to the current single-camera path.
+- Previously captured ASI678MC media remains visible historically where camera-aware pages support it.
+- No schema rollback is required.
+
+### Raspberry Test Plan
+
+Pre-flight:
+
+1. Confirm current IMX708 single-camera capture works with the feature flag off.
+2. Confirm ASI678MC is visible via `indi_getprop` against `localhost:7625`.
+3. Confirm ASI678MC has a DB camera row and appears in Modern Admin Cameras.
+4. Confirm enough free disk space for two image streams.
+
+Dry run:
+
+1. Add the `MULTI_CAMERA` config section with ASI678MC disabled.
+2. Keep `"MULTI_CAMERA_CAPTURE_ENABLE": false`.
+3. Restart `indi-allsky`.
+4. Confirm runtime behavior is unchanged.
+
+Feature-flag test:
+
+1. Enable `"MULTI_CAMERA_CAPTURE_ENABLE": true`.
+2. Enable only the IMX708 profile first.
+3. Restart `indi-allsky`.
+4. Confirm behavior is still equivalent to current single-camera capture.
+
+Two-camera images-only test:
+
+1. Start the ASI678MC `indiserver` user service on port `7625`.
+2. Enable the ASI678MC profile with images-only outputs.
+3. Restart `indi-allsky`.
+4. Confirm logs show two capture profiles and two capture workers.
+5. Confirm both workers enqueue image payloads with distinct `profile_id` values.
+6. Confirm both cameras write image rows with distinct `camera_id` values.
+7. Confirm Gallery/Images do not mix camera identities.
+8. Watch CPU, memory, queue depth, storage growth, USB errors, INDI disconnects, and libcamera errors for at least one short daytime test.
+
+Overnight pilot:
+
+1. Keep ASI678MC generated products disabled.
+2. Keep uploads for ASI678MC disabled.
+3. Let IMX708 continue full normal output.
+4. Verify in the morning that IMX708 generated products remain correct and ASI678MC has only image records.
+
+Failure criteria:
+
+- IMX708 capture stops or loses normal generated products.
+- `ImageWorker` crashes or queue depth grows without recovery.
+- Gallery/Images mix cameras without labels.
+- ASI678MC disconnects repeatedly and restarts destabilize the primary profile.
+
+On failure, use the rollback plan immediately.
+
 ### Step 11: Per-Camera Output Toggles
 
 Difficulty: Medium
