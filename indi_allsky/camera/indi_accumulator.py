@@ -247,6 +247,7 @@ class IndiClientIndiAccumulator(IndiClient):
             'exp_time'    : datetime.timestamp(exp_date),  # datetime objects are not json serializable
             'exp_elapsed' : exposure_elapsed_s,
             'camera_id'   : self.camera_id,
+            'profile_id'  : getattr(self, 'profile_id', 'default'),
             'filename_t'  : self._filename_t,
         }
 
@@ -298,4 +299,3 @@ class IndiClientIndiAccumulator(IndiClient):
         self.ccd_min_exp = float(ccd_info['CCD_EXPOSURE']['CCD_EXPOSURE_VALUE']['min'])
 
         return ccd_info
-

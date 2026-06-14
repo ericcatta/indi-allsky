@@ -487,6 +487,36 @@ class IndiAllSky(object):
         self.capture_worker.join()
 
 
+    def _queue_video_task(self, task):
+        # MULTI_CAMERA_PREP: passive route metadata for future queue routing.
+        # VideoWorker still loads the existing DB task by task_id.
+        payload = {
+            'task_id'    : task.id,
+            'profile_id' : self.capture_profiles[0].profile_id,
+        }
+
+        camera_id = task.data.get('kwargs', {}).get('camera_id')
+        if camera_id:
+            payload['camera_id'] = camera_id
+
+        self.video_q.put(payload)
+
+
+    def _queue_upload_task(self, task):
+        # MULTI_CAMERA_PREP: passive route metadata for future queue routing.
+        # FileUploader still loads the existing DB task by task_id.
+        payload = {
+            'task_id'    : task.id,
+            'profile_id' : self.capture_profiles[0].profile_id,
+        }
+
+        camera_id = task.data.get('kwargs', {}).get('camera_id')
+        if camera_id:
+            payload['camera_id'] = camera_id
+
+        self.upload_q.put(payload)
+
+
     def _startImageWorker(self):
         from .image import ImageWorker
 
@@ -849,7 +879,7 @@ class IndiAllSky(object):
         db.session.add(task)
         db.session.commit()
 
-        self.video_q.put({'task_id' : task.id})
+        self._queue_video_task(task)
 
 
     def dbImportImages(self):
@@ -1354,12 +1384,12 @@ class IndiAllSky(object):
             if task.queue == TaskQueueQueue.VIDEO:
                 logger.info('Queuing manual video task %d', task.id)
                 task.setQueued()
-                self.video_q.put({'task_id' : task.id})
+                self._queue_video_task(task)
 
             elif task.queue == TaskQueueQueue.UPLOAD:
                 logger.info('Queuing manual upload task %d', task.id)
                 task.setQueued()
-                self.upload_q.put({'task_id' : task.id})
+                self._queue_upload_task(task)
 
             elif task.queue == TaskQueueQueue.MAIN:
                 logger.info('Picked up MAIN task')
@@ -1515,7 +1545,7 @@ class IndiAllSky(object):
             db.session.add(task)
             db.session.commit()
 
-            self.video_q.put({'task_id' : task.id})
+            self._queue_video_task(task)
 
 
     def _updateSmokeData(self, task_state=TaskQueueState.QUEUED):
@@ -1541,7 +1571,7 @@ class IndiAllSky(object):
             db.session.add(task)
             db.session.commit()
 
-            self.video_q.put({'task_id' : task.id})
+            self._queue_video_task(task)
 
 
     def _updateSatelliteTleData(self, task_state=TaskQueueState.QUEUED):
@@ -1558,7 +1588,7 @@ class IndiAllSky(object):
         db.session.add(task)
         db.session.commit()
 
-        self.video_q.put({'task_id' : task.id})
+        self._queue_video_task(task)
 
 
     def _backupDatabase(self, task_state=TaskQueueState.QUEUED):
@@ -1575,7 +1605,7 @@ class IndiAllSky(object):
         db.session.add(task)
         db.session.commit()
 
-        self.video_q.put({'task_id' : task.id})
+        self._queue_video_task(task)
 
 
     def updateConfigLocation(self, latitude, longitude, elevation, camera_id):

@@ -89,6 +89,7 @@ class ImageWorker(Process):
         self.name = 'Image-{0:d}'.format(idx)
 
         self.config = config
+        self.profile_id = 'default'
 
         self.error_q = error_q
         self.image_q = image_q
@@ -293,8 +294,12 @@ class ImageWorker(Process):
         exp_date = datetime.fromtimestamp(i_dict['exp_time'])
         exp_elapsed = i_dict['exp_elapsed']
         camera_id = i_dict['camera_id']
+        # MULTI_CAMERA_PREP: passive route id; image processing still uses the
+        # existing camera_id and shared state behavior.
+        profile_id = i_dict.get('profile_id', 'default')
         filename_t = i_dict.get('filename_t')
         sqm_exposure = i_dict.get('sqm_exposure')
+        logger.debug('Image queue route: profile=%s camera_id=%s', profile_id, camera_id)
 
 
         # libcamera
@@ -1218,7 +1223,8 @@ class ImageWorker(Process):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
+        self.upload_q.put({'task_id' : upload_task.id, 'profile_id' : self.profile_id})
 
 
     def getSqmData(self, camera_id):
@@ -2807,4 +2813,3 @@ class ImageWorker(Process):
         with self.sensors_user_av.get_lock():
             self.sensors_user_av[constants.SENSOR_USER_CAMERA_SQM_MAG] = float(mag_sqm)
             self.sensors_user_av[constants.SENSOR_USER_CAMERA_SQM_ADU] = float(raw_adu)
-

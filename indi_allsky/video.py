@@ -99,6 +99,7 @@ class VideoWorker(Process):
         os.nice(19)  # lower priority
 
         self.config = config
+        self.profile_id = 'default'
 
         self.error_q = error_q
         self.video_q = video_q
@@ -195,6 +196,10 @@ class VideoWorker(Process):
 
     def processTask(self, v_dict):
         task_id = v_dict['task_id']
+        # MULTI_CAMERA_PREP: passive route id; video processing still loads
+        # and executes the existing DB task by id.
+        profile_id = v_dict.get('profile_id', 'default')
+        logger.debug('Video queue route: profile=%s camera_id=%s task_id=%s', profile_id, v_dict.get('camera_id'), task_id)
 
         try:
             task = IndiAllSkyDbTaskQueueTable.query\
@@ -1834,7 +1839,8 @@ class VideoWorker(Process):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
+        self.upload_q.put({'task_id' : upload_task.id, 'profile_id' : self.profile_id})
 
         task.setSuccess('Uploaded EndOfNight data')
 
@@ -2271,5 +2277,3 @@ class VideoWorker(Process):
 
 
         return mask_dict
-
-

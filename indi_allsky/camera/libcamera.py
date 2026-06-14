@@ -562,6 +562,7 @@ class IndiClientLibCameraGeneric(IndiClient):
             'exp_time'    : datetime.timestamp(exp_date),  # datetime objects are not json serializable
             'exp_elapsed' : exposure_elapsed_s,
             'camera_id'   : self.camera_id,
+            'profile_id'  : getattr(self, 'profile_id', 'default'),
             'filename_t'  : self._filename_t,
             'libcamera_black_level' : self._black_level,
             'libcamera_awb_gains'   : self._awb_gains,
@@ -1231,4 +1232,3 @@ class IndiClientLibCameraImx335(IndiClientLibCameraGeneric):
         self._binmode_options = {
             1 : '',
         }
-

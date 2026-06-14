@@ -44,6 +44,7 @@ class FileUploader(Thread):
         self.name = 'Upload-{0:d}'.format(idx)
 
         self.config = config
+        self.profile_id = 'default'
 
         self._miscDb = miscDb(self.config)
 
@@ -141,6 +142,10 @@ class FileUploader(Thread):
 
     def processUpload(self, u_dict):
         task_id = u_dict['task_id']
+        # MULTI_CAMERA_PREP: passive route id; upload still loads and
+        # executes the existing DB task by id.
+        profile_id = u_dict.get('profile_id', 'default')
+        logger.debug('Upload queue route: profile=%s camera_id=%s task_id=%s', profile_id, u_dict.get('camera_id'), task_id)
 
 
         try:
@@ -659,5 +664,5 @@ class FileUploader(Thread):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
-
+        # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
+        self.upload_q.put({'task_id' : upload_task.id, 'profile_id' : self.profile_id})

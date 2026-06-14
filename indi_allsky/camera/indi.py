@@ -405,6 +405,7 @@ class IndiClient(PyIndi.BaseClient):
             'exp_time'    : datetime.timestamp(exp_date),  # datetime objects are not json serializable
             'exp_elapsed' : exposure_elapsed_s,
             'camera_id'   : self.camera_id,
+            'profile_id'  : getattr(self, 'profile_id', 'default'),
             'filename_t'  : self._filename_t,
         }
 
@@ -1662,5 +1663,4 @@ class IndiClient(PyIndi.BaseClient):
         control = control if control else self.get_control(device, control_name, control_type)
 
         return [get_dict(c) for c in control]
-
 

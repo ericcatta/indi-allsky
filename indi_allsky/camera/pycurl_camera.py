@@ -304,6 +304,7 @@ class IndiClientPycurl(IndiClient):
             'exp_time'    : datetime.timestamp(exp_date),  # datetime objects are not json serializable
             'exp_elapsed' : exposure_elapsed_s,
             'camera_id'   : self.camera_id,
+            'profile_id'  : getattr(self, 'profile_id', 'default'),
             'filename_t'  : self._filename_t,
         }
 
@@ -457,4 +458,3 @@ class IndiClientPycurl(IndiClient):
     def setCcdScopeInfo(self, *args):
         # not supported
         pass
-

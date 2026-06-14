@@ -35,6 +35,7 @@ class miscUpload(object):
         self.config = config
         self.upload_q = upload_q
         self.night_av = night_av
+        self.profile_id = 'default'
 
 
         self._image_count = 0
@@ -42,6 +43,11 @@ class miscUpload(object):
         self._panorama_count = 0
         self._panorama_syncapi_count = 0
         self._realtime_keogram_count = 0
+
+
+    def _queue_upload_task(self, task):
+        # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
+        self.upload_q.put({'task_id' : task.id, 'profile_id' : self.profile_id})
 
 
     def upload_image(self, image_entry):
@@ -113,7 +119,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
         if self.config.get('FILETRANSFER', {}).get('UPLOAD_LATEST_IMAGE'):
@@ -138,7 +144,7 @@ class miscUpload(object):
             db.session.add(latest_upload_task)
             db.session.commit()
 
-            self.upload_q.put({'task_id' : latest_upload_task.id})
+            self._queue_upload_task(latest_upload_task)
 
 
     def upload_video(self, video_entry):
@@ -191,7 +197,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
         if self.config.get('FILETRANSFER', {}).get('UPLOAD_LATEST_VIDEO'):
@@ -216,7 +222,7 @@ class miscUpload(object):
             db.session.add(latest_upload_task)
             db.session.commit()
 
-            self.upload_q.put({'task_id' : latest_upload_task.id})
+            self._queue_upload_task(latest_upload_task)
 
 
     def upload_mini_video(self, video_entry):
@@ -269,7 +275,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
     def upload_panorama_video(self, video_entry):
@@ -322,7 +328,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
         if self.config.get('FILETRANSFER', {}).get('UPLOAD_LATEST_VIDEO'):
@@ -347,7 +353,7 @@ class miscUpload(object):
             db.session.add(latest_upload_task)
             db.session.commit()
 
-            self.upload_q.put({'task_id' : latest_upload_task.id})
+            self._queue_upload_task(latest_upload_task)
 
 
     def upload_keogram(self, keogram_entry):
@@ -400,7 +406,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
         if self.config.get('FILETRANSFER', {}).get('UPLOAD_LATEST_VIDEO'):
@@ -425,7 +431,7 @@ class miscUpload(object):
             db.session.add(latest_upload_task)
             db.session.commit()
 
-            self.upload_q.put({'task_id' : latest_upload_task.id})
+            self._queue_upload_task(latest_upload_task)
 
 
     def upload_startrail(self, startrail_entry):
@@ -478,7 +484,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
         if self.config.get('FILETRANSFER', {}).get('UPLOAD_LATEST_VIDEO'):
@@ -503,7 +509,7 @@ class miscUpload(object):
             db.session.add(latest_upload_task)
             db.session.commit()
 
-            self.upload_q.put({'task_id' : latest_upload_task.id})
+            self._queue_upload_task(latest_upload_task)
 
 
     def upload_startrail_video(self, startrail_video_entry):
@@ -556,7 +562,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
         if self.config.get('FILETRANSFER', {}).get('UPLOAD_LATEST_VIDEO'):
@@ -581,7 +587,7 @@ class miscUpload(object):
             db.session.add(latest_upload_task)
             db.session.commit()
 
-            self.upload_q.put({'task_id' : latest_upload_task.id})
+            self._queue_upload_task(latest_upload_task)
 
 
     def upload_panorama(self, panorama_entry):
@@ -648,7 +654,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
         if self.config.get('FILETRANSFER', {}).get('UPLOAD_LATEST_PANORAMA'):
@@ -673,7 +679,7 @@ class miscUpload(object):
             db.session.add(latest_upload_task)
             db.session.commit()
 
-            self.upload_q.put({'task_id' : latest_upload_task.id})
+            self._queue_upload_task(latest_upload_task)
 
 
     def upload_realtime_keogram(self, keogram_file, camera):
@@ -737,7 +743,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
     def upload_raw_image(self, raw_image_entry):
@@ -790,7 +796,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
         if self.config.get('FILETRANSFER', {}).get('UPLOAD_LATEST_RAW'):
@@ -815,7 +821,7 @@ class miscUpload(object):
             db.session.add(latest_upload_task)
             db.session.commit()
 
-            self.upload_q.put({'task_id' : latest_upload_task.id})
+            self._queue_upload_task(latest_upload_task)
 
 
     def upload_fits_image(self, fits_image_entry):
@@ -868,7 +874,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
     def upload_db_backup(self, backup_file):
@@ -920,7 +926,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
     def mqtt_publish_image(self, upload_filename, image_topic, mq_data):
@@ -944,7 +950,7 @@ class miscUpload(object):
         db.session.add(mqtt_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : mqtt_task.id})
+        self._queue_upload_task(mqtt_task)
 
 
     def s3_upload_asset(self, asset_entry, asset_metadata):
@@ -974,7 +980,7 @@ class miscUpload(object):
         db.session.add(s3_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : s3_task.id})
+        self._queue_upload_task(s3_task)
 
 
     def s3_upload_image(self, *args):
@@ -1083,7 +1089,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
     def syncapi_video(self, asset_entry, metadata):
@@ -1118,7 +1124,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
     def syncapi_mini_video(self, *args):
@@ -1195,7 +1201,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
     def _youtube_upload(self, video_entry, metadata):
@@ -1220,7 +1226,7 @@ class miscUpload(object):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task)
 
 
     def youtube_upload_video(self, video_entry, metadata):
@@ -1257,4 +1263,3 @@ class miscUpload(object):
         metadata['asset_label'] = 'Panorama Timelapse'
 
         self._youtube_upload(video_entry, metadata)
-

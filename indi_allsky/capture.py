@@ -888,6 +888,9 @@ class CaptureWorker(Process):
             self.binning_av,
             self.night_av,
         )
+        # MULTI_CAMERA_PREP: camera drivers include this stable profile id in
+        # image_q payloads while runtime remains single-camera.
+        self.indiclient.profile_id = self.capture_profile.profile_id
 
 
         # set indi server localhost and port
@@ -1596,7 +1599,35 @@ class CaptureWorker(Process):
         db.session.add(upload_task)
         db.session.commit()
 
-        self.upload_q.put({'task_id' : upload_task.id})
+        self._queue_upload_task(upload_task, camera_id=camera.id)
+
+
+    def _queue_video_task(self, task, camera_id=None):
+        # MULTI_CAMERA_PREP: route metadata is passive for now. VideoWorker
+        # still loads the task by id and uses existing DB task data.
+        payload = {
+            'task_id'    : task.id,
+            'profile_id' : self.capture_profile.profile_id,
+        }
+
+        if camera_id:
+            payload['camera_id'] = camera_id
+
+        self.video_q.put(payload)
+
+
+    def _queue_upload_task(self, task, camera_id=None):
+        # MULTI_CAMERA_PREP: route metadata is passive for now. FileUploader
+        # still loads the task by id and uses existing DB task data.
+        payload = {
+            'task_id'    : task.id,
+            'profile_id' : self.capture_profile.profile_id,
+        }
+
+        if camera_id:
+            payload['camera_id'] = camera_id
+
+        self.upload_q.put(payload)
 
 
     def _pre_run_tasks(self):
@@ -2159,7 +2190,7 @@ class CaptureWorker(Process):
         db.session.add(video_task)
         db.session.commit()
 
-        self.video_q.put({'task_id' : video_task.id})
+        self._queue_video_task(video_task, camera_id=camera.id)
 
 
         if self.config.get('FISH2PANO', {}).get('ENABLE'):
@@ -2180,7 +2211,7 @@ class CaptureWorker(Process):
             db.session.add(panorama_video_task)
             db.session.commit()
 
-            self.video_q.put({'task_id' : panorama_video_task.id})
+            self._queue_video_task(panorama_video_task, camera_id=camera.id)
 
 
     def _generateNightTimelapse(self, timespec, camera_id, task_state=TaskQueueState.QUEUED):
@@ -2213,7 +2244,7 @@ class CaptureWorker(Process):
         db.session.add(video_task)
         db.session.commit()
 
-        self.video_q.put({'task_id' : video_task.id})
+        self._queue_video_task(video_task, camera_id=camera.id)
 
 
         if self.config.get('FISH2PANO', {}).get('ENABLE'):
@@ -2234,7 +2265,7 @@ class CaptureWorker(Process):
             db.session.add(panorama_video_task)
             db.session.commit()
 
-            self.video_q.put({'task_id' : panorama_video_task.id})
+            self._queue_video_task(panorama_video_task, camera_id=camera.id)
 
 
     def _generateNightKeogram(self, timespec, camera_id, task_state=TaskQueueState.QUEUED):
@@ -2267,7 +2298,7 @@ class CaptureWorker(Process):
         db.session.add(task)
         db.session.commit()
 
-        self.video_q.put({'task_id' : task.id})
+        self._queue_video_task(task, camera_id=camera.id)
 
 
     def _generateDayKeogram(self, timespec, camera_id, task_state=TaskQueueState.QUEUED):
@@ -2304,7 +2335,7 @@ class CaptureWorker(Process):
         db.session.add(task)
         db.session.commit()
 
-        self.video_q.put({'task_id' : task.id})
+        self._queue_video_task(task, camera_id=camera.id)
 
 
     def shoot(self, exposure, gain, binning, sync=True, timeout=None, sqm_exposure=False):
@@ -2363,7 +2394,7 @@ class CaptureWorker(Process):
         db.session.add(task)
         db.session.commit()
 
-        self.video_q.put({'task_id' : task.id})
+        self._queue_video_task(task, camera_id=camera.id)
 
 
     def _expireData(self, camera_id, task_state=TaskQueueState.QUEUED):
@@ -2389,7 +2420,7 @@ class CaptureWorker(Process):
         db.session.add(task)
         db.session.commit()
 
-        self.video_q.put({'task_id' : task.id})
+        self._queue_video_task(task, camera_id=camera.id)
 
 
     def update_sensor_slot_labels(self):

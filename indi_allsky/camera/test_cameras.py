@@ -217,6 +217,7 @@ class IndiClientTestCameraBase(IndiClient):
             'exp_time'    : datetime.timestamp(exp_date),  # datetime objects are not json serializable
             'exp_elapsed' : exposure_elapsed_s,
             'camera_id'   : self.camera_id,
+            'profile_id'  : getattr(self, 'profile_id', 'default'),
             'filename_t'  : self._filename_t,
         }
 
@@ -822,5 +823,4 @@ class IndiClientTestCameraRotatingStars(IndiClientTestCameraBase):
 
             # simulate an image circle
             self._image = (self._image * self._image_circle_alpha_mask_dict[binning]).astype(numpy.uint16)
-
 
