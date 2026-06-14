@@ -446,6 +446,9 @@ class IndiAllSky(object):
             self.sensors_user_av,
             self.night_av,
             self.astro_av,
+            # MULTI_CAMERA_PREP: still start exactly one worker, bound to the
+            # first profile derived from the legacy single-camera config.
+            self.capture_profiles[0],
         )
         self.capture_worker.start()
 

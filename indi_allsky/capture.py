@@ -38,6 +38,8 @@ from .exceptions import CameraException
 from .exceptions import TimeOutException
 from .exceptions import TemperatureException
 
+from .capture_profiles import derive_capture_profiles
+
 from .flask import create_app
 from .flask import db
 from .flask.miscDb import miscDb
@@ -218,6 +220,7 @@ class CaptureWorker(Process):
         sensors_user_av,
         night_av,
         astro_av,
+        capture_profile=None,
     ):
 
         super(CaptureWorker, self).__init__()
@@ -225,6 +228,15 @@ class CaptureWorker(Process):
         self.name = 'Capture-{0:d}'.format(idx)
 
         self.config = config
+        # MULTI_CAMERA_PREP: use the first derived profile as a read-only
+        # camera identity layer while the runtime still operates one worker.
+        if capture_profile is None:
+            capture_profile = derive_capture_profiles(self.config)[0]
+
+        self.capture_profile = capture_profile
+        self.capture_camera_interface = capture_profile.camera_interface
+        logger.debug('Capture worker profile: %s', self.capture_profile.as_dict())
+
         self.error_q = error_q
         self.capture_q = capture_q
         self.image_q = image_q
@@ -634,10 +646,10 @@ class CaptureWorker(Process):
 
                         if frame_delta < -1:
 
-                            if self.config['CAMERA_INTERFACE'].startswith('pycurl'):
+                            if self.capture_camera_interface.startswith('pycurl'):
                                 ### camera does not obey expsoure values
                                 pass
-                            elif self.config['CAMERA_INTERFACE'] == 'indi_passive':
+                            elif self.capture_camera_interface == 'indi_passive':
                                 ### camera does not obey expsoure values
                                 pass
                             else:
@@ -824,7 +836,9 @@ class CaptureWorker(Process):
 
 
     def _initialize(self):
-        camera_interface = getattr(camera_module, self.config.get('CAMERA_INTERFACE', 'indi'))
+        # MULTI_CAMERA_PREP: camera backend selection now comes from the
+        # active CaptureProfile, preserving the single-camera runtime.
+        camera_interface = getattr(camera_module, self.capture_camera_interface)
 
 
         # instantiate the client
@@ -840,7 +854,7 @@ class CaptureWorker(Process):
 
 
         # set indi server localhost and port
-        self.indiclient.setServer(self.config['INDI_SERVER'], self.config['INDI_PORT'])
+        self.indiclient.setServer(self.capture_profile.indi_server, self.capture_profile.indi_port)
 
         # connect to indi server
         logger.info("Connecting to indiserver")
@@ -866,7 +880,7 @@ class CaptureWorker(Process):
         time.sleep(5)
 
         try:
-            self.indiclient.findCcd(camera_name=self.config.get('INDI_CAMERA_NAME'))
+            self.indiclient.findCcd(camera_name=self.capture_profile.indi_camera_name)
         except CameraException as e:
             logger.error('Camera error: !!! %s !!!', str(e).upper())
 
@@ -1967,7 +1981,7 @@ class CaptureWorker(Process):
                 logger.warning('Change to night (normal mode)')
 
 
-            if self.config['CAMERA_INTERFACE'].startswith('libcamera_') or self.config['CAMERA_INTERFACE'].startswith('mqtt_'):
+            if self.capture_camera_interface.startswith('libcamera_') or self.capture_camera_interface.startswith('mqtt_'):
                 libcamera_image_type = self.config.get('LIBCAMERA', {}).get('IMAGE_FILE_TYPE', 'jpg')
                 if libcamera_image_type == 'dng':
                     self.indiclient.libcamera_bit_depth = 16
@@ -2000,7 +2014,7 @@ class CaptureWorker(Process):
                 self.indiclient.disableCcdCooler()
 
 
-            if self.config['CAMERA_INTERFACE'].startswith('libcamera_') or self.config['CAMERA_INTERFACE'].startswith('mqtt_'):
+            if self.capture_camera_interface.startswith('libcamera_') or self.capture_camera_interface.startswith('mqtt_'):
                 libcamera_image_type = self.config.get('LIBCAMERA', {}).get('IMAGE_FILE_TYPE_DAY', 'jpg')
                 if libcamera_image_type == 'dng':
                     self.indiclient.libcamera_bit_depth = 16
@@ -2522,4 +2536,3 @@ class CaptureWorker(Process):
 
         for x, label in enumerate(temp_label_list[:50]):  # limit to 50
             self.SENSOR_SLOTS[x + 80][1] = '{0:s}'.format(label)
-
