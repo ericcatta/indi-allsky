@@ -24,6 +24,7 @@ from .version import __version__
 from .version import __config_level__
 
 from .config import IndiAllSkyConfig
+from .capture_profiles import derive_capture_profiles
 
 from . import constants
 
@@ -83,6 +84,11 @@ class IndiAllSky(object):
                 sys.exit(1)
 
             self.config = self._config_obj.config
+
+
+        # First multi-camera refactor step: derive but do not consume profiles.
+        self.capture_profiles = derive_capture_profiles(self.config)
+        logger.debug('Derived capture profiles: %s', [p.as_dict() for p in self.capture_profiles])
 
 
         self._miscDb = miscDb(self.config)
@@ -1598,4 +1604,3 @@ class IndiAllSky(object):
             logger.info('Wrote new config')
         except ConfigSaveException:
             return
-
