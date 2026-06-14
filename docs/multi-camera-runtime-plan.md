@@ -498,3 +498,545 @@ This matches the current strengths of indi-allsky:
 - Existing single-camera behavior can remain the compatibility path.
 
 The hard work is state/config isolation, not media storage.
+
+## 11. Implementation Roadmap
+
+### MVP Multi-Camera
+
+The MVP is the smallest runtime change that can capture from Eric's Camera Module V3 Wide and ASI678MC at the same time without breaking existing single-camera installs.
+
+MVP definition:
+
+- Existing single-camera config continues to boot unchanged.
+- Multi-camera capture is disabled by default.
+- A normalized default capture profile is derived from the current config.
+- A second optional capture profile can be stored for ASI678MC.
+- When `MULTI_CAMERA_CAPTURE_ENABLE` is false, the service starts one capture worker exactly as today.
+- When enabled for the pilot, the service starts:
+  - one `CaptureWorker` for IMX708/libcamera
+  - one `CaptureWorker` for ASI678MC/INDI
+- Each capture worker has isolated:
+  - capture queue
+  - error queue
+  - exposure state
+  - gain state
+  - binning state
+  - camera temp/state
+  - status namespace
+- Shared image/video/upload workers remain shared for the MVP.
+- ASI678MC starts with images-only output:
+  - no timelapse
+  - no keogram
+  - no startrails
+  - no panorama
+  - optional upload disabled by default
+- IMX708 remains the primary/dashboard camera and keeps existing output behavior.
+
+MVP success criteria:
+
+- IMX708 continues producing latest image, normal media, and existing outputs.
+- ASI678MC produces image rows under its own DB camera id.
+- Both camera histories are visible in Modern Admin media/camera views.
+- A failure in ASI678MC capture does not stop IMX708 capture.
+- A failure in IMX708 capture does not stop ASI678MC capture.
+- Existing classic admin behavior remains usable for the primary camera.
+
+### Step 1: Add Capture Profile Normalization
+
+Difficulty: Low
+
+Risk: Low
+
+Dependencies: None
+
+Add a pure helper that converts the current active config into a single normalized capture profile. This should not change runtime behavior.
+
+Example output:
+
+```json
+{
+  "profile_id": "default",
+  "primary": true,
+  "enabled": true,
+  "camera_interface": "libcamera_imx708",
+  "indi": {
+    "server": "localhost",
+    "port": 7624,
+    "camera_name": ""
+  },
+  "libcamera": {
+    "camera_id": 0
+  },
+  "outputs": {
+    "inherit_global": true
+  }
+}
+```
+
+Why first:
+
+- It creates a compatibility bridge.
+- It lets tests assert that current config maps cleanly into a future profile.
+- It does not require new workers, DB migrations, or UI changes.
+
+### Step 2: Add Read-Only Runtime Profile Diagnostics
+
+Difficulty: Low
+
+Risk: Low
+
+Dependencies: Step 1
+
+Expose the normalized active profile in Modern Admin read-only diagnostics.
+
+Show:
+
+- profile id
+- interface
+- DB camera id if known
+- INDI host/port/name
+- libcamera camera id
+- whether profile is primary
+- whether profile is enabled
+
+No write path yet.
+
+### Step 3: Namespace Capture State Without Changing Behavior
+
+Difficulty: Medium
+
+Risk: Medium
+
+Dependencies: Step 1
+
+Introduce a profile-aware state naming helper.
+
+Current global state:
+
+```text
+STATUS
+DB_CAMERA_ID
+CAMERA_NAME
+CAMERA_SERVER
+```
+
+New namespaced state:
+
+```text
+CAPTURE_PROFILES.default.STATUS
+CAPTURE_PROFILES.default.DB_CAMERA_ID
+CAPTURE_PROFILES.default.CAMERA_NAME
+CAPTURE_PROFILES.default.CAMERA_SERVER
+```
+
+Compatibility requirement:
+
+- The default/primary profile still writes the legacy global keys.
+- Existing UI and classic admin continue reading old keys until migrated.
+
+This prevents a future second capture worker from overwriting global active camera state.
+
+### Step 4: Split Shared Arrays Into Profile State Objects
+
+Difficulty: Medium
+
+Risk: Medium
+
+Dependencies: Step 3
+
+Create a small structure for per-camera shared runtime values:
+
+- exposure
+- gain
+- binning
+- camera temperature slots
+- camera user sensor slots
+- capture status
+
+Keep global shared arrays for:
+
+- location
+- sun altitude
+- moon altitude
+- moon phase
+- day/night state if treated as observatory-wide
+
+For the first refactor, still instantiate only one profile state object for the default camera.
+
+### Step 5: Refactor CaptureWorker Constructor
+
+Difficulty: Medium
+
+Risk: Medium
+
+Dependencies: Steps 1, 3, 4
+
+Change `CaptureWorker` so it receives:
+
+- global config
+- capture profile
+- profile runtime state
+- per-profile capture queue
+- per-profile error queue
+
+The worker should build an effective config internally by merging:
+
+```text
+global config + capture profile overrides
+```
+
+Behavior must remain identical with one default profile.
+
+### Step 6: Introduce CaptureSupervisor Running One Worker
+
+Difficulty: Medium
+
+Risk: Medium
+
+Dependencies: Step 5
+
+Move start/stop/restart logic for capture into a `CaptureSupervisor`.
+
+Initially:
+
+- supervisor owns one profile
+- supervisor starts one `CaptureWorker`
+- supervisor exposes one active worker handle
+- supervisor mirrors current shutdown behavior
+
+No simultaneous capture yet.
+
+This step makes multi-worker orchestration possible without changing the number of workers.
+
+### Step 7: Add Disabled Secondary Profile Storage
+
+Difficulty: Medium
+
+Risk: Medium
+
+Dependencies: Step 1
+
+Add config support for optional `CAMERA_PROFILES`, but keep it disabled by default.
+
+For Eric:
+
+```json
+{
+  "profile_id": "asi678mc",
+  "primary": false,
+  "enabled": false,
+  "camera_interface": "indi",
+  "indi": {
+    "server": "localhost",
+    "port": 7624,
+    "camera_name": "ZWO CCD ASI678MC"
+  },
+  "outputs": {
+    "capture_images": true,
+    "timelapse": false,
+    "keogram": false,
+    "startrail": false,
+    "panorama": false,
+    "upload": false
+  }
+}
+```
+
+Modern Admin can write this later, but the first runtime step can load it read-only or from manual config.
+
+### Step 8: Make Queues And Commands Profile-Aware
+
+Difficulty: Medium
+
+Risk: Medium
+
+Dependencies: Steps 5, 6
+
+Use one capture queue per capture worker.
+
+Add `profile_id` to queue payloads where useful, especially for:
+
+- manual pause/resume
+- reload/reconfigure
+- SQM frame request
+- status/debug commands
+
+Continue relying on `camera_id` for media processing and DB queries.
+
+### Step 9: Add Feature Flag For Multiple Capture Workers
+
+Difficulty: Medium
+
+Risk: High
+
+Dependencies: Steps 3, 4, 5, 6, 7, 8
+
+Add a guarded config flag:
+
+```json
+"MULTI_CAMERA_CAPTURE_ENABLE": false
+```
+
+When false:
+
+- current behavior remains single-camera.
+
+When true:
+
+- supervisor starts all enabled profiles.
+- each profile gets one capture worker.
+- image/video/upload workers stay shared.
+
+This is the first step that actually changes runtime concurrency.
+
+### Step 10: Pilot IMX708 + ASI678MC Images-Only
+
+Difficulty: Medium
+
+Risk: High
+
+Dependencies: Step 9
+
+Pilot settings:
+
+- IMX708:
+  - primary profile
+  - existing outputs unchanged
+
+- ASI678MC:
+  - secondary profile
+  - images only
+  - no timelapse
+  - no keogram
+  - no startrails
+  - no panorama
+  - no upload by default
+
+Monitor:
+
+- process health per capture profile
+- image queue depth
+- processing latency per camera
+- storage growth
+- CPU/memory
+- USB errors
+- INDI disconnects
+- libcamera failures
+
+Rollback:
+
+- set `MULTI_CAMERA_CAPTURE_ENABLE=false`
+- restart service
+- default single-camera behavior resumes
+
+### Step 11: Per-Camera Output Toggles
+
+Difficulty: Medium
+
+Risk: Medium
+
+Dependencies: Step 10
+
+Make generation gates per-camera:
+
+- timelapse
+- daytime timelapse
+- keogram
+- startrail
+- panorama
+- upload images
+- upload videos
+
+Default secondary camera outputs remain off until explicitly enabled.
+
+### Step 12: Per-Camera Queue Backpressure
+
+Difficulty: High
+
+Risk: High
+
+Dependencies: Step 10
+
+Current backpressure watches one shared `image_q` depth. With two capture workers, queue pressure should not blindly penalize both cameras in the same way.
+
+Add camera-aware queue metrics:
+
+- pending images per `camera_id`
+- processing latency per `camera_id`
+- dropped/skipped frame counters per profile
+- optional per-profile delay adjustment
+
+This is important if ASI678MC produces heavier FITS/raw frames while IMX708 produces lighter JPG frames.
+
+### Step 13: Modern Admin Runtime Control
+
+Difficulty: Medium
+
+Risk: Medium
+
+Dependencies: Steps 9-12
+
+Add safe controls after the runtime model is stable:
+
+- enable/disable secondary profile
+- view profile status
+- restart one capture profile
+- pause one capture profile
+- keep global service restart as fallback
+
+Do not add destructive camera deletion as part of this phase.
+
+## 12. Shared Vs Per-Camera Responsibilities
+
+### Can Be Shared Between Cameras
+
+- geolocation:
+  - latitude
+  - longitude
+  - elevation
+  - timezone
+
+- observatory state:
+  - sun altitude
+  - moon altitude
+  - moon phase
+  - day/night calculation, unless a camera has intentional horizon overrides
+
+- storage root:
+  - `IMAGE_FOLDER`
+  - database
+  - common media folder layout
+
+- upload infrastructure:
+  - credentials
+  - remote host/bucket
+  - upload workers
+  - retry logic
+  - queue mechanics
+
+- processing workers, initially:
+  - shared `ImageWorker`
+  - shared `VideoWorker`
+  - shared upload workers
+
+- notifications framework:
+  - notification table
+  - delivery/display mechanisms
+  - global system warnings
+
+- external environmental data:
+  - aurora/Kp
+  - smoke
+  - satellite/TLE data
+  - weather-like observatory context
+
+- retention defaults:
+  - can be shared initially with optional per-camera overrides later
+
+### Must Be Per-Camera
+
+- identity:
+  - profile id
+  - camera DB id
+  - camera name
+  - driver/interface
+  - INDI host/port/name
+  - libcamera camera id
+  - future USB path/device id
+
+- capture state:
+  - status
+  - last frame time
+  - last error
+  - reconnect count
+  - capture pause
+  - queue delay/backpressure
+
+- exposure behavior:
+  - exposure min/default/max
+  - night/day exposure period
+  - gain
+  - binning
+  - cooling
+  - camera-specific INDI properties
+  - libcamera options
+
+- image output behavior:
+  - image file type
+  - raw/FITS enablement
+  - bit depth
+  - debayer/CFA assumptions
+  - rotation/flip/crop
+
+- calibration:
+  - dark frames
+  - bad pixel maps
+  - black level
+  - camera-specific processing profile
+
+- optical metadata:
+  - lens name
+  - focal length
+  - focal ratio
+  - image circle
+  - lens offsets
+  - panorama parameters
+  - VirtualSky offsets
+
+- generated products:
+  - timelapse
+  - mini timelapse
+  - keogram
+  - startrails
+  - panorama
+  - panorama loop
+
+- upload decisions:
+  - upload images
+  - upload videos
+  - upload FITS/raw
+  - upload generated products
+
+## 13. Complexity Summary
+
+| Step | Description | Difficulty | Risk |
+| --- | --- | --- | --- |
+| 1 | Capture profile normalization | Low | Low |
+| 2 | Read-only profile diagnostics | Low | Low |
+| 3 | Namespaced capture state | Medium | Medium |
+| 4 | Per-profile runtime state objects | Medium | Medium |
+| 5 | CaptureWorker accepts profile | Medium | Medium |
+| 6 | CaptureSupervisor with one worker | Medium | Medium |
+| 7 | Disabled secondary profile storage | Medium | Medium |
+| 8 | Profile-aware queues/commands | Medium | Medium |
+| 9 | Feature flag for multiple workers | Medium | High |
+| 10 | IMX708 + ASI678MC images-only pilot | Medium | High |
+| 11 | Per-camera output toggles | Medium | Medium |
+| 12 | Per-camera queue backpressure | High | High |
+| 13 | Modern Admin runtime controls | Medium | Medium |
+
+Overall complexity: High.
+
+Reason: the DB/media model is already camera-aware, but runtime state, config, process supervision, and shared arrays are strongly single-camera.
+
+## 14. Final Recommendation
+
+The first code change should be Step 1: add a pure capture profile normalization helper.
+
+Recommended first change:
+
+```text
+Create a helper that derives one default CaptureProfile from the current active config.
+Use it in read-only diagnostics or tests only.
+Do not change CaptureWorker behavior yet.
+```
+
+Why this is safest:
+
+- It does not change runtime behavior.
+- It creates the language and data shape needed for every later step.
+- It lets Eric validate IMX708 and ASI678MC profile identity before any concurrent capture starts.
+- It gives Modern Admin a safe place to show future multi-camera runtime concepts.
+- It avoids touching service startup, queues, shared arrays, or capture loops too early.
+
+Do not start by adding a second `CaptureWorker`. That would run directly into global state collisions (`DB_CAMERA_ID`, `STATUS`, shared exposure/gain/binning arrays) before the compatibility path is ready.
