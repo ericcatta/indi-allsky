@@ -336,9 +336,18 @@ class ImageWorker(Process):
         # existing camera_id and shared state behavior.
         profile_id = self._validate_profile_id(i_dict)
         self._set_queue_context(profile_id, camera_id)
+        profile_outputs = i_dict.get('profile_outputs') or {}
+        profile_primary = bool(i_dict.get('profile_primary', True))
+        images_only = bool(i_dict.get('images_only', False))
         filename_t = i_dict.get('filename_t')
         sqm_exposure = i_dict.get('sqm_exposure')
-        logger.debug('Image queue route: profile=%s camera_id=%s', profile_id, camera_id)
+        logger.debug(
+            'Image queue route: profile=%s camera_id=%s primary=%s images_only=%s',
+            profile_id,
+            camera_id,
+            profile_primary,
+            images_only,
+        )
 
 
         # libcamera
@@ -727,7 +736,11 @@ class ImageWorker(Process):
         ##################################################
 
 
-        longterm_keogram_pixels = self.save_longterm_keogram_data(exp_date, camera_id)
+        if images_only or not profile_outputs.get('longterm_keogram', True):
+            logger.debug('[%s][camera_id=%s] Long term keogram disabled for images-only profile', profile_id, camera_id)
+            longterm_keogram_pixels = None
+        else:
+            longterm_keogram_pixels = self.save_longterm_keogram_data(exp_date, camera_id)
 
 
         self.image_processor.colormap()
@@ -736,10 +749,13 @@ class ImageWorker(Process):
         self.image_processor.apply_image_circle_mask(i_ref.binning)
 
 
-        self.image_processor.realtimeKeogramUpdate()
+        if images_only or not profile_outputs.get('realtime_keogram', True):
+            logger.debug('[%s][camera_id=%s] Realtime keogram disabled for images-only profile', profile_id, camera_id)
+        else:
+            self.image_processor.realtimeKeogramUpdate()
 
 
-        if self.config.get('FISH2PANO', {}).get('ENABLE'):
+        if not images_only and profile_outputs.get('panorama', True) and self.config.get('FISH2PANO', {}).get('ENABLE'):
             if not self.image_count % self.config.get('FISH2PANO', {}).get('MODULUS', 2):
                 pano_data = self.image_processor.fish2pano(i_ref.binning)
 
@@ -807,15 +823,24 @@ class ImageWorker(Process):
 
         #task.setSuccess('Image processed')
 
-        self.write_status_json(i_ref, adu, adu_average)  # write json status file
+        if profile_primary:
+            self.write_status_json(i_ref, adu, adu_average)  # write json status file
+        else:
+            logger.debug('[%s][camera_id=%s] Status json disabled for secondary profile', profile_id, camera_id)
 
 
-        if not isinstance(self.image_processor.realtime_keogram_data, type(None)):
+        if not images_only and profile_outputs.get('realtime_keogram', True) and not isinstance(self.image_processor.realtime_keogram_data, type(None)):
             # keogram might be empty on dimension mismatch
             self.write_realtime_keogram(self.image_processor.realtime_keogram_trimmed, camera)
 
 
-        latest_file, new_filename = self.write_img(self.image_processor.image, i_ref, camera, jpeg_exif=jpeg_exif)
+        latest_file, new_filename = self.write_img(
+            self.image_processor.image,
+            i_ref,
+            camera,
+            jpeg_exif=jpeg_exif,
+            write_latest=profile_primary,
+        )
 
         if new_filename:
             self.start_image_save_post_hook(new_filename, exposure, gain, binning)
@@ -1101,18 +1126,21 @@ class ImageWorker(Process):
                 upload_filename = latest_file
 
 
-            ### upload thumbnail first
-            if image_thumbnail_entry:
-                self._miscUpload.syncapi_thumbnail(image_thumbnail_entry, image_thumbnail_metadata)  # syncapi before s3
-                self._miscUpload.s3_upload_thumbnail(image_thumbnail_entry, image_thumbnail_metadata)
+            if images_only or not profile_outputs.get('extra_uploads', True):
+                logger.debug('[%s][camera_id=%s] Extra uploads disabled for images-only profile', profile_id, camera_id)
+            else:
+                ### upload thumbnail first
+                if image_thumbnail_entry:
+                    self._miscUpload.syncapi_thumbnail(image_thumbnail_entry, image_thumbnail_metadata)  # syncapi before s3
+                    self._miscUpload.s3_upload_thumbnail(image_thumbnail_entry, image_thumbnail_metadata)
 
 
-            self._miscUpload.syncapi_image(image_entry, image_metadata)  # syncapi before s3
-            self._miscUpload.s3_upload_image(image_entry, image_metadata)
-            self._miscUpload.mqtt_publish_image(upload_filename, mq_topic_latest, mqtt_data)
-            self._miscUpload.upload_image(image_entry)
+                self._miscUpload.syncapi_image(image_entry, image_metadata)  # syncapi before s3
+                self._miscUpload.s3_upload_image(image_entry, image_metadata)
+                self._miscUpload.mqtt_publish_image(upload_filename, mq_topic_latest, mqtt_data)
+                self._miscUpload.upload_image(image_entry)
 
-            self.upload_metadata(i_ref, adu, adu_average)
+                self.upload_metadata(i_ref, adu, adu_average)
 
 
     def decdeg2dms(self, dd):
@@ -1721,7 +1749,7 @@ class ImageWorker(Process):
         tmpfile_p.unlink()
 
 
-    def write_img(self, data, i_ref, camera, jpeg_exif=None):
+    def write_img(self, data, i_ref, camera, jpeg_exif=None, write_latest=True):
         f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.{0}'.format(self.config['IMAGE_FILE_TYPE']))
         f_tmpfile.close()
 
@@ -1764,17 +1792,19 @@ class ImageWorker(Process):
             logger.info('Compressed image file size: %0.2f MB', file_size_bytes / 1024 / 1024)
 
 
-        ### Always write the latest file for web access
-        latest_file = self.image_dir.joinpath('latest.{0:s}'.format(self.config['IMAGE_FILE_TYPE']))
+        latest_file = None
+        if write_latest:
+            ### Always write the latest file for web access
+            latest_file = self.image_dir.joinpath('latest.{0:s}'.format(self.config['IMAGE_FILE_TYPE']))
 
-        try:
-            latest_file.unlink()
-        except FileNotFoundError:
-            pass
+            try:
+                latest_file.unlink()
+            except FileNotFoundError:
+                pass
 
 
-        shutil.copy2(str(tmpfile_name), str(latest_file))
-        latest_file.chmod(0o644)
+            shutil.copy2(str(tmpfile_name), str(latest_file))
+            latest_file.chmod(0o644)
 
 
         ### disable timelapse images in focus mode

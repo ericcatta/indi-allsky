@@ -17,6 +17,7 @@ import signal
 import logging
 
 import queue
+from dataclasses import replace
 from multiprocessing import Queue
 from multiprocessing import Array
 
@@ -25,6 +26,7 @@ from .version import __config_level__
 
 from .config import IndiAllSkyConfig
 from .camera_shared_state import CameraSharedState
+from .capture_profiles import build_profile_config
 from .capture_profiles import derive_capture_profiles
 
 from . import constants
@@ -90,6 +92,9 @@ class IndiAllSky(object):
         # First multi-camera refactor step: derive but do not consume profiles.
         self.capture_profiles = derive_capture_profiles(self.config)
         logger.debug('Derived capture profiles: %s', [p.as_dict() for p in self.capture_profiles])
+        self.multi_camera_capture_enable = bool(self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False))
+        if self.multi_camera_capture_enable:
+            logger.warning('MULTI_CAMERA_CAPTURE_ENABLE active: experimental images-only capture mode')
 
 
         self._miscDb = miscDb(self.config)
@@ -229,6 +234,7 @@ class IndiAllSky(object):
         self.capture_q = Queue()
         self.capture_error_q = Queue()
         self.capture_worker = None
+        self.capture_worker_map = {}
         self.capture_worker_idx = 0
 
         self.image_q = Queue()
@@ -250,7 +256,11 @@ class IndiAllSky(object):
         self.upload_worker_list = []
         self.upload_worker_idx = 0
 
-        for x in range(self.config.get('UPLOAD_WORKERS', 1)):
+        upload_worker_count = self.config.get('UPLOAD_WORKERS', 1)
+        if self.multi_camera_capture_enable:
+            upload_worker_count = 1
+
+        for x in range(upload_worker_count):
             self.upload_worker_list.append({
                 'worker'  : None,
                 'error_q' : Queue(),
@@ -431,6 +441,10 @@ class IndiAllSky(object):
     def _startCaptureWorker(self):
         from .capture import CaptureWorker
 
+        if self.multi_camera_capture_enable:
+            self._startMultiCaptureWorkers()
+            return
+
         if self.capture_worker:
             if self.capture_worker.is_alive():
                 return
@@ -471,6 +485,10 @@ class IndiAllSky(object):
 
 
     def _stopCaptureWorker(self):
+        if self.multi_camera_capture_enable:
+            self._stopMultiCaptureWorkers()
+            return
+
         if not self.capture_worker:
             return
 
@@ -487,7 +505,158 @@ class IndiAllSky(object):
         self.capture_worker.join()
 
 
+    def _new_profile_shared_state(self, profile_id):
+        position_av = Array('f', [
+            float(self.config['LOCATION_LATITUDE']),
+            float(self.config['LOCATION_LONGITUDE']),
+            float(self.config.get('LOCATION_ELEVATION', 300)),
+            0.0,
+            0.0,
+        ])
+        exposure_av = Array('f', [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0])
+        gain_av = Array('f', [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0])
+        binning_av = Array('i', [-1, -1, -1, -1, -1, -1])
+        sensors_temp_av = Array('f', [0.0 for x in range(60)])
+        sensors_user_av = Array('f', [0.0 for x in range(110)])
+        night_av = Array('i', [-1, -1])
+        astro_av = Array('f', [0.0, 0.0, 0.0])
+
+        return CameraSharedState(
+            profile_id=profile_id,
+            position_av=position_av,
+            exposure_av=exposure_av,
+            gain_av=gain_av,
+            binning_av=binning_av,
+            sensors_temp_av=sensors_temp_av,
+            sensors_user_av=sensors_user_av,
+            night_av=night_av,
+            astro_av=astro_av,
+        )
+
+
+    def _enabled_capture_profiles(self):
+        enabled_profiles = [p for p in self.capture_profiles if p.enabled]
+        if enabled_profiles:
+            return [self._images_only_capture_profile(p) for p in enabled_profiles]
+
+        logger.error('MULTI_CAMERA_CAPTURE_ENABLE active but no profiles are enabled; falling back to first profile')
+        return [self._images_only_capture_profile(self.capture_profiles[0])]
+
+
+    def _images_only_capture_profile(self, profile):
+        # MULTI_CAMERA_PREP: the first real multi-camera MVP is images-only.
+        # Generated products stay disabled while two capture workers coexist.
+        outputs = dict(profile.outputs)
+        for key in (
+            'timelapse',
+            'mini_timelapse',
+            'keogram',
+            'realtime_keogram',
+            'longterm_keogram',
+            'startrails',
+            'panorama',
+            'panorama_loop',
+            'extra_uploads',
+        ):
+            outputs[key] = False
+
+        outputs['images'] = True
+        return replace(profile, outputs=outputs, daytime_timelapse=False)
+
+
+    def _capture_worker_handle(self, profile):
+        handle = self.capture_worker_map.get(profile.profile_id)
+        if handle:
+            return handle
+
+        if profile.primary:
+            capture_q = self.capture_q
+            capture_error_q = self.capture_error_q
+            shared_state = self.camera_shared_state
+        else:
+            capture_q = Queue()
+            capture_error_q = Queue()
+            shared_state = self._new_profile_shared_state(profile.profile_id)
+
+        handle = {
+            'profile'      : profile,
+            'config'       : build_profile_config(self.config, profile),
+            'capture_q'    : capture_q,
+            'error_q'      : capture_error_q,
+            'shared_state' : shared_state,
+            'worker'       : None,
+        }
+        self.capture_worker_map[profile.profile_id] = handle
+        return handle
+
+
+    def _startMultiCaptureWorkers(self):
+        from .capture import CaptureWorker
+
+        for profile in self._enabled_capture_profiles():
+            handle = self._capture_worker_handle(profile)
+            worker = handle['worker']
+
+            if worker:
+                if worker.is_alive():
+                    continue
+
+                try:
+                    capture_error, capture_traceback = handle['error_q'].get_nowait()
+                    for line in capture_traceback.split('\n'):
+                        logger.error('[%s] Capture worker exception: %s', profile.profile_id, line)
+                except queue.Empty:
+                    pass
+
+            self.capture_worker_idx += 1
+
+            logger.info('[%s] Starting Capture-%d worker', profile.profile_id, self.capture_worker_idx)
+            handle['worker'] = CaptureWorker(
+                self.capture_worker_idx,
+                handle['config'],
+                handle['error_q'],
+                handle['capture_q'],
+                self.image_q,
+                self.video_q,
+                self.upload_q,
+                handle['shared_state'].position_av,
+                handle['shared_state'].exposure_av,
+                handle['shared_state'].gain_av,
+                handle['shared_state'].binning_av,
+                handle['shared_state'].sensors_temp_av,
+                handle['shared_state'].sensors_user_av,
+                handle['shared_state'].night_av,
+                handle['shared_state'].astro_av,
+                profile,
+                handle['shared_state'],
+            )
+            handle['worker'].start()
+
+
+    def _stopMultiCaptureWorkers(self):
+        for profile_id, handle in self.capture_worker_map.items():
+            worker = handle.get('worker')
+            if not worker:
+                continue
+
+            if not worker.is_alive():
+                continue
+
+            if self._terminate:
+                logger.info('[%s] Terminating Capture worker', profile_id)
+                worker.terminate()
+
+            logger.info('[%s] Stopping Capture worker', profile_id)
+            handle['capture_q'].put({'stop' : True})
+            worker.join()
+
+
     def _queue_video_task(self, task):
+        if self.multi_camera_capture_enable:
+            logger.warning('Skipping VIDEO task %d while MULTI_CAMERA_CAPTURE_ENABLE images-only MVP is active', task.id)
+            task.setExpired()
+            return
+
         # MULTI_CAMERA_PREP: passive route metadata for future queue routing.
         # VideoWorker still loads the existing DB task by task_id.
         payload = {

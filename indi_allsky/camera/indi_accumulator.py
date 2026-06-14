@@ -248,6 +248,9 @@ class IndiClientIndiAccumulator(IndiClient):
             'exp_elapsed' : exposure_elapsed_s,
             'camera_id'   : self.camera_id,
             'profile_id'  : getattr(self, 'profile_id', 'default'),
+            'profile_primary' : bool(getattr(self, 'profile_primary', True)),
+            'images_only' : bool(getattr(self, 'images_only', False)),
+            'profile_outputs' : getattr(self, 'profile_outputs', {}),
             'filename_t'  : self._filename_t,
         }
 

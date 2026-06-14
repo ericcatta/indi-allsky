@@ -238,6 +238,19 @@ class CaptureWorker(Process):
 
         self.capture_profile = capture_profile
         self.capture_camera_interface = capture_profile.camera_interface
+        self.profile_id = self.capture_profile.profile_id
+        self.primary_profile = bool(self.capture_profile.primary)
+        self.profile_outputs = self.capture_profile.outputs
+        self.images_only_profile = not all((
+            self.profile_outputs.get('timelapse', True),
+            self.profile_outputs.get('keogram', True),
+            self.profile_outputs.get('realtime_keogram', True),
+            self.profile_outputs.get('longterm_keogram', True),
+            self.profile_outputs.get('startrails', True),
+            self.profile_outputs.get('panorama', True),
+            self.profile_outputs.get('panorama_loop', True),
+            self.profile_outputs.get('extra_uploads', True),
+        ))
         # MULTI_CAMERA_PREP: passive mirror for future per-camera runtime
         # state. Existing variables/shared arrays remain authoritative.
         self.camera_runtime_state = CameraRuntimeState()
@@ -330,6 +343,16 @@ class CaptureWorker(Process):
         self.generate_timelapse_flag = False   # This is updated once images have been generated
 
         self._shutdown = False
+
+
+    def _set_global_state(self, key, value):
+        # MULTI_CAMERA_PREP: in experimental multi-camera mode, only the
+        # primary profile owns legacy global status keys used by the UI.
+        if not self.primary_profile:
+            logger.debug('[%s] Skipping global state update %s=%s', self.profile_id, key, value)
+            return
+
+        self._miscDb.setState(key, value)
 
 
 
@@ -575,8 +598,8 @@ class CaptureWorker(Process):
                     logger.warning('*** CAPTURE PAUSED ***')
 
                     now_time = time.time()
-                    self._miscDb.setState('WATCHDOG', int(now_time))
-                    self._miscDb.setState('STATUS', constants.STATUS_PAUSED)
+                    self._set_global_state('WATCHDOG', int(now_time))
+                    self._set_global_state('STATUS', constants.STATUS_PAUSED)
 
                     if self._shutdown:
                         logger.warning('Shutting down')
@@ -596,8 +619,8 @@ class CaptureWorker(Process):
                     self.generate_timelapse_flag = False
 
                     now_time = time.time()
-                    self._miscDb.setState('WATCHDOG', int(now_time))
-                    self._miscDb.setState('STATUS', constants.STATUS_SLEEPING)
+                    self._set_global_state('WATCHDOG', int(now_time))
+                    self._set_global_state('STATUS', constants.STATUS_SLEEPING)
 
                     if self._shutdown:
                         logger.warning('Shutting down')
@@ -891,6 +914,16 @@ class CaptureWorker(Process):
         # MULTI_CAMERA_PREP: camera drivers include this stable profile id in
         # image_q payloads while runtime remains single-camera.
         self.indiclient.profile_id = self.capture_profile.profile_id
+        self.indiclient.profile_outputs = self.profile_outputs
+        self.indiclient.images_only = self.images_only_profile
+        self.indiclient.profile_primary = self.primary_profile
+        logger.info(
+            '[%s] Capture profile initialized: interface=%s primary=%s images_only=%s',
+            self.profile_id,
+            self.capture_camera_interface,
+            self.primary_profile,
+            self.images_only_profile,
+        )
 
 
         # set indi server localhost and port
@@ -905,7 +938,7 @@ class CaptureWorker(Process):
 
             logger.error("No indiserver available at %s:%d", host, port)
 
-            self._miscDb.setState('STATUS', constants.STATUS_NOINDISERVER)
+            self._set_global_state('STATUS', constants.STATUS_NOINDISERVER)
 
             self._miscDb.addNotification(
                 NotificationCategory.GENERAL,
@@ -927,7 +960,7 @@ class CaptureWorker(Process):
         except CameraException as e:
             logger.error('Camera error: !!! %s !!!', str(e).upper())
 
-            self._miscDb.setState('STATUS', constants.STATUS_NOCAMERA)
+            self._set_global_state('STATUS', constants.STATUS_NOCAMERA)
 
             self._miscDb.addNotification(
                 NotificationCategory.CAMERA,
@@ -959,11 +992,11 @@ class CaptureWorker(Process):
         # add driver name to config
         self.camera_name = self.indiclient.ccd_device.getDeviceName()
         self.camera_runtime_state.camera_name = self.camera_name
-        self._miscDb.setState('CAMERA_NAME', self.camera_name)
+        self._set_global_state('CAMERA_NAME', self.camera_name)
 
         self.camera_server = self.indiclient.ccd_device.getDriverExec()
         self.camera_runtime_state.camera_server = self.camera_server
-        self._miscDb.setState('CAMERA_SERVER', self.camera_server)
+        self._set_global_state('CAMERA_SERVER', self.camera_server)
 
 
         ### GPS config
@@ -1176,7 +1209,7 @@ class CaptureWorker(Process):
         except MultipleResultsFound:
             logger.error('!!! MULTIPLE CAMERAS WITH SAME NAME (%s) !!!', camera_metadata['name'])
 
-            self._miscDb.setState('STATUS', constants.STATUS_CAMERAERROR)
+            self._set_global_state('STATUS', constants.STATUS_CAMERAERROR)
 
             self._miscDb.addNotification(
                 NotificationCategory.CAMERA,
@@ -1193,8 +1226,9 @@ class CaptureWorker(Process):
         self.camera_id = camera.id
         self.camera_runtime_state.camera_id = camera.id
         self.indiclient.camera_id = camera.id
+        logger.info('[%s][camera_id=%s] Camera registered for capture', self.profile_id, camera.id)
 
-        self._miscDb.setState('DB_CAMERA_ID', camera.id)
+        self._set_global_state('DB_CAMERA_ID', camera.id)
 
 
         self._sync_camera(camera, camera_metadata)
@@ -1634,7 +1668,7 @@ class CaptureWorker(Process):
         # Tasks that need to be run before the main program loop
 
         # Update status
-        self._miscDb.setState('STATUS', constants.STATUS_RUNNING)
+        self._set_global_state('STATUS', constants.STATUS_RUNNING)
 
         if self.camera_server in ['indi_rpicam']:
             # Raspberry PI HQ Camera requires an initial throw away exposure of over 6s
@@ -1654,7 +1688,7 @@ class CaptureWorker(Process):
 
 
         # Update watchdog
-        self._miscDb.setState('WATCHDOG', int(now_time))
+        self._set_global_state('WATCHDOG', int(now_time))
 
 
         if self.camera_server in ['indi_asi_ccd']:
@@ -2040,6 +2074,9 @@ class CaptureWorker(Process):
         if self.night:
             # always indicate timelapse generation at night
             self.generate_timelapse_flag = True
+            if self.images_only_profile:
+                logger.debug('[%s][camera_id=%s] End-of-night generated products disabled for images-only profile', self.profile_id, self.camera_id)
+                self.generate_timelapse_flag = False
 
 
             self.indi_config = self.config['INDI_CONFIG_DEFAULTS']
@@ -2074,6 +2111,9 @@ class CaptureWorker(Process):
                 self.generate_timelapse_flag = False
             else:
                 self.generate_timelapse_flag = True
+                if self.images_only_profile:
+                    logger.debug('[%s][camera_id=%s] End-of-day generated products disabled for images-only profile', self.profile_id, self.camera_id)
+                    self.generate_timelapse_flag = False
 
 
 

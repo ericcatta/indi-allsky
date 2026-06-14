@@ -406,6 +406,9 @@ class IndiClient(PyIndi.BaseClient):
             'exp_elapsed' : exposure_elapsed_s,
             'camera_id'   : self.camera_id,
             'profile_id'  : getattr(self, 'profile_id', 'default'),
+            'profile_primary' : bool(getattr(self, 'profile_primary', True)),
+            'images_only' : bool(getattr(self, 'images_only', False)),
+            'profile_outputs' : getattr(self, 'profile_outputs', {}),
             'filename_t'  : self._filename_t,
         }
 
@@ -1663,4 +1666,3 @@ class IndiClient(PyIndi.BaseClient):
         control = control if control else self.get_control(device, control_name, control_type)
 
         return [get_dict(c) for c in control]
-
