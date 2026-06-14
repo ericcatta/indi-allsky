@@ -479,10 +479,14 @@ class ImageWorker(Process):
         #############################################################################################
 
 
-        self.start_image_save_pre_hook(exposure, gain, binning)
+        if images_only:
+            logger.debug('[MULTI_CAMERA_IMAGES_ONLY][%s][camera_id=%s] disabled FITS/raw/hooks/circular display/realtime keogram/longterm keogram/panorama/extra uploads', profile_id, camera_id)
+
+        if not images_only:
+            self.start_image_save_pre_hook(exposure, gain, binning)
 
 
-        if self.config.get('IMAGE_SAVE_FITS'):
+        if not images_only and self.config.get('IMAGE_SAVE_FITS'):
             if self.config.get('IMAGE_SAVE_FITS_PRE_DARK'):
                 logger.warning('Saving FITS without dark frame calibration')
                 self.write_fit(i_ref, camera)
@@ -499,7 +503,7 @@ class ImageWorker(Process):
         self.image_processor.fix_holes_early()
 
 
-        if self.config.get('IMAGE_SAVE_FITS'):
+        if not images_only and self.config.get('IMAGE_SAVE_FITS'):
             if not self.config.get('IMAGE_SAVE_FITS_PRE_DARK'):
                 self.write_fit(i_ref, camera)
 
@@ -621,7 +625,7 @@ class ImageWorker(Process):
                 self.image_processor.apply_color_correction_matrix(libcamera_ccm)
 
 
-        if self.config.get('IMAGE_EXPORT_RAW'):
+        if not images_only and self.config.get('IMAGE_EXPORT_RAW'):
             self.export_raw_image(i_ref, camera, jpeg_exif=jpeg_exif)
 
 
@@ -767,7 +771,7 @@ class ImageWorker(Process):
                 self.write_panorama_img(pano_data, i_ref, camera, jpeg_exif=jpeg_exif)
 
 
-        if self.config.get('CIRCULAR_DISPLAY', {}).get('ENABLE'):
+        if not images_only and self.config.get('CIRCULAR_DISPLAY', {}).get('ENABLE'):
             if not self.config.get('FOCUS_MODE', False):
                 circular_display_image = self.image_processor.circular_display(i_ref.binning)
                 self.write_circular_display_img(circular_display_image, jpeg_exif=jpeg_exif)
@@ -807,7 +811,10 @@ class ImageWorker(Process):
 
 
         # wait on the pre-hook to finish
-        custom_hook_data = self.wait_image_save_pre_hook()
+        if images_only:
+            custom_hook_data = {}
+        else:
+            custom_hook_data = self.wait_image_save_pre_hook()
 
 
         self.image_processor.label_image(adsb_aircraft_list=self.adsb_aircraft_list, custom_hook_data=custom_hook_data)
@@ -843,7 +850,8 @@ class ImageWorker(Process):
         )
 
         if new_filename:
-            self.start_image_save_post_hook(new_filename, exposure, gain, binning)
+            if not images_only:
+                self.start_image_save_post_hook(new_filename, exposure, gain, binning)
 
             image_metadata = {
                 'type'            : constants.IMAGE,
@@ -953,7 +961,8 @@ class ImageWorker(Process):
 
 
             # wait on the post-hook to finish
-            self.wait_image_save_post_hook()
+            if not images_only:
+                self.wait_image_save_post_hook()
         else:
             # images not being saved
             image_entry = None

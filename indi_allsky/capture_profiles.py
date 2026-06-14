@@ -280,6 +280,39 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
         filetransfer_config['UPLOAD_METADATA'] = False
         profile_config['FILETRANSFER'] = filetransfer_config
 
+        s3upload_config = deepcopy(profile_config.get('S3UPLOAD') or {})
+        s3upload_config['ENABLE'] = False
+        profile_config['S3UPLOAD'] = s3upload_config
+
+        syncapi_config = deepcopy(profile_config.get('SYNCAPI') or {})
+        syncapi_config['ENABLE'] = False
+        profile_config['SYNCAPI'] = syncapi_config
+
+        mqttpublish_config = deepcopy(profile_config.get('MQTTPUBLISH') or {})
+        mqttpublish_config['ENABLE'] = False
+        profile_config['MQTTPUBLISH'] = mqttpublish_config
+
+    if profile.outputs.get('images') and not all((
+        profile.outputs.get('timelapse', True),
+        profile.outputs.get('mini_timelapse', True),
+        profile.outputs.get('keogram', True),
+        profile.outputs.get('realtime_keogram', True),
+        profile.outputs.get('longterm_keogram', True),
+        profile.outputs.get('startrails', True),
+        profile.outputs.get('panorama', True),
+        profile.outputs.get('panorama_loop', True),
+        profile.outputs.get('extra_uploads', True),
+    )):
+        profile_config['IMAGE_SAVE_FITS'] = False
+        profile_config['IMAGE_SAVE_FITS_PRE_DARK'] = False
+        profile_config['IMAGE_EXPORT_RAW'] = ''
+        profile_config['IMAGE_SAVE_HOOK_PRE'] = ''
+        profile_config['IMAGE_SAVE_HOOK_POST'] = ''
+
+        circular_display_config = deepcopy(profile_config.get('CIRCULAR_DISPLAY') or {})
+        circular_display_config['ENABLE'] = False
+        profile_config['CIRCULAR_DISPLAY'] = circular_display_config
+
     profile_config['MULTI_CAMERA_ACTIVE_PROFILE'] = profile.profile_id
     profile_config['MULTI_CAMERA_PROFILE_OUTPUTS'] = deepcopy(profile.outputs)
 

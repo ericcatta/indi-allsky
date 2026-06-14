@@ -561,6 +561,10 @@ class IndiAllSky(object):
             outputs[key] = False
 
         outputs['images'] = True
+        logger.warning(
+            '[MULTI_CAMERA_IMAGES_ONLY][%s] disabled FITS/raw/hooks/circular display/timelapse/keogram/startrails/panorama/video extra/upload extra',
+            profile.profile_id,
+        )
         return replace(profile, outputs=outputs, daytime_timelapse=False)
 
 
