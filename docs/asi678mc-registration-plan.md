@@ -8,6 +8,8 @@ Register the ZWO ASI678MC in the indi-allsky database and make it appear in Mode
 
 This plan assumes the ASI678MC has already been successfully detected through INDI with `indi_asi_ccd` or `indi_asi_single_ccd`.
 
+For a dedicated user systemd service on port `7625`, see `docs/indiserver-systemd-plan.md`.
+
 ## Summary
 
 The safest practical path is a short temporary camera switch:
@@ -46,7 +48,7 @@ Capture config changes for the ASI registration window:
 | --- | --- | --- |
 | `CAMERA_INTERFACE` | `indi` | Switches capture from libcamera to INDI. |
 | `INDI_SERVER` | `localhost` | Use local indiserver. |
-| `INDI_PORT` | `7624` unless Eric's install uses another production port | Must match the indiserver service port used by indi-allsky. |
+| `INDI_PORT` | `7625` when using `indiserver-asi678mc.service`; otherwise the configured production INDI port | Must match the indiserver service port used by indi-allsky during the ASI registration window. |
 | `INDI_CAMERA_NAME` | Exact detected ASI device name, if known | Example: `ZWO CCD ASI678MC`. Leave blank only if the ASI is the only CCD exposed by that indiserver. |
 
 INDI server driver changes for the ASI registration window:
@@ -145,10 +147,19 @@ Use classic admin System > INDI Drivers if available:
 
 If using commands instead of the UI, avoid replacing service files blindly. The effective `indiserver.service` should run the ASI driver on the same port used by the indi-allsky config.
 
-Expected effective command shape:
+Expected effective command shape for the dedicated ASI service:
 
 ```text
-indiserver -p 7624 indi_simulator_telescope indi_asi_ccd <existing-gps-driver-if-any>
+indiserver -v -p 7625 -u /tmp/indiserver-modern-admin-7625 indi_simulator_telescope indi_asi_ccd
+```
+
+The helper script can create this user service:
+
+```bash
+./misc/setup_asi678mc_indiserver.sh
+systemctl --user daemon-reload
+systemctl --user enable --now indiserver-asi678mc.service
+systemctl --user status indiserver-asi678mc.service --no-pager
 ```
 
 ### 3. Temporarily configure capture for ASI
@@ -159,7 +170,7 @@ Change only:
 
 - `CAMERA_INTERFACE`: `indi`
 - `INDI_SERVER`: `localhost`
-- `INDI_PORT`: `7624` or the configured indiserver port
+- `INDI_PORT`: `7625` when using `indiserver-asi678mc.service`, otherwise the configured indiserver port
 - `INDI_CAMERA_NAME`: exact detected ASI device name, for example `ZWO CCD ASI678MC`
 
 If only one CCD is exposed by the ASI indiserver, `INDI_CAMERA_NAME` may be blank. Setting it explicitly is safer because it prevents the wrong INDI CCD from being selected if another CCD driver is exposed.
