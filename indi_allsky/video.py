@@ -99,7 +99,10 @@ class VideoWorker(Process):
         os.nice(19)  # lower priority
 
         self.config = config
+        # MULTI_CAMERA_PREP: default route context for the current
+        # single-camera runtime. It is refreshed from each video_q payload.
         self.profile_id = 'default'
+        self.current_camera_id = None
 
         self.error_q = error_q
         self.video_q = video_q
@@ -124,6 +127,42 @@ class VideoWorker(Process):
             self.image_dir = Path(__file__).parent.parent.joinpath('html', 'images').absolute()
 
         self._shutdown = False
+
+
+    def _validate_profile_id(self, payload):
+        # MULTI_CAMERA_PREP: accept a stable route id without changing video
+        # routing. Missing/blank profile ids fall back to the legacy default.
+        raw_profile_id = payload.get('profile_id', 'default')
+        profile_id = str(raw_profile_id or 'default')
+
+        if profile_id != raw_profile_id and raw_profile_id is not None:
+            logger.warning('Invalid video profile_id, using default')
+            return 'default'
+
+        return profile_id
+
+
+    def _set_queue_context(self, profile_id, camera_id=None):
+        # MULTI_CAMERA_PREP: mirror the active video route on this worker and
+        # on helpers that enqueue follow-up upload tasks.
+        self.profile_id = profile_id
+        self.current_camera_id = camera_id
+        self._miscUpload.set_profile_context(profile_id, camera_id=camera_id)
+
+
+    def _queue_upload_task(self, task, camera_id=None, profile_id=None):
+        # MULTI_CAMERA_PREP: passive route metadata; FileUploader still loads
+        # and executes the existing DB task by task_id.
+        payload = {
+            'task_id'    : task.id,
+            'profile_id' : profile_id or self.profile_id,
+        }
+
+        route_camera_id = camera_id or self.current_camera_id
+        if route_camera_id:
+            payload['camera_id'] = route_camera_id
+
+        self.upload_q.put(payload)
 
 
 
@@ -198,8 +237,7 @@ class VideoWorker(Process):
         task_id = v_dict['task_id']
         # MULTI_CAMERA_PREP: passive route id; video processing still loads
         # and executes the existing DB task by id.
-        profile_id = v_dict.get('profile_id', 'default')
-        logger.debug('Video queue route: profile=%s camera_id=%s task_id=%s', profile_id, v_dict.get('camera_id'), task_id)
+        profile_id = self._validate_profile_id(v_dict)
 
         try:
             task = IndiAllSkyDbTaskQueueTable.query\
@@ -218,6 +256,9 @@ class VideoWorker(Process):
 
         action = task.data['action']
         kwargs = task.data.get('kwargs', {})
+        camera_id = v_dict.get('camera_id') or kwargs.get('camera_id')
+        self._set_queue_context(profile_id, camera_id=camera_id)
+        logger.debug('Video queue route: profile=%s camera_id=%s task_id=%s', profile_id, camera_id, task_id)
 
 
         try:
@@ -1840,7 +1881,7 @@ class VideoWorker(Process):
         db.session.commit()
 
         # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
-        self.upload_q.put({'task_id' : upload_task.id, 'profile_id' : self.profile_id})
+        self._queue_upload_task(upload_task, camera_id=camera.id)
 
         task.setSuccess('Uploaded EndOfNight data')
 

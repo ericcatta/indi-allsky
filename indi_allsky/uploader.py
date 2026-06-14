@@ -50,6 +50,7 @@ class FileUploader(Thread):
 
         self.error_q = error_q
         self.upload_q = upload_q
+        self.current_camera_id = None
 
 
         self._stopper = threading.Event()
@@ -60,6 +61,40 @@ class FileUploader(Thread):
             self.image_dir = Path(self.config['IMAGE_FOLDER']).absolute()
         else:
             self.image_dir = Path(__file__).parent.parent.joinpath('html', 'images').absolute()
+
+
+    def _validate_profile_id(self, payload):
+        # MULTI_CAMERA_PREP: accept a stable route id without changing upload
+        # routing. Missing/blank profile ids fall back to the legacy default.
+        raw_profile_id = payload.get('profile_id', 'default')
+        profile_id = str(raw_profile_id or 'default')
+
+        if profile_id != raw_profile_id and raw_profile_id is not None:
+            logger.warning('Invalid upload profile_id, using default')
+            return 'default'
+
+        return profile_id
+
+
+    def _set_queue_context(self, profile_id, camera_id=None):
+        # MULTI_CAMERA_PREP: mirror the active upload route on this worker.
+        self.profile_id = profile_id
+        self.current_camera_id = camera_id
+
+
+    def _queue_upload_task(self, task, camera_id=None, profile_id=None):
+        # MULTI_CAMERA_PREP: passive route metadata; upload processing still
+        # loads and executes the existing DB task by task_id.
+        payload = {
+            'task_id'    : task.id,
+            'profile_id' : profile_id or self.profile_id,
+        }
+
+        route_camera_id = camera_id or self.current_camera_id
+        if route_camera_id:
+            payload['camera_id'] = route_camera_id
+
+        self.upload_q.put(payload)
 
 
 
@@ -144,8 +179,10 @@ class FileUploader(Thread):
         task_id = u_dict['task_id']
         # MULTI_CAMERA_PREP: passive route id; upload still loads and
         # executes the existing DB task by id.
-        profile_id = u_dict.get('profile_id', 'default')
-        logger.debug('Upload queue route: profile=%s camera_id=%s task_id=%s', profile_id, u_dict.get('camera_id'), task_id)
+        profile_id = self._validate_profile_id(u_dict)
+        camera_id = u_dict.get('camera_id')
+        self._set_queue_context(profile_id, camera_id=camera_id)
+        logger.debug('Upload queue route: profile=%s camera_id=%s task_id=%s', profile_id, camera_id, task_id)
 
 
         try:
@@ -665,4 +702,4 @@ class FileUploader(Thread):
         db.session.commit()
 
         # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
-        self.upload_q.put({'task_id' : upload_task.id, 'profile_id' : self.profile_id})
+        self._queue_upload_task(upload_task)

@@ -193,7 +193,7 @@ class ImageWorker(Process):
         # on helpers that enqueue follow-up upload tasks.
         self.profile_id = profile_id
         self.current_camera_id = camera_id
-        self._miscUpload.profile_id = profile_id
+        self._miscUpload.set_profile_context(profile_id, camera_id=camera_id)
 
 
     def _queue_upload_task(self, task, camera_id=None, profile_id=None):

@@ -36,6 +36,7 @@ class miscUpload(object):
         self.upload_q = upload_q
         self.night_av = night_av
         self.profile_id = 'default'
+        self.current_camera_id = None
 
 
         self._image_count = 0
@@ -45,9 +46,25 @@ class miscUpload(object):
         self._realtime_keogram_count = 0
 
 
+    def set_profile_context(self, profile_id, camera_id=None):
+        # MULTI_CAMERA_PREP: mirror the route context from the worker that is
+        # asking this helper to enqueue upload tasks.
+        self.profile_id = str(profile_id or 'default')
+        self.current_camera_id = camera_id
+
+
     def _queue_upload_task(self, task):
-        # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
-        self.upload_q.put({'task_id' : task.id, 'profile_id' : self.profile_id})
+        # MULTI_CAMERA_PREP: passive route metadata; upload worker still loads
+        # and executes the existing DB task by task_id.
+        payload = {
+            'task_id'    : task.id,
+            'profile_id' : self.profile_id,
+        }
+
+        if self.current_camera_id:
+            payload['camera_id'] = self.current_camera_id
+
+        self.upload_q.put(payload)
 
 
     def upload_image(self, image_entry):
