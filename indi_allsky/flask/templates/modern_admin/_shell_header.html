@@ -1,16 +1,21 @@
 <header class="modern-admin-topbar" aria-label="{{ modern_admin_header_label }}">
     <h1 class="modern-admin-visually-hidden" id="{{ modern_admin_title_id }}">{{ modern_admin_heading }}</h1>
+    {% set runtime_status = modern_admin_runtime_status|default({}, true) %}
+    {% set runtime_label = runtime_status.label|default(modern_capture_status|default('Runtime: Unknown'), true) %}
+    {% set runtime_tone = runtime_status.tone|default('muted', true) %}
+    {% set quick_action_url = modern_admin_quick_action_url|default(none, true) %}
+    {% set quick_action_camera = modern_admin_quick_action_camera|default(0, true) %}
 
     <div class="modern-admin-runtime-row">
         <div class="modern-admin-power-actions" aria-label="System quick actions">
-            <button class="modern-admin-topbar-button modern-admin-topbar-button-danger" type="button" data-modern-admin-system-command="poweroff">Power off</button>
-            <button class="modern-admin-topbar-button modern-admin-topbar-button-warn" type="button" data-modern-admin-system-command="reboot">Restart</button>
+            <button class="modern-admin-topbar-button modern-admin-topbar-button-danger" type="button" data-modern-admin-system-command="poweroff"{% if not quick_action_url %} disabled{% endif %}>Power off</button>
+            <button class="modern-admin-topbar-button modern-admin-topbar-button-warn" type="button" data-modern-admin-system-command="reboot"{% if not quick_action_url %} disabled{% endif %}>Restart</button>
         </div>
 
         <div class="modern-admin-runtime-spacer" aria-hidden="true"></div>
 
-        <div class="modern-admin-runtime-indicator modern-admin-runtime-{{ modern_admin_runtime_status.tone }}" title="{{ modern_admin_runtime_status.label }}">
-            {{ modern_admin_runtime_status.label }}
+        <div class="modern-admin-runtime-indicator modern-admin-runtime-{{ runtime_tone }}" title="{{ runtime_label }}">
+            {{ runtime_label }}
         </div>
 
         <div class="modern-admin-mode-switch" role="group" aria-label="Admin mode">
@@ -32,8 +37,8 @@
 
 <script>
 (function() {
-    const quickActionUrl = {{ modern_admin_quick_action_url|tojson }};
-    const cameraId = {{ modern_admin_quick_action_camera|tojson }};
+    const quickActionUrl = {{ quick_action_url|tojson }};
+    const cameraId = {{ quick_action_camera|tojson }};
     const messages = {
         poweroff: 'Power off this system?',
         reboot: 'Restart this system?',
@@ -42,7 +47,7 @@
     document.querySelectorAll('[data-modern-admin-system-command]').forEach((button) => {
         button.addEventListener('click', function() {
             const command = button.getAttribute('data-modern-admin-system-command');
-            if (!command || !window.confirm(messages[command] || 'Run this system action?')) {
+            if (!quickActionUrl || !command || !window.confirm(messages[command] || 'Run this system action?')) {
                 return;
             }
 

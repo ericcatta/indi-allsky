@@ -5106,37 +5106,75 @@ class ModernAdminView(TemplateView):
     def get_modern_admin_topbar_context(self):
         # Read-only runtime hint for the Modern Admin shell; no capture state is changed here.
         camera_id = getattr(getattr(self, 'camera', None), 'id', 0) or 0
+        quick_action_url = None
+        runtime_status = {
+            'label' : 'Runtime: Unknown',
+            'tone'  : 'muted',
+        }
+
+        try:
+            quick_action_url = url_for('indi_allsky.ajax_system_view')
+        except Exception as e:
+            app.logger.error('Error determining modern admin quick action URL: %s', str(e))
+
+        try:
+            runtime_status = self.get_modern_admin_runtime_status()
+        except Exception as e:
+            app.logger.error('Error determining modern admin runtime status: %s', str(e))
 
         return {
-            'modern_admin_quick_action_url'     : url_for('indi_allsky.ajax_system_view'),
+            'modern_admin_quick_action_url'     : quick_action_url,
             'modern_admin_quick_action_camera'  : camera_id,
-            'modern_admin_runtime_status'       : self.get_modern_admin_runtime_status(),
+            'modern_admin_runtime_status'       : runtime_status,
         }
 
 
     def get_modern_admin_runtime_status(self):
-        multi_camera_enabled = bool(self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE', False))
-        multi_camera_config = self.indi_allsky_config.get('MULTI_CAMERA') or {}
-        profile_configs = multi_camera_config.get('profiles') or []
-        enabled_profiles = [p for p in profile_configs if p.get('enabled', False)]
+        try:
+            multi_camera_enabled = bool(self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE', False))
+            multi_camera_config = self.indi_allsky_config.get('MULTI_CAMERA') or {}
+            profile_configs = multi_camera_config.get('profiles') or []
+            enabled_profiles = [p for p in profile_configs if p.get('enabled', False)]
 
-        recent_camera_ids = self.get_recent_image_camera_ids()
-        recent_camera_labels = self.get_recent_camera_labels(recent_camera_ids)
+            recent_camera_ids = self.get_recent_image_camera_ids()
+            recent_camera_labels = self.get_recent_camera_labels(recent_camera_ids)
 
-        if multi_camera_enabled:
-            if len(recent_camera_ids) >= 2:
-                label = 'Runtime: Multi-camera active'
-                detail = self.format_runtime_camera_list(recent_camera_labels)
+            if multi_camera_enabled:
+                if len(recent_camera_ids) >= 2:
+                    label = 'Runtime: Multi-camera active'
+                    detail = self.format_runtime_camera_list(recent_camera_labels)
+                    if detail:
+                        label = '{0:s} · {1:s}'.format(label, detail)
+
+                    return {
+                        'label' : label,
+                        'tone'  : 'good',
+                    }
+
+                if len(recent_camera_ids) == 1:
+                    label = 'Runtime: Restart required or only one camera active'
+                    detail = self.format_runtime_camera_list(recent_camera_labels)
+                    if detail:
+                        label = '{0:s} · {1:s}'.format(label, detail)
+
+                    return {
+                        'label' : label,
+                        'tone'  : 'warn',
+                    }
+
+                profile_labels = self.get_multi_camera_profile_labels(enabled_profiles)
+                label = 'Config: Multi-camera enabled · Restart may be required'
+                detail = self.format_runtime_camera_list(profile_labels)
                 if detail:
                     label = '{0:s} · {1:s}'.format(label, detail)
 
                 return {
                     'label' : label,
-                    'tone'  : 'good',
+                    'tone'  : 'warn',
                 }
 
-            if len(recent_camera_ids) == 1:
-                label = 'Runtime: Restart required or only one camera active'
+            if len(recent_camera_ids) >= 2:
+                label = 'Runtime: Multi-camera still active · Config disabled, restart may be required'
                 detail = self.format_runtime_camera_list(recent_camera_labels)
                 if detail:
                     label = '{0:s} · {1:s}'.format(label, detail)
@@ -5146,39 +5184,23 @@ class ModernAdminView(TemplateView):
                     'tone'  : 'warn',
                 }
 
-            profile_labels = self.get_multi_camera_profile_labels(enabled_profiles)
-            label = 'Config: Multi-camera enabled · Restart may be required'
-            detail = self.format_runtime_camera_list(profile_labels)
-            if detail:
-                label = '{0:s} · {1:s}'.format(label, detail)
+            if recent_camera_labels:
+                label = 'Capture: Single camera · {0:s}'.format(recent_camera_labels[0])
+            elif getattr(self, 'camera', None):
+                label = 'Capture: Single camera · {0:s}'.format(self.get_runtime_camera_label(self.camera))
+            else:
+                label = 'Capture: Single camera'
 
             return {
                 'label' : label,
-                'tone'  : 'warn',
+                'tone'  : 'muted',
             }
-
-        if len(recent_camera_ids) >= 2:
-            label = 'Runtime: Multi-camera still active · Config disabled, restart may be required'
-            detail = self.format_runtime_camera_list(recent_camera_labels)
-            if detail:
-                label = '{0:s} · {1:s}'.format(label, detail)
-
+        except Exception as e:
+            app.logger.error('Error building modern admin runtime status: %s', str(e))
             return {
-                'label' : label,
-                'tone'  : 'warn',
+                'label' : 'Runtime: Unknown',
+                'tone'  : 'muted',
             }
-
-        if recent_camera_labels:
-            label = 'Capture: Single camera · {0:s}'.format(recent_camera_labels[0])
-        elif getattr(self, 'camera', None):
-            label = 'Capture: Single camera · {0:s}'.format(self.get_runtime_camera_label(self.camera))
-        else:
-            label = 'Capture: Single camera'
-
-        return {
-            'label' : label,
-            'tone'  : 'muted',
-        }
 
 
     def get_recent_image_camera_ids(self):
@@ -5200,9 +5222,13 @@ class ModernAdminView(TemplateView):
         if not camera_ids:
             return list()
 
-        cameras = IndiAllSkyDbCameraTable.query\
-            .filter(IndiAllSkyDbCameraTable.id.in_(camera_ids))\
-            .all()
+        try:
+            cameras = IndiAllSkyDbCameraTable.query\
+                .filter(IndiAllSkyDbCameraTable.id.in_(camera_ids))\
+                .all()
+        except Exception as e:
+            app.logger.error('Error reading modern admin recent camera labels: %s', str(e))
+            return ['Camera {0:d}'.format(camera_id) for camera_id in camera_ids]
 
         camera_map = dict()
         for camera in cameras:
