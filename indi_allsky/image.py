@@ -2,6 +2,7 @@ import os
 import io
 import json
 import re
+import sys
 from pathlib import Path
 from datetime import datetime
 from datetime import timedelta
@@ -57,6 +58,15 @@ from .exceptions import BadImage
 app = create_app()
 
 logger = logging.getLogger('indi_allsky')
+
+
+def _multi_camera_diag(message, *args):
+    if args:
+        message = message % args
+
+    logger.warning(message)
+    sys.stderr.write(message + '\n')
+    sys.stderr.flush()
 
 
 
@@ -349,7 +359,7 @@ class ImageWorker(Process):
             images_only,
         )
         if images_only or profile_id != 'default':
-            logger.warning(
+            _multi_camera_diag(
                 '[MULTI_CAMERA_DIAG][%s][camera_id=%s] Image queue route primary=%s images_only=%s',
                 profile_id,
                 camera_id,

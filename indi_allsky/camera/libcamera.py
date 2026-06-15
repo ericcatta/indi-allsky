@@ -7,6 +7,7 @@ import tempfile
 import json
 import subprocess
 import psutil
+import sys
 from pathlib import Path
 import logging
 
@@ -20,6 +21,15 @@ from ..exceptions import BinModeException
 
 
 logger = logging.getLogger('indi_allsky')
+
+
+def _multi_camera_diag(message, *args):
+    if args:
+        message = message % args
+
+    logger.warning(message)
+    sys.stderr.write(message + '\n')
+    sys.stderr.flush()
 
 
 
@@ -39,6 +49,7 @@ class IndiClientLibCameraGeneric(IndiClient):
         super(IndiClientLibCameraGeneric, self).__init__(*args, **kwargs)
 
         self.libcamera_process = None
+        self.libcamera_output_f = None
 
         self._ccm = None
 
@@ -299,9 +310,10 @@ class IndiClientLibCameraGeneric(IndiClient):
         #]
 
 
+        images_only = bool(getattr(self, 'images_only', False))
         logger.info('image command: %s', ' '.join(cmd))
-        if bool(getattr(self, 'images_only', False)):
-            logger.warning(
+        if images_only:
+            _multi_camera_diag(
                 '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera command: %s',
                 getattr(self, 'profile_id', 'default'),
                 getattr(self, 'camera_id', 'unknown'),
@@ -311,9 +323,19 @@ class IndiClientLibCameraGeneric(IndiClient):
 
         self.exposureStartTime = time.time()
 
+        if images_only:
+            # MULTI_CAMERA_DIAG: avoid an unread PIPE in the asynchronous
+            # libcamera path. A verbose rpicam/libcamera process can block if
+            # stdout fills before getCcdExposureStatus() reads it.
+            self.libcamera_output_f = tempfile.TemporaryFile(mode='w+b')
+            libcamera_stdout = self.libcamera_output_f
+        else:
+            self.libcamera_output_f = None
+            libcamera_stdout = subprocess.PIPE
+
         self.libcamera_process = subprocess.Popen(
             cmd,
-            stdout=subprocess.PIPE,
+            stdout=libcamera_stdout,
             stderr=subprocess.STDOUT,
         )
 
@@ -335,14 +357,14 @@ class IndiClientLibCameraGeneric(IndiClient):
 
             if self.libcamera_process.returncode != 0:
                 # log errors
-                stdout = self.libcamera_process.stdout
-                for line in stdout.readlines():
+                stdout_lines = self._readLibcameraOutput()
+                for line in stdout_lines:
                     logger.error('rpicam-still error: %s', line)
 
                 # not returning, just log the error
 
-            if bool(getattr(self, 'images_only', False)):
-                logger.warning(
+            if images_only:
+                _multi_camera_diag(
                     '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera returncode=%s sync=%s',
                     getattr(self, 'profile_id', 'default'),
                     getattr(self, 'camera_id', 'unknown'),
@@ -353,6 +375,8 @@ class IndiClientLibCameraGeneric(IndiClient):
             self.active_exposure = False
 
             self._processMetadata()
+
+            self._closeLibcameraOutput()
 
             self._queueImage()
 
@@ -370,14 +394,14 @@ class IndiClientLibCameraGeneric(IndiClient):
 
             if self.libcamera_process.returncode != 0:
                 # log errors
-                stdout = self.libcamera_process.stdout
-                for line in stdout.readlines():
+                stdout_lines = self._readLibcameraOutput()
+                for line in stdout_lines:
                     logger.error('rpicam-still error: %s', line)
 
                 # not returning, just log the error
 
             if bool(getattr(self, 'images_only', False)):
-                logger.warning(
+                _multi_camera_diag(
                     '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera returncode=%s sync=%s',
                     getattr(self, 'profile_id', 'default'),
                     getattr(self, 'camera_id', 'unknown'),
@@ -388,10 +412,31 @@ class IndiClientLibCameraGeneric(IndiClient):
 
             self._processMetadata()
 
+            self._closeLibcameraOutput()
+
             self._queueImage()
 
 
         return True, 'READY'
+
+
+    def _readLibcameraOutput(self):
+        if self.libcamera_output_f:
+            self.libcamera_output_f.seek(0)
+            return self.libcamera_output_f.readlines()
+
+        if self.libcamera_process and self.libcamera_process.stdout:
+            return self.libcamera_process.stdout.readlines()
+
+        return []
+
+
+    def _closeLibcameraOutput(self):
+        if not self.libcamera_output_f:
+            return
+
+        self.libcamera_output_f.close()
+        self.libcamera_output_f = None
 
 
     def _processMetadata(self):
@@ -556,6 +601,8 @@ class IndiClientLibCameraGeneric(IndiClient):
         if self._libCameraProcessRunning():
             self.libcamera_process.kill()
             self.libcamera_process.poll()  # close out the process
+
+        self._closeLibcameraOutput()
 
 
         try:

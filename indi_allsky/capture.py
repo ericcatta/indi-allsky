@@ -2,6 +2,7 @@ import os
 import time
 import io
 import json
+import sys
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -52,6 +53,15 @@ from sqlalchemy.orm.exc import MultipleResultsFound
 app = create_app()
 
 logger = logging.getLogger('indi_allsky')
+
+
+def _multi_camera_diag(message, *args):
+    if args:
+        message = message % args
+
+    logger.warning(message)
+    sys.stderr.write(message + '\n')
+    sys.stderr.flush()
 
 
 class CaptureWorker(Process):
@@ -374,7 +384,7 @@ class CaptureWorker(Process):
 
         self._next_diag_heartbeat = now + 15.0
         camera_id = self.camera_id if self.camera_id is not None else 'unknown'
-        logger.warning(
+        _multi_camera_diag(
             '[MULTI_CAMERA_DIAG][%s][camera_id=%s] heartbeat pid=%s ready=%s busy=%s exposure_state=%s image_q_depth=%s',
             self.profile_id,
             camera_id,
@@ -423,17 +433,17 @@ class CaptureWorker(Process):
         ### use this as a method to log uncaught exceptions
         try:
             if self.multi_camera_diag:
-                logger.warning('[MULTI_CAMERA_DIAG][%s] CaptureWorker run start pid=%s', self.profile_id, os.getpid())
+                _multi_camera_diag('[MULTI_CAMERA_DIAG][%s] CaptureWorker run start pid=%s', self.profile_id, os.getpid())
             self.saferun()
         except Exception as e:
             tb = traceback.format_exc()
             self.error_q.put((str(e), tb))
             if self.multi_camera_diag:
-                logger.error('[MULTI_CAMERA_DIAG][%s] CaptureWorker crash pid=%s error=%s', self.profile_id, os.getpid(), str(e))
+                _multi_camera_diag('[MULTI_CAMERA_DIAG][%s] CaptureWorker crash pid=%s error=%s', self.profile_id, os.getpid(), str(e))
             raise e
         finally:
             if self.multi_camera_diag:
-                logger.warning('[MULTI_CAMERA_DIAG][%s] CaptureWorker run exit pid=%s', self.profile_id, os.getpid())
+                _multi_camera_diag('[MULTI_CAMERA_DIAG][%s] CaptureWorker run exit pid=%s', self.profile_id, os.getpid())
 
 
 
