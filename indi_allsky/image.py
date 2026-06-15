@@ -348,6 +348,14 @@ class ImageWorker(Process):
             profile_primary,
             images_only,
         )
+        if images_only or profile_id != 'default':
+            logger.warning(
+                '[MULTI_CAMERA_DIAG][%s][camera_id=%s] Image queue route primary=%s images_only=%s',
+                profile_id,
+                camera_id,
+                profile_primary,
+                images_only,
+            )
 
 
         # libcamera

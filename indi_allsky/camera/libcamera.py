@@ -300,6 +300,13 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
         logger.info('image command: %s', ' '.join(cmd))
+        if bool(getattr(self, 'images_only', False)):
+            logger.warning(
+                '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera command: %s',
+                getattr(self, 'profile_id', 'default'),
+                getattr(self, 'camera_id', 'unknown'),
+                ' '.join(cmd),
+            )
 
 
         self.exposureStartTime = time.time()
@@ -334,6 +341,15 @@ class IndiClientLibCameraGeneric(IndiClient):
 
                 # not returning, just log the error
 
+            if bool(getattr(self, 'images_only', False)):
+                logger.warning(
+                    '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera returncode=%s sync=%s',
+                    getattr(self, 'profile_id', 'default'),
+                    getattr(self, 'camera_id', 'unknown'),
+                    self.libcamera_process.returncode,
+                    sync,
+                )
+
             self.active_exposure = False
 
             self._processMetadata()
@@ -359,6 +375,15 @@ class IndiClientLibCameraGeneric(IndiClient):
                     logger.error('rpicam-still error: %s', line)
 
                 # not returning, just log the error
+
+            if bool(getattr(self, 'images_only', False)):
+                logger.warning(
+                    '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera returncode=%s sync=%s',
+                    getattr(self, 'profile_id', 'default'),
+                    getattr(self, 'camera_id', 'unknown'),
+                    self.libcamera_process.returncode,
+                    False,
+                )
 
 
             self._processMetadata()

@@ -605,16 +605,29 @@ class IndiAllSky(object):
                 if worker.is_alive():
                     continue
 
+                logger.warning(
+                    '[MULTI_CAMERA_DIAG][%s] CaptureWorker exited pid=%s exitcode=%s; checking error queue before restart',
+                    profile.profile_id,
+                    worker.pid,
+                    worker.exitcode,
+                )
+
                 try:
                     capture_error, capture_traceback = handle['error_q'].get_nowait()
+                    logger.error(
+                        '[MULTI_CAMERA_DIAG][%s] CaptureWorker error_q: %s',
+                        profile.profile_id,
+                        capture_error,
+                    )
                     for line in capture_traceback.split('\n'):
-                        logger.error('[%s] Capture worker exception: %s', profile.profile_id, line)
+                        logger.error('[MULTI_CAMERA_DIAG][%s] CaptureWorker traceback: %s', profile.profile_id, line)
                 except queue.Empty:
+                    logger.warning('[MULTI_CAMERA_DIAG][%s] CaptureWorker exited without error_q traceback', profile.profile_id)
                     pass
 
             self.capture_worker_idx += 1
 
-            logger.info('[%s] Starting Capture-%d worker', profile.profile_id, self.capture_worker_idx)
+            logger.warning('[MULTI_CAMERA_DIAG][%s] Starting Capture-%d worker', profile.profile_id, self.capture_worker_idx)
             handle['worker'] = CaptureWorker(
                 self.capture_worker_idx,
                 handle['config'],
@@ -635,6 +648,13 @@ class IndiAllSky(object):
                 handle['shared_state'],
             )
             handle['worker'].start()
+            logger.warning(
+                '[MULTI_CAMERA_DIAG][%s] CaptureWorker started pid=%s idx=%d primary=%s',
+                profile.profile_id,
+                handle['worker'].pid,
+                self.capture_worker_idx,
+                profile.primary,
+            )
 
 
     def _stopMultiCaptureWorkers(self):

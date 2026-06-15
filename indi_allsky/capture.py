@@ -241,6 +241,7 @@ class CaptureWorker(Process):
         self.profile_id = self.capture_profile.profile_id
         self.primary_profile = bool(self.capture_profile.primary)
         self.profile_outputs = self.capture_profile.outputs
+        self.multi_camera_diag = bool(self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False))
         self.images_only_profile = not all((
             self.profile_outputs.get('timelapse', True),
             self.profile_outputs.get('keogram', True),
@@ -343,6 +344,7 @@ class CaptureWorker(Process):
         self.generate_timelapse_flag = False   # This is updated once images have been generated
 
         self._shutdown = False
+        self._next_diag_heartbeat = 0.0
 
 
     def _set_global_state(self, key, value):
@@ -353,6 +355,35 @@ class CaptureWorker(Process):
             return
 
         self._miscDb.setState(key, value)
+
+
+    def _image_queue_depth(self):
+        try:
+            return self.image_q.qsize()
+        except (NotImplementedError, AttributeError):
+            return -1
+
+
+    def _log_diag_heartbeat(self, ready, exposure_state):
+        if not self.multi_camera_diag:
+            return
+
+        now = time.time()
+        if now < self._next_diag_heartbeat:
+            return
+
+        self._next_diag_heartbeat = now + 15.0
+        camera_id = self.camera_id if self.camera_id is not None else 'unknown'
+        logger.warning(
+            '[MULTI_CAMERA_DIAG][%s][camera_id=%s] heartbeat pid=%s ready=%s busy=%s exposure_state=%s image_q_depth=%s',
+            self.profile_id,
+            camera_id,
+            os.getpid(),
+            bool(ready),
+            not bool(ready),
+            exposure_state,
+            self._image_queue_depth(),
+        )
 
 
 
@@ -391,11 +422,18 @@ class CaptureWorker(Process):
 
         ### use this as a method to log uncaught exceptions
         try:
+            if self.multi_camera_diag:
+                logger.warning('[MULTI_CAMERA_DIAG][%s] CaptureWorker run start pid=%s', self.profile_id, os.getpid())
             self.saferun()
         except Exception as e:
             tb = traceback.format_exc()
             self.error_q.put((str(e), tb))
+            if self.multi_camera_diag:
+                logger.error('[MULTI_CAMERA_DIAG][%s] CaptureWorker crash pid=%s error=%s', self.profile_id, os.getpid(), str(e))
             raise e
+        finally:
+            if self.multi_camera_diag:
+                logger.warning('[MULTI_CAMERA_DIAG][%s] CaptureWorker run exit pid=%s', self.profile_id, os.getpid())
 
 
 
@@ -447,6 +485,7 @@ class CaptureWorker(Process):
 
             logger.info('Camera last ready: %0.1fs', loop_start_time - camera_ready_time)
             logger.info('Exposure state: %s', exposure_state)
+            self._log_diag_heartbeat(camera_ready, exposure_state)
 
 
             if self.indiclient.disconnected:
