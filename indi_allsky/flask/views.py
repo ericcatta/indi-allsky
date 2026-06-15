@@ -5192,9 +5192,15 @@ class ModernAdminCamerasView(ModernAdminView):
         context = super(ModernAdminCamerasView, self).get_context()
         context['modern_admin_camera_switch_error'] = None
         context['modern_admin_camera_switch_success'] = None
+        context['modern_admin_multi_camera_error'] = None
+        context['modern_admin_multi_camera_success'] = None
 
         if request.method == 'POST':
-            context.update(self.save_camera_switch_config())
+            modern_admin_action = request.form.get('modern_admin_action')
+            if modern_admin_action in ('multi_camera_enable', 'multi_camera_disable'):
+                context.update(self.save_multi_camera_toggle_config(modern_admin_action))
+            else:
+                context.update(self.save_camera_switch_config())
 
         cameras = IndiAllSkyDbCameraTable.query\
             .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
@@ -5229,6 +5235,7 @@ class ModernAdminCamerasView(ModernAdminView):
             })
 
         context['modern_admin_cameras'] = camera_list
+        context['modern_admin_multi_camera'] = self.get_multi_camera_context()
         context['modern_admin_section_links'] = (
             ('Add Camera', 'indi_allsky.modern_admin_camera_add_view'),
             ('Camera Info', 'indi_allsky.modern_admin_camera_info_view'),
@@ -5244,6 +5251,45 @@ class ModernAdminCamerasView(ModernAdminView):
         return context
 
 
+    def get_multi_camera_context(self):
+        multi_camera_config = self.indi_allsky_config.get('MULTI_CAMERA') or {}
+        profile_configs = multi_camera_config.get('profiles') or []
+
+        profiles = list()
+        enabled_count = 0
+        for profile_config in profile_configs:
+            enabled = bool(profile_config.get('enabled', False))
+            if enabled:
+                enabled_count += 1
+
+            profiles.append({
+                'profile_id'        : str(profile_config.get('profile_id') or 'unnamed'),
+                'primary'           : bool(profile_config.get('primary', False)),
+                'camera_interface'  : str(profile_config.get('camera_interface') or 'unknown'),
+                'enabled'           : enabled,
+            })
+
+        multi_camera_enabled = bool(self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE', False))
+        enable_allowed = enabled_count >= 2
+
+        if not profile_configs:
+            enable_block_reason = 'At least two enabled multi-camera profiles are required.'
+        elif not enable_allowed:
+            enable_block_reason = 'At least two enabled multi-camera profiles are required.'
+        else:
+            enable_block_reason = ''
+
+        return {
+            'enabled'             : multi_camera_enabled,
+            'status_label'        : 'Enabled' if multi_camera_enabled else 'Disabled',
+            'mode_label'          : 'Images-only MVP',
+            'profiles'            : profiles,
+            'enabled_count'       : enabled_count,
+            'enable_allowed'      : enable_allowed,
+            'enable_block_reason' : enable_block_reason,
+        }
+
+
     def get_camera_status_label(self, camera, latest_image=None):
         if camera.id == self.camera.id:
             return self.get_capture_status_label()
@@ -5254,6 +5300,59 @@ class ModernAdminCamerasView(ModernAdminView):
             return 'Offline'
 
         return 'Unknown'
+
+
+    def save_multi_camera_toggle_config(self, modern_admin_action):
+        result = {
+            'modern_admin_multi_camera_error'   : None,
+            'modern_admin_multi_camera_success' : None,
+        }
+
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            result['modern_admin_multi_camera_error'] = 'Only an admin user can change multi-camera capture mode.'
+            return result
+
+        multi_camera_context = self.get_multi_camera_context()
+        enable_requested = modern_admin_action == 'multi_camera_enable'
+
+        if enable_requested and not multi_camera_context['enable_allowed']:
+            result['modern_admin_multi_camera_error'] = multi_camera_context['enable_block_reason']
+            return result
+
+        new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
+        new_config['MULTI_CAMERA_CAPTURE_ENABLE'] = bool(enable_requested)
+
+        temp_config_p = None
+        try:
+            from ..config import IndiAllSkyConfigUtil
+
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json', encoding='utf-8') as temp_config_f:
+                json.dump(new_config, temp_config_f, indent=4)
+                temp_config_p = Path(temp_config_f.name)
+
+            with io.open(str(temp_config_p), 'r', encoding='utf-8') as temp_config_f:
+                # Reuse the existing Modern Admin camera config save path: load a complete config as a new active row.
+                IndiAllSkyConfigUtil().load(config=temp_config_f, force=True)
+
+            if enable_requested:
+                result['modern_admin_multi_camera_success'] = 'Multi-camera images-only MVP enabled in config. Restart indi-allsky to start the multi-camera capture workers.'
+            else:
+                result['modern_admin_multi_camera_success'] = 'Multi-camera capture disabled in config. Restart indi-allsky to return to the normal single-camera runtime.'
+
+            self.indi_allsky_config['MULTI_CAMERA_CAPTURE_ENABLE'] = bool(enable_requested)
+
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error('Error saving modern admin multi-camera toggle config: %s', str(e))
+            result['modern_admin_multi_camera_error'] = 'Unable to save multi-camera capture configuration: {0:s}'.format(str(e))
+        finally:
+            if temp_config_p:
+                try:
+                    temp_config_p.unlink()
+                except FileNotFoundError:
+                    pass
+
+        return result
 
 
     def save_camera_switch_config(self):
