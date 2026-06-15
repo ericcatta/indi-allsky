@@ -1052,6 +1052,89 @@ Failure criteria:
 
 On failure, use the rollback plan immediately.
 
+### MVP Test Result And Consolidation Status
+
+Current status after the first successful short test:
+
+- two `CaptureWorker` processes run simultaneously:
+  - IMX708 / libcamera as the primary profile
+  - ASI678MC / INDI as the secondary profile
+- one shared `ImageWorker` remains in use
+- image queue routing carries `profile_id` and `camera_id`
+- the DB stores images for both cameras:
+  - `camera_id=1`: IMX708
+  - `camera_id=2`: ASI678MC
+- no `IMAGE_EXCEPTION` events were observed during the successful 90 second test
+- MVP status: images-only short test passed
+
+Bug found during the pilot:
+
+- A single shared `ImageProcessor` reused image state, masks, stack data, and OpenCV arrays across cameras with different resolutions.
+- Alternating ASI678MC and IMX708 frames could leave cached arrays from one camera active while processing the other.
+- The visible failure was an OpenCV size mismatch after IMX708 reached `IMAGE_CALIBRATE_END`.
+
+Fix applied:
+
+- keep one `ImageWorker` process
+- create and reuse one `ImageProcessor` per `profile_id:camera_id`
+- leave DB, UI, and default single-camera behavior unchanged
+- keep the feature flag off by default
+
+Why this fix is the right MVP shape:
+
+- It isolates resolution-specific image state without starting multiple image worker processes.
+- It avoids broad cache reset logic that would require knowing every internal mutable field in `ImageProcessor`.
+- It keeps processing serialized, which is safer for the first multi-camera runtime tests.
+- It preserves the future option to move to multiple `ImageWorker` processes later.
+
+Diagnostics status:
+
+- Keep the current multi-camera diagnostics for now.
+- The diagnostics are intentionally verbose, but they are gated behind `MULTI_CAMERA_CAPTURE_ENABLE=true` and images-only payloads.
+- Do not remove them before the 10 minute and 1 hour tests, because they identify the exact stage of failures in the shared processing path.
+- After a clean 1 hour test, reduce routine noise and keep only:
+  - worker start/exit
+  - queue route
+  - image payload done
+  - exceptions
+  - DB save success/failure
+
+Known limits still present:
+
+- Multi-camera mode is images-only.
+- Generated products are not multi-camera-safe yet:
+  - timelapse
+  - mini timelapse
+  - realtime keogram
+  - longterm keogram
+  - startrails
+  - panorama
+  - panorama loop
+- Extra upload paths remain disabled for the MVP.
+- Latest/status output remains primary-camera oriented.
+- There is still one shared `ImageWorker`; processing latency from one camera can delay the other.
+- Queue backpressure is not yet per-camera.
+- Shared arrays for exposure, gain, binning, night state, and sensors still need deeper isolation before broader runtime features.
+- Camera-specific processing config is still mostly derived from the active/global config.
+
+Recommended next tests:
+
+1. Run a 10 minute two-camera images-only test.
+   - Confirm both `camera_id` values continue writing DB rows.
+   - Confirm no `IMAGE_EXCEPTION` events.
+   - Confirm no OpenCV size mismatch.
+   - Confirm image queue depth does not grow continuously.
+
+2. Run a 1 hour two-camera images-only test.
+   - Check CPU, memory, storage growth, queue depth, and process restarts.
+   - Confirm both camera folders receive media.
+   - Confirm IMX708 latest/status behavior remains correct.
+
+3. Consider an overnight test only after reviewing DB/media from the 1 hour test.
+   - Keep ASI678MC generated products disabled.
+   - Keep ASI678MC extra uploads disabled.
+   - Roll back immediately if IMX708 normal output is affected.
+
 ### Step 11: Per-Camera Output Toggles
 
 Difficulty: Medium
