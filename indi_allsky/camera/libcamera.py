@@ -28,8 +28,7 @@ def _multi_camera_diag(message, *args):
         message = message % args
 
     logger.warning(message)
-    sys.stderr.write(message + '\n')
-    sys.stderr.flush()
+    print(message, file=sys.stderr, flush=True)
 
 
 
@@ -60,6 +59,7 @@ class IndiClientLibCameraGeneric(IndiClient):
         self.active_exposure = False
         self.current_exposure_file_p = None
         self.current_metadata_file_p = None
+        self.exposureStartTime = 0.0
 
         memory_info = psutil.virtual_memory()
         self.memory_total_mb = memory_info[0] / 1024.0 / 1024.0
@@ -352,6 +352,14 @@ class IndiClientLibCameraGeneric(IndiClient):
                 self.libcamera_process.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
                 logger.error('Exposure timeout')
+                if images_only:
+                    _multi_camera_diag(
+                        '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera sync timeout timeout=%s; aborting process',
+                        getattr(self, 'profile_id', 'default'),
+                        getattr(self, 'camera_id', 'unknown'),
+                        timeout,
+                    )
+                self.abortCcdExposure()
                 raise TimeOutException('Timeout waiting for exposure')
 
 
@@ -379,10 +387,24 @@ class IndiClientLibCameraGeneric(IndiClient):
             self._closeLibcameraOutput()
 
             self._queueImage()
+            self._resetLibcameraProcessState()
 
 
     def getCcdExposureStatus(self):
         # returns camera_ready, exposure_state
+        if self.active_exposure and self._libcameraProcessTimedOut():
+            timeout = self._libcameraExposureTimeout()
+            elapsed = time.time() - self.exposureStartTime
+            _multi_camera_diag(
+                '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera async timeout elapsed=%0.1fs timeout=%0.1fs; aborting process',
+                getattr(self, 'profile_id', 'default'),
+                getattr(self, 'camera_id', 'unknown'),
+                elapsed,
+                timeout,
+            )
+            self.abortCcdExposure()
+            return True, 'TIMEOUT'
+
         if self._libCameraProcessRunning():
             return False, 'BUSY'
 
@@ -415,6 +437,7 @@ class IndiClientLibCameraGeneric(IndiClient):
             self._closeLibcameraOutput()
 
             self._queueImage()
+            self._resetLibcameraProcessState()
 
 
         return True, 'READY'
@@ -437,6 +460,32 @@ class IndiClientLibCameraGeneric(IndiClient):
 
         self.libcamera_output_f.close()
         self.libcamera_output_f = None
+
+
+    def _resetLibcameraProcessState(self):
+        self.libcamera_process = None
+        self.current_exposure_file_p = None
+        self.current_metadata_file_p = None
+        self.exposureStartTime = 0.0
+
+
+    def _libcameraExposureTimeout(self):
+        exposure = float(getattr(self, 'exposure', 0.0) or 0.0)
+        configured_timeout = float(self.config.get('CCD_EXPOSURE_TIMEOUT', 330))
+        return max(configured_timeout, exposure + 30.0)
+
+
+    def _libcameraProcessTimedOut(self):
+        if not bool(getattr(self, 'images_only', False)):
+            return False
+
+        if not self.exposureStartTime:
+            return False
+
+        if not self._libCameraProcessRunning():
+            return False
+
+        return (time.time() - self.exposureStartTime) > self._libcameraExposureTimeout()
 
 
     def _processMetadata(self):
@@ -617,6 +666,8 @@ class IndiClientLibCameraGeneric(IndiClient):
                 self.current_metadata_file_p.unlink()
         except FileNotFoundError:
             pass
+
+        self._resetLibcameraProcessState()
 
 
     def _queueImage(self):

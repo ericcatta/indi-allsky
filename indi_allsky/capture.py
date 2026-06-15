@@ -60,8 +60,7 @@ def _multi_camera_diag(message, *args):
         message = message % args
 
     logger.warning(message)
-    sys.stderr.write(message + '\n')
-    sys.stderr.flush()
+    print(message, file=sys.stderr, flush=True)
 
 
 class CaptureWorker(Process):
@@ -355,6 +354,10 @@ class CaptureWorker(Process):
 
         self._shutdown = False
         self._next_diag_heartbeat = 0.0
+        self._last_diag_ready = None
+        self._busy_started = None
+        self._libcamera_watchdog_cycles = 0
+        self._last_libcamera_frame_ts = 0.0
 
 
     def _set_global_state(self, key, value):
@@ -394,6 +397,66 @@ class CaptureWorker(Process):
             exposure_state,
             self._image_queue_depth(),
         )
+
+
+    def _log_diag_transition(self, ready, exposure_state):
+        if not self.multi_camera_diag:
+            return
+
+        if self._last_diag_ready is bool(ready):
+            return
+
+        self._last_diag_ready = bool(ready)
+        camera_id = self.camera_id if self.camera_id is not None else 'unknown'
+        _multi_camera_diag(
+            '[MULTI_CAMERA_DIAG][%s][camera_id=%s] ready/busy transition ready=%s busy=%s exposure_state=%s',
+            self.profile_id,
+            camera_id,
+            bool(ready),
+            not bool(ready),
+            exposure_state,
+        )
+
+
+    def _is_images_only_libcamera_profile(self):
+        return all((
+            self.multi_camera_diag,
+            self.images_only_profile,
+            self.capture_camera_interface.startswith('libcamera_'),
+        ))
+
+
+    def _libcamera_busy_timeout(self):
+        exposure = float(self.camera_runtime_state.current_exposure or 0.0)
+        configured_timeout = float(self.config.get('CCD_EXPOSURE_TIMEOUT', 330))
+        return max(configured_timeout, exposure + 30.0)
+
+
+    def _recover_libcamera_busy_timeout(self, now_time, exposure_state):
+        if not self._is_images_only_libcamera_profile():
+            return False
+
+        if self._busy_started is None:
+            return False
+
+        busy_elapsed = now_time - self._busy_started
+        busy_timeout = self._libcamera_busy_timeout()
+        if busy_elapsed <= busy_timeout:
+            return False
+
+        camera_id = self.camera_id if self.camera_id is not None else 'unknown'
+        _multi_camera_diag(
+            '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera busy watchdog timeout busy_elapsed=%0.1fs timeout=%0.1fs exposure_state=%s; aborting exposure',
+            self.profile_id,
+            camera_id,
+            busy_elapsed,
+            busy_timeout,
+            exposure_state,
+        )
+        self.indiclient.abortCcdExposure()
+        self._busy_started = None
+        self._libcamera_watchdog_cycles += 1
+        return True
 
 
 
@@ -726,6 +789,8 @@ class CaptureWorker(Process):
                         waiting_for_sqm_frame = False
 
 
+                    self._log_diag_transition(camera_ready, exposure_state)
+
                     # MULTI_CAMERA_PREP: mirror local loop state without
                     # changing the existing control flow.
                     self.camera_runtime_state.ready = bool(camera_ready)
@@ -733,11 +798,24 @@ class CaptureWorker(Process):
 
 
                     if not camera_ready:
+                        if self._busy_started is None:
+                            self._busy_started = now_time
+
+                        if self._recover_libcamera_busy_timeout(now_time, exposure_state):
+                            camera_ready = True
+                            exposure_state = 'Watchdog aborted'
+                            waiting_for_frame = False
+                            waiting_for_sqm_frame = False
+                            self.camera_runtime_state.ready = True
+                            self.camera_runtime_state.busy = False
+                            continue
+
                         continue
 
                     ###########################################
                     # Camera is ready, not taking an exposure #
                     ###########################################
+                    self._busy_started = None
                     if not last_camera_ready:
                         camera_ready_time = now_time
 
@@ -749,8 +827,19 @@ class CaptureWorker(Process):
                         waiting_for_frame = False
                         waiting_for_sqm_frame = False
                         self.camera_runtime_state.last_frame_ts = now_time
+                        self._last_libcamera_frame_ts = now_time
 
                         logger.info('Exposure received in %0.4fs (%+0.4fs)', frame_elapsed, frame_delta)
+                        if self._is_images_only_libcamera_profile():
+                            camera_id = self.camera_id if self.camera_id is not None else 'unknown'
+                            _multi_camera_diag(
+                                '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera exposure finish elapsed=%0.4fs delta=%+0.4fs watchdog_recoveries=%d',
+                                self.profile_id,
+                                camera_id,
+                                frame_elapsed,
+                                frame_delta,
+                                self._libcamera_watchdog_cycles,
+                            )
 
 
                         if frame_delta < -1:
@@ -897,6 +986,20 @@ class CaptureWorker(Process):
 
                         camera_ready = False
                         waiting_for_frame = True
+                        self._busy_started = now_time
+
+                        if self._is_images_only_libcamera_profile():
+                            camera_id = self.camera_id if self.camera_id is not None else 'unknown'
+                            _multi_camera_diag(
+                                '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera exposure start exposure=%0.8fs gain=%0.2f binning=%d next_frame_time=%0.3f image_q_depth=%s',
+                                self.profile_id,
+                                camera_id,
+                                self.exposure_av[constants.EXPOSURE_CURRENT],
+                                self.gain_av[constants.GAIN_CURRENT],
+                                self.binning_av[constants.BINNING_CURRENT],
+                                next_frame_time,
+                                self._image_queue_depth(),
+                            )
 
 
                         # if the image queue grows too large, introduce delays to new exposures

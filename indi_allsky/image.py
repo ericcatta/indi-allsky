@@ -65,8 +65,7 @@ def _multi_camera_diag(message, *args):
         message = message % args
 
     logger.warning(message)
-    sys.stderr.write(message + '\n')
-    sys.stderr.flush()
+    print(message, file=sys.stderr, flush=True)
 
 
 
