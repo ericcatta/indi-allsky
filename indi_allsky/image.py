@@ -320,7 +320,21 @@ class ImageWorker(Process):
 
             # new context for every task, reduces the effects of caching
             with app.app_context():
-                self.processImage(i_dict)
+                try:
+                    self.processImage(i_dict)
+                except Exception as e:
+                    if self._images_only_diag_enabled(bool(i_dict.get('images_only', False))):
+                        profile_id = self._validate_profile_id(i_dict)
+                        camera_id = i_dict.get('camera_id', 'unknown')
+                        self._images_only_diag(
+                            profile_id,
+                            camera_id,
+                            'IMAGE_EXCEPTION',
+                            error=str(e),
+                            error_type=e.__class__.__name__,
+                            location='processImage',
+                        )
+                    raise
 
 
     def processImage(self, i_dict):
@@ -538,6 +552,7 @@ class ImageWorker(Process):
                 day_date=i_ref.day_date,
                 exp_date=i_ref.exp_date,
             )
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_POST_PROCESS_START')
 
 
         filename_p.unlink()  # original file is no longer needed
@@ -569,10 +584,16 @@ class ImageWorker(Process):
             libcamera_black_level = i_ref.libcamera_black_level
 
 
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_CALIBRATE_START')
+
         self.image_processor.calibrate(libcamera_black_level=libcamera_black_level)
 
 
         self.image_processor.fix_holes_early()
+
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_CALIBRATE_END')
 
 
         if not images_only and self.config.get('IMAGE_SAVE_FITS'):
@@ -733,14 +754,41 @@ class ImageWorker(Process):
 
 
         # adu calculate (before processing)
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_ADU_CALC_START', target_adu_found=self.target_adu_found)
+
         adu, adu_average = self.calculate_exposure(adu, exposure, gain)
+
+        if images_only_diag:
+            self._images_only_diag(
+                profile_id,
+                camera_id,
+                'IMAGE_ADU_CALC_END',
+                adu=adu,
+                adu_average=adu_average,
+                current_adu_target=self.current_adu_target,
+                target_adu_found=self.target_adu_found,
+            )
 
 
         # generate a new mask base once the target ADU is found
         # this should only only fire once per restart
+        if images_only_diag:
+            self._images_only_diag(
+                profile_id,
+                camera_id,
+                'IMAGE_STABLE_CHECK',
+                generate_mask_base=self.generate_mask_base,
+                target_adu_found=self.target_adu_found,
+            )
+
         if self.generate_mask_base and self.target_adu_found:
             self.generate_mask_base = False
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_STABLE_CHECK', action='write_mask_base_start')
             self.write_mask_base_img(self.image_processor.image)
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_STABLE_CHECK', action='write_mask_base_end')
 
 
         # line detection
@@ -867,8 +915,14 @@ class ImageWorker(Process):
 
         self.image_processor.cardinal_dirs_label()
 
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_POST_PROCESS_END')
+
 
         # get ADS-B data
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_ADSB_CHECK', has_worker=bool(self.adsb_worker))
+
         if self.adsb_worker:
             try:
                 self.adsb_aircraft_list = self.adsb_aircraft_q.get(timeout=5.0)
@@ -881,6 +935,9 @@ class ImageWorker(Process):
             self.adsb_worker.join()
             self.adsb_worker = None
 
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_ADSB_DONE', aircraft=len(self.adsb_aircraft_list))
+
 
         # wait on the pre-hook to finish
         if images_only:
@@ -889,7 +946,13 @@ class ImageWorker(Process):
             custom_hook_data = self.wait_image_save_pre_hook()
 
 
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_LABEL_START')
+
         self.image_processor.label_image(adsb_aircraft_list=self.adsb_aircraft_list, custom_hook_data=custom_hook_data)
+
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_LABEL_END')
 
 
         processing_elapsed_s = time.time() - processing_start
@@ -902,8 +965,12 @@ class ImageWorker(Process):
 
         #task.setSuccess('Image processed')
 
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_STATUS_ELIGIBLE', primary=profile_primary)
+
         if profile_primary:
             if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_PRIMARY_BRANCH_START')
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_STATUS_JSON_START')
 
             try:
@@ -915,6 +982,7 @@ class ImageWorker(Process):
 
             if images_only_diag:
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_STATUS_JSON_END')
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_PRIMARY_BRANCH_END')
         else:
             logger.debug('[%s][camera_id=%s] Status json disabled for secondary profile', profile_id, camera_id)
 
@@ -1970,6 +2038,16 @@ class ImageWorker(Process):
 
 
         ### Do not write daytime image files if daytime capture is disabled
+        if diag_enabled:
+            self._images_only_diag(
+                diag_profile_id,
+                diag_camera_id,
+                'IMAGE_DAYTIME_SAVE_CHECK',
+                daytime_capture=self.config['DAYTIME_CAPTURE'],
+                daytime_capture_save=self.config.get('DAYTIME_CAPTURE_SAVE', True),
+                night=bool(self.night_av[constants.NIGHT_NIGHT]),
+            )
+
         if not self.night_av[constants.NIGHT_NIGHT] and self.config['DAYTIME_CAPTURE'] and not self.config.get('DAYTIME_CAPTURE_SAVE', True):
             logger.info('Daytime image save is disabled')
             if diag_enabled:
@@ -1985,6 +2063,15 @@ class ImageWorker(Process):
         filename = folder.joinpath(self.filename_t.format(i_ref.camera_id, date_str, self.config['IMAGE_FILE_TYPE']))
 
         #logger.info('Image filename: %s', filename)
+
+        if diag_enabled:
+            self._images_only_diag(
+                diag_profile_id,
+                diag_camera_id,
+                'IMAGE_DUPLICATE_CHECK',
+                exists=filename.exists(),
+                final_filename=str(filename),
+            )
 
         if filename.exists():
             logger.error('File exists: %s (skipping)', filename)
