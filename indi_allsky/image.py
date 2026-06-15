@@ -141,6 +141,7 @@ class ImageWorker(Process):
             self.night_av,
             self.astro_av,
         )
+        self.image_processors = {}
 
         self._miscDb = miscDb(self.config)
         self._miscUpload = miscUpload(
@@ -222,6 +223,80 @@ class ImageWorker(Process):
                 camera_id,
                 event,
             )
+
+
+    def _new_image_processor(self):
+        return ImageProcessor(
+            self.config,
+            self.position_av,
+            self.gain_av,
+            self.binning_av,
+            self.sensors_temp_av,
+            self.sensors_user_av,
+            self.night_av,
+            self.astro_av,
+        )
+
+
+    def _select_image_processor(self, profile_id, camera_id, images_only_diag):
+        if not images_only_diag:
+            return
+
+        processor_key = '{0:s}:{1!s}'.format(profile_id, camera_id)
+        try:
+            processor = self.image_processors[processor_key]
+            action = 'reuse'
+        except KeyError:
+            processor = self._new_image_processor()
+            self.image_processors[processor_key] = processor
+            action = 'create'
+
+        self.image_processor = processor
+        self._images_only_diag(
+            profile_id,
+            camera_id,
+            'IMAGE_PROCESSOR_CONTEXT',
+            action=action,
+            processor_key=processor_key,
+            processors=len(self.image_processors),
+        )
+
+
+    def _shape_for_diag(self, value):
+        shape = getattr(value, 'shape', None)
+        if shape is None:
+            return None
+
+        return 'x'.join(str(x) for x in shape)
+
+
+    def _processor_cache_diag(self, profile_id, camera_id, event, binning):
+        processor = self.image_processor
+        image_shape = self._shape_for_diag(getattr(processor, 'image', None))
+
+        image_list_shapes = []
+        for i_ref in getattr(processor, 'image_list', []):
+            if not i_ref:
+                continue
+
+            image_list_shapes.append(self._shape_for_diag(getattr(i_ref, 'opencv_data', None)))
+
+        detection_masks = getattr(processor, '_detection_mask_dict', None) or {}
+        adu_masks = getattr(processor, '_adu_mask_dict', None) or {}
+        image_circle_masks = getattr(processor, '_image_circle_alpha_mask_dict', None) or {}
+        overlay_masks = getattr(processor, '_alpha_mask_dict', None) or {}
+
+        self._images_only_diag(
+            profile_id,
+            camera_id,
+            event,
+            adu_mask_shape=self._shape_for_diag(adu_masks.get(binning)),
+            detection_mask_shape=self._shape_for_diag(detection_masks.get(binning)),
+            image_circle_mask_shape=self._shape_for_diag(image_circle_masks.get(binning)),
+            image_list_shapes=','.join([s for s in image_list_shapes if s]) or None,
+            image_shape=image_shape,
+            logo_alpha_shape=self._shape_for_diag(overlay_masks.get(binning)),
+        )
 
 
     def _queue_upload_task(self, task, camera_id=None, profile_id=None):
@@ -414,6 +489,8 @@ class ImageWorker(Process):
                 primary=profile_primary,
             )
 
+        self._select_image_processor(profile_id, camera_id, images_only_diag)
+
         # libcamera
         libcamera_black_level = i_dict.get('libcamera_black_level', 0)
         libcamera_awb_gains = i_dict.get('libcamera_awb_gains')
@@ -552,6 +629,7 @@ class ImageWorker(Process):
                 day_date=i_ref.day_date,
                 exp_date=i_ref.exp_date,
             )
+            self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_AFTER_ADD', binning)
             self._images_only_diag(profile_id, camera_id, 'IMAGE_POST_PROCESS_START')
 
 
@@ -594,6 +672,7 @@ class ImageWorker(Process):
 
         if images_only_diag:
             self._images_only_diag(profile_id, camera_id, 'IMAGE_CALIBRATE_END')
+            self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_AFTER_CALIBRATE', binning)
 
 
         if not images_only and self.config.get('IMAGE_SAVE_FITS'):
@@ -612,6 +691,8 @@ class ImageWorker(Process):
 
         image_height, image_width = self.image_processor.image.shape[:2]
         logger.info('Image: %d x %d', image_width, image_height)
+        if images_only_diag:
+            self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_AFTER_STACK', binning)
 
 
         ### IMAGE IS CALIBRATED ###
@@ -756,6 +837,7 @@ class ImageWorker(Process):
         # adu calculate (before processing)
         if images_only_diag:
             self._images_only_diag(profile_id, camera_id, 'IMAGE_ADU_CALC_START', target_adu_found=self.target_adu_found)
+            self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_BEFORE_ADU', binning)
 
         adu, adu_average = self.calculate_exposure(adu, exposure, gain)
 
@@ -870,6 +952,9 @@ class ImageWorker(Process):
         self.image_processor.colormap()
 
 
+        if images_only_diag:
+            self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_BEFORE_CIRCLE_MASK', i_ref.binning)
+
         self.image_processor.apply_image_circle_mask(i_ref.binning)
 
 
@@ -896,6 +981,9 @@ class ImageWorker(Process):
                 circular_display_image = self.image_processor.circular_display(i_ref.binning)
                 self.write_circular_display_img(circular_display_image, jpeg_exif=jpeg_exif)
 
+
+        if images_only_diag:
+            self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_BEFORE_LOGO', i_ref.binning)
 
         self.image_processor.apply_logo_overlay(i_ref.binning)
 
