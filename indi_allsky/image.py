@@ -201,6 +201,29 @@ class ImageWorker(Process):
         self._miscUpload.set_profile_context(profile_id, camera_id=camera_id)
 
 
+    def _images_only_diag_enabled(self, images_only):
+        return bool(images_only and self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False))
+
+
+    def _images_only_diag(self, profile_id, camera_id, event, **kwargs):
+        detail = ' '.join('{0:s}={1!s}'.format(k, v) for k, v in sorted(kwargs.items()))
+        if detail:
+            _multi_camera_diag(
+                '[MULTI_CAMERA_DIAG][%s][camera_id=%s] %s %s',
+                profile_id,
+                camera_id,
+                event,
+                detail,
+            )
+        else:
+            _multi_camera_diag(
+                '[MULTI_CAMERA_DIAG][%s][camera_id=%s] %s',
+                profile_id,
+                camera_id,
+                event,
+            )
+
+
     def _queue_upload_task(self, task, camera_id=None, profile_id=None):
         # MULTI_CAMERA_PREP: passive route metadata; FileUploader still loads
         # and executes the existing DB task by task_id.
@@ -344,6 +367,7 @@ class ImageWorker(Process):
         profile_outputs = i_dict.get('profile_outputs') or {}
         profile_primary = bool(i_dict.get('profile_primary', True))
         images_only = bool(i_dict.get('images_only', False))
+        images_only_diag = self._images_only_diag_enabled(images_only)
         filename_t = i_dict.get('filename_t')
         sqm_exposure = i_dict.get('sqm_exposure')
         logger.debug(
@@ -362,6 +386,19 @@ class ImageWorker(Process):
                 images_only,
             )
 
+        if images_only_diag:
+            input_exists = filename_p.exists()
+            input_size = filename_p.stat().st_size if input_exists else 'missing'
+            self._images_only_diag(
+                profile_id,
+                camera_id,
+                'IMAGE_PAYLOAD_START',
+                exp_time=i_dict.get('exp_time'),
+                filename=str(filename_p),
+                input_exists=input_exists,
+                input_size=input_size,
+                primary=profile_primary,
+            )
 
         # libcamera
         libcamera_black_level = i_dict.get('libcamera_black_level', 0)
@@ -384,6 +421,8 @@ class ImageWorker(Process):
 
         if not filename_p.exists():
             logger.error('Frame not found: %s', filename_p)
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_PAYLOAD_ERROR', reason='input_missing', filename=str(filename_p))
             #task.setFailed('Frame not found: {0:s}'.format(str(filename_p)))
             return
 
@@ -391,6 +430,8 @@ class ImageWorker(Process):
         image_size = filename_p.stat().st_size
         if image_size == 0:
             logger.error('Frame is empty: %s', filename_p)
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_PAYLOAD_ERROR', reason='input_empty', filename=str(filename_p))
             filename_p.unlink()
             return
 
@@ -463,6 +504,8 @@ class ImageWorker(Process):
         now = datetime.now()
         self.image_processor.update_astrometric_data(now)
 
+        if images_only_diag:
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_START', filename=str(filename_p), input_size=image_size)
 
         try:
             i_ref = self.image_processor.add(
@@ -476,9 +519,25 @@ class ImageWorker(Process):
             )
         except BadImage as e:
             logger.error('Bad Image: %s', str(e))
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_ERROR', error=str(e), error_type='BadImage')
             filename_p.unlink()
             #task.setFailed('Bad Image: {0:s}'.format(str(filename_p)))
             return
+        except Exception as e:
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_ERROR', error=str(e), error_type=e.__class__.__name__)
+            raise
+
+        if images_only_diag:
+            self._images_only_diag(
+                profile_id,
+                camera_id,
+                'IMAGE_PROCESSOR_END',
+                camera_uuid=i_ref.camera_uuid,
+                day_date=i_ref.day_date,
+                exp_date=i_ref.exp_date,
+            )
 
 
         filename_p.unlink()  # original file is no longer needed
@@ -844,7 +903,18 @@ class ImageWorker(Process):
         #task.setSuccess('Image processed')
 
         if profile_primary:
-            self.write_status_json(i_ref, adu, adu_average)  # write json status file
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_STATUS_JSON_START')
+
+            try:
+                self.write_status_json(i_ref, adu, adu_average)  # write json status file
+            except Exception as e:
+                if images_only_diag:
+                    self._images_only_diag(profile_id, camera_id, 'IMAGE_STATUS_JSON_ERROR', error=str(e), error_type=e.__class__.__name__)
+                raise
+
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_STATUS_JSON_END')
         else:
             logger.debug('[%s][camera_id=%s] Status json disabled for secondary profile', profile_id, camera_id)
 
@@ -854,13 +924,37 @@ class ImageWorker(Process):
             self.write_realtime_keogram(self.image_processor.realtime_keogram_trimmed, camera)
 
 
-        latest_file, new_filename = self.write_img(
-            self.image_processor.image,
-            i_ref,
-            camera,
-            jpeg_exif=jpeg_exif,
-            write_latest=profile_primary,
-        )
+        diag_context = None
+        if images_only_diag:
+            diag_context = {
+                'profile_id' : profile_id,
+                'camera_id'  : camera_id,
+                'images_only': images_only,
+            }
+            self._images_only_diag(profile_id, camera_id, 'IMAGE_WRITE_IMG_START', write_latest=profile_primary)
+
+        try:
+            latest_file, new_filename = self.write_img(
+                self.image_processor.image,
+                i_ref,
+                camera,
+                jpeg_exif=jpeg_exif,
+                write_latest=profile_primary,
+                diag_context=diag_context,
+            )
+        except Exception as e:
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_WRITE_IMG_ERROR', error=str(e), error_type=e.__class__.__name__)
+            raise
+
+        if images_only_diag:
+            self._images_only_diag(
+                profile_id,
+                camera_id,
+                'IMAGE_WRITE_IMG_RESULT',
+                latest_file=str(latest_file) if latest_file else None,
+                new_filename=str(new_filename) if new_filename else None,
+            )
 
         if new_filename:
             if not images_only:
@@ -943,11 +1037,22 @@ class ImageWorker(Process):
             image_metadata['data'] = image_add_data
 
 
-            image_entry = self._miscDb.addImage(
-                new_filename.relative_to(self.image_dir),
-                camera_id,
-                image_metadata,
-            )
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_ADDIMAGE_START', filename=str(new_filename))
+
+            try:
+                image_entry = self._miscDb.addImage(
+                    new_filename.relative_to(self.image_dir),
+                    camera_id,
+                    image_metadata,
+                )
+            except Exception as e:
+                if images_only_diag:
+                    self._images_only_diag(profile_id, camera_id, 'IMAGE_ADDIMAGE_ERROR', error=str(e), error_type=e.__class__.__name__, filename=str(new_filename))
+                raise
+
+            if images_only_diag:
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_ADDIMAGE_OK', image_id=image_entry.id, filename=str(new_filename))
 
 
             image_thumbnail_metadata = {
@@ -978,6 +1083,15 @@ class ImageWorker(Process):
                 self.wait_image_save_post_hook()
         else:
             # images not being saved
+            if images_only_diag:
+                reason = 'unknown'
+                if self.config.get('FOCUS_MODE', False):
+                    reason = 'focus_mode'
+                elif not self.night_av[constants.NIGHT_NIGHT] and self.config['DAYTIME_CAPTURE'] and not self.config.get('DAYTIME_CAPTURE_SAVE', True):
+                    reason = 'daytime_save_disabled'
+
+                self._images_only_diag(profile_id, camera_id, 'IMAGE_WRITE_IMG_SKIPPED', reason=reason)
+
             image_entry = None
             image_metadata = {}
             image_thumbnail_entry = None
@@ -1163,6 +1277,16 @@ class ImageWorker(Process):
                 self._miscUpload.upload_image(image_entry)
 
                 self.upload_metadata(i_ref, adu, adu_average)
+
+        if images_only_diag:
+            self._images_only_diag(
+                profile_id,
+                camera_id,
+                'IMAGE_PAYLOAD_DONE',
+                db_saved=bool(new_filename),
+                latest_file=str(latest_file) if latest_file else None,
+                new_filename=str(new_filename) if new_filename else None,
+            )
 
 
     def decdeg2dms(self, dd):
@@ -1771,7 +1895,12 @@ class ImageWorker(Process):
         tmpfile_p.unlink()
 
 
-    def write_img(self, data, i_ref, camera, jpeg_exif=None, write_latest=True):
+    def write_img(self, data, i_ref, camera, jpeg_exif=None, write_latest=True, diag_context=None):
+        diag_context = diag_context or {}
+        diag_enabled = bool(diag_context.get('images_only'))
+        diag_profile_id = diag_context.get('profile_id', self.profile_id)
+        diag_camera_id = diag_context.get('camera_id', i_ref.camera_id)
+
         f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.{0}'.format(self.config['IMAGE_FILE_TYPE']))
         f_tmpfile.close()
 
@@ -1832,6 +1961,8 @@ class ImageWorker(Process):
         ### disable timelapse images in focus mode
         if self.config.get('FOCUS_MODE', False):
             logger.warning('Focus mode enabled, not saving timelapse image')
+            if diag_enabled:
+                self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='focus_mode')
             #self.write_focus_fit(data)
             #self.write_focus_png(data)
             tmpfile_name.unlink()
@@ -1841,6 +1972,8 @@ class ImageWorker(Process):
         ### Do not write daytime image files if daytime capture is disabled
         if not self.night_av[constants.NIGHT_NIGHT] and self.config['DAYTIME_CAPTURE'] and not self.config.get('DAYTIME_CAPTURE_SAVE', True):
             logger.info('Daytime image save is disabled')
+            if diag_enabled:
+                self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='daytime_save_disabled')
             tmpfile_name.unlink()
             return latest_file, None
 
@@ -1855,6 +1988,8 @@ class ImageWorker(Process):
 
         if filename.exists():
             logger.error('File exists: %s (skipping)', filename)
+            if diag_enabled:
+                self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='final_filename_exists', final_filename=str(filename))
             tmpfile_name.unlink()
             return latest_file, None
 
