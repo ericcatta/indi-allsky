@@ -28,6 +28,7 @@ from .config import IndiAllSkyConfig
 from .camera_shared_state import CameraSharedState
 from .capture_profiles import build_profile_config
 from .capture_profiles import derive_capture_profiles
+from .multicamera_diag import write_multicamera_diag
 
 from . import constants
 
@@ -64,11 +65,7 @@ logger = logging.getLogger('indi_allsky')
 
 
 def _multi_camera_diag(message, *args):
-    if args:
-        message = message % args
-
-    logger.warning(message)
-    print(message, file=sys.stderr, flush=True)
+    write_multicamera_diag(message, *args)
 
 
 class IndiAllSky(object):

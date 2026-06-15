@@ -7,7 +7,6 @@ import tempfile
 import json
 import subprocess
 import psutil
-import sys
 from pathlib import Path
 import logging
 
@@ -15,6 +14,7 @@ from .indi import IndiClient
 from .fake_indi import FakeIndiCcd
 
 from .. import constants
+from ..multicamera_diag import write_multicamera_diag
 
 from ..exceptions import TimeOutException
 from ..exceptions import BinModeException
@@ -24,11 +24,7 @@ logger = logging.getLogger('indi_allsky')
 
 
 def _multi_camera_diag(message, *args):
-    if args:
-        message = message % args
-
-    logger.warning(message)
-    print(message, file=sys.stderr, flush=True)
+    write_multicamera_diag(message, *args)
 
 
 

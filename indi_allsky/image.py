@@ -2,7 +2,6 @@ import os
 import io
 import json
 import re
-import sys
 from pathlib import Path
 from datetime import datetime
 from datetime import timedelta
@@ -32,6 +31,7 @@ from PIL import Image
 from fractions import Fraction
 
 from . import constants
+from .multicamera_diag import write_multicamera_diag
 
 from .processing import ImageProcessor
 from .miscUpload import miscUpload
@@ -61,11 +61,7 @@ logger = logging.getLogger('indi_allsky')
 
 
 def _multi_camera_diag(message, *args):
-    if args:
-        message = message % args
-
-    logger.warning(message)
-    print(message, file=sys.stderr, flush=True)
+    write_multicamera_diag(message, *args)
 
 
 

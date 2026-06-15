@@ -2,7 +2,6 @@ import os
 import time
 import io
 import json
-import sys
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -42,6 +41,7 @@ from .exceptions import TemperatureException
 from .camera_runtime_state import CameraRuntimeState
 from .camera_shared_state import CameraSharedState
 from .capture_profiles import derive_capture_profiles
+from .multicamera_diag import write_multicamera_diag
 
 from .flask import create_app
 from .flask import db
@@ -56,11 +56,7 @@ logger = logging.getLogger('indi_allsky')
 
 
 def _multi_camera_diag(message, *args):
-    if args:
-        message = message % args
-
-    logger.warning(message)
-    print(message, file=sys.stderr, flush=True)
+    write_multicamera_diag(message, *args)
 
 
 class CaptureWorker(Process):
