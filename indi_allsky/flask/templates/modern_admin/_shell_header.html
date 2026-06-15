@@ -1,7 +1,18 @@
 <header class="modern-admin-topbar" aria-label="{{ modern_admin_header_label }}">
     <h1 class="modern-admin-visually-hidden" id="{{ modern_admin_title_id }}">{{ modern_admin_heading }}</h1>
 
-    <div class="modern-admin-header-actions">
+    <div class="modern-admin-runtime-row">
+        <div class="modern-admin-power-actions" aria-label="System quick actions">
+            <button class="modern-admin-topbar-button modern-admin-topbar-button-danger" type="button" data-modern-admin-system-command="poweroff">Power off</button>
+            <button class="modern-admin-topbar-button modern-admin-topbar-button-warn" type="button" data-modern-admin-system-command="reboot">Restart</button>
+        </div>
+
+        <div class="modern-admin-runtime-spacer" aria-hidden="true"></div>
+
+        <div class="modern-admin-runtime-indicator modern-admin-runtime-{{ modern_admin_runtime_status.tone }}" title="{{ modern_admin_runtime_status.label }}">
+            {{ modern_admin_runtime_status.label }}
+        </div>
+
         <div class="modern-admin-mode-switch" role="group" aria-label="Admin mode">
             <a class="modern-admin-mode-option{% if modern_admin_mode == 'modern' %} modern-admin-mode-option-active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_mode_view', mode='modern') }}">Modern</a>
             <a class="modern-admin-mode-option{% if modern_admin_mode == 'classic' %} modern-admin-mode-option-active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_mode_view', mode='classic') }}">Classic</a>
@@ -18,3 +29,51 @@
         {% endfor %}
     </nav>
 </header>
+
+<script>
+(function() {
+    const quickActionUrl = {{ modern_admin_quick_action_url|tojson }};
+    const cameraId = {{ modern_admin_quick_action_camera|tojson }};
+    const messages = {
+        poweroff: 'Power off this system?',
+        reboot: 'Restart this system?',
+    };
+
+    document.querySelectorAll('[data-modern-admin-system-command]').forEach((button) => {
+        button.addEventListener('click', function() {
+            const command = button.getAttribute('data-modern-admin-system-command');
+            if (!command || !window.confirm(messages[command] || 'Run this system action?')) {
+                return;
+            }
+
+            button.disabled = true;
+
+            fetch(quickActionUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    CAMERA_ID: cameraId,
+                    SERVICE_HIDDEN: 'system',
+                    COMMAND_HIDDEN: command,
+                }),
+            }).then((response) => {
+                if (!response.ok) {
+                    return response.json().then((data) => {
+                        throw new Error(Object.values(data).flat().join(' ') || 'System action failed.');
+                    });
+                }
+
+                return response.json();
+            }).then((data) => {
+                window.alert(data['success-message'] || 'System action submitted.');
+            }).catch((error) => {
+                window.alert(error.message || 'System action failed.');
+                button.disabled = false;
+            });
+        });
+    });
+})();
+</script>
