@@ -11981,10 +11981,54 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
 class ModernAdminMediaGalleryView(ModernAdminMediaListView):
     page_title = 'Modern Admin Gallery'
     modern_admin_section = 'Gallery'
-    modern_admin_description = 'Recent image gallery from the selected camera.'
+    modern_admin_description = 'Scrollable image archive from the selected camera.'
     modern_admin_media_model = IndiAllSkyDbImageTable
     modern_admin_media_kind = 'image'
     modern_admin_media_layout = 'gallery'
+    modern_admin_media_limit = 72
+
+    def get_context(self):
+        context = super(ModernAdminMediaGalleryView, self).get_context()
+        context['modern_admin_gallery_page_url'] = url_for('indi_allsky.modern_admin_media_gallery_page_view')
+        context['modern_admin_gallery_limit'] = self.modern_admin_media_limit
+        context['modern_admin_gallery_next_cursor'] = context['modern_admin_media_items'][-1]['id'] if context['modern_admin_media_items'] else None
+        context['modern_admin_gallery_has_more'] = len(context['modern_admin_media_items']) == self.modern_admin_media_limit
+
+        return context
+
+
+    def get_media_entries_page(self, limit=72, before_id=None, camera_id=None):
+        if not getattr(self, 'camera', None):
+            return list()
+
+        if camera_id is None:
+            camera_id = self.camera.id
+
+        query = self.modern_admin_media_model.query\
+            .join(self.modern_admin_media_model.camera)\
+            .filter(IndiAllSkyDbCameraTable.id == camera_id)
+
+        if before_id:
+            cursor_entry = self.modern_admin_media_model.query\
+                .filter(self.modern_admin_media_model.id == before_id)\
+                .first()
+
+            if not cursor_entry:
+                return list()
+
+            query = query.filter(or_(
+                self.modern_admin_media_model.createDate < cursor_entry.createDate,
+                and_(
+                    self.modern_admin_media_model.createDate == cursor_entry.createDate,
+                    self.modern_admin_media_model.id < cursor_entry.id,
+                ),
+            ))
+
+        return query\
+            .order_by(self.modern_admin_media_model.createDate.desc())\
+            .order_by(self.modern_admin_media_model.id.desc())\
+            .limit(limit + 1)\
+            .all()
 
     def get_media_preview_url(self, media_entry):
         if not media_entry.thumbnail_uuid:
@@ -12011,6 +12055,46 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
         except Exception as e:
             app.logger.error('Error determining modern admin thumbnail URL: %s', str(e))
             return self.get_media_url(media_entry)
+
+
+class ModernAdminMediaGalleryPageView(ModernAdminMediaGalleryView):
+    methods = ['GET']
+
+    def dispatch_request(self):
+        limit = request.args.get('limit', self.modern_admin_media_limit, type=int)
+        before_id = request.args.get('before_id', type=int)
+        camera_id = request.args.get('camera_id', type=int)
+
+        if limit <= 0:
+            limit = self.modern_admin_media_limit
+        elif limit > 144:
+            limit = 144
+
+        try:
+            media_entries = self.get_media_entries_page(limit=limit, before_id=before_id, camera_id=camera_id)
+        except Exception as e:
+            app.logger.error('Error querying modern admin gallery page: %s', str(e))
+            return jsonify({
+                'images'      : list(),
+                'has_more'    : False,
+                'next_cursor' : None,
+            }), 500
+
+        has_more = len(media_entries) > limit
+        media_entries = media_entries[:limit]
+
+        images = list()
+        for media_entry in media_entries:
+            try:
+                images.append(self.serialize_media_entry(media_entry))
+            except Exception as e:
+                app.logger.error('Error serializing modern admin gallery page entry %s: %s', getattr(media_entry, 'id', 'unknown'), str(e))
+
+        return jsonify({
+            'images'      : images,
+            'has_more'    : has_more,
+            'next_cursor' : images[-1]['id'] if has_more and images else None,
+        })
 
 
 class ModernAdminMediaImagesView(ModernAdminMediaListView):
@@ -14446,6 +14530,7 @@ bp_allsky.add_url_rule('/minivideoviewer', view_func=MiniVideoViewerView.as_view
 bp_allsky.add_url_rule('/ajax/minivideoviewer', view_func=AjaxMiniVideoViewerView.as_view('ajax_mini_videoviewer_view'))
 
 bp_allsky.add_url_rule('/modern-admin/media/gallery', view_func=ModernAdminMediaGalleryView.as_view('modern_admin_media_gallery_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/gallery/page', view_func=ModernAdminMediaGalleryPageView.as_view('modern_admin_media_gallery_page_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/images', view_func=ModernAdminMediaImagesView.as_view('modern_admin_media_images_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/timelapses', view_func=ModernAdminMediaTimelapsesView.as_view('modern_admin_media_timelapses_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/media_list.html'))

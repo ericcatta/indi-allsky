@@ -4,7 +4,7 @@
 
 {% block head %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}">
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-gallery-infinite-v1') }}">
 {% endblock %}
 
 {% block content %}
@@ -57,9 +57,9 @@ var camera_id = {{ camera_id }};
     {% endif %}
 
     {% if modern_admin_media_items %}
-    <section class="modern-admin-media-grid{% if modern_admin_media_layout == 'gallery' %} modern-admin-media-gallery-grid{% endif %}" aria-label="{{ modern_admin_section }} items">
+    <section class="modern-admin-media-grid{% if modern_admin_media_layout == 'gallery' %} modern-admin-media-gallery-grid{% endif %}"{% if modern_admin_media_layout == 'gallery' %} id="modern-admin-gallery-grid" data-gallery-page-url="{{ modern_admin_gallery_page_url }}" data-gallery-limit="{{ modern_admin_gallery_limit }}" data-gallery-next-cursor="{{ modern_admin_gallery_next_cursor or '' }}" data-gallery-has-more="{{ 'true' if modern_admin_gallery_has_more else 'false' }}"{% endif %} aria-label="{{ modern_admin_section }} items">
         {% for item in modern_admin_media_items %}
-        <article class="modern-admin-media-card" data-media-index="{{ loop.index0 }}">
+        <article class="modern-admin-media-card" data-media-index="{{ loop.index0 }}" data-media-id="{{ item.id }}">
             {% if item.url and modern_admin_media_kind in ('image', 'fits') %}
             <label class="modern-admin-media-select">
                 <input class="modern-admin-media-select-input" type="checkbox" value="{{ item.url }}" data-filename="{{ item.filename }}">
@@ -119,6 +119,13 @@ var camera_id = {{ camera_id }};
         </article>
         {% endfor %}
     </section>
+    {% if modern_admin_media_layout == 'gallery' %}
+    <section class="modern-admin-gallery-load-state" aria-live="polite">
+        <p id="modern-admin-gallery-loading" hidden>Loading older images...</p>
+        <p id="modern-admin-gallery-end"{% if modern_admin_gallery_has_more %} hidden{% endif %}>Beginning of archive reached</p>
+        <button class="modern-admin-media-button" id="modern-admin-gallery-load-more" type="button"{% if not modern_admin_gallery_has_more %} hidden{% endif %}>Load more</button>
+    </section>
+    {% endif %}
     {% else %}
     <section class="modern-admin-empty-state">
         <h3>No media found</h3>
@@ -145,7 +152,7 @@ var camera_id = {{ camera_id }};
 </div>
 
 <script>
-const modernAdminMediaItems = {{ modern_admin_media_items | tojson }};
+let modernAdminMediaItems = {{ modern_admin_media_items | tojson }};
 const modernAdminMediaKind = '{{ modern_admin_media_kind }}';
 const modernAdminLightbox = document.getElementById('modern-admin-lightbox');
 const modernAdminLightboxImage = document.getElementById('modern-admin-lightbox-image');
@@ -153,7 +160,15 @@ const modernAdminLightboxTitle = document.getElementById('modern-admin-lightbox-
 const modernAdminLightboxDownload = document.getElementById('modern-admin-lightbox-download');
 const modernAdminDownloadSelected = document.getElementById('modern-admin-download-selected');
 const modernAdminSelectionCount = document.getElementById('modern-admin-selection-count');
+const modernAdminGalleryGrid = document.getElementById('modern-admin-gallery-grid');
+const modernAdminGalleryLoadMore = document.getElementById('modern-admin-gallery-load-more');
+const modernAdminGalleryLoading = document.getElementById('modern-admin-gallery-loading');
+const modernAdminGalleryEnd = document.getElementById('modern-admin-gallery-end');
+const modernAdminGallerySeenIds = new Set(modernAdminMediaItems.map((item) => String(item.id)));
 let modernAdminLightboxIndex = 0;
+let modernAdminGalleryLoadingPage = false;
+let modernAdminGalleryHasMore = modernAdminGalleryGrid && modernAdminGalleryGrid.dataset.galleryHasMore === 'true';
+let modernAdminGalleryNextCursor = modernAdminGalleryGrid ? modernAdminGalleryGrid.dataset.galleryNextCursor : null;
 
 function modernAdminLightboxItem(index) {
     return modernAdminMediaItems[index] || null;
@@ -200,26 +215,152 @@ function modernAdminStepLightbox(direction) {
     modernAdminOpenLightbox(nextIndex);
 }
 
-document.querySelectorAll('.modern-admin-lightbox-trigger').forEach((trigger) => {
-    trigger.addEventListener('click', (event) => {
+function modernAdminEscapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+    }[character]));
+}
+
+function modernAdminGalleryCardHtml(item, index) {
+    const title = modernAdminEscapeHtml(item.title);
+    const filename = modernAdminEscapeHtml(item.filename);
+    const previewUrl = modernAdminEscapeHtml(item.preview_url || '');
+    const originalUrl = modernAdminEscapeHtml(item.url || item.preview_url || '');
+    const checkbox = item.url ? `
+            <label class="modern-admin-media-select">
+                <input class="modern-admin-media-select-input" type="checkbox" value="${modernAdminEscapeHtml(item.url)}" data-filename="${filename}">
+                <span class="modern-admin-visually-hidden">Select ${title}</span>
+            </label>` : '';
+    const preview = previewUrl ? `
+                <img src="${previewUrl}" alt="${title}" loading="lazy" data-original-url="${originalUrl}">` : `
+                <div class="modern-admin-media-file">${modernAdminMediaKind.toUpperCase()}</div>`;
+
+    return `
+        <article class="modern-admin-media-card" data-media-index="${index}" data-media-id="${modernAdminEscapeHtml(item.id)}">
+            ${checkbox}
+            <div class="modern-admin-media-preview${item.url ? ' modern-admin-lightbox-trigger' : ''}" data-media-index="${index}" tabindex="0" role="button" aria-label="Open ${title}">
+                ${preview}
+            </div>
+            <span class="modern-admin-visually-hidden">${modernAdminEscapeHtml(item.created)}</span>
+        </article>`;
+}
+
+function modernAdminGallerySetLoading(isLoading) {
+    modernAdminGalleryLoadingPage = isLoading;
+    if (modernAdminGalleryLoading) {
+        modernAdminGalleryLoading.hidden = !isLoading;
+    }
+
+    if (modernAdminGalleryLoadMore) {
+        modernAdminGalleryLoadMore.disabled = isLoading;
+    }
+}
+
+function modernAdminGallerySetEndReached() {
+    modernAdminGalleryHasMore = false;
+    if (modernAdminGalleryLoadMore) {
+        modernAdminGalleryLoadMore.hidden = true;
+    }
+    if (modernAdminGalleryEnd) {
+        modernAdminGalleryEnd.hidden = false;
+    }
+}
+
+async function modernAdminLoadOlderGalleryImages() {
+    if (!modernAdminGalleryGrid || modernAdminGalleryLoadingPage || !modernAdminGalleryHasMore) {
+        return;
+    }
+
+    if (!modernAdminGalleryNextCursor) {
+        modernAdminGallerySetEndReached();
+        return;
+    }
+
+    modernAdminGallerySetLoading(true);
+
+    try {
+        const pageUrl = new URL(modernAdminGalleryGrid.dataset.galleryPageUrl, window.location.href);
+        pageUrl.searchParams.set('limit', modernAdminGalleryGrid.dataset.galleryLimit || '72');
+        pageUrl.searchParams.set('before_id', modernAdminGalleryNextCursor);
+        pageUrl.searchParams.set('camera_id', String(camera_id));
+
+        const response = await fetch(pageUrl.toString(), {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Unable to load older images.');
+        }
+
+        const pageData = await response.json();
+        const newItems = (pageData.images || []).filter((item) => {
+            const itemId = String(item.id);
+            if (modernAdminGallerySeenIds.has(itemId)) {
+                return false;
+            }
+
+            modernAdminGallerySeenIds.add(itemId);
+            return true;
+        });
+
+        newItems.forEach((item) => {
+            const nextIndex = modernAdminMediaItems.length;
+            modernAdminMediaItems.push(item);
+            modernAdminGalleryGrid.insertAdjacentHTML('beforeend', modernAdminGalleryCardHtml(item, nextIndex));
+        });
+
+        modernAdminGalleryNextCursor = pageData.next_cursor || null;
+        modernAdminGalleryHasMore = Boolean(pageData.has_more);
+
+        if (!modernAdminGalleryHasMore) {
+            modernAdminGallerySetEndReached();
+        }
+    } catch (error) {
+        if (modernAdminGalleryLoadMore) {
+            modernAdminGalleryLoadMore.hidden = false;
+        }
+        window.console.error(error);
+    } finally {
+        modernAdminGallerySetLoading(false);
+    }
+}
+
+document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('.modern-admin-lightbox-trigger');
+    if (trigger) {
         event.preventDefault();
         modernAdminOpenLightbox(Number(trigger.dataset.mediaIndex || 0));
-    });
+        return;
+    }
 
-    trigger.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            modernAdminOpenLightbox(Number(trigger.dataset.mediaIndex || 0));
-        }
-    });
+    if (event.target.classList.contains('modern-admin-media-select-input')) {
+        event.stopPropagation();
+    }
 });
 
-document.querySelectorAll('.modern-admin-lightbox-trigger img[data-original-url]').forEach((image) => {
-    image.addEventListener('contextmenu', () => {
+document.addEventListener('keydown', (event) => {
+    const trigger = event.target.closest('.modern-admin-lightbox-trigger');
+    if (trigger && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        modernAdminOpenLightbox(Number(trigger.dataset.mediaIndex || 0));
+    }
+});
+
+document.addEventListener('contextmenu', (event) => {
+    const image = event.target.closest('.modern-admin-lightbox-trigger img[data-original-url]');
+    if (image) {
         if (modernAdminMediaKind !== 'fits' && image.dataset.originalUrl) {
             image.src = image.dataset.originalUrl;
         }
-    });
+    }
 });
 
 document.querySelectorAll('[data-lightbox-close]').forEach((closeButton) => {
@@ -255,9 +396,10 @@ function modernAdminUpdateSelection() {
     modernAdminSelectionCount.textContent = selected.length + ' selected';
 }
 
-document.querySelectorAll('.modern-admin-media-select-input').forEach((checkbox) => {
-    checkbox.addEventListener('click', (event) => event.stopPropagation());
-    checkbox.addEventListener('change', modernAdminUpdateSelection);
+document.addEventListener('change', (event) => {
+    if (event.target.classList.contains('modern-admin-media-select-input')) {
+        modernAdminUpdateSelection();
+    }
 });
 
 modernAdminDownloadSelected.addEventListener('click', () => {
@@ -274,6 +416,23 @@ modernAdminDownloadSelected.addEventListener('click', () => {
         }, index * 150);
     });
 });
+
+if (modernAdminGalleryLoadMore) {
+    modernAdminGalleryLoadMore.addEventListener('click', modernAdminLoadOlderGalleryImages);
+}
+
+if (modernAdminGalleryGrid) {
+    window.addEventListener('scroll', () => {
+        if (!modernAdminGalleryHasMore || modernAdminGalleryLoadingPage) {
+            return;
+        }
+
+        const distanceToBottom = document.documentElement.scrollHeight - (window.innerHeight + window.scrollY);
+        if (distanceToBottom < 900) {
+            modernAdminLoadOlderGalleryImages();
+        }
+    }, { passive: true });
+}
 </script>
 {% endif %}
 

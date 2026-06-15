@@ -1048,6 +1048,19 @@
   gap: 8px;
 }
 
+.modern-admin-gallery-load-state {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin: 22px 0 6px;
+  color: var(--modern-admin-muted);
+  font-size: 0.84rem;
+}
+
+.modern-admin-gallery-load-state p {
+  margin: 0;
+}
+
 .modern-admin-media-viewer {
   display: grid;
   grid-template-columns: minmax(160px, 0.28fr) minmax(0, 1fr);
