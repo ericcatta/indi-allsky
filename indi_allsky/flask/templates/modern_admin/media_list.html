@@ -4,7 +4,7 @@
 
 {% block head %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-gallery-infinite-v1') }}">
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-gallery-filter-pills-v2') }}">
 {% endblock %}
 
 {% block content %}
@@ -31,7 +31,7 @@ var camera_id = {{ camera_id }};
             {% elif camera_filter.camera_id %}
             {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view', camera_id=camera_filter.camera_id) %}
             {% endif %}
-            <a class="modern-admin-gallery-filter{% if camera_filter.active %} modern-admin-gallery-filter-active{% endif %}" href="{{ filter_url }}" role="button" aria-pressed="{{ 'true' if camera_filter.active else 'false' }}" data-gallery-filter-profile="{{ camera_filter.profile_id }}" data-gallery-filter-camera="{{ camera_filter.camera_id or '' }}">
+            <a class="modern-admin-media-button modern-admin-gallery-filter{% if camera_filter.active %} modern-admin-gallery-filter-active{% endif %}" href="{{ filter_url }}" role="button" aria-pressed="{{ 'true' if camera_filter.active else 'false' }}" data-gallery-filter-profile="{{ camera_filter.profile_id }}" data-gallery-filter-camera="{{ camera_filter.camera_id or '' }}">
                 <span>{{ camera_filter.label }}</span>
             </a>
             {% endfor %}
