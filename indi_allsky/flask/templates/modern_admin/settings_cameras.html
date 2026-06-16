@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-camera-settings-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-camera-settings-lens-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -22,9 +22,9 @@ var camera_id = {{ camera_id }};
                 <p class="modern-admin-eyebrow">Per-profile view</p>
                 <h2 id="modern-admin-camera-settings-title">Camera Settings</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-warning">Driver / Connection editable</span>
+            <span class="modern-admin-status-pill modern-admin-status-warning">Driver + Lens editable</span>
         </div>
-        <p class="modern-admin-note">Camera controls are shown from the selected multi-camera profile when available, then from the active global config, with DB camera identity shown separately. Only Driver / Connection can be saved, and only into the selected profile.</p>
+        <p class="modern-admin-note">Camera controls are shown from the selected multi-camera profile when available, then from the active global config, with DB camera identity shown separately. Driver / Connection and Lens & Optics can be saved only into the selected profile.</p>
         <p class="modern-admin-note">
             <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Inventory</a>
         </p>
@@ -109,6 +109,7 @@ var camera_id = {{ camera_id }};
 
                 <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form" novalidate>
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="modern_admin_action" value="driver_connection">
                     <div class="modern-admin-settings-edit-grid">
                         {% for field in modern_admin_camera_settings_driver_form.fields %}
                         <label class="modern-admin-settings-edit-field {% if field.input_type == 'checkbox' %}modern-admin-settings-edit-field-checkbox{% endif %}" for="camera-driver-{{ field.name }}" data-camera-driver-field-role="{{ field.role }}">
@@ -172,6 +173,137 @@ var camera_id = {{ camera_id }};
                         {% endif %}
                     </section>
                 </form>
+
+                <div class="modern-admin-table-scroll">
+                    <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
+                        <thead>
+                            <tr>
+                                <th>Setting</th>
+                                <th>Config key</th>
+                                <th>Effective value</th>
+                                <th>Source</th>
+                                <th>Future scope</th>
+                                <th>Restart</th>
+                                <th>Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for field in section.fields %}
+                            <tr data-camera-settings-row data-camera-settings-search="{{ field.search_text | e }}">
+                                <td><strong>{{ field.label }}</strong></td>
+                                <td><code>{{ field.config_key }}</code></td>
+                                <td><code>{{ field.current_value }}</code></td>
+                                <td><span class="modern-admin-settings-badge modern-admin-camera-settings-source-{{ field.source_class }}">{{ field.source }}</span></td>
+                                <td><span class="modern-admin-settings-badge">{{ field.scope }}</span></td>
+                                <td><span class="modern-admin-settings-badge modern-admin-settings-restart-{{ field.restart_required }}">{{ field.restart_required }}</span></td>
+                                <td><span class="modern-admin-settings-badge modern-admin-camera-settings-readonly">effective</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+        {% elif section.title == 'Lens & Optics' %}
+        <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-camera-settings-section="{{ section.key }}" open>
+            <summary>
+                <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
+                <span class="modern-admin-settings-section-title">{{ section.title }}</span>
+                <span class="modern-admin-settings-count">Profile-specific</span>
+            </summary>
+            <div class="modern-admin-settings-edit-section-body">
+                <div class="modern-admin-section-heading">
+                    <div>
+                        <p class="modern-admin-eyebrow">Profile-specific</p>
+                        <h2>Lens & Optics</h2>
+                    </div>
+                    <span class="modern-admin-status-pill modern-admin-status-warning">Restart or reload required after save</span>
+                </div>
+                <p class="modern-admin-note">Only these Lens & Optics overrides are editable. Empty text/number/list fields remove the profile override and fall back to global config.</p>
+
+                <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="modern_admin_action" value="lens_optics">
+                    <div class="modern-admin-settings-edit-grid">
+                        {% for field in modern_admin_camera_settings_lens_form.fields %}
+                        <label class="modern-admin-settings-edit-field" for="camera-lens-{{ field.name }}">
+                            <span class="modern-admin-settings-edit-label">{{ field.label }}</span>
+                            <span class="modern-admin-settings-edit-meta">
+                                MULTI_CAMERA.profiles[n].{{ field.config_key }}
+                                {% if field.field_type in ('csv_integer_list',) %} · comma-separated{% endif %}
+                            </span>
+
+                            {% if field.input_type == 'select' %}
+                            <select id="camera-lens-{{ field.name }}" name="{{ field.name }}" {% if field.readonly %}disabled{% endif %}>
+                                {% for choice in field.choices %}
+                                <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% else %}
+                            <input id="camera-lens-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.field_type == 'float' %}step="any"{% elif field.field_type == 'integer' %}step="1"{% endif %} {% if field.name in ('lens_focal_length', 'lens_focal_ratio', 'lens_image_circle', 'lens_altitude', 'lens_azimuth', 'image_circle_mask_diameter', 'image_circle_mask_blur', 'image_circle_mask_opacity') %}min="0"{% endif %} {% if field.readonly %}readonly{% endif %}>
+                            {% endif %}
+
+                            {% if field.field_type == 'boolean_select' %}
+                            <span class="modern-admin-settings-edit-help">Use global removes the profile override.</span>
+                            {% elif field.field_type == 'csv_integer_list' %}
+                            <span class="modern-admin-settings-edit-help">Use four comma-separated values, or leave empty to inherit global config.</span>
+                            {% else %}
+                            <span class="modern-admin-settings-edit-help">Leave empty to inherit global config.</span>
+                            {% endif %}
+
+                            {% if field.errors %}
+                            <span class="modern-admin-settings-edit-error">
+                                {% for error in field.errors %}
+                                {{ error }}{% if not loop.last %}<br>{% endif %}
+                                {% endfor %}
+                            </span>
+                            {% endif %}
+                        </label>
+                        {% endfor %}
+                    </div>
+
+                    <section class="modern-admin-table-panel modern-admin-settings-actions" aria-label="Camera lens settings actions">
+                        <div>
+                            <p class="modern-admin-eyebrow">Save</p>
+                            <h2>Write profile overrides only</h2>
+                            <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
+                        </div>
+                        {% if modern_admin_camera_settings_lens_form.enabled %}
+                        <button class="modern-admin-media-button" type="submit">Save Lens & Optics</button>
+                        {% else %}
+                        <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
+                        {% endif %}
+                    </section>
+                </form>
+
+                <div class="modern-admin-table-scroll">
+                    <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
+                        <thead>
+                            <tr>
+                                <th>Setting</th>
+                                <th>Config key</th>
+                                <th>Effective value</th>
+                                <th>Source</th>
+                                <th>Future scope</th>
+                                <th>Restart</th>
+                                <th>Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for field in section.fields %}
+                            <tr data-camera-settings-row data-camera-settings-search="{{ field.search_text | e }}">
+                                <td><strong>{{ field.label }}</strong></td>
+                                <td><code>{{ field.config_key }}</code></td>
+                                <td><code>{{ field.current_value }}</code></td>
+                                <td><span class="modern-admin-settings-badge modern-admin-camera-settings-source-{{ field.source_class }}">{{ field.source }}</span></td>
+                                <td><span class="modern-admin-settings-badge">{{ field.scope }}</span></td>
+                                <td><span class="modern-admin-settings-badge modern-admin-settings-restart-{{ field.restart_required }}">{{ field.restart_required }}</span></td>
+                                <td><span class="modern-admin-settings-badge modern-admin-camera-settings-readonly">effective</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </details>
         {% else %}

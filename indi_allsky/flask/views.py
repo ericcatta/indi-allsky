@@ -15029,6 +15029,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'LENS_ALTITUDE' : 'Lens Altitude',
         'LENS_AZIMUTH' : 'Lens Azimuth',
         'IMAGE_ROTATE' : 'Image Rotate',
+        'IMAGE_ROTATE_ANGLE' : 'Image Rotate Angle',
         'IMAGE_FLIP_V' : 'Flip Vertical',
         'IMAGE_FLIP_H' : 'Flip Horizontal',
         'IMAGE_SCALE' : 'Image Scale',
@@ -15041,7 +15042,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'IMAGE_CIRCLE_MASK.DIAMETER' : 'Mask Diameter',
         'IMAGE_CIRCLE_MASK.OFFSET_X' : 'Mask Offset X',
         'IMAGE_CIRCLE_MASK.OFFSET_Y' : 'Mask Offset Y',
+        'IMAGE_CIRCLE_MASK.BLUR' : 'Mask Blur',
+        'IMAGE_CIRCLE_MASK.OPACITY' : 'Mask Opacity',
+        'IMAGE_CIRCLE_MASK.OUTLINE' : 'Mask Outline',
         'IMAGE_CROP_ROI' : 'Image Crop ROI',
+        'IMAGE_CROP_IMAGE_CIRCLE' : 'Crop to Image Circle',
         'ADU_ROI' : 'ADU ROI',
         'SQM_ROI' : 'SQM ROI',
         'INDI_CONFIG_DEFAULTS' : 'INDI Default Config',
@@ -15085,6 +15090,29 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'LIBCAMERA.AWB_ENABLE' : ('libcamera_awb_enable', ('libcamera', 'AWB_ENABLE'), ('libcamera', 'awb_enable')),
         'LIBCAMERA.IMMEDIATE' : ('libcamera_immediate', ('libcamera', 'IMMEDIATE'), ('libcamera', 'immediate')),
         'LIBCAMERA.IMMEDIATE_DAY' : ('libcamera_immediate_day', ('libcamera', 'IMMEDIATE_DAY'), ('libcamera', 'immediate_day')),
+        'LENS_NAME' : ('lens_name', ('lens', 'name')),
+        'LENS_FOCAL_LENGTH' : ('lens_focal_length', ('lens', 'focal_length')),
+        'LENS_FOCAL_RATIO' : ('lens_focal_ratio', ('lens', 'focal_ratio')),
+        'LENS_IMAGE_CIRCLE' : ('lens_image_circle', ('lens', 'image_circle')),
+        'LENS_OFFSET_X' : ('lens_offset_x', ('lens', 'offset_x')),
+        'LENS_OFFSET_Y' : ('lens_offset_y', ('lens', 'offset_y')),
+        'LENS_ALTITUDE' : ('lens_altitude', ('lens', 'altitude')),
+        'LENS_AZIMUTH' : ('lens_azimuth', ('lens', 'azimuth')),
+        'IMAGE_ROTATE' : ('image_rotate', ('image', 'rotate')),
+        'IMAGE_ROTATE_ANGLE' : ('image_rotate_angle', ('image', 'rotate_angle')),
+        'IMAGE_FLIP_V' : ('image_flip_v', ('image', 'flip_v')),
+        'IMAGE_FLIP_H' : ('image_flip_h', ('image', 'flip_h')),
+        'IMAGE_CIRCLE_MASK.ENABLE' : ('image_circle_mask_enable', ('image_circle_mask', 'enable')),
+        'IMAGE_CIRCLE_MASK.DIAMETER' : ('image_circle_mask_diameter', ('image_circle_mask', 'diameter')),
+        'IMAGE_CIRCLE_MASK.OFFSET_X' : ('image_circle_mask_offset_x', ('image_circle_mask', 'offset_x')),
+        'IMAGE_CIRCLE_MASK.OFFSET_Y' : ('image_circle_mask_offset_y', ('image_circle_mask', 'offset_y')),
+        'IMAGE_CIRCLE_MASK.BLUR' : ('image_circle_mask_blur', ('image_circle_mask', 'blur')),
+        'IMAGE_CIRCLE_MASK.OPACITY' : ('image_circle_mask_opacity', ('image_circle_mask', 'opacity')),
+        'IMAGE_CIRCLE_MASK.OUTLINE' : ('image_circle_mask_outline', ('image_circle_mask', 'outline')),
+        'IMAGE_CROP_ROI' : ('image_crop_roi', ('image', 'crop_roi')),
+        'IMAGE_CROP_IMAGE_CIRCLE' : ('image_crop_image_circle', ('image', 'crop_image_circle')),
+        'ADU_ROI' : ('adu_roi',),
+        'SQM_ROI' : ('sqm_roi',),
     }
 
     CAMERA_SETTINGS_SECTIONS = (
@@ -15166,9 +15194,20 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'LENS_ALTITUDE',
                 'LENS_AZIMUTH',
                 'IMAGE_ROTATE',
+                'IMAGE_ROTATE_ANGLE',
                 'IMAGE_FLIP_V',
                 'IMAGE_FLIP_H',
-                'IMAGE_SCALE',
+                'IMAGE_CIRCLE_MASK.ENABLE',
+                'IMAGE_CIRCLE_MASK.DIAMETER',
+                'IMAGE_CIRCLE_MASK.OFFSET_X',
+                'IMAGE_CIRCLE_MASK.OFFSET_Y',
+                'IMAGE_CIRCLE_MASK.BLUR',
+                'IMAGE_CIRCLE_MASK.OPACITY',
+                'IMAGE_CIRCLE_MASK.OUTLINE',
+                'IMAGE_CROP_ROI',
+                'IMAGE_CROP_IMAGE_CIRCLE',
+                'ADU_ROI',
+                'SQM_ROI',
             ),
         },
         {
@@ -15180,19 +15219,6 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'IMAGE_CALIBRATE_FIX_HOLES',
                 'IMAGE_CALIBRATE_HOLE_THOLD',
                 'IMAGE_CALIBRATE_MANUAL_OFFSET',
-            ),
-        },
-        {
-            'title' : 'Masks & Image Circle',
-            'default_open' : False,
-            'fields' : (
-                'IMAGE_CIRCLE_MASK.ENABLE',
-                'IMAGE_CIRCLE_MASK.DIAMETER',
-                'IMAGE_CIRCLE_MASK.OFFSET_X',
-                'IMAGE_CIRCLE_MASK.OFFSET_Y',
-                'IMAGE_CROP_ROI',
-                'ADU_ROI',
-                'SQM_ROI',
             ),
         },
         {
@@ -15258,6 +15284,129 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'libcamera_image_file_type'  : 'libcamera Image Type',
         'libcamera_extra_options'    : 'libcamera Extra Options',
     }
+    CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER = (
+        'lens_name',
+        'lens_focal_length',
+        'lens_focal_ratio',
+        'lens_image_circle',
+        'lens_offset_x',
+        'lens_offset_y',
+        'lens_altitude',
+        'lens_azimuth',
+        'image_rotate',
+        'image_rotate_angle',
+        'image_flip_v',
+        'image_flip_h',
+        'image_circle_mask_enable',
+        'image_circle_mask_diameter',
+        'image_circle_mask_offset_x',
+        'image_circle_mask_offset_y',
+        'image_circle_mask_blur',
+        'image_circle_mask_opacity',
+        'image_circle_mask_outline',
+        'image_crop_roi',
+        'image_crop_image_circle',
+        'adu_roi',
+        'sqm_roi',
+    )
+    CAMERA_SETTINGS_LENS_FIELD_CONFIG_KEYS = {
+        'lens_name'                 : 'LENS_NAME',
+        'lens_focal_length'         : 'LENS_FOCAL_LENGTH',
+        'lens_focal_ratio'          : 'LENS_FOCAL_RATIO',
+        'lens_image_circle'         : 'LENS_IMAGE_CIRCLE',
+        'lens_offset_x'             : 'LENS_OFFSET_X',
+        'lens_offset_y'             : 'LENS_OFFSET_Y',
+        'lens_altitude'             : 'LENS_ALTITUDE',
+        'lens_azimuth'              : 'LENS_AZIMUTH',
+        'image_rotate'              : 'IMAGE_ROTATE',
+        'image_rotate_angle'        : 'IMAGE_ROTATE_ANGLE',
+        'image_flip_v'              : 'IMAGE_FLIP_V',
+        'image_flip_h'              : 'IMAGE_FLIP_H',
+        'image_circle_mask_enable'  : 'IMAGE_CIRCLE_MASK.ENABLE',
+        'image_circle_mask_diameter': 'IMAGE_CIRCLE_MASK.DIAMETER',
+        'image_circle_mask_offset_x': 'IMAGE_CIRCLE_MASK.OFFSET_X',
+        'image_circle_mask_offset_y': 'IMAGE_CIRCLE_MASK.OFFSET_Y',
+        'image_circle_mask_blur'    : 'IMAGE_CIRCLE_MASK.BLUR',
+        'image_circle_mask_opacity' : 'IMAGE_CIRCLE_MASK.OPACITY',
+        'image_circle_mask_outline' : 'IMAGE_CIRCLE_MASK.OUTLINE',
+        'image_crop_roi'            : 'IMAGE_CROP_ROI',
+        'image_crop_image_circle'   : 'IMAGE_CROP_IMAGE_CIRCLE',
+        'adu_roi'                   : 'ADU_ROI',
+        'sqm_roi'                   : 'SQM_ROI',
+    }
+    CAMERA_SETTINGS_LENS_FIELD_LABELS = {
+        'lens_name'                 : 'Lens Name',
+        'lens_focal_length'         : 'Focal Length',
+        'lens_focal_ratio'          : 'Focal Ratio',
+        'lens_image_circle'         : 'Image Circle Diameter',
+        'lens_offset_x'             : 'Image Circle Offset X',
+        'lens_offset_y'             : 'Image Circle Offset Y',
+        'lens_altitude'             : 'Lens Altitude',
+        'lens_azimuth'              : 'Lens Azimuth',
+        'image_rotate'              : 'Image Rotate',
+        'image_rotate_angle'        : 'Image Rotate Angle',
+        'image_flip_v'              : 'Flip Vertical',
+        'image_flip_h'              : 'Flip Horizontal',
+        'image_circle_mask_enable'  : 'Image Circle Mask',
+        'image_circle_mask_diameter': 'Mask Diameter',
+        'image_circle_mask_offset_x': 'Mask Offset X',
+        'image_circle_mask_offset_y': 'Mask Offset Y',
+        'image_circle_mask_blur'    : 'Mask Blur',
+        'image_circle_mask_opacity' : 'Mask Opacity',
+        'image_circle_mask_outline' : 'Mask Outline',
+        'image_crop_roi'            : 'Image Crop ROI',
+        'image_crop_image_circle'   : 'Crop to Image Circle',
+        'adu_roi'                   : 'ADU ROI',
+        'sqm_roi'                   : 'SQM ROI',
+    }
+    CAMERA_SETTINGS_LENS_FIELD_TYPES = {
+        'lens_name'                 : 'text',
+        'lens_focal_length'         : 'float',
+        'lens_focal_ratio'          : 'float',
+        'lens_image_circle'         : 'integer',
+        'lens_offset_x'             : 'integer',
+        'lens_offset_y'             : 'integer',
+        'lens_altitude'             : 'float',
+        'lens_azimuth'              : 'float',
+        'image_rotate'              : 'select',
+        'image_rotate_angle'        : 'integer',
+        'image_flip_v'              : 'boolean_select',
+        'image_flip_h'              : 'boolean_select',
+        'image_circle_mask_enable'  : 'boolean_select',
+        'image_circle_mask_diameter': 'integer',
+        'image_circle_mask_offset_x': 'integer',
+        'image_circle_mask_offset_y': 'integer',
+        'image_circle_mask_blur'    : 'integer',
+        'image_circle_mask_opacity' : 'integer',
+        'image_circle_mask_outline' : 'boolean_select',
+        'image_crop_roi'            : 'csv_integer_list',
+        'image_crop_image_circle'   : 'boolean_select',
+        'adu_roi'                   : 'csv_integer_list',
+        'sqm_roi'                   : 'csv_integer_list',
+    }
+    CAMERA_SETTINGS_LENS_NON_NEGATIVE_FIELDS = {
+        'lens_focal_length',
+        'lens_focal_ratio',
+        'lens_image_circle',
+        'lens_altitude',
+        'lens_azimuth',
+        'image_circle_mask_diameter',
+        'image_circle_mask_blur',
+        'image_circle_mask_opacity',
+    }
+    CAMERA_SETTINGS_LENS_CHECKBOX_FIELDS = {
+        'image_flip_v',
+        'image_flip_h',
+        'image_circle_mask_enable',
+        'image_circle_mask_outline',
+        'image_crop_image_circle',
+    }
+    CAMERA_SETTINGS_LENS_ROTATE_CHOICES = (
+        '',
+        'ROTATE_90_CLOCKWISE',
+        'ROTATE_90_COUNTERCLOCKWISE',
+        'ROTATE_180',
+    )
 
     def get_context(self):
         context = ModernAdminContextMixin.get_context(self)
@@ -15271,7 +15420,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         context['modern_admin_camera_settings_errors'] = {}
 
         if request.method == 'POST':
-            context.update(self.save_camera_settings_driver_profile())
+            modern_admin_action = request.form.get('modern_admin_action', 'driver_connection')
+            if modern_admin_action == 'lens_optics':
+                context.update(self.save_camera_settings_lens_profile())
+            else:
+                context.update(self.save_camera_settings_driver_profile())
             profiles = self.get_camera_settings_profiles()
             selected_profile = self.get_selected_camera_settings_profile(profiles)
             camera_map = self.get_camera_settings_camera_map(profiles)
@@ -15285,6 +15438,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         context['modern_admin_camera_settings_uses_multi_camera'] = bool(selected_profile.get('from_multi_camera'))
         if 'modern_admin_camera_settings_driver_form' not in context:
             context['modern_admin_camera_settings_driver_form'] = self.get_camera_settings_driver_form(selected_profile)
+        if 'modern_admin_camera_settings_lens_form' not in context:
+            context['modern_admin_camera_settings_lens_form'] = self.get_camera_settings_lens_form(selected_profile)
 
         return context
 
@@ -15892,6 +16047,341 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             profile.pop(key, None)
 
 
+    def get_camera_settings_lens_form(self, profile, submitted_data=None, errors=None):
+        submitted_data = submitted_data or {}
+        errors = errors or {}
+        fields = list()
+        for field_name in self.CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER:
+            value = submitted_data.get(field_name, self.get_camera_settings_lens_field_value(profile, field_name))
+            field_type = self.CAMERA_SETTINGS_LENS_FIELD_TYPES[field_name]
+            input_type = 'number' if field_type in ('integer', 'float') else 'text'
+            if field_type in ('select', 'boolean_select'):
+                input_type = 'select'
+
+            fields.append({
+                'name'       : field_name,
+                'label'      : self.CAMERA_SETTINGS_LENS_FIELD_LABELS[field_name],
+                'config_key' : self.CAMERA_SETTINGS_LENS_FIELD_CONFIG_KEYS[field_name],
+                'value'      : self.format_camera_settings_lens_form_value(value, field_type),
+                'checked'    : bool(value),
+                'input_type' : input_type,
+                'field_type' : field_type,
+                'readonly'   : not profile.get('from_multi_camera'),
+                'errors'     : errors.get(field_name, []),
+                'choices'    : self.get_camera_settings_lens_field_choices(field_name, value),
+            })
+
+        return {
+            'enabled' : bool(profile.get('from_multi_camera')),
+            'fields'  : fields,
+        }
+
+
+    def get_camera_settings_lens_field_value(self, profile, field_name):
+        config_key = self.CAMERA_SETTINGS_LENS_FIELD_CONFIG_KEYS[field_name]
+        found, value = self.get_camera_settings_profile_override(profile, config_key)
+        if found:
+            return value
+
+        return ''
+
+
+    def format_camera_settings_lens_form_value(self, value, field_type):
+        if value in (None, ''):
+            return ''
+        elif field_type == 'csv_integer_list' and isinstance(value, (list, tuple)):
+            return ', '.join(str(item) for item in value)
+
+        return self.format_structured_settings_value(value)
+
+
+    def get_camera_settings_lens_field_choices(self, field_name, value):
+        if self.CAMERA_SETTINGS_LENS_FIELD_TYPES[field_name] == 'boolean_select':
+            value_str = ''
+            if value is True:
+                value_str = '1'
+            elif value is False:
+                value_str = '0'
+
+            return ({
+                'value'    : '',
+                'label'    : 'Use global',
+                'selected' : value in (None, ''),
+            }, {
+                'value'    : '1',
+                'label'    : 'Enabled',
+                'selected' : value_str == '1',
+            }, {
+                'value'    : '0',
+                'label'    : 'Disabled',
+                'selected' : value_str == '0',
+            })
+
+        if field_name != 'image_rotate':
+            return tuple()
+
+        choices = list()
+        for choice_value in self.CAMERA_SETTINGS_LENS_ROTATE_CHOICES:
+            label = choice_value or 'No rotation'
+            choices.append({
+                'value'    : choice_value,
+                'label'    : label,
+                'selected' : str(value or '') == choice_value,
+            })
+
+        value_str = str(value or '')
+        if value_str and value_str not in self.CAMERA_SETTINGS_LENS_ROTATE_CHOICES:
+            choices.insert(0, {
+                'value'    : value_str,
+                'label'    : '{0:s} (current profile value)'.format(value_str),
+                'selected' : True,
+            })
+
+        return tuple(choices)
+
+
+    def save_camera_settings_lens_profile(self):
+        result = {
+            'modern_admin_camera_settings_error'   : None,
+            'modern_admin_camera_settings_success' : None,
+            'modern_admin_camera_settings_errors'  : {},
+        }
+
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            result['modern_admin_camera_settings_error'] = 'Only an admin user can change camera profile settings.'
+            return result
+
+        profiles = self.get_camera_settings_profiles()
+        selected_profile = self.get_selected_camera_settings_profile_for_save(profiles)
+        if not selected_profile:
+            result['modern_admin_camera_settings_error'] = 'Select a valid multi-camera profile before saving. No config was saved.'
+            return result
+
+        if not selected_profile.get('from_multi_camera'):
+            result['modern_admin_camera_settings_error'] = 'The current global camera fallback is read-only. Select a MULTI_CAMERA profile before saving.'
+            return result
+
+        submitted_data, validation_errors = self.get_camera_settings_lens_submitted_data()
+        if validation_errors:
+            result['modern_admin_camera_settings_error'] = 'Please fix the Lens & Optics settings below. No config was saved.'
+            result['modern_admin_camera_settings_errors'] = validation_errors
+            result['modern_admin_camera_settings_lens_form'] = self.get_camera_settings_lens_form(selected_profile, submitted_data, validation_errors)
+            return result
+
+        try:
+            new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
+            updated_profile_id = self.apply_camera_settings_lens_profile_to_config(
+                new_config,
+                selected_profile.get('profile_id'),
+                selected_profile.get('_profile_index'),
+                submitted_data,
+            )
+
+            if not app.config['LOGIN_DISABLED']:
+                username = current_user.username
+            else:
+                username = 'system'
+
+            from ..config import IndiAllSkyConfig
+
+            config_obj = IndiAllSkyConfig()
+            config_obj.config = new_config
+            config_obj.save(username, 'Modern Admin Camera Lens / Optics update for {0:s}'.format(updated_profile_id))
+            self.indi_allsky_config = new_config
+            app.logger.info('Saved Modern Admin Camera Lens / Optics config update for profile %s', updated_profile_id)
+            result['modern_admin_camera_settings_success'] = 'Lens & Optics saved for profile {0:s}. Restart or reload indi-allsky for running services to use the new values.'.format(updated_profile_id)
+        except ConfigSaveException as e:
+            db.session.rollback()
+            result['modern_admin_camera_settings_error'] = str(e)
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error('Error saving Modern Admin Camera Lens / Optics: %s', str(e))
+            result['modern_admin_camera_settings_error'] = 'Unable to save Lens & Optics: {0:s}'.format(str(e))
+
+        return result
+
+
+    def get_camera_settings_lens_submitted_data(self):
+        submitted_data = dict()
+        validation_errors = dict()
+
+        for field_name in self.CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER:
+            field_type = self.CAMERA_SETTINGS_LENS_FIELD_TYPES[field_name]
+            raw_value = request.form.get(field_name, '').strip()
+            if raw_value == '':
+                submitted_data[field_name] = {
+                    'delete' : True,
+                    'value'  : None,
+                }
+                continue
+
+            try:
+                value = self.parse_camera_settings_lens_field_value(field_name, field_type, raw_value)
+                submitted_data[field_name] = {
+                    'delete' : False,
+                    'value'  : value,
+                }
+            except ValueError as e:
+                submitted_data[field_name] = {
+                    'delete' : False,
+                    'value'  : raw_value,
+                }
+                validation_errors.setdefault(field_name, []).append(str(e))
+
+        return submitted_data, validation_errors
+
+
+    def parse_camera_settings_lens_field_value(self, field_name, field_type, raw_value):
+        if field_type == 'integer':
+            try:
+                value = int(raw_value)
+            except ValueError:
+                raise ValueError('{0:s} must be a whole number.'.format(self.CAMERA_SETTINGS_LENS_FIELD_LABELS[field_name]))
+        elif field_type == 'float':
+            try:
+                value = float(raw_value)
+            except ValueError:
+                raise ValueError('{0:s} must be a number.'.format(self.CAMERA_SETTINGS_LENS_FIELD_LABELS[field_name]))
+        elif field_type == 'csv_integer_list':
+            value = self.parse_camera_settings_integer_list(raw_value, field_name)
+        elif field_type == 'boolean_select':
+            if raw_value == '1':
+                value = True
+            elif raw_value == '0':
+                value = False
+            else:
+                raise ValueError('{0:s} must be Enabled, Disabled, or Use global.'.format(self.CAMERA_SETTINGS_LENS_FIELD_LABELS[field_name]))
+        elif field_type == 'select':
+            value = raw_value
+            if field_name == 'image_rotate' and value not in self.CAMERA_SETTINGS_LENS_ROTATE_CHOICES:
+                raise ValueError('Select a supported image rotation.')
+        else:
+            return raw_value
+
+        if field_name in self.CAMERA_SETTINGS_LENS_NON_NEGATIVE_FIELDS and value < 0:
+            raise ValueError('{0:s} must be greater than or equal to 0.'.format(self.CAMERA_SETTINGS_LENS_FIELD_LABELS[field_name]))
+
+        return value
+
+
+    def parse_camera_settings_integer_list(self, raw_value, field_name):
+        try:
+            values = [
+                int(part.strip())
+                for part in raw_value.split(',')
+                if part.strip() != ''
+            ]
+        except ValueError:
+            raise ValueError('{0:s} must be a comma-separated list of whole numbers.'.format(self.CAMERA_SETTINGS_LENS_FIELD_LABELS[field_name]))
+
+        if len(values) not in (0, 4):
+            raise ValueError('{0:s} must be empty or contain four comma-separated numbers.'.format(self.CAMERA_SETTINGS_LENS_FIELD_LABELS[field_name]))
+
+        return values
+
+
+    def apply_camera_settings_lens_profile_to_config(self, config, profile_id, profile_index, submitted_data):
+        multi_camera_config = config.get('MULTI_CAMERA')
+        if not isinstance(multi_camera_config, dict):
+            raise ValueError('MULTI_CAMERA config is missing or invalid.')
+
+        profiles = multi_camera_config.get('profiles')
+        if not isinstance(profiles, list):
+            raise ValueError('MULTI_CAMERA.profiles is missing or invalid.')
+
+        profile_offset = int(profile_index) - 1
+        if profile_offset < 0 or profile_offset >= len(profiles):
+            raise ValueError('Selected profile no longer exists.')
+
+        profile = profiles[profile_offset]
+        if not isinstance(profile, dict):
+            raise ValueError('Selected profile is not editable.')
+
+        if str(profile.get('profile_id') or profile.get('id') or 'profile-{0:d}'.format(profile_index)) != str(profile_id):
+            raise ValueError('Selected profile changed before save. Reload and try again.')
+
+        for field_name, field_data in submitted_data.items():
+            path = self.get_camera_settings_lens_profile_path(field_name)
+            self.delete_camera_settings_lens_override_aliases(profile, field_name)
+            if field_data['delete']:
+                pass
+            else:
+                self.set_camera_settings_profile_path(profile, path, field_data['value'])
+
+        self.cleanup_empty_camera_settings_profile_blocks(profile, ('lens', 'image', 'image_circle_mask'))
+        return str(profile_id)
+
+
+    def get_camera_settings_lens_profile_path(self, field_name):
+        profile_paths = {
+            'lens_name'                 : ('lens', 'name'),
+            'lens_focal_length'         : ('lens', 'focal_length'),
+            'lens_focal_ratio'          : ('lens', 'focal_ratio'),
+            'lens_image_circle'         : ('lens', 'image_circle'),
+            'lens_offset_x'             : ('lens', 'offset_x'),
+            'lens_offset_y'             : ('lens', 'offset_y'),
+            'lens_altitude'             : ('lens', 'altitude'),
+            'lens_azimuth'              : ('lens', 'azimuth'),
+            'image_rotate'              : ('image', 'rotate'),
+            'image_rotate_angle'        : ('image', 'rotate_angle'),
+            'image_flip_v'              : ('image', 'flip_v'),
+            'image_flip_h'              : ('image', 'flip_h'),
+            'image_circle_mask_enable'  : ('image_circle_mask', 'enable'),
+            'image_circle_mask_diameter': ('image_circle_mask', 'diameter'),
+            'image_circle_mask_offset_x': ('image_circle_mask', 'offset_x'),
+            'image_circle_mask_offset_y': ('image_circle_mask', 'offset_y'),
+            'image_circle_mask_blur'    : ('image_circle_mask', 'blur'),
+            'image_circle_mask_opacity' : ('image_circle_mask', 'opacity'),
+            'image_circle_mask_outline' : ('image_circle_mask', 'outline'),
+            'image_crop_roi'            : ('image', 'crop_roi'),
+            'image_crop_image_circle'   : ('image', 'crop_image_circle'),
+            'adu_roi'                   : ('adu_roi',),
+            'sqm_roi'                   : ('sqm_roi',),
+        }
+        return profile_paths[field_name]
+
+
+    def delete_camera_settings_lens_override_aliases(self, profile, field_name):
+        config_key = self.CAMERA_SETTINGS_LENS_FIELD_CONFIG_KEYS[field_name]
+        candidates = [config_key, config_key.replace('.', '__')]
+        candidates.extend(self.CAMERA_SETTINGS_PROFILE_ALIASES.get(config_key, tuple()))
+        candidates.append(self.get_camera_settings_lens_profile_path(field_name))
+
+        for candidate in candidates:
+            if isinstance(candidate, str):
+                self.delete_camera_settings_profile_path(profile, tuple(candidate.replace('__', '.').split('.')))
+            else:
+                self.delete_camera_settings_profile_path(profile, tuple(candidate))
+
+
+    def set_camera_settings_profile_path(self, profile, path, value):
+        current = profile
+        for path_part in path[:-1]:
+            nested_value = current.get(path_part)
+            if not isinstance(nested_value, dict):
+                nested_value = OrderedDict()
+                current[path_part] = nested_value
+            current = nested_value
+
+        current[path[-1]] = value
+
+
+    def delete_camera_settings_profile_path(self, profile, path):
+        current = profile
+        for path_part in path[:-1]:
+            current = current.get(path_part)
+            if not isinstance(current, dict):
+                return
+
+        current.pop(path[-1], None)
+
+
+    def cleanup_empty_camera_settings_profile_blocks(self, profile, block_names):
+        for block_name in block_names:
+            if isinstance(profile.get(block_name), dict) and not profile[block_name]:
+                profile.pop(block_name, None)
+
+
     def format_camera_settings_value(self, config_key, value, source):
         if source == 'missing' or value in (None, ''):
             return 'Not configured'
@@ -15974,6 +16464,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'LENS_ALTITUDE',
             'LENS_AZIMUTH',
             'IMAGE_ROTATE',
+            'IMAGE_ROTATE_ANGLE',
             'IMAGE_FLIP_V',
             'IMAGE_FLIP_H',
             'IMAGE_SCALE',
@@ -15986,7 +16477,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'IMAGE_CIRCLE_MASK.DIAMETER',
             'IMAGE_CIRCLE_MASK.OFFSET_X',
             'IMAGE_CIRCLE_MASK.OFFSET_Y',
+            'IMAGE_CIRCLE_MASK.BLUR',
+            'IMAGE_CIRCLE_MASK.OPACITY',
+            'IMAGE_CIRCLE_MASK.OUTLINE',
             'IMAGE_CROP_ROI',
+            'IMAGE_CROP_IMAGE_CIRCLE',
             'ADU_ROI',
             'SQM_ROI',
             'INDI_CONFIG_DEFAULTS',
