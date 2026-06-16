@@ -2336,6 +2336,14 @@ body.modern-admin-lightbox-open {
   padding: 0 16px 16px;
 }
 
+.modern-admin-shell .modern-admin-settings-lens-editor {
+  border-color: rgba(74, 222, 128, 0.26);
+}
+
+.modern-admin-shell .modern-admin-settings-lens-editor .modern-admin-settings-edit-section-body {
+  background: rgba(74, 222, 128, 0.035);
+}
+
 .modern-admin-shell .modern-admin-settings-edit-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

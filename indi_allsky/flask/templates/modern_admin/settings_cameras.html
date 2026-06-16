@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-camera-settings-lens-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-camera-settings-lens-v2') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -90,7 +90,7 @@ var camera_id = {{ camera_id }};
 
     <section class="modern-admin-settings-sections" aria-label="Camera settings sections">
         {% for section in modern_admin_camera_settings_sections %}
-        {% if section.title == 'Driver / Connection' %}
+        {% if section.key == 'driver-connection' %}
         <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-camera-settings-section="{{ section.key }}" open>
             <summary>
                 <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
@@ -204,8 +204,8 @@ var camera_id = {{ camera_id }};
                 </div>
             </div>
         </details>
-        {% elif section.title == 'Lens & Optics' %}
-        <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-camera-settings-section="{{ section.key }}" open>
+        {% elif section.key == 'lens-optics' %}
+        <details class="modern-admin-settings-section modern-admin-settings-edit-section modern-admin-settings-lens-editor" data-camera-settings-section="{{ section.key }}" data-camera-settings-editor="lens-optics" open>
             <summary>
                 <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
                 <span class="modern-admin-settings-section-title">{{ section.title }}</span>
