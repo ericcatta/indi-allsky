@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-inventory-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-settings-title">
+    {% set modern_admin_header_label = 'Settings header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Settings inventory summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Read-only inventory</p>
+                <h2 id="modern-admin-settings-title">Modern Settings Inventory</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">No save actions</span>
+        </div>
+        <p class="modern-admin-note">Configuration values are loaded from the existing classic config form and grouped for the future Modern Settings framework. Passwords and tokens are masked.</p>
+        <div class="modern-admin-settings-summary-grid">
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ modern_admin_settings_form_field_count }}</span>
+                <p>Classic form fields</p>
+            </div>
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ modern_admin_settings_field_count }}</span>
+                <p>Displayed rows</p>
+            </div>
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ modern_admin_settings_profile_count }}</span>
+                <p>Multi-camera profiles</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="modern-admin-settings-toolbar" aria-label="Settings filter">
+        <label for="modern-admin-settings-filter">Search settings</label>
+        <input id="modern-admin-settings-filter" class="modern-admin-settings-filter" type="search" placeholder="Filter by label, field, value, type, risk, or scope" autocomplete="off">
+    </section>
+
+    <section class="modern-admin-settings-sections" aria-label="Settings sections">
+        {% for group in modern_admin_settings_groups %}
+        <details class="modern-admin-settings-section" data-settings-section="{{ group.key }}" {% if group.default_open %}open{% endif %}>
+            <summary>
+                <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
+                <span class="modern-admin-settings-section-title">{{ group.title }}</span>
+                <span class="modern-admin-settings-count" data-settings-visible-count>{{ group.count }}</span>
+            </summary>
+            <div class="modern-admin-table-scroll">
+                <table class="modern-admin-data-table modern-admin-settings-table">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Field</th>
+                            <th>Current value</th>
+                            <th>Type</th>
+                            <th>Validators</th>
+                            <th>Scope</th>
+                            <th>Risk</th>
+                            <th>Restart</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field in group.fields %}
+                        <tr data-settings-row data-settings-search="{{ field.search_text | e }}">
+                            <td>
+                                <strong>{{ field.label }}</strong>
+                                <span>{{ field.group }}</span>
+                            </td>
+                            <td>
+                                <code>{{ field.name }}</code>
+                                <span>{{ field.config_key }}</span>
+                            </td>
+                            <td><code>{{ field.current_value }}</code></td>
+                            <td>{{ field.field_type }}</td>
+                            <td>{{ field.validators }}</td>
+                            <td><span class="modern-admin-settings-badge">{{ field.scope }}</span></td>
+                            <td><span class="modern-admin-settings-badge modern-admin-settings-risk-{{ field.risk }}">{{ field.risk }}</span></td>
+                            <td><span class="modern-admin-settings-badge modern-admin-settings-restart-{{ field.restart_required }}">{{ field.restart_required }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+        {% else %}
+        <section class="modern-admin-table-panel">
+            <p class="modern-admin-note">No settings were found.</p>
+        </section>
+        {% endfor %}
+    </section>
+</main>
+
+<script>
+(function () {
+    const storageKey = 'indi-allsky-modern-settings-sections';
+    const sections = Array.from(document.querySelectorAll('[data-settings-section]'));
+    const filter = document.getElementById('modern-admin-settings-filter');
+    let savedState = {};
+
+    try {
+        savedState = JSON.parse(window.localStorage.getItem(storageKey) || '{}');
+    } catch (error) {
+        savedState = {};
+    }
+
+    sections.forEach((section) => {
+        const key = section.dataset.settingsSection;
+        section.dataset.settingsDefaultOpen = section.open ? '1' : '0';
+        if (Object.prototype.hasOwnProperty.call(savedState, key)) {
+            section.open = Boolean(savedState[key]);
+        }
+
+        section.addEventListener('toggle', () => {
+            if (filter.value.trim()) {
+                return;
+            }
+
+            savedState[key] = section.open;
+            window.localStorage.setItem(storageKey, JSON.stringify(savedState));
+        });
+    });
+
+    function restoreSectionState() {
+        sections.forEach((section) => {
+            const key = section.dataset.settingsSection;
+            if (Object.prototype.hasOwnProperty.call(savedState, key)) {
+                section.open = Boolean(savedState[key]);
+            } else {
+                section.open = section.dataset.settingsDefaultOpen === '1';
+            }
+        });
+    }
+
+    function filterSettings() {
+        const query = filter.value.trim().toLowerCase();
+
+        sections.forEach((section) => {
+            const rows = Array.from(section.querySelectorAll('[data-settings-row]'));
+            let visibleCount = 0;
+
+            rows.forEach((row) => {
+                const matches = !query || row.dataset.settingsSearch.indexOf(query) !== -1;
+                row.hidden = !matches;
+                if (matches) {
+                    visibleCount += 1;
+                }
+            });
+
+            const count = section.querySelector('[data-settings-visible-count]');
+            if (count) {
+                count.textContent = visibleCount;
+            }
+
+            section.hidden = visibleCount === 0;
+            if (query && visibleCount > 0) {
+                section.open = true;
+            }
+        });
+
+        if (!query) {
+            restoreSectionState();
+        }
+    }
+
+    filter.addEventListener('input', filterSettings);
+})();
+</script>
+{% endblock %}

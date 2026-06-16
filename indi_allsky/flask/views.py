@@ -5088,6 +5088,7 @@ class ModernAdminView(TemplateView):
             ('Uploads', 'indi_allsky.modern_admin_uploads_view'),
             ('Observatory', 'indi_allsky.modern_admin_observatory_view'),
             ('System', 'indi_allsky.modern_admin_system_view'),
+            ('Settings', 'indi_allsky.modern_admin_settings_view'),
             ('Updates', 'indi_allsky.modern_admin_updates_view'),
         )
 
@@ -6633,6 +6634,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('System Info', 'indi_allsky.modern_admin_system_info_view'),
             ('Support Info', 'indi_allsky.modern_admin_support_info_view'),
             ('Log', 'indi_allsky.modern_admin_log_view'),
+            ('Settings Inventory', 'indi_allsky.modern_admin_settings_view'),
             ('Config', 'indi_allsky.modern_admin_config_view'),
             ('Network', 'indi_allsky.modern_admin_network_view'),
             ('GPIO Control', 'indi_allsky.modern_admin_manual_gpio_view'),
@@ -13993,6 +13995,502 @@ class ModernAdminConfigView(ModernAdminSafeControlsMixin, ConfigView):
         return context
 
 
+class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
+    page_title = 'Modern Admin Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    SETTINGS_GROUP_ORDER = (
+        'Camera / Capture',
+        'Multi-camera / Profile',
+        'Exposure / Gain / Binning',
+        'Processing / Calibration',
+        'Overlay / Labels / Lens',
+        'Output / Storage',
+        'Timelapse / Keogram / Startrail',
+        'Upload / Publishing',
+        'Devices / GPIO / Sensors',
+        'Web / Admin / System',
+        'Advanced / Other',
+    )
+    SETTINGS_DEFAULT_OPEN_GROUPS = (
+        'Camera / Capture',
+        'Multi-camera / Profile',
+    )
+    SETTINGS_SECRET_TOKENS = (
+        'PASSWORD',
+        'TOKEN',
+        'SECRET',
+        'PRIVATE_KEY',
+        'APIKEY',
+        'API_KEY',
+        'ACCESS_KEY',
+        'CLIENT_SECRET',
+        'WEBHOOK',
+        'PSK',
+    )
+
+    def get_context(self):
+        context = super(ModernAdminSettingsInventoryView, self).get_context()
+        form = context['form_config']
+        settings_groups = self.get_settings_inventory_groups(form)
+
+        context['modern_admin_settings_groups'] = settings_groups
+        context['modern_admin_settings_field_count'] = sum([group['count'] for group in settings_groups])
+        context['modern_admin_settings_form_field_count'] = len([field for field in form])
+        context['modern_admin_settings_profile_count'] = self.get_multi_camera_profile_count()
+        context['modern_admin_settings_group_counts'] = [(group['title'], group['count']) for group in settings_groups]
+
+        return context
+
+
+    def get_settings_inventory_groups(self, form):
+        grouped_fields = OrderedDict()
+        for group_title in self.SETTINGS_GROUP_ORDER:
+            grouped_fields[group_title] = list()
+
+        for field in form:
+            field_name = getattr(field, 'name', '')
+            if not field_name:
+                continue
+
+            group_title = self.estimate_settings_group(field_name)
+            grouped_fields[group_title].append(self.get_settings_field_metadata(field_name, field))
+
+        for profile_field in self.get_multi_camera_profile_fields():
+            grouped_fields['Multi-camera / Profile'].append(profile_field)
+
+        settings_groups = list()
+        for group_title, fields in grouped_fields.items():
+            if not fields:
+                continue
+
+            group_key = re.sub(r'[^a-z0-9]+', '-', group_title.lower()).strip('-')
+            settings_groups.append({
+                'title'        : group_title,
+                'key'          : group_key,
+                'fields'       : fields,
+                'count'        : len(fields),
+                'default_open' : group_title in self.SETTINGS_DEFAULT_OPEN_GROUPS,
+            })
+
+        return settings_groups
+
+
+    def get_settings_field_metadata(self, field_name, field):
+        field_type = field.__class__.__name__
+        risk = self.estimate_settings_risk(field_name, field)
+
+        return {
+            'label'            : str(field.label.text),
+            'name'             : field_name,
+            'config_key'       : self.form_field_to_config_key(field_name),
+            'current_value'    : self.format_settings_value(field_name, field, risk),
+            'field_type'       : field_type,
+            'validators'       : self.describe_field_validators(field),
+            'group'            : self.estimate_settings_group(field_name),
+            'scope'            : self.estimate_settings_scope(field_name),
+            'risk'             : risk,
+            'restart_required' : self.estimate_settings_restart(field_name),
+            'search_text'      : self.get_settings_search_text(field_name, field, risk),
+        }
+
+
+    def get_multi_camera_profile_count(self):
+        try:
+            profiles = self.indi_allsky_config.get('MULTI_CAMERA', {}).get('profiles', [])
+        except AttributeError:
+            return 0
+
+        if isinstance(profiles, list):
+            return len(profiles)
+
+        return 0
+
+
+    def get_multi_camera_profile_fields(self):
+        try:
+            profiles = self.indi_allsky_config.get('MULTI_CAMERA', {}).get('profiles', [])
+        except AttributeError:
+            return tuple()
+
+        if not isinstance(profiles, list):
+            return tuple()
+
+        profile_fields = list()
+        for profile_index, profile in enumerate(profiles, start=1):
+            if not isinstance(profile, dict):
+                continue
+
+            profile_id = profile.get('profile_id') or profile.get('id') or 'profile-{0:d}'.format(profile_index)
+            profile_name = 'MULTI_CAMERA.profiles[{0:d}]'.format(profile_index - 1)
+            profile_value = self.format_structured_settings_value(profile)
+            search_text = ' '.join([
+                'Multi-camera profile',
+                profile_name,
+                str(profile_id),
+                profile_value,
+            ])
+
+            profile_fields.append({
+                'label'            : 'Multi-camera profile {0:s}'.format(str(profile_id)),
+                'name'             : profile_name,
+                'config_key'       : profile_name,
+                'current_value'    : profile_value,
+                'field_type'       : 'ConfigProfile',
+                'validators'       : 'Configured profile entry',
+                'group'            : 'Multi-camera / Profile',
+                'scope'            : 'profile',
+                'risk'             : 'medium',
+                'restart_required' : 'restart',
+                'search_text'      : search_text.lower(),
+            })
+
+        return tuple(profile_fields)
+
+
+    def form_field_to_config_key(self, field_name):
+        return field_name.replace('__', '.')
+
+
+    def describe_field_validators(self, field):
+        validators = list()
+        for validator in getattr(field, 'validators', tuple()):
+            validator_name = getattr(validator, '__name__', validator.__class__.__name__)
+            validator_parts = list()
+            for attr_name in ('min', 'max', 'length', 'equal_to'):
+                if not hasattr(validator, attr_name):
+                    continue
+
+                validator_parts.append('{0:s}={1!s}'.format(attr_name, getattr(validator, attr_name)))
+
+            if validator_parts:
+                validators.append('{0:s} ({1:s})'.format(validator_name, ', '.join(validator_parts)))
+            else:
+                validators.append(validator_name)
+
+        if validators:
+            return ', '.join(validators)
+
+        choices = getattr(field, 'choices', None)
+        if choices:
+            return '{0:d} choices'.format(len(choices))
+
+        return 'None declared'
+
+
+    def format_settings_value(self, field_name, field, risk):
+        if risk == 'secret':
+            if field.data in (None, ''):
+                return 'Not configured'
+
+            return 'Configured (masked)'
+
+        data = field.data
+        if data is True:
+            return 'Enabled'
+        elif data is False:
+            return 'Disabled'
+        elif data in (None, ''):
+            return 'Not configured'
+
+        return self.format_structured_settings_value(data)
+
+
+    def format_structured_settings_value(self, value):
+        if isinstance(value, (dict, list, tuple)):
+            try:
+                return json.dumps(value, sort_keys=True, default=str)
+            except TypeError:
+                return str(value)
+
+        return str(value)
+
+
+    def get_settings_search_text(self, field_name, field, risk):
+        search_parts = (
+            str(field.label.text),
+            field_name,
+            self.form_field_to_config_key(field_name),
+            field.__class__.__name__,
+            self.describe_field_validators(field),
+            self.estimate_settings_group(field_name),
+            self.estimate_settings_scope(field_name),
+            risk,
+            self.estimate_settings_restart(field_name),
+            self.format_settings_value(field_name, field, risk),
+        )
+        return ' '.join(search_parts).lower()
+
+
+    def estimate_settings_group(self, field_name):
+        field_name_upper = field_name.upper()
+
+        if field_name_upper.startswith('MULTI_CAMERA'):
+            return 'Multi-camera / Profile'
+        elif any(token in field_name_upper for token in (
+            'CCD_CONFIG',
+            'CCD_EXPOSURE',
+            'EXPOSURE_PERIOD',
+            'GAIN',
+            'BINNING',
+            'COOLING',
+            'CCD_TEMP',
+            'TARGET_TEMP',
+        )):
+            return 'Exposure / Gain / Binning'
+        elif any(token in field_name_upper for token in (
+            'CAMERA_INTERFACE',
+            'INDI_',
+            'LIBCAMERA',
+            'PYCURL_CAMERA',
+            'GPHOTO',
+            'FOCUS',
+            'CFA_PATTERN',
+            'DAYTIME',
+            'CAPTURE_PAUSE',
+            'GPS_ENABLE',
+        )):
+            return 'Camera / Capture'
+        elif any(token in field_name_upper for token in (
+            'IMAGE_STRETCH',
+            'IMAGE_DENOISE',
+            'IMAGE_CALIBRATE',
+            'IMAGE_STACK',
+            'IMAGE_ALIGN',
+            'SCNR',
+            'WBR',
+            'WBG',
+            'WBB',
+            'AUTO_WB',
+            'SATURATION',
+            'GAMMA',
+            'SHARPEN',
+            'BILATERAL',
+            'CONTRAST',
+            'CLAHE',
+            'DETECT',
+            'ADU',
+            'SQM',
+            'CAMERA_SQM',
+            'TARGET_ADU',
+        )):
+            return 'Processing / Calibration'
+        elif any(token in field_name_upper for token in (
+            'LENS',
+            'LOGO',
+            'IMAGE_LABEL',
+            'IMAGE_ROTATE',
+            'IMAGE_FLIP',
+            'IMAGE_COLORMAP',
+            'IMAGE_CIRCLE',
+            'IMAGE_CROP',
+            'FISH2PANO',
+            'TEXT_PROPERTIES',
+            'MOON_OVERLAY',
+            'LIGHTGRAPH_OVERLAY',
+            'CARDINAL_DIRS',
+            'ORB_PROPERTIES',
+            'IMAGE_BORDER',
+        )):
+            return 'Overlay / Labels / Lens'
+        elif any(token in field_name_upper for token in (
+            'IMAGE_FILE',
+            'IMAGE_SAVE',
+            'IMAGE_EXPORT',
+            'IMAGE_FOLDER',
+            'FITS',
+            'RAW',
+            'CIRCULAR_DISPLAY',
+            'TIMELAPSE_EXPIRE',
+        )):
+            return 'Output / Storage'
+        elif any(token in field_name_upper for token in (
+            'TIMELAPSE',
+            'FFMPEG',
+            'KEOGRAM',
+            'LONGTERM_KEOGRAM',
+            'STARTRAIL',
+            'REALTIME_KEOGRAM',
+            'PANORAMA',
+        )):
+            return 'Timelapse / Keogram / Startrail'
+        elif any(token in field_name_upper for token in (
+            'UPLOAD',
+            'FILETRANSFER',
+            'S3',
+            'AZURE',
+            'GCS',
+            'MQTT',
+            'YOUTUBE',
+            'SYNCAPI',
+        )):
+            return 'Upload / Publishing'
+        elif any(token in field_name_upper for token in (
+            'TEMP_SENSOR',
+            'DEW_HEATER',
+            'FAN',
+            'GENERIC_GPIO',
+            'MANUAL_GPIO',
+            'FOCUSER',
+            'DEVICE',
+            'ADSB',
+            'SATELLITE',
+            'CHARTS',
+        )):
+            return 'Devices / GPIO / Sensors'
+        elif any(token in field_name_upper for token in (
+            'WEBSITE',
+            'WEB_',
+            'OWNER',
+            'LOCATION',
+            'TEMP_DISPLAY',
+            'PRESSURE_DISPLAY',
+            'WINDSPEED_DISPLAY',
+            'HEALTHCHECK',
+            'ADMIN_NETWORKS',
+            'LOGIN',
+            'ENCRYPT_PASSWORDS',
+            'RELOAD_ON_SAVE',
+            'CONFIG_NOTE',
+            'NIGHT_',
+            'TIMEZONE',
+            'LATITUDE',
+            'LONGITUDE',
+        )):
+            return 'Web / Admin / System'
+
+        return 'Advanced / Other'
+
+
+    def estimate_settings_scope(self, field_name):
+        field_name_upper = field_name.upper()
+        if field_name_upper.startswith('MULTI_CAMERA') or 'PROFILE' in field_name_upper:
+            return 'profile'
+        elif any(token in field_name_upper for token in (
+            'CAMERA',
+            'CCD_',
+            'INDI_',
+            'LIBCAMERA',
+            'GPHOTO',
+            'PYCURL_CAMERA',
+            'LENS',
+            'FOCUS',
+            'GAIN',
+            'BINNING',
+            'EXPOSURE',
+            'CFA_PATTERN',
+        )):
+            return 'camera'
+        elif any(token in field_name_upper for token in (
+            'UPLOAD',
+            'FILETRANSFER',
+            'S3',
+            'AZURE',
+            'GCS',
+            'MQTT',
+            'YOUTUBE',
+            'WEBSITE',
+            'OWNER',
+            'LOCATION',
+            'TIMEZONE',
+            'LATITUDE',
+            'LONGITUDE',
+        )):
+            return 'global'
+        elif any(token in field_name_upper for token in ('GPIO', 'DEVICE', 'FOCUSER', 'SENSOR')):
+            return 'advanced'
+
+        return 'unknown'
+
+
+    def estimate_settings_risk(self, field_name, field):
+        field_name_upper = field_name.upper()
+        field_type = field.__class__.__name__
+        if field_type == 'PasswordField' or any(token in field_name_upper for token in self.SETTINGS_SECRET_TOKENS):
+            return 'secret'
+        elif any(token in field_name_upper for token in (
+            'DELETE',
+            'REMOVE',
+            'PURGE',
+            'POWER',
+            'REBOOT',
+            'SHUTDOWN',
+            'FORMAT',
+        )):
+            return 'destructive'
+        elif any(token in field_name_upper for token in (
+            'GPIO',
+            'RELAY',
+            'DEW_HEATER',
+            'FAN',
+            'FOCUSER',
+            'INDI_PORT',
+            'INDI_SERVER',
+            'NETWORK',
+            'ENCRYPT_PASSWORDS',
+            'RELOAD_ON_SAVE',
+        )):
+            return 'high'
+        elif any(token in field_name_upper for token in (
+            'UPLOAD',
+            'FILETRANSFER',
+            'S3',
+            'AZURE',
+            'GCS',
+            'MQTT',
+            'YOUTUBE',
+            'TIMELAPSE',
+            'KEOGRAM',
+            'STARTRAIL',
+            'PANORAMA',
+            'FITS',
+            'RAW',
+            'CALIBRATE',
+        )):
+            return 'medium'
+
+        return 'safe'
+
+
+    def estimate_settings_restart(self, field_name):
+        field_name_upper = field_name.upper()
+        if any(token in field_name_upper for token in (
+            'CAMERA_INTERFACE',
+            'INDI_',
+            'LIBCAMERA',
+            'GPHOTO',
+            'PYCURL_CAMERA',
+            'MULTI_CAMERA',
+            'CCD_CONFIG',
+            'GPS_ENABLE',
+            'TEMP_SENSOR',
+            'GPIO',
+            'DEVICE',
+            'FOCUSER',
+            'ENCRYPT_PASSWORDS',
+            'TIMEZONE',
+        )):
+            return 'restart'
+        elif any(token in field_name_upper for token in (
+            'UPLOAD',
+            'FILETRANSFER',
+            'S3',
+            'AZURE',
+            'GCS',
+            'MQTT',
+            'YOUTUBE',
+            'WEBSITE',
+            'OWNER',
+            'LOCATION',
+            'LOGIN',
+            'ADMIN_NETWORKS',
+            'HEALTHCHECK',
+        )):
+            return 'reload'
+
+        return 'unknown'
+
+
 class ModernAdminNetworkView(ModernAdminSafeControlsMixin, NetworkManagerView):
     page_title = 'Modern Admin Network'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
@@ -14618,6 +15116,7 @@ bp_allsky.add_url_rule('/modern-admin/tools/generate', view_func=ModernAdminGene
 bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusView.as_view('modern_admin_focus_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))
+bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsInventoryView.as_view('modern_admin_settings_view', template_name='modern_admin/settings_inventory.html'))
 bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/safe_controls.html'))
