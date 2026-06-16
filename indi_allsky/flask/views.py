@@ -31,6 +31,7 @@ from flask import session
 from flask import jsonify
 from flask import Blueprint
 from flask import redirect
+from flask import flash
 from flask import Response
 from flask import url_for
 from flask import send_from_directory
@@ -5108,6 +5109,7 @@ class ModernAdminView(TemplateView):
         # Read-only runtime hint for the Modern Admin shell; no capture state is changed here.
         camera_id = getattr(getattr(self, 'camera', None), 'id', 0) or 0
         quick_action_url = None
+        capture_action_url = None
         runtime_status = {
             'label' : 'Runtime: Unknown',
             'tone'  : 'muted',
@@ -5119,6 +5121,11 @@ class ModernAdminView(TemplateView):
             app.logger.error('Error determining modern admin quick action URL: %s', str(e))
 
         try:
+            capture_action_url = url_for('indi_allsky.modern_admin_capture_service_action_view')
+        except Exception as e:
+            app.logger.error('Error determining modern admin capture action URL: %s', str(e))
+
+        try:
             runtime_status = self.get_modern_admin_runtime_status()
         except Exception as e:
             app.logger.error('Error determining modern admin runtime status: %s', str(e))
@@ -5126,6 +5133,7 @@ class ModernAdminView(TemplateView):
         return {
             'modern_admin_quick_action_url'     : quick_action_url,
             'modern_admin_quick_action_camera'  : camera_id,
+            'modern_admin_capture_action_url'   : capture_action_url,
             'modern_admin_runtime_status'       : runtime_status,
         }
 
@@ -6751,6 +6759,117 @@ class ModernAdminModeView(BaseView):
 
         session['admin_mode'] = 'modern'
         return redirect(url_for('indi_allsky.modern_admin_view'))
+
+
+class ModernAdminCaptureServiceActionView(BaseView):
+    methods = ['POST']
+    decorators = [login_required]
+
+    service_name = 'indi-allsky.service'
+    valid_commands = {
+        'start' : 'started',
+        'stop'  : 'stopped',
+    }
+
+    def dispatch_request(self):
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            return self.get_response(
+                False,
+                'You do not have permission to control capture.',
+                status_code=403,
+            )
+
+        command = self.get_requested_command()
+        if command not in self.valid_commands:
+            return self.get_response(
+                False,
+                'Invalid capture command.',
+                status_code=400,
+            )
+
+        try:
+            result = self.run_capture_service_command(command)
+        except TimeoutError:
+            return self.get_response(
+                False,
+                'Capture service command timed out.',
+                status_code=504,
+            )
+        except OSError as e:
+            app.logger.error('Capture service command failed to start: %s', str(e))
+            return self.get_response(
+                False,
+                'Capture service command failed to start: {0:s}'.format(str(e)),
+                status_code=500,
+            )
+
+        if result['returncode'] != 0:
+            app.logger.error('Capture service %s failed: %s', command, result['output'])
+            message = 'Capture service {0:s} failed.'.format(command)
+            if result['output']:
+                message = '{0:s} {1:s}'.format(message, result['output'])
+
+            return self.get_response(False, message, status_code=500)
+
+        message = 'Capture service {0:s}.'.format(self.valid_commands[command])
+        return self.get_response(True, message)
+
+
+    def get_requested_command(self):
+        payload = request.get_json(silent=True) or {}
+        if not payload:
+            payload = request.form
+
+        return str(payload.get('command', '')).strip().lower()
+
+
+    def run_capture_service_command(self, command):
+        import subprocess
+
+        try:
+            result = subprocess.run(
+                ['systemctl', '--user', command, self.service_name],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            raise TimeoutError()
+
+        return {
+            'returncode' : result.returncode,
+            'output'     : (result.stdout or '').strip(),
+        }
+
+
+    def get_redirect_url(self):
+        payload = request.get_json(silent=True) or {}
+        if not payload:
+            payload = request.form
+
+        next_url = payload.get('next') or request.headers.get('Referer') or ''
+        if next_url.startswith('/') and not next_url.startswith('//'):
+            return next_url
+
+        if next_url.startswith(request.host_url):
+            return next_url
+
+        return url_for('indi_allsky.modern_admin_view')
+
+
+    def get_response(self, success, message, status_code=200):
+        flash(message, 'success' if success else 'danger')
+
+        if request.is_json or 'application/json' in request.headers.get('Accept', ''):
+            response_key = 'success-message' if success else 'failure-message'
+            return jsonify({
+                response_key    : message,
+                'redirect-url'  : self.get_redirect_url(),
+            }), status_code
+
+        return redirect(self.get_redirect_url())
 
 
 class SystemInfoView(TemplateView):
@@ -16464,6 +16583,7 @@ bp_allsky.add_url_rule('/config/restore', view_func=ConfigRestoreView.as_view('c
 bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.as_view('ajax_config_restore_view'))
 
 bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
+bp_allsky.add_url_rule('/modern-admin/capture/service', view_func=ModernAdminCaptureServiceActionView.as_view('modern_admin_capture_service_action_view'))
 bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/add', view_func=ModernAdminCameraAddView.as_view('modern_admin_camera_add_view', template_name='modern_admin/camera_add.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/detect-indi', view_func=ModernAdminIndiCameraDetectView.as_view('modern_admin_camera_detect_indi_view'))

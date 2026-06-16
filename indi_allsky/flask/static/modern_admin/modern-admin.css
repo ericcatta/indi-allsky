@@ -156,6 +156,12 @@
   opacity: 0.54;
 }
 
+.modern-admin-shell .modern-admin-topbar-button-good {
+  border-color: rgba(155, 215, 178, 0.24);
+  color: #bfe8ce;
+  background: rgba(155, 215, 178, 0.08);
+}
+
 .modern-admin-shell .modern-admin-topbar-button-danger {
   border-color: rgba(255, 112, 112, 0.22);
   color: #ffb5b5;
@@ -166,6 +172,33 @@
   border-color: rgba(231, 160, 88, 0.24);
   color: #f0bd82;
   background: rgba(231, 160, 88, 0.08);
+}
+
+.modern-admin-shell .modern-admin-flash-list {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.modern-admin-shell .modern-admin-flash {
+  padding: 10px 12px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 8px;
+  color: var(--modern-admin-text);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.82rem;
+}
+
+.modern-admin-shell .modern-admin-flash-success {
+  border-color: rgba(155, 215, 178, 0.28);
+  color: #d7f1df;
+  background: rgba(155, 215, 178, 0.1);
+}
+
+.modern-admin-shell .modern-admin-flash-danger {
+  border-color: rgba(255, 112, 112, 0.28);
+  color: #ffd0d0;
+  background: rgba(255, 112, 112, 0.1);
 }
 
 .modern-admin-eyebrow {

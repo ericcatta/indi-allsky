@@ -5,9 +5,12 @@
     {% set runtime_tone = runtime_status.tone|default('muted', true) %}
     {% set quick_action_url = modern_admin_quick_action_url|default(none, true) %}
     {% set quick_action_camera = modern_admin_quick_action_camera|default(0, true) %}
+    {% set capture_action_url = modern_admin_capture_action_url|default(none, true) %}
 
     <div class="modern-admin-runtime-row">
         <div class="modern-admin-power-actions" aria-label="System quick actions">
+            <button class="modern-admin-topbar-button modern-admin-topbar-button-good" type="button" data-modern-admin-capture-command="start"{% if not capture_action_url %} disabled{% endif %}>Start Capture</button>
+            <button class="modern-admin-topbar-button modern-admin-topbar-button-warn" type="button" data-modern-admin-capture-command="stop"{% if not capture_action_url %} disabled{% endif %}>Stop Capture</button>
             <button class="modern-admin-topbar-button modern-admin-topbar-button-danger" type="button" data-modern-admin-system-command="poweroff"{% if not quick_action_url %} disabled{% endif %}>Power off</button>
             <button class="modern-admin-topbar-button modern-admin-topbar-button-warn" type="button" data-modern-admin-system-command="reboot"{% if not quick_action_url %} disabled{% endif %}>Restart</button>
         </div>
@@ -35,14 +38,68 @@
     </nav>
 </header>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="modern-admin-flash-list" aria-live="polite">
+    {% for category, message in messages %}
+    <div class="modern-admin-flash modern-admin-flash-{{ category|e }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
 <script>
 (function() {
     const quickActionUrl = {{ quick_action_url|tojson }};
+    const captureActionUrl = {{ capture_action_url|tojson }};
     const cameraId = {{ quick_action_camera|tojson }};
+    const csrfToken = {{ csrf_token()|tojson }};
     const messages = {
         poweroff: 'Power off this system?',
         reboot: 'Restart this system?',
     };
+    const captureMessages = {
+        start: 'Start capture service?',
+        stop: 'Stop capture service?',
+    };
+
+    document.querySelectorAll('[data-modern-admin-capture-command]').forEach((button) => {
+        button.addEventListener('click', function() {
+            const command = button.getAttribute('data-modern-admin-capture-command');
+            if (!captureActionUrl || !command || !window.confirm(captureMessages[command] || 'Run this capture action?')) {
+                return;
+            }
+
+            button.disabled = true;
+
+            fetch(captureActionUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({
+                    command: command,
+                    next: window.location.href,
+                }),
+            }).then((response) => {
+                if (!response.ok) {
+                    return response.json().then((data) => {
+                        throw new Error(data['failure-message'] || Object.values(data).flat().join(' ') || 'Capture action failed.');
+                    });
+                }
+
+                return response.json();
+            }).then((data) => {
+                window.alert(data['success-message'] || 'Capture action submitted.');
+                window.location.href = data['redirect-url'] || window.location.href;
+            }).catch((error) => {
+                window.alert(error.message || 'Capture action failed.');
+                button.disabled = false;
+            });
+        });
+    });
 
     document.querySelectorAll('[data-modern-admin-system-command]').forEach((button) => {
         button.addEventListener('click', function() {
@@ -58,6 +115,7 @@
                 credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
                 },
                 body: JSON.stringify({
                     CAMERA_ID: cameraId,
