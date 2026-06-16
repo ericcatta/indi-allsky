@@ -19,16 +19,28 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Camera settings summary">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Read-only per-profile view</p>
+                <p class="modern-admin-eyebrow">Per-profile view</p>
                 <h2 id="modern-admin-camera-settings-title">Camera Settings</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">No save actions</span>
+            <span class="modern-admin-status-pill modern-admin-status-warning">Driver / Connection editable</span>
         </div>
-        <p class="modern-admin-note">Camera controls are shown from the selected multi-camera profile when available, then from the active global config, with DB camera identity shown separately. This page does not write config or change capture runtime.</p>
+        <p class="modern-admin-note">Camera controls are shown from the selected multi-camera profile when available, then from the active global config, with DB camera identity shown separately. Only Driver / Connection can be saved, and only into the selected profile.</p>
         <p class="modern-admin-note">
             <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Inventory</a>
         </p>
     </section>
+
+    {% if modern_admin_camera_settings_error %}
+    <section class="modern-admin-alert modern-admin-alert-danger" role="alert">
+        {{ modern_admin_camera_settings_error }}
+    </section>
+    {% endif %}
+
+    {% if modern_admin_camera_settings_success %}
+    <section class="modern-admin-alert modern-admin-alert-success" role="status">
+        {{ modern_admin_camera_settings_success }}
+    </section>
+    {% endif %}
 
     <section class="modern-admin-table-panel modern-admin-camera-settings-selector" aria-label="Camera profile selector">
         <div class="modern-admin-section-heading">
@@ -78,6 +90,83 @@ var camera_id = {{ camera_id }};
 
     <section class="modern-admin-settings-sections" aria-label="Camera settings sections">
         {% for section in modern_admin_camera_settings_sections %}
+        {% if section.title == 'Driver / Connection' %}
+        <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-camera-settings-section="{{ section.key }}" open>
+            <summary>
+                <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
+                <span class="modern-admin-settings-section-title">{{ section.title }}</span>
+                <span class="modern-admin-settings-count">Profile-specific</span>
+            </summary>
+            <div class="modern-admin-settings-edit-section-body">
+                <div class="modern-admin-section-heading">
+                    <div>
+                        <p class="modern-admin-eyebrow">Profile-specific</p>
+                        <h2>Driver / Connection</h2>
+                    </div>
+                    <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
+                </div>
+                <p class="modern-admin-note">Only these Driver / Connection fields are editable. They are saved into the selected MULTI_CAMERA profile, not the global camera config.</p>
+
+                <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modern-admin-settings-edit-grid">
+                        {% for field in modern_admin_camera_settings_driver_form.fields %}
+                        <label class="modern-admin-settings-edit-field {% if field.input_type == 'checkbox' %}modern-admin-settings-edit-field-checkbox{% endif %}" for="camera-driver-{{ field.name }}">
+                            <span class="modern-admin-settings-edit-label">{{ field.label }}</span>
+                            <span class="modern-admin-settings-edit-meta">MULTI_CAMERA.profiles[n].{{ field.name }}</span>
+
+                            {% if field.input_type == 'checkbox' %}
+                            <span class="modern-admin-settings-toggle-row">
+                                <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="checkbox" value="1" {% if field.value %}checked{% endif %} {% if field.readonly %}disabled{% endif %}>
+                                <span>{{ 'Enabled' if field.value else 'Disabled' }}</span>
+                            </span>
+                            {% elif field.input_type == 'select' %}
+                            <select id="camera-driver-{{ field.name }}" name="{{ field.name }}" {% if field.readonly %}disabled{% endif %}>
+                                {% for choice in field.choices %}
+                                <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% else %}
+                            <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.input_type == 'number' %}step="1" min="{{ 1 if field.name == 'indi_port' else 0 }}"{% endif %} {% if field.readonly %}readonly{% endif %}>
+                            {% endif %}
+
+                            {% if field.name == 'profile_id' %}
+                            <span class="modern-admin-settings-edit-help">Read-only routing key. POST cannot change this value.</span>
+                            {% elif field.name == 'primary' %}
+                            <span class="modern-admin-settings-edit-help">Saving primary as enabled makes all other profiles non-primary.</span>
+                            {% elif field.name == 'enabled' %}
+                            <span class="modern-admin-settings-edit-help">Boolean profile flag.</span>
+                            {% else %}
+                            <span class="modern-admin-settings-edit-help">Saved only on the selected profile.</span>
+                            {% endif %}
+
+                            {% if field.errors %}
+                            <span class="modern-admin-settings-edit-error">
+                                {% for error in field.errors %}
+                                {{ error }}{% if not loop.last %}<br>{% endif %}
+                                {% endfor %}
+                            </span>
+                            {% endif %}
+                        </label>
+                        {% endfor %}
+                    </div>
+
+                    <section class="modern-admin-table-panel modern-admin-settings-actions" aria-label="Camera driver settings actions">
+                        <div>
+                            <p class="modern-admin-eyebrow">Save</p>
+                            <h2>Write profile config only</h2>
+                            <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
+                        </div>
+                        {% if modern_admin_camera_settings_driver_form.enabled %}
+                        <button class="modern-admin-media-button" type="submit">Save Driver / Connection</button>
+                        {% else %}
+                        <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
+                        {% endif %}
+                    </section>
+                </form>
+            </div>
+        </details>
+        {% else %}
         <details class="modern-admin-settings-section" data-camera-settings-section="{{ section.key }}" {% if section.default_open %}open{% endif %}>
             <summary>
                 <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
@@ -113,6 +202,7 @@ var camera_id = {{ camera_id }};
                 </table>
             </div>
         </details>
+        {% endif %}
         {% endfor %}
     </section>
 </main>
