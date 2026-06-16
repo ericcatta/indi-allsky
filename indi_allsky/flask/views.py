@@ -6635,6 +6635,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('Support Info', 'indi_allsky.modern_admin_support_info_view'),
             ('Log', 'indi_allsky.modern_admin_log_view'),
             ('Settings Inventory', 'indi_allsky.modern_admin_settings_view'),
+            ('Capture Basics', 'indi_allsky.modern_admin_capture_settings_view'),
             ('Config', 'indi_allsky.modern_admin_config_view'),
             ('Network', 'indi_allsky.modern_admin_network_view'),
             ('GPIO Control', 'indi_allsky.modern_admin_manual_gpio_view'),
@@ -14491,6 +14492,295 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         return 'unknown'
 
 
+class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Capture Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+    methods = ['GET', 'POST']
+
+    CAPTURE_SETTINGS_SECTIONS = (
+        {
+            'title' : 'Exposure period',
+            'note'  : 'Cadence and exposure limits. Changes are saved to config only; capture is not restarted automatically.',
+            'fields' : (
+                'EXPOSURE_PERIOD',
+                'EXPOSURE_PERIOD_DAY',
+                'CCD_EXPOSURE_MIN',
+                'CCD_EXPOSURE_MIN_DAY',
+                'CCD_EXPOSURE_DEF',
+                'CCD_EXPOSURE_MAX',
+                'CCD_EXPOSURE_TIMEOUT',
+            ),
+        },
+        {
+            'title' : 'Gain and binning',
+            'note'  : 'Night, moon mode, and daytime camera settings.',
+            'fields' : (
+                'CCD_CONFIG__NIGHT__GAIN',
+                'CCD_CONFIG__NIGHT__BINNING',
+                'CCD_CONFIG__MOONMODE__GAIN',
+                'CCD_CONFIG__MOONMODE__BINNING',
+                'CCD_CONFIG__DAY__GAIN',
+                'CCD_CONFIG__DAY__BINNING',
+                'CCD_CONFIG__AUTO_GAIN_ENABLE',
+                'CCD_CONFIG__AUTO_GAIN_LEVELS',
+            ),
+        },
+        {
+            'title' : 'Day capture',
+            'note'  : 'Daytime capture and image saving flags. Night image saving is implicit in the active capture flow and has no matching Classic field in this subset.',
+            'fields' : (
+                'DAYTIME_CAPTURE',
+                'DAYTIME_CAPTURE_SAVE',
+            ),
+        },
+        {
+            'title' : 'ADU exposure control',
+            'note'  : 'Target ADU values used by the exposure control loop.',
+            'fields' : (
+                'TARGET_ADU',
+                'TARGET_ADU_DAY',
+                'TARGET_ADU_DEV',
+                'TARGET_ADU_DEV_DAY',
+            ),
+        },
+    )
+    CAPTURE_SETTINGS_FIELD_NAMES = tuple([
+        field_name
+        for section in CAPTURE_SETTINGS_SECTIONS
+        for field_name in section['fields']
+    ])
+
+    def get_context(self):
+        context = super(ModernAdminCaptureSettingsView, self).get_context()
+        form = context['form_config']
+
+        context['modern_admin_capture_settings_error'] = None
+        context['modern_admin_capture_settings_success'] = None
+        context['modern_admin_capture_settings_errors'] = {}
+
+        if request.method == 'POST':
+            context.update(self.save_capture_settings(form))
+            form = context['modern_admin_capture_settings_form']
+
+        context['modern_admin_capture_settings_sections'] = self.get_capture_settings_sections(form)
+        context['modern_admin_capture_settings_field_names'] = self.CAPTURE_SETTINGS_FIELD_NAMES
+        context['modern_admin_capture_settings_config_keys'] = [
+            self.form_field_to_config_key(field_name)
+            for field_name in self.CAPTURE_SETTINGS_FIELD_NAMES
+        ]
+
+        return context
+
+
+    def get_capture_settings_sections(self, form):
+        sections = list()
+        for section in self.CAPTURE_SETTINGS_SECTIONS:
+            rows = list()
+            for field_name in section['fields']:
+                field = getattr(form, field_name, None)
+                if not field:
+                    continue
+
+                rows.append(self.get_capture_settings_field_metadata(field_name, field))
+
+            sections.append({
+                'title'  : section['title'],
+                'note'   : section['note'],
+                'fields' : rows,
+            })
+
+        return sections
+
+
+    def get_capture_settings_field_metadata(self, field_name, field):
+        field_type = field.__class__.__name__
+        field_data = field.data
+        input_type = 'text'
+        step = None
+        choices = tuple()
+
+        if field_type == 'BooleanField':
+            input_type = 'checkbox'
+        elif field_type == 'IntegerField':
+            input_type = 'number'
+            step = '1'
+        elif field_type == 'FloatField':
+            input_type = 'number'
+            step = '0.000001'
+        elif field_type == 'SelectField':
+            input_type = 'select'
+            choices = tuple([
+                {
+                    'value'    : str(choice_value),
+                    'label'    : str(choice_label),
+                    'selected' : str(choice_value) == str(field_data),
+                }
+                for choice_value, choice_label in getattr(field, 'choices', tuple())
+            ])
+
+        return {
+            'label'       : str(field.label.text),
+            'name'        : field_name,
+            'config_key'  : self.form_field_to_config_key(field_name),
+            'value'       : field_data,
+            'display'     : self.format_settings_value(field_name, field, self.estimate_settings_risk(field_name, field)),
+            'input_type'  : input_type,
+            'field_type'  : field_type,
+            'step'        : step,
+            'choices'     : choices,
+            'validators'  : self.describe_field_validators(field),
+            'scope'       : self.estimate_settings_scope(field_name),
+        }
+
+
+    def save_capture_settings(self, current_form):
+        result = {
+            'modern_admin_capture_settings_error'   : None,
+            'modern_admin_capture_settings_success' : None,
+            'modern_admin_capture_settings_errors'  : {},
+            'modern_admin_capture_settings_form'    : current_form,
+        }
+
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            result['modern_admin_capture_settings_error'] = 'Only an admin user can change capture settings.'
+            return result
+
+        full_data = {
+            field.name : field.data
+            for field in current_form
+        }
+
+        submitted_data, parse_errors = self.get_capture_settings_submitted_data(current_form)
+        full_data.update(submitted_data)
+
+        form_config = IndiAllskyConfigForm(data=full_data)
+        validation_errors = self.validate_capture_settings_form(form_config)
+        validation_errors.update(parse_errors)
+
+        result['modern_admin_capture_settings_form'] = form_config
+        if validation_errors:
+            result['modern_admin_capture_settings_error'] = 'Please fix the capture settings below. No config was saved.'
+            result['modern_admin_capture_settings_errors'] = validation_errors
+            return result
+
+        try:
+            new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
+            self.apply_capture_settings_to_config(new_config, form_config)
+
+            if not app.config['LOGIN_DISABLED']:
+                username = current_user.username
+            else:
+                username = 'system'
+
+            from ..config import IndiAllSkyConfig
+
+            config_obj = IndiAllSkyConfig()
+            config_obj.config = new_config
+            config_obj.save(username, 'Modern Admin Capture Basics update')
+            app.logger.info('Saved Modern Admin Capture Basics config update')
+            result['modern_admin_capture_settings_success'] = 'Capture Basics saved. Restart or reload indi-allsky for the running capture service to use the new values.'
+        except ConfigSaveException as e:
+            db.session.rollback()
+            result['modern_admin_capture_settings_error'] = str(e)
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error('Error saving Modern Admin Capture Basics: %s', str(e))
+            result['modern_admin_capture_settings_error'] = 'Unable to save Capture Basics: {0:s}'.format(str(e))
+
+        return result
+
+
+    def get_capture_settings_submitted_data(self, form):
+        submitted_data = dict()
+        parse_errors = dict()
+
+        for field_name in self.CAPTURE_SETTINGS_FIELD_NAMES:
+            field = getattr(form, field_name)
+            field_type = field.__class__.__name__
+
+            if field_type == 'BooleanField':
+                submitted_data[field_name] = field_name in request.form
+                continue
+
+            raw_value = request.form.get(field_name)
+            if raw_value is None:
+                parse_errors.setdefault(field_name, []).append('Missing value.')
+                continue
+
+            raw_value = raw_value.strip()
+            try:
+                if field_type == 'IntegerField':
+                    submitted_data[field_name] = int(raw_value)
+                elif field_type == 'FloatField':
+                    submitted_data[field_name] = float(raw_value)
+                else:
+                    submitted_data[field_name] = raw_value
+            except ValueError:
+                parse_errors.setdefault(field_name, []).append('Invalid number.')
+
+        return submitted_data, parse_errors
+
+
+    def validate_capture_settings_form(self, form_config):
+        validation_errors = dict()
+
+        for field_name in self.CAPTURE_SETTINGS_FIELD_NAMES:
+            field = getattr(form_config, field_name)
+            field.errors = list()
+            if not field.validate(form_config):
+                validation_errors[field_name] = list(field.errors)
+
+        if (
+            isinstance(form_config.CCD_EXPOSURE_DEF.data, (int, float)) and
+            isinstance(form_config.CCD_EXPOSURE_MAX.data, (int, float)) and
+            form_config.CCD_EXPOSURE_DEF.data > form_config.CCD_EXPOSURE_MAX.data
+        ):
+            validation_errors.setdefault('CCD_EXPOSURE_DEF', []).append('Default exposure cannot be greater than max exposure')
+            validation_errors.setdefault('CCD_EXPOSURE_MAX', []).append('Max exposure is less than default exposure')
+
+        if (
+            isinstance(form_config.CCD_EXPOSURE_MIN.data, (int, float)) and
+            isinstance(form_config.CCD_EXPOSURE_MAX.data, (int, float)) and
+            form_config.CCD_EXPOSURE_MIN.data > form_config.CCD_EXPOSURE_MAX.data
+        ):
+            validation_errors.setdefault('CCD_EXPOSURE_MIN', []).append('Minimum exposure cannot be greater than max exposure')
+            validation_errors.setdefault('CCD_EXPOSURE_MAX', []).append('Max exposure is less than minimum exposure')
+
+        return validation_errors
+
+
+    def apply_capture_settings_to_config(self, config, form_config):
+        config.setdefault('CCD_CONFIG', OrderedDict())
+        config['CCD_CONFIG'].setdefault('NIGHT', OrderedDict())
+        config['CCD_CONFIG'].setdefault('MOONMODE', OrderedDict())
+        config['CCD_CONFIG'].setdefault('DAY', OrderedDict())
+
+        config['CCD_CONFIG']['NIGHT']['GAIN'] = float(round(float(form_config.CCD_CONFIG__NIGHT__GAIN.data), 2))
+        config['CCD_CONFIG']['NIGHT']['BINNING'] = int(form_config.CCD_CONFIG__NIGHT__BINNING.data)
+        config['CCD_CONFIG']['MOONMODE']['GAIN'] = float(round(float(form_config.CCD_CONFIG__MOONMODE__GAIN.data), 2))
+        config['CCD_CONFIG']['MOONMODE']['BINNING'] = int(form_config.CCD_CONFIG__MOONMODE__BINNING.data)
+        config['CCD_CONFIG']['DAY']['GAIN'] = float(round(float(form_config.CCD_CONFIG__DAY__GAIN.data), 2))
+        config['CCD_CONFIG']['DAY']['BINNING'] = int(form_config.CCD_CONFIG__DAY__BINNING.data)
+        config['CCD_CONFIG']['AUTO_GAIN_ENABLE'] = bool(form_config.CCD_CONFIG__AUTO_GAIN_ENABLE.data)
+        config['CCD_CONFIG']['AUTO_GAIN_LEVELS'] = int(form_config.CCD_CONFIG__AUTO_GAIN_LEVELS.data)
+
+        config['CCD_EXPOSURE_MAX'] = float(round(float(form_config.CCD_EXPOSURE_MAX.data), 6))
+        config['CCD_EXPOSURE_DEF'] = float(round(float(form_config.CCD_EXPOSURE_DEF.data), 6))
+        config['CCD_EXPOSURE_MIN'] = float(round(float(form_config.CCD_EXPOSURE_MIN.data), 6))
+        config['CCD_EXPOSURE_MIN_DAY'] = float(round(float(form_config.CCD_EXPOSURE_MIN_DAY.data), 6))
+        config['CCD_EXPOSURE_TIMEOUT'] = int(form_config.CCD_EXPOSURE_TIMEOUT.data)
+        config['EXPOSURE_PERIOD'] = float(form_config.EXPOSURE_PERIOD.data)
+        config['EXPOSURE_PERIOD_DAY'] = float(form_config.EXPOSURE_PERIOD_DAY.data)
+
+        config['DAYTIME_CAPTURE'] = bool(form_config.DAYTIME_CAPTURE.data)
+        config['DAYTIME_CAPTURE_SAVE'] = bool(form_config.DAYTIME_CAPTURE_SAVE.data)
+
+        config['TARGET_ADU'] = int(form_config.TARGET_ADU.data)
+        config['TARGET_ADU_DAY'] = int(form_config.TARGET_ADU_DAY.data)
+        config['TARGET_ADU_DEV'] = int(form_config.TARGET_ADU_DEV.data)
+        config['TARGET_ADU_DEV_DAY'] = int(form_config.TARGET_ADU_DEV_DAY.data)
+
+
 class ModernAdminNetworkView(ModernAdminSafeControlsMixin, NetworkManagerView):
     page_title = 'Modern Admin Network'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
@@ -15117,6 +15407,7 @@ bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusVi
 bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsInventoryView.as_view('modern_admin_settings_view', template_name='modern_admin/settings_inventory.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/safe_controls.html'))

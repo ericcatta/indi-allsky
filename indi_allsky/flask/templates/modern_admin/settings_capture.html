@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-capture-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-capture-settings-title">
+    {% set modern_admin_header_label = 'Capture settings header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-capture-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Capture settings summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Editable subset</p>
+                <h2 id="modern-admin-capture-settings-title">Capture Basics</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
+        </div>
+        <p class="modern-admin-note">Only the fields below are editable in Modern Admin. All other configuration remains read-only in the settings inventory.</p>
+        <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Inventory</a>
+        </p>
+    </section>
+
+    {% if modern_admin_capture_settings_error %}
+    <section class="modern-admin-alert modern-admin-alert-danger" role="alert">
+        {{ modern_admin_capture_settings_error }}
+    </section>
+    {% endif %}
+
+    {% if modern_admin_capture_settings_success %}
+    <section class="modern-admin-alert modern-admin-alert-success" role="status">
+        {{ modern_admin_capture_settings_success }}
+    </section>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('indi_allsky.modern_admin_capture_settings_view') }}" class="modern-admin-settings-form">
+        {% for section in modern_admin_capture_settings_sections %}
+        <section class="modern-admin-table-panel modern-admin-settings-edit-section" aria-labelledby="capture-settings-section-{{ loop.index }}">
+            <div class="modern-admin-section-heading">
+                <div>
+                    <p class="modern-admin-eyebrow">Capture Basics</p>
+                    <h2 id="capture-settings-section-{{ loop.index }}">{{ section.title }}</h2>
+                </div>
+            </div>
+            <p class="modern-admin-note">{{ section.note }}</p>
+
+            <div class="modern-admin-settings-edit-grid">
+                {% for field in section.fields %}
+                {% set field_errors = modern_admin_capture_settings_errors.get(field.name, []) %}
+                <label class="modern-admin-settings-edit-field {% if field.input_type == 'checkbox' %}modern-admin-settings-edit-field-checkbox{% endif %}" for="{{ field.name }}">
+                    <span class="modern-admin-settings-edit-label">{{ field.label }}</span>
+                    <span class="modern-admin-settings-edit-meta">{{ field.config_key }} · {{ field.field_type }}</span>
+
+                    {% if field.input_type == 'checkbox' %}
+                    <span class="modern-admin-settings-toggle-row">
+                        <input id="{{ field.name }}" name="{{ field.name }}" type="checkbox" value="1" {% if field.value %}checked{% endif %}>
+                        <span>{{ 'Enabled' if field.value else 'Disabled' }}</span>
+                    </span>
+                    {% elif field.input_type == 'select' %}
+                    <select id="{{ field.name }}" name="{{ field.name }}">
+                        {% for choice in field.choices %}
+                        <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
+                    <input id="{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.step %}step="{{ field.step }}"{% endif %}>
+                    {% endif %}
+
+                    <span class="modern-admin-settings-edit-help">{{ field.validators }}</span>
+                    {% if field_errors %}
+                    <span class="modern-admin-settings-edit-error">
+                        {% for error in field_errors %}
+                        {{ error }}{% if not loop.last %}<br>{% endif %}
+                        {% endfor %}
+                    </span>
+                    {% endif %}
+                </label>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+
+        <section class="modern-admin-table-panel modern-admin-settings-actions" aria-label="Capture settings actions">
+            <div>
+                <p class="modern-admin-eyebrow">Save</p>
+                <h2>Write config only</h2>
+                <p class="modern-admin-note">Saving creates a new config revision with note “Modern Admin Capture Basics update”. Modern Admin will not restart or reload indi-allsky automatically.</p>
+            </div>
+            <button class="modern-admin-media-button" type="submit">Save Capture Basics</button>
+        </section>
+    </form>
+</main>
+{% endblock %}
