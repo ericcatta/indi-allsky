@@ -23,7 +23,7 @@ var camera_id = {{ camera_id }};
         <h2 id="modern-admin-media-title">{{ modern_admin_section }}</h2>
         <p>{{ modern_admin_description }}</p>
         {% if modern_admin_media_layout == 'gallery' %}
-        <div class="modern-admin-gallery-filter-bar" aria-label="Camera filter">
+        <div class="modern-admin-gallery-filter-bar" role="group" aria-label="Camera filter">
             {% for camera_filter in modern_admin_gallery_camera_filters %}
             {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view') %}
             {% if camera_filter.profile_id %}
@@ -31,8 +31,8 @@ var camera_id = {{ camera_id }};
             {% elif camera_filter.camera_id %}
             {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view', camera_id=camera_filter.camera_id) %}
             {% endif %}
-            <a class="modern-admin-gallery-filter{% if camera_filter.active %} modern-admin-gallery-filter-active{% endif %}" href="{{ filter_url }}" data-gallery-filter-profile="{{ camera_filter.profile_id }}" data-gallery-filter-camera="{{ camera_filter.camera_id or '' }}">
-                {{ camera_filter.label }}
+            <a class="modern-admin-gallery-filter{% if camera_filter.active %} modern-admin-gallery-filter-active{% endif %}" href="{{ filter_url }}" role="button" aria-pressed="{{ 'true' if camera_filter.active else 'false' }}" data-gallery-filter-profile="{{ camera_filter.profile_id }}" data-gallery-filter-camera="{{ camera_filter.camera_id or '' }}">
+                <span>{{ camera_filter.label }}</span>
             </a>
             {% endfor %}
         </div>
