@@ -1838,6 +1838,36 @@ body.modern-admin-lightbox-open {
   font-size: 0.82rem;
 }
 
+.modern-admin-shell .modern-admin-settings-action-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(88, 166, 255, 0.34);
+  border-radius: 14px;
+  background: rgba(88, 166, 255, 0.1);
+  color: var(--modern-admin-text);
+  text-decoration: none;
+}
+
+.modern-admin-shell .modern-admin-settings-action-card:hover {
+  border-color: rgba(88, 166, 255, 0.68);
+  background: rgba(88, 166, 255, 0.16);
+}
+
+.modern-admin-shell .modern-admin-settings-action-card strong,
+.modern-admin-shell .modern-admin-settings-action-card small {
+  display: block;
+}
+
+.modern-admin-shell .modern-admin-settings-action-card small {
+  margin-top: 4px;
+  color: var(--modern-admin-quiet);
+  font-size: 0.8rem;
+}
+
 .modern-admin-shell .modern-admin-settings-toolbar {
   display: grid;
   gap: 8px;
@@ -2069,6 +2099,10 @@ body.modern-admin-lightbox-open {
   display: grid;
   gap: 18px;
   margin-top: 18px;
+}
+
+.modern-admin-shell .modern-admin-settings-edit-section-body {
+  padding: 0 16px 16px;
 }
 
 .modern-admin-shell .modern-admin-settings-edit-grid {

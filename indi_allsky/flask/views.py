@@ -14499,11 +14499,19 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
 
     CAPTURE_SETTINGS_SECTIONS = (
         {
-            'title' : 'Exposure period',
+            'title' : 'Exposure Period',
+            'default_open' : True,
             'note'  : 'Cadence and exposure limits. Changes are saved to config only; capture is not restarted automatically.',
             'fields' : (
                 'EXPOSURE_PERIOD',
                 'EXPOSURE_PERIOD_DAY',
+            ),
+        },
+        {
+            'title' : 'Exposure Limits',
+            'default_open' : True,
+            'note'  : 'Minimum, default, maximum, and timeout values used by the exposure loop.',
+            'fields' : (
                 'CCD_EXPOSURE_MIN',
                 'CCD_EXPOSURE_MIN_DAY',
                 'CCD_EXPOSURE_DEF',
@@ -14512,13 +14520,28 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
             ),
         },
         {
-            'title' : 'Gain and binning',
-            'note'  : 'Night, moon mode, and daytime camera settings.',
+            'title' : 'Night Mode',
+            'default_open' : False,
+            'note'  : 'Night capture gain and binning.',
             'fields' : (
                 'CCD_CONFIG__NIGHT__GAIN',
                 'CCD_CONFIG__NIGHT__BINNING',
+            ),
+        },
+        {
+            'title' : 'Moon Mode',
+            'default_open' : False,
+            'note'  : 'Moon mode gain and binning.',
+            'fields' : (
                 'CCD_CONFIG__MOONMODE__GAIN',
                 'CCD_CONFIG__MOONMODE__BINNING',
+            ),
+        },
+        {
+            'title' : 'Day Mode',
+            'default_open' : False,
+            'note'  : 'Daytime gain, binning, and auto-gain behavior.',
+            'fields' : (
                 'CCD_CONFIG__DAY__GAIN',
                 'CCD_CONFIG__DAY__BINNING',
                 'CCD_CONFIG__AUTO_GAIN_ENABLE',
@@ -14526,21 +14549,23 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
             ),
         },
         {
-            'title' : 'Day capture',
-            'note'  : 'Daytime capture and image saving flags. Night image saving is implicit in the active capture flow and has no matching Classic field in this subset.',
-            'fields' : (
-                'DAYTIME_CAPTURE',
-                'DAYTIME_CAPTURE_SAVE',
-            ),
-        },
-        {
-            'title' : 'ADU exposure control',
+            'title' : 'ADU Control',
+            'default_open' : False,
             'note'  : 'Target ADU values used by the exposure control loop.',
             'fields' : (
                 'TARGET_ADU',
                 'TARGET_ADU_DAY',
                 'TARGET_ADU_DEV',
                 'TARGET_ADU_DEV_DAY',
+            ),
+        },
+        {
+            'title' : 'Daytime Capture',
+            'default_open' : False,
+            'note'  : 'Daytime capture and image saving flags. Night image saving is implicit in the active capture flow and has no matching Classic field in this subset.',
+            'fields' : (
+                'DAYTIME_CAPTURE',
+                'DAYTIME_CAPTURE_SAVE',
             ),
         },
     )
@@ -14584,9 +14609,11 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
                 rows.append(self.get_capture_settings_field_metadata(field_name, field))
 
             sections.append({
-                'title'  : section['title'],
-                'note'   : section['note'],
-                'fields' : rows,
+                'title'        : section['title'],
+                'key'          : re.sub(r'[^a-z0-9]+', '-', section['title'].lower()).strip('-'),
+                'note'         : section['note'],
+                'fields'       : rows,
+                'default_open' : bool(section.get('default_open')),
             })
 
         return sections

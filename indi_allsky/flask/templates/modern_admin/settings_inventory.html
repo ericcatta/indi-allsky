@@ -24,10 +24,14 @@ var camera_id = {{ camera_id }};
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">No save actions</span>
         </div>
-        <p class="modern-admin-note">Configuration values are loaded from the existing classic config form and grouped for the future Modern Settings framework. Passwords and tokens are masked.</p>
-        <p class="modern-admin-note">
-            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_capture_settings_view') }}">Edit Capture Basics</a>
-        </p>
+        <p class="modern-admin-note">Configuration values are loaded from the existing classic config form and grouped for the future Modern Settings framework. Passwords and tokens are masked. This inventory is read-only.</p>
+        <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.modern_admin_capture_settings_view') }}">
+            <span>
+                <strong>Edit Capture Basics</strong>
+                <small>Safe editor for exposure, gain, binning, daytime capture, and ADU control.</small>
+            </span>
+            <span aria-hidden="true">›</span>
+        </a>
         <div class="modern-admin-settings-summary-grid">
             <div class="modern-admin-settings-summary-card">
                 <span>{{ modern_admin_settings_form_field_count }}</span>
