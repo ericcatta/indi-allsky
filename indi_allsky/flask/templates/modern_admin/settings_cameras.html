@@ -132,7 +132,7 @@ var camera_id = {{ camera_id }};
                                 {% endfor %}
                             </select>
                             {% else %}
-                            <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.input_type == 'number' %}step="1" min="{{ 1 if field.name == 'indi_port' else 0 }}"{% endif %} {% if field.readonly %}readonly{% endif %} {% if field.disabled %}disabled{% endif %}>
+                            <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.input_type == 'number' %}step="{{ field.step }}" min="{{ field.min }}"{% endif %} {% if field.readonly %}readonly{% endif %} {% if field.disabled %}disabled{% endif %}>
                             {% endif %}
 
                             {% if field.name == 'profile_id' %}
@@ -143,6 +143,8 @@ var camera_id = {{ camera_id }};
                             <span class="modern-admin-settings-edit-help">Boolean profile flag.</span>
                             {% elif field.role == 'indi' %}
                             <span class="modern-admin-settings-edit-help">Required only when Camera Interface is INDI.</span>
+                            {% elif field.help %}
+                            <span class="modern-admin-settings-edit-help">{{ field.help }}</span>
                             {% elif field.role == 'libcamera' %}
                             <span class="modern-admin-settings-edit-help">Required only when Camera Interface starts with libcamera.</span>
                             {% else %}

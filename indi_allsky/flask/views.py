@@ -15054,6 +15054,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'LIBCAMERA.AWB' : 'libcamera AWB',
         'LIBCAMERA.AWB_DAY' : 'libcamera Day AWB',
         'LIBCAMERA.AWB_ENABLE' : 'libcamera AWB Enable',
+        'LIBCAMERA.AWB_MODE' : 'libcamera AWB Mode',
+        'LIBCAMERA.AWB_RED_GAIN' : 'libcamera AWB Red Gain',
+        'LIBCAMERA.AWB_BLUE_GAIN' : 'libcamera AWB Blue Gain',
         'LIBCAMERA.IMMEDIATE' : 'libcamera Immediate',
         'LIBCAMERA.IMMEDIATE_DAY' : 'libcamera Day Immediate',
     }
@@ -15088,6 +15091,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'LIBCAMERA.AWB' : ('libcamera_awb', ('libcamera', 'AWB'), ('libcamera', 'awb')),
         'LIBCAMERA.AWB_DAY' : ('libcamera_awb_day', ('libcamera', 'AWB_DAY'), ('libcamera', 'awb_day')),
         'LIBCAMERA.AWB_ENABLE' : ('libcamera_awb_enable', ('libcamera', 'AWB_ENABLE'), ('libcamera', 'awb_enable')),
+        'LIBCAMERA.AWB_MODE' : ('libcamera_awb_mode', ('libcamera', 'AWB_MODE'), ('libcamera', 'awb_mode')),
+        'LIBCAMERA.AWB_RED_GAIN' : ('libcamera_awb_red_gain', ('libcamera', 'AWB_RED_GAIN'), ('libcamera', 'awb_red_gain')),
+        'LIBCAMERA.AWB_BLUE_GAIN' : ('libcamera_awb_blue_gain', ('libcamera', 'AWB_BLUE_GAIN'), ('libcamera', 'awb_blue_gain')),
         'LIBCAMERA.IMMEDIATE' : ('libcamera_immediate', ('libcamera', 'IMMEDIATE'), ('libcamera', 'immediate')),
         'LIBCAMERA.IMMEDIATE_DAY' : ('libcamera_immediate_day', ('libcamera', 'IMMEDIATE_DAY'), ('libcamera', 'immediate_day')),
         'LENS_NAME' : ('lens_name', ('lens', 'name')),
@@ -15140,6 +15146,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'INDI_CAMERA_NAME',
                 'LIBCAMERA.CAMERA_ID',
                 'LIBCAMERA.IMAGE_FILE_TYPE',
+                'LIBCAMERA.AWB_MODE',
+                'LIBCAMERA.AWB_RED_GAIN',
+                'LIBCAMERA.AWB_BLUE_GAIN',
                 'LIBCAMERA.EXTRA_OPTIONS',
             ),
         },
@@ -15258,6 +15267,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'indi_camera_name',
         'libcamera_camera_id',
         'libcamera_image_file_type',
+        'libcamera_awb_mode',
+        'libcamera_awb_red_gain',
+        'libcamera_awb_blue_gain',
         'libcamera_extra_options',
     )
     CAMERA_SETTINGS_DRIVER_OPTIONAL_PROFILE_FIELDS = {
@@ -15270,6 +15282,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'indi_camera_name',
         'libcamera_camera_id',
         'libcamera_image_file_type',
+        'libcamera_awb_mode',
+        'libcamera_awb_red_gain',
+        'libcamera_awb_blue_gain',
         'libcamera_extra_options',
     )
     CAMERA_SETTINGS_DRIVER_FIELD_LABELS = {
@@ -15282,8 +15297,20 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'indi_camera_name'           : 'INDI Camera Name',
         'libcamera_camera_id'        : 'libcamera Camera ID',
         'libcamera_image_file_type'  : 'libcamera Image Type',
+        'libcamera_awb_mode'         : 'libcamera AWB Mode',
+        'libcamera_awb_red_gain'     : 'libcamera AWB Red Gain',
+        'libcamera_awb_blue_gain'    : 'libcamera AWB Blue Gain',
         'libcamera_extra_options'    : 'libcamera Extra Options',
     }
+    CAMERA_SETTINGS_LIBCAMERA_AWB_MODES = (
+        'auto',
+        'fixed',
+        'daylight',
+        'cloudy',
+        'tungsten',
+        'fluorescent',
+        'indoor',
+    )
     CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER = (
         'lens_name',
         'lens_focal_length',
@@ -15727,6 +15754,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         fields = list()
         camera_interface = submitted_data.get('camera_interface', self.get_camera_settings_driver_field_value(profile, 'camera_interface'))
         driver_type = self.get_camera_settings_driver_type(camera_interface)
+        libcamera_awb_mode = str(submitted_data.get('libcamera_awb_mode', self.get_camera_settings_driver_field_value(profile, 'libcamera_awb_mode')) or 'auto').lower()
 
         for field_name in self.CAMERA_SETTINGS_DRIVER_EDIT_FIELD_ORDER:
             if field_name in self.CAMERA_SETTINGS_DRIVER_OPTIONAL_PROFILE_FIELDS and not self.profile_has_camera_settings_driver_field(profile, field_name):
@@ -15736,6 +15764,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             field_type = self.get_camera_settings_driver_field_type(field_name)
             field_role = self.get_camera_settings_driver_field_role(field_name)
             field_required = self.is_camera_settings_driver_field_required(field_name, driver_type)
+            if driver_type == 'libcamera' and libcamera_awb_mode == 'fixed' and field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+                field_required = True
             field_disabled = not self.is_camera_settings_driver_field_relevant(field_name, driver_type)
             fields.append({
                 'name'        : field_name,
@@ -15749,6 +15779,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'role'        : field_role,
                 'errors'      : errors.get(field_name, []),
                 'choices'     : self.get_camera_settings_driver_field_choices(field_name, value),
+                'step'        : self.get_camera_settings_driver_field_step(field_name),
+                'min'         : self.get_camera_settings_driver_field_min(field_name),
+                'help'        : self.get_camera_settings_driver_field_help(field_name),
             })
 
         return {
@@ -15770,7 +15803,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     def get_camera_settings_driver_field_role(self, field_name):
         if field_name in ('indi_server', 'indi_port', 'indi_camera_name'):
             return 'indi'
-        elif field_name in ('libcamera_camera_id', 'libcamera_image_file_type', 'libcamera_extra_options'):
+        elif field_name in (
+            'libcamera_camera_id',
+            'libcamera_image_file_type',
+            'libcamera_awb_mode',
+            'libcamera_awb_red_gain',
+            'libcamera_awb_blue_gain',
+            'libcamera_extra_options',
+        ):
             return 'libcamera'
 
         return 'common'
@@ -15793,15 +15833,48 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     def get_camera_settings_driver_field_type(self, field_name):
         if field_name in ('enabled', 'primary'):
             return 'checkbox'
-        elif field_name == 'camera_interface':
+        elif field_name in ('camera_interface', 'libcamera_awb_mode'):
             return 'select'
-        elif field_name in ('indi_port', 'libcamera_camera_id'):
+        elif field_name in ('indi_port', 'libcamera_camera_id', 'libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
             return 'number'
 
         return 'text'
 
 
+    def get_camera_settings_driver_field_step(self, field_name):
+        if field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+            return '0.01'
+
+        return '1'
+
+
+    def get_camera_settings_driver_field_min(self, field_name):
+        if field_name == 'indi_port':
+            return '1'
+        elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+            return '0.01'
+
+        return '0'
+
+
+    def get_camera_settings_driver_field_help(self, field_name):
+        if field_name == 'libcamera_awb_mode':
+            return 'Use fixed to emit --awbgains instead of --awb. Auto preserves current behavior.'
+        elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+            return 'Required only when libcamera AWB Mode is fixed.'
+
+        return ''
+
+
     def get_camera_settings_driver_field_choices(self, field_name, value):
+        if field_name == 'libcamera_awb_mode':
+            value = str(value or 'auto')
+            return tuple({
+                'value'    : awb_mode,
+                'label'    : awb_mode,
+                'selected' : awb_mode == value,
+            } for awb_mode in self.CAMERA_SETTINGS_LIBCAMERA_AWB_MODES)
+
         if field_name != 'camera_interface':
             return tuple()
 
@@ -15852,11 +15925,19 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'indi_camera_name'          : 'INDI_CAMERA_NAME',
             'libcamera_camera_id'       : 'LIBCAMERA.CAMERA_ID',
             'libcamera_image_file_type' : 'LIBCAMERA.IMAGE_FILE_TYPE',
+            'libcamera_awb_mode'        : 'LIBCAMERA.AWB_MODE',
+            'libcamera_awb_red_gain'    : 'LIBCAMERA.AWB_RED_GAIN',
+            'libcamera_awb_blue_gain'   : 'LIBCAMERA.AWB_BLUE_GAIN',
             'libcamera_extra_options'   : 'LIBCAMERA.EXTRA_OPTIONS',
         }
         found, value = self.get_camera_settings_profile_override(profile, field_config_map[field_name])
         if found:
             return value
+
+        if field_name == 'libcamera_awb_mode':
+            return 'auto'
+        elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+            return '1.0'
 
         return ''
 
@@ -15978,6 +16059,28 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                     submitted_data['libcamera_camera_id'] = libcamera_camera_id_raw
                     validation_errors.setdefault('libcamera_camera_id', []).append('libcamera Camera ID must be a number greater than or equal to 0.')
 
+            libcamera_awb_mode = request.form.get('libcamera_awb_mode', 'auto').strip().lower() or 'auto'
+            submitted_data['libcamera_awb_mode'] = libcamera_awb_mode
+            if libcamera_awb_mode not in self.CAMERA_SETTINGS_LIBCAMERA_AWB_MODES:
+                validation_errors.setdefault('libcamera_awb_mode', []).append('Select a supported libcamera AWB mode.')
+
+            for field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+                gain_raw = request.form.get(field_name, '').strip()
+                if not gain_raw:
+                    submitted_data[field_name] = gain_raw
+                    if libcamera_awb_mode == 'fixed':
+                        validation_errors.setdefault(field_name, []).append('{0:s} is required when libcamera AWB Mode is fixed.'.format(self.CAMERA_SETTINGS_DRIVER_FIELD_LABELS[field_name]))
+                    continue
+
+                try:
+                    gain_value = float(gain_raw)
+                    if gain_value <= 0:
+                        raise ValueError()
+                    submitted_data[field_name] = gain_value
+                except ValueError:
+                    submitted_data[field_name] = gain_raw
+                    validation_errors.setdefault(field_name, []).append('{0:s} must be a number greater than 0.'.format(self.CAMERA_SETTINGS_DRIVER_FIELD_LABELS[field_name]))
+
             for field_name in self.CAMERA_SETTINGS_DRIVER_OPTIONAL_PROFILE_FIELDS:
                 if not self.profile_has_camera_settings_driver_field(profile, field_name):
                     continue
@@ -16034,6 +16137,17 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 profile['libcamera'] = libcamera_config
 
             libcamera_config['camera_id'] = int(submitted_data['libcamera_camera_id'])
+            libcamera_config['awb_mode'] = submitted_data['libcamera_awb_mode']
+            if submitted_data.get('libcamera_awb_red_gain') not in (None, ''):
+                libcamera_config['awb_red_gain'] = float(submitted_data['libcamera_awb_red_gain'])
+            else:
+                libcamera_config.pop('awb_red_gain', None)
+
+            if submitted_data.get('libcamera_awb_blue_gain') not in (None, ''):
+                libcamera_config['awb_blue_gain'] = float(submitted_data['libcamera_awb_blue_gain'])
+            else:
+                libcamera_config.pop('awb_blue_gain', None)
+
             if 'libcamera_image_file_type' in submitted_data:
                 libcamera_config['IMAGE_FILE_TYPE'] = submitted_data['libcamera_image_file_type']
             if 'libcamera_extra_options' in submitted_data:

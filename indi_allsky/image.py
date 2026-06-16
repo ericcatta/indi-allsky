@@ -532,7 +532,7 @@ class ImageWorker(Process):
                 return
 
             queue_pop_time = time.time()
-            if self._images_only_diag_enabled(bool(i_dict.get('images_only', False))):
+            if self._images_only_diag_enabled(bool(i_dict.get('images_only', False))) and self.config.get('MULTI_CAMERA_TIMING_DIAG', False):
                 profile_id = self._validate_profile_id(i_dict)
                 camera_id = i_dict.get('camera_id', 'unknown')
                 queue_time = i_dict.get('queue_time')
@@ -647,7 +647,7 @@ class ImageWorker(Process):
                 images_only,
             )
 
-        if images_only_diag:
+        if images_only_diag and self.config.get('MULTI_CAMERA_TIMING_DIAG', False):
             _multi_camera_diag(
                 '[MULTI_CAMERA_TIMING][%s][camera_id=%s] processing_start t=%0.6f queue_wait=%0.4fs capture_to_processing=%0.4fs exp_elapsed=%0.4fs',
                 profile_id,
@@ -1618,7 +1618,7 @@ class ImageWorker(Process):
 
                 self.upload_metadata(i_ref, adu, adu_average)
 
-        if images_only_diag:
+        if images_only_diag and self.config.get('MULTI_CAMERA_TIMING_DIAG', False):
             post_processing_elapsed_s = time.time() - post_processing_start
             payload_elapsed_s = time.time() - payload_start_time
             _multi_camera_diag(

@@ -31,6 +31,15 @@ def _multi_camera_diag(message, *args):
 class IndiClientLibCameraGeneric(IndiClient):
 
     libcamera_exec = 'rpicam-still'
+    libcamera_awb_modes = {
+        'auto',
+        'fixed',
+        'daylight',
+        'cloudy',
+        'tungsten',
+        'fluorescent',
+        'indoor',
+    }
 
     _sensor_temp_metadata_key = 'SensorTemperature'
     _analogue_gain_metadata_key = 'AnalogueGain'
@@ -108,6 +117,54 @@ class IndiClientLibCameraGeneric(IndiClient):
                 return True
 
         return False
+
+
+    def _multiCameraTimingDiagEnabled(self):
+        return bool(getattr(self, 'images_only', False)) and bool(self.config.get('MULTI_CAMERA_TIMING_DIAG', False))
+
+
+    def _libcameraAwbMode(self, night=True):
+        libcamera_config = self.config.get('LIBCAMERA', {}) or {}
+        awb_mode = str(libcamera_config.get('AWB_MODE', libcamera_config.get('awb_mode', '')) or '').strip().lower()
+        if not awb_mode:
+            if night:
+                awb_enabled = bool(libcamera_config.get('AWB_ENABLE', True))
+                awb_mode = str(libcamera_config.get('AWB', 'auto') or 'auto').strip().lower() if awb_enabled else 'fixed'
+            else:
+                awb_enabled = bool(libcamera_config.get('AWB_ENABLE_DAY', True))
+                awb_mode = str(libcamera_config.get('AWB_DAY', 'auto') or 'auto').strip().lower() if awb_enabled else 'fixed'
+
+        if awb_mode not in self.libcamera_awb_modes:
+            logger.warning('Invalid libcamera AWB mode "%s"; using auto', awb_mode)
+            return 'auto'
+
+        return awb_mode
+
+
+    def _libcameraAwbGainValue(self, key):
+        libcamera_config = self.config.get('LIBCAMERA', {}) or {}
+        try:
+            gain = float(libcamera_config.get(key, libcamera_config.get(key.lower(), 1.0)))
+        except (TypeError, ValueError):
+            logger.warning('Invalid libcamera %s value; using 1.0', key)
+            return 1.0
+
+        if gain <= 0:
+            logger.warning('Invalid libcamera %s value %0.4f; using 1.0', key, gain)
+            return 1.0
+
+        return gain
+
+
+    def _appendLibcameraAwbOptions(self, cmd, night=True):
+        awb_mode = self._libcameraAwbMode(night=night)
+        if awb_mode == 'fixed':
+            red_gain = self._libcameraAwbGainValue('AWB_RED_GAIN')
+            blue_gain = self._libcameraAwbGainValue('AWB_BLUE_GAIN')
+            cmd.extend(['--awbgains', '{0:g},{1:g}'.format(red_gain, blue_gain)])
+            return
+
+        cmd.extend(['--awb', awb_mode])
 
 
     @property
@@ -251,13 +308,7 @@ class IndiClientLibCameraGeneric(IndiClient):
                 cmd.insert(1, '--immediate')
 
 
-            # Auto white balance, AWB causes long exposure times at night
-            if self.config.get('LIBCAMERA', {}).get('AWB_ENABLE'):
-                awb = self.config.get('LIBCAMERA', {}).get('AWB', 'auto')
-                cmd.extend(['--awb', awb])
-            else:
-                # awb enabled by default, the following disables
-                cmd.extend(['--awbgains', '1,1'])
+            self._appendLibcameraAwbOptions(cmd, night=True)
 
 
             # CCM
@@ -271,13 +322,7 @@ class IndiClientLibCameraGeneric(IndiClient):
                 cmd.insert(1, '--immediate')
 
 
-            # Auto white balance, AWB causes long exposure times at night
-            if self.config.get('LIBCAMERA', {}).get('AWB_ENABLE_DAY'):
-                awb = self.config.get('LIBCAMERA', {}).get('AWB_DAY', 'auto')
-                cmd.extend(['--awb', awb])
-            else:
-                # awb enabled by default, the following disables
-                cmd.extend(['--awbgains', '1,1'])
+            self._appendLibcameraAwbOptions(cmd, night=False)
 
 
             # CCM
@@ -344,7 +389,8 @@ class IndiClientLibCameraGeneric(IndiClient):
             self.libcamera_output_f = None
             libcamera_stdout = subprocess.PIPE
 
-        if images_only:
+        timing_diag = self._multiCameraTimingDiagEnabled()
+        if timing_diag:
             _multi_camera_diag(
                 '[MULTI_CAMERA_TIMING][%s][camera_id=%s] rpicam_command requested_exposure_s=%0.8f shutter_us=%d timeout=%0.1fs command=%s',
                 getattr(self, 'profile_id', 'default'),
@@ -407,7 +453,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
                 # not returning, just log the error
 
-            if images_only:
+            if timing_diag:
                 process_exit_time = time.time()
                 rpicam_elapsed_s = process_exit_time - self.exposureStartTime
                 _multi_camera_diag(
@@ -466,7 +512,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
                 # not returning, just log the error
 
-            if bool(getattr(self, 'images_only', False)):
+            if self._multiCameraTimingDiagEnabled():
                 process_exit_time = time.time()
                 rpicam_elapsed_s = process_exit_time - self.exposureStartTime
                 _multi_camera_diag(
@@ -604,7 +650,7 @@ class IndiClientLibCameraGeneric(IndiClient):
         # Only return these values when libcamera AWB is enabled
         if self.night_av[constants.NIGHT_NIGHT]:
             # night
-            if self.config.get('LIBCAMERA', {}).get('AWB_ENABLE'):
+            if self._libcameraAwbMode(night=True) != 'fixed':
                 try:
                     awb_gains = metadata_dict[self._awb_gains_metadata_key]
                     self._awb_gains = [awb_gains[0], awb_gains[1]]
@@ -638,7 +684,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
         else:
             # day
-            if self.config.get('LIBCAMERA', {}).get('AWB_ENABLE_DAY'):
+            if self._libcameraAwbMode(night=False) != 'fixed':
                 try:
                     awb_gains = metadata_dict[self._awb_gains_metadata_key]
                     self._awb_gains = [awb_gains[0], awb_gains[1]]
@@ -750,7 +796,7 @@ class IndiClientLibCameraGeneric(IndiClient):
             #'libcamera_ccm'         : self._ccm,
         }
 
-        if bool(getattr(self, 'images_only', False)):
+        if self._multiCameraTimingDiagEnabled():
             try:
                 file_size = self.current_exposure_file_p.stat().st_size
             except (FileNotFoundError, AttributeError):

@@ -8,6 +8,17 @@ from typing import Mapping
 from typing import Optional
 
 
+LIBCAMERA_AWB_MODES = {
+    'auto',
+    'fixed',
+    'daylight',
+    'cloudy',
+    'tungsten',
+    'fluorescent',
+    'indoor',
+}
+
+
 @dataclass(frozen=True)
 class CaptureProfile:
     """Normalized read-only description of one camera capture target.
@@ -54,6 +65,10 @@ class CaptureProfile:
     libcamera_awb_day: str
     libcamera_awb_enable: bool
     libcamera_awb_enable_day: bool
+    libcamera_awb_mode_configured: bool
+    libcamera_awb_mode: str
+    libcamera_awb_red_gain: float
+    libcamera_awb_blue_gain: float
     libcamera_ccm_disable: bool
     libcamera_ccm_disable_day: bool
     libcamera_extra_options: str
@@ -88,6 +103,20 @@ def _int_config(config: Mapping[str, Any], key: str, default: int) -> int:
 
 def _bool_config(config: Mapping[str, Any], key: str, default: bool) -> bool:
     return bool(config.get(key, default))
+
+
+def _libcamera_awb_mode(config: Mapping[str, Any]) -> str:
+    awb_mode = str(config.get('AWB_MODE', config.get('awb_mode', '')) or '').strip().lower()
+    if not awb_mode:
+        if bool(config.get('AWB_ENABLE', True)):
+            awb_mode = str(config.get('AWB', 'auto') or 'auto').strip().lower()
+        else:
+            awb_mode = 'fixed'
+
+    if awb_mode not in LIBCAMERA_AWB_MODES:
+        return 'auto'
+
+    return awb_mode
 
 
 def _mapping_float(config: Mapping[str, Any], key: str, default: float) -> float:
@@ -210,6 +239,10 @@ def _profile_from_config(
         libcamera_awb_day=str(libcamera_config.get('AWB_DAY', 'auto') or 'auto'),
         libcamera_awb_enable=bool(libcamera_config.get('AWB_ENABLE', True)),
         libcamera_awb_enable_day=bool(libcamera_config.get('AWB_ENABLE_DAY', True)),
+        libcamera_awb_mode_configured='AWB_MODE' in libcamera_config or 'awb_mode' in libcamera_config,
+        libcamera_awb_mode=_libcamera_awb_mode(libcamera_config),
+        libcamera_awb_red_gain=_mapping_float(libcamera_config, 'AWB_RED_GAIN', _mapping_float(libcamera_config, 'awb_red_gain', 1.0)),
+        libcamera_awb_blue_gain=_mapping_float(libcamera_config, 'AWB_BLUE_GAIN', _mapping_float(libcamera_config, 'awb_blue_gain', 1.0)),
         libcamera_ccm_disable=bool(libcamera_config.get('CCM_DISABLE', False)),
         libcamera_ccm_disable_day=bool(libcamera_config.get('CCM_DISABLE_DAY', False)),
         libcamera_extra_options=str(libcamera_config.get('EXTRA_OPTIONS', '') or ''),
@@ -269,6 +302,18 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     libcamera_config['AWB_DAY'] = profile.libcamera_awb_day
     libcamera_config['AWB_ENABLE'] = profile.libcamera_awb_enable
     libcamera_config['AWB_ENABLE_DAY'] = profile.libcamera_awb_enable_day
+    if profile.libcamera_awb_mode_configured:
+        libcamera_config['AWB_MODE'] = profile.libcamera_awb_mode
+        libcamera_config['AWB_RED_GAIN'] = profile.libcamera_awb_red_gain
+        libcamera_config['AWB_BLUE_GAIN'] = profile.libcamera_awb_blue_gain
+        if profile.libcamera_awb_mode == 'fixed':
+            libcamera_config['AWB_ENABLE'] = False
+            libcamera_config['AWB_ENABLE_DAY'] = False
+        else:
+            libcamera_config['AWB'] = profile.libcamera_awb_mode
+            libcamera_config['AWB_DAY'] = profile.libcamera_awb_mode
+            libcamera_config['AWB_ENABLE'] = True
+            libcamera_config['AWB_ENABLE_DAY'] = True
     libcamera_config['CCM_DISABLE'] = profile.libcamera_ccm_disable
     libcamera_config['CCM_DISABLE_DAY'] = profile.libcamera_ccm_disable_day
     libcamera_config['EXTRA_OPTIONS'] = profile.libcamera_extra_options

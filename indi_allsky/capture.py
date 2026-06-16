@@ -826,7 +826,7 @@ class CaptureWorker(Process):
                         self._last_libcamera_frame_ts = now_time
 
                         logger.info('Exposure received in %0.4fs (%+0.4fs)', frame_elapsed, frame_delta)
-                        if self._is_images_only_libcamera_profile():
+                        if self._is_images_only_libcamera_profile() and self.config.get('MULTI_CAMERA_TIMING_DIAG', False):
                             camera_id = self.camera_id if self.camera_id is not None else 'unknown'
                             _multi_camera_diag(
                                 '[MULTI_CAMERA_TIMING][%s][camera_id=%s] capture_loop_end elapsed=%0.4fs delta=%+0.4fs exposure_current=%0.8fs watchdog_recoveries=%d',
@@ -919,7 +919,7 @@ class CaptureWorker(Process):
 
                         frame_start_time = now_time
 
-                        if self._is_images_only_libcamera_profile():
+                        if self._is_images_only_libcamera_profile() and self.config.get('MULTI_CAMERA_TIMING_DIAG', False):
                             camera_id = self.camera_id if self.camera_id is not None else 'unknown'
                             _multi_camera_diag(
                                 '[MULTI_CAMERA_TIMING][%s][camera_id=%s] capture_loop_start t=%0.6f exposure_next=%0.8fs gain_next=%0.2f binning_next=%d image_q_depth=%s',
