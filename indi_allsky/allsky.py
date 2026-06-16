@@ -747,6 +747,8 @@ class IndiAllSky(object):
             self.sensors_user_av,
             self.night_av,
             self.astro_av,
+            camera_shared_state_map=self._image_worker_shared_state_map(),
+            camera_config_map=self._image_worker_config_map(),
         )
         self.image_worker.start()
 
@@ -760,6 +762,34 @@ class IndiAllSky(object):
                     'WARNING: Image worker was restarted more than 10 times',
                     expire=timedelta(hours=2),
                 )
+
+
+    def _image_worker_shared_state_map(self):
+        shared_state_map = {
+            'default' : self.camera_shared_state,
+            self.capture_profiles[0].profile_id : self.camera_shared_state,
+        }
+
+        for profile_id, handle in self.capture_worker_map.items():
+            shared_state = handle.get('shared_state')
+            if shared_state:
+                shared_state_map[profile_id] = shared_state
+
+        return shared_state_map
+
+
+    def _image_worker_config_map(self):
+        config_map = {
+            'default' : self.config,
+            self.capture_profiles[0].profile_id : self.config,
+        }
+
+        for profile_id, handle in self.capture_worker_map.items():
+            profile_config = handle.get('config')
+            if profile_config:
+                config_map[profile_id] = profile_config
+
+        return config_map
 
 
     def _stopImageWorker(self):

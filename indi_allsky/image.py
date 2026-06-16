@@ -88,16 +88,21 @@ class ImageWorker(Process):
         sensors_user_av,
         night_av,
         astro_av,
+        camera_shared_state_map=None,
+        camera_config_map=None,
     ):
         super(ImageWorker, self).__init__()
 
         self.name = 'Image-{0:d}'.format(idx)
 
+        self.base_config = config
         self.config = config
+        self.camera_config_map = camera_config_map or {}
         # MULTI_CAMERA_PREP: default route context for the current
         # single-camera runtime. It is refreshed from each image_q payload.
         self.profile_id = 'default'
         self.current_camera_id = None
+        self.adu_context_key = 'default:unknown'
 
         self.error_q = error_q
         self.image_q = image_q
@@ -112,6 +117,7 @@ class ImageWorker(Process):
         self.sensors_user_av = sensors_user_av
         self.night_av = night_av
         self.astro_av = astro_av
+        self.camera_shared_state_map = camera_shared_state_map or {}
 
         self.filename_t = 'ccd{0:d}_{1:s}.{2:s}'
 
@@ -120,11 +126,10 @@ class ImageWorker(Process):
         self.adsb_aircraft_q = None
         self.adsb_aircraft_list = []
 
+        self.adu_states = {}
+        self.adu_state = self._new_adu_state()
+        self.adu_states[self.adu_context_key] = self.adu_state
         self.generate_mask_base = True
-
-        self.target_adu_found = False
-        self.current_adu_target = 0
-        self.hist_adu = []
 
         self.sqm_value = 0
 
@@ -151,7 +156,7 @@ class ImageWorker(Process):
         )
 
 
-        self._gain_step = None  # calculate on first image
+        self._gain_step = None  # legacy fallback, per-camera state is authoritative after context selection
         self.auto_gain_step_list = None  # list of fixed gain values
         self.auto_gain_exposure_cutoff_low = None
         self.auto_gain_exposure_cutoff_mid = None
@@ -313,6 +318,63 @@ class ImageWorker(Process):
         self.upload_q.put(payload)
 
 
+    def _new_adu_state(self):
+        return {
+            'target_adu_found'               : False,
+            'current_adu_target'             : 0,
+            'hist_adu'                       : [],
+            'gain_step'                      : None,
+            'auto_gain_step_list'            : None,
+            'auto_gain_exposure_cutoff_low'  : None,
+            'auto_gain_exposure_cutoff_mid'  : None,
+            'auto_gain_exposure_cutoff_high' : None,
+            'generate_mask_base'             : True,
+        }
+
+
+    def _adu_key(self, profile_id, camera_id):
+        profile_key = str(profile_id or 'default')
+        camera_key = str(camera_id if camera_id is not None else 'unknown')
+        return '{0:s}:{1:s}'.format(profile_key, camera_key)
+
+
+    def _select_adu_state(self, profile_id, camera_id):
+        adu_key = self._adu_key(profile_id, camera_id)
+        try:
+            self.adu_state = self.adu_states[adu_key]
+        except KeyError:
+            self.adu_state = self._new_adu_state()
+            self.adu_states[adu_key] = self.adu_state
+
+        self.adu_context_key = adu_key
+        return adu_key
+
+
+    def _select_profile_config(self, profile_id):
+        self.config = self.camera_config_map.get(profile_id, self.camera_config_map.get('default', self.base_config))
+
+
+    def _select_shared_state(self, profile_id):
+        shared_state = self.camera_shared_state_map.get(profile_id, self.camera_shared_state_map.get('default'))
+        if not shared_state:
+            return
+
+        self.position_av = shared_state.position_av
+        self.exposure_av = shared_state.exposure_av
+        self.gain_av = shared_state.gain_av
+        self.binning_av = shared_state.binning_av
+        self.sensors_temp_av = shared_state.sensors_temp_av
+        self.sensors_user_av = shared_state.sensors_user_av
+        self.night_av = shared_state.night_av
+        self.astro_av = shared_state.astro_av
+
+
+    def _select_runtime_context(self, profile_id, camera_id):
+        self._select_profile_config(profile_id)
+        self._select_shared_state(profile_id)
+        return self._select_adu_state(profile_id, camera_id)
+
+
     @property
     def libcamera_raw(self):
         return self._libcamera_raw
@@ -324,7 +386,84 @@ class ImageWorker(Process):
 
     @property
     def gain_step(self):
-        return self._gain_step
+        return self.adu_state.get('gain_step')
+
+    @gain_step.setter
+    def gain_step(self, new_gain_step):
+        self.adu_state['gain_step'] = new_gain_step
+        self._gain_step = new_gain_step
+
+
+    @property
+    def target_adu_found(self):
+        return bool(self.adu_state.get('target_adu_found'))
+
+    @target_adu_found.setter
+    def target_adu_found(self, new_target_adu_found):
+        self.adu_state['target_adu_found'] = bool(new_target_adu_found)
+
+
+    @property
+    def current_adu_target(self):
+        return self.adu_state.get('current_adu_target', 0)
+
+    @current_adu_target.setter
+    def current_adu_target(self, new_current_adu_target):
+        self.adu_state['current_adu_target'] = new_current_adu_target
+
+
+    @property
+    def hist_adu(self):
+        return self.adu_state.setdefault('hist_adu', [])
+
+    @hist_adu.setter
+    def hist_adu(self, new_hist_adu):
+        self.adu_state['hist_adu'] = new_hist_adu
+
+
+    @property
+    def generate_mask_base(self):
+        return bool(self.adu_state.get('generate_mask_base'))
+
+    @generate_mask_base.setter
+    def generate_mask_base(self, new_generate_mask_base):
+        self.adu_state['generate_mask_base'] = bool(new_generate_mask_base)
+
+
+    @property
+    def auto_gain_step_list(self):
+        return self.adu_state.get('auto_gain_step_list')
+
+    @auto_gain_step_list.setter
+    def auto_gain_step_list(self, new_auto_gain_step_list):
+        self.adu_state['auto_gain_step_list'] = new_auto_gain_step_list
+
+
+    @property
+    def auto_gain_exposure_cutoff_low(self):
+        return self.adu_state.get('auto_gain_exposure_cutoff_low')
+
+    @auto_gain_exposure_cutoff_low.setter
+    def auto_gain_exposure_cutoff_low(self, new_auto_gain_exposure_cutoff_low):
+        self.adu_state['auto_gain_exposure_cutoff_low'] = new_auto_gain_exposure_cutoff_low
+
+
+    @property
+    def auto_gain_exposure_cutoff_mid(self):
+        return self.adu_state.get('auto_gain_exposure_cutoff_mid')
+
+    @auto_gain_exposure_cutoff_mid.setter
+    def auto_gain_exposure_cutoff_mid(self, new_auto_gain_exposure_cutoff_mid):
+        self.adu_state['auto_gain_exposure_cutoff_mid'] = new_auto_gain_exposure_cutoff_mid
+
+
+    @property
+    def auto_gain_exposure_cutoff_high(self):
+        return self.adu_state.get('auto_gain_exposure_cutoff_high')
+
+    @auto_gain_exposure_cutoff_high.setter
+    def auto_gain_exposure_cutoff_high(self, new_auto_gain_exposure_cutoff_high):
+        self.adu_state['auto_gain_exposure_cutoff_high'] = new_auto_gain_exposure_cutoff_high
 
 
     def sighup_handler_worker(self, signum, frame):
@@ -449,9 +588,10 @@ class ImageWorker(Process):
         exp_date = datetime.fromtimestamp(i_dict['exp_time'])
         exp_elapsed = i_dict['exp_elapsed']
         camera_id = i_dict['camera_id']
-        # MULTI_CAMERA_PREP: passive route id; image processing still uses the
-        # existing camera_id and shared state behavior.
+        # MULTI_CAMERA: route id selects the per-camera ADU state and shared
+        # exposure/gain arrays before any exposure recalculation runs.
         profile_id = self._validate_profile_id(i_dict)
+        adu_context_key = self._select_runtime_context(profile_id, camera_id)
         self._set_queue_context(profile_id, camera_id)
         profile_outputs = i_dict.get('profile_outputs') or {}
         profile_primary = bool(i_dict.get('profile_primary', True))
@@ -466,6 +606,15 @@ class ImageWorker(Process):
             profile_primary,
             images_only,
         )
+        if self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False):
+            _multi_camera_diag(
+                '[MULTI_CAMERA_ADU][%s][camera_id=%s] context=%s states=%d',
+                profile_id,
+                camera_id,
+                adu_context_key,
+                len(self.adu_states),
+            )
+
         if images_only or profile_id != 'default':
             _multi_camera_diag(
                 '[MULTI_CAMERA_DIAG][%s][camera_id=%s] Image queue route primary=%s images_only=%s',
@@ -546,7 +695,7 @@ class ImageWorker(Process):
             auto_gain_levels = self.config.get('CCD_CONFIG', {}).get('AUTO_GAIN_LEVELS', 5)
 
 
-            self._gain_step = gain_range / (auto_gain_levels - 1)  # need divisions
+            self.gain_step = gain_range / (auto_gain_levels - 1)  # need divisions
 
             self.auto_gain_step_list = [float(round((self.gain_step * x) + self.gain_av[constants.GAIN_MIN_NIGHT], 2)) for x in range(auto_gain_levels)]
             self.auto_gain_step_list[-1] = float(round(self.gain_av[constants.GAIN_MAX_NIGHT], 2))  # replace last value, round is necessary
@@ -2557,6 +2706,26 @@ class ImageWorker(Process):
         self._miscUpload.upload_realtime_keogram(keogram_file, camera)
 
 
+    def _log_adu_diag(self, adu, target_adu, adu_average=0.0):
+        if not self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False):
+            return
+
+        _multi_camera_diag(
+            '[MULTI_CAMERA_ADU][%s][camera_id=%s] key=%s adu=%s adu_average=%s target=%s current_target=%s stable=%s exposure_next=%s gain_next=%s hist_len=%d',
+            self.profile_id,
+            self.current_camera_id,
+            self.adu_context_key,
+            '{0:0.2f}'.format(float(adu)),
+            '{0:0.2f}'.format(float(adu_average)),
+            target_adu,
+            self.current_adu_target,
+            self.target_adu_found,
+            '{0:0.8f}'.format(float(self.exposure_av[constants.EXPOSURE_NEXT])),
+            '{0:0.2f}'.format(float(self.gain_av[constants.GAIN_NEXT])),
+            len(self.hist_adu),
+        )
+
+
     def calculate_exposure(self, adu, exposure, gain):
         if adu <= 0.0:
             # ensure we do not divide by zero
@@ -2599,6 +2768,7 @@ class ImageWorker(Process):
 
         if not self.target_adu_found:
             self.recalculate_exposure(exposure, gain, adu, target_adu, target_adu_min, target_adu_max, exp_scale_factor)
+            self._log_adu_diag(adu, target_adu)
             return adu, 0.0
 
 
@@ -2614,6 +2784,7 @@ class ImageWorker(Process):
 
         ### Need at least x values to continue
         if len(self.hist_adu) < history_max_vals:
+            self._log_adu_diag(adu, target_adu, adu_average)
             return adu, 0.0
 
 
@@ -2624,6 +2795,8 @@ class ImageWorker(Process):
         elif adu_average < current_adu_target_min:
             logger.warning('ADU decreasing beyond limits, recalculating next exposure')
             self.target_adu_found = False
+
+        self._log_adu_diag(adu, target_adu, adu_average)
 
         return adu, adu_average
 

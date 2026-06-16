@@ -32,6 +32,10 @@ class CaptureProfile:
     exposure_timeout: float
     exposure_period: float
     exposure_period_day: float
+    target_adu: int
+    target_adu_day: int
+    target_adu_dev: int
+    target_adu_dev_day: int
     gain_night: float
     gain_moonmode: float
     gain_day: float
@@ -184,6 +188,10 @@ def _profile_from_config(
         exposure_timeout=_float_config(profile_config, 'exposure_timeout', _float_config(config, 'CCD_EXPOSURE_TIMEOUT', 330.0)),
         exposure_period=_float_config(profile_config, 'exposure_period', _float_config(config, 'EXPOSURE_PERIOD', 15.0)),
         exposure_period_day=_float_config(profile_config, 'exposure_period_day', _float_config(config, 'EXPOSURE_PERIOD_DAY', 15.0)),
+        target_adu=_int_config(profile_config, 'target_adu', _int_config(config, 'TARGET_ADU', 75)),
+        target_adu_day=_int_config(profile_config, 'target_adu_day', _int_config(config, 'TARGET_ADU_DAY', 75)),
+        target_adu_dev=_int_config(profile_config, 'target_adu_dev', _int_config(config, 'TARGET_ADU_DEV', 10)),
+        target_adu_dev_day=_int_config(profile_config, 'target_adu_dev_day', _int_config(config, 'TARGET_ADU_DEV_DAY', 20)),
         gain_night=_mapping_float(ccd_night, 'GAIN', 100.0),
         gain_moonmode=_mapping_float(ccd_moonmode, 'GAIN', 75.0),
         gain_day=_mapping_float(ccd_day, 'GAIN', 0.0),
@@ -234,6 +242,10 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     profile_config['CCD_EXPOSURE_TIMEOUT'] = profile.exposure_timeout
     profile_config['EXPOSURE_PERIOD'] = profile.exposure_period
     profile_config['EXPOSURE_PERIOD_DAY'] = profile.exposure_period_day
+    profile_config['TARGET_ADU'] = profile.target_adu
+    profile_config['TARGET_ADU_DAY'] = profile.target_adu_day
+    profile_config['TARGET_ADU_DEV'] = profile.target_adu_dev
+    profile_config['TARGET_ADU_DEV_DAY'] = profile.target_adu_dev_day
     profile_config['CCD_COOLING'] = profile.cooling_enabled
     profile_config['CCD_COOLING_DAY'] = profile.cooling_enabled_day
     profile_config['CCD_TEMP'] = profile.target_temperature
