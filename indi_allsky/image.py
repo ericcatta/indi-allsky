@@ -531,6 +531,24 @@ class ImageWorker(Process):
 
                 return
 
+            queue_pop_time = time.time()
+            if self._images_only_diag_enabled(bool(i_dict.get('images_only', False))):
+                profile_id = self._validate_profile_id(i_dict)
+                camera_id = i_dict.get('camera_id', 'unknown')
+                queue_time = i_dict.get('queue_time')
+                capture_start_time = i_dict.get('capture_start_time')
+                queue_wait_s = queue_pop_time - queue_time if queue_time else 0.0
+                capture_to_pop_s = queue_pop_time - capture_start_time if capture_start_time else 0.0
+                _multi_camera_diag(
+                    '[MULTI_CAMERA_TIMING][%s][camera_id=%s] image_queue_pop t=%0.6f queue_wait=%0.4fs capture_to_pop=%0.4fs filename=%s',
+                    profile_id,
+                    camera_id,
+                    queue_pop_time,
+                    queue_wait_s,
+                    capture_to_pop_s,
+                    str(i_dict.get('filename')),
+                )
+
 
             # new context for every task, reduces the effects of caching
             with app.app_context():
@@ -599,6 +617,11 @@ class ImageWorker(Process):
         images_only_diag = self._images_only_diag_enabled(images_only)
         filename_t = i_dict.get('filename_t')
         sqm_exposure = i_dict.get('sqm_exposure')
+        payload_start_time = time.time()
+        queue_time = i_dict.get('queue_time')
+        capture_start_time = i_dict.get('capture_start_time')
+        queue_wait_s = payload_start_time - queue_time if queue_time else 0.0
+        capture_to_processing_s = payload_start_time - capture_start_time if capture_start_time else 0.0
         logger.debug(
             'Image queue route: profile=%s camera_id=%s primary=%s images_only=%s',
             profile_id,
@@ -622,6 +645,17 @@ class ImageWorker(Process):
                 camera_id,
                 profile_primary,
                 images_only,
+            )
+
+        if images_only_diag:
+            _multi_camera_diag(
+                '[MULTI_CAMERA_TIMING][%s][camera_id=%s] processing_start t=%0.6f queue_wait=%0.4fs capture_to_processing=%0.4fs exp_elapsed=%0.4fs',
+                profile_id,
+                camera_id,
+                payload_start_time,
+                queue_wait_s,
+                capture_to_processing_s,
+                float(exp_elapsed),
             )
 
         if images_only_diag:
@@ -1194,6 +1228,7 @@ class ImageWorker(Process):
 
         processing_elapsed_s = time.time() - processing_start
         logger.info('Image processed in %0.4f s', processing_elapsed_s)
+        post_processing_start = time.time()
 
 
         # need this after resizing and scaling
@@ -1584,13 +1619,20 @@ class ImageWorker(Process):
                 self.upload_metadata(i_ref, adu, adu_average)
 
         if images_only_diag:
-            self._images_only_diag(
+            post_processing_elapsed_s = time.time() - post_processing_start
+            payload_elapsed_s = time.time() - payload_start_time
+            _multi_camera_diag(
+                '[MULTI_CAMERA_TIMING][%s][camera_id=%s] processing_end processing=%0.4fs post_processing=%0.4fs total_worker=%0.4fs queue_wait=%0.4fs capture_to_done=%0.4fs db_saved=%s latest_file=%s new_filename=%s',
                 profile_id,
                 camera_id,
-                'IMAGE_PAYLOAD_DONE',
-                db_saved=bool(new_filename),
-                latest_file=str(latest_file) if latest_file else None,
-                new_filename=str(new_filename) if new_filename else None,
+                processing_elapsed_s,
+                post_processing_elapsed_s,
+                payload_elapsed_s,
+                queue_wait_s,
+                (time.time() - capture_start_time) if capture_start_time else 0.0,
+                bool(new_filename),
+                str(latest_file) if latest_file else None,
+                str(new_filename) if new_filename else None,
             )
 
 

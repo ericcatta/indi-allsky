@@ -829,11 +829,12 @@ class CaptureWorker(Process):
                         if self._is_images_only_libcamera_profile():
                             camera_id = self.camera_id if self.camera_id is not None else 'unknown'
                             _multi_camera_diag(
-                                '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera exposure finish elapsed=%0.4fs delta=%+0.4fs watchdog_recoveries=%d',
+                                '[MULTI_CAMERA_TIMING][%s][camera_id=%s] capture_loop_end elapsed=%0.4fs delta=%+0.4fs exposure_current=%0.8fs watchdog_recoveries=%d',
                                 self.profile_id,
                                 camera_id,
                                 frame_elapsed,
                                 frame_delta,
+                                self.exposure_av[constants.EXPOSURE_CURRENT],
                                 self._libcamera_watchdog_cycles,
                             )
 
@@ -917,6 +918,19 @@ class CaptureWorker(Process):
 
 
                         frame_start_time = now_time
+
+                        if self._is_images_only_libcamera_profile():
+                            camera_id = self.camera_id if self.camera_id is not None else 'unknown'
+                            _multi_camera_diag(
+                                '[MULTI_CAMERA_TIMING][%s][camera_id=%s] capture_loop_start t=%0.6f exposure_next=%0.8fs gain_next=%0.2f binning_next=%d image_q_depth=%s',
+                                self.profile_id,
+                                camera_id,
+                                frame_start_time,
+                                self.exposure_av[constants.EXPOSURE_NEXT],
+                                self.gain_av[constants.GAIN_NEXT],
+                                self.binning_av[constants.BINNING_NEXT],
+                                self._image_queue_depth(),
+                            )
 
 
                         if not self.sqm_camera_enable or self.focus_mode:

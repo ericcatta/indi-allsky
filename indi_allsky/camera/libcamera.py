@@ -56,6 +56,8 @@ class IndiClientLibCameraGeneric(IndiClient):
         self.current_exposure_file_p = None
         self.current_metadata_file_p = None
         self.exposureStartTime = 0.0
+        self.processStartTime = 0.0
+        self.libcamera_timeout = 0.0
 
         memory_info = psutil.virtual_memory()
         self.memory_total_mb = memory_info[0] / 1024.0 / 1024.0
@@ -97,6 +99,15 @@ class IndiClientLibCameraGeneric(IndiClient):
         self._binmode_options = {
             1 : '',
         }
+
+
+    def _cmdHasOption(self, cmd, option):
+        option_eq = '{0:s}='.format(option)
+        for cmd_part in cmd:
+            if cmd_part == option or str(cmd_part).startswith(option_eq):
+                return True
+
+        return False
 
 
     @property
@@ -295,6 +306,9 @@ class IndiClientLibCameraGeneric(IndiClient):
             if extra_options:
                 cmd.extend(extra_options.split(' '))
 
+        if self._cmdHasOption(cmd, '--immediate') and not self._cmdHasOption(cmd, '--timeout'):
+            cmd.extend(['--timeout', '1'])
+
 
         # Finally add output file
         cmd.extend(['--output', str(image_tmp_p)])
@@ -318,6 +332,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
         self.exposureStartTime = time.time()
+        self.libcamera_timeout = self._libcameraExposureTimeout()
 
         if images_only:
             # MULTI_CAMERA_DIAG: avoid an unread PIPE in the asynchronous
@@ -329,6 +344,31 @@ class IndiClientLibCameraGeneric(IndiClient):
             self.libcamera_output_f = None
             libcamera_stdout = subprocess.PIPE
 
+        if images_only:
+            _multi_camera_diag(
+                '[MULTI_CAMERA_TIMING][%s][camera_id=%s] rpicam_command requested_exposure_s=%0.8f shutter_us=%d timeout=%0.1fs command=%s',
+                getattr(self, 'profile_id', 'default'),
+                getattr(self, 'camera_id', 'unknown'),
+                float(exposure),
+                exposure_us,
+                self.libcamera_timeout,
+                ' '.join(cmd),
+            )
+            _multi_camera_diag(
+                '[MULTI_CAMERA_TIMING][%s][camera_id=%s] rpicam_start exposure_start_time=%0.6f requested_exposure_s=%0.8f shutter_us=%d gain=%0.2f binning=%d image_type=%s libcamera_camera_id=%s timeout=%0.1fs',
+                getattr(self, 'profile_id', 'default'),
+                getattr(self, 'camera_id', 'unknown'),
+                self.exposureStartTime,
+                float(exposure),
+                exposure_us,
+                float(gain),
+                int(binning),
+                image_type,
+                libcamera_camera_id,
+                self.libcamera_timeout,
+            )
+
+        self.processStartTime = time.time()
         self.libcamera_process = subprocess.Popen(
             cmd,
             stdout=libcamera_stdout,
@@ -368,12 +408,20 @@ class IndiClientLibCameraGeneric(IndiClient):
                 # not returning, just log the error
 
             if images_only:
+                process_exit_time = time.time()
+                rpicam_elapsed_s = process_exit_time - self.exposureStartTime
                 _multi_camera_diag(
-                    '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera returncode=%s sync=%s',
+                    '[MULTI_CAMERA_TIMING][%s][camera_id=%s] rpicam_end process_start_time=%0.6f process_exit_time=%0.6f elapsed=%0.4fs requested_exposure_s=%0.8f shutter_us=%d returncode=%s sync=%s timeout=%0.1fs',
                     getattr(self, 'profile_id', 'default'),
                     getattr(self, 'camera_id', 'unknown'),
+                    self.processStartTime,
+                    process_exit_time,
+                    rpicam_elapsed_s,
+                    float(self.exposure),
+                    int(float(self.exposure) * 1000000),
                     self.libcamera_process.returncode,
                     sync,
+                    self.libcamera_timeout,
                 )
 
             self.active_exposure = False
@@ -419,12 +467,20 @@ class IndiClientLibCameraGeneric(IndiClient):
                 # not returning, just log the error
 
             if bool(getattr(self, 'images_only', False)):
+                process_exit_time = time.time()
+                rpicam_elapsed_s = process_exit_time - self.exposureStartTime
                 _multi_camera_diag(
-                    '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera returncode=%s sync=%s',
+                    '[MULTI_CAMERA_TIMING][%s][camera_id=%s] rpicam_end process_start_time=%0.6f process_exit_time=%0.6f elapsed=%0.4fs requested_exposure_s=%0.8f shutter_us=%d returncode=%s sync=%s timeout=%0.1fs',
                     getattr(self, 'profile_id', 'default'),
                     getattr(self, 'camera_id', 'unknown'),
+                    self.processStartTime,
+                    process_exit_time,
+                    rpicam_elapsed_s,
+                    float(self.exposure),
+                    int(float(self.exposure) * 1000000),
                     self.libcamera_process.returncode,
                     False,
+                    self.libcamera_timeout,
                 )
 
 
@@ -668,6 +724,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
     def _queueImage(self):
         exposure_elapsed_s = time.time() - self.exposureStartTime
+        queue_time = time.time()
 
         exp_date = datetime.now()
 
@@ -680,6 +737,8 @@ class IndiClientLibCameraGeneric(IndiClient):
             'sqm_exposure': self.sqm_exposure,
             'exp_time'    : datetime.timestamp(exp_date),  # datetime objects are not json serializable
             'exp_elapsed' : exposure_elapsed_s,
+            'capture_start_time' : self.exposureStartTime,
+            'queue_time'  : queue_time,
             'camera_id'   : self.camera_id,
             'profile_id'  : getattr(self, 'profile_id', 'default'),
             'profile_primary' : bool(getattr(self, 'profile_primary', True)),
@@ -690,6 +749,28 @@ class IndiClientLibCameraGeneric(IndiClient):
             'libcamera_awb_gains'   : self._awb_gains,
             #'libcamera_ccm'         : self._ccm,
         }
+
+        if bool(getattr(self, 'images_only', False)):
+            try:
+                file_size = self.current_exposure_file_p.stat().st_size
+            except (FileNotFoundError, AttributeError):
+                file_size = 'missing'
+
+            try:
+                queue_depth = self.image_q.qsize()
+            except NotImplementedError:
+                queue_depth = 'unknown'
+
+            _multi_camera_diag(
+                '[MULTI_CAMERA_TIMING][%s][camera_id=%s] image_queue_push t=%0.6f capture_elapsed=%0.4fs file_size=%s queue_depth_before=%s filename=%s',
+                getattr(self, 'profile_id', 'default'),
+                getattr(self, 'camera_id', 'unknown'),
+                queue_time,
+                exposure_elapsed_s,
+                file_size,
+                queue_depth,
+                str(self.current_exposure_file_p),
+            )
 
         self.image_q.put(jobdata)
 
