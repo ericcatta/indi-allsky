@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-camera-settings-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-camera-settings-title">
+    {% set modern_admin_header_label = 'Camera settings header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-camera-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Camera settings summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Read-only per-profile view</p>
+                <h2 id="modern-admin-camera-settings-title">Camera Settings</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">No save actions</span>
+        </div>
+        <p class="modern-admin-note">Camera controls are shown from the selected multi-camera profile when available, then from the active global config, with DB camera identity shown separately. This page does not write config or change capture runtime.</p>
+        <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Inventory</a>
+        </p>
+    </section>
+
+    <section class="modern-admin-table-panel modern-admin-camera-settings-selector" aria-label="Camera profile selector">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">{{ 'Multi-camera profiles' if modern_admin_camera_settings_uses_multi_camera else 'Current active config' }}</p>
+                <h2>Select Profile</h2>
+            </div>
+            <span class="modern-admin-settings-count">{{ modern_admin_camera_settings_profile_count }}</span>
+        </div>
+
+        <div class="modern-admin-camera-profile-tabs">
+            {% for profile in modern_admin_camera_settings_profiles %}
+            {% set active_profile = profile.profile_id == modern_admin_camera_settings_profile.profile_id %}
+            <a class="modern-admin-camera-profile-tab {% if active_profile %}modern-admin-camera-profile-tab-active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=profile.profile_id) }}">
+                <strong>{{ profile['_selector_label'] }}</strong>
+                <span>{{ profile['_selector_subtitle'] }}</span>
+            </a>
+            {% endfor %}
+        </div>
+
+        <div class="modern-admin-camera-profile-summary">
+            <div>
+                <span>Selected</span>
+                <strong>{{ modern_admin_camera_settings_profile['_profile_label'] }}</strong>
+            </div>
+            <div>
+                <span>Profile ID</span>
+                <strong>{{ modern_admin_camera_settings_profile.profile_id }}</strong>
+            </div>
+            <div>
+                <span>DB camera</span>
+                <strong>
+                    {% if modern_admin_camera_settings_camera %}
+                    {{ modern_admin_camera_settings_camera.friendlyName or modern_admin_camera_settings_camera.name }}
+                    {% else %}
+                    Not linked
+                    {% endif %}
+                </strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="modern-admin-settings-toolbar" aria-label="Camera settings filter">
+        <label for="modern-admin-camera-settings-filter">Search camera settings</label>
+        <input id="modern-admin-camera-settings-filter" class="modern-admin-settings-filter" type="search" placeholder="Filter by label, key, value, source, scope, or restart" autocomplete="off">
+    </section>
+
+    <section class="modern-admin-settings-sections" aria-label="Camera settings sections">
+        {% for section in modern_admin_camera_settings_sections %}
+        <details class="modern-admin-settings-section" data-camera-settings-section="{{ section.key }}" {% if section.default_open %}open{% endif %}>
+            <summary>
+                <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
+                <span class="modern-admin-settings-section-title">{{ section.title }}</span>
+                <span class="modern-admin-settings-count" data-camera-settings-visible-count>{{ section.count }}</span>
+            </summary>
+            <div class="modern-admin-table-scroll">
+                <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Config key</th>
+                            <th>Effective value</th>
+                            <th>Source</th>
+                            <th>Future scope</th>
+                            <th>Restart</th>
+                            <th>Mode</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field in section.fields %}
+                        <tr data-camera-settings-row data-camera-settings-search="{{ field.search_text | e }}">
+                            <td><strong>{{ field.label }}</strong></td>
+                            <td><code>{{ field.config_key }}</code></td>
+                            <td><code>{{ field.current_value }}</code></td>
+                            <td><span class="modern-admin-settings-badge modern-admin-camera-settings-source-{{ field.source_class }}">{{ field.source }}</span></td>
+                            <td><span class="modern-admin-settings-badge">{{ field.scope }}</span></td>
+                            <td><span class="modern-admin-settings-badge modern-admin-settings-restart-{{ field.restart_required }}">{{ field.restart_required }}</span></td>
+                            <td><span class="modern-admin-settings-badge modern-admin-camera-settings-readonly">read-only</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+        {% endfor %}
+    </section>
+</main>
+
+<script>
+(function () {
+    const storageKey = 'indi-allsky-modern-camera-settings-sections';
+    const sections = Array.from(document.querySelectorAll('[data-camera-settings-section]'));
+    const filter = document.getElementById('modern-admin-camera-settings-filter');
+    let savedState = {};
+
+    try {
+        savedState = JSON.parse(window.localStorage.getItem(storageKey) || '{}');
+    } catch (error) {
+        savedState = {};
+    }
+
+    sections.forEach((section) => {
+        const key = section.dataset.cameraSettingsSection;
+        section.dataset.settingsDefaultOpen = section.open ? '1' : '0';
+        if (Object.prototype.hasOwnProperty.call(savedState, key)) {
+            section.open = Boolean(savedState[key]);
+        }
+
+        section.addEventListener('toggle', () => {
+            if (filter.value.trim()) {
+                return;
+            }
+
+            savedState[key] = section.open;
+            window.localStorage.setItem(storageKey, JSON.stringify(savedState));
+        });
+    });
+
+    function restoreSectionState() {
+        sections.forEach((section) => {
+            const key = section.dataset.cameraSettingsSection;
+            if (Object.prototype.hasOwnProperty.call(savedState, key)) {
+                section.open = Boolean(savedState[key]);
+            } else {
+                section.open = section.dataset.settingsDefaultOpen === '1';
+            }
+        });
+    }
+
+    function filterSettings() {
+        const query = filter.value.trim().toLowerCase();
+
+        sections.forEach((section) => {
+            const rows = Array.from(section.querySelectorAll('[data-camera-settings-row]'));
+            let visibleCount = 0;
+
+            rows.forEach((row) => {
+                const matches = !query || row.dataset.cameraSettingsSearch.indexOf(query) !== -1;
+                row.hidden = !matches;
+                if (matches) {
+                    visibleCount += 1;
+                }
+            });
+
+            const count = section.querySelector('[data-camera-settings-visible-count]');
+            if (count) {
+                count.textContent = visibleCount;
+            }
+
+            section.hidden = visibleCount === 0;
+            if (query && visibleCount > 0) {
+                section.open = true;
+            }
+        });
+
+        if (!query) {
+            restoreSectionState();
+        }
+    }
+
+    filter.addEventListener('input', filterSettings);
+})();
+</script>
+{% endblock %}

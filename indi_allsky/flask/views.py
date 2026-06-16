@@ -6636,6 +6636,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('Log', 'indi_allsky.modern_admin_log_view'),
             ('Settings Inventory', 'indi_allsky.modern_admin_settings_view'),
             ('Capture Basics', 'indi_allsky.modern_admin_capture_settings_view'),
+            ('Camera Settings', 'indi_allsky.modern_admin_camera_settings_view'),
             ('Config', 'indi_allsky.modern_admin_config_view'),
             ('Network', 'indi_allsky.modern_admin_network_view'),
             ('GPIO Control', 'indi_allsky.modern_admin_manual_gpio_view'),
@@ -14492,6 +14493,675 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         return 'unknown'
 
 
+class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Camera Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+    methods = ['GET']
+
+    CAMERA_SETTINGS_FIELD_LABELS = {
+        'profile_id' : 'Profile ID',
+        'profile_label' : 'Profile Label',
+        'profile_enabled' : 'Profile Enabled',
+        'profile_primary' : 'Primary Profile',
+        'db_camera_id' : 'DB Camera ID',
+        'db_camera_name' : 'DB Camera Name',
+        'db_camera_driver' : 'DB Camera Driver',
+        'db_camera_status' : 'DB Camera Status',
+        'CAMERA_INTERFACE' : 'Camera Interface',
+        'INDI_SERVER' : 'INDI Server',
+        'INDI_PORT' : 'INDI Port',
+        'INDI_CAMERA_NAME' : 'INDI Camera Name',
+        'LIBCAMERA.CAMERA_ID' : 'libcamera Camera ID',
+        'LIBCAMERA.IMAGE_FILE_TYPE' : 'libcamera Image Type',
+        'LIBCAMERA.EXTRA_OPTIONS' : 'libcamera Extra Options',
+        'EXPOSURE_PERIOD' : 'Exposure Period',
+        'EXPOSURE_PERIOD_DAY' : 'Day Exposure Period',
+        'CCD_EXPOSURE_MIN' : 'Minimum Exposure',
+        'CCD_EXPOSURE_MIN_DAY' : 'Day Minimum Exposure',
+        'CCD_EXPOSURE_DEF' : 'Default Exposure',
+        'CCD_EXPOSURE_MAX' : 'Maximum Exposure',
+        'CCD_EXPOSURE_TIMEOUT' : 'Exposure Timeout',
+        'CCD_CONFIG.NIGHT.GAIN' : 'Night Gain',
+        'CCD_CONFIG.NIGHT.BINNING' : 'Night Binning',
+        'CCD_CONFIG.MOONMODE.GAIN' : 'Moon Mode Gain',
+        'CCD_CONFIG.MOONMODE.BINNING' : 'Moon Mode Binning',
+        'CCD_CONFIG.DAY.GAIN' : 'Day Gain',
+        'CCD_CONFIG.DAY.BINNING' : 'Day Binning',
+        'DAYTIME_CAPTURE' : 'Daytime Capture',
+        'DAYTIME_CAPTURE_SAVE' : 'Save Daytime Images',
+        'TARGET_ADU' : 'Night Target ADU',
+        'TARGET_ADU_DAY' : 'Day Target ADU',
+        'CCD_BIT_DEPTH' : 'Bit Depth',
+        'CFA_PATTERN' : 'CFA Pattern',
+        'USE_NIGHT_COLOR' : 'Use Night Color',
+        'AUTO_WB' : 'Auto White Balance',
+        'AUTO_WB_DAY' : 'Day Auto White Balance',
+        'NIGHT_GRAYSCALE' : 'Night Grayscale',
+        'DAYTIME_GRAYSCALE' : 'Daytime Grayscale',
+        'CCD_COOLING' : 'Cooling',
+        'CCD_TEMP' : 'Target Temperature',
+        'LENS_NAME' : 'Lens Name',
+        'LENS_FOCAL_LENGTH' : 'Focal Length',
+        'LENS_FOCAL_RATIO' : 'Focal Ratio',
+        'LENS_IMAGE_CIRCLE' : 'Lens Image Circle',
+        'LENS_OFFSET_X' : 'Lens Offset X',
+        'LENS_OFFSET_Y' : 'Lens Offset Y',
+        'LENS_ALTITUDE' : 'Lens Altitude',
+        'LENS_AZIMUTH' : 'Lens Azimuth',
+        'IMAGE_ROTATE' : 'Image Rotate',
+        'IMAGE_FLIP_V' : 'Flip Vertical',
+        'IMAGE_FLIP_H' : 'Flip Horizontal',
+        'IMAGE_SCALE' : 'Image Scale',
+        'IMAGE_CALIBRATE_DARK' : 'Dark Calibration',
+        'IMAGE_CALIBRATE_BPM' : 'Bad Pixel Map Calibration',
+        'IMAGE_CALIBRATE_FIX_HOLES' : 'Fix Calibration Holes',
+        'IMAGE_CALIBRATE_HOLE_THOLD' : 'Calibration Hole Threshold',
+        'IMAGE_CALIBRATE_MANUAL_OFFSET' : 'Calibration Manual Offset',
+        'IMAGE_CIRCLE_MASK.ENABLE' : 'Image Circle Mask',
+        'IMAGE_CIRCLE_MASK.DIAMETER' : 'Mask Diameter',
+        'IMAGE_CIRCLE_MASK.OFFSET_X' : 'Mask Offset X',
+        'IMAGE_CIRCLE_MASK.OFFSET_Y' : 'Mask Offset Y',
+        'IMAGE_CROP_ROI' : 'Image Crop ROI',
+        'ADU_ROI' : 'ADU ROI',
+        'SQM_ROI' : 'SQM ROI',
+        'INDI_CONFIG_DEFAULTS' : 'INDI Default Config',
+        'INDI_CONFIG_DAY' : 'INDI Day Config',
+        'LIBCAMERA.AWB' : 'libcamera AWB',
+        'LIBCAMERA.AWB_DAY' : 'libcamera Day AWB',
+        'LIBCAMERA.AWB_ENABLE' : 'libcamera AWB Enable',
+        'LIBCAMERA.IMMEDIATE' : 'libcamera Immediate',
+        'LIBCAMERA.IMMEDIATE_DAY' : 'libcamera Day Immediate',
+    }
+
+    CAMERA_SETTINGS_PROFILE_ALIASES = {
+        'CAMERA_INTERFACE' : ('camera_interface', 'interface', 'driver'),
+        'INDI_SERVER' : ('indi_server', ('indi', 'server')),
+        'INDI_PORT' : ('indi_port', ('indi', 'port')),
+        'INDI_CAMERA_NAME' : ('indi_camera_name', 'camera_name', ('indi', 'camera_name')),
+        'LIBCAMERA.CAMERA_ID' : ('libcamera_camera_id', 'libcamera_id', 'camera_id_hint', ('libcamera', 'camera_id'), ('libcamera', 'CAMERA_ID')),
+        'LIBCAMERA.IMAGE_FILE_TYPE' : ('libcamera_image_file_type', ('libcamera', 'IMAGE_FILE_TYPE'), ('libcamera', 'image_file_type')),
+        'LIBCAMERA.EXTRA_OPTIONS' : ('libcamera_extra_options', ('libcamera', 'EXTRA_OPTIONS'), ('libcamera', 'extra_options')),
+        'CCD_CONFIG.NIGHT.GAIN' : ('gain_night', ('ccd_config', 'NIGHT', 'GAIN')),
+        'CCD_CONFIG.NIGHT.BINNING' : ('binning_night', ('ccd_config', 'NIGHT', 'BINNING')),
+        'CCD_CONFIG.MOONMODE.GAIN' : ('gain_moonmode', ('ccd_config', 'MOONMODE', 'GAIN')),
+        'CCD_CONFIG.MOONMODE.BINNING' : ('binning_moonmode', ('ccd_config', 'MOONMODE', 'BINNING')),
+        'CCD_CONFIG.DAY.GAIN' : ('gain_day', ('ccd_config', 'DAY', 'GAIN')),
+        'CCD_CONFIG.DAY.BINNING' : ('binning_day', ('ccd_config', 'DAY', 'BINNING')),
+        'EXPOSURE_PERIOD' : ('exposure_period',),
+        'EXPOSURE_PERIOD_DAY' : ('exposure_period_day',),
+        'CCD_EXPOSURE_MIN' : ('exposure_min',),
+        'CCD_EXPOSURE_MIN_DAY' : ('exposure_min_day',),
+        'CCD_EXPOSURE_DEF' : ('exposure_default',),
+        'CCD_EXPOSURE_MAX' : ('exposure_max',),
+        'CCD_EXPOSURE_TIMEOUT' : ('exposure_timeout',),
+        'CCD_COOLING' : ('cooling_enabled',),
+        'CCD_TEMP' : ('target_temperature',),
+        'DAYTIME_CAPTURE' : ('daytime_capture',),
+        'DAYTIME_CAPTURE_SAVE' : ('daytime_capture_save',),
+        'CCD_BIT_DEPTH' : ('ccd_bit_depth',),
+        'CFA_PATTERN' : ('cfa_pattern',),
+        'LIBCAMERA.AWB' : ('libcamera_awb', ('libcamera', 'AWB'), ('libcamera', 'awb')),
+        'LIBCAMERA.AWB_DAY' : ('libcamera_awb_day', ('libcamera', 'AWB_DAY'), ('libcamera', 'awb_day')),
+        'LIBCAMERA.AWB_ENABLE' : ('libcamera_awb_enable', ('libcamera', 'AWB_ENABLE'), ('libcamera', 'awb_enable')),
+        'LIBCAMERA.IMMEDIATE' : ('libcamera_immediate', ('libcamera', 'IMMEDIATE'), ('libcamera', 'immediate')),
+        'LIBCAMERA.IMMEDIATE_DAY' : ('libcamera_immediate_day', ('libcamera', 'IMMEDIATE_DAY'), ('libcamera', 'immediate_day')),
+    }
+
+    CAMERA_SETTINGS_SECTIONS = (
+        {
+            'title' : 'Camera Identity',
+            'default_open' : True,
+            'fields' : (
+                'profile_id',
+                'profile_label',
+                'profile_enabled',
+                'profile_primary',
+                'db_camera_id',
+                'db_camera_name',
+                'db_camera_driver',
+                'db_camera_status',
+            ),
+        },
+        {
+            'title' : 'Driver / Connection',
+            'default_open' : True,
+            'fields' : (
+                'CAMERA_INTERFACE',
+                'INDI_SERVER',
+                'INDI_PORT',
+                'INDI_CAMERA_NAME',
+                'LIBCAMERA.CAMERA_ID',
+                'LIBCAMERA.IMAGE_FILE_TYPE',
+                'LIBCAMERA.EXTRA_OPTIONS',
+            ),
+        },
+        {
+            'title' : 'Capture',
+            'default_open' : True,
+            'fields' : (
+                'EXPOSURE_PERIOD',
+                'EXPOSURE_PERIOD_DAY',
+                'CCD_EXPOSURE_MIN',
+                'CCD_EXPOSURE_MIN_DAY',
+                'CCD_EXPOSURE_DEF',
+                'CCD_EXPOSURE_MAX',
+                'CCD_EXPOSURE_TIMEOUT',
+                'CCD_CONFIG.NIGHT.GAIN',
+                'CCD_CONFIG.NIGHT.BINNING',
+                'CCD_CONFIG.MOONMODE.GAIN',
+                'CCD_CONFIG.MOONMODE.BINNING',
+                'CCD_CONFIG.DAY.GAIN',
+                'CCD_CONFIG.DAY.BINNING',
+                'DAYTIME_CAPTURE',
+                'DAYTIME_CAPTURE_SAVE',
+                'TARGET_ADU',
+                'TARGET_ADU_DAY',
+            ),
+        },
+        {
+            'title' : 'Sensor',
+            'default_open' : False,
+            'fields' : (
+                'CCD_BIT_DEPTH',
+                'CFA_PATTERN',
+                'USE_NIGHT_COLOR',
+                'AUTO_WB',
+                'AUTO_WB_DAY',
+                'NIGHT_GRAYSCALE',
+                'DAYTIME_GRAYSCALE',
+                'CCD_COOLING',
+                'CCD_TEMP',
+            ),
+        },
+        {
+            'title' : 'Lens & Optics',
+            'default_open' : False,
+            'fields' : (
+                'LENS_NAME',
+                'LENS_FOCAL_LENGTH',
+                'LENS_FOCAL_RATIO',
+                'LENS_IMAGE_CIRCLE',
+                'LENS_OFFSET_X',
+                'LENS_OFFSET_Y',
+                'LENS_ALTITUDE',
+                'LENS_AZIMUTH',
+                'IMAGE_ROTATE',
+                'IMAGE_FLIP_V',
+                'IMAGE_FLIP_H',
+                'IMAGE_SCALE',
+            ),
+        },
+        {
+            'title' : 'Calibration',
+            'default_open' : False,
+            'fields' : (
+                'IMAGE_CALIBRATE_DARK',
+                'IMAGE_CALIBRATE_BPM',
+                'IMAGE_CALIBRATE_FIX_HOLES',
+                'IMAGE_CALIBRATE_HOLE_THOLD',
+                'IMAGE_CALIBRATE_MANUAL_OFFSET',
+            ),
+        },
+        {
+            'title' : 'Masks & Image Circle',
+            'default_open' : False,
+            'fields' : (
+                'IMAGE_CIRCLE_MASK.ENABLE',
+                'IMAGE_CIRCLE_MASK.DIAMETER',
+                'IMAGE_CIRCLE_MASK.OFFSET_X',
+                'IMAGE_CIRCLE_MASK.OFFSET_Y',
+                'IMAGE_CROP_ROI',
+                'ADU_ROI',
+                'SQM_ROI',
+            ),
+        },
+        {
+            'title' : 'Advanced',
+            'default_open' : False,
+            'fields' : (
+                'INDI_CONFIG_DEFAULTS',
+                'INDI_CONFIG_DAY',
+                'LIBCAMERA.AWB',
+                'LIBCAMERA.AWB_DAY',
+                'LIBCAMERA.AWB_ENABLE',
+                'LIBCAMERA.IMMEDIATE',
+                'LIBCAMERA.IMMEDIATE_DAY',
+            ),
+        },
+    )
+
+    CAMERA_SETTINGS_PROFILE_FIELDS = {
+        'profile_id',
+        'profile_label',
+        'profile_enabled',
+        'profile_primary',
+    }
+    CAMERA_SETTINGS_DB_FIELDS = {
+        'db_camera_id',
+        'db_camera_name',
+        'db_camera_driver',
+        'db_camera_status',
+    }
+
+    def get_context(self):
+        context = ModernAdminContextMixin.get_context(self)
+        profiles = self.get_camera_settings_profiles()
+        selected_profile = self.get_selected_camera_settings_profile(profiles)
+        camera_map = self.get_camera_settings_camera_map(profiles)
+        selected_camera = self.get_camera_settings_profile_camera(selected_profile, camera_map)
+
+        context['modern_admin_camera_settings_profiles'] = profiles
+        context['modern_admin_camera_settings_profile'] = selected_profile
+        context['modern_admin_camera_settings_camera'] = selected_camera
+        context['modern_admin_camera_settings_sections'] = self.get_camera_settings_sections(selected_profile, selected_camera)
+        context['modern_admin_camera_settings_profile_count'] = len(profiles)
+        context['modern_admin_camera_settings_uses_multi_camera'] = bool(selected_profile.get('from_multi_camera'))
+
+        return context
+
+
+    def get_camera_settings_profiles(self):
+        try:
+            profiles = self.indi_allsky_config.get('MULTI_CAMERA', {}).get('profiles', [])
+        except AttributeError:
+            profiles = []
+
+        normalized_profiles = list()
+        if isinstance(profiles, list):
+            for profile_index, profile in enumerate(profiles, start=1):
+                if not isinstance(profile, dict):
+                    continue
+
+                profile_id = str(profile.get('profile_id') or profile.get('id') or 'profile-{0:d}'.format(profile_index))
+                profile_label = str(profile.get('label') or profile.get('camera_name') or profile_id)
+                profile_copy = dict(profile)
+                profile_copy.update({
+                    '_profile_index'     : profile_index,
+                    'profile_id'         : profile_id,
+                    '_profile_label'     : profile_label,
+                    'from_multi_camera'  : True,
+                    '_selector_label'    : profile_label,
+                    '_selector_subtitle' : profile_id,
+                })
+                normalized_profiles.append(profile_copy)
+
+        if normalized_profiles:
+            return tuple(normalized_profiles)
+
+        camera_name = 'Current config'
+        if getattr(self, 'camera', None):
+            camera_name = str(self.camera.friendlyName or self.camera.name or 'Current camera')
+
+        return ({
+            '_profile_index'     : 1,
+            'profile_id'         : 'current-config',
+            '_profile_label'     : camera_name,
+            'enabled'            : True,
+            'primary'            : True,
+            'from_multi_camera'  : False,
+            '_selector_label'    : camera_name,
+            '_selector_subtitle' : 'active camera / current config',
+            '_fallback_camera_id': getattr(getattr(self, 'camera', None), 'id', None),
+        },)
+
+
+    def get_selected_camera_settings_profile(self, profiles):
+        if not profiles:
+            return {}
+
+        selected_profile_id = request.args.get('profile_id', '')
+        for profile in profiles:
+            if str(profile.get('profile_id')) == selected_profile_id:
+                return profile
+
+        return profiles[0]
+
+
+    def get_camera_settings_camera_map(self, profiles):
+        camera_ids = set()
+        for profile in profiles:
+            camera_id = self.get_camera_settings_profile_camera_id(profile)
+            if camera_id:
+                camera_ids.add(camera_id)
+
+        if getattr(self, 'camera', None):
+            camera_ids.add(self.camera.id)
+
+        if not camera_ids:
+            return {}
+
+        try:
+            camera_rows = IndiAllSkyDbCameraTable.query\
+                .filter(IndiAllSkyDbCameraTable.id.in_(camera_ids))\
+                .all()
+        except Exception as e:
+            app.logger.error('Error reading camera settings DB camera rows: %s', str(e))
+            return {}
+
+        return {
+            camera.id : camera
+            for camera in camera_rows
+        }
+
+
+    def get_camera_settings_profile_camera_id(self, profile):
+        for key in ('db_camera_id', 'camera_db_id', 'camera_id'):
+            if key not in profile:
+                continue
+
+            try:
+                return int(profile[key])
+            except (TypeError, ValueError):
+                continue
+
+        fallback_camera_id = profile.get('_fallback_camera_id')
+        if fallback_camera_id:
+            try:
+                return int(fallback_camera_id)
+            except (TypeError, ValueError):
+                return None
+
+        return None
+
+
+    def get_camera_settings_profile_camera(self, profile, camera_map):
+        camera_id = self.get_camera_settings_profile_camera_id(profile)
+        if camera_id and camera_id in camera_map:
+            return camera_map[camera_id]
+
+        if profile.get('from_multi_camera'):
+            return None
+
+        return getattr(self, 'camera', None)
+
+
+    def get_camera_settings_sections(self, profile, db_camera):
+        sections = list()
+        for section in self.CAMERA_SETTINGS_SECTIONS:
+            rows = list()
+            for config_key in section['fields']:
+                rows.append(self.get_camera_settings_row(config_key, profile, db_camera))
+
+            sections.append({
+                'title'        : section['title'],
+                'key'          : re.sub(r'[^a-z0-9]+', '-', section['title'].lower()).strip('-'),
+                'fields'       : rows,
+                'count'        : len(rows),
+                'default_open' : bool(section.get('default_open')),
+            })
+
+        return sections
+
+
+    def get_camera_settings_row(self, config_key, profile, db_camera):
+        value, source = self.get_camera_settings_effective_value(config_key, profile, db_camera)
+        display_value = self.format_camera_settings_value(config_key, value, source)
+        search_text = ' '.join((
+            self.CAMERA_SETTINGS_FIELD_LABELS.get(config_key, config_key),
+            config_key,
+            display_value,
+            source,
+            self.estimate_camera_settings_scope(config_key),
+            self.estimate_camera_settings_restart(config_key),
+        )).lower()
+
+        return {
+            'label'            : self.CAMERA_SETTINGS_FIELD_LABELS.get(config_key, config_key.replace('_', ' ').title()),
+            'config_key'       : config_key,
+            'current_value'    : display_value,
+            'source'           : source,
+            'source_class'     : re.sub(r'[^a-z0-9]+', '-', source.lower()).strip('-'),
+            'scope'            : self.estimate_camera_settings_scope(config_key),
+            'restart_required' : self.estimate_camera_settings_restart(config_key),
+            'search_text'      : search_text,
+        }
+
+
+    def get_camera_settings_effective_value(self, config_key, profile, db_camera):
+        if config_key in self.CAMERA_SETTINGS_PROFILE_FIELDS:
+            return self.get_camera_settings_profile_field_value(config_key, profile), 'derived'
+
+        if config_key in self.CAMERA_SETTINGS_DB_FIELDS:
+            return self.get_camera_settings_db_field_value(config_key, db_camera, profile), 'db camera' if db_camera else 'missing'
+
+        found, value = self.get_camera_settings_profile_override(profile, config_key)
+        if found:
+            return value, 'profile override'
+
+        found, value = self.get_camera_settings_config_value(config_key)
+        if found:
+            return value, 'global config'
+
+        return None, 'missing'
+
+
+    def get_camera_settings_profile_field_value(self, config_key, profile):
+        if config_key == 'profile_id':
+            return profile.get('profile_id')
+        elif config_key == 'profile_label':
+            return profile.get('_profile_label') or profile.get('label') or profile.get('camera_name')
+        elif config_key == 'profile_enabled':
+            return bool(profile.get('enabled', True))
+        elif config_key == 'profile_primary':
+            return bool(profile.get('primary', False))
+
+        return None
+
+
+    def get_camera_settings_db_field_value(self, config_key, db_camera, profile):
+        if not db_camera:
+            if config_key == 'db_camera_id':
+                return self.get_camera_settings_profile_camera_id(profile)
+
+            return None
+
+        if config_key == 'db_camera_id':
+            return db_camera.id
+        elif config_key == 'db_camera_name':
+            return db_camera.friendlyName or db_camera.name
+        elif config_key == 'db_camera_driver':
+            return db_camera.driver
+        elif config_key == 'db_camera_status':
+            if getattr(getattr(self, 'camera', None), 'id', None) == db_camera.id:
+                return 'Active'
+
+            return 'Configured'
+
+        return None
+
+
+    def get_camera_settings_profile_override(self, profile, config_key):
+        candidates = [config_key, config_key.replace('.', '__')]
+        candidates.extend(self.CAMERA_SETTINGS_PROFILE_ALIASES.get(config_key, tuple()))
+
+        for candidate in candidates:
+            found, value = self.get_camera_settings_nested_value(profile, candidate)
+            if found:
+                return True, value
+
+        return False, None
+
+
+    def get_camera_settings_config_value(self, config_key):
+        return self.get_camera_settings_nested_value(self.indi_allsky_config, config_key)
+
+
+    def get_camera_settings_nested_value(self, data, path):
+        if not isinstance(data, dict):
+            return False, None
+
+        if isinstance(path, str):
+            if path in data:
+                return True, data[path]
+
+            path_parts = path.replace('__', '.').split('.')
+        else:
+            path_parts = list(path)
+
+        current = data
+        for path_part in path_parts:
+            if not isinstance(current, dict):
+                return False, None
+
+            candidate_keys = (
+                path_part,
+                str(path_part).upper(),
+                str(path_part).lower(),
+            )
+            found_key = None
+            for candidate_key in candidate_keys:
+                if candidate_key in current:
+                    found_key = candidate_key
+                    break
+
+            if found_key is None:
+                return False, None
+
+            current = current[found_key]
+
+        return True, current
+
+
+    def format_camera_settings_value(self, config_key, value, source):
+        if source == 'missing' or value in (None, ''):
+            return 'Not configured'
+        elif value is True:
+            return 'Enabled'
+        elif value is False:
+            return 'Disabled'
+
+        if any(token in config_key.upper() for token in self.SETTINGS_SECRET_TOKENS):
+            return 'Configured (masked)'
+
+        return self.format_structured_settings_value(self.redact_camera_settings_value(value))
+
+
+    def redact_camera_settings_value(self, value):
+        if isinstance(value, dict):
+            redacted_value = dict()
+            for key, nested_value in value.items():
+                if any(token in str(key).upper() for token in self.SETTINGS_SECRET_TOKENS):
+                    redacted_value[key] = 'Configured (masked)'
+                else:
+                    redacted_value[key] = self.redact_camera_settings_value(nested_value)
+
+            return redacted_value
+
+        if isinstance(value, (list, tuple)):
+            return [
+                self.redact_camera_settings_value(nested_value)
+                for nested_value in value
+            ]
+
+        return value
+
+
+    def estimate_camera_settings_scope(self, config_key):
+        if config_key in self.CAMERA_SETTINGS_PROFILE_FIELDS:
+            return 'profile'
+        elif config_key in self.CAMERA_SETTINGS_DB_FIELDS:
+            return 'camera'
+        elif config_key in (
+            'CAMERA_INTERFACE',
+            'INDI_SERVER',
+            'INDI_PORT',
+            'INDI_CAMERA_NAME',
+            'LIBCAMERA.CAMERA_ID',
+            'LIBCAMERA.IMAGE_FILE_TYPE',
+            'LIBCAMERA.EXTRA_OPTIONS',
+            'EXPOSURE_PERIOD',
+            'EXPOSURE_PERIOD_DAY',
+            'CCD_EXPOSURE_MIN',
+            'CCD_EXPOSURE_MIN_DAY',
+            'CCD_EXPOSURE_DEF',
+            'CCD_EXPOSURE_MAX',
+            'CCD_EXPOSURE_TIMEOUT',
+            'CCD_CONFIG.NIGHT.GAIN',
+            'CCD_CONFIG.NIGHT.BINNING',
+            'CCD_CONFIG.MOONMODE.GAIN',
+            'CCD_CONFIG.MOONMODE.BINNING',
+            'CCD_CONFIG.DAY.GAIN',
+            'CCD_CONFIG.DAY.BINNING',
+            'DAYTIME_CAPTURE',
+            'DAYTIME_CAPTURE_SAVE',
+            'TARGET_ADU',
+            'TARGET_ADU_DAY',
+            'CCD_BIT_DEPTH',
+            'CFA_PATTERN',
+            'USE_NIGHT_COLOR',
+            'AUTO_WB',
+            'AUTO_WB_DAY',
+            'NIGHT_GRAYSCALE',
+            'DAYTIME_GRAYSCALE',
+            'CCD_COOLING',
+            'CCD_TEMP',
+            'LENS_NAME',
+            'LENS_FOCAL_LENGTH',
+            'LENS_FOCAL_RATIO',
+            'LENS_IMAGE_CIRCLE',
+            'LENS_OFFSET_X',
+            'LENS_OFFSET_Y',
+            'LENS_ALTITUDE',
+            'LENS_AZIMUTH',
+            'IMAGE_ROTATE',
+            'IMAGE_FLIP_V',
+            'IMAGE_FLIP_H',
+            'IMAGE_SCALE',
+            'IMAGE_CALIBRATE_DARK',
+            'IMAGE_CALIBRATE_BPM',
+            'IMAGE_CALIBRATE_FIX_HOLES',
+            'IMAGE_CALIBRATE_HOLE_THOLD',
+            'IMAGE_CALIBRATE_MANUAL_OFFSET',
+            'IMAGE_CIRCLE_MASK.ENABLE',
+            'IMAGE_CIRCLE_MASK.DIAMETER',
+            'IMAGE_CIRCLE_MASK.OFFSET_X',
+            'IMAGE_CIRCLE_MASK.OFFSET_Y',
+            'IMAGE_CROP_ROI',
+            'ADU_ROI',
+            'SQM_ROI',
+            'INDI_CONFIG_DEFAULTS',
+            'INDI_CONFIG_DAY',
+            'LIBCAMERA.AWB',
+            'LIBCAMERA.AWB_DAY',
+            'LIBCAMERA.AWB_ENABLE',
+            'LIBCAMERA.IMMEDIATE',
+            'LIBCAMERA.IMMEDIATE_DAY',
+        ):
+            return 'profile'
+
+        return self.estimate_settings_scope(config_key)
+
+
+    def estimate_camera_settings_restart(self, config_key):
+        if config_key in self.CAMERA_SETTINGS_PROFILE_FIELDS or config_key in self.CAMERA_SETTINGS_DB_FIELDS:
+            return 'no'
+        elif any(token in config_key.upper() for token in (
+            'CAMERA_INTERFACE',
+            'INDI_',
+            'LIBCAMERA',
+            'CCD_CONFIG',
+            'CCD_EXPOSURE',
+            'CCD_COOLING',
+            'CCD_TEMP',
+            'CFA_PATTERN',
+        )):
+            return 'restart'
+        elif any(token in config_key.upper() for token in (
+            'LENS',
+            'IMAGE_CIRCLE',
+            'IMAGE_CROP',
+            'ADU_ROI',
+            'SQM_ROI',
+            'CALIBRATE',
+            'ROTATE',
+            'FLIP',
+            'SCALE',
+        )):
+            return 'reload'
+
+        return 'unknown'
+
+
 class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
     page_title = 'Modern Admin Capture Settings'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
@@ -15435,6 +16105,7 @@ bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdmin
 bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsInventoryView.as_view('modern_admin_settings_view', template_name='modern_admin/settings_inventory.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))
 bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/safe_controls.html'))

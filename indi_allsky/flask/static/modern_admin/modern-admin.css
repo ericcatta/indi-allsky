@@ -1843,7 +1843,6 @@ body.modern-admin-lightbox-open {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 18px;
   padding: 14px 16px;
   border: 1px solid rgba(88, 166, 255, 0.34);
   border-radius: 14px;
@@ -1852,9 +1851,26 @@ body.modern-admin-lightbox-open {
   text-decoration: none;
 }
 
+.modern-admin-shell .modern-admin-settings-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
 .modern-admin-shell .modern-admin-settings-action-card:hover {
   border-color: rgba(88, 166, 255, 0.68);
   background: rgba(88, 166, 255, 0.16);
+}
+
+.modern-admin-shell .modern-admin-settings-action-card-readonly {
+  border-color: rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.modern-admin-shell .modern-admin-settings-action-card-readonly:hover {
+  border-color: rgba(148, 163, 184, 0.5);
+  background: rgba(255, 255, 255, 0.075);
 }
 
 .modern-admin-shell .modern-admin-settings-action-card strong,
@@ -2059,6 +2075,128 @@ body.modern-admin-lightbox-open {
   background: rgba(96, 165, 250, 0.12);
 }
 
+.modern-admin-shell .modern-admin-camera-settings-selector {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.modern-admin-shell .modern-admin-camera-profile-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.modern-admin-shell .modern-admin-camera-profile-tab {
+  flex: 0 0 auto;
+  min-width: 180px;
+  padding: 12px 14px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--modern-admin-text);
+  text-decoration: none;
+}
+
+.modern-admin-shell .modern-admin-camera-profile-tab strong,
+.modern-admin-shell .modern-admin-camera-profile-tab span {
+  display: block;
+}
+
+.modern-admin-shell .modern-admin-camera-profile-tab span {
+  margin-top: 4px;
+  color: var(--modern-admin-quiet);
+  font-size: 0.78rem;
+}
+
+.modern-admin-shell .modern-admin-camera-profile-tab-active {
+  border-color: rgba(88, 166, 255, 0.62);
+  background: rgba(88, 166, 255, 0.12);
+  box-shadow: inset 0 -2px 0 rgba(88, 166, 255, 0.88);
+}
+
+.modern-admin-shell .modern-admin-camera-profile-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modern-admin-shell .modern-admin-camera-profile-summary div {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.modern-admin-shell .modern-admin-camera-profile-summary span,
+.modern-admin-shell .modern-admin-camera-profile-summary strong {
+  display: block;
+}
+
+.modern-admin-shell .modern-admin-camera-profile-summary span {
+  color: var(--modern-admin-quiet);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.modern-admin-shell .modern-admin-camera-profile-summary strong {
+  margin-top: 5px;
+  color: var(--modern-admin-text);
+  overflow-wrap: anywhere;
+}
+
+.modern-admin-shell .modern-admin-camera-settings-table {
+  min-width: 1040px;
+}
+
+.modern-admin-shell .modern-admin-camera-settings-table th:nth-child(1),
+.modern-admin-shell .modern-admin-camera-settings-table td:nth-child(1) {
+  width: 19%;
+}
+
+.modern-admin-shell .modern-admin-camera-settings-table th:nth-child(2),
+.modern-admin-shell .modern-admin-camera-settings-table td:nth-child(2) {
+  width: 18%;
+}
+
+.modern-admin-shell .modern-admin-camera-settings-table th:nth-child(3),
+.modern-admin-shell .modern-admin-camera-settings-table td:nth-child(3) {
+  width: 25%;
+}
+
+.modern-admin-shell .modern-admin-camera-settings-source-profile-override {
+  color: #bfdbfe;
+  background: rgba(59, 130, 246, 0.16);
+}
+
+.modern-admin-shell .modern-admin-camera-settings-source-global-config {
+  color: #c4b5fd;
+  background: rgba(167, 139, 250, 0.13);
+}
+
+.modern-admin-shell .modern-admin-camera-settings-source-db-camera {
+  color: #bbf7d0;
+  background: rgba(74, 222, 128, 0.12);
+}
+
+.modern-admin-shell .modern-admin-camera-settings-source-derived {
+  color: #fef3c7;
+  background: rgba(251, 191, 36, 0.11);
+}
+
+.modern-admin-shell .modern-admin-camera-settings-source-missing {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.modern-admin-shell .modern-admin-camera-settings-readonly {
+  color: #bfdbfe;
+  background: rgba(96, 165, 250, 0.1);
+}
+
 .modern-admin-shell .modern-admin-inline-link {
   color: var(--modern-admin-accent);
   font-weight: 700;
@@ -2184,6 +2322,11 @@ body.modern-admin-lightbox-open {
 
 @media (max-width: 760px) {
   .modern-admin-shell .modern-admin-settings-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modern-admin-shell .modern-admin-settings-action-grid,
+  .modern-admin-shell .modern-admin-camera-profile-summary {
     grid-template-columns: 1fr;
   }
 
