@@ -5374,40 +5374,14 @@ class ModernAdminCamerasView(ModernAdminView):
             else:
                 context.update(self.save_camera_switch_config())
 
-        cameras = IndiAllSkyDbCameraTable.query\
-            .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
-            .order_by(IndiAllSkyDbCameraTable.connectDate.desc())\
-            .order_by(IndiAllSkyDbCameraTable.createDate.desc())\
-            .all()
-
-        camera_list = list()
-        for camera in cameras:
-            latest_image = IndiAllSkyDbImageTable.query\
-                .join(IndiAllSkyDbImageTable.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == camera.id)\
-                .order_by(IndiAllSkyDbImageTable.createDate.desc())\
-                .first()
-
-            if latest_image:
-                last_image_age = self.format_image_age(latest_image.createDate)
-            else:
-                last_image_age = 'No image'
-
-            selected = camera.id == self.camera.id
-            status = self.get_camera_status_label(camera, latest_image=latest_image)
-            camera_list.append({
-                'id'             : camera.id,
-                'name'           : str(camera.friendlyName or camera.name or 'Unknown camera'),
-                'driver'         : str(camera.driver or 'Driver unavailable'),
-                'status'         : status,
-                'last_image_age' : last_image_age,
-                'selected'       : selected,
-                'badge'          : 'Active' if selected else status,
-                'switch_enabled' : not selected,
-            })
+        multi_camera_context = self.get_multi_camera_context()
+        if multi_camera_context['enabled']:
+            camera_list = self.get_multi_camera_runtime_camera_list(multi_camera_context['profiles'])
+        else:
+            camera_list = self.get_single_camera_runtime_camera_list()
 
         context['modern_admin_cameras'] = camera_list
-        context['modern_admin_multi_camera'] = self.get_multi_camera_context()
+        context['modern_admin_multi_camera'] = multi_camera_context
         context['modern_admin_section_links'] = (
             ('Add Camera', 'indi_allsky.modern_admin_camera_add_view'),
             ('Camera Info', 'indi_allsky.modern_admin_camera_info_view'),
@@ -5436,6 +5410,13 @@ class ModernAdminCamerasView(ModernAdminView):
 
             profiles.append({
                 'profile_id'        : str(profile_config.get('profile_id') or 'unnamed'),
+                'label'             : str(profile_config.get('label') or ''),
+                'camera_name'       : str(profile_config.get('camera_name') or ''),
+                'camera_id'         : profile_config.get('camera_id'),
+                'camera_db_id'      : profile_config.get('camera_db_id'),
+                'db_camera_id'      : profile_config.get('db_camera_id'),
+                'indi_camera_name'  : str(profile_config.get('indi_camera_name') or ''),
+                'indi'              : profile_config.get('indi') or {},
                 'primary'           : bool(profile_config.get('primary', False)),
                 'camera_interface'  : str(profile_config.get('camera_interface') or 'unknown'),
                 'enabled'           : enabled,
@@ -5460,6 +5441,177 @@ class ModernAdminCamerasView(ModernAdminView):
             'enable_allowed'      : enable_allowed,
             'enable_block_reason' : enable_block_reason,
         }
+
+
+    def get_single_camera_runtime_camera_list(self):
+        cameras = IndiAllSkyDbCameraTable.query\
+            .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
+            .order_by(IndiAllSkyDbCameraTable.connectDate.desc())\
+            .order_by(IndiAllSkyDbCameraTable.createDate.desc())\
+            .all()
+
+        camera_list = list()
+        for camera in cameras:
+            latest_image = self.get_latest_camera_image(camera.id)
+            last_image_age = self.format_image_age(latest_image.createDate) if latest_image else 'No image'
+            selected = camera.id == self.camera.id
+            status = self.get_camera_status_label(camera, latest_image=latest_image)
+            camera_list.append({
+                'id'             : camera.id,
+                'name'           : str(camera.friendlyName or camera.name or 'Unknown camera'),
+                'driver'         : str(camera.driver or 'Driver unavailable'),
+                'status'         : status,
+                'last_image_age' : last_image_age,
+                'selected'       : selected,
+                'badge'          : 'Active' if selected else status,
+                'role_badge'     : None,
+                'enabled'        : True,
+                'profile_id'     : None,
+                'profile_mode'   : False,
+                'switch_enabled' : not selected,
+            })
+
+        return camera_list
+
+
+    def get_multi_camera_runtime_camera_list(self, profiles):
+        camera_rows = self.get_modern_admin_visible_camera_rows()
+        recent_camera_ids = set(self.get_recent_image_camera_ids())
+
+        camera_list = list()
+        for profile_index, profile in enumerate(profiles):
+            camera_id = self.get_multi_camera_profile_camera_id(profile, camera_rows, profile_index)
+            camera = self.get_camera_row_by_id(camera_rows, camera_id)
+            latest_image = self.get_latest_camera_image(camera_id) if camera_id else None
+            last_image_age = self.format_image_age(latest_image.createDate) if latest_image else 'No image'
+            enabled = bool(profile.get('enabled', False))
+            running = enabled and camera_id in recent_camera_ids
+            status = self.get_multi_camera_profile_runtime_status(enabled, running)
+            role_badge = 'Primary' if profile.get('primary') else 'Secondary'
+
+            camera_list.append({
+                'id'             : camera_id,
+                'name'           : self.get_multi_camera_profile_camera_name(profile, camera),
+                'driver'         : str(profile.get('camera_interface') or getattr(camera, 'driver', '') or 'unknown'),
+                'status'         : status,
+                'last_image_age' : last_image_age,
+                'selected'       : running,
+                'badge'          : status,
+                'role_badge'     : role_badge,
+                'enabled'        : enabled,
+                'profile_id'     : str(profile.get('profile_id') or 'unnamed'),
+                'profile_mode'   : True,
+                'switch_enabled' : False,
+            })
+
+        return camera_list
+
+
+    def get_modern_admin_visible_camera_rows(self):
+        try:
+            return IndiAllSkyDbCameraTable.query\
+                .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
+                .order_by(IndiAllSkyDbCameraTable.id.asc())\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin camera rows: %s', str(e))
+            return list()
+
+
+    def get_latest_camera_image(self, camera_id):
+        if not camera_id:
+            return None
+
+        try:
+            return IndiAllSkyDbImageTable.query\
+                .filter(IndiAllSkyDbImageTable.camera_id == camera_id)\
+                .order_by(IndiAllSkyDbImageTable.createDate.desc())\
+                .first()
+        except Exception as e:
+            app.logger.error('Error loading latest image for camera %s: %s', camera_id, str(e))
+            return None
+
+
+    def get_multi_camera_profile_runtime_status(self, enabled, running):
+        if running:
+            return 'Running'
+        elif enabled:
+            return 'Enabled'
+
+        return 'Disabled'
+
+
+    def get_multi_camera_profile_camera_id(self, profile, camera_rows, profile_index):
+        for key in ('db_camera_id', 'camera_db_id', 'camera_id'):
+            if key not in profile:
+                continue
+
+            try:
+                return int(profile[key])
+            except (TypeError, ValueError):
+                continue
+
+        matched_camera = self.get_multi_camera_profile_camera_match(profile, camera_rows)
+        if matched_camera:
+            return matched_camera.id
+
+        if profile_index < len(camera_rows):
+            return camera_rows[profile_index].id
+
+        return None
+
+
+    def get_multi_camera_profile_camera_match(self, profile, camera_rows):
+        profile_terms = set()
+        for key in ('profile_id', 'label', 'camera_name', 'camera_interface', 'indi_camera_name'):
+            value = profile.get(key)
+            if value:
+                profile_terms.add(str(value).strip().lower())
+
+        nested_indi = profile.get('indi') or {}
+        if isinstance(nested_indi, dict):
+            value = nested_indi.get('camera_name')
+            if value:
+                profile_terms.add(str(value).strip().lower())
+
+        if not profile_terms:
+            return None
+
+        for camera in camera_rows:
+            camera_terms = (
+                camera.friendlyName,
+                camera.name,
+                camera.name_alt1,
+                camera.name_alt2,
+                camera.driver,
+            )
+            normalized_camera_terms = [
+                str(term).strip().lower()
+                for term in camera_terms
+                if term
+            ]
+
+            for profile_term in profile_terms:
+                for camera_term in normalized_camera_terms:
+                    if profile_term == camera_term or profile_term in camera_term or camera_term in profile_term:
+                        return camera
+
+        return None
+
+
+    def get_camera_row_by_id(self, camera_rows, camera_id):
+        for camera in camera_rows:
+            if camera.id == camera_id:
+                return camera
+
+        return None
+
+
+    def get_multi_camera_profile_camera_name(self, profile, camera):
+        if camera:
+            return str(camera.friendlyName or camera.name or 'Unknown camera')
+
+        return str(profile.get('camera_name') or profile.get('label') or profile.get('profile_id') or 'Unknown camera')
 
 
     def get_camera_status_label(self, camera, latest_image=None):

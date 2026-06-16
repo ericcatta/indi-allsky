@@ -1562,6 +1562,13 @@ body.modern-admin-lightbox-open {
   overflow-wrap: anywhere;
 }
 
+.modern-admin-camera-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
 .modern-admin-warning-note {
   color: var(--modern-admin-warn) !important;
 }
