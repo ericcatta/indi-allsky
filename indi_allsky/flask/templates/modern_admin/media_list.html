@@ -22,6 +22,21 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-eyebrow">Media</p>
         <h2 id="modern-admin-media-title">{{ modern_admin_section }}</h2>
         <p>{{ modern_admin_description }}</p>
+        {% if modern_admin_media_layout == 'gallery' %}
+        <div class="modern-admin-gallery-filter-bar" aria-label="Camera filter">
+            {% for camera_filter in modern_admin_gallery_camera_filters %}
+            {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view') %}
+            {% if camera_filter.profile_id %}
+            {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view', profile_id=camera_filter.profile_id) %}
+            {% elif camera_filter.camera_id %}
+            {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view', camera_id=camera_filter.camera_id) %}
+            {% endif %}
+            <a class="modern-admin-gallery-filter{% if camera_filter.active %} modern-admin-gallery-filter-active{% endif %}" href="{{ filter_url }}" data-gallery-filter-profile="{{ camera_filter.profile_id }}" data-gallery-filter-camera="{{ camera_filter.camera_id or '' }}">
+                {{ camera_filter.label }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% if modern_admin_media_kind in ('image', 'fits') %}
         <div class="modern-admin-media-toolbar" aria-label="Media selection actions">
             <button class="modern-admin-media-button" id="modern-admin-download-selected" type="button" disabled>Download selected</button>
@@ -57,7 +72,7 @@ var camera_id = {{ camera_id }};
     {% endif %}
 
     {% if modern_admin_media_items %}
-    <section class="modern-admin-media-grid{% if modern_admin_media_layout == 'gallery' %} modern-admin-media-gallery-grid{% endif %}"{% if modern_admin_media_layout == 'gallery' %} id="modern-admin-gallery-grid" data-gallery-page-url="{{ modern_admin_gallery_page_url }}" data-gallery-limit="{{ modern_admin_gallery_limit }}" data-gallery-next-cursor="{{ modern_admin_gallery_next_cursor or '' }}" data-gallery-has-more="{{ 'true' if modern_admin_gallery_has_more else 'false' }}"{% endif %} aria-label="{{ modern_admin_section }} items">
+    <section class="modern-admin-media-grid{% if modern_admin_media_layout == 'gallery' %} modern-admin-media-gallery-grid{% endif %}"{% if modern_admin_media_layout == 'gallery' %} id="modern-admin-gallery-grid" data-gallery-page-url="{{ modern_admin_gallery_page_url }}" data-gallery-limit="{{ modern_admin_gallery_limit }}" data-gallery-next-cursor="{{ modern_admin_gallery_next_cursor or '' }}" data-gallery-has-more="{{ 'true' if modern_admin_gallery_has_more else 'false' }}" data-gallery-profile-id="{{ modern_admin_gallery_selected_filter.profile_id }}" data-gallery-camera-id="{{ modern_admin_gallery_selected_filter.camera_id or '' }}"{% endif %} aria-label="{{ modern_admin_section }} items">
         {% for item in modern_admin_media_items %}
         <article class="modern-admin-media-card" data-media-index="{{ loop.index0 }}" data-media-id="{{ item.id }}">
             {% if item.url and modern_admin_media_kind in ('image', 'fits') %}
@@ -169,6 +184,20 @@ let modernAdminLightboxIndex = 0;
 let modernAdminGalleryLoadingPage = false;
 let modernAdminGalleryHasMore = modernAdminGalleryGrid && modernAdminGalleryGrid.dataset.galleryHasMore === 'true';
 let modernAdminGalleryNextCursor = modernAdminGalleryGrid ? modernAdminGalleryGrid.dataset.galleryNextCursor : null;
+
+function modernAdminGalleryApplyFilterParams(pageUrl) {
+    if (!modernAdminGalleryGrid) {
+        return;
+    }
+
+    const profileId = modernAdminGalleryGrid.dataset.galleryProfileId || '';
+    const cameraId = modernAdminGalleryGrid.dataset.galleryCameraId || '';
+    if (profileId) {
+        pageUrl.searchParams.set('profile_id', profileId);
+    } else if (cameraId) {
+        pageUrl.searchParams.set('camera_id', cameraId);
+    }
+}
 
 function modernAdminLightboxItem(index) {
     return modernAdminMediaItems[index] || null;
@@ -286,7 +315,7 @@ async function modernAdminLoadOlderGalleryImages() {
         const pageUrl = new URL(modernAdminGalleryGrid.dataset.galleryPageUrl, window.location.href);
         pageUrl.searchParams.set('limit', modernAdminGalleryGrid.dataset.galleryLimit || '72');
         pageUrl.searchParams.set('before_id', modernAdminGalleryNextCursor);
-        pageUrl.searchParams.set('camera_id', String(camera_id));
+        modernAdminGalleryApplyFilterParams(pageUrl);
 
         const response = await fetch(pageUrl.toString(), {
             method: 'GET',
@@ -333,7 +362,83 @@ async function modernAdminLoadOlderGalleryImages() {
     }
 }
 
+async function modernAdminApplyGalleryFilter(filterLink) {
+    if (!modernAdminGalleryGrid || modernAdminGalleryLoadingPage) {
+        return;
+    }
+
+    modernAdminGalleryGrid.dataset.galleryProfileId = filterLink.dataset.galleryFilterProfile || '';
+    modernAdminGalleryGrid.dataset.galleryCameraId = filterLink.dataset.galleryFilterCamera || '';
+    modernAdminGalleryNextCursor = null;
+    modernAdminGalleryHasMore = true;
+    modernAdminMediaItems = [];
+    modernAdminGallerySeenIds.clear();
+    modernAdminGalleryGrid.innerHTML = '';
+
+    document.querySelectorAll('.modern-admin-gallery-filter').forEach((link) => {
+        link.classList.toggle('modern-admin-gallery-filter-active', link === filterLink);
+    });
+
+    if (modernAdminGalleryLoadMore) {
+        modernAdminGalleryLoadMore.hidden = true;
+    }
+    if (modernAdminGalleryEnd) {
+        modernAdminGalleryEnd.hidden = true;
+    }
+
+    modernAdminGallerySetLoading(true);
+
+    try {
+        const pageUrl = new URL(modernAdminGalleryGrid.dataset.galleryPageUrl, window.location.href);
+        pageUrl.searchParams.set('limit', modernAdminGalleryGrid.dataset.galleryLimit || '72');
+        modernAdminGalleryApplyFilterParams(pageUrl);
+
+        const response = await fetch(pageUrl.toString(), {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Unable to load filtered images.');
+        }
+
+        const pageData = await response.json();
+        (pageData.images || []).forEach((item) => {
+            const nextIndex = modernAdminMediaItems.length;
+            modernAdminMediaItems.push(item);
+            modernAdminGallerySeenIds.add(String(item.id));
+            modernAdminGalleryGrid.insertAdjacentHTML('beforeend', modernAdminGalleryCardHtml(item, nextIndex));
+        });
+
+        modernAdminGalleryNextCursor = pageData.next_cursor || null;
+        modernAdminGalleryHasMore = Boolean(pageData.has_more);
+        if (!modernAdminGalleryHasMore) {
+            modernAdminGallerySetEndReached();
+        } else if (modernAdminGalleryLoadMore) {
+            modernAdminGalleryLoadMore.hidden = false;
+        }
+
+        window.history.pushState({}, '', filterLink.href);
+        modernAdminUpdateSelection();
+    } catch (error) {
+        window.console.error(error);
+        window.location.href = filterLink.href;
+    } finally {
+        modernAdminGallerySetLoading(false);
+    }
+}
+
 document.addEventListener('click', (event) => {
+    const filterLink = event.target.closest('.modern-admin-gallery-filter');
+    if (filterLink) {
+        event.preventDefault();
+        modernAdminApplyGalleryFilter(filterLink);
+        return;
+    }
+
     const trigger = event.target.closest('.modern-admin-lightbox-trigger');
     if (trigger) {
         event.preventDefault();

@@ -851,6 +851,39 @@
   font-size: 0.82rem;
 }
 
+.modern-admin-gallery-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.modern-admin-gallery-filter {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 999px;
+  color: var(--modern-admin-muted);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.modern-admin-gallery-filter:hover {
+  color: var(--modern-admin-text);
+  border-color: var(--modern-admin-line-strong);
+  background: rgba(255, 255, 255, 0.09);
+  text-decoration: none;
+}
+
+.modern-admin-gallery-filter-active {
+  color: var(--modern-admin-text);
+  border-color: rgba(155, 215, 178, 0.32);
+  background: rgba(155, 215, 178, 0.12);
+}
+
 .modern-admin-media-button {
   min-height: 30px;
   padding: 0 12px;
