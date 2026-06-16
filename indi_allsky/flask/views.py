@@ -15082,6 +15082,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         submitted_data = submitted_data or {}
         errors = errors or {}
         fields = list()
+        camera_interface = submitted_data.get('camera_interface', self.get_camera_settings_driver_field_value(profile, 'camera_interface'))
+        driver_type = self.get_camera_settings_driver_type(camera_interface)
 
         for field_name in self.CAMERA_SETTINGS_DRIVER_EDIT_FIELD_ORDER:
             if field_name in self.CAMERA_SETTINGS_DRIVER_OPTIONAL_PROFILE_FIELDS and not self.profile_has_camera_settings_driver_field(profile, field_name):
@@ -15089,6 +15091,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
             value = submitted_data.get(field_name, self.get_camera_settings_driver_field_value(profile, field_name))
             field_type = self.get_camera_settings_driver_field_type(field_name)
+            field_role = self.get_camera_settings_driver_field_role(field_name)
+            field_required = self.is_camera_settings_driver_field_required(field_name, driver_type)
+            field_disabled = not self.is_camera_settings_driver_field_relevant(field_name, driver_type)
             fields.append({
                 'name'        : field_name,
                 'label'       : self.CAMERA_SETTINGS_DRIVER_FIELD_LABELS[field_name],
@@ -15096,6 +15101,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'display'     : self.format_structured_settings_value(value) if value not in (None, '') else 'Not configured',
                 'input_type'  : field_type,
                 'readonly'    : field_name == 'profile_id' or not profile.get('from_multi_camera'),
+                'disabled'    : field_disabled,
+                'required'    : field_required,
+                'role'        : field_role,
                 'errors'      : errors.get(field_name, []),
                 'choices'     : self.get_camera_settings_driver_field_choices(field_name, value),
             })
@@ -15104,6 +15112,39 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'enabled' : bool(profile.get('from_multi_camera')),
             'fields'  : fields,
         }
+
+
+    def get_camera_settings_driver_type(self, camera_interface):
+        camera_interface = str(camera_interface or '')
+        if camera_interface.startswith('libcamera'):
+            return 'libcamera'
+        elif camera_interface == 'indi':
+            return 'indi'
+
+        return 'other'
+
+
+    def get_camera_settings_driver_field_role(self, field_name):
+        if field_name in ('indi_server', 'indi_port', 'indi_camera_name'):
+            return 'indi'
+        elif field_name in ('libcamera_camera_id', 'libcamera_image_file_type', 'libcamera_extra_options'):
+            return 'libcamera'
+
+        return 'common'
+
+
+    def is_camera_settings_driver_field_relevant(self, field_name, driver_type):
+        field_role = self.get_camera_settings_driver_field_role(field_name)
+        return field_role == 'common' or field_role == driver_type
+
+
+    def is_camera_settings_driver_field_required(self, field_name, driver_type):
+        if driver_type == 'indi':
+            return field_name in ('camera_interface', 'indi_server', 'indi_port', 'indi_camera_name')
+        elif driver_type == 'libcamera':
+            return field_name in ('camera_interface', 'libcamera_camera_id')
+
+        return field_name == 'camera_interface'
 
 
     def get_camera_settings_driver_field_type(self, field_name):
@@ -15257,35 +15298,48 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         elif camera_interface not in supported_interfaces:
             validation_errors.setdefault('camera_interface', []).append('Select a supported camera interface.')
         submitted_data['camera_interface'] = camera_interface
+        driver_type = self.get_camera_settings_driver_type(camera_interface)
 
-        for field_name in ('indi_server', 'indi_camera_name'):
-            submitted_data[field_name] = request.form.get(field_name, '').strip()
+        if driver_type == 'indi':
+            for field_name in ('indi_server', 'indi_camera_name'):
+                value = request.form.get(field_name, '').strip()
+                submitted_data[field_name] = value
+                if not value:
+                    validation_errors.setdefault(field_name, []).append('{0:s} is required for INDI profiles.'.format(self.CAMERA_SETTINGS_DRIVER_FIELD_LABELS[field_name]))
 
-        indi_port_raw = request.form.get('indi_port', '').strip()
-        try:
-            indi_port = int(indi_port_raw)
-            if indi_port < 1 or indi_port > 65535:
-                raise ValueError()
-            submitted_data['indi_port'] = indi_port
-        except ValueError:
-            submitted_data['indi_port'] = indi_port_raw
-            validation_errors.setdefault('indi_port', []).append('INDI port must be a number from 1 to 65535.')
+            indi_port_raw = request.form.get('indi_port', '').strip()
+            if not indi_port_raw:
+                submitted_data['indi_port'] = indi_port_raw
+                validation_errors.setdefault('indi_port', []).append('INDI Port is required only for INDI profiles.')
+            else:
+                try:
+                    indi_port = int(indi_port_raw)
+                    if indi_port < 1 or indi_port > 65535:
+                        raise ValueError()
+                    submitted_data['indi_port'] = indi_port
+                except ValueError:
+                    submitted_data['indi_port'] = indi_port_raw
+                    validation_errors.setdefault('indi_port', []).append('INDI Port must be a number from 1 to 65535.')
+        elif driver_type == 'libcamera':
+            libcamera_camera_id_raw = request.form.get('libcamera_camera_id', '').strip()
+            if not libcamera_camera_id_raw:
+                submitted_data['libcamera_camera_id'] = libcamera_camera_id_raw
+                validation_errors.setdefault('libcamera_camera_id', []).append('libcamera Camera ID is required for libcamera profiles.')
+            else:
+                try:
+                    libcamera_camera_id = int(libcamera_camera_id_raw)
+                    if libcamera_camera_id < 0:
+                        raise ValueError()
+                    submitted_data['libcamera_camera_id'] = libcamera_camera_id
+                except ValueError:
+                    submitted_data['libcamera_camera_id'] = libcamera_camera_id_raw
+                    validation_errors.setdefault('libcamera_camera_id', []).append('libcamera Camera ID must be a number greater than or equal to 0.')
 
-        libcamera_camera_id_raw = request.form.get('libcamera_camera_id', '').strip()
-        try:
-            libcamera_camera_id = int(libcamera_camera_id_raw)
-            if libcamera_camera_id < 0:
-                raise ValueError()
-            submitted_data['libcamera_camera_id'] = libcamera_camera_id
-        except ValueError:
-            submitted_data['libcamera_camera_id'] = libcamera_camera_id_raw
-            validation_errors.setdefault('libcamera_camera_id', []).append('libcamera camera ID must be a number greater than or equal to 0.')
+            for field_name in self.CAMERA_SETTINGS_DRIVER_OPTIONAL_PROFILE_FIELDS:
+                if not self.profile_has_camera_settings_driver_field(profile, field_name):
+                    continue
 
-        for field_name in self.CAMERA_SETTINGS_DRIVER_OPTIONAL_PROFILE_FIELDS:
-            if not self.profile_has_camera_settings_driver_field(profile, field_name):
-                continue
-
-            submitted_data[field_name] = request.form.get(field_name, '').strip()
+                submitted_data[field_name] = request.form.get(field_name, '').strip()
 
         return submitted_data, validation_errors
 
@@ -15318,22 +15372,25 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         profile['enabled'] = bool(submitted_data['enabled'])
         profile['primary'] = bool(submitted_data['primary'])
         profile['camera_interface'] = submitted_data['camera_interface']
-        profile['indi_server'] = submitted_data['indi_server']
-        profile['indi_port'] = int(submitted_data['indi_port'])
-        profile['indi_camera_name'] = submitted_data['indi_camera_name']
+        driver_type = self.get_camera_settings_driver_type(submitted_data['camera_interface'])
 
-        libcamera_config = profile.get('libcamera')
-        if not isinstance(libcamera_config, dict):
-            libcamera_config = OrderedDict()
-            profile['libcamera'] = libcamera_config
+        if driver_type == 'indi':
+            profile['indi_server'] = submitted_data['indi_server']
+            profile['indi_port'] = int(submitted_data['indi_port'])
+            profile['indi_camera_name'] = submitted_data['indi_camera_name']
+        elif driver_type == 'libcamera':
+            libcamera_config = profile.get('libcamera')
+            if not isinstance(libcamera_config, dict):
+                libcamera_config = OrderedDict()
+                profile['libcamera'] = libcamera_config
 
-        libcamera_config['camera_id'] = int(submitted_data['libcamera_camera_id'])
-        if 'libcamera_image_file_type' in submitted_data:
-            libcamera_config['IMAGE_FILE_TYPE'] = submitted_data['libcamera_image_file_type']
-        if 'libcamera_extra_options' in submitted_data:
-            libcamera_config['EXTRA_OPTIONS'] = submitted_data['libcamera_extra_options']
+            libcamera_config['camera_id'] = int(submitted_data['libcamera_camera_id'])
+            if 'libcamera_image_file_type' in submitted_data:
+                libcamera_config['IMAGE_FILE_TYPE'] = submitted_data['libcamera_image_file_type']
+            if 'libcamera_extra_options' in submitted_data:
+                libcamera_config['EXTRA_OPTIONS'] = submitted_data['libcamera_extra_options']
 
-        self.sync_existing_camera_settings_driver_aliases(profile, submitted_data)
+            self.sync_existing_camera_settings_driver_aliases(profile, submitted_data)
 
         return str(profile_id)
 

@@ -111,23 +111,27 @@ var camera_id = {{ camera_id }};
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="modern-admin-settings-edit-grid">
                         {% for field in modern_admin_camera_settings_driver_form.fields %}
-                        <label class="modern-admin-settings-edit-field {% if field.input_type == 'checkbox' %}modern-admin-settings-edit-field-checkbox{% endif %}" for="camera-driver-{{ field.name }}">
+                        <label class="modern-admin-settings-edit-field {% if field.input_type == 'checkbox' %}modern-admin-settings-edit-field-checkbox{% endif %}" for="camera-driver-{{ field.name }}" data-camera-driver-field-role="{{ field.role }}">
                             <span class="modern-admin-settings-edit-label">{{ field.label }}</span>
-                            <span class="modern-admin-settings-edit-meta">MULTI_CAMERA.profiles[n].{{ field.name }}</span>
+                            <span class="modern-admin-settings-edit-meta">
+                                MULTI_CAMERA.profiles[n].{{ field.name }}
+                                {% if field.required %} · required{% endif %}
+                                {% if field.disabled %} · not used by selected driver{% endif %}
+                            </span>
 
                             {% if field.input_type == 'checkbox' %}
                             <span class="modern-admin-settings-toggle-row">
-                                <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="checkbox" value="1" {% if field.value %}checked{% endif %} {% if field.readonly %}disabled{% endif %}>
+                                <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="checkbox" value="1" {% if field.value %}checked{% endif %} {% if field.readonly or field.disabled %}disabled{% endif %} {% if field.required %}required{% endif %}>
                                 <span>{{ 'Enabled' if field.value else 'Disabled' }}</span>
                             </span>
                             {% elif field.input_type == 'select' %}
-                            <select id="camera-driver-{{ field.name }}" name="{{ field.name }}" {% if field.readonly %}disabled{% endif %}>
+                            <select id="camera-driver-{{ field.name }}" name="{{ field.name }}" {% if field.readonly or field.disabled %}disabled{% endif %} {% if field.required %}required{% endif %}>
                                 {% for choice in field.choices %}
                                 <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
                                 {% endfor %}
                             </select>
                             {% else %}
-                            <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.input_type == 'number' %}step="1" min="{{ 1 if field.name == 'indi_port' else 0 }}"{% endif %} {% if field.readonly %}readonly{% endif %}>
+                            <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.input_type == 'number' %}step="1" min="{{ 1 if field.name == 'indi_port' else 0 }}"{% endif %} {% if field.readonly %}readonly{% endif %} {% if field.disabled %}disabled{% endif %} {% if field.required %}required{% endif %}>
                             {% endif %}
 
                             {% if field.name == 'profile_id' %}
@@ -136,6 +140,10 @@ var camera_id = {{ camera_id }};
                             <span class="modern-admin-settings-edit-help">Saving primary as enabled makes all other profiles non-primary.</span>
                             {% elif field.name == 'enabled' %}
                             <span class="modern-admin-settings-edit-help">Boolean profile flag.</span>
+                            {% elif field.role == 'indi' %}
+                            <span class="modern-admin-settings-edit-help">Required only when Camera Interface is INDI.</span>
+                            {% elif field.role == 'libcamera' %}
+                            <span class="modern-admin-settings-edit-help">Required only when Camera Interface starts with libcamera.</span>
                             {% else %}
                             <span class="modern-admin-settings-edit-help">Saved only on the selected profile.</span>
                             {% endif %}
@@ -212,7 +220,43 @@ var camera_id = {{ camera_id }};
     const storageKey = 'indi-allsky-modern-camera-settings-sections';
     const sections = Array.from(document.querySelectorAll('[data-camera-settings-section]'));
     const filter = document.getElementById('modern-admin-camera-settings-filter');
+    const cameraInterface = document.getElementById('camera-driver-camera_interface');
     let savedState = {};
+
+    function getDriverType(value) {
+        if ((value || '').indexOf('libcamera') === 0) {
+            return 'libcamera';
+        }
+        if (value === 'indi') {
+            return 'indi';
+        }
+        return 'other';
+    }
+
+    function syncDriverFields() {
+        if (!cameraInterface) {
+            return;
+        }
+
+        const driverType = getDriverType(cameraInterface.value);
+        document.querySelectorAll('[data-camera-driver-field-role]').forEach((field) => {
+            const role = field.dataset.cameraDriverFieldRole;
+            const isRelevant = role === 'common' || role === driverType;
+            field.hidden = !isRelevant;
+            field.querySelectorAll('input, select, textarea').forEach((input) => {
+                if (input.readOnly) {
+                    return;
+                }
+
+                input.disabled = !isRelevant;
+                input.required = isRelevant && (
+                    input.name === 'camera_interface' ||
+                    (driverType === 'indi' && ['indi_server', 'indi_port', 'indi_camera_name'].indexOf(input.name) !== -1) ||
+                    (driverType === 'libcamera' && input.name === 'libcamera_camera_id')
+                );
+            });
+        });
+    }
 
     try {
         savedState = JSON.parse(window.localStorage.getItem(storageKey) || '{}');
@@ -277,6 +321,11 @@ var camera_id = {{ camera_id }};
         if (!query) {
             restoreSectionState();
         }
+    }
+
+    if (cameraInterface) {
+        cameraInterface.addEventListener('change', syncDriverFields);
+        syncDriverFields();
     }
 
     filter.addEventListener('input', filterSettings);
