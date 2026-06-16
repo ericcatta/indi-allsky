@@ -107,7 +107,7 @@ var camera_id = {{ camera_id }};
                 </div>
                 <p class="modern-admin-note">Only these Driver / Connection fields are editable. They are saved into the selected MULTI_CAMERA profile, not the global camera config.</p>
 
-                <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form">
+                <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form" novalidate>
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="modern-admin-settings-edit-grid">
                         {% for field in modern_admin_camera_settings_driver_form.fields %}
@@ -121,17 +121,17 @@ var camera_id = {{ camera_id }};
 
                             {% if field.input_type == 'checkbox' %}
                             <span class="modern-admin-settings-toggle-row">
-                                <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="checkbox" value="1" {% if field.value %}checked{% endif %} {% if field.readonly or field.disabled %}disabled{% endif %} {% if field.required %}required{% endif %}>
+                                <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="checkbox" value="1" {% if field.value %}checked{% endif %} {% if field.readonly or field.disabled %}disabled{% endif %}>
                                 <span>{{ 'Enabled' if field.value else 'Disabled' }}</span>
                             </span>
                             {% elif field.input_type == 'select' %}
-                            <select id="camera-driver-{{ field.name }}" name="{{ field.name }}" {% if field.readonly or field.disabled %}disabled{% endif %} {% if field.required %}required{% endif %}>
+                            <select id="camera-driver-{{ field.name }}" name="{{ field.name }}" {% if field.readonly or field.disabled %}disabled{% endif %}>
                                 {% for choice in field.choices %}
                                 <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
                                 {% endfor %}
                             </select>
                             {% else %}
-                            <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.input_type == 'number' %}step="1" min="{{ 1 if field.name == 'indi_port' else 0 }}"{% endif %} {% if field.readonly %}readonly{% endif %} {% if field.disabled %}disabled{% endif %} {% if field.required %}required{% endif %}>
+                            <input id="camera-driver-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.input_type == 'number' %}step="1" min="{{ 1 if field.name == 'indi_port' else 0 }}"{% endif %} {% if field.readonly %}readonly{% endif %} {% if field.disabled %}disabled{% endif %}>
                             {% endif %}
 
                             {% if field.name == 'profile_id' %}
@@ -249,11 +249,6 @@ var camera_id = {{ camera_id }};
                 }
 
                 input.disabled = !isRelevant;
-                input.required = isRelevant && (
-                    input.name === 'camera_interface' ||
-                    (driverType === 'indi' && ['indi_server', 'indi_port', 'indi_camera_name'].indexOf(input.name) !== -1) ||
-                    (driverType === 'libcamera' && input.name === 'libcamera_camera_id')
-                );
             });
         });
     }

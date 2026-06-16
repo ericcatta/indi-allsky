@@ -14758,6 +14758,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'libcamera_image_file_type',
         'libcamera_extra_options',
     }
+    CAMERA_SETTINGS_DRIVER_TRANSIENT_PROFILE_KEYS = (
+        'indi_server',
+        'indi_port',
+        'indi_camera_name',
+        'libcamera_camera_id',
+        'libcamera_image_file_type',
+        'libcamera_extra_options',
+    )
     CAMERA_SETTINGS_DRIVER_FIELD_LABELS = {
         'profile_id'                 : 'Profile ID',
         'enabled'                    : 'Enabled',
@@ -15372,12 +15380,18 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         profile['enabled'] = bool(submitted_data['enabled'])
         profile['primary'] = bool(submitted_data['primary'])
         profile['camera_interface'] = submitted_data['camera_interface']
+        self.cleanup_camera_settings_driver_transient_keys(profile)
         driver_type = self.get_camera_settings_driver_type(submitted_data['camera_interface'])
 
         if driver_type == 'indi':
-            profile['indi_server'] = submitted_data['indi_server']
-            profile['indi_port'] = int(submitted_data['indi_port'])
-            profile['indi_camera_name'] = submitted_data['indi_camera_name']
+            indi_config = profile.get('indi')
+            if not isinstance(indi_config, dict):
+                indi_config = OrderedDict()
+                profile['indi'] = indi_config
+
+            indi_config['server'] = submitted_data['indi_server']
+            indi_config['port'] = int(submitted_data['indi_port'])
+            indi_config['camera_name'] = submitted_data['indi_camera_name']
         elif driver_type == 'libcamera':
             libcamera_config = profile.get('libcamera')
             if not isinstance(libcamera_config, dict):
@@ -15390,21 +15404,12 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             if 'libcamera_extra_options' in submitted_data:
                 libcamera_config['EXTRA_OPTIONS'] = submitted_data['libcamera_extra_options']
 
-            self.sync_existing_camera_settings_driver_aliases(profile, submitted_data)
-
         return str(profile_id)
 
 
-    def sync_existing_camera_settings_driver_aliases(self, profile, submitted_data):
-        for alias_name in ('libcamera_camera_id', 'libcamera_id', 'camera_id_hint'):
-            if alias_name in profile:
-                profile[alias_name] = int(submitted_data['libcamera_camera_id'])
-
-        if 'libcamera_image_file_type' in profile and 'libcamera_image_file_type' in submitted_data:
-            profile['libcamera_image_file_type'] = submitted_data['libcamera_image_file_type']
-
-        if 'libcamera_extra_options' in profile and 'libcamera_extra_options' in submitted_data:
-            profile['libcamera_extra_options'] = submitted_data['libcamera_extra_options']
+    def cleanup_camera_settings_driver_transient_keys(self, profile):
+        for key in self.CAMERA_SETTINGS_DRIVER_TRANSIENT_PROFILE_KEYS:
+            profile.pop(key, None)
 
 
     def format_camera_settings_value(self, config_key, value, source):
