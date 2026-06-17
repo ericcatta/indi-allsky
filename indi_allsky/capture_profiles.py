@@ -53,9 +53,14 @@ class CaptureProfile:
     target_adu_day: int
     target_adu_dev: int
     target_adu_dev_day: int
+    gain_default: float
+    gain_min: float
+    gain_max: float
     gain_night: float
     gain_moonmode: float
     gain_day: float
+    auto_gain_enable: bool
+    auto_gain_levels: int
     binning_night: int
     binning_moonmode: int
     binning_day: int
@@ -236,12 +241,17 @@ def _profile_from_config(
         target_adu_day=_int_config(profile_config, 'target_adu_day', _int_config(config, 'TARGET_ADU_DAY', 75)),
         target_adu_dev=_int_config(profile_config, 'target_adu_dev', _int_config(config, 'TARGET_ADU_DEV', 10)),
         target_adu_dev_day=_int_config(profile_config, 'target_adu_dev_day', _int_config(config, 'TARGET_ADU_DEV_DAY', 20)),
-        gain_night=_mapping_float(ccd_night, 'GAIN', 100.0),
+        gain_default=_float_config(profile_config, 'gain_default', _mapping_float(ccd_night, 'GAIN', 100.0)),
+        gain_min=_float_config(profile_config, 'gain_min', _mapping_float(ccd_day, 'GAIN', 0.0)),
+        gain_max=_float_config(profile_config, 'gain_max', _mapping_float(ccd_night, 'GAIN', 100.0)),
+        gain_night=_float_config(profile_config, 'gain_max', _mapping_float(ccd_night, 'GAIN', 100.0)),
         gain_moonmode=_mapping_float(ccd_moonmode, 'GAIN', 75.0),
-        gain_day=_mapping_float(ccd_day, 'GAIN', 0.0),
-        binning_night=_mapping_int(ccd_night, 'BINNING', 1),
+        gain_day=_float_config(profile_config, 'gain_min', _mapping_float(ccd_day, 'GAIN', 0.0)),
+        auto_gain_enable=bool(profile_config.get('auto_gain_enable', bool(ccd_config.get('AUTO_GAIN_ENABLE', False)))),
+        auto_gain_levels=_int_config(profile_config, 'auto_gain_levels', _mapping_int(ccd_config, 'AUTO_GAIN_LEVELS', 5)),
+        binning_night=_int_config(profile_config, 'binning_night', _mapping_int(ccd_night, 'BINNING', 1)),
         binning_moonmode=_mapping_int(ccd_moonmode, 'BINNING', 1),
-        binning_day=_mapping_int(ccd_day, 'BINNING', 1),
+        binning_day=_int_config(profile_config, 'binning_day', _mapping_int(ccd_day, 'BINNING', 1)),
         cooling_enabled=bool(profile_config.get('cooling_enabled', _bool_config(config, 'CCD_COOLING', False))),
         cooling_enabled_day=bool(profile_config.get('cooling_enabled_day', _bool_config(config, 'CCD_COOLING_DAY', False))),
         target_temperature=_float_config(profile_config, 'target_temperature', _float_config(config, 'CCD_TEMP', 15.0)),
@@ -283,7 +293,18 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     profile_config['INDI_SERVER'] = profile.indi_server
     profile_config['INDI_PORT'] = profile.indi_port
     profile_config['INDI_CAMERA_NAME'] = profile.indi_camera_name
-    profile_config['CCD_CONFIG'] = deepcopy(profile.ccd_config)
+    ccd_config = deepcopy(profile.ccd_config)
+    ccd_night = deepcopy(ccd_config.get('NIGHT') or {})
+    ccd_day = deepcopy(ccd_config.get('DAY') or {})
+    ccd_night['GAIN'] = profile.gain_max
+    ccd_night['BINNING'] = profile.binning_night
+    ccd_day['GAIN'] = profile.gain_min
+    ccd_day['BINNING'] = profile.binning_day
+    ccd_config['NIGHT'] = ccd_night
+    ccd_config['DAY'] = ccd_day
+    ccd_config['AUTO_GAIN_ENABLE'] = profile.auto_gain_enable
+    ccd_config['AUTO_GAIN_LEVELS'] = profile.auto_gain_levels
+    profile_config['CCD_CONFIG'] = ccd_config
     profile_config['CCD_EXPOSURE_MIN'] = profile.exposure_min
     profile_config['CCD_EXPOSURE_MIN_DAY'] = profile.exposure_min_day
     profile_config['CCD_EXPOSURE_MAX'] = profile.exposure_max

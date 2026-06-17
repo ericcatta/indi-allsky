@@ -15012,6 +15012,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'DAYTIME_CAPTURE_SAVE' : 'Save Daytime Images',
         'TARGET_ADU' : 'Night Target ADU',
         'TARGET_ADU_DAY' : 'Day Target ADU',
+        'TARGET_ADU_DEV' : 'Night Target ADU Deviation',
+        'TARGET_ADU_DEV_DAY' : 'Day Target ADU Deviation',
+        'exposure_min' : 'Minimum Exposure',
+        'exposure_max' : 'Maximum Exposure',
+        'exposure_default' : 'Default Exposure',
+        'gain_default' : 'Default Gain',
+        'gain_min' : 'Minimum Gain',
+        'gain_max' : 'Maximum Gain',
+        'target_adu' : 'Night Target ADU',
+        'target_adu_day' : 'Day Target ADU',
+        'target_adu_dev' : 'Night Target ADU Deviation',
+        'target_adu_dev_day' : 'Day Target ADU Deviation',
+        'auto_gain_enable' : 'Auto Gain',
+        'auto_gain_levels' : 'Auto Gain Levels',
+        'binning_day' : 'Day Binning',
+        'binning_night' : 'Night Binning',
         'CCD_BIT_DEPTH' : 'Bit Depth',
         'CFA_PATTERN' : 'CFA Pattern',
         'USE_NIGHT_COLOR' : 'Use Night Color',
@@ -15077,6 +15093,20 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'CCD_CONFIG.MOONMODE.BINNING' : ('binning_moonmode', ('ccd_config', 'MOONMODE', 'BINNING')),
         'CCD_CONFIG.DAY.GAIN' : ('gain_day', ('ccd_config', 'DAY', 'GAIN')),
         'CCD_CONFIG.DAY.BINNING' : ('binning_day', ('ccd_config', 'DAY', 'BINNING')),
+        'exposure_min' : ('CCD_EXPOSURE_MIN',),
+        'exposure_max' : ('CCD_EXPOSURE_MAX',),
+        'exposure_default' : ('CCD_EXPOSURE_DEF',),
+        'gain_default' : ('gain_default',),
+        'gain_min' : ('gain_min', 'gain_day', ('ccd_config', 'DAY', 'GAIN')),
+        'gain_max' : ('gain_max', 'gain_night', ('ccd_config', 'NIGHT', 'GAIN')),
+        'target_adu' : ('TARGET_ADU',),
+        'target_adu_day' : ('TARGET_ADU_DAY',),
+        'target_adu_dev' : ('TARGET_ADU_DEV',),
+        'target_adu_dev_day' : ('TARGET_ADU_DEV_DAY',),
+        'auto_gain_enable' : ('auto_gain_enable', ('ccd_config', 'AUTO_GAIN_ENABLE')),
+        'auto_gain_levels' : ('auto_gain_levels', ('ccd_config', 'AUTO_GAIN_LEVELS')),
+        'binning_day' : ('binning_day', ('ccd_config', 'DAY', 'BINNING')),
+        'binning_night' : ('binning_night', ('ccd_config', 'NIGHT', 'BINNING')),
         'EXPOSURE_PERIOD' : ('exposure_period',),
         'EXPOSURE_PERIOD_DAY' : ('exposure_period_day',),
         'CCD_EXPOSURE_MIN' : ('exposure_min',),
@@ -15158,23 +15188,20 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'title' : 'Capture',
             'default_open' : True,
             'fields' : (
-                'EXPOSURE_PERIOD',
-                'EXPOSURE_PERIOD_DAY',
-                'CCD_EXPOSURE_MIN',
-                'CCD_EXPOSURE_MIN_DAY',
-                'CCD_EXPOSURE_DEF',
-                'CCD_EXPOSURE_MAX',
-                'CCD_EXPOSURE_TIMEOUT',
-                'CCD_CONFIG.NIGHT.GAIN',
-                'CCD_CONFIG.NIGHT.BINNING',
-                'CCD_CONFIG.MOONMODE.GAIN',
-                'CCD_CONFIG.MOONMODE.BINNING',
-                'CCD_CONFIG.DAY.GAIN',
-                'CCD_CONFIG.DAY.BINNING',
-                'DAYTIME_CAPTURE',
-                'DAYTIME_CAPTURE_SAVE',
-                'TARGET_ADU',
-                'TARGET_ADU_DAY',
+                'exposure_min',
+                'exposure_max',
+                'exposure_default',
+                'gain_default',
+                'gain_min',
+                'gain_max',
+                'target_adu',
+                'target_adu_day',
+                'target_adu_dev',
+                'target_adu_dev_day',
+                'auto_gain_enable',
+                'auto_gain_levels',
+                'binning_day',
+                'binning_night',
             ),
         },
         {
@@ -15318,6 +15345,70 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'classic',
         'hybrid',
     )
+    CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER = (
+        'exposure_min',
+        'exposure_max',
+        'exposure_default',
+        'gain_default',
+        'gain_min',
+        'gain_max',
+        'target_adu',
+        'target_adu_day',
+        'target_adu_dev',
+        'target_adu_dev_day',
+        'auto_gain_enable',
+        'auto_gain_levels',
+        'binning_day',
+        'binning_night',
+    )
+    CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS = {
+        'exposure_min'       : 'CCD_EXPOSURE_MIN',
+        'exposure_max'       : 'CCD_EXPOSURE_MAX',
+        'exposure_default'   : 'CCD_EXPOSURE_DEF',
+        'gain_default'       : ('CCD_CONFIG', 'NIGHT', 'GAIN'),
+        'gain_min'           : ('CCD_CONFIG', 'DAY', 'GAIN'),
+        'gain_max'           : ('CCD_CONFIG', 'NIGHT', 'GAIN'),
+        'target_adu'         : 'TARGET_ADU',
+        'target_adu_day'     : 'TARGET_ADU_DAY',
+        'target_adu_dev'     : 'TARGET_ADU_DEV',
+        'target_adu_dev_day' : 'TARGET_ADU_DEV_DAY',
+        'auto_gain_enable'   : ('CCD_CONFIG', 'AUTO_GAIN_ENABLE'),
+        'auto_gain_levels'   : ('CCD_CONFIG', 'AUTO_GAIN_LEVELS'),
+        'binning_day'        : ('CCD_CONFIG', 'DAY', 'BINNING'),
+        'binning_night'      : ('CCD_CONFIG', 'NIGHT', 'BINNING'),
+    }
+    CAMERA_SETTINGS_CAPTURE_FIELD_LABELS = {
+        'exposure_min'       : 'Minimum Exposure',
+        'exposure_max'       : 'Maximum Exposure',
+        'exposure_default'   : 'Default Exposure',
+        'gain_default'       : 'Default Gain',
+        'gain_min'           : 'Minimum Gain',
+        'gain_max'           : 'Maximum Gain',
+        'target_adu'         : 'Night Target ADU',
+        'target_adu_day'     : 'Day Target ADU',
+        'target_adu_dev'     : 'Night Target ADU Deviation',
+        'target_adu_dev_day' : 'Day Target ADU Deviation',
+        'auto_gain_enable'   : 'Auto Gain',
+        'auto_gain_levels'   : 'Auto Gain Levels',
+        'binning_day'        : 'Day Binning',
+        'binning_night'      : 'Night Binning',
+    }
+    CAMERA_SETTINGS_CAPTURE_FIELD_TYPES = {
+        'exposure_min'       : 'float',
+        'exposure_max'       : 'float',
+        'exposure_default'   : 'float',
+        'gain_default'       : 'float',
+        'gain_min'           : 'float',
+        'gain_max'           : 'float',
+        'target_adu'         : 'integer',
+        'target_adu_day'     : 'integer',
+        'target_adu_dev'     : 'integer',
+        'target_adu_dev_day' : 'integer',
+        'auto_gain_enable'   : 'boolean_select',
+        'auto_gain_levels'   : 'integer',
+        'binning_day'        : 'integer',
+        'binning_night'      : 'integer',
+    }
     CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER = (
         'lens_name',
         'lens_focal_length',
@@ -15457,6 +15548,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             modern_admin_action = request.form.get('modern_admin_action', 'driver_connection')
             if modern_admin_action == 'hybrid_controller':
                 context.update(self.save_camera_settings_hybrid_profile())
+            elif modern_admin_action == 'capture':
+                context.update(self.save_camera_settings_capture_profile())
             elif modern_admin_action == 'lens_optics':
                 context.update(self.save_camera_settings_lens_profile())
             else:
@@ -15474,6 +15567,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         context['modern_admin_camera_settings_uses_multi_camera'] = bool(selected_profile.get('from_multi_camera'))
         if 'modern_admin_camera_settings_driver_form' not in context:
             context['modern_admin_camera_settings_driver_form'] = self.get_camera_settings_driver_form(selected_profile)
+        if 'modern_admin_camera_settings_capture_form' not in context:
+            context['modern_admin_camera_settings_capture_form'] = self.get_camera_settings_capture_form(selected_profile)
         if 'modern_admin_camera_settings_lens_form' not in context:
             context['modern_admin_camera_settings_lens_form'] = self.get_camera_settings_lens_form(selected_profile)
         if 'modern_admin_camera_settings_hybrid_form' not in context:
@@ -15667,6 +15762,12 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
         if config_key == 'PROCESSING_MODE':
             return 'classic', 'derived'
+
+        global_config_key = self.CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS.get(config_key)
+        if global_config_key:
+            found, value = self.get_camera_settings_config_value(global_config_key)
+            if found:
+                return value, 'global config'
 
         found, value = self.get_camera_settings_config_value(config_key)
         if found:
@@ -16308,6 +16409,279 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             profile.pop(key, None)
 
 
+    def get_camera_settings_capture_form(self, profile, submitted_data=None, errors=None):
+        submitted_data = submitted_data or {}
+        errors = errors or {}
+        fields = list()
+        for field_name in self.CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER:
+            value = submitted_data.get(field_name, self.get_camera_settings_capture_field_value(profile, field_name))
+            field_type = self.CAMERA_SETTINGS_CAPTURE_FIELD_TYPES[field_name]
+            input_type = 'number' if field_type in ('integer', 'float') else 'text'
+            if field_type == 'boolean_select':
+                input_type = 'select'
+
+            fields.append({
+                'name'       : field_name,
+                'label'      : self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name],
+                'config_key' : field_name,
+                'value'      : self.format_camera_settings_capture_form_value(value, field_type),
+                'input_type' : input_type,
+                'field_type' : field_type,
+                'readonly'   : not profile.get('from_multi_camera'),
+                'errors'     : errors.get(field_name, []),
+                'choices'    : self.get_camera_settings_capture_field_choices(field_name, value),
+                'min'        : self.get_camera_settings_capture_field_min(field_name),
+                'step'       : 'any' if field_type == 'float' else '1',
+            })
+
+        return {
+            'enabled' : bool(profile.get('from_multi_camera')),
+            'fields'  : fields,
+        }
+
+
+    def get_camera_settings_capture_field_value(self, profile, field_name):
+        found, value = self.get_camera_settings_nested_value(profile, field_name)
+        if found:
+            return value
+
+        return ''
+
+
+    def format_camera_settings_capture_form_value(self, value, field_type):
+        if value in (None, ''):
+            return ''
+
+        if field_type == 'boolean_select':
+            if value is True:
+                return '1'
+            elif value is False:
+                return '0'
+
+        return self.format_structured_settings_value(value)
+
+
+    def get_camera_settings_capture_field_choices(self, field_name, value):
+        if self.CAMERA_SETTINGS_CAPTURE_FIELD_TYPES[field_name] != 'boolean_select':
+            return tuple()
+
+        value_str = ''
+        if value is True:
+            value_str = '1'
+        elif value is False:
+            value_str = '0'
+
+        return ({
+            'value'    : '',
+            'label'    : 'Use global',
+            'selected' : value in (None, ''),
+        }, {
+            'value'    : '1',
+            'label'    : 'Enabled',
+            'selected' : value_str == '1',
+        }, {
+            'value'    : '0',
+            'label'    : 'Disabled',
+            'selected' : value_str == '0',
+        })
+
+
+    def get_camera_settings_capture_field_min(self, field_name):
+        if field_name in ('auto_gain_levels', 'binning_day', 'binning_night'):
+            return '1'
+
+        return '0'
+
+
+    def save_camera_settings_capture_profile(self):
+        result = {
+            'modern_admin_camera_settings_error'   : None,
+            'modern_admin_camera_settings_success' : None,
+            'modern_admin_camera_settings_errors'  : {},
+        }
+
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            result['modern_admin_camera_settings_error'] = 'Only an admin user can change camera profile settings.'
+            return result
+
+        profiles = self.get_camera_settings_profiles()
+        selected_profile = self.get_selected_camera_settings_profile_for_save(profiles)
+        if not selected_profile:
+            result['modern_admin_camera_settings_error'] = 'Select a valid multi-camera profile before saving. No config was saved.'
+            return result
+
+        if not selected_profile.get('from_multi_camera'):
+            result['modern_admin_camera_settings_error'] = 'The current global camera fallback is read-only. Select a MULTI_CAMERA profile before saving.'
+            return result
+
+        submitted_data, validation_errors = self.get_camera_settings_capture_submitted_data()
+        if validation_errors:
+            result['modern_admin_camera_settings_error'] = 'Please fix the Capture settings below. No config was saved.'
+            result['modern_admin_camera_settings_errors'] = validation_errors
+            result['modern_admin_camera_settings_capture_form'] = self.get_camera_settings_capture_form(selected_profile, submitted_data, validation_errors)
+            return result
+
+        try:
+            new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
+            updated_profile_id = self.apply_camera_settings_capture_profile_to_config(
+                new_config,
+                selected_profile.get('profile_id'),
+                selected_profile.get('_profile_index'),
+                submitted_data,
+            )
+
+            if not app.config['LOGIN_DISABLED']:
+                username = current_user.username
+            else:
+                username = 'system'
+
+            from ..config import IndiAllSkyConfig
+
+            config_obj = IndiAllSkyConfig()
+            config_obj.config = new_config
+            config_obj.save(username, 'Modern Admin Camera Capture update for {0:s}'.format(updated_profile_id))
+            self.indi_allsky_config = new_config
+            app.logger.info('Saved Modern Admin Camera Capture config update for profile %s', updated_profile_id)
+            result['modern_admin_camera_settings_success'] = 'Capture saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new values.'.format(updated_profile_id)
+        except ConfigSaveException as e:
+            db.session.rollback()
+            result['modern_admin_camera_settings_error'] = str(e)
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error('Error saving Modern Admin Camera Capture: %s', str(e))
+            result['modern_admin_camera_settings_error'] = 'Unable to save Capture: {0:s}'.format(str(e))
+
+        return result
+
+
+    def get_camera_settings_capture_submitted_data(self):
+        submitted_data = dict()
+        validation_errors = dict()
+
+        for field_name in self.CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER:
+            field_type = self.CAMERA_SETTINGS_CAPTURE_FIELD_TYPES[field_name]
+            raw_value = request.form.get(field_name, '').strip()
+            if raw_value == '':
+                submitted_data[field_name] = {
+                    'delete' : True,
+                    'value'  : None,
+                }
+                continue
+
+            try:
+                value = self.parse_camera_settings_capture_field_value(field_name, field_type, raw_value)
+                submitted_data[field_name] = {
+                    'delete' : False,
+                    'value'  : value,
+                }
+            except ValueError as e:
+                submitted_data[field_name] = {
+                    'delete' : False,
+                    'value'  : raw_value,
+                }
+                validation_errors.setdefault(field_name, []).append(str(e))
+
+        self.validate_camera_settings_capture_ranges(submitted_data, validation_errors)
+        return submitted_data, validation_errors
+
+
+    def parse_camera_settings_capture_field_value(self, field_name, field_type, raw_value):
+        if field_type == 'integer':
+            try:
+                value = int(raw_value)
+            except ValueError:
+                raise ValueError('{0:s} must be a whole number.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
+        elif field_type == 'float':
+            try:
+                value = float(raw_value)
+            except ValueError:
+                raise ValueError('{0:s} must be a number.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
+        elif field_type == 'boolean_select':
+            if raw_value == '1':
+                value = True
+            elif raw_value == '0':
+                value = False
+            else:
+                raise ValueError('{0:s} must be Enabled, Disabled, or Use global.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
+        else:
+            value = raw_value
+
+        if field_name in ('auto_gain_levels', 'binning_day', 'binning_night') and value < 1:
+            raise ValueError('{0:s} must be greater than or equal to 1.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
+
+        if field_name not in ('auto_gain_enable',) and value < 0:
+            raise ValueError('{0:s} must be greater than or equal to 0.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
+
+        return value
+
+
+    def validate_camera_settings_capture_ranges(self, submitted_data, validation_errors):
+        exposure_min = self.get_camera_settings_submitted_number(submitted_data, 'exposure_min')
+        exposure_max = self.get_camera_settings_submitted_number(submitted_data, 'exposure_max')
+        exposure_default = self.get_camera_settings_submitted_number(submitted_data, 'exposure_default')
+        gain_min = self.get_camera_settings_submitted_number(submitted_data, 'gain_min')
+        gain_max = self.get_camera_settings_submitted_number(submitted_data, 'gain_max')
+        gain_default = self.get_camera_settings_submitted_number(submitted_data, 'gain_default')
+
+        if exposure_min is not None and exposure_max is not None and exposure_min > exposure_max:
+            validation_errors.setdefault('exposure_min', []).append('Minimum Exposure cannot be greater than Maximum Exposure.')
+
+        if exposure_default is not None and exposure_min is not None and exposure_default < exposure_min:
+            validation_errors.setdefault('exposure_default', []).append('Default Exposure cannot be lower than Minimum Exposure.')
+
+        if exposure_default is not None and exposure_max is not None and exposure_default > exposure_max:
+            validation_errors.setdefault('exposure_default', []).append('Default Exposure cannot be greater than Maximum Exposure.')
+
+        if gain_min is not None and gain_max is not None and gain_min > gain_max:
+            validation_errors.setdefault('gain_min', []).append('Minimum Gain cannot be greater than Maximum Gain.')
+
+        if gain_default is not None and gain_min is not None and gain_default < gain_min:
+            validation_errors.setdefault('gain_default', []).append('Default Gain cannot be lower than Minimum Gain.')
+
+        if gain_default is not None and gain_max is not None and gain_default > gain_max:
+            validation_errors.setdefault('gain_default', []).append('Default Gain cannot be greater than Maximum Gain.')
+
+
+    def get_camera_settings_submitted_number(self, submitted_data, field_name):
+        field_data = submitted_data.get(field_name)
+        if not field_data or field_data.get('delete'):
+            return None
+
+        value = field_data.get('value')
+        if isinstance(value, (int, float)):
+            return float(value)
+
+        return None
+
+
+    def apply_camera_settings_capture_profile_to_config(self, config, profile_id, profile_index, submitted_data):
+        multi_camera_config = config.get('MULTI_CAMERA')
+        if not isinstance(multi_camera_config, dict):
+            raise ValueError('MULTI_CAMERA config is missing or invalid.')
+
+        profiles = multi_camera_config.get('profiles')
+        if not isinstance(profiles, list):
+            raise ValueError('MULTI_CAMERA.profiles is missing or invalid.')
+
+        profile_offset = int(profile_index) - 1
+        if profile_offset < 0 or profile_offset >= len(profiles):
+            raise ValueError('Selected profile no longer exists.')
+
+        profile = profiles[profile_offset]
+        if not isinstance(profile, dict):
+            raise ValueError('Selected profile is not editable.')
+
+        if str(profile.get('profile_id') or profile.get('id') or 'profile-{0:d}'.format(profile_index)) != str(profile_id):
+            raise ValueError('Selected profile changed before save. Reload and try again.')
+
+        for field_name, field_data in submitted_data.items():
+            self.delete_camera_settings_profile_path(profile, (field_name,))
+            if not field_data['delete']:
+                profile[field_name] = field_data['value']
+
+        return str(profile_id)
+
+
     def get_camera_settings_lens_form(self, profile, submitted_data=None, errors=None):
         submitted_data = submitted_data or {}
         errors = errors or {}
@@ -16698,6 +17072,20 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'CCD_EXPOSURE_DEF',
             'CCD_EXPOSURE_MAX',
             'CCD_EXPOSURE_TIMEOUT',
+            'exposure_min',
+            'exposure_max',
+            'exposure_default',
+            'gain_default',
+            'gain_min',
+            'gain_max',
+            'target_adu',
+            'target_adu_day',
+            'target_adu_dev',
+            'target_adu_dev_day',
+            'auto_gain_enable',
+            'auto_gain_levels',
+            'binning_day',
+            'binning_night',
             'CCD_CONFIG.NIGHT.GAIN',
             'CCD_CONFIG.NIGHT.BINNING',
             'CCD_CONFIG.MOONMODE.GAIN',
@@ -16770,6 +17158,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'LIBCAMERA',
             'CCD_CONFIG',
             'CCD_EXPOSURE',
+            'EXPOSURE_',
+            'GAIN_',
+            'BINNING_',
+            'TARGET_ADU',
+            'AUTO_GAIN',
             'CCD_COOLING',
             'CCD_TEMP',
             'CFA_PATTERN',
