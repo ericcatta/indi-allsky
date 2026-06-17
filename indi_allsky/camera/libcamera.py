@@ -66,7 +66,10 @@ class IndiClientLibCameraGeneric(IndiClient):
         self.current_metadata_file_p = None
         self.exposureStartTime = 0.0
         self.processStartTime = 0.0
+        self.exposureStartMonotonic = 0.0
+        self.processStartMonotonic = 0.0
         self.libcamera_timeout = 0.0
+        self._hybrid_awb_capture_control = None
 
         memory_info = psutil.virtual_memory()
         self.memory_total_mb = memory_info[0] / 1024.0 / 1024.0
@@ -117,6 +120,32 @@ class IndiClientLibCameraGeneric(IndiClient):
                 return True
 
         return False
+
+
+    def _cmdOptionCount(self, cmd, option):
+        option_eq = '{0:s}='.format(option)
+        return sum(1 for cmd_part in cmd if cmd_part == option or str(cmd_part).startswith(option_eq))
+
+
+    def _removeCmdOptions(self, cmd, options):
+        normalized_cmd = []
+        skip_next = False
+        for idx, cmd_part in enumerate(cmd):
+            if skip_next:
+                skip_next = False
+                continue
+
+            if cmd_part in options:
+                if idx + 1 < len(cmd) and not str(cmd[idx + 1]).startswith('--'):
+                    skip_next = True
+                continue
+
+            if any(str(cmd_part).startswith('{0:s}='.format(option)) for option in options):
+                continue
+
+            normalized_cmd.append(cmd_part)
+
+        return normalized_cmd
 
 
     def _multiCameraTimingDiagEnabled(self):
@@ -187,6 +216,10 @@ class IndiClientLibCameraGeneric(IndiClient):
         return self._hybridAwbApplyMode() in ('auto', 'capture_driver')
 
 
+    def _hybridAwbCaptureDiagEnabled(self):
+        return self._hybridAwbEnabled()
+
+
     def _clampHybridAwbGain(self, gain):
         return max(0.5, min(3.0, float(gain)))
 
@@ -222,6 +255,106 @@ class IndiClientLibCameraGeneric(IndiClient):
             return red_gain, blue_gain, 0, 'shared-state-error'
 
         return red_gain, blue_gain, sample_count, None
+
+
+    def _hybridAwbCaptureControl(self):
+        apply_mode = self._hybridAwbApplyMode()
+        if apply_mode in ('auto', 'capture_driver'):
+            red_gain, blue_gain, sample_count, reason = self._hybridAwbGains()
+            return {
+                'apply_mode'   : apply_mode,
+                'backend'      : 'libcamera_capture',
+                'awb_source'   : 'hybrid_runtime',
+                'red_gain'     : red_gain,
+                'blue_gain'    : blue_gain,
+                'sample_count' : sample_count,
+                'reason'       : reason,
+            }
+
+        red_gain, blue_gain = self._hybridAwbFallbackGains()
+        return {
+            'apply_mode'   : apply_mode,
+            'backend'      : apply_mode,
+            'awb_source'   : 'fixed_fallback_capture',
+            'red_gain'     : red_gain,
+            'blue_gain'    : blue_gain,
+            'sample_count' : 0,
+            'reason'       : 'postprocess-or-disabled',
+        }
+
+
+    def _normalizeHybridAwbCaptureCommand(self, cmd):
+        if not self._hybridAwbEnabled():
+            return cmd, None
+
+        control = self._hybridAwbCaptureControl()
+        normalized_cmd = self._removeCmdOptions(cmd, {'--awb', '--awbgains'})
+        normalized_cmd.extend([
+            '--awbgains',
+            '{0:0.4f},{1:0.4f}'.format(control['red_gain'], control['blue_gain']),
+        ])
+        return normalized_cmd, control
+
+
+    def _logHybridAwbCaptureCommandDiag(self, cmd, control, exposure, exposure_us, gain, timeout):
+        if not control or not self._hybridAwbCaptureDiagEnabled():
+            return
+
+        _multi_camera_diag(
+            '[HYBRID_AWB_CAPTURE_DIAG][%s][camera_id=%s] command=%s argv=%r apply_mode=%s backend=%s awb_source=%s awb_red=%0.4f awb_blue=%0.4f sample_count=%d shutter_us=%d requested_exposure_s=%0.8f gain=%0.2f start_monotonic=%0.6f exposure_period=%0.4f exposure_period_day=%0.4f timeout=%0.1fs has_awbgains=%s awbgains_count=%d has_awb=%s awb_count=%d has_timeout=%s has_immediate=%s has_nopreview=%s',
+            getattr(self, 'profile_id', 'default'),
+            getattr(self, 'camera_id', 'unknown'),
+            ' '.join(cmd),
+            cmd,
+            control.get('apply_mode'),
+            control.get('backend'),
+            control.get('awb_source'),
+            control.get('red_gain'),
+            control.get('blue_gain'),
+            int(control.get('sample_count') or 0),
+            exposure_us,
+            float(exposure),
+            float(gain),
+            self.exposureStartMonotonic,
+            float(self.config.get('EXPOSURE_PERIOD', 0.0)),
+            float(self.config.get('EXPOSURE_PERIOD_DAY', 0.0)),
+            timeout,
+            self._cmdHasOption(cmd, '--awbgains'),
+            self._cmdOptionCount(cmd, '--awbgains'),
+            self._cmdHasOption(cmd, '--awb'),
+            self._cmdOptionCount(cmd, '--awb'),
+            self._cmdHasOption(cmd, '--timeout'),
+            self._cmdHasOption(cmd, '--immediate'),
+            self._cmdHasOption(cmd, '--nopreview'),
+        )
+
+
+    def _logHybridAwbCaptureEndDiag(self, process_exit_time, process_exit_monotonic, sync):
+        control = getattr(self, '_hybrid_awb_capture_control', None)
+        if not control or not self._hybridAwbCaptureDiagEnabled():
+            return
+
+        rpicam_elapsed_s = process_exit_time - self.exposureStartTime
+        monotonic_elapsed_s = process_exit_monotonic - self.exposureStartMonotonic
+        _multi_camera_diag(
+            '[HYBRID_AWB_CAPTURE_DIAG][%s][camera_id=%s] process_end apply_mode=%s backend=%s awb_source=%s start_monotonic=%0.6f end_monotonic=%0.6f elapsed_monotonic=%0.4fs process_start_time=%0.6f process_exit_time=%0.6f elapsed=%0.4fs requested_exposure_s=%0.8f shutter_us=%d returncode=%s sync=%s timeout=%0.1fs',
+            getattr(self, 'profile_id', 'default'),
+            getattr(self, 'camera_id', 'unknown'),
+            control.get('apply_mode'),
+            control.get('backend'),
+            control.get('awb_source'),
+            self.exposureStartMonotonic,
+            process_exit_monotonic,
+            monotonic_elapsed_s,
+            self.processStartTime,
+            process_exit_time,
+            rpicam_elapsed_s,
+            float(self.exposure),
+            int(float(self.exposure) * 1000000),
+            self.libcamera_process.returncode,
+            sync,
+            self.libcamera_timeout,
+        )
 
 
     def _appendLibcameraAwbOptions(self, cmd, night=True):
@@ -434,7 +567,12 @@ class IndiClientLibCameraGeneric(IndiClient):
             if extra_options:
                 cmd.extend(extra_options.split(' '))
 
-        if self._cmdHasOption(cmd, '--immediate') and not self._cmdHasOption(cmd, '--timeout'):
+        cmd, self._hybrid_awb_capture_control = self._normalizeHybridAwbCaptureCommand(cmd)
+
+        if self._hybridAwbEnabled() and self._cmdHasOption(cmd, '--immediate'):
+            cmd = self._removeCmdOptions(cmd, {'--timeout'})
+            cmd.extend(['--timeout', '1'])
+        elif self._cmdHasOption(cmd, '--immediate') and not self._cmdHasOption(cmd, '--timeout'):
             cmd.extend(['--timeout', '1'])
 
 
@@ -449,6 +587,9 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
         images_only = bool(getattr(self, 'images_only', False))
+        self.libcamera_timeout = self._libcameraExposureTimeout()
+        self.exposureStartTime = time.time()
+        self.exposureStartMonotonic = time.monotonic()
         logger.info('image command: %s', ' '.join(cmd))
         if images_only:
             _multi_camera_diag(
@@ -457,10 +598,8 @@ class IndiClientLibCameraGeneric(IndiClient):
                 getattr(self, 'camera_id', 'unknown'),
                 ' '.join(cmd),
             )
+        self._logHybridAwbCaptureCommandDiag(cmd, self._hybrid_awb_capture_control, exposure, exposure_us, gain, self.libcamera_timeout)
 
-
-        self.exposureStartTime = time.time()
-        self.libcamera_timeout = self._libcameraExposureTimeout()
 
         if images_only:
             # MULTI_CAMERA_DIAG: avoid an unread PIPE in the asynchronous
@@ -498,6 +637,7 @@ class IndiClientLibCameraGeneric(IndiClient):
             )
 
         self.processStartTime = time.time()
+        self.processStartMonotonic = time.monotonic()
         self.libcamera_process = subprocess.Popen(
             cmd,
             stdout=libcamera_stdout,
@@ -538,6 +678,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
             if timing_diag:
                 process_exit_time = time.time()
+                process_exit_monotonic = time.monotonic()
                 rpicam_elapsed_s = process_exit_time - self.exposureStartTime
                 _multi_camera_diag(
                     '[MULTI_CAMERA_TIMING][%s][camera_id=%s] rpicam_end process_start_time=%0.6f process_exit_time=%0.6f elapsed=%0.4fs requested_exposure_s=%0.8f shutter_us=%d returncode=%s sync=%s timeout=%0.1fs',
@@ -552,6 +693,11 @@ class IndiClientLibCameraGeneric(IndiClient):
                     sync,
                     self.libcamera_timeout,
                 )
+            else:
+                process_exit_time = time.time()
+                process_exit_monotonic = time.monotonic()
+
+            self._logHybridAwbCaptureEndDiag(process_exit_time, process_exit_monotonic, True)
 
             self.active_exposure = False
 
@@ -597,6 +743,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
             if self._multiCameraTimingDiagEnabled():
                 process_exit_time = time.time()
+                process_exit_monotonic = time.monotonic()
                 rpicam_elapsed_s = process_exit_time - self.exposureStartTime
                 _multi_camera_diag(
                     '[MULTI_CAMERA_TIMING][%s][camera_id=%s] rpicam_end process_start_time=%0.6f process_exit_time=%0.6f elapsed=%0.4fs requested_exposure_s=%0.8f shutter_us=%d returncode=%s sync=%s timeout=%0.1fs',
@@ -611,6 +758,11 @@ class IndiClientLibCameraGeneric(IndiClient):
                     False,
                     self.libcamera_timeout,
                 )
+            else:
+                process_exit_time = time.time()
+                process_exit_monotonic = time.monotonic()
+
+            self._logHybridAwbCaptureEndDiag(process_exit_time, process_exit_monotonic, False)
 
 
             self._processMetadata()

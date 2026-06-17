@@ -428,6 +428,64 @@ class CaptureWorker(Process):
         return str(self.config.get('PROCESSING_MODE', 'classic') or 'classic').strip().lower()
 
 
+    def _hybrid_awb_apply_mode(self):
+        hybrid_config = self.config.get('HYBRID') or {}
+        if not isinstance(hybrid_config, dict):
+            hybrid_config = {}
+
+        awb_config = hybrid_config.get('AWB') or {}
+        if not isinstance(awb_config, dict):
+            awb_config = {}
+
+        apply_mode = str(awb_config.get('APPLY_MODE', 'auto') or 'auto').strip().lower()
+        if apply_mode not in ('auto', 'capture_driver', 'postprocess_rgb', 'disabled'):
+            return 'auto'
+
+        return apply_mode
+
+
+    def _hybrid_awb_backend(self):
+        if self._processing_mode() != 'hybrid':
+            return 'classic'
+
+        apply_mode = self._hybrid_awb_apply_mode()
+        if apply_mode in ('auto', 'capture_driver') and self.capture_camera_interface.startswith('libcamera_'):
+            return 'libcamera_capture'
+        if apply_mode == 'postprocess_rgb':
+            return 'postprocess_rgb'
+        if apply_mode == 'disabled':
+            return 'disabled_not_applied'
+
+        return 'unsupported_not_applied'
+
+
+    def _hybrid_awb_capture_diag(self, next_frame_time, frame_start_time, total_elapsed):
+        if not self.capture_camera_interface.startswith('libcamera_'):
+            return
+
+        if self._processing_mode() != 'hybrid':
+            return
+
+        camera_id = self.camera_id if self.camera_id is not None else 'unknown'
+        exposure_next = float(self.exposure_av[constants.EXPOSURE_NEXT])
+        period = float(self.config.get('EXPOSURE_PERIOD_DAY' if not self.night else 'EXPOSURE_PERIOD', 0.0))
+        _multi_camera_diag(
+            '[HYBRID_AWB_CAPTURE_DIAG][%s][camera_id=%s] capture_loop apply_mode=%s backend=%s next_frame_time=%0.6f frame_start_time=%0.6f capture_loop_elapsed=%0.4fs capture_loop_delta=%+0.4fs exposure_next=%0.8fs exposure_period=%0.4fs add_period_delay=%0.4fs image_q_depth=%s',
+            self.profile_id,
+            camera_id,
+            self._hybrid_awb_apply_mode(),
+            self._hybrid_awb_backend(),
+            next_frame_time,
+            frame_start_time,
+            total_elapsed,
+            total_elapsed - exposure_next,
+            exposure_next,
+            period,
+            self.add_period_delay,
+            self._image_queue_depth(),
+        )
+
+
     def _log_hybrid_placeholder(self):
         if self._processing_mode() != 'hybrid':
             return
@@ -949,6 +1007,7 @@ class CaptureWorker(Process):
                                 self._image_queue_depth(),
                             )
 
+                        self._hybrid_awb_capture_diag(next_frame_time, frame_start_time, total_elapsed)
 
                         if not self.sqm_camera_enable or self.focus_mode:
                             # Normal exposure
