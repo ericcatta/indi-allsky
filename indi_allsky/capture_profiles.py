@@ -147,19 +147,30 @@ def _processing_mode(profile_config: Mapping[str, Any]) -> str:
 
 
 def _hybrid_awb_apply_mode(profile_config: Mapping[str, Any]) -> str:
-    hybrid_config = profile_config.get('hybrid') or {}
-    if not isinstance(hybrid_config, Mapping):
-        hybrid_config = {}
+    apply_mode_candidates = (
+        ('hybrid', 'awb', 'apply_mode'),
+        ('HYBRID', 'AWB', 'APPLY_MODE'),
+        ('HYBRID', 'awb', 'apply_mode'),
+        ('hybrid', 'AWB', 'APPLY_MODE'),
+        ('hybrid_awb_apply_mode',),
+    )
+    for path in apply_mode_candidates:
+        current = profile_config
+        for key in path:
+            if not isinstance(current, Mapping) or key not in current:
+                current = None
+                break
 
-    awb_config = hybrid_config.get('awb') or {}
-    if not isinstance(awb_config, Mapping):
-        awb_config = {}
+            current = current[key]
 
-    apply_mode = str(awb_config.get('apply_mode', 'auto') or 'auto').strip().lower()
-    if apply_mode not in HYBRID_AWB_APPLY_MODES:
-        return 'auto'
+        if current is None:
+            continue
 
-    return apply_mode
+        apply_mode = str(current or 'auto').strip().lower()
+        if apply_mode in HYBRID_AWB_APPLY_MODES:
+            return apply_mode
+
+    return 'auto'
 
 
 def _mapping_float(config: Mapping[str, Any], key: str, default: float) -> float:

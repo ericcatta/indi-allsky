@@ -387,6 +387,15 @@ class ImageWorker(Process):
 
 
     def _hybrid_awb_apply_mode(self):
+        raw_apply_mode = self._hybrid_awb_raw_apply_mode()
+        apply_mode = str(raw_apply_mode or 'auto').strip().lower()
+        if apply_mode not in ('auto', 'capture_driver', 'postprocess_rgb', 'disabled'):
+            return 'auto'
+
+        return apply_mode
+
+
+    def _hybrid_awb_raw_apply_mode(self):
         hybrid_config = self.config.get('HYBRID') or {}
         if not isinstance(hybrid_config, dict):
             hybrid_config = {}
@@ -395,11 +404,28 @@ class ImageWorker(Process):
         if not isinstance(awb_config, dict):
             awb_config = {}
 
-        apply_mode = str(awb_config.get('APPLY_MODE', 'auto') or 'auto').strip().lower()
-        if apply_mode not in ('auto', 'capture_driver', 'postprocess_rgb', 'disabled'):
-            return 'auto'
+        if 'APPLY_MODE' in awb_config:
+            return awb_config.get('APPLY_MODE')
 
-        return apply_mode
+        active_profile_id = self.config.get('MULTI_CAMERA_ACTIVE_PROFILE')
+        profile_configs = self.config.get('MULTI_CAMERA', {}).get('profiles', [])
+        if not active_profile_id or not isinstance(profile_configs, list):
+            return None
+
+        for profile_config in profile_configs:
+            if not isinstance(profile_config, dict):
+                continue
+
+            profile_id = profile_config.get('profile_id') or profile_config.get('id')
+            if str(profile_id) != str(active_profile_id):
+                continue
+
+            try:
+                return profile_config.get('hybrid', {}).get('awb', {}).get('apply_mode')
+            except AttributeError:
+                return None
+
+        return None
 
 
     def _hybrid_awb_backend(self):

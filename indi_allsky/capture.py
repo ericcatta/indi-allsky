@@ -262,6 +262,7 @@ class CaptureWorker(Process):
         self.camera_runtime_state = CameraRuntimeState()
         logger.debug('Capture worker profile: %s', self.capture_profile.as_dict())
         logger.debug('Camera runtime state initialized: %s', self.camera_runtime_state.as_dict())
+        self._log_hybrid_awb_config()
 
         self.error_q = error_q
         self.capture_q = capture_q
@@ -429,6 +430,15 @@ class CaptureWorker(Process):
 
 
     def _hybrid_awb_apply_mode(self):
+        raw_apply_mode = self._hybrid_awb_raw_apply_mode()
+        apply_mode = str(raw_apply_mode or 'auto').strip().lower()
+        if apply_mode not in ('auto', 'capture_driver', 'postprocess_rgb', 'disabled'):
+            return 'auto'
+
+        return apply_mode
+
+
+    def _hybrid_awb_raw_apply_mode(self):
         hybrid_config = self.config.get('HYBRID') or {}
         if not isinstance(hybrid_config, dict):
             hybrid_config = {}
@@ -437,11 +447,28 @@ class CaptureWorker(Process):
         if not isinstance(awb_config, dict):
             awb_config = {}
 
-        apply_mode = str(awb_config.get('APPLY_MODE', 'auto') or 'auto').strip().lower()
-        if apply_mode not in ('auto', 'capture_driver', 'postprocess_rgb', 'disabled'):
-            return 'auto'
+        if 'APPLY_MODE' in awb_config:
+            return awb_config.get('APPLY_MODE')
 
-        return apply_mode
+        active_profile_id = self.config.get('MULTI_CAMERA_ACTIVE_PROFILE')
+        profile_configs = self.config.get('MULTI_CAMERA', {}).get('profiles', [])
+        if not active_profile_id or not isinstance(profile_configs, list):
+            return None
+
+        for profile_config in profile_configs:
+            if not isinstance(profile_config, dict):
+                continue
+
+            profile_id = profile_config.get('profile_id') or profile_config.get('id')
+            if str(profile_id) != str(active_profile_id):
+                continue
+
+            try:
+                return profile_config.get('hybrid', {}).get('awb', {}).get('apply_mode')
+            except AttributeError:
+                return None
+
+        return None
 
 
     def _hybrid_awb_backend(self):
@@ -483,6 +510,18 @@ class CaptureWorker(Process):
             period,
             self.add_period_delay,
             self._image_queue_depth(),
+        )
+
+
+    def _log_hybrid_awb_config(self, camera_id='unknown'):
+        _multi_camera_diag(
+            '[HYBRID_AWB_CONFIG][%s][camera_id=%s] processing_mode=%s apply_mode=%s raw_apply_mode=%r camera_interface=%s',
+            self.profile_id,
+            camera_id,
+            self._processing_mode(),
+            self._hybrid_awb_apply_mode(),
+            self._hybrid_awb_raw_apply_mode(),
+            self.capture_camera_interface,
         )
 
 
@@ -1466,6 +1505,7 @@ class CaptureWorker(Process):
         self.camera_runtime_state.camera_id = camera.id
         self.indiclient.camera_id = camera.id
         logger.info('[%s][camera_id=%s] Camera registered for capture', self.profile_id, camera.id)
+        self._log_hybrid_awb_config(camera.id)
         self._log_hybrid_placeholder()
 
         self._set_global_state('DB_CAMERA_ID', camera.id)

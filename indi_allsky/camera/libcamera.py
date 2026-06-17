@@ -194,6 +194,15 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
     def _hybridAwbApplyMode(self):
+        raw_apply_mode = self._hybridAwbRawApplyMode()
+        apply_mode = str(raw_apply_mode or 'auto').strip().lower()
+        if apply_mode not in ('auto', 'capture_driver', 'postprocess_rgb', 'disabled'):
+            return 'auto'
+
+        return apply_mode
+
+
+    def _hybridAwbRawApplyMode(self):
         hybrid_config = self.config.get('HYBRID') or {}
         if not isinstance(hybrid_config, dict):
             hybrid_config = {}
@@ -202,11 +211,28 @@ class IndiClientLibCameraGeneric(IndiClient):
         if not isinstance(awb_config, dict):
             awb_config = {}
 
-        apply_mode = str(awb_config.get('APPLY_MODE', 'auto') or 'auto').strip().lower()
-        if apply_mode not in ('auto', 'capture_driver', 'postprocess_rgb', 'disabled'):
-            return 'auto'
+        if 'APPLY_MODE' in awb_config:
+            return awb_config.get('APPLY_MODE')
 
-        return apply_mode
+        active_profile_id = self.config.get('MULTI_CAMERA_ACTIVE_PROFILE')
+        profile_configs = self.config.get('MULTI_CAMERA', {}).get('profiles', [])
+        if not active_profile_id or not isinstance(profile_configs, list):
+            return None
+
+        for profile_config in profile_configs:
+            if not isinstance(profile_config, dict):
+                continue
+
+            profile_id = profile_config.get('profile_id') or profile_config.get('id')
+            if str(profile_id) != str(active_profile_id):
+                continue
+
+            try:
+                return profile_config.get('hybrid', {}).get('awb', {}).get('apply_mode')
+            except AttributeError:
+                return None
+
+        return None
 
 
     def _hybridAwbCaptureEnabled(self):
@@ -261,10 +287,12 @@ class IndiClientLibCameraGeneric(IndiClient):
         apply_mode = self._hybridAwbApplyMode()
         if apply_mode in ('auto', 'capture_driver'):
             red_gain, blue_gain, sample_count, reason = self._hybridAwbGains()
-            return {
+        return {
                 'apply_mode'   : apply_mode,
                 'backend'      : 'libcamera_capture',
                 'awb_source'   : 'hybrid_runtime',
+                'raw_apply_mode': self._hybridAwbRawApplyMode(),
+                'awbgains_suppressed': False,
                 'red_gain'     : red_gain,
                 'blue_gain'    : blue_gain,
                 'sample_count' : sample_count,
@@ -276,6 +304,8 @@ class IndiClientLibCameraGeneric(IndiClient):
             'apply_mode'   : apply_mode,
             'backend'      : apply_mode,
             'awb_source'   : 'fixed_fallback_capture',
+            'raw_apply_mode': self._hybridAwbRawApplyMode(),
+            'awbgains_suppressed': apply_mode in ('postprocess_rgb', 'disabled'),
             'red_gain'     : red_gain,
             'blue_gain'    : blue_gain,
             'sample_count' : 0,
@@ -301,14 +331,16 @@ class IndiClientLibCameraGeneric(IndiClient):
             return
 
         _multi_camera_diag(
-            '[HYBRID_AWB_CAPTURE_DIAG][%s][camera_id=%s] command=%s argv=%r apply_mode=%s backend=%s awb_source=%s awb_red=%0.4f awb_blue=%0.4f sample_count=%d shutter_us=%d requested_exposure_s=%0.8f gain=%0.2f start_monotonic=%0.6f exposure_period=%0.4f exposure_period_day=%0.4f timeout=%0.1fs has_awbgains=%s awbgains_count=%d has_awb=%s awb_count=%d has_timeout=%s has_immediate=%s has_nopreview=%s',
+            '[HYBRID_AWB_CAPTURE_DIAG][%s][camera_id=%s] command=%s argv=%r raw_apply_mode=%r apply_mode=%s backend=%s awb_source=%s awbgains_suppressed=%s awb_red=%0.4f awb_blue=%0.4f sample_count=%d shutter_us=%d requested_exposure_s=%0.8f gain=%0.2f start_monotonic=%0.6f exposure_period=%0.4f exposure_period_day=%0.4f timeout=%0.1fs has_awbgains=%s awbgains_count=%d has_awb=%s awb_count=%d has_timeout=%s has_immediate=%s has_nopreview=%s',
             getattr(self, 'profile_id', 'default'),
             getattr(self, 'camera_id', 'unknown'),
             ' '.join(cmd),
             cmd,
+            control.get('raw_apply_mode'),
             control.get('apply_mode'),
             control.get('backend'),
             control.get('awb_source'),
+            control.get('awbgains_suppressed'),
             control.get('red_gain'),
             control.get('blue_gain'),
             int(control.get('sample_count') or 0),
