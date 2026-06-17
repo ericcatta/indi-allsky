@@ -156,7 +156,67 @@ class IndiClientLibCameraGeneric(IndiClient):
         return gain
 
 
+    def _processingMode(self):
+        return str(self.config.get('PROCESSING_MODE', 'classic') or 'classic').strip().lower()
+
+
+    def _hybridAwbEnabled(self):
+        return self._processingMode() == 'hybrid'
+
+
+    def _clampHybridAwbGain(self, gain):
+        return max(0.5, min(3.0, float(gain)))
+
+
+    def _hybridAwbFallbackGains(self):
+        return (
+            self._clampHybridAwbGain(self._libcameraAwbGainValue('AWB_RED_GAIN')),
+            self._clampHybridAwbGain(self._libcameraAwbGainValue('AWB_BLUE_GAIN')),
+        )
+
+
+    def _hybridAwbGains(self):
+        red_gain, blue_gain = self._hybridAwbFallbackGains()
+        hybrid_av = getattr(self, 'hybrid_av', None)
+        if hybrid_av is None:
+            return red_gain, blue_gain, 0, 'no-shared-state'
+
+        try:
+            with hybrid_av.get_lock():
+                if hybrid_av[constants.HYBRID_AWB_INITIALIZED] < 0.5:
+                    hybrid_av[constants.HYBRID_AWB_RED_GAIN_NEXT] = red_gain
+                    hybrid_av[constants.HYBRID_AWB_BLUE_GAIN_NEXT] = blue_gain
+                    hybrid_av[constants.HYBRID_AWB_INITIALIZED] = 1.0
+                    hybrid_av[constants.HYBRID_AWB_SAMPLE_COUNT] = 0.0
+                    hybrid_av[constants.HYBRID_AWB_STATUS] = 0.0
+
+                red_gain = self._clampHybridAwbGain(hybrid_av[constants.HYBRID_AWB_RED_GAIN_NEXT])
+                blue_gain = self._clampHybridAwbGain(hybrid_av[constants.HYBRID_AWB_BLUE_GAIN_NEXT])
+                sample_count = int(hybrid_av[constants.HYBRID_AWB_SAMPLE_COUNT])
+        except Exception as e:
+            logger.error('Hybrid AWB shared state error: %s', str(e))
+            red_gain, blue_gain = self._hybridAwbFallbackGains()
+            return red_gain, blue_gain, 0, 'shared-state-error'
+
+        return red_gain, blue_gain, sample_count, None
+
+
     def _appendLibcameraAwbOptions(self, cmd, night=True):
+        if self._hybridAwbEnabled():
+            red_gain, blue_gain, sample_count, reason = self._hybridAwbGains()
+            cmd.extend(['--awbgains', '{0:g},{1:g}'.format(red_gain, blue_gain)])
+            reason_s = '' if reason is None else ' reason={0:s}'.format(reason)
+            _multi_camera_diag(
+                '[HYBRID_AWB][%s][camera_id=%s] applied_red=%0.4f applied_blue=%0.4f sample_count=%d%s',
+                getattr(self, 'profile_id', 'default'),
+                self.camera_id if self.camera_id is not None else 'unknown',
+                red_gain,
+                blue_gain,
+                sample_count,
+                reason_s,
+            )
+            return
+
         awb_mode = self._libcameraAwbMode(night=night)
         if awb_mode == 'fixed':
             red_gain = self._libcameraAwbGainValue('AWB_RED_GAIN')

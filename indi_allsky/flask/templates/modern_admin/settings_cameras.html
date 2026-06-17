@@ -111,7 +111,7 @@ var camera_id = {{ camera_id }};
                     </div>
                     <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
                 </div>
-                <p class="modern-admin-note">Classic preserves the current indi-allsky pipeline. Hybrid only enables the per-camera controller foundation in this patch; it does not change image output, exposure, gain, AWB, stretch, or color calibration yet.</p>
+                <p class="modern-admin-note">Classic preserves the current indi-allsky pipeline. Hybrid enables the per-camera controller path; AWB uses runtime gains from the previous frame while the other controllers remain placeholders.</p>
 
                 <div class="modern-admin-camera-profile-summary" aria-label="Hybrid controller status">
                     <div>
@@ -123,15 +123,15 @@ var camera_id = {{ camera_id }};
                         <strong>{{ 'Hybrid foundation active' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic pipeline active' }}</strong>
                     </div>
                     <div>
-                        <span>Runtime effect</span>
-                        <strong>None in v2 layout</strong>
+                        <span>AWB status</span>
+                        <strong>{{ 'Runtime gains from previous frame' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic libcamera AWB path' }}</strong>
                     </div>
                 </div>
 
                 <div class="modern-admin-camera-profile-tabs" aria-label="Hybrid controller future modules">
                     <span class="modern-admin-camera-profile-tab">
                         <strong>AWB</strong>
-                        <span>Future per-camera controller</span>
+                        <span>{{ 'Active for libcamera captures' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic controlled' }}</span>
                     </span>
                     <span class="modern-admin-camera-profile-tab">
                         <strong>ADU / Exposure</strong>

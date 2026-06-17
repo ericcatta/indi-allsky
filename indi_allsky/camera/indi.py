@@ -112,6 +112,7 @@ class IndiClient(PyIndi.BaseClient):
         self.binning_av = binning_av
 
         self.night_av = night_av
+        self.hybrid_av = None
 
         self._camera_id = None
 

@@ -282,6 +282,7 @@ class CaptureWorker(Process):
                 sensors_user_av=sensors_user_av,
                 night_av=night_av,
                 astro_av=astro_av,
+                hybrid_av=None,
             )
 
         self.camera_shared_state = camera_shared_state
@@ -296,6 +297,7 @@ class CaptureWorker(Process):
         self.sensors_user_av = self.camera_shared_state.sensors_user_av  # 0 ccd_temp
         self.night_av = self.camera_shared_state.night_av
         self.astro_av = self.camera_shared_state.astro_av
+        self.hybrid_av = self.camera_shared_state.hybrid_av
 
         self._miscDb = miscDb(self.config)
         self._dateCalcs = IndiAllSkyDateCalcs(self.config, self.position_av)
@@ -1094,6 +1096,7 @@ class CaptureWorker(Process):
         self.indiclient.profile_outputs = self.profile_outputs
         self.indiclient.images_only = self.images_only_profile
         self.indiclient.profile_primary = self.primary_profile
+        self.indiclient.hybrid_av = self.hybrid_av
         logger.info(
             '[%s] Capture profile initialized: interface=%s primary=%s images_only=%s',
             self.profile_id,

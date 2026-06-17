@@ -132,6 +132,14 @@ BINNING_MOONMODE    = 4
 BINNING_SQM         = 5
 
 
+# Hybrid controller indexes
+HYBRID_AWB_RED_GAIN_NEXT   = 0
+HYBRID_AWB_BLUE_GAIN_NEXT  = 1
+HYBRID_AWB_INITIALIZED     = 2
+HYBRID_AWB_SAMPLE_COUNT    = 3
+HYBRID_AWB_STATUS          = 4
+
+
 # Leaving gaps for addtional classifications
 SMOKE_RATING_NODATA  = -1
 SMOKE_RATING_CLEAR   = 1
@@ -484,4 +492,3 @@ INDISERVER_GPS_MAP = {
     'indi_gpsnmea'          : 'GPSd NEMA',
     'indi_simulator_gps'    : 'GPS Simulator',
 }
-

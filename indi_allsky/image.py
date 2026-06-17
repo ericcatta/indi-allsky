@@ -377,6 +377,194 @@ class ImageWorker(Process):
         return self._select_adu_state(profile_id, camera_id)
 
 
+    def _processing_mode(self):
+        return str(self.config.get('PROCESSING_MODE', 'classic') or 'classic').strip().lower()
+
+
+    def _hybrid_awb_enabled(self):
+        return self._processing_mode() == 'hybrid'
+
+
+    def _clamp_hybrid_awb_gain(self, gain):
+        return max(0.5, min(3.0, float(gain)))
+
+
+    def _hybrid_awb_fallback_gains(self):
+        libcamera_config = self.config.get('LIBCAMERA', {}) or {}
+
+        try:
+            red_gain = float(libcamera_config.get('AWB_RED_GAIN', libcamera_config.get('awb_red_gain', 1.0)))
+        except (TypeError, ValueError):
+            red_gain = 1.0
+
+        try:
+            blue_gain = float(libcamera_config.get('AWB_BLUE_GAIN', libcamera_config.get('awb_blue_gain', 1.0)))
+        except (TypeError, ValueError):
+            blue_gain = 1.0
+
+        return (
+            self._clamp_hybrid_awb_gain(red_gain),
+            self._clamp_hybrid_awb_gain(blue_gain),
+        )
+
+
+    def _hybrid_awb_current_gains(self):
+        red_gain, blue_gain = self._hybrid_awb_fallback_gains()
+        if self.hybrid_av is None:
+            return red_gain, blue_gain, 0
+
+        with self.hybrid_av.get_lock():
+            if self.hybrid_av[constants.HYBRID_AWB_INITIALIZED] < 0.5:
+                self.hybrid_av[constants.HYBRID_AWB_RED_GAIN_NEXT] = red_gain
+                self.hybrid_av[constants.HYBRID_AWB_BLUE_GAIN_NEXT] = blue_gain
+                self.hybrid_av[constants.HYBRID_AWB_INITIALIZED] = 1.0
+                self.hybrid_av[constants.HYBRID_AWB_SAMPLE_COUNT] = 0.0
+                self.hybrid_av[constants.HYBRID_AWB_STATUS] = 0.0
+
+            red_gain = self._clamp_hybrid_awb_gain(self.hybrid_av[constants.HYBRID_AWB_RED_GAIN_NEXT])
+            blue_gain = self._clamp_hybrid_awb_gain(self.hybrid_av[constants.HYBRID_AWB_BLUE_GAIN_NEXT])
+            sample_count = int(self.hybrid_av[constants.HYBRID_AWB_SAMPLE_COUNT])
+
+        return red_gain, blue_gain, sample_count
+
+
+    def _hybrid_awb_roi(self, image):
+        adu_roi = self.config.get('ADU_ROI', [])
+        if not isinstance(adu_roi, (list, tuple)) or len(adu_roi) != 4:
+            return image
+
+        image_height, image_width = image.shape[:2]
+        try:
+            x1 = max(0, min(image_width, int(adu_roi[0])))
+            y1 = max(0, min(image_height, int(adu_roi[1])))
+            x2 = max(0, min(image_width, int(adu_roi[2])))
+            y2 = max(0, min(image_height, int(adu_roi[3])))
+        except (TypeError, ValueError):
+            return image
+
+        if x2 <= x1 or y2 <= y1:
+            return image
+
+        return image[y1:y2, x1:x2]
+
+
+    def _hybrid_awb_channel_stat(self, channel_values):
+        if channel_values.size < 32:
+            return None
+
+        low, high = numpy.percentile(channel_values, (5, 95))
+        clipped_values = channel_values[(channel_values >= low) & (channel_values <= high)]
+        if clipped_values.size < 32:
+            clipped_values = channel_values
+
+        return float(numpy.median(clipped_values))
+
+
+    def _hybrid_awb_skip(self, profile_id, camera_id, reason):
+        try:
+            red_gain, blue_gain, sample_count = self._hybrid_awb_current_gains()
+            if self.hybrid_av is not None:
+                with self.hybrid_av.get_lock():
+                    self.hybrid_av[constants.HYBRID_AWB_STATUS] = -1.0
+        except Exception:
+            red_gain, blue_gain = self._hybrid_awb_fallback_gains()
+            sample_count = 0
+
+        _multi_camera_diag(
+            '[HYBRID_AWB][%s][camera_id=%s] skipped reason=%s applied_red=%0.4f applied_blue=%0.4f sample_count=%d',
+            profile_id,
+            camera_id if camera_id is not None else 'unknown',
+            reason,
+            red_gain,
+            blue_gain,
+            sample_count,
+        )
+
+
+    def update_hybrid_awb(self, profile_id, camera_id):
+        if not self._hybrid_awb_enabled():
+            return
+
+        try:
+            image = getattr(self.image_processor, 'image', None)
+            if image is None:
+                self._hybrid_awb_skip(profile_id, camera_id, 'no-image')
+                return
+
+            if image.ndim != 3 or image.shape[2] < 3:
+                self._hybrid_awb_skip(profile_id, camera_id, 'not-bgr')
+                return
+
+            if self.hybrid_av is None:
+                self._hybrid_awb_skip(profile_id, camera_id, 'no-shared-state')
+                return
+
+            sample_image = self._hybrid_awb_roi(image[:, :, :3])
+            sample_pixels = sample_image.shape[0] * sample_image.shape[1]
+            if sample_pixels <= 0:
+                self._hybrid_awb_skip(profile_id, camera_id, 'empty-roi')
+                return
+
+            stride = max(1, int((sample_pixels / 500000) ** 0.5))
+            sample_image = sample_image[::stride, ::stride, :3]
+
+            if numpy.issubdtype(sample_image.dtype, numpy.integer):
+                max_value = float(numpy.iinfo(sample_image.dtype).max)
+            else:
+                max_value = float(numpy.nanmax(sample_image))
+                if not numpy.isfinite(max_value) or max_value <= 0:
+                    max_value = 1.0
+
+            sample_float = sample_image.astype(numpy.float32, copy=False)
+            pixel_max = numpy.nanmax(sample_float, axis=2)
+            valid_mask = numpy.isfinite(sample_float).all(axis=2)
+            valid_mask &= pixel_max > (max_value * 0.01)
+            valid_mask &= pixel_max < (max_value * 0.98)
+
+            sample_count = int(numpy.count_nonzero(valid_mask))
+            if sample_count < 256:
+                self._hybrid_awb_skip(profile_id, camera_id, 'insufficient-samples')
+                return
+
+            valid_pixels = sample_float[valid_mask]
+            blue_stat = self._hybrid_awb_channel_stat(valid_pixels[:, 0])
+            green_stat = self._hybrid_awb_channel_stat(valid_pixels[:, 1])
+            red_stat = self._hybrid_awb_channel_stat(valid_pixels[:, 2])
+
+            if not all((blue_stat, green_stat, red_stat)):
+                self._hybrid_awb_skip(profile_id, camera_id, 'invalid-channel-stat')
+                return
+
+            measured_red = self._clamp_hybrid_awb_gain(green_stat / red_stat)
+            measured_blue = self._clamp_hybrid_awb_gain(green_stat / blue_stat)
+
+            old_red, old_blue, previous_sample_count = self._hybrid_awb_current_gains()
+            applied_red = self._clamp_hybrid_awb_gain((old_red * 0.75) + (measured_red * 0.25))
+            applied_blue = self._clamp_hybrid_awb_gain((old_blue * 0.75) + (measured_blue * 0.25))
+
+            with self.hybrid_av.get_lock():
+                self.hybrid_av[constants.HYBRID_AWB_RED_GAIN_NEXT] = applied_red
+                self.hybrid_av[constants.HYBRID_AWB_BLUE_GAIN_NEXT] = applied_blue
+                self.hybrid_av[constants.HYBRID_AWB_INITIALIZED] = 1.0
+                self.hybrid_av[constants.HYBRID_AWB_SAMPLE_COUNT] = float(sample_count)
+                self.hybrid_av[constants.HYBRID_AWB_STATUS] = 1.0
+
+            _multi_camera_diag(
+                '[HYBRID_AWB][%s][camera_id=%s] measured_red=%0.4f measured_blue=%0.4f applied_red=%0.4f applied_blue=%0.4f sample_count=%d previous_sample_count=%d',
+                profile_id,
+                camera_id if camera_id is not None else 'unknown',
+                measured_red,
+                measured_blue,
+                applied_red,
+                applied_blue,
+                sample_count,
+                previous_sample_count,
+            )
+        except Exception as e:
+            logger.error('Hybrid AWB calculation failed: %s', str(e))
+            self._hybrid_awb_skip(profile_id, camera_id, 'calculation-error')
+
+
     @property
     def libcamera_raw(self):
         return self._libcamera_raw
@@ -878,6 +1066,8 @@ class ImageWorker(Process):
         logger.info('Image: %d x %d', image_width, image_height)
         if images_only_diag:
             self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_AFTER_STACK', binning)
+
+        self.update_hybrid_awb(profile_id, camera_id)
 
 
         ### IMAGE IS CALIBRATED ###
