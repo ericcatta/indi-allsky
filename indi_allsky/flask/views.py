@@ -15345,6 +15345,12 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'classic',
         'hybrid',
     )
+    CAMERA_SETTINGS_HYBRID_AWB_APPLY_MODES = (
+        'auto',
+        'capture_driver',
+        'postprocess_rgb',
+        'disabled',
+    )
     CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER = (
         'exposure_min',
         'exposure_max',
@@ -15882,58 +15888,120 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         submitted_data = submitted_data or {}
         errors = errors or {}
         processing_mode = str(submitted_data.get('processing_mode', self.get_camera_settings_processing_mode(profile)) or 'classic').lower()
+        awb_apply_mode = str(submitted_data.get('awb_apply_mode', self.get_camera_settings_hybrid_awb_apply_mode(profile)) or 'auto').lower()
+        capabilities = self.get_camera_settings_hybrid_capabilities(profile, awb_apply_mode)
 
         return {
             'enabled'         : bool(profile.get('from_multi_camera')),
             'processing_mode' : processing_mode,
             'choices'         : self.get_camera_settings_processing_mode_choices(processing_mode),
-            'errors'          : errors.get('processing_mode', []),
+            'awb_apply_mode'  : awb_apply_mode,
+            'awb_apply_choices': self.get_camera_settings_hybrid_awb_apply_mode_choices(awb_apply_mode, capabilities),
+            'errors'          : errors,
             'readonly'        : not profile.get('from_multi_camera'),
-            'capabilities'    : self.get_camera_settings_hybrid_capabilities(profile),
+            'capabilities'    : capabilities,
         }
 
 
-    def get_camera_settings_hybrid_capabilities(self, profile):
+    def get_camera_settings_hybrid_capabilities(self, profile, awb_apply_mode=None):
         camera_interface = self.get_camera_settings_driver_field_value(profile, 'camera_interface')
         driver_type = self.get_camera_settings_driver_type(camera_interface)
+        awb_apply_mode = str(awb_apply_mode or self.get_camera_settings_hybrid_awb_apply_mode(profile) or 'auto').lower()
 
         capture_apply_available = driver_type == 'libcamera'
+        postprocess_available = True
+
+        if awb_apply_mode == 'disabled':
+            resolved_backend = 'disabled_not_applied'
+            apply_backend = 'disabled'
+        elif awb_apply_mode == 'postprocess_rgb':
+            resolved_backend = 'postprocess_rgb'
+            apply_backend = 'post-process RGB'
+        elif awb_apply_mode == 'capture_driver':
+            resolved_backend = 'libcamera_capture' if capture_apply_available else 'unsupported_not_applied'
+            apply_backend = 'capture driver' if capture_apply_available else 'unsupported'
+        elif capture_apply_available:
+            resolved_backend = 'libcamera_capture'
+            apply_backend = 'capture driver'
+        elif driver_type == 'indi':
+            resolved_backend = 'postprocess_rgb'
+            apply_backend = 'post-process RGB'
+        else:
+            resolved_backend = 'unsupported_not_applied'
+            apply_backend = 'unsupported'
+
         if capture_apply_available:
             capture_apply_status = 'available'
             capture_backend = 'libcamera_capture'
             capture_apply_detail = 'Applied to the next capture with --awbgains.'
-            apply_backend = 'capture driver'
-            postprocess_status = 'not used'
-            postprocess_backend = 'not_used'
-            postprocess_detail = 'Skipped to avoid double AWB correction.'
         else:
             capture_apply_status = 'not available'
             capture_backend = 'unsupported_not_applied' if driver_type != 'indi' else 'indi_capture_not_available'
             capture_apply_detail = 'No safe capture-side AWB gain backend is implemented for this interface.'
-            if driver_type == 'indi':
-                apply_backend = 'post-process RGB'
-                postprocess_status = 'available'
-                postprocess_backend = 'postprocess_rgb'
-                postprocess_detail = 'Applied in image processing before stretch and overlays.'
-            else:
-                apply_backend = 'unsupported'
-                postprocess_status = 'not available'
-                postprocess_backend = 'unsupported_not_applied'
-                postprocess_detail = 'No AWB apply backend is implemented for this interface.'
+
+        if postprocess_available:
+            postprocess_status = 'available'
+            postprocess_backend = 'postprocess_rgb'
+            postprocess_detail = 'Applied in image processing before stretch and overlays.'
+        else:
+            postprocess_status = 'not available'
+            postprocess_backend = 'unsupported_not_applied'
+            postprocess_detail = 'No AWB postprocess backend is implemented for this interface.'
 
         return {
             'camera_interface'        : camera_interface or 'unknown',
             'measurement_status'      : 'available',
             'measurement_detail'      : 'Hybrid can measure RGB balance from processed frame input.',
+            'resolved_backend'        : resolved_backend,
             'apply_backend'           : apply_backend,
             'capture_apply_status'    : capture_apply_status,
             'capture_apply_available' : capture_apply_available,
             'capture_backend'         : capture_backend,
             'capture_apply_detail'    : capture_apply_detail,
+            'postprocess_available'   : postprocess_available,
             'postprocess_status'      : postprocess_status,
             'postprocess_backend'     : postprocess_backend,
             'postprocess_detail'      : postprocess_detail,
         }
+
+
+    def get_camera_settings_hybrid_awb_apply_mode(self, profile):
+        hybrid_config = profile.get('hybrid') or {}
+        if not isinstance(hybrid_config, dict):
+            return 'auto'
+
+        awb_config = hybrid_config.get('awb') or {}
+        if not isinstance(awb_config, dict):
+            return 'auto'
+
+        awb_apply_mode = str(awb_config.get('apply_mode', 'auto') or 'auto').strip().lower()
+        if awb_apply_mode not in self.CAMERA_SETTINGS_HYBRID_AWB_APPLY_MODES:
+            return 'auto'
+
+        return awb_apply_mode
+
+
+    def get_camera_settings_hybrid_awb_apply_mode_choices(self, value, capabilities):
+        labels = {
+            'auto'           : 'Auto',
+            'capture_driver' : 'Capture driver',
+            'postprocess_rgb': 'Post-process RGB',
+            'disabled'       : 'Disabled',
+        }
+        descriptions = {
+            'auto'           : 'Choose the safest backend for this camera.',
+            'capture_driver' : 'Apply before capture when the driver supports it.',
+            'postprocess_rgb': 'Apply in image processing before stretch.',
+            'disabled'       : 'Measure/log only; do not apply AWB.',
+        }
+
+        return tuple({
+            'value'       : apply_mode,
+            'label'       : labels[apply_mode],
+            'description' : descriptions[apply_mode],
+            'selected'    : apply_mode == value,
+            'disabled'    : apply_mode == 'capture_driver' and not capabilities.get('capture_apply_available'),
+        } for apply_mode in self.CAMERA_SETTINGS_HYBRID_AWB_APPLY_MODES)
 
 
     def get_camera_settings_processing_mode(self, profile):
@@ -15979,7 +16047,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             result['modern_admin_camera_settings_error'] = 'The current global camera fallback is read-only. Select a MULTI_CAMERA profile before saving.'
             return result
 
-        submitted_data, validation_errors = self.get_camera_settings_hybrid_submitted_data()
+        submitted_data, validation_errors = self.get_camera_settings_hybrid_submitted_data(selected_profile)
         if validation_errors:
             result['modern_admin_camera_settings_error'] = 'Please fix the Hybrid Controller settings below. No config was saved.'
             result['modern_admin_camera_settings_errors'] = validation_errors
@@ -16019,7 +16087,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         return result
 
 
-    def get_camera_settings_hybrid_submitted_data(self):
+    def get_camera_settings_hybrid_submitted_data(self, profile):
         submitted_data = {}
         validation_errors = dict()
 
@@ -16027,6 +16095,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         submitted_data['processing_mode'] = processing_mode
         if processing_mode not in self.CAMERA_SETTINGS_PROCESSING_MODES:
             validation_errors.setdefault('processing_mode', []).append('Select Classic or Hybrid.')
+
+        awb_apply_mode = request.form.get('awb_apply_mode', 'auto').strip().lower() or 'auto'
+        submitted_data['awb_apply_mode'] = awb_apply_mode
+        if awb_apply_mode not in self.CAMERA_SETTINGS_HYBRID_AWB_APPLY_MODES:
+            validation_errors.setdefault('awb_apply_mode', []).append('Select Auto, Capture driver, Post-process RGB, or Disabled.')
+        elif awb_apply_mode == 'capture_driver':
+            capabilities = self.get_camera_settings_hybrid_capabilities(profile, awb_apply_mode)
+            if not capabilities.get('capture_apply_available'):
+                validation_errors.setdefault('awb_apply_mode', []).append('Capture driver AWB is not available for this camera interface. Use Auto, Post-process RGB, or Disabled.')
 
         return submitted_data, validation_errors
 
@@ -16052,6 +16129,17 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             raise ValueError('Selected profile changed before save. Reload and try again.')
 
         profile['processing_mode'] = submitted_data['processing_mode']
+        hybrid_config = profile.get('hybrid')
+        if not isinstance(hybrid_config, dict):
+            hybrid_config = {}
+
+        awb_config = hybrid_config.get('awb')
+        if not isinstance(awb_config, dict):
+            awb_config = {}
+
+        awb_config['apply_mode'] = submitted_data['awb_apply_mode']
+        hybrid_config['awb'] = awb_config
+        profile['hybrid'] = hybrid_config
         return str(profile_id)
 
 

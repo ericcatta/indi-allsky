@@ -23,6 +23,13 @@ PROCESSING_MODES = {
     'hybrid',
 }
 
+HYBRID_AWB_APPLY_MODES = {
+    'auto',
+    'capture_driver',
+    'postprocess_rgb',
+    'disabled',
+}
+
 
 @dataclass(frozen=True)
 class CaptureProfile:
@@ -36,6 +43,7 @@ class CaptureProfile:
     enabled: bool
     primary: bool
     processing_mode: str
+    hybrid_awb_apply_mode: str
     camera_interface: str
     indi_server: str
     indi_port: int
@@ -138,6 +146,22 @@ def _processing_mode(profile_config: Mapping[str, Any]) -> str:
     return processing_mode
 
 
+def _hybrid_awb_apply_mode(profile_config: Mapping[str, Any]) -> str:
+    hybrid_config = profile_config.get('hybrid') or {}
+    if not isinstance(hybrid_config, Mapping):
+        hybrid_config = {}
+
+    awb_config = hybrid_config.get('awb') or {}
+    if not isinstance(awb_config, Mapping):
+        awb_config = {}
+
+    apply_mode = str(awb_config.get('apply_mode', 'auto') or 'auto').strip().lower()
+    if apply_mode not in HYBRID_AWB_APPLY_MODES:
+        return 'auto'
+
+    return apply_mode
+
+
 def _mapping_float(config: Mapping[str, Any], key: str, default: float) -> float:
     try:
         return float(config.get(key, default))
@@ -222,6 +246,7 @@ def _profile_from_config(
         enabled=bool(profile_config.get('enabled', default_enabled)),
         primary=bool(profile_config.get('primary', default_primary)),
         processing_mode=_processing_mode(profile_config),
+        hybrid_awb_apply_mode=_hybrid_awb_apply_mode(profile_config),
         camera_interface=str(camera_interface or 'indi'),
         indi_server=str(indi_config.get('server', profile_config.get('indi_server', config.get('INDI_SERVER', 'localhost'))) or 'localhost'),
         indi_port=indi_port,
@@ -289,6 +314,11 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
 
     profile_config = deepcopy(dict(config))
     profile_config['PROCESSING_MODE'] = profile.processing_mode
+    hybrid_config = deepcopy(profile_config.get('HYBRID') or {})
+    hybrid_awb_config = deepcopy(hybrid_config.get('AWB') or {})
+    hybrid_awb_config['APPLY_MODE'] = profile.hybrid_awb_apply_mode
+    hybrid_config['AWB'] = hybrid_awb_config
+    profile_config['HYBRID'] = hybrid_config
     profile_config['CAMERA_INTERFACE'] = profile.camera_interface
     profile_config['INDI_SERVER'] = profile.indi_server
     profile_config['INDI_PORT'] = profile.indi_port

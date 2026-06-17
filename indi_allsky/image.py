@@ -386,8 +386,37 @@ class ImageWorker(Process):
         return self._processing_mode() == 'hybrid'
 
 
+    def _hybrid_awb_apply_mode(self):
+        hybrid_config = self.config.get('HYBRID') or {}
+        if not isinstance(hybrid_config, dict):
+            hybrid_config = {}
+
+        awb_config = hybrid_config.get('AWB') or {}
+        if not isinstance(awb_config, dict):
+            awb_config = {}
+
+        apply_mode = str(awb_config.get('APPLY_MODE', 'auto') or 'auto').strip().lower()
+        if apply_mode not in ('auto', 'capture_driver', 'postprocess_rgb', 'disabled'):
+            return 'auto'
+
+        return apply_mode
+
+
     def _hybrid_awb_backend(self):
+        apply_mode = self._hybrid_awb_apply_mode()
+        if apply_mode == 'disabled':
+            return 'disabled_not_applied'
+
+        if apply_mode == 'postprocess_rgb':
+            return 'postprocess_rgb'
+
         camera_interface = str(self.config.get('CAMERA_INTERFACE', '') or '').strip().lower()
+        if apply_mode == 'capture_driver':
+            if camera_interface.startswith('libcamera'):
+                return 'libcamera_capture'
+
+            return 'unsupported_not_applied'
+
         if camera_interface.startswith('libcamera'):
             return 'libcamera_capture'
 
@@ -435,6 +464,14 @@ class ImageWorker(Process):
         self._log_hybrid_awb_backend_warning(profile_id, camera_id, backend)
 
         if backend == 'libcamera_capture':
+            return
+
+        if backend == 'disabled_not_applied':
+            _multi_camera_diag(
+                '[HYBRID_AWB][%s][camera_id=%s] backend=disabled_not_applied skipped reason=apply-disabled',
+                profile_id,
+                camera_id if camera_id is not None else 'unknown',
+            )
             return
 
         if backend == 'unsupported_not_applied':

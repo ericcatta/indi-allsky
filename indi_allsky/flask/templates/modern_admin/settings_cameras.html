@@ -128,6 +128,10 @@ var camera_id = {{ camera_id }};
                         <strong>{{ 'Measurement available · apply via ' ~ hybrid_capabilities.apply_backend if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic AWB path' }}</strong>
                     </div>
                     <div>
+                        <span>AWB apply mode</span>
+                        <strong>{{ modern_admin_camera_settings_hybrid_form.awb_apply_mode }}</strong>
+                    </div>
+                    <div>
                         <span>Camera interface</span>
                         <strong>{{ hybrid_capabilities.camera_interface }}</strong>
                     </div>
@@ -142,7 +146,7 @@ var camera_id = {{ camera_id }};
                         <strong>AWB capture apply</strong>
                         <span>{{ hybrid_capabilities.capture_apply_status }} · {{ hybrid_capabilities.capture_apply_detail }}</span>
                     </span>
-                    <span class="modern-admin-camera-profile-tab{% if hybrid_capabilities.postprocess_status == 'not available' %} modern-admin-status-warning{% endif %}">
+                    <span class="modern-admin-camera-profile-tab{% if not hybrid_capabilities.postprocess_available %} modern-admin-status-warning{% endif %}">
                         <strong>AWB postprocess apply</strong>
                         <span>{{ hybrid_capabilities.postprocess_status }} · {{ hybrid_capabilities.postprocess_detail }}</span>
                     </span>
@@ -174,9 +178,28 @@ var camera_id = {{ camera_id }};
                             </select>
                             <span class="modern-admin-settings-edit-help">Hybrid is an opt-in placeholder for future per-camera AWB, ADU/exposure, stretch, and color calibration controllers.</span>
 
-                            {% if modern_admin_camera_settings_hybrid_form.errors %}
+                            {% if modern_admin_camera_settings_hybrid_form.errors.processing_mode %}
                             <span class="modern-admin-settings-edit-error">
-                                {% for error in modern_admin_camera_settings_hybrid_form.errors %}
+                                {% for error in modern_admin_camera_settings_hybrid_form.errors.processing_mode %}
+                                {{ error }}{% if not loop.last %}<br>{% endif %}
+                                {% endfor %}
+                            </span>
+                            {% endif %}
+                        </label>
+
+                        <label class="modern-admin-settings-edit-field" for="camera-hybrid-awb-apply-mode">
+                            <span class="modern-admin-settings-edit-label">AWB Apply Mode</span>
+                            <span class="modern-admin-settings-edit-meta">MULTI_CAMERA.profiles[n].hybrid.awb.apply_mode · profile-specific</span>
+                            <select id="camera-hybrid-awb-apply-mode" name="awb_apply_mode" {% if modern_admin_camera_settings_hybrid_form.readonly %}disabled{% endif %}>
+                                {% for choice in modern_admin_camera_settings_hybrid_form.awb_apply_choices %}
+                                <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %} {% if choice.disabled %}disabled{% endif %}>{{ choice.label }}{% if choice.disabled %} (unavailable){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="modern-admin-settings-edit-help">Auto uses capture driver for libcamera and post-process RGB for INDI. Disabled keeps measurement/logging but does not apply AWB.</span>
+
+                            {% if modern_admin_camera_settings_hybrid_form.errors.awb_apply_mode %}
+                            <span class="modern-admin-settings-edit-error">
+                                {% for error in modern_admin_camera_settings_hybrid_form.errors.awb_apply_mode %}
                                 {{ error }}{% if not loop.last %}<br>{% endif %}
                                 {% endfor %}
                             </span>

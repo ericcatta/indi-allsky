@@ -164,6 +164,29 @@ class IndiClientLibCameraGeneric(IndiClient):
         return self._processingMode() == 'hybrid'
 
 
+    def _hybridAwbApplyMode(self):
+        hybrid_config = self.config.get('HYBRID') or {}
+        if not isinstance(hybrid_config, dict):
+            hybrid_config = {}
+
+        awb_config = hybrid_config.get('AWB') or {}
+        if not isinstance(awb_config, dict):
+            awb_config = {}
+
+        apply_mode = str(awb_config.get('APPLY_MODE', 'auto') or 'auto').strip().lower()
+        if apply_mode not in ('auto', 'capture_driver', 'postprocess_rgb', 'disabled'):
+            return 'auto'
+
+        return apply_mode
+
+
+    def _hybridAwbCaptureEnabled(self):
+        if not self._hybridAwbEnabled():
+            return False
+
+        return self._hybridAwbApplyMode() in ('auto', 'capture_driver')
+
+
     def _clampHybridAwbGain(self, gain):
         return max(0.5, min(3.0, float(gain)))
 
@@ -202,7 +225,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
     def _appendLibcameraAwbOptions(self, cmd, night=True):
-        if self._hybridAwbEnabled():
+        if self._hybridAwbCaptureEnabled():
             red_gain, blue_gain, sample_count, reason = self._hybridAwbGains()
             cmd.extend(['--awbgains', '{0:g},{1:g}'.format(red_gain, blue_gain)])
             reason_s = '' if reason is None else ' reason={0:s}'.format(reason)
