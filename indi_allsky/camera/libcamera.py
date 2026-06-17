@@ -207,7 +207,7 @@ class IndiClientLibCameraGeneric(IndiClient):
             cmd.extend(['--awbgains', '{0:g},{1:g}'.format(red_gain, blue_gain)])
             reason_s = '' if reason is None else ' reason={0:s}'.format(reason)
             _multi_camera_diag(
-                '[HYBRID_AWB][%s][camera_id=%s] applied_red=%0.4f applied_blue=%0.4f sample_count=%d%s',
+                '[HYBRID_AWB][%s][camera_id=%s] backend=libcamera_capture applied_red=%0.4f applied_blue=%0.4f sample_count=%d%s',
                 getattr(self, 'profile_id', 'default'),
                 self.camera_id if self.camera_id is not None else 'unknown',
                 red_gain,

@@ -130,6 +130,7 @@ class ImageWorker(Process):
         self.adu_states = {}
         self.adu_state = self._new_adu_state()
         self.adu_states[self.adu_context_key] = self.adu_state
+        self.hybrid_awb_backend_warned = set()
         self.generate_mask_base = True
 
         self.sqm_value = 0
@@ -385,6 +386,129 @@ class ImageWorker(Process):
         return self._processing_mode() == 'hybrid'
 
 
+    def _hybrid_awb_backend(self):
+        camera_interface = str(self.config.get('CAMERA_INTERFACE', '') or '').strip().lower()
+        if camera_interface.startswith('libcamera'):
+            return 'libcamera_capture'
+
+        if camera_interface == 'indi':
+            return 'postprocess_rgb'
+
+        return 'unsupported_not_applied'
+
+
+    def _log_hybrid_awb_backend_warning(self, profile_id, camera_id, backend):
+        if backend != 'unsupported_not_applied':
+            return
+
+        warning_key = '{0:s}:{1:s}:{2:s}'.format(
+            str(profile_id),
+            str(camera_id if camera_id is not None else 'unknown'),
+            backend,
+        )
+        if warning_key in self.hybrid_awb_backend_warned:
+            return
+
+        self.hybrid_awb_backend_warned.add(warning_key)
+        logger.warning(
+            '[HYBRID_AWB][%s][camera_id=%s] measured values are not applied to capture backend=%s',
+            profile_id,
+            camera_id if camera_id is not None else 'unknown',
+            backend,
+        )
+
+
+    def _hybrid_awb_postprocess_skip(self, profile_id, camera_id, reason):
+        _multi_camera_diag(
+            '[HYBRID_AWB][%s][camera_id=%s] backend=postprocess_rgb skipped reason=%s',
+            profile_id,
+            camera_id if camera_id is not None else 'unknown',
+            reason,
+        )
+
+
+    def apply_hybrid_awb(self, profile_id, camera_id):
+        if not self._hybrid_awb_enabled():
+            return
+
+        backend = self._hybrid_awb_backend()
+        self._log_hybrid_awb_backend_warning(profile_id, camera_id, backend)
+
+        if backend == 'libcamera_capture':
+            return
+
+        if backend == 'unsupported_not_applied':
+            _multi_camera_diag(
+                '[HYBRID_AWB][%s][camera_id=%s] backend=unsupported_not_applied skipped reason=no-apply-backend',
+                profile_id,
+                camera_id if camera_id is not None else 'unknown',
+            )
+            return
+
+        if backend != 'postprocess_rgb':
+            return
+
+        try:
+            image = getattr(self.image_processor, 'image', None)
+            if image is None:
+                self._hybrid_awb_postprocess_skip(profile_id, camera_id, 'no-image')
+                return
+
+            if image.ndim != 3 or image.shape[2] < 3:
+                self._hybrid_awb_postprocess_skip(profile_id, camera_id, 'not-bgr')
+                return
+
+            if self.hybrid_av is None:
+                self._hybrid_awb_postprocess_skip(profile_id, camera_id, 'no-shared-state')
+                return
+
+            with self.hybrid_av.get_lock():
+                initialized = self.hybrid_av[constants.HYBRID_AWB_INITIALIZED] >= 0.5
+                sample_count = int(self.hybrid_av[constants.HYBRID_AWB_SAMPLE_COUNT])
+                red_gain = self._clamp_hybrid_awb_gain(self.hybrid_av[constants.HYBRID_AWB_RED_GAIN_NEXT])
+                blue_gain = self._clamp_hybrid_awb_gain(self.hybrid_av[constants.HYBRID_AWB_BLUE_GAIN_NEXT])
+
+            if not initialized or sample_count <= 0:
+                self._hybrid_awb_postprocess_skip(profile_id, camera_id, 'not_initialized')
+                return
+
+            corrected_image = image.astype(numpy.float32, copy=True)
+            corrected_image[:, :, 0] *= blue_gain
+            corrected_image[:, :, 2] *= red_gain
+
+            if numpy.issubdtype(image.dtype, numpy.integer):
+                max_value = numpy.iinfo(image.dtype).max
+                corrected_image = numpy.clip(corrected_image, 0, max_value).astype(image.dtype)
+            elif numpy.issubdtype(image.dtype, numpy.floating):
+                finite_max = float(numpy.nanmax(image))
+                if not numpy.isfinite(finite_max) or finite_max <= 1.5:
+                    max_value = 1.0
+                elif finite_max <= 255.0:
+                    max_value = 255.0
+                elif finite_max <= 65535.0:
+                    max_value = 65535.0
+                else:
+                    max_value = finite_max
+
+                corrected_image = numpy.clip(corrected_image, 0.0, max_value).astype(image.dtype, copy=False)
+            else:
+                self._hybrid_awb_postprocess_skip(profile_id, camera_id, 'unsupported-dtype')
+                return
+
+            self.image_processor.image = corrected_image
+            _multi_camera_diag(
+                '[HYBRID_AWB][%s][camera_id=%s] backend=postprocess_rgb applied_red=%0.4f applied_blue=%0.4f sample_count=%d',
+                profile_id,
+                camera_id if camera_id is not None else 'unknown',
+                red_gain,
+                blue_gain,
+                sample_count,
+            )
+        except Exception as e:
+            logger.error('Hybrid AWB postprocess apply failed: %s', str(e))
+            self._hybrid_awb_postprocess_skip(profile_id, camera_id, 'apply-error')
+
+
     def _clamp_hybrid_awb_gain(self, gain):
         return max(0.5, min(3.0, float(gain)))
 
@@ -461,6 +585,9 @@ class ImageWorker(Process):
 
 
     def _hybrid_awb_skip(self, profile_id, camera_id, reason):
+        backend = self._hybrid_awb_backend()
+        self._log_hybrid_awb_backend_warning(profile_id, camera_id, backend)
+
         try:
             red_gain, blue_gain, sample_count = self._hybrid_awb_current_gains()
             if self.hybrid_av is not None:
@@ -471,10 +598,11 @@ class ImageWorker(Process):
             sample_count = 0
 
         _multi_camera_diag(
-            '[HYBRID_AWB][%s][camera_id=%s] skipped reason=%s applied_red=%0.4f applied_blue=%0.4f sample_count=%d',
+            '[HYBRID_AWB][%s][camera_id=%s] skipped reason=%s backend=%s applied_red=%0.4f applied_blue=%0.4f sample_count=%d',
             profile_id,
             camera_id if camera_id is not None else 'unknown',
             reason,
+            backend,
             red_gain,
             blue_gain,
             sample_count,
@@ -486,6 +614,9 @@ class ImageWorker(Process):
             return
 
         try:
+            backend = self._hybrid_awb_backend()
+            self._log_hybrid_awb_backend_warning(profile_id, camera_id, backend)
+
             image = getattr(self.image_processor, 'image', None)
             if image is None:
                 self._hybrid_awb_skip(profile_id, camera_id, 'no-image')
@@ -550,11 +681,12 @@ class ImageWorker(Process):
                 self.hybrid_av[constants.HYBRID_AWB_STATUS] = 1.0
 
             _multi_camera_diag(
-                '[HYBRID_AWB][%s][camera_id=%s] measured_red=%0.4f measured_blue=%0.4f applied_red=%0.4f applied_blue=%0.4f sample_count=%d previous_sample_count=%d',
+                '[HYBRID_AWB][%s][camera_id=%s] measured_red=%0.4f measured_blue=%0.4f backend=%s applied_red=%0.4f applied_blue=%0.4f sample_count=%d previous_sample_count=%d',
                 profile_id,
                 camera_id if camera_id is not None else 'unknown',
                 measured_red,
                 measured_blue,
+                backend,
                 applied_red,
                 applied_blue,
                 sample_count,
@@ -1067,6 +1199,7 @@ class ImageWorker(Process):
         if images_only_diag:
             self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_AFTER_STACK', binning)
 
+        self.apply_hybrid_awb(profile_id, camera_id)
         self.update_hybrid_awb(profile_id, camera_id)
 
 

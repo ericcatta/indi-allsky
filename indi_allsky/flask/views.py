@@ -15889,6 +15889,50 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'choices'         : self.get_camera_settings_processing_mode_choices(processing_mode),
             'errors'          : errors.get('processing_mode', []),
             'readonly'        : not profile.get('from_multi_camera'),
+            'capabilities'    : self.get_camera_settings_hybrid_capabilities(profile),
+        }
+
+
+    def get_camera_settings_hybrid_capabilities(self, profile):
+        camera_interface = self.get_camera_settings_driver_field_value(profile, 'camera_interface')
+        driver_type = self.get_camera_settings_driver_type(camera_interface)
+
+        capture_apply_available = driver_type == 'libcamera'
+        if capture_apply_available:
+            capture_apply_status = 'available'
+            capture_backend = 'libcamera_capture'
+            capture_apply_detail = 'Applied to the next capture with --awbgains.'
+            apply_backend = 'capture driver'
+            postprocess_status = 'not used'
+            postprocess_backend = 'not_used'
+            postprocess_detail = 'Skipped to avoid double AWB correction.'
+        else:
+            capture_apply_status = 'not available'
+            capture_backend = 'unsupported_not_applied' if driver_type != 'indi' else 'indi_capture_not_available'
+            capture_apply_detail = 'No safe capture-side AWB gain backend is implemented for this interface.'
+            if driver_type == 'indi':
+                apply_backend = 'post-process RGB'
+                postprocess_status = 'available'
+                postprocess_backend = 'postprocess_rgb'
+                postprocess_detail = 'Applied in image processing before stretch and overlays.'
+            else:
+                apply_backend = 'unsupported'
+                postprocess_status = 'not available'
+                postprocess_backend = 'unsupported_not_applied'
+                postprocess_detail = 'No AWB apply backend is implemented for this interface.'
+
+        return {
+            'camera_interface'        : camera_interface or 'unknown',
+            'measurement_status'      : 'available',
+            'measurement_detail'      : 'Hybrid can measure RGB balance from processed frame input.',
+            'apply_backend'           : apply_backend,
+            'capture_apply_status'    : capture_apply_status,
+            'capture_apply_available' : capture_apply_available,
+            'capture_backend'         : capture_backend,
+            'capture_apply_detail'    : capture_apply_detail,
+            'postprocess_status'      : postprocess_status,
+            'postprocess_backend'     : postprocess_backend,
+            'postprocess_detail'      : postprocess_detail,
         }
 
 

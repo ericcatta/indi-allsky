@@ -98,6 +98,7 @@ var camera_id = {{ camera_id }};
         {% for section in modern_admin_camera_settings_sections %}
         {% if section.key == 'hybrid-controller' %}
         <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-camera-settings-section="{{ section.key }}" open>
+            {% set hybrid_capabilities = modern_admin_camera_settings_hybrid_form.capabilities %}
             <summary>
                 <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
                 <span class="modern-admin-settings-section-title">{{ section.title }}</span>
@@ -124,14 +125,26 @@ var camera_id = {{ camera_id }};
                     </div>
                     <div>
                         <span>AWB status</span>
-                        <strong>{{ 'Runtime gains from previous frame' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic libcamera AWB path' }}</strong>
+                        <strong>{{ 'Measurement available · apply via ' ~ hybrid_capabilities.apply_backend if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic AWB path' }}</strong>
+                    </div>
+                    <div>
+                        <span>Camera interface</span>
+                        <strong>{{ hybrid_capabilities.camera_interface }}</strong>
                     </div>
                 </div>
 
                 <div class="modern-admin-camera-profile-tabs" aria-label="Hybrid controller future modules">
                     <span class="modern-admin-camera-profile-tab">
-                        <strong>AWB</strong>
-                        <span>{{ 'Active for libcamera captures' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic controlled' }}</span>
+                        <strong>AWB measurement</strong>
+                        <span>{{ hybrid_capabilities.measurement_status }} · {{ hybrid_capabilities.measurement_detail }}</span>
+                    </span>
+                    <span class="modern-admin-camera-profile-tab{% if not hybrid_capabilities.capture_apply_available %} modern-admin-status-warning{% endif %}">
+                        <strong>AWB capture apply</strong>
+                        <span>{{ hybrid_capabilities.capture_apply_status }} · {{ hybrid_capabilities.capture_apply_detail }}</span>
+                    </span>
+                    <span class="modern-admin-camera-profile-tab{% if hybrid_capabilities.postprocess_status == 'not available' %} modern-admin-status-warning{% endif %}">
+                        <strong>AWB postprocess apply</strong>
+                        <span>{{ hybrid_capabilities.postprocess_status }} · {{ hybrid_capabilities.postprocess_detail }}</span>
                     </span>
                     <span class="modern-admin-camera-profile-tab">
                         <strong>ADU / Exposure</strong>
