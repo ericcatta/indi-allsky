@@ -15125,7 +15125,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
     CAMERA_SETTINGS_SECTIONS = (
         {
-            'title' : 'Camera Identity',
+            'title' : 'Profile',
             'default_open' : True,
             'fields' : (
                 'profile_id',
@@ -15136,13 +15136,6 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'db_camera_name',
                 'db_camera_driver',
                 'db_camera_status',
-            ),
-        },
-        {
-            'title' : 'Hybrid Controller',
-            'default_open' : True,
-            'fields' : (
-                'PROCESSING_MODE',
             ),
         },
         {
@@ -15185,21 +15178,6 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             ),
         },
         {
-            'title' : 'Sensor',
-            'default_open' : False,
-            'fields' : (
-                'CCD_BIT_DEPTH',
-                'CFA_PATTERN',
-                'USE_NIGHT_COLOR',
-                'AUTO_WB',
-                'AUTO_WB_DAY',
-                'NIGHT_GRAYSCALE',
-                'DAYTIME_GRAYSCALE',
-                'CCD_COOLING',
-                'CCD_TEMP',
-            ),
-        },
-        {
             'title' : 'Lens & Optics',
             'default_open' : False,
             'fields' : (
@@ -15229,14 +15207,30 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             ),
         },
         {
-            'title' : 'Calibration',
+            'title' : 'Processing',
             'default_open' : False,
             'fields' : (
+                'CCD_BIT_DEPTH',
+                'CFA_PATTERN',
+                'USE_NIGHT_COLOR',
+                'AUTO_WB',
+                'AUTO_WB_DAY',
+                'NIGHT_GRAYSCALE',
+                'DAYTIME_GRAYSCALE',
+                'CCD_COOLING',
+                'CCD_TEMP',
                 'IMAGE_CALIBRATE_DARK',
                 'IMAGE_CALIBRATE_BPM',
                 'IMAGE_CALIBRATE_FIX_HOLES',
                 'IMAGE_CALIBRATE_HOLE_THOLD',
                 'IMAGE_CALIBRATE_MANUAL_OFFSET',
+            ),
+        },
+        {
+            'title' : 'Hybrid Controller',
+            'default_open' : True,
+            'fields' : (
+                'PROCESSING_MODE',
             ),
         },
         {

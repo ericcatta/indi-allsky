@@ -22,9 +22,9 @@ var camera_id = {{ camera_id }};
                 <p class="modern-admin-eyebrow">Per-profile view</p>
                 <h2 id="modern-admin-camera-settings-title">Camera Settings</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-warning">Driver + Lens + Hybrid editable</span>
+            <span class="modern-admin-status-pill modern-admin-status-warning">Profile-specific editors</span>
         </div>
-        <p class="modern-admin-note">Camera controls are shown from the selected multi-camera profile when available, then from the active global config, with DB camera identity shown separately. Hybrid Controller, Driver / Connection, and Lens & Optics can be saved only into the selected profile.</p>
+        <p class="modern-admin-note">Camera controls are grouped by Profile, Driver / Connection, Capture, Lens & Optics, Processing, Hybrid Controller, and Advanced. Editable sections save only into the selected multi-camera profile.</p>
         <p class="modern-admin-note">
             <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Inventory</a>
         </p>
@@ -110,6 +110,40 @@ var camera_id = {{ camera_id }};
                     <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
                 </div>
                 <p class="modern-admin-note">Classic preserves the current indi-allsky pipeline. Hybrid only enables the per-camera controller foundation in this patch; it does not change image output, exposure, gain, AWB, stretch, or color calibration yet.</p>
+
+                <div class="modern-admin-camera-profile-summary" aria-label="Hybrid controller status">
+                    <div>
+                        <span>processing_mode</span>
+                        <strong>{{ modern_admin_camera_settings_hybrid_form.processing_mode }}</strong>
+                    </div>
+                    <div>
+                        <span>Current status</span>
+                        <strong>{{ 'Hybrid foundation active' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic pipeline active' }}</strong>
+                    </div>
+                    <div>
+                        <span>Runtime effect</span>
+                        <strong>None in v2 layout</strong>
+                    </div>
+                </div>
+
+                <div class="modern-admin-camera-profile-tabs" aria-label="Hybrid controller future modules">
+                    <span class="modern-admin-camera-profile-tab">
+                        <strong>AWB</strong>
+                        <span>Future per-camera controller</span>
+                    </span>
+                    <span class="modern-admin-camera-profile-tab">
+                        <strong>ADU / Exposure</strong>
+                        <span>Future per-camera controller</span>
+                    </span>
+                    <span class="modern-admin-camera-profile-tab">
+                        <strong>Stretch</strong>
+                        <span>Future automatic stretch</span>
+                    </span>
+                    <span class="modern-admin-camera-profile-tab">
+                        <strong>Color</strong>
+                        <span>Future calibration stage</span>
+                    </span>
+                </div>
 
                 <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form" novalidate>
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
