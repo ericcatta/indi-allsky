@@ -117,6 +117,7 @@ class ImageWorker(Process):
         self.sensors_user_av = sensors_user_av
         self.night_av = night_av
         self.astro_av = astro_av
+        self.hybrid_av = None
         self.camera_shared_state_map = camera_shared_state_map or {}
 
         self.filename_t = 'ccd{0:d}_{1:s}.{2:s}'
@@ -367,6 +368,7 @@ class ImageWorker(Process):
         self.sensors_user_av = shared_state.sensors_user_av
         self.night_av = shared_state.night_av
         self.astro_av = shared_state.astro_av
+        self.hybrid_av = getattr(shared_state, 'hybrid_av', None)
 
 
     def _select_runtime_context(self, profile_id, camera_id):

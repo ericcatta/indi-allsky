@@ -20,6 +20,7 @@ class CameraSharedState:
     sensors_user_av: Any
     night_av: Any
     astro_av: Any
+    hybrid_av: Any = None
 
     def summary(self) -> Dict[str, str]:
         return {
@@ -32,4 +33,5 @@ class CameraSharedState:
             'sensors_user_av': type(self.sensors_user_av).__name__,
             'night_av': type(self.night_av).__name__,
             'astro_av': type(self.astro_av).__name__,
+            'hybrid_av': type(self.hybrid_av).__name__,
         }

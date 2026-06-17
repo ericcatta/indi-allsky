@@ -422,6 +422,21 @@ class CaptureWorker(Process):
         ))
 
 
+    def _processing_mode(self):
+        return str(self.config.get('PROCESSING_MODE', 'classic') or 'classic').strip().lower()
+
+
+    def _log_hybrid_placeholder(self):
+        if self._processing_mode() != 'hybrid':
+            return
+
+        _multi_camera_diag(
+            '[HYBRID][%s][camera_id=%s] mode=hybrid active placeholder',
+            self.profile_id,
+            self.camera_id if self.camera_id is not None else 'unknown',
+        )
+
+
     def _libcamera_busy_timeout(self):
         exposure = float(self.camera_runtime_state.current_exposure or 0.0)
         configured_timeout = float(self.config.get('CCD_EXPOSURE_TIMEOUT', 330))
@@ -1389,6 +1404,7 @@ class CaptureWorker(Process):
         self.camera_runtime_state.camera_id = camera.id
         self.indiclient.camera_id = camera.id
         logger.info('[%s][camera_id=%s] Camera registered for capture', self.profile_id, camera.id)
+        self._log_hybrid_placeholder()
 
         self._set_global_state('DB_CAMERA_ID', camera.id)
 

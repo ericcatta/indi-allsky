@@ -14987,6 +14987,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'db_camera_name' : 'DB Camera Name',
         'db_camera_driver' : 'DB Camera Driver',
         'db_camera_status' : 'DB Camera Status',
+        'PROCESSING_MODE' : 'Processing Mode',
         'CAMERA_INTERFACE' : 'Camera Interface',
         'INDI_SERVER' : 'INDI Server',
         'INDI_PORT' : 'INDI Port',
@@ -15062,6 +15063,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     }
 
     CAMERA_SETTINGS_PROFILE_ALIASES = {
+        'PROCESSING_MODE' : ('processing_mode',),
         'CAMERA_INTERFACE' : ('camera_interface', 'interface', 'driver'),
         'INDI_SERVER' : ('indi_server', ('indi', 'server')),
         'INDI_PORT' : ('indi_port', ('indi', 'port')),
@@ -15134,6 +15136,13 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'db_camera_name',
                 'db_camera_driver',
                 'db_camera_status',
+            ),
+        },
+        {
+            'title' : 'Hybrid Controller',
+            'default_open' : True,
+            'fields' : (
+                'PROCESSING_MODE',
             ),
         },
         {
@@ -15311,6 +15320,10 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'fluorescent',
         'indoor',
     )
+    CAMERA_SETTINGS_PROCESSING_MODES = (
+        'classic',
+        'hybrid',
+    )
     CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER = (
         'lens_name',
         'lens_focal_length',
@@ -15448,7 +15461,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
         if request.method == 'POST':
             modern_admin_action = request.form.get('modern_admin_action', 'driver_connection')
-            if modern_admin_action == 'lens_optics':
+            if modern_admin_action == 'hybrid_controller':
+                context.update(self.save_camera_settings_hybrid_profile())
+            elif modern_admin_action == 'lens_optics':
                 context.update(self.save_camera_settings_lens_profile())
             else:
                 context.update(self.save_camera_settings_driver_profile())
@@ -15467,6 +15482,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             context['modern_admin_camera_settings_driver_form'] = self.get_camera_settings_driver_form(selected_profile)
         if 'modern_admin_camera_settings_lens_form' not in context:
             context['modern_admin_camera_settings_lens_form'] = self.get_camera_settings_lens_form(selected_profile)
+        if 'modern_admin_camera_settings_hybrid_form' not in context:
+            context['modern_admin_camera_settings_hybrid_form'] = self.get_camera_settings_hybrid_form(selected_profile)
 
         return context
 
@@ -15654,6 +15671,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if found:
             return value, 'profile override'
 
+        if config_key == 'PROCESSING_MODE':
+            return 'classic', 'derived'
+
         found, value = self.get_camera_settings_config_value(config_key)
         if found:
             return value, 'global config'
@@ -15746,6 +15766,139 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             current = current[found_key]
 
         return True, current
+
+
+    def get_camera_settings_hybrid_form(self, profile, submitted_data=None, errors=None):
+        submitted_data = submitted_data or {}
+        errors = errors or {}
+        processing_mode = str(submitted_data.get('processing_mode', self.get_camera_settings_processing_mode(profile)) or 'classic').lower()
+
+        return {
+            'enabled'         : bool(profile.get('from_multi_camera')),
+            'processing_mode' : processing_mode,
+            'choices'         : self.get_camera_settings_processing_mode_choices(processing_mode),
+            'errors'          : errors.get('processing_mode', []),
+            'readonly'        : not profile.get('from_multi_camera'),
+        }
+
+
+    def get_camera_settings_processing_mode(self, profile):
+        found, value = self.get_camera_settings_profile_override(profile, 'PROCESSING_MODE')
+        if found:
+            processing_mode = str(value or 'classic').strip().lower()
+            if processing_mode in self.CAMERA_SETTINGS_PROCESSING_MODES:
+                return processing_mode
+
+        return 'classic'
+
+
+    def get_camera_settings_processing_mode_choices(self, value):
+        labels = {
+            'classic' : 'Classic',
+            'hybrid'  : 'Hybrid',
+        }
+        return tuple({
+            'value'    : processing_mode,
+            'label'    : labels[processing_mode],
+            'selected' : processing_mode == value,
+        } for processing_mode in self.CAMERA_SETTINGS_PROCESSING_MODES)
+
+
+    def save_camera_settings_hybrid_profile(self):
+        result = {
+            'modern_admin_camera_settings_error'   : None,
+            'modern_admin_camera_settings_success' : None,
+            'modern_admin_camera_settings_errors'  : {},
+        }
+
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            result['modern_admin_camera_settings_error'] = 'Only an admin user can change camera profile settings.'
+            return result
+
+        profiles = self.get_camera_settings_profiles()
+        selected_profile = self.get_selected_camera_settings_profile_for_save(profiles)
+        if not selected_profile:
+            result['modern_admin_camera_settings_error'] = 'Select a valid multi-camera profile before saving. No config was saved.'
+            return result
+
+        if not selected_profile.get('from_multi_camera'):
+            result['modern_admin_camera_settings_error'] = 'The current global camera fallback is read-only. Select a MULTI_CAMERA profile before saving.'
+            return result
+
+        submitted_data, validation_errors = self.get_camera_settings_hybrid_submitted_data()
+        if validation_errors:
+            result['modern_admin_camera_settings_error'] = 'Please fix the Hybrid Controller settings below. No config was saved.'
+            result['modern_admin_camera_settings_errors'] = validation_errors
+            result['modern_admin_camera_settings_hybrid_form'] = self.get_camera_settings_hybrid_form(selected_profile, submitted_data, validation_errors)
+            return result
+
+        try:
+            new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
+            updated_profile_id = self.apply_camera_settings_hybrid_profile_to_config(
+                new_config,
+                selected_profile.get('profile_id'),
+                selected_profile.get('_profile_index'),
+                submitted_data,
+            )
+
+            if not app.config['LOGIN_DISABLED']:
+                username = current_user.username
+            else:
+                username = 'system'
+
+            from ..config import IndiAllSkyConfig
+
+            config_obj = IndiAllSkyConfig()
+            config_obj.config = new_config
+            config_obj.save(username, 'Modern Admin Camera Hybrid Controller update for {0:s}'.format(updated_profile_id))
+            self.indi_allsky_config = new_config
+            app.logger.info('Saved Modern Admin Camera Hybrid Controller config update for profile %s', updated_profile_id)
+            result['modern_admin_camera_settings_success'] = 'Hybrid Controller saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new mode.'.format(updated_profile_id)
+        except ConfigSaveException as e:
+            db.session.rollback()
+            result['modern_admin_camera_settings_error'] = str(e)
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error('Error saving Modern Admin Camera Hybrid Controller: %s', str(e))
+            result['modern_admin_camera_settings_error'] = 'Unable to save Hybrid Controller: {0:s}'.format(str(e))
+
+        return result
+
+
+    def get_camera_settings_hybrid_submitted_data(self):
+        submitted_data = {}
+        validation_errors = dict()
+
+        processing_mode = request.form.get('processing_mode', 'classic').strip().lower() or 'classic'
+        submitted_data['processing_mode'] = processing_mode
+        if processing_mode not in self.CAMERA_SETTINGS_PROCESSING_MODES:
+            validation_errors.setdefault('processing_mode', []).append('Select Classic or Hybrid.')
+
+        return submitted_data, validation_errors
+
+
+    def apply_camera_settings_hybrid_profile_to_config(self, config, profile_id, profile_index, submitted_data):
+        multi_camera_config = config.get('MULTI_CAMERA')
+        if not isinstance(multi_camera_config, dict):
+            raise ValueError('MULTI_CAMERA config is missing or invalid.')
+
+        profiles = multi_camera_config.get('profiles')
+        if not isinstance(profiles, list):
+            raise ValueError('MULTI_CAMERA.profiles is missing or invalid.')
+
+        profile_offset = int(profile_index) - 1
+        if profile_offset < 0 or profile_offset >= len(profiles):
+            raise ValueError('Selected profile no longer exists.')
+
+        profile = profiles[profile_offset]
+        if not isinstance(profile, dict):
+            raise ValueError('Selected profile is not editable.')
+
+        if str(profile.get('profile_id') or profile.get('id') or 'profile-{0:d}'.format(profile_index)) != str(profile_id):
+            raise ValueError('Selected profile changed before save. Reload and try again.')
+
+        profile['processing_mode'] = submitted_data['processing_mode']
+        return str(profile_id)
 
 
     def get_camera_settings_driver_form(self, profile, submitted_data=None, errors=None):
@@ -16536,6 +16689,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         elif config_key in self.CAMERA_SETTINGS_DB_FIELDS:
             return 'camera'
         elif config_key in (
+            'PROCESSING_MODE',
             'CAMERA_INTERFACE',
             'INDI_SERVER',
             'INDI_PORT',
@@ -16614,6 +16768,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     def estimate_camera_settings_restart(self, config_key):
         if config_key in self.CAMERA_SETTINGS_PROFILE_FIELDS or config_key in self.CAMERA_SETTINGS_DB_FIELDS:
             return 'no'
+        elif config_key == 'PROCESSING_MODE':
+            return 'restart'
         elif any(token in config_key.upper() for token in (
             'CAMERA_INTERFACE',
             'INDI_',

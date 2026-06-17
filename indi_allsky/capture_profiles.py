@@ -18,6 +18,11 @@ LIBCAMERA_AWB_MODES = {
     'indoor',
 }
 
+PROCESSING_MODES = {
+    'classic',
+    'hybrid',
+}
+
 
 @dataclass(frozen=True)
 class CaptureProfile:
@@ -30,6 +35,7 @@ class CaptureProfile:
     profile_id: str
     enabled: bool
     primary: bool
+    processing_mode: str
     camera_interface: str
     indi_server: str
     indi_port: int
@@ -119,6 +125,14 @@ def _libcamera_awb_mode(config: Mapping[str, Any]) -> str:
     return awb_mode
 
 
+def _processing_mode(profile_config: Mapping[str, Any]) -> str:
+    processing_mode = str(profile_config.get('processing_mode', 'classic') or 'classic').strip().lower()
+    if processing_mode not in PROCESSING_MODES:
+        return 'classic'
+
+    return processing_mode
+
+
 def _mapping_float(config: Mapping[str, Any], key: str, default: float) -> float:
     try:
         return float(config.get(key, default))
@@ -202,6 +216,7 @@ def _profile_from_config(
         profile_id=str(profile_config.get('profile_id', default_profile_id) or default_profile_id),
         enabled=bool(profile_config.get('enabled', default_enabled)),
         primary=bool(profile_config.get('primary', default_primary)),
+        processing_mode=_processing_mode(profile_config),
         camera_interface=str(camera_interface or 'indi'),
         indi_server=str(indi_config.get('server', profile_config.get('indi_server', config.get('INDI_SERVER', 'localhost'))) or 'localhost'),
         indi_port=indi_port,
@@ -263,6 +278,7 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     """Return a per-profile config overlay without mutating the base config."""
 
     profile_config = deepcopy(dict(config))
+    profile_config['PROCESSING_MODE'] = profile.processing_mode
     profile_config['CAMERA_INTERFACE'] = profile.camera_interface
     profile_config['INDI_SERVER'] = profile.indi_server
     profile_config['INDI_PORT'] = profile.indi_port

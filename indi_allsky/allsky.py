@@ -219,6 +219,7 @@ class IndiAllSky(object):
             0.0,  # moon alt
             0.0,  # moon percent
         ])
+        self.hybrid_av = Array('f', [0.0 for x in range(16)])
 
         # MULTI_CAMERA_PREP: one adapter object wraps the existing global
         # shared arrays. Runtime still reads/writes the same arrays directly.
@@ -232,6 +233,7 @@ class IndiAllSky(object):
             sensors_user_av=self.sensors_user_av,
             night_av=self.night_av,
             astro_av=self.astro_av,
+            hybrid_av=self.hybrid_av,
         )
         logger.debug('Camera shared state initialized: %s', self.camera_shared_state.summary())
 
@@ -525,6 +527,7 @@ class IndiAllSky(object):
         sensors_user_av = Array('f', [0.0 for x in range(110)])
         night_av = Array('i', [-1, -1])
         astro_av = Array('f', [0.0, 0.0, 0.0])
+        hybrid_av = Array('f', [0.0 for x in range(16)])
 
         return CameraSharedState(
             profile_id=profile_id,
@@ -536,6 +539,7 @@ class IndiAllSky(object):
             sensors_user_av=sensors_user_av,
             night_av=night_av,
             astro_av=astro_av,
+            hybrid_av=hybrid_av,
         )
 
 
