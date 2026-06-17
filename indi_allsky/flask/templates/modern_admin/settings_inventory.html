@@ -28,15 +28,15 @@ var camera_id = {{ camera_id }};
         <div class="modern-admin-settings-action-grid">
             <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.modern_admin_capture_settings_view') }}">
                 <span>
-                    <strong>Edit Capture Basics</strong>
-                    <small>Safe editor for exposure, gain, binning, daytime capture, and ADU control.</small>
+                    <strong>Global Capture Defaults</strong>
+                    <small>Fallback and legacy defaults. For multi-camera tuning, start from Cameras and open a profile Settings page.</small>
                 </span>
                 <span aria-hidden="true">›</span>
             </a>
-            <a class="modern-admin-settings-action-card modern-admin-settings-action-card-readonly" href="{{ url_for('indi_allsky.modern_admin_camera_settings_view') }}">
+            <a class="modern-admin-settings-action-card modern-admin-settings-action-card-readonly" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
                 <span>
-                    <strong>Camera Settings</strong>
-                    <small>Read-only profile view for driver, capture, sensor, lens, masks, and advanced camera controls.</small>
+                    <strong>Camera Profile Settings</strong>
+                    <small>Profile-first entrypoint for acquisition, driver, lens, processing, and hybrid controls.</small>
                 </span>
                 <span aria-hidden="true">›</span>
             </a>

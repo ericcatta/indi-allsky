@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-capture-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-capture-defaults-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -11,7 +11,7 @@ var camera_id = {{ camera_id }};
 
 {% block content %}
 <main class="modern-admin-shell" aria-labelledby="modern-admin-capture-settings-title">
-    {% set modern_admin_header_label = 'Capture settings header' %}
+    {% set modern_admin_header_label = 'Global capture defaults header' %}
     {% set modern_admin_heading = 'Settings' %}
     {% set modern_admin_title_id = 'modern-admin-capture-settings-title' %}
     {% include 'modern_admin/_shell_header.html' %}
@@ -19,14 +19,16 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Capture settings summary">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Editable subset</p>
-                <h2 id="modern-admin-capture-settings-title">Capture Basics</h2>
+                <p class="modern-admin-eyebrow">Fallback / legacy defaults</p>
+                <h2 id="modern-admin-capture-settings-title">Global Capture Defaults</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
         </div>
-        <p class="modern-admin-note">Only the fields below are editable in Modern Admin. All other configuration remains read-only in the settings inventory.</p>
+        <p class="modern-admin-note">These values are global defaults and legacy fallback settings. In multi-camera mode, tune each camera from Cameras → Settings instead.</p>
         <p class="modern-admin-note">
             <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Inventory</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Open Camera Profiles</a>
         </p>
     </section>
 
@@ -96,9 +98,9 @@ var camera_id = {{ camera_id }};
             <div>
                 <p class="modern-admin-eyebrow">Save</p>
                 <h2>Write config only</h2>
-                <p class="modern-admin-note">Saving creates a new config revision with note “Modern Admin Capture Basics update”. Modern Admin will not restart or reload indi-allsky automatically.</p>
+                <p class="modern-admin-note">Saving creates a new config revision for global fallback values. Modern Admin will not restart or reload indi-allsky automatically.</p>
             </div>
-            <button class="modern-admin-media-button" type="submit">Save Capture Basics</button>
+            <button class="modern-admin-media-button" type="submit">Save Global Defaults</button>
         </section>
     </form>
 </main>

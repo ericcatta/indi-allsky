@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-camera-settings-lens-v2') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-camera-settings-profile-first-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -24,8 +24,10 @@ var camera_id = {{ camera_id }};
             </div>
             <span class="modern-admin-status-pill modern-admin-status-warning">Profile-specific editors</span>
         </div>
-        <p class="modern-admin-note">Camera controls are grouped by Profile, Driver / Connection, Capture, Lens & Optics, Processing, Hybrid Controller, and Advanced. Editable sections save only into the selected multi-camera profile.</p>
+        <p class="modern-admin-note">Start from the selected profile. Acquisition, Driver / Connection, Lens & Optics, and Hybrid Controller changes are saved only into that camera profile. Global settings are used only as fallback defaults.</p>
         <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Back to Cameras</a>
+            ·
             <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Inventory</a>
         </p>
     </section>
@@ -329,8 +331,8 @@ var camera_id = {{ camera_id }};
                 </div>
             </div>
         </details>
-        {% elif section.key == 'capture' %}
-        <details class="modern-admin-settings-section modern-admin-settings-edit-section modern-admin-settings-capture-editor" data-camera-settings-section="{{ section.key }}" data-camera-settings-editor="capture" open>
+        {% elif section.key == 'acquisition' %}
+        <details id="acquisition" class="modern-admin-settings-section modern-admin-settings-edit-section modern-admin-settings-capture-editor" data-camera-settings-section="{{ section.key }}" data-camera-settings-editor="acquisition" open>
             <summary>
                 <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
                 <span class="modern-admin-settings-section-title">{{ section.title }}</span>
@@ -340,11 +342,11 @@ var camera_id = {{ camera_id }};
                 <div class="modern-admin-section-heading">
                     <div>
                         <p class="modern-admin-eyebrow">Profile-specific</p>
-                        <h2>Capture</h2>
+                        <h2>Acquisition</h2>
                     </div>
                     <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
                 </div>
-                <p class="modern-admin-note">These Capture values are saved only as overrides on the selected MULTI_CAMERA profile. Empty fields remove the profile override and fall back to global config.</p>
+                <p class="modern-admin-note">Tune this camera here. Values are saved on the selected MULTI_CAMERA profile; global capture defaults are only fallback values when a profile field is empty.</p>
 
                 <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form" novalidate>
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -353,7 +355,7 @@ var camera_id = {{ camera_id }};
                         {% for field in modern_admin_camera_settings_capture_form.fields %}
                         <label class="modern-admin-settings-edit-field" for="camera-capture-{{ field.name }}">
                             <span class="modern-admin-settings-edit-label">{{ field.label }}</span>
-                            <span class="modern-admin-settings-edit-meta">MULTI_CAMERA.profiles[n].{{ field.config_key }}</span>
+                            <span class="modern-admin-settings-edit-meta">{{ field.group }} · MULTI_CAMERA.profiles[n].{{ field.config_key }}</span>
 
                             {% if field.input_type == 'select' %}
                             <select id="camera-capture-{{ field.name }}" name="{{ field.name }}" {% if field.readonly %}disabled{% endif %}>
@@ -366,9 +368,9 @@ var camera_id = {{ camera_id }};
                             {% endif %}
 
                             {% if field.field_type == 'boolean_select' %}
-                            <span class="modern-admin-settings-edit-help">Use global removes the profile override.</span>
+                            <span class="modern-admin-settings-edit-help">Use global removes the profile value and falls back to Global Capture Defaults.</span>
                             {% else %}
-                            <span class="modern-admin-settings-edit-help">Leave empty to inherit global config.</span>
+                            <span class="modern-admin-settings-edit-help">Leave empty to inherit Global Capture Defaults.</span>
                             {% endif %}
 
                             {% if field.errors %}
@@ -382,14 +384,14 @@ var camera_id = {{ camera_id }};
                         {% endfor %}
                     </div>
 
-                    <section class="modern-admin-table-panel modern-admin-settings-actions" aria-label="Camera capture settings actions">
+                    <section class="modern-admin-table-panel modern-admin-settings-actions" aria-label="Camera acquisition settings actions">
                         <div>
                             <p class="modern-admin-eyebrow">Save</p>
-                            <h2>Write profile overrides only</h2>
+                            <h2>Write profile values only</h2>
                             <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
                         </div>
                         {% if modern_admin_camera_settings_capture_form.enabled %}
-                        <button class="modern-admin-media-button" type="submit">Save Capture</button>
+                        <button class="modern-admin-media-button" type="submit">Save Acquisition</button>
                         {% else %}
                         <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
                         {% endif %}

@@ -5470,6 +5470,7 @@ class ModernAdminCamerasView(ModernAdminView):
                 'profile_mode'   : False,
                 'switch_enabled' : not selected,
                 'settings_url'   : url_for('indi_allsky.modern_admin_camera_settings_view'),
+                'acquisition_url': url_for('indi_allsky.modern_admin_camera_settings_view', _anchor='acquisition'),
                 'gallery_url'    : url_for('indi_allsky.modern_admin_media_gallery_view', camera_id=camera.id),
             })
 
@@ -5505,6 +5506,7 @@ class ModernAdminCamerasView(ModernAdminView):
                 'profile_mode'   : True,
                 'switch_enabled' : False,
                 'settings_url'   : url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=str(profile.get('profile_id') or 'unnamed')),
+                'acquisition_url': url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=str(profile.get('profile_id') or 'unnamed'), _anchor='acquisition'),
                 'gallery_url'    : url_for('indi_allsky.modern_admin_media_gallery_view', profile_id=str(profile.get('profile_id') or 'unnamed')) if profile.get('profile_id') else url_for('indi_allsky.modern_admin_media_gallery_view', camera_id=camera_id),
             })
 
@@ -6799,7 +6801,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('Support Info', 'indi_allsky.modern_admin_support_info_view'),
             ('Log', 'indi_allsky.modern_admin_log_view'),
             ('Settings Inventory', 'indi_allsky.modern_admin_settings_view'),
-            ('Capture Basics', 'indi_allsky.modern_admin_capture_settings_view'),
+            ('Global Capture Defaults', 'indi_allsky.modern_admin_capture_settings_view'),
             ('Camera Settings', 'indi_allsky.modern_admin_camera_settings_view'),
             ('Config', 'indi_allsky.modern_admin_config_view'),
             ('Network', 'indi_allsky.modern_admin_network_view'),
@@ -14979,7 +14981,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
 
 class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     page_title = 'Modern Admin Camera Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
     methods = ['GET', 'POST']
 
     CAMERA_SETTINGS_FIELD_LABELS = {
@@ -15182,14 +15184,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'INDI_CAMERA_NAME',
                 'LIBCAMERA.CAMERA_ID',
                 'LIBCAMERA.IMAGE_FILE_TYPE',
-                'LIBCAMERA.AWB_MODE',
-                'LIBCAMERA.AWB_RED_GAIN',
-                'LIBCAMERA.AWB_BLUE_GAIN',
                 'LIBCAMERA.EXTRA_OPTIONS',
             ),
         },
         {
-            'title' : 'Capture',
+            'title' : 'Acquisition',
             'default_open' : True,
             'fields' : (
                 'exposure_min',
@@ -15206,6 +15205,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'auto_gain_levels',
                 'binning_day',
                 'binning_night',
+                'LIBCAMERA.AWB_MODE',
+                'LIBCAMERA.AWB_RED_GAIN',
+                'LIBCAMERA.AWB_BLUE_GAIN',
             ),
         },
         {
@@ -15301,9 +15303,6 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'indi_camera_name',
         'libcamera_camera_id',
         'libcamera_image_file_type',
-        'libcamera_awb_mode',
-        'libcamera_awb_red_gain',
-        'libcamera_awb_blue_gain',
         'libcamera_extra_options',
     )
     CAMERA_SETTINGS_DRIVER_OPTIONAL_PROFILE_FIELDS = {
@@ -15316,9 +15315,6 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'indi_camera_name',
         'libcamera_camera_id',
         'libcamera_image_file_type',
-        'libcamera_awb_mode',
-        'libcamera_awb_red_gain',
-        'libcamera_awb_blue_gain',
         'libcamera_extra_options',
     )
     CAMERA_SETTINGS_DRIVER_FIELD_LABELS = {
@@ -15364,6 +15360,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels',
         'binning_day',
         'binning_night',
+        'libcamera_awb_mode',
+        'libcamera_awb_red_gain',
+        'libcamera_awb_blue_gain',
     )
     CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS = {
         'exposure_min'       : 'CCD_EXPOSURE_MIN',
@@ -15380,6 +15379,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels'   : ('CCD_CONFIG', 'AUTO_GAIN_LEVELS'),
         'binning_day'        : ('CCD_CONFIG', 'DAY', 'BINNING'),
         'binning_night'      : ('CCD_CONFIG', 'NIGHT', 'BINNING'),
+        'libcamera_awb_mode'      : 'LIBCAMERA.AWB_MODE',
+        'libcamera_awb_red_gain'  : 'LIBCAMERA.AWB_RED_GAIN',
+        'libcamera_awb_blue_gain' : 'LIBCAMERA.AWB_BLUE_GAIN',
     }
     CAMERA_SETTINGS_CAPTURE_FIELD_LABELS = {
         'exposure_min'       : 'Minimum Exposure',
@@ -15396,6 +15398,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels'   : 'Auto Gain Levels',
         'binning_day'        : 'Day Binning',
         'binning_night'      : 'Night Binning',
+        'libcamera_awb_mode'      : 'libcamera AWB Mode',
+        'libcamera_awb_red_gain'  : 'libcamera AWB Red Gain',
+        'libcamera_awb_blue_gain' : 'libcamera AWB Blue Gain',
     }
     CAMERA_SETTINGS_CAPTURE_FIELD_TYPES = {
         'exposure_min'       : 'float',
@@ -15412,6 +15417,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels'   : 'integer',
         'binning_day'        : 'integer',
         'binning_night'      : 'integer',
+        'libcamera_awb_mode'      : 'select',
+        'libcamera_awb_red_gain'  : 'float',
+        'libcamera_awb_blue_gain' : 'float',
     }
     CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER = (
         'lens_name',
@@ -15762,6 +15770,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
         found, value = self.get_camera_settings_profile_override(profile, config_key)
         if found:
+            if config_key in self.CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS:
+                return value, 'profile'
+
             return value, 'profile override'
 
         if config_key == 'PROCESSING_MODE':
@@ -15771,7 +15782,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if global_config_key:
             found, value = self.get_camera_settings_config_value(global_config_key)
             if found:
-                return value, 'global config'
+                return value, 'global fallback'
 
         found, value = self.get_camera_settings_config_value(config_key)
         if found:
@@ -16311,28 +16322,6 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                     submitted_data['libcamera_camera_id'] = libcamera_camera_id_raw
                     validation_errors.setdefault('libcamera_camera_id', []).append('libcamera Camera ID must be a number greater than or equal to 0.')
 
-            libcamera_awb_mode = request.form.get('libcamera_awb_mode', 'auto').strip().lower() or 'auto'
-            submitted_data['libcamera_awb_mode'] = libcamera_awb_mode
-            if libcamera_awb_mode not in self.CAMERA_SETTINGS_LIBCAMERA_AWB_MODES:
-                validation_errors.setdefault('libcamera_awb_mode', []).append('Select a supported libcamera AWB mode.')
-
-            for field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
-                gain_raw = request.form.get(field_name, '').strip()
-                if not gain_raw:
-                    submitted_data[field_name] = gain_raw
-                    if libcamera_awb_mode == 'fixed':
-                        validation_errors.setdefault(field_name, []).append('{0:s} is required when libcamera AWB Mode is fixed.'.format(self.CAMERA_SETTINGS_DRIVER_FIELD_LABELS[field_name]))
-                    continue
-
-                try:
-                    gain_value = float(gain_raw)
-                    if gain_value <= 0:
-                        raise ValueError()
-                    submitted_data[field_name] = gain_value
-                except ValueError:
-                    submitted_data[field_name] = gain_raw
-                    validation_errors.setdefault(field_name, []).append('{0:s} must be a number greater than 0.'.format(self.CAMERA_SETTINGS_DRIVER_FIELD_LABELS[field_name]))
-
             for field_name in self.CAMERA_SETTINGS_DRIVER_OPTIONAL_PROFILE_FIELDS:
                 if not self.profile_has_camera_settings_driver_field(profile, field_name):
                     continue
@@ -16389,17 +16378,6 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 profile['libcamera'] = libcamera_config
 
             libcamera_config['camera_id'] = int(submitted_data['libcamera_camera_id'])
-            libcamera_config['awb_mode'] = submitted_data['libcamera_awb_mode']
-            if submitted_data.get('libcamera_awb_red_gain') not in (None, ''):
-                libcamera_config['awb_red_gain'] = float(submitted_data['libcamera_awb_red_gain'])
-            else:
-                libcamera_config.pop('awb_red_gain', None)
-
-            if submitted_data.get('libcamera_awb_blue_gain') not in (None, ''):
-                libcamera_config['awb_blue_gain'] = float(submitted_data['libcamera_awb_blue_gain'])
-            else:
-                libcamera_config.pop('awb_blue_gain', None)
-
             if 'libcamera_image_file_type' in submitted_data:
                 libcamera_config['IMAGE_FILE_TYPE'] = submitted_data['libcamera_image_file_type']
             if 'libcamera_extra_options' in submitted_data:
@@ -16417,11 +16395,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         submitted_data = submitted_data or {}
         errors = errors or {}
         fields = list()
+        driver_type = self.get_camera_settings_driver_type(self.get_camera_settings_driver_field_value(profile, 'camera_interface'))
         for field_name in self.CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER:
+            if field_name.startswith('libcamera_') and driver_type != 'libcamera':
+                continue
+
             value = submitted_data.get(field_name, self.get_camera_settings_capture_field_value(profile, field_name))
             field_type = self.CAMERA_SETTINGS_CAPTURE_FIELD_TYPES[field_name]
             input_type = 'number' if field_type in ('integer', 'float') else 'text'
-            if field_type == 'boolean_select':
+            if field_type in ('boolean_select', 'select'):
                 input_type = 'select'
 
             fields.append({
@@ -16436,6 +16418,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'choices'    : self.get_camera_settings_capture_field_choices(field_name, value),
                 'min'        : self.get_camera_settings_capture_field_min(field_name),
                 'step'       : 'any' if field_type == 'float' else '1',
+                'group'      : self.get_camera_settings_capture_field_group(field_name),
             })
 
         return {
@@ -16445,6 +16428,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_capture_field_value(self, profile, field_name):
+        if field_name.startswith('libcamera_'):
+            config_key = self.CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS[field_name]
+            found, value = self.get_camera_settings_profile_override(profile, config_key)
+            if found:
+                return value
+
+            return ''
+
         found, value = self.get_camera_settings_nested_value(profile, field_name)
         if found:
             return value
@@ -16466,6 +16457,19 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_capture_field_choices(self, field_name, value):
+        if field_name == 'libcamera_awb_mode':
+            choices = [{
+                'value'    : '',
+                'label'    : 'Use global',
+                'selected' : value in (None, ''),
+            }]
+            choices.extend({
+                'value'    : awb_mode,
+                'label'    : awb_mode,
+                'selected' : awb_mode == value,
+            } for awb_mode in self.CAMERA_SETTINGS_LIBCAMERA_AWB_MODES)
+            return tuple(choices)
+
         if self.CAMERA_SETTINGS_CAPTURE_FIELD_TYPES[field_name] != 'boolean_select':
             return tuple()
 
@@ -16490,9 +16494,24 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         })
 
 
+    def get_camera_settings_capture_field_group(self, field_name):
+        if field_name.startswith('exposure_'):
+            return 'Exposure'
+        elif field_name.startswith('gain_'):
+            return 'Gain'
+        elif field_name.startswith('target_adu'):
+            return 'ADU'
+        elif field_name.startswith('libcamera_'):
+            return 'libcamera AWB'
+
+        return 'Capture'
+
+
     def get_camera_settings_capture_field_min(self, field_name):
         if field_name in ('auto_gain_levels', 'binning_day', 'binning_night'):
             return '1'
+        elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+            return '0.01'
 
         return '0'
 
@@ -16518,9 +16537,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             result['modern_admin_camera_settings_error'] = 'The current global camera fallback is read-only. Select a MULTI_CAMERA profile before saving.'
             return result
 
-        submitted_data, validation_errors = self.get_camera_settings_capture_submitted_data()
+        submitted_data, validation_errors = self.get_camera_settings_capture_submitted_data(selected_profile)
         if validation_errors:
-            result['modern_admin_camera_settings_error'] = 'Please fix the Capture settings below. No config was saved.'
+            result['modern_admin_camera_settings_error'] = 'Please fix the Acquisition settings below. No config was saved.'
             result['modern_admin_camera_settings_errors'] = validation_errors
             result['modern_admin_camera_settings_capture_form'] = self.get_camera_settings_capture_form(selected_profile, submitted_data, validation_errors)
             return result
@@ -16544,26 +16563,30 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
             config_obj = IndiAllSkyConfig()
             config_obj.config = new_config
-            config_obj.save(username, 'Modern Admin Camera Capture update for {0:s}'.format(updated_profile_id))
+            config_obj.save(username, 'Modern Admin Camera Acquisition update for {0:s}'.format(updated_profile_id))
             self.indi_allsky_config = new_config
-            app.logger.info('Saved Modern Admin Camera Capture config update for profile %s', updated_profile_id)
-            result['modern_admin_camera_settings_success'] = 'Capture saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new values.'.format(updated_profile_id)
+            app.logger.info('Saved Modern Admin Camera Acquisition config update for profile %s', updated_profile_id)
+            result['modern_admin_camera_settings_success'] = 'Acquisition saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new values.'.format(updated_profile_id)
         except ConfigSaveException as e:
             db.session.rollback()
             result['modern_admin_camera_settings_error'] = str(e)
         except Exception as e:
             db.session.rollback()
-            app.logger.error('Error saving Modern Admin Camera Capture: %s', str(e))
-            result['modern_admin_camera_settings_error'] = 'Unable to save Capture: {0:s}'.format(str(e))
+            app.logger.error('Error saving Modern Admin Camera Acquisition: %s', str(e))
+            result['modern_admin_camera_settings_error'] = 'Unable to save Acquisition: {0:s}'.format(str(e))
 
         return result
 
 
-    def get_camera_settings_capture_submitted_data(self):
+    def get_camera_settings_capture_submitted_data(self, profile):
         submitted_data = dict()
         validation_errors = dict()
+        driver_type = self.get_camera_settings_driver_type(self.get_camera_settings_driver_field_value(profile, 'camera_interface'))
 
         for field_name in self.CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER:
+            if field_name.startswith('libcamera_') and driver_type != 'libcamera':
+                continue
+
             field_type = self.CAMERA_SETTINGS_CAPTURE_FIELD_TYPES[field_name]
             raw_value = request.form.get(field_name, '').strip()
             if raw_value == '':
@@ -16587,6 +16610,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 validation_errors.setdefault(field_name, []).append(str(e))
 
         self.validate_camera_settings_capture_ranges(submitted_data, validation_errors)
+        self.validate_camera_settings_capture_libcamera_awb(submitted_data, validation_errors)
         return submitted_data, validation_errors
 
 
@@ -16608,13 +16632,20 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 value = False
             else:
                 raise ValueError('{0:s} must be Enabled, Disabled, or Use global.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
+        elif field_type == 'select':
+            value = raw_value.strip().lower()
+            if field_name == 'libcamera_awb_mode' and value not in self.CAMERA_SETTINGS_LIBCAMERA_AWB_MODES:
+                raise ValueError('Select a supported libcamera AWB mode.')
         else:
             value = raw_value
 
-        if field_name in ('auto_gain_levels', 'binning_day', 'binning_night') and value < 1:
+        if field_type in ('integer', 'float') and field_name in ('auto_gain_levels', 'binning_day', 'binning_night') and value < 1:
             raise ValueError('{0:s} must be greater than or equal to 1.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
 
-        if field_name not in ('auto_gain_enable',) and value < 0:
+        if field_type in ('integer', 'float') and field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain') and value <= 0:
+            raise ValueError('{0:s} must be greater than 0.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
+
+        if field_type in ('integer', 'float') and field_name not in ('auto_gain_enable',) and value < 0:
             raise ValueError('{0:s} must be greater than or equal to 0.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
 
         return value
@@ -16645,6 +16676,20 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
         if gain_default is not None and gain_max is not None and gain_default > gain_max:
             validation_errors.setdefault('gain_default', []).append('Default Gain cannot be greater than Maximum Gain.')
+
+
+    def validate_camera_settings_capture_libcamera_awb(self, submitted_data, validation_errors):
+        awb_mode_data = submitted_data.get('libcamera_awb_mode')
+        if not awb_mode_data or awb_mode_data.get('delete'):
+            return
+
+        if awb_mode_data.get('value') != 'fixed':
+            return
+
+        for field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+            field_data = submitted_data.get(field_name)
+            if not field_data or field_data.get('delete'):
+                validation_errors.setdefault(field_name, []).append('{0:s} is required when libcamera AWB Mode is fixed.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
 
 
     def get_camera_settings_submitted_number(self, submitted_data, field_name):
@@ -16679,12 +16724,41 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if str(profile.get('profile_id') or profile.get('id') or 'profile-{0:d}'.format(profile_index)) != str(profile_id):
             raise ValueError('Selected profile changed before save. Reload and try again.')
 
+        libcamera_config = profile.get('libcamera')
+        if not isinstance(libcamera_config, dict):
+            libcamera_config = OrderedDict()
+
         for field_name, field_data in submitted_data.items():
+            if field_name.startswith('libcamera_'):
+                self.delete_camera_settings_profile_path(profile, (field_name,))
+                self.apply_camera_settings_capture_libcamera_field(profile, libcamera_config, field_name, field_data)
+                continue
+
             self.delete_camera_settings_profile_path(profile, (field_name,))
             if not field_data['delete']:
                 profile[field_name] = field_data['value']
 
         return str(profile_id)
+
+
+    def apply_camera_settings_capture_libcamera_field(self, profile, libcamera_config, field_name, field_data):
+        field_key_map = {
+            'libcamera_awb_mode'      : 'awb_mode',
+            'libcamera_awb_red_gain'  : 'awb_red_gain',
+            'libcamera_awb_blue_gain' : 'awb_blue_gain',
+        }
+        config_key = field_key_map[field_name]
+        if field_data['delete']:
+            libcamera_config.pop(config_key, None)
+        elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+            libcamera_config[config_key] = float(field_data['value'])
+        else:
+            libcamera_config[config_key] = field_data['value']
+
+        if libcamera_config:
+            profile['libcamera'] = libcamera_config
+        else:
+            profile.pop('libcamera', None)
 
 
     def preserve_camera_settings_capture_global_values(self, config):
@@ -17206,7 +17280,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
 class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Capture Settings'
+    page_title = 'Modern Admin Global Capture Defaults'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
     methods = ['GET', 'POST']
 
@@ -17416,16 +17490,16 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
 
             config_obj = IndiAllSkyConfig()
             config_obj.config = new_config
-            config_obj.save(username, 'Modern Admin Capture Basics update')
-            app.logger.info('Saved Modern Admin Capture Basics config update')
-            result['modern_admin_capture_settings_success'] = 'Capture Basics saved. Restart or reload indi-allsky for the running capture service to use the new values.'
+            config_obj.save(username, 'Modern Admin Global Capture Defaults update')
+            app.logger.info('Saved Modern Admin Global Capture Defaults config update')
+            result['modern_admin_capture_settings_success'] = 'Global Capture Defaults saved. Restart or reload indi-allsky for the running capture service to use the new fallback values.'
         except ConfigSaveException as e:
             db.session.rollback()
             result['modern_admin_capture_settings_error'] = str(e)
         except Exception as e:
             db.session.rollback()
-            app.logger.error('Error saving Modern Admin Capture Basics: %s', str(e))
-            result['modern_admin_capture_settings_error'] = 'Unable to save Capture Basics: {0:s}'.format(str(e))
+            app.logger.error('Error saving Modern Admin Global Capture Defaults: %s', str(e))
+            result['modern_admin_capture_settings_error'] = 'Unable to save Global Capture Defaults: {0:s}'.format(str(e))
 
         return result
 
