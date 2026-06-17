@@ -80,6 +80,12 @@ var camera_id = {{ camera_id }};
                         <strong>{{ camera.last_image_age }}</strong>
                     </div>
                 </div>
+                <div class="modern-admin-action-row">
+                    <a class="modern-admin-media-button" href="{{ camera.settings_url }}">Settings</a>
+                    {% if camera.gallery_url %}
+                    <a class="modern-admin-media-button" href="{{ camera.gallery_url }}">Gallery</a>
+                    {% endif %}
+                </div>
                 {% if camera.switch_enabled and not camera.profile_mode %}
                 <form class="modern-admin-camera-switch-form" method="post" action="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

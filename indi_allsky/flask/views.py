@@ -5469,6 +5469,8 @@ class ModernAdminCamerasView(ModernAdminView):
                 'profile_id'     : None,
                 'profile_mode'   : False,
                 'switch_enabled' : not selected,
+                'settings_url'   : url_for('indi_allsky.modern_admin_camera_settings_view'),
+                'gallery_url'    : url_for('indi_allsky.modern_admin_media_gallery_view', camera_id=camera.id),
             })
 
         return camera_list
@@ -5502,6 +5504,8 @@ class ModernAdminCamerasView(ModernAdminView):
                 'profile_id'     : str(profile.get('profile_id') or 'unnamed'),
                 'profile_mode'   : True,
                 'switch_enabled' : False,
+                'settings_url'   : url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=str(profile.get('profile_id') or 'unnamed')),
+                'gallery_url'    : url_for('indi_allsky.modern_admin_media_gallery_view', profile_id=str(profile.get('profile_id') or 'unnamed')) if profile.get('profile_id') else url_for('indi_allsky.modern_admin_media_gallery_view', camera_id=camera_id),
             })
 
         return camera_list
@@ -16529,6 +16533,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 selected_profile.get('_profile_index'),
                 submitted_data,
             )
+            self.preserve_camera_settings_capture_global_values(new_config)
 
             if not app.config['LOGIN_DISABLED']:
                 username = current_user.username
@@ -16680,6 +16685,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 profile[field_name] = field_data['value']
 
         return str(profile_id)
+
+
+    def preserve_camera_settings_capture_global_values(self, config):
+        for config_key in self.CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS.values():
+            found, original_value = self.get_camera_settings_nested_value(self.indi_allsky_config, config_key)
+            if found:
+                self.set_camera_settings_profile_path(config, self.get_camera_settings_config_path(config_key), original_value)
+            else:
+                self.delete_camera_settings_profile_path(config, self.get_camera_settings_config_path(config_key))
+
+
+    def get_camera_settings_config_path(self, config_key):
+        if isinstance(config_key, str):
+            return tuple(config_key.replace('__', '.').split('.'))
+
+        return tuple(config_key)
 
 
     def get_camera_settings_lens_form(self, profile, submitted_data=None, errors=None):
