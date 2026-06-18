@@ -69,6 +69,7 @@ class IndiClientLibCameraGeneric(IndiClient):
         self.exposureStartMonotonic = 0.0
         self.processStartMonotonic = 0.0
         self.libcamera_timeout = 0.0
+        self.current_libcamera_cmd = None
         self._hybrid_awb_capture_control = None
 
         memory_info = psutil.virtual_memory()
@@ -681,6 +682,7 @@ class IndiClientLibCameraGeneric(IndiClient):
         self.libcamera_timeout = self._libcameraExposureTimeout()
         self.exposureStartTime = time.time()
         self.exposureStartMonotonic = time.monotonic()
+        self.current_libcamera_cmd = list(cmd)
         logger.info('image command: %s', ' '.join(cmd))
         if images_only:
             _multi_camera_diag(
@@ -734,6 +736,15 @@ class IndiClientLibCameraGeneric(IndiClient):
             stdout=libcamera_stdout,
             stderr=subprocess.STDOUT,
         )
+        logger.info(
+            'rpicam-still started profile=%s camera_id=%s pid=%s requested_exposure=%0.8fs timeout=%0.1fs command=%s',
+            getattr(self, 'profile_id', 'default'),
+            getattr(self, 'camera_id', 'unknown'),
+            self.libcamera_process.pid,
+            float(exposure),
+            self.libcamera_timeout,
+            ' '.join(cmd),
+        )
 
         self.active_exposure = True
 
@@ -744,18 +755,15 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
         if sync:
+            wait_timeout = timeout
+            if wait_timeout is None and self._libcameraProfileContextEnabled():
+                wait_timeout = self.libcamera_timeout
+
             try:
-                self.libcamera_process.wait(timeout=timeout)
+                self.libcamera_process.wait(timeout=wait_timeout)
             except subprocess.TimeoutExpired:
-                logger.error('Exposure timeout')
-                if images_only:
-                    _multi_camera_diag(
-                        '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera sync timeout timeout=%s; aborting process',
-                        getattr(self, 'profile_id', 'default'),
-                        getattr(self, 'camera_id', 'unknown'),
-                        timeout,
-                    )
-                self.abortCcdExposure()
+                elapsed = time.time() - self.exposureStartTime
+                self._abortTimedOutLibcameraExposure(elapsed, wait_timeout, sync=True)
                 raise TimeOutException('Timeout waiting for exposure')
 
 
@@ -783,6 +791,17 @@ class IndiClientLibCameraGeneric(IndiClient):
                 process_exit_time = time.time()
                 process_exit_monotonic = time.monotonic()
 
+            logger.info(
+                'rpicam-still exited profile=%s camera_id=%s pid=%s elapsed=%0.4fs returncode=%s requested_exposure=%0.8fs timeout=%0.1fs',
+                getattr(self, 'profile_id', 'default'),
+                getattr(self, 'camera_id', 'unknown'),
+                self.libcamera_process.pid,
+                process_exit_time - self.exposureStartTime,
+                self.libcamera_process.returncode,
+                float(self.exposure),
+                self.libcamera_timeout,
+            )
+
             self._logHybridAwbCaptureEndDiag(process_exit_time, process_exit_monotonic, True)
 
             self.active_exposure = False
@@ -800,14 +819,7 @@ class IndiClientLibCameraGeneric(IndiClient):
         if self.active_exposure and self._libcameraProcessTimedOut():
             timeout = self._libcameraExposureTimeout()
             elapsed = time.time() - self.exposureStartTime
-            _multi_camera_diag(
-                '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera async timeout elapsed=%0.1fs timeout=%0.1fs; aborting process',
-                getattr(self, 'profile_id', 'default'),
-                getattr(self, 'camera_id', 'unknown'),
-                elapsed,
-                timeout,
-            )
-            self.abortCcdExposure()
+            self._abortTimedOutLibcameraExposure(elapsed, timeout, sync=False)
             return True, 'TIMEOUT'
 
         if self._libCameraProcessRunning():
@@ -842,6 +854,17 @@ class IndiClientLibCameraGeneric(IndiClient):
             else:
                 process_exit_time = time.time()
                 process_exit_monotonic = time.monotonic()
+
+            logger.info(
+                'rpicam-still exited profile=%s camera_id=%s pid=%s elapsed=%0.4fs returncode=%s requested_exposure=%0.8fs timeout=%0.1fs',
+                getattr(self, 'profile_id', 'default'),
+                getattr(self, 'camera_id', 'unknown'),
+                self.libcamera_process.pid,
+                process_exit_time - self.exposureStartTime,
+                self.libcamera_process.returncode,
+                float(self.exposure),
+                self.libcamera_timeout,
+            )
 
             self._logHybridAwbCaptureEndDiag(process_exit_time, process_exit_monotonic, False)
 
@@ -880,17 +903,78 @@ class IndiClientLibCameraGeneric(IndiClient):
         self.libcamera_process = None
         self.current_exposure_file_p = None
         self.current_metadata_file_p = None
+        self.current_libcamera_cmd = None
         self.exposureStartTime = 0.0
+
+
+    def _libcameraProfileContextEnabled(self):
+        active_profile_id = self.config.get('MULTI_CAMERA_ACTIVE_PROFILE') or getattr(self, 'profile_id', None)
+        if active_profile_id in (None, ''):
+            return False
+
+        return str(active_profile_id) not in ('default', 'current-config')
 
 
     def _libcameraExposureTimeout(self):
         exposure = float(getattr(self, 'exposure', 0.0) or 0.0)
+        if self._libcameraProfileContextEnabled():
+            return max(10.0, exposure + 12.0)
+
         configured_timeout = float(self.config.get('CCD_EXPOSURE_TIMEOUT', 330))
         return max(configured_timeout, exposure + 30.0)
 
 
+    def _libcameraFileStats(self, file_p):
+        if not file_p:
+            return 'path=None exists=False'
+
+        try:
+            stat_info = file_p.stat()
+            return 'path={0:s} exists=True size={1:d} mtime={2:0.6f}'.format(str(file_p), stat_info.st_size, stat_info.st_mtime)
+        except FileNotFoundError:
+            return 'path={0:s} exists=False'.format(str(file_p))
+        except OSError as e:
+            return 'path={0:s} stat_error={1:s}'.format(str(file_p), str(e))
+
+
+    def _abortTimedOutLibcameraExposure(self, elapsed, timeout, sync=False):
+        process = self.libcamera_process
+        pid = getattr(process, 'pid', None)
+        command = ' '.join(self.current_libcamera_cmd or [])
+        image_stats = self._libcameraFileStats(self.current_exposure_file_p)
+        metadata_stats = self._libcameraFileStats(self.current_metadata_file_p)
+        logger.error(
+            'rpicam-still timeout profile=%s camera_id=%s pid=%s requested_exposure=%0.8fs timeout=%0.1fs elapsed=%0.4fs sync=%s command=%s image=[%s] metadata=[%s]',
+            getattr(self, 'profile_id', 'default'),
+            getattr(self, 'camera_id', 'unknown'),
+            pid,
+            float(getattr(self, 'exposure', 0.0) or 0.0),
+            float(timeout),
+            float(elapsed),
+            sync,
+            command,
+            image_stats,
+            metadata_stats,
+        )
+        _multi_camera_diag(
+            '[MULTI_CAMERA_DIAG][%s][camera_id=%s] libcamera process timeout pid=%s requested_exposure=%0.8fs timeout=%0.1fs elapsed=%0.4fs sync=%s command=%s image=[%s] metadata=[%s]',
+            getattr(self, 'profile_id', 'default'),
+            getattr(self, 'camera_id', 'unknown'),
+            pid,
+            float(getattr(self, 'exposure', 0.0) or 0.0),
+            float(timeout),
+            float(elapsed),
+            sync,
+            command,
+            image_stats,
+            metadata_stats,
+        )
+
+        self.abortCcdExposure()
+
+
     def _libcameraProcessTimedOut(self):
-        if not bool(getattr(self, 'images_only', False)):
+        if not self._libcameraProfileContextEnabled() and not bool(getattr(self, 'images_only', False)):
             return False
 
         if not self.exposureStartTime:
