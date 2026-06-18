@@ -24,7 +24,8 @@ var camera_id = {{ camera_id }};
             </div>
             <span class="modern-admin-status-pill modern-admin-status-warning">Global config</span>
         </div>
-        <p class="modern-admin-note">Use Camera Profile Settings for per-camera acquisition, driver, lens, and Hybrid AWB controls. This page covers the remaining global settings still present in the classic config form and uses the same backend validation and save path.</p>
+        <p class="modern-admin-note">Use Camera Profile Settings for per-camera acquisition, driver, lens, and Hybrid AWB controls. CCD_CONFIG gain/binning values edited here are global fallback defaults, not per-camera tuning. This page covers the remaining global settings still present in the classic config form and uses the same backend validation and save path.</p>
+        <p class="modern-admin-note"><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Open Camera Profiles</a></p>
         <div class="modern-admin-settings-summary-grid">
             <div class="modern-admin-settings-summary-card">
                 <span>{{ modern_admin_full_settings_field_count }}</span>

@@ -214,6 +214,16 @@ def _coerce_outputs(config: Mapping[str, Any], raw_outputs: Optional[Mapping[str
     return outputs
 
 
+def _deep_update(base_config: Dict[str, Any], override_config: Mapping[str, Any]) -> Dict[str, Any]:
+    for key, value in override_config.items():
+        if isinstance(value, Mapping) and isinstance(base_config.get(key), dict):
+            _deep_update(base_config[key], value)
+        else:
+            base_config[key] = deepcopy(value)
+
+    return base_config
+
+
 def _profile_from_config(
     config: Mapping[str, Any],
     profile_config: Optional[Mapping[str, Any]] = None,
@@ -224,7 +234,10 @@ def _profile_from_config(
 ) -> CaptureProfile:
     profile_config = profile_config or {}
 
-    ccd_config = deepcopy(profile_config.get('ccd_config') or config.get('CCD_CONFIG') or {})
+    ccd_config = deepcopy(config.get('CCD_CONFIG') or {})
+    profile_ccd_config = profile_config.get('ccd_config') or {}
+    if isinstance(profile_ccd_config, Mapping):
+        _deep_update(ccd_config, profile_ccd_config)
     libcamera_config = deepcopy(config.get('LIBCAMERA') or {})
     libcamera_config.update(profile_config.get('libcamera') or {})
     indi_config = profile_config.get('indi') or {}
@@ -280,9 +293,9 @@ def _profile_from_config(
         gain_default=_float_config(profile_config, 'gain_default', _mapping_float(ccd_night, 'GAIN', 100.0)),
         gain_min=_float_config(profile_config, 'gain_min', _mapping_float(ccd_day, 'GAIN', 0.0)),
         gain_max=_float_config(profile_config, 'gain_max', _mapping_float(ccd_night, 'GAIN', 100.0)),
-        gain_night=_float_config(profile_config, 'gain_max', _mapping_float(ccd_night, 'GAIN', 100.0)),
+        gain_night=_mapping_float(ccd_night, 'GAIN', _float_config(profile_config, 'gain_max', 100.0)),
         gain_moonmode=_mapping_float(ccd_moonmode, 'GAIN', 75.0),
-        gain_day=_float_config(profile_config, 'gain_min', _mapping_float(ccd_day, 'GAIN', 0.0)),
+        gain_day=_mapping_float(ccd_day, 'GAIN', _float_config(profile_config, 'gain_min', 0.0)),
         auto_gain_enable=bool(profile_config.get('auto_gain_enable', bool(ccd_config.get('AUTO_GAIN_ENABLE', False)))),
         auto_gain_levels=_int_config(profile_config, 'auto_gain_levels', _mapping_int(ccd_config, 'AUTO_GAIN_LEVELS', 5)),
         binning_night=_int_config(profile_config, 'binning_night', _mapping_int(ccd_night, 'BINNING', 1)),
@@ -336,12 +349,16 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     profile_config['INDI_CAMERA_NAME'] = profile.indi_camera_name
     ccd_config = deepcopy(profile.ccd_config)
     ccd_night = deepcopy(ccd_config.get('NIGHT') or {})
+    ccd_moonmode = deepcopy(ccd_config.get('MOONMODE') or {})
     ccd_day = deepcopy(ccd_config.get('DAY') or {})
-    ccd_night['GAIN'] = profile.gain_max
+    ccd_night['GAIN'] = profile.gain_night
     ccd_night['BINNING'] = profile.binning_night
-    ccd_day['GAIN'] = profile.gain_min
+    ccd_moonmode['GAIN'] = profile.gain_moonmode
+    ccd_moonmode['BINNING'] = profile.binning_moonmode
+    ccd_day['GAIN'] = profile.gain_day
     ccd_day['BINNING'] = profile.binning_day
     ccd_config['NIGHT'] = ccd_night
+    ccd_config['MOONMODE'] = ccd_moonmode
     ccd_config['DAY'] = ccd_day
     ccd_config['AUTO_GAIN_ENABLE'] = profile.auto_gain_enable
     ccd_config['AUTO_GAIN_LEVELS'] = profile.auto_gain_levels
