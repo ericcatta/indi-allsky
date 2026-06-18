@@ -139,6 +139,7 @@ class IndiClient(PyIndi.BaseClient):
 
         self._disconnected = False
         self._ccd_removed = False
+        self._blob_filter_warning_keys = set()
 
         logger.info('creating an instance of IndiClient')
 
@@ -313,15 +314,8 @@ class IndiClient(PyIndi.BaseClient):
             p_blob = PyIndi.PropertyBlob(p)
             #logger.info("new Blob %s for %s", p_blob.getName(), p_blob.getDeviceName())
 
-
-            if isinstance(self.ccd_device, type(None)):
+            if not self._isBlobForCurrentCcd(p_blob):
                 return
-
-
-            if p_blob.getDeviceName() != self.ccd_device.getDeviceName():
-                logger.error('Received Blob from unexpected camera device: %s - Expected: %s', p_blob.getDeviceName(), self.ccd_device.getDeviceName())
-                return
-
 
             self.processBlob(p_blob[0])
         elif p.getType() == PyIndi.INDI_NUMBER:
@@ -347,6 +341,9 @@ class IndiClient(PyIndi.BaseClient):
     def newBLOB(self, bp):
         # legacy INDI 1.x.x code path
         #logger.info("new BLOB %s", bp.name)
+        if not self._isBlobForCurrentCcd(bp, allow_unknown_device=True):
+            return
+
         self.processBlob(bp)
 
     def newSwitch(self, svp):
@@ -368,6 +365,56 @@ class IndiClient(PyIndi.BaseClient):
         # legacy INDI 1.x.x code path
         #logger.info("new Light %s for %s", lvp.name, lvp.device)
         pass
+
+
+    def _getBlobDeviceName(self, blob):
+        if hasattr(blob, 'getDeviceName'):
+            try:
+                return blob.getDeviceName()
+            except (AttributeError, TypeError):
+                pass
+
+        for attr_name in ('device', 'deviceName', 'devicename'):
+            if not hasattr(blob, attr_name):
+                continue
+
+            blob_device = getattr(blob, attr_name)
+            if callable(blob_device):
+                try:
+                    blob_device = blob_device()
+                except TypeError:
+                    continue
+
+            if blob_device:
+                return str(blob_device)
+
+        return None
+
+
+    def _isBlobForCurrentCcd(self, blob, allow_unknown_device=False):
+        if isinstance(self.ccd_device, type(None)):
+            return False
+
+        expected_device_name = self.ccd_device.getDeviceName()
+        blob_device_name = self._getBlobDeviceName(blob)
+
+        if not blob_device_name:
+            warning_key = ('missing_device_name', expected_device_name)
+            if warning_key not in self._blob_filter_warning_keys:
+                self._blob_filter_warning_keys.add(warning_key)
+                logger.warning('Received Blob without device name; expected camera device: %s', expected_device_name)
+
+            return bool(allow_unknown_device)
+
+        if blob_device_name == expected_device_name:
+            return True
+
+        logger.debug(
+            'Ignoring Blob from non-target camera device: %s - Expected: %s',
+            blob_device_name,
+            expected_device_name,
+        )
+        return False
 
 
     def processBlob(self, blob):
