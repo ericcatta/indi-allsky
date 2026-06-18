@@ -495,9 +495,9 @@ class CaptureWorker(Process):
 
         camera_id = self.camera_id if self.camera_id is not None else 'unknown'
         exposure_next = float(self.exposure_av[constants.EXPOSURE_NEXT])
-        period = float(self.config.get('EXPOSURE_PERIOD_DAY' if not self.night else 'EXPOSURE_PERIOD', 0.0))
+        period_info = self._effective_exposure_period(exposure_next)
         _multi_camera_diag(
-            '[HYBRID_AWB_CAPTURE_DIAG][%s][camera_id=%s] capture_loop apply_mode=%s backend=%s next_frame_time=%0.6f frame_start_time=%0.6f capture_loop_elapsed=%0.4fs capture_loop_delta=%+0.4fs exposure_next=%0.8fs exposure_period=%0.4fs add_period_delay=%0.4fs image_q_depth=%s',
+            '[HYBRID_AWB_CAPTURE_DIAG][%s][camera_id=%s] capture_loop apply_mode=%s backend=%s next_frame_time=%0.6f frame_start_time=%0.6f capture_loop_elapsed=%0.4fs capture_loop_delta=%+0.4fs exposure_next=%0.8fs configured_exposure_period=%0.4fs minimum_exposure_period=%0.4fs effective_exposure_period=%0.4fs period_clamped=%s period_mode=%s add_period_delay=%0.4fs image_q_depth=%s',
             self.profile_id,
             camera_id,
             self._hybrid_awb_apply_mode(),
@@ -507,7 +507,11 @@ class CaptureWorker(Process):
             total_elapsed,
             total_elapsed - exposure_next,
             exposure_next,
-            period,
+            period_info['configured'],
+            period_info['minimum'],
+            period_info['effective'],
+            period_info['clamped'],
+            period_info['mode'],
             self.add_period_delay,
             self._image_queue_depth(),
         )
@@ -555,6 +559,59 @@ class CaptureWorker(Process):
             self.config.get('EXPOSURE_PERIOD'),
             self.config.get('EXPOSURE_PERIOD_DAY'),
             self._hybrid_awb_apply_mode(),
+        )
+
+
+    def _configured_exposure_period(self):
+        if self.night:
+            mode = 'moonmode' if self.moonmode else 'night'
+            period_key = 'EXPOSURE_PERIOD'
+            default_period = 15.0
+        else:
+            mode = 'day'
+            period_key = 'EXPOSURE_PERIOD_DAY'
+            default_period = float(self.config.get('EXPOSURE_PERIOD', 15.0))
+
+        try:
+            configured_period = float(self.config.get(period_key, default_period))
+        except (TypeError, ValueError):
+            configured_period = float(default_period)
+
+        return mode, period_key, configured_period
+
+
+    def _effective_exposure_period(self, exposure):
+        try:
+            requested_exposure = float(exposure)
+        except (TypeError, ValueError):
+            requested_exposure = 0.0
+
+        mode, period_key, configured_period = self._configured_exposure_period()
+        minimum_period = requested_exposure + 15.0
+        effective_period = max(configured_period, minimum_period)
+        return {
+            'mode'       : mode,
+            'period_key' : period_key,
+            'configured' : configured_period,
+            'requested'  : requested_exposure,
+            'minimum'    : minimum_period,
+            'effective'  : effective_period,
+            'clamped'    : effective_period > configured_period,
+        }
+
+
+    def _log_effective_exposure_period(self, period_info):
+        logger.info(
+            '[EXPOSURE_PERIOD_RUNTIME][%s][camera_id=%s] mode=%s period_key=%s configured_exposure_period=%0.4fs requested_exposure_s=%0.8fs minimum_exposure_period=%0.4fs effective_exposure_period=%0.4fs period_clamped=%s',
+            self.profile_id,
+            self.camera_id if self.camera_id is not None else 'unknown',
+            period_info['mode'],
+            period_info['period_key'],
+            period_info['configured'],
+            period_info['requested'],
+            period_info['minimum'],
+            period_info['effective'],
+            period_info['clamped'],
         )
 
 
@@ -1071,10 +1128,9 @@ class CaptureWorker(Process):
                             logger.error('DBus Error: %s', str(e))
 
                         # time change, need to update next frame time
-                        if self.night:
-                            next_frame_time = time.time() + self.config['EXPOSURE_PERIOD']
-                        else:
-                            next_frame_time = time.time() + self.config['EXPOSURE_PERIOD_DAY']
+                        period_info = self._effective_exposure_period(self.exposure_av[constants.EXPOSURE_NEXT])
+                        self._log_effective_exposure_period(period_info)
+                        next_frame_time = time.time() + period_info['effective']
 
                         break  # go ahead and break the loop to update other timestamps
 
@@ -1091,15 +1147,21 @@ class CaptureWorker(Process):
 
 
                         frame_start_time = now_time
+                        exposure_period_info = self._effective_exposure_period(self.exposure_av[constants.EXPOSURE_NEXT])
+                        self._log_effective_exposure_period(exposure_period_info)
 
                         if self._is_images_only_libcamera_profile() and self.config.get('MULTI_CAMERA_TIMING_DIAG', False):
                             camera_id = self.camera_id if self.camera_id is not None else 'unknown'
                             _multi_camera_diag(
-                                '[MULTI_CAMERA_TIMING][%s][camera_id=%s] capture_loop_start t=%0.6f exposure_next=%0.8fs gain_next=%0.2f binning_next=%d image_q_depth=%s',
+                                '[MULTI_CAMERA_TIMING][%s][camera_id=%s] capture_loop_start t=%0.6f exposure_next=%0.8fs configured_exposure_period=%0.4fs minimum_exposure_period=%0.4fs effective_exposure_period=%0.4fs period_clamped=%s gain_next=%0.2f binning_next=%d image_q_depth=%s',
                                 self.profile_id,
                                 camera_id,
                                 frame_start_time,
                                 self.exposure_av[constants.EXPOSURE_NEXT],
+                                exposure_period_info['configured'],
+                                exposure_period_info['minimum'],
+                                exposure_period_info['effective'],
+                                exposure_period_info['clamped'],
                                 self.gain_av[constants.GAIN_NEXT],
                                 self.binning_av[constants.BINNING_NEXT],
                                 self._image_queue_depth(),
@@ -1219,10 +1281,8 @@ class CaptureWorker(Process):
                         elif waiting_for_sqm_frame:
                             # take next exposure as quickly as possible
                             next_frame_time = frame_start_time
-                        elif self.night:
-                            next_frame_time = frame_start_time + self.config['EXPOSURE_PERIOD'] + self.add_period_delay
                         else:
-                            next_frame_time = frame_start_time + self.config['EXPOSURE_PERIOD_DAY'] + self.add_period_delay
+                            next_frame_time = frame_start_time + exposure_period_info['effective'] + self.add_period_delay
 
                         logger.info('Total time since last exposure %0.4f s', total_elapsed)
 
