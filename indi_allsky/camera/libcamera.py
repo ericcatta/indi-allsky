@@ -285,9 +285,9 @@ class IndiClientLibCameraGeneric(IndiClient):
 
     def _hybridAwbCaptureControl(self):
         apply_mode = self._hybridAwbApplyMode()
+        red_gain, blue_gain, sample_count, reason = self._hybridAwbGains()
         if apply_mode in ('auto', 'capture_driver'):
-            red_gain, blue_gain, sample_count, reason = self._hybridAwbGains()
-        return {
+            return {
                 'apply_mode'   : apply_mode,
                 'backend'      : 'libcamera_capture',
                 'awb_source'   : 'hybrid_runtime',
@@ -299,17 +299,16 @@ class IndiClientLibCameraGeneric(IndiClient):
                 'reason'       : reason,
             }
 
-        red_gain, blue_gain = self._hybridAwbFallbackGains()
         return {
             'apply_mode'   : apply_mode,
             'backend'      : apply_mode,
-            'awb_source'   : 'fixed_fallback_capture',
+            'awb_source'   : 'hybrid_runtime_diagnostic',
             'raw_apply_mode': self._hybridAwbRawApplyMode(),
             'awbgains_suppressed': apply_mode in ('postprocess_rgb', 'disabled'),
             'red_gain'     : red_gain,
             'blue_gain'    : blue_gain,
-            'sample_count' : 0,
-            'reason'       : 'postprocess-or-disabled',
+            'sample_count' : sample_count,
+            'reason'       : reason,
         }
 
 
@@ -319,10 +318,11 @@ class IndiClientLibCameraGeneric(IndiClient):
 
         control = self._hybridAwbCaptureControl()
         normalized_cmd = self._removeCmdOptions(cmd, {'--awb', '--awbgains'})
-        normalized_cmd.extend([
-            '--awbgains',
-            '{0:0.4f},{1:0.4f}'.format(control['red_gain'], control['blue_gain']),
-        ])
+        if not control.get('awbgains_suppressed'):
+            normalized_cmd.extend([
+                '--awbgains',
+                '{0:0.4f},{1:0.4f}'.format(control['red_gain'], control['blue_gain']),
+            ])
         return normalized_cmd, control
 
 
