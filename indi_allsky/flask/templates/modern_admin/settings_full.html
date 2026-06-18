@@ -24,20 +24,20 @@ var camera_id = {{ camera_id }};
             </div>
             <span class="modern-admin-status-pill modern-admin-status-warning">Global config</span>
         </div>
-        <p class="modern-admin-note">Use Camera Profile Settings for per-camera acquisition, driver, lens, and Hybrid AWB controls. CCD_CONFIG gain/binning values edited here are global fallback defaults, not per-camera tuning. This page covers the remaining global settings still present in the classic config form and uses the same backend validation and save path.</p>
+        <p class="modern-admin-note">Use Camera Profile Settings for acquisition, gain, exposure, target ADU, binning, and AWB controls. Those fields are intentionally hidden from this global editor so there is one operational path for both single-camera and multi-camera systems.</p>
         <p class="modern-admin-note"><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Open Camera Profiles</a></p>
         <div class="modern-admin-settings-summary-grid">
             <div class="modern-admin-settings-summary-card">
                 <span>{{ modern_admin_full_settings_field_count }}</span>
-                <p>Editable fields</p>
+                <p>Global fields</p>
+            </div>
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ modern_admin_full_settings_profile_operated_fields | length }}</span>
+                <p>Profile-operated fields hidden</p>
             </div>
             <div class="modern-admin-settings-summary-card">
                 <span>{{ modern_admin_full_settings_profile_count }}</span>
                 <p>Multi-camera profiles preserved</p>
-            </div>
-            <div class="modern-admin-settings-summary-card">
-                <span>{{ config_id }}</span>
-                <p>Active config ID</p>
             </div>
         </div>
     </section>
@@ -66,6 +66,11 @@ var camera_id = {{ camera_id }};
     </section>
 
     <form id="modern-admin-full-settings-form" class="modern-admin-settings-form" autocomplete="off" novalidate>
+        {% for field_meta in modern_admin_full_settings_profile_operated_hidden_fields %}
+        {% set field = field_meta.field %}
+        {{ field(id=field_meta.name, data_modern_full_field='1', hidden=true) }}
+        {% endfor %}
+
         {% for group in modern_admin_full_settings_groups %}
         <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-full-settings-section="{{ group.key }}" {% if group.default_open %}open{% endif %}>
             <summary>

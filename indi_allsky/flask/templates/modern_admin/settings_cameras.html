@@ -24,7 +24,7 @@ var camera_id = {{ camera_id }};
             </div>
             <span class="modern-admin-status-pill modern-admin-status-warning">Profile-specific editors</span>
         </div>
-        <p class="modern-admin-note">Start from the selected profile. Acquisition, Driver / Connection, Lens & Optics, and Hybrid Controller changes are saved only into that camera profile. Global settings are used only as fallback defaults.</p>
+        <p class="modern-admin-note">Start from the selected camera. Acquisition and Hybrid Controller are the operational editors for both single-camera and multi-camera systems. Multi-camera saves into the selected profile; single-camera saves into the current camera fallback used by the legacy runtime.</p>
         <p class="modern-admin-note">
             <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Back to Cameras</a>
             ·
@@ -170,7 +170,7 @@ var camera_id = {{ camera_id }};
                     <div class="modern-admin-settings-edit-grid">
                         <label class="modern-admin-settings-edit-field" for="camera-hybrid-processing-mode">
                             <span class="modern-admin-settings-edit-label">Processing Mode</span>
-                            <span class="modern-admin-settings-edit-meta">MULTI_CAMERA.profiles[n].processing_mode · required</span>
+                            <span class="modern-admin-settings-edit-meta">{{ modern_admin_camera_settings_hybrid_form.storage_label }}.processing_mode · required</span>
                             <select id="camera-hybrid-processing-mode" name="processing_mode" {% if modern_admin_camera_settings_hybrid_form.readonly %}disabled{% endif %}>
                                 {% for choice in modern_admin_camera_settings_hybrid_form.choices %}
                                 <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
@@ -189,7 +189,7 @@ var camera_id = {{ camera_id }};
 
                         <label class="modern-admin-settings-edit-field" for="camera-hybrid-awb-apply-mode">
                             <span class="modern-admin-settings-edit-label">AWB Apply Mode</span>
-                            <span class="modern-admin-settings-edit-meta">MULTI_CAMERA.profiles[n].hybrid.awb.apply_mode · profile-specific</span>
+                            <span class="modern-admin-settings-edit-meta">{{ modern_admin_camera_settings_hybrid_form.storage_label }}.hybrid.awb.apply_mode · profile-specific</span>
                             <select id="camera-hybrid-awb-apply-mode" name="awb_apply_mode" {% if modern_admin_camera_settings_hybrid_form.readonly %}disabled{% endif %}>
                                 {% for choice in modern_admin_camera_settings_hybrid_form.awb_apply_choices %}
                                 <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %} {% if choice.disabled %}disabled{% endif %}>{{ choice.label }}{% if choice.disabled %} (unavailable){% endif %}</option>
@@ -388,38 +388,52 @@ var camera_id = {{ camera_id }};
                 <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form" novalidate>
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="modern_admin_action" value="capture">
-                    <div class="modern-admin-settings-edit-grid">
-                        {% for field in modern_admin_camera_settings_capture_form.fields %}
-                        <label class="modern-admin-settings-edit-field" for="camera-capture-{{ field.name }}">
-                            <span class="modern-admin-settings-edit-label">{{ field.label }}</span>
-                            <span class="modern-admin-settings-edit-meta">{{ field.group }} · MULTI_CAMERA.profiles[n].{{ field.config_key }}</span>
+                    {% for group in modern_admin_camera_settings_capture_form.groups %}
+                    <div class="modern-admin-settings-edit-subsection">
+                        <h3>{{ group.name }}</h3>
+                        {% if group.name == 'Gain' %}
+                        <p class="modern-admin-note">Set fixed gain targets for day, night, and moon mode for this camera.</p>
+                        {% elif group.name == 'Auto Gain' %}
+                        <p class="modern-admin-note">Keep day gain fixed when disabled; allow night or moon mode gain adjustment after exposure reaches the profile limits.</p>
+                        {% elif group.name == 'Exposure' %}
+                        <p class="modern-admin-note">Exposure limits and cadence for this camera profile.</p>
+                        {% elif group.name == 'AWB' %}
+                        <p class="modern-admin-note">AWB settings for this profile. Hybrid Apply Mode is controlled below in Hybrid Controller.</p>
+                        {% endif %}
+                        <div class="modern-admin-settings-edit-grid">
+                            {% for field in group.fields %}
+                            <label class="modern-admin-settings-edit-field" for="camera-capture-{{ field.name }}">
+                                <span class="modern-admin-settings-edit-label">{{ field.label }}</span>
+                                <span class="modern-admin-settings-edit-meta">{{ field.group }} · {{ modern_admin_camera_settings_capture_form.storage_label }}.{{ field.config_key }}</span>
 
-                            {% if field.input_type == 'select' %}
-                            <select id="camera-capture-{{ field.name }}" name="{{ field.name }}" {% if field.readonly %}disabled{% endif %}>
-                                {% for choice in field.choices %}
-                                <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
-                                {% endfor %}
-                            </select>
-                            {% else %}
-                            <input id="camera-capture-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" step="{{ field.step }}" min="{{ field.min }}" {% if field.readonly %}readonly{% endif %}>
-                            {% endif %}
+                                {% if field.input_type == 'select' %}
+                                <select id="camera-capture-{{ field.name }}" name="{{ field.name }}" {% if field.readonly %}disabled{% endif %}>
+                                    {% for choice in field.choices %}
+                                    <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% else %}
+                                <input id="camera-capture-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" step="{{ field.step }}" min="{{ field.min }}" {% if field.readonly %}readonly{% endif %}>
+                                {% endif %}
 
-                            {% if field.field_type == 'boolean_select' %}
-                            <span class="modern-admin-settings-edit-help">Use global removes the profile value and falls back to Global Capture Defaults.</span>
-                            {% else %}
-                            <span class="modern-admin-settings-edit-help">Leave empty to inherit Global Capture Defaults.</span>
-                            {% endif %}
+                                {% if field.field_type == 'boolean_select' %}
+                                <span class="modern-admin-settings-edit-help">Use global removes the profile value and falls back to legacy defaults.</span>
+                                {% else %}
+                                <span class="modern-admin-settings-edit-help">Leave empty to inherit legacy fallback defaults.</span>
+                                {% endif %}
 
-                            {% if field.errors %}
-                            <span class="modern-admin-settings-edit-error">
-                                {% for error in field.errors %}
-                                {{ error }}{% if not loop.last %}<br>{% endif %}
-                                {% endfor %}
-                            </span>
-                            {% endif %}
-                        </label>
-                        {% endfor %}
+                                {% if field.errors %}
+                                <span class="modern-admin-settings-edit-error">
+                                    {% for error in field.errors %}
+                                    {{ error }}{% if not loop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </span>
+                                {% endif %}
+                            </label>
+                            {% endfor %}
+                        </div>
                     </div>
+                    {% endfor %}
 
                     <section class="modern-admin-table-panel modern-admin-settings-actions" aria-label="Camera acquisition settings actions">
                         <div>

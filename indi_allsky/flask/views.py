@@ -15045,30 +15045,69 @@ class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
 
     SETTINGS_FULL_DEFAULT_OPEN_GROUPS = (
-        'Camera / Capture',
-        'Exposure / Gain / Binning',
         'Processing / Calibration',
     )
+    SETTINGS_FULL_PROFILE_OPERATED_FIELDS = {
+        'CCD_CONFIG__DAY__GAIN',
+        'CCD_CONFIG__NIGHT__GAIN',
+        'CCD_CONFIG__MOONMODE__GAIN',
+        'CCD_CONFIG__DAY__BINNING',
+        'CCD_CONFIG__NIGHT__BINNING',
+        'CCD_CONFIG__MOONMODE__BINNING',
+        'CCD_CONFIG__AUTO_GAIN_ENABLE',
+        'CCD_CONFIG__AUTO_GAIN_LEVELS',
+        'CCD_EXPOSURE_MIN',
+        'CCD_EXPOSURE_MIN_DAY',
+        'CCD_EXPOSURE_DEF',
+        'CCD_EXPOSURE_MAX',
+        'CCD_EXPOSURE_TIMEOUT',
+        'EXPOSURE_PERIOD',
+        'EXPOSURE_PERIOD_DAY',
+        'TARGET_ADU',
+        'TARGET_ADU_DAY',
+        'TARGET_ADU_DEV',
+        'TARGET_ADU_DEV_DAY',
+        'LIBCAMERA__AWB',
+        'LIBCAMERA__AWB_DAY',
+        'LIBCAMERA__AWB_ENABLE',
+        'LIBCAMERA__AWB_ENABLE_DAY',
+        'LIBCAMERA__CCM_DISABLE',
+        'LIBCAMERA__CCM_DISABLE_DAY',
+        'LIBCAMERA__IMMEDIATE',
+        'LIBCAMERA__IMMEDIATE_DAY',
+        'LIBCAMERA__EXTRA_OPTIONS',
+        'LIBCAMERA__EXTRA_OPTIONS_DAY',
+    }
 
     def get_context(self):
         context = super(ModernAdminFullSettingsView, self).get_context()
         form = context['form_config']
         editor_groups = self.get_full_settings_editor_groups(form)
+        profile_operated_hidden_fields = self.get_full_settings_profile_operated_hidden_fields(form)
 
         context['modern_admin_full_settings_groups'] = editor_groups
+        context['modern_admin_full_settings_profile_operated_hidden_fields'] = profile_operated_hidden_fields
         context['modern_admin_full_settings_field_count'] = sum([group['count'] for group in editor_groups])
         context['modern_admin_full_settings_field_names'] = [
             field['name']
             for group in editor_groups
             for field in group['fields']
+        ] + [
+            field['name']
+            for field in profile_operated_hidden_fields
         ]
         context['modern_admin_full_settings_checkbox_names'] = [
             field['name']
             for group in editor_groups
             for field in group['fields']
             if field['is_checkbox']
+        ] + [
+            field['name']
+            for field in profile_operated_hidden_fields
+            if field['is_checkbox']
         ]
         context['modern_admin_full_settings_profile_count'] = self.get_multi_camera_profile_count()
+        context['modern_admin_full_settings_profile_operated_fields'] = tuple(sorted(self.SETTINGS_FULL_PROFILE_OPERATED_FIELDS))
         return context
 
 
@@ -15080,6 +15119,8 @@ class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
         for field in form:
             field_name = getattr(field, 'name', '')
             if not field_name:
+                continue
+            if field_name in self.SETTINGS_FULL_PROFILE_OPERATED_FIELDS:
                 continue
 
             group_title = self.estimate_settings_group(field_name)
@@ -15100,6 +15141,18 @@ class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
             })
 
         return editor_groups
+
+
+    def get_full_settings_profile_operated_hidden_fields(self, form):
+        fields = list()
+        for field in form:
+            field_name = getattr(field, 'name', '')
+            if field_name not in self.SETTINGS_FULL_PROFILE_OPERATED_FIELDS:
+                continue
+
+            fields.append(self.get_full_settings_field_metadata(field_name, field))
+
+        return fields
 
 
     def get_full_settings_field_metadata(self, field_name, field):
@@ -15124,6 +15177,7 @@ class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
             'is_password'       : field_type == 'PasswordField' or widget_type == 'password',
             'is_hidden'         : field_type == 'CSRFTokenField' or widget_type == 'hidden',
             'is_submit_control' : field_name in ('CONFIG_NOTE', 'RELOAD_ON_SAVE'),
+            'profile_operated'  : field_name in self.SETTINGS_FULL_PROFILE_OPERATED_FIELDS,
             'search_text'       : self.get_settings_search_text(field_name, field, risk),
         }
 
@@ -15537,24 +15591,24 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'disabled',
     )
     CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER = (
-        'exposure_min',
-        'exposure_min_day',
-        'exposure_max',
-        'exposure_default',
-        'exposure_timeout',
-        'exposure_period',
-        'exposure_period_day',
+        'gain_day',
         'gain_night',
         'gain_moonmode',
-        'gain_day',
         'auto_gain_day',
         'auto_gain_night',
         'auto_gain_moonmode',
         'auto_gain_levels',
-        'target_adu',
         'target_adu_day',
-        'target_adu_dev',
+        'target_adu',
         'target_adu_dev_day',
+        'target_adu_dev',
+        'exposure_min_day',
+        'exposure_min',
+        'exposure_default',
+        'exposure_max',
+        'exposure_timeout',
+        'exposure_period_day',
+        'exposure_period',
         'binning_night',
         'binning_moonmode',
         'binning_day',
@@ -15598,13 +15652,13 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'libcamera_awb_blue_gain' : 'LIBCAMERA.AWB_BLUE_GAIN',
     }
     CAMERA_SETTINGS_CAPTURE_FIELD_LABELS = {
-        'exposure_min'       : 'Minimum Exposure',
-        'exposure_min_day'   : 'Day Minimum Exposure',
-        'exposure_max'       : 'Maximum Exposure',
+        'exposure_min'       : 'Exposure Min Night',
+        'exposure_min_day'   : 'Exposure Min Day',
+        'exposure_max'       : 'Exposure Max',
         'exposure_default'   : 'Default Exposure',
         'exposure_timeout'   : 'Exposure Timeout',
-        'exposure_period'    : 'Exposure Period',
-        'exposure_period_day': 'Day Exposure Period',
+        'exposure_period'    : 'Exposure Period Night',
+        'exposure_period_day': 'Exposure Period Day',
         'gain_night'         : 'Night Gain',
         'gain_moonmode'      : 'Moon Mode Gain',
         'gain_day'           : 'Day Gain',
@@ -15659,6 +15713,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'libcamera_awb_red_gain'  : 'float',
         'libcamera_awb_blue_gain' : 'float',
     }
+    CAMERA_SETTINGS_CAPTURE_GROUP_ORDER = (
+        'Gain',
+        'Auto Gain',
+        'Target ADU',
+        'Exposure',
+        'Binning',
+        'AWB',
+    )
     CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER = (
         'lens_name',
         'lens_focal_length',
@@ -15869,7 +15931,16 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             '_selector_label'    : camera_name,
             '_selector_subtitle' : 'active camera / current config',
             '_fallback_camera_id': getattr(getattr(self, 'camera', None), 'id', None),
+            '_profile_save_scope': 'global_fallback',
         },)
+
+
+    def is_camera_settings_profile_editable(self, profile):
+        return bool(profile.get('from_multi_camera')) or profile.get('_profile_save_scope') == 'global_fallback'
+
+
+    def is_camera_settings_global_fallback_profile(self, profile):
+        return profile.get('_profile_save_scope') == 'global_fallback'
 
 
     def get_selected_camera_settings_profile(self, profiles):
@@ -16124,14 +16195,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         capabilities = self.get_camera_settings_hybrid_capabilities(profile, awb_apply_mode)
 
         return {
-            'enabled'         : bool(profile.get('from_multi_camera')),
+            'enabled'         : self.is_camera_settings_profile_editable(profile),
             'processing_mode' : processing_mode,
             'choices'         : self.get_camera_settings_processing_mode_choices(processing_mode),
             'awb_apply_mode'  : awb_apply_mode,
             'awb_apply_choices': self.get_camera_settings_hybrid_awb_apply_mode_choices(awb_apply_mode, capabilities),
             'errors'          : errors,
-            'readonly'        : not profile.get('from_multi_camera'),
+            'readonly'        : not self.is_camera_settings_profile_editable(profile),
             'capabilities'    : capabilities,
+            'storage_label'   : 'current camera fallback' if self.is_camera_settings_global_fallback_profile(profile) else 'MULTI_CAMERA.profiles[n]',
         }
 
 
@@ -16198,6 +16270,13 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_hybrid_awb_apply_mode(self, profile):
+        if self.is_camera_settings_global_fallback_profile(profile):
+            found, value = self.get_camera_settings_config_value('HYBRID.AWB.APPLY_MODE')
+            if found:
+                awb_apply_mode = str(value or 'auto').strip().lower()
+                if awb_apply_mode in self.CAMERA_SETTINGS_HYBRID_AWB_APPLY_MODES:
+                    return awb_apply_mode
+
         awb_profile_config = profile.get('awb') or {}
         if isinstance(awb_profile_config, dict):
             awb_apply_mode = str(awb_profile_config.get('apply_mode', '') or '').strip().lower()
@@ -16243,6 +16322,13 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_processing_mode(self, profile):
+        if self.is_camera_settings_global_fallback_profile(profile):
+            found, value = self.get_camera_settings_config_value('PROCESSING_MODE')
+            if found:
+                processing_mode = str(value or 'classic').strip().lower()
+                if processing_mode in self.CAMERA_SETTINGS_PROCESSING_MODES:
+                    return processing_mode
+
         found, value = self.get_camera_settings_profile_override(profile, 'PROCESSING_MODE')
         if found:
             processing_mode = str(value or 'classic').strip().lower()
@@ -16287,8 +16373,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             result['modern_admin_camera_settings_error'] = 'Select a valid multi-camera profile before saving. No config was saved.'
             return result
 
-        if not selected_profile.get('from_multi_camera'):
-            result['modern_admin_camera_settings_error'] = 'The current global camera fallback is read-only. Select a MULTI_CAMERA profile before saving.'
+        if not self.is_camera_settings_profile_editable(selected_profile):
+            result['modern_admin_camera_settings_error'] = 'The selected camera profile is read-only. No config was saved.'
             return result
 
         submitted_data, validation_errors = self.get_camera_settings_hybrid_submitted_data(selected_profile)
@@ -16300,12 +16386,19 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
         try:
             new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
-            updated_profile_id = self.apply_camera_settings_hybrid_profile_to_config(
-                new_config,
-                selected_profile.get('profile_id'),
-                selected_profile.get('_profile_index'),
-                submitted_data,
-            )
+            if self.is_camera_settings_global_fallback_profile(selected_profile):
+                updated_profile_id = self.apply_camera_settings_hybrid_global_fallback_to_config(
+                    new_config,
+                    selected_profile.get('profile_id'),
+                    submitted_data,
+                )
+            else:
+                updated_profile_id = self.apply_camera_settings_hybrid_profile_to_config(
+                    new_config,
+                    selected_profile.get('profile_id'),
+                    selected_profile.get('_profile_index'),
+                    submitted_data,
+                )
 
             if not app.config['LOGIN_DISABLED']:
                 username = current_user.username
@@ -16329,6 +16422,23 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             result['modern_admin_camera_settings_error'] = 'Unable to save Hybrid Controller: {0:s}'.format(str(e))
 
         return result
+
+
+    def apply_camera_settings_hybrid_global_fallback_to_config(self, config, profile_id, submitted_data):
+        config['PROCESSING_MODE'] = submitted_data['processing_mode']
+
+        hybrid_config = config.get('HYBRID')
+        if not isinstance(hybrid_config, dict):
+            hybrid_config = OrderedDict()
+
+        awb_config = hybrid_config.get('AWB')
+        if not isinstance(awb_config, dict):
+            awb_config = OrderedDict()
+
+        awb_config['APPLY_MODE'] = submitted_data['awb_apply_mode']
+        hybrid_config['AWB'] = awb_config
+        config['HYBRID'] = hybrid_config
+        return str(profile_id)
 
 
     def get_camera_settings_hybrid_submitted_data(self, profile):
@@ -16581,6 +16691,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if found:
             return value
 
+        if self.is_camera_settings_global_fallback_profile(profile):
+            found, value = self.get_camera_settings_config_value(field_config_map[field_name])
+            if found:
+                return value
+
         if field_name == 'libcamera_awb_mode':
             return 'auto'
         elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
@@ -16800,7 +16915,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'value'      : self.format_camera_settings_capture_form_value(value, field_type),
                 'input_type' : input_type,
                 'field_type' : field_type,
-                'readonly'   : not profile.get('from_multi_camera'),
+                'readonly'   : not self.is_camera_settings_profile_editable(profile),
                 'errors'     : errors.get(field_name, []),
                 'choices'    : self.get_camera_settings_capture_field_choices(field_name, value),
                 'min'        : self.get_camera_settings_capture_field_min(field_name),
@@ -16808,9 +16923,26 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'group'      : self.get_camera_settings_capture_field_group(field_name),
             })
 
+        groups = list()
+        for group_name in self.CAMERA_SETTINGS_CAPTURE_GROUP_ORDER:
+            group_fields = [
+                field
+                for field in fields
+                if field['group'] == group_name
+            ]
+            if not group_fields:
+                continue
+
+            groups.append({
+                'name'   : group_name,
+                'fields' : group_fields,
+            })
+
         return {
-            'enabled' : bool(profile.get('from_multi_camera')),
+            'enabled' : self.is_camera_settings_profile_editable(profile),
             'fields'  : fields,
+            'groups'  : groups,
+            'storage_label' : 'current camera fallback' if self.is_camera_settings_global_fallback_profile(profile) else 'MULTI_CAMERA.profiles[n]',
         }
 
 
@@ -16840,6 +16972,13 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         found, value = self.get_camera_settings_nested_value(profile, field_name)
         if found:
             return value
+
+        if self.is_camera_settings_global_fallback_profile(profile):
+            global_config_key = self.CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS.get(field_name)
+            if global_config_key:
+                found, value = self.get_camera_settings_config_value(global_config_key)
+                if found:
+                    return value
 
         return ''
 
@@ -16896,16 +17035,18 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_capture_field_group(self, field_name):
-        if field_name.startswith('exposure_'):
-            return 'Exposure'
-        elif field_name.startswith('gain_') or field_name.startswith('auto_gain_'):
+        if field_name.startswith('gain_'):
             return 'Gain'
+        elif field_name.startswith('auto_gain_'):
+            return 'Auto Gain'
         elif field_name.startswith('target_adu'):
-            return 'ADU'
+            return 'Target ADU'
+        elif field_name.startswith('exposure_'):
+            return 'Exposure'
         elif field_name.startswith('binning_'):
             return 'Binning'
         elif field_name.startswith('libcamera_'):
-            return 'libcamera AWB'
+            return 'AWB'
 
         return 'Capture'
 
@@ -16936,8 +17077,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             result['modern_admin_camera_settings_error'] = 'Select a valid multi-camera profile before saving. No config was saved.'
             return result
 
-        if not selected_profile.get('from_multi_camera'):
-            result['modern_admin_camera_settings_error'] = 'The current global camera fallback is read-only. Select a MULTI_CAMERA profile before saving.'
+        if not self.is_camera_settings_profile_editable(selected_profile):
+            result['modern_admin_camera_settings_error'] = 'The selected camera profile is read-only. No config was saved.'
             return result
 
         submitted_data, validation_errors = self.get_camera_settings_capture_submitted_data(selected_profile)
@@ -16949,13 +17090,20 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
         try:
             new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
-            updated_profile_id = self.apply_camera_settings_capture_profile_to_config(
-                new_config,
-                selected_profile.get('profile_id'),
-                selected_profile.get('_profile_index'),
-                submitted_data,
-            )
-            self.preserve_camera_settings_capture_global_values(new_config)
+            if self.is_camera_settings_global_fallback_profile(selected_profile):
+                updated_profile_id = self.apply_camera_settings_capture_global_fallback_to_config(
+                    new_config,
+                    selected_profile.get('profile_id'),
+                    submitted_data,
+                )
+            else:
+                updated_profile_id = self.apply_camera_settings_capture_profile_to_config(
+                    new_config,
+                    selected_profile.get('profile_id'),
+                    selected_profile.get('_profile_index'),
+                    submitted_data,
+                )
+                self.preserve_camera_settings_capture_global_values(new_config)
 
             if not app.config['LOGIN_DISABLED']:
                 username = current_user.username
@@ -16979,6 +17127,24 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             result['modern_admin_camera_settings_error'] = 'Unable to save Acquisition: {0:s}'.format(str(e))
 
         return result
+
+
+    def apply_camera_settings_capture_global_fallback_to_config(self, config, profile_id, submitted_data):
+        for field_name, field_data in submitted_data.items():
+            if field_data.get('delete'):
+                continue
+
+            config_key = self.CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS.get(field_name)
+            if not config_key:
+                continue
+
+            self.set_camera_settings_profile_path(
+                config,
+                self.get_camera_settings_config_path(config_key),
+                field_data['value'],
+            )
+
+        return str(profile_id)
 
 
     def get_camera_settings_capture_submitted_data(self, profile):
@@ -17739,14 +17905,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
 class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Global Capture Defaults'
+    page_title = 'Modern Admin Legacy Capture Fallbacks'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    methods = ['GET', 'POST']
+    methods = ['GET']
 
     CAPTURE_SETTINGS_SECTIONS = (
         {
             'title' : 'Exposure Period',
-            'default_open' : True,
+            'default_open' : False,
             'note'  : 'Cadence and exposure limits. Changes are saved to config only; capture is not restarted automatically.',
             'fields' : (
                 'EXPOSURE_PERIOD',
@@ -17755,7 +17921,7 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
         },
         {
             'title' : 'Exposure Limits',
-            'default_open' : True,
+            'default_open' : False,
             'note'  : 'Minimum, default, maximum, and timeout values used by the exposure loop.',
             'fields' : (
                 'CCD_EXPOSURE_MIN',

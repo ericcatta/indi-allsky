@@ -26,17 +26,17 @@ var camera_id = {{ camera_id }};
         </div>
         <p class="modern-admin-note">Configuration values are loaded from the existing classic config form and grouped for the future Modern Settings framework. Passwords and tokens are masked. This inventory is read-only.</p>
         <div class="modern-admin-settings-action-grid">
-            <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.modern_admin_capture_settings_view') }}">
-                <span>
-                    <strong>Global Capture Defaults</strong>
-                    <small>Fallback and legacy defaults. For multi-camera tuning, start from Cameras and open a profile Settings page.</small>
-                </span>
-                <span aria-hidden="true">›</span>
-            </a>
             <a class="modern-admin-settings-action-card modern-admin-settings-action-card-readonly" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
                 <span>
                     <strong>Camera Profile Settings</strong>
-                    <small>Profile-first entrypoint for acquisition, driver, lens, processing, and hybrid controls.</small>
+                    <small>Primary entrypoint for acquisition, gain, exposure, target ADU, AWB, driver, lens, processing, and hybrid controls.</small>
+                </span>
+                <span aria-hidden="true">›</span>
+            </a>
+            <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.modern_admin_capture_settings_view') }}">
+                <span>
+                    <strong>Legacy Capture Fallbacks</strong>
+                    <small>Read-only fallback values for compatibility. Use Camera Profile Settings for operational tuning.</small>
                 </span>
                 <span aria-hidden="true">›</span>
             </a>

@@ -19,15 +19,15 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Capture settings summary">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Fallback / legacy defaults</p>
-                <h2 id="modern-admin-capture-settings-title">Global Capture Defaults</h2>
+                <p class="modern-admin-eyebrow">Legacy fallback settings</p>
+                <h2 id="modern-admin-capture-settings-title">Legacy Capture Fallbacks</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
         </div>
-        <p class="modern-admin-note">These values are global defaults and legacy fallback settings. In multi-camera mode, tune each camera from Cameras → Settings instead.</p>
+        <p class="modern-admin-note">These values are fallback defaults for older configs and single-camera compatibility. Operational capture tuning now lives in Cameras → Settings for both one-camera and multi-camera systems.</p>
         {% if modern_admin_capture_settings_multicamera_enabled %}
         <section class="modern-admin-alert modern-admin-alert-warning" role="status">
-            Multicamera is enabled. Camera gain, exposure, AWB and auto gain are controlled per camera profile. These global values are legacy/single-camera fallback.
+            Multicamera is enabled. Camera gain, exposure, AWB and auto gain are controlled per camera profile. These global values are legacy fallback only.
         </section>
         {% endif %}
         <p class="modern-admin-note">
@@ -49,65 +49,41 @@ var camera_id = {{ camera_id }};
     </section>
     {% endif %}
 
-    <form method="post" action="{{ url_for('indi_allsky.modern_admin_capture_settings_view') }}" class="modern-admin-settings-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <section class="modern-admin-settings-sections" aria-label="Legacy capture fallback sections">
         {% for section in modern_admin_capture_settings_sections %}
-        <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-capture-settings-section="{{ section.key }}" {% if section.default_open %}open{% endif %}>
+        <details class="modern-admin-settings-section" data-capture-settings-section="{{ section.key }}" {% if section.default_open %}open{% endif %}>
             <summary>
                 <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
                 <span class="modern-admin-settings-section-title">{{ section.title }}</span>
                 <span class="modern-admin-settings-count">{{ section.fields | length }}</span>
             </summary>
-
-            <div class="modern-admin-settings-edit-section-body">
-                <p class="modern-admin-note">{{ section.note }}</p>
-
-                <div class="modern-admin-settings-edit-grid">
-                    {% for field in section.fields %}
-                    {% set field_errors = modern_admin_capture_settings_errors.get(field.name, []) %}
-                    <label class="modern-admin-settings-edit-field {% if field.input_type == 'checkbox' %}modern-admin-settings-edit-field-checkbox{% endif %}" for="{{ field.name }}">
-                        <span class="modern-admin-settings-edit-label">{{ field.label }}</span>
-                        <span class="modern-admin-settings-edit-meta">{{ field.config_key }} · {{ field.field_type }}</span>
-
-                        {% if field.input_type == 'checkbox' %}
-                        <span class="modern-admin-settings-toggle-row">
-                            <input id="{{ field.name }}" name="{{ field.name }}" type="checkbox" value="1" {% if field.value %}checked{% endif %}>
-                            <span>{{ 'Enabled' if field.value else 'Disabled' }}</span>
-                        </span>
-                        {% elif field.input_type == 'select' %}
-                        <select id="{{ field.name }}" name="{{ field.name }}">
-                            {% for choice in field.choices %}
-                            <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
-                            {% endfor %}
-                        </select>
-                        {% else %}
-                        <input id="{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" {% if field.step %}step="{{ field.step }}"{% endif %}>
-                        {% endif %}
-
-                        <span class="modern-admin-settings-edit-help">{{ field.validators }}</span>
-                        {% if field_errors %}
-                        <span class="modern-admin-settings-edit-error">
-                            {% for error in field_errors %}
-                            {{ error }}{% if not loop.last %}<br>{% endif %}
-                            {% endfor %}
-                        </span>
-                        {% endif %}
-                    </label>
-                    {% endfor %}
-                </div>
+            <div class="modern-admin-table-scroll">
+                <table class="modern-admin-data-table modern-admin-settings-table">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Config key</th>
+                            <th>Fallback value</th>
+                            <th>Type</th>
+                            <th>Use</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field in section.fields %}
+                        <tr>
+                            <td><strong>{{ field.label }}</strong></td>
+                            <td><code>{{ field.config_key }}</code></td>
+                            <td><code>{{ field.display }}</code></td>
+                            <td>{{ field.field_type }}</td>
+                            <td><span class="modern-admin-settings-badge">legacy fallback</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </details>
         {% endfor %}
-
-        <section class="modern-admin-table-panel modern-admin-settings-actions" aria-label="Capture settings actions">
-            <div>
-                <p class="modern-admin-eyebrow">Save</p>
-                <h2>Write config only</h2>
-                <p class="modern-admin-note">Saving creates a new config revision for global fallback values. Modern Admin will not restart or reload indi-allsky automatically.</p>
-            </div>
-            <button class="modern-admin-media-button" type="submit">Save Global Defaults</button>
-        </section>
-    </form>
+    </section>
 </main>
 <script>
 (function () {
