@@ -15184,6 +15184,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'target_adu_dev' : 'Night Target ADU Deviation',
         'target_adu_dev_day' : 'Day Target ADU Deviation',
         'auto_gain_enable' : 'Auto Gain',
+        'auto_gain_day' : 'Day Auto Gain',
+        'auto_gain_night' : 'Night Auto Gain',
+        'auto_gain_moonmode' : 'Moon Mode Auto Gain',
         'auto_gain_levels' : 'Auto Gain Levels',
         'binning_day' : 'Day Binning',
         'binning_night' : 'Night Binning',
@@ -15270,6 +15273,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'target_adu_dev' : (('target_adu', 'dev'), 'TARGET_ADU_DEV', 'target_adu_dev'),
         'target_adu_dev_day' : (('target_adu', 'dev_day'), 'TARGET_ADU_DEV_DAY', 'target_adu_dev_day'),
         'auto_gain_enable' : (('gain', 'auto'), 'auto_gain_enable', ('ccd_config', 'AUTO_GAIN_ENABLE')),
+        'auto_gain_day' : (('gain', 'auto_day'), 'auto_gain_day', ('ccd_config', 'AUTO_GAIN_ENABLE_DAY')),
+        'auto_gain_night' : (('gain', 'auto_night'), 'auto_gain_night', ('ccd_config', 'AUTO_GAIN_ENABLE_NIGHT')),
+        'auto_gain_moonmode' : (('gain', 'auto_moonmode'), 'auto_gain_moonmode', ('ccd_config', 'AUTO_GAIN_ENABLE_MOONMODE')),
         'auto_gain_levels' : (('gain', 'auto_levels'), 'auto_gain_levels', ('ccd_config', 'AUTO_GAIN_LEVELS')),
         'binning_day' : (('ccd_config', 'DAY', 'BINNING'), 'binning_day'),
         'binning_night' : (('ccd_config', 'NIGHT', 'BINNING'), 'binning_night'),
@@ -15369,12 +15375,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'gain_night',
                 'gain_moonmode',
                 'gain_day',
+                'auto_gain_day',
+                'auto_gain_night',
+                'auto_gain_moonmode',
+                'auto_gain_levels',
                 'target_adu',
                 'target_adu_day',
                 'target_adu_dev',
                 'target_adu_dev_day',
-                'auto_gain_enable',
-                'auto_gain_levels',
                 'binning_night',
                 'binning_moonmode',
                 'binning_day',
@@ -15539,12 +15547,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'gain_night',
         'gain_moonmode',
         'gain_day',
+        'auto_gain_day',
+        'auto_gain_night',
+        'auto_gain_moonmode',
+        'auto_gain_levels',
         'target_adu',
         'target_adu_day',
         'target_adu_dev',
         'target_adu_dev_day',
-        'auto_gain_enable',
-        'auto_gain_levels',
         'binning_night',
         'binning_moonmode',
         'binning_day',
@@ -15572,6 +15582,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'target_adu_dev'     : 'TARGET_ADU_DEV',
         'target_adu_dev_day' : 'TARGET_ADU_DEV_DAY',
         'auto_gain_enable'   : ('CCD_CONFIG', 'AUTO_GAIN_ENABLE'),
+        'auto_gain_day'      : ('CCD_CONFIG', 'AUTO_GAIN_ENABLE_DAY'),
+        'auto_gain_night'    : ('CCD_CONFIG', 'AUTO_GAIN_ENABLE_NIGHT'),
+        'auto_gain_moonmode' : ('CCD_CONFIG', 'AUTO_GAIN_ENABLE_MOONMODE'),
         'auto_gain_levels'   : ('CCD_CONFIG', 'AUTO_GAIN_LEVELS'),
         'binning_night'      : ('CCD_CONFIG', 'NIGHT', 'BINNING'),
         'binning_moonmode'   : ('CCD_CONFIG', 'MOONMODE', 'BINNING'),
@@ -15600,6 +15613,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'target_adu_dev'     : 'Night Target ADU Deviation',
         'target_adu_dev_day' : 'Day Target ADU Deviation',
         'auto_gain_enable'   : 'Auto Gain',
+        'auto_gain_day'      : 'Day Auto Gain',
+        'auto_gain_night'    : 'Night Auto Gain',
+        'auto_gain_moonmode' : 'Moon Mode Auto Gain',
         'auto_gain_levels'   : 'Auto Gain Levels',
         'binning_night'      : 'Night Binning',
         'binning_moonmode'   : 'Moon Mode Binning',
@@ -15628,6 +15644,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'target_adu_dev'     : 'integer',
         'target_adu_dev_day' : 'integer',
         'auto_gain_enable'   : 'boolean_select',
+        'auto_gain_day'      : 'boolean_select',
+        'auto_gain_night'    : 'boolean_select',
+        'auto_gain_moonmode' : 'boolean_select',
         'auto_gain_levels'   : 'integer',
         'binning_night'      : 'integer',
         'binning_moonmode'   : 'integer',
@@ -16879,7 +16898,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     def get_camera_settings_capture_field_group(self, field_name):
         if field_name.startswith('exposure_'):
             return 'Exposure'
-        elif field_name.startswith('gain_'):
+        elif field_name.startswith('gain_') or field_name.startswith('auto_gain_'):
             return 'Gain'
         elif field_name.startswith('target_adu'):
             return 'ADU'
@@ -17029,7 +17048,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if field_type in ('integer', 'float') and field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain') and value <= 0:
             raise ValueError('{0:s} must be greater than 0.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
 
-        if field_type in ('integer', 'float') and field_name not in ('auto_gain_enable',) and value < 0:
+        if field_type in ('integer', 'float') and value < 0:
             raise ValueError('{0:s} must be greater than or equal to 0.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
 
         return value
@@ -17139,11 +17158,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'gain_night'       : ('gain', 'night'),
             'gain_moonmode'    : ('gain', 'moonmode'),
             'gain_day'         : ('gain', 'day'),
+            'auto_gain_enable' : ('gain', 'auto'),
+            'auto_gain_day'    : ('gain', 'auto_day'),
+            'auto_gain_night'  : ('gain', 'auto_night'),
+            'auto_gain_moonmode' : ('gain', 'auto_moonmode'),
+            'auto_gain_levels' : ('gain', 'auto_levels'),
             'binning_night'    : ('ccd_config', 'NIGHT', 'BINNING'),
             'binning_moonmode' : ('ccd_config', 'MOONMODE', 'BINNING'),
             'binning_day'      : ('ccd_config', 'DAY', 'BINNING'),
-            'auto_gain_enable' : ('gain', 'auto'),
-            'auto_gain_levels' : ('gain', 'auto_levels'),
         }
         return paths.get(field_name)
 
@@ -17611,6 +17633,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'target_adu_dev',
             'target_adu_dev_day',
             'auto_gain_enable',
+            'auto_gain_day',
+            'auto_gain_night',
+            'auto_gain_moonmode',
             'auto_gain_levels',
             'binning_night',
             'binning_moonmode',
@@ -17799,16 +17824,18 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
     def get_context(self):
         context = super(ModernAdminCaptureSettingsView, self).get_context()
         form = context['form_config']
+        multi_camera_enabled = bool(self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE', False))
 
         context['modern_admin_capture_settings_error'] = None
         context['modern_admin_capture_settings_success'] = None
         context['modern_admin_capture_settings_errors'] = {}
+        context['modern_admin_capture_settings_multicamera_enabled'] = multi_camera_enabled
 
         if request.method == 'POST':
             context.update(self.save_capture_settings(form))
             form = context['modern_admin_capture_settings_form']
 
-        context['modern_admin_capture_settings_sections'] = self.get_capture_settings_sections(form)
+        context['modern_admin_capture_settings_sections'] = self.get_capture_settings_sections(form, multi_camera_enabled=multi_camera_enabled)
         context['modern_admin_capture_settings_field_names'] = self.CAPTURE_SETTINGS_FIELD_NAMES
         context['modern_admin_capture_settings_config_keys'] = [
             self.form_field_to_config_key(field_name)
@@ -17818,7 +17845,7 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
         return context
 
 
-    def get_capture_settings_sections(self, form):
+    def get_capture_settings_sections(self, form, multi_camera_enabled=False):
         sections = list()
         for section in self.CAPTURE_SETTINGS_SECTIONS:
             rows = list()
@@ -17834,7 +17861,7 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
                 'key'          : re.sub(r'[^a-z0-9]+', '-', section['title'].lower()).strip('-'),
                 'note'         : section['note'],
                 'fields'       : rows,
-                'default_open' : bool(section.get('default_open')),
+                'default_open' : bool(section.get('default_open')) and not multi_camera_enabled,
             })
 
         return sections

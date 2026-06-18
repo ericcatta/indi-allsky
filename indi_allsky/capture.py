@@ -532,18 +532,47 @@ class CaptureWorker(Process):
         ccd_day = ccd_config.get('DAY') or {}
 
         logger.info(
-            '[MULTI_CAMERA_RESOLVED_CONFIG][%s][camera_id=%s] camera_interface=%s gain_day=%s gain_night=%s gain_moonmode=%s exposure_min=%s exposure_max=%s exposure_default=%s awb_apply_mode=%s',
+            '[MULTI_CAMERA_RESOLVED_CONFIG][%s][camera_id=%s] camera_interface=%s gain_day=%s gain_night=%s gain_moonmode=%s auto_gain_day=%s auto_gain_night=%s auto_gain_moonmode=%s auto_gain_levels=%s target_adu_day=%s target_adu_night=%s target_adu_dev_day=%s target_adu_dev_night=%s exposure_min=%s exposure_min_day=%s exposure_max=%s exposure_default=%s exposure_period=%s exposure_period_day=%s awb_apply_mode=%s',
             self.profile_id,
             camera_id,
             self.capture_camera_interface,
             ccd_day.get('GAIN'),
             ccd_night.get('GAIN'),
             ccd_moonmode.get('GAIN'),
+            self._auto_gain_enabled('day'),
+            self._auto_gain_enabled('night'),
+            self._auto_gain_enabled('moonmode'),
+            ccd_config.get('AUTO_GAIN_LEVELS'),
+            self.config.get('TARGET_ADU_DAY'),
+            self.config.get('TARGET_ADU'),
+            self.config.get('TARGET_ADU_DEV_DAY'),
+            self.config.get('TARGET_ADU_DEV'),
             self.config.get('CCD_EXPOSURE_MIN'),
+            self.config.get('CCD_EXPOSURE_MIN_DAY'),
             self.config.get('CCD_EXPOSURE_MAX'),
             self.config.get('CCD_EXPOSURE_DEF'),
+            self.config.get('EXPOSURE_PERIOD'),
+            self.config.get('EXPOSURE_PERIOD_DAY'),
             self._hybrid_awb_apply_mode(),
         )
+
+
+    def _auto_gain_enabled(self, mode=None):
+        ccd_config = self.config.get('CCD_CONFIG') or {}
+        legacy_auto = bool(ccd_config.get('AUTO_GAIN_ENABLE', False))
+        if mode == 'day':
+            return bool(ccd_config.get('AUTO_GAIN_ENABLE_DAY', legacy_auto))
+        elif mode == 'moonmode':
+            return bool(ccd_config.get('AUTO_GAIN_ENABLE_MOONMODE', legacy_auto))
+        elif mode == 'night':
+            return bool(ccd_config.get('AUTO_GAIN_ENABLE_NIGHT', legacy_auto))
+
+        if self.night_av[constants.NIGHT_NIGHT]:
+            if self.night_av[constants.NIGHT_MOONMODE]:
+                return bool(ccd_config.get('AUTO_GAIN_ENABLE_MOONMODE', legacy_auto))
+            return bool(ccd_config.get('AUTO_GAIN_ENABLE_NIGHT', legacy_auto))
+
+        return bool(ccd_config.get('AUTO_GAIN_ENABLE_DAY', legacy_auto))
 
 
     def _log_hybrid_placeholder(self):
@@ -1815,7 +1844,7 @@ class CaptureWorker(Process):
                 ccd_exposure_default = 0.01  # this should give better results for many cameras
 
                 # gain
-                if self.config.get('CCD_CONFIG', {}).get('AUTO_GAIN_ENABLE'):
+                if self._auto_gain_enabled():
                     ccd_gain_default = gain_day
                 else:
                     if self.night_av[constants.NIGHT_NIGHT]:
@@ -1876,11 +1905,14 @@ class CaptureWorker(Process):
 
             self.gain_av[constants.GAIN_SQM] = float(gain_sqm)
 
-            if self.config.get('CCD_CONFIG', {}).get('AUTO_GAIN_ENABLE'):
+            if self._auto_gain_enabled('night'):
                 self.gain_av[constants.GAIN_MIN_NIGHT] = float(gain_day)
-                self.gain_av[constants.GAIN_MIN_MOONMODE] = float(gain_day)
             else:
                 self.gain_av[constants.GAIN_MIN_NIGHT] = float(gain_night)
+
+            if self._auto_gain_enabled('moonmode'):
+                self.gain_av[constants.GAIN_MIN_MOONMODE] = float(gain_day)
+            else:
                 self.gain_av[constants.GAIN_MIN_MOONMODE] = float(gain_moonmode)
 
         self.camera_runtime_state.current_gain = float(self.gain_av[constants.GAIN_CURRENT])

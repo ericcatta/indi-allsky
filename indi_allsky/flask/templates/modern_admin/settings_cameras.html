@@ -383,6 +383,7 @@ var camera_id = {{ camera_id }};
                     <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
                 </div>
                 <p class="modern-admin-note">Tune this camera here. Values are saved on the selected MULTI_CAMERA profile; global capture defaults are only fallback values when a profile field is empty.</p>
+                <p class="modern-admin-note">Day strategy: fixed profile gain with automatic exposure. Night strategy: exposure can rise to the profile maximum, then profile auto gain can take over when enabled for night or moon mode.</p>
 
                 <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form" novalidate>
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -330,6 +330,7 @@ class ImageWorker(Process):
             'auto_gain_exposure_cutoff_low'  : None,
             'auto_gain_exposure_cutoff_mid'  : None,
             'auto_gain_exposure_cutoff_high' : None,
+            'auto_gain_step_key'             : None,
             'generate_mask_base'             : True,
         }
 
@@ -354,6 +355,46 @@ class ImageWorker(Process):
 
     def _select_profile_config(self, profile_id):
         self.config = self.camera_config_map.get(profile_id, self.camera_config_map.get('default', self.base_config))
+
+
+    def _auto_gain_mode(self):
+        if self.night_av[constants.NIGHT_NIGHT]:
+            if self.night_av[constants.NIGHT_MOONMODE]:
+                return 'moonmode'
+            return 'night'
+
+        return 'day'
+
+
+    def _auto_gain_enabled(self, mode=None):
+        ccd_config = self.config.get('CCD_CONFIG') or {}
+        legacy_auto = bool(ccd_config.get('AUTO_GAIN_ENABLE', False))
+        mode = mode or self._auto_gain_mode()
+        if mode == 'day':
+            return bool(ccd_config.get('AUTO_GAIN_ENABLE_DAY', legacy_auto))
+        elif mode == 'moonmode':
+            return bool(ccd_config.get('AUTO_GAIN_ENABLE_MOONMODE', legacy_auto))
+
+        return bool(ccd_config.get('AUTO_GAIN_ENABLE_NIGHT', legacy_auto))
+
+
+    def _auto_gain_limits(self, mode=None):
+        mode = mode or self._auto_gain_mode()
+        if mode == 'day':
+            return (
+                float(self.gain_av[constants.GAIN_MIN_DAY]),
+                float(self.gain_av[constants.GAIN_MAX_DAY]),
+            )
+        elif mode == 'moonmode':
+            return (
+                float(self.gain_av[constants.GAIN_MIN_MOONMODE]),
+                float(self.gain_av[constants.GAIN_MAX_MOONMODE]),
+            )
+
+        return (
+            float(self.gain_av[constants.GAIN_MIN_NIGHT]),
+            float(self.gain_av[constants.GAIN_MAX_NIGHT]),
+        )
 
 
     def _select_shared_state(self, profile_id):
@@ -1108,16 +1149,22 @@ class ImageWorker(Process):
             return
 
 
-        if isinstance(self.gain_step, type(None)):
+        auto_gain_mode = self._auto_gain_mode()
+        auto_gain_min, auto_gain_max = self._auto_gain_limits(auto_gain_mode)
+        try:
+            auto_gain_levels = max(2, int(self.config.get('CCD_CONFIG', {}).get('AUTO_GAIN_LEVELS', 5)))
+        except (TypeError, ValueError):
+            auto_gain_levels = 5
+        auto_gain_step_key = (auto_gain_mode, auto_gain_min, auto_gain_max, auto_gain_levels)
+        if isinstance(self.gain_step, type(None)) or self.adu_state.get('auto_gain_step_key') != auto_gain_step_key:
             # the gain steps cannot be calculated until the gain_av variable is populated
-            gain_range = self.gain_av[constants.GAIN_MAX_NIGHT] - self.gain_av[constants.GAIN_MIN_NIGHT]
-            auto_gain_levels = self.config.get('CCD_CONFIG', {}).get('AUTO_GAIN_LEVELS', 5)
-
+            gain_range = auto_gain_max - auto_gain_min
 
             self.gain_step = gain_range / (auto_gain_levels - 1)  # need divisions
 
-            self.auto_gain_step_list = [float(round((self.gain_step * x) + self.gain_av[constants.GAIN_MIN_NIGHT], 2)) for x in range(auto_gain_levels)]
-            self.auto_gain_step_list[-1] = float(round(self.gain_av[constants.GAIN_MAX_NIGHT], 2))  # replace last value, round is necessary
+            self.auto_gain_step_list = [float(round((self.gain_step * x) + auto_gain_min, 2)) for x in range(auto_gain_levels)]
+            self.auto_gain_step_list[-1] = float(round(auto_gain_max, 2))  # replace last value, round is necessary
+            self.adu_state['auto_gain_step_key'] = auto_gain_step_key
 
 
             self.auto_gain_exposure_cutoff_high = self.exposure_av[constants.EXPOSURE_MAX] - 0.5
@@ -1129,7 +1176,7 @@ class ImageWorker(Process):
             self.auto_gain_exposure_cutoff_mid = self.auto_gain_exposure_cutoff_high - ((self.auto_gain_exposure_cutoff_high - self.auto_gain_exposure_cutoff_low) / 2)
 
 
-            if self.config.get('CCD_CONFIG', {}).get('AUTO_GAIN_ENABLE'):
+            if self._auto_gain_enabled(auto_gain_mode):
                 logger.info('Gain Steps: %d @ %0.2f', auto_gain_levels, self.gain_step)
                 logger.info('Gain Step list: %s', str(self.auto_gain_step_list))
                 logger.info(
@@ -3243,7 +3290,7 @@ class ImageWorker(Process):
             return
 
 
-        if self.config.get('CCD_CONFIG', {}).get('AUTO_GAIN_ENABLE'):
+        if self._auto_gain_enabled():
             # moonmode settings are ignored with auto-gain
 
             if self.night_av[constants.NIGHT_NIGHT]:
@@ -3251,8 +3298,7 @@ class ImageWorker(Process):
             else:
                 exposure_min = float(self.exposure_av[constants.EXPOSURE_MIN_DAY])
 
-            gain_min = float(self.gain_av[constants.GAIN_MIN_NIGHT])
-            gain_max = float(self.gain_av[constants.GAIN_MAX_NIGHT])
+            gain_min, gain_max = self._auto_gain_limits()
         else:
             if self.night_av[constants.NIGHT_NIGHT]:
                 exposure_min = float(self.exposure_av[constants.EXPOSURE_MIN_NIGHT])
@@ -3287,7 +3333,7 @@ class ImageWorker(Process):
             next_exposure = float(self.exposure_av[constants.EXPOSURE_MAX])
 
 
-        if self.config.get('CCD_CONFIG', {}).get('AUTO_GAIN_ENABLE'):
+        if self._auto_gain_enabled():
             try:
                 auto_gain_idx = self.auto_gain_step_list.index(gain)
             except ValueError:

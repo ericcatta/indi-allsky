@@ -68,6 +68,9 @@ class CaptureProfile:
     gain_moonmode: float
     gain_day: float
     auto_gain_enable: bool
+    auto_gain_day: bool
+    auto_gain_night: bool
+    auto_gain_moonmode: bool
     auto_gain_levels: int
     binning_night: int
     binning_moonmode: int
@@ -227,7 +230,13 @@ def _processing_mode(profile_config: Mapping[str, Any]) -> str:
     return processing_mode
 
 
-def _hybrid_awb_apply_mode(profile_config: Mapping[str, Any]) -> str:
+def _hybrid_awb_apply_mode(
+    profile_config: Mapping[str, Any],
+    *,
+    profile_id: str = '',
+    camera_interface: str = '',
+    indi_camera_name: str = '',
+) -> str:
     apply_mode_candidates = (
         ('awb', 'apply_mode'),
         ('hybrid', 'awb', 'apply_mode'),
@@ -251,6 +260,9 @@ def _hybrid_awb_apply_mode(profile_config: Mapping[str, Any]) -> str:
         apply_mode = str(current or 'auto').strip().lower()
         if apply_mode in HYBRID_AWB_APPLY_MODES:
             return apply_mode
+
+    if _processing_mode(profile_config) == 'hybrid' and _known_profile_gain_defaults(profile_id, camera_interface, indi_camera_name):
+        return 'postprocess_rgb'
 
     return 'auto'
 
@@ -303,6 +315,12 @@ def _profile_from_config(
         ccd_config['DAY']['GAIN'] = deepcopy(gain_config['day'])
     if 'auto' in gain_config:
         ccd_config['AUTO_GAIN_ENABLE'] = deepcopy(gain_config['auto'])
+    if 'auto_day' in gain_config:
+        ccd_config['AUTO_GAIN_ENABLE_DAY'] = deepcopy(gain_config['auto_day'])
+    if 'auto_night' in gain_config:
+        ccd_config['AUTO_GAIN_ENABLE_NIGHT'] = deepcopy(gain_config['auto_night'])
+    if 'auto_moonmode' in gain_config:
+        ccd_config['AUTO_GAIN_ENABLE_MOONMODE'] = deepcopy(gain_config['auto_moonmode'])
     if 'auto_levels' in gain_config:
         ccd_config['AUTO_GAIN_LEVELS'] = deepcopy(gain_config['auto_levels'])
     libcamera_config = deepcopy(config.get('LIBCAMERA') or {})
@@ -354,7 +372,12 @@ def _profile_from_config(
         enabled=bool(profile_config.get('enabled', default_enabled)),
         primary=bool(profile_config.get('primary', default_primary)),
         processing_mode=_processing_mode(profile_config),
-        hybrid_awb_apply_mode=_hybrid_awb_apply_mode(profile_config),
+        hybrid_awb_apply_mode=_hybrid_awb_apply_mode(
+            profile_config,
+            profile_id=profile_id,
+            camera_interface=str(camera_interface or ''),
+            indi_camera_name=indi_camera_name,
+        ),
         camera_interface=str(camera_interface or 'indi'),
         indi_server=str(indi_config.get('server', profile_config.get('indi_server', config.get('INDI_SERVER', 'localhost'))) or 'localhost'),
         indi_port=indi_port,
@@ -381,6 +404,9 @@ def _profile_from_config(
         gain_moonmode=_mapping_float(ccd_moonmode, 'GAIN', 75.0),
         gain_day=_mapping_float(ccd_day, 'GAIN', _float_config(profile_config, 'gain_min', 0.0)),
         auto_gain_enable=bool(profile_config.get('auto_gain_enable', bool(ccd_config.get('AUTO_GAIN_ENABLE', False)))),
+        auto_gain_day=bool(profile_config.get('auto_gain_day', bool(ccd_config.get('AUTO_GAIN_ENABLE_DAY', ccd_config.get('AUTO_GAIN_ENABLE', False))))),
+        auto_gain_night=bool(profile_config.get('auto_gain_night', bool(ccd_config.get('AUTO_GAIN_ENABLE_NIGHT', ccd_config.get('AUTO_GAIN_ENABLE', False))))),
+        auto_gain_moonmode=bool(profile_config.get('auto_gain_moonmode', bool(ccd_config.get('AUTO_GAIN_ENABLE_MOONMODE', ccd_config.get('AUTO_GAIN_ENABLE', False))))),
         auto_gain_levels=_int_config(profile_config, 'auto_gain_levels', _mapping_int(ccd_config, 'AUTO_GAIN_LEVELS', 5)),
         binning_night=_int_config(profile_config, 'binning_night', _mapping_int(ccd_night, 'BINNING', 1)),
         binning_moonmode=_mapping_int(ccd_moonmode, 'BINNING', 1),
@@ -444,7 +470,10 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     ccd_config['NIGHT'] = ccd_night
     ccd_config['MOONMODE'] = ccd_moonmode
     ccd_config['DAY'] = ccd_day
-    ccd_config['AUTO_GAIN_ENABLE'] = profile.auto_gain_enable
+    ccd_config['AUTO_GAIN_ENABLE'] = bool(profile.auto_gain_day or profile.auto_gain_night or profile.auto_gain_moonmode)
+    ccd_config['AUTO_GAIN_ENABLE_DAY'] = profile.auto_gain_day
+    ccd_config['AUTO_GAIN_ENABLE_NIGHT'] = profile.auto_gain_night
+    ccd_config['AUTO_GAIN_ENABLE_MOONMODE'] = profile.auto_gain_moonmode
     ccd_config['AUTO_GAIN_LEVELS'] = profile.auto_gain_levels
     profile_config['CCD_CONFIG'] = ccd_config
     profile_config['CCD_EXPOSURE_MIN'] = profile.exposure_min

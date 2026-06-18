@@ -25,6 +25,11 @@ var camera_id = {{ camera_id }};
             <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
         </div>
         <p class="modern-admin-note">These values are global defaults and legacy fallback settings. In multi-camera mode, tune each camera from Cameras → Settings instead.</p>
+        {% if modern_admin_capture_settings_multicamera_enabled %}
+        <section class="modern-admin-alert modern-admin-alert-warning" role="status">
+            Multicamera is enabled. Camera gain, exposure, AWB and auto gain are controlled per camera profile. These global values are legacy/single-camera fallback.
+        </section>
+        {% endif %}
         <p class="modern-admin-note">
             <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Inventory</a>
             ·
