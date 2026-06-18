@@ -5028,6 +5028,58 @@ class AjaxMiniVideoViewerView(BaseView):
         return jsonify(json_data)
 
 
+def get_modern_admin_capture_service_status(service_name='indi-allsky.service'):
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ['systemctl', '--user', 'is-active', service_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as e:
+        return {
+            'state'          : 'unknown',
+            'running'        : False,
+            'label'          : '? Unknown',
+            'tone'           : 'muted',
+            'toggle_command' : 'start',
+            'toggle_label'   : 'Start Capture',
+            'output'         : str(e),
+        }
+
+    state = (result.stdout or '').strip().split('\n')[0].strip().lower() or 'unknown'
+    running = state == 'active'
+    if running:
+        label = '● Running'
+        tone = 'good'
+        toggle_command = 'stop'
+        toggle_label = 'Stop Capture'
+    elif state == 'failed':
+        label = '● Failed'
+        tone = 'danger'
+        toggle_command = 'start'
+        toggle_label = 'Start Capture'
+    else:
+        label = '○ Stopped'
+        tone = 'muted'
+        toggle_command = 'start'
+        toggle_label = 'Start Capture'
+
+    return {
+        'state'          : state,
+        'running'        : running,
+        'label'          : label,
+        'tone'           : tone,
+        'toggle_command' : toggle_command,
+        'toggle_label'   : toggle_label,
+        'output'         : (result.stdout or '').strip(),
+    }
+
+
 class ModernAdminView(TemplateView):
     # Future entry point for the modern admin UI; keep it isolated from classic admin.
     page_title = 'Modern Admin'
@@ -5135,6 +5187,7 @@ class ModernAdminView(TemplateView):
             'modern_admin_quick_action_camera'  : camera_id,
             'modern_admin_capture_action_url'   : capture_action_url,
             'modern_admin_runtime_status'       : runtime_status,
+            'modern_admin_capture_service_status': get_modern_admin_capture_service_status(),
         }
 
 
@@ -6920,16 +6973,22 @@ class ModernAdminModeView(BaseView):
 
 
 class ModernAdminCaptureServiceActionView(BaseView):
-    methods = ['POST']
+    methods = ['GET', 'POST']
     decorators = [login_required]
 
     service_name = 'indi-allsky.service'
     valid_commands = {
-        'start' : 'started',
-        'stop'  : 'stopped',
+        'start'   : 'started',
+        'stop'    : 'stopped',
+        'restart' : 'restarted',
     }
 
     def dispatch_request(self):
+        if request.method == 'GET':
+            return jsonify({
+                'service-status' : get_modern_admin_capture_service_status(self.service_name),
+            })
+
         if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
             return self.get_response(
                 False,
@@ -7019,12 +7078,14 @@ class ModernAdminCaptureServiceActionView(BaseView):
 
     def get_response(self, success, message, status_code=200):
         flash(message, 'success' if success else 'danger')
+        service_status = get_modern_admin_capture_service_status(self.service_name)
 
         if request.is_json or 'application/json' in request.headers.get('Accept', ''):
             response_key = 'success-message' if success else 'failure-message'
             return jsonify({
                 response_key    : message,
                 'redirect-url'  : self.get_redirect_url(),
+                'service-status': service_status,
             }), status_code
 
         return redirect(self.get_redirect_url())

@@ -130,6 +130,12 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+.modern-admin-shell .modern-admin-runtime-danger {
+  border-color: rgba(255, 112, 112, 0.22);
+  color: #ffb5b5;
+  background: rgba(255, 112, 112, 0.08);
+}
+
 .modern-admin-shell .modern-admin-topbar-button {
   display: inline-flex;
   align-items: center;

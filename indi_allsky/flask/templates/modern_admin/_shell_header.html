@@ -6,19 +6,26 @@
     {% set quick_action_url = modern_admin_quick_action_url|default(none, true) %}
     {% set quick_action_camera = modern_admin_quick_action_camera|default(0, true) %}
     {% set capture_action_url = modern_admin_capture_action_url|default(none, true) %}
+    {% set capture_service_status = modern_admin_capture_service_status|default({}, true) %}
+    {% set capture_service_tone = capture_service_status.tone|default('muted', true) %}
+    {% set capture_toggle_command = capture_service_status.toggle_command|default('start', true) %}
+    {% set capture_toggle_label = capture_service_status.toggle_label|default('Start Capture', true) %}
 
     <div class="modern-admin-runtime-row">
         <div class="modern-admin-power-actions" aria-label="System quick actions">
-            <button class="modern-admin-topbar-button modern-admin-topbar-button-good" type="button" data-modern-admin-capture-command="start"{% if not capture_action_url %} disabled{% endif %}>Start Capture</button>
-            <button class="modern-admin-topbar-button modern-admin-topbar-button-warn" type="button" data-modern-admin-capture-command="stop"{% if not capture_action_url %} disabled{% endif %}>Stop Capture</button>
+            <button class="modern-admin-topbar-button {% if capture_toggle_command == 'stop' %}modern-admin-topbar-button-warn{% else %}modern-admin-topbar-button-good{% endif %}" type="button" data-modern-admin-capture-toggle data-modern-admin-capture-command="{{ capture_toggle_command }}"{% if not capture_action_url %} disabled{% endif %}>{{ capture_toggle_label }}</button>
+            <button class="modern-admin-topbar-button modern-admin-topbar-button-warn" type="button" data-modern-admin-capture-command="restart"{% if not capture_action_url %} disabled{% endif %}>Restart indi-allsky</button>
             <button class="modern-admin-topbar-button modern-admin-topbar-button-danger" type="button" data-modern-admin-system-command="poweroff"{% if not quick_action_url %} disabled{% endif %}>Power off</button>
-            <button class="modern-admin-topbar-button modern-admin-topbar-button-warn" type="button" data-modern-admin-system-command="reboot"{% if not quick_action_url %} disabled{% endif %}>Restart</button>
+            <button class="modern-admin-topbar-button modern-admin-topbar-button-warn" type="button" data-modern-admin-system-command="reboot"{% if not quick_action_url %} disabled{% endif %}>Restart System</button>
         </div>
 
         <div class="modern-admin-runtime-spacer" aria-hidden="true"></div>
 
         <div class="modern-admin-runtime-indicator modern-admin-runtime-{{ runtime_tone }}" title="{{ runtime_label }}">
             {{ runtime_label }}
+        </div>
+        <div class="modern-admin-runtime-indicator modern-admin-runtime-{{ capture_service_tone }}" data-modern-admin-service-status title="indi-allsky service status">
+            {{ capture_service_status.label|default('? Unknown', true) }}
         </div>
 
         <div class="modern-admin-mode-switch" role="group" aria-label="Admin mode">
@@ -52,6 +59,7 @@
 (function() {
     const quickActionUrl = {{ quick_action_url|tojson }};
     const captureActionUrl = {{ capture_action_url|tojson }};
+    const initialCaptureServiceStatus = {{ capture_service_status|tojson }};
     const cameraId = {{ quick_action_camera|tojson }};
     const csrfToken = {{ csrf_token()|tojson }};
     const messages = {
@@ -61,7 +69,59 @@
     const captureMessages = {
         start: 'Start capture service?',
         stop: 'Stop capture service?',
+        restart: 'Restart indi-allsky service?',
     };
+
+    function setCaptureControlsBusy(isBusy) {
+        document.querySelectorAll('[data-modern-admin-capture-command]').forEach((button) => {
+            button.disabled = isBusy || !captureActionUrl;
+        });
+    }
+
+    function renderCaptureServiceStatus(status) {
+        if (!status) {
+            return;
+        }
+
+        const toggle = document.querySelector('[data-modern-admin-capture-toggle]');
+        if (toggle) {
+            toggle.textContent = status.toggle_label || 'Start Capture';
+            toggle.setAttribute('data-modern-admin-capture-command', status.toggle_command || 'start');
+            toggle.classList.toggle('modern-admin-topbar-button-good', status.toggle_command !== 'stop');
+            toggle.classList.toggle('modern-admin-topbar-button-warn', status.toggle_command === 'stop');
+        }
+
+        const badge = document.querySelector('[data-modern-admin-service-status]');
+        if (badge) {
+            badge.textContent = status.label || '? Unknown';
+            badge.classList.remove('modern-admin-runtime-good', 'modern-admin-runtime-muted', 'modern-admin-runtime-danger', 'modern-admin-runtime-warn');
+            badge.classList.add(`modern-admin-runtime-${status.tone || 'muted'}`);
+        }
+    }
+
+    function refreshCaptureServiceStatus() {
+        if (!captureActionUrl) {
+            return Promise.resolve();
+        }
+
+        return fetch(captureActionUrl, {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+            },
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error('Unable to refresh capture service status.');
+            }
+
+            return response.json();
+        }).then((data) => {
+            renderCaptureServiceStatus(data['service-status']);
+        });
+    }
+
+    renderCaptureServiceStatus(initialCaptureServiceStatus);
 
     document.querySelectorAll('[data-modern-admin-capture-command]').forEach((button) => {
         button.addEventListener('click', function() {
@@ -70,7 +130,7 @@
                 return;
             }
 
-            button.disabled = true;
+            setCaptureControlsBusy(true);
 
             fetch(captureActionUrl, {
                 method: 'POST',
@@ -92,11 +152,12 @@
 
                 return response.json();
             }).then((data) => {
-                window.alert(data['success-message'] || 'Capture action submitted.');
-                window.location.href = data['redirect-url'] || window.location.href;
+                renderCaptureServiceStatus(data['service-status']);
+                return refreshCaptureServiceStatus();
             }).catch((error) => {
                 window.alert(error.message || 'Capture action failed.');
-                button.disabled = false;
+            }).finally(() => {
+                setCaptureControlsBusy(false);
             });
         });
     });
