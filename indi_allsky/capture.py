@@ -587,7 +587,7 @@ class CaptureWorker(Process):
             requested_exposure = 0.0
 
         mode, period_key, configured_period = self._configured_exposure_period()
-        minimum_period = requested_exposure + 15.0
+        minimum_period = requested_exposure + 5.0
         effective_period = max(configured_period, minimum_period)
         return {
             'mode'       : mode,
