@@ -15170,8 +15170,12 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'TARGET_ADU_DEV' : 'Night Target ADU Deviation',
         'TARGET_ADU_DEV_DAY' : 'Day Target ADU Deviation',
         'exposure_min' : 'Minimum Exposure',
+        'exposure_min_day' : 'Day Minimum Exposure',
         'exposure_max' : 'Maximum Exposure',
         'exposure_default' : 'Default Exposure',
+        'exposure_timeout' : 'Exposure Timeout',
+        'exposure_period' : 'Exposure Period',
+        'exposure_period_day' : 'Day Exposure Period',
         'gain_night' : 'Night Gain',
         'gain_moonmode' : 'Moon Mode Gain',
         'gain_day' : 'Day Gain',
@@ -15226,6 +15230,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'LIBCAMERA.AWB' : 'libcamera AWB',
         'LIBCAMERA.AWB_DAY' : 'libcamera Day AWB',
         'LIBCAMERA.AWB_ENABLE' : 'libcamera AWB Enable',
+        'LIBCAMERA.AWB_ENABLE_DAY' : 'libcamera Day AWB Enable',
         'LIBCAMERA.AWB_MODE' : 'libcamera AWB Mode',
         'LIBCAMERA.AWB_RED_GAIN' : 'libcamera AWB Red Gain',
         'LIBCAMERA.AWB_BLUE_GAIN' : 'libcamera AWB Blue Gain',
@@ -15234,7 +15239,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     }
 
     CAMERA_SETTINGS_PROFILE_ALIASES = {
-        'PROCESSING_MODE' : ('processing_mode',),
+        'PROCESSING_MODE' : ('processing_mode', ('awb', 'mode')),
         'CAMERA_INTERFACE' : ('camera_interface', 'interface', 'driver'),
         'INDI_SERVER' : ('indi_server', ('indi', 'server')),
         'INDI_PORT' : ('indi_port', ('indi', 'port')),
@@ -15248,22 +15253,26 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'CCD_CONFIG.MOONMODE.BINNING' : ('binning_moonmode', ('ccd_config', 'MOONMODE', 'BINNING')),
         'CCD_CONFIG.DAY.GAIN' : ('gain_day', ('ccd_config', 'DAY', 'GAIN')),
         'CCD_CONFIG.DAY.BINNING' : ('binning_day', ('ccd_config', 'DAY', 'BINNING')),
-        'exposure_min' : ('CCD_EXPOSURE_MIN',),
-        'exposure_max' : ('CCD_EXPOSURE_MAX',),
-        'exposure_default' : ('CCD_EXPOSURE_DEF',),
-        'gain_night' : (('ccd_config', 'NIGHT', 'GAIN'), 'gain_night', 'gain_max'),
-        'gain_moonmode' : (('ccd_config', 'MOONMODE', 'GAIN'), 'gain_moonmode'),
-        'gain_day' : (('ccd_config', 'DAY', 'GAIN'), 'gain_day', 'gain_min'),
+        'exposure_min' : (('exposure', 'min'), 'CCD_EXPOSURE_MIN', 'exposure_min'),
+        'exposure_min_day' : (('exposure', 'min_day'), 'CCD_EXPOSURE_MIN_DAY', 'exposure_min_day'),
+        'exposure_max' : (('exposure', 'max'), 'CCD_EXPOSURE_MAX', 'exposure_max'),
+        'exposure_default' : (('exposure', 'default'), 'CCD_EXPOSURE_DEF', 'exposure_default'),
+        'exposure_timeout' : (('exposure', 'timeout'), 'CCD_EXPOSURE_TIMEOUT', 'exposure_timeout'),
+        'exposure_period' : (('exposure', 'period'), 'EXPOSURE_PERIOD', 'exposure_period'),
+        'exposure_period_day' : (('exposure', 'period_day'), 'EXPOSURE_PERIOD_DAY', 'exposure_period_day'),
+        'gain_night' : (('gain', 'night'), ('ccd_config', 'NIGHT', 'GAIN'), 'gain_night', 'gain_max'),
+        'gain_moonmode' : (('gain', 'moonmode'), ('ccd_config', 'MOONMODE', 'GAIN'), 'gain_moonmode'),
+        'gain_day' : (('gain', 'day'), ('ccd_config', 'DAY', 'GAIN'), 'gain_day', 'gain_min'),
         'gain_min' : ('gain_min', 'gain_day', ('ccd_config', 'DAY', 'GAIN')),
         'gain_max' : ('gain_max', 'gain_night', ('ccd_config', 'NIGHT', 'GAIN')),
-        'target_adu' : ('TARGET_ADU',),
-        'target_adu_day' : ('TARGET_ADU_DAY',),
-        'target_adu_dev' : ('TARGET_ADU_DEV',),
-        'target_adu_dev_day' : ('TARGET_ADU_DEV_DAY',),
-        'auto_gain_enable' : ('auto_gain_enable', ('ccd_config', 'AUTO_GAIN_ENABLE')),
-        'auto_gain_levels' : ('auto_gain_levels', ('ccd_config', 'AUTO_GAIN_LEVELS')),
-        'binning_day' : ('binning_day', ('ccd_config', 'DAY', 'BINNING')),
-        'binning_night' : ('binning_night', ('ccd_config', 'NIGHT', 'BINNING')),
+        'target_adu' : (('target_adu', 'night'), 'TARGET_ADU', 'target_adu'),
+        'target_adu_day' : (('target_adu', 'day'), 'TARGET_ADU_DAY', 'target_adu_day'),
+        'target_adu_dev' : (('target_adu', 'dev'), 'TARGET_ADU_DEV', 'target_adu_dev'),
+        'target_adu_dev_day' : (('target_adu', 'dev_day'), 'TARGET_ADU_DEV_DAY', 'target_adu_dev_day'),
+        'auto_gain_enable' : (('gain', 'auto'), 'auto_gain_enable', ('ccd_config', 'AUTO_GAIN_ENABLE')),
+        'auto_gain_levels' : (('gain', 'auto_levels'), 'auto_gain_levels', ('ccd_config', 'AUTO_GAIN_LEVELS')),
+        'binning_day' : (('ccd_config', 'DAY', 'BINNING'), 'binning_day'),
+        'binning_night' : (('ccd_config', 'NIGHT', 'BINNING'), 'binning_night'),
         'binning_moonmode' : (('ccd_config', 'MOONMODE', 'BINNING'), 'binning_moonmode'),
         'EXPOSURE_PERIOD' : ('exposure_period',),
         'EXPOSURE_PERIOD_DAY' : ('exposure_period_day',),
@@ -15278,14 +15287,21 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'DAYTIME_CAPTURE_SAVE' : ('daytime_capture_save',),
         'CCD_BIT_DEPTH' : ('ccd_bit_depth',),
         'CFA_PATTERN' : ('cfa_pattern',),
-        'LIBCAMERA.AWB' : ('libcamera_awb', ('libcamera', 'AWB'), ('libcamera', 'awb')),
-        'LIBCAMERA.AWB_DAY' : ('libcamera_awb_day', ('libcamera', 'AWB_DAY'), ('libcamera', 'awb_day')),
-        'LIBCAMERA.AWB_ENABLE' : ('libcamera_awb_enable', ('libcamera', 'AWB_ENABLE'), ('libcamera', 'awb_enable')),
+        'LIBCAMERA.AWB' : (('awb', 'libcamera_awb'), 'libcamera_awb', ('libcamera', 'AWB'), ('libcamera', 'awb')),
+        'LIBCAMERA.AWB_DAY' : (('awb', 'libcamera_awb_day'), 'libcamera_awb_day', ('libcamera', 'AWB_DAY'), ('libcamera', 'awb_day')),
+        'LIBCAMERA.AWB_ENABLE' : (('awb', 'libcamera_awb_enable'), 'libcamera_awb_enable', ('libcamera', 'AWB_ENABLE'), ('libcamera', 'awb_enable')),
         'LIBCAMERA.AWB_MODE' : ('libcamera_awb_mode', ('libcamera', 'AWB_MODE'), ('libcamera', 'awb_mode')),
-        'LIBCAMERA.AWB_RED_GAIN' : ('libcamera_awb_red_gain', ('libcamera', 'AWB_RED_GAIN'), ('libcamera', 'awb_red_gain')),
-        'LIBCAMERA.AWB_BLUE_GAIN' : ('libcamera_awb_blue_gain', ('libcamera', 'AWB_BLUE_GAIN'), ('libcamera', 'awb_blue_gain')),
+        'LIBCAMERA.AWB_RED_GAIN' : (('awb', 'red_gain'), 'libcamera_awb_red_gain', ('libcamera', 'AWB_RED_GAIN'), ('libcamera', 'awb_red_gain')),
+        'LIBCAMERA.AWB_BLUE_GAIN' : (('awb', 'blue_gain'), 'libcamera_awb_blue_gain', ('libcamera', 'AWB_BLUE_GAIN'), ('libcamera', 'awb_blue_gain')),
         'LIBCAMERA.IMMEDIATE' : ('libcamera_immediate', ('libcamera', 'IMMEDIATE'), ('libcamera', 'immediate')),
         'LIBCAMERA.IMMEDIATE_DAY' : ('libcamera_immediate_day', ('libcamera', 'IMMEDIATE_DAY'), ('libcamera', 'immediate_day')),
+        'libcamera_awb' : (('awb', 'libcamera_awb'), ('libcamera', 'AWB'), ('libcamera', 'awb')),
+        'libcamera_awb_day' : (('awb', 'libcamera_awb_day'), ('libcamera', 'AWB_DAY'), ('libcamera', 'awb_day')),
+        'libcamera_awb_enable' : (('awb', 'libcamera_awb_enable'), ('libcamera', 'AWB_ENABLE'), ('libcamera', 'awb_enable')),
+        'libcamera_awb_enable_day' : (('awb', 'libcamera_awb_enable_day'), ('libcamera', 'AWB_ENABLE_DAY'), ('libcamera', 'awb_enable_day')),
+        'libcamera_awb_mode' : (('awb', 'libcamera_awb_mode'), ('libcamera', 'AWB_MODE'), ('libcamera', 'awb_mode')),
+        'libcamera_awb_red_gain' : (('awb', 'red_gain'), ('libcamera', 'AWB_RED_GAIN'), ('libcamera', 'awb_red_gain')),
+        'libcamera_awb_blue_gain' : (('awb', 'blue_gain'), ('libcamera', 'AWB_BLUE_GAIN'), ('libcamera', 'awb_blue_gain')),
         'LENS_NAME' : ('lens_name', ('lens', 'name')),
         'LENS_FOCAL_LENGTH' : ('lens_focal_length', ('lens', 'focal_length')),
         'LENS_FOCAL_RATIO' : ('lens_focal_ratio', ('lens', 'focal_ratio')),
@@ -15344,8 +15360,12 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'default_open' : True,
             'fields' : (
                 'exposure_min',
+                'exposure_min_day',
                 'exposure_max',
                 'exposure_default',
+                'exposure_timeout',
+                'exposure_period',
+                'exposure_period_day',
                 'gain_night',
                 'gain_moonmode',
                 'gain_day',
@@ -15358,6 +15378,10 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'binning_night',
                 'binning_moonmode',
                 'binning_day',
+                'LIBCAMERA.AWB',
+                'LIBCAMERA.AWB_DAY',
+                'LIBCAMERA.AWB_ENABLE',
+                'LIBCAMERA.AWB_ENABLE_DAY',
                 'LIBCAMERA.AWB_MODE',
                 'LIBCAMERA.AWB_RED_GAIN',
                 'LIBCAMERA.AWB_BLUE_GAIN',
@@ -15506,8 +15530,12 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     )
     CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER = (
         'exposure_min',
+        'exposure_min_day',
         'exposure_max',
         'exposure_default',
+        'exposure_timeout',
+        'exposure_period',
+        'exposure_period_day',
         'gain_night',
         'gain_moonmode',
         'gain_day',
@@ -15520,14 +15548,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'binning_night',
         'binning_moonmode',
         'binning_day',
+        'libcamera_awb',
+        'libcamera_awb_day',
+        'libcamera_awb_enable',
+        'libcamera_awb_enable_day',
         'libcamera_awb_mode',
         'libcamera_awb_red_gain',
         'libcamera_awb_blue_gain',
     )
     CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS = {
         'exposure_min'       : 'CCD_EXPOSURE_MIN',
+        'exposure_min_day'   : 'CCD_EXPOSURE_MIN_DAY',
         'exposure_max'       : 'CCD_EXPOSURE_MAX',
         'exposure_default'   : 'CCD_EXPOSURE_DEF',
+        'exposure_timeout'   : 'CCD_EXPOSURE_TIMEOUT',
+        'exposure_period'    : 'EXPOSURE_PERIOD',
+        'exposure_period_day': 'EXPOSURE_PERIOD_DAY',
         'gain_night'         : ('CCD_CONFIG', 'NIGHT', 'GAIN'),
         'gain_moonmode'      : ('CCD_CONFIG', 'MOONMODE', 'GAIN'),
         'gain_day'           : ('CCD_CONFIG', 'DAY', 'GAIN'),
@@ -15540,14 +15576,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'binning_night'      : ('CCD_CONFIG', 'NIGHT', 'BINNING'),
         'binning_moonmode'   : ('CCD_CONFIG', 'MOONMODE', 'BINNING'),
         'binning_day'        : ('CCD_CONFIG', 'DAY', 'BINNING'),
+        'libcamera_awb'           : 'LIBCAMERA.AWB',
+        'libcamera_awb_day'       : 'LIBCAMERA.AWB_DAY',
+        'libcamera_awb_enable'    : 'LIBCAMERA.AWB_ENABLE',
+        'libcamera_awb_enable_day': 'LIBCAMERA.AWB_ENABLE_DAY',
         'libcamera_awb_mode'      : 'LIBCAMERA.AWB_MODE',
         'libcamera_awb_red_gain'  : 'LIBCAMERA.AWB_RED_GAIN',
         'libcamera_awb_blue_gain' : 'LIBCAMERA.AWB_BLUE_GAIN',
     }
     CAMERA_SETTINGS_CAPTURE_FIELD_LABELS = {
         'exposure_min'       : 'Minimum Exposure',
+        'exposure_min_day'   : 'Day Minimum Exposure',
         'exposure_max'       : 'Maximum Exposure',
         'exposure_default'   : 'Default Exposure',
+        'exposure_timeout'   : 'Exposure Timeout',
+        'exposure_period'    : 'Exposure Period',
+        'exposure_period_day': 'Day Exposure Period',
         'gain_night'         : 'Night Gain',
         'gain_moonmode'      : 'Moon Mode Gain',
         'gain_day'           : 'Day Gain',
@@ -15560,14 +15604,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'binning_night'      : 'Night Binning',
         'binning_moonmode'   : 'Moon Mode Binning',
         'binning_day'        : 'Day Binning',
+        'libcamera_awb'           : 'libcamera AWB',
+        'libcamera_awb_day'       : 'libcamera Day AWB',
+        'libcamera_awb_enable'    : 'libcamera AWB Enable',
+        'libcamera_awb_enable_day': 'libcamera Day AWB Enable',
         'libcamera_awb_mode'      : 'libcamera AWB Mode',
         'libcamera_awb_red_gain'  : 'libcamera AWB Red Gain',
         'libcamera_awb_blue_gain' : 'libcamera AWB Blue Gain',
     }
     CAMERA_SETTINGS_CAPTURE_FIELD_TYPES = {
         'exposure_min'       : 'float',
+        'exposure_min_day'   : 'float',
         'exposure_max'       : 'float',
         'exposure_default'   : 'float',
+        'exposure_timeout'   : 'integer',
+        'exposure_period'    : 'float',
+        'exposure_period_day': 'float',
         'gain_night'         : 'float',
         'gain_moonmode'      : 'float',
         'gain_day'           : 'float',
@@ -15580,6 +15632,10 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'binning_night'      : 'integer',
         'binning_moonmode'   : 'integer',
         'binning_day'        : 'integer',
+        'libcamera_awb'           : 'select',
+        'libcamera_awb_day'       : 'select',
+        'libcamera_awb_enable'    : 'boolean_select',
+        'libcamera_awb_enable_day': 'boolean_select',
         'libcamera_awb_mode'      : 'select',
         'libcamera_awb_red_gain'  : 'float',
         'libcamera_awb_blue_gain' : 'float',
@@ -15990,8 +16046,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_profile_override(self, profile, config_key):
-        candidates = [config_key, config_key.replace('.', '__')]
-        candidates.extend(self.CAMERA_SETTINGS_PROFILE_ALIASES.get(config_key, tuple()))
+        candidates = list(self.CAMERA_SETTINGS_PROFILE_ALIASES.get(config_key, tuple()))
+        candidates.extend((config_key, config_key.replace('.', '__')))
 
         for candidate in candidates:
             found, value = self.get_camera_settings_nested_value(profile, candidate)
@@ -16123,6 +16179,12 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_hybrid_awb_apply_mode(self, profile):
+        awb_profile_config = profile.get('awb') or {}
+        if isinstance(awb_profile_config, dict):
+            awb_apply_mode = str(awb_profile_config.get('apply_mode', '') or '').strip().lower()
+            if awb_apply_mode in self.CAMERA_SETTINGS_HYBRID_AWB_APPLY_MODES:
+                return awb_apply_mode
+
         hybrid_config = profile.get('hybrid') or {}
         if not isinstance(hybrid_config, dict):
             return 'auto'
@@ -16165,6 +16227,12 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         found, value = self.get_camera_settings_profile_override(profile, 'PROCESSING_MODE')
         if found:
             processing_mode = str(value or 'classic').strip().lower()
+            if processing_mode in self.CAMERA_SETTINGS_PROCESSING_MODES:
+                return processing_mode
+
+        awb_profile_config = profile.get('awb') or {}
+        if isinstance(awb_profile_config, dict):
+            processing_mode = str(awb_profile_config.get('mode', '') or '').strip().lower()
             if processing_mode in self.CAMERA_SETTINGS_PROCESSING_MODES:
                 return processing_mode
 
@@ -16286,6 +16354,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             raise ValueError('Selected profile changed before save. Reload and try again.')
 
         profile['processing_mode'] = submitted_data['processing_mode']
+        awb_profile_config = profile.get('awb')
+        if not isinstance(awb_profile_config, dict):
+            awb_profile_config = {}
+
+        awb_profile_config['mode'] = submitted_data['processing_mode']
+        awb_profile_config['apply_mode'] = submitted_data['awb_apply_mode']
+        profile['awb'] = awb_profile_config
+
         hybrid_config = profile.get('hybrid')
         if not isinstance(hybrid_config, dict):
             hybrid_config = {}
@@ -16763,7 +16839,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_capture_field_choices(self, field_name, value):
-        if field_name == 'libcamera_awb_mode':
+        if field_name in ('libcamera_awb_mode', 'libcamera_awb', 'libcamera_awb_day'):
             choices = [{
                 'value'    : '',
                 'label'    : 'Use global',
@@ -16942,7 +17018,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 raise ValueError('{0:s} must be Enabled, Disabled, or Use global.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
         elif field_type == 'select':
             value = raw_value.strip().lower()
-            if field_name == 'libcamera_awb_mode' and value not in self.CAMERA_SETTINGS_LIBCAMERA_AWB_MODES:
+            if field_name in ('libcamera_awb_mode', 'libcamera_awb', 'libcamera_awb_day') and value not in self.CAMERA_SETTINGS_LIBCAMERA_AWB_MODES:
                 raise ValueError('Select a supported libcamera AWB mode.')
         else:
             value = raw_value
@@ -17026,14 +17102,10 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if str(profile.get('profile_id') or profile.get('id') or 'profile-{0:d}'.format(profile_index)) != str(profile_id):
             raise ValueError('Selected profile changed before save. Reload and try again.')
 
-        libcamera_config = profile.get('libcamera')
-        if not isinstance(libcamera_config, dict):
-            libcamera_config = OrderedDict()
-
         for field_name, field_data in submitted_data.items():
             if field_name.startswith('libcamera_'):
-                self.delete_camera_settings_profile_path(profile, (field_name,))
-                self.apply_camera_settings_capture_libcamera_field(profile, libcamera_config, field_name, field_data)
+                self.delete_camera_settings_capture_override_aliases(profile, field_name)
+                self.apply_camera_settings_capture_awb_field(profile, field_name, field_data)
                 continue
 
             self.delete_camera_settings_profile_path(profile, (field_name,))
@@ -17047,20 +17119,31 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             if not field_data['delete']:
                 profile[field_name] = field_data['value']
 
-        self.cleanup_empty_camera_settings_profile_blocks(profile, ('ccd_config',))
+        self.cleanup_empty_camera_settings_profile_blocks(profile, ('exposure', 'gain', 'awb', 'target_adu', 'ccd_config'))
         return str(profile_id)
 
 
     def get_camera_settings_capture_ccd_config_path(self, field_name):
         paths = {
-            'gain_night'       : ('ccd_config', 'NIGHT', 'GAIN'),
-            'gain_moonmode'    : ('ccd_config', 'MOONMODE', 'GAIN'),
-            'gain_day'         : ('ccd_config', 'DAY', 'GAIN'),
+            'exposure_min'     : ('exposure', 'min'),
+            'exposure_min_day' : ('exposure', 'min_day'),
+            'exposure_max'     : ('exposure', 'max'),
+            'exposure_default' : ('exposure', 'default'),
+            'exposure_timeout' : ('exposure', 'timeout'),
+            'exposure_period'  : ('exposure', 'period'),
+            'exposure_period_day' : ('exposure', 'period_day'),
+            'target_adu'       : ('target_adu', 'night'),
+            'target_adu_day'   : ('target_adu', 'day'),
+            'target_adu_dev'   : ('target_adu', 'dev'),
+            'target_adu_dev_day' : ('target_adu', 'dev_day'),
+            'gain_night'       : ('gain', 'night'),
+            'gain_moonmode'    : ('gain', 'moonmode'),
+            'gain_day'         : ('gain', 'day'),
             'binning_night'    : ('ccd_config', 'NIGHT', 'BINNING'),
             'binning_moonmode' : ('ccd_config', 'MOONMODE', 'BINNING'),
             'binning_day'      : ('ccd_config', 'DAY', 'BINNING'),
-            'auto_gain_enable' : ('ccd_config', 'AUTO_GAIN_ENABLE'),
-            'auto_gain_levels' : ('ccd_config', 'AUTO_GAIN_LEVELS'),
+            'auto_gain_enable' : ('gain', 'auto'),
+            'auto_gain_levels' : ('gain', 'auto_levels'),
         }
         return paths.get(field_name)
 
@@ -17080,24 +17163,32 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 self.delete_camera_settings_profile_path(profile, tuple(candidate))
 
 
-    def apply_camera_settings_capture_libcamera_field(self, profile, libcamera_config, field_name, field_data):
+    def apply_camera_settings_capture_awb_field(self, profile, field_name, field_data):
         field_key_map = {
-            'libcamera_awb_mode'      : 'awb_mode',
-            'libcamera_awb_red_gain'  : 'awb_red_gain',
-            'libcamera_awb_blue_gain' : 'awb_blue_gain',
+            'libcamera_awb'            : 'libcamera_awb',
+            'libcamera_awb_day'        : 'libcamera_awb_day',
+            'libcamera_awb_enable'     : 'libcamera_awb_enable',
+            'libcamera_awb_enable_day' : 'libcamera_awb_enable_day',
+            'libcamera_awb_mode'       : 'libcamera_awb_mode',
+            'libcamera_awb_red_gain'   : 'red_gain',
+            'libcamera_awb_blue_gain'  : 'blue_gain',
         }
         config_key = field_key_map[field_name]
-        if field_data['delete']:
-            libcamera_config.pop(config_key, None)
-        elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
-            libcamera_config[config_key] = float(field_data['value'])
-        else:
-            libcamera_config[config_key] = field_data['value']
+        awb_config = profile.get('awb')
+        if not isinstance(awb_config, dict):
+            awb_config = OrderedDict()
 
-        if libcamera_config:
-            profile['libcamera'] = libcamera_config
+        if field_data['delete']:
+            awb_config.pop(config_key, None)
+        elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+            awb_config[config_key] = float(field_data['value'])
         else:
-            profile.pop('libcamera', None)
+            awb_config[config_key] = field_data['value']
+
+        if awb_config:
+            profile['awb'] = awb_config
+        else:
+            profile.pop('awb', None)
 
 
     def preserve_camera_settings_capture_global_values(self, config):

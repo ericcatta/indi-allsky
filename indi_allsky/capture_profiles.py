@@ -138,41 +138,6 @@ def _libcamera_awb_mode(config: Mapping[str, Any]) -> str:
     return awb_mode
 
 
-def _processing_mode(profile_config: Mapping[str, Any]) -> str:
-    processing_mode = str(profile_config.get('processing_mode', 'classic') or 'classic').strip().lower()
-    if processing_mode not in PROCESSING_MODES:
-        return 'classic'
-
-    return processing_mode
-
-
-def _hybrid_awb_apply_mode(profile_config: Mapping[str, Any]) -> str:
-    apply_mode_candidates = (
-        ('hybrid', 'awb', 'apply_mode'),
-        ('HYBRID', 'AWB', 'APPLY_MODE'),
-        ('HYBRID', 'awb', 'apply_mode'),
-        ('hybrid', 'AWB', 'APPLY_MODE'),
-        ('hybrid_awb_apply_mode',),
-    )
-    for path in apply_mode_candidates:
-        current = profile_config
-        for key in path:
-            if not isinstance(current, Mapping) or key not in current:
-                current = None
-                break
-
-            current = current[key]
-
-        if current is None:
-            continue
-
-        apply_mode = str(current or 'auto').strip().lower()
-        if apply_mode in HYBRID_AWB_APPLY_MODES:
-            return apply_mode
-
-    return 'auto'
-
-
 def _mapping_float(config: Mapping[str, Any], key: str, default: float) -> float:
     try:
         return float(config.get(key, default))
@@ -224,6 +189,71 @@ def _deep_update(base_config: Dict[str, Any], override_config: Mapping[str, Any]
     return base_config
 
 
+def _mapping_config(config: Mapping[str, Any], key: str) -> Mapping[str, Any]:
+    value = config.get(key) or {}
+    if isinstance(value, Mapping):
+        return value
+
+    return {}
+
+
+def _known_profile_gain_defaults(profile_id: str, camera_interface: str) -> Dict[str, float]:
+    profile_id_l = str(profile_id or '').strip().lower()
+    camera_interface_l = str(camera_interface or '').strip().lower()
+
+    if 'imx708' in profile_id_l or 'imx708' in camera_interface_l:
+        return {
+            'night': 16.0,
+            'moonmode': 16.0,
+            'day': 1.13,
+        }
+    elif 'asi678' in profile_id_l:
+        return {
+            'night': 220.0,
+            'moonmode': 75.0,
+            'day': 0.0,
+        }
+
+    return {}
+
+
+def _processing_mode(profile_config: Mapping[str, Any]) -> str:
+    awb_config = _mapping_config(profile_config, 'awb')
+    processing_mode = str(profile_config.get('processing_mode', awb_config.get('mode', 'classic')) or 'classic').strip().lower()
+    if processing_mode not in PROCESSING_MODES:
+        return 'classic'
+
+    return processing_mode
+
+
+def _hybrid_awb_apply_mode(profile_config: Mapping[str, Any]) -> str:
+    apply_mode_candidates = (
+        ('awb', 'apply_mode'),
+        ('hybrid', 'awb', 'apply_mode'),
+        ('HYBRID', 'AWB', 'APPLY_MODE'),
+        ('HYBRID', 'awb', 'apply_mode'),
+        ('hybrid', 'AWB', 'APPLY_MODE'),
+        ('hybrid_awb_apply_mode',),
+    )
+    for path in apply_mode_candidates:
+        current = profile_config
+        for key in path:
+            if not isinstance(current, Mapping) or key not in current:
+                current = None
+                break
+
+            current = current[key]
+
+        if current is None:
+            continue
+
+        apply_mode = str(current or 'auto').strip().lower()
+        if apply_mode in HYBRID_AWB_APPLY_MODES:
+            return apply_mode
+
+    return 'auto'
+
+
 def _profile_from_config(
     config: Mapping[str, Any],
     profile_config: Optional[Mapping[str, Any]] = None,
@@ -233,15 +263,75 @@ def _profile_from_config(
     default_primary: bool = True,
 ) -> CaptureProfile:
     profile_config = profile_config or {}
+    profile_id = str(profile_config.get('profile_id', default_profile_id) or default_profile_id)
+    camera_interface = profile_config.get('camera_interface', config.get('CAMERA_INTERFACE', 'indi'))
+    known_gain_defaults = _known_profile_gain_defaults(profile_id, camera_interface)
+    exposure_config = _mapping_config(profile_config, 'exposure')
+    gain_config = _mapping_config(profile_config, 'gain')
+    target_adu_config = _mapping_config(profile_config, 'target_adu')
+    awb_config = _mapping_config(profile_config, 'awb')
 
     ccd_config = deepcopy(config.get('CCD_CONFIG') or {})
     profile_ccd_config = profile_config.get('ccd_config') or {}
     if isinstance(profile_ccd_config, Mapping):
         _deep_update(ccd_config, profile_ccd_config)
+
+    ccd_config.setdefault('NIGHT', {})
+    ccd_config.setdefault('MOONMODE', {})
+    ccd_config.setdefault('DAY', {})
+    if 'night' in known_gain_defaults and not any((
+        'night' in gain_config,
+        'gain_night' in profile_config,
+        isinstance(profile_ccd_config, Mapping) and isinstance(profile_ccd_config.get('NIGHT'), Mapping) and 'GAIN' in profile_ccd_config['NIGHT'],
+    )):
+        ccd_config['NIGHT']['GAIN'] = known_gain_defaults['night']
+    if 'moonmode' in known_gain_defaults and not any((
+        'moonmode' in gain_config,
+        'gain_moonmode' in profile_config,
+        isinstance(profile_ccd_config, Mapping) and isinstance(profile_ccd_config.get('MOONMODE'), Mapping) and 'GAIN' in profile_ccd_config['MOONMODE'],
+    )):
+        ccd_config['MOONMODE']['GAIN'] = known_gain_defaults['moonmode']
+    if 'day' in known_gain_defaults and not any((
+        'day' in gain_config,
+        'gain_day' in profile_config,
+        'gain_min' in profile_config,
+        isinstance(profile_ccd_config, Mapping) and isinstance(profile_ccd_config.get('DAY'), Mapping) and 'GAIN' in profile_ccd_config['DAY'],
+    )):
+        ccd_config['DAY']['GAIN'] = known_gain_defaults['day']
+
+    if 'night' in gain_config:
+        ccd_config['NIGHT']['GAIN'] = deepcopy(gain_config['night'])
+    if 'moonmode' in gain_config:
+        ccd_config['MOONMODE']['GAIN'] = deepcopy(gain_config['moonmode'])
+    if 'day' in gain_config:
+        ccd_config['DAY']['GAIN'] = deepcopy(gain_config['day'])
+    if 'auto' in gain_config:
+        ccd_config['AUTO_GAIN_ENABLE'] = deepcopy(gain_config['auto'])
+    if 'auto_levels' in gain_config:
+        ccd_config['AUTO_GAIN_LEVELS'] = deepcopy(gain_config['auto_levels'])
     libcamera_config = deepcopy(config.get('LIBCAMERA') or {})
     libcamera_config.update(profile_config.get('libcamera') or {})
+    if 'libcamera_awb' in awb_config:
+        libcamera_config['AWB'] = awb_config['libcamera_awb']
+    if 'libcamera_awb_day' in awb_config:
+        libcamera_config['AWB_DAY'] = awb_config['libcamera_awb_day']
+    if 'libcamera_awb_enable' in awb_config:
+        libcamera_config['AWB_ENABLE'] = awb_config['libcamera_awb_enable']
+    if 'libcamera_awb_enable_day' in awb_config:
+        libcamera_config['AWB_ENABLE_DAY'] = awb_config['libcamera_awb_enable_day']
+    if 'libcamera_awb_mode' in awb_config:
+        libcamera_config['AWB_MODE'] = awb_config['libcamera_awb_mode']
+    if 'red_gain' in awb_config:
+        libcamera_config['AWB_RED_GAIN'] = awb_config['red_gain']
+    if 'blue_gain' in awb_config:
+        libcamera_config['AWB_BLUE_GAIN'] = awb_config['blue_gain']
     indi_config = profile_config.get('indi') or {}
-    camera_sqm = deepcopy(profile_config.get('camera_sqm') or config.get('CAMERA_SQM') or {})
+    camera_sqm = deepcopy(config.get('CAMERA_SQM') or {})
+    profile_camera_sqm = profile_config.get('camera_sqm') or {}
+    if isinstance(profile_camera_sqm, Mapping):
+        _deep_update(camera_sqm, profile_camera_sqm)
+    if 'sqm' in gain_config:
+        camera_sqm['GAIN'] = deepcopy(gain_config['sqm'])
 
     ccd_night = ccd_config.get('NIGHT') or {}
     ccd_moonmode = ccd_config.get('MOONMODE') or {}
@@ -262,11 +352,10 @@ def _profile_from_config(
     except (TypeError, ValueError):
         libcamera_camera_id = 0
 
-    camera_interface = profile_config.get('camera_interface', config.get('CAMERA_INTERFACE', 'indi'))
     outputs = _coerce_outputs(config, profile_config.get('outputs'))
 
     return CaptureProfile(
-        profile_id=str(profile_config.get('profile_id', default_profile_id) or default_profile_id),
+        profile_id=profile_id,
         enabled=bool(profile_config.get('enabled', default_enabled)),
         primary=bool(profile_config.get('primary', default_primary)),
         processing_mode=_processing_mode(profile_config),
@@ -279,17 +368,17 @@ def _profile_from_config(
         # MULTI_CAMERA_PREP: mirror per-camera tuning from the legacy
         # global config without changing runtime behavior yet.
         ccd_config=ccd_config,
-        exposure_min=_float_config(profile_config, 'exposure_min', _float_config(config, 'CCD_EXPOSURE_MIN', 0.0)),
-        exposure_min_day=_float_config(profile_config, 'exposure_min_day', _float_config(config, 'CCD_EXPOSURE_MIN_DAY', 0.0)),
-        exposure_max=_float_config(profile_config, 'exposure_max', _float_config(config, 'CCD_EXPOSURE_MAX', 15.0)),
-        exposure_default=_float_config(profile_config, 'exposure_default', _float_config(config, 'CCD_EXPOSURE_DEF', 0.0)),
-        exposure_timeout=_float_config(profile_config, 'exposure_timeout', _float_config(config, 'CCD_EXPOSURE_TIMEOUT', 330.0)),
-        exposure_period=_float_config(profile_config, 'exposure_period', _float_config(config, 'EXPOSURE_PERIOD', 15.0)),
-        exposure_period_day=_float_config(profile_config, 'exposure_period_day', _float_config(config, 'EXPOSURE_PERIOD_DAY', 15.0)),
-        target_adu=_int_config(profile_config, 'target_adu', _int_config(config, 'TARGET_ADU', 75)),
-        target_adu_day=_int_config(profile_config, 'target_adu_day', _int_config(config, 'TARGET_ADU_DAY', 75)),
-        target_adu_dev=_int_config(profile_config, 'target_adu_dev', _int_config(config, 'TARGET_ADU_DEV', 10)),
-        target_adu_dev_day=_int_config(profile_config, 'target_adu_dev_day', _int_config(config, 'TARGET_ADU_DEV_DAY', 20)),
+        exposure_min=_mapping_float(exposure_config, 'min', _float_config(profile_config, 'exposure_min', _float_config(config, 'CCD_EXPOSURE_MIN', 0.0))),
+        exposure_min_day=_mapping_float(exposure_config, 'min_day', _float_config(profile_config, 'exposure_min_day', _float_config(config, 'CCD_EXPOSURE_MIN_DAY', 0.0))),
+        exposure_max=_mapping_float(exposure_config, 'max', _float_config(profile_config, 'exposure_max', _float_config(config, 'CCD_EXPOSURE_MAX', 15.0))),
+        exposure_default=_mapping_float(exposure_config, 'default', _float_config(profile_config, 'exposure_default', _float_config(config, 'CCD_EXPOSURE_DEF', 0.0))),
+        exposure_timeout=_mapping_float(exposure_config, 'timeout', _float_config(profile_config, 'exposure_timeout', _float_config(config, 'CCD_EXPOSURE_TIMEOUT', 330.0))),
+        exposure_period=_mapping_float(exposure_config, 'period', _float_config(profile_config, 'exposure_period', _float_config(config, 'EXPOSURE_PERIOD', 15.0))),
+        exposure_period_day=_mapping_float(exposure_config, 'period_day', _float_config(profile_config, 'exposure_period_day', _float_config(config, 'EXPOSURE_PERIOD_DAY', 15.0))),
+        target_adu=_mapping_int(target_adu_config, 'night', _int_config(profile_config, 'target_adu', _int_config(config, 'TARGET_ADU', 75))),
+        target_adu_day=_mapping_int(target_adu_config, 'day', _int_config(profile_config, 'target_adu_day', _int_config(config, 'TARGET_ADU_DAY', 75))),
+        target_adu_dev=_mapping_int(target_adu_config, 'dev', _int_config(profile_config, 'target_adu_dev', _int_config(config, 'TARGET_ADU_DEV', 10))),
+        target_adu_dev_day=_mapping_int(target_adu_config, 'dev_day', _int_config(profile_config, 'target_adu_dev_day', _int_config(config, 'TARGET_ADU_DEV_DAY', 20))),
         gain_default=_float_config(profile_config, 'gain_default', _mapping_float(ccd_night, 'GAIN', 100.0)),
         gain_min=_float_config(profile_config, 'gain_min', _mapping_float(ccd_day, 'GAIN', 0.0)),
         gain_max=_float_config(profile_config, 'gain_max', _mapping_float(ccd_night, 'GAIN', 100.0)),
