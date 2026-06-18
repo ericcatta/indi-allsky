@@ -389,6 +389,55 @@ class IndiClientLibCameraGeneric(IndiClient):
         )
 
 
+    def _logLibcameraProcessOutput(self, returncode):
+        stdout_lines = self._readLibcameraOutput()
+        if returncode == -15:
+            logger.info('rpicam-still process terminated during capture shutdown/abort (returncode=%s)', returncode)
+        elif returncode != 0:
+            logger.error('rpicam-still exited with returncode=%s', returncode)
+
+        for line in stdout_lines:
+            line_s = str(line).strip()
+            if not line_s:
+                continue
+
+            line_upper = line_s.upper()
+            if (
+                line_upper.startswith('INFO ') or
+                line_upper.startswith('[INFO]') or
+                line_upper.startswith('INFO:') or
+                ' INFO ' in line_upper
+            ):
+                logger.debug('rpicam-still: %s', line_s)
+            elif (
+                line_upper.startswith('WARN ') or
+                line_upper.startswith('[WARN]') or
+                line_upper.startswith('WARNING') or
+                line_upper.startswith('WARN:') or
+                ' WARN ' in line_upper
+            ):
+                logger.warning('rpicam-still: %s', line_s)
+            elif (
+                line_upper.startswith('ERROR') or
+                line_upper.startswith('[ERROR]') or
+                line_upper.startswith('FATAL') or
+                line_upper.startswith('[FATAL]') or
+                ' ERROR ' in line_upper or
+                ' FATAL ' in line_upper
+            ):
+                if returncode == -15:
+                    logger.warning('rpicam-still: %s', line_s)
+                else:
+                    logger.error('rpicam-still: %s', line_s)
+            else:
+                if returncode == -15:
+                    logger.debug('rpicam-still: %s', line_s)
+                elif returncode != 0:
+                    logger.warning('rpicam-still: %s', line_s)
+                else:
+                    logger.debug('rpicam-still: %s', line_s)
+
+
     def _appendLibcameraAwbOptions(self, cmd, night=True):
         if self._hybridAwbCaptureEnabled():
             red_gain, blue_gain, sample_count, reason = self._hybridAwbGains()
@@ -701,12 +750,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
             if self.libcamera_process.returncode != 0:
-                # log errors
-                stdout_lines = self._readLibcameraOutput()
-                for line in stdout_lines:
-                    logger.error('rpicam-still error: %s', line)
-
-                # not returning, just log the error
+                self._logLibcameraProcessOutput(self.libcamera_process.returncode)
 
             if timing_diag:
                 process_exit_time = time.time()
@@ -766,12 +810,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
             if self.libcamera_process.returncode != 0:
-                # log errors
-                stdout_lines = self._readLibcameraOutput()
-                for line in stdout_lines:
-                    logger.error('rpicam-still error: %s', line)
-
-                # not returning, just log the error
+                self._logLibcameraProcessOutput(self.libcamera_process.returncode)
 
             if self._multiCameraTimingDiagEnabled():
                 process_exit_time = time.time()
@@ -854,20 +893,19 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
     def _processMetadata(self):
+        metadata_dict = dict()
+
         # read metadata to get sensor temperature
         if self.current_metadata_file_p:
             try:
                 with io.open(self.current_metadata_file_p, 'r', encoding='utf-8') as f_metadata:
                     metadata_dict = json.load(f_metadata, object_pairs_hook=OrderedDict)
             except FileNotFoundError as e:
-                logger.error('Metadata file not found: %s', str(e))
-                metadata_dict = dict()
+                logger.debug('Metadata file not found: %s', str(e))
             except PermissionError as e:
-                logger.error('Permission erro: %s', str(e))
-                metadata_dict = dict()
+                logger.warning('Permission error reading metadata: %s', str(e))
             except json.JSONDecodeError as e:
-                logger.error('Error decoding json: %s', str(e))
-                metadata_dict = dict()
+                logger.warning('Error decoding libcamera metadata json: %s', str(e))
 
 
         #logger.info('Metadata: %s', metadata_dict)
@@ -908,9 +946,9 @@ class IndiClientLibCameraGeneric(IndiClient):
         try:
             self.ccd_temp = float(metadata_dict[self._sensor_temp_metadata_key])
         except KeyError:
-            logger.error('libcamera camera temperature key not found')
+            logger.debug('libcamera camera temperature key not found')
         except ValueError:
-            logger.error('Unable to parse libcamera camera temperature')
+            logger.warning('Unable to parse libcamera camera temperature')
 
 
         ### Auto white balance
@@ -923,10 +961,10 @@ class IndiClientLibCameraGeneric(IndiClient):
                     self._awb_gains = [awb_gains[0], awb_gains[1]]
                     logger.info('libcamera color gains: Red: %0.2f, Blue: %0.2f', *self._awb_gains)
                 except KeyError:
-                    logger.error('libcamera sensor AWB key not found')
+                    logger.debug('libcamera sensor AWB key not found')
                     self._awb_gains = None
                 except IndexError:
-                    logger.error('Invalid color gain values')
+                    logger.warning('Invalid color gain values')
                     self._awb_gains = None
 
 
@@ -957,10 +995,10 @@ class IndiClientLibCameraGeneric(IndiClient):
                     self._awb_gains = [awb_gains[0], awb_gains[1]]
                     logger.info('libcamera color gains: Red: %0.2f, Blue: %0.2f', *self._awb_gains)
                 except KeyError:
-                    logger.error('libcamera sensor AWB key not found')
+                    logger.debug('libcamera sensor AWB key not found')
                     self._awb_gains = None
                 except IndexError:
-                    logger.error('Invalid color gain values')
+                    logger.warning('Invalid color gain values')
                     self._awb_gains = None
 
 
@@ -990,10 +1028,10 @@ class IndiClientLibCameraGeneric(IndiClient):
             self._black_level = black_level[0]  # Only going to use the first key for now
             logger.info('libcamera black level: %d', self._black_level)
         except KeyError:
-            logger.error('libcamera sensor black level key not found')
+            logger.debug('libcamera sensor black level key not found')
             self._black_level = None
         except IndexError:
-            logger.error('Invalid black level values')
+            logger.warning('Invalid black level values')
             self._black_level = None
 
 

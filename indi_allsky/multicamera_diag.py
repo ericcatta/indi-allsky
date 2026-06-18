@@ -1,6 +1,5 @@
 import os
 import re
-import sys
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -22,8 +21,7 @@ def write_multicamera_diag(message, *args):
     if args:
         message = message % args
 
-    logger.warning(message)
-    print(message, file=sys.stderr, flush=True)
+    logger.debug(message)
 
     timestamp = datetime.now().isoformat(timespec='seconds')
     profile_match = PROFILE_RE.search(message)
