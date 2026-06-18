@@ -153,6 +153,15 @@ class IndiClientLibCameraGeneric(IndiClient):
         return bool(getattr(self, 'images_only', False)) and bool(self.config.get('MULTI_CAMERA_TIMING_DIAG', False))
 
 
+    def _libcameraImmediateAllowed(self, exposure):
+        try:
+            requested_exposure = float(exposure)
+        except (TypeError, ValueError):
+            return True
+
+        return requested_exposure < 1.0
+
+
     def _libcameraAwbMode(self, night=True):
         libcamera_config = self.config.get('LIBCAMERA', {}) or {}
         awb_mode = str(libcamera_config.get('AWB_MODE', libcamera_config.get('awb_mode', '')) or '').strip().lower()
@@ -660,6 +669,9 @@ class IndiClientLibCameraGeneric(IndiClient):
                 cmd.extend(extra_options.split(' '))
 
         cmd, self._hybrid_awb_capture_control = self._normalizeHybridAwbCaptureCommand(cmd)
+
+        if not self._libcameraImmediateAllowed(exposure):
+            cmd = self._removeCmdOptions(cmd, {'--immediate'})
 
         if self._hybridAwbEnabled() and self._cmdHasOption(cmd, '--immediate'):
             cmd = self._removeCmdOptions(cmd, {'--timeout'})
