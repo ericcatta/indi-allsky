@@ -1071,7 +1071,14 @@ class CaptureWorker(Process):
 
                         if frame_delta < -1:
 
-                            if self.capture_camera_interface.startswith('pycurl'):
+                            if self._shutdown or exposure_state == 'Aborted':
+                                logger.info(
+                                    'Ignoring short exposure during shutdown/abort: requested=%0.4fs elapsed=%0.4fs delta=%+0.4fs',
+                                    self.exposure_av[constants.EXPOSURE_CURRENT],
+                                    frame_elapsed,
+                                    frame_delta,
+                                )
+                            elif self.capture_camera_interface.startswith('pycurl'):
                                 ### camera does not obey expsoure values
                                 pass
                             elif self.capture_camera_interface == 'indi_passive':
