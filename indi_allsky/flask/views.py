@@ -15040,6 +15040,94 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         return 'unknown'
 
 
+class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Full Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    SETTINGS_FULL_DEFAULT_OPEN_GROUPS = (
+        'Camera / Capture',
+        'Exposure / Gain / Binning',
+        'Processing / Calibration',
+    )
+
+    def get_context(self):
+        context = super(ModernAdminFullSettingsView, self).get_context()
+        form = context['form_config']
+        editor_groups = self.get_full_settings_editor_groups(form)
+
+        context['modern_admin_full_settings_groups'] = editor_groups
+        context['modern_admin_full_settings_field_count'] = sum([group['count'] for group in editor_groups])
+        context['modern_admin_full_settings_field_names'] = [
+            field['name']
+            for group in editor_groups
+            for field in group['fields']
+        ]
+        context['modern_admin_full_settings_checkbox_names'] = [
+            field['name']
+            for group in editor_groups
+            for field in group['fields']
+            if field['is_checkbox']
+        ]
+        context['modern_admin_full_settings_profile_count'] = self.get_multi_camera_profile_count()
+        return context
+
+
+    def get_full_settings_editor_groups(self, form):
+        grouped_fields = OrderedDict()
+        for group_title in self.SETTINGS_GROUP_ORDER:
+            grouped_fields[group_title] = list()
+
+        for field in form:
+            field_name = getattr(field, 'name', '')
+            if not field_name:
+                continue
+
+            group_title = self.estimate_settings_group(field_name)
+            grouped_fields[group_title].append(self.get_full_settings_field_metadata(field_name, field))
+
+        editor_groups = list()
+        for group_title, fields in grouped_fields.items():
+            if not fields:
+                continue
+
+            group_key = re.sub(r'[^a-z0-9]+', '-', group_title.lower()).strip('-')
+            editor_groups.append({
+                'title'        : group_title,
+                'key'          : group_key,
+                'fields'       : fields,
+                'count'        : len(fields),
+                'default_open' : group_title in self.SETTINGS_FULL_DEFAULT_OPEN_GROUPS,
+            })
+
+        return editor_groups
+
+
+    def get_full_settings_field_metadata(self, field_name, field):
+        field_type = field.__class__.__name__
+        risk = self.estimate_settings_risk(field_name, field)
+        widget_type = getattr(getattr(field, 'widget', None), 'input_type', '')
+
+        return {
+            'field'             : field,
+            'label'             : str(field.label.text),
+            'name'              : field_name,
+            'config_key'        : self.form_field_to_config_key(field_name),
+            'field_type'        : field_type,
+            'validators'        : self.describe_field_validators(field),
+            'group'             : self.estimate_settings_group(field_name),
+            'scope'             : self.estimate_settings_scope(field_name),
+            'risk'              : risk,
+            'restart_required'  : self.estimate_settings_restart(field_name),
+            'is_checkbox'       : field_type == 'BooleanField',
+            'is_textarea'       : field_type == 'TextAreaField',
+            'is_select'         : field_type == 'SelectField',
+            'is_password'       : field_type == 'PasswordField' or widget_type == 'password',
+            'is_hidden'         : field_type == 'CSRFTokenField' or widget_type == 'hidden',
+            'is_submit_control' : field_name in ('CONFIG_NOTE', 'RELOAD_ON_SAVE'),
+            'search_text'       : self.get_settings_search_text(field_name, field, risk),
+        }
+
+
 class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     page_title = 'Modern Admin Camera Settings'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
@@ -18415,6 +18503,7 @@ bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusVi
 bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsInventoryView.as_view('modern_admin_settings_view', template_name='modern_admin/settings_inventory.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))
 bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))

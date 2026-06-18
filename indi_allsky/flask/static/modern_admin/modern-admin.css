@@ -2382,6 +2382,8 @@ body.modern-admin-lightbox-open {
 
 .modern-admin-shell .modern-admin-settings-edit-field input[type="number"],
 .modern-admin-shell .modern-admin-settings-edit-field input[type="text"],
+.modern-admin-shell .modern-admin-settings-edit-field input[type="password"],
+.modern-admin-shell .modern-admin-settings-edit-field textarea,
 .modern-admin-shell .modern-admin-settings-edit-field select {
   width: 100%;
   min-height: 40px;
@@ -2394,10 +2396,21 @@ body.modern-admin-lightbox-open {
   font: inherit;
 }
 
+.modern-admin-shell .modern-admin-settings-edit-field textarea {
+  min-height: 118px;
+  resize: vertical;
+}
+
 .modern-admin-shell .modern-admin-settings-edit-field input:focus,
+.modern-admin-shell .modern-admin-settings-edit-field textarea:focus,
 .modern-admin-shell .modern-admin-settings-edit-field select:focus {
   border-color: rgba(88, 166, 255, 0.72);
   box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.16);
+}
+
+.modern-admin-shell .modern-admin-settings-edit-field .is-invalid {
+  border-color: rgba(248, 113, 113, 0.72);
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.12);
 }
 
 .modern-admin-shell .modern-admin-settings-toggle-row {
@@ -2427,6 +2440,32 @@ body.modern-admin-lightbox-open {
   gap: 18px;
 }
 
+.modern-admin-shell .modern-admin-full-settings-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.modern-admin-shell .modern-admin-full-settings-reload,
+.modern-admin-shell .modern-admin-full-settings-note {
+  max-width: 520px;
+  margin-top: 12px;
+}
+
+.modern-admin-shell .modern-admin-full-settings-message {
+  font-weight: 700;
+}
+
+.modern-admin-shell .modern-admin-full-settings-message-success {
+  color: #bbf7d0;
+  border-color: rgba(74, 222, 128, 0.28);
+  background: rgba(22, 101, 52, 0.18);
+}
+
+.modern-admin-shell .modern-admin-full-settings-message-error {
+  color: #fecdd3;
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(127, 29, 29, 0.18);
+}
+
 @media (max-width: 760px) {
   .modern-admin-shell .modern-admin-settings-summary-grid {
     grid-template-columns: 1fr;
@@ -2443,6 +2482,10 @@ body.modern-admin-lightbox-open {
 
   .modern-admin-shell .modern-admin-settings-edit-grid,
   .modern-admin-shell .modern-admin-settings-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .modern-admin-shell .modern-admin-full-settings-grid {
     grid-template-columns: 1fr;
   }
 

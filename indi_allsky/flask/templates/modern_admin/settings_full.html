@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-full-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-full-settings-title">
+    {% set modern_admin_header_label = 'Full settings header' %}
+    {% set modern_admin_heading = 'Full Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-full-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Full settings summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Modern editor</p>
+                <h2 id="modern-admin-full-settings-title">Full Settings</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-warning">Global config</span>
+        </div>
+        <p class="modern-admin-note">Use Camera Profile Settings for per-camera acquisition, driver, lens, and Hybrid AWB controls. This page covers the remaining global settings still present in the classic config form and uses the same backend validation and save path.</p>
+        <div class="modern-admin-settings-summary-grid">
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ modern_admin_full_settings_field_count }}</span>
+                <p>Editable fields</p>
+            </div>
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ modern_admin_full_settings_profile_count }}</span>
+                <p>Multi-camera profiles preserved</p>
+            </div>
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ config_id }}</span>
+                <p>Active config ID</p>
+            </div>
+        </div>
+    </section>
+
+    {% if longitude_validation_message %}
+    <section class="modern-admin-table-panel">
+        <p class="modern-admin-note">{{ longitude_validation_message | safe }}</p>
+    </section>
+    {% endif %}
+
+    {% if fits_enabled %}
+    <section class="modern-admin-table-panel">
+        <p class="modern-admin-note"><span class="modern-admin-settings-badge modern-admin-settings-risk-medium">Warning</span> FITS saving is enabled and may increase storage usage.</p>
+    </section>
+    {% endif %}
+
+    {% if mark_detections_enabled %}
+    <section class="modern-admin-table-panel">
+        <p class="modern-admin-note"><span class="modern-admin-settings-badge modern-admin-settings-risk-medium">Warning</span> Detection marking is enabled.</p>
+    </section>
+    {% endif %}
+
+    <section class="modern-admin-settings-toolbar" aria-label="Full settings filter">
+        <label for="modern-admin-full-settings-filter">Search settings</label>
+        <input id="modern-admin-full-settings-filter" class="modern-admin-settings-filter" type="search" placeholder="Filter by label, field, value, type, risk, or scope" autocomplete="off">
+    </section>
+
+    <form id="modern-admin-full-settings-form" class="modern-admin-settings-form" autocomplete="off" novalidate>
+        {% for group in modern_admin_full_settings_groups %}
+        <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-full-settings-section="{{ group.key }}" {% if group.default_open %}open{% endif %}>
+            <summary>
+                <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
+                <span class="modern-admin-settings-section-title">{{ group.title }}</span>
+                <span class="modern-admin-settings-count" data-full-settings-visible-count>{{ group.count }}</span>
+            </summary>
+            <div class="modern-admin-settings-edit-section-body">
+                <div class="modern-admin-settings-edit-grid modern-admin-full-settings-grid">
+                    {% for field_meta in group.fields %}
+                    {% set field = field_meta.field %}
+                    {% if field_meta.is_hidden %}
+                        {{ field(data_modern_full_field='1') }}
+                    {% elif field_meta.is_submit_control %}
+                        {# Rendered in the save action panel below. #}
+                    {% else %}
+                    <label class="modern-admin-settings-edit-field {% if field_meta.is_checkbox %}modern-admin-settings-edit-field-checkbox{% endif %}" for="{{ field_meta.name }}" data-full-settings-row data-full-settings-search="{{ field_meta.search_text | e }}">
+                        <span class="modern-admin-settings-edit-label">{{ field_meta.label }}</span>
+                        <span class="modern-admin-settings-edit-meta">{{ field_meta.name }} · {{ field_meta.config_key }} · {{ field_meta.field_type }}</span>
+                        {% if field_meta.is_checkbox %}
+                        <span class="modern-admin-settings-toggle-row">
+                            {{ field(id=field_meta.name, data_modern_full_field='1') }}
+                            <span>Enabled</span>
+                        </span>
+                        {% elif field_meta.is_textarea %}
+                            {{ field(id=field_meta.name, class='modern-admin-full-settings-textarea', rows='5', data_modern_full_field='1') }}
+                        {% elif field_meta.is_select %}
+                            {{ field(id=field_meta.name, data_modern_full_field='1') }}
+                        {% elif field_meta.is_password %}
+                            {{ field(id=field_meta.name, data_modern_full_field='1', autocomplete='new-password') }}
+                        {% else %}
+                            {{ field(id=field_meta.name, data_modern_full_field='1') }}
+                        {% endif %}
+                        <span class="modern-admin-settings-edit-help">{{ field_meta.validators }}</span>
+                        <span class="modern-admin-settings-edit-help">
+                            <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ field_meta.risk }}">{{ field_meta.risk }}</span>
+                            <span class="modern-admin-settings-badge">{{ field_meta.scope }}</span>
+                            <span class="modern-admin-settings-badge modern-admin-settings-restart-{{ field_meta.restart_required }}">{{ field_meta.restart_required }}</span>
+                        </span>
+                        <span id="{{ field_meta.name }}-error" class="modern-admin-settings-edit-error" hidden></span>
+                    </label>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </details>
+        {% endfor %}
+
+        <section class="modern-admin-table-panel modern-admin-settings-actions" aria-label="Full settings save">
+            <div>
+                <p class="modern-admin-note">Saving writes a new active config row. It does not restart capture unless Reload on Save is enabled.</p>
+                <label class="modern-admin-settings-edit-field modern-admin-settings-edit-field-checkbox modern-admin-full-settings-reload" for="RELOAD_ON_SAVE">
+                    <span class="modern-admin-settings-toggle-row">
+                        {{ form_config.RELOAD_ON_SAVE(id='RELOAD_ON_SAVE', data_modern_full_field='1') }}
+                        <span>Reload on Save</span>
+                    </span>
+                    <span id="RELOAD_ON_SAVE-error" class="modern-admin-settings-edit-error" hidden></span>
+                </label>
+                <label class="modern-admin-settings-edit-field modern-admin-full-settings-note" for="CONFIG_NOTE">
+                    <span class="modern-admin-settings-edit-label">{{ form_config.CONFIG_NOTE.label.text }}</span>
+                    {{ form_config.CONFIG_NOTE(id='CONFIG_NOTE', data_modern_full_field='1') }}
+                    <span id="CONFIG_NOTE-error" class="modern-admin-settings-edit-error" hidden></span>
+                </label>
+            </div>
+            <button id="modern-admin-full-settings-save" class="modern-admin-button modern-admin-primary-action" type="submit">Save Full Settings</button>
+        </section>
+    </form>
+
+    <section class="modern-admin-table-panel" id="modern-admin-full-settings-message" hidden></section>
+</main>
+
+<script>
+(function () {
+    const form = document.getElementById('modern-admin-full-settings-form');
+    const saveButton = document.getElementById('modern-admin-full-settings-save');
+    const message = document.getElementById('modern-admin-full-settings-message');
+    const filter = document.getElementById('modern-admin-full-settings-filter');
+    const sections = Array.from(document.querySelectorAll('[data-full-settings-section]'));
+    const fieldNames = {{ modern_admin_full_settings_field_names | tojson }};
+    const checkboxNames = new Set({{ modern_admin_full_settings_checkbox_names | tojson }});
+    const ajaxUrl = {{ url_for('indi_allsky.ajax_config_view') | tojson }};
+
+    function setMessage(text, tone) {
+        message.hidden = false;
+        message.className = 'modern-admin-table-panel modern-admin-full-settings-message modern-admin-full-settings-message-' + tone;
+        message.textContent = text;
+    }
+
+    function clearErrors() {
+        form.querySelectorAll('.modern-admin-settings-edit-error').forEach((error) => {
+            error.hidden = true;
+            error.textContent = '';
+        });
+        form.querySelectorAll('.is-invalid').forEach((input) => {
+            input.classList.remove('is-invalid');
+        });
+    }
+
+    function collectPayload() {
+        const payload = {};
+        fieldNames.forEach((name) => {
+            const input = document.getElementById(name);
+            if (!input) {
+                return;
+            }
+
+            if (checkboxNames.has(name)) {
+                payload[name] = Boolean(input.checked);
+            } else {
+                payload[name] = input.value;
+            }
+        });
+        return payload;
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        clearErrors();
+        message.hidden = true;
+        saveButton.disabled = true;
+        saveButton.textContent = 'Saving...';
+
+        try {
+            const response = await fetch(ajaxUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(collectPayload())
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                Object.entries(data).forEach(([key, errors]) => {
+                    const input = document.getElementById(key);
+                    const error = document.getElementById(key + '-error');
+                    if (input) {
+                        input.classList.add('is-invalid');
+                    }
+                    if (error) {
+                        error.textContent = Array.isArray(errors) ? errors.join(' ') : String(errors);
+                        error.hidden = false;
+                    }
+                });
+                setMessage(data.form_global ? data.form_global.join(' ') : 'Please fix the highlighted fields. No config was saved.', 'error');
+                return;
+            }
+
+            setMessage(data['success-message'] || 'Saved new config', 'success');
+            const note = document.getElementById('CONFIG_NOTE');
+            if (note) {
+                note.value = '';
+            }
+            const reload = document.getElementById('RELOAD_ON_SAVE');
+            if (reload) {
+                reload.checked = false;
+            }
+        } catch (error) {
+            setMessage('Unable to save settings: ' + error.message, 'error');
+        } finally {
+            saveButton.disabled = false;
+            saveButton.textContent = 'Save Full Settings';
+        }
+    });
+
+    function filterSettings() {
+        const query = filter.value.trim().toLowerCase();
+        sections.forEach((section) => {
+            const rows = Array.from(section.querySelectorAll('[data-full-settings-row]'));
+            let visibleCount = 0;
+            rows.forEach((row) => {
+                const matches = !query || row.dataset.fullSettingsSearch.indexOf(query) !== -1;
+                row.hidden = !matches;
+                if (matches) {
+                    visibleCount += 1;
+                }
+            });
+
+            const count = section.querySelector('[data-full-settings-visible-count]');
+            if (count) {
+                count.textContent = visibleCount;
+            }
+
+            section.hidden = visibleCount === 0;
+            if (query && visibleCount > 0) {
+                section.open = true;
+            }
+        });
+    }
+
+    filter.addEventListener('input', filterSettings);
+})();
+</script>
+{% endblock %}
