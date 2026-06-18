@@ -197,9 +197,10 @@ def _mapping_config(config: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     return {}
 
 
-def _known_profile_gain_defaults(profile_id: str, camera_interface: str) -> Dict[str, float]:
+def _known_profile_gain_defaults(profile_id: str, camera_interface: str, indi_camera_name: str = '') -> Dict[str, float]:
     profile_id_l = str(profile_id or '').strip().lower()
     camera_interface_l = str(camera_interface or '').strip().lower()
+    indi_camera_name_l = str(indi_camera_name or '').strip().lower()
 
     if 'imx708' in profile_id_l or 'imx708' in camera_interface_l:
         return {
@@ -207,7 +208,7 @@ def _known_profile_gain_defaults(profile_id: str, camera_interface: str) -> Dict
             'moonmode': 16.0,
             'day': 1.13,
         }
-    elif 'asi678' in profile_id_l:
+    elif 'asi678' in profile_id_l or 'asi678' in indi_camera_name_l:
         return {
             'night': 220.0,
             'moonmode': 75.0,
@@ -265,7 +266,9 @@ def _profile_from_config(
     profile_config = profile_config or {}
     profile_id = str(profile_config.get('profile_id', default_profile_id) or default_profile_id)
     camera_interface = profile_config.get('camera_interface', config.get('CAMERA_INTERFACE', 'indi'))
-    known_gain_defaults = _known_profile_gain_defaults(profile_id, camera_interface)
+    indi_config = profile_config.get('indi') or {}
+    indi_camera_name = str(indi_config.get('camera_name', profile_config.get('indi_camera_name', config.get('INDI_CAMERA_NAME', ''))) or '')
+    known_gain_defaults = _known_profile_gain_defaults(profile_id, camera_interface, indi_camera_name)
     exposure_config = _mapping_config(profile_config, 'exposure')
     gain_config = _mapping_config(profile_config, 'gain')
     target_adu_config = _mapping_config(profile_config, 'target_adu')
@@ -279,25 +282,18 @@ def _profile_from_config(
     ccd_config.setdefault('NIGHT', {})
     ccd_config.setdefault('MOONMODE', {})
     ccd_config.setdefault('DAY', {})
-    if 'night' in known_gain_defaults and not any((
-        'night' in gain_config,
-        'gain_night' in profile_config,
-        isinstance(profile_ccd_config, Mapping) and isinstance(profile_ccd_config.get('NIGHT'), Mapping) and 'GAIN' in profile_ccd_config['NIGHT'],
-    )):
-        ccd_config['NIGHT']['GAIN'] = known_gain_defaults['night']
-    if 'moonmode' in known_gain_defaults and not any((
-        'moonmode' in gain_config,
-        'gain_moonmode' in profile_config,
-        isinstance(profile_ccd_config, Mapping) and isinstance(profile_ccd_config.get('MOONMODE'), Mapping) and 'GAIN' in profile_ccd_config['MOONMODE'],
-    )):
-        ccd_config['MOONMODE']['GAIN'] = known_gain_defaults['moonmode']
-    if 'day' in known_gain_defaults and not any((
-        'day' in gain_config,
-        'gain_day' in profile_config,
-        'gain_min' in profile_config,
-        isinstance(profile_ccd_config, Mapping) and isinstance(profile_ccd_config.get('DAY'), Mapping) and 'GAIN' in profile_ccd_config['DAY'],
-    )):
-        ccd_config['DAY']['GAIN'] = known_gain_defaults['day']
+
+    # Existing DB profiles may already contain a legacy ccd_config copied from
+    # the global defaults. In multicamera mode, known camera profiles need safe
+    # per-camera gain defaults unless the new gain block or legacy top-level
+    # gain aliases explicitly override them.
+    if not gain_config:
+        if 'night' in known_gain_defaults and 'gain_night' not in profile_config and 'gain_max' not in profile_config:
+            ccd_config['NIGHT']['GAIN'] = known_gain_defaults['night']
+        if 'moonmode' in known_gain_defaults and 'gain_moonmode' not in profile_config:
+            ccd_config['MOONMODE']['GAIN'] = known_gain_defaults['moonmode']
+        if 'day' in known_gain_defaults and 'gain_day' not in profile_config and 'gain_min' not in profile_config:
+            ccd_config['DAY']['GAIN'] = known_gain_defaults['day']
 
     if 'night' in gain_config:
         ccd_config['NIGHT']['GAIN'] = deepcopy(gain_config['night'])
@@ -325,7 +321,6 @@ def _profile_from_config(
         libcamera_config['AWB_RED_GAIN'] = awb_config['red_gain']
     if 'blue_gain' in awb_config:
         libcamera_config['AWB_BLUE_GAIN'] = awb_config['blue_gain']
-    indi_config = profile_config.get('indi') or {}
     camera_sqm = deepcopy(config.get('CAMERA_SQM') or {})
     profile_camera_sqm = profile_config.get('camera_sqm') or {}
     if isinstance(profile_camera_sqm, Mapping):
@@ -363,7 +358,7 @@ def _profile_from_config(
         camera_interface=str(camera_interface or 'indi'),
         indi_server=str(indi_config.get('server', profile_config.get('indi_server', config.get('INDI_SERVER', 'localhost'))) or 'localhost'),
         indi_port=indi_port,
-        indi_camera_name=str(indi_config.get('camera_name', profile_config.get('indi_camera_name', config.get('INDI_CAMERA_NAME', ''))) or ''),
+        indi_camera_name=indi_camera_name,
         libcamera_camera_id=libcamera_camera_id,
         # MULTI_CAMERA_PREP: mirror per-camera tuning from the legacy
         # global config without changing runtime behavior yet.

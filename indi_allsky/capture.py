@@ -525,6 +525,27 @@ class CaptureWorker(Process):
         )
 
 
+    def _log_resolved_profile_config(self, camera_id='unknown'):
+        ccd_config = self.config.get('CCD_CONFIG') or {}
+        ccd_night = ccd_config.get('NIGHT') or {}
+        ccd_moonmode = ccd_config.get('MOONMODE') or {}
+        ccd_day = ccd_config.get('DAY') or {}
+
+        logger.info(
+            '[MULTI_CAMERA_RESOLVED_CONFIG][%s][camera_id=%s] camera_interface=%s gain_day=%s gain_night=%s gain_moonmode=%s exposure_min=%s exposure_max=%s exposure_default=%s awb_apply_mode=%s',
+            self.profile_id,
+            camera_id,
+            self.capture_camera_interface,
+            ccd_day.get('GAIN'),
+            ccd_night.get('GAIN'),
+            ccd_moonmode.get('GAIN'),
+            self.config.get('CCD_EXPOSURE_MIN'),
+            self.config.get('CCD_EXPOSURE_MAX'),
+            self.config.get('CCD_EXPOSURE_DEF'),
+            self._hybrid_awb_apply_mode(),
+        )
+
+
     def _log_hybrid_placeholder(self):
         if self._processing_mode() != 'hybrid':
             return
@@ -1505,6 +1526,7 @@ class CaptureWorker(Process):
         self.camera_runtime_state.camera_id = camera.id
         self.indiclient.camera_id = camera.id
         logger.info('[%s][camera_id=%s] Camera registered for capture', self.profile_id, camera.id)
+        self._log_resolved_profile_config(camera.id)
         self._log_hybrid_awb_config(camera.id)
         self._log_hybrid_placeholder()
 
