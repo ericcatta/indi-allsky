@@ -764,6 +764,7 @@ class CaptureWorker(Process):
         exposure_aborted = False
         last_camera_ready = False
         exposure_state = 'unset'
+        camera_driver_returncode = None
         next_check_exposure_state = time.time() + self.exposure_timeout
 
         self.reconfigure_camera = True  # reconfigure on first run
@@ -1005,10 +1006,13 @@ class CaptureWorker(Process):
 
 
                     if not exposure_aborted:
+                        camera_driver_process = getattr(self.indiclient, 'libcamera_process', None)
+                        camera_driver_returncode = camera_driver_process.poll() if camera_driver_process else None
                         camera_ready, exposure_state = self.indiclient.getCcdExposureStatus()
                     else:
                         # Aborted exposure, bypass next checks
                         exposure_aborted = False  # reset
+                        camera_driver_returncode = None
                         camera_ready = True
                         exposure_state = 'Aborted'
                         waiting_for_frame = False
@@ -1074,6 +1078,13 @@ class CaptureWorker(Process):
                             if self._shutdown or exposure_state == 'Aborted':
                                 logger.info(
                                     'Ignoring short exposure during shutdown/abort: requested=%0.4fs elapsed=%0.4fs delta=%+0.4fs',
+                                    self.exposure_av[constants.EXPOSURE_CURRENT],
+                                    frame_elapsed,
+                                    frame_delta,
+                                )
+                            elif camera_driver_returncode == -15:
+                                logger.info(
+                                    'Ignoring short exposure after libcamera abort/termination: requested=%0.4fs elapsed=%0.4fs delta=%+0.4fs',
                                     self.exposure_av[constants.EXPOSURE_CURRENT],
                                     frame_elapsed,
                                     frame_delta,
