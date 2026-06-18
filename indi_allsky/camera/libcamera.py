@@ -299,12 +299,19 @@ class IndiClientLibCameraGeneric(IndiClient):
                 'reason'       : reason,
             }
 
+        capture_awb_mode = None
+        if apply_mode == 'postprocess_rgb':
+            capture_awb_mode = self._libcameraAwbMode(night=bool(self.night_av[constants.NIGHT_NIGHT] == 1))
+            if capture_awb_mode in ('auto', 'fixed'):
+                capture_awb_mode = 'daylight'
+
         return {
             'apply_mode'   : apply_mode,
             'backend'      : apply_mode,
             'awb_source'   : 'hybrid_runtime_diagnostic',
             'raw_apply_mode': self._hybridAwbRawApplyMode(),
             'awbgains_suppressed': apply_mode in ('postprocess_rgb', 'disabled'),
+            'capture_awb_mode': capture_awb_mode,
             'red_gain'     : red_gain,
             'blue_gain'    : blue_gain,
             'sample_count' : sample_count,
@@ -323,6 +330,8 @@ class IndiClientLibCameraGeneric(IndiClient):
                 '--awbgains',
                 '{0:0.4f},{1:0.4f}'.format(control['red_gain'], control['blue_gain']),
             ])
+        elif control.get('apply_mode') == 'postprocess_rgb' and control.get('capture_awb_mode'):
+            normalized_cmd.extend(['--awb', control['capture_awb_mode']])
         return normalized_cmd, control
 
 
@@ -331,7 +340,7 @@ class IndiClientLibCameraGeneric(IndiClient):
             return
 
         _multi_camera_diag(
-            '[HYBRID_AWB_CAPTURE_DIAG][%s][camera_id=%s] command=%s argv=%r raw_apply_mode=%r apply_mode=%s backend=%s awb_source=%s awbgains_suppressed=%s awb_red=%0.4f awb_blue=%0.4f sample_count=%d shutter_us=%d requested_exposure_s=%0.8f gain=%0.2f start_monotonic=%0.6f exposure_period=%0.4f exposure_period_day=%0.4f timeout=%0.1fs has_awbgains=%s awbgains_count=%d has_awb=%s awb_count=%d has_timeout=%s has_immediate=%s has_nopreview=%s',
+            '[HYBRID_AWB_CAPTURE_DIAG][%s][camera_id=%s] command=%s argv=%r raw_apply_mode=%r apply_mode=%s backend=%s awb_source=%s awbgains_suppressed=%s capture_awb_mode=%s awb_red=%0.4f awb_blue=%0.4f sample_count=%d shutter_us=%d requested_exposure_s=%0.8f gain=%0.2f start_monotonic=%0.6f exposure_period=%0.4f exposure_period_day=%0.4f timeout=%0.1fs has_awbgains=%s awbgains_count=%d has_awb=%s awb_count=%d has_timeout=%s has_immediate=%s has_nopreview=%s',
             getattr(self, 'profile_id', 'default'),
             getattr(self, 'camera_id', 'unknown'),
             ' '.join(cmd),
@@ -341,6 +350,7 @@ class IndiClientLibCameraGeneric(IndiClient):
             control.get('backend'),
             control.get('awb_source'),
             control.get('awbgains_suppressed'),
+            control.get('capture_awb_mode'),
             control.get('red_gain'),
             control.get('blue_gain'),
             int(control.get('sample_count') or 0),
@@ -523,7 +533,7 @@ class IndiClientLibCameraGeneric(IndiClient):
         libcamera_camera_id = self.config.get('LIBCAMERA', {}).get('CAMERA_ID', 0)
 
 
-        if self.night_av[constants.NIGHT_NIGHT]:
+        if self.night_av[constants.NIGHT_NIGHT] == 1:
             # night
             image_type = self.config.get('LIBCAMERA', {}).get('IMAGE_FILE_TYPE', 'jpg')
         else:
@@ -598,7 +608,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
 
-        if self.night_av[constants.NIGHT_NIGHT]:
+        if self.night_av[constants.NIGHT_NIGHT] == 1:
             #  night
 
             if self.config.get('LIBCAMERA', {}).get('IMMEDIATE', True):
@@ -633,7 +643,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
         # extra options get added last
-        if self.night_av[constants.NIGHT_NIGHT]:
+        if self.night_av[constants.NIGHT_NIGHT] == 1:
             #  night
             # Add extra config options
             extra_options = self.config.get('LIBCAMERA', {}).get('EXTRA_OPTIONS')
@@ -953,7 +963,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
         ### Auto white balance
         # Only return these values when libcamera AWB is enabled
-        if self.night_av[constants.NIGHT_NIGHT]:
+        if self.night_av[constants.NIGHT_NIGHT] == 1:
             # night
             if self._libcameraAwbMode(night=True) != 'fixed':
                 try:

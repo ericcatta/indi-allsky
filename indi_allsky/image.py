@@ -103,6 +103,8 @@ class ImageWorker(Process):
         self.profile_id = 'default'
         self.current_camera_id = None
         self.adu_context_key = 'default:unknown'
+        self._missing_profile_config_warned = set()
+        self._missing_profile_shared_state_warned = set()
 
         self.error_q = error_q
         self.image_q = image_q
@@ -354,12 +356,22 @@ class ImageWorker(Process):
 
 
     def _select_profile_config(self, profile_id):
-        self.config = self.camera_config_map.get(profile_id, self.camera_config_map.get('default', self.base_config))
+        if profile_id in self.camera_config_map:
+            self.config = self.camera_config_map[profile_id]
+            return
+
+        self.config = self.camera_config_map.get('default', self.base_config)
+        if profile_id not in ('default', None) and profile_id not in self._missing_profile_config_warned:
+            self._missing_profile_config_warned.add(profile_id)
+            logger.warning(
+                '[MULTI_CAMERA_CONFIG][%s] profile config not found in ImageWorker map; using global/default config fallback',
+                profile_id,
+            )
 
 
     def _auto_gain_mode(self):
-        if self.night_av[constants.NIGHT_NIGHT]:
-            if self.night_av[constants.NIGHT_MOONMODE]:
+        if self.night_av[constants.NIGHT_NIGHT] == 1:
+            if self.night_av[constants.NIGHT_MOONMODE] == 1:
                 return 'moonmode'
             return 'night'
 
@@ -398,7 +410,15 @@ class ImageWorker(Process):
 
 
     def _select_shared_state(self, profile_id):
-        shared_state = self.camera_shared_state_map.get(profile_id, self.camera_shared_state_map.get('default'))
+        shared_state = self.camera_shared_state_map.get(profile_id)
+        if not shared_state:
+            shared_state = self.camera_shared_state_map.get('default')
+            if profile_id not in ('default', None) and profile_id not in self._missing_profile_shared_state_warned:
+                self._missing_profile_shared_state_warned.add(profile_id)
+                logger.warning(
+                    '[MULTI_CAMERA_CONFIG][%s] shared state not found in ImageWorker map; using global/default shared state fallback',
+                    profile_id,
+                )
         if not shared_state:
             return
 
@@ -3210,7 +3230,7 @@ class ImageWorker(Process):
             adu = 0.1
 
 
-        if self.night_av[constants.NIGHT_NIGHT]:
+        if self.night_av[constants.NIGHT_NIGHT] == 1:
             target_adu = self.config['TARGET_ADU']
         else:
             target_adu = self.config['TARGET_ADU_DAY']
@@ -3293,17 +3313,17 @@ class ImageWorker(Process):
         if self._auto_gain_enabled():
             # moonmode settings are ignored with auto-gain
 
-            if self.night_av[constants.NIGHT_NIGHT]:
+            if self.night_av[constants.NIGHT_NIGHT] == 1:
                 exposure_min = float(self.exposure_av[constants.EXPOSURE_MIN_NIGHT])
             else:
                 exposure_min = float(self.exposure_av[constants.EXPOSURE_MIN_DAY])
 
             gain_min, gain_max = self._auto_gain_limits()
         else:
-            if self.night_av[constants.NIGHT_NIGHT]:
+            if self.night_av[constants.NIGHT_NIGHT] == 1:
                 exposure_min = float(self.exposure_av[constants.EXPOSURE_MIN_NIGHT])
 
-                if self.night_av[constants.NIGHT_MOONMODE]:
+                if self.night_av[constants.NIGHT_MOONMODE] == 1:
                     gain_min = float(self.gain_av[constants.GAIN_MIN_MOONMODE])
                     gain_max = float(self.gain_av[constants.GAIN_MAX_MOONMODE])
                 else:
@@ -3412,8 +3432,8 @@ class ImageWorker(Process):
 
 
         # Binning
-        if self.night_av[constants.NIGHT_NIGHT]:
-            if self.night_av[constants.NIGHT_MOONMODE]:
+        if self.night_av[constants.NIGHT_NIGHT] == 1:
+            if self.night_av[constants.NIGHT_MOONMODE] == 1:
                 next_binning = self.binning_av[constants.BINNING_MOONMODE]
             else:
                 next_binning = self.binning_av[constants.BINNING_NIGHT]
