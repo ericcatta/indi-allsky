@@ -10,13 +10,14 @@ class AutoExposureDecision:
     proposed_gain: float
     target: float
     error: float
+    deadband: float
     shadow: bool = True
 
 
 class AutoExposureController:
     """Shadow controller for future exposure-first, gain-second decisions."""
 
-    deadband = 8.0
+    deadband = 10.0
     exposure_step_fraction = 0.25
     gain_step_fraction = 0.15
 
@@ -48,7 +49,9 @@ class AutoExposureController:
         error = target - smoothed_value
         action = 'hold'
 
-        if error > self.deadband:
+        if abs(error) <= self.deadband:
+            action = 'hold'
+        elif error > self.deadband:
             if current_exposure < exposure_max:
                 action = 'increase_exposure'
                 exposure_step = max(0.05, current_exposure * self.exposure_step_fraction)
@@ -75,6 +78,7 @@ class AutoExposureController:
             proposed_gain=proposed_gain,
             target=target,
             error=error,
+            deadband=self.deadband,
             shadow=True,
         )
 

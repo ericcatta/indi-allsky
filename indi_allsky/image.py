@@ -467,13 +467,14 @@ class ImageWorker(Process):
             return None
 
         logger.info(
-            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f source_gain=%s shadow=%s',
+            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f source_gain=%s shadow=%s',
             profile_id,
             camera_id,
             result.mode,
             smoothed_value,
             decision.target,
             decision.error,
+            decision.deadband,
             decision.action,
             decision.current_exposure,
             decision.proposed_exposure,
