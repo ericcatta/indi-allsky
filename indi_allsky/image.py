@@ -326,6 +326,8 @@ class ImageWorker(Process):
             'smoothed_value'  : None,
             'sample_count'    : 0,
             'excluded_pixels' : 0,
+            'trend_count'     : 0,
+            'trend_direction' : 'none',
         }
 
 
@@ -452,6 +454,25 @@ class ImageWorker(Process):
             return None
 
         try:
+            target = float(inputs['target'])
+            error = target - float(smoothed_value)
+        except (TypeError, ValueError) as e:
+            self._log_auto_exposure_decision_skipped(profile_id, camera_id, result.mode, str(e))
+            return None
+
+        trend_count = 0
+        trend_direction = 'none'
+        if abs(error) > self.auto_exposure_controller.inner_deadband:
+            trend_direction = 'positive' if error > 0 else 'negative'
+            if state.get('trend_direction') == trend_direction:
+                trend_count = int(state.get('trend_count') or 0) + 1
+            else:
+                trend_count = 1
+
+        state['trend_count'] = trend_count
+        state['trend_direction'] = trend_direction
+
+        try:
             decision = self.auto_exposure_controller.decide(
                 smoothed_value=smoothed_value,
                 current_exposure=inputs['current_exposure'],
@@ -461,13 +482,18 @@ class ImageWorker(Process):
                 gain_min=inputs['gain_min'],
                 gain_max=inputs['gain_max'],
                 target=inputs['target'],
+                trend_count=trend_count,
             )
         except (TypeError, ValueError) as e:
             self._log_auto_exposure_decision_skipped(profile_id, camera_id, result.mode, str(e))
             return None
 
+        if abs(decision.error) > decision.deadband and decision.action != 'hold':
+            state['trend_count'] = 0
+            state['trend_direction'] = 'none'
+
         logger.info(
-            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f source_gain=%s shadow=%s',
+            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f source_gain=%s shadow=%s',
             profile_id,
             camera_id,
             result.mode,
@@ -475,6 +501,10 @@ class ImageWorker(Process):
             decision.target,
             decision.error,
             decision.deadband,
+            decision.trend_count,
+            decision.trend_active,
+            decision.trend_direction,
+            decision.trend_step,
             decision.action,
             decision.current_exposure,
             decision.proposed_exposure,

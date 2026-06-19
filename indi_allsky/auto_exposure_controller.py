@@ -11,6 +11,10 @@ class AutoExposureDecision:
     target: float
     error: float
     deadband: float
+    trend_count: int
+    trend_active: bool
+    trend_direction: str
+    trend_step: float
     shadow: bool = True
 
 
@@ -18,6 +22,8 @@ class AutoExposureController:
     """Shadow controller for future exposure-first, gain-second decisions."""
 
     deadband = 10.0
+    inner_deadband = 5.0
+    trend_frames = 5
     exposure_step_fraction = 0.25
     gain_step_fraction = 0.15
 
@@ -32,6 +38,7 @@ class AutoExposureController:
         gain_min,
         gain_max,
         target=75.0,
+        trend_count=0,
     ):
         smoothed_value = float(smoothed_value)
         current_exposure = float(current_exposure)
@@ -48,9 +55,25 @@ class AutoExposureController:
         proposed_gain = current_gain
         error = target - smoothed_value
         action = 'hold'
+        trend_active = False
+        trend_direction = 'none'
+        trend_step = 0.0
 
-        if abs(error) <= self.deadband:
+        if abs(error) <= self.inner_deadband:
             action = 'hold'
+        elif abs(error) <= self.deadband:
+            if trend_count >= self.trend_frames:
+                trend_active = True
+                exposure_step = max(0.05, current_exposure * self.exposure_step_fraction)
+                trend_step = exposure_step / 2.0
+                if error > 0:
+                    action = 'increase_exposure'
+                    trend_direction = 'positive'
+                    proposed_exposure = self._clamp(current_exposure + trend_step, exposure_min, exposure_max)
+                else:
+                    action = 'decrease_exposure'
+                    trend_direction = 'negative'
+                    proposed_exposure = self._clamp(current_exposure - trend_step, exposure_min, exposure_max)
         elif error > self.deadband:
             if current_exposure < exposure_max:
                 action = 'increase_exposure'
@@ -79,6 +102,10 @@ class AutoExposureController:
             target=target,
             error=error,
             deadband=self.deadband,
+            trend_count=int(trend_count),
+            trend_active=trend_active,
+            trend_direction=trend_direction,
+            trend_step=trend_step,
             shadow=True,
         )
 
