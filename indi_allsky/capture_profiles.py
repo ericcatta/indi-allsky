@@ -219,6 +219,29 @@ def _mapping_config(config: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     return {}
 
 
+def _mapping_value(config: Mapping[str, Any], *keys: str, default: Any = None) -> Any:
+    for key in keys:
+        for candidate_key in (key, key.upper(), key.lower()):
+            if candidate_key in config:
+                return config[candidate_key]
+
+    return default
+
+
+def _mapping_float_any(config: Mapping[str, Any], keys: tuple, default: float) -> float:
+    try:
+        return float(_mapping_value(config, *keys, default=default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _mapping_int_any(config: Mapping[str, Any], keys: tuple, default: int) -> int:
+    try:
+        return int(_mapping_value(config, *keys, default=default))
+    except (TypeError, ValueError):
+        return default
+
+
 def _known_profile_gain_defaults(profile_id: str, camera_interface: str, indi_camera_name: str = '') -> Dict[str, float]:
     profile_id_l = str(profile_id or '').strip().lower()
     camera_interface_l = str(camera_interface or '').strip().lower()
@@ -357,8 +380,16 @@ def _profile_exposure_default(config: Mapping[str, Any], profile_config: Mapping
     return _float_config(config, 'CCD_EXPOSURE_DEF', 0.0)
 
 
-def _processing_value(config: Mapping[str, Any], profile_config: Mapping[str, Any], processing_config: Mapping[str, Any], key: str, global_key: str, default: Any) -> Any:
-    return processing_config.get(key, profile_config.get(key, config.get(global_key, default)))
+def _processing_value(config: Mapping[str, Any], profile_config: Mapping[str, Any], processing_config: Mapping[str, Any], key: str, global_key: str, default: Any, *aliases: str) -> Any:
+    processing_value = _mapping_value(processing_config, key, global_key, *aliases)
+    if processing_value is not None:
+        return processing_value
+
+    profile_value = _mapping_value(profile_config, key, global_key, *aliases)
+    if profile_value is not None:
+        return profile_value
+
+    return config.get(global_key, default)
 
 
 def _profile_from_config(
@@ -537,18 +568,18 @@ def _profile_from_config(
         daytime_capture_save=bool(profile_config.get('daytime_capture_save', _bool_config(config, 'DAYTIME_CAPTURE_SAVE', True))),
         daytime_timelapse=bool(profile_config.get('daytime_timelapse', _bool_config(config, 'DAYTIME_TIMELAPSE', True))),
         cfa_pattern=str(_processing_value(config, profile_config, processing_config, 'cfa_pattern', 'CFA_PATTERN', '') or ''),
-        ccd_bit_depth=_mapping_int(processing_config, 'ccd_bit_depth', _int_config(profile_config, 'ccd_bit_depth', _int_config(config, 'CCD_BIT_DEPTH', 0))),
+        ccd_bit_depth=_mapping_int_any(processing_config, ('ccd_bit_depth', 'CCD_BIT_DEPTH'), _int_config(profile_config, 'ccd_bit_depth', _int_config(config, 'CCD_BIT_DEPTH', 0))),
         auto_wb=_bool_value(_processing_value(config, profile_config, processing_config, 'auto_wb', 'AUTO_WB', False)),
         auto_wb_day=_bool_value(_processing_value(config, profile_config, processing_config, 'auto_wb_day', 'AUTO_WB_DAY', False)),
-        wbr_factor=_mapping_float(processing_config, 'wbr_factor', _float_config(profile_config, 'wbr_factor', _float_config(config, 'WBR_FACTOR', 1.0))),
-        wbg_factor=_mapping_float(processing_config, 'wbg_factor', _float_config(profile_config, 'wbg_factor', _float_config(config, 'WBG_FACTOR', 1.0))),
-        wbb_factor=_mapping_float(processing_config, 'wbb_factor', _float_config(profile_config, 'wbb_factor', _float_config(config, 'WBB_FACTOR', 1.0))),
-        wbr_factor_day=_mapping_float(processing_config, 'wbr_factor_day', _float_config(profile_config, 'wbr_factor_day', _float_config(config, 'WBR_FACTOR_DAY', 1.0))),
-        wbg_factor_day=_mapping_float(processing_config, 'wbg_factor_day', _float_config(profile_config, 'wbg_factor_day', _float_config(config, 'WBG_FACTOR_DAY', 1.0))),
-        wbb_factor_day=_mapping_float(processing_config, 'wbb_factor_day', _float_config(profile_config, 'wbb_factor_day', _float_config(config, 'WBB_FACTOR_DAY', 1.0))),
-        gamma_correction=_mapping_float(processing_config, 'gamma_correction', _float_config(profile_config, 'gamma_correction', _float_config(config, 'GAMMA_CORRECTION', 1.0))),
-        gamma_correction_day=_mapping_float(processing_config, 'gamma_correction_day', _float_config(profile_config, 'gamma_correction_day', _float_config(config, 'GAMMA_CORRECTION_DAY', 1.0))),
-        image_stretch_daytime=_bool_value(processing_image_stretch_config.get('daytime', processing_config.get('image_stretch_daytime', profile_config.get('image_stretch_daytime', image_stretch_config.get('DAYTIME', False))))),
+        wbr_factor=_mapping_float_any(processing_config, ('wbr_factor', 'WBR_FACTOR', 'WBR'), _float_config(profile_config, 'wbr_factor', _float_config(config, 'WBR_FACTOR', 1.0))),
+        wbg_factor=_mapping_float_any(processing_config, ('wbg_factor', 'WBG_FACTOR', 'WBG'), _float_config(profile_config, 'wbg_factor', _float_config(config, 'WBG_FACTOR', 1.0))),
+        wbb_factor=_mapping_float_any(processing_config, ('wbb_factor', 'WBB_FACTOR', 'WBB'), _float_config(profile_config, 'wbb_factor', _float_config(config, 'WBB_FACTOR', 1.0))),
+        wbr_factor_day=_mapping_float_any(processing_config, ('wbr_factor_day', 'WBR_FACTOR_DAY', 'WBR_DAY'), _float_config(profile_config, 'wbr_factor_day', _float_config(config, 'WBR_FACTOR_DAY', 1.0))),
+        wbg_factor_day=_mapping_float_any(processing_config, ('wbg_factor_day', 'WBG_FACTOR_DAY', 'WBG_DAY'), _float_config(profile_config, 'wbg_factor_day', _float_config(config, 'WBG_FACTOR_DAY', 1.0))),
+        wbb_factor_day=_mapping_float_any(processing_config, ('wbb_factor_day', 'WBB_FACTOR_DAY', 'WBB_DAY'), _float_config(profile_config, 'wbb_factor_day', _float_config(config, 'WBB_FACTOR_DAY', 1.0))),
+        gamma_correction=_mapping_float_any(processing_config, ('gamma_correction', 'GAMMA_CORRECTION', 'GAMMA'), _float_config(profile_config, 'gamma_correction', _float_config(config, 'GAMMA_CORRECTION', 1.0))),
+        gamma_correction_day=_mapping_float_any(processing_config, ('gamma_correction_day', 'GAMMA_CORRECTION_DAY', 'GAMMA_DAY'), _float_config(profile_config, 'gamma_correction_day', _float_config(config, 'GAMMA_CORRECTION_DAY', 1.0))),
+        image_stretch_daytime=_bool_value(processing_image_stretch_config.get('daytime', processing_image_stretch_config.get('DAYTIME', _mapping_value(processing_config, 'image_stretch_daytime', 'IMAGE_STRETCH_DAYTIME', default=profile_config.get('image_stretch_daytime', image_stretch_config.get('DAYTIME', False)))))),
         daytime_contrast_enhance=_bool_value(_processing_value(config, profile_config, processing_config, 'daytime_contrast_enhance', 'DAYTIME_CONTRAST_ENHANCE', False)),
         daytime_grayscale=_bool_value(_processing_value(config, profile_config, processing_config, 'daytime_grayscale', 'DAYTIME_GRAYSCALE', False)),
         scnr_algorithm_day=str(_processing_value(config, profile_config, processing_config, 'scnr_algorithm_day', 'SCNR_ALGORITHM_DAY', '') or ''),

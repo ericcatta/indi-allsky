@@ -536,7 +536,7 @@ class CaptureWorker(Process):
         ccd_day = ccd_config.get('DAY') or {}
 
         logger.info(
-            '[MULTI_CAMERA_RESOLVED_CONFIG][%s][camera_id=%s] camera_interface=%s processing_mode=%s gain_day=%s gain_night=%s gain_moonmode=%s auto_gain_day=%s auto_gain_night=%s auto_gain_moonmode=%s auto_gain_levels=%s target_adu_day=%s target_adu_night=%s target_adu_dev_day=%s target_adu_dev_night=%s exposure_min=%s exposure_min_day=%s exposure_max=%s exposure_default=%s exposure_period=%s exposure_period_day=%s auto_exposure_metering_mode=%s hybrid_awb_apply_mode=%s cfa_pattern=%s ccd_bit_depth=%s auto_wb_day=%s auto_wb_night=%s gamma_day=%s image_stretch_daytime=%s daytime_contrast_enhance=%s',
+            '[MULTI_CAMERA_RESOLVED_CONFIG][%s][camera_id=%s] camera_interface=%s processing_mode=%s gain_day=%s gain_night=%s gain_moonmode=%s auto_gain_day=%s auto_gain_night=%s auto_gain_moonmode=%s auto_gain_levels=%s target_adu_day=%s target_adu_night=%s target_adu_dev_day=%s target_adu_dev_night=%s exposure_min=%s exposure_min_day=%s exposure_max=%s exposure_default=%s exposure_period=%s exposure_period_day=%s auto_exposure_metering_mode=%s hybrid_awb_apply_mode=%s cfa_pattern=%s ccd_bit_depth=%s auto_wb_day=%s auto_wb_night=%s wbr_day=%s wbg_day=%s wbb_day=%s gamma_day=%s image_stretch_daytime=%s daytime_contrast_enhance=%s',
             self.profile_id,
             camera_id,
             self.capture_camera_interface,
@@ -564,6 +564,9 @@ class CaptureWorker(Process):
             self.config.get('CCD_BIT_DEPTH'),
             self.config.get('AUTO_WB_DAY'),
             self.config.get('AUTO_WB'),
+            self.config.get('WBR_FACTOR_DAY'),
+            self.config.get('WBG_FACTOR_DAY'),
+            self.config.get('WBB_FACTOR_DAY'),
             self.config.get('GAMMA_CORRECTION_DAY'),
             (self.config.get('IMAGE_STRETCH') or {}).get('DAYTIME'),
             self.config.get('DAYTIME_CONTRAST_ENHANCE'),

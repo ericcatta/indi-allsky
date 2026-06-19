@@ -284,6 +284,19 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - controllare che `exposure_default` vuoto sui profili non torni a 8s dopo restart;
     - controllare se ASI678MC resta a `smoothed_value ~239/255` anche con CFA/WB/stretch profilo corretti;
     - se resta sovraesposta a gain 0/exposure 0.05s, investigare driver/bit depth/debayer o saturazione reale del sensore.
+- 2026-06-19: Fix resolver alias per `MULTI_CAMERA.profiles[n].processing`.
+  - Il resolver runtime ora legge anche chiavi uppercase/legacy dentro il blocco `processing`, incluse:
+    - `CFA_PATTERN`
+    - `CCD_BIT_DEPTH`
+    - `AUTO_WB_DAY`
+    - `WBR_DAY`, `WBG_DAY`, `WBB_DAY`
+    - equivalenti `*_FACTOR_DAY` e lower-case Modern.
+  - `build_profile_config()` propaga questi valori nella config piatta usata da `capture.py` e `image.py`, mantenendo i globali solo come fallback quando il profilo non contiene il valore.
+  - `[MULTI_CAMERA_RESOLVED_CONFIG]` include anche `wbr_day`, `wbg_day`, `wbb_day` oltre a CFA/bit depth/AUTO_WB/gamma/stretch.
+  - Static check locale: profilo `asi678mc` con `processing.CFA_PATTERN=RGGB`, `processing.CCD_BIT_DEPTH=16`, `processing.AUTO_WB_DAY=1` risolve `cfa_pattern=RGGB`, `ccd_bit_depth=16`, `auto_wb_day=True`.
+  - Mancante/verifica Raspberry:
+    - dopo `git pull` e restart, controllare che i log runtime non mostrino piu' `cfa_pattern=`, `ccd_bit_depth=0` quando il profilo ASI contiene valori processing;
+    - confermare se il cambio CFA/bit depth/WB corregge la sovraesposizione/colore ASI diurno o se serve indagare saturazione reale/debayer ulteriore.
 
 - 2026-06-19: Consolidata roadmap Hybrid AllSky come documento operativo principale.
 - 2026-06-19: Stabilizzato runtime multicamera con gain/exposure/profile resolver per IMX708 e ASI678MC.
