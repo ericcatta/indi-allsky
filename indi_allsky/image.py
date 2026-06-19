@@ -31,6 +31,7 @@ from PIL import Image
 from fractions import Fraction
 
 from . import constants
+from .auto_exposure_controller import AutoExposureController
 from .auto_meter import DEFAULT_AUTO_EXPOSURE_METERING_MODE
 from .auto_meter import measure_auto_exposure
 from .multicamera_diag import write_multicamera_diag
@@ -137,6 +138,7 @@ class ImageWorker(Process):
         self.auto_meter_context_key = self.adu_context_key
         self.auto_meter_states = {}
         self.auto_meter_states[self.auto_meter_context_key] = self._new_auto_meter_state()
+        self.auto_exposure_controller = AutoExposureController()
         self.hybrid_awb_backend_warned = set()
         self.generate_mask_base = True
 
@@ -369,6 +371,94 @@ class ImageWorker(Process):
         return state
 
 
+    def _auto_exposure_controller_inputs(self, mode):
+        if self.night_av[constants.NIGHT_NIGHT]:
+            target = self.config.get('TARGET_ADU', 75)
+            exposure_min = self.exposure_av[constants.EXPOSURE_MIN_NIGHT]
+            exposure_max = self.exposure_av[constants.EXPOSURE_MAX]
+            if self.night_av[constants.NIGHT_MOONMODE]:
+                gain_min = self.gain_av[constants.GAIN_MIN_MOONMODE]
+                gain_max = self.gain_av[constants.GAIN_MAX_MOONMODE]
+            else:
+                gain_min = self.gain_av[constants.GAIN_MIN_NIGHT]
+                gain_max = self.gain_av[constants.GAIN_MAX_NIGHT]
+        else:
+            target = self.config.get('TARGET_ADU_DAY', 75)
+            exposure_min = self.exposure_av[constants.EXPOSURE_MIN_DAY]
+            exposure_max = self.exposure_av[constants.EXPOSURE_MAX]
+            gain_min = self.gain_av[constants.GAIN_MIN_DAY]
+            gain_max = self.gain_av[constants.GAIN_MAX_DAY]
+
+        return {
+            'target'           : target,
+            'current_exposure' : self.exposure_av[constants.EXPOSURE_CURRENT],
+            'current_gain'     : self.gain_av[constants.GAIN_CURRENT],
+            'exposure_min'     : exposure_min,
+            'exposure_max'     : exposure_max,
+            'gain_min'         : gain_min,
+            'gain_max'         : gain_max,
+        }
+
+
+    def _log_auto_exposure_decision_skipped(self, profile_id, camera_id, mode, reason):
+        logger.info(
+            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s status=skipped reason=%s shadow=True',
+            profile_id,
+            camera_id,
+            mode,
+            reason,
+        )
+
+
+    def _decide_auto_exposure_shadow(self, profile_id, camera_id, result, state):
+        smoothed_value = state.get('smoothed_value')
+        if smoothed_value is None:
+            self._log_auto_exposure_decision_skipped(profile_id, camera_id, result.mode, 'missing_smoothed_value')
+            return None
+
+        inputs = self._auto_exposure_controller_inputs(result.mode)
+        missing_inputs = [
+            key
+            for key, value in inputs.items()
+            if value is None
+        ]
+        if missing_inputs:
+            self._log_auto_exposure_decision_skipped(profile_id, camera_id, result.mode, 'missing_{0:s}'.format(','.join(missing_inputs)))
+            return None
+
+        try:
+            decision = self.auto_exposure_controller.decide(
+                smoothed_value=smoothed_value,
+                current_exposure=inputs['current_exposure'],
+                current_gain=inputs['current_gain'],
+                exposure_min=inputs['exposure_min'],
+                exposure_max=inputs['exposure_max'],
+                gain_min=inputs['gain_min'],
+                gain_max=inputs['gain_max'],
+                target=inputs['target'],
+            )
+        except (TypeError, ValueError) as e:
+            self._log_auto_exposure_decision_skipped(profile_id, camera_id, result.mode, str(e))
+            return None
+
+        logger.info(
+            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f action=%s current_exposure=%0.8f proposed_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f shadow=%s',
+            profile_id,
+            camera_id,
+            result.mode,
+            smoothed_value,
+            decision.target,
+            decision.error,
+            decision.action,
+            decision.current_exposure,
+            decision.proposed_exposure,
+            decision.current_gain,
+            decision.proposed_gain,
+            decision.shadow,
+        )
+        return decision
+
+
     def _meter_auto_exposure(self, profile_id, camera_id, binning):
         try:
             adu_masks = getattr(self.image_processor, '_adu_mask_dict', None) or {}
@@ -388,7 +478,8 @@ class ImageWorker(Process):
                 result.excluded_pixels,
                 result.status,
             )
-            self._update_auto_meter_state(profile_id, camera_id, result)
+            state = self._update_auto_meter_state(profile_id, camera_id, result)
+            self._decide_auto_exposure_shadow(profile_id, camera_id, result, state)
             return result
         except Exception as e:
             logger.warning('[AUTO_METER] profile=%s camera_id=%s mode=%s status=error error=%s', profile_id, camera_id, self._auto_exposure_metering_mode(), str(e))
