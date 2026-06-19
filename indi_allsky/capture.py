@@ -536,7 +536,7 @@ class CaptureWorker(Process):
         ccd_day = ccd_config.get('DAY') or {}
 
         logger.info(
-            '[MULTI_CAMERA_RESOLVED_CONFIG][%s][camera_id=%s] camera_interface=%s processing_mode=%s gain_day=%s gain_night=%s gain_moonmode=%s auto_gain_day=%s auto_gain_night=%s auto_gain_moonmode=%s auto_gain_levels=%s target_adu_day=%s target_adu_night=%s target_adu_dev_day=%s target_adu_dev_night=%s exposure_min=%s exposure_min_day=%s exposure_max=%s exposure_default=%s exposure_period=%s exposure_period_day=%s hybrid_awb_apply_mode=%s',
+            '[MULTI_CAMERA_RESOLVED_CONFIG][%s][camera_id=%s] camera_interface=%s processing_mode=%s gain_day=%s gain_night=%s gain_moonmode=%s auto_gain_day=%s auto_gain_night=%s auto_gain_moonmode=%s auto_gain_levels=%s target_adu_day=%s target_adu_night=%s target_adu_dev_day=%s target_adu_dev_night=%s exposure_min=%s exposure_min_day=%s exposure_max=%s exposure_default=%s exposure_period=%s exposure_period_day=%s auto_exposure_metering_mode=%s hybrid_awb_apply_mode=%s',
             self.profile_id,
             camera_id,
             self.capture_camera_interface,
@@ -558,6 +558,7 @@ class CaptureWorker(Process):
             self.config.get('CCD_EXPOSURE_DEF'),
             self.config.get('EXPOSURE_PERIOD'),
             self.config.get('EXPOSURE_PERIOD_DAY'),
+            self.config.get('AUTO_EXPOSURE_METERING_MODE', 'default'),
             self._hybrid_awb_apply_mode(),
         )
 

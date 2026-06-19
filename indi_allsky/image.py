@@ -31,6 +31,8 @@ from PIL import Image
 from fractions import Fraction
 
 from . import constants
+from .auto_meter import DEFAULT_AUTO_EXPOSURE_METERING_MODE
+from .auto_meter import measure_auto_exposure
 from .multicamera_diag import write_multicamera_diag
 
 from .processing import ImageProcessor
@@ -306,6 +308,35 @@ class ImageWorker(Process):
             image_shape=image_shape,
             logo_alpha_shape=self._shape_for_diag(overlay_masks.get(binning)),
         )
+
+
+    def _auto_exposure_metering_mode(self):
+        return str(self.config.get('AUTO_EXPOSURE_METERING_MODE', DEFAULT_AUTO_EXPOSURE_METERING_MODE) or DEFAULT_AUTO_EXPOSURE_METERING_MODE).strip().lower()
+
+
+    def _meter_auto_exposure(self, profile_id, camera_id, binning):
+        try:
+            adu_masks = getattr(self.image_processor, '_adu_mask_dict', None) or {}
+            result = measure_auto_exposure(
+                self.image_processor.image,
+                mask=adu_masks.get(binning),
+                mode=self._auto_exposure_metering_mode(),
+            )
+            logger.info(
+                '[AUTO_METER] profile=%s camera_id=%s mode=%s strategy=%s sample_count=%d measured_value=%0.2f excluded_pixels=%d status=%s',
+                profile_id,
+                camera_id,
+                result.mode,
+                result.strategy,
+                result.sample_count,
+                result.measured_value,
+                result.excluded_pixels,
+                result.status,
+            )
+            return result
+        except Exception as e:
+            logger.warning('[AUTO_METER] profile=%s camera_id=%s mode=%s status=error error=%s', profile_id, camera_id, self._auto_exposure_metering_mode(), str(e))
+            return None
 
 
     def _queue_upload_task(self, task, camera_id=None, profile_id=None):
@@ -1443,6 +1474,7 @@ class ImageWorker(Process):
 
         # Calculate ADU before stretch
         adu = self.image_processor.calculate_8bit_adu()
+        self._meter_auto_exposure(profile_id, camera_id, binning)
         # adu value may be updated below
 
 

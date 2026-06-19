@@ -15242,6 +15242,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_night' : 'Night Auto Gain',
         'auto_gain_moonmode' : 'Moon Mode Auto Gain',
         'auto_gain_levels' : 'Auto Gain Levels',
+        'auto_exposure_metering_mode' : 'Auto Exposure Metering',
         'binning_day' : 'Day Binning',
         'binning_night' : 'Night Binning',
         'CCD_BIT_DEPTH' : 'Bit Depth',
@@ -15331,6 +15332,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_night' : (('gain', 'auto_night'), 'auto_gain_night', ('ccd_config', 'AUTO_GAIN_ENABLE_NIGHT')),
         'auto_gain_moonmode' : (('gain', 'auto_moonmode'), 'auto_gain_moonmode', ('ccd_config', 'AUTO_GAIN_ENABLE_MOONMODE')),
         'auto_gain_levels' : (('gain', 'auto_levels'), 'auto_gain_levels', ('ccd_config', 'AUTO_GAIN_LEVELS')),
+        'auto_exposure_metering_mode' : (('auto_exposure', 'metering_mode'), 'AUTO_EXPOSURE_METERING_MODE', 'auto_exposure_metering_mode'),
         'binning_day' : (('ccd_config', 'DAY', 'BINNING'), 'binning_day'),
         'binning_night' : (('ccd_config', 'NIGHT', 'BINNING'), 'binning_night'),
         'binning_moonmode' : (('ccd_config', 'MOONMODE', 'BINNING'), 'binning_moonmode'),
@@ -15433,6 +15435,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'auto_gain_night',
                 'auto_gain_moonmode',
                 'auto_gain_levels',
+                'auto_exposure_metering_mode',
                 'target_adu',
                 'target_adu_day',
                 'target_adu_dev',
@@ -15590,6 +15593,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'postprocess_rgb',
         'disabled',
     )
+    CAMERA_SETTINGS_AUTO_EXPOSURE_METERING_MODES = (
+        'default',
+        'average',
+        'median',
+        'sigma_clipped',
+        'background',
+        'moon_aware',
+        'stars_only',
+    )
     CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER = (
         'gain_day',
         'gain_night',
@@ -15598,6 +15610,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_night',
         'auto_gain_moonmode',
         'auto_gain_levels',
+        'auto_exposure_metering_mode',
         'target_adu_day',
         'target_adu',
         'target_adu_dev_day',
@@ -15640,6 +15653,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_night'    : ('CCD_CONFIG', 'AUTO_GAIN_ENABLE_NIGHT'),
         'auto_gain_moonmode' : ('CCD_CONFIG', 'AUTO_GAIN_ENABLE_MOONMODE'),
         'auto_gain_levels'   : ('CCD_CONFIG', 'AUTO_GAIN_LEVELS'),
+        'auto_exposure_metering_mode' : 'AUTO_EXPOSURE_METERING_MODE',
         'binning_night'      : ('CCD_CONFIG', 'NIGHT', 'BINNING'),
         'binning_moonmode'   : ('CCD_CONFIG', 'MOONMODE', 'BINNING'),
         'binning_day'        : ('CCD_CONFIG', 'DAY', 'BINNING'),
@@ -15671,6 +15685,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_night'    : 'Night Auto Gain',
         'auto_gain_moonmode' : 'Moon Mode Auto Gain',
         'auto_gain_levels'   : 'Auto Gain Levels',
+        'auto_exposure_metering_mode' : 'Auto Exposure Metering',
         'binning_night'      : 'Night Binning',
         'binning_moonmode'   : 'Moon Mode Binning',
         'binning_day'        : 'Day Binning',
@@ -15702,6 +15717,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_night'    : 'boolean_select',
         'auto_gain_moonmode' : 'boolean_select',
         'auto_gain_levels'   : 'integer',
+        'auto_exposure_metering_mode' : 'select',
         'binning_night'      : 'integer',
         'binning_moonmode'   : 'integer',
         'binning_day'        : 'integer',
@@ -17010,6 +17026,19 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             } for awb_mode in self.CAMERA_SETTINGS_LIBCAMERA_AWB_MODES)
             return tuple(choices)
 
+        if field_name == 'auto_exposure_metering_mode':
+            choices = [{
+                'value'    : '',
+                'label'    : 'Use global',
+                'selected' : value in (None, ''),
+            }]
+            choices.extend({
+                'value'    : metering_mode,
+                'label'    : metering_mode,
+                'selected' : metering_mode == value,
+            } for metering_mode in self.CAMERA_SETTINGS_AUTO_EXPOSURE_METERING_MODES)
+            return tuple(choices)
+
         if self.CAMERA_SETTINGS_CAPTURE_FIELD_TYPES[field_name] != 'boolean_select':
             return tuple()
 
@@ -17038,6 +17067,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if field_name.startswith('gain_'):
             return 'Gain'
         elif field_name.startswith('auto_gain_'):
+            return 'Auto Gain'
+        elif field_name.startswith('auto_exposure_'):
             return 'Auto Gain'
         elif field_name.startswith('target_adu'):
             return 'Target ADU'
@@ -17205,6 +17236,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             value = raw_value.strip().lower()
             if field_name in ('libcamera_awb_mode', 'libcamera_awb', 'libcamera_awb_day') and value not in self.CAMERA_SETTINGS_LIBCAMERA_AWB_MODES:
                 raise ValueError('Select a supported libcamera AWB mode.')
+            if field_name == 'auto_exposure_metering_mode' and value not in self.CAMERA_SETTINGS_AUTO_EXPOSURE_METERING_MODES:
+                raise ValueError('Select a supported auto exposure metering mode.')
         else:
             value = raw_value
 
@@ -17304,7 +17337,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             if not field_data['delete']:
                 profile[field_name] = field_data['value']
 
-        self.cleanup_empty_camera_settings_profile_blocks(profile, ('exposure', 'gain', 'awb', 'target_adu', 'ccd_config'))
+        self.cleanup_empty_camera_settings_profile_blocks(profile, ('exposure', 'gain', 'awb', 'target_adu', 'ccd_config', 'auto_exposure'))
         return str(profile_id)
 
 
@@ -17329,6 +17362,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'auto_gain_night'  : ('gain', 'auto_night'),
             'auto_gain_moonmode' : ('gain', 'auto_moonmode'),
             'auto_gain_levels' : ('gain', 'auto_levels'),
+            'auto_exposure_metering_mode' : ('auto_exposure', 'metering_mode'),
             'binning_night'    : ('ccd_config', 'NIGHT', 'BINNING'),
             'binning_moonmode' : ('ccd_config', 'MOONMODE', 'BINNING'),
             'binning_day'      : ('ccd_config', 'DAY', 'BINNING'),
