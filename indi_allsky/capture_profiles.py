@@ -108,6 +108,20 @@ class CaptureProfile:
     daytime_timelapse: bool
     cfa_pattern: str
     ccd_bit_depth: int
+    auto_wb: bool
+    auto_wb_day: bool
+    wbr_factor: float
+    wbg_factor: float
+    wbb_factor: float
+    wbr_factor_day: float
+    wbg_factor_day: float
+    wbb_factor_day: float
+    gamma_correction: float
+    gamma_correction_day: float
+    image_stretch_daytime: bool
+    daytime_contrast_enhance: bool
+    daytime_grayscale: bool
+    scnr_algorithm_day: str
     outputs: Dict[str, Any]
 
     def as_dict(self) -> Dict[str, Any]:
@@ -319,6 +333,34 @@ def _auto_exposure_enabled(config: Mapping[str, Any], profile_config: Mapping[st
     ))
 
 
+def _profile_identity_config(profile_config: Mapping[str, Any]) -> bool:
+    return any(key in profile_config for key in (
+        'profile_id',
+        'id',
+        'camera_interface',
+        'indi',
+        'libcamera',
+    ))
+
+
+def _profile_exposure_default(config: Mapping[str, Any], profile_config: Mapping[str, Any], exposure_config: Mapping[str, Any]) -> float:
+    if 'default' in exposure_config:
+        return _mapping_float(exposure_config, 'default', 0.0)
+
+    for key in ('exposure_default', 'CCD_EXPOSURE_DEF'):
+        if key in profile_config:
+            return _float_config(profile_config, key, 0.0)
+
+    if _profile_identity_config(profile_config):
+        return 0.0
+
+    return _float_config(config, 'CCD_EXPOSURE_DEF', 0.0)
+
+
+def _processing_value(config: Mapping[str, Any], profile_config: Mapping[str, Any], processing_config: Mapping[str, Any], key: str, global_key: str, default: Any) -> Any:
+    return processing_config.get(key, profile_config.get(key, config.get(global_key, default)))
+
+
 def _profile_from_config(
     config: Mapping[str, Any],
     profile_config: Optional[Mapping[str, Any]] = None,
@@ -337,6 +379,9 @@ def _profile_from_config(
     gain_config = _mapping_config(profile_config, 'gain')
     target_adu_config = _mapping_config(profile_config, 'target_adu')
     awb_config = _mapping_config(profile_config, 'awb')
+    processing_config = _mapping_config(profile_config, 'processing')
+    image_stretch_config = config.get('IMAGE_STRETCH') or {}
+    processing_image_stretch_config = _mapping_config(processing_config, 'image_stretch')
 
     ccd_config = deepcopy(config.get('CCD_CONFIG') or {})
     profile_ccd_config = profile_config.get('ccd_config') or {}
@@ -441,7 +486,7 @@ def _profile_from_config(
         exposure_min=_mapping_float(exposure_config, 'min', _float_config(profile_config, 'exposure_min', _float_config(config, 'CCD_EXPOSURE_MIN', 0.0))),
         exposure_min_day=_mapping_float(exposure_config, 'min_day', _float_config(profile_config, 'exposure_min_day', _float_config(config, 'CCD_EXPOSURE_MIN_DAY', 0.0))),
         exposure_max=_mapping_float(exposure_config, 'max', _float_config(profile_config, 'exposure_max', _float_config(config, 'CCD_EXPOSURE_MAX', 15.0))),
-        exposure_default=_mapping_float(exposure_config, 'default', _float_config(profile_config, 'exposure_default', _float_config(config, 'CCD_EXPOSURE_DEF', 0.0))),
+        exposure_default=_profile_exposure_default(config, profile_config, exposure_config),
         exposure_timeout=_mapping_float(exposure_config, 'timeout', _float_config(profile_config, 'exposure_timeout', _float_config(config, 'CCD_EXPOSURE_TIMEOUT', 330.0))),
         exposure_period=_mapping_float(exposure_config, 'period', _float_config(profile_config, 'exposure_period', _float_config(config, 'EXPOSURE_PERIOD', 15.0))),
         exposure_period_day=_mapping_float(exposure_config, 'period_day', _float_config(profile_config, 'exposure_period_day', _float_config(config, 'EXPOSURE_PERIOD_DAY', 15.0))),
@@ -491,8 +536,22 @@ def _profile_from_config(
         daytime_capture=bool(profile_config.get('daytime_capture', _bool_config(config, 'DAYTIME_CAPTURE', True))),
         daytime_capture_save=bool(profile_config.get('daytime_capture_save', _bool_config(config, 'DAYTIME_CAPTURE_SAVE', True))),
         daytime_timelapse=bool(profile_config.get('daytime_timelapse', _bool_config(config, 'DAYTIME_TIMELAPSE', True))),
-        cfa_pattern=str(profile_config.get('cfa_pattern', config.get('CFA_PATTERN', '')) or ''),
-        ccd_bit_depth=_int_config(profile_config, 'ccd_bit_depth', _int_config(config, 'CCD_BIT_DEPTH', 0)),
+        cfa_pattern=str(_processing_value(config, profile_config, processing_config, 'cfa_pattern', 'CFA_PATTERN', '') or ''),
+        ccd_bit_depth=_mapping_int(processing_config, 'ccd_bit_depth', _int_config(profile_config, 'ccd_bit_depth', _int_config(config, 'CCD_BIT_DEPTH', 0))),
+        auto_wb=_bool_value(_processing_value(config, profile_config, processing_config, 'auto_wb', 'AUTO_WB', False)),
+        auto_wb_day=_bool_value(_processing_value(config, profile_config, processing_config, 'auto_wb_day', 'AUTO_WB_DAY', False)),
+        wbr_factor=_mapping_float(processing_config, 'wbr_factor', _float_config(profile_config, 'wbr_factor', _float_config(config, 'WBR_FACTOR', 1.0))),
+        wbg_factor=_mapping_float(processing_config, 'wbg_factor', _float_config(profile_config, 'wbg_factor', _float_config(config, 'WBG_FACTOR', 1.0))),
+        wbb_factor=_mapping_float(processing_config, 'wbb_factor', _float_config(profile_config, 'wbb_factor', _float_config(config, 'WBB_FACTOR', 1.0))),
+        wbr_factor_day=_mapping_float(processing_config, 'wbr_factor_day', _float_config(profile_config, 'wbr_factor_day', _float_config(config, 'WBR_FACTOR_DAY', 1.0))),
+        wbg_factor_day=_mapping_float(processing_config, 'wbg_factor_day', _float_config(profile_config, 'wbg_factor_day', _float_config(config, 'WBG_FACTOR_DAY', 1.0))),
+        wbb_factor_day=_mapping_float(processing_config, 'wbb_factor_day', _float_config(profile_config, 'wbb_factor_day', _float_config(config, 'WBB_FACTOR_DAY', 1.0))),
+        gamma_correction=_mapping_float(processing_config, 'gamma_correction', _float_config(profile_config, 'gamma_correction', _float_config(config, 'GAMMA_CORRECTION', 1.0))),
+        gamma_correction_day=_mapping_float(processing_config, 'gamma_correction_day', _float_config(profile_config, 'gamma_correction_day', _float_config(config, 'GAMMA_CORRECTION_DAY', 1.0))),
+        image_stretch_daytime=_bool_value(processing_image_stretch_config.get('daytime', processing_config.get('image_stretch_daytime', profile_config.get('image_stretch_daytime', image_stretch_config.get('DAYTIME', False))))),
+        daytime_contrast_enhance=_bool_value(_processing_value(config, profile_config, processing_config, 'daytime_contrast_enhance', 'DAYTIME_CONTRAST_ENHANCE', False)),
+        daytime_grayscale=_bool_value(_processing_value(config, profile_config, processing_config, 'daytime_grayscale', 'DAYTIME_GRAYSCALE', False)),
+        scnr_algorithm_day=str(_processing_value(config, profile_config, processing_config, 'scnr_algorithm_day', 'SCNR_ALGORITHM_DAY', '') or ''),
         outputs=outputs,
     )
 
@@ -554,6 +613,22 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     profile_config['DAYTIME_TIMELAPSE'] = profile.daytime_timelapse
     profile_config['CFA_PATTERN'] = profile.cfa_pattern
     profile_config['CCD_BIT_DEPTH'] = profile.ccd_bit_depth
+    profile_config['AUTO_WB'] = profile.auto_wb
+    profile_config['AUTO_WB_DAY'] = profile.auto_wb_day
+    profile_config['WBR_FACTOR'] = profile.wbr_factor
+    profile_config['WBG_FACTOR'] = profile.wbg_factor
+    profile_config['WBB_FACTOR'] = profile.wbb_factor
+    profile_config['WBR_FACTOR_DAY'] = profile.wbr_factor_day
+    profile_config['WBG_FACTOR_DAY'] = profile.wbg_factor_day
+    profile_config['WBB_FACTOR_DAY'] = profile.wbb_factor_day
+    profile_config['GAMMA_CORRECTION'] = profile.gamma_correction
+    profile_config['GAMMA_CORRECTION_DAY'] = profile.gamma_correction_day
+    profile_config['DAYTIME_CONTRAST_ENHANCE'] = profile.daytime_contrast_enhance
+    profile_config['DAYTIME_GRAYSCALE'] = profile.daytime_grayscale
+    profile_config['SCNR_ALGORITHM_DAY'] = profile.scnr_algorithm_day
+    image_stretch_config = deepcopy(profile_config.get('IMAGE_STRETCH') or {})
+    image_stretch_config['DAYTIME'] = profile.image_stretch_daytime
+    profile_config['IMAGE_STRETCH'] = image_stretch_config
     profile_config['CAMERA_SQM'] = deepcopy(profile.camera_sqm)
 
     libcamera_config = deepcopy(profile_config.get('LIBCAMERA') or {})

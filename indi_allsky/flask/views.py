@@ -15077,6 +15077,22 @@ class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
         'LIBCAMERA__IMMEDIATE_DAY',
         'LIBCAMERA__EXTRA_OPTIONS',
         'LIBCAMERA__EXTRA_OPTIONS_DAY',
+        'CCD_BIT_DEPTH',
+        'CFA_PATTERN',
+        'AUTO_WB',
+        'AUTO_WB_DAY',
+        'WBR_FACTOR',
+        'WBG_FACTOR',
+        'WBB_FACTOR',
+        'WBR_FACTOR_DAY',
+        'WBG_FACTOR_DAY',
+        'WBB_FACTOR_DAY',
+        'GAMMA_CORRECTION',
+        'GAMMA_CORRECTION_DAY',
+        'IMAGE_STRETCH__DAYTIME',
+        'DAYTIME_CONTRAST_ENHANCE',
+        'DAYTIME_GRAYSCALE',
+        'SCNR_ALGORITHM_DAY',
     }
 
     def get_context(self):
@@ -15246,11 +15262,38 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_exposure_metering_mode' : 'Auto Exposure Metering',
         'binning_day' : 'Day Binning',
         'binning_night' : 'Night Binning',
+        'cfa_pattern' : 'CFA Pattern',
+        'ccd_bit_depth' : 'Bit Depth',
+        'auto_wb' : 'Night Legacy Auto WB',
+        'auto_wb_day' : 'Day Legacy Auto WB',
+        'wbr_factor' : 'Night Red WB Factor',
+        'wbg_factor' : 'Night Green WB Factor',
+        'wbb_factor' : 'Night Blue WB Factor',
+        'wbr_factor_day' : 'Day Red WB Factor',
+        'wbg_factor_day' : 'Day Green WB Factor',
+        'wbb_factor_day' : 'Day Blue WB Factor',
+        'gamma_correction' : 'Night Gamma',
+        'gamma_correction_day' : 'Day Gamma',
+        'image_stretch_daytime' : 'Day Image Stretch',
+        'daytime_contrast_enhance' : 'Day Contrast Enhance',
+        'daytime_grayscale' : 'Day Grayscale',
+        'scnr_algorithm_day' : 'Day SCNR',
         'CCD_BIT_DEPTH' : 'Bit Depth',
         'CFA_PATTERN' : 'CFA Pattern',
         'USE_NIGHT_COLOR' : 'Use Night Color',
         'AUTO_WB' : 'Auto White Balance',
         'AUTO_WB_DAY' : 'Day Auto White Balance',
+        'WBR_FACTOR' : 'Night Red WB Factor',
+        'WBG_FACTOR' : 'Night Green WB Factor',
+        'WBB_FACTOR' : 'Night Blue WB Factor',
+        'WBR_FACTOR_DAY' : 'Day Red WB Factor',
+        'WBG_FACTOR_DAY' : 'Day Green WB Factor',
+        'WBB_FACTOR_DAY' : 'Day Blue WB Factor',
+        'GAMMA_CORRECTION' : 'Night Gamma',
+        'GAMMA_CORRECTION_DAY' : 'Day Gamma',
+        'IMAGE_STRETCH.DAYTIME' : 'Day Image Stretch',
+        'DAYTIME_CONTRAST_ENHANCE' : 'Day Contrast Enhance',
+        'SCNR_ALGORITHM_DAY' : 'Day SCNR',
         'NIGHT_GRAYSCALE' : 'Night Grayscale',
         'DAYTIME_GRAYSCALE' : 'Daytime Grayscale',
         'CCD_COOLING' : 'Cooling',
@@ -15335,6 +15378,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels' : (('gain', 'auto_levels'), 'auto_gain_levels', ('ccd_config', 'AUTO_GAIN_LEVELS')),
         'auto_exposure_enabled' : (('auto_exposure', 'enabled'), 'AUTO_EXPOSURE_ENABLED', 'auto_exposure_enabled'),
         'auto_exposure_metering_mode' : (('auto_exposure', 'metering_mode'), 'AUTO_EXPOSURE_METERING_MODE', 'auto_exposure_metering_mode'),
+        'cfa_pattern' : (('processing', 'cfa_pattern'), 'cfa_pattern', 'CFA_PATTERN'),
+        'ccd_bit_depth' : (('processing', 'ccd_bit_depth'), 'ccd_bit_depth', 'CCD_BIT_DEPTH'),
+        'auto_wb' : (('processing', 'auto_wb'), 'auto_wb', 'AUTO_WB'),
+        'auto_wb_day' : (('processing', 'auto_wb_day'), 'auto_wb_day', 'AUTO_WB_DAY'),
+        'wbr_factor' : (('processing', 'wbr_factor'), 'wbr_factor', 'WBR_FACTOR'),
+        'wbg_factor' : (('processing', 'wbg_factor'), 'wbg_factor', 'WBG_FACTOR'),
+        'wbb_factor' : (('processing', 'wbb_factor'), 'wbb_factor', 'WBB_FACTOR'),
+        'wbr_factor_day' : (('processing', 'wbr_factor_day'), 'wbr_factor_day', 'WBR_FACTOR_DAY'),
+        'wbg_factor_day' : (('processing', 'wbg_factor_day'), 'wbg_factor_day', 'WBG_FACTOR_DAY'),
+        'wbb_factor_day' : (('processing', 'wbb_factor_day'), 'wbb_factor_day', 'WBB_FACTOR_DAY'),
+        'gamma_correction' : (('processing', 'gamma_correction'), 'gamma_correction', 'GAMMA_CORRECTION'),
+        'gamma_correction_day' : (('processing', 'gamma_correction_day'), 'gamma_correction_day', 'GAMMA_CORRECTION_DAY'),
+        'image_stretch_daytime' : (('processing', 'image_stretch_daytime'), ('processing', 'image_stretch', 'daytime'), 'image_stretch_daytime', ('IMAGE_STRETCH', 'DAYTIME')),
+        'daytime_contrast_enhance' : (('processing', 'daytime_contrast_enhance'), 'daytime_contrast_enhance', 'DAYTIME_CONTRAST_ENHANCE'),
+        'daytime_grayscale' : (('processing', 'daytime_grayscale'), 'daytime_grayscale', 'DAYTIME_GRAYSCALE'),
+        'scnr_algorithm_day' : (('processing', 'scnr_algorithm_day'), 'scnr_algorithm_day', 'SCNR_ALGORITHM_DAY'),
         'binning_day' : (('ccd_config', 'DAY', 'BINNING'), 'binning_day'),
         'binning_night' : (('ccd_config', 'NIGHT', 'BINNING'), 'binning_night'),
         'binning_moonmode' : (('ccd_config', 'MOONMODE', 'BINNING'), 'binning_moonmode'),
@@ -15349,8 +15408,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'CCD_TEMP' : ('target_temperature',),
         'DAYTIME_CAPTURE' : ('daytime_capture',),
         'DAYTIME_CAPTURE_SAVE' : ('daytime_capture_save',),
-        'CCD_BIT_DEPTH' : ('ccd_bit_depth',),
-        'CFA_PATTERN' : ('cfa_pattern',),
+        'CCD_BIT_DEPTH' : (('processing', 'ccd_bit_depth'), 'ccd_bit_depth'),
+        'CFA_PATTERN' : (('processing', 'cfa_pattern'), 'cfa_pattern'),
+        'AUTO_WB' : (('processing', 'auto_wb'), 'auto_wb'),
+        'AUTO_WB_DAY' : (('processing', 'auto_wb_day'), 'auto_wb_day'),
+        'WBR_FACTOR' : (('processing', 'wbr_factor'), 'wbr_factor'),
+        'WBG_FACTOR' : (('processing', 'wbg_factor'), 'wbg_factor'),
+        'WBB_FACTOR' : (('processing', 'wbb_factor'), 'wbb_factor'),
+        'WBR_FACTOR_DAY' : (('processing', 'wbr_factor_day'), 'wbr_factor_day'),
+        'WBG_FACTOR_DAY' : (('processing', 'wbg_factor_day'), 'wbg_factor_day'),
+        'WBB_FACTOR_DAY' : (('processing', 'wbb_factor_day'), 'wbb_factor_day'),
+        'GAMMA_CORRECTION' : (('processing', 'gamma_correction'), 'gamma_correction'),
+        'GAMMA_CORRECTION_DAY' : (('processing', 'gamma_correction_day'), 'gamma_correction_day'),
+        'IMAGE_STRETCH.DAYTIME' : (('processing', 'image_stretch_daytime'), ('processing', 'image_stretch', 'daytime'), 'image_stretch_daytime'),
+        'DAYTIME_CONTRAST_ENHANCE' : (('processing', 'daytime_contrast_enhance'), 'daytime_contrast_enhance'),
+        'DAYTIME_GRAYSCALE' : (('processing', 'daytime_grayscale'), 'daytime_grayscale'),
+        'SCNR_ALGORITHM_DAY' : (('processing', 'scnr_algorithm_day'), 'scnr_algorithm_day'),
         'LIBCAMERA.AWB' : (('awb', 'libcamera_awb'), 'libcamera_awb', ('libcamera', 'AWB'), ('libcamera', 'awb')),
         'LIBCAMERA.AWB_DAY' : (('awb', 'libcamera_awb_day'), 'libcamera_awb_day', ('libcamera', 'AWB_DAY'), ('libcamera', 'awb_day')),
         'LIBCAMERA.AWB_ENABLE' : (('awb', 'libcamera_awb_enable'), 'libcamera_awb_enable', ('libcamera', 'AWB_ENABLE'), ('libcamera', 'awb_enable')),
@@ -15493,6 +15566,17 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'USE_NIGHT_COLOR',
                 'AUTO_WB',
                 'AUTO_WB_DAY',
+                'WBR_FACTOR',
+                'WBG_FACTOR',
+                'WBB_FACTOR',
+                'WBR_FACTOR_DAY',
+                'WBG_FACTOR_DAY',
+                'WBB_FACTOR_DAY',
+                'GAMMA_CORRECTION',
+                'GAMMA_CORRECTION_DAY',
+                'IMAGE_STRETCH.DAYTIME',
+                'DAYTIME_CONTRAST_ENHANCE',
+                'SCNR_ALGORITHM_DAY',
                 'NIGHT_GRAYSCALE',
                 'DAYTIME_GRAYSCALE',
                 'CCD_COOLING',
@@ -15619,6 +15703,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'target_adu',
         'target_adu_dev_day',
         'target_adu_dev',
+        'cfa_pattern',
+        'ccd_bit_depth',
+        'auto_wb_day',
+        'auto_wb',
+        'wbr_factor_day',
+        'wbg_factor_day',
+        'wbb_factor_day',
+        'wbr_factor',
+        'wbg_factor',
+        'wbb_factor',
+        'gamma_correction_day',
+        'gamma_correction',
+        'image_stretch_daytime',
+        'daytime_contrast_enhance',
+        'daytime_grayscale',
+        'scnr_algorithm_day',
         'exposure_min_day',
         'exposure_min',
         'exposure_default',
@@ -15669,6 +15769,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'libcamera_awb_mode'      : 'LIBCAMERA.AWB_MODE',
         'libcamera_awb_red_gain'  : 'LIBCAMERA.AWB_RED_GAIN',
         'libcamera_awb_blue_gain' : 'LIBCAMERA.AWB_BLUE_GAIN',
+        'cfa_pattern'             : 'CFA_PATTERN',
+        'ccd_bit_depth'           : 'CCD_BIT_DEPTH',
+        'auto_wb'                 : 'AUTO_WB',
+        'auto_wb_day'             : 'AUTO_WB_DAY',
+        'wbr_factor'              : 'WBR_FACTOR',
+        'wbg_factor'              : 'WBG_FACTOR',
+        'wbb_factor'              : 'WBB_FACTOR',
+        'wbr_factor_day'          : 'WBR_FACTOR_DAY',
+        'wbg_factor_day'          : 'WBG_FACTOR_DAY',
+        'wbb_factor_day'          : 'WBB_FACTOR_DAY',
+        'gamma_correction'        : 'GAMMA_CORRECTION',
+        'gamma_correction_day'    : 'GAMMA_CORRECTION_DAY',
+        'image_stretch_daytime'   : ('IMAGE_STRETCH', 'DAYTIME'),
+        'daytime_contrast_enhance': 'DAYTIME_CONTRAST_ENHANCE',
+        'daytime_grayscale'       : 'DAYTIME_GRAYSCALE',
+        'scnr_algorithm_day'      : 'SCNR_ALGORITHM_DAY',
     }
     CAMERA_SETTINGS_CAPTURE_FIELD_LABELS = {
         'exposure_min'       : 'Exposure Min Night',
@@ -15702,6 +15818,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'libcamera_awb_mode'      : 'libcamera AWB Mode',
         'libcamera_awb_red_gain'  : 'libcamera AWB Red Gain',
         'libcamera_awb_blue_gain' : 'libcamera AWB Blue Gain',
+        'cfa_pattern'             : 'CFA Pattern',
+        'ccd_bit_depth'           : 'Bit Depth',
+        'auto_wb'                 : 'Night Legacy Auto WB',
+        'auto_wb_day'             : 'Day Legacy Auto WB',
+        'wbr_factor'              : 'Night Red WB Factor',
+        'wbg_factor'              : 'Night Green WB Factor',
+        'wbb_factor'              : 'Night Blue WB Factor',
+        'wbr_factor_day'          : 'Day Red WB Factor',
+        'wbg_factor_day'          : 'Day Green WB Factor',
+        'wbb_factor_day'          : 'Day Blue WB Factor',
+        'gamma_correction'        : 'Night Gamma',
+        'gamma_correction_day'    : 'Day Gamma',
+        'image_stretch_daytime'   : 'Day Image Stretch',
+        'daytime_contrast_enhance': 'Day Contrast Enhance',
+        'daytime_grayscale'       : 'Day Grayscale',
+        'scnr_algorithm_day'      : 'Day SCNR',
     }
     CAMERA_SETTINGS_CAPTURE_FIELD_TYPES = {
         'exposure_min'       : 'float',
@@ -15735,15 +15867,62 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'libcamera_awb_mode'      : 'select',
         'libcamera_awb_red_gain'  : 'float',
         'libcamera_awb_blue_gain' : 'float',
+        'cfa_pattern'             : 'select',
+        'ccd_bit_depth'           : 'integer',
+        'auto_wb'                 : 'boolean_select',
+        'auto_wb_day'             : 'boolean_select',
+        'wbr_factor'              : 'float',
+        'wbg_factor'              : 'float',
+        'wbb_factor'              : 'float',
+        'wbr_factor_day'          : 'float',
+        'wbg_factor_day'          : 'float',
+        'wbb_factor_day'          : 'float',
+        'gamma_correction'        : 'float',
+        'gamma_correction_day'    : 'float',
+        'image_stretch_daytime'   : 'boolean_select',
+        'daytime_contrast_enhance': 'boolean_select',
+        'daytime_grayscale'       : 'boolean_select',
+        'scnr_algorithm_day'      : 'select',
     }
     CAMERA_SETTINGS_CAPTURE_GROUP_ORDER = (
         'Gain',
         'Auto Gain',
         'Target ADU',
+        'Debayer / Color',
         'Exposure',
         'Binning',
         'AWB',
     )
+    CAMERA_SETTINGS_CFA_PATTERN_CHOICES = (
+        '',
+        'RGGB',
+        'BGGR',
+        'GRBG',
+        'GBRG',
+    )
+    CAMERA_SETTINGS_SCNR_DAY_CHOICES = (
+        '',
+        'average_neutral',
+        'maximum_neutral',
+        'green_mtf',
+    )
+    CAMERA_SETTINGS_CAPTURE_FIELD_HELP = {
+        'exposure_default' : 'Profile startup seed. Leave empty to avoid falling back to legacy CCD_EXPOSURE_DEF after service restart/reinit.',
+        'auto_exposure_enabled' : 'Default OFF. When enabled, the Auto Exposure Controller may apply proposed runtime exposure/gain to this camera only.',
+        'auto_exposure_metering_mode' : 'Per-camera metering strategy used by the shadow/apply auto exposure controller.',
+        'cfa_pattern' : 'Critical for ASI/ZWO debayer. A wrong Bayer pattern can make color and brightness look broken even with correct exposure.',
+        'ccd_bit_depth' : 'Sensor bit depth used for processing scale. Wrong values can push metering and stretch toward saturation.',
+        'auto_wb_day' : 'Legacy daytime postprocess auto white balance. Separate from Hybrid AWB; use carefully with postprocess_rgb.',
+        'auto_wb' : 'Legacy night postprocess auto white balance. Separate from Hybrid AWB.',
+        'wbr_factor_day' : 'Manual daytime red multiplier used by the legacy white-balance stage.',
+        'wbg_factor_day' : 'Manual daytime green multiplier used by the legacy white-balance stage.',
+        'wbb_factor_day' : 'Manual daytime blue multiplier used by the legacy white-balance stage.',
+        'gamma_correction_day' : 'Daytime gamma applied in image processing after capture.',
+        'image_stretch_daytime' : 'Daytime stretch is per-camera here; aggressive stretch can make a bright ASI frame look worse.',
+        'daytime_contrast_enhance' : 'Daytime contrast enhancement for this camera profile.',
+        'daytime_grayscale' : 'Forces daytime output to grayscale for this camera profile.',
+        'scnr_algorithm_day' : 'Daytime green-noise reduction algorithm for this camera profile.',
+    }
     CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER = (
         'lens_name',
         'lens_focal_length',
@@ -16944,6 +17123,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'min'        : self.get_camera_settings_capture_field_min(field_name),
                 'step'       : 'any' if field_type == 'float' else '1',
                 'group'      : self.get_camera_settings_capture_field_group(field_name),
+                'help'       : self.CAMERA_SETTINGS_CAPTURE_FIELD_HELP.get(field_name),
+                'badges'     : self.get_camera_settings_capture_field_badges(profile, field_name),
             })
 
         groups = list()
@@ -17046,6 +17227,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             } for metering_mode in self.CAMERA_SETTINGS_AUTO_EXPOSURE_METERING_MODES)
             return tuple(choices)
 
+        if field_name == 'cfa_pattern':
+            value_str = str(value or '').upper()
+            return tuple({
+                'value'    : cfa_pattern,
+                'label'    : cfa_pattern or 'Use global',
+                'selected' : value in (None, '') if not cfa_pattern else value_str == cfa_pattern,
+            } for cfa_pattern in self.CAMERA_SETTINGS_CFA_PATTERN_CHOICES)
+
+        if field_name == 'scnr_algorithm_day':
+            value_str = str(value or '').lower()
+            return tuple({
+                'value'    : scnr_algorithm,
+                'label'    : scnr_algorithm or 'Use global',
+                'selected' : value in (None, '') if not scnr_algorithm else value_str == scnr_algorithm,
+            } for scnr_algorithm in self.CAMERA_SETTINGS_SCNR_DAY_CHOICES)
+
         if self.CAMERA_SETTINGS_CAPTURE_FIELD_TYPES[field_name] != 'boolean_select':
             return tuple()
 
@@ -17079,6 +17276,25 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             return 'Auto Gain'
         elif field_name.startswith('target_adu'):
             return 'Target ADU'
+        elif field_name in (
+            'cfa_pattern',
+            'ccd_bit_depth',
+            'auto_wb',
+            'auto_wb_day',
+            'wbr_factor',
+            'wbg_factor',
+            'wbb_factor',
+            'wbr_factor_day',
+            'wbg_factor_day',
+            'wbb_factor_day',
+            'gamma_correction',
+            'gamma_correction_day',
+            'image_stretch_daytime',
+            'daytime_contrast_enhance',
+            'daytime_grayscale',
+            'scnr_algorithm_day',
+        ):
+            return 'Debayer / Color'
         elif field_name.startswith('exposure_'):
             return 'Exposure'
         elif field_name.startswith('binning_'):
@@ -17092,10 +17308,24 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     def get_camera_settings_capture_field_min(self, field_name):
         if field_name in ('auto_gain_levels', 'binning_day', 'binning_moonmode', 'binning_night'):
             return '1'
-        elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain'):
+        elif field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain', 'wbr_factor', 'wbg_factor', 'wbb_factor', 'wbr_factor_day', 'wbg_factor_day', 'wbb_factor_day', 'gamma_correction', 'gamma_correction_day'):
             return '0.01'
 
         return '0'
+
+
+    def get_camera_settings_capture_field_badges(self, profile, field_name):
+        badges = ['Per-camera']
+        found, _value = self.get_camera_settings_profile_override(profile, field_name)
+        if found:
+            badges.append('Profile override')
+        elif field_name == 'exposure_default' and profile.get('from_multi_camera'):
+            badges.append('Runtime reuse')
+        else:
+            badges.append('Legacy fallback')
+        if field_name in ('cfa_pattern', 'ccd_bit_depth', 'auto_wb_day', 'gamma_correction_day', 'image_stretch_daytime'):
+            badges.append('ASI audit')
+        return tuple(badges)
 
 
     def save_camera_settings_capture_profile(self):
@@ -17245,13 +17475,19 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 raise ValueError('Select a supported libcamera AWB mode.')
             if field_name == 'auto_exposure_metering_mode' and value not in self.CAMERA_SETTINGS_AUTO_EXPOSURE_METERING_MODES:
                 raise ValueError('Select a supported auto exposure metering mode.')
+            if field_name == 'cfa_pattern':
+                value = raw_value.strip().upper()
+                if value not in self.CAMERA_SETTINGS_CFA_PATTERN_CHOICES or value == '':
+                    raise ValueError('Select a supported CFA pattern.')
+            if field_name == 'scnr_algorithm_day' and value not in self.CAMERA_SETTINGS_SCNR_DAY_CHOICES:
+                raise ValueError('Select a supported daytime SCNR algorithm.')
         else:
             value = raw_value
 
         if field_type in ('integer', 'float') and field_name in ('auto_gain_levels', 'binning_day', 'binning_moonmode', 'binning_night') and value < 1:
             raise ValueError('{0:s} must be greater than or equal to 1.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
 
-        if field_type in ('integer', 'float') and field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain') and value <= 0:
+        if field_type in ('integer', 'float') and field_name in ('libcamera_awb_red_gain', 'libcamera_awb_blue_gain', 'wbr_factor', 'wbg_factor', 'wbb_factor', 'wbr_factor_day', 'wbg_factor_day', 'wbb_factor_day', 'gamma_correction', 'gamma_correction_day') and value <= 0:
             raise ValueError('{0:s} must be greater than 0.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
 
         if field_type in ('integer', 'float') and value < 0:
@@ -17344,7 +17580,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             if not field_data['delete']:
                 profile[field_name] = field_data['value']
 
-        self.cleanup_empty_camera_settings_profile_blocks(profile, ('exposure', 'gain', 'awb', 'target_adu', 'ccd_config', 'auto_exposure'))
+        self.cleanup_empty_camera_settings_profile_blocks(profile, ('exposure', 'gain', 'awb', 'target_adu', 'ccd_config', 'auto_exposure', 'processing'))
         return str(profile_id)
 
 
@@ -17371,6 +17607,22 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'auto_gain_levels' : ('gain', 'auto_levels'),
             'auto_exposure_enabled' : ('auto_exposure', 'enabled'),
             'auto_exposure_metering_mode' : ('auto_exposure', 'metering_mode'),
+            'cfa_pattern'       : ('processing', 'cfa_pattern'),
+            'ccd_bit_depth'     : ('processing', 'ccd_bit_depth'),
+            'auto_wb'           : ('processing', 'auto_wb'),
+            'auto_wb_day'       : ('processing', 'auto_wb_day'),
+            'wbr_factor'        : ('processing', 'wbr_factor'),
+            'wbg_factor'        : ('processing', 'wbg_factor'),
+            'wbb_factor'        : ('processing', 'wbb_factor'),
+            'wbr_factor_day'    : ('processing', 'wbr_factor_day'),
+            'wbg_factor_day'    : ('processing', 'wbg_factor_day'),
+            'wbb_factor_day'    : ('processing', 'wbb_factor_day'),
+            'gamma_correction'  : ('processing', 'gamma_correction'),
+            'gamma_correction_day' : ('processing', 'gamma_correction_day'),
+            'image_stretch_daytime' : ('processing', 'image_stretch_daytime'),
+            'daytime_contrast_enhance' : ('processing', 'daytime_contrast_enhance'),
+            'daytime_grayscale' : ('processing', 'daytime_grayscale'),
+            'scnr_algorithm_day': ('processing', 'scnr_algorithm_day'),
             'binning_night'    : ('ccd_config', 'NIGHT', 'BINNING'),
             'binning_moonmode' : ('ccd_config', 'MOONMODE', 'BINNING'),
             'binning_day'      : ('ccd_config', 'DAY', 'BINNING'),
@@ -17863,6 +18115,17 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'USE_NIGHT_COLOR',
             'AUTO_WB',
             'AUTO_WB_DAY',
+            'WBR_FACTOR',
+            'WBG_FACTOR',
+            'WBB_FACTOR',
+            'WBR_FACTOR_DAY',
+            'WBG_FACTOR_DAY',
+            'WBB_FACTOR_DAY',
+            'GAMMA_CORRECTION',
+            'GAMMA_CORRECTION_DAY',
+            'IMAGE_STRETCH.DAYTIME',
+            'DAYTIME_CONTRAST_ENHANCE',
+            'SCNR_ALGORITHM_DAY',
             'NIGHT_GRAYSCALE',
             'DAYTIME_GRAYSCALE',
             'CCD_COOLING',
@@ -17928,6 +18191,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'CCD_COOLING',
             'CCD_TEMP',
             'CFA_PATTERN',
+            'AUTO_WB',
+            'GAMMA_CORRECTION',
+            'IMAGE_STRETCH',
+            'DAYTIME_CONTRAST',
+            'SCNR',
         )):
             return 'restart'
         elif any(token in config_key.upper() for token in (

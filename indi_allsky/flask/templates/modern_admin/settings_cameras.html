@@ -397,6 +397,8 @@ var camera_id = {{ camera_id }};
                         <p class="modern-admin-note">Keep day gain fixed when disabled; allow night or moon mode gain adjustment after exposure reaches the profile limits.</p>
                         {% elif group.name == 'Exposure' %}
                         <p class="modern-admin-note">Exposure limits and cadence for this camera profile.</p>
+                        {% elif group.name == 'Debayer / Color' %}
+                        <p class="modern-admin-note">CFA/debayer, legacy white balance, gamma, and daytime stretch are profile settings here. This is the first place to audit ASI678MC daytime color or saturation.</p>
                         {% elif group.name == 'AWB' %}
                         <p class="modern-admin-note">AWB settings for this profile. Hybrid Apply Mode is controlled below in Hybrid Controller.</p>
                         {% endif %}
@@ -405,6 +407,11 @@ var camera_id = {{ camera_id }};
                             <label class="modern-admin-settings-edit-field" for="camera-capture-{{ field.name }}">
                                 <span class="modern-admin-settings-edit-label">{{ field.label }}</span>
                                 <span class="modern-admin-settings-edit-meta">{{ field.group }} · {{ modern_admin_camera_settings_capture_form.storage_label }}.{{ field.config_key }}</span>
+                                <span class="modern-admin-settings-edit-badges">
+                                    {% for badge in field.badges %}
+                                    <span class="modern-admin-settings-badge">{{ badge }}</span>
+                                    {% endfor %}
+                                </span>
 
                                 {% if field.input_type == 'select' %}
                                 <select id="camera-capture-{{ field.name }}" name="{{ field.name }}" {% if field.readonly %}disabled{% endif %}>
@@ -416,7 +423,9 @@ var camera_id = {{ camera_id }};
                                 <input id="camera-capture-{{ field.name }}" name="{{ field.name }}" type="{{ field.input_type }}" value="{{ field.value }}" step="{{ field.step }}" min="{{ field.min }}" {% if field.readonly %}readonly{% endif %}>
                                 {% endif %}
 
-                                {% if field.field_type == 'boolean_select' %}
+                                {% if field.help %}
+                                <span class="modern-admin-settings-edit-help">{{ field.help }}</span>
+                                {% elif field.field_type == 'boolean_select' %}
                                 <span class="modern-admin-settings-edit-help">Use global removes the profile value and falls back to legacy defaults.</span>
                                 {% else %}
                                 <span class="modern-admin-settings-edit-help">Leave empty to inherit legacy fallback defaults.</span>

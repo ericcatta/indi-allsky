@@ -259,6 +259,32 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## 9. Log operativo
 
+- 2026-06-19: Profile-first Settings/UI coherence patch.
+  - Camera Profile Settings / Acquisition ora include anche i campi processing critici per camera:
+    - `processing.cfa_pattern`
+    - `processing.ccd_bit_depth`
+    - `processing.auto_wb`
+    - `processing.auto_wb_day`
+    - `processing.wbr_factor*`
+    - `processing.wbg_factor*`
+    - `processing.wbb_factor*`
+    - `processing.gamma_correction*`
+    - `processing.image_stretch_daytime`
+    - `processing.daytime_contrast_enhance`
+    - `processing.daytime_grayscale`
+    - `processing.scnr_algorithm_day`
+  - Full Settings nasconde questi campi dalla normale UI operativa insieme a gain/exposure/target/AWB, trattandoli come legacy fallback.
+  - I campi Acquisition mostrano badge `Per-camera`, `Profile override`, `Legacy fallback`, `Runtime reuse` e `ASI audit` dove utile.
+  - Il resolver profili non copia piu' automaticamente `CCD_EXPOSURE_DEF` globale dentro un profilo multicamera reale se il profilo non ha un default esposizione esplicito. Questo riduce il rischio che `CCD_EXPOSURE_DEF=8` resetti IMX708/ASI dopo restart/reinit.
+  - Runtime logging esteso:
+    - `[MULTI_CAMERA_RESOLVED_CONFIG]` include CFA, bit depth, legacy auto WB, gamma day, stretch day, contrast day.
+    - `[MULTI_CAMERA_PROCESSING_CONFIG]` logga una volta per profilo/camera i parametri CFA/debayer/WB/gamma/stretch effettivamente risolti.
+  - Mancante/verifica Raspberry:
+    - impostare o confermare il CFA corretto per ASI678MC;
+    - controllare che `exposure_default` vuoto sui profili non torni a 8s dopo restart;
+    - controllare se ASI678MC resta a `smoothed_value ~239/255` anche con CFA/WB/stretch profilo corretti;
+    - se resta sovraesposta a gain 0/exposure 0.05s, investigare driver/bit depth/debayer o saturazione reale del sensore.
+
 - 2026-06-19: Consolidata roadmap Hybrid AllSky come documento operativo principale.
 - 2026-06-19: Stabilizzato runtime multicamera con gain/exposure/profile resolver per IMX708 e ASI678MC.
 - 2026-06-19: Introdotto metering per-camera selezionabile in shadow mode.

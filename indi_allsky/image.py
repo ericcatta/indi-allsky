@@ -140,6 +140,7 @@ class ImageWorker(Process):
         self.auto_meter_states[self.auto_meter_context_key] = self._new_auto_meter_state()
         self.auto_exposure_controller = AutoExposureController()
         self.hybrid_awb_backend_warned = set()
+        self.processing_config_logged = set()
         self.generate_mask_base = True
 
         self.sqm_value = 0
@@ -275,6 +276,34 @@ class ImageWorker(Process):
             action=action,
             processor_key=processor_key,
             processors=len(self.image_processors),
+        )
+
+
+    def _log_processing_config_once(self, profile_id, camera_id):
+        processing_key = '{0:s}:{1!s}'.format(str(profile_id), camera_id)
+        if processing_key in self.processing_config_logged:
+            return
+
+        self.processing_config_logged.add(processing_key)
+        image_stretch_config = self.config.get('IMAGE_STRETCH') or {}
+        logger.info(
+            '[MULTI_CAMERA_PROCESSING_CONFIG][%s][camera_id=%s] camera_interface=%s cfa_pattern=%s ccd_bit_depth=%s auto_wb_day=%s auto_wb_night=%s wbr_day=%s wbg_day=%s wbb_day=%s gamma_day=%s image_stretch_daytime=%s daytime_contrast_enhance=%s daytime_grayscale=%s scnr_algorithm_day=%s hybrid_awb_backend=%s',
+            profile_id,
+            camera_id if camera_id is not None else 'unknown',
+            self.config.get('CAMERA_INTERFACE'),
+            self.config.get('CFA_PATTERN'),
+            self.config.get('CCD_BIT_DEPTH'),
+            self.config.get('AUTO_WB_DAY'),
+            self.config.get('AUTO_WB'),
+            self.config.get('WBR_FACTOR_DAY'),
+            self.config.get('WBG_FACTOR_DAY'),
+            self.config.get('WBB_FACTOR_DAY'),
+            self.config.get('GAMMA_CORRECTION_DAY'),
+            image_stretch_config.get('DAYTIME'),
+            self.config.get('DAYTIME_CONTRAST_ENHANCE'),
+            self.config.get('DAYTIME_GRAYSCALE'),
+            self.config.get('SCNR_ALGORITHM_DAY'),
+            self._hybrid_awb_backend(),
         )
 
 
@@ -1469,6 +1498,7 @@ class ImageWorker(Process):
             )
 
         self._select_image_processor(profile_id, camera_id, images_only_diag)
+        self._log_processing_config_once(profile_id, camera_id)
 
         # libcamera
         libcamera_black_level = i_dict.get('libcamera_black_level', 0)

@@ -2404,6 +2404,18 @@ body.modern-admin-lightbox-open {
   overflow-wrap: anywhere;
 }
 
+.modern-admin-shell .modern-admin-settings-edit-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.modern-admin-shell .modern-admin-settings-edit-badges .modern-admin-settings-badge {
+  min-height: 20px;
+  padding: 2px 7px;
+  font-size: 0.68rem;
+}
+
 .modern-admin-shell .modern-admin-settings-edit-field input[type="number"],
 .modern-admin-shell .modern-admin-settings-edit-field input[type="text"],
 .modern-admin-shell .modern-admin-settings-edit-field input[type="password"],
