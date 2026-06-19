@@ -333,6 +333,22 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - Se il raw non e' saturo ma lo diventa dopo Hybrid AWB, calcolare auto-meter su frame pre-AWB o limitare il backend AWB usato per il controllo esposizione.
     - Se il debayer viene saltato o usa shape inattesa, correggere il percorso FITS/debayer prima di toccare exposure/gain.
 
+- 2026-06-19: Patch diagnostica temporanea `[ASI_FRAME_STATS]` per sovraesposizione diurna ASI678MC.
+  - Aggiunti log strutturati solo per `profile_id=asi678mc` o `CAMERA_INTERFACE=indi`, limitati al primo frame e poi ogni 10 frame per profilo/camera.
+  - Checkpoint loggati:
+    - `raw_fits_after_read_pre_debayer`;
+    - `after_calibration_bitdepth_pre_debayer`;
+    - `after_debayer_cfa`;
+    - `before_hybrid_awb_postprocess`;
+    - `after_hybrid_awb_postprocess`;
+    - `before_auto_meter`.
+  - Ogni riga include `shape`, `dtype`, `min`, `max`, `mean`, `median`, `p95`, `p99`, percentuale `pct_ge_250_equiv`, soglia equivalente, `exposure`, `gain`, `binning`, `image_bitpix`, bit depth rilevato/configurato, `processor_max_bit_depth`, `fits_bayerpat`, `config_cfa` e `camera_interface`.
+  - Come interpretare:
+    - se `raw_fits_after_read_pre_debayer` ha gia' `p95/p99/max` alti o `pct_ge_250_equiv` elevato, il problema e' prima del processing indi-allsky: driver/camera/controlli INDI o saturazione reale.
+    - se raw e' sano ma `after_debayer_cfa` salta alto, il problema e' CFA/debayer/shape FITS.
+    - se `before_hybrid_awb_postprocess` e' sano ma `after_hybrid_awb_postprocess` o `before_auto_meter` diventano alti, il problema e' Hybrid AWB postprocess che clippa prima della misura.
+    - se solo l'immagine finale e' chiara ma `before_auto_meter` e' sano, allora il problema e' dopo il meter: stretch/gamma/WB legacy/JPEG.
+
 - 2026-06-19: Consolidata roadmap Hybrid AllSky come documento operativo principale.
 - 2026-06-19: Stabilizzato runtime multicamera con gain/exposure/profile resolver per IMX708 e ASI678MC.
 - 2026-06-19: Introdotto metering per-camera selezionabile in shadow mode.

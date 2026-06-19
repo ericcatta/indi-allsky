@@ -141,6 +141,7 @@ class ImageWorker(Process):
         self.auto_exposure_controller = AutoExposureController()
         self.hybrid_awb_backend_warned = set()
         self.processing_config_logged = set()
+        self.asi_frame_stats_counts = {}
         self.generate_mask_base = True
 
         self.sqm_value = 0
@@ -313,6 +314,138 @@ class ImageWorker(Process):
             return None
 
         return 'x'.join(str(x) for x in shape)
+
+
+    def _asi_frame_stats_should_log(self, profile_id, camera_id):
+        camera_interface = str(self.config.get('CAMERA_INTERFACE') or '').lower()
+        profile_match = str(profile_id or '').lower() == 'asi678mc'
+        interface_match = camera_interface == 'indi' or camera_interface.startswith('indi_')
+
+        if not profile_match and not interface_match:
+            return False
+
+        stats_key = '{0:s}:{1!s}'.format(str(profile_id or 'default'), camera_id)
+        count = self.asi_frame_stats_counts.get(stats_key, 0) + 1
+        self.asi_frame_stats_counts[stats_key] = count
+
+        return count == 1 or count % 10 == 0
+
+
+    def _asi_frame_stats_threshold(self, data, bit_depth=None):
+        if numpy.issubdtype(data.dtype, numpy.integer):
+            try:
+                bit_depth_int = int(bit_depth or 0)
+            except (TypeError, ValueError):
+                bit_depth_int = 0
+
+            if bit_depth_int > 8:
+                max_value = float((2 ** bit_depth_int) - 1)
+            else:
+                max_value = float(numpy.iinfo(data.dtype).max)
+        else:
+            finite_max = float(numpy.nanmax(data)) if data.size else 0.0
+            if finite_max <= 1.0:
+                max_value = 1.0
+            elif finite_max <= 255.0:
+                max_value = 255.0
+            elif bit_depth:
+                try:
+                    max_value = float((2 ** int(bit_depth)) - 1)
+                except (TypeError, ValueError):
+                    max_value = finite_max
+            else:
+                max_value = finite_max
+
+        if max_value <= 255.0:
+            return 250.0
+
+        return max_value * (250.0 / 255.0)
+
+
+    def _log_asi_frame_stats(self, enabled, stage, profile_id, camera_id, image, exposure=None, gain=None, binning=None, i_ref=None):
+        if not enabled:
+            return
+
+        if image is None:
+            logger.info(
+                '[ASI_FRAME_STATS][%s][camera_id=%s] stage=%s status=skipped reason=no-image',
+                profile_id,
+                camera_id if camera_id is not None else 'unknown',
+                stage,
+            )
+            return
+
+        try:
+            data = numpy.asarray(image)
+            if data.size == 0:
+                logger.info(
+                    '[ASI_FRAME_STATS][%s][camera_id=%s] stage=%s status=skipped reason=empty-image shape=%s dtype=%s',
+                    profile_id,
+                    camera_id if camera_id is not None else 'unknown',
+                    stage,
+                    self._shape_for_diag(data),
+                    data.dtype,
+                )
+                return
+
+            if numpy.issubdtype(data.dtype, numpy.floating):
+                samples = data[numpy.isfinite(data)]
+            else:
+                samples = data.reshape(-1)
+
+            if samples.size == 0:
+                logger.info(
+                    '[ASI_FRAME_STATS][%s][camera_id=%s] stage=%s status=skipped reason=no-finite-samples shape=%s dtype=%s',
+                    profile_id,
+                    camera_id if camera_id is not None else 'unknown',
+                    stage,
+                    self._shape_for_diag(data),
+                    data.dtype,
+                )
+                return
+
+            image_bitpix = getattr(i_ref, 'image_bitpix', None)
+            image_bayerpat = getattr(i_ref, 'image_bayerpat', None)
+            detected_bit_depth = getattr(i_ref, 'detected_bit_depth', None)
+            configured_bit_depth = self.config.get('CCD_BIT_DEPTH')
+            bit_depth_for_threshold = configured_bit_depth or detected_bit_depth or image_bitpix
+            threshold = self._asi_frame_stats_threshold(data, bit_depth=bit_depth_for_threshold)
+            saturated_pct = (float(numpy.count_nonzero(samples >= threshold)) / float(samples.size)) * 100.0
+
+            logger.info(
+                '[ASI_FRAME_STATS][%s][camera_id=%s] stage=%s shape=%s dtype=%s min=%0.3f max=%0.3f mean=%0.3f median=%0.3f p95=%0.3f p99=%0.3f pct_ge_250_equiv=%0.3f threshold=%0.3f exposure=%s gain=%s binning=%s image_bitpix=%s detected_bit_depth=%s configured_bit_depth=%s processor_max_bit_depth=%s fits_bayerpat=%s config_cfa=%s camera_interface=%s',
+                profile_id,
+                camera_id if camera_id is not None else 'unknown',
+                stage,
+                self._shape_for_diag(data),
+                data.dtype,
+                float(numpy.min(samples)),
+                float(numpy.max(samples)),
+                float(numpy.mean(samples)),
+                float(numpy.median(samples)),
+                float(numpy.percentile(samples, 95.0)),
+                float(numpy.percentile(samples, 99.0)),
+                saturated_pct,
+                threshold,
+                exposure,
+                gain,
+                binning,
+                image_bitpix,
+                detected_bit_depth,
+                configured_bit_depth,
+                getattr(self.image_processor, 'max_bit_depth', None),
+                image_bayerpat,
+                self.config.get('CFA_PATTERN'),
+                self.config.get('CAMERA_INTERFACE'),
+            )
+        except Exception as e:
+            logger.warning(
+                '[ASI_FRAME_STATS][%s][camera_id=%s] stage=%s status=error error=%s',
+                profile_id,
+                camera_id if camera_id is not None else 'unknown',
+                stage,
+                str(e),
+            )
 
 
     def _processor_cache_diag(self, profile_id, camera_id, event, binning):
@@ -1499,6 +1632,7 @@ class ImageWorker(Process):
 
         self._select_image_processor(profile_id, camera_id, images_only_diag)
         self._log_processing_config_once(profile_id, camera_id)
+        asi_frame_stats_enabled = self._asi_frame_stats_should_log(profile_id, camera_id)
 
         # libcamera
         libcamera_black_level = i_dict.get('libcamera_black_level', 0)
@@ -1647,6 +1781,18 @@ class ImageWorker(Process):
             self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_AFTER_ADD', binning)
             self._images_only_diag(profile_id, camera_id, 'IMAGE_POST_PROCESS_START')
 
+        self._log_asi_frame_stats(
+            asi_frame_stats_enabled,
+            'raw_fits_after_read_pre_debayer',
+            profile_id,
+            camera_id,
+            i_ref.hdulist[0].data,
+            exposure=exposure,
+            gain=gain,
+            binning=binning,
+            i_ref=i_ref,
+        )
+
 
         filename_p.unlink()  # original file is no longer needed
 
@@ -1685,6 +1831,18 @@ class ImageWorker(Process):
 
         self.image_processor.fix_holes_early()
 
+        self._log_asi_frame_stats(
+            asi_frame_stats_enabled,
+            'after_calibration_bitdepth_pre_debayer',
+            profile_id,
+            camera_id,
+            i_ref.hdulist[0].data,
+            exposure=exposure,
+            gain=gain,
+            binning=binning,
+            i_ref=i_ref,
+        )
+
         if images_only_diag:
             self._images_only_diag(profile_id, camera_id, 'IMAGE_CALIBRATE_END')
             self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_AFTER_CALIBRATE', binning)
@@ -1700,6 +1858,17 @@ class ImageWorker(Process):
 
         self.image_processor.debayer()  # populates self.opencv_data
 
+        self._log_asi_frame_stats(
+            asi_frame_stats_enabled,
+            'after_debayer_cfa',
+            profile_id,
+            camera_id,
+            i_ref.opencv_data,
+            exposure=exposure,
+            gain=gain,
+            binning=binning,
+            i_ref=i_ref,
+        )
 
         self.image_processor.stack()  # populates self.image
 
@@ -1709,7 +1878,32 @@ class ImageWorker(Process):
         if images_only_diag:
             self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_AFTER_STACK', binning)
 
+        self._log_asi_frame_stats(
+            asi_frame_stats_enabled,
+            'before_hybrid_awb_postprocess',
+            profile_id,
+            camera_id,
+            self.image_processor.image,
+            exposure=exposure,
+            gain=gain,
+            binning=binning,
+            i_ref=i_ref,
+        )
+
         self.apply_hybrid_awb(profile_id, camera_id)
+
+        self._log_asi_frame_stats(
+            asi_frame_stats_enabled,
+            'after_hybrid_awb_postprocess',
+            profile_id,
+            camera_id,
+            self.image_processor.image,
+            exposure=exposure,
+            gain=gain,
+            binning=binning,
+            i_ref=i_ref,
+        )
+
         self.update_hybrid_awb(profile_id, camera_id)
 
 
@@ -1823,6 +2017,19 @@ class ImageWorker(Process):
 
         # Calculate ADU before stretch
         adu = self.image_processor.calculate_8bit_adu()
+
+        self._log_asi_frame_stats(
+            asi_frame_stats_enabled,
+            'before_auto_meter',
+            profile_id,
+            camera_id,
+            self.image_processor.image,
+            exposure=exposure,
+            gain=gain,
+            binning=binning,
+            i_ref=i_ref,
+        )
+
         self._meter_auto_exposure(profile_id, camera_id, binning)
         # adu value may be updated below
 
