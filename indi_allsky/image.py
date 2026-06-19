@@ -319,6 +319,21 @@ class ImageWorker(Process):
         return str(self.config.get('AUTO_EXPOSURE_METERING_MODE', DEFAULT_AUTO_EXPOSURE_METERING_MODE) or DEFAULT_AUTO_EXPOSURE_METERING_MODE).strip().lower()
 
 
+    def _auto_exposure_enabled(self):
+        enabled = self.config.get('AUTO_EXPOSURE_ENABLED', False)
+        if isinstance(enabled, bool):
+            return enabled
+
+        if isinstance(enabled, str):
+            enabled_str = enabled.strip().lower()
+            if enabled_str in ('1', 'true', 'yes', 'on', 'enabled'):
+                return True
+            if enabled_str in ('0', 'false', 'no', 'off', 'disabled'):
+                return False
+
+        return bool(enabled)
+
+
     def _new_auto_meter_state(self):
         return {
             'mode'            : None,
@@ -328,6 +343,7 @@ class ImageWorker(Process):
             'excluded_pixels' : 0,
             'trend_count'     : 0,
             'trend_direction' : 'none',
+            'last_decision'   : None,
         }
 
 
@@ -492,6 +508,8 @@ class ImageWorker(Process):
             state['trend_count'] = 0
             state['trend_direction'] = 'none'
 
+        state['last_decision'] = decision
+
         logger.info(
             '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f source_gain=%s shadow=%s',
             profile_id,
@@ -515,6 +533,88 @@ class ImageWorker(Process):
             decision.shadow,
         )
         return decision
+
+
+    def _clamp_auto_exposure_apply_value(self, value, minimum, maximum):
+        value = float(value)
+        minimum = float(minimum)
+        maximum = float(maximum)
+        if minimum > maximum:
+            minimum, maximum = maximum, minimum
+
+        return max(minimum, min(maximum, value))
+
+
+    def _apply_auto_exposure_decision(self, profile_id, camera_id):
+        if not self._auto_exposure_enabled():
+            return
+
+        state = self.auto_meter_states.get(self._adu_key(profile_id, camera_id))
+        if not state:
+            logger.info('[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s enabled=True status=skipped reason=missing_state', profile_id, camera_id)
+            return
+
+        decision = state.get('last_decision')
+        if decision is None:
+            logger.info('[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s enabled=True status=skipped reason=missing_decision', profile_id, camera_id)
+            return
+
+        old_exposure = float(self.exposure_av[constants.EXPOSURE_NEXT])
+        old_gain = float(self.gain_av[constants.GAIN_NEXT])
+        if decision.action == 'hold':
+            logger.info(
+                '[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s enabled=True action=hold old_exposure=%0.8f new_exposure=%0.8f old_gain=%0.2f new_gain=%0.2f',
+                profile_id,
+                camera_id,
+                old_exposure,
+                old_exposure,
+                old_gain,
+                old_gain,
+            )
+            return
+
+        try:
+            if self.night_av[constants.NIGHT_NIGHT]:
+                exposure_min = self.exposure_av[constants.EXPOSURE_MIN_NIGHT]
+                if self.night_av[constants.NIGHT_MOONMODE]:
+                    gain_min = self.gain_av[constants.GAIN_MIN_MOONMODE]
+                    gain_max = self.gain_av[constants.GAIN_MAX_MOONMODE]
+                else:
+                    gain_min = self.gain_av[constants.GAIN_MIN_NIGHT]
+                    gain_max = self.gain_av[constants.GAIN_MAX_NIGHT]
+            else:
+                exposure_min = self.exposure_av[constants.EXPOSURE_MIN_DAY]
+                gain_min = self.gain_av[constants.GAIN_MIN_DAY]
+                gain_max = self.gain_av[constants.GAIN_MAX_DAY]
+
+            new_exposure = self._clamp_auto_exposure_apply_value(
+                decision.proposed_exposure,
+                exposure_min,
+                self.exposure_av[constants.EXPOSURE_MAX],
+            )
+            new_gain = self._clamp_auto_exposure_apply_value(decision.proposed_gain, gain_min, gain_max)
+        except (TypeError, ValueError) as e:
+            logger.info('[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s enabled=True status=skipped reason=%s', profile_id, camera_id, str(e))
+            return
+
+        with self.exposure_av.get_lock():
+            self.exposure_av[constants.EXPOSURE_NEXT] = float(new_exposure)
+            self.exposure_av[constants.EXPOSURE_DELTA] = float(new_exposure - self.exposure_av[constants.EXPOSURE_CURRENT])
+
+        with self.gain_av.get_lock():
+            self.gain_av[constants.GAIN_NEXT] = float(new_gain)
+            self.gain_av[constants.GAIN_DELTA] = float(new_gain - self.gain_av[constants.GAIN_CURRENT])
+
+        logger.info(
+            '[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s enabled=True action=%s old_exposure=%0.8f new_exposure=%0.8f old_gain=%0.2f new_gain=%0.2f',
+            profile_id,
+            camera_id,
+            decision.action,
+            old_exposure,
+            new_exposure,
+            old_gain,
+            new_gain,
+        )
 
 
     def _meter_auto_exposure(self, profile_id, camera_id, binning):
@@ -1715,6 +1815,7 @@ class ImageWorker(Process):
             self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_BEFORE_ADU', binning)
 
         adu, adu_average = self.calculate_exposure(adu, exposure, gain)
+        self._apply_auto_exposure_decision(profile_id, camera_id)
 
         if images_only_diag:
             self._images_only_diag(

@@ -60,6 +60,7 @@ class CaptureProfile:
     exposure_timeout: float
     exposure_period: float
     exposure_period_day: float
+    auto_exposure_enabled: bool
     auto_exposure_metering_mode: str
     target_adu: int
     target_adu_day: int
@@ -290,6 +291,34 @@ def _auto_exposure_metering_mode(config: Mapping[str, Any], profile_config: Mapp
     return DEFAULT_AUTO_EXPOSURE_METERING_MODE
 
 
+def _bool_value(value, default=False) -> bool:
+    if isinstance(value, bool):
+        return value
+
+    if value is None:
+        return default
+
+    if isinstance(value, str):
+        value_str = value.strip().lower()
+        if value_str in ('1', 'true', 'yes', 'on', 'enabled'):
+            return True
+        if value_str in ('0', 'false', 'no', 'off', 'disabled'):
+            return False
+
+    return bool(value)
+
+
+def _auto_exposure_enabled(config: Mapping[str, Any], profile_config: Mapping[str, Any]) -> bool:
+    auto_exposure_config = _mapping_config(profile_config, 'auto_exposure')
+    return _bool_value(auto_exposure_config.get(
+        'enabled',
+        profile_config.get(
+            'AUTO_EXPOSURE_ENABLED',
+            profile_config.get('auto_exposure_enabled', config.get('AUTO_EXPOSURE_ENABLED', False)),
+        ),
+    ))
+
+
 def _profile_from_config(
     config: Mapping[str, Any],
     profile_config: Optional[Mapping[str, Any]] = None,
@@ -416,6 +445,7 @@ def _profile_from_config(
         exposure_timeout=_mapping_float(exposure_config, 'timeout', _float_config(profile_config, 'exposure_timeout', _float_config(config, 'CCD_EXPOSURE_TIMEOUT', 330.0))),
         exposure_period=_mapping_float(exposure_config, 'period', _float_config(profile_config, 'exposure_period', _float_config(config, 'EXPOSURE_PERIOD', 15.0))),
         exposure_period_day=_mapping_float(exposure_config, 'period_day', _float_config(profile_config, 'exposure_period_day', _float_config(config, 'EXPOSURE_PERIOD_DAY', 15.0))),
+        auto_exposure_enabled=_auto_exposure_enabled(config, profile_config),
         auto_exposure_metering_mode=_auto_exposure_metering_mode(config, profile_config),
         target_adu=_mapping_int(target_adu_config, 'night', _int_config(profile_config, 'target_adu', _int_config(config, 'TARGET_ADU', 75))),
         target_adu_day=_mapping_int(target_adu_config, 'day', _int_config(profile_config, 'target_adu_day', _int_config(config, 'TARGET_ADU_DAY', 75))),
@@ -507,6 +537,7 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     profile_config['CCD_EXPOSURE_TIMEOUT'] = profile.exposure_timeout
     profile_config['EXPOSURE_PERIOD'] = profile.exposure_period
     profile_config['EXPOSURE_PERIOD_DAY'] = profile.exposure_period_day
+    profile_config['AUTO_EXPOSURE_ENABLED'] = profile.auto_exposure_enabled
     profile_config['AUTO_EXPOSURE_METERING_MODE'] = profile.auto_exposure_metering_mode
     profile_config['TARGET_ADU'] = profile.target_adu
     profile_config['TARGET_ADU_DAY'] = profile.target_adu_day
