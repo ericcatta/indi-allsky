@@ -134,6 +134,9 @@ class ImageWorker(Process):
         self.adu_states = {}
         self.adu_state = self._new_adu_state()
         self.adu_states[self.adu_context_key] = self.adu_state
+        self.auto_meter_context_key = self.adu_context_key
+        self.auto_meter_states = {}
+        self.auto_meter_states[self.auto_meter_context_key] = self._new_auto_meter_state()
         self.hybrid_awb_backend_warned = set()
         self.generate_mask_base = True
 
@@ -314,6 +317,58 @@ class ImageWorker(Process):
         return str(self.config.get('AUTO_EXPOSURE_METERING_MODE', DEFAULT_AUTO_EXPOSURE_METERING_MODE) or DEFAULT_AUTO_EXPOSURE_METERING_MODE).strip().lower()
 
 
+    def _new_auto_meter_state(self):
+        return {
+            'mode'            : None,
+            'measured_value'  : None,
+            'smoothed_value'  : None,
+            'sample_count'    : 0,
+            'excluded_pixels' : 0,
+        }
+
+
+    def _select_auto_meter_state(self, profile_id, camera_id, mode):
+        auto_meter_key = self._adu_key(profile_id, camera_id)
+        state = self.auto_meter_states.get(auto_meter_key)
+        if state is None or state.get('mode') not in (None, mode):
+            state = self._new_auto_meter_state()
+            self.auto_meter_states[auto_meter_key] = state
+
+        state['mode'] = mode
+        self.auto_meter_context_key = auto_meter_key
+        return state
+
+
+    def _update_auto_meter_state(self, profile_id, camera_id, result):
+        alpha = 0.25
+        state = self._select_auto_meter_state(profile_id, camera_id, result.mode)
+        measured_value = float(result.measured_value)
+        previous_smoothed = state.get('smoothed_value')
+        if previous_smoothed is None:
+            smoothed_value = measured_value
+        else:
+            smoothed_value = (float(previous_smoothed) * (1.0 - alpha)) + (measured_value * alpha)
+
+        state['measured_value'] = measured_value
+        state['smoothed_value'] = smoothed_value
+        state['sample_count'] = int(result.sample_count)
+        state['excluded_pixels'] = int(result.excluded_pixels)
+
+        logger.info(
+            '[AUTO_METER_STATE] profile=%s camera_id=%s mode=%s measured_value=%0.2f smoothed_value=%0.2f alpha=%0.2f sample_count=%d excluded_pixels=%d',
+            profile_id,
+            camera_id,
+            result.mode,
+            measured_value,
+            smoothed_value,
+            alpha,
+            int(result.sample_count),
+            int(result.excluded_pixels),
+        )
+
+        return state
+
+
     def _meter_auto_exposure(self, profile_id, camera_id, binning):
         try:
             adu_masks = getattr(self.image_processor, '_adu_mask_dict', None) or {}
@@ -333,6 +388,7 @@ class ImageWorker(Process):
                 result.excluded_pixels,
                 result.status,
             )
+            self._update_auto_meter_state(profile_id, camera_id, result)
             return result
         except Exception as e:
             logger.warning('[AUTO_METER] profile=%s camera_id=%s mode=%s status=error error=%s', profile_id, camera_id, self._auto_exposure_metering_mode(), str(e))
