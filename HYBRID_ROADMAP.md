@@ -176,7 +176,88 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Il fix futuro piu' sicuro e' rendere l'inizializzazione restart-safe: preferire last stable exposure per camera/profilo oppure stato persistente recente prima di applicare `CCD_EXPOSURE_DEF`.
 - Aggiungere diagnostica esplicita alla sorgente iniziale di exposure: `source=profile_default|global_default|last_image|fallback_min`.
 
-## 8. Log operativo
+## 8. Audit pipeline diurna IMX708 vs ASI678MC - 2026-06-19
+
+### File analizzati
+
+- `indi_allsky/capture_profiles.py`
+- `indi_allsky/capture.py`
+- `indi_allsky/image.py`
+- `indi_allsky/processing.py`
+- `indi_allsky/camera/libcamera.py`
+- `indi_allsky/camera/indi.py`
+- `indi_allsky/config.py`
+- `indi_allsky/flask/views.py`
+- `indi_allsky/flask/templates/modern_admin/settings_cameras.html`
+
+### Conclusione
+
+- La pipeline non usa davvero gli stessi parametri completi per le due camere.
+- Capture/gain/exposure/target ADU sono per-profilo tramite `capture_profiles.py`.
+- Parte del processing resta invece globale o solo parzialmente profile-aware: `CFA_PATTERN`, `CCD_BIT_DEPTH`, `AUTO_WB*`, `WBR/WBG/WBB*`, `GAMMA_CORRECTION*`, `IMAGE_STRETCH`, `DAYTIME_CONTRAST_ENHANCE`, `CLAHE_*`, `SCNR_*`, grayscale e calibrazione.
+- IMX708 via libcamera/JPEG arriva spesso gia' demosaicizzata e con un percorso capture-side libcamera piu' deterministico; ASI678MC via INDI dipende molto di piu' da CFA/debayer e white balance postprocess. Quindi una config globale che "va bene" per IMX708 puo' produrre immagini ASI diurne sbagliate.
+- Causa piu' probabile per ASI678MC diurna errata: combinazione di exposure/gain day non ancora controllati bene + debayer/CFA/WB/stretch globali non per-camera. Il primo controllo da fare sul Raspberry e' verificare CFA effettivo ASI e log `HYBRID_AWB` con `backend=postprocess_rgb applied`.
+
+### Tabella parametri
+
+| Parametro | IMX708 | ASI678MC | Sorgente config/profile/runtime |
+| --- | --- | --- | --- |
+| Camera interface | `libcamera_imx708` | INDI/ZWO ASI | `MULTI_CAMERA.profiles[n].camera_interface` -> `build_profile_config()` |
+| Capture driver | `rpicam-still` via `libcamera.py` | INDI `CCD_EXPOSURE` / `CCD_CONTROLS.Gain` via `indi.py` | Runtime CaptureWorker |
+| Camera ID | atteso `1` DB / libcamera camera id profilo | atteso `2` DB / INDI camera name | DB camera + profilo |
+| Day gain | 1.13, clamp minimo libcamera | 0.0 atteso | Profilo `gain.day`; fallback known defaults; clamp driver in `capture.py` |
+| Night gain | 16 | 220 | Profilo `gain.night`; fallback known defaults |
+| Moon gain | 16 | 75 | Profilo `gain.moonmode`; fallback known defaults |
+| Day exposure | profilo/fallback `exposure.*` | profilo/fallback `exposure.*` | Profilo -> `CCD_EXPOSURE_*` runtime; rischio reset da `exposure.default` |
+| Auto Exposure Enabled | per profilo, default OFF | per profilo, default OFF | `auto_exposure.enabled` -> `AUTO_EXPOSURE_ENABLED` |
+| Auto Metering | per profilo | per profilo | `auto_exposure.metering_mode` -> `AUTO_EXPOSURE_METERING_MODE` |
+| Target ADU day/night | per profilo | per profilo | `target_adu.*` -> `TARGET_ADU*` |
+| Auto gain day/night/moon | per profilo | per profilo | `gain.auto_*` -> `CCD_CONFIG.AUTO_GAIN_ENABLE_*` |
+| Capture AWB | libcamera command may use `--awb`/`--awbgains`; Hybrid `postprocess_rgb` suppresses Hybrid capture gains | no safe INDI capture AWB backend | `LIBCAMERA.*` only applies to libcamera; ASI uses postprocess |
+| Hybrid AWB apply | expected `postprocess_rgb` | expected `postprocess_rgb` | `hybrid.awb.apply_mode` -> `HYBRID.AWB.APPLY_MODE`; shared `hybrid_av` per profile |
+| Hybrid AWB measurement | after stack, before stretch | after stack, before stretch | `image.py update_hybrid_awb()` using current BGR image |
+| Hybrid AWB apply point | before measurement, before stretch | before measurement, before stretch | `image.py apply_hybrid_awb()` |
+| Debayer | often no CFA effect for JPEG/libcamera path; raw DNG/FITS would use CFA | critical for ASI raw/FITS frames | `processing.py debayer()`; `CFA_PATTERN` can override detected Bayer globally/profile |
+| CFA_PATTERN | profile can override, else global | profile can override, else global | `capture_profiles.py` only supports `cfa_pattern`; must verify ASI-specific value |
+| CCD bit depth | profile can override, else global | profile can override, else global | `ccd_bit_depth` -> `CCD_BIT_DEPTH`; affects scaling |
+| Dark/calibration | currently global/profile fallback only if profile sets keys not fully mapped in resolver | same | `IMAGE_CALIBRATE_*`; mostly global processing |
+| Stretch | same global config unless profile map/fallback carries override | same global config unless profile map/fallback carries override | `IMAGE_STRETCH.*`; not currently a first-class per-camera profile field |
+| Daytime stretch enable | same global `IMAGE_STRETCH.DAYTIME` | same global `IMAGE_STRETCH.DAYTIME` | Global unless explicit profile extension added |
+| Gamma day | same global `GAMMA_CORRECTION_DAY` | same global `GAMMA_CORRECTION_DAY` | Global processing |
+| Manual WB day | same global `WBR/WBG/WBB_FACTOR_DAY` unless config copied into profile manually | same global | Global processing |
+| Legacy Auto WB day | same global `AUTO_WB_DAY` | same global | Global processing; separate from Hybrid AWB |
+| SCNR day | same global `SCNR_ALGORITHM_DAY` | same global | Global processing |
+| CLAHE/contrast day | same global `DAYTIME_CONTRAST_ENHANCE`, `CLAHE_*` | same global | Global processing |
+| Grayscale day | same global `DAYTIME_GRAYSCALE` | same global | Global processing |
+
+### Differenze trovate
+
+- IMX708 e ASI678MC hanno capture profile separati per gain/exposure/AWB apply mode, ma molte impostazioni di rendering finale sono ancora condivise.
+- IMX708 e' meno sensibile a `CFA_PATTERN` quando acquisisce JPEG da libcamera; ASI678MC e' molto sensibile perche' il debayer avviene nel processing.
+- `processing.py` applica WB legacy, gamma, SCNR, stretch e contrast dopo Hybrid AWB. Questi valori sono globali e possono correggere IMX708 ma peggiorare ASI.
+- `ImageProcessor` e' cacheato per `profile_id:camera_id`, ma viene creato con la config selezionata in quel momento. Se ImageWorker cade su fallback globale per profilo mancante, anche processing e maschere possono contaminarsi.
+
+### Verifiche runtime consigliate sul Raspberry
+
+- Controllare `IMAGE_PAYLOAD_START` e `IMAGE_PROCESSOR_CONTEXT` per `asi678mc` e `imx708-wide`.
+- Controllare assenza di warning `[MULTI_CAMERA_CONFIG] ... fallback` per entrambi i profili.
+- Controllare `HYBRID_AWB`:
+  - IMX708: `backend=postprocess_rgb applied_red=... applied_blue=...`
+  - ASI678MC: `backend=postprocess_rgb applied_red=... applied_blue=...`
+- Verificare `CFA_PATTERN` effettivo ASI678MC: se errato o globale adatto a IMX708, il colore diurno ASI sara' sbagliato anche con AWB.
+- Verificare esposizione/gain diurna ASI nei log `[MULTI_CAMERA_RESOLVED_CONFIG]` e `[AUTO_EXPOSURE_APPLY]`.
+
+### Prossimi fix consigliati
+
+1. Rendere per-camera i parametri processing minimi per ASI: `CFA_PATTERN`, `CCD_BIT_DEPTH`, `WBR/WBG/WBB_FACTOR_DAY`, `AUTO_WB_DAY`, `GAMMA_CORRECTION_DAY`, `IMAGE_STRETCH.DAYTIME`, `SCNR_ALGORITHM_DAY`, `DAYTIME_CONTRAST_ENHANCE`.
+2. Aggiungere log diagnostico processing per frame: profile, camera_id, CFA pattern usato, bit depth, stretch daytime on/off, gamma day, WB legacy on/off, Hybrid AWB applied/skipped.
+3. Verificare e correggere il CFA ASI678MC prima di modificare algoritmi AWB: un Bayer pattern errato rende ogni WB successivo inaffidabile.
+4. Separare i preset Basic per camera:
+   - ASI678MC day: gain 0, auto exposure enabled, Hybrid AWB postprocess, CFA corretto, no stretch aggressivo.
+   - IMX708 day: gain minimo driver 1.13, Hybrid AWB postprocess o libcamera fixed deterministico, processing dedicato.
+5. Solo dopo CFA/WB/exposure day corretti, valutare color calibration per-camera.
+
+## 9. Log operativo
 
 - 2026-06-19: Consolidata roadmap Hybrid AllSky come documento operativo principale.
 - 2026-06-19: Stabilizzato runtime multicamera con gain/exposure/profile resolver per IMX708 e ASI678MC.
@@ -185,3 +266,4 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - 2026-06-19: Aggiunto toggle per-camera `AUTO_EXPOSURE_ENABLED`, default OFF, per applicazione runtime controllata.
 - 2026-06-19: Eseguito audit configurazione Hybrid AllSky e documentati conflitti fra profili, global fallback e runtime.
 - 2026-06-19: Mappato flusso `CCD_EXPOSURE_DEF` -> `EXPOSURE_CURRENT/NEXT` e identificata la reinizializzazione da shared state `-1.0` come causa probabile dei ritorni a 8s.
+- 2026-06-19: Auditata pipeline diurna IMX708 vs ASI678MC; identificati CFA/debayer/WB/stretch globali come causa probabile delle immagini ASI diurne errate.
