@@ -117,7 +117,66 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Advanced: binning day/night/moon, exposure timeout, exposure period, auto gain day/night/moon/levels, libcamera AWB fixed/manual gains, ROI/mask, camera-specific options.
 - Developer: Full Settings globali legacy, raw `CCD_CONFIG`, raw `CCD_EXPOSURE_*`, diagnostica timing, metering internals, upload internals, compatibilita' driver e feature sperimentali.
 
-## 7. Log operativo
+## 7. Audit exposure flow - 2026-06-19
+
+### File analizzati
+
+- `indi_allsky/config.py`
+- `indi_allsky/constants.py`
+- `indi_allsky/flask/views.py`
+- `indi_allsky/capture_profiles.py`
+- `indi_allsky/allsky.py`
+- `indi_allsky/capture.py`
+- `indi_allsky/image.py`
+- `indi_allsky/camera/libcamera.py`
+- `indi_allsky/camera/indi.py`
+- Driver alternativi con stesso pattern: `pycurl_camera.py`, `libcamera_mqtt.py`, `indi_accumulator.py`, `indi_passive.py`, `test_cameras.py`.
+
+### Mappa config -> profile -> runtime -> driver
+
+1. UI / DB config:
+   - Legacy global config puo' salvare `CCD_EXPOSURE_DEF` da Full Settings / config API.
+   - Modern Camera Settings salva il default operativo del profilo in `MULTI_CAMERA.profiles[n].exposure.default`.
+   - Il default statico in `config.py` e' `CCD_EXPOSURE_DEF = 0.0`, quindi 8.0 non nasce dal codice base ma da DB/config/profilo salvato.
+2. Capture profile:
+   - `capture_profiles.py` risolve `exposure.default` / `exposure_default` / global `CCD_EXPOSURE_DEF`.
+   - `build_profile_config()` scrive il valore risolto nella config runtime piatta come `CCD_EXPOSURE_DEF`.
+3. Shared state:
+   - `constants.py` definisce `EXPOSURE_CURRENT = 0` e `EXPOSURE_NEXT = 1`.
+   - `allsky.py` crea gli array shared exposure con `[-1.0, -1.0, ...]`; `-1.0` significa non inizializzato.
+   - In multicamera, il profilo primary usa lo shared state principale; i profili secondari ricevono uno shared state separato creato da `_new_profile_shared_state()`.
+4. CaptureWorker:
+   - `capture.py` legge `CCD_EXPOSURE_DEF` durante `_initialize()`.
+   - Se `CCD_EXPOSURE_DEF` e' truthy, usa quel valore come `ccd_exposure_default` e non riusa la last stable exposure dal DB.
+   - Se `EXPOSURE_CURRENT == -1.0`, scrive sia `EXPOSURE_CURRENT` sia `EXPOSURE_NEXT` a `ccd_exposure_default`.
+   - Se `EXPOSURE_CURRENT` e' gia' valorizzato, non lo resetta durante il semplice restart del worker dentro lo stesso processo padre.
+5. Runtime controller:
+   - `image.py` puo' aggiornare `EXPOSURE_NEXT` in due punti:
+     - legacy ADU `recalculate_exposure()`;
+     - Auto Exposure Controller quando `AUTO_EXPOSURE_ENABLED=True`.
+   - Entrambi aggiornano `EXPOSURE_DELTA`; nessuno scrive `CCD_EXPOSURE_DEF`.
+6. Camera driver:
+   - `capture.py` passa `EXPOSURE_NEXT` a `shoot()`.
+   - `libcamera.py` e `indi.py` impostano il driver rispettivamente con `--shutter` / `CCD_EXPOSURE`.
+   - All'avvio dello scatto il driver aggiorna `EXPOSURE_CURRENT` al valore richiesto. Il driver non decide il valore 8.0.
+
+### Risposte operative
+
+- Chi imposta 8.0 secondi: un valore salvato in DB/config/profilo come `CCD_EXPOSURE_DEF` o `MULTI_CAMERA.profiles[n].exposure.default`. Il codice base non contiene default 8.0.
+- Quando viene reimpostato: quando uno shared state exposure nuovo o resettato ha `EXPOSURE_CURRENT == -1.0` e la config runtime del profilo ha `CCD_EXPOSURE_DEF=8.0`.
+- Startup: si', startup del servizio crea shared arrays a `-1.0`; se il profilo risolve default 8.0, `capture.py` inizializza current/next a 8.0.
+- Profile switch: non esiste un vero trasferimento di stato fra profili. Se il profilo mantiene lo stesso handle/shared state, non resetta. Se il profilo cambia id, viene ricreato, o il servizio ricarica la config creando nuovi handle, torna al default risolto.
+- Camera reconnect: se reconnect avviene dentro lo stesso CaptureWorker/shared state, non dovrebbe resettare. Se il worker o il processo padre ricrea lo shared state, puo' rientrare da `CCD_EXPOSURE_DEF`.
+- Multicamera handoff: il primary usa lo shared state principale, i secondari hanno shared state separato. Non c'e' handoff di `EXPOSURE_CURRENT/NEXT` tra camere. Se ImageWorker non trova `profile_id` e usa fallback default, puo' leggere/scrivere lo shared state sbagliato; i warning `[MULTI_CAMERA_CONFIG] ... fallback` sono quindi critici.
+
+### Punti critici
+
+- `CCD_EXPOSURE_DEF` truthy disabilita il riuso della last stable exposure recente dal DB.
+- Il reset a 8s non e' un timer: e' una reinizializzazione da default quando lo stato torna a non inizializzato.
+- Il fix futuro piu' sicuro e' rendere l'inizializzazione restart-safe: preferire last stable exposure per camera/profilo oppure stato persistente recente prima di applicare `CCD_EXPOSURE_DEF`.
+- Aggiungere diagnostica esplicita alla sorgente iniziale di exposure: `source=profile_default|global_default|last_image|fallback_min`.
+
+## 8. Log operativo
 
 - 2026-06-19: Consolidata roadmap Hybrid AllSky come documento operativo principale.
 - 2026-06-19: Stabilizzato runtime multicamera con gain/exposure/profile resolver per IMX708 e ASI678MC.
@@ -125,3 +184,4 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - 2026-06-19: Introdotto Auto Exposure Controller con decisioni shadow, smoothing e deadband trend-aware.
 - 2026-06-19: Aggiunto toggle per-camera `AUTO_EXPOSURE_ENABLED`, default OFF, per applicazione runtime controllata.
 - 2026-06-19: Eseguito audit configurazione Hybrid AllSky e documentati conflitti fra profili, global fallback e runtime.
+- 2026-06-19: Mappato flusso `CCD_EXPOSURE_DEF` -> `EXPOSURE_CURRENT/NEXT` e identificata la reinizializzazione da shared state `-1.0` come causa probabile dei ritorni a 8s.
