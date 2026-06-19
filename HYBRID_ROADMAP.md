@@ -298,6 +298,41 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - dopo `git pull` e restart, controllare che i log runtime non mostrino piu' `cfa_pattern=`, `ccd_bit_depth=0` quando il profilo ASI contiene valori processing;
     - confermare se il cambio CFA/bit depth/WB corregge la sovraesposizione/colore ASI diurno o se serve indagare saturazione reale/debayer ulteriore.
 
+- 2026-06-19: Audit diagnostico pipeline ASI678MC dopo conferma resolver processing.
+  - Stato confermato sul Raspberry dopo `f41bf109`:
+    - `MULTI_CAMERA_RESOLVED_CONFIG` e `MULTI_CAMERA_PROCESSING_CONFIG` mostrano `cfa_pattern=RGGB`, `ccd_bit_depth=16`, `auto_wb_day=True` per ASI678MC.
+    - IMX708 resta su `smoothed_value` circa 136-145, mentre ASI678MC resta circa 235-255 anche a `exposure=0.05` e `gain=0`.
+  - Pipeline effettiva letta nel codice:
+    - INDI/ZWO scrive il BLOB FITS quasi grezzo in `indi_allsky/camera/indi.py`; non normalizza ne' fa stretch.
+    - `ImageProcessor._add()` in `indi_allsky/processing.py` apre il FITS, legge `BITPIX`, `BAYERPAT`, dati raw e applica override `CCD_BIT_DEPTH=16` dal profilo.
+    - `calibrate()` puo' sottrarre dark frame o offset, ma non dovrebbe sbiancare l'immagine salvo calibrazione/mappa errata.
+    - `debayer()` usa `CFA_PATTERN=RGGB` se configurato e il frame FITS e' 2D; se il FITS e' gia' RGB/non-2D, il debayer viene saltato e il CFA non ha effetto.
+    - `stack()` popola `self.image`; in day mode lo stacking e' disabilitato se `IMAGE_STACK_DAY=False`.
+    - `apply_hybrid_awb()` viene eseguito prima della misura auto-meter; con backend `postprocess_rgb` moltiplica R/B e clippa al range dtype.
+    - `AUTO_METER_STATE` viene calcolato subito dopo Hybrid AWB e prima di `denoise()`, `stretch()`, `convert_16bit_to_8bit()`, WB legacy, gamma, SCNR, CLAHE e JPEG.
+    - `convert_16bit_to_8bit()` e' uno shift lineare basato su `max_bit_depth`; con `CCD_BIT_DEPTH=16` non introduce stretch automatico.
+  - Conclusione chiave:
+    - Il `smoothed_value` alto della ASI non puo' essere causato da JPEG output, gamma finale, SCNR, WB legacy finale o `IMAGE_STRETCH`, perche' questi avvengono dopo la misura.
+    - Il problema nasce prima o durante uno di questi punti: dati FITS gia' alti, calibrazione/fix holes, debayer/interpretazione shape, stacking, oppure Hybrid AWB postprocess prima del meter.
+  - Ipotesi ordinate per probabilita':
+    1. Raw FITS ASI e' gia' vicino al full-scale anche a 0.05s/gain 0, oppure il driver/firmware non sta realmente usando un livello minimo equivalente. Da verificare con statistiche raw FITS `min/p50/p95/p99/max` prima del debayer.
+    2. Hybrid AWB `postprocess_rgb` applica gains elevati e clippa R/B prima di `AUTO_METER_STATE`; puo' alzare la luminanza misurata anche se il raw non e' saturo. Da verificare con log `applied_red`, `applied_blue` e statistiche pre/post AWB.
+    3. Il FITS ASI non arriva come Bayer 2D ma come RGB/non-2D; in quel caso `processing.py` salta il debayer e `CFA_PATTERN=RGGB` non viene usato. Da verificare con shape/dtype raw nel log.
+    4. Stack daytime o calibrazione errata alterano il frame prima del meter. Meno probabile, ma da verificare controllando `IMAGE_STACK_DAY`, dark frame matching e statistiche dopo calibrazione.
+    5. Bit depth errato resta una possibilita' solo se il FITS e' gia' riscalato o left-shiftato in modo inatteso; con `CCD_BIT_DEPTH=16` la conversione normale non dovrebbe sbiancare un frame non saturo.
+    6. Stretch/gamma/WB/JPEG possono peggiorare l'aspetto finale, ma non spiegano il meter ASI a 235-255.
+  - Prossimo fix consigliato:
+    - Prima patch diagnostica, non di tuning: aggiungere log per ASI/processing con `profile_id`, `camera_id`, image type, FITS shape, dtype, `BITPIX`, `BAYERPAT`, `CFA_PATTERN` risolto, bit depth rilevato/configurato, e statistiche `min/p50/p95/p99/max` in questi checkpoint:
+      1. raw FITS subito dopo `_add()`;
+      2. dopo calibrazione/fix holes;
+      3. dopo debayer;
+      4. dopo stack;
+      5. prima e dopo `apply_hybrid_awb()`;
+      6. nel punto esatto usato da `AUTO_METER_STATE`.
+    - Se il raw FITS e' gia' saturo, correggere capture/driver ASI o verificare controlli INDI reali.
+    - Se il raw non e' saturo ma lo diventa dopo Hybrid AWB, calcolare auto-meter su frame pre-AWB o limitare il backend AWB usato per il controllo esposizione.
+    - Se il debayer viene saltato o usa shape inattesa, correggere il percorso FITS/debayer prima di toccare exposure/gain.
+
 - 2026-06-19: Consolidata roadmap Hybrid AllSky come documento operativo principale.
 - 2026-06-19: Stabilizzato runtime multicamera con gain/exposure/profile resolver per IMX708 e ASI678MC.
 - 2026-06-19: Introdotto metering per-camera selezionabile in shadow mode.
