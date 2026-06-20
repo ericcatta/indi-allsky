@@ -40,6 +40,8 @@ from .exceptions import TemperatureException
 
 from .camera_runtime_state import CameraRuntimeState
 from .camera_shared_state import CameraSharedState
+from .auto_gain_runtime_state import AutoGainRuntimeStateStore
+from .auto_gain_runtime_state import default_auto_gain_runtime_state_path
 from .capture_profiles import derive_capture_profiles
 from .multicamera_diag import write_multicamera_diag
 
@@ -302,6 +304,11 @@ class CaptureWorker(Process):
 
         self._miscDb = miscDb(self.config)
         self._dateCalcs = IndiAllSkyDateCalcs(self.config, self.position_av)
+        self.varlib_folder_p = Path(self.config.get('VARLIB_FOLDER', '/var/lib/indi-allsky'))
+        self.auto_gain_runtime_state_store = AutoGainRuntimeStateStore(
+            self.config.get('AUTO_GAIN_RUNTIME_STATE_PATH', default_auto_gain_runtime_state_path(self.varlib_folder_p)),
+            max_age_seconds=self.config.get('AUTO_GAIN_RESTORE_MAX_AGE_SECONDS', 86400),
+        )
 
         self.next_forced_transition_time = None
 
@@ -653,6 +660,51 @@ class CaptureWorker(Process):
 
     def _is_moonmode(self):
         return self.night_av[constants.NIGHT_MOONMODE] == 1
+
+
+    def _auto_gain_mode(self):
+        if self._is_night_mode():
+            if self._is_moonmode():
+                return 'moonmode'
+            return 'night'
+
+        return 'day'
+
+
+    def _auto_gain_mode_limits(self, mode, gain_day, gain_night, gain_moonmode, gain_max_day, gain_max_night, gain_max_moonmode):
+        if mode == 'day':
+            return float(gain_day), float(gain_max_day)
+        if mode == 'moonmode':
+            gain_min = gain_day if self._auto_gain_enabled('moonmode') else gain_moonmode
+            return float(gain_min), float(gain_max_moonmode)
+
+        gain_min = gain_day if self._auto_gain_enabled('night') else gain_night
+        return float(gain_min), float(gain_max_night)
+
+
+    def _log_auto_gain_restore(self, mode, restored_gain, configured_gain, gain_max, reason):
+        logger.info(
+            '[AUTO_GAIN_RESTORE] profile=%s camera_id=%s mode=%s restored_gain=%0.2f configured_gain=%0.2f gain_max=%0.2f reason=%s',
+            self.profile_id,
+            self.camera_id,
+            mode,
+            restored_gain,
+            configured_gain,
+            gain_max,
+            reason,
+        )
+
+
+    def _log_auto_gain_reset(self, mode, old_gain, new_gain, reason):
+        logger.info(
+            '[AUTO_GAIN_RESET] profile=%s camera_id=%s mode=%s old_gain=%0.2f new_gain=%0.2f reason=%s',
+            self.profile_id,
+            self.camera_id,
+            mode,
+            old_gain,
+            new_gain,
+            reason,
+        )
 
 
     def _log_hybrid_placeholder(self):
@@ -2004,11 +2056,49 @@ class CaptureWorker(Process):
             ccd_exposure_default = ccd_min_exp
 
 
+        auto_gain_mode = self._auto_gain_mode()
+        mode_gain_min, mode_gain_max = self._auto_gain_mode_limits(
+            auto_gain_mode,
+            gain_day,
+            gain_night,
+            gain_moonmode,
+            gain_max_day,
+            gain_max_night,
+            gain_max_moonmode,
+        )
+        configured_gain_default = float(ccd_gain_default)
+
         # sanity check
-        if ccd_gain_default > gain_night:
-            ccd_gain_default = gain_night
-        if ccd_gain_default < gain_day:
-            ccd_gain_default = gain_day
+        if ccd_gain_default > mode_gain_max:
+            ccd_gain_default = mode_gain_max
+        if ccd_gain_default < mode_gain_min:
+            ccd_gain_default = mode_gain_min
+
+        restore_result = self.auto_gain_runtime_state_store.restore_gain(
+            profile_id=self.profile_id,
+            camera_id=self.camera_id,
+            mode=auto_gain_mode,
+            configured_gain=ccd_gain_default,
+            gain_min=mode_gain_min,
+            gain_max=mode_gain_max,
+        )
+        self._log_auto_gain_restore(
+            auto_gain_mode,
+            restore_result.gain,
+            configured_gain_default,
+            mode_gain_max,
+            restore_result.reason,
+        )
+        if restore_result.restored:
+            ccd_gain_default = float(restore_result.gain)
+        else:
+            old_gain = restore_result.stored_gain if restore_result.stored_gain is not None else configured_gain_default
+            reset_reason = {
+                'missing'         : 'missing_state',
+                'expired'         : 'config_change',
+                'profile_changed' : 'profile_changed',
+            }.get(restore_result.reason, restore_result.reason)
+            self._log_auto_gain_reset(auto_gain_mode, float(old_gain), float(ccd_gain_default), reset_reason)
 
 
         if self.exposure_av[constants.EXPOSURE_CURRENT] == -1.0:
