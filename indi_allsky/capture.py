@@ -536,7 +536,7 @@ class CaptureWorker(Process):
         ccd_day = ccd_config.get('DAY') or {}
 
         logger.info(
-            '[MULTI_CAMERA_RESOLVED_CONFIG][%s][camera_id=%s] camera_interface=%s processing_mode=%s gain_day=%s gain_night=%s gain_moonmode=%s auto_gain_day=%s auto_gain_night=%s auto_gain_moonmode=%s auto_gain_levels=%s target_adu_day=%s target_adu_night=%s target_adu_dev_day=%s target_adu_dev_night=%s exposure_min=%s exposure_min_day=%s exposure_max=%s exposure_default=%s exposure_period=%s exposure_period_day=%s auto_exposure_metering_mode=%s hybrid_awb_apply_mode=%s cfa_pattern=%s ccd_bit_depth=%s auto_wb_day=%s auto_wb_night=%s wbr_day=%s wbg_day=%s wbb_day=%s gamma_day=%s image_stretch_daytime=%s daytime_contrast_enhance=%s',
+            '[MULTI_CAMERA_RESOLVED_CONFIG][%s][camera_id=%s] camera_interface=%s processing_mode=%s gain_day=%s gain_night=%s gain_moonmode=%s gain_max_day=%s gain_max_night=%s gain_max_moonmode=%s auto_gain_day=%s auto_gain_night=%s auto_gain_moonmode=%s auto_gain_levels=%s target_adu_day=%s target_adu_night=%s target_adu_dev_day=%s target_adu_dev_night=%s exposure_min=%s exposure_min_day=%s exposure_max=%s exposure_default=%s exposure_period=%s exposure_period_day=%s auto_exposure_metering_mode=%s hybrid_awb_apply_mode=%s cfa_pattern=%s ccd_bit_depth=%s auto_wb_day=%s auto_wb_night=%s wbr_day=%s wbg_day=%s wbb_day=%s gamma_day=%s image_stretch_daytime=%s daytime_contrast_enhance=%s',
             self.profile_id,
             camera_id,
             self.capture_camera_interface,
@@ -544,6 +544,9 @@ class CaptureWorker(Process):
             ccd_day.get('GAIN'),
             ccd_night.get('GAIN'),
             ccd_moonmode.get('GAIN'),
+            self.config.get('GAIN_MAX_DAY'),
+            self.config.get('GAIN_MAX_NIGHT'),
+            self.config.get('GAIN_MAX_MOONMODE'),
             self._auto_gain_enabled('day'),
             self._auto_gain_enabled('night'),
             self._auto_gain_enabled('moonmode'),
@@ -1788,6 +1791,23 @@ class CaptureWorker(Process):
         ccd_min_gain = math.ceil(float(ccd_info['GAIN_INFO']['min']) * 100) / 100  # round up the hundredths spot
         ccd_max_gain = math.floor(float(ccd_info['GAIN_INFO']['max']) * 100) / 100  # round down
 
+        def _profile_gain_max(config_key, fallback_gain):
+            try:
+                gain_limit = float(self.config.get(config_key, fallback_gain))
+            except (TypeError, ValueError):
+                gain_limit = float(fallback_gain)
+
+            if gain_limit < ccd_min_gain:
+                logger.error('%s below minimum, changing to %0.2f', config_key, float(ccd_min_gain))
+                gain_limit = float(ccd_min_gain)
+                time.sleep(3)
+            elif gain_limit > ccd_max_gain:
+                logger.error('%s above maximum, changing to %0.2f', config_key, float(ccd_max_gain))
+                gain_limit = float(ccd_max_gain)
+                time.sleep(3)
+
+            return gain_limit
+
         if self.config['CCD_CONFIG']['NIGHT']['GAIN'] < ccd_min_gain:
             logger.error('CCD night gain below minimum, changing to %0.2f', float(ccd_min_gain))
             gain_night = float(ccd_min_gain)
@@ -1822,6 +1842,19 @@ class CaptureWorker(Process):
             time.sleep(3)
         else:
             gain_day = float(self.config['CCD_CONFIG']['DAY']['GAIN'])
+
+        gain_max_day = _profile_gain_max('GAIN_MAX_DAY', gain_day)
+        gain_max_night = _profile_gain_max('GAIN_MAX_NIGHT', gain_night)
+        gain_max_moonmode = _profile_gain_max('GAIN_MAX_MOONMODE', gain_moonmode)
+        if gain_max_day < gain_day:
+            logger.warning('GAIN_MAX_DAY below day gain, changing to %0.2f', gain_day)
+            gain_max_day = gain_day
+        if gain_max_night < gain_night:
+            logger.warning('GAIN_MAX_NIGHT below night gain, changing to %0.2f', gain_night)
+            gain_max_night = gain_night
+        if gain_max_moonmode < gain_moonmode:
+            logger.warning('GAIN_MAX_MOONMODE below moonmode gain, changing to %0.2f', gain_moonmode)
+            gain_max_moonmode = gain_moonmode
 
 
         if self.config.get('CAMERA_SQM', {}).get('GAIN', 10.0) < ccd_min_gain:
@@ -1994,11 +2027,11 @@ class CaptureWorker(Process):
             self.gain_av[constants.GAIN_CURRENT] = float(ccd_gain_default)
             self.gain_av[constants.GAIN_NEXT] = float(ccd_gain_default)
 
-            self.gain_av[constants.GAIN_MAX_NIGHT] = float(gain_night)
-            self.gain_av[constants.GAIN_MAX_MOONMODE] = float(gain_moonmode)
+            self.gain_av[constants.GAIN_MAX_NIGHT] = float(gain_max_night)
+            self.gain_av[constants.GAIN_MAX_MOONMODE] = float(gain_max_moonmode)
 
             # day is always lowest gain
-            self.gain_av[constants.GAIN_MAX_DAY] = float(gain_day)
+            self.gain_av[constants.GAIN_MAX_DAY] = float(gain_max_day)
             self.gain_av[constants.GAIN_MIN_DAY] = float(gain_day)
 
             self.gain_av[constants.GAIN_SQM] = float(gain_sqm)

@@ -453,6 +453,10 @@ Quarto micro-step implementato: Auto Gain Apply reale gated.
   - errori piccoli persistenti `abs_error < 5 ADU` per 5 frame attivano `fine_convergence`, con step ridotto, fino a `abs_error <= 1.5 ADU`;
   - trend/cooldown/gain min/max/exposure-at-limit/apply gate restano invariati;
   - i log includono `fine_convergence`, `convergence_frames` e `convergence_mode`.
+- Gain Max profile-first:
+  - Modern Camera Settings > Acquisition espone `Day/Night/Moon Mode Gain Max` per profilo camera;
+  - i valori salvati in `gain.max_day`, `gain.max_night`, `gain.max_moonmode` alimentano `GAIN_MAX_DAY`, `GAIN_MAX_NIGHT`, `GAIN_MAX_MOONMODE` runtime;
+  - questi limiti sono hardware-specific e non vengono copiati da Save & Sync Acquisition tra camere diverse.
 
 Validazione runtime Raspberry del secondo micro-step del 2026-06-20:
 

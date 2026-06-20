@@ -75,6 +75,9 @@ class CaptureProfile:
     gain_night: float
     gain_moonmode: float
     gain_day: float
+    gain_max_day: float
+    gain_max_night: float
+    gain_max_moonmode: float
     auto_gain_enable: bool
     auto_gain_day: bool
     auto_gain_night: bool
@@ -567,6 +570,13 @@ def _profile_from_config(
 
     outputs = _coerce_outputs(config, profile_config.get('outputs'))
 
+    gain_night = _mapping_float(ccd_night, 'GAIN', _float_config(profile_config, 'gain_max', 100.0))
+    gain_moonmode = _mapping_float(ccd_moonmode, 'GAIN', 75.0)
+    gain_day = _mapping_float(ccd_day, 'GAIN', _float_config(profile_config, 'gain_min', 0.0))
+    gain_max_night = _mapping_float_any(gain_config, ('max_night', 'night_max', 'gain_max_night'), _float_config(profile_config, 'gain_max_night', _float_config(profile_config, 'gain_max', gain_night)))
+    gain_max_moonmode = _mapping_float_any(gain_config, ('max_moonmode', 'moonmode_max', 'gain_max_moonmode'), _float_config(profile_config, 'gain_max_moonmode', gain_moonmode))
+    gain_max_day = _mapping_float_any(gain_config, ('max_day', 'day_max', 'gain_max_day'), _float_config(profile_config, 'gain_max_day', gain_day))
+
     return CaptureProfile(
         profile_id=profile_id,
         enabled=bool(profile_config.get('enabled', default_enabled)),
@@ -636,10 +646,13 @@ def _profile_from_config(
         ),
         gain_default=_float_config(profile_config, 'gain_default', _mapping_float(ccd_night, 'GAIN', 100.0)),
         gain_min=_float_config(profile_config, 'gain_min', _mapping_float(ccd_day, 'GAIN', 0.0)),
-        gain_max=_float_config(profile_config, 'gain_max', _mapping_float(ccd_night, 'GAIN', 100.0)),
-        gain_night=_mapping_float(ccd_night, 'GAIN', _float_config(profile_config, 'gain_max', 100.0)),
-        gain_moonmode=_mapping_float(ccd_moonmode, 'GAIN', 75.0),
-        gain_day=_mapping_float(ccd_day, 'GAIN', _float_config(profile_config, 'gain_min', 0.0)),
+        gain_max=gain_max_night,
+        gain_night=gain_night,
+        gain_moonmode=gain_moonmode,
+        gain_day=gain_day,
+        gain_max_day=gain_max_day,
+        gain_max_night=gain_max_night,
+        gain_max_moonmode=gain_max_moonmode,
         auto_gain_enable=bool(profile_config.get('auto_gain_enable', bool(ccd_config.get('AUTO_GAIN_ENABLE', False)))),
         auto_gain_day=bool(profile_config.get('auto_gain_day', bool(ccd_config.get('AUTO_GAIN_ENABLE_DAY', ccd_config.get('AUTO_GAIN_ENABLE', False))))),
         auto_gain_night=bool(profile_config.get('auto_gain_night', bool(ccd_config.get('AUTO_GAIN_ENABLE_NIGHT', ccd_config.get('AUTO_GAIN_ENABLE', False))))),
@@ -741,6 +754,9 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     profile_config['AUTO_GAIN_MIN_STEP'] = profile.auto_gain_min_step
     profile_config['AUTO_GAIN_MAX_STEP'] = profile.auto_gain_max_step
     profile_config['AUTO_GAIN_APPLY_ENABLED'] = profile.auto_gain_apply_enabled
+    profile_config['GAIN_MAX_DAY'] = profile.gain_max_day
+    profile_config['GAIN_MAX_NIGHT'] = profile.gain_max_night
+    profile_config['GAIN_MAX_MOONMODE'] = profile.gain_max_moonmode
     profile_config['CCD_EXPOSURE_MIN'] = profile.exposure_min
     profile_config['CCD_EXPOSURE_MIN_DAY'] = profile.exposure_min_day
     profile_config['CCD_EXPOSURE_MAX'] = profile.exposure_max

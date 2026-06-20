@@ -15365,6 +15365,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'gain_night' : (('gain', 'night'), ('ccd_config', 'NIGHT', 'GAIN'), 'gain_night', 'gain_max'),
         'gain_moonmode' : (('gain', 'moonmode'), ('ccd_config', 'MOONMODE', 'GAIN'), 'gain_moonmode'),
         'gain_day' : (('gain', 'day'), ('ccd_config', 'DAY', 'GAIN'), 'gain_day', 'gain_min'),
+        'gain_max_day' : (('gain', 'max_day'), ('gain', 'day_max'), 'gain_max_day', 'GAIN_MAX_DAY'),
+        'gain_max_night' : (('gain', 'max_night'), ('gain', 'night_max'), 'gain_max_night', 'GAIN_MAX_NIGHT', 'gain_max'),
+        'gain_max_moonmode' : (('gain', 'max_moonmode'), ('gain', 'moonmode_max'), 'gain_max_moonmode', 'GAIN_MAX_MOONMODE'),
         'gain_min' : ('gain_min', 'gain_day', ('ccd_config', 'DAY', 'GAIN')),
         'gain_max' : ('gain_max', 'gain_night', ('ccd_config', 'NIGHT', 'GAIN')),
         'target_adu' : (('target_adu', 'night'), 'TARGET_ADU', 'target_adu'),
@@ -15691,8 +15694,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     )
     CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER = (
         'gain_day',
+        'gain_max_day',
         'gain_night',
+        'gain_max_night',
         'gain_moonmode',
+        'gain_max_moonmode',
         'auto_gain_day',
         'auto_gain_night',
         'auto_gain_moonmode',
@@ -15770,6 +15776,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'gain_night'         : ('CCD_CONFIG', 'NIGHT', 'GAIN'),
         'gain_moonmode'      : ('CCD_CONFIG', 'MOONMODE', 'GAIN'),
         'gain_day'           : ('CCD_CONFIG', 'DAY', 'GAIN'),
+        'gain_max_day'       : 'GAIN_MAX_DAY',
+        'gain_max_night'     : 'GAIN_MAX_NIGHT',
+        'gain_max_moonmode'  : 'GAIN_MAX_MOONMODE',
         'target_adu'         : 'TARGET_ADU',
         'target_adu_day'     : 'TARGET_ADU_DAY',
         'target_adu_dev'     : 'TARGET_ADU_DEV',
@@ -15819,6 +15828,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'gain_night'         : 'Night Gain',
         'gain_moonmode'      : 'Moon Mode Gain',
         'gain_day'           : 'Day Gain',
+        'gain_max_day'       : 'Day Gain Max',
+        'gain_max_night'     : 'Night Gain Max',
+        'gain_max_moonmode'  : 'Moon Mode Gain Max',
         'target_adu'         : 'Night Target ADU',
         'target_adu_day'     : 'Day Target ADU',
         'target_adu_dev'     : 'Night Target ADU Deviation',
@@ -15868,6 +15880,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'gain_night'         : 'float',
         'gain_moonmode'      : 'float',
         'gain_day'           : 'float',
+        'gain_max_day'       : 'float',
+        'gain_max_night'     : 'float',
+        'gain_max_moonmode'  : 'float',
         'target_adu'         : 'integer',
         'target_adu_day'     : 'integer',
         'target_adu_dev'     : 'integer',
@@ -15930,6 +15945,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     )
     CAMERA_SETTINGS_CAPTURE_FIELD_HELP = {
         'exposure_default' : 'Profile startup seed. Leave empty to avoid falling back to legacy CCD_EXPOSURE_DEF after service restart/reinit.',
+        'gain_max_day' : 'Maximum gain Auto Gain may use in day mode for this camera. Hardware-specific; not copied by Save & Sync.',
+        'gain_max_night' : 'Maximum gain Auto Gain may use in night mode for this camera. Hardware-specific; not copied by Save & Sync.',
+        'gain_max_moonmode' : 'Maximum gain Auto Gain may use in moon mode for this camera. Hardware-specific; not copied by Save & Sync.',
         'auto_exposure_enabled' : 'Default OFF. When enabled, the Auto Exposure Controller may apply proposed runtime exposure/gain to this camera only.',
         'auto_exposure_metering_mode' : 'Per-camera metering strategy used by the shadow/apply auto exposure controller.',
         'cfa_pattern' : 'Hardware-specific Bayer pattern override for this camera. Auto removes the override and lets legacy/default detection apply. This field is never copied by Save & Sync.',
@@ -17818,6 +17836,10 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         exposure_default = self.get_camera_settings_submitted_number(submitted_data, 'exposure_default')
         gain_day = self.get_camera_settings_submitted_number(submitted_data, 'gain_day')
         gain_night = self.get_camera_settings_submitted_number(submitted_data, 'gain_night')
+        gain_moonmode = self.get_camera_settings_submitted_number(submitted_data, 'gain_moonmode')
+        gain_max_day = self.get_camera_settings_submitted_number(submitted_data, 'gain_max_day')
+        gain_max_night = self.get_camera_settings_submitted_number(submitted_data, 'gain_max_night')
+        gain_max_moonmode = self.get_camera_settings_submitted_number(submitted_data, 'gain_max_moonmode')
 
         if exposure_min is not None and exposure_max is not None and exposure_min > exposure_max:
             validation_errors.setdefault('exposure_min', []).append('Minimum Exposure cannot be greater than Maximum Exposure.')
@@ -17831,6 +17853,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if gain_day is not None and gain_night is not None and gain_day > gain_night:
             validation_errors.setdefault('gain_day', []).append('Day Gain is usually the lower bound and cannot be greater than Night Gain.')
             validation_errors.setdefault('gain_night', []).append('Night Gain is less than Day Gain.')
+
+        if gain_day is not None and gain_max_day is not None and gain_max_day < gain_day:
+            validation_errors.setdefault('gain_max_day', []).append('Day Gain Max cannot be lower than Day Gain.')
+
+        if gain_night is not None and gain_max_night is not None and gain_max_night < gain_night:
+            validation_errors.setdefault('gain_max_night', []).append('Night Gain Max cannot be lower than Night Gain.')
+
+        if gain_moonmode is not None and gain_max_moonmode is not None and gain_max_moonmode < gain_moonmode:
+            validation_errors.setdefault('gain_max_moonmode', []).append('Moon Mode Gain Max cannot be lower than Moon Mode Gain.')
 
 
     def validate_camera_settings_capture_libcamera_awb(self, submitted_data, validation_errors):
@@ -17916,6 +17947,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'gain_night'       : ('gain', 'night'),
             'gain_moonmode'    : ('gain', 'moonmode'),
             'gain_day'         : ('gain', 'day'),
+            'gain_max_day'     : ('gain', 'max_day'),
+            'gain_max_night'   : ('gain', 'max_night'),
+            'gain_max_moonmode' : ('gain', 'max_moonmode'),
             'auto_gain_enable' : ('gain', 'auto'),
             'auto_gain_day'    : ('gain', 'auto_day'),
             'auto_gain_night'  : ('gain', 'auto_night'),
@@ -18426,6 +18460,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'gain_night',
             'gain_moonmode',
             'gain_day',
+            'gain_max_day',
+            'gain_max_night',
+            'gain_max_moonmode',
             'target_adu',
             'target_adu_day',
             'target_adu_dev',
