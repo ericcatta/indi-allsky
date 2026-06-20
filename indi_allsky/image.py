@@ -32,6 +32,8 @@ from fractions import Fraction
 
 from . import constants
 from .auto_gain_controller import AutoGainController
+from .auto_gain_runtime_state import AutoGainRuntimeStateStore
+from .auto_gain_runtime_state import default_auto_gain_runtime_state_path
 from .auto_exposure_controller import AutoExposureController
 from .auto_meter import DEFAULT_AUTO_EXPOSURE_METERING_MODE
 from .auto_meter import measure_auto_exposure
@@ -203,6 +205,10 @@ class ImageWorker(Process):
         self.varlib_folder_p = Path(varlib_folder)
         self.frame_metadata_writer = FrameMetadataWriter(
             self.config.get('FRAME_METADATA_PATH', default_frame_metadata_path(self.varlib_folder_p))
+        )
+        self.auto_gain_runtime_state_store = AutoGainRuntimeStateStore(
+            self.config.get('AUTO_GAIN_RUNTIME_STATE_PATH', default_auto_gain_runtime_state_path(self.varlib_folder_p)),
+            max_age_seconds=self.config.get('AUTO_GAIN_RESTORE_MAX_AGE_SECONDS', 86400),
         )
 
 
@@ -932,6 +938,15 @@ class ImageWorker(Process):
 
             with self.gain_av.get_lock():
                 self.gain_av[constants.GAIN_NEXT] = float(new_gain)
+
+            self.auto_gain_runtime_state_store.save_gain(
+                profile_id=profile_id,
+                camera_id=camera_id,
+                mode=decision.mode,
+                gain=new_gain,
+                gain_min=decision.gain_min,
+                gain_max=decision.gain_max,
+            )
 
             self._log_auto_gain_apply(
                 profile_id,

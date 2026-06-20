@@ -536,6 +536,13 @@ Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
 - I log mostrano `convergence_mode=aggressive|normal|fine`, `fine_convergence`, `convergence_frames` e `step_strategy` coerenti.
 - ASI678MC moonmode ha prodotto decisioni Auto Gain aggressive corrette e ha raggiunto `gain=300` rispettando il limite profile-specific.
 - Il runtime resolver continua a usare target ADU e gain max profile-first, senza fallback globale inatteso.
+- Auto Gain restart restore:
+  - aggiunto state file runtime separato dalla config DB: `VARLIB_FOLDER/auto_gain_runtime_state.json`.
+  - quando Auto Gain Apply scrive davvero su `GAIN_NEXT`, salva l'ultimo gain adattivo per `profile_id:camera_id:mode`.
+  - al restart CaptureWorker ripristina `GAIN_CURRENT`/`GAIN_NEXT` dal valore recente se profilo, camera e mode coincidono.
+  - il restore clampa sempre al range corrente `gain_min/gain_max`.
+  - fallback al gain configurato resta invariato se lo stato e' assente, scaduto o appartiene a un altro profilo.
+  - log diagnostici: `[AUTO_GAIN_RESTORE]` e `[AUTO_GAIN_RESET]`.
 
 ### Auto Exposure Refinement
 
@@ -716,8 +723,10 @@ grep -E "MULTI_CAMERA_RESOLVED_CONFIG|MULTI_CAMERA_PROCESSING_CONFIG" /var/log/i
 grep -E "AUTO_METER_STATE|AUTO_EXPOSURE_DECISION|AUTO_EXPOSURE_APPLY" /var/log/indi-allsky/indi-allsky.log | tail -200
 grep -E "AUTO_EXPOSURE_BLOCKER|AUTO_EXPOSURE_DECISION" /var/log/indi-allsky/indi-allsky.log | tail -200
 grep -E "AUTO_GAIN_STATE|AUTO_GAIN_DECISION|AUTO_GAIN_APPLY" /var/log/indi-allsky/indi-allsky.log | tail -200
+grep -E "AUTO_GAIN_RESTORE|AUTO_GAIN_RESET" /var/log/indi-allsky/indi-allsky.log | tail -100
 grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail -200
 tail -20 /var/lib/indi-allsky/frame_metadata.jsonl
+cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 ```
 
 ### Known Good Checks
@@ -759,6 +768,10 @@ tail -20 /var/lib/indi-allsky/frame_metadata.jsonl
   - normal errors `5-20 ADU` keep normal bounded behavior.
   - persistent small errors `abs_error < 5 ADU` for 5 frames activate `fine_convergence`.
   - `abs_error <= 1.5 ADU` returns to hold.
+- Auto Gain restore:
+  - `[AUTO_GAIN_RESTORE]` reports `reason=restored` after service restart when a recent adaptive gain exists.
+  - `[AUTO_GAIN_RESTORE]` reports `reason=clamped` if persisted gain exceeds current profile/driver limits.
+  - `[AUTO_GAIN_RESET]` explains fallback to configured gain for missing/expired/profile-changed state.
 - Hybrid AWB:
   - ASI backend `postprocess_rgb`.
   - IMX backend according to profile apply mode.
@@ -799,3 +812,4 @@ tail -20 /var/lib/indi-allsky/frame_metadata.jsonl
 - 2026-06-21: Validati su Raspberry target ADU persistente, resolver runtime corretto, `gain_max_*` profile-specific, ASI678MC moonmode fino a gain `300` e decisioni Auto Gain aggressive coerenti.
 - 2026-06-21: Auto Exposure Refinement fase 1: audit controller, aggiunti `reason`/`blocker` e `[AUTO_EXPOSURE_BLOCKER]` diagnostico senza cambiare comportamento runtime.
 - 2026-06-21: Implementata Metadata / Analytics Base con `FrameMetadata` e JSONL append-only per frame processed/error/not_saved.
+- 2026-06-21: Implementato restore runtime Auto Gain dopo service restart tramite state file separato dalla config DB, con clamp e log restore/reset.
