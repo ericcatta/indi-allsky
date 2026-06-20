@@ -17569,7 +17569,6 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 self.apply_camera_settings_capture_awb_field(profile, field_name, field_data)
                 continue
 
-            self.delete_camera_settings_profile_path(profile, (field_name,))
             ccd_config_path = self.get_camera_settings_capture_ccd_config_path(field_name)
             if ccd_config_path:
                 self.delete_camera_settings_capture_override_aliases(profile, field_name)
@@ -17577,6 +17576,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                     self.set_camera_settings_profile_path(profile, ccd_config_path, field_data['value'])
                 continue
 
+            self.delete_camera_settings_profile_path(profile, (field_name,))
             if not field_data['delete']:
                 profile[field_name] = field_data['value']
 
@@ -17640,9 +17640,18 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
         for candidate in candidates:
             if isinstance(candidate, str):
-                self.delete_camera_settings_profile_path(profile, tuple(candidate.replace('__', '.').split('.')))
+                path = tuple(candidate.replace('__', '.').split('.'))
             else:
-                self.delete_camera_settings_profile_path(profile, tuple(candidate))
+                path = tuple(candidate)
+
+            if (
+                len(path) == 1
+                and isinstance(profile.get(path[0]), dict)
+                and self.get_camera_settings_capture_ccd_config_path(field_name)
+            ):
+                continue
+
+            self.delete_camera_settings_profile_path(profile, path)
 
 
     def apply_camera_settings_capture_awb_field(self, profile, field_name, field_data):
