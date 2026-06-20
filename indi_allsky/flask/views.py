@@ -16084,12 +16084,18 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             modern_admin_action = request.form.get('modern_admin_action', 'driver_connection')
             if modern_admin_action == 'hybrid_controller':
                 context.update(self.save_camera_settings_hybrid_profile())
+            elif modern_admin_action == 'hybrid_sync':
+                context.update(self.sync_camera_settings_section_profile('hybrid'))
             elif modern_admin_action == 'capture':
                 context.update(self.save_camera_settings_capture_profile())
             elif modern_admin_action == 'capture_sync':
-                context.update(self.sync_camera_settings_capture_profile())
+                context.update(self.sync_camera_settings_section_profile('acquisition'))
             elif modern_admin_action == 'lens_optics':
                 context.update(self.save_camera_settings_lens_profile())
+            elif modern_admin_action == 'lens_optics_sync':
+                context.update(self.sync_camera_settings_section_profile('lens_optics'))
+            elif modern_admin_action == 'driver_connection_sync':
+                context.update(self.sync_camera_settings_section_profile('driver_connection'))
             else:
                 context.update(self.save_camera_settings_driver_profile())
             profiles = self.get_camera_settings_profiles()
@@ -17421,12 +17427,23 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         return result
 
 
-    def sync_camera_settings_capture_profile(self):
+    def sync_camera_settings_section_profile(self, section_key):
         result = {
             'modern_admin_camera_settings_error'   : None,
             'modern_admin_camera_settings_success' : None,
             'modern_admin_camera_settings_errors'  : {},
         }
+
+        section_labels = {
+            'hybrid'            : 'Hybrid Controller',
+            'driver_connection' : 'Driver / Connection',
+            'acquisition'       : 'Acquisition',
+            'lens_optics'       : 'Lens & Optics',
+        }
+        section_label = section_labels.get(section_key)
+        if not section_label:
+            result['modern_admin_camera_settings_error'] = 'Unsupported camera profile sync section. No config was saved.'
+            return result
 
         if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
             result['modern_admin_camera_settings_error'] = 'Only an admin user can sync camera profile settings.'
@@ -17444,24 +17461,21 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
         target_profile = self.get_camera_settings_capture_sync_target_profile(profiles, source_profile)
         if not target_profile:
-            result['modern_admin_camera_settings_error'] = 'Acquisition sync needs exactly one other editable camera profile. No config was saved.'
+            result['modern_admin_camera_settings_error'] = '{0:s} sync needs exactly one other editable camera profile. No config was saved.'.format(section_label)
             return result
 
         try:
             new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
-            source_profile_id, target_profile_id, copied_fields = self.apply_camera_settings_capture_sync_to_config(
-                new_config,
-                source_profile,
-                target_profile,
-            )
-            self.preserve_camera_settings_capture_global_values(new_config)
+            source_profile_id, target_profile_id, copied_fields = self.apply_camera_settings_section_sync_to_config(new_config, section_key, source_profile, target_profile)
+            if section_key == 'acquisition':
+                self.preserve_camera_settings_capture_global_values(new_config)
 
             if not app.config['LOGIN_DISABLED']:
                 username = current_user.username
             else:
                 username = 'system'
 
-            save_note = 'Modern Admin Camera Acquisition sync from {0:s} to {1:s}'.format(source_profile_id, target_profile_id)
+            save_note = 'Modern Admin Camera {0:s} sync from {1:s} to {2:s}'.format(section_label, source_profile_id, target_profile_id)
 
             from ..config import IndiAllSkyConfig
 
@@ -17469,15 +17483,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             config_obj.config = new_config
             config_obj.save(username, save_note)
             self.indi_allsky_config = new_config
-            app.logger.info('%s copied_fields=%s', save_note, ','.join(copied_fields))
-            result['modern_admin_camera_settings_success'] = 'Synced Acquisition settings from {0:s} to {1:s}. Restart indi-allsky for the running capture service to use the copied values.'.format(source_profile_id, target_profile_id)
+            app.logger.info('%s section=%s copied_fields=%s', save_note, section_key, ','.join(copied_fields))
+            result['modern_admin_camera_settings_success'] = 'Synced {0:s} settings from {1:s} to {2:s}. Restart indi-allsky for the running capture service to use the copied values.'.format(section_label, source_profile_id, target_profile_id)
         except ConfigSaveException as e:
             db.session.rollback()
             result['modern_admin_camera_settings_error'] = str(e)
         except Exception as e:
             db.session.rollback()
-            app.logger.error('Error syncing Modern Admin Camera Acquisition: %s', str(e))
-            result['modern_admin_camera_settings_error'] = 'Unable to sync Acquisition settings: {0:s}'.format(str(e))
+            app.logger.error('Error syncing Modern Admin Camera %s: %s', section_label, str(e))
+            result['modern_admin_camera_settings_error'] = 'Unable to sync {0:s} settings: {1:s}'.format(section_label, str(e))
 
         return result
 
@@ -17502,7 +17516,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         return candidates[0]
 
 
-    def apply_camera_settings_capture_sync_to_config(self, config, source_profile, target_profile):
+    def apply_camera_settings_section_sync_to_config(self, config, section_key, source_profile, target_profile):
         multi_camera_config = config.get('MULTI_CAMERA')
         if not isinstance(multi_camera_config, dict):
             raise ValueError('MULTI_CAMERA config is missing or invalid.')
@@ -17524,6 +17538,51 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if str(target_config_profile.get('profile_id') or target_config_profile.get('id') or 'profile-{0:d}'.format(target_offset + 1)) != target_profile_id:
             raise ValueError('Target profile changed before sync. Reload and try again.')
 
+        if section_key == 'hybrid':
+            copied_fields = self.sync_camera_settings_hybrid_section(source_profile, target_config_profile)
+        elif section_key == 'driver_connection':
+            copied_fields = self.sync_camera_settings_driver_section(source_profile, target_config_profile)
+        elif section_key == 'acquisition':
+            copied_fields = self.sync_camera_settings_capture_section(source_profile, target_config_profile)
+        elif section_key == 'lens_optics':
+            copied_fields = self.sync_camera_settings_lens_section(source_profile, target_config_profile)
+        else:
+            raise ValueError('Unsupported sync section.')
+
+        return source_profile_id, target_profile_id, copied_fields
+
+
+    def sync_camera_settings_hybrid_section(self, source_profile, target_config_profile):
+        processing_mode = self.get_camera_settings_processing_mode(source_profile)
+        awb_apply_mode = self.get_camera_settings_hybrid_awb_apply_mode(source_profile)
+
+        target_config_profile['processing_mode'] = processing_mode
+
+        awb_profile_config = target_config_profile.get('awb')
+        if not isinstance(awb_profile_config, dict):
+            awb_profile_config = OrderedDict()
+        awb_profile_config['mode'] = processing_mode
+        awb_profile_config['apply_mode'] = awb_apply_mode
+        target_config_profile['awb'] = awb_profile_config
+
+        hybrid_config = target_config_profile.get('hybrid')
+        if not isinstance(hybrid_config, dict):
+            hybrid_config = OrderedDict()
+        awb_config = hybrid_config.get('awb')
+        if not isinstance(awb_config, dict):
+            awb_config = OrderedDict()
+        awb_config['apply_mode'] = awb_apply_mode
+        hybrid_config['awb'] = awb_config
+        target_config_profile['hybrid'] = hybrid_config
+        return ['processing_mode', 'awb.mode', 'awb.apply_mode', 'hybrid.awb.apply_mode']
+
+
+    def sync_camera_settings_driver_section(self, source_profile, target_config_profile):
+        target_config_profile['enabled'] = bool(source_profile.get('enabled', True))
+        return ['enabled']
+
+
+    def sync_camera_settings_capture_section(self, source_profile, target_config_profile):
         copied_fields = list()
         for field_name in self.CAMERA_SETTINGS_CAPTURE_SYNC_FIELD_ORDER:
             ccd_config_path = self.get_camera_settings_capture_ccd_config_path(field_name)
@@ -17543,7 +17602,30 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             copied_fields.append('.'.join(ccd_config_path))
 
         self.cleanup_empty_camera_settings_profile_blocks(target_config_profile, ('exposure', 'gain', 'target_adu', 'auto_exposure'))
-        return source_profile_id, target_profile_id, copied_fields
+        return copied_fields
+
+
+    def sync_camera_settings_lens_section(self, source_profile, target_config_profile):
+        copied_fields = list()
+        for field_name in self.CAMERA_SETTINGS_LENS_EDIT_FIELD_ORDER:
+            path = self.get_camera_settings_lens_profile_path(field_name)
+            self.delete_camera_settings_lens_override_aliases(target_config_profile, field_name)
+
+            found, value = self.get_camera_settings_nested_value(source_profile, path)
+            if not found:
+                found, value = self.get_camera_settings_profile_override(source_profile, self.CAMERA_SETTINGS_LENS_FIELD_CONFIG_KEYS[field_name])
+            if not found:
+                continue
+
+            self.set_camera_settings_profile_path(
+                target_config_profile,
+                path,
+                json.loads(json.dumps(value), object_pairs_hook=OrderedDict),
+            )
+            copied_fields.append('.'.join(path))
+
+        self.cleanup_empty_camera_settings_profile_blocks(target_config_profile, ('lens', 'image', 'image_circle_mask'))
+        return copied_fields
 
 
     def apply_camera_settings_capture_global_fallback_to_config(self, config, profile_id, submitted_data):

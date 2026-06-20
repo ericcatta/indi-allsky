@@ -213,13 +213,24 @@ var camera_id = {{ camera_id }};
                             <h2>Write profile mode only</h2>
                             <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
                         </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_hybrid_form.enabled %}
                         <button class="modern-admin-media-button" type="submit">Save Hybrid Controller</button>
+                        {% if modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
+                        <button class="modern-admin-media-button" type="submit" form="camera-hybrid-sync-form">Sync settings to other camera</button>
+                        {% endif %}
                         {% else %}
                         <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
                         {% endif %}
+                        </div>
                     </section>
                 </form>
+                {% if modern_admin_camera_settings_hybrid_form.enabled and modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
+                <form id="camera-hybrid-sync-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" onsubmit="return confirm('Sync Hybrid Controller settings from {{ modern_admin_camera_settings_profile.profile_id }} to the other camera profile? This copies only processing mode and Hybrid AWB apply mode. Camera identity, driver, hardware, lens, acquisition, and binding settings will not be copied.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="modern_admin_action" value="hybrid_sync">
+                </form>
+                {% endif %}
 
                 <div class="modern-admin-table-scroll">
                     <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
@@ -329,13 +340,24 @@ var camera_id = {{ camera_id }};
                             <h2>Write profile config only</h2>
                             <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
                         </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_driver_form.enabled %}
                         <button class="modern-admin-media-button" type="submit">Save Driver / Connection</button>
+                        {% if modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
+                        <button class="modern-admin-media-button" type="submit" form="camera-driver-sync-form">Sync settings to other camera</button>
+                        {% endif %}
                         {% else %}
                         <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
                         {% endif %}
+                        </div>
                     </section>
                 </form>
+                {% if modern_admin_camera_settings_driver_form.enabled and modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
+                <form id="camera-driver-sync-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" onsubmit="return confirm('Sync Driver / Connection settings from {{ modern_admin_camera_settings_profile.profile_id }} to the other camera profile? This copies only the safe Enabled flag. Profile ID, primary flag, camera interface, INDI/libcamera binding, device names, ports, and hardware IDs will not be copied.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="modern_admin_action" value="driver_connection_sync">
+                </form>
+                {% endif %}
 
                 <div class="modern-admin-table-scroll">
                     <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
@@ -563,13 +585,24 @@ var camera_id = {{ camera_id }};
                             <h2>Write profile overrides only</h2>
                             <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
                         </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_lens_form.enabled %}
                         <button class="modern-admin-media-button" type="submit">Save Lens & Optics</button>
+                        {% if modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
+                        <button class="modern-admin-media-button" type="submit" form="camera-lens-sync-form">Sync settings to other camera</button>
+                        {% endif %}
                         {% else %}
                         <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
                         {% endif %}
+                        </div>
                     </section>
                 </form>
+                {% if modern_admin_camera_settings_lens_form.enabled and modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
+                <form id="camera-lens-sync-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" onsubmit="return confirm('Sync Lens & Optics settings from {{ modern_admin_camera_settings_profile.profile_id }} to the other camera profile? This copies only Lens & Optics section overrides. Camera identity, driver, hardware binding, Acquisition, and Hybrid settings will not be copied.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="modern_admin_action" value="lens_optics_sync">
+                </form>
+                {% endif %}
 
                 <div class="modern-admin-table-scroll">
                     <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
