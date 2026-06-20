@@ -57,6 +57,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Legacy fallback.
   - Read-only.
 - Modern Cameras page mostra profili multicamera e link Settings per profilo.
+- Camera Profile Settings > Acquisition include un sync controllato verso l'altra camera:
+  - copia solo blocchi comuni `gain`, `auto_exposure`, `target_adu` ed `exposure`;
+  - preserva identity/hardware (`profile_id`, `camera_id`, driver, `indi`, `libcamera`, lens, processing, binning, AWB);
+  - crea una nuova config row e richiede restart/reload manuale per il runtime.
 - Gallery Modern supporta filtro camera/profile e mantiene il filtro con infinite scroll.
 - Topbar Modern Admin include toggle Start/Stop Capture, Restart indi-allsky e badge stato servizio.
 
@@ -701,3 +705,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Verificata simmetria pipeline profile-first per `target_adu.day/night/dev_day/dev` da UI a runtime flat config.
 - 2026-06-20: Abilitato Auto Gain apply reale ma gated: default off, mode-specific, exposure-first, write solo su `GAIN_NEXT`.
 - 2026-06-20: Validato su Raspberry che Auto Gain Apply gated resta spento di default (`apply_disabled`) e non cambia il gain runtime.
+- 2026-06-20: Aggiunto sync Modern Admin Acquisition da un profilo all'altro, limitato ai blocchi automatici comuni e senza copiare identity/hardware camera.

@@ -15737,6 +15737,28 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'libcamera_awb_red_gain',
         'libcamera_awb_blue_gain',
     )
+    CAMERA_SETTINGS_CAPTURE_SYNC_FIELD_ORDER = (
+        'gain_day',
+        'gain_night',
+        'gain_moonmode',
+        'auto_gain_day',
+        'auto_gain_night',
+        'auto_gain_moonmode',
+        'auto_gain_levels',
+        'auto_exposure_enabled',
+        'auto_exposure_metering_mode',
+        'target_adu_day',
+        'target_adu',
+        'target_adu_dev_day',
+        'target_adu_dev',
+        'exposure_min_day',
+        'exposure_min',
+        'exposure_default',
+        'exposure_max',
+        'exposure_timeout',
+        'exposure_period_day',
+        'exposure_period',
+    )
     CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS = {
         'exposure_min'       : 'CCD_EXPOSURE_MIN',
         'exposure_min_day'   : 'CCD_EXPOSURE_MIN_DAY',
@@ -16064,6 +16086,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 context.update(self.save_camera_settings_hybrid_profile())
             elif modern_admin_action == 'capture':
                 context.update(self.save_camera_settings_capture_profile())
+            elif modern_admin_action == 'capture_sync':
+                context.update(self.sync_camera_settings_capture_profile())
             elif modern_admin_action == 'lens_optics':
                 context.update(self.save_camera_settings_lens_profile())
             else:
@@ -17395,6 +17419,131 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             result['modern_admin_camera_settings_error'] = 'Unable to save Acquisition: {0:s}'.format(str(e))
 
         return result
+
+
+    def sync_camera_settings_capture_profile(self):
+        result = {
+            'modern_admin_camera_settings_error'   : None,
+            'modern_admin_camera_settings_success' : None,
+            'modern_admin_camera_settings_errors'  : {},
+        }
+
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            result['modern_admin_camera_settings_error'] = 'Only an admin user can sync camera profile settings.'
+            return result
+
+        profiles = self.get_camera_settings_profiles()
+        source_profile = self.get_selected_camera_settings_profile_for_save(profiles)
+        if not source_profile:
+            result['modern_admin_camera_settings_error'] = 'Select a valid source camera profile before syncing. No config was saved.'
+            return result
+
+        if not self.is_camera_settings_profile_editable(source_profile) or self.is_camera_settings_global_fallback_profile(source_profile):
+            result['modern_admin_camera_settings_error'] = 'Select an editable multi-camera profile before syncing. No config was saved.'
+            return result
+
+        target_profile = self.get_camera_settings_capture_sync_target_profile(profiles, source_profile)
+        if not target_profile:
+            result['modern_admin_camera_settings_error'] = 'Acquisition sync needs exactly one other editable camera profile. No config was saved.'
+            return result
+
+        try:
+            new_config = json.loads(json.dumps(self.indi_allsky_config), object_pairs_hook=OrderedDict)
+            source_profile_id, target_profile_id, copied_fields = self.apply_camera_settings_capture_sync_to_config(
+                new_config,
+                source_profile,
+                target_profile,
+            )
+            self.preserve_camera_settings_capture_global_values(new_config)
+
+            if not app.config['LOGIN_DISABLED']:
+                username = current_user.username
+            else:
+                username = 'system'
+
+            save_note = 'Modern Admin Camera Acquisition sync from {0:s} to {1:s}'.format(source_profile_id, target_profile_id)
+
+            from ..config import IndiAllSkyConfig
+
+            config_obj = IndiAllSkyConfig()
+            config_obj.config = new_config
+            config_obj.save(username, save_note)
+            self.indi_allsky_config = new_config
+            app.logger.info('%s copied_fields=%s', save_note, ','.join(copied_fields))
+            result['modern_admin_camera_settings_success'] = 'Synced Acquisition settings from {0:s} to {1:s}. Restart indi-allsky for the running capture service to use the copied values.'.format(source_profile_id, target_profile_id)
+        except ConfigSaveException as e:
+            db.session.rollback()
+            result['modern_admin_camera_settings_error'] = str(e)
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error('Error syncing Modern Admin Camera Acquisition: %s', str(e))
+            result['modern_admin_camera_settings_error'] = 'Unable to sync Acquisition settings: {0:s}'.format(str(e))
+
+        return result
+
+
+    def get_camera_settings_capture_sync_target_profile(self, profiles, source_profile):
+        if not source_profile:
+            return None
+
+        source_profile_id = str(source_profile.get('profile_id') or '')
+        candidates = [
+            profile
+            for profile in profiles
+            if (
+                isinstance(profile, dict)
+                and self.is_camera_settings_profile_editable(profile)
+                and str(profile.get('profile_id') or '') != source_profile_id
+            )
+        ]
+        if len(candidates) != 1:
+            return None
+
+        return candidates[0]
+
+
+    def apply_camera_settings_capture_sync_to_config(self, config, source_profile, target_profile):
+        multi_camera_config = config.get('MULTI_CAMERA')
+        if not isinstance(multi_camera_config, dict):
+            raise ValueError('MULTI_CAMERA config is missing or invalid.')
+
+        profiles = multi_camera_config.get('profiles')
+        if not isinstance(profiles, list):
+            raise ValueError('MULTI_CAMERA.profiles is missing or invalid.')
+
+        source_profile_id = str(source_profile.get('profile_id') or '')
+        target_profile_id = str(target_profile.get('profile_id') or '')
+        target_offset = int(target_profile.get('_profile_index')) - 1
+        if target_offset < 0 or target_offset >= len(profiles):
+            raise ValueError('Target profile no longer exists.')
+
+        target_config_profile = profiles[target_offset]
+        if not isinstance(target_config_profile, dict):
+            raise ValueError('Target profile is not editable.')
+
+        if str(target_config_profile.get('profile_id') or target_config_profile.get('id') or 'profile-{0:d}'.format(target_offset + 1)) != target_profile_id:
+            raise ValueError('Target profile changed before sync. Reload and try again.')
+
+        copied_fields = list()
+        for field_name in self.CAMERA_SETTINGS_CAPTURE_SYNC_FIELD_ORDER:
+            ccd_config_path = self.get_camera_settings_capture_ccd_config_path(field_name)
+            if not ccd_config_path:
+                continue
+
+            self.delete_camera_settings_capture_override_aliases(target_config_profile, field_name)
+            found, value = self.get_camera_settings_profile_override(source_profile, field_name)
+            if not found:
+                continue
+
+            self.set_camera_settings_profile_path(
+                target_config_profile,
+                ccd_config_path,
+                json.loads(json.dumps(value), object_pairs_hook=OrderedDict),
+            )
+            copied_fields.append('.'.join(ccd_config_path))
+
+        self.cleanup_empty_camera_settings_profile_blocks(target_config_profile, ('exposure', 'gain', 'target_adu', 'auto_exposure'))
+        return source_profile_id, target_profile_id, copied_fields
 
 
     def apply_camera_settings_capture_global_fallback_to_config(self, config, profile_id, submitted_data):
