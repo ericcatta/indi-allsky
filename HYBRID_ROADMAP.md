@@ -259,8 +259,8 @@ Priorita' exposure vs gain:
   - se exposure e' al limite o stabilmente vicino al limite per N frame: aumentare gain.
   - se gain automatico e' disabilitato: non cambiare gain e loggare `reason=gain_auto_disabled`.
 - Sovraesposizione:
-  - se gain automatico e' attivo e gain > min della modalita': ridurre gain prima.
-  - altrimenti ridurre exposure.
+  - se il gain era stato aumentato automaticamente dal controller e gain > min della modalita': ridurre gain prima.
+  - se il gain non era stato aumentato automaticamente o e' gia' al minimo: demandare la riduzione a exposure control.
   - in day, ridurre exposure prima perche' il gain dovrebbe gia' essere minimo/fisso.
 - `hold`:
   - se il meter e' dentro deadband o cooldown attivo.
@@ -379,6 +379,17 @@ Fasi consigliate:
 - Fase 3: enable controllato per ASI night only.
 - Fase 4: twilight state esplicito.
 - Fase 5: UI Advanced per step/cooldown, lasciando Basic con soli toggle day/night/moonmode.
+
+Primo micro-step implementato:
+
+- Controller Auto Gain shadow-only separato.
+- Stato diagnostico per `profile_id:camera_id`.
+- Log `[AUTO_GAIN_STATE]` e `[AUTO_GAIN_DECISION]`.
+- Nessun write su `GAIN_NEXT`, `GAIN_CURRENT` o configurazione.
+- Day mode rispetta `AUTO_GAIN_ENABLE_DAY=False` e logga `reason=gain_auto_disabled`.
+- La policy resta exposure-first: se exposure non e' al limite, il gain resta in `hold` con `reason=exposure_first`.
+- La riduzione gain viene proposta solo se lo stato shadow sa che il gain era stato aumentato automaticamente.
+- Parametri diagnostici Auto Gain leggibili da `profile.gain.*` tramite resolver, con globali solo fallback.
 
 ### Auto Exposure Refinement
 
@@ -593,3 +604,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Fix Auto Exposure baseline runtime: decisione usa `EXPOSURE_NEXT`/`GAIN_NEXT`.
 - 2026-06-20: Fix step daytime bounded per evitare oscillazione ASI dark/saturated.
 - 2026-06-20: Definita architettura Auto Gain profile-first con state machine day/twilight/night/moonmode.
+- 2026-06-20: Aggiunto Auto Gain shadow controller diagnostico, senza apply runtime.

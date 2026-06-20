@@ -80,6 +80,12 @@ class CaptureProfile:
     auto_gain_night: bool
     auto_gain_moonmode: bool
     auto_gain_levels: int
+    auto_gain_deadband: float
+    auto_gain_trend_frames: int
+    auto_gain_cooldown_frames: int
+    auto_gain_step_factor: float
+    auto_gain_min_step: float
+    auto_gain_max_step: float
     binning_night: int
     binning_moonmode: int
     binning_day: int
@@ -368,6 +374,24 @@ def _auto_exposure_float(config: Mapping[str, Any], profile_config: Mapping[str,
     )
 
 
+def _auto_gain_float(config: Mapping[str, Any], profile_config: Mapping[str, Any], key: str, flat_key: str, default: float) -> float:
+    gain_config = _mapping_config(profile_config, 'gain')
+    return _mapping_float(
+        gain_config,
+        key,
+        _float_config(profile_config, flat_key, _float_config(config, flat_key.upper(), default)),
+    )
+
+
+def _auto_gain_int(config: Mapping[str, Any], profile_config: Mapping[str, Any], key: str, flat_key: str, default: int) -> int:
+    gain_config = _mapping_config(profile_config, 'gain')
+    return _mapping_int(
+        gain_config,
+        key,
+        _int_config(profile_config, flat_key, _int_config(config, flat_key.upper(), default)),
+    )
+
+
 def _profile_identity_config(profile_config: Mapping[str, Any]) -> bool:
     return any(key in profile_config for key in (
         'profile_id',
@@ -553,6 +577,12 @@ def _profile_from_config(
         auto_gain_night=bool(profile_config.get('auto_gain_night', bool(ccd_config.get('AUTO_GAIN_ENABLE_NIGHT', ccd_config.get('AUTO_GAIN_ENABLE', False))))),
         auto_gain_moonmode=bool(profile_config.get('auto_gain_moonmode', bool(ccd_config.get('AUTO_GAIN_ENABLE_MOONMODE', ccd_config.get('AUTO_GAIN_ENABLE', False))))),
         auto_gain_levels=_int_config(profile_config, 'auto_gain_levels', _mapping_int(ccd_config, 'AUTO_GAIN_LEVELS', 5)),
+        auto_gain_deadband=_auto_gain_float(config, profile_config, 'deadband', 'auto_gain_deadband', 10.0),
+        auto_gain_trend_frames=_auto_gain_int(config, profile_config, 'trend_frames', 'auto_gain_trend_frames', 3),
+        auto_gain_cooldown_frames=_auto_gain_int(config, profile_config, 'cooldown_frames', 'auto_gain_cooldown_frames', 2),
+        auto_gain_step_factor=_auto_gain_float(config, profile_config, 'step_factor', 'auto_gain_step_factor', 0.15),
+        auto_gain_min_step=_auto_gain_float(config, profile_config, 'min_step', 'auto_gain_min_step', 0.01),
+        auto_gain_max_step=_auto_gain_float(config, profile_config, 'max_step', 'auto_gain_max_step', 0.0),
         binning_night=_int_config(profile_config, 'binning_night', _mapping_int(ccd_night, 'BINNING', 1)),
         binning_moonmode=_mapping_int(ccd_moonmode, 'BINNING', 1),
         binning_day=_int_config(profile_config, 'binning_day', _mapping_int(ccd_day, 'BINNING', 1)),
@@ -635,6 +665,12 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     ccd_config['AUTO_GAIN_ENABLE_MOONMODE'] = profile.auto_gain_moonmode
     ccd_config['AUTO_GAIN_LEVELS'] = profile.auto_gain_levels
     profile_config['CCD_CONFIG'] = ccd_config
+    profile_config['AUTO_GAIN_DEADBAND'] = profile.auto_gain_deadband
+    profile_config['AUTO_GAIN_TREND_FRAMES'] = profile.auto_gain_trend_frames
+    profile_config['AUTO_GAIN_COOLDOWN_FRAMES'] = profile.auto_gain_cooldown_frames
+    profile_config['AUTO_GAIN_STEP_FACTOR'] = profile.auto_gain_step_factor
+    profile_config['AUTO_GAIN_MIN_STEP'] = profile.auto_gain_min_step
+    profile_config['AUTO_GAIN_MAX_STEP'] = profile.auto_gain_max_step
     profile_config['CCD_EXPOSURE_MIN'] = profile.exposure_min
     profile_config['CCD_EXPOSURE_MIN_DAY'] = profile.exposure_min_day
     profile_config['CCD_EXPOSURE_MAX'] = profile.exposure_max

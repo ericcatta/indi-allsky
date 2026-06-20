@@ -31,6 +31,7 @@ from PIL import Image
 from fractions import Fraction
 
 from . import constants
+from .auto_gain_controller import AutoGainController
 from .auto_exposure_controller import AutoExposureController
 from .auto_meter import DEFAULT_AUTO_EXPOSURE_METERING_MODE
 from .auto_meter import measure_auto_exposure
@@ -139,6 +140,9 @@ class ImageWorker(Process):
         self.auto_meter_states = {}
         self.auto_meter_states[self.auto_meter_context_key] = self._new_auto_meter_state()
         self.auto_exposure_controller = AutoExposureController()
+        self.auto_gain_states = {}
+        self.auto_gain_states[self.auto_meter_context_key] = self._new_auto_gain_state()
+        self.auto_gain_controller = AutoGainController()
         self.hybrid_awb_backend_warned = set()
         self.processing_config_logged = set()
         self.asi_frame_stats_counts = {}
@@ -509,6 +513,18 @@ class ImageWorker(Process):
         }
 
 
+    def _new_auto_gain_state(self):
+        return {
+            'mode'               : None,
+            'trend_count'        : 0,
+            'trend_direction'    : 'none',
+            'cooldown_remaining' : 0,
+            'last_action'        : 'hold',
+            'last_decision'      : None,
+            'auto_gain_raised'   : False,
+        }
+
+
     def _select_auto_meter_state(self, profile_id, camera_id, mode):
         auto_meter_key = self._adu_key(profile_id, camera_id)
         state = self.auto_meter_states.get(auto_meter_key)
@@ -518,6 +534,17 @@ class ImageWorker(Process):
 
         state['mode'] = mode
         self.auto_meter_context_key = auto_meter_key
+        return state
+
+
+    def _select_auto_gain_state(self, profile_id, camera_id, mode):
+        auto_gain_key = self._adu_key(profile_id, camera_id)
+        state = self.auto_gain_states.get(auto_gain_key)
+        if state is None or state.get('mode') not in (None, mode):
+            state = self._new_auto_gain_state()
+            self.auto_gain_states[auto_gain_key] = state
+
+        state['mode'] = mode
         return state
 
 
@@ -583,6 +610,33 @@ class ImageWorker(Process):
 
         if not numpy.isfinite(value) or value <= 0.0:
             return float(default)
+
+        return value
+
+
+    def _auto_gain_config_float(self, key, default, allow_zero=False):
+        try:
+            value = float(self.config.get(key, default))
+        except (TypeError, ValueError):
+            return float(default)
+
+        if not numpy.isfinite(value):
+            return float(default)
+
+        if value < 0.0 or (value == 0.0 and not allow_zero):
+            return float(default)
+
+        return value
+
+
+    def _auto_gain_config_int(self, key, default):
+        try:
+            value = int(self.config.get(key, default))
+        except (TypeError, ValueError):
+            return int(default)
+
+        if value <= 0:
+            return int(default)
 
         return value
 
@@ -770,6 +824,130 @@ class ImageWorker(Process):
         return decision
 
 
+    def _log_auto_gain_decision_skipped(self, profile_id, camera_id, mode, reason):
+        logger.info(
+            '[AUTO_GAIN_DECISION] profile=%s camera_id=%s mode=%s status=skipped reason=%s shadow=True',
+            profile_id,
+            camera_id,
+            mode,
+            reason,
+        )
+
+
+    def _decide_auto_gain_shadow(self, profile_id, camera_id, result, meter_state):
+        mode = self._auto_gain_mode()
+        state = self._select_auto_gain_state(profile_id, camera_id, mode)
+        smoothed_value = meter_state.get('smoothed_value')
+        if smoothed_value is None:
+            self._log_auto_gain_decision_skipped(profile_id, camera_id, mode, 'missing_smoothed_value')
+            return None
+
+        inputs = self._auto_exposure_controller_inputs(result.mode)
+        missing_inputs = [
+            key
+            for key, value in inputs.items()
+            if value is None and key not in (
+                'source_exposure',
+                'source_gain',
+                'exposure_runtime_current',
+                'exposure_runtime_next',
+                'gain_runtime_current',
+                'gain_runtime_next',
+                'is_day',
+                'allow_gain_control',
+            )
+        ]
+        if missing_inputs:
+            self._log_auto_gain_decision_skipped(profile_id, camera_id, mode, 'missing_{0:s}'.format(','.join(missing_inputs)))
+            return None
+
+        enabled = self._auto_gain_enabled(mode)
+        deadband = self._auto_gain_config_float('AUTO_GAIN_DEADBAND', 10.0)
+        trend_frames = self._auto_gain_config_int('AUTO_GAIN_TREND_FRAMES', 3)
+        cooldown_frames = self._auto_gain_config_int('AUTO_GAIN_COOLDOWN_FRAMES', 2)
+        gain_step_factor = self._auto_gain_config_float('AUTO_GAIN_STEP_FACTOR', 0.15)
+        gain_min_step = self._auto_gain_config_float('AUTO_GAIN_MIN_STEP', 0.01)
+        gain_max_step = self._auto_gain_config_float('AUTO_GAIN_MAX_STEP', 0.0, allow_zero=True)
+        logger.info(
+            '[AUTO_GAIN_STATE] profile=%s camera_id=%s mode=%s metering_mode=%s enabled=%s trend_count=%d trend_direction=%s cooldown_remaining=%d last_action=%s auto_gain_raised=%s deadband=%0.2f trend_frames=%d cooldown_frames=%d gain_step_factor=%0.4f gain_min_step=%0.4f gain_max_step=%0.4f',
+            profile_id,
+            camera_id,
+            mode,
+            result.mode,
+            enabled,
+            int(state.get('trend_count') or 0),
+            state.get('trend_direction', 'none'),
+            int(state.get('cooldown_remaining') or 0),
+            state.get('last_action', 'hold'),
+            bool(state.get('auto_gain_raised', False)),
+            deadband,
+            trend_frames,
+            cooldown_frames,
+            gain_step_factor,
+            gain_min_step,
+            gain_max_step,
+        )
+
+        try:
+            decision = self.auto_gain_controller.decide(
+                smoothed_value=smoothed_value,
+                target=inputs['target'],
+                mode=mode,
+                enabled=enabled,
+                current_exposure=inputs['current_exposure'],
+                exposure_min=inputs['exposure_min'],
+                exposure_max=inputs['exposure_max'],
+                current_gain=inputs['current_gain'],
+                gain_min=inputs['gain_min'],
+                gain_max=inputs['gain_max'],
+                state=state,
+                deadband=deadband,
+                trend_frames=trend_frames,
+                cooldown_frames=cooldown_frames,
+                gain_step_factor=gain_step_factor,
+                gain_min_step=gain_min_step,
+                gain_max_step=gain_max_step,
+            )
+        except (TypeError, ValueError) as e:
+            self._log_auto_gain_decision_skipped(profile_id, camera_id, mode, str(e))
+            return None
+
+        state['last_decision'] = decision
+        logger.info(
+            '[AUTO_GAIN_DECISION] profile=%s camera_id=%s mode=%s metering_mode=%s enabled=%s action=%s reason=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f current_exposure=%0.8f proposed_exposure=%0.8f exposure_min=%0.8f exposure_max=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f gain_min=%0.2f gain_max=%0.2f source_gain=%s trend_count=%d trend_active=%s trend_direction=%s cooldown_remaining=%d auto_gain_raised=%s step=%0.4f step_strategy=%s shadow=%s',
+            profile_id,
+            camera_id,
+            decision.mode,
+            result.mode,
+            decision.enabled,
+            decision.action,
+            decision.reason,
+            float(smoothed_value),
+            decision.target,
+            decision.error,
+            decision.deadband,
+            decision.current_exposure,
+            decision.proposed_exposure,
+            decision.exposure_min,
+            decision.exposure_max,
+            inputs['source_exposure'],
+            decision.current_gain,
+            decision.proposed_gain,
+            decision.gain_min,
+            decision.gain_max,
+            inputs['source_gain'],
+            decision.trend_count,
+            decision.trend_active,
+            decision.trend_direction,
+            decision.cooldown_remaining,
+            decision.auto_gain_raised,
+            decision.step,
+            decision.step_strategy,
+            decision.shadow,
+        )
+        return decision
+
+
     def _clamp_auto_exposure_apply_value(self, value, minimum, maximum):
         value = float(value)
         minimum = float(minimum)
@@ -891,6 +1069,7 @@ class ImageWorker(Process):
             )
             state = self._update_auto_meter_state(profile_id, camera_id, result)
             self._decide_auto_exposure_shadow(profile_id, camera_id, result, state)
+            self._decide_auto_gain_shadow(profile_id, camera_id, result, state)
             return result
         except Exception as e:
             logger.warning('[AUTO_METER] profile=%s camera_id=%s mode=%s status=error error=%s', profile_id, camera_id, self._auto_exposure_metering_mode(), str(e))
