@@ -447,6 +447,12 @@ Quarto micro-step implementato: Auto Gain Apply reale gated.
 - Il write runtime e' limitato a `GAIN_NEXT`; non scrive camera, config o DB.
 - `[AUTO_GAIN_APPLY]` logga `status=applied shadow=False` solo quando il write su `GAIN_NEXT` avviene davvero; tutti gli altri casi restano `status=skipped` con motivo esplicito.
 - Test mirati coprono apply disabled, day/mode disabled, exposure sotto max, condizioni valide con trend attivo e clamp al gain massimo.
+- Auto Gain convergence improvement:
+  - errori grandi `abs_error > 20 ADU` usano `convergence_mode=aggressive` e `step_strategy=aggressive_bounded` con step 2x rispetto al bounded normale;
+  - errori normali tra circa `5` e `20 ADU` mantengono il comportamento esistente;
+  - errori piccoli persistenti `abs_error < 5 ADU` per 5 frame attivano `fine_convergence`, con step ridotto, fino a `abs_error <= 1.5 ADU`;
+  - trend/cooldown/gain min/max/exposure-at-limit/apply gate restano invariati;
+  - i log includono `fine_convergence`, `convergence_frames` e `convergence_mode`.
 
 Validazione runtime Raspberry del secondo micro-step del 2026-06-20:
 

@@ -986,7 +986,7 @@ class ImageWorker(Process):
         gain_min_step = self._auto_gain_config_float('AUTO_GAIN_MIN_STEP', 0.01)
         gain_max_step = self._auto_gain_config_float('AUTO_GAIN_MAX_STEP', 0.0, allow_zero=True)
         logger.info(
-            '[AUTO_GAIN_STATE] profile=%s camera_id=%s mode=%s metering_mode=%s enabled=%s trend_count=%d trend_direction=%s cooldown_remaining=%d last_action=%s auto_gain_raised=%s deadband=%0.2f trend_frames=%d cooldown_frames=%d gain_step_factor=%0.4f gain_min_step=%0.4f gain_max_step=%0.4f',
+            '[AUTO_GAIN_STATE] profile=%s camera_id=%s mode=%s metering_mode=%s enabled=%s trend_count=%d trend_direction=%s convergence_frames=%d cooldown_remaining=%d last_action=%s auto_gain_raised=%s deadband=%0.2f trend_frames=%d cooldown_frames=%d gain_step_factor=%0.4f gain_min_step=%0.4f gain_max_step=%0.4f',
             profile_id,
             camera_id,
             mode,
@@ -994,6 +994,7 @@ class ImageWorker(Process):
             enabled,
             int(state.get('trend_count') or 0),
             state.get('trend_direction', 'none'),
+            int(state.get('convergence_frames') or 0),
             int(state.get('cooldown_remaining') or 0),
             state.get('last_action', 'hold'),
             bool(state.get('auto_gain_raised', False)),
@@ -1031,7 +1032,7 @@ class ImageWorker(Process):
 
         state['last_decision'] = decision
         logger.info(
-            '[AUTO_GAIN_DECISION] profile=%s camera_id=%s mode=%s metering_mode=%s enabled=%s action=%s reason=%s blocker=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f current_exposure=%0.8f proposed_exposure=%0.8f exposure_min=%0.8f exposure_max=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f gain_min=%0.2f gain_max=%0.2f source_gain=%s trend_count=%d trend_active=%s trend_direction=%s cooldown_remaining=%d auto_gain_raised=%s step=%0.4f step_strategy=%s shadow=%s',
+            '[AUTO_GAIN_DECISION] profile=%s camera_id=%s mode=%s metering_mode=%s enabled=%s action=%s reason=%s blocker=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f current_exposure=%0.8f proposed_exposure=%0.8f exposure_min=%0.8f exposure_max=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f gain_min=%0.2f gain_max=%0.2f source_gain=%s trend_count=%d trend_active=%s trend_direction=%s convergence_frames=%d fine_convergence=%s convergence_mode=%s cooldown_remaining=%d auto_gain_raised=%s step=%0.4f step_strategy=%s shadow=%s',
             profile_id,
             camera_id,
             decision.mode,
@@ -1057,6 +1058,9 @@ class ImageWorker(Process):
             decision.trend_count,
             decision.trend_active,
             decision.trend_direction,
+            decision.convergence_frames,
+            decision.fine_convergence,
+            decision.convergence_mode,
             decision.cooldown_remaining,
             decision.auto_gain_raised,
             decision.step,
