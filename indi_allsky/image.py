@@ -854,13 +854,14 @@ class ImageWorker(Process):
 
     def _log_auto_gain_apply(self, profile_id, camera_id, decision, *, apply_enabled, status, reason, old_gain=None, new_gain=None, shadow=True):
         logger.info(
-            '[AUTO_GAIN_APPLY] profile=%s camera_id=%s mode=%s apply_enabled=%s status=%s reason=%s action=%s old_gain=%0.2f new_gain=%0.2f current_exposure=%0.8f exposure_max=%0.8f trend_active=%s cooldown_remaining=%d auto_gain_raised=%s shadow=%s',
+            '[AUTO_GAIN_APPLY] profile=%s camera_id=%s mode=%s apply_enabled=%s status=%s reason=%s blocker=%s action=%s old_gain=%0.2f new_gain=%0.2f current_exposure=%0.8f exposure_max=%0.8f trend_active=%s cooldown_remaining=%d auto_gain_raised=%s shadow=%s',
             profile_id,
             camera_id,
             decision.mode,
             apply_enabled,
             status,
             reason,
+            decision.blocker,
             decision.action,
             decision.current_gain if old_gain is None else old_gain,
             decision.current_gain if new_gain is None else new_gain,
@@ -887,69 +888,44 @@ class ImageWorker(Process):
             )
             return
 
-        if not decision.enabled:
-            self._log_auto_gain_apply(profile_id, camera_id, decision, apply_enabled=True, status='skipped', reason='mode_disabled', shadow=False)
+        self._log_auto_gain_apply(
+            profile_id,
+            camera_id,
+            decision,
+            apply_enabled=True,
+            status='skipped',
+            reason='validation_only',
+            shadow=True,
+        )
+        return
+
+
+    def _log_auto_gain_blocker(self, profile_id, camera_id, decision):
+        if decision.blocker == 'none':
             return
 
-        if decision.action == 'hold':
-            self._log_auto_gain_apply(profile_id, camera_id, decision, apply_enabled=True, status='skipped', reason=decision.reason, shadow=False)
-            return
-
-        if decision.reason == 'cooldown':
-            self._log_auto_gain_apply(profile_id, camera_id, decision, apply_enabled=True, status='skipped', reason='cooldown', shadow=False)
-            return
-
-        if not decision.trend_active:
-            self._log_auto_gain_apply(profile_id, camera_id, decision, apply_enabled=True, status='skipped', reason='trend_inactive', shadow=False)
-            return
-
-        proposed_gain = self._clamp_auto_exposure_apply_value(decision.proposed_gain, decision.gain_min, decision.gain_max)
-        if proposed_gain == decision.current_gain:
-            self._log_auto_gain_apply(profile_id, camera_id, decision, apply_enabled=True, status='skipped', reason='no_gain_delta', shadow=False)
-            return
-
-        exposure_at_max = decision.current_exposure >= (decision.exposure_max - 0.000001)
-        if decision.action == 'increase_gain':
-            if decision.reason != 'exposure_at_max' or not exposure_at_max:
-                self._log_auto_gain_apply(profile_id, camera_id, decision, apply_enabled=True, status='skipped', reason='exposure_not_at_max', shadow=False)
-                return
-        elif decision.action == 'decrease_gain':
-            if decision.reason != 'reduce_auto_gain_first' or not decision.auto_gain_raised:
-                self._log_auto_gain_apply(profile_id, camera_id, decision, apply_enabled=True, status='skipped', reason='gain_not_auto_raised', shadow=False)
-                return
-        else:
-            self._log_auto_gain_apply(profile_id, camera_id, decision, apply_enabled=True, status='skipped', reason='unsupported_action', shadow=False)
-            return
-
-        try:
-            with self.gain_av.get_lock():
-                self.gain_av[constants.GAIN_NEXT] = float(proposed_gain)
-
-            if decision.action == 'increase_gain':
-                state['auto_gain_raised'] = True
-            elif proposed_gain <= decision.gain_min:
-                state['auto_gain_raised'] = False
-
-            self._log_auto_gain_apply(
-                profile_id,
-                camera_id,
-                decision,
-                apply_enabled=True,
-                status='applied',
-                reason=decision.reason,
-                old_gain=decision.current_gain,
-                new_gain=proposed_gain,
-                shadow=False,
-            )
-        except Exception as e:
-            logger.info(
-                '[AUTO_GAIN_APPLY] profile=%s camera_id=%s mode=%s apply_enabled=True status=skipped reason=%s action=%s shadow=False',
-                profile_id,
-                camera_id,
-                decision.mode,
-                str(e),
-                decision.action,
-            )
+        logger.info(
+            '[AUTO_GAIN_BLOCKER] profile=%s camera_id=%s mode=%s blocker=%s action=%s reason=%s enabled=%s current_exposure=%0.8f exposure_max=%0.8f current_gain=%0.2f proposed_gain=%0.2f gain_min=%0.2f gain_max=%0.2f trend_active=%s trend_count=%d cooldown_remaining=%d error=%+0.2f deadband=%0.2f shadow=%s',
+            profile_id,
+            camera_id,
+            decision.mode,
+            decision.blocker,
+            decision.action,
+            decision.reason,
+            decision.enabled,
+            decision.current_exposure,
+            decision.exposure_max,
+            decision.current_gain,
+            decision.proposed_gain,
+            decision.gain_min,
+            decision.gain_max,
+            decision.trend_active,
+            decision.trend_count,
+            decision.cooldown_remaining,
+            decision.error,
+            decision.deadband,
+            decision.shadow,
+        )
 
 
     def _decide_auto_gain_shadow(self, profile_id, camera_id, result, meter_state):
@@ -1032,7 +1008,7 @@ class ImageWorker(Process):
 
         state['last_decision'] = decision
         logger.info(
-            '[AUTO_GAIN_DECISION] profile=%s camera_id=%s mode=%s metering_mode=%s enabled=%s action=%s reason=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f current_exposure=%0.8f proposed_exposure=%0.8f exposure_min=%0.8f exposure_max=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f gain_min=%0.2f gain_max=%0.2f source_gain=%s trend_count=%d trend_active=%s trend_direction=%s cooldown_remaining=%d auto_gain_raised=%s step=%0.4f step_strategy=%s shadow=%s',
+            '[AUTO_GAIN_DECISION] profile=%s camera_id=%s mode=%s metering_mode=%s enabled=%s action=%s reason=%s blocker=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f current_exposure=%0.8f proposed_exposure=%0.8f exposure_min=%0.8f exposure_max=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f gain_min=%0.2f gain_max=%0.2f source_gain=%s trend_count=%d trend_active=%s trend_direction=%s cooldown_remaining=%d auto_gain_raised=%s step=%0.4f step_strategy=%s shadow=%s',
             profile_id,
             camera_id,
             decision.mode,
@@ -1040,6 +1016,7 @@ class ImageWorker(Process):
             decision.enabled,
             decision.action,
             decision.reason,
+            decision.blocker,
             float(smoothed_value),
             decision.target,
             decision.error,
@@ -1063,6 +1040,7 @@ class ImageWorker(Process):
             decision.step_strategy,
             decision.shadow,
         )
+        self._log_auto_gain_blocker(profile_id, camera_id, decision)
         self._apply_auto_gain_decision(profile_id, camera_id, decision, state)
         return decision
 

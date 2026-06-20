@@ -411,6 +411,20 @@ Secondo micro-step implementato:
 - Apply consentito solo se mode auto gain e' abilitata, trend e' attivo, cooldown non blocca la decisione, gain resta nei limiti e la decisione rispetta Exposure-first/Gain-last.
 - Di giorno `AUTO_GAIN_ENABLE_DAY=False` continua a bloccare sia proposta sia apply.
 
+Terzo micro-step implementato: Night Gain Decision Validation.
+
+- Auto Gain resta diagnostico: nessun write reale su `GAIN_NEXT`.
+- Aggiunto log `[AUTO_GAIN_BLOCKER]` per spiegare perche' il gain non aumenta.
+- Blocker espliciti:
+  - `exposure_not_at_limit`.
+  - `mode_disabled`.
+  - `cooldown_active`.
+  - `trend_not_confirmed`.
+  - `gain_already_max`.
+  - `gain_already_min`.
+  - `deadband_hold`.
+- Quando tutte le condizioni sono soddisfatte, `[AUTO_GAIN_DECISION]` mostra `action=increase_gain`, `shadow=True` e `proposed_gain`, ma `[AUTO_GAIN_APPLY]` resta `status=skipped reason=validation_only` anche se `apply_enabled=True`.
+
 Validazione runtime Raspberry del secondo micro-step del 2026-06-20:
 
 - `[AUTO_GAIN_APPLY]` compare nei log.
@@ -656,3 +670,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Aggiunto path Auto Gain apply gated, disattivato di default e limitato a `GAIN_NEXT`.
 - 2026-06-20: Aggiunto obiettivo UI dashboard per mostrare simultaneamente l'ultima immagine di entrambe le camere.
 - 2026-06-20: Validati log runtime Auto Gain apply gated con `apply_enabled=false` e nessun gain reale applicato.
+- 2026-06-20: Aggiunti diagnostici Night Gain Decision Validation con `[AUTO_GAIN_BLOCKER]` e apply validation-only.

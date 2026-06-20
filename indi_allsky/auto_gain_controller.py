@@ -25,6 +25,7 @@ class AutoGainDecision:
     step: float
     step_strategy: str
     auto_gain_raised: bool
+    blocker: str
     shadow: bool = True
 
 
@@ -97,6 +98,7 @@ class AutoGainController:
 
         action = 'hold'
         reason = 'deadband'
+        blocker = 'deadband_hold'
         proposed_exposure = current_exposure
         proposed_gain = current_gain
         step = 0.0
@@ -104,17 +106,22 @@ class AutoGainController:
         trend_active = trend_count >= trend_frames and trend_direction != 'none'
 
         if not enabled:
-            reason = 'gain_auto_disabled'
+            reason = 'mode_disabled'
+            blocker = 'mode_disabled'
         elif cooldown_remaining > 0:
-            reason = 'cooldown'
+            reason = 'cooldown_active'
+            blocker = 'cooldown_active'
         elif abs(error) <= deadband:
-            reason = 'deadband'
+            reason = 'deadband_hold'
+            blocker = 'deadband_hold'
         elif not trend_active:
-            reason = 'waiting_for_persistent_trend'
+            reason = 'trend_not_confirmed'
+            blocker = 'trend_not_confirmed'
         elif error > deadband:
             if current_exposure < exposure_max:
                 action = 'hold'
-                reason = 'exposure_first'
+                reason = 'exposure_not_at_limit'
+                blocker = 'exposure_not_at_limit'
             elif current_gain < gain_max:
                 step = self._gain_step(
                     current_gain,
@@ -126,7 +133,11 @@ class AutoGainController:
                 )
                 proposed_gain = self._clamp(current_gain + step, gain_min, gain_max)
                 action = 'increase_gain' if proposed_gain > current_gain else 'hold'
-                reason = 'exposure_at_max'
+                reason = 'gain_increase_conditions_satisfied'
+                blocker = 'none' if action == 'increase_gain' else 'gain_already_max'
+            else:
+                reason = 'gain_already_max'
+                blocker = 'gain_already_max'
         elif error < (deadband * -1):
             if auto_gain_raised and current_gain > gain_min:
                 step = self._gain_step(
@@ -139,10 +150,16 @@ class AutoGainController:
                 )
                 proposed_gain = self._clamp(current_gain - step, gain_min, gain_max)
                 action = 'decrease_gain' if proposed_gain < current_gain else 'hold'
-                reason = 'reduce_auto_gain_first'
+                reason = 'reduce_auto_gain_first' if action == 'decrease_gain' else 'gain_already_min'
+                blocker = 'none' if action == 'decrease_gain' else 'gain_already_min'
+            elif current_gain <= gain_min:
+                action = 'hold'
+                reason = 'gain_already_min'
+                blocker = 'gain_already_min'
             elif current_exposure > exposure_min:
                 action = 'hold'
                 reason = 'gain_not_auto_raised_exposure_control'
+                blocker = 'gain_not_auto_raised'
 
         if action == 'increase_gain':
             cooldown_remaining = cooldown_frames
@@ -181,6 +198,7 @@ class AutoGainController:
             step=abs(proposed_gain - current_gain),
             step_strategy=step_strategy,
             auto_gain_raised=auto_gain_raised,
+            blocker=blocker,
             shadow=True,
         )
 
