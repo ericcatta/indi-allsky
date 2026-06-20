@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.frame_metadata import FrameMetadata
 from indi_allsky.frame_metadata import FrameMetadataWriter
+from indi_allsky.frame_metadata import default_frame_metadata_dir
 
 
 def _metadata(frame_id=42, timestamp='2026-06-21T12:00:00+00:00'):
@@ -55,9 +56,22 @@ def test_frame_metadata_daily_filename_selection():
         metadata_dir = Path(tmpdir).joinpath('frame_metadata')
         writer = FrameMetadataWriter(metadata_dir, rotate_daily=True)
 
-        writer.write(_metadata(timestamp='2026-06-21T23:59:59+00:00'))
+        metadata_path = writer.write(_metadata(timestamp='2026-06-21T23:59:59+00:00'))
 
         assert metadata_dir.joinpath('2026-06-21.jsonl').exists()
+        assert metadata_path == metadata_dir.joinpath('2026-06-21.jsonl')
+
+
+def test_frame_metadata_default_daily_directory_case():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_dir = default_frame_metadata_dir(tmpdir)
+        writer = FrameMetadataWriter(metadata_dir, rotate_daily=True)
+
+        metadata_path = writer.write(_metadata(timestamp='2026-06-21T12:00:00+00:00'))
+
+        assert metadata_dir.is_dir()
+        assert metadata_path == metadata_dir.joinpath('2026-06-21.jsonl')
+        assert metadata_path.exists()
 
 
 def test_frame_metadata_same_day_appends_to_same_file():
@@ -88,6 +102,28 @@ def test_frame_metadata_different_days_split_files():
         assert len(metadata_dir.joinpath('2026-06-22.jsonl').read_text(encoding='utf-8').splitlines()) == 1
 
 
+def test_frame_metadata_custom_path_stays_single_file_without_rotation():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_path = Path(tmpdir).joinpath('custom_metadata.jsonl')
+        writer = FrameMetadataWriter(metadata_path, rotate_daily=False)
+
+        written_path = writer.write(_metadata(timestamp='2026-06-21T12:00:00+00:00'))
+
+        assert written_path == metadata_path
+        assert metadata_path.exists()
+
+
+def test_frame_metadata_custom_path_rotates_when_enabled():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_dir = Path(tmpdir).joinpath('custom_metadata')
+        writer = FrameMetadataWriter(metadata_dir, rotate_daily=True)
+
+        written_path = writer.write(_metadata(timestamp='2026-06-21T12:00:00+00:00'))
+
+        assert written_path == metadata_dir.joinpath('2026-06-21.jsonl')
+        assert written_path.exists()
+
+
 def test_frame_metadata_daily_directory_auto_creation():
     with tempfile.TemporaryDirectory() as tmpdir:
         metadata_dir = Path(tmpdir).joinpath('missing', 'frame_metadata')
@@ -102,7 +138,10 @@ def test_frame_metadata_daily_directory_auto_creation():
 if __name__ == '__main__':
     test_frame_metadata_fixed_jsonl_write()
     test_frame_metadata_daily_filename_selection()
+    test_frame_metadata_default_daily_directory_case()
     test_frame_metadata_same_day_appends_to_same_file()
     test_frame_metadata_different_days_split_files()
+    test_frame_metadata_custom_path_stays_single_file_without_rotation()
+    test_frame_metadata_custom_path_rotates_when_enabled()
     test_frame_metadata_daily_directory_auto_creation()
     print('frame metadata tests OK')

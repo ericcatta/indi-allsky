@@ -209,6 +209,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - default daily rotation: `VARLIB_FOLDER/frame_metadata/YYYY-MM-DD.jsonl`.
   - la data del file viene derivata da `FrameMetadata.timestamp`.
   - override opzionale legacy: `FRAME_METADATA_PATH` mantiene il comportamento a file singolo, salvo `FRAME_METADATA_ROTATE_DAILY=True`.
+  - `FRAME_METADATA_PATH` vuoto viene trattato come non configurato, quindi usa la directory daily default.
+  - ogni write riuscito logga `[FRAME_METADATA] status=written path=...` per validazione runtime a basso rumore.
 - Campi persistiti:
   - `frame_id`.
   - `timestamp`.
@@ -820,3 +822,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementata Metadata / Analytics Base con `FrameMetadata` e JSONL append-only per frame processed/error/not_saved.
 - 2026-06-21: Implementato restore runtime Auto Gain dopo service restart tramite state file separato dalla config DB, con clamp e log restore/reset.
 - 2026-06-21: Implementata rotazione giornaliera metadata JSONL in `frame_metadata/YYYY-MM-DD.jsonl`, mantenendo compatibilita' con `FRAME_METADATA_PATH`.
+- 2026-06-21: Fix rotazione metadata Raspberry: path vuoto trattato come default daily, writer ritorna/logga il file effettivamente scritto.

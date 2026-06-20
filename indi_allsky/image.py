@@ -203,8 +203,11 @@ class ImageWorker(Process):
 
         varlib_folder = self.config.get('VARLIB_FOLDER', '/var/lib/indi-allsky')
         self.varlib_folder_p = Path(varlib_folder)
-        frame_metadata_path = self.config.get('FRAME_METADATA_PATH')
-        frame_metadata_rotate_daily = self.config.get('FRAME_METADATA_ROTATE_DAILY', frame_metadata_path is None)
+        frame_metadata_path = self._optional_config_string(self.config.get('FRAME_METADATA_PATH'))
+        frame_metadata_rotate_daily = self._config_bool(
+            self.config.get('FRAME_METADATA_ROTATE_DAILY', frame_metadata_path is None),
+            default=frame_metadata_path is None,
+        )
         self.frame_metadata_writer = FrameMetadataWriter(
             frame_metadata_path or default_frame_metadata_dir(self.varlib_folder_p),
             rotate_daily=frame_metadata_rotate_daily,
@@ -216,6 +219,34 @@ class ImageWorker(Process):
 
 
         self._shutdown = False
+
+
+    def _optional_config_string(self, value):
+        if value is None:
+            return None
+
+        value_str = str(value).strip()
+        if not value_str:
+            return None
+
+        return value_str
+
+
+    def _config_bool(self, value, default=False):
+        if isinstance(value, bool):
+            return value
+
+        if value is None:
+            return bool(default)
+
+        if isinstance(value, str):
+            value_str = value.strip().lower()
+            if value_str in ('1', 'true', 'yes', 'on', 'enabled'):
+                return True
+            if value_str in ('0', 'false', 'no', 'off', 'disabled', ''):
+                return False
+
+        return bool(value)
 
 
     def _validate_profile_id(self, i_dict):
@@ -1080,7 +1111,14 @@ class ImageWorker(Process):
                 quality_score=0.0,
                 quality_flags=[],
             )
-            self.frame_metadata_writer.write(metadata)
+            metadata_path = self.frame_metadata_writer.write(metadata)
+            logger.info(
+                '[FRAME_METADATA] profile=%s camera_id=%s frame_id=%s status=written path=%s',
+                profile_id,
+                camera_id,
+                frame_id,
+                metadata_path,
+            )
         except Exception as e:
             logger.warning(
                 '[FRAME_METADATA] profile=%s camera_id=%s frame_id=%s status=skipped reason=%s',

@@ -48,6 +48,7 @@ class FrameMetadataWriter:
         with metadata_path.open('a', encoding='utf-8') as f_metadata:
             json.dump(metadata.to_dict(), f_metadata, sort_keys=True, separators=(',', ':'))
             f_metadata.write('\n')
+        return metadata_path
 
 
     def _metadata_path_for(self, metadata):
