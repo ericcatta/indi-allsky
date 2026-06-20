@@ -252,6 +252,23 @@ def _mapping_int_any(config: Mapping[str, Any], keys: tuple, default: int) -> in
         return default
 
 
+def _profile_target_adu_int(
+    config: Mapping[str, Any],
+    profile_config: Mapping[str, Any],
+    target_adu_config: Mapping[str, Any],
+    nested_keys: tuple,
+    flat_keys: tuple,
+    global_key: str,
+    default: int,
+) -> int:
+    profile_default = _mapping_int_any(
+        profile_config,
+        flat_keys,
+        _int_config(config, global_key, default),
+    )
+    return _mapping_int_any(target_adu_config, nested_keys, profile_default)
+
+
 def _known_profile_gain_defaults(profile_id: str, camera_interface: str, indi_camera_name: str = '') -> Dict[str, float]:
     profile_id_l = str(profile_id or '').strip().lower()
     camera_interface_l = str(camera_interface or '').strip().lower()
@@ -581,10 +598,42 @@ def _profile_from_config(
         auto_exposure_day_max_step=_auto_exposure_float(config, profile_config, 'day_max_step', 'auto_exposure_day_max_step', 0.005),
         auto_exposure_day_min_step=_auto_exposure_float(config, profile_config, 'day_min_step', 'auto_exposure_day_min_step', 0.00025),
         auto_exposure_day_step_factor=_auto_exposure_float(config, profile_config, 'day_step_factor', 'auto_exposure_day_step_factor', 0.35),
-        target_adu=_mapping_int(target_adu_config, 'night', _int_config(profile_config, 'target_adu', _int_config(config, 'TARGET_ADU', 75))),
-        target_adu_day=_mapping_int(target_adu_config, 'day', _int_config(profile_config, 'target_adu_day', _int_config(config, 'TARGET_ADU_DAY', 75))),
-        target_adu_dev=_mapping_int(target_adu_config, 'dev', _int_config(profile_config, 'target_adu_dev', _int_config(config, 'TARGET_ADU_DEV', 10))),
-        target_adu_dev_day=_mapping_int(target_adu_config, 'dev_day', _int_config(profile_config, 'target_adu_dev_day', _int_config(config, 'TARGET_ADU_DEV_DAY', 20))),
+        target_adu=_profile_target_adu_int(
+            config,
+            profile_config,
+            target_adu_config,
+            ('night', 'NIGHT'),
+            ('target_adu', 'TARGET_ADU', 'target_adu_night', 'TARGET_ADU_NIGHT'),
+            'TARGET_ADU',
+            75,
+        ),
+        target_adu_day=_profile_target_adu_int(
+            config,
+            profile_config,
+            target_adu_config,
+            ('day', 'DAY'),
+            ('target_adu_day', 'TARGET_ADU_DAY'),
+            'TARGET_ADU_DAY',
+            75,
+        ),
+        target_adu_dev=_profile_target_adu_int(
+            config,
+            profile_config,
+            target_adu_config,
+            ('dev', 'DEV'),
+            ('target_adu_dev', 'TARGET_ADU_DEV'),
+            'TARGET_ADU_DEV',
+            10,
+        ),
+        target_adu_dev_day=_profile_target_adu_int(
+            config,
+            profile_config,
+            target_adu_config,
+            ('dev_day', 'DEV_DAY', 'day_dev', 'DAY_DEV'),
+            ('target_adu_dev_day', 'TARGET_ADU_DEV_DAY'),
+            'TARGET_ADU_DEV_DAY',
+            20,
+        ),
         gain_default=_float_config(profile_config, 'gain_default', _mapping_float(ccd_night, 'GAIN', 100.0)),
         gain_min=_float_config(profile_config, 'gain_min', _mapping_float(ccd_day, 'GAIN', 0.0)),
         gain_max=_float_config(profile_config, 'gain_max', _mapping_float(ccd_night, 'GAIN', 100.0)),
