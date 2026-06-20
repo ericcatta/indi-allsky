@@ -15840,7 +15840,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'libcamera_awb_mode'      : 'libcamera AWB Mode',
         'libcamera_awb_red_gain'  : 'libcamera AWB Red Gain',
         'libcamera_awb_blue_gain' : 'libcamera AWB Blue Gain',
-        'cfa_pattern'             : 'CFA Pattern',
+        'cfa_pattern'             : 'CFA / Debayer Pattern',
         'ccd_bit_depth'           : 'Bit Depth',
         'auto_wb'                 : 'Night Legacy Auto WB',
         'auto_wb_day'             : 'Day Legacy Auto WB',
@@ -15932,7 +15932,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'exposure_default' : 'Profile startup seed. Leave empty to avoid falling back to legacy CCD_EXPOSURE_DEF after service restart/reinit.',
         'auto_exposure_enabled' : 'Default OFF. When enabled, the Auto Exposure Controller may apply proposed runtime exposure/gain to this camera only.',
         'auto_exposure_metering_mode' : 'Per-camera metering strategy used by the shadow/apply auto exposure controller.',
-        'cfa_pattern' : 'Critical for ASI/ZWO debayer. A wrong Bayer pattern can make color and brightness look broken even with correct exposure.',
+        'cfa_pattern' : 'Hardware-specific Bayer pattern override for this camera. Auto removes the override and lets legacy/default detection apply. This field is never copied by Save & Sync.',
         'ccd_bit_depth' : 'Sensor bit depth used for processing scale. Wrong values can push metering and stretch toward saturation.',
         'auto_wb_day' : 'Legacy daytime postprocess auto white balance. Separate from Hybrid AWB; use carefully with postprocess_rgb.',
         'auto_wb' : 'Legacy night postprocess auto white balance. Separate from Hybrid AWB.',
@@ -16632,6 +16632,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                     submitted_data,
                 )
 
+            save_sync_requested = self.is_camera_settings_save_sync_requested('hybrid')
+            if save_sync_requested:
+                source_profile_id, target_profile_id, copied_fields = self.apply_camera_settings_save_sync_to_config(new_config, 'hybrid', selected_profile)
+                save_note = 'Modern Admin Camera Hybrid Controller save+sync from {0:s} to {1:s}'.format(source_profile_id, target_profile_id)
+            else:
+                target_profile_id = None
+                copied_fields = tuple()
+                save_note = 'Modern Admin Camera Hybrid Controller update for {0:s}'.format(updated_profile_id)
+
             if not app.config['LOGIN_DISABLED']:
                 username = current_user.username
             else:
@@ -16641,10 +16650,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
             config_obj = IndiAllSkyConfig()
             config_obj.config = new_config
-            config_obj.save(username, 'Modern Admin Camera Hybrid Controller update for {0:s}'.format(updated_profile_id))
+            config_obj.save(username, save_note)
             self.indi_allsky_config = new_config
-            app.logger.info('Saved Modern Admin Camera Hybrid Controller config update for profile %s', updated_profile_id)
-            result['modern_admin_camera_settings_success'] = 'Hybrid Controller saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new mode.'.format(updated_profile_id)
+            if save_sync_requested:
+                app.logger.info('%s section=hybrid copied_fields=%s', save_note, ','.join(copied_fields))
+                result['modern_admin_camera_settings_success'] = 'Hybrid Controller saved for profile {0:s} and synced to {1:s}. Restart indi-allsky for the running capture service to use the new mode.'.format(updated_profile_id, target_profile_id)
+            else:
+                app.logger.info('Saved Modern Admin Camera Hybrid Controller config update for profile %s', updated_profile_id)
+                result['modern_admin_camera_settings_success'] = 'Hybrid Controller saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new mode.'.format(updated_profile_id)
         except ConfigSaveException as e:
             db.session.rollback()
             result['modern_admin_camera_settings_error'] = str(e)
@@ -16973,6 +16986,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 submitted_data,
             )
 
+            save_sync_requested = self.is_camera_settings_save_sync_requested('driver_connection')
+            if save_sync_requested:
+                source_profile_id, target_profile_id, copied_fields = self.apply_camera_settings_save_sync_to_config(new_config, 'driver_connection', selected_profile)
+                save_note = 'Modern Admin Camera Driver / Connection save+sync from {0:s} to {1:s}'.format(source_profile_id, target_profile_id)
+            else:
+                target_profile_id = None
+                copied_fields = tuple()
+                save_note = 'Modern Admin Camera Driver / Connection update for {0:s}'.format(updated_profile_id)
+
             if not app.config['LOGIN_DISABLED']:
                 username = current_user.username
             else:
@@ -16982,10 +17004,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
             config_obj = IndiAllSkyConfig()
             config_obj.config = new_config
-            config_obj.save(username, 'Modern Admin Camera Driver / Connection update for {0:s}'.format(updated_profile_id))
+            config_obj.save(username, save_note)
             self.indi_allsky_config = new_config
-            app.logger.info('Saved Modern Admin Camera Driver / Connection config update for profile %s', updated_profile_id)
-            result['modern_admin_camera_settings_success'] = 'Driver / Connection saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new values.'.format(updated_profile_id)
+            if save_sync_requested:
+                app.logger.info('%s section=driver_connection copied_fields=%s', save_note, ','.join(copied_fields))
+                result['modern_admin_camera_settings_success'] = 'Driver / Connection saved for profile {0:s} and synced to {1:s}. Restart indi-allsky for the running capture service to use the new values.'.format(updated_profile_id, target_profile_id)
+            else:
+                app.logger.info('Saved Modern Admin Camera Driver / Connection config update for profile %s', updated_profile_id)
+                result['modern_admin_camera_settings_success'] = 'Driver / Connection saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new values.'.format(updated_profile_id)
         except ConfigSaveException as e:
             db.session.rollback()
             result['modern_admin_camera_settings_error'] = str(e)
@@ -17261,7 +17287,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             value_str = str(value or '').upper()
             return tuple({
                 'value'    : cfa_pattern,
-                'label'    : cfa_pattern or 'Use global',
+                'label'    : cfa_pattern or 'Auto',
                 'selected' : value in (None, '') if not cfa_pattern else value_str == cfa_pattern,
             } for cfa_pattern in self.CAMERA_SETTINGS_CFA_PATTERN_CHOICES)
 
@@ -17403,6 +17429,16 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 )
                 self.preserve_camera_settings_capture_global_values(new_config)
 
+            save_sync_requested = self.is_camera_settings_save_sync_requested('acquisition')
+            if save_sync_requested:
+                source_profile_id, target_profile_id, copied_fields = self.apply_camera_settings_save_sync_to_config(new_config, 'acquisition', selected_profile)
+                self.preserve_camera_settings_capture_global_values(new_config)
+                save_note = 'Modern Admin Camera Acquisition save+sync from {0:s} to {1:s}'.format(source_profile_id, target_profile_id)
+            else:
+                target_profile_id = None
+                copied_fields = tuple()
+                save_note = 'Modern Admin Camera Acquisition update for {0:s}'.format(updated_profile_id)
+
             if not app.config['LOGIN_DISABLED']:
                 username = current_user.username
             else:
@@ -17412,10 +17448,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
             config_obj = IndiAllSkyConfig()
             config_obj.config = new_config
-            config_obj.save(username, 'Modern Admin Camera Acquisition update for {0:s}'.format(updated_profile_id))
+            config_obj.save(username, save_note)
             self.indi_allsky_config = new_config
-            app.logger.info('Saved Modern Admin Camera Acquisition config update for profile %s', updated_profile_id)
-            result['modern_admin_camera_settings_success'] = 'Acquisition saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new values.'.format(updated_profile_id)
+            if save_sync_requested:
+                app.logger.info('%s section=acquisition copied_fields=%s', save_note, ','.join(copied_fields))
+                result['modern_admin_camera_settings_success'] = 'Acquisition saved for profile {0:s} and synced to {1:s}. Restart indi-allsky for the running capture service to use the new values.'.format(updated_profile_id, target_profile_id)
+            else:
+                app.logger.info('Saved Modern Admin Camera Acquisition config update for profile %s', updated_profile_id)
+                result['modern_admin_camera_settings_success'] = 'Acquisition saved for profile {0:s}. Restart indi-allsky for the running capture service to use the new values.'.format(updated_profile_id)
         except ConfigSaveException as e:
             db.session.rollback()
             result['modern_admin_camera_settings_error'] = str(e)
@@ -17514,6 +17554,51 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             return None
 
         return candidates[0]
+
+
+    def get_camera_settings_config_profile(self, config, profile_id, profile_index):
+        profiles = config.get('MULTI_CAMERA', {}).get('profiles', [])
+        if not isinstance(profiles, list):
+            raise ValueError('MULTI_CAMERA.profiles is missing or invalid.')
+
+        profile_offset = int(profile_index) - 1
+        if profile_offset < 0 or profile_offset >= len(profiles):
+            raise ValueError('Selected profile no longer exists.')
+
+        profile = profiles[profile_offset]
+        if not isinstance(profile, dict):
+            raise ValueError('Selected profile is not editable.')
+
+        if str(profile.get('profile_id') or profile.get('id') or 'profile-{0:d}'.format(profile_index)) != str(profile_id):
+            raise ValueError('Selected profile changed before save and sync. Reload and try again.')
+
+        return profile
+
+
+    def apply_camera_settings_save_sync_to_config(self, config, section_key, selected_profile):
+        if self.is_camera_settings_global_fallback_profile(selected_profile):
+            raise ValueError('Save & Sync requires a MULTI_CAMERA profile.')
+
+        profiles = self.get_camera_settings_profiles()
+        target_profile = self.get_camera_settings_capture_sync_target_profile(profiles, selected_profile)
+        if not target_profile:
+            raise ValueError('Save & Sync needs exactly one other editable camera profile.')
+
+        source_config_profile = self.get_camera_settings_config_profile(
+            config,
+            selected_profile.get('profile_id'),
+            selected_profile.get('_profile_index'),
+        )
+        return self.apply_camera_settings_section_sync_to_config(
+            config,
+            section_key,
+            source_config_profile,
+            target_profile,
+        )
+
+
+    def is_camera_settings_save_sync_requested(self, section_key):
+        return request.form.get('modern_admin_save_sync') == section_key
 
 
     def apply_camera_settings_section_sync_to_config(self, config, section_key, source_profile, target_profile):
@@ -18059,6 +18144,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 submitted_data,
             )
 
+            save_sync_requested = self.is_camera_settings_save_sync_requested('lens_optics')
+            if save_sync_requested:
+                source_profile_id, target_profile_id, copied_fields = self.apply_camera_settings_save_sync_to_config(new_config, 'lens_optics', selected_profile)
+                save_note = 'Modern Admin Camera Lens & Optics save+sync from {0:s} to {1:s}'.format(source_profile_id, target_profile_id)
+            else:
+                target_profile_id = None
+                copied_fields = tuple()
+                save_note = 'Modern Admin Camera Lens / Optics update for {0:s}'.format(updated_profile_id)
+
             if not app.config['LOGIN_DISABLED']:
                 username = current_user.username
             else:
@@ -18068,10 +18162,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
             config_obj = IndiAllSkyConfig()
             config_obj.config = new_config
-            config_obj.save(username, 'Modern Admin Camera Lens / Optics update for {0:s}'.format(updated_profile_id))
+            config_obj.save(username, save_note)
             self.indi_allsky_config = new_config
-            app.logger.info('Saved Modern Admin Camera Lens / Optics config update for profile %s', updated_profile_id)
-            result['modern_admin_camera_settings_success'] = 'Lens & Optics saved for profile {0:s}. Restart or reload indi-allsky for running services to use the new values.'.format(updated_profile_id)
+            if save_sync_requested:
+                app.logger.info('%s section=lens_optics copied_fields=%s', save_note, ','.join(copied_fields))
+                result['modern_admin_camera_settings_success'] = 'Lens & Optics saved for profile {0:s} and synced to {1:s}. Restart or reload indi-allsky for running services to use the new values.'.format(updated_profile_id, target_profile_id)
+            else:
+                app.logger.info('Saved Modern Admin Camera Lens / Optics config update for profile %s', updated_profile_id)
+                result['modern_admin_camera_settings_success'] = 'Lens & Optics saved for profile {0:s}. Restart or reload indi-allsky for running services to use the new values.'.format(updated_profile_id)
         except ConfigSaveException as e:
             db.session.rollback()
             result['modern_admin_camera_settings_error'] = str(e)
