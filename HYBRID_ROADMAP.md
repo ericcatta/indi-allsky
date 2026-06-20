@@ -349,6 +349,23 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - se `before_hybrid_awb_postprocess` e' sano ma `after_hybrid_awb_postprocess` o `before_auto_meter` diventano alti, il problema e' Hybrid AWB postprocess che clippa prima della misura.
     - se solo l'immagine finale e' chiara ma `before_auto_meter` e' sano, allora il problema e' dopo il meter: stretch/gamma/WB legacy/JPEG.
 
+- 2026-06-20: Fix baseline runtime Auto Exposure ASI678MC.
+  - Diagnosi Raspberry:
+    - `[ASI_FRAME_STATS] raw_fits_after_read_pre_debayer` mostra saturazione reale nel FITS raw quando l'exposure ASI e' troppo alta (`p99=65534`/mean alta).
+    - Hybrid AWB postprocess non crea la sovraesposizione; in alcuni frame riduce il clipping.
+    - `[AUTO_EXPOSURE_DECISION]` usava spesso `current_exposure=0.00003201 source_exposure=profile`, mentre `[AUTO_EXPOSURE_APPLY]` vedeva runtime reali come `0.0103`, `0.0135`, `0.0341`, `0.0500`.
+    - Questo creava oscillazione visibile dark -> good -> overexposed: il controller decideva da un minimo/default profilo invece dell'esposizione runtime realmente applicata.
+  - Fix applicato:
+    - Auto Exposure Controller ora usa come baseline `EXPOSURE_NEXT` se valido, poi `EXPOSURE_CURRENT`, e solo infine il fallback profilo.
+    - Stessa regola per gain: `GAIN_NEXT`, poi `GAIN_CURRENT`, poi fallback profilo.
+    - `0` resta valido per gain ASI; solo valori runtime negativi/non finiti sono considerati non inizializzati.
+    - I log `[AUTO_EXPOSURE_DECISION]` includono `runtime_current_exposure`, `runtime_next_exposure`, `runtime_current_gain`, `runtime_next_gain`.
+    - `[AUTO_EXPOSURE_APPLY]` logga la stessa baseline della decisione, cosi' `old_exposure` e `current_exposure` devono coincidere.
+  - Verifica attesa Raspberry:
+    - per ASI678MC, `source_exposure` deve essere `runtime_next` o `runtime_current` dopo l'inizializzazione;
+    - `AUTO_EXPOSURE_DECISION current_exposure` deve coincidere con `AUTO_EXPOSURE_APPLY old_exposure`;
+    - non deve piu' alternare fra `0.000032` e `0.0500` salvo richiesta reale del controller basata su frame consecutivi.
+
 - 2026-06-19: Consolidata roadmap Hybrid AllSky come documento operativo principale.
 - 2026-06-19: Stabilizzato runtime multicamera con gain/exposure/profile resolver per IMX708 e ASI678MC.
 - 2026-06-19: Introdotto metering per-camera selezionabile in shadow mode.

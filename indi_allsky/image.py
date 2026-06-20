@@ -551,14 +551,28 @@ class ImageWorker(Process):
         return state
 
 
-    def _auto_exposure_profile_float(self, value, runtime_value):
-        try:
-            if value is None:
-                raise TypeError
+    def _auto_exposure_runtime_float(self, runtime_next, runtime_current, fallback_value, fallback_source):
+        for source, value in (
+            ('runtime_next', runtime_next),
+            ('runtime_current', runtime_current),
+        ):
+            try:
+                runtime_value = float(value)
+            except (TypeError, ValueError):
+                continue
 
-            return float(value), 'profile'
+            if numpy.isfinite(runtime_value) and runtime_value >= 0.0:
+                return runtime_value, source
+
+        try:
+            fallback_runtime_value = float(fallback_value)
         except (TypeError, ValueError):
-            return runtime_value, 'runtime'
+            return None, 'missing'
+
+        if numpy.isfinite(fallback_runtime_value):
+            return fallback_runtime_value, fallback_source
+
+        return None, 'missing'
 
 
     def _auto_exposure_controller_inputs(self, mode):
@@ -583,25 +597,38 @@ class ImageWorker(Process):
             gain_min = self.gain_av[constants.GAIN_MIN_DAY]
             gain_max = self.gain_av[constants.GAIN_MAX_DAY]
 
-        current_exposure, source_exposure = self._auto_exposure_profile_float(
+        exposure_runtime_current = self.exposure_av[constants.EXPOSURE_CURRENT]
+        exposure_runtime_next = self.exposure_av[constants.EXPOSURE_NEXT]
+        gain_runtime_current = self.gain_av[constants.GAIN_CURRENT]
+        gain_runtime_next = self.gain_av[constants.GAIN_NEXT]
+
+        current_exposure, source_exposure = self._auto_exposure_runtime_float(
+            exposure_runtime_next,
+            exposure_runtime_current,
             self.config.get('CCD_EXPOSURE_DEF'),
-            self.exposure_av[constants.EXPOSURE_CURRENT],
+            'profile_default',
         )
-        current_gain, source_gain = self._auto_exposure_profile_float(
+        current_gain, source_gain = self._auto_exposure_runtime_float(
+            gain_runtime_next,
+            gain_runtime_current,
             mode_gain_config.get('GAIN'),
-            self.gain_av[constants.GAIN_CURRENT],
+            'profile_gain',
         )
 
         return {
-            'target'           : target,
-            'current_exposure' : current_exposure,
-            'current_gain'     : current_gain,
-            'exposure_min'     : exposure_min,
-            'exposure_max'     : exposure_max,
-            'gain_min'         : gain_min,
-            'gain_max'         : gain_max,
-            'source_exposure'  : source_exposure,
-            'source_gain'      : source_gain,
+            'target'                   : target,
+            'current_exposure'         : current_exposure,
+            'current_gain'             : current_gain,
+            'exposure_min'             : exposure_min,
+            'exposure_max'             : exposure_max,
+            'gain_min'                 : gain_min,
+            'gain_max'                 : gain_max,
+            'source_exposure'          : source_exposure,
+            'source_gain'              : source_gain,
+            'exposure_runtime_current' : exposure_runtime_current,
+            'exposure_runtime_next'    : exposure_runtime_next,
+            'gain_runtime_current'     : gain_runtime_current,
+            'gain_runtime_next'        : gain_runtime_next,
         }
 
 
@@ -625,7 +652,14 @@ class ImageWorker(Process):
         missing_inputs = [
             key
             for key, value in inputs.items()
-            if value is None and key not in ('source_exposure', 'source_gain')
+            if value is None and key not in (
+                'source_exposure',
+                'source_gain',
+                'exposure_runtime_current',
+                'exposure_runtime_next',
+                'gain_runtime_current',
+                'gain_runtime_next',
+            )
         ]
         if missing_inputs:
             self._log_auto_exposure_decision_skipped(profile_id, camera_id, result.mode, 'missing_{0:s}'.format(','.join(missing_inputs)))
@@ -673,7 +707,7 @@ class ImageWorker(Process):
         state['last_decision'] = decision
 
         logger.info(
-            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s current_gain=%0.2f proposed_gain=%0.2f source_gain=%s shadow=%s',
+            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s runtime_current_exposure=%0.8f runtime_next_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f source_gain=%s runtime_current_gain=%0.2f runtime_next_gain=%0.2f shadow=%s',
             profile_id,
             camera_id,
             result.mode,
@@ -689,9 +723,13 @@ class ImageWorker(Process):
             decision.current_exposure,
             decision.proposed_exposure,
             inputs['source_exposure'],
+            float(inputs['exposure_runtime_current']),
+            float(inputs['exposure_runtime_next']),
             decision.current_gain,
             decision.proposed_gain,
             inputs['source_gain'],
+            float(inputs['gain_runtime_current']),
+            float(inputs['gain_runtime_next']),
             decision.shadow,
         )
         return decision
@@ -727,11 +765,11 @@ class ImageWorker(Process):
                 logger.info('[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s enabled=True status=skipped reason=missing_smoothed_value shadow=False', profile_id, camera_id)
                 return
 
-            old_exposure = float(self.exposure_av[constants.EXPOSURE_NEXT])
-            old_gain = float(self.gain_av[constants.GAIN_NEXT])
+            old_exposure = float(decision.current_exposure)
+            old_gain = float(decision.current_gain)
             if decision.action == 'hold':
                 logger.info(
-                    '[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s mode=%s enabled=True status=skipped reason=hold action=hold old_exposure=%0.8f new_exposure=%0.8f old_gain=%0.2f new_gain=%0.2f target=%0.2f smoothed_value=%0.2f error=%+0.2f deadband=%0.2f shadow=False',
+                    '[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s mode=%s enabled=True status=skipped reason=hold action=hold old_exposure=%0.8f new_exposure=%0.8f old_gain=%0.2f new_gain=%0.2f target=%0.2f smoothed_value=%0.2f error=%+0.2f deadband=%0.2f decision_current_exposure=%0.8f decision_current_gain=%0.2f shadow=False',
                     profile_id,
                     camera_id,
                     state.get('mode'),
@@ -743,6 +781,8 @@ class ImageWorker(Process):
                     float(smoothed_value),
                     decision.error,
                     decision.deadband,
+                    decision.current_exposure,
+                    decision.current_gain,
                 )
                 return
 
@@ -775,7 +815,7 @@ class ImageWorker(Process):
                 self.gain_av[constants.GAIN_DELTA] = float(new_gain - self.gain_av[constants.GAIN_CURRENT])
 
             logger.info(
-                '[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s mode=%s enabled=True action=%s old_exposure=%0.8f new_exposure=%0.8f old_gain=%0.2f new_gain=%0.2f target=%0.2f smoothed_value=%0.2f error=%+0.2f deadband=%0.2f shadow=False',
+                '[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s mode=%s enabled=True action=%s old_exposure=%0.8f new_exposure=%0.8f old_gain=%0.2f new_gain=%0.2f target=%0.2f smoothed_value=%0.2f error=%+0.2f deadband=%0.2f decision_current_exposure=%0.8f decision_current_gain=%0.2f shadow=False',
                 profile_id,
                 camera_id,
                 state.get('mode'),
@@ -788,6 +828,8 @@ class ImageWorker(Process):
                 float(smoothed_value),
                 decision.error,
                 decision.deadband,
+                decision.current_exposure,
+                decision.current_gain,
             )
         except Exception as e:
             logger.info('[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s enabled=True status=skipped reason=%s shadow=False', profile_id, camera_id, str(e))
