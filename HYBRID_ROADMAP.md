@@ -451,6 +451,15 @@ Validazione runtime Raspberry del secondo micro-step del 2026-06-20:
 - IMX708 day mantiene `old_gain=1.13` e `new_gain=1.13`.
 - Nessun gain reale viene applicato.
 
+Validazione runtime Raspberry del quarto micro-step del 2026-06-20:
+
+- Auto Gain Apply gated validato dopo introduzione del path reale su `GAIN_NEXT`.
+- Default `AUTO_GAIN_APPLY_ENABLED=False`.
+- Runtime log mostra `[AUTO_GAIN_APPLY] status=skipped reason=apply_disabled`.
+- `mode_disabled` blocca correttamente la day mode quando Auto Gain day e' disattivato.
+- Nessun `status=applied` osservato.
+- Nessun cambio gain runtime osservato.
+
 ### Auto Exposure Refinement
 
 - Rafforzare anti-oscillazione/hysteresis.
@@ -691,3 +700,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Validata persistenza profile-first di ASI678MC Day Target ADU a `95` da UI fino a resolver runtime e controller Auto Exposure/Auto Gain.
 - 2026-06-20: Verificata simmetria pipeline profile-first per `target_adu.day/night/dev_day/dev` da UI a runtime flat config.
 - 2026-06-20: Abilitato Auto Gain apply reale ma gated: default off, mode-specific, exposure-first, write solo su `GAIN_NEXT`.
+- 2026-06-20: Validato su Raspberry che Auto Gain Apply gated resta spento di default (`apply_disabled`) e non cambia il gain runtime.
