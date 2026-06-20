@@ -173,6 +173,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - gain day rimasto `0.00`;
   - nessun salto `0.000032 -> 0.050000`;
   - convergenza stabile attorno al target `85 ADU` con exposure circa `0.021686-0.024186s`.
+- Validazione runtime ASI678MC profile Target ADU del 2026-06-20:
+  - Day Target ADU modificato da Camera Profile Settings a `95`;
+  - latest config DB contiene `MULTI_CAMERA.profiles[n].profile_id=asi678mc` con `target_adu.day=95`;
+  - dopo restart `[MULTI_CAMERA_RESOLVED_CONFIG][asi678mc]` mostra `target_adu_day=95`;
+  - `[AUTO_EXPOSURE_DECISION]` e `[AUTO_GAIN_DECISION]` usano `target=95.00`.
 
 ## IN TEST
 
@@ -671,3 +676,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Aggiunto obiettivo UI dashboard per mostrare simultaneamente l'ultima immagine di entrambe le camere.
 - 2026-06-20: Validati log runtime Auto Gain apply gated con `apply_enabled=false` e nessun gain reale applicato.
 - 2026-06-20: Aggiunti diagnostici Night Gain Decision Validation con `[AUTO_GAIN_BLOCKER]` e apply validation-only.
+- 2026-06-20: Validata persistenza profile-first di ASI678MC Day Target ADU a `95` da UI fino a resolver runtime e controller Auto Exposure/Auto Gain.
