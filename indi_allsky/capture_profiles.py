@@ -62,6 +62,9 @@ class CaptureProfile:
     exposure_period_day: float
     auto_exposure_enabled: bool
     auto_exposure_metering_mode: str
+    auto_exposure_day_max_step: float
+    auto_exposure_day_min_step: float
+    auto_exposure_day_step_factor: float
     target_adu: int
     target_adu_day: int
     target_adu_dev: int
@@ -356,6 +359,15 @@ def _auto_exposure_enabled(config: Mapping[str, Any], profile_config: Mapping[st
     ))
 
 
+def _auto_exposure_float(config: Mapping[str, Any], profile_config: Mapping[str, Any], key: str, flat_key: str, default: float) -> float:
+    auto_exposure_config = _mapping_config(profile_config, 'auto_exposure')
+    return _mapping_float(
+        auto_exposure_config,
+        key,
+        _float_config(profile_config, flat_key, _float_config(config, flat_key.upper(), default)),
+    )
+
+
 def _profile_identity_config(profile_config: Mapping[str, Any]) -> bool:
     return any(key in profile_config for key in (
         'profile_id',
@@ -523,6 +535,9 @@ def _profile_from_config(
         exposure_period_day=_mapping_float(exposure_config, 'period_day', _float_config(profile_config, 'exposure_period_day', _float_config(config, 'EXPOSURE_PERIOD_DAY', 15.0))),
         auto_exposure_enabled=_auto_exposure_enabled(config, profile_config),
         auto_exposure_metering_mode=_auto_exposure_metering_mode(config, profile_config),
+        auto_exposure_day_max_step=_auto_exposure_float(config, profile_config, 'day_max_step', 'auto_exposure_day_max_step', 0.005),
+        auto_exposure_day_min_step=_auto_exposure_float(config, profile_config, 'day_min_step', 'auto_exposure_day_min_step', 0.00025),
+        auto_exposure_day_step_factor=_auto_exposure_float(config, profile_config, 'day_step_factor', 'auto_exposure_day_step_factor', 0.35),
         target_adu=_mapping_int(target_adu_config, 'night', _int_config(profile_config, 'target_adu', _int_config(config, 'TARGET_ADU', 75))),
         target_adu_day=_mapping_int(target_adu_config, 'day', _int_config(profile_config, 'target_adu_day', _int_config(config, 'TARGET_ADU_DAY', 75))),
         target_adu_dev=_mapping_int(target_adu_config, 'dev', _int_config(profile_config, 'target_adu_dev', _int_config(config, 'TARGET_ADU_DEV', 10))),
@@ -629,6 +644,9 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     profile_config['EXPOSURE_PERIOD_DAY'] = profile.exposure_period_day
     profile_config['AUTO_EXPOSURE_ENABLED'] = profile.auto_exposure_enabled
     profile_config['AUTO_EXPOSURE_METERING_MODE'] = profile.auto_exposure_metering_mode
+    profile_config['AUTO_EXPOSURE_DAY_MAX_STEP'] = profile.auto_exposure_day_max_step
+    profile_config['AUTO_EXPOSURE_DAY_MIN_STEP'] = profile.auto_exposure_day_min_step
+    profile_config['AUTO_EXPOSURE_DAY_STEP_FACTOR'] = profile.auto_exposure_day_step_factor
     profile_config['TARGET_ADU'] = profile.target_adu
     profile_config['TARGET_ADU_DAY'] = profile.target_adu_day
     profile_config['TARGET_ADU_DEV'] = profile.target_adu_dev

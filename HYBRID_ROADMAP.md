@@ -366,6 +366,24 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - `AUTO_EXPOSURE_DECISION current_exposure` deve coincidere con `AUTO_EXPOSURE_APPLY old_exposure`;
     - non deve piu' alternare fra `0.000032` e `0.0500` salvo richiesta reale del controller basata su frame consecutivi.
 
+- 2026-06-20: Fix passo daytime Auto Exposure ASI678MC.
+  - Problema residuo:
+    - dopo il fix baseline, decision/apply erano allineati ma il controller usava ancora `max(0.05, current_exposure * 0.25)` anche di giorno;
+    - da un frame quasi nero a `0.000032s`, un singolo `increase_exposure` poteva saltare direttamente a circa `0.050s`, saturando il FITS raw ASI e generando oscillazione.
+  - Fix applicato:
+    - daytime usa strategia `day_bounded`, con step adattivo limitato:
+      - `AUTO_EXPOSURE_DAY_STEP_FACTOR`, default `0.35`;
+      - `AUTO_EXPOSURE_DAY_MIN_STEP`, default `0.00025s`;
+      - `AUTO_EXPOSURE_DAY_MAX_STEP`, default `0.005s`.
+    - I valori sono leggibili per profilo da `MULTI_CAMERA.profiles[n].auto_exposure.day_step_factor`, `day_min_step`, `day_max_step`.
+    - notte/moonmode mantengono la strategia legacy `legacy_fractional`.
+    - di giorno il gain non viene modificato dal controller se `AUTO_GAIN_ENABLE_DAY` non e' esplicitamente attivo.
+    - `[AUTO_EXPOSURE_DECISION]` ora include `step_strategy`, `exposure_step`, `day_step_factor`, `day_min_step`, `day_max_step`, `allow_gain_control`.
+  - Verifica attesa Raspberry:
+    - ASI day da `0.000032s` deve aumentare gradualmente (`~0.00028s`, poi step successivi), non saltare direttamente a `0.050s`;
+    - `current_exposure` e `AUTO_EXPOSURE_APPLY old_exposure` restano allineati;
+    - il raw FITS non dovrebbe piu' alternare black/saturated per effetto di un singolo salto troppo grande.
+
 - 2026-06-19: Consolidata roadmap Hybrid AllSky come documento operativo principale.
 - 2026-06-19: Stabilizzato runtime multicamera con gain/exposure/profile resolver per IMX708 e ASI678MC.
 - 2026-06-19: Introdotto metering per-camera selezionabile in shadow mode.

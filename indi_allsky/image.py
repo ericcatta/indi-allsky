@@ -575,8 +575,21 @@ class ImageWorker(Process):
         return None, 'missing'
 
 
+    def _auto_exposure_config_float(self, key, default):
+        try:
+            value = float(self.config.get(key, default))
+        except (TypeError, ValueError):
+            return float(default)
+
+        if not numpy.isfinite(value) or value <= 0.0:
+            return float(default)
+
+        return value
+
+
     def _auto_exposure_controller_inputs(self, mode):
         ccd_config = self.config.get('CCD_CONFIG') or {}
+        is_day = not bool(self.night_av[constants.NIGHT_NIGHT])
         if self.night_av[constants.NIGHT_NIGHT]:
             target = self.config.get('TARGET_ADU', 75)
             exposure_min = self.exposure_av[constants.EXPOSURE_MIN_NIGHT]
@@ -596,6 +609,10 @@ class ImageWorker(Process):
             exposure_max = self.exposure_av[constants.EXPOSURE_MAX]
             gain_min = self.gain_av[constants.GAIN_MIN_DAY]
             gain_max = self.gain_av[constants.GAIN_MAX_DAY]
+
+        allow_gain_control = True
+        if is_day:
+            allow_gain_control = self._auto_gain_enabled('day')
 
         exposure_runtime_current = self.exposure_av[constants.EXPOSURE_CURRENT]
         exposure_runtime_next = self.exposure_av[constants.EXPOSURE_NEXT]
@@ -629,6 +646,11 @@ class ImageWorker(Process):
             'exposure_runtime_next'    : exposure_runtime_next,
             'gain_runtime_current'     : gain_runtime_current,
             'gain_runtime_next'        : gain_runtime_next,
+            'is_day'                   : is_day,
+            'allow_gain_control'       : allow_gain_control,
+            'day_step_factor'          : self._auto_exposure_config_float('AUTO_EXPOSURE_DAY_STEP_FACTOR', 0.35),
+            'day_min_step'             : self._auto_exposure_config_float('AUTO_EXPOSURE_DAY_MIN_STEP', 0.00025),
+            'day_max_step'             : self._auto_exposure_config_float('AUTO_EXPOSURE_DAY_MAX_STEP', 0.005),
         }
 
 
@@ -659,6 +681,8 @@ class ImageWorker(Process):
                 'exposure_runtime_next',
                 'gain_runtime_current',
                 'gain_runtime_next',
+                'is_day',
+                'allow_gain_control',
             )
         ]
         if missing_inputs:
@@ -695,6 +719,11 @@ class ImageWorker(Process):
                 gain_max=inputs['gain_max'],
                 target=inputs['target'],
                 trend_count=trend_count,
+                is_day=inputs['is_day'],
+                day_step_factor=inputs['day_step_factor'],
+                day_min_step=inputs['day_min_step'],
+                day_max_step=inputs['day_max_step'],
+                allow_gain_control=inputs['allow_gain_control'],
             )
         except (TypeError, ValueError) as e:
             self._log_auto_exposure_decision_skipped(profile_id, camera_id, result.mode, str(e))
@@ -707,7 +736,7 @@ class ImageWorker(Process):
         state['last_decision'] = decision
 
         logger.info(
-            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s runtime_current_exposure=%0.8f runtime_next_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f source_gain=%s runtime_current_gain=%0.2f runtime_next_gain=%0.2f shadow=%s',
+            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f step_strategy=%s exposure_step=%0.8f day_step_factor=%0.5f day_min_step=%0.8f day_max_step=%0.8f allow_gain_control=%s action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s runtime_current_exposure=%0.8f runtime_next_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f source_gain=%s runtime_current_gain=%0.2f runtime_next_gain=%0.2f shadow=%s',
             profile_id,
             camera_id,
             result.mode,
@@ -719,6 +748,12 @@ class ImageWorker(Process):
             decision.trend_active,
             decision.trend_direction,
             decision.trend_step,
+            decision.step_strategy,
+            decision.exposure_step,
+            inputs['day_step_factor'],
+            inputs['day_min_step'],
+            inputs['day_max_step'],
+            inputs['allow_gain_control'],
             decision.action,
             decision.current_exposure,
             decision.proposed_exposure,
