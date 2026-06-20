@@ -4,6 +4,8 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class AutoExposureDecision:
     action: str
+    reason: str
+    blocker: str
     current_exposure: float
     proposed_exposure: float
     current_gain: float
@@ -70,6 +72,8 @@ class AutoExposureController:
         proposed_gain = current_gain
         error = target - smoothed_value
         action = 'hold'
+        reason = 'inner_deadband_hold'
+        blocker = 'inner_deadband_hold'
         trend_active = False
         trend_direction = 'none'
         trend_step = 0.0
@@ -78,6 +82,8 @@ class AutoExposureController:
 
         if abs(error) <= self.inner_deadband:
             action = 'hold'
+            reason = 'inner_deadband_hold'
+            blocker = 'inner_deadband_hold'
         elif abs(error) <= self.deadband:
             if trend_count >= self.trend_frames:
                 trend_active = True
@@ -91,15 +97,24 @@ class AutoExposureController:
                 trend_step = exposure_step / 2.0
                 if error > 0:
                     action = 'increase_exposure'
+                    reason = 'trend_micro_increase_exposure'
+                    blocker = 'none'
                     trend_direction = 'positive'
                     proposed_exposure = self._clamp(current_exposure + trend_step, exposure_min, exposure_max)
                 else:
                     action = 'decrease_exposure'
+                    reason = 'trend_micro_decrease_exposure'
+                    blocker = 'none'
                     trend_direction = 'negative'
                     proposed_exposure = self._clamp(current_exposure - trend_step, exposure_min, exposure_max)
+            else:
+                reason = 'trend_not_confirmed'
+                blocker = 'trend_not_confirmed'
         elif error > self.deadband:
             if current_exposure < exposure_max:
                 action = 'increase_exposure'
+                reason = 'increase_exposure_conditions_satisfied'
+                blocker = 'none'
                 exposure_step = self._exposure_step(
                     current_exposure,
                     is_day=is_day,
@@ -110,15 +125,27 @@ class AutoExposureController:
                 proposed_exposure = self._clamp(current_exposure + exposure_step, exposure_min, exposure_max)
             elif allow_gain_control and current_gain < gain_max:
                 action = 'increase_gain'
+                reason = 'exposure_at_limit_increase_gain'
+                blocker = 'none'
                 gain_step = max(0.01, max(abs(current_gain), 1.0) * self.gain_step_fraction)
                 proposed_gain = self._clamp(current_gain + gain_step, gain_min, gain_max)
+            elif not allow_gain_control:
+                reason = 'gain_control_disabled'
+                blocker = 'gain_control_disabled'
+            else:
+                reason = 'exposure_and_gain_already_max'
+                blocker = 'exposure_and_gain_already_max'
         elif error < (self.deadband * -1):
             if allow_gain_control and current_gain > gain_min:
                 action = 'decrease_gain'
+                reason = 'decrease_gain_before_exposure'
+                blocker = 'none'
                 gain_step = max(0.01, max(abs(current_gain), 1.0) * self.gain_step_fraction)
                 proposed_gain = self._clamp(current_gain - gain_step, gain_min, gain_max)
             elif current_exposure > exposure_min:
                 action = 'decrease_exposure'
+                reason = 'decrease_exposure_conditions_satisfied'
+                blocker = 'none'
                 exposure_step = self._exposure_step(
                     current_exposure,
                     is_day=is_day,
@@ -127,9 +154,17 @@ class AutoExposureController:
                     day_max_step=day_max_step,
                 )
                 proposed_exposure = self._clamp(current_exposure - exposure_step, exposure_min, exposure_max)
+            elif allow_gain_control:
+                reason = 'exposure_and_gain_already_min'
+                blocker = 'exposure_and_gain_already_min'
+            else:
+                reason = 'exposure_already_min'
+                blocker = 'exposure_already_min'
 
         return AutoExposureDecision(
             action=action,
+            reason=reason,
+            blocker=blocker,
             current_exposure=current_exposure,
             proposed_exposure=proposed_exposure,
             current_gain=current_gain,

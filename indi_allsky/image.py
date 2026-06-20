@@ -736,6 +736,30 @@ class ImageWorker(Process):
         )
 
 
+    def _log_auto_exposure_blocker(self, profile_id, camera_id, mode, decision):
+        if decision.blocker == 'none':
+            return
+
+        logger.info(
+            '[AUTO_EXPOSURE_BLOCKER] profile=%s camera_id=%s mode=%s blocker=%s action=%s reason=%s current_exposure=%0.8f proposed_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f trend_active=%s trend_count=%d error=%+0.2f deadband=%0.2f shadow=%s',
+            profile_id,
+            camera_id,
+            mode,
+            decision.blocker,
+            decision.action,
+            decision.reason,
+            decision.current_exposure,
+            decision.proposed_exposure,
+            decision.current_gain,
+            decision.proposed_gain,
+            decision.trend_active,
+            decision.trend_count,
+            decision.error,
+            decision.deadband,
+            decision.shadow,
+        )
+
+
     def _decide_auto_exposure_shadow(self, profile_id, camera_id, result, state):
         smoothed_value = state.get('smoothed_value')
         if smoothed_value is None:
@@ -806,9 +830,10 @@ class ImageWorker(Process):
             state['trend_direction'] = 'none'
 
         state['last_decision'] = decision
+        self._log_auto_exposure_blocker(profile_id, camera_id, result.mode, decision)
 
         logger.info(
-            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f step_strategy=%s exposure_step=%0.8f day_step_factor=%0.5f day_min_step=%0.8f day_max_step=%0.8f allow_gain_control=%s action=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s runtime_current_exposure=%0.8f runtime_next_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f source_gain=%s runtime_current_gain=%0.2f runtime_next_gain=%0.2f shadow=%s',
+            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f step_strategy=%s exposure_step=%0.8f day_step_factor=%0.5f day_min_step=%0.8f day_max_step=%0.8f allow_gain_control=%s action=%s reason=%s blocker=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s runtime_current_exposure=%0.8f runtime_next_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f source_gain=%s runtime_current_gain=%0.2f runtime_next_gain=%0.2f shadow=%s',
             profile_id,
             camera_id,
             result.mode,
@@ -827,6 +852,8 @@ class ImageWorker(Process):
             inputs['day_max_step'],
             inputs['allow_gain_control'],
             decision.action,
+            decision.reason,
+            decision.blocker,
             decision.current_exposure,
             decision.proposed_exposure,
             inputs['source_exposure'],

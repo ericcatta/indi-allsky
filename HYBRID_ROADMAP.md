@@ -195,6 +195,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - `target_adu.day`, `target_adu.night`, `target_adu.dev_day` e `target_adu.dev` seguono la stessa catena UI -> latest config DB -> `capture_profiles.py` resolver -> runtime flat config;
   - il runtime espone rispettivamente `TARGET_ADU_DAY`, `TARGET_ADU`, `TARGET_ADU_DEV_DAY` e `TARGET_ADU_DEV`;
   - il legacy ADU controller legge i target da day/night e le deviazioni da `TARGET_ADU_DEV_DAY` per esposizioni day molto brevi o `TARGET_ADU_DEV` per gli altri casi.
+- Auto Exposure Refinement fase 1:
+  - audit conferma che Auto Exposure ha trend minimale per camera/profilo e reset su cambio segno tramite stato Auto Meter;
+  - non ha ancora cooldown dedicato, trend separato over/under persistente, outlier guard o parametri profile-first completi per deadband/trend/cooldown;
+  - aggiunto logging diagnostico conservativo con `reason`/`blocker` in `[AUTO_EXPOSURE_DECISION]`;
+  - aggiunto `[AUTO_EXPOSURE_BLOCKER]` per spiegare hold/blocchi come `inner_deadband_hold`, `trend_not_confirmed`, `gain_control_disabled`, limiti exposure/gain;
+  - nessuna modifica a step, apply, UI, config o coordinamento runtime con Auto Gain.
 
 ## IN TEST
 
@@ -516,6 +522,13 @@ Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
   - day min/max step.
   - night min/max step.
   - cooldown.
+- Aggiungere blocker/reason applicativi piu' completi solo dopo validazione runtime dei nuovi log:
+  - `saturated_frame`.
+  - `near_black_frame`.
+  - `cooldown_active`.
+  - `outlier_frame`.
+  - `exposure_already_max`.
+  - `exposure_already_min`.
 - Strategie separate ASI e Raspberry camera, senza hardcode fragile.
 - Metrica esposimetrica piu' stabile per cielo diurno:
   - usare percentili bassi/medi.
@@ -680,6 +693,7 @@ systemctl --user restart indi-allsky
 grep -E "ERROR|Traceback|Exception" /var/log/indi-allsky/indi-allsky.log | tail -100
 grep -E "MULTI_CAMERA_RESOLVED_CONFIG|MULTI_CAMERA_PROCESSING_CONFIG" /var/log/indi-allsky/indi-allsky.log | tail -100
 grep -E "AUTO_METER_STATE|AUTO_EXPOSURE_DECISION|AUTO_EXPOSURE_APPLY" /var/log/indi-allsky/indi-allsky.log | tail -200
+grep -E "AUTO_EXPOSURE_BLOCKER|AUTO_EXPOSURE_DECISION" /var/log/indi-allsky/indi-allsky.log | tail -200
 grep -E "AUTO_GAIN_STATE|AUTO_GAIN_DECISION|AUTO_GAIN_APPLY" /var/log/indi-allsky/indi-allsky.log | tail -200
 grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail -200
 ```
@@ -699,6 +713,8 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
   - `source_exposure=runtime_next` or `runtime_current` after initialization.
   - `AUTO_EXPOSURE_DECISION current_exposure` equals `AUTO_EXPOSURE_APPLY old_exposure`.
   - `step_strategy=day_bounded`.
+  - `AUTO_EXPOSURE_DECISION` includes explicit `reason` and `blocker`.
+  - `AUTO_EXPOSURE_BLOCKER` explains hold/blocked decisions without changing runtime behavior.
   - no single jump from `0.000032s` to `0.050s`.
 - Auto Gain shadow:
   - `AUTO_GAIN_STATE` and `AUTO_GAIN_DECISION` present for both profiles.
@@ -755,3 +771,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Convertito sync Camera Settings in Save & Sync per sezione, con CFA/Debayer Pattern esplicitamente profile-specific e non sincronizzabile.
 - 2026-06-20: Aggiunto sync Modern Admin Acquisition da un profilo all'altro, limitato ai blocchi automatici comuni e senza copiare identity/hardware camera.
 - 2026-06-21: Validati su Raspberry target ADU persistente, resolver runtime corretto, `gain_max_*` profile-specific, ASI678MC moonmode fino a gain `300` e decisioni Auto Gain aggressive coerenti.
+- 2026-06-21: Auto Exposure Refinement fase 1: audit controller, aggiunti `reason`/`blocker` e `[AUTO_EXPOSURE_BLOCKER]` diagnostico senza cambiare comportamento runtime.
