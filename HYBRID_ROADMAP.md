@@ -178,6 +178,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - latest config DB contiene `MULTI_CAMERA.profiles[n].profile_id=asi678mc` con `target_adu.day=95`;
   - dopo restart `[MULTI_CAMERA_RESOLVED_CONFIG][asi678mc]` mostra `target_adu_day=95`;
   - `[AUTO_EXPOSURE_DECISION]` e `[AUTO_GAIN_DECISION]` usano `target=95.00`.
+- Verifica pipeline Target ADU profile-first del 2026-06-20:
+  - `target_adu.day`, `target_adu.night`, `target_adu.dev_day` e `target_adu.dev` seguono la stessa catena UI -> latest config DB -> `capture_profiles.py` resolver -> runtime flat config;
+  - il runtime espone rispettivamente `TARGET_ADU_DAY`, `TARGET_ADU`, `TARGET_ADU_DEV_DAY` e `TARGET_ADU_DEV`;
+  - il legacy ADU controller legge i target da day/night e le deviazioni da `TARGET_ADU_DEV_DAY` per esposizioni day molto brevi o `TARGET_ADU_DEV` per gli altri casi.
 
 ## IN TEST
 
@@ -677,3 +681,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Validati log runtime Auto Gain apply gated con `apply_enabled=false` e nessun gain reale applicato.
 - 2026-06-20: Aggiunti diagnostici Night Gain Decision Validation con `[AUTO_GAIN_BLOCKER]` e apply validation-only.
 - 2026-06-20: Validata persistenza profile-first di ASI678MC Day Target ADU a `95` da UI fino a resolver runtime e controller Auto Exposure/Auto Gain.
+- 2026-06-20: Verificata simmetria pipeline profile-first per `target_adu.day/night/dev_day/dev` da UI a runtime flat config.
