@@ -411,6 +411,15 @@ Secondo micro-step implementato:
 - Apply consentito solo se mode auto gain e' abilitata, trend e' attivo, cooldown non blocca la decisione, gain resta nei limiti e la decisione rispetta Exposure-first/Gain-last.
 - Di giorno `AUTO_GAIN_ENABLE_DAY=False` continua a bloccare sia proposta sia apply.
 
+Validazione runtime Raspberry del secondo micro-step del 2026-06-20:
+
+- `[AUTO_GAIN_APPLY]` compare nei log.
+- Auto Gain `apply_enabled=false` di default.
+- Apply resta `status=skipped`, `reason=apply_disabled`, `shadow=True`.
+- ASI678MC day mantiene `old_gain=0.00` e `new_gain=0.00`.
+- IMX708 day mantiene `old_gain=1.13` e `new_gain=1.13`.
+- Nessun gain reale viene applicato.
+
 ### Auto Exposure Refinement
 
 - Rafforzare anti-oscillazione/hysteresis.
@@ -590,7 +599,7 @@ systemctl --user restart indi-allsky
 grep -E "ERROR|Traceback|Exception" /var/log/indi-allsky/indi-allsky.log | tail -100
 grep -E "MULTI_CAMERA_RESOLVED_CONFIG|MULTI_CAMERA_PROCESSING_CONFIG" /var/log/indi-allsky/indi-allsky.log | tail -100
 grep -E "AUTO_METER_STATE|AUTO_EXPOSURE_DECISION|AUTO_EXPOSURE_APPLY" /var/log/indi-allsky/indi-allsky.log | tail -200
-grep -E "AUTO_GAIN_STATE|AUTO_GAIN_DECISION" /var/log/indi-allsky/indi-allsky.log | tail -200
+grep -E "AUTO_GAIN_STATE|AUTO_GAIN_DECISION|AUTO_GAIN_APPLY" /var/log/indi-allsky/indi-allsky.log | tail -200
 grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail -200
 ```
 
@@ -615,6 +624,12 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
   - day mode remains `enabled=False`.
   - `action=hold`, `reason=gain_auto_disabled`, `shadow=True`.
   - ASI proposed gain remains `0.00`; IMX proposed gain remains `1.13`.
+- Auto Gain gated apply:
+  - `AUTO_GAIN_APPLY` present.
+  - default `apply_enabled=False`.
+  - `status=skipped`, `reason=apply_disabled`, `shadow=True`.
+  - ASI day remains `old_gain=0.00`, `new_gain=0.00`.
+  - IMX day remains `old_gain=1.13`, `new_gain=1.13`.
 - Hybrid AWB:
   - ASI backend `postprocess_rgb`.
   - IMX backend according to profile apply mode.
@@ -640,3 +655,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Validati log runtime Auto Gain shadow su Raspberry per IMX708 e ASI678MC.
 - 2026-06-20: Aggiunto path Auto Gain apply gated, disattivato di default e limitato a `GAIN_NEXT`.
 - 2026-06-20: Aggiunto obiettivo UI dashboard per mostrare simultaneamente l'ultima immagine di entrambe le camere.
+- 2026-06-20: Validati log runtime Auto Gain apply gated con `apply_enabled=false` e nessun gain reale applicato.
