@@ -481,6 +481,12 @@ Secondo micro-step implementato:
   - current exposure/gain.
   - processing mode.
   - AWB backend.
+- Dashboard con visione simultanea dell'ultima immagine di entrambe le camere:
+  - mostrare affiancate ASI678MC Zenith e IMX708 South Wide.
+  - non mostrare solo una camera come nella dashboard attuale.
+  - ogni riquadro deve includere timestamp, age, exposure, gain, quality/status e link alla gallery filtrata.
+  - se una camera non ha frame recente, mostrare placeholder/stato chiaro senza nascondere l'altra.
+  - layout responsive: affiancato su desktop, stacked su mobile.
 - Grafici:
   - brightness.
   - exposure.
@@ -633,3 +639,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Aggiunto Auto Gain shadow controller diagnostico, senza apply runtime.
 - 2026-06-20: Validati log runtime Auto Gain shadow su Raspberry per IMX708 e ASI678MC.
 - 2026-06-20: Aggiunto path Auto Gain apply gated, disattivato di default e limitato a `GAIN_NEXT`.
+- 2026-06-20: Aggiunto obiettivo UI dashboard per mostrare simultaneamente l'ultima immagine di entrambe le camere.
