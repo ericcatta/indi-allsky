@@ -206,8 +206,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 - Aggiunto schema `FrameMetadata` per metadata frame append-only.
 - Persistenza iniziale in JSONL, senza migration DB:
-  - default: `VARLIB_FOLDER/frame_metadata.jsonl`.
-  - override opzionale: `FRAME_METADATA_PATH`.
+  - default daily rotation: `VARLIB_FOLDER/frame_metadata/YYYY-MM-DD.jsonl`.
+  - la data del file viene derivata da `FrameMetadata.timestamp`.
+  - override opzionale legacy: `FRAME_METADATA_PATH` mantiene il comportamento a file singolo, salvo `FRAME_METADATA_ROTATE_DAILY=True`.
 - Campi persistiti:
   - `frame_id`.
   - `timestamp`.
@@ -583,7 +584,7 @@ Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
 ### Metadata / Analytics Follow-up
 
 - Validare runtime JSONL su Raspberry con entrambe le camere.
-- Decidere retention/rotation per `frame_metadata.jsonl`.
+- Decidere retention per `frame_metadata/YYYY-MM-DD.jsonl`.
 - Aggiungere export/debug semplice per analizzare una giornata.
 - Valutare se promuovere i metadata da JSONL a SQLite quando dashboard/chart richiedono query veloci.
 - Popolare `quality_score` e `quality_flags` con AI/smart detection future.
@@ -729,7 +730,8 @@ grep -E "AUTO_EXPOSURE_BLOCKER|AUTO_EXPOSURE_DECISION" /var/log/indi-allsky/indi
 grep -E "AUTO_GAIN_STATE|AUTO_GAIN_DECISION|AUTO_GAIN_APPLY" /var/log/indi-allsky/indi-allsky.log | tail -200
 grep -E "AUTO_GAIN_RESTORE|AUTO_GAIN_RESET" /var/log/indi-allsky/indi-allsky.log | tail -100
 grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail -200
-tail -20 /var/lib/indi-allsky/frame_metadata.jsonl
+ls -l /var/lib/indi-allsky/frame_metadata/
+tail -20 /var/lib/indi-allsky/frame_metadata/$(date +%F).jsonl
 cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 ```
 
@@ -783,7 +785,7 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
   - no `--immediate` for exposure >= 1s.
   - no repeated 5x exposure cadence caused by AWB auto.
 - Frame metadata JSONL:
-  - `/var/lib/indi-allsky/frame_metadata.jsonl` exists after new frames are processed.
+  - `/var/lib/indi-allsky/frame_metadata/YYYY-MM-DD.jsonl` exists after new frames are processed.
   - latest rows contain `profile_id`, `camera_id`, `exposure_us`, `gain`, meter values and Auto Exposure/Gain actions.
   - `capture_status=processed` for saved frames.
 
@@ -817,3 +819,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Auto Exposure Refinement fase 1: audit controller, aggiunti `reason`/`blocker` e `[AUTO_EXPOSURE_BLOCKER]` diagnostico senza cambiare comportamento runtime.
 - 2026-06-21: Implementata Metadata / Analytics Base con `FrameMetadata` e JSONL append-only per frame processed/error/not_saved.
 - 2026-06-21: Implementato restore runtime Auto Gain dopo service restart tramite state file separato dalla config DB, con clamp e log restore/reset.
+- 2026-06-21: Implementata rotazione giornaliera metadata JSONL in `frame_metadata/YYYY-MM-DD.jsonl`, mantenendo compatibilita' con `FRAME_METADATA_PATH`.

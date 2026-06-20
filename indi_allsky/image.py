@@ -39,7 +39,7 @@ from .auto_meter import DEFAULT_AUTO_EXPOSURE_METERING_MODE
 from .auto_meter import measure_auto_exposure
 from .frame_metadata import FrameMetadata
 from .frame_metadata import FrameMetadataWriter
-from .frame_metadata import default_frame_metadata_path
+from .frame_metadata import default_frame_metadata_dir
 from .multicamera_diag import write_multicamera_diag
 
 from .processing import ImageProcessor
@@ -203,8 +203,11 @@ class ImageWorker(Process):
 
         varlib_folder = self.config.get('VARLIB_FOLDER', '/var/lib/indi-allsky')
         self.varlib_folder_p = Path(varlib_folder)
+        frame_metadata_path = self.config.get('FRAME_METADATA_PATH')
+        frame_metadata_rotate_daily = self.config.get('FRAME_METADATA_ROTATE_DAILY', frame_metadata_path is None)
         self.frame_metadata_writer = FrameMetadataWriter(
-            self.config.get('FRAME_METADATA_PATH', default_frame_metadata_path(self.varlib_folder_p))
+            frame_metadata_path or default_frame_metadata_dir(self.varlib_folder_p),
+            rotate_daily=frame_metadata_rotate_daily,
         )
         self.auto_gain_runtime_state_store = AutoGainRuntimeStateStore(
             self.config.get('AUTO_GAIN_RUNTIME_STATE_PATH', default_auto_gain_runtime_state_path(self.varlib_folder_p)),

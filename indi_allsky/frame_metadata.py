@@ -2,6 +2,7 @@ import json
 import logging
 from dataclasses import asdict
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 
@@ -36,16 +37,42 @@ class FrameMetadata:
 class FrameMetadataWriter:
     """Append-only JSONL persistence for frame analytics metadata."""
 
-    def __init__(self, metadata_path):
+    def __init__(self, metadata_path, rotate_daily=False):
         self.metadata_path = Path(metadata_path)
+        self.rotate_daily = bool(rotate_daily)
 
 
     def write(self, metadata):
-        self.metadata_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.metadata_path.open('a', encoding='utf-8') as f_metadata:
+        metadata_path = self._metadata_path_for(metadata)
+        metadata_path.parent.mkdir(parents=True, exist_ok=True)
+        with metadata_path.open('a', encoding='utf-8') as f_metadata:
             json.dump(metadata.to_dict(), f_metadata, sort_keys=True, separators=(',', ':'))
             f_metadata.write('\n')
 
 
+    def _metadata_path_for(self, metadata):
+        if not self.rotate_daily:
+            return self.metadata_path
+
+        return self.metadata_path.joinpath('{0:s}.jsonl'.format(self._date_from_timestamp(metadata.timestamp)))
+
+
+    def _date_from_timestamp(self, timestamp):
+        timestamp_str = str(timestamp or '').strip()
+        if timestamp_str.endswith('Z'):
+            timestamp_str = '{0:s}+00:00'.format(timestamp_str[:-1])
+
+        try:
+            return datetime.fromisoformat(timestamp_str).date().isoformat()
+        except ValueError:
+            if len(timestamp_str) >= 10:
+                return datetime.fromisoformat(timestamp_str[:10]).date().isoformat()
+            raise
+
+
 def default_frame_metadata_path(varlib_folder):
     return Path(varlib_folder).joinpath('frame_metadata.jsonl')
+
+
+def default_frame_metadata_dir(varlib_folder):
+    return Path(varlib_folder).joinpath('frame_metadata')
