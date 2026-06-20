@@ -221,21 +221,6 @@ var camera_id = {{ camera_id }};
                     </section>
                 </form>
 
-                {% if modern_admin_camera_settings_capture_form.enabled and modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
-                <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form" onsubmit="return confirm('Sync Acquisition settings from {{ modern_admin_camera_settings_profile.profile_id }} to the other camera profile? This copies only gain, exposure, target ADU, and auto exposure settings. Camera identity, driver, hardware, lens, processing, binning, and AWB settings will not be copied.');">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="hidden" name="modern_admin_action" value="capture_sync">
-                    <section class="modern-admin-table-panel modern-admin-settings-actions" aria-label="Camera acquisition sync actions">
-                        <div>
-                            <p class="modern-admin-eyebrow">Profile sync</p>
-                            <h2>Sync settings to other camera</h2>
-                            <p class="modern-admin-note">Copies common Acquisition controls from this profile only: gain, auto gain, exposure, target ADU, auto exposure, and metering. Camera identity and hardware-specific settings stay untouched.</p>
-                        </div>
-                        <button class="modern-admin-media-button" type="submit">Sync settings to other camera</button>
-                    </section>
-                </form>
-                {% endif %}
-
                 <div class="modern-admin-table-scroll">
                     <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
                         <thead>
@@ -465,13 +450,24 @@ var camera_id = {{ camera_id }};
                             <h2>Write profile values only</h2>
                             <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
                         </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_capture_form.enabled %}
                         <button class="modern-admin-media-button" type="submit">Save Acquisition</button>
+                        {% if modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
+                        <button class="modern-admin-media-button" type="submit" form="camera-acquisition-sync-form">Sync settings to other camera</button>
+                        {% endif %}
                         {% else %}
                         <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
                         {% endif %}
+                        </div>
                     </section>
                 </form>
+                {% if modern_admin_camera_settings_capture_form.enabled and modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
+                <form id="camera-acquisition-sync-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" onsubmit="return confirm('Sync Acquisition settings from {{ modern_admin_camera_settings_profile.profile_id }} to the other camera profile? This copies only gain, exposure, target ADU, and auto exposure settings. Camera identity, driver, hardware, lens, processing, binning, and AWB settings will not be copied.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="modern_admin_action" value="capture_sync">
+                </form>
+                {% endif %}
 
                 <div class="modern-admin-table-scroll">
                     <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
