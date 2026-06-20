@@ -39,6 +39,39 @@ class AutoGainController:
     gain_min_step = 0.01
     gain_max_step = None
 
+    def should_apply(self, decision, *, apply_enabled):
+        if not apply_enabled:
+            return False, 'apply_disabled'
+
+        if not decision.enabled:
+            return False, 'mode_disabled'
+
+        if decision.blocker != 'none':
+            return False, decision.blocker
+
+        if decision.action == 'hold':
+            return False, 'hold'
+
+        if decision.action not in ('increase_gain', 'decrease_gain'):
+            return False, 'unsupported_action'
+
+        if not decision.trend_active:
+            return False, 'trend_not_confirmed'
+
+        if decision.current_exposure < decision.exposure_max:
+            return False, 'exposure_not_at_limit'
+
+        if decision.proposed_gain > decision.gain_max:
+            return False, 'gain_above_max'
+
+        if decision.proposed_gain < decision.gain_min:
+            return False, 'gain_below_min'
+
+        if decision.proposed_gain == decision.current_gain:
+            return False, 'gain_unchanged'
+
+        return True, 'conditions_satisfied'
+
 
     def decide(
         self,

@@ -876,28 +876,51 @@ class ImageWorker(Process):
 
     def _apply_auto_gain_decision(self, profile_id, camera_id, decision, state):
         apply_enabled = self._auto_gain_config_bool('AUTO_GAIN_APPLY_ENABLED', False)
-        if not apply_enabled:
+        should_apply, reason = self.auto_gain_controller.should_apply(decision, apply_enabled=apply_enabled)
+        if not should_apply:
             self._log_auto_gain_apply(
                 profile_id,
                 camera_id,
                 decision,
-                apply_enabled=False,
+                apply_enabled=apply_enabled,
                 status='skipped',
-                reason='apply_disabled',
+                reason=reason,
                 shadow=True,
             )
             return
 
-        self._log_auto_gain_apply(
-            profile_id,
-            camera_id,
-            decision,
-            apply_enabled=True,
-            status='skipped',
-            reason='validation_only',
-            shadow=True,
-        )
-        return
+        try:
+            new_gain = self._clamp_auto_exposure_apply_value(
+                decision.proposed_gain,
+                decision.gain_min,
+                decision.gain_max,
+            )
+            old_gain = float(self.gain_av[constants.GAIN_NEXT])
+
+            with self.gain_av.get_lock():
+                self.gain_av[constants.GAIN_NEXT] = float(new_gain)
+
+            self._log_auto_gain_apply(
+                profile_id,
+                camera_id,
+                decision,
+                apply_enabled=True,
+                status='applied',
+                reason=reason,
+                old_gain=old_gain,
+                new_gain=new_gain,
+                shadow=False,
+            )
+        except Exception as e:
+            self._log_auto_gain_apply(
+                profile_id,
+                camera_id,
+                decision,
+                apply_enabled=True,
+                status='skipped',
+                reason=str(e),
+                shadow=True,
+            )
 
 
     def _log_auto_gain_blocker(self, profile_id, camera_id, decision):

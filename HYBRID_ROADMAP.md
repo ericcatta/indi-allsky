@@ -434,6 +434,14 @@ Terzo micro-step implementato: Night Gain Decision Validation.
   - `deadband_hold`.
 - Quando tutte le condizioni sono soddisfatte, `[AUTO_GAIN_DECISION]` mostra `action=increase_gain`, `shadow=True` e `proposed_gain`, ma `[AUTO_GAIN_APPLY]` resta `status=skipped reason=validation_only` anche se `apply_enabled=True`.
 
+Quarto micro-step implementato: Auto Gain Apply reale gated.
+
+- `AUTO_GAIN_APPLY_ENABLED=False` resta il default sicuro e non scrive nulla.
+- Quando `AUTO_GAIN_APPLY_ENABLED=True`, il controller applica solo decisioni `increase_gain`/`decrease_gain` con `blocker=none`, mode abilitata, trend confermato, exposure al limite massimo della modalita' e gain entro min/max.
+- Il write runtime e' limitato a `GAIN_NEXT`; non scrive camera, config o DB.
+- `[AUTO_GAIN_APPLY]` logga `status=applied shadow=False` solo quando il write su `GAIN_NEXT` avviene davvero; tutti gli altri casi restano `status=skipped` con motivo esplicito.
+- Test mirati coprono apply disabled, day/mode disabled, exposure sotto max, condizioni valide con trend attivo e clamp al gain massimo.
+
 Validazione runtime Raspberry del secondo micro-step del 2026-06-20:
 
 - `[AUTO_GAIN_APPLY]` compare nei log.
@@ -682,3 +690,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Aggiunti diagnostici Night Gain Decision Validation con `[AUTO_GAIN_BLOCKER]` e apply validation-only.
 - 2026-06-20: Validata persistenza profile-first di ASI678MC Day Target ADU a `95` da UI fino a resolver runtime e controller Auto Exposure/Auto Gain.
 - 2026-06-20: Verificata simmetria pipeline profile-first per `target_adu.day/night/dev_day/dev` da UI a runtime flat config.
+- 2026-06-20: Abilitato Auto Gain apply reale ma gated: default off, mode-specific, exposure-first, write solo su `GAIN_NEXT`.
