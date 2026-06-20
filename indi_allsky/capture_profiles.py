@@ -86,6 +86,7 @@ class CaptureProfile:
     auto_gain_step_factor: float
     auto_gain_min_step: float
     auto_gain_max_step: float
+    auto_gain_apply_enabled: bool
     binning_night: int
     binning_moonmode: int
     binning_day: int
@@ -392,6 +393,24 @@ def _auto_gain_int(config: Mapping[str, Any], profile_config: Mapping[str, Any],
     )
 
 
+def _auto_gain_apply_enabled(config: Mapping[str, Any], profile_config: Mapping[str, Any]) -> bool:
+    auto_gain_config = _mapping_config(profile_config, 'auto_gain')
+    gain_config = _mapping_config(profile_config, 'gain')
+    return _bool_value(
+        auto_gain_config.get(
+            'apply_enabled',
+            gain_config.get(
+                'apply_enabled',
+                profile_config.get(
+                    'AUTO_GAIN_APPLY_ENABLED',
+                    profile_config.get('auto_gain_apply_enabled', config.get('AUTO_GAIN_APPLY_ENABLED', False)),
+                ),
+            ),
+        ),
+        False,
+    )
+
+
 def _profile_identity_config(profile_config: Mapping[str, Any]) -> bool:
     return any(key in profile_config for key in (
         'profile_id',
@@ -583,6 +602,7 @@ def _profile_from_config(
         auto_gain_step_factor=_auto_gain_float(config, profile_config, 'step_factor', 'auto_gain_step_factor', 0.15),
         auto_gain_min_step=_auto_gain_float(config, profile_config, 'min_step', 'auto_gain_min_step', 0.01),
         auto_gain_max_step=_auto_gain_float(config, profile_config, 'max_step', 'auto_gain_max_step', 0.0),
+        auto_gain_apply_enabled=_auto_gain_apply_enabled(config, profile_config),
         binning_night=_int_config(profile_config, 'binning_night', _mapping_int(ccd_night, 'BINNING', 1)),
         binning_moonmode=_mapping_int(ccd_moonmode, 'BINNING', 1),
         binning_day=_int_config(profile_config, 'binning_day', _mapping_int(ccd_day, 'BINNING', 1)),
@@ -671,6 +691,7 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     profile_config['AUTO_GAIN_STEP_FACTOR'] = profile.auto_gain_step_factor
     profile_config['AUTO_GAIN_MIN_STEP'] = profile.auto_gain_min_step
     profile_config['AUTO_GAIN_MAX_STEP'] = profile.auto_gain_max_step
+    profile_config['AUTO_GAIN_APPLY_ENABLED'] = profile.auto_gain_apply_enabled
     profile_config['CCD_EXPOSURE_MIN'] = profile.exposure_min
     profile_config['CCD_EXPOSURE_MIN_DAY'] = profile.exposure_min_day
     profile_config['CCD_EXPOSURE_MAX'] = profile.exposure_max

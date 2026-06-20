@@ -401,6 +401,16 @@ Validazione runtime Raspberry del 2026-06-20:
 - IMX708 mantiene `current_gain=1.13` e `proposed_gain=1.13`.
 - Nessun write reale su gain runtime osservato.
 
+Secondo micro-step implementato:
+
+- Aggiunto gate profile-first `auto_gain.apply_enabled`, esposto runtime come `AUTO_GAIN_APPLY_ENABLED`.
+- Default globale/profilo `False`; i profili esistenti restano shadow-only.
+- Aggiunto log `[AUTO_GAIN_APPLY]`.
+- Quando `apply_enabled=False`, log `status=skipped reason=apply_disabled`.
+- Quando `apply_enabled=True`, il solo write consentito e' verso `GAIN_NEXT`.
+- Apply consentito solo se mode auto gain e' abilitata, trend e' attivo, cooldown non blocca la decisione, gain resta nei limiti e la decisione rispetta Exposure-first/Gain-last.
+- Di giorno `AUTO_GAIN_ENABLE_DAY=False` continua a bloccare sia proposta sia apply.
+
 ### Auto Exposure Refinement
 
 - Rafforzare anti-oscillazione/hysteresis.
@@ -622,3 +632,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Definita architettura Auto Gain profile-first con state machine day/twilight/night/moonmode.
 - 2026-06-20: Aggiunto Auto Gain shadow controller diagnostico, senza apply runtime.
 - 2026-06-20: Validati log runtime Auto Gain shadow su Raspberry per IMX708 e ASI678MC.
+- 2026-06-20: Aggiunto path Auto Gain apply gated, disattivato di default e limitato a `GAIN_NEXT`.
