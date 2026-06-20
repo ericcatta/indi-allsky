@@ -214,27 +214,171 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ### Auto Gain
 
-- Separare formalmente controllo gain da controllo exposure.
-- Policy per modalita':
-  - giorno: preferire gain minimo/fisso, soprattutto ASI gain 0.
-  - notte: consentire gain automatico dopo exposure ai limiti.
-  - twilight: evitare cambi bruschi fra logica day/night.
-- Usare `AUTO_GAIN_ENABLE_DAY`, `AUTO_GAIN_ENABLE_NIGHT`, `AUTO_GAIN_ENABLE_MOONMODE` per profilo.
-- Garantire limiti min/max gain per profilo.
-- Implementare step gain bounded:
-  - fattore step.
-  - min step.
-  - max step.
-  - cooldown.
-- Evitare oscillazioni exposure/gain:
-  - priorita': prima exposure, poi gain solo quando exposure e' al limite.
-  - quando si diminuisce luminosita': prima ridurre gain se gain automatico e' attivo, poi exposure.
-- Logging decisionale completo per gain:
+Design review e architettura proposta.
+
+Obiettivo:
+
+- Rendere il gain automatico una policy per-camera/profile, non un effetto collaterale della logica legacy globale.
+- Evitare due autorita' concorrenti:
+  - legacy `recalculate_exposure()` con `auto_gain_step_list`.
+  - nuovo Auto Exposure Controller profile-aware.
+- Mantenere default sicuro:
+  - gain automatico spento se il profilo non lo abilita esplicitamente.
+  - giorno con gain fisso/minimo.
+  - notte con exposure-first e gain solo quando serve.
+
+Macchina a stati proposta:
+
+- `day`:
+  - condizione: stato diurno corrente.
+  - policy: gain fisso/minimo, soprattutto ASI gain `0`.
+  - exposure e' il controllo primario.
+  - gain cambia solo se `AUTO_GAIN_ENABLE_DAY=True` nel profilo.
+- `twilight_evening`:
+  - transizione day -> night.
+  - policy: evitare salti bruschi verso gain notturni.
+  - aumentare exposure gradualmente; gain resta bloccato finche' exposure non e' vicina al limite twilight/notte per N frame.
+- `night`:
+  - policy: prima exposure fino a `exposure.max`, poi gain.
+  - gain automatico consentito solo se `AUTO_GAIN_ENABLE_NIGHT=True`.
+  - gain minimo notturno puo' essere diverso dal gain day.
+- `moonmode`:
+  - policy separata da night.
+  - proteggere dettagli lunari e alte luci.
+  - gain automatico consentito solo se `AUTO_GAIN_ENABLE_MOONMODE=True`.
+  - step piu' conservativi rispetto a night se il meter segnala alte luci importanti.
+- `twilight_morning`:
+  - transizione night -> day.
+  - policy: ridurre gain prima che il cielo diventi troppo luminoso.
+  - usare cooldown/hysteresis per evitare ping-pong night/day vicino alla soglia.
+
+Priorita' exposure vs gain:
+
+- Sottoesposizione:
+  - se exposure < max della modalita': aumentare exposure.
+  - se exposure e' al limite o stabilmente vicino al limite per N frame: aumentare gain.
+  - se gain automatico e' disabilitato: non cambiare gain e loggare `reason=gain_auto_disabled`.
+- Sovraesposizione:
+  - se gain automatico e' attivo e gain > min della modalita': ridurre gain prima.
+  - altrimenti ridurre exposure.
+  - in day, ridurre exposure prima perche' il gain dovrebbe gia' essere minimo/fisso.
+- `hold`:
+  - se il meter e' dentro deadband o cooldown attivo.
+  - se il frame e' marcato outlier/non affidabile.
+
+Limiti min/max per camera:
+
+- I limiti devono arrivare dal profilo risolto e dagli array runtime:
+  - `GAIN_MIN_DAY`, `GAIN_MAX_DAY`.
+  - `GAIN_MIN_NIGHT`, `GAIN_MAX_NIGHT`.
+  - `GAIN_MIN_MOONMODE`, `GAIN_MAX_MOONMODE`.
+- I globali restano solo fallback iniziale se il profilo non contiene valori.
+- ASI678MC:
+  - giorno: gain `0` come default operativo; non abilitare auto gain day salvo test specifici.
+  - notte: gain minimo consigliato almeno `100` se la policy notturna lo richiede, con massimo profilo corrente `220`.
+  - moonmode: default operativo corrente `75`.
+  - step gain piccoli per evitare amplificazione improvvisa su raw 16 bit molto sensibile.
+- IMX708:
+  - giorno: gain minimo effettivo libcamera `1.13`.
+  - notte/moonmode: default operativo corrente `16`.
+  - range piu' stretto e gia' clampato dal driver; auto gain deve essere piu' conservativo.
+  - non reintrodurre AWB/exposure comportamenti libcamera che hanno causato cadence lunga.
+
+Anti-oscillazione:
+
+- Usare sempre baseline runtime:
+  - `GAIN_NEXT`, poi `GAIN_CURRENT`, poi fallback profilo.
+  - mai usare il default profilo come current se il runtime ha gia' un valore valido.
+- Deadband separata per gain, piu' larga della deadband exposure.
+- Trend requirement:
+  - cambiare gain solo dopo errore persistente con stesso segno per N frame.
+  - reset trend se cambia modalita', profilo, camera, segno errore o frame outlier.
+- Step bounded:
+  - `gain_step_factor`.
+  - `gain_min_step`.
+  - `gain_max_step`.
+  - possibilmente separati day/night/moonmode.
+- Saturation guard:
+  - frame quasi saturo: ridurre exposure/gain in modo controllato ma prioritario.
+  - frame quasi nero: aumentare exposure gradualmente prima del gain.
+- Flapping guard:
+  - se gain aumenta e poi diminuisce subito, dimezzare step successivo e attivare cooldown.
+
+Cooldown:
+
+- Stato per `profile_id:camera_id`.
+- Cooldown breve dopo cambio exposure.
+- Cooldown piu' lungo dopo cambio gain, perche' il gain cambia rumore, saturazione e colore.
+- Cooldown separato dopo cambio stato day/twilight/night/moonmode.
+- Durante cooldown:
+  - continuare meter e log.
+  - decisione `hold` con `reason=cooldown`.
+  - consentire solo emergency down-step se frame e' gravemente saturo.
+
+Integrazione con Auto Exposure esistente:
+
+- Il nuovo Auto Exposure Controller deve diventare il coordinatore unico exposure/gain quando `AUTO_EXPOSURE_ENABLED=True`.
+- La logica legacy `recalculate_exposure()`/`auto_gain_step_list` va mantenuta solo per compatibilita' quando il nuovo controller non e' attivo.
+- In modalita' controller attivo:
+  - decisione exposure e decisione gain devono uscire dallo stesso oggetto decisionale o da due oggetti coordinati.
+  - evitare che legacy auto gain riscriva `GAIN_NEXT` dopo il controller.
+- Il controller deve sapere:
+  - modalita' corrente (`day`, `twilight_evening`, `night`, `moonmode`, `twilight_morning`).
+  - current/proposed exposure.
   - current/proposed gain.
-  - source runtime/profile.
-  - limits.
-  - step.
-  - reason/action.
+  - limiti per modalita'.
+  - flag `AUTO_GAIN_ENABLE_*` del profilo.
+  - stato cooldown/trend.
+- Il primo rollout deve essere shadow-only:
+  - loggare decisioni Auto Gain senza applicarle.
+  - confrontare con `GAIN_NEXT` reale.
+  - poi abilitare apply solo per un profilo alla volta.
+
+Configurazione profile-first proposta:
+
+- Usare e mantenere i campi gia' presenti:
+  - `gain.day`.
+  - `gain.night`.
+  - `gain.moonmode`.
+  - `gain.auto_day`.
+  - `gain.auto_night`.
+  - `gain.auto_moonmode`.
+  - `gain.auto_levels`.
+- Aggiungere in futuro, solo quando necessario:
+  - `gain.day_min`, `gain.day_max`.
+  - `gain.night_min`, `gain.night_max`.
+  - `gain.moonmode_min`, `gain.moonmode_max`.
+  - `gain.step_factor_day`, `gain.step_factor_night`, `gain.step_factor_moonmode`.
+  - `gain.min_step_day`, `gain.min_step_night`, `gain.min_step_moonmode`.
+  - `gain.max_step_day`, `gain.max_step_night`, `gain.max_step_moonmode`.
+  - `gain.cooldown_frames_day`, `gain.cooldown_frames_night`, `gain.cooldown_frames_moonmode`.
+  - `gain.twilight_policy`.
+- Global `CCD_CONFIG.AUTO_GAIN_*` resta fallback legacy/advanced, non sorgente operativa primaria.
+
+Logging necessario:
+
+- `[AUTO_GAIN_STATE]`
+  - `profile`, `camera_id`, `state`, `mode`, `trend_count`, `cooldown_remaining`, `last_action`.
+- `[AUTO_GAIN_DECISION]`
+  - `profile`, `camera_id`, `mode`, `enabled`, `action`, `reason`.
+  - `current_gain`, `proposed_gain`, `source_gain`.
+  - `gain_min`, `gain_max`, `step`, `step_strategy`.
+  - `current_exposure`, `proposed_exposure`, `exposure_min`, `exposure_max`.
+  - `meter_value`, `target`, `error`, `deadband`.
+  - `saturation_pct`, `black_pct` se disponibili.
+  - `shadow=True|False`.
+- `[AUTO_GAIN_APPLY]`
+  - `old_gain`, `new_gain`, `old_exposure`, `new_exposure`.
+  - `status=applied|skipped`.
+  - `reason`.
+
+Fasi consigliate:
+
+- Fase 1: Auto Gain shadow controller, nessun apply runtime.
+- Fase 2: disaccoppiare legacy auto gain dal nuovo controller quando `AUTO_EXPOSURE_ENABLED=True`.
+- Fase 3: enable controllato per ASI night only.
+- Fase 4: twilight state esplicito.
+- Fase 5: UI Advanced per step/cooldown, lasciando Basic con soli toggle day/night/moonmode.
 
 ### Auto Exposure Refinement
 
@@ -448,3 +592,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-19: Aggiunti log processing profile e `[ASI_FRAME_STATS]`.
 - 2026-06-20: Fix Auto Exposure baseline runtime: decisione usa `EXPOSURE_NEXT`/`GAIN_NEXT`.
 - 2026-06-20: Fix step daytime bounded per evitare oscillazione ASI dark/saturated.
+- 2026-06-20: Definita architettura Auto Gain profile-first con state machine day/twilight/night/moonmode.
