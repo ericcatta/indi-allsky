@@ -60,8 +60,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Camera Profile Settings include Save & Sync controllato verso l'altra camera:
   - copia solo blocchi comuni `gain`, `auto_exposure`, `target_adu` ed `exposure`;
   - ogni sezione salvabile puo' salvare il profilo corrente e sincronizzare in un solo config snapshot;
+  - Save & Sync e' disponibile per tutte le sezioni Camera Settings salvabili:
+    - Driver / Connection.
+    - Acquisition.
+    - Lens & Optics.
+    - Hybrid Controller.
+  - ogni Save & Sync salva prima la sezione del profilo corrente e poi sincronizza solo i campi ammessi di quella sezione verso l'altro profilo;
   - preserva identity/hardware (`profile_id`, `camera_id`, driver, `indi`, `libcamera`, lens, processing, binning, AWB);
   - `CFA / Debayer Pattern` resta profile-specific, hardware-specific e non viene copiato;
+  - `CFA / Debayer Pattern` e' modificabile per-camera ma non e' sincronizzato, per evitare di copiare pattern Bayer tra sensori diversi;
   - crea una nuova config row e richiede restart/reload manuale per il runtime.
 - Gallery Modern supporta filtro camera/profile e mantiene il filtro con infinite scroll.
 - Topbar Modern Admin include toggle Start/Stop Capture, Restart indi-allsky e badge stato servizio.
@@ -457,6 +464,12 @@ Quarto micro-step implementato: Auto Gain Apply reale gated.
   - Modern Camera Settings > Acquisition espone `Day/Night/Moon Mode Gain Max` per profilo camera;
   - i valori salvati in `gain.max_day`, `gain.max_night`, `gain.max_moonmode` alimentano `GAIN_MAX_DAY`, `GAIN_MAX_NIGHT`, `GAIN_MAX_MOONMODE` runtime;
   - questi limiti sono hardware-specific e non vengono copiati da Save & Sync Acquisition tra camere diverse.
+  - validazione runtime Raspberry 2026-06-21:
+    - `gain_max_day`, `gain_max_night`, `gain_max_moonmode` persistono nel profilo corretto;
+    - `[MULTI_CAMERA_RESOLVED_CONFIG]` mostra i `gain_max_*` risolti per profilo;
+    - `[AUTO_GAIN_DECISION]` usa il limite `gain_max` della modalita' corrente;
+    - ASI678MC in moonmode raggiunge correttamente `gain=300` quando il profilo consente `gain_max_moonmode=300`;
+    - IMX708 conserva i propri limiti separati e non eredita i limiti ASI.
 
 Validazione runtime Raspberry del secondo micro-step del 2026-06-20:
 
@@ -475,6 +488,18 @@ Validazione runtime Raspberry del quarto micro-step del 2026-06-20:
 - `mode_disabled` blocca correttamente la day mode quando Auto Gain day e' disattivato.
 - Nessun `status=applied` osservato.
 - Nessun cambio gain runtime osservato.
+
+Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
+
+- Auto Gain day/night/moonmode e' risolto per profilo e per modalita'.
+- Auto Gain Apply gated funziona con default sicuro `AUTO_GAIN_APPLY_ENABLED=False` e apply reale solo quando abilitato esplicitamente.
+- Le decisioni aggressive sono generate correttamente quando `abs_error > 20 ADU`.
+- Per errori normali `5-20 ADU` resta il comportamento bounded normale.
+- La fine convergence si attiva quando `abs_error < 5 ADU` persiste per 5 frame consecutivi.
+- La convergenza fine si ferma quando `abs_error <= 1.5 ADU`.
+- I log mostrano `convergence_mode=aggressive|normal|fine`, `fine_convergence`, `convergence_frames` e `step_strategy` coerenti.
+- ASI678MC moonmode ha prodotto decisioni Auto Gain aggressive corrette e ha raggiunto `gain=300` rispettando il limite profile-specific.
+- Il runtime resolver continua a usare target ADU e gain max profile-first, senza fallback globale inatteso.
 
 ### Auto Exposure Refinement
 
@@ -686,6 +711,16 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
   - `status=skipped`, `reason=apply_disabled`, `shadow=True`.
   - ASI day remains `old_gain=0.00`, `new_gain=0.00`.
   - IMX day remains `old_gain=1.13`, `new_gain=1.13`.
+- Auto Gain profile limits:
+  - `MULTI_CAMERA_RESOLVED_CONFIG` includes `gain_max_day`, `gain_max_night`, `gain_max_moonmode`.
+  - `AUTO_GAIN_DECISION` reports the active mode `gain_max` from the profile.
+  - ASI moonmode can reach `gain=300` when `gain.max_moonmode=300`.
+  - IMX gain limits remain separate from ASI gain limits.
+- Auto Gain convergence:
+  - large errors `abs_error > 20 ADU` log `convergence_mode=aggressive` / `step_strategy=aggressive_bounded`.
+  - normal errors `5-20 ADU` keep normal bounded behavior.
+  - persistent small errors `abs_error < 5 ADU` for 5 frames activate `fine_convergence`.
+  - `abs_error <= 1.5 ADU` returns to hold.
 - Hybrid AWB:
   - ASI backend `postprocess_rgb`.
   - IMX backend according to profile apply mode.
@@ -719,3 +754,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Validato su Raspberry che Auto Gain Apply gated resta spento di default (`apply_disabled`) e non cambia il gain runtime.
 - 2026-06-20: Convertito sync Camera Settings in Save & Sync per sezione, con CFA/Debayer Pattern esplicitamente profile-specific e non sincronizzabile.
 - 2026-06-20: Aggiunto sync Modern Admin Acquisition da un profilo all'altro, limitato ai blocchi automatici comuni e senza copiare identity/hardware camera.
+- 2026-06-21: Validati su Raspberry target ADU persistente, resolver runtime corretto, `gain_max_*` profile-specific, ASI678MC moonmode fino a gain `300` e decisioni Auto Gain aggressive coerenti.
