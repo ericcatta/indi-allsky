@@ -391,6 +391,16 @@ Primo micro-step implementato:
 - La riduzione gain viene proposta solo se lo stato shadow sa che il gain era stato aumentato automaticamente.
 - Parametri diagnostici Auto Gain leggibili da `profile.gain.*` tramite resolver, con globali solo fallback.
 
+Validazione runtime Raspberry del 2026-06-20:
+
+- Nessun `ERROR`, `Traceback` o `Exception` dopo restart.
+- `[AUTO_GAIN_STATE]` e `[AUTO_GAIN_DECISION]` compaiono per `imx708-wide` e `asi678mc`.
+- In `mode=day`, Auto Gain resta `enabled=False`.
+- Le decisioni restano `action=hold`, `reason=gain_auto_disabled`, `shadow=True`.
+- ASI678MC mantiene `current_gain=0.00` e `proposed_gain=0.00`.
+- IMX708 mantiene `current_gain=1.13` e `proposed_gain=1.13`.
+- Nessun write reale su gain runtime osservato.
+
 ### Auto Exposure Refinement
 
 - Rafforzare anti-oscillazione/hysteresis.
@@ -564,6 +574,7 @@ systemctl --user restart indi-allsky
 grep -E "ERROR|Traceback|Exception" /var/log/indi-allsky/indi-allsky.log | tail -100
 grep -E "MULTI_CAMERA_RESOLVED_CONFIG|MULTI_CAMERA_PROCESSING_CONFIG" /var/log/indi-allsky/indi-allsky.log | tail -100
 grep -E "AUTO_METER_STATE|AUTO_EXPOSURE_DECISION|AUTO_EXPOSURE_APPLY" /var/log/indi-allsky/indi-allsky.log | tail -200
+grep -E "AUTO_GAIN_STATE|AUTO_GAIN_DECISION" /var/log/indi-allsky/indi-allsky.log | tail -200
 grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail -200
 ```
 
@@ -583,6 +594,11 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
   - `AUTO_EXPOSURE_DECISION current_exposure` equals `AUTO_EXPOSURE_APPLY old_exposure`.
   - `step_strategy=day_bounded`.
   - no single jump from `0.000032s` to `0.050s`.
+- Auto Gain shadow:
+  - `AUTO_GAIN_STATE` and `AUTO_GAIN_DECISION` present for both profiles.
+  - day mode remains `enabled=False`.
+  - `action=hold`, `reason=gain_auto_disabled`, `shadow=True`.
+  - ASI proposed gain remains `0.00`; IMX proposed gain remains `1.13`.
 - Hybrid AWB:
   - ASI backend `postprocess_rgb`.
   - IMX backend according to profile apply mode.
@@ -605,3 +621,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Fix step daytime bounded per evitare oscillazione ASI dark/saturated.
 - 2026-06-20: Definita architettura Auto Gain profile-first con state machine day/twilight/night/moonmode.
 - 2026-06-20: Aggiunto Auto Gain shadow controller diagnostico, senza apply runtime.
+- 2026-06-20: Validati log runtime Auto Gain shadow su Raspberry per IMX708 e ASI678MC.
