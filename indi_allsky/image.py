@@ -35,6 +35,9 @@ from .auto_gain_controller import AutoGainController
 from .auto_exposure_controller import AutoExposureController
 from .auto_meter import DEFAULT_AUTO_EXPOSURE_METERING_MODE
 from .auto_meter import measure_auto_exposure
+from .frame_metadata import FrameMetadata
+from .frame_metadata import FrameMetadataWriter
+from .frame_metadata import default_frame_metadata_path
 from .multicamera_diag import write_multicamera_diag
 
 from .processing import ImageProcessor
@@ -198,6 +201,9 @@ class ImageWorker(Process):
 
         varlib_folder = self.config.get('VARLIB_FOLDER', '/var/lib/indi-allsky')
         self.varlib_folder_p = Path(varlib_folder)
+        self.frame_metadata_writer = FrameMetadataWriter(
+            self.config.get('FRAME_METADATA_PATH', default_frame_metadata_path(self.varlib_folder_p))
+        )
 
 
         self._shutdown = False
@@ -976,6 +982,76 @@ class ImageWorker(Process):
             decision.deadband,
             decision.shadow,
         )
+
+
+    def _persist_frame_metadata(self, *, frame_id, timestamp, camera_id, profile_id, image_file_path, exposure, gain, capture_status='processed', error_message=''):
+        try:
+            state = self.auto_meter_states.get(self._adu_key(profile_id, camera_id), {})
+            auto_exposure_decision = state.get('last_decision')
+            auto_gain_state = self.auto_gain_states.get(self._adu_key(profile_id, camera_id), {})
+            auto_gain_decision = auto_gain_state.get('last_decision')
+
+            target_meter = None
+            meter_error = None
+            auto_exposure_action = 'unknown'
+            auto_gain_action = 'unknown'
+            decision_reason = ''
+
+            if auto_exposure_decision is not None:
+                target_meter = auto_exposure_decision.target
+                meter_error = auto_exposure_decision.error
+                auto_exposure_action = auto_exposure_decision.action
+                decision_reason = auto_exposure_decision.reason
+
+            if auto_gain_decision is not None:
+                auto_gain_action = auto_gain_decision.action
+                if not decision_reason:
+                    decision_reason = auto_gain_decision.reason
+
+            metadata = FrameMetadata(
+                frame_id=int(frame_id),
+                timestamp=timestamp,
+                camera_id=int(camera_id),
+                profile_id=str(profile_id),
+                image_file_path=str(image_file_path),
+                exposure_us=int(round(float(exposure) * 1000000.0)),
+                gain=float(gain),
+                meter_value_raw=self._optional_float(state.get('measured_value')),
+                meter_value_smoothed=self._optional_float(state.get('smoothed_value')),
+                target_meter=self._optional_float(target_meter),
+                meter_error=self._optional_float(meter_error),
+                auto_exposure_action=str(auto_exposure_action),
+                auto_gain_action=str(auto_gain_action),
+                decision_reason=str(decision_reason),
+                capture_status=str(capture_status),
+                error_message=str(error_message or ''),
+                quality_score=0.0,
+                quality_flags=[],
+            )
+            self.frame_metadata_writer.write(metadata)
+        except Exception as e:
+            logger.warning(
+                '[FRAME_METADATA] profile=%s camera_id=%s frame_id=%s status=skipped reason=%s',
+                profile_id,
+                camera_id,
+                frame_id,
+                str(e),
+            )
+
+
+    def _optional_float(self, value):
+        if value is None:
+            return None
+
+        try:
+            value_float = float(value)
+        except (TypeError, ValueError):
+            return None
+
+        if not numpy.isfinite(value_float):
+            return None
+
+        return value_float
 
 
     def _decide_auto_gain_shadow(self, profile_id, camera_id, result, meter_state):
@@ -2064,6 +2140,17 @@ class ImageWorker(Process):
             logger.error('Frame not found: %s', filename_p)
             if images_only_diag:
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_PAYLOAD_ERROR', reason='input_missing', filename=str(filename_p))
+            self._persist_frame_metadata(
+                frame_id=0,
+                timestamp=exp_date.astimezone(timezone.utc).isoformat(),
+                camera_id=camera_id,
+                profile_id=profile_id,
+                image_file_path=filename_p,
+                exposure=exposure,
+                gain=gain,
+                capture_status='input_missing',
+                error_message='Frame not found',
+            )
             #task.setFailed('Frame not found: {0:s}'.format(str(filename_p)))
             return
 
@@ -2073,6 +2160,17 @@ class ImageWorker(Process):
             logger.error('Frame is empty: %s', filename_p)
             if images_only_diag:
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_PAYLOAD_ERROR', reason='input_empty', filename=str(filename_p))
+            self._persist_frame_metadata(
+                frame_id=0,
+                timestamp=exp_date.astimezone(timezone.utc).isoformat(),
+                camera_id=camera_id,
+                profile_id=profile_id,
+                image_file_path=filename_p,
+                exposure=exposure,
+                gain=gain,
+                capture_status='input_empty',
+                error_message='Frame is empty',
+            )
             filename_p.unlink()
             return
 
@@ -2168,6 +2266,17 @@ class ImageWorker(Process):
             logger.error('Bad Image: %s', str(e))
             if images_only_diag:
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_ERROR', error=str(e), error_type='BadImage')
+            self._persist_frame_metadata(
+                frame_id=0,
+                timestamp=exp_date.astimezone(timezone.utc).isoformat(),
+                camera_id=camera_id,
+                profile_id=profile_id,
+                image_file_path=filename_p,
+                exposure=exposure,
+                gain=gain,
+                capture_status='bad_image',
+                error_message=str(e),
+            )
             filename_p.unlink()
             #task.setFailed('Bad Image: {0:s}'.format(str(filename_p)))
             return
@@ -2840,10 +2949,32 @@ class ImageWorker(Process):
             except Exception as e:
                 if images_only_diag:
                     self._images_only_diag(profile_id, camera_id, 'IMAGE_ADDIMAGE_ERROR', error=str(e), error_type=e.__class__.__name__, filename=str(new_filename))
+                self._persist_frame_metadata(
+                    frame_id=0,
+                    timestamp=exp_date.astimezone(timezone.utc).isoformat(),
+                    camera_id=camera_id,
+                    profile_id=profile_id,
+                    image_file_path=new_filename,
+                    exposure=exposure,
+                    gain=gain,
+                    capture_status='db_error',
+                    error_message=str(e),
+                )
                 raise
 
             if images_only_diag:
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_ADDIMAGE_OK', image_id=image_entry.id, filename=str(new_filename))
+
+            self._persist_frame_metadata(
+                frame_id=image_entry.id,
+                timestamp=exp_date.astimezone(timezone.utc).isoformat(),
+                camera_id=camera_id,
+                profile_id=profile_id,
+                image_file_path=new_filename,
+                exposure=exposure,
+                gain=gain,
+                capture_status='processed',
+            )
 
 
             image_thumbnail_metadata = {
@@ -2874,6 +3005,7 @@ class ImageWorker(Process):
                 self.wait_image_save_post_hook()
         else:
             # images not being saved
+            reason = 'not_saved'
             if images_only_diag:
                 reason = 'unknown'
                 if self.config.get('FOCUS_MODE', False):
@@ -2887,6 +3019,16 @@ class ImageWorker(Process):
             image_metadata = {}
             image_thumbnail_entry = None
             image_thumbnail_metadata = {}
+            self._persist_frame_metadata(
+                frame_id=0,
+                timestamp=exp_date.astimezone(timezone.utc).isoformat(),
+                camera_id=camera_id,
+                profile_id=profile_id,
+                image_file_path=latest_file or '',
+                exposure=exposure,
+                gain=gain,
+                capture_status=reason,
+            )
 
 
         if latest_file:

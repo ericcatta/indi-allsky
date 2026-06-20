@@ -202,6 +202,36 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - aggiunto `[AUTO_EXPOSURE_BLOCKER]` per spiegare hold/blocchi come `inner_deadband_hold`, `trend_not_confirmed`, `gain_control_disabled`, limiti exposure/gain;
   - nessuna modifica a step, apply, UI, config o coordinamento runtime con Auto Gain.
 
+### Metadata / Analytics Base
+
+- Aggiunto schema `FrameMetadata` per metadata frame append-only.
+- Persistenza iniziale in JSONL, senza migration DB:
+  - default: `VARLIB_FOLDER/frame_metadata.jsonl`.
+  - override opzionale: `FRAME_METADATA_PATH`.
+- Campi persistiti:
+  - `frame_id`.
+  - `timestamp`.
+  - `camera_id`.
+  - `profile_id`.
+  - `image_file_path`.
+  - `exposure_us`.
+  - `gain`.
+  - `meter_value_raw`.
+  - `meter_value_smoothed`.
+  - `target_meter`.
+  - `meter_error`.
+  - `auto_exposure_action`.
+  - `auto_gain_action`.
+  - `decision_reason`.
+  - `capture_status`.
+  - `error_message`.
+  - `quality_score` placeholder.
+  - `quality_flags` placeholder.
+- Scrittura best-effort dopo processing:
+  - `processed` quando l'immagine viene salvata e inserita nel DB.
+  - `input_missing`, `input_empty`, `bad_image`, `not_saved` per percorsi noti senza DB image id.
+- Nessun cambio a dashboard, UI, upload o log esistenti.
+
 ## IN TEST
 
 ### Hybrid AWB / Color ASI
@@ -539,22 +569,13 @@ Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
   - se raw e' quasi nero, aumentare gradualmente senza salto enorme.
 - Valutare se il meter per Auto Exposure debba misurare prima o dopo Hybrid AWB.
 
-### Metadata / Analytics Base
+### Metadata / Analytics Follow-up
 
-- Salvare per ogni frame:
-  - `camera_id`.
-  - `profile_id`.
-  - exposure corrente.
-  - gain corrente.
-  - brightness/meter value.
-  - smoothed brightness.
-  - auto exposure action.
-  - quality score futuro.
-- Definire se usare:
-  - colonne DB esistenti.
-  - JSON metadata.
-  - tabella SQLite dedicata.
+- Validare runtime JSONL su Raspberry con entrambe le camere.
+- Decidere retention/rotation per `frame_metadata.jsonl`.
 - Aggiungere export/debug semplice per analizzare una giornata.
+- Valutare se promuovere i metadata da JSONL a SQLite quando dashboard/chart richiedono query veloci.
+- Popolare `quality_score` e `quality_flags` con AI/smart detection future.
 
 ### Reliability Outdoor
 
@@ -696,6 +717,7 @@ grep -E "AUTO_METER_STATE|AUTO_EXPOSURE_DECISION|AUTO_EXPOSURE_APPLY" /var/log/i
 grep -E "AUTO_EXPOSURE_BLOCKER|AUTO_EXPOSURE_DECISION" /var/log/indi-allsky/indi-allsky.log | tail -200
 grep -E "AUTO_GAIN_STATE|AUTO_GAIN_DECISION|AUTO_GAIN_APPLY" /var/log/indi-allsky/indi-allsky.log | tail -200
 grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail -200
+tail -20 /var/lib/indi-allsky/frame_metadata.jsonl
 ```
 
 ### Known Good Checks
@@ -743,6 +765,10 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - Libcamera long exposures:
   - no `--immediate` for exposure >= 1s.
   - no repeated 5x exposure cadence caused by AWB auto.
+- Frame metadata JSONL:
+  - `/var/lib/indi-allsky/frame_metadata.jsonl` exists after new frames are processed.
+  - latest rows contain `profile_id`, `camera_id`, `exposure_us`, `gain`, meter values and Auto Exposure/Gain actions.
+  - `capture_status=processed` for saved frames.
 
 ## Log Operativo Breve
 
@@ -772,3 +798,4 @@ grep -E "ASI_FRAME_STATS|HYBRID_AWB" /var/log/indi-allsky/indi-allsky.log | tail
 - 2026-06-20: Aggiunto sync Modern Admin Acquisition da un profilo all'altro, limitato ai blocchi automatici comuni e senza copiare identity/hardware camera.
 - 2026-06-21: Validati su Raspberry target ADU persistente, resolver runtime corretto, `gain_max_*` profile-specific, ASI678MC moonmode fino a gain `300` e decisioni Auto Gain aggressive coerenti.
 - 2026-06-21: Auto Exposure Refinement fase 1: audit controller, aggiunti `reason`/`blocker` e `[AUTO_EXPOSURE_BLOCKER]` diagnostico senza cambiare comportamento runtime.
+- 2026-06-21: Implementata Metadata / Analytics Base con `FrameMetadata` e JSONL append-only per frame processed/error/not_saved.
