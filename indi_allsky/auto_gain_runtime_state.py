@@ -28,10 +28,10 @@ class AutoGainRuntimeStateStore:
         self.max_age_seconds = float(max_age_seconds)
 
 
-    def save_gain(self, *, profile_id, camera_id, mode, gain, gain_min=None, gain_max=None):
+    def save_gain(self, *, profile_id, camera_id, mode, gain, gain_min=None, gain_max=None, reason=None):
         state = self._load_state()
         records = state.setdefault('records', {})
-        records[self._key(profile_id, camera_id, mode)] = {
+        record = {
             'profile_id' : str(profile_id),
             'camera_id'  : str(camera_id),
             'mode'       : str(mode),
@@ -40,6 +40,10 @@ class AutoGainRuntimeStateStore:
             'gain_max'   : self._optional_float(gain_max),
             'timestamp'  : time.time(),
         }
+        if reason:
+            record['reason'] = str(reason)
+
+        records[self._key(profile_id, camera_id, mode)] = record
         self._write_state(state)
 
 

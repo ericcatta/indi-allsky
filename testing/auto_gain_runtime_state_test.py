@@ -1,3 +1,4 @@
+import json
 import sys
 import tempfile
 import time
@@ -109,9 +110,63 @@ def test_profile_changed_is_not_restored():
         assert restored.gain == 100.0
 
 
+def test_runtime_next_changed_writes_state_file():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        state_path = Path(tmpdir).joinpath('auto_gain_runtime_state.json')
+        store = AutoGainRuntimeStateStore(state_path, max_age_seconds=3600)
+        store.save_gain(
+            profile_id='asi678mc',
+            camera_id=2,
+            mode='moonmode',
+            gain=300.0,
+            gain_min=0.0,
+            gain_max=300.0,
+            reason='runtime_next_changed',
+        )
+
+        assert state_path.exists()
+        state = json.loads(state_path.read_text(encoding='utf-8'))
+        record = state['records']['asi678mc:2:moonmode']
+        assert record['gain'] == 300.0
+        assert record['reason'] == 'runtime_next_changed'
+
+
+def test_apply_applied_writes_restorable_state_file():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        state_path = Path(tmpdir).joinpath('auto_gain_runtime_state.json')
+        store = AutoGainRuntimeStateStore(state_path, max_age_seconds=3600)
+        store.save_gain(
+            profile_id='asi678mc',
+            camera_id=2,
+            mode='moonmode',
+            gain=300.0,
+            gain_min=0.0,
+            gain_max=300.0,
+            reason='apply_applied',
+        )
+
+        state = json.loads(state_path.read_text(encoding='utf-8'))
+        record = state['records']['asi678mc:2:moonmode']
+        assert record['reason'] == 'apply_applied'
+
+        restored = store.restore_gain(
+            profile_id='asi678mc',
+            camera_id=2,
+            mode='moonmode',
+            configured_gain=100.0,
+            gain_min=0.0,
+            gain_max=300.0,
+        )
+        assert restored.restored is True
+        assert restored.reason == 'restored'
+        assert restored.gain == 300.0
+
+
 if __name__ == '__main__':
     test_restore_recent_gain()
     test_restore_clamps_to_current_limits()
     test_expired_gain_is_not_restored()
     test_profile_changed_is_not_restored()
+    test_runtime_next_changed_writes_state_file()
+    test_apply_applied_writes_restorable_state_file()
     print('auto gain runtime state tests OK')

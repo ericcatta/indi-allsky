@@ -913,6 +913,39 @@ class ImageWorker(Process):
         )
 
 
+    def _save_auto_gain_runtime_state(self, profile_id, camera_id, mode, gain, gain_min, gain_max, reason):
+        try:
+            self.auto_gain_runtime_state_store.save_gain(
+                profile_id=profile_id,
+                camera_id=camera_id,
+                mode=mode,
+                gain=gain,
+                gain_min=gain_min,
+                gain_max=gain_max,
+                reason=reason,
+            )
+            logger.info(
+                '[AUTO_GAIN_STATE_SAVE] profile=%s camera_id=%s mode=%s gain=%0.2f reason=%s path=%s',
+                profile_id,
+                camera_id,
+                mode,
+                float(gain),
+                reason,
+                self.auto_gain_runtime_state_store.state_path,
+            )
+        except Exception as e:
+            logger.warning(
+                '[AUTO_GAIN_STATE_SAVE] profile=%s camera_id=%s mode=%s gain=%s reason=%s status=failed error=%s path=%s',
+                profile_id,
+                camera_id,
+                mode,
+                gain,
+                reason,
+                str(e),
+                self.auto_gain_runtime_state_store.state_path,
+            )
+
+
     def _apply_auto_gain_decision(self, profile_id, camera_id, decision, state):
         apply_enabled = self._auto_gain_config_bool('AUTO_GAIN_APPLY_ENABLED', False)
         should_apply, reason = self.auto_gain_controller.should_apply(decision, apply_enabled=apply_enabled)
@@ -939,13 +972,14 @@ class ImageWorker(Process):
             with self.gain_av.get_lock():
                 self.gain_av[constants.GAIN_NEXT] = float(new_gain)
 
-            self.auto_gain_runtime_state_store.save_gain(
-                profile_id=profile_id,
-                camera_id=camera_id,
-                mode=decision.mode,
-                gain=new_gain,
-                gain_min=decision.gain_min,
-                gain_max=decision.gain_max,
+            self._save_auto_gain_runtime_state(
+                profile_id,
+                camera_id,
+                decision.mode,
+                new_gain,
+                decision.gain_min,
+                decision.gain_max,
+                'apply_applied',
             )
 
             self._log_auto_gain_apply(
@@ -1260,6 +1294,7 @@ class ImageWorker(Process):
                 self.exposure_av[constants.EXPOSURE_MAX],
             )
             new_gain = self._clamp_auto_exposure_apply_value(decision.proposed_gain, gain_min, gain_max)
+            old_gain_next = float(self.gain_av[constants.GAIN_NEXT])
 
             with self.exposure_av.get_lock():
                 self.exposure_av[constants.EXPOSURE_NEXT] = float(new_exposure)
@@ -1268,6 +1303,17 @@ class ImageWorker(Process):
             with self.gain_av.get_lock():
                 self.gain_av[constants.GAIN_NEXT] = float(new_gain)
                 self.gain_av[constants.GAIN_DELTA] = float(new_gain - self.gain_av[constants.GAIN_CURRENT])
+
+            if float(new_gain) != old_gain_next:
+                self._save_auto_gain_runtime_state(
+                    profile_id,
+                    camera_id,
+                    state.get('mode') or self._auto_gain_mode(),
+                    new_gain,
+                    gain_min,
+                    gain_max,
+                    'runtime_next_changed',
+                )
 
             logger.info(
                 '[AUTO_EXPOSURE_APPLY] profile=%s camera_id=%s mode=%s enabled=True action=%s old_exposure=%0.8f new_exposure=%0.8f old_gain=%0.2f new_gain=%0.2f target=%0.2f smoothed_value=%0.2f error=%+0.2f deadband=%0.2f decision_current_exposure=%0.8f decision_current_gain=%0.2f shadow=False',
@@ -4614,6 +4660,7 @@ class ImageWorker(Process):
 
 
         logger.warning('New calculated exposure: %0.6fs (%+0.8f) @ gain %0.2f (%+0.2f) bin %d', next_exposure, exposure_delta, next_gain, gain_delta, next_binning)
+        old_gain_next = float(self.gain_av[constants.GAIN_NEXT])
         with self.exposure_av.get_lock():
             self.exposure_av[constants.EXPOSURE_NEXT] = float(next_exposure)
             self.exposure_av[constants.EXPOSURE_DELTA] = float(exposure_delta)
@@ -4621,6 +4668,17 @@ class ImageWorker(Process):
         with self.gain_av.get_lock():
             self.gain_av[constants.GAIN_NEXT] = float(next_gain)
             self.gain_av[constants.GAIN_DELTA] = float(gain_delta)
+
+        if float(next_gain) != old_gain_next:
+            self._save_auto_gain_runtime_state(
+                self.profile_id,
+                self.camera_id,
+                self._auto_gain_mode(),
+                next_gain,
+                gain_min,
+                gain_max,
+                'runtime_next_changed',
+            )
 
         with self.binning_av.get_lock():
             self.binning_av[constants.BINNING_NEXT] = int(next_binning)

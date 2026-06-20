@@ -538,11 +538,15 @@ Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
 - Il runtime resolver continua a usare target ADU e gain max profile-first, senza fallback globale inatteso.
 - Auto Gain restart restore:
   - aggiunto state file runtime separato dalla config DB: `VARLIB_FOLDER/auto_gain_runtime_state.json`.
-  - quando Auto Gain Apply scrive davvero su `GAIN_NEXT`, salva l'ultimo gain adattivo per `profile_id:camera_id:mode`.
+  - validazione Raspberry iniziale ha mostrato che lo state file non veniva creato quando `AUTO_GAIN_APPLY_ENABLED=False`, perche' il gain adattivo evolveva comunque tramite `GAIN_NEXT` ma il save era agganciato solo al path di apply reale.
+  - il fix persiste l'ultimo gain adattivo per `profile_id:camera_id:mode` ogni volta che il runtime cambia `GAIN_NEXT`, anche se il write camera/hardware e' bloccato dall'apply gate.
+  - quando Auto Gain Apply scrive davvero su `GAIN_NEXT`, salva lo stesso stato con reason `apply_applied`.
+  - quando Auto Exposure o il ricalcolo legacy aggiornano `GAIN_NEXT`, salva lo stato con reason `runtime_next_changed`.
   - al restart CaptureWorker ripristina `GAIN_CURRENT`/`GAIN_NEXT` dal valore recente se profilo, camera e mode coincidono.
   - il restore clampa sempre al range corrente `gain_min/gain_max`.
   - fallback al gain configurato resta invariato se lo stato e' assente, scaduto o appartiene a un altro profilo.
-  - log diagnostici: `[AUTO_GAIN_RESTORE]` e `[AUTO_GAIN_RESET]`.
+  - log diagnostici: `[AUTO_GAIN_RESTORE]`, `[AUTO_GAIN_RESET]` e `[AUTO_GAIN_STATE_SAVE]`.
+  - nessuna scrittura su config DB o camera hardware viene fatta dal solo save dello stato runtime.
 
 ### Auto Exposure Refinement
 
