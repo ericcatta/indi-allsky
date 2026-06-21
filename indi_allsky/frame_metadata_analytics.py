@@ -81,6 +81,22 @@ class FrameMetadataAnalytics:
         }
 
 
+    def get_nightly_summary(self, date=None):
+        summary_date = self._latest_day() if date is None else str(date)
+        frames = self.load_day(summary_date) if summary_date else []
+        camera_ids = sorted(set(self._string_value(frame.get('camera_id')) for frame in frames if self._string_value(frame.get('camera_id'))))
+        return {
+            'date': summary_date,
+            'cameras': [
+                self._nightly_camera_summary(camera_id, [
+                    frame for frame in frames
+                    if self._string_value(frame.get('camera_id')) == camera_id
+                ])
+                for camera_id in camera_ids
+            ],
+        }
+
+
     def _iter_frames(self):
         for metadata_path in sorted(self.metadata_dir.glob('*.jsonl')):
             yield from self._load_file(metadata_path)
@@ -121,6 +137,99 @@ class FrameMetadataAnalytics:
             'minimum_quality_score': min(quality_scores) if quality_scores else None,
             'maximum_quality_score': max(quality_scores) if quality_scores else None,
         }
+
+
+    def _nightly_camera_summary(self, camera_id, frames):
+        summary = self._summary(frames)
+        total = len(frames)
+        quality_flags = Counter()
+        decision_reasons = Counter()
+        nominal_count = 0
+        low_meter_count = 0
+        high_meter_count = 0
+        exposure_max_count = 0
+        gain_max_count = 0
+        capture_error_count = 0
+        profile_ids = Counter(self._string_value(frame.get('profile_id')) for frame in frames if self._string_value(frame.get('profile_id')))
+
+        for frame in frames:
+            flags = self._quality_flags(frame.get('quality_flags'))
+            quality_flags.update(flags)
+            reason = self._string_value(frame.get('decision_reason'))
+            if reason:
+                decision_reasons.update([reason])
+
+            quality_score = self._optional_float(frame.get('quality_score'))
+            if 'nominal' in flags or (quality_score is not None and quality_score >= 90.0):
+                nominal_count += 1
+
+            meter = self._optional_float(frame.get('meter_value_smoothed'))
+            target = self._optional_float(frame.get('target_meter'))
+            if 'meter_near_black' in flags or (meter is not None and target is not None and meter < (target - 20.0)):
+                low_meter_count += 1
+            if 'meter_saturated_high' in flags or (meter is not None and target is not None and meter > (target + 20.0)):
+                high_meter_count += 1
+
+            if 'exposure_and_gain_already_max' in reason or ('exposure' in reason and 'max' in reason):
+                exposure_max_count += 1
+            if 'gain_already_max' in reason or ('gain' in reason and 'max' in reason):
+                gain_max_count += 1
+
+            capture_status = self._string_value(frame.get('capture_status')).lower()
+            if capture_status and capture_status != 'processed':
+                capture_error_count += 1
+            elif self._string_value(frame.get('error_message')):
+                capture_error_count += 1
+            elif 'capture_error' in flags or 'capture_not_processed' in flags:
+                capture_error_count += 1
+
+        summary.update({
+            'camera_id': camera_id,
+            'profile_id': profile_ids.most_common(1)[0][0] if profile_ids else '',
+            'most_common_quality_flags': self._counter_rows(quality_flags),
+            'most_common_decision_reasons': self._counter_rows(decision_reasons),
+            'percentages': {
+                'nominal_quality': self._percentage(nominal_count, total),
+                'low_meter': self._percentage(low_meter_count, total),
+                'high_meter': self._percentage(high_meter_count, total),
+                'exposure_max': self._percentage(exposure_max_count, total),
+                'gain_max': self._percentage(gain_max_count, total),
+                'capture_errors': self._percentage(capture_error_count, total),
+            },
+        })
+        return summary
+
+
+    def _latest_day(self):
+        metadata_paths = sorted(self.metadata_dir.glob('*.jsonl'))
+        if not metadata_paths:
+            return None
+        return metadata_paths[-1].stem
+
+
+    def _quality_flags(self, flags):
+        if isinstance(flags, list):
+            return [self._string_value(flag) for flag in flags if self._string_value(flag)]
+        flag_value = self._string_value(flags)
+        if not flag_value:
+            return []
+        return [flag_value]
+
+
+    def _counter_rows(self, counter, limit=5):
+        return [
+            {
+                'label': label,
+                'count': count,
+            }
+            for label, count in counter.most_common(limit)
+        ]
+
+
+    def _percentage(self, count, total):
+        if not total:
+            return 0.0
+        return (float(count) / float(total)) * 100.0
 
 
     def _day_path(self, date):

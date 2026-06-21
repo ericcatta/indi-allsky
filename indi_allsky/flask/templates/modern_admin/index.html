@@ -113,6 +113,75 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 
+    <section class="modern-admin-dashboard-section" aria-labelledby="nightly-summary-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Nightly Summary</p>
+            <h2 id="nightly-summary-title">{{ modern_admin_nightly_summary.date }}</h2>
+        </div>
+
+        {% if modern_admin_nightly_summary.cameras %}
+        <div class="modern-admin-nightly-grid">
+            {% for camera in modern_admin_nightly_summary.cameras %}
+            <article class="modern-admin-nightly-panel">
+                <div class="modern-admin-dashboard-card-header">
+                    <div>
+                        <p class="modern-admin-card-label">Camera {{ camera.camera_id }}</p>
+                        <h3>{{ camera.profile_id }}</h3>
+                    </div>
+                    <span class="modern-admin-status-pill modern-admin-status-neutral">{{ camera.frame_count }} frames</span>
+                </div>
+
+                <dl class="modern-admin-nightly-list">
+                    <div><dt>First frame</dt><dd>{{ camera.first_timestamp }}</dd></div>
+                    <div><dt>Last frame</dt><dd>{{ camera.last_timestamp }}</dd></div>
+                    <div><dt>Quality avg / min / max</dt><dd>{{ camera.average_quality }} / {{ camera.minimum_quality }} / {{ camera.maximum_quality }}</dd></div>
+                    <div><dt>Meter avg / min / max</dt><dd>{{ camera.average_meter }} / {{ camera.minimum_meter }} / {{ camera.maximum_meter }}</dd></div>
+                    <div><dt>Exposure avg / min / max</dt><dd>{{ camera.average_exposure }} / {{ camera.minimum_exposure }} / {{ camera.maximum_exposure }}</dd></div>
+                    <div><dt>Gain avg / min / max</dt><dd>{{ camera.average_gain }} / {{ camera.minimum_gain }} / {{ camera.maximum_gain }}</dd></div>
+                </dl>
+
+                <div class="modern-admin-nightly-percent-grid">
+                    <div><span>Nominal</span><strong>{{ camera.percentages.nominal_quality }}</strong></div>
+                    <div><span>Low meter</span><strong>{{ camera.percentages.low_meter }}</strong></div>
+                    <div><span>High meter</span><strong>{{ camera.percentages.high_meter }}</strong></div>
+                    <div><span>Exposure max</span><strong>{{ camera.percentages.exposure_max }}</strong></div>
+                    <div><span>Gain max</span><strong>{{ camera.percentages.gain_max }}</strong></div>
+                    <div><span>Capture errors</span><strong>{{ camera.percentages.capture_errors }}</strong></div>
+                </div>
+
+                <div class="modern-admin-nightly-common-grid">
+                    <div>
+                        <h4>Quality flags</h4>
+                        <ul>
+                            {% for item in camera.quality_flags %}
+                            <li><span>{{ item.label }}</span><strong>{{ item.count }}</strong></li>
+                            {% else %}
+                            <li><span>No flags</span><strong>0</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Decision reasons</h4>
+                        <ul>
+                            {% for item in camera.decision_reasons %}
+                            <li><span>{{ item.label }}</span><strong>{{ item.count }}</strong></li>
+                            {% else %}
+                            <li><span>No reasons</span><strong>0</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <article class="modern-admin-dashboard-empty">
+            <h3>No nightly metadata yet</h3>
+            <p>The nightly summary will populate after daily frame metadata exists.</p>
+        </article>
+        {% endif %}
+    </section>
+
     <section class="modern-admin-dashboard-section" aria-labelledby="analytics-title">
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">24h Analytics</p>

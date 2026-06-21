@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from indi_allsky.frame_metadata_analytics import FrameMetadataAnalytics
 
 
-def _frame(frame_id, timestamp, camera_id, exposure_us, gain, meter_value, exposure_action='hold', gain_action='hold', reason='target_reached'):
+def _frame(frame_id, timestamp, camera_id, exposure_us, gain, meter_value, exposure_action='hold', gain_action='hold', reason='target_reached', quality_flags=None, capture_status='processed'):
     return {
         'frame_id': frame_id,
         'timestamp': timestamp,
@@ -26,10 +26,10 @@ def _frame(frame_id, timestamp, camera_id, exposure_us, gain, meter_value, expos
         'auto_exposure_action': exposure_action,
         'auto_gain_action': gain_action,
         'decision_reason': reason,
-        'capture_status': 'processed',
+        'capture_status': capture_status,
         'error_message': '',
         'quality_score': max(0.0, min(100.0, 100.0 - abs(95.0 - meter_value))),
-        'quality_flags': [],
+        'quality_flags': quality_flags if quality_flags is not None else [],
     }
 
 
@@ -143,10 +143,66 @@ def test_multi_camera_statistics_and_decision_counts():
         assert 'too_bright' not in camera_stats['decision_reason']
 
 
+def test_nightly_summary_per_camera():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_dir = Path(tmpdir)
+        _write_day(metadata_dir, '2026-06-21', [
+            _frame(1, '2026-06-21T00:00:00+00:00', 2, 1000, 0.0, 95.0, reason='target_reached', quality_flags=['nominal']),
+            _frame(2, '2026-06-21T00:01:00+00:00', 2, 3000, 2.0, 40.0, reason='gain_already_max', quality_flags=['meter_far_from_target']),
+            _frame(3, '2026-06-21T00:02:00+00:00', 1, 5000, 16.0, 250.0, reason='exposure_and_gain_already_max', quality_flags=['meter_saturated_high']),
+            _frame(4, '2026-06-21T00:03:00+00:00', 1, 6000, 16.0, 100.0, reason='bad_image', quality_flags=['capture_not_processed'], capture_status='bad_image'),
+        ])
+
+        summary = FrameMetadataAnalytics(metadata_dir).get_nightly_summary('2026-06-21')
+        assert summary['date'] == '2026-06-21'
+        assert len(summary['cameras']) == 2
+
+        camera_2 = [camera for camera in summary['cameras'] if camera['camera_id'] == '2'][0]
+        assert camera_2['frame_count'] == 2
+        assert camera_2['profile_id'] == 'asi678mc'
+        assert camera_2['average_meter_value'] == 67.5
+        assert camera_2['percentages']['nominal_quality'] == 50.0
+        assert camera_2['percentages']['low_meter'] == 50.0
+        assert camera_2['percentages']['gain_max'] == 50.0
+        assert camera_2['most_common_quality_flags'][0]['label'] == 'nominal'
+
+        camera_1 = [camera for camera in summary['cameras'] if camera['camera_id'] == '1'][0]
+        assert camera_1['frame_count'] == 2
+        assert camera_1['percentages']['high_meter'] == 50.0
+        assert camera_1['percentages']['exposure_max'] == 50.0
+        assert camera_1['percentages']['capture_errors'] == 50.0
+
+
+def test_nightly_summary_tolerates_legacy_rows():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_dir = Path(tmpdir)
+        _write_day(metadata_dir, '2026-06-21', [
+            {
+                'frame_id': 1,
+                'timestamp': '2026-06-21T00:00:00+00:00',
+                'camera_id': 2,
+                'profile_id': 'asi678mc',
+                'exposure_us': 1000,
+                'gain': 0.0,
+                'meter_value_smoothed': 90.0,
+                'target_meter': 95.0,
+                'decision_reason': 'target_reached',
+                'capture_status': 'processed',
+            },
+        ])
+
+        summary = FrameMetadataAnalytics(metadata_dir).get_nightly_summary('2026-06-21')
+        assert summary['cameras'][0]['frame_count'] == 1
+        assert summary['cameras'][0]['average_quality_score'] is None
+        assert summary['cameras'][0]['percentages']['capture_errors'] == 0.0
+
+
 if __name__ == '__main__':
     test_load_day()
     test_latest_frames_across_days()
     test_camera_summary()
     test_recent_frames_filters_by_timestamp()
     test_multi_camera_statistics_and_decision_counts()
+    test_nightly_summary_per_camera()
+    test_nightly_summary_tolerates_legacy_rows()
     print('frame metadata analytics tests OK')

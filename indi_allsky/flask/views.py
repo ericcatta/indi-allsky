@@ -5142,10 +5142,12 @@ class ModernAdminView(TemplateView):
         try:
             recent_frames = analytics.get_recent_frames(hours=24)
             latest_frames = analytics.get_latest_frames(limit=500)
+            nightly_summary = analytics.get_nightly_summary()
         except Exception as e:
             app.logger.error('Error reading modern admin dashboard metadata: %s', str(e))
             recent_frames = list()
             latest_frames = list()
+            nightly_summary = {'date': None, 'cameras': []}
 
         camera_ids = self.get_modern_admin_dashboard_camera_ids(recent_frames, latest_frames)
         chart_data = dict()
@@ -5197,6 +5199,7 @@ class ModernAdminView(TemplateView):
             'modern_admin_dashboard_cameras'        : camera_cards,
             'modern_admin_dashboard_chart_data'     : chart_data,
             'modern_admin_dashboard_has_metadata'   : bool(recent_frames or latest_frames),
+            'modern_admin_nightly_summary'          : self.format_dashboard_nightly_summary(nightly_summary),
         }
 
 
@@ -5331,7 +5334,59 @@ class ModernAdminView(TemplateView):
         }
 
 
+    def format_dashboard_nightly_summary(self, nightly_summary):
+        return {
+            'date': nightly_summary.get('date') or 'No metadata day',
+            'cameras': [
+                self.format_dashboard_nightly_camera_summary(camera_summary)
+                for camera_summary in nightly_summary.get('cameras', [])
+            ],
+        }
+
+
+    def format_dashboard_nightly_camera_summary(self, camera_summary):
+        percentages = camera_summary.get('percentages') or {}
+        return {
+            'camera_id'          : camera_summary.get('camera_id') or 'Unknown',
+            'profile_id'         : camera_summary.get('profile_id') or 'Unknown profile',
+            'frame_count'        : camera_summary.get('frame_count', 0),
+            'first_timestamp'    : camera_summary.get('first_timestamp') or 'No metadata',
+            'last_timestamp'     : camera_summary.get('last_timestamp') or 'No metadata',
+            'average_quality'    : self.format_dashboard_quality_score(camera_summary.get('average_quality_score')),
+            'minimum_quality'    : self.format_dashboard_quality_score(camera_summary.get('minimum_quality_score')),
+            'maximum_quality'    : self.format_dashboard_quality_score(camera_summary.get('maximum_quality_score')),
+            'average_meter'      : self.format_dashboard_number(camera_summary.get('average_meter_value')),
+            'minimum_meter'      : self.format_dashboard_number(camera_summary.get('minimum_meter_value')),
+            'maximum_meter'      : self.format_dashboard_number(camera_summary.get('maximum_meter_value')),
+            'average_exposure'   : self.format_dashboard_exposure(camera_summary.get('average_exposure')),
+            'minimum_exposure'   : self.format_dashboard_exposure(camera_summary.get('minimum_exposure')),
+            'maximum_exposure'   : self.format_dashboard_exposure(camera_summary.get('maximum_exposure')),
+            'average_gain'       : self.format_dashboard_gain(camera_summary.get('average_gain')),
+            'minimum_gain'       : self.format_dashboard_gain(camera_summary.get('minimum_gain')),
+            'maximum_gain'       : self.format_dashboard_gain(camera_summary.get('maximum_gain')),
+            'quality_flags'      : self.format_dashboard_counter(camera_summary.get('most_common_quality_flags') or []),
+            'decision_reasons'   : self.format_dashboard_counter(camera_summary.get('most_common_decision_reasons') or []),
+            'percentages'        : {
+                'nominal_quality' : self.format_dashboard_percentage(percentages.get('nominal_quality')),
+                'low_meter'       : self.format_dashboard_percentage(percentages.get('low_meter')),
+                'high_meter'      : self.format_dashboard_percentage(percentages.get('high_meter')),
+                'exposure_max'    : self.format_dashboard_percentage(percentages.get('exposure_max')),
+                'gain_max'        : self.format_dashboard_percentage(percentages.get('gain_max')),
+                'capture_errors'  : self.format_dashboard_percentage(percentages.get('capture_errors')),
+            },
+        }
+
+
     def format_dashboard_counter(self, counter):
+        if isinstance(counter, list):
+            return [
+                {
+                    'label': self.format_dashboard_reason_label(item.get('label')),
+                    'count': item.get('count', 0),
+                }
+                for item in counter
+            ]
+
         preferred = ('increase_exposure', 'decrease_exposure', 'increase_gain', 'decrease_gain', 'hold')
         rows = list()
         used = set()
@@ -5444,6 +5499,13 @@ class ModernAdminView(TemplateView):
             return ['No flags']
 
         return [self.format_dashboard_reason_label(value_str)]
+
+
+    def format_dashboard_percentage(self, value):
+        number = self._modern_optional_float(value)
+        if number is None:
+            return '0%'
+        return '{0:0.0f}%'.format(number)
 
 
     def format_dashboard_number(self, value):

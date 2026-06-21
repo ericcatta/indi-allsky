@@ -79,8 +79,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Dashboard Polish v1 con unita' leggibili, reason label, chart Y-axis, tooltip e X-axis temporale.
 - IN TEST:
   - Quality Score v1 metadata-only: usa meter/target, exposure/gain state, capture status e decision state; non usa AI, image analysis o star detection.
+  - Nightly Summary v1: riepilogo daily per camera da JSONL con quality, meter, exposure, gain, flag, reason e percentuali operative.
 - NEXT:
   - Validare Quality Score v1 sul Raspberry con frame buoni, saturi, scuri e capture error.
+  - Validare Nightly Summary v1 sul Raspberry con giornata completa e metadata multicamera.
   - Aggiungere filtri dashboard/gallery basati su metadata e quality flags.
   - Grafici storici giornalieri piu' ricchi per brightness/exposure/gain.
 - LATER:
@@ -364,6 +366,17 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - persiste `quality_score` 0-100 e `quality_flags` in ogni `FrameMetadata`;
   - Dashboard mostra latest quality score/flags nelle camera cards e average quality nel quick summary.
 - Validare su frame buoni, saturi, quasi neri e capture error.
+
+### Nightly Summary v1
+
+- Nightly Summary v1 implementato localmente e da validare sul Raspberry:
+  - legge daily JSONL esistenti senza schema DB nuovo;
+  - produce riepilogo per camera con frame count, first/last timestamp, quality score avg/min/max, meter avg/min/max, exposure avg/min/max e gain avg/min/max;
+  - mostra quality flags e decision reasons piu' comuni;
+  - calcola percentuale frame nominali, low meter, high meter, exposure max, gain max e capture errors usando solo metadata esistenti;
+  - Dashboard mostra la sezione read-only `Nightly Summary`;
+  - tollera righe JSONL legacy senza `quality_score` o `quality_flags`.
+- Validare con una notte/giornata completa su entrambe le camere.
 
 ### Hybrid AWB / Color ASI
 
@@ -968,3 +981,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Dashboard Polish v1: summary riordinato sotto le camera cards, unita' piu' leggibili, reason label, axis labels e tooltip sui grafici.
 - 2026-06-21: Migliorata leggibilita' asse X dashboard con tick temporali locali, subtitle `Last 24 hours` e timestamp completo nei tooltip.
 - 2026-06-21: Implementato Quality Score v1 metadata-only con persistenza `quality_score`/`quality_flags` e visualizzazione read-only nel dashboard.
+- 2026-06-21: Implementato Nightly Summary v1 read-only da daily JSONL con riepilogo per camera e percentuali operative.

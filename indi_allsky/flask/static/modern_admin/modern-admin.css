@@ -2511,7 +2511,8 @@ body.modern-admin-lightbox-open {
 .modern-admin-shell .modern-admin-dashboard-camera-grid,
 .modern-admin-shell .modern-admin-chart-grid,
 .modern-admin-shell .modern-admin-decision-grid,
-.modern-admin-shell .modern-admin-summary-grid {
+.modern-admin-shell .modern-admin-summary-grid,
+.modern-admin-shell .modern-admin-nightly-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
@@ -2521,6 +2522,7 @@ body.modern-admin-lightbox-open {
 .modern-admin-shell .modern-admin-chart-panel,
 .modern-admin-shell .modern-admin-decision-panel,
 .modern-admin-shell .modern-admin-summary-panel,
+.modern-admin-shell .modern-admin-nightly-panel,
 .modern-admin-shell .modern-admin-dashboard-empty {
   min-width: 0;
   padding: 18px;
@@ -2770,17 +2772,97 @@ body.modern-admin-lightbox-open {
   margin: 16px 0 0;
 }
 
+.modern-admin-shell .modern-admin-nightly-list,
+.modern-admin-shell .modern-admin-nightly-percent-grid,
+.modern-admin-shell .modern-admin-nightly-common-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.modern-admin-shell .modern-admin-nightly-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 14px 0 0;
+}
+
+.modern-admin-shell .modern-admin-nightly-list div,
+.modern-admin-shell .modern-admin-nightly-percent-grid div {
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.modern-admin-shell .modern-admin-nightly-list dt,
+.modern-admin-shell .modern-admin-nightly-percent-grid span {
+  color: var(--modern-admin-quiet);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.modern-admin-shell .modern-admin-nightly-list dd,
+.modern-admin-shell .modern-admin-nightly-percent-grid strong {
+  display: block;
+  margin: 4px 0 0;
+  color: var(--modern-admin-text);
+  font-size: 0.94rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.modern-admin-shell .modern-admin-nightly-percent-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 12px;
+}
+
+.modern-admin-shell .modern-admin-nightly-common-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.modern-admin-shell .modern-admin-nightly-common-grid h4 {
+  margin: 0 0 8px;
+  color: var(--modern-admin-text);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.modern-admin-shell .modern-admin-nightly-common-grid ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modern-admin-shell .modern-admin-nightly-common-grid li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 9px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 10px;
+  color: var(--modern-admin-muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 @media (max-width: 760px) {
   .modern-admin-shell .modern-admin-dashboard-camera-grid,
   .modern-admin-shell .modern-admin-chart-grid,
   .modern-admin-shell .modern-admin-decision-grid,
   .modern-admin-shell .modern-admin-summary-grid,
+  .modern-admin-shell .modern-admin-nightly-grid,
+  .modern-admin-shell .modern-admin-nightly-list,
+  .modern-admin-shell .modern-admin-nightly-common-grid,
   .modern-admin-shell .modern-admin-decision-columns {
     grid-template-columns: 1fr;
   }
 
   .modern-admin-shell .modern-admin-dashboard-metrics,
-  .modern-admin-shell .modern-admin-summary-list {
+  .modern-admin-shell .modern-admin-summary-list,
+  .modern-admin-shell .modern-admin-nightly-percent-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
