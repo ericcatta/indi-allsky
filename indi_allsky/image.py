@@ -4817,7 +4817,7 @@ class ImageWorker(Process):
         if float(next_gain) != old_gain_next:
             self._save_auto_gain_runtime_state(
                 self.profile_id,
-                self.camera_id,
+                getattr(self, 'camera_id', None),
                 self._auto_gain_mode(),
                 next_gain,
                 gain_min,
