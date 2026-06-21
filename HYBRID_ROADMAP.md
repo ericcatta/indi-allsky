@@ -101,6 +101,7 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Non avviare AI detection prima che il sistema sappia distinguere condizioni cielo buone/scarse.
 - Elementi gia' presenti da non duplicare:
   - Dew heater, dew point e sensori ambiente esistono gia' in `sensor.py`, device sensor modules e utility MQTT.
+  - Dew heater threshold/control e dew point da sensori/API esistono gia' nella pipeline legacy; Environmental Awareness v1 non deve comandare heater/fan.
   - Weather/API integration esiste in forma legacy/utility, incluso Astrospheric/cloud cover in script di test.
   - Star count e' gia' documentato come misura oggettiva delle condizioni cielo, ma non e' ancora parte della fondazione metadata-only v1.
   - Nightly Summary calcola gia' `night_trend` per quality, meter, exposure e gain; Sky Trend v1 non lo sostituisce, ma aggiunge una classificazione compatta diagnostica.
@@ -150,38 +151,32 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - delta medio iniziale/finale <= -10 punti -> `degrading`;
       - variazioni piccole -> `stable`.
     - integrato nel Nightly Summary analytics come `sky_trend`, senza rimuovere il dettaglio `night_trend`.
+  - Dew / Condensation Detection v1:
+    - modulo isolato metadata-only `condensation_detection.py`;
+    - modalita' solo shadow/diagnostica, senza decisioni operative;
+    - output: `possible_condensation` boolean;
+    - input usati:
+      - sequenza temporale metadata della singola camera/profilo;
+      - `quality_score`;
+      - `quality_flags`;
+      - `capture_status`;
+      - `exposure_us`;
+      - `gain`;
+      - `sky_trend` tramite classificatore metadata-only.
+    - comportamento conservativo:
+      - lista vuota, un solo frame, meno di 4 frame o metadata insufficienti -> `False`;
+      - sequenze con camera/profilo misti -> `False`;
+      - capture fallito o flag critici -> `False`;
+      - cloudiness da sola non basta;
+      - richiede degrado netto e persistente della qualita', `sky_trend=degrading`, qualita' finale bassa e almeno un segnale coerente tra exposure/gain in aumento o quality flags negativi persistenti.
+    - integrato nel Nightly Summary analytics come `possible_condensation`;
+    - non usa dew point, sensori ambiente o heater control in questa fase.
 - NEXT:
-  - Sky Condition Classification:
-    - Purpose: produrre uno stato leggibile per le condizioni osservative correnti.
-    - Output atteso:
-      - `excellent`.
-      - `good`.
-      - `usable`.
-      - `poor`.
-      - `unusable`.
-  - Condensation / Dew Detection:
-    - Purpose: rilevare possibile condensa su lente/dome.
-    - Indicatori possibili:
-      - calo quality score.
-      - stelle che spariscono.
-      - contrasto in calo.
-      - meter relativamente stabile.
-      - immagine uniformemente sfocata, lavata o priva di dettaglio.
-    - Output atteso:
-      - `possible_condensation`.
-      - confidence score.
-      - warning visibile in dashboard.
-  - Sky Trend:
-    - Purpose: capire se le condizioni stanno migliorando, restando stabili o peggiorando.
-    - Output atteso:
-      - `improving`.
-      - `stable`.
-      - `degrading`.
   - Weather Awareness:
     - Purpose: combinare in futuro metadata interni con meteo esterno o sensori locali.
     - Nessun requisito di API esterna nella prima fase.
 - Prossimo micro-step consigliato:
-  - Dew / Condensation Detection v1 shadow/read-only sopra metadata esistenti, sensori/dew point esistenti e trend quality/meter, ancora senza AI e senza azioni runtime.
+  - Environmental Awareness v1 summary polish / dashboard exposure read-only per mostrare `sky_condition`, `cloud_condition`, `sky_trend` e `possible_condensation` in modo compatto.
 - LATER:
   - Integrare temperatura Raspberry/CPU, spazio disco e health log.
   - Alert futuri Telegram/email/webhook.
@@ -1096,3 +1091,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementata fondazione Sky Condition v1 metadata-only, profile-aware e multi-camera safe, senza cloud/dew/weather/AI/event detection.
 - 2026-06-21: Implementata Cloud Detection v1 shadow metadata-only, integrata nel Nightly Summary analytics come `cloud_condition`, senza AI/event/runtime control.
 - 2026-06-21: Implementata Sky Trend v1 shadow metadata-only, integrata nel Nightly Summary analytics come `sky_trend`, senza sostituire `night_trend`.
+- 2026-06-21: Implementata Dew / Condensation Detection v1 shadow metadata-only come `possible_condensation`, senza usare sensori/heater control o image analysis.
