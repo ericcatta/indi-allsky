@@ -233,6 +233,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Scrittura best-effort dopo processing:
   - `processed` quando l'immagine viene salvata e inserita nel DB.
   - `input_missing`, `input_empty`, `bad_image`, `not_saved` per percorsi noti senza DB image id.
+- Analytics reader base:
+  - legge direttamente i daily JSONL, senza migration DB.
+  - API iniziali: `load_day(date)`, `get_latest_frames(limit)`, `get_camera_summary(camera_id)`, `get_decision_statistics(camera_id=None)`.
+  - summary include count, timestamp primo/ultimo, min/max/media exposure, gain e meter value.
+  - statistiche decisioni includono conteggi per `auto_exposure_action`, `auto_gain_action` e `decision_reason`.
 - Nessun cambio a dashboard, UI, upload o log esistenti.
 
 ## IN TEST
@@ -833,4 +838,5 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementato restore runtime Auto Gain dopo service restart tramite state file separato dalla config DB, con clamp e log restore/reset.
 - 2026-06-21: Implementata rotazione giornaliera metadata JSONL in `frame_metadata/YYYY-MM-DD.jsonl`, mantenendo compatibilita' con `FRAME_METADATA_PATH`.
 - 2026-06-21: Fix rotazione metadata Raspberry: path vuoto trattato come default daily, writer ritorna/logga il file effettivamente scritto.
+- 2026-06-21: Implementato Metadata Analytics Reader base per daily JSONL con summary per camera, latest frames e conteggi decisioni.
 - 2026-06-21: Rifattorizzata Auto Exposure convergence in tier `aggressive/normal/fine/target`, con recupero rapido da saturazione dentro il tier aggressive.
