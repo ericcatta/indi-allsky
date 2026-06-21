@@ -1000,3 +1000,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementato Quality Score v1 metadata-only con persistenza `quality_score`/`quality_flags` e visualizzazione read-only nel dashboard.
 - 2026-06-21: Implementato Nightly Summary v1 read-only da daily JSONL con riepilogo per camera e percentuali operative.
 - 2026-06-21: Completato Nightly Summary v1 locale con UI a card, missing frames, anomaly events, best/worst frame e night trend metadata-only.
+- 2026-06-21: Rifinito layout Nightly Summary per evitare rendering tabellare/plain text: card scure responsive, metric tiles e cache-buster CSS dedicato.
