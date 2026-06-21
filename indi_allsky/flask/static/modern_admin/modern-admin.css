@@ -2625,9 +2625,24 @@ body.modern-admin-lightbox-open {
   background: rgba(7, 10, 16, 0.34);
 }
 
+.modern-admin-shell .modern-admin-chart-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.modern-admin-shell .modern-admin-chart-heading span {
+  color: var(--modern-admin-quiet);
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .modern-admin-shell .modern-admin-chart-card h4,
 .modern-admin-shell .modern-admin-decision-columns h4 {
-  margin: 0 0 10px;
+  margin: 0;
   color: var(--modern-admin-text);
   font-size: 0.95rem;
   font-weight: 800;

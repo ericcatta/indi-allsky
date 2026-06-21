@@ -252,6 +252,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - meter mostrato come valore misurato / target;
   - reason/action comuni convertiti in label leggibili;
   - grafici con label asse Y e tooltip timestamp/exposure/gain/meter.
+- Dashboard X-axis polish:
+  - grafici con label temporali locali sull'asse X;
+  - subtitle `Last 24 hours` in ogni chart;
+  - tooltip con timestamp locale completo.
 - Nessun cambio a upload, processing, Auto Exposure o Auto Gain.
 
 ## IN TEST
@@ -857,3 +861,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Rifattorizzata Auto Exposure convergence in tier `aggressive/normal/fine/target`, con recupero rapido da saturazione dentro il tier aggressive.
 - 2026-06-21: Implementato Dashboard MVP read-only con latest frame per camera, grafici 24h exposure/gain/meter, statistiche decisioni e quick summary basati su `FrameMetadataAnalytics`.
 - 2026-06-21: Dashboard Polish v1: summary riordinato sotto le camera cards, unita' piu' leggibili, reason label, axis labels e tooltip sui grafici.
+- 2026-06-21: Migliorata leggibilita' asse X dashboard con tick temporali locali, subtitle `Last 24 hours` e timestamp completo nei tooltip.

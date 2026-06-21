@@ -117,15 +117,24 @@ var camera_id = {{ camera_id }};
                 </div>
                 <div class="modern-admin-chart-stack">
                     <div class="modern-admin-chart-card">
-                        <h4>Exposure</h4>
+                        <div class="modern-admin-chart-heading">
+                            <h4>Exposure</h4>
+                            <span>Last 24 hours</span>
+                        </div>
                         <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="exposure" data-axis-label="Exposure"></canvas>
                     </div>
                     <div class="modern-admin-chart-card">
-                        <h4>Gain</h4>
+                        <div class="modern-admin-chart-heading">
+                            <h4>Gain</h4>
+                            <span>Last 24 hours</span>
+                        </div>
                         <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="gain" data-axis-label="Gain"></canvas>
                     </div>
                     <div class="modern-admin-chart-card">
-                        <h4>Meter Value</h4>
+                        <div class="modern-admin-chart-heading">
+                            <h4>Meter Value</h4>
+                            <span>Last 24 hours</span>
+                        </div>
                         <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="meter" data-axis-label="Meter"></canvas>
                     </div>
                 </div>
@@ -206,6 +215,38 @@ var camera_id = {{ camera_id }};
     }
     const tooltip = document.getElementById('modern-dashboard-chart-tooltip');
 
+    function parseTimestamp(value) {
+        const timestamp = Date.parse(value || '');
+        if (!Number.isFinite(timestamp)) {
+            return null;
+        }
+        return timestamp;
+    }
+
+    function formatTimeLabel(timestamp) {
+        if (!Number.isFinite(timestamp)) {
+            return '';
+        }
+        return new Date(timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }
+
+    function formatTooltipTimestamp(timestamp) {
+        if (!Number.isFinite(timestamp)) {
+            return 'Unknown timestamp';
+        }
+        return new Date(timestamp).toLocaleString([], {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+        });
+    }
+
     function formatExposure(value) {
         const number = Number(value);
         if (!Number.isFinite(number)) {
@@ -244,8 +285,9 @@ var camera_id = {{ camera_id }};
     }
 
     function tooltipText(row) {
+        const timestamp = parseTimestamp(row.timestamp);
         return [
-            row.timestamp || 'Unknown timestamp',
+            formatTooltipTimestamp(timestamp),
             `Exposure: ${formatExposure(row.exposure)}`,
             `Gain: ${formatGain(row.gain)}`,
             `Meter: ${formatMeter(row.meter)}`,
@@ -269,8 +311,14 @@ var camera_id = {{ camera_id }};
         const metric = canvas.dataset.metric || '';
         const axisLabel = canvas.dataset.axisLabel || metric;
         const rows = (chartData[cameraId] || []).filter((row) => (
-            row[metric] !== null && row[metric] !== undefined && Number.isFinite(Number(row[metric]))
-        ));
+            row[metric] !== null &&
+            row[metric] !== undefined &&
+            Number.isFinite(Number(row[metric])) &&
+            parseTimestamp(row.timestamp) !== null
+        )).map((row) => ({
+            ...row,
+            timestampMs: parseTimestamp(row.timestamp),
+        }));
 
         if (rows.length < 2) {
             drawEmpty(ctx, canvas, 'Not enough metadata yet');
@@ -281,23 +329,44 @@ var camera_id = {{ camera_id }};
         const minValue = Math.min.apply(null, values);
         const maxValue = Math.max.apply(null, values);
         const valueSpan = Math.max(maxValue - minValue, 0.000001);
+        const minTime = Math.min.apply(null, rows.map((row) => row.timestampMs));
+        const maxTime = Math.max.apply(null, rows.map((row) => row.timestampMs));
+        const timeSpan = Math.max(maxTime - minTime, 1);
         const padX = 54;
-        const padY = 22;
+        const padTop = 22;
+        const padBottom = 36;
         const width = canvas.width - (padX * 2);
-        const height = canvas.height - (padY * 2);
+        const height = canvas.height - padTop - padBottom;
+        const chartBottom = canvas.height - padBottom;
         const points = [];
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(padX, padY);
-        ctx.lineTo(padX, canvas.height - padY);
-        ctx.lineTo(canvas.width - padX, canvas.height - padY);
+        ctx.moveTo(padX, padTop);
+        ctx.lineTo(padX, chartBottom);
+        ctx.lineTo(canvas.width - padX, chartBottom);
         ctx.stroke();
 
+        const tickCount = Math.min(4, rows.length);
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.74)';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        for (let tickIndex = 0; tickIndex < tickCount; tickIndex += 1) {
+            const ratio = tickCount === 1 ? 0 : tickIndex / (tickCount - 1);
+            const tickTime = minTime + (timeSpan * ratio);
+            const x = padX + (width * ratio);
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
+            ctx.beginPath();
+            ctx.moveTo(x, padTop);
+            ctx.lineTo(x, chartBottom);
+            ctx.stroke();
+            ctx.fillText(formatTimeLabel(tickTime), x, canvas.height - 10);
+        }
+
         ctx.save();
-        ctx.translate(15, canvas.height / 2);
+        ctx.translate(15, padTop + (height / 2));
         ctx.rotate(-Math.PI / 2);
         ctx.fillStyle = 'rgba(226, 232, 240, 0.82)';
         ctx.font = '12px sans-serif';
@@ -309,8 +378,8 @@ var camera_id = {{ camera_id }};
         ctx.lineWidth = 2;
         ctx.beginPath();
         rows.forEach((row, index) => {
-            const x = padX + ((rows.length === 1 ? 0 : index / (rows.length - 1)) * width);
-            const y = (canvas.height - padY) - (((Number(row[metric]) - minValue) / valueSpan) * height);
+            const x = padX + (((row.timestampMs - minTime) / timeSpan) * width);
+            const y = chartBottom - (((Number(row[metric]) - minValue) / valueSpan) * height);
             if (index === 0) {
                 ctx.moveTo(x, y);
             } else {
@@ -324,7 +393,7 @@ var camera_id = {{ camera_id }};
         ctx.font = '12px sans-serif';
         ctx.textAlign = 'left';
         ctx.fillText(formatMetric(metric, maxValue), padX, 14);
-        ctx.fillText(formatMetric(metric, minValue), padX, canvas.height - 6);
+        ctx.fillText(formatMetric(metric, minValue), padX, chartBottom - 4);
 
         canvas.dataset.chartPoints = JSON.stringify(points.map((point) => ({
             x: point.x,
