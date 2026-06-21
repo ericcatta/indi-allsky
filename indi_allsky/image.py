@@ -879,7 +879,7 @@ class ImageWorker(Process):
         self._log_auto_exposure_blocker(profile_id, camera_id, result.mode, decision)
 
         logger.info(
-            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f convergence_frames=%d fine_convergence=%s convergence_mode=%s saturated=%s step_strategy=%s exposure_step=%0.8f day_step_factor=%0.5f day_min_step=%0.8f day_max_step=%0.8f allow_gain_control=%s action=%s reason=%s blocker=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s runtime_current_exposure=%0.8f runtime_next_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f source_gain=%s runtime_current_gain=%0.2f runtime_next_gain=%0.2f shadow=%s',
+            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f convergence_frames=%d fine_convergence=%s convergence_mode=%s saturated=%s estimated_exposure=%0.8f correction_ratio=%0.6f safety_limited=%s step_strategy=%s exposure_step=%0.8f day_step_factor=%0.5f day_min_step=%0.8f day_max_step=%0.8f allow_gain_control=%s action=%s reason=%s blocker=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s runtime_current_exposure=%0.8f runtime_next_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f source_gain=%s runtime_current_gain=%0.2f runtime_next_gain=%0.2f shadow=%s',
             profile_id,
             camera_id,
             result.mode,
@@ -895,6 +895,9 @@ class ImageWorker(Process):
             decision.fine_convergence,
             decision.convergence_mode,
             decision.saturated,
+            decision.estimated_exposure,
+            decision.correction_ratio,
+            decision.safety_limited,
             decision.step_strategy,
             decision.exposure_step,
             inputs['day_step_factor'],

@@ -555,12 +555,14 @@ Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
 
 - Auto Exposure convergence tiers unificati, allineati alla filosofia Auto Gain:
   - finding Raspberry: con `smoothed_value=253-255`, `target_adu_day=95`, gain gia' al minimo e exposure multi-secondo, la decisione `decrease_exposure` usava ancora `day_bounded` con `day_max_step=0.005s`, rendendo il recupero dalla saturazione troppo lento.
-  - `convergence_mode=aggressive` quando `abs(error) > 20 ADU`; per decrease exposure recupera rapidamente anche da saturazione (`>1.0s` dimezza, `>0.1s` riduce del 30%, sotto usa step aggressivo bounded).
+  - `convergence_mode=aggressive` quando `abs(error) > 20 ADU`; usa stima proporzionale ADU `estimated_exposure = current_exposure * (target / max(smoothed_value, 1.0))`.
+  - in aggressive decrease la stima guida la correzione ma viene limitata da cap di sicurezza: non meno del 50% dell'exposure corrente sopra `1.0s`, non meno del 70% tra `0.1s` e `1.0s`, non meno dell'85% sotto `0.1s`.
+  - in aggressive increase la stima guida la crescita ma non supera lo step aggressivo bounded e resta clamped a `exposure_max`.
   - `convergence_mode=normal` per `5..20 ADU`, mantenendo il comportamento esistente.
   - `convergence_mode=fine` per `1.5..5 ADU` dopo 5 frame consecutivi con stesso segno, usando micro-step.
   - `convergence_mode=target` con `action=hold` quando `abs(error) <= 1.5 ADU`.
   - clamp sempre a `exposure_min`.
-  - log `[AUTO_EXPOSURE_DECISION]` include `convergence_frames`, `fine_convergence`, `convergence_mode`, `saturated`, `exposure_step` e `step_strategy`.
+  - log `[AUTO_EXPOSURE_DECISION]` include `convergence_frames`, `fine_convergence`, `convergence_mode`, `saturated`, `estimated_exposure`, `correction_ratio`, `safety_limited`, `exposure_step` e `step_strategy`.
 - Rafforzare anti-oscillazione/hysteresis.
 - Rendere il trend piu' robusto:
   - contatori separati per sovra/sottoesposizione.

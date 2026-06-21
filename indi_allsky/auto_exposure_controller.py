@@ -23,6 +23,9 @@ class AutoExposureDecision:
     convergence_frames: int = 0
     fine_convergence: bool = False
     saturated: bool = False
+    estimated_exposure: float = 0.0
+    correction_ratio: float = 1.0
+    safety_limited: bool = False
     shadow: bool = True
 
 
@@ -88,6 +91,9 @@ class AutoExposureController:
         convergence_frames = int(trend_count)
         fine_convergence = False
         saturated = bool(smoothed_value >= 245.0)
+        correction_ratio = target / max(smoothed_value, 1.0)
+        estimated_exposure = self._clamp(current_exposure * correction_ratio, exposure_min, exposure_max)
+        safety_limited = False
 
         if abs_error <= 1.5:
             action = 'hold'
@@ -110,7 +116,10 @@ class AutoExposureController:
                         day_min_step=day_min_step,
                         day_max_step=day_max_step,
                     )
-                    proposed_exposure = self._clamp(current_exposure + exposure_step, exposure_min, exposure_max)
+                    safety_limit = current_exposure + exposure_step
+                    proposed_exposure = min(estimated_exposure, safety_limit)
+                    proposed_exposure = self._clamp(proposed_exposure, exposure_min, exposure_max)
+                    safety_limited = proposed_exposure < estimated_exposure
                     exposure_step = max(0.0, proposed_exposure - current_exposure)
                 elif allow_gain_control and current_gain < gain_max:
                     action = 'increase_gain'
@@ -136,19 +145,22 @@ class AutoExposureController:
                     reason = 'aggressive_decrease_exposure'
                     blocker = 'none'
                     if current_exposure > 1.0:
-                        proposed_exposure = self._clamp(current_exposure * 0.5, exposure_min, exposure_max)
+                        safety_limit = current_exposure * 0.5
                     elif current_exposure > 0.1:
-                        proposed_exposure = self._clamp(current_exposure * 0.7, exposure_min, exposure_max)
+                        safety_limit = current_exposure * 0.7
                     else:
-                        exposure_step = self._aggressive_exposure_step(
+                        exposure_step = self._exposure_step(
                             current_exposure,
                             is_day=is_day,
                             day_step_factor=day_step_factor,
                             day_min_step=day_min_step,
                             day_max_step=day_max_step,
                         )
-                        proposed_exposure = self._clamp(current_exposure - exposure_step, exposure_min, exposure_max)
+                        safety_limit = max(current_exposure - exposure_step, current_exposure * 0.85)
 
+                    proposed_exposure = max(estimated_exposure, safety_limit)
+                    proposed_exposure = self._clamp(proposed_exposure, exposure_min, exposure_max)
+                    safety_limited = proposed_exposure > estimated_exposure
                     exposure_step = max(0.0, current_exposure - proposed_exposure)
                 elif allow_gain_control:
                     reason = 'exposure_and_gain_already_min'
@@ -289,6 +301,9 @@ class AutoExposureController:
             convergence_frames=convergence_frames,
             fine_convergence=fine_convergence,
             saturated=saturated,
+            estimated_exposure=estimated_exposure,
+            correction_ratio=correction_ratio,
+            safety_limited=safety_limited,
             shadow=True,
         )
 
