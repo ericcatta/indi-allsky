@@ -77,7 +77,7 @@ def remove_synthetic_rows(jsonl_path, id_field):
             kept_lines.append(line)
             continue
 
-        if str(row.get(id_field, '')).startswith(SYNTHETIC_PREFIX):
+        if is_synthetic_row(row, id_field):
             removed += 1
             continue
         kept_lines.append(line)
@@ -88,6 +88,17 @@ def remove_synthetic_rows(jsonl_path, id_field):
         jsonl_path.unlink()
 
     return removed
+
+
+def is_synthetic_row(row, id_field):
+    if str(row.get(id_field, '')).startswith(SYNTHETIC_PREFIX):
+        return True
+
+    candidate_ids = row.get('candidate_ids')
+    if isinstance(candidate_ids, list):
+        return any(str(candidate_id).startswith(SYNTHETIC_PREFIX) for candidate_id in candidate_ids)
+
+    return False
 
 
 def cleanup_synthetic(candidate_dir, timeline_dir, date):
