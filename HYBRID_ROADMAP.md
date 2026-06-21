@@ -553,6 +553,14 @@ Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
 
 ### Auto Exposure Refinement
 
+- Auto Exposure convergence tiers unificati, allineati alla filosofia Auto Gain:
+  - finding Raspberry: con `smoothed_value=253-255`, `target_adu_day=95`, gain gia' al minimo e exposure multi-secondo, la decisione `decrease_exposure` usava ancora `day_bounded` con `day_max_step=0.005s`, rendendo il recupero dalla saturazione troppo lento.
+  - `convergence_mode=aggressive` quando `abs(error) > 20 ADU`; per decrease exposure recupera rapidamente anche da saturazione (`>1.0s` dimezza, `>0.1s` riduce del 30%, sotto usa step aggressivo bounded).
+  - `convergence_mode=normal` per `5..20 ADU`, mantenendo il comportamento esistente.
+  - `convergence_mode=fine` per `1.5..5 ADU` dopo 5 frame consecutivi con stesso segno, usando micro-step.
+  - `convergence_mode=target` con `action=hold` quando `abs(error) <= 1.5 ADU`.
+  - clamp sempre a `exposure_min`.
+  - log `[AUTO_EXPOSURE_DECISION]` include `convergence_frames`, `fine_convergence`, `convergence_mode`, `saturated`, `exposure_step` e `step_strategy`.
 - Rafforzare anti-oscillazione/hysteresis.
 - Rendere il trend piu' robusto:
   - contatori separati per sovra/sottoesposizione.
@@ -823,3 +831,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementato restore runtime Auto Gain dopo service restart tramite state file separato dalla config DB, con clamp e log restore/reset.
 - 2026-06-21: Implementata rotazione giornaliera metadata JSONL in `frame_metadata/YYYY-MM-DD.jsonl`, mantenendo compatibilita' con `FRAME_METADATA_PATH`.
 - 2026-06-21: Fix rotazione metadata Raspberry: path vuoto trattato come default daily, writer ritorna/logga il file effettivamente scritto.
+- 2026-06-21: Rifattorizzata Auto Exposure convergence in tier `aggressive/normal/fine/target`, con recupero rapido da saturazione dentro il tier aggressive.

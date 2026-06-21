@@ -19,6 +19,10 @@ class AutoExposureDecision:
     trend_step: float
     step_strategy: str
     exposure_step: float
+    convergence_mode: str = 'normal'
+    convergence_frames: int = 0
+    fine_convergence: bool = False
+    saturated: bool = False
     shadow: bool = True
 
 
@@ -79,12 +83,113 @@ class AutoExposureController:
         trend_step = 0.0
         step_strategy = 'day_bounded' if is_day else 'legacy_fractional'
         exposure_step = 0.0
+        abs_error = abs(error)
+        convergence_mode = 'normal'
+        convergence_frames = int(trend_count)
+        fine_convergence = False
+        saturated = bool(smoothed_value >= 245.0)
 
-        if abs(error) <= self.inner_deadband:
+        if abs_error <= 1.5:
             action = 'hold'
-            reason = 'inner_deadband_hold'
-            blocker = 'inner_deadband_hold'
-        elif abs(error) <= self.deadband:
+            reason = 'target_reached'
+            blocker = 'target_reached'
+            convergence_mode = 'target'
+
+        elif abs_error > 20.0:
+            convergence_mode = 'aggressive'
+            step_strategy = 'aggressive_bounded'
+            if error > 0:
+                if current_exposure < exposure_max:
+                    action = 'increase_exposure'
+                    reason = 'aggressive_increase_exposure'
+                    blocker = 'none'
+                    exposure_step = self._aggressive_exposure_step(
+                        current_exposure,
+                        is_day=is_day,
+                        day_step_factor=day_step_factor,
+                        day_min_step=day_min_step,
+                        day_max_step=day_max_step,
+                    )
+                    proposed_exposure = self._clamp(current_exposure + exposure_step, exposure_min, exposure_max)
+                    exposure_step = max(0.0, proposed_exposure - current_exposure)
+                elif allow_gain_control and current_gain < gain_max:
+                    action = 'increase_gain'
+                    reason = 'exposure_at_limit_increase_gain'
+                    blocker = 'none'
+                    gain_step = max(0.01, max(abs(current_gain), 1.0) * self.gain_step_fraction)
+                    proposed_gain = self._clamp(current_gain + gain_step, gain_min, gain_max)
+                elif not allow_gain_control:
+                    reason = 'gain_control_disabled'
+                    blocker = 'gain_control_disabled'
+                else:
+                    reason = 'exposure_and_gain_already_max'
+                    blocker = 'exposure_and_gain_already_max'
+            else:
+                if allow_gain_control and current_gain > gain_min:
+                    action = 'decrease_gain'
+                    reason = 'decrease_gain_before_exposure'
+                    blocker = 'none'
+                    gain_step = max(0.01, max(abs(current_gain), 1.0) * self.gain_step_fraction)
+                    proposed_gain = self._clamp(current_gain - gain_step, gain_min, gain_max)
+                elif current_exposure > exposure_min:
+                    action = 'decrease_exposure'
+                    reason = 'aggressive_decrease_exposure'
+                    blocker = 'none'
+                    if current_exposure > 1.0:
+                        proposed_exposure = self._clamp(current_exposure * 0.5, exposure_min, exposure_max)
+                    elif current_exposure > 0.1:
+                        proposed_exposure = self._clamp(current_exposure * 0.7, exposure_min, exposure_max)
+                    else:
+                        exposure_step = self._aggressive_exposure_step(
+                            current_exposure,
+                            is_day=is_day,
+                            day_step_factor=day_step_factor,
+                            day_min_step=day_min_step,
+                            day_max_step=day_max_step,
+                        )
+                        proposed_exposure = self._clamp(current_exposure - exposure_step, exposure_min, exposure_max)
+
+                    exposure_step = max(0.0, current_exposure - proposed_exposure)
+                elif allow_gain_control:
+                    reason = 'exposure_and_gain_already_min'
+                    blocker = 'exposure_and_gain_already_min'
+                else:
+                    reason = 'exposure_already_min'
+                    blocker = 'exposure_already_min'
+
+        elif abs_error < self.inner_deadband:
+            convergence_mode = 'fine'
+            if trend_count >= self.trend_frames:
+                fine_convergence = True
+                trend_active = True
+                exposure_step = self._exposure_step(
+                    current_exposure,
+                    is_day=is_day,
+                    day_step_factor=day_step_factor,
+                    day_min_step=day_min_step,
+                    day_max_step=day_max_step,
+                ) / 4.0
+                trend_step = exposure_step
+                step_strategy = 'fine_convergence_bounded'
+                if error > 0:
+                    action = 'increase_exposure'
+                    reason = 'fine_increase_exposure'
+                    blocker = 'none'
+                    trend_direction = 'positive'
+                    proposed_exposure = self._clamp(current_exposure + trend_step, exposure_min, exposure_max)
+                    exposure_step = max(0.0, proposed_exposure - current_exposure)
+                else:
+                    action = 'decrease_exposure'
+                    reason = 'fine_decrease_exposure'
+                    blocker = 'none'
+                    trend_direction = 'negative'
+                    proposed_exposure = self._clamp(current_exposure - trend_step, exposure_min, exposure_max)
+                    exposure_step = max(0.0, current_exposure - proposed_exposure)
+            else:
+                reason = 'fine_trend_not_confirmed'
+                blocker = 'trend_not_confirmed'
+
+        elif abs_error <= self.deadband:
             if trend_count >= self.trend_frames:
                 trend_active = True
                 exposure_step = self._exposure_step(
@@ -110,6 +215,7 @@ class AutoExposureController:
             else:
                 reason = 'trend_not_confirmed'
                 blocker = 'trend_not_confirmed'
+
         elif error > self.deadband:
             if current_exposure < exposure_max:
                 action = 'increase_exposure'
@@ -135,6 +241,7 @@ class AutoExposureController:
             else:
                 reason = 'exposure_and_gain_already_max'
                 blocker = 'exposure_and_gain_already_max'
+
         elif error < (self.deadband * -1):
             if allow_gain_control and current_gain > gain_min:
                 action = 'decrease_gain'
@@ -178,6 +285,10 @@ class AutoExposureController:
             trend_step=trend_step,
             step_strategy=step_strategy,
             exposure_step=exposure_step,
+            convergence_mode=convergence_mode,
+            convergence_frames=convergence_frames,
+            fine_convergence=fine_convergence,
+            saturated=saturated,
             shadow=True,
         )
 
@@ -207,3 +318,18 @@ class AutoExposureController:
 
         step = max(day_min_step, current_exposure * day_step_factor)
         return min(day_max_step, step)
+
+
+    def _aggressive_exposure_step(self, current_exposure, *, is_day, day_step_factor, day_min_step, day_max_step):
+        if not is_day:
+            return max(0.1, current_exposure * (self.exposure_step_fraction * 2.0))
+
+        normal_step = self._exposure_step(
+            current_exposure,
+            is_day=is_day,
+            day_step_factor=day_step_factor,
+            day_min_step=day_min_step,
+            day_max_step=day_max_step,
+        )
+        aggressive_step = max(day_min_step, current_exposure * day_step_factor * 2.0)
+        return max(normal_step, aggressive_step)

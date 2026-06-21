@@ -840,7 +840,7 @@ class ImageWorker(Process):
 
         trend_count = 0
         trend_direction = 'none'
-        if abs(error) > self.auto_exposure_controller.inner_deadband:
+        if abs(error) > 1.5:
             trend_direction = 'positive' if error > 0 else 'negative'
             if state.get('trend_direction') == trend_direction:
                 trend_count = int(state.get('trend_count') or 0) + 1
@@ -879,7 +879,7 @@ class ImageWorker(Process):
         self._log_auto_exposure_blocker(profile_id, camera_id, result.mode, decision)
 
         logger.info(
-            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f step_strategy=%s exposure_step=%0.8f day_step_factor=%0.5f day_min_step=%0.8f day_max_step=%0.8f allow_gain_control=%s action=%s reason=%s blocker=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s runtime_current_exposure=%0.8f runtime_next_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f source_gain=%s runtime_current_gain=%0.2f runtime_next_gain=%0.2f shadow=%s',
+            '[AUTO_EXPOSURE_DECISION] profile=%s camera_id=%s mode=%s smoothed_value=%0.2f target=%0.2f error=%+0.2f deadband=%0.2f trend_count=%d trend_active=%s trend_direction=%s trend_step=%0.8f convergence_frames=%d fine_convergence=%s convergence_mode=%s saturated=%s step_strategy=%s exposure_step=%0.8f day_step_factor=%0.5f day_min_step=%0.8f day_max_step=%0.8f allow_gain_control=%s action=%s reason=%s blocker=%s current_exposure=%0.8f proposed_exposure=%0.8f source_exposure=%s runtime_current_exposure=%0.8f runtime_next_exposure=%0.8f current_gain=%0.2f proposed_gain=%0.2f source_gain=%s runtime_current_gain=%0.2f runtime_next_gain=%0.2f shadow=%s',
             profile_id,
             camera_id,
             result.mode,
@@ -891,6 +891,10 @@ class ImageWorker(Process):
             decision.trend_active,
             decision.trend_direction,
             decision.trend_step,
+            decision.convergence_frames,
+            decision.fine_convergence,
+            decision.convergence_mode,
+            decision.saturated,
             decision.step_strategy,
             decision.exposure_step,
             inputs['day_step_factor'],
