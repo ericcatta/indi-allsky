@@ -78,9 +78,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Dashboard MVP read-only con camera cards, latest frame, charts 24h, decision statistics e quick summary.
   - Dashboard Polish v1 con unita' leggibili, reason label, chart Y-axis, tooltip e X-axis temporale.
   - Nightly Summary v1 analytics/UI polish locale: cards responsive per overview, quality, exposure, gain, meter, missing frames, anomaly events, best/worst frame, flags, reasons e trend.
+  - Metadata Health & Consolidation locale: report di completezza/validita' metadata, compatibilita' legacy quality e sezione dashboard compatta.
 - IN TEST:
   - Quality Score v1 metadata-only: usa meter/target, exposure/gain state, capture status e decision state; non usa AI, image analysis o star detection.
   - Nightly Summary v1 sul Raspberry: validare una giornata/notte completa multicamera con gap, anomaly events e trend reali.
+  - Metadata Health sul Raspberry: validare coverage/completeness reali sui JSONL giornalieri dopo pull/restart.
 - NEXT:
   - Validare Quality Score v1 sul Raspberry con frame buoni, saturi, scuri e capture error.
   - Validare Nightly Summary v1 sul Raspberry con giornata completa e metadata multicamera.
@@ -753,6 +755,12 @@ Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
 
 ### Metadata / Analytics Follow-up
 
+- Metadata Health & Consolidation:
+  - analytics espone un report read-only su tutti i JSONL disponibili o su un giorno specifico;
+  - verifica presenza dei campi core `frame_id`, `timestamp`, `camera_id`, `profile_id`, exposure/gain/meter, `capture_status`, `quality_score`, `quality_flags`;
+  - valida timestamp, exposure/gain non negativi, `quality_score` 0-100, `quality_flags` lista e identita' camera/profilo;
+  - righe legacy senza `quality_score`/`quality_flags` vengono conteggiate in completeness/quality coverage ma non rompono analytics e non sono invalid rows;
+  - Dashboard mostra una card compatta `Metadata Health` con frames checked, completeness, quality coverage, invalid rows, missing fields e invalid values.
 - Validare runtime JSONL su Raspberry con entrambe le camere.
 - Decidere retention per `frame_metadata/YYYY-MM-DD.jsonl`.
 - Aggiungere export/debug semplice per analizzare una giornata.
@@ -1001,3 +1009,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementato Nightly Summary v1 read-only da daily JSONL con riepilogo per camera e percentuali operative.
 - 2026-06-21: Completato Nightly Summary v1 locale con UI a card, missing frames, anomaly events, best/worst frame e night trend metadata-only.
 - 2026-06-21: Rifinito layout Nightly Summary per evitare rendering tabellare/plain text: card scure responsive, metric tiles e cache-buster CSS dedicato.
+- 2026-06-21: Implementato Metadata Health & Consolidation locale con report integrity/coverage e card dashboard read-only.

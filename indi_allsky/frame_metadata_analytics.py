@@ -9,6 +9,22 @@ from pathlib import Path
 class FrameMetadataAnalytics:
     """Lightweight reader/summary layer for daily frame metadata JSONL files."""
 
+    REQUIRED_METADATA_FIELDS = (
+        'frame_id',
+        'timestamp',
+        'camera_id',
+        'profile_id',
+        'exposure_us',
+        'gain',
+        'meter_value_raw',
+        'meter_value_smoothed',
+        'target_meter',
+        'capture_status',
+        'quality_score',
+        'quality_flags',
+    )
+    LEGACY_OPTIONAL_FIELDS = ('quality_score', 'quality_flags')
+
     def __init__(self, metadata_dir):
         self.metadata_dir = Path(metadata_dir)
 
@@ -94,6 +110,78 @@ class FrameMetadataAnalytics:
                 ])
                 for camera_id in camera_ids
             ],
+        }
+
+
+    def get_metadata_health_report(self, date=None):
+        frames = self.load_day(date) if date is not None else list(self._iter_frames())
+        total_frames = len(frames)
+        missing_field_counts = Counter()
+        invalid_value_counts = Counter()
+        valid_frames = 0
+        quality_frames = 0
+        present_field_total = 0
+        required_field_total = total_frames * len(self.REQUIRED_METADATA_FIELDS)
+
+        for frame in frames:
+            frame_valid = True
+
+            for field in self.REQUIRED_METADATA_FIELDS:
+                if field in frame and frame.get(field) is not None:
+                    present_field_total += 1
+                    continue
+
+                missing_field_counts.update([field])
+                if field not in self.LEGACY_OPTIONAL_FIELDS:
+                    frame_valid = False
+
+            if self._parse_timestamp(frame.get('timestamp')) is None:
+                invalid_value_counts.update(['timestamp'])
+                frame_valid = False
+
+            if not self._string_value(frame.get('camera_id')):
+                invalid_value_counts.update(['camera_id'])
+                frame_valid = False
+
+            if not self._string_value(frame.get('profile_id')):
+                invalid_value_counts.update(['profile_id'])
+                frame_valid = False
+
+            exposure = self._optional_float(frame.get('exposure_us'))
+            if exposure is None or exposure < 0.0:
+                invalid_value_counts.update(['exposure_us'])
+                frame_valid = False
+
+            gain = self._optional_float(frame.get('gain'))
+            if gain is None or gain < 0.0:
+                invalid_value_counts.update(['gain'])
+                frame_valid = False
+
+            quality_score = self._optional_float(frame.get('quality_score'))
+            quality_flags = frame.get('quality_flags')
+            has_quality_score = quality_score is not None
+            has_quality_flags = isinstance(quality_flags, list)
+            if has_quality_score and (quality_score < 0.0 or quality_score > 100.0):
+                invalid_value_counts.update(['quality_score'])
+                frame_valid = False
+            if frame.get('quality_flags') is not None and not isinstance(quality_flags, list):
+                invalid_value_counts.update(['quality_flags'])
+                frame_valid = False
+            if has_quality_score and has_quality_flags:
+                quality_frames += 1
+
+            if frame_valid:
+                valid_frames += 1
+
+        invalid_frames = total_frames - valid_frames
+        return {
+            'total_frames_checked': total_frames,
+            'valid_frames': valid_frames,
+            'invalid_frames': invalid_frames,
+            'missing_field_counts': dict(missing_field_counts),
+            'invalid_value_counts': dict(invalid_value_counts),
+            'quality_coverage_percentage': self._percentage(quality_frames, total_frames),
+            'metadata_completeness_percentage': self._percentage(present_field_total, required_field_total),
         }
 
 

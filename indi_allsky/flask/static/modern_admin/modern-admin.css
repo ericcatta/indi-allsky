@@ -2530,6 +2530,7 @@ body.modern-admin-lightbox-open {
 .modern-admin-shell .modern-admin-chart-panel,
 .modern-admin-shell .modern-admin-decision-panel,
 .modern-admin-shell .modern-admin-summary-panel,
+.modern-admin-shell .modern-admin-metadata-health-card,
 .modern-admin-shell .modern-admin-nightly-card,
 .modern-admin-shell .modern-admin-dashboard-empty {
   min-width: 0;
@@ -2786,6 +2787,84 @@ body.modern-admin-lightbox-open {
   margin: 16px 0 0;
 }
 
+.modern-admin-shell .modern-admin-metadata-health-card {
+  display: grid;
+  gap: 14px;
+}
+
+.modern-admin-shell .modern-admin-metadata-health-grid,
+.modern-admin-shell .modern-admin-metadata-health-detail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.modern-admin-shell .modern-admin-metadata-health-detail {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.modern-admin-shell .modern-admin-metadata-health-grid div,
+.modern-admin-shell .modern-admin-metadata-health-detail > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.modern-admin-shell .modern-admin-metadata-health-grid span {
+  display: block;
+  color: var(--modern-admin-quiet);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.modern-admin-shell .modern-admin-metadata-health-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--modern-admin-text);
+  font-size: 1.02rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.modern-admin-shell .modern-admin-metadata-health-detail h3 {
+  margin: 0 0 8px;
+  color: var(--modern-admin-text);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.modern-admin-shell .modern-admin-metadata-health-detail ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modern-admin-shell .modern-admin-metadata-health-detail li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  color: var(--modern-admin-muted);
+  font-size: 0.82rem;
+}
+
+.modern-admin-shell .modern-admin-metadata-health-detail li span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.modern-admin-shell .modern-admin-metadata-health-detail li strong {
+  color: var(--modern-admin-text);
+  font-weight: 800;
+}
+
 .modern-admin-shell .modern-admin-nightly-card {
   display: grid;
   gap: 12px;
@@ -2987,6 +3066,8 @@ body.modern-admin-lightbox-open {
   .modern-admin-shell .modern-admin-chart-grid,
   .modern-admin-shell .modern-admin-decision-grid,
   .modern-admin-shell .modern-admin-summary-grid,
+  .modern-admin-shell .modern-admin-metadata-health-grid,
+  .modern-admin-shell .modern-admin-metadata-health-detail,
   .modern-admin-shell .modern-admin-nightly-grid,
   .modern-admin-shell .modern-admin-nightly-overview-grid,
   .modern-admin-shell .modern-admin-nightly-common-grid,

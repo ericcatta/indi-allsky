@@ -5143,11 +5143,21 @@ class ModernAdminView(TemplateView):
             recent_frames = analytics.get_recent_frames(hours=24)
             latest_frames = analytics.get_latest_frames(limit=500)
             nightly_summary = analytics.get_nightly_summary()
+            metadata_health = analytics.get_metadata_health_report()
         except Exception as e:
             app.logger.error('Error reading modern admin dashboard metadata: %s', str(e))
             recent_frames = list()
             latest_frames = list()
             nightly_summary = {'date': None, 'cameras': []}
+            metadata_health = {
+                'total_frames_checked': 0,
+                'valid_frames': 0,
+                'invalid_frames': 0,
+                'missing_field_counts': {},
+                'invalid_value_counts': {},
+                'quality_coverage_percentage': 0.0,
+                'metadata_completeness_percentage': 0.0,
+            }
 
         camera_ids = self.get_modern_admin_dashboard_camera_ids(recent_frames, latest_frames)
         chart_data = dict()
@@ -5200,6 +5210,7 @@ class ModernAdminView(TemplateView):
             'modern_admin_dashboard_chart_data'     : chart_data,
             'modern_admin_dashboard_has_metadata'   : bool(recent_frames or latest_frames),
             'modern_admin_nightly_summary'          : self.format_dashboard_nightly_summary(nightly_summary),
+            'modern_admin_metadata_health'          : self.format_dashboard_metadata_health(metadata_health),
         }
 
 
@@ -5341,6 +5352,18 @@ class ModernAdminView(TemplateView):
                 self.format_dashboard_nightly_camera_summary(camera_summary)
                 for camera_summary in nightly_summary.get('cameras', [])
             ],
+        }
+
+
+    def format_dashboard_metadata_health(self, metadata_health):
+        return {
+            'total_frames_checked' : metadata_health.get('total_frames_checked', 0),
+            'valid_frames'         : metadata_health.get('valid_frames', 0),
+            'invalid_frames'       : metadata_health.get('invalid_frames', 0),
+            'quality_coverage'     : self.format_dashboard_percentage_precise(metadata_health.get('quality_coverage_percentage')),
+            'completeness'         : self.format_dashboard_percentage_precise(metadata_health.get('metadata_completeness_percentage')),
+            'missing_fields'       : self.format_dashboard_counter(metadata_health.get('missing_field_counts') or {}),
+            'invalid_values'       : self.format_dashboard_counter(metadata_health.get('invalid_value_counts') or {}),
         }
 
 
@@ -5548,7 +5571,18 @@ class ModernAdminView(TemplateView):
             'meter_off_target'                        : 'Meter off target',
             'meter_saturated_high'                    : 'Meter saturated high',
             'nominal'                                 : 'Nominal',
+            'camera_id'                               : 'Camera ID',
+            'capture_status'                          : 'Capture status',
+            'exposure_us'                             : 'Exposure',
+            'frame_id'                                : 'Frame ID',
+            'meter_value_raw'                         : 'Raw meter',
+            'meter_value_smoothed'                    : 'Smoothed meter',
+            'profile_id'                              : 'Profile ID',
+            'quality_flags'                           : 'Quality flags',
+            'quality_score'                           : 'Quality score',
             'target_missing'                          : 'Target missing',
+            'target_meter'                            : 'Target meter',
+            'timestamp'                               : 'Timestamp',
             'target_reached'                          : 'Target reached',
             'trend_not_confirmed'                     : 'Trend not confirmed',
         }
@@ -5579,6 +5613,13 @@ class ModernAdminView(TemplateView):
         if number is None:
             return '0%'
         return '{0:0.0f}%'.format(number)
+
+
+    def format_dashboard_percentage_precise(self, value):
+        number = self._modern_optional_float(value)
+        if number is None:
+            return '0.0%'
+        return '{0:0.1f}%'.format(number)
 
 
     def format_dashboard_seconds(self, value):
