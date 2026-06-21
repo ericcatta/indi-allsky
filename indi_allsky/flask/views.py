@@ -5364,6 +5364,11 @@ class ModernAdminView(TemplateView):
             'average_gain'       : self.format_dashboard_gain(camera_summary.get('average_gain')),
             'minimum_gain'       : self.format_dashboard_gain(camera_summary.get('minimum_gain')),
             'maximum_gain'       : self.format_dashboard_gain(camera_summary.get('maximum_gain')),
+            'missing_frames'     : self.format_dashboard_missing_frames(camera_summary.get('missing_frames') or {}),
+            'anomaly_events'     : self.format_dashboard_anomaly_events(camera_summary.get('anomaly_events') or {}),
+            'best_frame'         : self.format_dashboard_frame_reference(camera_summary.get('best_frame') or {}),
+            'worst_frame'        : self.format_dashboard_frame_reference(camera_summary.get('worst_frame') or {}),
+            'night_trend'        : self.format_dashboard_night_trend(camera_summary.get('night_trend') or {}),
             'quality_flags'      : self.format_dashboard_counter(camera_summary.get('most_common_quality_flags') or []),
             'decision_reasons'   : self.format_dashboard_counter(camera_summary.get('most_common_decision_reasons') or []),
             'percentages'        : {
@@ -5375,6 +5380,68 @@ class ModernAdminView(TemplateView):
                 'capture_errors'  : self.format_dashboard_percentage(percentages.get('capture_errors')),
             },
         }
+
+
+    def format_dashboard_missing_frames(self, missing_frames):
+        return {
+            'count'       : missing_frames.get('count', 0),
+            'percent'     : self.format_dashboard_percentage(missing_frames.get('percent')),
+            'expected'    : self.format_dashboard_seconds(missing_frames.get('expected_interval_seconds')),
+            'threshold'   : self.format_dashboard_seconds(missing_frames.get('threshold_seconds')),
+        }
+
+
+    def format_dashboard_anomaly_events(self, anomaly_events):
+        return {
+            'count'       : anomaly_events.get('count', 0),
+            'most_common' : self.format_dashboard_counter(anomaly_events.get('most_common') or []),
+        }
+
+
+    def format_dashboard_frame_reference(self, frame_reference):
+        return {
+            'timestamp'     : frame_reference.get('timestamp') or 'No frame',
+            'quality_score' : self.format_dashboard_quality_score(frame_reference.get('quality_score')),
+            'image_file_path': frame_reference.get('image_file_path') or '',
+            'frame_id'      : frame_reference.get('frame_id') or '',
+        }
+
+
+    def format_dashboard_night_trend(self, night_trend):
+        return [
+            {
+                'label'     : label,
+                'direction' : self.format_dashboard_trend_direction((night_trend.get(key) or {}).get('direction')),
+                'delta'     : self.format_dashboard_trend_delta((night_trend.get(key) or {}).get('delta'), exposure=(key == 'exposure')),
+            }
+            for key, label in (
+                ('quality', 'Quality'),
+                ('meter', 'Meter'),
+                ('exposure', 'Exposure'),
+                ('gain', 'Gain'),
+            )
+        ]
+
+
+    def format_dashboard_trend_direction(self, direction):
+        labels = {
+            'up'      : 'Up',
+            'down'    : 'Down',
+            'stable'  : 'Stable',
+            'unknown' : 'Unknown',
+        }
+        return labels.get(self._modern_string(direction), 'Unknown')
+
+
+    def format_dashboard_trend_delta(self, value, exposure=False):
+        number = self._modern_optional_float(value)
+        if number is None:
+            return 'Unknown'
+        if exposure:
+            return self.format_dashboard_exposure(number)
+        if abs(number) >= 10:
+            return '{0:+0.0f}'.format(number)
+        return '{0:+0.1f}'.format(number)
 
 
     def format_dashboard_counter(self, counter):
@@ -5464,10 +5531,16 @@ class ModernAdminView(TemplateView):
             'increase_gain_conditions_satisfied'      : 'Increase gain',
             'capture_error'                           : 'Capture error',
             'capture_not_processed'                   : 'Capture not processed',
+            'bad_image'                               : 'Bad image',
             'controller_at_limit'                     : 'Controller at limit',
+            'exposure_max'                            : 'Exposure max',
             'exposure_adjusting'                      : 'Exposure adjusting',
             'exposure_invalid'                        : 'Exposure invalid',
             'exposure_missing'                        : 'Exposure missing',
+            'gain_max'                                : 'Gain max',
+            'high_meter'                              : 'High meter',
+            'low_meter'                               : 'Low meter',
+            'low_quality'                             : 'Low quality',
             'meter_far_from_target'                   : 'Meter far from target',
             'meter_missing'                           : 'Meter missing',
             'meter_near_black'                        : 'Meter near black',
@@ -5506,6 +5579,15 @@ class ModernAdminView(TemplateView):
         if number is None:
             return '0%'
         return '{0:0.0f}%'.format(number)
+
+
+    def format_dashboard_seconds(self, value):
+        number = self._modern_optional_float(value)
+        if number is None:
+            return 'Unknown'
+        if number < 1.0:
+            return '{0:0.0f} ms'.format(number * 1000.0)
+        return '{0:0.1f} s'.format(number)
 
 
     def format_dashboard_number(self, value):

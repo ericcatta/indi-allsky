@@ -77,9 +77,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Metadata Analytics Reader con day load, latest frames, recent frames, camera summary e decision statistics.
   - Dashboard MVP read-only con camera cards, latest frame, charts 24h, decision statistics e quick summary.
   - Dashboard Polish v1 con unita' leggibili, reason label, chart Y-axis, tooltip e X-axis temporale.
+  - Nightly Summary v1 analytics/UI polish locale: cards responsive per overview, quality, exposure, gain, meter, missing frames, anomaly events, best/worst frame, flags, reasons e trend.
 - IN TEST:
   - Quality Score v1 metadata-only: usa meter/target, exposure/gain state, capture status e decision state; non usa AI, image analysis o star detection.
-  - Nightly Summary v1: riepilogo daily per camera da JSONL con quality, meter, exposure, gain, flag, reason e percentuali operative.
+  - Nightly Summary v1 sul Raspberry: validare una giornata/notte completa multicamera con gap, anomaly events e trend reali.
 - NEXT:
   - Validare Quality Score v1 sul Raspberry con frame buoni, saturi, scuri e capture error.
   - Validare Nightly Summary v1 sul Raspberry con giornata completa e metadata multicamera.
@@ -374,7 +375,23 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - produce riepilogo per camera con frame count, first/last timestamp, quality score avg/min/max, meter avg/min/max, exposure avg/min/max e gain avg/min/max;
   - mostra quality flags e decision reasons piu' comuni;
   - calcola percentuale frame nominali, low meter, high meter, exposure max, gain max e capture errors usando solo metadata esistenti;
-  - Dashboard mostra la sezione read-only `Nightly Summary`;
+  - calcola missing frames rilevando gap tra timestamp consecutivi oltre 2x l'intervallo atteso stimato dalla sequenza della camera;
+  - calcola anomaly events metadata-only: capture errors, low quality, exposure max, gain max, meter troppo basso e meter troppo alto;
+  - seleziona best/worst image tramite `quality_score` massimo/minimo, tollerando metadata legacy senza quality;
+  - calcola night trend semplice per quality, meter, exposure e gain confrontando prima e seconda meta' della sequenza;
+  - Dashboard mostra la sezione read-only `Nightly Summary` in layout card-based coerente con Modern Admin:
+    - Summary Overview.
+    - Quality Score.
+    - Exposure.
+    - Gain.
+    - Meter.
+    - Missing Frames.
+    - Anomaly Events.
+    - Best / Worst Image.
+    - Quality Flags.
+    - Decision Reasons.
+    - Night Trend.
+  - il layout usa card scure responsive, griglia desktop/tablet e stack verticale su schermi piccoli;
   - tollera righe JSONL legacy senza `quality_score` o `quality_flags`.
 - Validare con una notte/giornata completa su entrambe le camere.
 
@@ -982,3 +999,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Migliorata leggibilita' asse X dashboard con tick temporali locali, subtitle `Last 24 hours` e timestamp completo nei tooltip.
 - 2026-06-21: Implementato Quality Score v1 metadata-only con persistenza `quality_score`/`quality_flags` e visualizzazione read-only nel dashboard.
 - 2026-06-21: Implementato Nightly Summary v1 read-only da daily JSONL con riepilogo per camera e percentuali operative.
+- 2026-06-21: Completato Nightly Summary v1 locale con UI a card, missing frames, anomaly events, best/worst frame e night trend metadata-only.

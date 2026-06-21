@@ -151,6 +151,12 @@ class FrameMetadataAnalytics:
         gain_max_count = 0
         capture_error_count = 0
         profile_ids = Counter(self._string_value(frame.get('profile_id')) for frame in frames if self._string_value(frame.get('profile_id')))
+        sorted_frames = self._frames_sorted_by_timestamp(frames)
+        missing_frames = self._missing_frame_summary(sorted_frames)
+        anomaly_events = Counter()
+        best_frame = self._quality_extreme_frame(frames, reverse=True)
+        worst_frame = self._quality_extreme_frame(frames, reverse=False)
+        night_trend = self._night_trend(sorted_frames)
 
         for frame in frames:
             flags = self._quality_flags(frame.get('quality_flags'))
@@ -167,25 +173,44 @@ class FrameMetadataAnalytics:
             target = self._optional_float(frame.get('target_meter'))
             if 'meter_near_black' in flags or (meter is not None and target is not None and meter < (target - 20.0)):
                 low_meter_count += 1
+                anomaly_events.update(['low_meter'])
             if 'meter_saturated_high' in flags or (meter is not None and target is not None and meter > (target + 20.0)):
                 high_meter_count += 1
+                anomaly_events.update(['high_meter'])
 
             if 'exposure_and_gain_already_max' in reason or ('exposure' in reason and 'max' in reason):
                 exposure_max_count += 1
+                anomaly_events.update(['exposure_max'])
             if 'gain_already_max' in reason or ('gain' in reason and 'max' in reason):
                 gain_max_count += 1
+                anomaly_events.update(['gain_max'])
 
             capture_status = self._string_value(frame.get('capture_status')).lower()
             if capture_status and capture_status != 'processed':
                 capture_error_count += 1
+                anomaly_events.update(['capture_error'])
             elif self._string_value(frame.get('error_message')):
                 capture_error_count += 1
+                anomaly_events.update(['capture_error'])
             elif 'capture_error' in flags or 'capture_not_processed' in flags:
                 capture_error_count += 1
+                anomaly_events.update(['capture_error'])
+
+            quality_score = self._optional_float(frame.get('quality_score'))
+            if quality_score is not None and quality_score < 50.0:
+                anomaly_events.update(['low_quality'])
 
         summary.update({
             'camera_id': camera_id,
             'profile_id': profile_ids.most_common(1)[0][0] if profile_ids else '',
+            'missing_frames': missing_frames,
+            'anomaly_events': {
+                'count': sum(anomaly_events.values()),
+                'most_common': self._counter_rows(anomaly_events),
+            },
+            'best_frame': self._frame_reference(best_frame),
+            'worst_frame': self._frame_reference(worst_frame),
+            'night_trend': night_trend,
             'most_common_quality_flags': self._counter_rows(quality_flags),
             'most_common_decision_reasons': self._counter_rows(decision_reasons),
             'percentages': {
@@ -198,6 +223,124 @@ class FrameMetadataAnalytics:
             },
         })
         return summary
+
+
+    def _frames_sorted_by_timestamp(self, frames):
+        timestamped_frames = []
+        for frame in frames:
+            timestamp = self._parse_timestamp(frame.get('timestamp'))
+            if timestamp is not None:
+                timestamped_frames.append((timestamp, frame))
+        return [frame for timestamp, frame in sorted(timestamped_frames, key=lambda item: item[0])]
+
+
+    def _missing_frame_summary(self, frames):
+        timestamps = [self._parse_timestamp(frame.get('timestamp')) for frame in frames]
+        timestamps = [timestamp for timestamp in timestamps if timestamp is not None]
+        if len(timestamps) < 2:
+            return {
+                'count': 0,
+                'percent': 0.0,
+                'expected_interval_seconds': None,
+                'threshold_seconds': None,
+            }
+
+        intervals = [
+            (timestamps[index] - timestamps[index - 1]).total_seconds()
+            for index in range(1, len(timestamps))
+            if (timestamps[index] - timestamps[index - 1]).total_seconds() > 0
+        ]
+        if not intervals:
+            return {
+                'count': 0,
+                'percent': 0.0,
+                'expected_interval_seconds': None,
+                'threshold_seconds': None,
+            }
+
+        expected_interval = self._median(intervals)
+        threshold = expected_interval * 2.0
+        missing_count = 0
+        for interval in intervals:
+            if interval > threshold:
+                missing_count += max(1, int(round(interval / expected_interval)) - 1)
+
+        total_expected = len(timestamps) + missing_count
+        return {
+            'count': missing_count,
+            'percent': self._percentage(missing_count, total_expected),
+            'expected_interval_seconds': expected_interval,
+            'threshold_seconds': threshold,
+        }
+
+
+    def _quality_extreme_frame(self, frames, reverse=False):
+        scored_frames = [
+            (self._optional_float(frame.get('quality_score')), frame)
+            for frame in frames
+            if self._optional_float(frame.get('quality_score')) is not None
+        ]
+        if not scored_frames:
+            return None
+        return sorted(scored_frames, key=lambda item: item[0], reverse=reverse)[0][1]
+
+
+    def _frame_reference(self, frame):
+        if frame is None:
+            return {
+                'timestamp': None,
+                'quality_score': None,
+                'image_file_path': None,
+                'frame_id': None,
+            }
+        return {
+            'timestamp': self._string_value(frame.get('timestamp')) or None,
+            'quality_score': self._optional_float(frame.get('quality_score')),
+            'image_file_path': self._string_value(frame.get('image_file_path')) or None,
+            'frame_id': frame.get('frame_id'),
+        }
+
+
+    def _night_trend(self, frames):
+        return {
+            'quality': self._metric_trend(frames, 'quality_score'),
+            'meter': self._metric_trend(frames, 'meter_value_smoothed'),
+            'exposure': self._metric_trend(frames, 'exposure_us'),
+            'gain': self._metric_trend(frames, 'gain'),
+        }
+
+
+    def _metric_trend(self, frames, key):
+        values = [self._optional_float(frame.get(key)) for frame in frames]
+        values = [value for value in values if value is not None]
+        if len(values) < 2:
+            return {
+                'direction': 'unknown',
+                'delta': None,
+                'first_average': None,
+                'last_average': None,
+            }
+
+        midpoint = max(1, int(len(values) / 2))
+        first_values = values[:midpoint]
+        last_values = values[midpoint:] or values[midpoint - 1:]
+        first_average = self._average(first_values)
+        last_average = self._average(last_values)
+        delta = last_average - first_average
+        tolerance = max(abs(first_average) * 0.05, 0.5)
+        if delta > tolerance:
+            direction = 'up'
+        elif delta < (tolerance * -1):
+            direction = 'down'
+        else:
+            direction = 'stable'
+
+        return {
+            'direction': direction,
+            'delta': delta,
+            'first_average': first_average,
+            'last_average': last_average,
+        }
 
 
     def _latest_day(self):
@@ -247,6 +390,16 @@ class FrameMetadataAnalytics:
         if not values:
             return None
         return sum(values) / len(values)
+
+
+    def _median(self, values):
+        if not values:
+            return None
+        values_sorted = sorted(values)
+        midpoint = int(len(values_sorted) / 2)
+        if len(values_sorted) % 2:
+            return values_sorted[midpoint]
+        return (values_sorted[midpoint - 1] + values_sorted[midpoint]) / 2.0
 
 
     def _string_value(self, value):

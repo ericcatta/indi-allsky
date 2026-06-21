@@ -150,7 +150,9 @@ def test_nightly_summary_per_camera():
             _frame(1, '2026-06-21T00:00:00+00:00', 2, 1000, 0.0, 95.0, reason='target_reached', quality_flags=['nominal']),
             _frame(2, '2026-06-21T00:01:00+00:00', 2, 3000, 2.0, 40.0, reason='gain_already_max', quality_flags=['meter_far_from_target']),
             _frame(3, '2026-06-21T00:02:00+00:00', 1, 5000, 16.0, 250.0, reason='exposure_and_gain_already_max', quality_flags=['meter_saturated_high']),
-            _frame(4, '2026-06-21T00:03:00+00:00', 1, 6000, 16.0, 100.0, reason='bad_image', quality_flags=['capture_not_processed'], capture_status='bad_image'),
+            _frame(5, '2026-06-21T00:03:00+00:00', 1, 5200, 16.0, 100.0, reason='target_reached', quality_flags=['nominal']),
+            _frame(6, '2026-06-21T00:04:00+00:00', 1, 5300, 16.0, 100.0, reason='target_reached', quality_flags=['nominal']),
+            _frame(4, '2026-06-21T00:08:00+00:00', 1, 6000, 16.0, 100.0, reason='bad_image', quality_flags=['capture_not_processed'], capture_status='bad_image'),
         ])
 
         summary = FrameMetadataAnalytics(metadata_dir).get_nightly_summary('2026-06-21')
@@ -165,12 +167,20 @@ def test_nightly_summary_per_camera():
         assert camera_2['percentages']['low_meter'] == 50.0
         assert camera_2['percentages']['gain_max'] == 50.0
         assert camera_2['most_common_quality_flags'][0]['label'] == 'nominal'
+        assert camera_2['missing_frames']['count'] == 0
+        assert camera_2['best_frame']['frame_id'] == 1
+        assert camera_2['worst_frame']['frame_id'] == 2
+        assert camera_2['anomaly_events']['count'] == 3
+        assert camera_2['night_trend']['meter']['direction'] == 'down'
 
         camera_1 = [camera for camera in summary['cameras'] if camera['camera_id'] == '1'][0]
-        assert camera_1['frame_count'] == 2
-        assert camera_1['percentages']['high_meter'] == 50.0
-        assert camera_1['percentages']['exposure_max'] == 50.0
-        assert camera_1['percentages']['capture_errors'] == 50.0
+        assert camera_1['frame_count'] == 4
+        assert camera_1['percentages']['high_meter'] == 25.0
+        assert camera_1['percentages']['exposure_max'] == 25.0
+        assert camera_1['percentages']['gain_max'] == 25.0
+        assert camera_1['percentages']['capture_errors'] == 25.0
+        assert camera_1['missing_frames']['count'] == 3
+        assert camera_1['anomaly_events']['count'] == 5
 
 
 def test_nightly_summary_tolerates_legacy_rows():

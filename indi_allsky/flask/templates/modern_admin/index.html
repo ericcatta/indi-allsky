@@ -121,37 +121,142 @@ var camera_id = {{ camera_id }};
 
         {% if modern_admin_nightly_summary.cameras %}
         <div class="modern-admin-nightly-grid">
-            {% for camera in modern_admin_nightly_summary.cameras %}
-            <article class="modern-admin-nightly-panel">
-                <div class="modern-admin-dashboard-card-header">
+            <article class="modern-admin-nightly-card modern-admin-nightly-card-wide">
+                <p class="modern-admin-card-label">Summary Overview</p>
+                <h3>Per-camera overview</h3>
+                <div class="modern-admin-nightly-table-wrap">
+                    <table class="modern-admin-nightly-table">
+                        <thead>
+                            <tr>
+                                <th>Camera</th>
+                                <th>Frames</th>
+                                <th>Quality Avg</th>
+                                <th>Missing</th>
+                                <th>Errors</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for camera in modern_admin_nightly_summary.cameras %}
+                            <tr>
+                                <th>{{ camera.profile_id }}</th>
+                                <td>{{ camera.frame_count }}</td>
+                                <td>{{ camera.average_quality }}</td>
+                                <td>{{ camera.missing_frames.count }} ({{ camera.missing_frames.percent }})</td>
+                                <td>{{ camera.percentages.capture_errors }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            {% for card in [
+                ('Quality Score', 'Average / Min / Max', 'average_quality', 'minimum_quality', 'maximum_quality'),
+                ('Exposure', 'Average / Min / Max', 'average_exposure', 'minimum_exposure', 'maximum_exposure'),
+                ('Gain', 'Average / Min / Max', 'average_gain', 'minimum_gain', 'maximum_gain'),
+                ('Meter', 'Average / Min / Max', 'average_meter', 'minimum_meter', 'maximum_meter')
+            ] %}
+            <article class="modern-admin-nightly-card">
+                <p class="modern-admin-card-label">{{ card[0] }}</p>
+                <h3>{{ card[1] }}</h3>
+                <div class="modern-admin-nightly-table-wrap">
+                    <table class="modern-admin-nightly-table">
+                        <thead>
+                            <tr>
+                                <th>Camera</th>
+                                <th>Average</th>
+                                <th>Min</th>
+                                <th>Max</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for camera in modern_admin_nightly_summary.cameras %}
+                            <tr>
+                                <th>{{ camera.profile_id }}</th>
+                                <td>{{ camera[card[2]] }}</td>
+                                <td>{{ camera[card[3]] }}</td>
+                                <td>{{ camera[card[4]] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+            {% endfor %}
+
+            <article class="modern-admin-nightly-card">
+                <p class="modern-admin-card-label">Missing Frames</p>
+                <h3>Detected gaps</h3>
+                <div class="modern-admin-nightly-table-wrap">
+                    <table class="modern-admin-nightly-table">
+                        <thead><tr><th>Camera</th><th>Missing</th><th>%</th><th>Threshold</th></tr></thead>
+                        <tbody>
+                            {% for camera in modern_admin_nightly_summary.cameras %}
+                            <tr><th>{{ camera.profile_id }}</th><td>{{ camera.missing_frames.count }}</td><td>{{ camera.missing_frames.percent }}</td><td>{{ camera.missing_frames.threshold }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="modern-admin-nightly-card">
+                <p class="modern-admin-card-label">Anomaly Events</p>
+                <h3>Metadata-derived events</h3>
+                <div class="modern-admin-nightly-table-wrap">
+                    <table class="modern-admin-nightly-table">
+                        <thead><tr><th>Camera</th><th>Total</th><th>Common</th></tr></thead>
+                        <tbody>
+                            {% for camera in modern_admin_nightly_summary.cameras %}
+                            <tr>
+                                <th>{{ camera.profile_id }}</th>
+                                <td>{{ camera.anomaly_events.count }}</td>
+                                <td>{% for item in camera.anomaly_events.most_common[:2] %}{{ item.label }} ({{ item.count }}){% if not loop.last %}, {% endif %}{% else %}None{% endfor %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="modern-admin-nightly-card">
+                <p class="modern-admin-card-label">Best / Worst Image</p>
+                <h3>By quality score</h3>
+                <div class="modern-admin-nightly-table-wrap">
+                    <table class="modern-admin-nightly-table">
+                        <thead><tr><th>Camera</th><th>Best</th><th>Worst</th></tr></thead>
+                        <tbody>
+                            {% for camera in modern_admin_nightly_summary.cameras %}
+                            <tr><th>{{ camera.profile_id }}</th><td>{{ camera.best_frame.timestamp }} ({{ camera.best_frame.quality_score }})</td><td>{{ camera.worst_frame.timestamp }} ({{ camera.worst_frame.quality_score }})</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="modern-admin-nightly-card">
+                <p class="modern-admin-card-label">Night Trend</p>
+                <h3>Quality, meter, exposure, gain</h3>
+                <div class="modern-admin-nightly-trend-grid">
+                    {% for camera in modern_admin_nightly_summary.cameras %}
                     <div>
-                        <p class="modern-admin-card-label">Camera {{ camera.camera_id }}</p>
-                        <h3>{{ camera.profile_id }}</h3>
+                        <h4>{{ camera.profile_id }}</h4>
+                        <ul>
+                            {% for trend in camera.night_trend %}
+                            <li><span>{{ trend.label }}</span><strong>{{ trend.direction }} · {{ trend.delta }}</strong></li>
+                            {% endfor %}
+                        </ul>
                     </div>
-                    <span class="modern-admin-status-pill modern-admin-status-neutral">{{ camera.frame_count }} frames</span>
+                    {% endfor %}
                 </div>
+            </article>
 
-                <dl class="modern-admin-nightly-list">
-                    <div><dt>First frame</dt><dd>{{ camera.first_timestamp }}</dd></div>
-                    <div><dt>Last frame</dt><dd>{{ camera.last_timestamp }}</dd></div>
-                    <div><dt>Quality avg / min / max</dt><dd>{{ camera.average_quality }} / {{ camera.minimum_quality }} / {{ camera.maximum_quality }}</dd></div>
-                    <div><dt>Meter avg / min / max</dt><dd>{{ camera.average_meter }} / {{ camera.minimum_meter }} / {{ camera.maximum_meter }}</dd></div>
-                    <div><dt>Exposure avg / min / max</dt><dd>{{ camera.average_exposure }} / {{ camera.minimum_exposure }} / {{ camera.maximum_exposure }}</dd></div>
-                    <div><dt>Gain avg / min / max</dt><dd>{{ camera.average_gain }} / {{ camera.minimum_gain }} / {{ camera.maximum_gain }}</dd></div>
-                </dl>
-
-                <div class="modern-admin-nightly-percent-grid">
-                    <div><span>Nominal</span><strong>{{ camera.percentages.nominal_quality }}</strong></div>
-                    <div><span>Low meter</span><strong>{{ camera.percentages.low_meter }}</strong></div>
-                    <div><span>High meter</span><strong>{{ camera.percentages.high_meter }}</strong></div>
-                    <div><span>Exposure max</span><strong>{{ camera.percentages.exposure_max }}</strong></div>
-                    <div><span>Gain max</span><strong>{{ camera.percentages.gain_max }}</strong></div>
-                    <div><span>Capture errors</span><strong>{{ camera.percentages.capture_errors }}</strong></div>
-                </div>
-
+            <article class="modern-admin-nightly-card modern-admin-nightly-card-wide">
+                <p class="modern-admin-card-label">Quality Flags</p>
+                <h3>Most common flags</h3>
                 <div class="modern-admin-nightly-common-grid">
+                    {% for camera in modern_admin_nightly_summary.cameras %}
                     <div>
-                        <h4>Quality flags</h4>
+                        <h4>{{ camera.profile_id }}</h4>
                         <ul>
                             {% for item in camera.quality_flags %}
                             <li><span>{{ item.label }}</span><strong>{{ item.count }}</strong></li>
@@ -160,8 +265,17 @@ var camera_id = {{ camera_id }};
                             {% endfor %}
                         </ul>
                     </div>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="modern-admin-nightly-card modern-admin-nightly-card-wide">
+                <p class="modern-admin-card-label">Decision Reasons</p>
+                <h3>Most common controller reasons</h3>
+                <div class="modern-admin-nightly-common-grid">
+                    {% for camera in modern_admin_nightly_summary.cameras %}
                     <div>
-                        <h4>Decision reasons</h4>
+                        <h4>{{ camera.profile_id }}</h4>
                         <ul>
                             {% for item in camera.decision_reasons %}
                             <li><span>{{ item.label }}</span><strong>{{ item.count }}</strong></li>
@@ -170,9 +284,9 @@ var camera_id = {{ camera_id }};
                             {% endfor %}
                         </ul>
                     </div>
+                    {% endfor %}
                 </div>
             </article>
-            {% endfor %}
         </div>
         {% else %}
         <article class="modern-admin-dashboard-empty">

@@ -2518,11 +2518,15 @@ body.modern-admin-lightbox-open {
   gap: 18px;
 }
 
+.modern-admin-shell .modern-admin-nightly-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .modern-admin-shell .modern-admin-dashboard-camera-card,
 .modern-admin-shell .modern-admin-chart-panel,
 .modern-admin-shell .modern-admin-decision-panel,
 .modern-admin-shell .modern-admin-summary-panel,
-.modern-admin-shell .modern-admin-nightly-panel,
+.modern-admin-shell .modern-admin-nightly-card,
 .modern-admin-shell .modern-admin-dashboard-empty {
   min-width: 0;
   padding: 18px;
@@ -2727,6 +2731,12 @@ body.modern-admin-lightbox-open {
   display: block;
 }
 
+@media (max-width: 1180px) {
+  .modern-admin-shell .modern-admin-nightly-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .modern-admin-shell .modern-admin-decision-columns {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2772,63 +2782,67 @@ body.modern-admin-lightbox-open {
   margin: 16px 0 0;
 }
 
-.modern-admin-shell .modern-admin-nightly-list,
-.modern-admin-shell .modern-admin-nightly-percent-grid,
-.modern-admin-shell .modern-admin-nightly-common-grid {
+.modern-admin-shell .modern-admin-nightly-card {
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  align-content: start;
 }
 
-.modern-admin-shell .modern-admin-nightly-list {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: 14px 0 0;
+.modern-admin-shell .modern-admin-nightly-card-wide {
+  grid-column: span 2;
 }
 
-.modern-admin-shell .modern-admin-nightly-list div,
-.modern-admin-shell .modern-admin-nightly-percent-grid div {
-  min-width: 0;
-  padding: 11px;
-  border: 1px solid var(--modern-admin-line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.035);
-}
-
-.modern-admin-shell .modern-admin-nightly-list dt,
-.modern-admin-shell .modern-admin-nightly-percent-grid span {
-  color: var(--modern-admin-quiet);
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.modern-admin-shell .modern-admin-nightly-list dd,
-.modern-admin-shell .modern-admin-nightly-percent-grid strong {
-  display: block;
-  margin: 4px 0 0;
+.modern-admin-shell .modern-admin-nightly-card h3 {
+  margin: -6px 0 0;
   color: var(--modern-admin-text);
-  font-size: 0.94rem;
+  font-size: 1rem;
   font-weight: 800;
-  overflow-wrap: anywhere;
 }
 
-.modern-admin-shell .modern-admin-nightly-percent-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 12px;
+.modern-admin-shell .modern-admin-nightly-table-wrap {
+  min-width: 0;
+  overflow-x: auto;
 }
 
-.modern-admin-shell .modern-admin-nightly-common-grid {
+.modern-admin-shell .modern-admin-nightly-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+  color: var(--modern-admin-muted);
+  font-size: 0.82rem;
+}
+
+.modern-admin-shell .modern-admin-nightly-table th,
+.modern-admin-shell .modern-admin-nightly-table td {
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--modern-admin-line);
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+}
+
+.modern-admin-shell .modern-admin-nightly-table th {
+  color: var(--modern-admin-text);
+  font-weight: 800;
+}
+
+.modern-admin-shell .modern-admin-nightly-common-grid,
+.modern-admin-shell .modern-admin-nightly-trend-grid {
+  display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 14px;
+  gap: 14px;
 }
 
-.modern-admin-shell .modern-admin-nightly-common-grid h4 {
+.modern-admin-shell .modern-admin-nightly-common-grid h4,
+.modern-admin-shell .modern-admin-nightly-trend-grid h4 {
   margin: 0 0 8px;
   color: var(--modern-admin-text);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 800;
 }
 
-.modern-admin-shell .modern-admin-nightly-common-grid ul {
+.modern-admin-shell .modern-admin-nightly-common-grid ul,
+.modern-admin-shell .modern-admin-nightly-trend-grid ul {
   display: grid;
   gap: 7px;
   margin: 0;
@@ -2836,7 +2850,8 @@ body.modern-admin-lightbox-open {
   list-style: none;
 }
 
-.modern-admin-shell .modern-admin-nightly-common-grid li {
+.modern-admin-shell .modern-admin-nightly-common-grid li,
+.modern-admin-shell .modern-admin-nightly-trend-grid li {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2846,6 +2861,7 @@ body.modern-admin-lightbox-open {
   border-radius: 10px;
   color: var(--modern-admin-muted);
   background: rgba(255, 255, 255, 0.03);
+  font-size: 0.8rem;
 }
 
 @media (max-width: 760px) {
@@ -2854,15 +2870,18 @@ body.modern-admin-lightbox-open {
   .modern-admin-shell .modern-admin-decision-grid,
   .modern-admin-shell .modern-admin-summary-grid,
   .modern-admin-shell .modern-admin-nightly-grid,
-  .modern-admin-shell .modern-admin-nightly-list,
   .modern-admin-shell .modern-admin-nightly-common-grid,
+  .modern-admin-shell .modern-admin-nightly-trend-grid,
   .modern-admin-shell .modern-admin-decision-columns {
     grid-template-columns: 1fr;
   }
 
+  .modern-admin-shell .modern-admin-nightly-card-wide {
+    grid-column: span 1;
+  }
+
   .modern-admin-shell .modern-admin-dashboard-metrics,
-  .modern-admin-shell .modern-admin-summary-list,
-  .modern-admin-shell .modern-admin-nightly-percent-grid {
+  .modern-admin-shell .modern-admin-summary-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
