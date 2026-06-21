@@ -112,22 +112,26 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - fallback a `unknown` quando metadata/quality/meter non sono sufficienti;
     - integrato nel Nightly Summary analytics come stato calcolato dall'ultimo frame della camera;
     - nessuna cloud detection, trend, dew/condensation detection, weather fusion, AI o event detection.
-- NEXT:
   - Cloud Detection v1:
-    - Purpose: capire se il cielo e' utilizzabile o coperto usando segnali metadata/image-derived.
-    - Input possibili:
-      - `quality_score`.
-      - `quality_flags`.
-      - trend meter.
-      - comportamento exposure/gain.
-      - stelle rilevate, se disponibili in futuro.
-      - contrasto/brightness indicator, se disponibili in futuro.
-    - Output atteso:
-      - `clear`.
-      - `mostly_clear`.
-      - `partly_cloudy`.
-      - `cloudy`.
-      - `overcast`.
+    - modulo isolato metadata-only `cloud_detection.py`;
+    - modalita' solo shadow/diagnostica, senza decisioni operative;
+    - valori ammessi: `unknown`, `clear`, `mostly_clear`, `partly_cloudy`, `cloudy`, `overcast`;
+    - input usati:
+      - `sky_condition`;
+      - `quality_score`;
+      - `quality_flags`;
+      - `capture_status`;
+      - metadata meter/target quando serve fallback via `sky_condition`;
+      - `profile_id` e `camera_id` tramite frame metadata/summary.
+    - mapping conservativo:
+      - `excellent` -> `clear` se non ci sono flag negativi forti;
+      - `good` -> `mostly_clear` se non ci sono flag negativi forti;
+      - `usable` -> `partly_cloudy`;
+      - `poor` -> `cloudy`;
+      - `unusable` con qualita' molto bassa o flag severi -> `overcast`;
+      - metadata incompleti o capture fallito -> `unknown`.
+    - integrato nel Nightly Summary analytics come `cloud_condition` calcolato dall'ultimo frame della camera.
+- NEXT:
   - Sky Condition Classification:
     - Purpose: produrre uno stato leggibile per le condizioni osservative correnti.
     - Output atteso:
@@ -158,7 +162,7 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - Purpose: combinare in futuro metadata interni con meteo esterno o sensori locali.
     - Nessun requisito di API esterna nella prima fase.
 - Prossimo micro-step consigliato:
-  - Cloud Detection v1 shadow/read-only sopra metadata esistenti e `sky_condition`, ancora senza AI e senza azioni runtime.
+  - Sky Trend v1 shadow/read-only sopra metadata esistenti, `sky_condition` e `cloud_condition`, ancora senza AI e senza azioni runtime.
 - LATER:
   - Integrare temperatura Raspberry/CPU, spazio disco e health log.
   - Alert futuri Telegram/email/webhook.
@@ -1071,3 +1075,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementato Metadata Health & Consolidation locale con report integrity/coverage e card dashboard read-only.
 - 2026-06-21: Documentata fase Environmental Awareness: cloud detection, sky condition, condensation/dew, sky trend e weather awareness prima di Event Detection/AI.
 - 2026-06-21: Implementata fondazione Sky Condition v1 metadata-only, profile-aware e multi-camera safe, senza cloud/dew/weather/AI/event detection.
+- 2026-06-21: Implementata Cloud Detection v1 shadow metadata-only, integrata nel Nightly Summary analytics come `cloud_condition`, senza AI/event/runtime control.

@@ -5,6 +5,7 @@ from datetime import timedelta
 from datetime import timezone
 from pathlib import Path
 
+from .cloud_detection import classify_cloud_condition
 from .sky_condition import compute_sky_condition_from_frame
 
 
@@ -302,6 +303,7 @@ class FrameMetadataAnalytics:
             'best_frame': self._frame_reference(best_frame),
             'worst_frame': self._frame_reference(worst_frame),
             'sky_condition': compute_sky_condition_from_frame(latest_frame),
+            'cloud_condition': classify_cloud_condition(latest_frame),
             'night_trend': night_trend,
             'most_common_quality_flags': self._counter_rows(quality_flags),
             'most_common_decision_reasons': self._counter_rows(decision_reasons),
