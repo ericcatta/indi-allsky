@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .cloud_detection import classify_cloud_condition
 from .sky_condition import compute_sky_condition_from_frame
+from .sky_trend import classify_sky_trend
 
 
 class FrameMetadataAnalytics:
@@ -304,6 +305,7 @@ class FrameMetadataAnalytics:
             'worst_frame': self._frame_reference(worst_frame),
             'sky_condition': compute_sky_condition_from_frame(latest_frame),
             'cloud_condition': classify_cloud_condition(latest_frame),
+            'sky_trend': classify_sky_trend(sorted_frames),
             'night_trend': night_trend,
             'most_common_quality_flags': self._counter_rows(quality_flags),
             'most_common_decision_reasons': self._counter_rows(decision_reasons),
