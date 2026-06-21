@@ -157,7 +157,10 @@ class EventCandidateAnalytics:
                 line = line.strip()
                 if not line:
                     continue
-                rows.append(json.loads(line))
+                try:
+                    rows.append(json.loads(line))
+                except ValueError:
+                    continue
 
         return rows
 
@@ -235,7 +238,10 @@ class EventTimelineAnalytics:
                 line = line.strip()
                 if not line:
                     continue
-                rows.append(json.loads(line))
+                try:
+                    rows.append(json.loads(line))
+                except ValueError:
+                    continue
 
         return rows
 

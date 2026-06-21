@@ -22,6 +22,10 @@ from passlib.hash import argon2
 
 from ..version import __version__
 from .. import constants
+from ..event_candidate import EventCandidateAnalytics
+from ..event_candidate import EventTimelineAnalytics
+from ..event_candidate import default_event_candidate_dir
+from ..event_candidate import default_event_timeline_dir
 from ..frame_metadata import default_frame_metadata_dir
 from ..frame_metadata_analytics import FrameMetadataAnalytics
 from ..processing import ImageProcessor
@@ -5159,6 +5163,16 @@ class ModernAdminView(TemplateView):
                 'metadata_completeness_percentage': 0.0,
             }
 
+        event_candidate_dir = self.get_modern_admin_event_candidate_dir()
+        event_timeline_dir = self.get_modern_admin_event_timeline_dir()
+        try:
+            event_candidate_summary = EventCandidateAnalytics(event_candidate_dir).get_nightly_event_summary(nightly_summary.get('date'))
+            event_timeline_summary = EventTimelineAnalytics(event_timeline_dir).get_nightly_timeline_summary(nightly_summary.get('date'))
+        except Exception as e:
+            app.logger.error('Error reading modern admin event foundation analytics: %s', str(e))
+            event_candidate_summary = {}
+            event_timeline_summary = {}
+
         camera_ids = self.get_modern_admin_dashboard_camera_ids(recent_frames, latest_frames)
         chart_data = dict()
         camera_cards = list()
@@ -5211,6 +5225,7 @@ class ModernAdminView(TemplateView):
             'modern_admin_dashboard_has_metadata'   : bool(recent_frames or latest_frames),
             'modern_admin_nightly_summary'          : self.format_dashboard_nightly_summary(nightly_summary),
             'modern_admin_metadata_health'          : self.format_dashboard_metadata_health(metadata_health),
+            'modern_admin_event_foundation'         : self.format_dashboard_event_foundation(event_candidate_summary, event_timeline_summary),
         }
 
 
@@ -5228,6 +5243,14 @@ class ModernAdminView(TemplateView):
             return Path(configured_path).parent
 
         return default_frame_metadata_dir(self.indi_allsky_config.get('VARLIB_FOLDER', '/var/lib/indi-allsky'))
+
+
+    def get_modern_admin_event_candidate_dir(self):
+        return default_event_candidate_dir(self.indi_allsky_config.get('VARLIB_FOLDER', '/var/lib/indi-allsky'))
+
+
+    def get_modern_admin_event_timeline_dir(self):
+        return default_event_timeline_dir(self.indi_allsky_config.get('VARLIB_FOLDER', '/var/lib/indi-allsky'))
 
 
     def get_modern_admin_dashboard_camera_ids(self, recent_frames, latest_frames):
@@ -5364,6 +5387,29 @@ class ModernAdminView(TemplateView):
             'completeness'         : self.format_dashboard_percentage_precise(metadata_health.get('metadata_completeness_percentage')),
             'missing_fields'       : self.format_dashboard_counter(metadata_health.get('missing_field_counts') or {}),
             'invalid_values'       : self.format_dashboard_counter(metadata_health.get('invalid_value_counts') or {}),
+        }
+
+
+    def format_dashboard_event_foundation(self, candidate_summary, timeline_summary):
+        return {
+            'date': candidate_summary.get('date') or timeline_summary.get('date') or 'No event data day',
+            'has_event_data': bool(candidate_summary.get('total_event_candidates') or timeline_summary.get('total_timeline_segments')),
+            'candidates': {
+                'total': candidate_summary.get('total_event_candidates', 0),
+                'by_camera': self.format_dashboard_counter(candidate_summary.get('event_candidates_by_camera') or {}),
+                'by_reason': self.format_dashboard_counter(candidate_summary.get('event_candidates_by_reason') or {}),
+                'average_score': self.format_dashboard_number(candidate_summary.get('average_candidate_score')),
+                'max_score': self.format_dashboard_number(candidate_summary.get('max_candidate_score')),
+            },
+            'timelines': {
+                'total': timeline_summary.get('total_timeline_segments', 0),
+                'by_camera': self.format_dashboard_counter(timeline_summary.get('timeline_segments_by_camera') or {}),
+                'by_reason': self.format_dashboard_counter(timeline_summary.get('timeline_segments_by_reason') or {}),
+                'average_duration': self.format_dashboard_seconds(timeline_summary.get('average_segment_duration_seconds')),
+                'max_duration': self.format_dashboard_seconds(timeline_summary.get('max_segment_duration_seconds')),
+                'average_candidates': self.format_dashboard_number(timeline_summary.get('average_candidates_per_segment')),
+                'max_candidates': self.format_dashboard_number(timeline_summary.get('max_candidates_per_segment')),
+            },
         }
 
 

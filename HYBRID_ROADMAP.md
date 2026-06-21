@@ -213,10 +213,26 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - persistenza append-only JSONL in directory `event_timelines/YYYY-MM-DD.jsonl`;
     - analytics minimi: totale segmenti, segmenti per camera, durata media/max, candidate medie/max per segmento e conteggi reason;
     - nessuna dashboard UI, nessuna classificazione reale, nessuna integrazione capture.
+  - Event Foundation Dashboard Read-only v0:
+    - Modern Admin dashboard mostra analytics JSONL esistenti per Event Candidates ed Event Timelines;
+    - espone totale, conteggi per camera/reason, score candidate medio/max, durata timeline media/max e candidate per segmento;
+    - gestisce file mancanti/vuoti/malformati senza crash;
+    - solo diagnostica read-only: nessuna generazione automatica candidate, nessun trigger runtime, nessuna classificazione.
+  - Event Foundation manual smoke test:
+    - script manuale `testing/event_foundation_smoke_test.py`;
+    - genera dati sintetici chiaramente marcati `synthetic-smoke-v0`;
+    - default sicuro in `/tmp/indi-allsky-event-foundation-smoke`;
+    - per popolare la dashboard Raspberry: `python3 testing/event_foundation_smoke_test.py --varlib /var/lib/indi-allsky`;
+    - cleanup mirato: `python3 testing/event_foundation_smoke_test.py --varlib /var/lib/indi-allsky --cleanup`;
+    - nessuna generazione automatica, nessun hook runtime.
 - NEXT:
-  - Event Timeline dashboard read-only:
-    - mostrare solo segmenti `unclassified`;
+  - Candidate Trigger Rules v0 shadow-only:
+    - definire regole conservative metadata-only per creare candidate `unclassified`;
+    - disabilitate o gated di default finche' non validate;
+    - nessuna AI, RMS, meteor detection o classificazione reale.
+  - Event Timeline dashboard detail:
     - collegare segmenti a frame/candidate per ispezione manuale;
+    - mantenere tutti i segmenti `unclassified`;
     - nessuna azione runtime o pubblicazione automatica.
 - LATER:
   - Meteor detection.
@@ -1129,3 +1145,5 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Esposti nel dashboard Modern Admin gli indicatori Environmental Awareness read-only (`sky_condition`, `cloud_condition`, `sky_trend`, `possible_condensation`) nella card `Sky Awareness`.
 - 2026-06-21: Avviata Event Detection Foundation con `EventCandidate` v0 shadow-only, JSONL append-only e analytics minimi, senza classificazione eventi o integrazione capture.
 - 2026-06-21: Aggiunta Event Timeline v0 shadow-only per raggruppare candidate `unclassified` vicine nel tempo senza AI, RMS, meteor detection o impatto runtime.
+- 2026-06-21: Esposti nel Modern Admin dashboard gli analytics read-only di Event Candidates/Event Timelines esistenti, senza generazione automatica candidate o classificazione.
+- 2026-06-21: Aggiunto smoke test manuale Event Foundation v0 con dati sintetici `synthetic-smoke-v0`, persistence JSONL candidate/timeline e cleanup sicuro.

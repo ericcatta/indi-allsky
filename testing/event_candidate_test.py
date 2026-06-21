@@ -128,6 +128,21 @@ def test_event_candidate_nightly_analytics_counts():
         assert summary['max_candidate_score'] == 40.0
 
 
+def test_event_candidate_analytics_missing_empty_and_malformed_files():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        candidate_dir = Path(tmpdir)
+        analytics = EventCandidateAnalytics(candidate_dir)
+        assert analytics.get_nightly_event_summary('2026-06-21')['total_event_candidates'] == 0
+
+        candidate_dir.joinpath('2026-06-21.jsonl').write_text('\nnot-json\n', encoding='utf-8')
+        assert analytics.load_day('2026-06-21') == []
+
+        _write_candidates(candidate_dir, '2026-06-21', [_candidate()])
+        with candidate_dir.joinpath('2026-06-21.jsonl').open('a', encoding='utf-8') as f_candidate:
+            f_candidate.write('not-json\n')
+        assert analytics.get_nightly_event_summary('2026-06-21')['total_event_candidates'] == 1
+
+
 def test_placeholder_builder_is_disabled_without_reasons():
     assert build_event_candidate_from_metadata({
         'frame_id': 42,
@@ -310,6 +325,22 @@ def test_event_timeline_nightly_analytics_counts():
         assert summary['timeline_segments_by_reason']['capture_error'] == 1
 
 
+def test_event_timeline_analytics_missing_empty_and_malformed_files():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        timeline_dir = Path(tmpdir)
+        analytics = EventTimelineAnalytics(timeline_dir)
+        assert analytics.get_nightly_timeline_summary('2026-06-21')['total_timeline_segments'] == 0
+
+        timeline_dir.joinpath('2026-06-21.jsonl').write_text('\nnot-json\n', encoding='utf-8')
+        assert analytics.load_day('2026-06-21') == []
+
+        writer = EventTimelineWriter(timeline_dir)
+        writer.write(build_event_timeline_segments([_candidate()])[0])
+        with timeline_dir.joinpath('2026-06-21.jsonl').open('a', encoding='utf-8') as f_timeline:
+            f_timeline.write('not-json\n')
+        assert analytics.get_nightly_timeline_summary('2026-06-21')['total_timeline_segments'] == 1
+
+
 if __name__ == '__main__':
     test_event_candidate_v0_serialization()
     test_candidate_type_is_always_unclassified()
@@ -317,6 +348,7 @@ if __name__ == '__main__':
     test_event_candidate_default_directory()
     test_event_candidate_multi_camera_fields_preserved()
     test_event_candidate_nightly_analytics_counts()
+    test_event_candidate_analytics_missing_empty_and_malformed_files()
     test_placeholder_builder_is_disabled_without_reasons()
     test_placeholder_builder_uses_existing_metadata_only()
     test_event_timeline_single_candidate_segment()
@@ -329,4 +361,5 @@ if __name__ == '__main__':
     test_event_timeline_jsonl_persistence()
     test_event_timeline_default_directory()
     test_event_timeline_nightly_analytics_counts()
+    test_event_timeline_analytics_missing_empty_and_malformed_files()
     print('event candidate tests OK')

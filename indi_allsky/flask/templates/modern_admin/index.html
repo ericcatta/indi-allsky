@@ -164,6 +164,81 @@ var camera_id = {{ camera_id }};
         </article>
     </section>
 
+    <section class="modern-admin-dashboard-section" aria-labelledby="event-foundation-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Event Foundation</p>
+            <h2 id="event-foundation-title">Shadow diagnostics · {{ modern_admin_event_foundation.date }}</h2>
+        </div>
+
+        <div class="modern-admin-summary-grid">
+            <article class="modern-admin-summary-panel">
+                <p class="modern-admin-card-label">Event Candidates</p>
+                <h3>Unclassified · shadow-only</h3>
+                <dl class="modern-admin-summary-list">
+                    <div><dt>Total</dt><dd>{{ modern_admin_event_foundation.candidates.total }}</dd></div>
+                    <div><dt>Average score</dt><dd>{{ modern_admin_event_foundation.candidates.average_score }}</dd></div>
+                    <div><dt>Max score</dt><dd>{{ modern_admin_event_foundation.candidates.max_score }}</dd></div>
+                </dl>
+                <div class="modern-admin-metadata-health-detail">
+                    <div>
+                        <h3>By camera</h3>
+                        <ul>
+                            {% for item in modern_admin_event_foundation.candidates.by_camera[:4] %}
+                            <li><span>Camera {{ item.label }}</span><strong>{{ item.count }}</strong></li>
+                            {% else %}
+                            <li><span>No event candidate data yet</span><strong>0</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>By reason</h3>
+                        <ul>
+                            {% for item in modern_admin_event_foundation.candidates.by_reason[:4] %}
+                            <li><span>{{ item.label }}</span><strong>{{ item.count }}</strong></li>
+                            {% else %}
+                            <li><span>No reasons</span><strong>0</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </article>
+
+            <article class="modern-admin-summary-panel">
+                <p class="modern-admin-card-label">Event Timelines</p>
+                <h3>Unclassified · shadow-only</h3>
+                <dl class="modern-admin-summary-list">
+                    <div><dt>Total</dt><dd>{{ modern_admin_event_foundation.timelines.total }}</dd></div>
+                    <div><dt>Average duration</dt><dd>{{ modern_admin_event_foundation.timelines.average_duration }}</dd></div>
+                    <div><dt>Max duration</dt><dd>{{ modern_admin_event_foundation.timelines.max_duration }}</dd></div>
+                    <div><dt>Avg candidates</dt><dd>{{ modern_admin_event_foundation.timelines.average_candidates }}</dd></div>
+                    <div><dt>Max candidates</dt><dd>{{ modern_admin_event_foundation.timelines.max_candidates }}</dd></div>
+                </dl>
+                <div class="modern-admin-metadata-health-detail">
+                    <div>
+                        <h3>By camera</h3>
+                        <ul>
+                            {% for item in modern_admin_event_foundation.timelines.by_camera[:4] %}
+                            <li><span>Camera {{ item.label }}</span><strong>{{ item.count }}</strong></li>
+                            {% else %}
+                            <li><span>No timeline data yet</span><strong>0</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>By reason</h3>
+                        <ul>
+                            {% for item in modern_admin_event_foundation.timelines.by_reason[:4] %}
+                            <li><span>{{ item.label }}</span><strong>{{ item.count }}</strong></li>
+                            {% else %}
+                            <li><span>No reasons</span><strong>0</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
     <section class="modern-admin-dashboard-section" aria-labelledby="nightly-summary-title">
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">Nightly Summary</p>
