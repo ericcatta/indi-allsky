@@ -193,6 +193,22 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ### 4. Event Detection
 
+- IN TEST:
+  - Event Candidate v0 data contract + persistence/analytics shadow-only:
+    - modulo isolato `event_candidate.py`;
+    - contratto `EventCandidate` con `schema_version=event_candidate_v0`;
+    - `candidate_type` forzato a `unclassified`;
+    - `shadow_only=True`;
+    - contesto quality/environment salvato come snapshot diagnostico;
+    - persistenza append-only JSONL in directory `event_candidates/YYYY-MM-DD.jsonl`;
+    - analytics minimi per riepilogo notturno: totale candidate, conteggio per camera, conteggio per reason, score medio e score massimo;
+    - builder placeholder disabilitato di default se non vengono fornite reason esplicite;
+    - nessuna integrazione nella capture pipeline, nessuna decisione runtime, nessuna classificazione meteor/satellite/aircraft/aurora.
+- NEXT:
+  - Event Timeline shadow-only:
+    - aggregare candidate e metadata in una timeline diagnostica giornaliera;
+    - mantenere tutte le candidate `unclassified`;
+    - nessuna azione runtime o pubblicazione automatica.
 - LATER:
   - Meteor detection.
   - Aurora detection.
@@ -1102,3 +1118,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementata Sky Trend v1 shadow metadata-only, integrata nel Nightly Summary analytics come `sky_trend`, senza sostituire `night_trend`.
 - 2026-06-21: Implementata Dew / Condensation Detection v1 shadow metadata-only come `possible_condensation`, senza usare sensori/heater control o image analysis.
 - 2026-06-21: Esposti nel dashboard Modern Admin gli indicatori Environmental Awareness read-only (`sky_condition`, `cloud_condition`, `sky_trend`, `possible_condensation`) nella card `Sky Awareness`.
+- 2026-06-21: Avviata Event Detection Foundation con `EventCandidate` v0 shadow-only, JSONL append-only e analytics minimi, senza classificazione eventi o integrazione capture.
