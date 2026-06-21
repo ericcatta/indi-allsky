@@ -1,6 +1,8 @@
 import json
 import sys
 import tempfile
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -93,6 +95,25 @@ def test_camera_summary():
         assert summary['maximum_meter_value'] == 100.0
 
 
+def test_recent_frames_filters_by_timestamp():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_dir = Path(tmpdir)
+        _write_day(metadata_dir, '2026-06-20', [
+            _frame(1, '2026-06-20T23:00:00+00:00', 2, 1000, 0.0, 90.0),
+        ])
+        _write_day(metadata_dir, '2026-06-21', [
+            _frame(2, '2026-06-21T12:00:00+00:00', 2, 2000, 1.0, 95.0),
+            _frame(3, '2026-06-21T23:30:00+00:00', 1, 3000, 16.0, 100.0),
+        ])
+
+        rows = FrameMetadataAnalytics(metadata_dir).get_recent_frames(
+            hours=24,
+            now=datetime(2026, 6, 21, 23, 45, tzinfo=timezone.utc),
+        )
+
+        assert [row['frame_id'] for row in rows] == [2, 3]
+
+
 def test_multi_camera_statistics_and_decision_counts():
     with tempfile.TemporaryDirectory() as tmpdir:
         metadata_dir = Path(tmpdir)
@@ -123,5 +144,6 @@ if __name__ == '__main__':
     test_load_day()
     test_latest_frames_across_days()
     test_camera_summary()
+    test_recent_frames_filters_by_timestamp()
     test_multi_camera_statistics_and_decision_counts()
     print('frame metadata analytics tests OK')

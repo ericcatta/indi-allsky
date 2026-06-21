@@ -22,6 +22,8 @@ from passlib.hash import argon2
 
 from ..version import __version__
 from .. import constants
+from ..frame_metadata import default_frame_metadata_dir
+from ..frame_metadata_analytics import FrameMetadataAnalytics
 from ..processing import ImageProcessor
 
 from cryptography.fernet import InvalidToken
@@ -5103,6 +5105,7 @@ class ModernAdminView(TemplateView):
         context['latest_image_updated'] = 'No recent image available'
         context['latest_image_age'] = 'No recent image'
         context['latest_image_status'] = 'Waiting for latest frame'
+        context.update(self.get_modern_admin_dashboard_context())
 
         if not self.latest_image_entry:
             return context
@@ -5130,6 +5133,272 @@ class ModernAdminView(TemplateView):
         context['latest_image_status'] = self.latest_image_entry.createDate.strftime('%Y-%m-%d %H:%M:%S')
 
         return context
+
+
+    def get_modern_admin_dashboard_context(self):
+        metadata_dir = self.get_modern_admin_metadata_dir()
+        analytics = FrameMetadataAnalytics(metadata_dir)
+
+        try:
+            recent_frames = analytics.get_recent_frames(hours=24)
+            latest_frames = analytics.get_latest_frames(limit=500)
+        except Exception as e:
+            app.logger.error('Error reading modern admin dashboard metadata: %s', str(e))
+            recent_frames = list()
+            latest_frames = list()
+
+        camera_ids = self.get_modern_admin_dashboard_camera_ids(recent_frames, latest_frames)
+        chart_data = dict()
+        camera_cards = list()
+
+        for camera_id in camera_ids:
+            camera_key = str(camera_id)
+            latest_frame = self.get_latest_metadata_frame_for_camera(latest_frames, camera_id)
+            latest_image = self.get_latest_dashboard_camera_image(camera_id)
+            summary = analytics.get_camera_summary(camera_id)
+            decision_stats = analytics.get_decision_statistics(camera_id)
+            camera_frames = [
+                frame for frame in recent_frames
+                if self._modern_string(frame.get('camera_id')) == camera_key
+            ]
+
+            chart_data[camera_key] = [
+                {
+                    'timestamp' : self._modern_string(frame.get('timestamp')),
+                    'exposure'  : self._modern_exposure_seconds(frame.get('exposure_us')),
+                    'gain'      : self._modern_optional_float(frame.get('gain')),
+                    'meter'     : self._modern_optional_float(frame.get('meter_value_smoothed')),
+                }
+                for frame in camera_frames
+            ]
+
+            image_url = self.get_dashboard_image_url(latest_image) if latest_image else None
+            image_age = self.format_image_age(latest_image.createDate) if latest_image else 'No recent image'
+
+            camera_cards.append({
+                'camera_id'             : camera_id,
+                'profile_id'            : self._modern_string(latest_frame.get('profile_id')) if latest_frame else 'Unknown profile',
+                'latest_timestamp'      : self._modern_string(latest_frame.get('timestamp')) if latest_frame else 'No metadata yet',
+                'current_exposure'      : self.format_dashboard_exposure(latest_frame.get('exposure_us')) if latest_frame else 'Unknown',
+                'current_gain'          : self.format_dashboard_number(latest_frame.get('gain')) if latest_frame else 'Unknown',
+                'current_meter'         : self.format_dashboard_number(latest_frame.get('meter_value_smoothed')) if latest_frame else 'Unknown',
+                'current_target_meter'  : self.format_dashboard_number(latest_frame.get('target_meter')) if latest_frame else 'Unknown',
+                'current_reason'        : self._modern_string(latest_frame.get('decision_reason')) if latest_frame else 'No decision yet',
+                'image_url'             : image_url,
+                'image_age'             : image_age,
+                'summary'               : self.format_dashboard_summary(summary),
+                'decision_stats'        : self.format_dashboard_decision_stats(decision_stats),
+            })
+
+        return {
+            'modern_admin_dashboard_metadata_dir'   : str(metadata_dir),
+            'modern_admin_dashboard_cameras'        : camera_cards,
+            'modern_admin_dashboard_chart_data'     : chart_data,
+            'modern_admin_dashboard_has_metadata'   : bool(recent_frames or latest_frames),
+        }
+
+
+    def get_modern_admin_metadata_dir(self):
+        configured_path = self._modern_optional_config_string(self.indi_allsky_config.get('FRAME_METADATA_PATH'))
+        rotate_daily = self._modern_config_bool(
+            self.indi_allsky_config.get('FRAME_METADATA_ROTATE_DAILY', configured_path is None),
+            default=configured_path is None,
+        )
+
+        if configured_path and rotate_daily:
+            return Path(configured_path)
+
+        if configured_path and not rotate_daily:
+            return Path(configured_path).parent
+
+        return default_frame_metadata_dir(self.indi_allsky_config.get('VARLIB_FOLDER', '/var/lib/indi-allsky'))
+
+
+    def get_modern_admin_dashboard_camera_ids(self, recent_frames, latest_frames):
+        camera_ids = list()
+        for frame in list(latest_frames) + list(recent_frames):
+            camera_id = self._modern_optional_int(frame.get('camera_id'))
+            if camera_id and camera_id not in camera_ids:
+                camera_ids.append(camera_id)
+
+        try:
+            camera_rows = IndiAllSkyDbCameraTable.query\
+                .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
+                .order_by(IndiAllSkyDbCameraTable.id.asc())\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin dashboard camera rows: %s', str(e))
+            camera_rows = list()
+
+        for camera_row in camera_rows:
+            if camera_row.id and camera_row.id not in camera_ids:
+                camera_ids.append(camera_row.id)
+
+        if not camera_ids and getattr(self, 'camera', None):
+            camera_id = getattr(self.camera, 'id', None)
+            if camera_id:
+                camera_ids.append(camera_id)
+
+        return camera_ids[:2]
+
+
+    def get_latest_metadata_frame_for_camera(self, latest_frames, camera_id):
+        camera_id_str = self._modern_string(camera_id)
+        for frame in latest_frames:
+            if self._modern_string(frame.get('camera_id')) == camera_id_str:
+                return frame
+        return None
+
+
+    def get_latest_dashboard_camera_image(self, camera_id):
+        if not camera_id:
+            return None
+
+        try:
+            return IndiAllSkyDbImageTable.query\
+                .filter(IndiAllSkyDbImageTable.camera_id == camera_id)\
+                .order_by(IndiAllSkyDbImageTable.createDate.desc())\
+                .first()
+        except Exception as e:
+            app.logger.error('Error loading modern admin dashboard image for camera %s: %s', camera_id, str(e))
+            return None
+
+
+    def get_dashboard_image_url(self, image_entry):
+        local = True
+        if self.web_nonlocal_images:
+            if self.web_local_images_admin and self.verify_admin_network():
+                pass
+            else:
+                local = False
+                if not image_entry.remote_url and not image_entry.s3_key:
+                    return None
+
+        try:
+            image_url = image_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
+        except Exception as e:
+            app.logger.error('Error determining modern admin dashboard image URL: %s', str(e))
+            return None
+
+        return self.normalize_dashboard_image_url(image_url)
+
+
+    def normalize_dashboard_image_url(self, image_url):
+        if not image_url:
+            return None
+
+        image_url_str = str(image_url)
+        if image_url_str.startswith(('http://', 'https://', '/')):
+            return image_url_str
+
+        image_url_p = Path(image_url_str)
+        if image_url_p.parts and image_url_p.parts[0] == 'images':
+            return url_for('indi_allsky.images_folder', path=str(Path(*image_url_p.parts[1:])))
+
+        return image_url_str
+
+
+    def format_dashboard_summary(self, summary):
+        return {
+            'frame_count'       : summary.get('frame_count', 0),
+            'first_timestamp'   : summary.get('first_timestamp') or 'No metadata',
+            'last_timestamp'    : summary.get('last_timestamp') or 'No metadata',
+            'average_exposure'  : self.format_dashboard_exposure(summary.get('average_exposure')),
+            'minimum_exposure'  : self.format_dashboard_exposure(summary.get('minimum_exposure')),
+            'maximum_exposure'  : self.format_dashboard_exposure(summary.get('maximum_exposure')),
+            'average_gain'      : self.format_dashboard_number(summary.get('average_gain')),
+            'minimum_gain'      : self.format_dashboard_number(summary.get('minimum_gain')),
+            'maximum_gain'      : self.format_dashboard_number(summary.get('maximum_gain')),
+            'average_meter'     : self.format_dashboard_number(summary.get('average_meter_value')),
+            'minimum_meter'     : self.format_dashboard_number(summary.get('minimum_meter_value')),
+            'maximum_meter'     : self.format_dashboard_number(summary.get('maximum_meter_value')),
+        }
+
+
+    def format_dashboard_decision_stats(self, decision_stats):
+        exposure_counts = decision_stats.get('auto_exposure_action') or {}
+        gain_counts = decision_stats.get('auto_gain_action') or {}
+        reason_counts = decision_stats.get('decision_reason') or {}
+        return {
+            'auto_exposure' : self.format_dashboard_counter(exposure_counts),
+            'auto_gain'     : self.format_dashboard_counter(gain_counts),
+            'reasons'       : self.format_dashboard_counter(reason_counts),
+        }
+
+
+    def format_dashboard_counter(self, counter):
+        preferred = ('increase_exposure', 'decrease_exposure', 'increase_gain', 'decrease_gain', 'hold')
+        rows = list()
+        used = set()
+        for key in preferred:
+            if key in counter:
+                rows.append({'label': key, 'count': counter.get(key, 0)})
+                used.add(key)
+
+        for key in sorted(counter.keys()):
+            if key in used:
+                continue
+            rows.append({'label': key or 'unknown', 'count': counter.get(key, 0)})
+
+        return rows
+
+
+    def format_dashboard_exposure(self, exposure_us):
+        exposure_s = self._modern_exposure_seconds(exposure_us)
+        if exposure_s is None:
+            return 'Unknown'
+        if exposure_s < 1.0:
+            return '{0:0.3f}s'.format(exposure_s)
+        return '{0:0.2f}s'.format(exposure_s)
+
+
+    def format_dashboard_number(self, value):
+        number = self._modern_optional_float(value)
+        if number is None:
+            return 'Unknown'
+        return '{0:0.2f}'.format(number)
+
+
+    def _modern_exposure_seconds(self, exposure_us):
+        exposure = self._modern_optional_float(exposure_us)
+        if exposure is None:
+            return None
+        return exposure / 1000000.0
+
+
+    def _modern_optional_float(self, value):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+
+    def _modern_optional_int(self, value):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+
+    def _modern_optional_config_string(self, value):
+        value_str = self._modern_string(value).strip()
+        return value_str or None
+
+
+    def _modern_config_bool(self, value, default=False):
+        if value is None:
+            return bool(default)
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return bool(value)
+        return self._modern_string(value).strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+    def _modern_string(self, value):
+        if value is None:
+            return ''
+        return str(value)
 
 
     def get_modern_admin_nav(self):

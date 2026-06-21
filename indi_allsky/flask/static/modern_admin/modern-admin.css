@@ -2502,7 +2502,203 @@ body.modern-admin-lightbox-open {
   background: rgba(127, 29, 29, 0.18);
 }
 
+.modern-admin-shell .modern-admin-dashboard-section {
+  display: grid;
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.modern-admin-shell .modern-admin-dashboard-camera-grid,
+.modern-admin-shell .modern-admin-chart-grid,
+.modern-admin-shell .modern-admin-decision-grid,
+.modern-admin-shell .modern-admin-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.modern-admin-shell .modern-admin-dashboard-camera-card,
+.modern-admin-shell .modern-admin-chart-panel,
+.modern-admin-shell .modern-admin-decision-panel,
+.modern-admin-shell .modern-admin-summary-panel,
+.modern-admin-shell .modern-admin-dashboard-empty {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 18px;
+  background: var(--modern-admin-panel);
+  box-shadow: var(--modern-admin-shadow);
+}
+
+.modern-admin-shell .modern-admin-dashboard-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.modern-admin-shell .modern-admin-dashboard-card-header h3,
+.modern-admin-shell .modern-admin-decision-panel h3,
+.modern-admin-shell .modern-admin-summary-panel h3,
+.modern-admin-shell .modern-admin-dashboard-empty h3 {
+  margin: 0;
+  color: var(--modern-admin-text);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.modern-admin-shell .modern-admin-dashboard-preview {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.modern-admin-shell .modern-admin-dashboard-preview img,
+.modern-admin-shell .modern-admin-dashboard-preview .modern-admin-sky-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 14px;
+  object-fit: cover;
+  background: rgba(7, 10, 16, 0.64);
+}
+
+.modern-admin-shell .modern-admin-dashboard-preview figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--modern-admin-quiet);
+  font-size: 0.78rem;
+}
+
+.modern-admin-shell .modern-admin-dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 0;
+}
+
+.modern-admin-shell .modern-admin-dashboard-metrics div,
+.modern-admin-shell .modern-admin-summary-list div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.modern-admin-shell .modern-admin-dashboard-metrics dt,
+.modern-admin-shell .modern-admin-summary-list dt {
+  color: var(--modern-admin-quiet);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.modern-admin-shell .modern-admin-dashboard-metrics dd,
+.modern-admin-shell .modern-admin-summary-list dd {
+  margin: 4px 0 0;
+  color: var(--modern-admin-text);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.modern-admin-shell .modern-admin-dashboard-reason {
+  margin: 14px 0 0;
+  color: var(--modern-admin-muted);
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.modern-admin-shell .modern-admin-chart-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.modern-admin-shell .modern-admin-chart-card {
+  padding: 14px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 14px;
+  background: rgba(7, 10, 16, 0.34);
+}
+
+.modern-admin-shell .modern-admin-chart-card h4,
+.modern-admin-shell .modern-admin-decision-columns h4 {
+  margin: 0 0 10px;
+  color: var(--modern-admin-text);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.modern-admin-shell .modern-admin-chart-canvas {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border-radius: 10px;
+  background: rgba(7, 10, 16, 0.42);
+}
+
+.modern-admin-shell .modern-admin-decision-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.modern-admin-shell .modern-admin-decision-columns ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modern-admin-shell .modern-admin-decision-columns li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 10px;
+  color: var(--modern-admin-muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.modern-admin-shell .modern-admin-decision-columns li span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.modern-admin-shell .modern-admin-decision-columns li strong {
+  color: var(--modern-admin-text);
+  font-size: 0.96rem;
+}
+
+.modern-admin-shell .modern-admin-summary-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 0;
+}
+
 @media (max-width: 760px) {
+  .modern-admin-shell .modern-admin-dashboard-camera-grid,
+  .modern-admin-shell .modern-admin-chart-grid,
+  .modern-admin-shell .modern-admin-decision-grid,
+  .modern-admin-shell .modern-admin-summary-grid,
+  .modern-admin-shell .modern-admin-decision-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .modern-admin-shell .modern-admin-dashboard-metrics,
+  .modern-admin-shell .modern-admin-summary-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .modern-admin-shell .modern-admin-settings-summary-grid {
     grid-template-columns: 1fr;
   }

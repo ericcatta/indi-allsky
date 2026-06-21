@@ -1,5 +1,8 @@
 import json
 from collections import Counter
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 from pathlib import Path
 
 
@@ -38,6 +41,18 @@ class FrameMetadataAnalytics:
                 break
 
         return frames[:limit]
+
+
+    def get_recent_frames(self, hours=24, now=None):
+        now_dt = now or datetime.now(timezone.utc)
+        cutoff = now_dt - timedelta(hours=float(hours))
+        frames = []
+        for frame in self._iter_frames():
+            timestamp = self._parse_timestamp(frame.get('timestamp'))
+            if timestamp is not None and timestamp >= cutoff:
+                frames.append(frame)
+
+        return sorted(frames, key=lambda frame: self._string_value(frame.get('timestamp')))
 
 
     def get_camera_summary(self, camera_id):
@@ -125,3 +140,21 @@ class FrameMetadataAnalytics:
         if value is None:
             return ''
         return str(value)
+
+
+    def _parse_timestamp(self, timestamp):
+        timestamp_str = self._string_value(timestamp).strip()
+        if not timestamp_str:
+            return None
+        if timestamp_str.endswith('Z'):
+            timestamp_str = '{0:s}+00:00'.format(timestamp_str[:-1])
+
+        try:
+            timestamp_dt = datetime.fromisoformat(timestamp_str)
+        except ValueError:
+            return None
+
+        if timestamp_dt.tzinfo is None:
+            return timestamp_dt.replace(tzinfo=timezone.utc)
+
+        return timestamp_dt.astimezone(timezone.utc)

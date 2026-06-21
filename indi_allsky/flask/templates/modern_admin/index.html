@@ -3,112 +3,272 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-dashboard-mvp-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
 {% endblock %}
 
 {% block content %}
-<!-- Future modern admin UI entry point; this placeholder keeps classic admin unchanged. -->
 <main class="modern-admin-shell" aria-labelledby="modern-admin-title">
-    {% set modern_admin_header_label = 'Dashboard header' %}
+    {% set modern_admin_header_label = 'Monitoring dashboard' %}
     {% set modern_admin_heading = 'Modern Admin Dashboard' %}
     {% set modern_admin_title_id = 'modern-admin-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
-    <section class="modern-admin-hero" aria-labelledby="latest-image-title">
-        <div class="modern-admin-hero-copy">
-            <p class="modern-admin-eyebrow">Latest Image</p>
-            <h2 id="latest-image-title">Latest camera frame</h2>
-            <p class="modern-admin-hero-meta">
-                {{ latest_image_age }}
-            </p>
-        </div>
-
-        <figure class="modern-admin-sky-frame" aria-label="Latest all-sky image">
-            {% if latest_image_url %}
-            <img class="modern-admin-latest-image" src="{{ latest_image_url }}" alt="Latest all-sky camera frame">
-            {% else %}
-            <div class="modern-admin-sky-placeholder"></div>
-            {% endif %}
-            <figcaption>
-                <span>{{ latest_image_updated }}</span>
-                <span>{{ latest_image_status }}</span>
-            </figcaption>
-        </figure>
-    </section>
-
-    <section class="modern-admin-status-grid" aria-label="System status">
-        <a class="modern-admin-status-card modern-admin-card-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
-            <div class="modern-admin-card-label">Camera</div>
-            <h3>{{ modern_admin_camera_name }}</h3>
-            <p>{{ modern_admin_camera_model }}</p>
-            <span class="modern-admin-status-pill modern-admin-status-good">Nominal</span>
-        </a>
-
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Capture</div>
-            <h3>{{ modern_admin_capture_status }}</h3>
-            <p>Latest image age: {{ latest_image_age }}. Timestamp: {{ latest_image_status }}.</p>
-            <span class="modern-admin-status-pill modern-admin-status-good">Fresh</span>
-        </article>
-
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Storage</div>
-            <h3>{{ modern_admin_storage_percent }}</h3>
-            <p>{{ modern_admin_storage_detail }}</p>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_storage_path }}</span>
-        </article>
-
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Upload / Sync</div>
-            <h3>Pending Setup</h3>
-            <p>Upload destination and sync health will remain read-only when connected.</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">TBD</span>
-        </article>
-    </section>
-
-    <section class="modern-admin-events-section" aria-labelledby="events-title">
+    <section class="modern-admin-dashboard-section" aria-labelledby="camera-status-title">
         <div class="modern-admin-section-heading">
-            <p class="modern-admin-eyebrow">Recent Events</p>
-            <h2 id="events-title">Nothing urgent needs attention</h2>
+            <p class="modern-admin-eyebrow">Camera Status</p>
+            <h2 id="camera-status-title">Latest frame and controller state</h2>
+            <p>Read-only metadata from {{ modern_admin_dashboard_metadata_dir }}.</p>
         </div>
 
-        <div class="modern-admin-events-grid">
-            <article class="modern-admin-event-panel">
-                <h3>Warnings</h3>
-                <ul>
-                    <li>
-                        <span class="modern-admin-event-time">21:58</span>
-                        Placeholder warning for future validation.
-                    </li>
-                    <li>
-                        <span class="modern-admin-event-time">20:41</span>
-                        Placeholder note for setup documentation.
-                    </li>
-                </ul>
-            </article>
+        {% if modern_admin_dashboard_cameras %}
+        <div class="modern-admin-dashboard-camera-grid">
+            {% for camera in modern_admin_dashboard_cameras %}
+            <article class="modern-admin-dashboard-camera-card">
+                <div class="modern-admin-dashboard-card-header">
+                    <div>
+                        <p class="modern-admin-card-label">Camera {{ camera.camera_id }}</p>
+                        <h3>{{ camera.profile_id }}</h3>
+                    </div>
+                    <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+                </div>
 
-            <article class="modern-admin-event-panel">
-                <h3>Recent Activity</h3>
-                <ul>
-                    <li>
-                        <span class="modern-admin-event-time">22:14</span>
-                        Latest image metadata refreshed.
-                    </li>
-                    <li>
-                        <span class="modern-admin-event-time">22:12</span>
-                        Placeholder storage check completed.
-                    </li>
-                </ul>
+                <figure class="modern-admin-dashboard-preview">
+                    {% if camera.image_url %}
+                    <img src="{{ camera.image_url }}" alt="Latest frame for camera {{ camera.camera_id }}">
+                    {% else %}
+                    <div class="modern-admin-sky-placeholder"></div>
+                    {% endif %}
+                    <figcaption>
+                        <span>{{ camera.image_age }}</span>
+                        <span>{{ camera.latest_timestamp }}</span>
+                    </figcaption>
+                </figure>
+
+                <dl class="modern-admin-dashboard-metrics">
+                    <div>
+                        <dt>Exposure</dt>
+                        <dd>{{ camera.current_exposure }}</dd>
+                    </div>
+                    <div>
+                        <dt>Gain</dt>
+                        <dd>{{ camera.current_gain }}</dd>
+                    </div>
+                    <div>
+                        <dt>Meter</dt>
+                        <dd>{{ camera.current_meter }}</dd>
+                    </div>
+                    <div>
+                        <dt>Target</dt>
+                        <dd>{{ camera.current_target_meter }}</dd>
+                    </div>
+                </dl>
+
+                <p class="modern-admin-dashboard-reason">{{ camera.current_reason }}</p>
             </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <article class="modern-admin-dashboard-empty">
+            <h3>No camera metadata yet</h3>
+            <p>The dashboard will populate after the first processed frame writes metadata.</p>
+        </article>
+        {% endif %}
+    </section>
+
+    <section class="modern-admin-dashboard-section" aria-labelledby="analytics-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">24h Analytics</p>
+            <h2 id="analytics-title">Exposure, gain, and meter trends</h2>
+        </div>
+
+        <div class="modern-admin-chart-grid">
+            {% for camera in modern_admin_dashboard_cameras %}
+            <article class="modern-admin-chart-panel">
+                <div class="modern-admin-dashboard-card-header">
+                    <div>
+                        <p class="modern-admin-card-label">Camera {{ camera.camera_id }}</p>
+                        <h3>{{ camera.profile_id }}</h3>
+                    </div>
+                </div>
+                <div class="modern-admin-chart-stack">
+                    <div class="modern-admin-chart-card">
+                        <h4>Exposure</h4>
+                        <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="exposure"></canvas>
+                    </div>
+                    <div class="modern-admin-chart-card">
+                        <h4>Gain</h4>
+                        <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="gain"></canvas>
+                    </div>
+                    <div class="modern-admin-chart-card">
+                        <h4>Meter Value</h4>
+                        <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="meter"></canvas>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="modern-admin-dashboard-section" aria-labelledby="decision-stats-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Decision Statistics</p>
+            <h2 id="decision-stats-title">Controller action counts</h2>
+        </div>
+
+        <div class="modern-admin-decision-grid">
+            {% for camera in modern_admin_dashboard_cameras %}
+            <article class="modern-admin-decision-panel">
+                <p class="modern-admin-card-label">Camera {{ camera.camera_id }}</p>
+                <h3>{{ camera.profile_id }}</h3>
+
+                <div class="modern-admin-decision-columns">
+                    <div>
+                        <h4>Auto Exposure</h4>
+                        <ul>
+                            {% for item in camera.decision_stats.auto_exposure %}
+                            <li><span>{{ item.label }}</span><strong>{{ item.count }}</strong></li>
+                            {% else %}
+                            <li><span>No data</span><strong>0</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Auto Gain</h4>
+                        <ul>
+                            {% for item in camera.decision_stats.auto_gain %}
+                            <li><span>{{ item.label }}</span><strong>{{ item.count }}</strong></li>
+                            {% else %}
+                            <li><span>No data</span><strong>0</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Reasons</h4>
+                        <ul>
+                            {% for item in camera.decision_stats.reasons %}
+                            <li><span>{{ item.label }}</span><strong>{{ item.count }}</strong></li>
+                            {% else %}
+                            <li><span>No data</span><strong>0</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="modern-admin-dashboard-section" aria-labelledby="summary-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Quick Summary</p>
+            <h2 id="summary-title">Metadata rollup by camera</h2>
+        </div>
+
+        <div class="modern-admin-summary-grid">
+            {% for camera in modern_admin_dashboard_cameras %}
+            <article class="modern-admin-summary-panel">
+                <p class="modern-admin-card-label">Camera {{ camera.camera_id }}</p>
+                <h3>{{ camera.profile_id }}</h3>
+                <dl class="modern-admin-summary-list">
+                    <div><dt>Frames</dt><dd>{{ camera.summary.frame_count }}</dd></div>
+                    <div><dt>Average exposure</dt><dd>{{ camera.summary.average_exposure }}</dd></div>
+                    <div><dt>Average gain</dt><dd>{{ camera.summary.average_gain }}</dd></div>
+                    <div><dt>Average meter</dt><dd>{{ camera.summary.average_meter }}</dd></div>
+                    <div><dt>Minimum meter</dt><dd>{{ camera.summary.minimum_meter }}</dd></div>
+                    <div><dt>Maximum meter</dt><dd>{{ camera.summary.maximum_meter }}</dd></div>
+                </dl>
+            </article>
+            {% endfor %}
         </div>
     </section>
 
     <footer class="modern-admin-footer">
-        <span>Modern dashboard</span>
-        <span>Read-only preview</span>
+        <span>Dashboard MVP</span>
+        <span>Read-only metadata analytics</span>
     </footer>
 </main>
+
+<script type="application/json" id="modern-dashboard-chart-data">{{ modern_admin_dashboard_chart_data|tojson }}</script>
+<script>
+(function () {
+    const dataNode = document.getElementById('modern-dashboard-chart-data');
+    if (!dataNode) {
+        return;
+    }
+
+    let chartData = {};
+    try {
+        chartData = JSON.parse(dataNode.textContent || '{}');
+    } catch (error) {
+        chartData = {};
+    }
+
+    function drawEmpty(ctx, canvas, label) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.72)';
+        ctx.font = '14px sans-serif';
+        ctx.fillText(label, 24, canvas.height / 2);
+    }
+
+    function drawChart(canvas) {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            return;
+        }
+
+        const cameraId = String(canvas.dataset.cameraId || '');
+        const metric = canvas.dataset.metric || '';
+        const rows = (chartData[cameraId] || []).filter((row) => (
+            row[metric] !== null && row[metric] !== undefined && Number.isFinite(Number(row[metric]))
+        ));
+
+        if (rows.length < 2) {
+            drawEmpty(ctx, canvas, 'Not enough metadata yet');
+            return;
+        }
+
+        const values = rows.map((row) => Number(row[metric]));
+        const minValue = Math.min.apply(null, values);
+        const maxValue = Math.max.apply(null, values);
+        const valueSpan = Math.max(maxValue - minValue, 0.000001);
+        const padX = 32;
+        const padY = 22;
+        const width = canvas.width - (padX * 2);
+        const height = canvas.height - (padY * 2);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padX, padY);
+        ctx.lineTo(padX, canvas.height - padY);
+        ctx.lineTo(canvas.width - padX, canvas.height - padY);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(88, 166, 255, 0.95)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        rows.forEach((row, index) => {
+            const x = padX + ((rows.length === 1 ? 0 : index / (rows.length - 1)) * width);
+            const y = (canvas.height - padY) - (((Number(row[metric]) - minValue) / valueSpan) * height);
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.86)';
+        ctx.font = '12px sans-serif';
+        ctx.fillText(maxValue.toFixed(2), padX, 14);
+        ctx.fillText(minValue.toFixed(2), padX, canvas.height - 6);
+    }
+
+    document.querySelectorAll('[data-modern-dashboard-chart]').forEach(drawChart);
+})();
+</script>
 {% endblock %}

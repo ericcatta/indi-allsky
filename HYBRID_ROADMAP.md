@@ -235,10 +235,17 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - `input_missing`, `input_empty`, `bad_image`, `not_saved` per percorsi noti senza DB image id.
 - Analytics reader base:
   - legge direttamente i daily JSONL, senza migration DB.
-  - API iniziali: `load_day(date)`, `get_latest_frames(limit)`, `get_camera_summary(camera_id)`, `get_decision_statistics(camera_id=None)`.
+  - API iniziali: `load_day(date)`, `get_latest_frames(limit)`, `get_recent_frames(hours)`, `get_camera_summary(camera_id)`, `get_decision_statistics(camera_id=None)`.
   - summary include count, timestamp primo/ultimo, min/max/media exposure, gain e meter value.
   - statistiche decisioni includono conteggi per `auto_exposure_action`, `auto_gain_action` e `decision_reason`.
-- Nessun cambio a dashboard, UI, upload o log esistenti.
+- Dashboard MVP read-only sopra `FrameMetadataAnalytics`:
+  - mostra side-by-side le ultime immagini disponibili per Camera 1 e Camera 2 quando presenti;
+  - mostra per camera `camera_id`, `profile_id`, timestamp, exposure, gain, meter value, target meter e decision reason;
+  - visualizza serie 24h per exposure, gain e meter value senza nuove dipendenze frontend;
+  - mostra statistiche decisioni Auto Exposure, Auto Gain e reason count;
+  - mostra quick summary per camera con frame count, exposure/gain/meter medi/min/max;
+  - funziona anche se una camera e' offline o senza metadata recenti.
+- Nessun cambio a upload, processing, Auto Exposure o Auto Gain.
 
 ## IN TEST
 
@@ -805,6 +812,7 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
   - `/var/lib/indi-allsky/frame_metadata/YYYY-MM-DD.jsonl` exists after new frames are processed.
   - latest rows contain `profile_id`, `camera_id`, `exposure_us`, `gain`, meter values and Auto Exposure/Gain actions.
   - `capture_status=processed` for saved frames.
+  - Modern Dashboard shows the same metadata in latest-frame cards, 24h charts, decision statistics and quick summary panels.
 
 ## Log Operativo Breve
 
@@ -840,3 +848,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Fix rotazione metadata Raspberry: path vuoto trattato come default daily, writer ritorna/logga il file effettivamente scritto.
 - 2026-06-21: Implementato Metadata Analytics Reader base per daily JSONL con summary per camera, latest frames e conteggi decisioni.
 - 2026-06-21: Rifattorizzata Auto Exposure convergence in tier `aggressive/normal/fine/target`, con recupero rapido da saturazione dentro il tier aggressive.
+- 2026-06-21: Implementato Dashboard MVP read-only con latest frame per camera, grafici 24h exposure/gain/meter, statistiche decisioni e quick summary basati su `FrameMetadataAnalytics`.
