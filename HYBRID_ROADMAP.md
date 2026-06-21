@@ -225,11 +225,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - per popolare la dashboard Raspberry: `python3 testing/event_foundation_smoke_test.py --varlib /var/lib/indi-allsky`;
     - cleanup mirato: `python3 testing/event_foundation_smoke_test.py --varlib /var/lib/indi-allsky --cleanup`;
     - nessuna generazione automatica, nessun hook runtime.
-- NEXT:
   - Candidate Trigger Rules v0 shadow-only:
-    - definire regole conservative metadata-only per creare candidate `unclassified`;
-    - disabilitate o gated di default finche' non validate;
+    - funzione pura/test-only `evaluate_candidate_triggers(...)`;
+    - valuta solo metadata gia' esistenti e contesto quality/environment;
+    - trigger conservativi v0: `brightness_spike`, `quality_drop`, `condensation_onset`, `sky_condition_transition`;
+    - supporta override opzionali via `profile_config`;
+    - puo' essere disabilitata via `event_candidate_triggers.enabled=False`;
+    - non persiste e non viene chiamata automaticamente;
+    - genera solo `EventCandidate` `unclassified` e `shadow_only=True`;
     - nessuna AI, RMS, meteor detection o classificazione reale.
+- NEXT:
   - Event Timeline dashboard detail:
     - collegare segmenti a frame/candidate per ispezione manuale;
     - mantenere tutti i segmenti `unclassified`;
@@ -1147,3 +1152,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Aggiunta Event Timeline v0 shadow-only per raggruppare candidate `unclassified` vicine nel tempo senza AI, RMS, meteor detection o impatto runtime.
 - 2026-06-21: Esposti nel Modern Admin dashboard gli analytics read-only di Event Candidates/Event Timelines esistenti, senza generazione automatica candidate o classificazione.
 - 2026-06-21: Aggiunto smoke test manuale Event Foundation v0 con dati sintetici `synthetic-smoke-v0`, persistence JSONL candidate/timeline e cleanup sicuro.
+- 2026-06-21: Aggiunte Candidate Trigger Rules v0 test-only metadata-based per candidate `unclassified`, senza hook runtime o classificazione eventi.

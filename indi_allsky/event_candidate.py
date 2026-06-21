@@ -11,6 +11,13 @@ EVENT_CANDIDATE_SCHEMA_VERSION = 'event_candidate_v0'
 EVENT_CANDIDATE_TYPE = 'unclassified'
 EVENT_TIMELINE_SCHEMA_VERSION = 'event_timeline_segment_v0'
 EVENT_TIMELINE_TYPE = 'unclassified'
+DEFAULT_TRIGGER_CONFIG = {
+    'enabled': True,
+    'brightness_spike_meter_delta': 60.0,
+    'brightness_spike_over_target': 50.0,
+    'quality_drop_score': 45.0,
+    'quality_drop_delta': 25.0,
+}
 
 
 @dataclass
@@ -342,6 +349,169 @@ def build_event_candidate_from_metadata(frame_metadata, reasons=None, candidate_
         },
         environment_context=environment_context or {},
     )
+
+
+def evaluate_candidate_triggers(current_metadata, previous_metadata=None, profile_config=None):
+    """Evaluate metadata-only Event Candidate trigger rules.
+
+    This function is deliberately pure/test-only: it does not persist, does not
+    classify real-world event types, and is not called by capture/runtime code.
+    """
+    config = _trigger_config(profile_config)
+    if not config.get('enabled', True):
+        return []
+
+    if not _has_candidate_identity(current_metadata):
+        return []
+
+    candidates = []
+    for reason, score in _candidate_trigger_reasons(current_metadata, previous_metadata, config):
+        candidate = build_event_candidate_from_metadata(
+            current_metadata,
+            reasons=[reason],
+            candidate_score=score,
+            environment_context=_environment_context_from_metadata(current_metadata),
+        )
+        if candidate is not None:
+            candidate.candidate_id = '{0:s}:{1:s}'.format(candidate.candidate_id, reason)
+            candidates.append(candidate)
+
+    return candidates
+
+
+def _trigger_config(profile_config):
+    config = dict(DEFAULT_TRIGGER_CONFIG)
+    if isinstance(profile_config, dict):
+        event_config = profile_config.get('event_candidate_triggers')
+        if isinstance(event_config, dict):
+            config.update(event_config)
+        config.update({
+            key: value for key, value in profile_config.items()
+            if key in config
+        })
+    return config
+
+
+def _has_candidate_identity(metadata):
+    if not isinstance(metadata, dict):
+        return False
+    return all(_string_value(metadata.get(key)) for key in ('frame_id', 'timestamp', 'camera_id', 'profile_id'))
+
+
+def _candidate_trigger_reasons(current_metadata, previous_metadata, config):
+    reasons = []
+
+    brightness_spike = _brightness_spike_score(current_metadata, previous_metadata, config)
+    if brightness_spike is not None:
+        reasons.append(('brightness_spike', brightness_spike))
+
+    quality_drop = _quality_drop_score(current_metadata, previous_metadata, config)
+    if quality_drop is not None:
+        reasons.append(('quality_drop', quality_drop))
+
+    if _condensation_onset(current_metadata, previous_metadata):
+        reasons.append(('condensation_onset', 35.0))
+
+    if _sky_condition_transition(current_metadata, previous_metadata):
+        reasons.append(('sky_condition_transition', 30.0))
+
+    return reasons
+
+
+def _brightness_spike_score(current_metadata, previous_metadata, config):
+    if not isinstance(previous_metadata, dict):
+        return None
+
+    current_meter = _optional_float(current_metadata.get('meter_value_smoothed'))
+    previous_meter = _optional_float(previous_metadata.get('meter_value_smoothed'))
+    target_meter = _optional_float(current_metadata.get('target_meter'))
+    if current_meter is None or previous_meter is None or target_meter is None:
+        return None
+
+    meter_delta = current_meter - previous_meter
+    over_target = current_meter - target_meter
+    if meter_delta < float(config.get('brightness_spike_meter_delta', 60.0)):
+        return None
+    if over_target < float(config.get('brightness_spike_over_target', 50.0)):
+        return None
+
+    return min(100.0, max(0.0, (meter_delta + over_target) / 2.0))
+
+
+def _quality_drop_score(current_metadata, previous_metadata, config):
+    current_quality = _optional_float(current_metadata.get('quality_score'))
+    if current_quality is None:
+        return None
+
+    quality_threshold = float(config.get('quality_drop_score', 45.0))
+    if current_quality <= quality_threshold:
+        return min(100.0, quality_threshold - current_quality + 20.0)
+
+    if isinstance(previous_metadata, dict):
+        previous_quality = _optional_float(previous_metadata.get('quality_score'))
+        if previous_quality is not None:
+            quality_delta = previous_quality - current_quality
+            if quality_delta >= float(config.get('quality_drop_delta', 25.0)):
+                return min(100.0, quality_delta)
+
+    return None
+
+
+def _condensation_onset(current_metadata, previous_metadata):
+    if not isinstance(previous_metadata, dict):
+        return False
+    return (
+        _metadata_bool(current_metadata, 'possible_condensation')
+        and not _metadata_bool(previous_metadata, 'possible_condensation')
+    )
+
+
+def _sky_condition_transition(current_metadata, previous_metadata):
+    if not isinstance(previous_metadata, dict):
+        return False
+
+    previous_sky = _condition_rank(_metadata_value(previous_metadata, 'sky_condition'), ('excellent', 'good', 'usable', 'poor', 'unusable'))
+    current_sky = _condition_rank(_metadata_value(current_metadata, 'sky_condition'), ('excellent', 'good', 'usable', 'poor', 'unusable'))
+    if previous_sky is not None and current_sky is not None and current_sky - previous_sky >= 2:
+        return True
+
+    previous_cloud = _condition_rank(_metadata_value(previous_metadata, 'cloud_condition'), ('clear', 'mostly_clear', 'partly_cloudy', 'cloudy', 'overcast'))
+    current_cloud = _condition_rank(_metadata_value(current_metadata, 'cloud_condition'), ('clear', 'mostly_clear', 'partly_cloudy', 'cloudy', 'overcast'))
+    return previous_cloud is not None and current_cloud is not None and current_cloud - previous_cloud >= 2
+
+
+def _condition_rank(value, ordered_values):
+    value_str = _string_value(value)
+    if value_str not in ordered_values:
+        return None
+    return ordered_values.index(value_str)
+
+
+def _metadata_bool(metadata, key):
+    value = _metadata_value(metadata, key)
+    if isinstance(value, bool):
+        return value
+    return _string_value(value).lower() in ('1', 'true', 'yes', 'on')
+
+
+def _metadata_value(metadata, key):
+    if not isinstance(metadata, dict):
+        return None
+    if key in metadata:
+        return metadata.get(key)
+    environment_context = metadata.get('environment_context')
+    if isinstance(environment_context, dict):
+        return environment_context.get(key)
+    return None
+
+
+def _environment_context_from_metadata(metadata):
+    return {
+        'sky_condition': _metadata_value(metadata, 'sky_condition'),
+        'cloud_condition': _metadata_value(metadata, 'cloud_condition'),
+        'sky_trend': _metadata_value(metadata, 'sky_trend'),
+        'possible_condensation': _metadata_bool(metadata, 'possible_condensation'),
+    }
 
 
 def build_event_timeline_segments(candidates, max_gap_seconds=2.0):

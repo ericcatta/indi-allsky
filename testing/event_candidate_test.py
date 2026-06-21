@@ -16,6 +16,7 @@ from indi_allsky.event_candidate import build_event_candidate_from_metadata
 from indi_allsky.event_candidate import build_event_timeline_segments
 from indi_allsky.event_candidate import default_event_candidate_dir
 from indi_allsky.event_candidate import default_event_timeline_dir
+from indi_allsky.event_candidate import evaluate_candidate_triggers
 
 
 _SMOKE_SCRIPT_PATH = Path(__file__).resolve().parent.joinpath('event_foundation_smoke_test.py')
@@ -59,6 +60,28 @@ def _write_candidates(candidate_dir, date, candidates):
         for candidate in candidates:
             json.dump(candidate.to_dict(), f_candidate, sort_keys=True, separators=(',', ':'))
             f_candidate.write('\n')
+
+
+def _metadata(frame_id=42, camera_id=2, profile_id='asi678mc', timestamp='2026-06-21T22:15:00+00:00', meter=95.0, target=95.0, quality=95.0, sky_condition='good', cloud_condition='mostly_clear', possible_condensation=False):
+    return {
+        'frame_id': frame_id,
+        'timestamp': timestamp,
+        'camera_id': camera_id,
+        'profile_id': profile_id,
+        'meter_value_raw': meter,
+        'meter_value_smoothed': meter,
+        'target_meter': target,
+        'meter_error': target - meter,
+        'exposure_us': 1000000,
+        'gain': 0.0,
+        'capture_status': 'processed',
+        'quality_score': quality,
+        'quality_flags': [],
+        'sky_condition': sky_condition,
+        'cloud_condition': cloud_condition,
+        'sky_trend': 'stable',
+        'possible_condensation': possible_condensation,
+    }
 
 
 def test_event_candidate_v0_serialization():
@@ -187,6 +210,110 @@ def test_placeholder_builder_uses_existing_metadata_only():
     assert row['source_metrics']['meter_value_smoothed'] == 249.0
     assert row['quality_context']['quality_flags'] == ['meter_saturated_high']
     assert row['environment_context']['sky_condition'] == 'poor'
+
+
+def test_candidate_triggers_normal_input_creates_no_candidate():
+    candidates = evaluate_candidate_triggers(
+        _metadata(frame_id=2, meter=96.0, quality=94.0),
+        previous_metadata=_metadata(frame_id=1, meter=95.0, quality=95.0),
+    )
+
+    assert candidates == []
+
+
+def test_candidate_triggers_brightness_spike():
+    candidates = evaluate_candidate_triggers(
+        _metadata(frame_id=2, meter=180.0, target=95.0, quality=92.0),
+        previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=93.0),
+    )
+
+    assert len(candidates) == 1
+    row = candidates[0].to_dict()
+    assert row['reasons'] == ['brightness_spike']
+    assert row['candidate_type'] == 'unclassified'
+    assert row['shadow_only'] is True
+    assert row['source_metrics']['meter_value_smoothed'] == 180.0
+
+
+def test_candidate_triggers_quality_drop():
+    candidates = evaluate_candidate_triggers(
+        _metadata(frame_id=2, meter=95.0, quality=35.0),
+        previous_metadata=_metadata(frame_id=1, meter=95.0, quality=94.0),
+    )
+
+    assert len(candidates) == 1
+    assert candidates[0].reasons == ['quality_drop']
+    assert candidates[0].quality_context['quality_score'] == 35.0
+
+
+def test_candidate_triggers_condensation_onset():
+    candidates = evaluate_candidate_triggers(
+        _metadata(frame_id=2, possible_condensation=True),
+        previous_metadata=_metadata(frame_id=1, possible_condensation=False),
+    )
+
+    assert len(candidates) == 1
+    assert candidates[0].reasons == ['condensation_onset']
+    assert candidates[0].environment_context['possible_condensation'] is True
+
+
+def test_candidate_triggers_sky_condition_transition():
+    candidates = evaluate_candidate_triggers(
+        _metadata(frame_id=2, quality=80.0, sky_condition='poor', cloud_condition='cloudy'),
+        previous_metadata=_metadata(frame_id=1, quality=82.0, sky_condition='excellent', cloud_condition='clear'),
+    )
+
+    assert len(candidates) == 1
+    assert candidates[0].reasons == ['sky_condition_transition']
+
+
+def test_candidate_triggers_missing_fields_create_no_candidate():
+    assert evaluate_candidate_triggers({'quality_score': 20.0}) == []
+    assert evaluate_candidate_triggers(_metadata(frame_id=2, quality=None)) == []
+
+
+def test_candidate_triggers_preserve_multi_camera_profile_fields():
+    candidates = evaluate_candidate_triggers(
+        _metadata(frame_id=77, camera_id=1, profile_id='imx708_south', meter=190.0, quality=90.0),
+        previous_metadata=_metadata(frame_id=76, camera_id=1, profile_id='imx708_south', meter=95.0, quality=92.0),
+    )
+
+    assert len(candidates) == 1
+    assert candidates[0].camera_id == 1
+    assert candidates[0].profile_id == 'imx708_south'
+    assert candidates[0].candidate_type == 'unclassified'
+    assert candidates[0].shadow_only is True
+
+
+def test_candidate_triggers_profile_config_can_disable_all():
+    candidates = evaluate_candidate_triggers(
+        _metadata(frame_id=2, meter=180.0, target=95.0, quality=30.0),
+        previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=95.0),
+        profile_config={'event_candidate_triggers': {'enabled': False}},
+    )
+
+    assert candidates == []
+
+
+def test_candidate_triggers_profile_config_can_override_thresholds():
+    candidates = evaluate_candidate_triggers(
+        _metadata(frame_id=2, meter=140.0, target=95.0, quality=90.0),
+        previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=95.0),
+    )
+    assert candidates == []
+
+    candidates = evaluate_candidate_triggers(
+        _metadata(frame_id=2, meter=140.0, target=95.0, quality=90.0),
+        previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=95.0),
+        profile_config={
+            'event_candidate_triggers': {
+                'brightness_spike_meter_delta': 40.0,
+                'brightness_spike_over_target': 40.0,
+            },
+        },
+    )
+    assert len(candidates) == 1
+    assert candidates[0].reasons == ['brightness_spike']
 
 
 def test_event_timeline_single_candidate_segment():
@@ -385,6 +512,15 @@ if __name__ == '__main__':
     test_event_candidate_analytics_missing_empty_and_malformed_files()
     test_placeholder_builder_is_disabled_without_reasons()
     test_placeholder_builder_uses_existing_metadata_only()
+    test_candidate_triggers_normal_input_creates_no_candidate()
+    test_candidate_triggers_brightness_spike()
+    test_candidate_triggers_quality_drop()
+    test_candidate_triggers_condensation_onset()
+    test_candidate_triggers_sky_condition_transition()
+    test_candidate_triggers_missing_fields_create_no_candidate()
+    test_candidate_triggers_preserve_multi_camera_profile_fields()
+    test_candidate_triggers_profile_config_can_disable_all()
+    test_candidate_triggers_profile_config_can_override_thresholds()
     test_event_timeline_single_candidate_segment()
     test_event_timeline_groups_nearby_same_camera_profile_night()
     test_event_timeline_splits_candidates_beyond_gap()
