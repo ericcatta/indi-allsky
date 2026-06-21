@@ -5392,6 +5392,10 @@ class ModernAdminView(TemplateView):
             'best_frame'         : self.format_dashboard_frame_reference(camera_summary.get('best_frame') or {}),
             'worst_frame'        : self.format_dashboard_frame_reference(camera_summary.get('worst_frame') or {}),
             'night_trend'        : self.format_dashboard_night_trend(camera_summary.get('night_trend') or {}),
+            'sky_condition'      : self.format_dashboard_environment_label((camera_summary.get('sky_condition') or {}).get('sky_condition')),
+            'cloud_condition'    : self.format_dashboard_environment_label(camera_summary.get('cloud_condition')),
+            'sky_trend'          : self.format_dashboard_environment_label(camera_summary.get('sky_trend')),
+            'possible_condensation': self.format_dashboard_condensation_label(camera_summary.get('possible_condensation')),
             'quality_flags'      : self.format_dashboard_counter(camera_summary.get('most_common_quality_flags') or []),
             'decision_reasons'   : self.format_dashboard_counter(camera_summary.get('most_common_decision_reasons') or []),
             'percentages'        : {
@@ -5454,6 +5458,38 @@ class ModernAdminView(TemplateView):
             'unknown' : 'Unknown',
         }
         return labels.get(self._modern_string(direction), 'Unknown')
+
+
+    def format_dashboard_environment_label(self, value):
+        value_str = self._modern_string(value).strip()
+        if not value_str:
+            return 'Unknown'
+
+        labels = {
+            'unknown'       : 'Unknown',
+            'excellent'     : 'Excellent',
+            'good'          : 'Good',
+            'usable'        : 'Usable',
+            'poor'          : 'Poor',
+            'unusable'      : 'Unusable',
+            'clear'         : 'Clear',
+            'mostly_clear'  : 'Mostly clear',
+            'partly_cloudy' : 'Partly cloudy',
+            'cloudy'        : 'Cloudy',
+            'overcast'      : 'Overcast',
+            'improving'     : 'Improving',
+            'stable'        : 'Stable',
+            'degrading'     : 'Degrading',
+        }
+        return labels.get(value_str, value_str.replace('_', ' ').title())
+
+
+    def format_dashboard_condensation_label(self, value):
+        if value is True:
+            return 'Possible'
+        if value is False:
+            return 'No'
+        return 'Unknown'
 
 
     def format_dashboard_trend_delta(self, value, exposure=False):

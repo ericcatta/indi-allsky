@@ -171,12 +171,21 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - richiede degrado netto e persistente della qualita', `sky_trend=degrading`, qualita' finale bassa e almeno un segnale coerente tra exposure/gain in aumento o quality flags negativi persistenti.
     - integrato nel Nightly Summary analytics come `possible_condensation`;
     - non usa dew point, sensori ambiente o heater control in questa fase.
+  - Environmental Awareness dashboard read-only:
+    - card compatta `Sky Awareness` nella Nightly Summary del Modern Admin;
+    - mostra per camera `sky_condition`, `cloud_condition`, `sky_trend` e `possible_condensation`;
+    - usa solo valori gia' calcolati da `FrameMetadataAnalytics`;
+    - nessuna decisione runtime, nessun controllo capture, nessuna AI/ML/event detection.
 - NEXT:
+  - Raspberry field validation / threshold tuning:
+    - verificare su piu' notti/giorni reali che `sky_condition`, `cloud_condition`, `sky_trend` e `possible_condensation` siano coerenti con immagini e meteo osservato;
+    - annotare falsi positivi/negativi prima di cambiare soglie;
+    - mantenere la visualizzazione read-only finche' i segnali non sono validati.
   - Weather Awareness:
     - Purpose: combinare in futuro metadata interni con meteo esterno o sensori locali.
     - Nessun requisito di API esterna nella prima fase.
 - Prossimo micro-step consigliato:
-  - Environmental Awareness v1 summary polish / dashboard exposure read-only per mostrare `sky_condition`, `cloud_condition`, `sky_trend` e `possible_condensation` in modo compatto.
+  - Raspberry field validation / threshold tuning degli indicatori Environmental Awareness prima di usare questi segnali in dashboard avanzate o automazioni.
 - LATER:
   - Integrare temperatura Raspberry/CPU, spazio disco e health log.
   - Alert futuri Telegram/email/webhook.
@@ -1092,3 +1101,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementata Cloud Detection v1 shadow metadata-only, integrata nel Nightly Summary analytics come `cloud_condition`, senza AI/event/runtime control.
 - 2026-06-21: Implementata Sky Trend v1 shadow metadata-only, integrata nel Nightly Summary analytics come `sky_trend`, senza sostituire `night_trend`.
 - 2026-06-21: Implementata Dew / Condensation Detection v1 shadow metadata-only come `possible_condensation`, senza usare sensori/heater control o image analysis.
+- 2026-06-21: Esposti nel dashboard Modern Admin gli indicatori Environmental Awareness read-only (`sky_condition`, `cloud_condition`, `sky_trend`, `possible_condensation`) nella card `Sky Awareness`.

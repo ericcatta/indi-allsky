@@ -193,6 +193,24 @@ var camera_id = {{ camera_id }};
                 </div>
             </article>
 
+            <article class="modern-admin-nightly-card">
+                <p class="modern-admin-card-label">Environmental Awareness</p>
+                <h3>Sky Awareness</h3>
+                <div class="modern-admin-nightly-metric-stack">
+                    {% for camera in modern_admin_nightly_summary.cameras %}
+                    <div class="modern-admin-nightly-metric-row">
+                        <strong>{{ camera.profile_id }}</strong>
+                        <dl>
+                            <div><dt>Sky</dt><dd>{{ camera.sky_condition }}</dd></div>
+                            <div><dt>Clouds</dt><dd>{{ camera.cloud_condition }}</dd></div>
+                            <div><dt>Trend</dt><dd>{{ camera.sky_trend }}</dd></div>
+                            <div class="modern-admin-nightly-metric-wide"><dt>Condensation</dt><dd>{{ camera.possible_condensation }}</dd></div>
+                        </dl>
+                    </div>
+                    {% endfor %}
+                </div>
+            </article>
+
             {% for card in [
                 ('Quality Score', 'Average / Min / Max', 'average_quality', 'minimum_quality', 'maximum_quality'),
                 ('Exposure', 'Average / Min / Max', 'average_exposure', 'minimum_exposure', 'maximum_exposure'),
