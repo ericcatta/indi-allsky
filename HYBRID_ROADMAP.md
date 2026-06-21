@@ -204,10 +204,19 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - analytics minimi per riepilogo notturno: totale candidate, conteggio per camera, conteggio per reason, score medio e score massimo;
     - builder placeholder disabilitato di default se non vengono fornite reason esplicite;
     - nessuna integrazione nella capture pipeline, nessuna decisione runtime, nessuna classificazione meteor/satellite/aircraft/aurora.
+  - Event Timeline v0 shadow-only:
+    - contratto `EventTimelineSegment` con `schema_version=event_timeline_segment_v0`;
+    - `segment_type` forzato a `unclassified`;
+    - `shadow_only=True`;
+    - raggruppa solo candidate esistenti e omogenee per `camera_id`, `profile_id`, `night_id`;
+    - max gap configurabile tra candidate, default `2s`;
+    - persistenza append-only JSONL in directory `event_timelines/YYYY-MM-DD.jsonl`;
+    - analytics minimi: totale segmenti, segmenti per camera, durata media/max, candidate medie/max per segmento e conteggi reason;
+    - nessuna dashboard UI, nessuna classificazione reale, nessuna integrazione capture.
 - NEXT:
-  - Event Timeline shadow-only:
-    - aggregare candidate e metadata in una timeline diagnostica giornaliera;
-    - mantenere tutte le candidate `unclassified`;
+  - Event Timeline dashboard read-only:
+    - mostrare solo segmenti `unclassified`;
+    - collegare segmenti a frame/candidate per ispezione manuale;
     - nessuna azione runtime o pubblicazione automatica.
 - LATER:
   - Meteor detection.
@@ -1119,3 +1128,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementata Dew / Condensation Detection v1 shadow metadata-only come `possible_condensation`, senza usare sensori/heater control o image analysis.
 - 2026-06-21: Esposti nel dashboard Modern Admin gli indicatori Environmental Awareness read-only (`sky_condition`, `cloud_condition`, `sky_trend`, `possible_condensation`) nella card `Sky Awareness`.
 - 2026-06-21: Avviata Event Detection Foundation con `EventCandidate` v0 shadow-only, JSONL append-only e analytics minimi, senza classificazione eventi o integrazione capture.
+- 2026-06-21: Aggiunta Event Timeline v0 shadow-only per raggruppare candidate `unclassified` vicine nel tempo senza AI, RMS, meteor detection o impatto runtime.
