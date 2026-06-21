@@ -234,7 +234,18 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - non persiste e non viene chiamata automaticamente;
     - genera solo `EventCandidate` `unclassified` e `shadow_only=True`;
     - nessuna AI, RMS, meteor detection o classificazione reale.
+  - Candidate Trigger Smoke Test v0:
+    - script manuale `testing/candidate_trigger_smoke_test.py`;
+    - genera metadata sintetici per casi normal, brightness spike, quality drop, condensation onset e sky/cloud transition;
+    - default sicuro in `/tmp/indi-allsky-candidate-trigger-smoke`;
+    - per popolare la dashboard Raspberry: `python3 testing/candidate_trigger_smoke_test.py --varlib /var/lib/indi-allsky`;
+    - cleanup mirato: `python3 testing/candidate_trigger_smoke_test.py --varlib /var/lib/indi-allsky --cleanup`;
+    - resta manual-only: nessun hook capture/runtime, nessuna classificazione.
 - NEXT:
+  - Candidate Trigger Runtime Integration v0 shadow-only:
+    - valutare se e come collegare i trigger al path metadata dopo processing;
+    - deve essere gated/configurabile e inizialmente shadow-only;
+    - nessuna AI, RMS, meteor detection o classificazione reale.
   - Event Timeline dashboard detail:
     - collegare segmenti a frame/candidate per ispezione manuale;
     - mantenere tutti i segmenti `unclassified`;
@@ -1153,3 +1164,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Esposti nel Modern Admin dashboard gli analytics read-only di Event Candidates/Event Timelines esistenti, senza generazione automatica candidate o classificazione.
 - 2026-06-21: Aggiunto smoke test manuale Event Foundation v0 con dati sintetici `synthetic-smoke-v0`, persistence JSONL candidate/timeline e cleanup sicuro.
 - 2026-06-21: Aggiunte Candidate Trigger Rules v0 test-only metadata-based per candidate `unclassified`, senza hook runtime o classificazione eventi.
+- 2026-06-21: Aggiunto Candidate Trigger Smoke Test v0 manual-only con metadata sintetici, persistence candidate/timeline, analytics dashboard e cleanup sicuro.

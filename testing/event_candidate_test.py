@@ -24,6 +24,11 @@ _SMOKE_SPEC = importlib.util.spec_from_file_location('event_foundation_smoke_tes
 event_foundation_smoke_test = importlib.util.module_from_spec(_SMOKE_SPEC)
 _SMOKE_SPEC.loader.exec_module(event_foundation_smoke_test)
 
+_TRIGGER_SMOKE_SCRIPT_PATH = Path(__file__).resolve().parent.joinpath('candidate_trigger_smoke_test.py')
+_TRIGGER_SMOKE_SPEC = importlib.util.spec_from_file_location('candidate_trigger_smoke_test', _TRIGGER_SMOKE_SCRIPT_PATH)
+candidate_trigger_smoke_test = importlib.util.module_from_spec(_TRIGGER_SMOKE_SPEC)
+_TRIGGER_SMOKE_SPEC.loader.exec_module(candidate_trigger_smoke_test)
+
 
 def _candidate(candidate_id='asi678mc:2:42', camera_id=2, profile_id='asi678mc', frame_id=42, score=12.5, reasons=None, timestamp='2026-06-21T22:15:00+00:00'):
     return EventCandidate(
@@ -502,6 +507,48 @@ def test_event_foundation_smoke_cleanup_removes_candidates_and_timelines():
         assert EventTimelineAnalytics(timeline_dir).get_nightly_timeline_summary(date)['total_timeline_segments'] == 0
 
 
+def test_candidate_trigger_smoke_cases_and_cleanup():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        date = '2026-06-21'
+        base_dir = Path(tmpdir)
+        candidate_dir = default_event_candidate_dir(base_dir)
+        timeline_dir = default_event_timeline_dir(base_dir)
+
+        candidates, case_results = candidate_trigger_smoke_test.build_synthetic_trigger_candidates(date)
+        assert dict(case_results) == {
+            'normal': [],
+            'brightness_spike': ['brightness_spike'],
+            'quality_drop': ['quality_drop'],
+            'condensation_onset': ['condensation_onset'],
+            'sky_condition_transition': ['sky_condition_transition'],
+        }
+
+        candidate_writer = EventCandidateWriter(candidate_dir)
+        for candidate in candidates:
+            candidate_writer.write(candidate)
+
+        timeline_writer = EventTimelineWriter(timeline_dir)
+        for segment in build_event_timeline_segments(candidates):
+            timeline_writer.write(segment)
+
+        candidate_summary = EventCandidateAnalytics(candidate_dir).get_nightly_event_summary(date)
+        timeline_summary = EventTimelineAnalytics(timeline_dir).get_nightly_timeline_summary(date)
+        assert candidate_summary['total_event_candidates'] == 4
+        assert candidate_summary['event_candidates_by_reason'] == {
+            'brightness_spike': 1,
+            'condensation_onset': 1,
+            'quality_drop': 1,
+            'sky_condition_transition': 1,
+        }
+        assert timeline_summary['total_timeline_segments'] == 4
+
+        removed_candidates, removed_timelines = candidate_trigger_smoke_test.cleanup_synthetic(candidate_dir, timeline_dir, date)
+        assert removed_candidates == 4
+        assert removed_timelines == 4
+        assert EventCandidateAnalytics(candidate_dir).get_nightly_event_summary(date)['total_event_candidates'] == 0
+        assert EventTimelineAnalytics(timeline_dir).get_nightly_timeline_summary(date)['total_timeline_segments'] == 0
+
+
 if __name__ == '__main__':
     test_event_candidate_v0_serialization()
     test_candidate_type_is_always_unclassified()
@@ -533,4 +580,5 @@ if __name__ == '__main__':
     test_event_timeline_nightly_analytics_counts()
     test_event_timeline_analytics_missing_empty_and_malformed_files()
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
+    test_candidate_trigger_smoke_cases_and_cleanup()
     print('event candidate tests OK')
