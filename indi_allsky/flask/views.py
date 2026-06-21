@@ -5184,6 +5184,8 @@ class ModernAdminView(TemplateView):
                 'current_meter'         : self.format_dashboard_meter_pair(latest_frame) if latest_frame else 'Unknown',
                 'current_target_meter'  : self.format_dashboard_number(latest_frame.get('target_meter')) if latest_frame else 'Unknown',
                 'current_reason'        : self.format_dashboard_reason_label(latest_frame.get('decision_reason')) if latest_frame else 'No decision yet',
+                'quality_score'         : self.format_dashboard_quality_score(latest_frame.get('quality_score')) if latest_frame else 'Unknown',
+                'quality_flags'         : self.format_dashboard_quality_flags(latest_frame.get('quality_flags')) if latest_frame else ['No quality metadata'],
                 'image_url'             : image_url,
                 'image_age'             : image_age,
                 'summary'               : self.format_dashboard_summary(summary),
@@ -5312,6 +5314,9 @@ class ModernAdminView(TemplateView):
             'average_meter'     : self.format_dashboard_number(summary.get('average_meter_value')),
             'minimum_meter'     : self.format_dashboard_number(summary.get('minimum_meter_value')),
             'maximum_meter'     : self.format_dashboard_number(summary.get('maximum_meter_value')),
+            'average_quality'   : self.format_dashboard_quality_score(summary.get('average_quality_score')),
+            'minimum_quality'   : self.format_dashboard_quality_score(summary.get('minimum_quality_score')),
+            'maximum_quality'   : self.format_dashboard_quality_score(summary.get('maximum_quality_score')),
         }
 
 
@@ -5394,15 +5399,51 @@ class ModernAdminView(TemplateView):
             'gain_auto_disabled'                      : 'Gain auto disabled',
             'gain_already_max'                        : 'Gain at maximum',
             'gain_already_min'                        : 'Gain at minimum',
+            'gain_adjusting'                          : 'Gain adjusting',
+            'gain_invalid'                            : 'Gain invalid',
+            'gain_missing'                            : 'Gain missing',
             'hold'                                    : 'Hold',
             'increase_exposure'                       : 'Increase exposure',
             'increase_exposure_conditions_satisfied'  : 'Increase exposure',
             'increase_gain'                           : 'Increase gain',
             'increase_gain_conditions_satisfied'      : 'Increase gain',
+            'capture_error'                           : 'Capture error',
+            'capture_not_processed'                   : 'Capture not processed',
+            'controller_at_limit'                     : 'Controller at limit',
+            'exposure_adjusting'                      : 'Exposure adjusting',
+            'exposure_invalid'                        : 'Exposure invalid',
+            'exposure_missing'                        : 'Exposure missing',
+            'meter_far_from_target'                   : 'Meter far from target',
+            'meter_missing'                           : 'Meter missing',
+            'meter_near_black'                        : 'Meter near black',
+            'meter_near_edge'                         : 'Meter near edge',
+            'meter_off_target'                        : 'Meter off target',
+            'meter_saturated_high'                    : 'Meter saturated high',
+            'nominal'                                 : 'Nominal',
+            'target_missing'                          : 'Target missing',
             'target_reached'                          : 'Target reached',
             'trend_not_confirmed'                     : 'Trend not confirmed',
         }
         return labels.get(value_str, value_str)
+
+
+    def format_dashboard_quality_score(self, value):
+        number = self._modern_optional_float(value)
+        if number is None:
+            return 'Unknown'
+        return '{0:0.0f} / 100'.format(number)
+
+
+    def format_dashboard_quality_flags(self, value):
+        if isinstance(value, (list, tuple)):
+            flags = [self.format_dashboard_reason_label(flag) for flag in value if self._modern_string(flag)]
+            return flags or ['No flags']
+
+        value_str = self._modern_string(value).strip()
+        if not value_str:
+            return ['No flags']
+
+        return [self.format_dashboard_reason_label(value_str)]
 
 
     def format_dashboard_number(self, value):

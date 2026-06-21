@@ -28,7 +28,7 @@ def _frame(frame_id, timestamp, camera_id, exposure_us, gain, meter_value, expos
         'decision_reason': reason,
         'capture_status': 'processed',
         'error_message': '',
-        'quality_score': 0.0,
+        'quality_score': max(0.0, min(100.0, 100.0 - abs(95.0 - meter_value))),
         'quality_flags': [],
     }
 
@@ -93,6 +93,9 @@ def test_camera_summary():
         assert summary['average_meter_value'] == 95.0
         assert summary['minimum_meter_value'] == 90.0
         assert summary['maximum_meter_value'] == 100.0
+        assert summary['average_quality_score'] == 95.0
+        assert summary['minimum_quality_score'] == 95.0
+        assert summary['maximum_quality_score'] == 95.0
 
 
 def test_recent_frames_filters_by_timestamp():

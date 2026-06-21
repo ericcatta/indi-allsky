@@ -65,6 +65,18 @@ var camera_id = {{ camera_id }};
                         <dd>{{ camera.current_reason }}</dd>
                     </div>
                 </dl>
+
+                <div class="modern-admin-dashboard-quality">
+                    <div>
+                        <span>Quality</span>
+                        <strong>{{ camera.quality_score }}</strong>
+                    </div>
+                    <ul>
+                        {% for flag in camera.quality_flags %}
+                        <li>{{ flag }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </article>
             {% endfor %}
         </div>
@@ -94,6 +106,7 @@ var camera_id = {{ camera_id }};
                     <div><dt>Average meter</dt><dd>{{ camera.summary.average_meter }}</dd></div>
                     <div><dt>Minimum meter</dt><dd>{{ camera.summary.minimum_meter }}</dd></div>
                     <div><dt>Maximum meter</dt><dd>{{ camera.summary.maximum_meter }}</dd></div>
+                    <div><dt>Average quality</dt><dd>{{ camera.summary.average_quality }}</dd></div>
                 </dl>
             </article>
             {% endfor %}

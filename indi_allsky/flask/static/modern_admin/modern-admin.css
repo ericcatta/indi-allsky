@@ -2613,6 +2613,53 @@ body.modern-admin-lightbox-open {
   overflow-wrap: anywhere;
 }
 
+.modern-admin-shell .modern-admin-dashboard-quality {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.modern-admin-shell .modern-admin-dashboard-quality span {
+  display: block;
+  color: var(--modern-admin-quiet);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.modern-admin-shell .modern-admin-dashboard-quality strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--modern-admin-text);
+  font-size: 1.08rem;
+}
+
+.modern-admin-shell .modern-admin-dashboard-quality ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modern-admin-shell .modern-admin-dashboard-quality li {
+  padding: 4px 7px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  color: var(--modern-admin-muted);
+  background: rgba(148, 163, 184, 0.08);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .modern-admin-shell .modern-admin-chart-stack {
   display: grid;
   gap: 12px;

@@ -102,6 +102,7 @@ class FrameMetadataAnalytics:
         exposures = [value for value in (self._optional_float(frame.get('exposure_us')) for frame in frames) if value is not None]
         gains = [value for value in (self._optional_float(frame.get('gain')) for frame in frames) if value is not None]
         meters = [value for value in (self._optional_float(frame.get('meter_value_smoothed')) for frame in frames) if value is not None]
+        quality_scores = [value for value in (self._optional_float(frame.get('quality_score')) for frame in frames) if value is not None]
 
         return {
             'frame_count': len(frames),
@@ -116,6 +117,9 @@ class FrameMetadataAnalytics:
             'average_meter_value': self._average(meters),
             'minimum_meter_value': min(meters) if meters else None,
             'maximum_meter_value': max(meters) if meters else None,
+            'average_quality_score': self._average(quality_scores),
+            'minimum_quality_score': min(quality_scores) if quality_scores else None,
+            'maximum_quality_score': max(quality_scores) if quality_scores else None,
         }
 
 

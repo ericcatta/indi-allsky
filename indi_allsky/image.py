@@ -40,6 +40,7 @@ from .auto_meter import measure_auto_exposure
 from .frame_metadata import FrameMetadata
 from .frame_metadata import FrameMetadataWriter
 from .frame_metadata import default_frame_metadata_dir
+from .frame_quality import compute_frame_quality
 from .multicamera_diag import write_multicamera_diag
 
 from .processing import ImageProcessor
@@ -1098,25 +1099,43 @@ class ImageWorker(Process):
                 if not decision_reason:
                     decision_reason = auto_gain_decision.reason
 
+            meter_value_raw = self._optional_float(state.get('measured_value'))
+            meter_value_smoothed = self._optional_float(state.get('smoothed_value'))
+            target_meter_float = self._optional_float(target_meter)
+            meter_error_float = self._optional_float(meter_error)
+            exposure_us = int(round(float(exposure) * 1000000.0))
+            gain_float = float(gain)
+            quality_score, quality_flags = compute_frame_quality(
+                meter_value=meter_value_smoothed,
+                target_meter=target_meter_float,
+                exposure_us=exposure_us,
+                gain=gain_float,
+                auto_exposure_action=auto_exposure_action,
+                auto_gain_action=auto_gain_action,
+                decision_reason=decision_reason,
+                capture_status=capture_status,
+                error_message=error_message,
+            )
+
             metadata = FrameMetadata(
                 frame_id=int(frame_id),
                 timestamp=timestamp,
                 camera_id=int(camera_id),
                 profile_id=str(profile_id),
                 image_file_path=str(image_file_path),
-                exposure_us=int(round(float(exposure) * 1000000.0)),
-                gain=float(gain),
-                meter_value_raw=self._optional_float(state.get('measured_value')),
-                meter_value_smoothed=self._optional_float(state.get('smoothed_value')),
-                target_meter=self._optional_float(target_meter),
-                meter_error=self._optional_float(meter_error),
+                exposure_us=exposure_us,
+                gain=gain_float,
+                meter_value_raw=meter_value_raw,
+                meter_value_smoothed=meter_value_smoothed,
+                target_meter=target_meter_float,
+                meter_error=meter_error_float,
                 auto_exposure_action=str(auto_exposure_action),
                 auto_gain_action=str(auto_gain_action),
                 decision_reason=str(decision_reason),
                 capture_status=str(capture_status),
                 error_message=str(error_message or ''),
-                quality_score=0.0,
-                quality_flags=[],
+                quality_score=quality_score,
+                quality_flags=quality_flags,
             )
             metadata_path = self.frame_metadata_writer.write(metadata)
             logger.info(

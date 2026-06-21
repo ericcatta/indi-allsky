@@ -44,6 +44,102 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - gain night/moonmode `16`.
 - La sovraesposizione ASI diurna e' stata confermata come saturazione raw FITS quando l'exposure sale troppo, non come artefatto creato da debayer, stretch, JPEG o Hybrid AWB.
 
+## Roadmap Per Area
+
+### 1. Camera Control
+
+- DONE:
+  - Metering per-camera/profile con modalita' `default`, `average`, `median`, `sigma_clipped`, `background`, `moon_aware`, `stars_only`.
+  - Auto Meter state smoother con EMA per `profile_id:camera_id`.
+  - Auto Exposure profile-first con runtime baseline da `EXPOSURE_NEXT`/`EXPOSURE_CURRENT`.
+  - Auto Exposure daytime ASI con `day_bounded` step e convergenza stabile validata sul Raspberry.
+  - Auto Exposure convergence tiers `aggressive/normal/fine/target`.
+  - Auto Gain shadow controller, apply gated, profile-specific gain limits e convergence modes.
+  - Auto Gain runtime state persistence/restore separata dalla config DB.
+  - Hybrid AWB per-camera con `postprocess_rgb` operativo per ASI/INDI.
+- IN TEST:
+  - Coordinamento continuo Auto Exposure + Auto Gain in condizioni notte/moonmode reali.
+  - Auto Exposure blocker/reason diagnostics per tuning senza cambiare comportamento.
+- NEXT:
+  - Raffinare cooldown/trend profile-first per Auto Exposure.
+  - Validare Auto Gain night/moonmode su piu' notti.
+  - Ridurre o rimuovere diagnostica temporanea `[ASI_FRAME_STATS]` quando non serve piu'.
+- LATER:
+  - ROI/mask per metering e AWB.
+  - Color calibration per-camera.
+  - Stretch custom per-camera.
+
+### 2. Metadata & Analytics
+
+- DONE:
+  - `FrameMetadata` JSONL append-only.
+  - Daily rotation in `VARLIB_FOLDER/frame_metadata/YYYY-MM-DD.jsonl`.
+  - Metadata Analytics Reader con day load, latest frames, recent frames, camera summary e decision statistics.
+  - Dashboard MVP read-only con camera cards, latest frame, charts 24h, decision statistics e quick summary.
+  - Dashboard Polish v1 con unita' leggibili, reason label, chart Y-axis, tooltip e X-axis temporale.
+- IN TEST:
+  - Quality Score v1 metadata-only: usa meter/target, exposure/gain state, capture status e decision state; non usa AI, image analysis o star detection.
+- NEXT:
+  - Validare Quality Score v1 sul Raspberry con frame buoni, saturi, scuri e capture error.
+  - Aggiungere filtri dashboard/gallery basati su metadata e quality flags.
+  - Grafici storici giornalieri piu' ricchi per brightness/exposure/gain.
+- LATER:
+  - Retention policy metadata.
+  - Export/debug metadata.
+  - Persistenza analytics in SQLite solo se JSONL diventa insufficiente.
+
+### 3. Environmental Awareness
+
+- NEXT:
+  - Cloud detection.
+  - Sky condition classification.
+  - Weather awareness.
+  - Condensation/fog/rain/haze detection.
+- LATER:
+  - Integrare temperatura Raspberry/CPU, spazio disco e health log.
+  - Alert futuri Telegram/email/webhook.
+  - Analisi ambientale persistita come metadata, non solo log.
+
+### 4. Event Detection
+
+- LATER:
+  - Meteor detection.
+  - Aurora detection.
+  - Satellite detection.
+  - Aircraft detection, se utile per il sito pubblico o per debug.
+  - Light pollution/event detection futura.
+  - Timeline diagnostica giornaliera con eventi camera restart, exposure jump, saturation, missing frame, service restart.
+
+### 5. AI / Smart Features
+
+- IDEAS:
+  - AI classification per frame o per sequenza.
+  - Smart summaries giornalieri/notturni.
+  - Anomaly detection su exposure/gain/meter/quality metadata.
+  - Riconoscimento frame inutilizzabili:
+    - saturi.
+    - neri.
+    - fuori fuoco.
+    - coperti.
+    - mossi/artefatti.
+  - Eventuali modelli futuri devono scrivere output come metadata persistente e restare opzionali.
+
+### 6. Future / Backlog
+
+- Dashboard pubblica esterna piu' pulita.
+- Dashboard con visione simultanea dell'ultima foto di entrambe le camere.
+- Gallery multicamera con filtri per camera, giorno/notte, qualita' e reason.
+- Nomi camera chiari nella UI:
+  - "ASI678MC Zenith".
+  - "IMX708 South Wide".
+- Modalita' "science/debug day" che salva campioni raw periodici per analisi.
+- Profilo "public-safe" con pubblicazione solo frame validi.
+- Preset hardware:
+  - ASI678MC daytime.
+  - ASI678MC night.
+  - IMX708 long exposure.
+  - IMX708 daylight.
+
 ## DONE
 
 ### Modern Admin e Configurazione
@@ -228,8 +324,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - `decision_reason`.
   - `capture_status`.
   - `error_message`.
-  - `quality_score` placeholder.
-  - `quality_flags` placeholder.
+  - `quality_score`.
+  - `quality_flags`.
 - Scrittura best-effort dopo processing:
   - `processed` quando l'immagine viene salvata e inserita nel DB.
   - `input_missing`, `input_empty`, `bad_image`, `not_saved` per percorsi noti senza DB image id.
@@ -259,6 +355,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Nessun cambio a upload, processing, Auto Exposure o Auto Gain.
 
 ## IN TEST
+
+### Quality Score v1
+
+- Quality Score v1 metadata-only implementato localmente e da validare sul Raspberry:
+  - usa solo meter value, target meter, exposure/gain state, capture status, action/reason dei controller ed eventuale error message;
+  - non usa AI, image analysis, star detection o quality inference da pixel;
+  - persiste `quality_score` 0-100 e `quality_flags` in ogni `FrameMetadata`;
+  - Dashboard mostra latest quality score/flags nelle camera cards e average quality nel quick summary.
+- Validare su frame buoni, saturi, quasi neri e capture error.
 
 ### Hybrid AWB / Color ASI
 
@@ -862,3 +967,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementato Dashboard MVP read-only con latest frame per camera, grafici 24h exposure/gain/meter, statistiche decisioni e quick summary basati su `FrameMetadataAnalytics`.
 - 2026-06-21: Dashboard Polish v1: summary riordinato sotto le camera cards, unita' piu' leggibili, reason label, axis labels e tooltip sui grafici.
 - 2026-06-21: Migliorata leggibilita' asse X dashboard con tick temporali locali, subtitle `Last 24 hours` e timestamp completo nei tooltip.
+- 2026-06-21: Implementato Quality Score v1 metadata-only con persistenza `quality_score`/`quality_flags` e visualizzazione read-only nel dashboard.
