@@ -95,11 +95,55 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ### 3. Environmental Awareness
 
+- Scopo della fase:
+  - Dopo Metadata / Analytics consolidation, il sistema inizia a interpretare condizioni cielo/ambiente usando segnali affidabili prima di introdurre AI o event detection.
+  - Event Detection e AI devono aspettare finche' metadata quality, sky condition e health signals sono abbastanza stabili.
+  - Non avviare AI detection prima che il sistema sappia distinguere condizioni cielo buone/scarse.
 - NEXT:
-  - Cloud detection.
-  - Sky condition classification.
-  - Weather awareness.
-  - Condensation/fog/rain/haze detection.
+  - Cloud Detection v1:
+    - Purpose: capire se il cielo e' utilizzabile o coperto usando segnali metadata/image-derived.
+    - Input possibili:
+      - `quality_score`.
+      - `quality_flags`.
+      - trend meter.
+      - comportamento exposure/gain.
+      - stelle rilevate, se disponibili in futuro.
+      - contrasto/brightness indicator, se disponibili in futuro.
+    - Output atteso:
+      - `clear`.
+      - `mostly_clear`.
+      - `partly_cloudy`.
+      - `cloudy`.
+      - `overcast`.
+  - Sky Condition Classification:
+    - Purpose: produrre uno stato leggibile per le condizioni osservative correnti.
+    - Output atteso:
+      - `excellent`.
+      - `good`.
+      - `usable`.
+      - `poor`.
+      - `unusable`.
+  - Condensation / Dew Detection:
+    - Purpose: rilevare possibile condensa su lente/dome.
+    - Indicatori possibili:
+      - calo quality score.
+      - stelle che spariscono.
+      - contrasto in calo.
+      - meter relativamente stabile.
+      - immagine uniformemente sfocata, lavata o priva di dettaglio.
+    - Output atteso:
+      - `possible_condensation`.
+      - confidence score.
+      - warning visibile in dashboard.
+  - Sky Trend:
+    - Purpose: capire se le condizioni stanno migliorando, restando stabili o peggiorando.
+    - Output atteso:
+      - `improving`.
+      - `stable`.
+      - `degrading`.
+  - Weather Awareness:
+    - Purpose: combinare in futuro metadata interni con meteo esterno o sensori locali.
+    - Nessun requisito di API esterna nella prima fase.
 - LATER:
   - Integrare temperatura Raspberry/CPU, spazio disco e health log.
   - Alert futuri Telegram/email/webhook.
@@ -1010,3 +1054,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Completato Nightly Summary v1 locale con UI a card, missing frames, anomaly events, best/worst frame e night trend metadata-only.
 - 2026-06-21: Rifinito layout Nightly Summary per evitare rendering tabellare/plain text: card scure responsive, metric tiles e cache-buster CSS dedicato.
 - 2026-06-21: Implementato Metadata Health & Consolidation locale con report integrity/coverage e card dashboard read-only.
+- 2026-06-21: Documentata fase Environmental Awareness: cloud detection, sky condition, condensation/dew, sky trend e weather awareness prima di Event Detection/AI.
