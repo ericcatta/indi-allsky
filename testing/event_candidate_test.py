@@ -17,6 +17,7 @@ from indi_allsky.event_candidate import build_event_timeline_segments
 from indi_allsky.event_candidate import default_event_candidate_dir
 from indi_allsky.event_candidate import default_event_timeline_dir
 from indi_allsky.event_candidate import evaluate_candidate_triggers
+from indi_allsky.event_candidate import persist_event_candidates_shadow
 
 
 _SMOKE_SCRIPT_PATH = Path(__file__).resolve().parent.joinpath('event_foundation_smoke_test.py')
@@ -549,6 +550,98 @@ def test_candidate_trigger_smoke_cases_and_cleanup():
         assert EventTimelineAnalytics(timeline_dir).get_nightly_timeline_summary(date)['total_timeline_segments'] == 0
 
 
+def test_runtime_shadow_integration_disabled_by_default():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        candidate_dir = default_event_candidate_dir(base_dir)
+        timeline_dir = default_event_timeline_dir(base_dir)
+
+        result = persist_event_candidates_shadow(
+            _metadata(frame_id=2, meter=180.0, target=95.0, quality=30.0),
+            previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=95.0),
+            candidate_dir=candidate_dir,
+            timeline_dir=timeline_dir,
+        )
+
+        assert result['status'] == 'disabled'
+        assert result['candidate_count'] == 0
+        assert not candidate_dir.exists()
+        assert not timeline_dir.exists()
+
+
+def test_runtime_shadow_integration_enabled_persists_candidates_and_timelines():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        candidate_dir = default_event_candidate_dir(base_dir)
+        timeline_dir = default_event_timeline_dir(base_dir)
+        date = '2026-06-21'
+
+        result = persist_event_candidates_shadow(
+            _metadata(frame_id=2, meter=180.0, target=95.0, quality=30.0),
+            previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=95.0),
+            profile_config={'event_candidate_triggers': {'enabled': True}},
+            candidate_dir=candidate_dir,
+            timeline_dir=timeline_dir,
+        )
+
+        assert result['status'] == 'written'
+        assert result['candidate_count'] == 2
+        assert EventCandidateAnalytics(candidate_dir).get_nightly_event_summary(date)['total_event_candidates'] == 2
+        assert EventTimelineAnalytics(timeline_dir).get_nightly_timeline_summary(date)['total_timeline_segments'] == 1
+
+
+def test_runtime_shadow_integration_rebuilds_timeline_without_duplicates():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        candidate_dir = default_event_candidate_dir(base_dir)
+        timeline_dir = default_event_timeline_dir(base_dir)
+        date = '2026-06-21'
+        config = {'event_candidate_triggers': {'enabled': True}}
+
+        persist_event_candidates_shadow(
+            _metadata(frame_id=2, timestamp='2026-06-21T22:15:00+00:00', meter=180.0, target=95.0, quality=95.0),
+            previous_metadata=_metadata(frame_id=1, timestamp='2026-06-21T22:14:59+00:00', meter=95.0, target=95.0, quality=95.0),
+            profile_config=config,
+            candidate_dir=candidate_dir,
+            timeline_dir=timeline_dir,
+        )
+        persist_event_candidates_shadow(
+            _metadata(frame_id=3, timestamp='2026-06-21T22:15:01+00:00', meter=190.0, target=95.0, quality=95.0),
+            previous_metadata=_metadata(frame_id=2, timestamp='2026-06-21T22:15:00+00:00', meter=95.0, target=95.0, quality=95.0),
+            profile_config=config,
+            candidate_dir=candidate_dir,
+            timeline_dir=timeline_dir,
+        )
+
+        assert EventCandidateAnalytics(candidate_dir).get_nightly_event_summary(date)['total_event_candidates'] == 2
+        assert EventTimelineAnalytics(timeline_dir).get_nightly_timeline_summary(date)['total_timeline_segments'] == 1
+
+
+def test_runtime_shadow_integration_trigger_failure_is_isolated():
+    def broken_evaluator(*args, **kwargs):
+        raise RuntimeError('synthetic trigger failure')
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        candidate_dir = default_event_candidate_dir(base_dir)
+        timeline_dir = default_event_timeline_dir(base_dir)
+
+        result = persist_event_candidates_shadow(
+            _metadata(frame_id=2, meter=180.0, target=95.0, quality=30.0),
+            previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=95.0),
+            profile_config={'event_candidate_triggers': {'enabled': True}},
+            candidate_dir=candidate_dir,
+            timeline_dir=timeline_dir,
+            trigger_evaluator=broken_evaluator,
+        )
+
+        assert result['status'] == 'error'
+        assert result['candidate_count'] == 0
+        assert 'synthetic trigger failure' in result['reason']
+        assert EventCandidateAnalytics(candidate_dir).get_nightly_event_summary('2026-06-21')['total_event_candidates'] == 0
+        assert EventTimelineAnalytics(timeline_dir).get_nightly_timeline_summary('2026-06-21')['total_timeline_segments'] == 0
+
+
 if __name__ == '__main__':
     test_event_candidate_v0_serialization()
     test_candidate_type_is_always_unclassified()
@@ -581,4 +674,8 @@ if __name__ == '__main__':
     test_event_timeline_analytics_missing_empty_and_malformed_files()
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
     test_candidate_trigger_smoke_cases_and_cleanup()
+    test_runtime_shadow_integration_disabled_by_default()
+    test_runtime_shadow_integration_enabled_persists_candidates_and_timelines()
+    test_runtime_shadow_integration_rebuilds_timeline_without_duplicates()
+    test_runtime_shadow_integration_trigger_failure_is_isolated()
     print('event candidate tests OK')

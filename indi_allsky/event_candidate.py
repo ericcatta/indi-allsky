@@ -18,6 +18,10 @@ DEFAULT_TRIGGER_CONFIG = {
     'quality_drop_score': 45.0,
     'quality_drop_delta': 25.0,
 }
+DEFAULT_RUNTIME_TRIGGER_CONFIG = {
+    **DEFAULT_TRIGGER_CONFIG,
+    'enabled': False,
+}
 
 
 @dataclass
@@ -141,6 +145,15 @@ class EventTimelineWriter:
         with timeline_path.open('a', encoding='utf-8') as f_timeline:
             json.dump(segment.to_dict(), f_timeline, sort_keys=True, separators=(',', ':'))
             f_timeline.write('\n')
+        return timeline_path
+
+    def write_day(self, date, segments):
+        timeline_path = self.timeline_dir.joinpath('{0:s}.jsonl'.format(str(date)))
+        timeline_path.parent.mkdir(parents=True, exist_ok=True)
+        with timeline_path.open('w', encoding='utf-8') as f_timeline:
+            for segment in segments or []:
+                json.dump(segment.to_dict(), f_timeline, sort_keys=True, separators=(',', ':'))
+                f_timeline.write('\n')
         return timeline_path
 
     def _timeline_path_for(self, segment):
@@ -379,8 +392,79 @@ def evaluate_candidate_triggers(current_metadata, previous_metadata=None, profil
     return candidates
 
 
-def _trigger_config(profile_config):
-    config = dict(DEFAULT_TRIGGER_CONFIG)
+def persist_event_candidates_shadow(
+        current_metadata,
+        previous_metadata=None,
+        profile_config=None,
+        candidate_dir=None,
+        timeline_dir=None,
+        trigger_evaluator=evaluate_candidate_triggers,
+):
+    """Evaluate and persist shadow event candidates without touching capture.
+
+    Runtime integration intentionally defaults to disabled. Callers can invoke
+    this after frame metadata persistence; failures are converted into a status
+    payload so image saving/metadata generation can continue unchanged.
+    """
+    config = _trigger_config(profile_config, default_config=DEFAULT_RUNTIME_TRIGGER_CONFIG)
+    if not config.get('enabled', False):
+        return {
+            'enabled': False,
+            'status': 'disabled',
+            'candidate_count': 0,
+            'timeline_count': 0,
+        }
+
+    if candidate_dir is None or timeline_dir is None:
+        return {
+            'enabled': True,
+            'status': 'skipped',
+            'reason': 'missing_persistence_path',
+            'candidate_count': 0,
+            'timeline_count': 0,
+        }
+
+    try:
+        candidates = trigger_evaluator(
+            current_metadata,
+            previous_metadata=previous_metadata,
+            profile_config={'event_candidate_triggers': config},
+        )
+        if not candidates:
+            return {
+                'enabled': True,
+                'status': 'no_candidates',
+                'candidate_count': 0,
+                'timeline_count': 0,
+            }
+
+        candidate_writer = EventCandidateWriter(candidate_dir)
+        candidate_paths = [candidate_writer.write(candidate) for candidate in candidates]
+        summary_date = _date_from_timestamp(current_metadata.get('timestamp'))
+        all_candidates = EventCandidateAnalytics(candidate_dir).load_day(summary_date)
+        segments = build_event_timeline_segments(all_candidates)
+        timeline_path = EventTimelineWriter(timeline_dir).write_day(summary_date, segments)
+
+        return {
+            'enabled': True,
+            'status': 'written',
+            'candidate_count': len(candidates),
+            'timeline_count': len(segments),
+            'candidate_path': str(candidate_paths[0]) if candidate_paths else '',
+            'timeline_path': str(timeline_path),
+        }
+    except Exception as exc:
+        return {
+            'enabled': True,
+            'status': 'error',
+            'reason': str(exc),
+            'candidate_count': 0,
+            'timeline_count': 0,
+        }
+
+
+def _trigger_config(profile_config, default_config=None):
+    config = dict(default_config or DEFAULT_TRIGGER_CONFIG)
     if isinstance(profile_config, dict):
         event_config = profile_config.get('event_candidate_triggers')
         if isinstance(event_config, dict):

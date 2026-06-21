@@ -41,7 +41,12 @@ from .frame_metadata import FrameMetadata
 from .frame_metadata import FrameMetadataWriter
 from .frame_metadata import default_frame_metadata_dir
 from .frame_quality import compute_frame_quality
+from .cloud_detection import classify_cloud_condition
+from .event_candidate import default_event_candidate_dir
+from .event_candidate import default_event_timeline_dir
+from .event_candidate import persist_event_candidates_shadow
 from .multicamera_diag import write_multicamera_diag
+from .sky_condition import compute_sky_condition_from_frame
 
 from .processing import ImageProcessor
 from .miscUpload import miscUpload
@@ -213,6 +218,7 @@ class ImageWorker(Process):
             frame_metadata_path or default_frame_metadata_dir(self.varlib_folder_p),
             rotate_daily=frame_metadata_rotate_daily,
         )
+        self.event_candidate_previous_metadata = {}
         self.auto_gain_runtime_state_store = AutoGainRuntimeStateStore(
             self.config.get('AUTO_GAIN_RUNTIME_STATE_PATH', default_auto_gain_runtime_state_path(self.varlib_folder_p)),
             max_age_seconds=self.config.get('AUTO_GAIN_RESTORE_MAX_AGE_SECONDS', 86400),
@@ -1145,6 +1151,7 @@ class ImageWorker(Process):
                 frame_id,
                 metadata_path,
             )
+            self._persist_event_candidates_shadow(metadata)
         except Exception as e:
             logger.warning(
                 '[FRAME_METADATA] profile=%s camera_id=%s frame_id=%s status=skipped reason=%s',
@@ -1153,6 +1160,77 @@ class ImageWorker(Process):
                 frame_id,
                 str(e),
             )
+
+
+    def _persist_event_candidates_shadow(self, metadata):
+        metadata_dict = metadata.to_dict()
+        profile_id = metadata_dict.get('profile_id')
+        camera_id = metadata_dict.get('camera_id')
+        frame_id = metadata_dict.get('frame_id')
+        context_key = self._adu_key(profile_id, camera_id)
+        previous_metadata = self.event_candidate_previous_metadata.get(context_key)
+
+        try:
+            profile_config = self._event_candidate_trigger_profile_config()
+            trigger_config = profile_config.get('event_candidate_triggers', {})
+            if not trigger_config.get('enabled', False):
+                return
+
+            metadata_dict.update(self._event_candidate_environment_context(metadata_dict))
+            result = persist_event_candidates_shadow(
+                metadata_dict,
+                previous_metadata=previous_metadata,
+                profile_config=profile_config,
+                candidate_dir=default_event_candidate_dir(self.varlib_folder_p),
+                timeline_dir=default_event_timeline_dir(self.varlib_folder_p),
+            )
+            logger.info(
+                '[EVENT_CANDIDATE] profile=%s camera_id=%s frame_id=%s status=%s candidates=%d timelines=%d reason=%s',
+                profile_id,
+                camera_id,
+                frame_id,
+                result.get('status', 'unknown'),
+                int(result.get('candidate_count') or 0),
+                int(result.get('timeline_count') or 0),
+                result.get('reason', ''),
+            )
+        except Exception as e:
+            logger.warning(
+                '[EVENT_CANDIDATE] profile=%s camera_id=%s frame_id=%s status=skipped reason=%s',
+                profile_id,
+                camera_id,
+                frame_id,
+                str(e),
+            )
+        finally:
+            self.event_candidate_previous_metadata[context_key] = metadata_dict
+
+
+    def _event_candidate_trigger_profile_config(self):
+        raw_config = self.config.get('event_candidate_triggers')
+        if not isinstance(raw_config, dict):
+            raw_config = self.config.get('EVENT_CANDIDATE_TRIGGERS')
+
+        if isinstance(raw_config, dict):
+            trigger_config = dict(raw_config)
+        else:
+            trigger_config = {}
+
+        trigger_config.setdefault('enabled', False)
+        return {'event_candidate_triggers': trigger_config}
+
+
+    def _event_candidate_environment_context(self, metadata):
+        sky_condition = compute_sky_condition_from_frame(metadata).get('sky_condition', 'unknown')
+        enriched_metadata = dict(metadata)
+        enriched_metadata['sky_condition'] = sky_condition
+
+        return {
+            'sky_condition': sky_condition,
+            'cloud_condition': classify_cloud_condition(enriched_metadata),
+            'sky_trend': 'unknown',
+            'possible_condensation': False,
+        }
 
 
     def _optional_float(self, value):

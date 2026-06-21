@@ -241,11 +241,20 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - per popolare la dashboard Raspberry: `python3 testing/candidate_trigger_smoke_test.py --varlib /var/lib/indi-allsky`;
     - cleanup mirato: `python3 testing/candidate_trigger_smoke_test.py --varlib /var/lib/indi-allsky --cleanup`;
     - resta manual-only: nessun hook capture/runtime, nessuna classificazione.
+  - Runtime Shadow Integration v0:
+    - collega i trigger candidate al path metadata solo dopo la persistenza `FrameMetadata`;
+    - gated da `event_candidate_triggers.enabled`, default `False`;
+    - quando disabilitato non valuta trigger, non persiste candidate e non aggiorna timeline;
+    - quando abilitato valuta metadata + quality + contesto Environmental Awareness corrente e persiste JSONL candidate/timeline;
+    - failure isolation: errori trigger/persistenza sono loggati e non bloccano image saving, metadata generation o capture;
+    - timeline giornaliera ricostruita dai candidate JSONL per evitare duplicati;
+    - ancora nessuna AI, RMS, meteor detection, classificazione, notification o decisione runtime.
 - NEXT:
-  - Candidate Trigger Runtime Integration v0 shadow-only:
-    - valutare se e come collegare i trigger al path metadata dopo processing;
-    - deve essere gated/configurabile e inizialmente shadow-only;
-    - nessuna AI, RMS, meteor detection o classificazione reale.
+  - Raspberry validation Runtime Shadow Integration v0:
+    - abilitare temporaneamente `event_candidate_triggers.enabled=True` in configurazione controllata;
+    - verificare che candidate/timeline reali compaiano nei JSONL e nella dashboard;
+    - verificare che con `enabled=False` non vengano generati nuovi record;
+    - confermare assenza di effetti su capture timing, exposure, gain e image saving.
   - Event Timeline dashboard detail:
     - collegare segmenti a frame/candidate per ispezione manuale;
     - mantenere tutti i segmenti `unclassified`;
