@@ -172,6 +172,8 @@ def test_nightly_summary_per_camera():
         assert camera_2['worst_frame']['frame_id'] == 2
         assert camera_2['anomaly_events']['count'] == 3
         assert camera_2['night_trend']['meter']['direction'] == 'down'
+        assert camera_2['sky_condition']['sky_condition'] == 'poor'
+        assert camera_2['sky_condition']['profile_id'] == 'asi678mc'
 
         camera_1 = [camera for camera in summary['cameras'] if camera['camera_id'] == '1'][0]
         assert camera_1['frame_count'] == 4
@@ -181,6 +183,7 @@ def test_nightly_summary_per_camera():
         assert camera_1['percentages']['capture_errors'] == 25.0
         assert camera_1['missing_frames']['count'] == 3
         assert camera_1['anomaly_events']['count'] == 5
+        assert camera_1['sky_condition']['sky_condition'] == 'unusable'
 
 
 def test_nightly_summary_tolerates_legacy_rows():

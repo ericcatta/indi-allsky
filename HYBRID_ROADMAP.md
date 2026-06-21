@@ -99,6 +99,19 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Dopo Metadata / Analytics consolidation, il sistema inizia a interpretare condizioni cielo/ambiente usando segnali affidabili prima di introdurre AI o event detection.
   - Event Detection e AI devono aspettare finche' metadata quality, sky condition e health signals sono abbastanza stabili.
   - Non avviare AI detection prima che il sistema sappia distinguere condizioni cielo buone/scarse.
+- Elementi gia' presenti da non duplicare:
+  - Dew heater, dew point e sensori ambiente esistono gia' in `sensor.py`, device sensor modules e utility MQTT.
+  - Weather/API integration esiste in forma legacy/utility, incluso Astrospheric/cloud cover in script di test.
+  - Star count e' gia' documentato come misura oggettiva delle condizioni cielo, ma non e' ancora parte della fondazione metadata-only v1.
+- IN TEST:
+  - Sky Condition foundation v1:
+    - modulo isolato metadata-only `sky_condition.py`;
+    - valori ammessi: `unknown`, `excellent`, `good`, `usable`, `poor`, `unusable`;
+    - input usati: `quality_score`, `quality_flags`, `capture_status`, `meter_value_smoothed`, `target_meter`, `profile_id`, `camera_id`;
+    - output profile-aware e multi-camera safe, senza decisioni operative;
+    - fallback a `unknown` quando metadata/quality/meter non sono sufficienti;
+    - integrato nel Nightly Summary analytics come stato calcolato dall'ultimo frame della camera;
+    - nessuna cloud detection, trend, dew/condensation detection, weather fusion, AI o event detection.
 - NEXT:
   - Cloud Detection v1:
     - Purpose: capire se il cielo e' utilizzabile o coperto usando segnali metadata/image-derived.
@@ -144,6 +157,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Weather Awareness:
     - Purpose: combinare in futuro metadata interni con meteo esterno o sensori locali.
     - Nessun requisito di API esterna nella prima fase.
+- Prossimo micro-step consigliato:
+  - Cloud Detection v1 shadow/read-only sopra metadata esistenti e `sky_condition`, ancora senza AI e senza azioni runtime.
 - LATER:
   - Integrare temperatura Raspberry/CPU, spazio disco e health log.
   - Alert futuri Telegram/email/webhook.
@@ -1055,3 +1070,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Rifinito layout Nightly Summary per evitare rendering tabellare/plain text: card scure responsive, metric tiles e cache-buster CSS dedicato.
 - 2026-06-21: Implementato Metadata Health & Consolidation locale con report integrity/coverage e card dashboard read-only.
 - 2026-06-21: Documentata fase Environmental Awareness: cloud detection, sky condition, condensation/dew, sky trend e weather awareness prima di Event Detection/AI.
+- 2026-06-21: Implementata fondazione Sky Condition v1 metadata-only, profile-aware e multi-camera safe, senza cloud/dew/weather/AI/event detection.

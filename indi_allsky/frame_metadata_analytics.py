@@ -5,6 +5,8 @@ from datetime import timedelta
 from datetime import timezone
 from pathlib import Path
 
+from .sky_condition import compute_sky_condition_from_frame
+
 
 class FrameMetadataAnalytics:
     """Lightweight reader/summary layer for daily frame metadata JSONL files."""
@@ -245,6 +247,7 @@ class FrameMetadataAnalytics:
         best_frame = self._quality_extreme_frame(frames, reverse=True)
         worst_frame = self._quality_extreme_frame(frames, reverse=False)
         night_trend = self._night_trend(sorted_frames)
+        latest_frame = sorted_frames[-1] if sorted_frames else None
 
         for frame in frames:
             flags = self._quality_flags(frame.get('quality_flags'))
@@ -298,6 +301,7 @@ class FrameMetadataAnalytics:
             },
             'best_frame': self._frame_reference(best_frame),
             'worst_frame': self._frame_reference(worst_frame),
+            'sky_condition': compute_sky_condition_from_frame(latest_frame),
             'night_trend': night_trend,
             'most_common_quality_flags': self._counter_rows(quality_flags),
             'most_common_decision_reasons': self._counter_rows(decision_reasons),
