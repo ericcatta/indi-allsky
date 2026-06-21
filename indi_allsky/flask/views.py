@@ -5180,10 +5180,10 @@ class ModernAdminView(TemplateView):
                 'profile_id'            : self._modern_string(latest_frame.get('profile_id')) if latest_frame else 'Unknown profile',
                 'latest_timestamp'      : self._modern_string(latest_frame.get('timestamp')) if latest_frame else 'No metadata yet',
                 'current_exposure'      : self.format_dashboard_exposure(latest_frame.get('exposure_us')) if latest_frame else 'Unknown',
-                'current_gain'          : self.format_dashboard_number(latest_frame.get('gain')) if latest_frame else 'Unknown',
-                'current_meter'         : self.format_dashboard_number(latest_frame.get('meter_value_smoothed')) if latest_frame else 'Unknown',
+                'current_gain'          : self.format_dashboard_gain(latest_frame.get('gain')) if latest_frame else 'Unknown',
+                'current_meter'         : self.format_dashboard_meter_pair(latest_frame) if latest_frame else 'Unknown',
                 'current_target_meter'  : self.format_dashboard_number(latest_frame.get('target_meter')) if latest_frame else 'Unknown',
-                'current_reason'        : self._modern_string(latest_frame.get('decision_reason')) if latest_frame else 'No decision yet',
+                'current_reason'        : self.format_dashboard_reason_label(latest_frame.get('decision_reason')) if latest_frame else 'No decision yet',
                 'image_url'             : image_url,
                 'image_age'             : image_age,
                 'summary'               : self.format_dashboard_summary(summary),
@@ -5306,9 +5306,9 @@ class ModernAdminView(TemplateView):
             'average_exposure'  : self.format_dashboard_exposure(summary.get('average_exposure')),
             'minimum_exposure'  : self.format_dashboard_exposure(summary.get('minimum_exposure')),
             'maximum_exposure'  : self.format_dashboard_exposure(summary.get('maximum_exposure')),
-            'average_gain'      : self.format_dashboard_number(summary.get('average_gain')),
-            'minimum_gain'      : self.format_dashboard_number(summary.get('minimum_gain')),
-            'maximum_gain'      : self.format_dashboard_number(summary.get('maximum_gain')),
+            'average_gain'      : self.format_dashboard_gain(summary.get('average_gain')),
+            'minimum_gain'      : self.format_dashboard_gain(summary.get('minimum_gain')),
+            'maximum_gain'      : self.format_dashboard_gain(summary.get('maximum_gain')),
             'average_meter'     : self.format_dashboard_number(summary.get('average_meter_value')),
             'minimum_meter'     : self.format_dashboard_number(summary.get('minimum_meter_value')),
             'maximum_meter'     : self.format_dashboard_number(summary.get('maximum_meter_value')),
@@ -5332,13 +5332,13 @@ class ModernAdminView(TemplateView):
         used = set()
         for key in preferred:
             if key in counter:
-                rows.append({'label': key, 'count': counter.get(key, 0)})
+                rows.append({'label': self.format_dashboard_reason_label(key), 'count': counter.get(key, 0)})
                 used.add(key)
 
         for key in sorted(counter.keys()):
             if key in used:
                 continue
-            rows.append({'label': key or 'unknown', 'count': counter.get(key, 0)})
+            rows.append({'label': self.format_dashboard_reason_label(key or 'unknown'), 'count': counter.get(key, 0)})
 
         return rows
 
@@ -5348,8 +5348,61 @@ class ModernAdminView(TemplateView):
         if exposure_s is None:
             return 'Unknown'
         if exposure_s < 1.0:
-            return '{0:0.3f}s'.format(exposure_s)
-        return '{0:0.2f}s'.format(exposure_s)
+            return '{0:0.0f} ms'.format(exposure_s * 1000.0)
+        return '{0:0.1f} s'.format(exposure_s)
+
+
+    def format_dashboard_gain(self, value):
+        number = self._modern_optional_float(value)
+        if number is None:
+            return 'Unknown'
+        if float(number).is_integer():
+            return '{0:0.0f}x'.format(number)
+        return '{0:s}x'.format('{0:0.2f}'.format(number).rstrip('0').rstrip('.'))
+
+
+    def format_dashboard_meter_pair(self, frame):
+        meter = self.format_dashboard_meter_value(frame.get('meter_value_smoothed'))
+        target = self.format_dashboard_meter_value(frame.get('target_meter'))
+        if meter == 'Unknown' and target == 'Unknown':
+            return 'Unknown'
+        return '{0:s} / {1:s}'.format(meter, target)
+
+
+    def format_dashboard_meter_value(self, value):
+        number = self._modern_optional_float(value)
+        if number is None:
+            return 'Unknown'
+        if float(number).is_integer():
+            return '{0:0.0f}'.format(number)
+        return '{0:0.1f}'.format(number)
+
+
+    def format_dashboard_reason_label(self, value):
+        value_str = self._modern_string(value).strip()
+        if not value_str:
+            return 'Unknown'
+
+        labels = {
+            'decrease_exposure'                       : 'Decrease exposure',
+            'decrease_exposure_conditions_satisfied'  : 'Decrease exposure',
+            'decrease_gain'                           : 'Decrease gain',
+            'decrease_gain_conditions_satisfied'      : 'Decrease gain',
+            'deadband'                                : 'Deadband',
+            'deadband_hold'                           : 'Deadband hold',
+            'exposure_and_gain_already_max'           : 'Exposure & gain at maximum',
+            'gain_auto_disabled'                      : 'Gain auto disabled',
+            'gain_already_max'                        : 'Gain at maximum',
+            'gain_already_min'                        : 'Gain at minimum',
+            'hold'                                    : 'Hold',
+            'increase_exposure'                       : 'Increase exposure',
+            'increase_exposure_conditions_satisfied'  : 'Increase exposure',
+            'increase_gain'                           : 'Increase gain',
+            'increase_gain_conditions_satisfied'      : 'Increase gain',
+            'target_reached'                          : 'Target reached',
+            'trend_not_confirmed'                     : 'Trend not confirmed',
+        }
+        return labels.get(value_str, value_str)
 
 
     def format_dashboard_number(self, value):

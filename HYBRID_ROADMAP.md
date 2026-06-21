@@ -245,6 +245,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - mostra statistiche decisioni Auto Exposure, Auto Gain e reason count;
   - mostra quick summary per camera con frame count, exposure/gain/meter medi/min/max;
   - funziona anche se una camera e' offline o senza metadata recenti.
+- Dashboard Polish v1:
+  - Quick Summary spostato subito sotto le camera cards;
+  - exposure formattata in ms sotto 1s e secondi sopra 1s;
+  - gain formattato come moltiplicatore `x`;
+  - meter mostrato come valore misurato / target;
+  - reason/action comuni convertiti in label leggibili;
+  - grafici con label asse Y e tooltip timestamp/exposure/gain/meter.
 - Nessun cambio a upload, processing, Auto Exposure o Auto Gain.
 
 ## IN TEST
@@ -849,3 +856,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Implementato Metadata Analytics Reader base per daily JSONL con summary per camera, latest frames e conteggi decisioni.
 - 2026-06-21: Rifattorizzata Auto Exposure convergence in tier `aggressive/normal/fine/target`, con recupero rapido da saturazione dentro il tier aggressive.
 - 2026-06-21: Implementato Dashboard MVP read-only con latest frame per camera, grafici 24h exposure/gain/meter, statistiche decisioni e quick summary basati su `FrameMetadataAnalytics`.
+- 2026-06-21: Dashboard Polish v1: summary riordinato sotto le camera cards, unita' piu' leggibili, reason label, axis labels e tooltip sui grafici.

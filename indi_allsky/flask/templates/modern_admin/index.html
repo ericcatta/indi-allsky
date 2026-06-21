@@ -61,12 +61,10 @@ var camera_id = {{ camera_id }};
                         <dd>{{ camera.current_meter }}</dd>
                     </div>
                     <div>
-                        <dt>Target</dt>
-                        <dd>{{ camera.current_target_meter }}</dd>
+                        <dt>Reason</dt>
+                        <dd>{{ camera.current_reason }}</dd>
                     </div>
                 </dl>
-
-                <p class="modern-admin-dashboard-reason">{{ camera.current_reason }}</p>
             </article>
             {% endfor %}
         </div>
@@ -76,6 +74,30 @@ var camera_id = {{ camera_id }};
             <p>The dashboard will populate after the first processed frame writes metadata.</p>
         </article>
         {% endif %}
+    </section>
+
+    <section class="modern-admin-dashboard-section" aria-labelledby="summary-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Quick Summary</p>
+            <h2 id="summary-title">Metadata rollup by camera</h2>
+        </div>
+
+        <div class="modern-admin-summary-grid">
+            {% for camera in modern_admin_dashboard_cameras %}
+            <article class="modern-admin-summary-panel">
+                <p class="modern-admin-card-label">Camera {{ camera.camera_id }}</p>
+                <h3>{{ camera.profile_id }}</h3>
+                <dl class="modern-admin-summary-list">
+                    <div><dt>Frames</dt><dd>{{ camera.summary.frame_count }}</dd></div>
+                    <div><dt>Average exposure</dt><dd>{{ camera.summary.average_exposure }}</dd></div>
+                    <div><dt>Average gain</dt><dd>{{ camera.summary.average_gain }}</dd></div>
+                    <div><dt>Average meter</dt><dd>{{ camera.summary.average_meter }}</dd></div>
+                    <div><dt>Minimum meter</dt><dd>{{ camera.summary.minimum_meter }}</dd></div>
+                    <div><dt>Maximum meter</dt><dd>{{ camera.summary.maximum_meter }}</dd></div>
+                </dl>
+            </article>
+            {% endfor %}
+        </div>
     </section>
 
     <section class="modern-admin-dashboard-section" aria-labelledby="analytics-title">
@@ -96,15 +118,15 @@ var camera_id = {{ camera_id }};
                 <div class="modern-admin-chart-stack">
                     <div class="modern-admin-chart-card">
                         <h4>Exposure</h4>
-                        <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="exposure"></canvas>
+                        <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="exposure" data-axis-label="Exposure"></canvas>
                     </div>
                     <div class="modern-admin-chart-card">
                         <h4>Gain</h4>
-                        <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="gain"></canvas>
+                        <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="gain" data-axis-label="Gain"></canvas>
                     </div>
                     <div class="modern-admin-chart-card">
                         <h4>Meter Value</h4>
-                        <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="meter"></canvas>
+                        <canvas class="modern-admin-chart-canvas" width="640" height="180" data-modern-dashboard-chart data-camera-id="{{ camera.camera_id }}" data-metric="meter" data-axis-label="Meter"></canvas>
                     </div>
                 </div>
             </article>
@@ -161,30 +183,6 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 
-    <section class="modern-admin-dashboard-section" aria-labelledby="summary-title">
-        <div class="modern-admin-section-heading">
-            <p class="modern-admin-eyebrow">Quick Summary</p>
-            <h2 id="summary-title">Metadata rollup by camera</h2>
-        </div>
-
-        <div class="modern-admin-summary-grid">
-            {% for camera in modern_admin_dashboard_cameras %}
-            <article class="modern-admin-summary-panel">
-                <p class="modern-admin-card-label">Camera {{ camera.camera_id }}</p>
-                <h3>{{ camera.profile_id }}</h3>
-                <dl class="modern-admin-summary-list">
-                    <div><dt>Frames</dt><dd>{{ camera.summary.frame_count }}</dd></div>
-                    <div><dt>Average exposure</dt><dd>{{ camera.summary.average_exposure }}</dd></div>
-                    <div><dt>Average gain</dt><dd>{{ camera.summary.average_gain }}</dd></div>
-                    <div><dt>Average meter</dt><dd>{{ camera.summary.average_meter }}</dd></div>
-                    <div><dt>Minimum meter</dt><dd>{{ camera.summary.minimum_meter }}</dd></div>
-                    <div><dt>Maximum meter</dt><dd>{{ camera.summary.maximum_meter }}</dd></div>
-                </dl>
-            </article>
-            {% endfor %}
-        </div>
-    </section>
-
     <footer class="modern-admin-footer">
         <span>Dashboard MVP</span>
         <span>Read-only metadata analytics</span>
@@ -192,6 +190,7 @@ var camera_id = {{ camera_id }};
 </main>
 
 <script type="application/json" id="modern-dashboard-chart-data">{{ modern_admin_dashboard_chart_data|tojson }}</script>
+<div class="modern-admin-chart-tooltip" id="modern-dashboard-chart-tooltip" role="status" aria-live="polite"></div>
 <script>
 (function () {
     const dataNode = document.getElementById('modern-dashboard-chart-data');
@@ -204,6 +203,53 @@ var camera_id = {{ camera_id }};
         chartData = JSON.parse(dataNode.textContent || '{}');
     } catch (error) {
         chartData = {};
+    }
+    const tooltip = document.getElementById('modern-dashboard-chart-tooltip');
+
+    function formatExposure(value) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) {
+            return 'unknown';
+        }
+        if (number < 1) {
+            return `${Math.round(number * 1000)} ms`;
+        }
+        return `${number.toFixed(1)} s`;
+    }
+
+    function formatGain(value) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) {
+            return 'unknown';
+        }
+        return `${Number.isInteger(number) ? number.toFixed(0) : number.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}x`;
+    }
+
+    function formatMeter(value) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) {
+            return 'unknown';
+        }
+        return Number.isInteger(number) ? number.toFixed(0) : number.toFixed(1);
+    }
+
+    function formatMetric(metric, value) {
+        if (metric === 'exposure') {
+            return formatExposure(value);
+        }
+        if (metric === 'gain') {
+            return formatGain(value);
+        }
+        return formatMeter(value);
+    }
+
+    function tooltipText(row) {
+        return [
+            row.timestamp || 'Unknown timestamp',
+            `Exposure: ${formatExposure(row.exposure)}`,
+            `Gain: ${formatGain(row.gain)}`,
+            `Meter: ${formatMeter(row.meter)}`,
+        ].join('\n');
     }
 
     function drawEmpty(ctx, canvas, label) {
@@ -221,6 +267,7 @@ var camera_id = {{ camera_id }};
 
         const cameraId = String(canvas.dataset.cameraId || '');
         const metric = canvas.dataset.metric || '';
+        const axisLabel = canvas.dataset.axisLabel || metric;
         const rows = (chartData[cameraId] || []).filter((row) => (
             row[metric] !== null && row[metric] !== undefined && Number.isFinite(Number(row[metric]))
         ));
@@ -234,10 +281,11 @@ var camera_id = {{ camera_id }};
         const minValue = Math.min.apply(null, values);
         const maxValue = Math.max.apply(null, values);
         const valueSpan = Math.max(maxValue - minValue, 0.000001);
-        const padX = 32;
+        const padX = 54;
         const padY = 22;
         const width = canvas.width - (padX * 2);
         const height = canvas.height - (padY * 2);
+        const points = [];
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
@@ -247,6 +295,15 @@ var camera_id = {{ camera_id }};
         ctx.lineTo(padX, canvas.height - padY);
         ctx.lineTo(canvas.width - padX, canvas.height - padY);
         ctx.stroke();
+
+        ctx.save();
+        ctx.translate(15, canvas.height / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.82)';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(axisLabel, 0, 0);
+        ctx.restore();
 
         ctx.strokeStyle = 'rgba(88, 166, 255, 0.95)';
         ctx.lineWidth = 2;
@@ -259,16 +316,62 @@ var camera_id = {{ camera_id }};
             } else {
                 ctx.lineTo(x, y);
             }
+            points.push({ x, y, row });
         });
         ctx.stroke();
 
         ctx.fillStyle = 'rgba(226, 232, 240, 0.86)';
         ctx.font = '12px sans-serif';
-        ctx.fillText(maxValue.toFixed(2), padX, 14);
-        ctx.fillText(minValue.toFixed(2), padX, canvas.height - 6);
+        ctx.textAlign = 'left';
+        ctx.fillText(formatMetric(metric, maxValue), padX, 14);
+        ctx.fillText(formatMetric(metric, minValue), padX, canvas.height - 6);
+
+        canvas.dataset.chartPoints = JSON.stringify(points.map((point) => ({
+            x: point.x,
+            y: point.y,
+            row: point.row,
+        })));
+        canvas.title = 'Hover for timestamp, exposure, gain, and meter';
     }
 
     document.querySelectorAll('[data-modern-dashboard-chart]').forEach(drawChart);
+
+    document.querySelectorAll('[data-modern-dashboard-chart]').forEach((canvas) => {
+        canvas.addEventListener('mousemove', (event) => {
+            if (!tooltip) {
+                return;
+            }
+
+            let points = [];
+            try {
+                points = JSON.parse(canvas.dataset.chartPoints || '[]');
+            } catch (error) {
+                points = [];
+            }
+            if (!points.length) {
+                return;
+            }
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const x = (event.clientX - rect.left) * scaleX;
+            const nearest = points.reduce((best, point) => (
+                Math.abs(point.x - x) < Math.abs(best.x - x) ? point : best
+            ), points[0]);
+
+            canvas.title = tooltipText(nearest.row);
+            tooltip.textContent = tooltipText(nearest.row);
+            tooltip.style.left = `${event.clientX + 14}px`;
+            tooltip.style.top = `${event.clientY + 14}px`;
+            tooltip.classList.add('is-visible');
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            if (tooltip) {
+                tooltip.classList.remove('is-visible');
+            }
+        });
+    });
 })();
 </script>
 {% endblock %}
