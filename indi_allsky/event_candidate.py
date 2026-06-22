@@ -287,7 +287,15 @@ class RuleBasedEventClassifierV1:
         if best_match is not None:
             label = best_match[1].target_label
             confidence = best_match[2].score
-            rules_matched = [rule.rule_id for order, rule, result in matches]
+            rules_matched = [
+                {
+                    'rule_id': rule.rule_id,
+                    'target_label': rule.target_label,
+                    'score': result.score,
+                    'reason': result.reason,
+                }
+                for order, rule, result in matches
+            ]
             alternative_labels = [
                 rule.target_label for order, rule, result in matches
                 if rule.target_label != label
@@ -312,6 +320,11 @@ class RuleBasedEventClassifierV1:
             'max_candidate_score': timeline_dict.get('max_candidate_score'),
             'average_candidate_score': timeline_dict.get('average_candidate_score'),
             'reasons': timeline_dict.get('reasons') or [],
+            'quality_context_summary': timeline_dict.get('quality_context_summary') or {},
+            'environment_context_summary': timeline_dict.get('environment_context_summary') or {},
+            'candidate_ids': timeline_dict.get('candidate_ids') or [],
+            'start_timestamp_utc': timeline_dict.get('start_timestamp_utc'),
+            'end_timestamp_utc': timeline_dict.get('end_timestamp_utc'),
         }
 
 

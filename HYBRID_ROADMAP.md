@@ -277,6 +277,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - registry regole `ClassificationRuleRegistry` con contratti `ClassificationRule` e `ClassificationRuleResult`;
     - registry vuoto di default, quindi il comportamento resta no-op e produce `unknown_event`;
     - se in futuro piu' regole shadow matchano, il classifier sceglie il label con score piu' alto e tie-break deterministico per ordine registrazione;
+    - explainability foundation:
+      - `rules_matched` contiene `rule_id`, `target_label`, `score`, `reason`;
+      - `features_used` include candidate ids, timestamp inizio/fine, summary quality e summary environment della timeline;
+      - rende auditabili regole future senza introdurre regole reali.
     - semantica:
       - `unclassified` = non processato da classifier;
       - `unknown_event` = processato dal classifier ma nessuna regola ha matchato;
@@ -1217,3 +1221,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-22: Resa osservabile la Runtime Shadow Integration Event Candidate anche con zero candidate: `event_candidate_runtime.json` viene aggiornato con evaluation count e `last_status`, senza generare fake candidate o cambiare capture/runtime.
 - 2026-06-22: Aggiunta Event Classification v1 foundation shadow-only: contratto JSONL, writer e classifier rule-based no-op che restituisce `unknown_event`, senza classificazione reale o impatto runtime.
 - 2026-06-22: Aggiunta foundation Event Classification Rule Registry: contratti regola/risultato, registry ordinato e classifier shadow che resta no-op con registry vuoto.
+- 2026-06-22: Aggiunta explainability foundation Event Classification: `rules_matched` strutturato con score/reason e `features_used` arricchito con summary quality/environment della timeline.

@@ -589,6 +589,11 @@ def test_rule_based_event_classifier_v1_noop_unknown_event():
     assert row['features_used']['candidate_count'] == 2
     assert row['features_used']['duration_seconds'] == 1.0
     assert row['features_used']['reasons'] == ['high_meter', 'low_quality']
+    assert row['features_used']['candidate_ids'] == ['asi678mc:2:1', 'asi678mc:2:2']
+    assert row['features_used']['start_timestamp_utc'] == '2026-06-21T22:15:00+00:00'
+    assert row['features_used']['end_timestamp_utc'] == '2026-06-21T22:15:01+00:00'
+    assert 'quality_context_summary' in row['features_used']
+    assert 'environment_context_summary' in row['features_used']
 
 
 def test_classification_rule_registry_registration_and_ordering():
@@ -634,7 +639,20 @@ def test_rule_based_event_classifier_v1_selects_best_rule_match():
 
     assert row['label'] == 'synthetic_high'
     assert row['confidence'] == 0.75
-    assert row['rules_matched'] == ['low_score_rule', 'high_score_rule']
+    assert row['rules_matched'] == [
+        {
+            'rule_id': 'low_score_rule',
+            'target_label': 'synthetic_low',
+            'score': 0.25,
+            'reason': 'synthetic',
+        },
+        {
+            'rule_id': 'high_score_rule',
+            'target_label': 'synthetic_high',
+            'score': 0.75,
+            'reason': 'synthetic',
+        },
+    ]
     assert row['alternative_labels'] == ['synthetic_low']
     assert row['status'] == 'shadow'
     assert row['method'] == 'rule_based_v1'
@@ -656,8 +674,51 @@ def test_rule_based_event_classifier_v1_uses_registration_order_for_ties():
 
     assert row['label'] == 'synthetic_first'
     assert row['confidence'] == 0.50
-    assert row['rules_matched'] == ['first_rule', 'second_rule']
+    assert row['rules_matched'] == [
+        {
+            'rule_id': 'first_rule',
+            'target_label': 'synthetic_first',
+            'score': 0.5,
+            'reason': 'synthetic',
+        },
+        {
+            'rule_id': 'second_rule',
+            'target_label': 'synthetic_second',
+            'score': 0.5,
+            'reason': 'synthetic',
+        },
+    ]
     assert row['alternative_labels'] == ['synthetic_second']
+
+
+def test_event_classification_explainable_rule_match_reason():
+    timeline = build_event_timeline_segments([
+        _candidate(candidate_id='asi678mc:2:1', frame_id=1, timestamp='2026-06-21T22:15:00+00:00', score=10.0),
+    ])[0]
+    registry = ClassificationRuleRegistry([
+        _SyntheticClassificationRule(
+            'explainable_rule',
+            'synthetic_explainable',
+            score=0.60,
+            reason='matched_synthetic_signal',
+        ),
+    ])
+
+    row = RuleBasedEventClassifierV1(registry=registry).classify_timeline(
+        timeline,
+        created_at='2026-06-21T22:16:00+00:00',
+    ).to_dict()
+
+    assert row['rules_matched'] == [
+        {
+            'rule_id': 'explainable_rule',
+            'target_label': 'synthetic_explainable',
+            'score': 0.6,
+            'reason': 'matched_synthetic_signal',
+        },
+    ]
+    assert row['features_used']['quality_context_summary']
+    assert row['features_used']['environment_context_summary']
 
 
 def test_event_foundation_smoke_cleanup_removes_candidates_and_timelines():
@@ -963,6 +1024,7 @@ if __name__ == '__main__':
     test_classification_rule_registry_requires_rule_id_and_label()
     test_rule_based_event_classifier_v1_selects_best_rule_match()
     test_rule_based_event_classifier_v1_uses_registration_order_for_ties()
+    test_event_classification_explainable_rule_match_reason()
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
     test_candidate_trigger_smoke_cases_and_cleanup()
     test_runtime_shadow_integration_disabled_by_default()
