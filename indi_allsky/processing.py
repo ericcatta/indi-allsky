@@ -1308,12 +1308,17 @@ class ImageProcessor(object):
             self._generateAduMask(self.image, i_ref.binning)
 
 
-        mask_dimensions = self._adu_mask_dict[i_ref.binning].shape[:2]
+        adu_mask = self._adu_mask_dict[i_ref.binning]
         image_dimensions = self.image.shape[:2]
 
-        if mask_dimensions != image_dimensions:
-            # This is a canary message.  The cv2.mean() call will fail below, as well as many other functions later.
-            logger.error('Detection mask dimensions %dx%d do not match image %dx%d', mask_dimensions[1], mask_dimensions[0], image_dimensions[1], image_dimensions[0])
+        if adu_mask is None:
+            logger.warning(
+                'Detection mask is not available for binning %s; ignoring ADU mask for this frame',
+                i_ref.binning,
+            )
+        elif adu_mask.shape[:2] != image_dimensions:
+            mask_dimensions = adu_mask.shape[:2]
+            logger.warning('Detection mask dimensions %dx%d do not match image %dx%d; ignoring ADU mask for this frame', mask_dimensions[1], mask_dimensions[0], image_dimensions[1], image_dimensions[0])
 
             self._miscDb.addNotification(
                 NotificationCategory.MEDIA,
@@ -1322,13 +1327,33 @@ class ImageProcessor(object):
                 expire=timedelta(minutes=15),
             )
 
+            adu_mask = None
+
 
         if len(self.image.shape) == 2:
             # mono
-            adu = cv2.mean(src=self.image, mask=self._adu_mask_dict[i_ref.binning])[0]
+            if adu_mask is None or adu_mask.shape[:2] != self.image.shape[:2]:
+                logger.warning(
+                    'Ignoring incompatible ADU mask: binning=%s mask_shape=%s image_shape=%s',
+                    i_ref.binning,
+                    None if adu_mask is None else adu_mask.shape,
+                    self.image.shape,
+                )
+                adu = cv2.mean(src=self.image)[0]
+            else:
+                adu = cv2.mean(src=self.image, mask=adu_mask)[0]
         else:
             data_mono = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-            adu = cv2.mean(src=data_mono, mask=self._adu_mask_dict[i_ref.binning])[0]
+            if adu_mask is None or adu_mask.shape[:2] != data_mono.shape[:2]:
+                logger.warning(
+                    'Ignoring incompatible ADU mask: binning=%s mask_shape=%s data_mono_shape=%s',
+                    i_ref.binning,
+                    None if adu_mask is None else adu_mask.shape,
+                    data_mono.shape,
+                )
+                adu = cv2.mean(src=data_mono)[0]
+            else:
+                adu = cv2.mean(src=data_mono, mask=adu_mask)[0]
 
 
         if i_ref.image_bitpix == 8:
@@ -4542,4 +4567,3 @@ class ImageData(object):
 
 
         self.detected_bit_depth = detected_bit_depth
-
