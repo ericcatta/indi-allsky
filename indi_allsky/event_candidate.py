@@ -21,6 +21,7 @@ DEFAULT_TRIGGER_CONFIG = {
 DEFAULT_RUNTIME_TRIGGER_CONFIG = {
     **DEFAULT_TRIGGER_CONFIG,
     'enabled': False,
+    'max_candidates_per_hour': 100,
 }
 
 
@@ -315,12 +316,134 @@ class EventTimelineAnalytics:
         return files[-1].stem
 
 
+class EventCandidateRuntimeDiagnostics:
+    """Small JSON counter store for shadow runtime trigger observability."""
+
+    def __init__(self, diagnostics_path):
+        self.diagnostics_path = Path(diagnostics_path)
+
+    def read_summary(self):
+        summary = self._empty_summary()
+        try:
+            if self.diagnostics_path.exists():
+                with self.diagnostics_path.open('r', encoding='utf-8') as f_diagnostics:
+                    stored_summary = json.load(f_diagnostics)
+                if isinstance(stored_summary, dict):
+                    summary.update({
+                        key: stored_summary.get(key, summary.get(key))
+                        for key in summary.keys()
+                    })
+        except (OSError, ValueError):
+            return summary
+
+        summary['total_evaluations'] = int(summary.get('total_evaluations') or 0)
+        summary['total_generated_candidates'] = int(summary.get('total_generated_candidates') or 0)
+        summary['trigger_evaluation_failures'] = int(summary.get('trigger_evaluation_failures') or 0)
+        summary['candidates_by_reason'] = self._counter_dict(summary.get('candidates_by_reason'))
+        summary['candidates_by_hour'] = self._counter_dict(summary.get('candidates_by_hour'))
+        summary['rate_limited_events'] = int(summary.get('rate_limited_events') or 0)
+        return summary
+
+    def candidates_this_hour(self, timestamp):
+        summary = self.read_summary()
+        return int(summary.get('candidates_by_hour', {}).get(self._hour_key(timestamp), 0))
+
+    def record_evaluation(self, enabled, max_candidates_per_hour):
+        summary = self.read_summary()
+        summary['enabled'] = bool(enabled)
+        summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
+        summary['total_evaluations'] = int(summary.get('total_evaluations') or 0) + 1
+        self.write_summary(summary)
+        return summary
+
+    def record_generated(self, candidates, timestamp, enabled, max_candidates_per_hour):
+        summary = self.read_summary()
+        summary['enabled'] = bool(enabled)
+        summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
+        summary['total_generated_candidates'] = int(summary.get('total_generated_candidates') or 0) + len(candidates)
+
+        reason_counter = Counter(summary.get('candidates_by_reason') or {})
+        for candidate in candidates:
+            for reason in getattr(candidate, 'reasons', []) or []:
+                reason_value = _string_value(reason)
+                if reason_value:
+                    reason_counter.update([reason_value])
+        summary['candidates_by_reason'] = dict(reason_counter)
+
+        hour_key = self._hour_key(timestamp)
+        hour_counter = Counter(summary.get('candidates_by_hour') or {})
+        hour_counter.update({hour_key: len(candidates)})
+        summary['candidates_by_hour'] = dict(hour_counter)
+
+        self.write_summary(summary)
+        return summary
+
+    def record_failure(self, enabled, max_candidates_per_hour):
+        summary = self.read_summary()
+        summary['enabled'] = bool(enabled)
+        summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
+        summary['trigger_evaluation_failures'] = int(summary.get('trigger_evaluation_failures') or 0) + 1
+        self.write_summary(summary)
+        return summary
+
+    def record_rate_limited(self, enabled, max_candidates_per_hour):
+        summary = self.read_summary()
+        summary['enabled'] = bool(enabled)
+        summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
+        summary['rate_limited_events'] = int(summary.get('rate_limited_events') or 0) + 1
+        self.write_summary(summary)
+        return summary
+
+    def write_summary(self, summary):
+        self.diagnostics_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp_path = self.diagnostics_path.with_suffix('{0:s}.tmp'.format(self.diagnostics_path.suffix))
+        with tmp_path.open('w', encoding='utf-8') as f_diagnostics:
+            json.dump(summary, f_diagnostics, sort_keys=True, separators=(',', ':'))
+            f_diagnostics.write('\n')
+        tmp_path.replace(self.diagnostics_path)
+
+    def _empty_summary(self):
+        return {
+            'enabled': False,
+            'max_candidates_per_hour': int(DEFAULT_RUNTIME_TRIGGER_CONFIG['max_candidates_per_hour']),
+            'total_evaluations': 0,
+            'total_generated_candidates': 0,
+            'candidates_by_reason': {},
+            'trigger_evaluation_failures': 0,
+            'rate_limited_events': 0,
+            'candidates_by_hour': {},
+        }
+
+    def _hour_key(self, timestamp):
+        timestamp_dt = _parse_timestamp(timestamp)
+        if timestamp_dt is not None:
+            return timestamp_dt.replace(minute=0, second=0, microsecond=0).isoformat()
+
+        timestamp_str = _string_value(timestamp)
+        if len(timestamp_str) >= 13:
+            return timestamp_str[:13]
+        return 'unknown'
+
+    def _counter_dict(self, value):
+        if not isinstance(value, dict):
+            return {}
+        return {
+            _string_value(key): int(count or 0)
+            for key, count in value.items()
+            if _string_value(key)
+        }
+
+
 def default_event_candidate_dir(varlib_folder):
     return Path(varlib_folder).joinpath('event_candidates')
 
 
 def default_event_timeline_dir(varlib_folder):
     return Path(varlib_folder).joinpath('event_timelines')
+
+
+def default_event_candidate_runtime_path(varlib_folder):
+    return Path(varlib_folder).joinpath('event_candidate_runtime.json')
 
 
 def build_event_candidate_from_metadata(frame_metadata, reasons=None, candidate_score=0.0, environment_context=None):
@@ -398,6 +521,7 @@ def persist_event_candidates_shadow(
         profile_config=None,
         candidate_dir=None,
         timeline_dir=None,
+        diagnostics_path=None,
         trigger_evaluator=evaluate_candidate_triggers,
 ):
     """Evaluate and persist shadow event candidates without touching capture.
@@ -407,6 +531,8 @@ def persist_event_candidates_shadow(
     payload so image saving/metadata generation can continue unchanged.
     """
     config = _trigger_config(profile_config, default_config=DEFAULT_RUNTIME_TRIGGER_CONFIG)
+    max_candidates_per_hour = max(0, int(config.get('max_candidates_per_hour', DEFAULT_RUNTIME_TRIGGER_CONFIG['max_candidates_per_hour']) or 0))
+    diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path) if diagnostics_path else None
     if not config.get('enabled', False):
         return {
             'enabled': False,
@@ -425,6 +551,21 @@ def persist_event_candidates_shadow(
         }
 
     try:
+        if diagnostics and max_candidates_per_hour > 0:
+            current_hour_count = diagnostics.candidates_this_hour(current_metadata.get('timestamp'))
+            if current_hour_count >= max_candidates_per_hour:
+                diagnostics.record_rate_limited(True, max_candidates_per_hour)
+                return {
+                    'enabled': True,
+                    'status': 'rate_limited',
+                    'reason': 'max_candidates_per_hour_exceeded',
+                    'candidate_count': 0,
+                    'timeline_count': 0,
+                }
+
+        if diagnostics:
+            diagnostics.record_evaluation(True, max_candidates_per_hour)
+
         candidates = trigger_evaluator(
             current_metadata,
             previous_metadata=previous_metadata,
@@ -438,22 +579,45 @@ def persist_event_candidates_shadow(
                 'timeline_count': 0,
             }
 
+        rate_limited = False
+        if diagnostics and max_candidates_per_hour > 0:
+            current_hour_count = diagnostics.candidates_this_hour(current_metadata.get('timestamp'))
+            remaining_candidates = max_candidates_per_hour - current_hour_count
+            if remaining_candidates <= 0:
+                diagnostics.record_rate_limited(True, max_candidates_per_hour)
+                return {
+                    'enabled': True,
+                    'status': 'rate_limited',
+                    'reason': 'max_candidates_per_hour_exceeded',
+                    'candidate_count': 0,
+                    'timeline_count': 0,
+                }
+            if len(candidates) > remaining_candidates:
+                candidates = candidates[:remaining_candidates]
+                rate_limited = True
+                diagnostics.record_rate_limited(True, max_candidates_per_hour)
+
         candidate_writer = EventCandidateWriter(candidate_dir)
         candidate_paths = [candidate_writer.write(candidate) for candidate in candidates]
         summary_date = _date_from_timestamp(current_metadata.get('timestamp'))
         all_candidates = EventCandidateAnalytics(candidate_dir).load_day(summary_date)
         segments = build_event_timeline_segments(all_candidates)
         timeline_path = EventTimelineWriter(timeline_dir).write_day(summary_date, segments)
+        if diagnostics:
+            diagnostics.record_generated(candidates, current_metadata.get('timestamp'), True, max_candidates_per_hour)
 
         return {
             'enabled': True,
-            'status': 'written',
+            'status': 'rate_limited' if rate_limited else 'written',
+            'reason': 'max_candidates_per_hour_exceeded' if rate_limited else '',
             'candidate_count': len(candidates),
             'timeline_count': len(segments),
             'candidate_path': str(candidate_paths[0]) if candidate_paths else '',
             'timeline_path': str(timeline_path),
         }
     except Exception as exc:
+        if diagnostics:
+            diagnostics.record_failure(True, max_candidates_per_hour)
         return {
             'enabled': True,
             'status': 'error',

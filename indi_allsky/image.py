@@ -43,6 +43,7 @@ from .frame_metadata import default_frame_metadata_dir
 from .frame_quality import compute_frame_quality
 from .cloud_detection import classify_cloud_condition
 from .event_candidate import default_event_candidate_dir
+from .event_candidate import default_event_candidate_runtime_path
 from .event_candidate import default_event_timeline_dir
 from .event_candidate import persist_event_candidates_shadow
 from .multicamera_diag import write_multicamera_diag
@@ -1183,8 +1184,10 @@ class ImageWorker(Process):
                 profile_config=profile_config,
                 candidate_dir=default_event_candidate_dir(self.varlib_folder_p),
                 timeline_dir=default_event_timeline_dir(self.varlib_folder_p),
+                diagnostics_path=default_event_candidate_runtime_path(self.varlib_folder_p),
             )
-            logger.info(
+            log_func = logger.warning if result.get('status') == 'rate_limited' else logger.info
+            log_func(
                 '[EVENT_CANDIDATE] profile=%s camera_id=%s frame_id=%s status=%s candidates=%d timelines=%d reason=%s',
                 profile_id,
                 camera_id,

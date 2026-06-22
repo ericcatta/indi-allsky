@@ -249,11 +249,25 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - failure isolation: errori trigger/persistenza sono loggati e non bloccano image saving, metadata generation o capture;
     - timeline giornaliera ricostruita dai candidate JSONL per evitare duplicati;
     - ancora nessuna AI, RMS, meteor detection, classificazione, notification o decisione runtime.
+  - Controlled Enablement v0:
+    - abilita la generazione candidate runtime solo se `event_candidate_triggers.enabled=True`;
+    - aggiunge safety limit runtime `max_candidates_per_hour`, default `100`;
+    - se il limite orario viene raggiunto, non vengono persistiti nuovi candidate e la capture continua invariata;
+    - persiste diagnostica runtime in `event_candidate_runtime.json`:
+      - trigger evaluations;
+      - generated candidates;
+      - candidates by reason;
+      - trigger evaluation failures;
+      - rate-limit hits.
+    - Modern Admin mostra card read-only `Event Candidate Runtime`;
+    - Nightly Summary espone `event_trigger_evaluations`, `event_trigger_candidates`, `event_trigger_failures`;
+    - ancora shadow-only: nessuna AI, RMS, meteor detection, classificazione, notification o decisione runtime.
 - NEXT:
-  - Raspberry validation Runtime Shadow Integration v0:
+  - Raspberry validation Controlled Enablement v0:
     - abilitare temporaneamente `event_candidate_triggers.enabled=True` in configurazione controllata;
     - verificare che candidate/timeline reali compaiano nei JSONL e nella dashboard;
     - verificare che con `enabled=False` non vengano generati nuovi record;
+    - verificare che `max_candidates_per_hour` limiti correttamente il volume candidate;
     - confermare assenza di effetti su capture timing, exposure, gain e image saving.
   - Event Timeline dashboard detail:
     - collegare segmenti a frame/candidate per ispezione manuale;

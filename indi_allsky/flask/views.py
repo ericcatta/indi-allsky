@@ -23,8 +23,10 @@ from passlib.hash import argon2
 from ..version import __version__
 from .. import constants
 from ..event_candidate import EventCandidateAnalytics
+from ..event_candidate import EventCandidateRuntimeDiagnostics
 from ..event_candidate import EventTimelineAnalytics
 from ..event_candidate import default_event_candidate_dir
+from ..event_candidate import default_event_candidate_runtime_path
 from ..event_candidate import default_event_timeline_dir
 from ..frame_metadata import default_frame_metadata_dir
 from ..frame_metadata_analytics import FrameMetadataAnalytics
@@ -5165,17 +5167,21 @@ class ModernAdminView(TemplateView):
 
         event_candidate_dir = self.get_modern_admin_event_candidate_dir()
         event_timeline_dir = self.get_modern_admin_event_timeline_dir()
+        event_runtime_path = self.get_modern_admin_event_candidate_runtime_path()
         try:
             event_candidate_summary = EventCandidateAnalytics(event_candidate_dir).get_nightly_event_summary(nightly_summary.get('date'))
             event_timeline_summary = EventTimelineAnalytics(event_timeline_dir).get_nightly_timeline_summary(nightly_summary.get('date'))
+            event_runtime_summary = EventCandidateRuntimeDiagnostics(event_runtime_path).read_summary()
         except Exception as e:
             app.logger.error('Error reading modern admin event foundation analytics: %s', str(e))
             event_candidate_summary = {}
             event_timeline_summary = {}
+            event_runtime_summary = {}
 
         camera_ids = self.get_modern_admin_dashboard_camera_ids(recent_frames, latest_frames)
         chart_data = dict()
         camera_cards = list()
+        formatted_nightly_summary = self.format_dashboard_nightly_summary(nightly_summary, event_runtime_summary)
 
         for camera_id in camera_ids:
             camera_key = str(camera_id)
@@ -5223,9 +5229,9 @@ class ModernAdminView(TemplateView):
             'modern_admin_dashboard_cameras'        : camera_cards,
             'modern_admin_dashboard_chart_data'     : chart_data,
             'modern_admin_dashboard_has_metadata'   : bool(recent_frames or latest_frames),
-            'modern_admin_nightly_summary'          : self.format_dashboard_nightly_summary(nightly_summary),
+            'modern_admin_nightly_summary'          : formatted_nightly_summary,
             'modern_admin_metadata_health'          : self.format_dashboard_metadata_health(metadata_health),
-            'modern_admin_event_foundation'         : self.format_dashboard_event_foundation(event_candidate_summary, event_timeline_summary),
+            'modern_admin_event_foundation'         : self.format_dashboard_event_foundation(event_candidate_summary, event_timeline_summary, event_runtime_summary),
         }
 
 
@@ -5251,6 +5257,10 @@ class ModernAdminView(TemplateView):
 
     def get_modern_admin_event_timeline_dir(self):
         return default_event_timeline_dir(self.indi_allsky_config.get('VARLIB_FOLDER', '/var/lib/indi-allsky'))
+
+
+    def get_modern_admin_event_candidate_runtime_path(self):
+        return default_event_candidate_runtime_path(self.indi_allsky_config.get('VARLIB_FOLDER', '/var/lib/indi-allsky'))
 
 
     def get_modern_admin_dashboard_camera_ids(self, recent_frames, latest_frames):
@@ -5368,13 +5378,17 @@ class ModernAdminView(TemplateView):
         }
 
 
-    def format_dashboard_nightly_summary(self, nightly_summary):
+    def format_dashboard_nightly_summary(self, nightly_summary, event_runtime_summary=None):
+        event_runtime_summary = event_runtime_summary or {}
         return {
             'date': nightly_summary.get('date') or 'No metadata day',
             'cameras': [
                 self.format_dashboard_nightly_camera_summary(camera_summary)
                 for camera_summary in nightly_summary.get('cameras', [])
             ],
+            'event_trigger_evaluations': event_runtime_summary.get('total_evaluations', 0),
+            'event_trigger_candidates': event_runtime_summary.get('total_generated_candidates', 0),
+            'event_trigger_failures': event_runtime_summary.get('trigger_evaluation_failures', 0),
         }
 
 
@@ -5390,10 +5404,22 @@ class ModernAdminView(TemplateView):
         }
 
 
-    def format_dashboard_event_foundation(self, candidate_summary, timeline_summary):
+    def format_dashboard_event_foundation(self, candidate_summary, timeline_summary, runtime_summary=None):
+        runtime_summary = runtime_summary or {}
+        runtime_config = self._modern_event_candidate_trigger_config()
         return {
             'date': candidate_summary.get('date') or timeline_summary.get('date') or 'No event data day',
             'has_event_data': bool(candidate_summary.get('total_event_candidates') or timeline_summary.get('total_timeline_segments')),
+            'runtime': {
+                'enabled': 'Enabled' if runtime_config.get('enabled') else 'Disabled',
+                'enabled_bool': bool(runtime_config.get('enabled')),
+                'total_evaluations': runtime_summary.get('total_evaluations', 0),
+                'total_generated_candidates': runtime_summary.get('total_generated_candidates', 0),
+                'trigger_evaluation_failures': runtime_summary.get('trigger_evaluation_failures', 0),
+                'rate_limited_events': runtime_summary.get('rate_limited_events', 0),
+                'max_candidates_per_hour': runtime_config.get('max_candidates_per_hour', runtime_summary.get('max_candidates_per_hour', 100)),
+                'candidates_by_reason': self.format_dashboard_counter(runtime_summary.get('candidates_by_reason') or {}),
+            },
             'candidates': {
                 'total': candidate_summary.get('total_event_candidates', 0),
                 'by_camera': self.format_dashboard_counter(candidate_summary.get('event_candidates_by_camera') or {}),
@@ -5410,6 +5436,23 @@ class ModernAdminView(TemplateView):
                 'average_candidates': self.format_dashboard_number(timeline_summary.get('average_candidates_per_segment')),
                 'max_candidates': self.format_dashboard_number(timeline_summary.get('max_candidates_per_segment')),
             },
+        }
+
+
+    def _modern_event_candidate_trigger_config(self):
+        raw_config = self.indi_allsky_config.get('event_candidate_triggers')
+        if not isinstance(raw_config, dict):
+            raw_config = self.indi_allsky_config.get('EVENT_CANDIDATE_TRIGGERS')
+        if not isinstance(raw_config, dict):
+            raw_config = {}
+
+        max_candidates_per_hour = self._modern_optional_int(raw_config.get('max_candidates_per_hour'))
+        if max_candidates_per_hour is None:
+            max_candidates_per_hour = 100
+
+        return {
+            'enabled': self._modern_config_bool(raw_config.get('enabled'), default=False),
+            'max_candidates_per_hour': max_candidates_per_hour,
         }
 
 

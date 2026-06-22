@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.event_candidate import EventCandidate
 from indi_allsky.event_candidate import EventCandidateAnalytics
+from indi_allsky.event_candidate import EventCandidateRuntimeDiagnostics
 from indi_allsky.event_candidate import EventCandidateWriter
 from indi_allsky.event_candidate import EventTimelineAnalytics
 from indi_allsky.event_candidate import EventTimelineSegment
@@ -15,6 +16,7 @@ from indi_allsky.event_candidate import EventTimelineWriter
 from indi_allsky.event_candidate import build_event_candidate_from_metadata
 from indi_allsky.event_candidate import build_event_timeline_segments
 from indi_allsky.event_candidate import default_event_candidate_dir
+from indi_allsky.event_candidate import default_event_candidate_runtime_path
 from indi_allsky.event_candidate import default_event_timeline_dir
 from indi_allsky.event_candidate import evaluate_candidate_triggers
 from indi_allsky.event_candidate import persist_event_candidates_shadow
@@ -590,6 +592,72 @@ def test_runtime_shadow_integration_enabled_persists_candidates_and_timelines():
         assert EventTimelineAnalytics(timeline_dir).get_nightly_timeline_summary(date)['total_timeline_segments'] == 1
 
 
+def test_runtime_shadow_integration_populates_diagnostics():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        candidate_dir = default_event_candidate_dir(base_dir)
+        timeline_dir = default_event_timeline_dir(base_dir)
+        diagnostics_path = default_event_candidate_runtime_path(base_dir)
+
+        result = persist_event_candidates_shadow(
+            _metadata(frame_id=2, meter=180.0, target=95.0, quality=30.0),
+            previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=95.0),
+            profile_config={'event_candidate_triggers': {'enabled': True}},
+            candidate_dir=candidate_dir,
+            timeline_dir=timeline_dir,
+            diagnostics_path=diagnostics_path,
+        )
+        diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path).read_summary()
+
+        assert result['status'] == 'written'
+        assert diagnostics['enabled'] is True
+        assert diagnostics['total_evaluations'] == 1
+        assert diagnostics['total_generated_candidates'] == 2
+        assert diagnostics['trigger_evaluation_failures'] == 0
+        assert diagnostics['candidates_by_reason'] == {
+            'brightness_spike': 1,
+            'quality_drop': 1,
+        }
+
+
+def test_runtime_shadow_integration_rate_limit_caps_candidates():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        candidate_dir = default_event_candidate_dir(base_dir)
+        timeline_dir = default_event_timeline_dir(base_dir)
+        diagnostics_path = default_event_candidate_runtime_path(base_dir)
+        config = {'event_candidate_triggers': {'enabled': True, 'max_candidates_per_hour': 1}}
+
+        result = persist_event_candidates_shadow(
+            _metadata(frame_id=2, meter=180.0, target=95.0, quality=30.0),
+            previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=95.0),
+            profile_config=config,
+            candidate_dir=candidate_dir,
+            timeline_dir=timeline_dir,
+            diagnostics_path=diagnostics_path,
+        )
+        assert result['status'] == 'rate_limited'
+        assert result['candidate_count'] == 1
+        assert EventCandidateAnalytics(candidate_dir).get_nightly_event_summary('2026-06-21')['total_event_candidates'] == 1
+
+        result = persist_event_candidates_shadow(
+            _metadata(frame_id=3, meter=190.0, target=95.0, quality=30.0),
+            previous_metadata=_metadata(frame_id=2, meter=95.0, target=95.0, quality=95.0),
+            profile_config=config,
+            candidate_dir=candidate_dir,
+            timeline_dir=timeline_dir,
+            diagnostics_path=diagnostics_path,
+        )
+        diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path).read_summary()
+
+        assert result['status'] == 'rate_limited'
+        assert result['candidate_count'] == 0
+        assert diagnostics['total_evaluations'] == 1
+        assert diagnostics['total_generated_candidates'] == 1
+        assert diagnostics['rate_limited_events'] == 2
+        assert EventCandidateAnalytics(candidate_dir).get_nightly_event_summary('2026-06-21')['total_event_candidates'] == 1
+
+
 def test_runtime_shadow_integration_rebuilds_timeline_without_duplicates():
     with tempfile.TemporaryDirectory() as tmpdir:
         base_dir = Path(tmpdir)
@@ -632,12 +700,15 @@ def test_runtime_shadow_integration_trigger_failure_is_isolated():
             profile_config={'event_candidate_triggers': {'enabled': True}},
             candidate_dir=candidate_dir,
             timeline_dir=timeline_dir,
+            diagnostics_path=default_event_candidate_runtime_path(base_dir),
             trigger_evaluator=broken_evaluator,
         )
+        diagnostics = EventCandidateRuntimeDiagnostics(default_event_candidate_runtime_path(base_dir)).read_summary()
 
         assert result['status'] == 'error'
         assert result['candidate_count'] == 0
         assert 'synthetic trigger failure' in result['reason']
+        assert diagnostics['trigger_evaluation_failures'] == 1
         assert EventCandidateAnalytics(candidate_dir).get_nightly_event_summary('2026-06-21')['total_event_candidates'] == 0
         assert EventTimelineAnalytics(timeline_dir).get_nightly_timeline_summary('2026-06-21')['total_timeline_segments'] == 0
 
@@ -676,6 +747,8 @@ if __name__ == '__main__':
     test_candidate_trigger_smoke_cases_and_cleanup()
     test_runtime_shadow_integration_disabled_by_default()
     test_runtime_shadow_integration_enabled_persists_candidates_and_timelines()
+    test_runtime_shadow_integration_populates_diagnostics()
+    test_runtime_shadow_integration_rate_limit_caps_candidates()
     test_runtime_shadow_integration_rebuilds_timeline_without_duplicates()
     test_runtime_shadow_integration_trigger_failure_is_isolated()
     print('event candidate tests OK')
