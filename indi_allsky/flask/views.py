@@ -3242,6 +3242,7 @@ class AjaxConfigView(BaseView):
             'LONGTERM_KEOGRAM',
             'REALTIME_KEOGRAM',
             'STARTRAILS',
+            'EVENT_CANDIDATE_TRIGGERS',
         )
 
         for leaf in leaf_list:
@@ -3358,7 +3359,6 @@ class AjaxConfigView(BaseView):
         self.indi_allsky_config['DETECT_METEORS_THOLD']                 = int(request.json['DETECT_METEORS_THOLD'])
         self.indi_allsky_config['DETECT_MASK']                          = str(request.json['DETECT_MASK'])
         self.indi_allsky_config['DETECT_DRAW']                          = bool(request.json['DETECT_DRAW'])
-        self.indi_allsky_config.setdefault('EVENT_CANDIDATE_TRIGGERS', {})
         self.indi_allsky_config['EVENT_CANDIDATE_TRIGGERS']['enabled']  = bool(request.json.get('EVENT_CANDIDATE_TRIGGERS__enabled', False))
         self.indi_allsky_config['EVENT_CANDIDATE_TRIGGERS']['max_candidates_per_hour'] = int(request.json['EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour'])
         self.indi_allsky_config['LOGO_OVERLAY']                         = str(request.json['LOGO_OVERLAY'])
