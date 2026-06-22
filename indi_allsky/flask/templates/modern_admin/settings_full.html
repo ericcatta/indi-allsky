@@ -135,7 +135,7 @@ var camera_id = {{ camera_id }};
                     <span id="CONFIG_NOTE-error" class="modern-admin-settings-edit-error" hidden></span>
                 </label>
             </div>
-            <button id="modern-admin-full-settings-save" class="modern-admin-button modern-admin-primary-action" type="submit">Save Full Settings</button>
+            <button id="modern-admin-full-settings-save" class="modern-admin-button modern-admin-primary-action" type="submit" formnovalidate>Save Full Settings</button>
         </section>
     </form>
 
@@ -151,7 +151,7 @@ var camera_id = {{ camera_id }};
     const sections = Array.from(document.querySelectorAll('[data-full-settings-section]'));
     const fieldNames = {{ modern_admin_full_settings_field_names | tojson }};
     const checkboxNames = new Set({{ modern_admin_full_settings_checkbox_names | tojson }});
-    const ajaxUrl = {{ url_for('indi_allsky.ajax_config_view') | tojson }};
+    const ajaxUrl = new URL({{ url_for('indi_allsky.ajax_config_view') | tojson }}, window.location.href).toString();
 
     function setMessage(text, tone) {
         message.hidden = false;
@@ -190,6 +190,47 @@ var camera_id = {{ camera_id }};
         return payload;
     }
 
+    function describeInput(input) {
+        if (!input) {
+            return 'field=<missing>';
+        }
+
+        const value = input.type === 'password' ? '<redacted>' : input.value;
+        return 'field=' + (input.id || input.name || '<unnamed>') +
+            ' type=' + (input.type || input.tagName || '<unknown>') +
+            ' value=' + JSON.stringify(value) +
+            ' pattern=' + JSON.stringify(input.getAttribute('pattern')) +
+            ' min=' + JSON.stringify(input.getAttribute('min')) +
+            ' max=' + JSON.stringify(input.getAttribute('max')) +
+            ' step=' + JSON.stringify(input.getAttribute('step'));
+    }
+
+    function getNativeValidationDiagnostics() {
+        const diagnostics = [];
+        const inputs = Array.from(form.querySelectorAll('[data-modern-full-field]'));
+        inputs.forEach((input) => {
+            try {
+                if (typeof input.checkValidity === 'function') {
+                    input.checkValidity();
+                }
+            } catch (error) {
+                diagnostics.push(describeInput(input) + ' error=' + error.message);
+            }
+        });
+        return diagnostics;
+    }
+
+    function stringifyPayload(payload) {
+        Object.entries(payload).forEach(([key, value]) => {
+            try {
+                JSON.stringify({[key]: value});
+            } catch (error) {
+                throw new Error('Unable to serialize field "' + key + '" value=' + JSON.stringify(String(value)) + ': ' + error.message);
+            }
+        });
+        return JSON.stringify(payload);
+    }
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         clearErrors();
@@ -197,18 +238,33 @@ var camera_id = {{ camera_id }};
         saveButton.disabled = true;
         saveButton.textContent = 'Saving...';
 
+        let saveStage = 'initializing';
+        let nativeValidationDiagnostics = [];
         try {
+            saveStage = 'native validation preflight';
+            form.noValidate = true;
+            nativeValidationDiagnostics = getNativeValidationDiagnostics();
+            saveStage = 'payload collection';
+            const payload = collectPayload();
+            saveStage = 'ajax request';
             const response = await fetch(ajaxUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(collectPayload())
+                body: stringifyPayload(payload)
             });
 
-            const data = await response.json();
+            let data = {};
+            try {
+                saveStage = 'response json parse';
+                data = await response.json();
+            } catch (error) {
+                throw new Error('Unable to parse save response as JSON: HTTP ' + response.status + ' ' + response.statusText + ' error=' + error.message);
+            }
             if (!response.ok) {
+                saveStage = 'server validation';
                 Object.entries(data).forEach(([key, errors]) => {
                     const input = document.getElementById(key);
                     const error = document.getElementById(key + '-error');
@@ -234,7 +290,8 @@ var camera_id = {{ camera_id }};
                 reload.checked = false;
             }
         } catch (error) {
-            setMessage('Unable to save settings: ' + error.message, 'error');
+            const diagnosticText = nativeValidationDiagnostics.length ? ' Native validation diagnostics: ' + nativeValidationDiagnostics.join(' | ') : '';
+            setMessage('Unable to save settings during ' + saveStage + ': ' + error.message + diagnosticText, 'error');
         } finally {
             saveButton.disabled = false;
             saveButton.textContent = 'Save Full Settings';
