@@ -553,16 +553,14 @@ class IndiAllSky(object):
 
 
     def _images_only_capture_profile(self, profile):
-        # MULTI_CAMERA_PREP: the first real multi-camera MVP is images-only.
-        # Generated products stay disabled while two capture workers coexist.
+        # MULTI_CAMERA_PREP: keep core generated products that are already
+        # camera-scoped while disabling extra/continuous products during the
+        # multi-camera MVP.
         outputs = dict(profile.outputs)
         for key in (
-            'timelapse',
             'mini_timelapse',
-            'keogram',
             'realtime_keogram',
             'longterm_keogram',
-            'startrails',
             'panorama',
             'panorama_loop',
             'extra_uploads',
@@ -571,10 +569,10 @@ class IndiAllSky(object):
 
         outputs['images'] = True
         _multi_camera_diag(
-            '[MULTI_CAMERA_IMAGES_ONLY][%s] disabled FITS/raw/hooks/circular display/timelapse/keogram/startrails/panorama/video extra/upload extra',
+            '[MULTI_CAMERA_IMAGES_ONLY][%s] preserved timelapse/keogram/startrails and disabled mini/realtime/longterm/panorama/upload extras',
             profile.profile_id,
         )
-        return replace(profile, outputs=outputs, daytime_timelapse=False)
+        return replace(profile, outputs=outputs)
 
 
     def _capture_worker_handle(self, profile):
