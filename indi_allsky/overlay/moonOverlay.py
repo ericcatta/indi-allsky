@@ -123,7 +123,7 @@ class IndiAllSkyMoonOverlay(object):
 
         ### cover half the moon
         #logger.info('moon_height: %d, moon_width: %d, moon_radius: %d, half_start: %d, half_end: %d, half_scale: %s', moon_height, moon_width, moon_radius, half_start, half_end, str(half_scale))
-        mask = cv2.ellipse(
+        mask = self._safe_ellipse(
             img=mask,
             center=(int(moon_height / 2), int(moon_width / 2)),
             axes=(moon_radius, moon_radius),
@@ -137,7 +137,7 @@ class IndiAllSkyMoonOverlay(object):
 
         ### crecent
         #logger.info('moon_height: %d, moon_width: %d, moon_radius: %d, ellipse_b: %d, crecent_scale: %s', moon_height, moon_width, moon_radius, ellipse_b, str(crecent_scale))
-        mask = cv2.ellipse(
+        mask = self._safe_ellipse(
             img=mask,
             center=(int(moon_height / 2), int(moon_width / 2)),
             axes=(moon_radius, ellipse_b),
@@ -230,3 +230,61 @@ class IndiAllSkyMoonOverlay(object):
         #moon_overlay_elapsed_s = time.time() - moon_overlay_start
         #logger.warning('Moon Overlay processing in %0.4f s', moon_overlay_elapsed_s)
 
+
+    @staticmethod
+    def _safe_ellipse(img, center, axes, angle, startAngle, endAngle, color, thickness=1, lineType=cv2.LINE_8, shift=0):
+        try:
+            center = (int(center[0]), int(center[1]))
+            axes = (int(axes[0]), int(axes[1]))
+            thickness = int(thickness)
+            shift = int(shift)
+        except (TypeError, ValueError, IndexError) as e:
+            logger.warning(
+                'Skipping moon overlay ellipse with invalid parameters: center=%s axes=%s thickness=%s shift=%s reason=%s',
+                center,
+                axes,
+                thickness,
+                shift,
+                str(e),
+            )
+            return img
+
+        if axes[0] < 0 or axes[1] < 0:
+            logger.warning('Skipping moon overlay ellipse with negative axes: center=%s axes=%s thickness=%s shift=%s', center, axes, thickness, shift)
+            return img
+
+        if thickness != cv2.FILLED and thickness <= 0:
+            logger.warning('Skipping moon overlay ellipse with invalid thickness: center=%s axes=%s thickness=%s shift=%s', center, axes, thickness, shift)
+            return img
+
+        if thickness > 32767:
+            logger.warning('Skipping moon overlay ellipse with excessive thickness: center=%s axes=%s thickness=%s shift=%s', center, axes, thickness, shift)
+            return img
+
+        if shift < 0 or shift > 16:
+            logger.warning('Skipping moon overlay ellipse with invalid shift: center=%s axes=%s thickness=%s shift=%s', center, axes, thickness, shift)
+            return img
+
+        try:
+            return cv2.ellipse(
+                img=img,
+                center=center,
+                axes=axes,
+                angle=angle,
+                startAngle=startAngle,
+                endAngle=endAngle,
+                color=color,
+                thickness=thickness,
+                lineType=lineType,
+                shift=shift,
+            )
+        except cv2.error as e:
+            logger.warning(
+                'Skipping moon overlay ellipse after OpenCV rejected parameters: center=%s axes=%s thickness=%s shift=%s reason=%s',
+                center,
+                axes,
+                thickness,
+                shift,
+                str(e),
+            )
+            return img
