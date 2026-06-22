@@ -2335,6 +2335,8 @@ class ConfigView(FormView):
             'DETECT_METEORS_THOLD'           : self.indi_allsky_config.get('DETECT_METEORS_THOLD', 125),
             'DETECT_MASK'                    : self.indi_allsky_config.get('DETECT_MASK', ''),
             'DETECT_DRAW'                    : self.indi_allsky_config.get('DETECT_DRAW', False),
+            'EVENT_CANDIDATE_TRIGGERS__enabled'                 : self.indi_allsky_config.get('EVENT_CANDIDATE_TRIGGERS', {}).get('enabled', False),
+            'EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour' : self.indi_allsky_config.get('EVENT_CANDIDATE_TRIGGERS', {}).get('max_candidates_per_hour', 100),
             'LOGO_OVERLAY'                   : self.indi_allsky_config.get('LOGO_OVERLAY', ''),
             'HEALTHCHECK__DISK_USAGE'        : self.indi_allsky_config.get('HEALTHCHECK', {}).get('DISK_USAGE', 90.0),
             'HEALTHCHECK__SWAP_USAGE'        : self.indi_allsky_config.get('HEALTHCHECK', {}).get('SWAP_USAGE', 90.0),
@@ -3356,6 +3358,9 @@ class AjaxConfigView(BaseView):
         self.indi_allsky_config['DETECT_METEORS_THOLD']                 = int(request.json['DETECT_METEORS_THOLD'])
         self.indi_allsky_config['DETECT_MASK']                          = str(request.json['DETECT_MASK'])
         self.indi_allsky_config['DETECT_DRAW']                          = bool(request.json['DETECT_DRAW'])
+        self.indi_allsky_config.setdefault('EVENT_CANDIDATE_TRIGGERS', {})
+        self.indi_allsky_config['EVENT_CANDIDATE_TRIGGERS']['enabled']  = bool(request.json.get('EVENT_CANDIDATE_TRIGGERS__enabled', False))
+        self.indi_allsky_config['EVENT_CANDIDATE_TRIGGERS']['max_candidates_per_hour'] = int(request.json['EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour'])
         self.indi_allsky_config['LOGO_OVERLAY']                         = str(request.json['LOGO_OVERLAY'])
         self.indi_allsky_config['HEALTHCHECK']['DISK_USAGE']            = float(request.json['HEALTHCHECK__DISK_USAGE'])
         self.indi_allsky_config['HEALTHCHECK']['SWAP_USAGE']            = float(request.json['HEALTHCHECK__SWAP_USAGE'])
@@ -15232,6 +15237,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         'Upload / Publishing',
         'Devices / GPIO / Sensors',
         'Web / Admin / System',
+        'Event Detection Foundation',
         'Advanced / Other',
     )
     SETTINGS_DEFAULT_OPEN_GROUPS = (
@@ -15447,7 +15453,9 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
     def estimate_settings_group(self, field_name):
         field_name_upper = field_name.upper()
 
-        if field_name_upper.startswith('MULTI_CAMERA'):
+        if field_name_upper.startswith('EVENT_CANDIDATE_TRIGGERS'):
+            return 'Event Detection Foundation'
+        elif field_name_upper.startswith('MULTI_CAMERA'):
             return 'Multi-camera / Profile'
         elif any(token in field_name_upper for token in (
             'CCD_CONFIG',
@@ -15586,7 +15594,9 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
 
     def estimate_settings_scope(self, field_name):
         field_name_upper = field_name.upper()
-        if field_name_upper.startswith('MULTI_CAMERA') or 'PROFILE' in field_name_upper:
+        if field_name_upper.startswith('EVENT_CANDIDATE_TRIGGERS'):
+            return 'advanced'
+        elif field_name_upper.startswith('MULTI_CAMERA') or 'PROFILE' in field_name_upper:
             return 'profile'
         elif any(token in field_name_upper for token in (
             'CAMERA',
@@ -15670,6 +15680,8 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'CALIBRATE',
         )):
             return 'medium'
+        elif field_name_upper.startswith('EVENT_CANDIDATE_TRIGGERS'):
+            return 'medium'
 
         return 'safe'
 
@@ -15677,6 +15689,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
     def estimate_settings_restart(self, field_name):
         field_name_upper = field_name.upper()
         if any(token in field_name_upper for token in (
+            'EVENT_CANDIDATE_TRIGGERS',
             'CAMERA_INTERFACE',
             'INDI_',
             'LIBCAMERA',

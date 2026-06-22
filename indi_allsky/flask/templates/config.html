@@ -9764,6 +9764,40 @@ var camera_id = {{ camera_id }};
 
 </div>
 
+    <hr>
+
+    <h3>Event Detection Foundation</h3>
+    <div><span class="badge rounded-pill bg-info text-dark">Shadow-only</span> Generates unclassified EventCandidate metadata only. Capture, exposure, gain, notifications, and classification are not changed.</div>
+
+    <hr>
+
+    <div class="form-group row">
+        <div class="col-sm-2">
+            {{ form_config.EVENT_CANDIDATE_TRIGGERS__enabled.label }}
+        </div>
+        <div class="col-sm-2">
+            <div class="form-switch">
+                {{ form_config.EVENT_CANDIDATE_TRIGGERS__enabled(class='form-check-input') }}
+                <div id="EVENT_CANDIDATE_TRIGGERS__enabled-error" class="invalid-feedback text-danger" style="display: none;"></div>
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <div>Shadow-only. Generates unclassified EventCandidate metadata only.</div>
+            <div><span class="badge rounded-pill bg-warning text-dark">Default</span> Disabled. No trigger evaluation runs unless explicitly enabled.</div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-sm-2">
+            {{ form_config.EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour.label(class='col-form-label') }}
+        </div>
+        <div class="col-sm-2">
+            {{ form_config.EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour(class='form-control bg-secondary') }}
+            <div id="EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour-error" class="invalid-feedback text-danger" style="display: none;"></div>
+        </div>
+        <div class="col-sm-8">Safety limit. If exceeded, candidate generation is skipped, capture continues. Use 0 for no hourly limit.</div>
+    </div>
+
     <hr> <hr> <hr>
 
     <div class="form-group row">
@@ -9904,6 +9938,7 @@ const field_names = [
     'DETECT_STARS_THOLD',
     'DETECT_METEORS_THOLD',
     'DETECT_MASK',
+    'EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour',
     'LOGO_OVERLAY',
     'HEALTHCHECK__DISK_USAGE',
     'HEALTHCHECK__SWAP_USAGE',
@@ -10392,6 +10427,7 @@ const checkbox_field_names = [
     'DETECT_STARS',
     'DETECT_METEORS',
     'DETECT_DRAW',
+    'EVENT_CANDIDATE_TRIGGERS__enabled',
     'CAPTURE_PAUSE',
     'TIMELAPSE_ENABLE',
     'TIMELAPSE__FFMPEG_REPORT',

@@ -252,6 +252,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Controlled Enablement v0:
     - abilita la generazione candidate runtime solo se `event_candidate_triggers.enabled=True`;
     - aggiunge safety limit runtime `max_candidates_per_hour`, default `100`;
+    - Web UI config controls aggiunti nella configurazione Full Settings / Modern Settings Inventory:
+      - `EVENT_CANDIDATE_TRIGGERS.enabled`, default `False`;
+      - `EVENT_CANDIDATE_TRIGGERS.max_candidates_per_hour`, default `100`;
+      - sezione `Event Detection Foundation`, con testo esplicito shadow-only.
     - se il limite orario viene raggiunto, non vengono persistiti nuovi candidate e la capture continua invariata;
     - persiste diagnostica runtime in `event_candidate_runtime.json`:
       - trigger evaluations;
@@ -1188,3 +1192,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Aggiunto smoke test manuale Event Foundation v0 con dati sintetici `synthetic-smoke-v0`, persistence JSONL candidate/timeline e cleanup sicuro.
 - 2026-06-21: Aggiunte Candidate Trigger Rules v0 test-only metadata-based per candidate `unclassified`, senza hook runtime o classificazione eventi.
 - 2026-06-21: Aggiunto Candidate Trigger Smoke Test v0 manual-only con metadata sintetici, persistence candidate/timeline, analytics dashboard e cleanup sicuro.
+- 2026-06-22: Esposti in Web UI config i controlli shadow-only `EVENT_CANDIDATE_TRIGGERS.enabled` e `max_candidates_per_hour`; default resta disabilitato e la logica runtime trigger non e' stata modificata.
