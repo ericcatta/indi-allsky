@@ -9773,12 +9773,12 @@ var camera_id = {{ camera_id }};
 
     <div class="form-group row">
         <div class="col-sm-2">
-            {{ form_config.EVENT_CANDIDATE_TRIGGERS__enabled.label }}
+            {{ form_config.EVENT_CANDIDATE_TRIGGERS__ENABLED.label }}
         </div>
         <div class="col-sm-2">
             <div class="form-switch">
-                {{ form_config.EVENT_CANDIDATE_TRIGGERS__enabled(class='form-check-input') }}
-                <div id="EVENT_CANDIDATE_TRIGGERS__enabled-error" class="invalid-feedback text-danger" style="display: none;"></div>
+                {{ form_config.EVENT_CANDIDATE_TRIGGERS__ENABLED(class='form-check-input') }}
+                <div id="EVENT_CANDIDATE_TRIGGERS__ENABLED-error" class="invalid-feedback text-danger" style="display: none;"></div>
             </div>
         </div>
         <div class="col-sm-8">
@@ -9789,11 +9789,11 @@ var camera_id = {{ camera_id }};
 
     <div class="form-group row">
         <div class="col-sm-2">
-            {{ form_config.EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour.label(class='col-form-label') }}
+            {{ form_config.EVENT_CANDIDATE_TRIGGERS__MAX_CANDIDATES_PER_HOUR.label(class='col-form-label') }}
         </div>
         <div class="col-sm-2">
-            {{ form_config.EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour(class='form-control bg-secondary') }}
-            <div id="EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour-error" class="invalid-feedback text-danger" style="display: none;"></div>
+            {{ form_config.EVENT_CANDIDATE_TRIGGERS__MAX_CANDIDATES_PER_HOUR(class='form-control bg-secondary') }}
+            <div id="EVENT_CANDIDATE_TRIGGERS__MAX_CANDIDATES_PER_HOUR-error" class="invalid-feedback text-danger" style="display: none;"></div>
         </div>
         <div class="col-sm-8">Safety limit. If exceeded, candidate generation is skipped, capture continues. Use 0 for no hourly limit.</div>
     </div>
@@ -9938,7 +9938,7 @@ const field_names = [
     'DETECT_STARS_THOLD',
     'DETECT_METEORS_THOLD',
     'DETECT_MASK',
-    'EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour',
+    'EVENT_CANDIDATE_TRIGGERS__MAX_CANDIDATES_PER_HOUR',
     'LOGO_OVERLAY',
     'HEALTHCHECK__DISK_USAGE',
     'HEALTHCHECK__SWAP_USAGE',
@@ -10427,7 +10427,7 @@ const checkbox_field_names = [
     'DETECT_STARS',
     'DETECT_METEORS',
     'DETECT_DRAW',
-    'EVENT_CANDIDATE_TRIGGERS__enabled',
+    'EVENT_CANDIDATE_TRIGGERS__ENABLED',
     'CAPTURE_PAUSE',
     'TIMELAPSE_ENABLE',
     'TIMELAPSE__FFMPEG_REPORT',

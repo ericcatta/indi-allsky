@@ -172,15 +172,19 @@ var camera_id = {{ camera_id }};
     function collectPayload() {
         const payload = {};
         fieldNames.forEach((name) => {
-            const input = document.getElementById(name);
-            if (!input) {
-                return;
-            }
+            try {
+                const input = document.getElementById(name);
+                if (!input) {
+                    return;
+                }
 
-            if (checkboxNames.has(name)) {
-                payload[name] = Boolean(input.checked);
-            } else {
-                payload[name] = input.value;
+                if (checkboxNames.has(name)) {
+                    payload[name] = Boolean(input.checked);
+                } else {
+                    payload[name] = input.value;
+                }
+            } catch (error) {
+                throw new Error('Unable to read field "' + name + '": ' + error.message);
             }
         });
         return payload;

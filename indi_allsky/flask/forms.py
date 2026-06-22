@@ -264,7 +264,7 @@ def CCD_CONFIG__AUTO_GAIN_LEVELS_validator(form, field):
         raise ValidationError('Invalid number of levels')
 
 
-def EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour_validator(form, field):
+def EVENT_CANDIDATE_TRIGGERS__MAX_CANDIDATES_PER_HOUR_validator(form, field):
     if not isinstance(field.data, int):
         raise ValidationError('Max candidates per hour must be an integer')
 
@@ -4425,8 +4425,8 @@ class IndiAllskyConfigForm(FlaskForm):
     DETECT_METEORS_THOLD             = IntegerField('Meteor Detection Threshold', validators=[DataRequired(), DETECT_METEORS_THOLD_validator])
     DETECT_MASK                      = StringField('Detection Mask', validators=[DETECT_MASK_validator])
     DETECT_DRAW                      = BooleanField('Mark Detections on Image')
-    EVENT_CANDIDATE_TRIGGERS__enabled = BooleanField('Enable event candidate trigger evaluation', description='Shadow-only. Generates unclassified EventCandidate metadata only.')
-    EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour = IntegerField('Max Event Candidates per Hour', validators=[EVENT_CANDIDATE_TRIGGERS__max_candidates_per_hour_validator], widget=NumberInput(min=0, step=1), description='Safety limit. If exceeded, candidate generation is skipped, capture continues.')
+    EVENT_CANDIDATE_TRIGGERS__ENABLED = BooleanField('Enable event candidate trigger evaluation', description='Shadow-only. Generates unclassified EventCandidate metadata only.')
+    EVENT_CANDIDATE_TRIGGERS__MAX_CANDIDATES_PER_HOUR = IntegerField('Max Event Candidates per Hour', validators=[EVENT_CANDIDATE_TRIGGERS__MAX_CANDIDATES_PER_HOUR_validator], widget=NumberInput(min=0, step=1), description='Safety limit. If exceeded, candidate generation is skipped, capture continues.')
     LOGO_OVERLAY                     = StringField('Logo Overlay', validators=[LOGO_OVERLAY_validator])
     SQM_ROI_X1                       = IntegerField('SQM ROI x1', validators=[SQM_ROI_validator])
     SQM_ROI_Y1                       = IntegerField('SQM ROI y1', validators=[SQM_ROI_validator])
