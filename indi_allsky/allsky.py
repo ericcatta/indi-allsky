@@ -685,19 +685,51 @@ class IndiAllSky(object):
 
 
     def _queue_video_task(self, task):
+        action = task.data.get('action') if task.data else None
+        kwargs = task.data.get('kwargs', {}) if task.data else {}
+        camera_id = kwargs.get('camera_id')
+        profile_id = self.capture_profiles[0].profile_id
+
         if self.multi_camera_capture_enable:
-            logger.warning('Skipping VIDEO task %d while MULTI_CAMERA_CAPTURE_ENABLE images-only MVP is active', task.id)
-            task.setExpired()
-            return
+            multicamera_safe_video_actions = {
+                'generateVideo',
+                'generateKeogramStarTrails',
+                'generatePanoramaVideo',
+            }
+
+            if action not in multicamera_safe_video_actions:
+                logger.warning(
+                    'Skipping VIDEO task %d action=%s while MULTI_CAMERA_CAPTURE_ENABLE images-only MVP is active',
+                    task.id,
+                    action,
+                )
+                task.setExpired()
+                return
+
+            if not camera_id:
+                logger.warning(
+                    'Skipping VIDEO task %d action=%s while MULTI_CAMERA_CAPTURE_ENABLE is active: missing camera_id',
+                    task.id,
+                    action,
+                )
+                task.setExpired()
+                return
+
+            logger.warning(
+                'Allowing multicamera VIDEO task %d action=%s camera_id=%s profile_id=%s',
+                task.id,
+                action,
+                camera_id,
+                profile_id,
+            )
 
         # MULTI_CAMERA_PREP: passive route metadata for future queue routing.
         # VideoWorker still loads the existing DB task by task_id.
         payload = {
             'task_id'    : task.id,
-            'profile_id' : self.capture_profiles[0].profile_id,
+            'profile_id' : profile_id,
         }
 
-        camera_id = task.data.get('kwargs', {}).get('camera_id')
         if camera_id:
             payload['camera_id'] = camera_id
 
