@@ -379,6 +379,65 @@ class RuleBasedEventClassifierV1:
         }
 
 
+def classify_event_timelines_offline(timeline_path, classification_dir, created_at=None):
+    """Manually classify existing timeline JSONL records in shadow mode.
+
+    This runner is intentionally offline/manual. It does not change capture,
+    candidate generation, timeline generation, dashboard, or runtime behavior.
+    """
+    timeline_path = Path(timeline_path)
+    writer = EventClassificationWriter(classification_dir)
+    registry = ClassificationRuleRegistry([WeatherOrCloudEventRule()])
+    classifier = RuleBasedEventClassifierV1(registry=registry)
+    labels = Counter()
+    summary = {
+        'total_lines': 0,
+        'timelines_classified': 0,
+        'classifications_written': 0,
+        'skipped_lines': 0,
+        'labels_count': {},
+    }
+
+    if not timeline_path.exists():
+        return summary
+
+    with timeline_path.open('r', encoding='utf-8') as f_timeline:
+        for line in f_timeline:
+            line = line.strip()
+            if not line:
+                continue
+            summary['total_lines'] += 1
+            try:
+                timeline = json.loads(line)
+            except ValueError:
+                summary['skipped_lines'] += 1
+                continue
+
+            if not _has_timeline_classification_identity(timeline):
+                summary['skipped_lines'] += 1
+                continue
+
+            try:
+                classification = classifier.classify_timeline(timeline, created_at=created_at)
+                writer.write(classification)
+            except Exception:
+                summary['skipped_lines'] += 1
+                continue
+
+            summary['timelines_classified'] += 1
+            summary['classifications_written'] += 1
+            labels.update([classification.label])
+
+    summary['labels_count'] = dict(labels)
+    return summary
+
+
+def _has_timeline_classification_identity(timeline):
+    if not isinstance(timeline, dict):
+        return False
+    return all(_string_value(timeline.get(key)) for key in ('timeline_id', 'camera_id', 'profile_id', 'start_timestamp_utc'))
+
+
 class EventCandidateAnalytics:
     """Lightweight reader/summary layer for shadow event candidate JSONL files."""
 

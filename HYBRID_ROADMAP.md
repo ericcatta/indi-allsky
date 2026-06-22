@@ -287,6 +287,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - matcha solo segnali ambientali forti da timeline summary/reasons;
       - confidence conservativa `0.35-0.65`;
       - usabile solo in test/manual registry finche' non verra' deciso un path runtime/dashboard dedicato.
+    - runner offline/manuale:
+      - legge Event Timeline JSONL esistenti;
+      - registra esplicitamente `WeatherOrCloudEventRule` solo per la run manuale;
+      - scrive Event Classification JSONL append-only;
+      - salta righe malformate o incomplete senza fermare l'intera run;
+      - nessun hook runtime/capture/dashboard.
     - semantica:
       - `unclassified` = non processato da classifier;
       - `unknown_event` = processato dal classifier ma nessuna regola ha matchato;
@@ -1229,3 +1235,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-22: Aggiunta foundation Event Classification Rule Registry: contratti regola/risultato, registry ordinato e classifier shadow che resta no-op con registry vuoto.
 - 2026-06-22: Aggiunta explainability foundation Event Classification: `rules_matched` strutturato con score/reason e `features_used` arricchito con summary quality/environment della timeline.
 - 2026-06-22: Aggiunta `WeatherOrCloudEventRule` shadow-only e non registrata di default: prima regola classificazione conservativa basata solo su segnali ambientali forti.
+- 2026-06-22: Aggiunto runner offline/manuale Event Classification: classifica Event Timeline JSONL in shadow mode e scrive Event Classification JSONL senza runtime hook.

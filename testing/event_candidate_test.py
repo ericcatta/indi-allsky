@@ -22,6 +22,7 @@ from indi_allsky.event_candidate import RuleBasedEventClassifierV1
 from indi_allsky.event_candidate import WeatherOrCloudEventRule
 from indi_allsky.event_candidate import build_event_candidate_from_metadata
 from indi_allsky.event_candidate import build_event_timeline_segments
+from indi_allsky.event_candidate import classify_event_timelines_offline
 from indi_allsky.event_candidate import default_event_classification_dir
 from indi_allsky.event_candidate import default_event_candidate_dir
 from indi_allsky.event_candidate import default_event_candidate_runtime_path
@@ -830,6 +831,84 @@ def test_weather_or_cloud_rule_ignores_missing_environment_summary():
     assert row['rules_matched'] == []
 
 
+def test_offline_event_classification_runner_writes_classifications_and_counts_labels():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        timeline_path = base_dir.joinpath('event_timelines', '2026-06-21.jsonl')
+        classification_dir = base_dir.joinpath('event_classifications')
+        timeline_path.parent.mkdir(parents=True, exist_ok=True)
+
+        strong_timeline = _timeline_with_context(
+            environment_context_summary={
+                'cloud_condition': {'overcast': 1},
+                'sky_trend': {'degrading': 1},
+                'possible_condensation': False,
+            },
+        )
+        ambiguous_timeline = _timeline_with_context(
+            reasons=['brightness_spike'],
+            environment_context_summary={
+                'cloud_condition': {'mostly_clear': 1},
+                'sky_trend': {'stable': 1},
+                'possible_condensation': False,
+            },
+        )
+        malformed_timeline = {'timeline_id': 'missing-required-fields'}
+
+        with timeline_path.open('w', encoding='utf-8') as f_timeline:
+            json.dump(strong_timeline.to_dict(), f_timeline, sort_keys=True, separators=(',', ':'))
+            f_timeline.write('\n')
+            f_timeline.write('not-json\n')
+            json.dump(ambiguous_timeline.to_dict(), f_timeline, sort_keys=True, separators=(',', ':'))
+            f_timeline.write('\n')
+            json.dump(malformed_timeline, f_timeline, sort_keys=True, separators=(',', ':'))
+            f_timeline.write('\n')
+
+        summary = classify_event_timelines_offline(
+            timeline_path,
+            classification_dir,
+            created_at='2026-06-21T23:00:00+00:00',
+        )
+
+        assert summary == {
+            'total_lines': 4,
+            'timelines_classified': 2,
+            'classifications_written': 2,
+            'skipped_lines': 2,
+            'labels_count': {
+                'unknown_event': 1,
+                'weather_or_cloud_event': 1,
+            },
+        }
+
+        rows = [
+            json.loads(line)
+            for line in classification_dir.joinpath('2026-06-21.jsonl').read_text(encoding='utf-8').splitlines()
+        ]
+        assert len(rows) == 2
+        assert [row['label'] for row in rows] == ['weather_or_cloud_event', 'unknown_event']
+        assert rows[0]['rules_matched'][0]['rule_id'] == 'weather_or_cloud_event_v1'
+        assert rows[1]['rules_matched'] == []
+
+
+def test_offline_event_classification_runner_does_not_change_default_classifier_registry():
+    timeline = _timeline_with_context(
+        environment_context_summary={
+            'cloud_condition': {'overcast': 1},
+            'sky_trend': {'degrading': 1},
+            'possible_condensation': False,
+        },
+    )
+
+    row = RuleBasedEventClassifierV1().classify_timeline(
+        timeline,
+        created_at='2026-06-21T23:00:00+00:00',
+    ).to_dict()
+
+    assert row['label'] == 'unknown_event'
+    assert row['rules_matched'] == []
+
+
 def test_event_foundation_smoke_cleanup_removes_candidates_and_timelines():
     with tempfile.TemporaryDirectory() as tmpdir:
         date = '2026-06-21'
@@ -1138,6 +1217,8 @@ if __name__ == '__main__':
     test_weather_or_cloud_rule_classifies_condensation_timeline()
     test_weather_or_cloud_rule_ignores_weak_ambiguous_timeline()
     test_weather_or_cloud_rule_ignores_missing_environment_summary()
+    test_offline_event_classification_runner_writes_classifications_and_counts_labels()
+    test_offline_event_classification_runner_does_not_change_default_classifier_registry()
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
     test_candidate_trigger_smoke_cases_and_cleanup()
     test_runtime_shadow_integration_disabled_by_default()
