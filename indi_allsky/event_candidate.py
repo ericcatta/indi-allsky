@@ -353,6 +353,15 @@ class EventCandidateRuntimeDiagnostics:
         summary['enabled'] = bool(enabled)
         summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
         summary['total_evaluations'] = int(summary.get('total_evaluations') or 0) + 1
+        summary['last_status'] = 'evaluated'
+        self.write_summary(summary)
+        return summary
+
+    def record_disabled(self, max_candidates_per_hour):
+        summary = self.read_summary()
+        summary['enabled'] = False
+        summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
+        summary['last_status'] = 'disabled'
         self.write_summary(summary)
         return summary
 
@@ -361,6 +370,7 @@ class EventCandidateRuntimeDiagnostics:
         summary['enabled'] = bool(enabled)
         summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
         summary['total_generated_candidates'] = int(summary.get('total_generated_candidates') or 0) + len(candidates)
+        summary['last_status'] = 'generated'
 
         reason_counter = Counter(summary.get('candidates_by_reason') or {})
         for candidate in candidates:
@@ -383,6 +393,7 @@ class EventCandidateRuntimeDiagnostics:
         summary['enabled'] = bool(enabled)
         summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
         summary['trigger_evaluation_failures'] = int(summary.get('trigger_evaluation_failures') or 0) + 1
+        summary['last_status'] = 'failure'
         self.write_summary(summary)
         return summary
 
@@ -391,6 +402,7 @@ class EventCandidateRuntimeDiagnostics:
         summary['enabled'] = bool(enabled)
         summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
         summary['rate_limited_events'] = int(summary.get('rate_limited_events') or 0) + 1
+        summary['last_status'] = 'rate_limited'
         self.write_summary(summary)
         return summary
 
@@ -412,6 +424,7 @@ class EventCandidateRuntimeDiagnostics:
             'trigger_evaluation_failures': 0,
             'rate_limited_events': 0,
             'candidates_by_hour': {},
+            'last_status': 'none',
         }
 
     def _hour_key(self, timestamp):
@@ -534,6 +547,8 @@ def persist_event_candidates_shadow(
     max_candidates_per_hour = max(0, int(config.get('max_candidates_per_hour', DEFAULT_RUNTIME_TRIGGER_CONFIG['max_candidates_per_hour']) or 0))
     diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path) if diagnostics_path else None
     if not config.get('enabled', False):
+        if diagnostics:
+            diagnostics.record_disabled(max_candidates_per_hour)
         return {
             'enabled': False,
             'status': 'disabled',
@@ -575,6 +590,7 @@ def persist_event_candidates_shadow(
             return {
                 'enabled': True,
                 'status': 'no_candidates',
+                'reason': 'no_trigger_rules_matched',
                 'candidate_count': 0,
                 'timeline_count': 0,
             }

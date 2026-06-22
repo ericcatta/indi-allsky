@@ -557,16 +557,51 @@ def test_runtime_shadow_integration_disabled_by_default():
         base_dir = Path(tmpdir)
         candidate_dir = default_event_candidate_dir(base_dir)
         timeline_dir = default_event_timeline_dir(base_dir)
+        diagnostics_path = default_event_candidate_runtime_path(base_dir)
 
         result = persist_event_candidates_shadow(
             _metadata(frame_id=2, meter=180.0, target=95.0, quality=30.0),
             previous_metadata=_metadata(frame_id=1, meter=95.0, target=95.0, quality=95.0),
             candidate_dir=candidate_dir,
             timeline_dir=timeline_dir,
+            diagnostics_path=diagnostics_path,
         )
+        diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path).read_summary()
 
         assert result['status'] == 'disabled'
         assert result['candidate_count'] == 0
+        assert diagnostics_path.exists()
+        assert diagnostics['enabled'] is False
+        assert diagnostics['total_evaluations'] == 0
+        assert diagnostics['last_status'] == 'disabled'
+        assert not candidate_dir.exists()
+        assert not timeline_dir.exists()
+
+
+def test_runtime_shadow_integration_enabled_no_candidates_records_evaluation():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        candidate_dir = default_event_candidate_dir(base_dir)
+        timeline_dir = default_event_timeline_dir(base_dir)
+        diagnostics_path = default_event_candidate_runtime_path(base_dir)
+
+        result = persist_event_candidates_shadow(
+            _metadata(frame_id=2, meter=95.0, target=95.0, quality=95.0),
+            previous_metadata=_metadata(frame_id=1, meter=94.0, target=95.0, quality=95.0),
+            profile_config={'event_candidate_triggers': {'enabled': True}},
+            candidate_dir=candidate_dir,
+            timeline_dir=timeline_dir,
+            diagnostics_path=diagnostics_path,
+        )
+        diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path).read_summary()
+
+        assert result['status'] == 'no_candidates'
+        assert result['reason'] == 'no_trigger_rules_matched'
+        assert result['candidate_count'] == 0
+        assert diagnostics_path.exists()
+        assert diagnostics['enabled'] is True
+        assert diagnostics['total_evaluations'] == 1
+        assert diagnostics['total_generated_candidates'] == 0
         assert not candidate_dir.exists()
         assert not timeline_dir.exists()
 
@@ -746,6 +781,7 @@ if __name__ == '__main__':
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
     test_candidate_trigger_smoke_cases_and_cleanup()
     test_runtime_shadow_integration_disabled_by_default()
+    test_runtime_shadow_integration_enabled_no_candidates_records_evaluation()
     test_runtime_shadow_integration_enabled_persists_candidates_and_timelines()
     test_runtime_shadow_integration_populates_diagnostics()
     test_runtime_shadow_integration_rate_limit_caps_candidates()

@@ -1173,10 +1173,6 @@ class ImageWorker(Process):
 
         try:
             profile_config = self._event_candidate_trigger_profile_config()
-            trigger_config = profile_config.get('event_candidate_triggers', {})
-            if not trigger_config.get('enabled', False):
-                return
-
             metadata_dict.update(self._event_candidate_environment_context(metadata_dict))
             result = persist_event_candidates_shadow(
                 metadata_dict,
