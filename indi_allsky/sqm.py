@@ -50,12 +50,34 @@ class IndiAllskySqm(object):
             self._generateSqmMask(sqm_img, i_ref.binning)
 
 
-        return cv2.mean(src=sqm_img, mask=self._sqm_mask_dict[i_ref.binning])[0]
+        sqm_mask = self._sqm_mask_dict[i_ref.binning]
+        if isinstance(sqm_mask, type(None)):
+            logger.warning(
+                'Skipping SQM average: no usable mask for binning %s, image shape=%s',
+                i_ref.binning,
+                sqm_img.shape,
+            )
+            return None
+
+
+        if sqm_mask.shape[:2] != sqm_img.shape[:2]:
+            logger.warning(
+                'Skipping SQM average: mask shape %s does not match image shape %s for binning %s',
+                sqm_mask.shape,
+                sqm_img.shape,
+                i_ref.binning,
+            )
+            return None
+
+
+        return cv2.mean(src=sqm_img, mask=sqm_mask)[0]
 
 
     def jSqm(self, i_ref):
         ### Janky SQM
         sqm_avg = self.averageAdu(i_ref)
+        if sqm_avg is None:
+            return 0.0
 
         # offset the sqm based on the exposure and gain
         weighted_sqm_avg = (((self.config['CCD_EXPOSURE_MAX'] - i_ref.exposure) / 10) + 1) * (sqm_avg * (((float(self.gain_av[constants.GAIN_MAX_NIGHT]) - i_ref.gain) / 10) + 1))
@@ -67,6 +89,8 @@ class IndiAllskySqm(object):
 
     def magnitudeSqm(self, i_ref):
         sqm_avg = self.averageAdu(i_ref)
+        if sqm_avg is None:
+            return 0.0, 0.0, 0.0
 
         try:
             raw_mag = (math.log10(sqm_avg) * 2.5) * -1
@@ -115,6 +139,16 @@ class IndiAllskySqm(object):
 
         # combine masks in case there is overlapping regions
         if not isinstance(self._external_mask_dict[binning], type(None)):
+            if self._external_mask_dict[binning].shape[:2] != mask.shape[:2]:
+                logger.warning(
+                    'Skipping external SQM mask merge: external mask shape %s does not match SQM mask shape %s for binning %s',
+                    self._external_mask_dict[binning].shape,
+                    mask.shape,
+                    binning,
+                )
+                self._sqm_mask_dict[binning] = mask
+                return
+
             # combine existing mask with a central ROI
             logger.info('Merging SQM mask with central ROI')
             self._sqm_mask_dict[binning] = cv2.bitwise_and(mask, self._external_mask_dict[binning])
@@ -122,4 +156,3 @@ class IndiAllskySqm(object):
 
 
         self._sqm_mask_dict[binning] = mask
-
