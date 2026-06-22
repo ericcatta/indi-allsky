@@ -1315,9 +1315,10 @@ class ImageProcessor(object):
         image_dimensions = self.image.shape[:2]
 
         if adu_mask is None:
-            logger.warning(
-                'Detection mask is not available for binning %s; ignoring ADU mask for this frame',
+            logger.info(
+                'ADU mask is not available for binning %s, image_shape=%s; using unmasked ADU average',
                 i_ref.binning,
+                image_dimensions,
             )
         elif adu_mask.shape[:2] != image_dimensions:
             mask_dimensions = adu_mask.shape[:2]
@@ -1336,8 +1337,8 @@ class ImageProcessor(object):
         if len(self.image.shape) == 2:
             # mono
             if adu_mask is None or adu_mask.shape[:2] != self.image.shape[:2]:
-                logger.warning(
-                    'Ignoring incompatible ADU mask: binning=%s mask_shape=%s image_shape=%s',
+                logger.info(
+                    'Using unmasked ADU average: binning=%s mask_shape=%s image_shape=%s',
                     i_ref.binning,
                     None if adu_mask is None else adu_mask.shape,
                     self.image.shape,
@@ -1348,8 +1349,8 @@ class ImageProcessor(object):
         else:
             data_mono = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
             if adu_mask is None or adu_mask.shape[:2] != data_mono.shape[:2]:
-                logger.warning(
-                    'Ignoring incompatible ADU mask: binning=%s mask_shape=%s data_mono_shape=%s',
+                logger.info(
+                    'Using unmasked ADU average: binning=%s mask_shape=%s data_mono_shape=%s',
                     i_ref.binning,
                     None if adu_mask is None else adu_mask.shape,
                     data_mono.shape,
@@ -4181,6 +4182,20 @@ class ImageProcessor(object):
 
         image_height, image_width = img.shape[:2]
         mask_key = (binning, image_width, image_height)
+
+        detection_mask = self._detection_mask_dict.get(binning)
+        if not isinstance(detection_mask, type(None)):
+            if detection_mask.shape[:2] == img.shape[:2] and detection_mask.dtype in (numpy.uint8, numpy.int8):
+                self._adu_mask_dict[mask_key] = detection_mask
+                return
+
+            logger.info(
+                'Ignoring incompatible detection mask for ADU: binning=%s mask_shape=%s mask_dtype=%s image_shape=%s',
+                binning,
+                detection_mask.shape,
+                detection_mask.dtype,
+                img.shape[:2],
+            )
 
         # create a black background
         mask = numpy.zeros((image_height, image_width), dtype=numpy.uint8)

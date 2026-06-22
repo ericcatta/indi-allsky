@@ -143,8 +143,8 @@ class IndiAllskySqm(object):
         external_mask = self._external_mask_dict.get(binning)
         if not isinstance(external_mask, type(None)):
             if external_mask.shape[:2] != mask.shape[:2]:
-                logger.warning(
-                    'Skipping external SQM mask merge: external mask shape %s does not match SQM mask shape %s for binning %s',
+                logger.info(
+                    'Ignoring incompatible external SQM mask: external mask shape %s does not match SQM mask shape %s for binning %s; using local ROI mask',
                     external_mask.shape,
                     mask.shape,
                     binning,

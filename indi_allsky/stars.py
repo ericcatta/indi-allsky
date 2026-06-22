@@ -77,7 +77,7 @@ class IndiAllSkyStars(object):
             )
             masked_img = original_data
         elif star_mask.shape[:2] != image_shape:
-            logger.warning(
+            logger.info(
                 'Star mask shape %s does not match image shape %s for binning %s; regenerating star mask',
                 star_mask.shape,
                 image_shape,
@@ -145,8 +145,8 @@ class IndiAllSkyStars(object):
                 self._star_mask_dict[mask_key] = sqm_mask
                 return
 
-            logger.warning(
-                'Ignoring incompatible SQM star mask for binning %s, mask_shape=%s, mask_dtype=%s, image_shape=%s',
+            logger.info(
+                'Ignoring incompatible SQM star mask for binning %s, mask_shape=%s, mask_dtype=%s, image_shape=%s; generating local ROI mask',
                 binning,
                 sqm_mask.shape,
                 sqm_mask.dtype,
