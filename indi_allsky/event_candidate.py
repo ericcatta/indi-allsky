@@ -434,6 +434,92 @@ def classify_event_timelines_offline(timeline_path, classification_dir, created_
     return summary
 
 
+def build_event_pipeline_offline_report(candidate_path=None, timeline_path=None, classification_path=None):
+    """Read existing event JSONL files and return a compact diagnostic report."""
+    candidates, candidate_malformed = _load_jsonl_rows(candidate_path)
+    timelines, timeline_malformed = _load_jsonl_rows(timeline_path)
+    classifications, classification_malformed = _load_jsonl_rows(classification_path)
+
+    report = {
+        'total_candidate_lines': len(candidates),
+        'total_timeline_lines': len(timelines),
+        'total_classification_lines': len(classifications),
+        'malformed_lines': {
+            'candidates': candidate_malformed,
+            'timelines': timeline_malformed,
+            'classifications': classification_malformed,
+        },
+        'counts_by_profile_id': {},
+        'counts_by_camera_id': {},
+        'counts_by_candidate_reasons': {},
+        'counts_by_timeline_reasons': {},
+        'counts_by_classification_label': {},
+        'counts_by_quality_flags': {},
+        'counts_by_environment_cloud_condition': {},
+        'counts_by_sky_condition': {},
+        'counts_by_sky_trend': {},
+        'possible_condensation_true': 0,
+    }
+
+    profile_counts = Counter()
+    camera_counts = Counter()
+    candidate_reason_counts = Counter()
+    timeline_reason_counts = Counter()
+    classification_label_counts = Counter()
+    quality_flag_counts = Counter()
+    cloud_condition_counts = Counter()
+    sky_condition_counts = Counter()
+    sky_trend_counts = Counter()
+    possible_condensation_true = 0
+
+    for row in candidates:
+        _update_identity_counts(row, profile_counts, camera_counts)
+        _update_list_counter(candidate_reason_counts, row.get('reasons'))
+        _update_quality_flags(quality_flag_counts, row.get('quality_context'))
+        possible_condensation_true += _update_environment_counts(
+            row.get('environment_context'),
+            cloud_condition_counts,
+            sky_condition_counts,
+            sky_trend_counts,
+        )
+
+    for row in timelines:
+        _update_identity_counts(row, profile_counts, camera_counts)
+        _update_list_counter(timeline_reason_counts, row.get('reasons'))
+        _update_quality_flags(quality_flag_counts, row.get('quality_context_summary'))
+        possible_condensation_true += _update_environment_counts(
+            row.get('environment_context_summary'),
+            cloud_condition_counts,
+            sky_condition_counts,
+            sky_trend_counts,
+        )
+
+    for row in classifications:
+        _update_identity_counts(row, profile_counts, camera_counts)
+        label = _string_value(row.get('label'))
+        if label:
+            classification_label_counts.update([label])
+        _update_quality_flags(quality_flag_counts, (row.get('features_used') or {}).get('quality_context_summary'))
+        possible_condensation_true += _update_environment_counts(
+            (row.get('features_used') or {}).get('environment_context_summary'),
+            cloud_condition_counts,
+            sky_condition_counts,
+            sky_trend_counts,
+        )
+
+    report['counts_by_profile_id'] = dict(profile_counts)
+    report['counts_by_camera_id'] = dict(camera_counts)
+    report['counts_by_candidate_reasons'] = dict(candidate_reason_counts)
+    report['counts_by_timeline_reasons'] = dict(timeline_reason_counts)
+    report['counts_by_classification_label'] = dict(classification_label_counts)
+    report['counts_by_quality_flags'] = dict(quality_flag_counts)
+    report['counts_by_environment_cloud_condition'] = dict(cloud_condition_counts)
+    report['counts_by_sky_condition'] = dict(sky_condition_counts)
+    report['counts_by_sky_trend'] = dict(sky_trend_counts)
+    report['possible_condensation_true'] = possible_condensation_true
+    return report
+
+
 def _has_timeline_classification_identity(timeline):
     if not isinstance(timeline, dict):
         return False
@@ -1197,6 +1283,98 @@ def _environment_context_summary(candidates):
         'sky_trend': dict(counters['sky_trend']),
         'possible_condensation': possible_condensation,
     }
+
+
+def _load_jsonl_rows(path):
+    if path is None:
+        return [], 0
+
+    jsonl_path = Path(path)
+    if not jsonl_path.exists():
+        return [], 0
+
+    rows = []
+    malformed_lines = 0
+    with jsonl_path.open('r', encoding='utf-8') as f_jsonl:
+        for line in f_jsonl:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except ValueError:
+                malformed_lines += 1
+                continue
+            if isinstance(row, dict):
+                rows.append(row)
+            else:
+                malformed_lines += 1
+
+    return rows, malformed_lines
+
+
+def _update_identity_counts(row, profile_counts, camera_counts):
+    profile_id = _string_value(row.get('profile_id'))
+    camera_id = _string_value(row.get('camera_id'))
+    if profile_id:
+        profile_counts.update([profile_id])
+    if camera_id:
+        camera_counts.update([camera_id])
+
+
+def _update_list_counter(counter, value):
+    if isinstance(value, list):
+        counter.update(_string_value(item) for item in value if _string_value(item))
+        return
+    value_str = _string_value(value)
+    if value_str:
+        counter.update([value_str])
+
+
+def _update_quality_flags(counter, quality_context):
+    if not isinstance(quality_context, dict):
+        return
+
+    flags = quality_context.get('quality_flags')
+    if isinstance(flags, dict):
+        for flag, count in flags.items():
+            flag_value = _string_value(flag)
+            if flag_value:
+                counter.update({flag_value: int(count or 0)})
+        return
+
+    _update_list_counter(counter, flags)
+
+
+def _update_environment_counts(environment_context, cloud_counter, sky_counter, trend_counter):
+    if not isinstance(environment_context, dict):
+        return 0
+
+    _update_environment_value_counter(cloud_counter, environment_context.get('cloud_condition'))
+    _update_environment_value_counter(sky_counter, environment_context.get('sky_condition'))
+    _update_environment_value_counter(trend_counter, environment_context.get('sky_trend'))
+
+    possible_condensation = environment_context.get('possible_condensation')
+    if isinstance(possible_condensation, dict):
+        return sum(
+            int(count or 0)
+            for value, count in possible_condensation.items()
+            if _string_value(value).lower() in ('1', 'true', 'yes', 'on')
+        )
+    return 1 if bool(possible_condensation) else 0
+
+
+def _update_environment_value_counter(counter, value):
+    if isinstance(value, dict):
+        for label, count in value.items():
+            label_value = _string_value(label)
+            if label_value:
+                counter.update({label_value: int(count or 0)})
+        return
+
+    value_str = _string_value(value)
+    if value_str:
+        counter.update([value_str])
 
 
 def _parse_timestamp(timestamp):

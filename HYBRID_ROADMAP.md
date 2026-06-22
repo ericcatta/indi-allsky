@@ -295,6 +295,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - scrive Event Classification JSONL append-only;
       - salta righe malformate o incomplete senza fermare l'intera run;
       - nessun hook runtime/capture/dashboard.
+    - report offline/read-only Event Pipeline:
+      - legge Event Candidate, Event Timeline ed Event Classification JSONL;
+      - produce conteggi per camera, profilo, reason, label, quality flags e segnali environmental;
+      - tollera file mancanti, vuoti o righe JSONL malformate;
+      - non genera nuovi record e non modifica file.
     - semantica:
       - `unclassified` = non processato da classifier;
       - `unknown_event` = processato dal classifier ma nessuna regola ha matchato;
@@ -1239,3 +1244,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-22: Aggiunta `WeatherOrCloudEventRule` shadow-only e non registrata di default: prima regola classificazione conservativa basata solo su segnali ambientali forti.
 - 2026-06-22: Aggiunto runner offline/manuale Event Classification: classifica Event Timeline JSONL in shadow mode e scrive Event Classification JSONL senza runtime hook.
 - 2026-06-22: Raffinata `WeatherOrCloudEventRule`: `sky_condition_transition` e `partly_cloudy` da soli non generano piu' `weather_or_cloud_event`.
+- 2026-06-22: Aggiunto report offline/read-only Event Pipeline per riassumere candidate, timeline e classification JSONL senza modificare dati o runtime.

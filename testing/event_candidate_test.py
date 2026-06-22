@@ -22,6 +22,7 @@ from indi_allsky.event_candidate import RuleBasedEventClassifierV1
 from indi_allsky.event_candidate import WeatherOrCloudEventRule
 from indi_allsky.event_candidate import build_event_candidate_from_metadata
 from indi_allsky.event_candidate import build_event_timeline_segments
+from indi_allsky.event_candidate import build_event_pipeline_offline_report
 from indi_allsky.event_candidate import classify_event_timelines_offline
 from indi_allsky.event_candidate import default_event_classification_dir
 from indi_allsky.event_candidate import default_event_candidate_dir
@@ -1026,6 +1027,103 @@ def test_offline_event_classification_runner_does_not_change_default_classifier_
     assert row['rules_matched'] == []
 
 
+def test_event_pipeline_offline_report_counts_jsonl_inputs():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        candidate_path = base_dir.joinpath('event_candidates', '2026-06-21.jsonl')
+        timeline_path = base_dir.joinpath('event_timelines', '2026-06-21.jsonl')
+        classification_path = base_dir.joinpath('event_classifications', '2026-06-21.jsonl')
+        candidate_path.parent.mkdir(parents=True, exist_ok=True)
+        timeline_path.parent.mkdir(parents=True, exist_ok=True)
+        classification_path.parent.mkdir(parents=True, exist_ok=True)
+
+        candidate = _candidate(
+            candidate_id='asi678mc:2:1',
+            camera_id=2,
+            profile_id='asi678mc',
+            frame_id=1,
+            reasons=['brightness_spike', 'quality_drop'],
+        )
+        with candidate_path.open('w', encoding='utf-8') as f_candidate:
+            json.dump(candidate.to_dict(), f_candidate, sort_keys=True, separators=(',', ':'))
+            f_candidate.write('\n')
+            f_candidate.write('not-json\n')
+
+        timeline = _timeline_with_context(
+            reasons=['brightness_spike', 'sky_condition_transition'],
+            environment_context_summary={
+                'cloud_condition': {'cloudy': 2},
+                'sky_condition': {'poor': 1},
+                'sky_trend': {'degrading': 1},
+                'possible_condensation': True,
+            },
+            quality_context_summary={
+                'quality_flags': {'low_meter': 2, 'nominal': 1},
+            },
+        )
+        with timeline_path.open('w', encoding='utf-8') as f_timeline:
+            json.dump(timeline.to_dict(), f_timeline, sort_keys=True, separators=(',', ':'))
+            f_timeline.write('\n')
+
+        classification = EventClassification(
+            timeline_id='timeline-weather-test',
+            camera_id=2,
+            profile_id='asi678mc',
+            created_at='2026-06-21T23:00:00+00:00',
+            label='weather_or_cloud_event',
+            confidence=0.45,
+            features_used=timeline.to_dict(),
+        )
+        with classification_path.open('w', encoding='utf-8') as f_classification:
+            json.dump(classification.to_dict(), f_classification, sort_keys=True, separators=(',', ':'))
+            f_classification.write('\n')
+
+        report = build_event_pipeline_offline_report(
+            candidate_path=candidate_path,
+            timeline_path=timeline_path,
+            classification_path=classification_path,
+        )
+
+        assert report['total_candidate_lines'] == 1
+        assert report['total_timeline_lines'] == 1
+        assert report['total_classification_lines'] == 1
+        assert report['malformed_lines']['candidates'] == 1
+        assert report['malformed_lines']['timelines'] == 0
+        assert report['malformed_lines']['classifications'] == 0
+        assert report['counts_by_profile_id'] == {'asi678mc': 3}
+        assert report['counts_by_camera_id'] == {'2': 3}
+        assert report['counts_by_candidate_reasons'] == {'brightness_spike': 1, 'quality_drop': 1}
+        assert report['counts_by_timeline_reasons'] == {'brightness_spike': 1, 'sky_condition_transition': 1}
+        assert report['counts_by_classification_label'] == {'weather_or_cloud_event': 1}
+        assert report['counts_by_quality_flags']['low_meter'] == 5
+        assert report['counts_by_quality_flags']['nominal'] == 2
+        assert report['counts_by_environment_cloud_condition']['cloudy'] == 5
+        assert report['counts_by_sky_condition']['poor'] == 3
+        assert report['counts_by_sky_trend']['degrading'] == 3
+        assert report['possible_condensation_true'] == 2
+
+
+def test_event_pipeline_offline_report_tolerates_missing_empty_and_malformed_files():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        malformed_path = base_dir.joinpath('bad.jsonl')
+        malformed_path.write_text('not-json\n[]\n', encoding='utf-8')
+
+        report = build_event_pipeline_offline_report(
+            candidate_path=base_dir.joinpath('missing-candidates.jsonl'),
+            timeline_path=malformed_path,
+            classification_path=None,
+        )
+
+        assert report['total_candidate_lines'] == 0
+        assert report['total_timeline_lines'] == 0
+        assert report['total_classification_lines'] == 0
+        assert report['malformed_lines']['candidates'] == 0
+        assert report['malformed_lines']['timelines'] == 2
+        assert report['malformed_lines']['classifications'] == 0
+        assert report['counts_by_profile_id'] == {}
+
+
 def test_event_foundation_smoke_cleanup_removes_candidates_and_timelines():
     with tempfile.TemporaryDirectory() as tmpdir:
         date = '2026-06-21'
@@ -1342,6 +1440,8 @@ if __name__ == '__main__':
     test_weather_or_cloud_rule_ignores_missing_environment_summary()
     test_offline_event_classification_runner_writes_classifications_and_counts_labels()
     test_offline_event_classification_runner_does_not_change_default_classifier_registry()
+    test_event_pipeline_offline_report_counts_jsonl_inputs()
+    test_event_pipeline_offline_report_tolerates_missing_empty_and_malformed_files()
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
     test_candidate_trigger_smoke_cases_and_cleanup()
     test_runtime_shadow_integration_disabled_by_default()
