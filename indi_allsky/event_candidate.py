@@ -238,6 +238,57 @@ class ClassificationRule:
         raise NotImplementedError('ClassificationRule.evaluate must be implemented by subclasses')
 
 
+class WeatherOrCloudEventRule(ClassificationRule):
+    rule_id = 'weather_or_cloud_event_v1'
+    target_label = 'weather_or_cloud_event'
+
+    def evaluate(self, timeline, features=None):
+        features = features or {}
+        timeline_reasons = set(_string_value(reason) for reason in features.get('reasons') or [] if _string_value(reason))
+        environment_summary = features.get('environment_context_summary') or {}
+        signals = []
+
+        cloud_conditions = self._counter(environment_summary.get('cloud_condition'))
+        cloudy_count = cloud_conditions.get('cloudy', 0)
+        overcast_count = cloud_conditions.get('overcast', 0)
+        if overcast_count:
+            signals.append('cloud_condition_overcast')
+        elif cloudy_count:
+            signals.append('cloud_condition_cloudy')
+
+        sky_trends = self._counter(environment_summary.get('sky_trend'))
+        if sky_trends.get('degrading', 0):
+            signals.append('sky_trend_degrading')
+
+        if bool(environment_summary.get('possible_condensation')):
+            signals.append('possible_condensation')
+
+        if 'condensation_onset' in timeline_reasons:
+            signals.append('reason_condensation_onset')
+
+        if 'sky_condition_transition' in timeline_reasons:
+            signals.append('reason_sky_condition_transition')
+
+        if not signals:
+            return ClassificationRuleResult(matched=False, reason='no_strong_environmental_signal')
+
+        score = min(0.65, 0.35 + (0.10 * min(len(signals), 3)))
+        return ClassificationRuleResult(
+            matched=True,
+            score=score,
+            reason=','.join(signals),
+        )
+
+    def _counter(self, value):
+        if not isinstance(value, dict):
+            return {}
+        return {
+            _string_value(key).lower(): int(count or 0)
+            for key, count in value.items()
+            if _string_value(key)
+        }
+
+
 class ClassificationRuleRegistry:
     def __init__(self, rules=None):
         self._rules = []

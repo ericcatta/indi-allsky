@@ -19,6 +19,7 @@ from indi_allsky.event_candidate import EventTimelineAnalytics
 from indi_allsky.event_candidate import EventTimelineSegment
 from indi_allsky.event_candidate import EventTimelineWriter
 from indi_allsky.event_candidate import RuleBasedEventClassifierV1
+from indi_allsky.event_candidate import WeatherOrCloudEventRule
 from indi_allsky.event_candidate import build_event_candidate_from_metadata
 from indi_allsky.event_candidate import build_event_timeline_segments
 from indi_allsky.event_candidate import default_event_classification_dir
@@ -82,6 +83,25 @@ def _candidate(candidate_id='asi678mc:2:42', camera_id=2, profile_id='asi678mc',
             'sky_trend': 'degrading',
             'possible_condensation': False,
         },
+    )
+
+
+def _timeline_with_context(reasons=None, environment_context_summary=None, quality_context_summary=None):
+    return EventTimelineSegment(
+        timeline_id='timeline-weather-test',
+        camera_id=2,
+        profile_id='asi678mc',
+        night_id='2026-06-21',
+        start_timestamp_utc='2026-06-21T22:15:00+00:00',
+        end_timestamp_utc='2026-06-21T22:15:01+00:00',
+        duration_seconds=1.0,
+        candidate_count=1,
+        candidate_ids=['asi678mc:2:1'],
+        reasons=reasons or [],
+        max_candidate_score=95.0,
+        average_candidate_score=95.0,
+        quality_context_summary=quality_context_summary or {},
+        environment_context_summary=environment_context_summary or {},
     )
 
 
@@ -721,6 +741,95 @@ def test_event_classification_explainable_rule_match_reason():
     assert row['features_used']['environment_context_summary']
 
 
+def test_weather_or_cloud_rule_classifies_strong_cloudy_timeline():
+    timeline = _timeline_with_context(
+        environment_context_summary={
+            'cloud_condition': {'cloudy': 2},
+            'sky_trend': {'stable': 1},
+            'possible_condensation': False,
+        },
+    )
+    registry = ClassificationRuleRegistry([WeatherOrCloudEventRule()])
+
+    row = RuleBasedEventClassifierV1(registry=registry).classify_timeline(
+        timeline,
+        created_at='2026-06-21T22:16:00+00:00',
+    ).to_dict()
+
+    assert row['label'] == 'weather_or_cloud_event'
+    assert 0.35 <= row['confidence'] <= 0.65
+    assert row['rules_matched'] == [
+        {
+            'rule_id': 'weather_or_cloud_event_v1',
+            'target_label': 'weather_or_cloud_event',
+            'score': row['confidence'],
+            'reason': 'cloud_condition_cloudy',
+        },
+    ]
+    assert row['status'] == 'shadow'
+    assert row['method'] == 'rule_based_v1'
+
+
+def test_weather_or_cloud_rule_classifies_condensation_timeline():
+    timeline = _timeline_with_context(
+        reasons=['condensation_onset'],
+        environment_context_summary={
+            'cloud_condition': {'mostly_clear': 1},
+            'sky_trend': {'degrading': 1},
+            'possible_condensation': True,
+        },
+    )
+    registry = ClassificationRuleRegistry([WeatherOrCloudEventRule()])
+
+    row = RuleBasedEventClassifierV1(registry=registry).classify_timeline(
+        timeline,
+        created_at='2026-06-21T22:16:00+00:00',
+    ).to_dict()
+
+    assert row['label'] == 'weather_or_cloud_event'
+    assert row['confidence'] == 0.65
+    assert row['rules_matched'][0]['rule_id'] == 'weather_or_cloud_event_v1'
+    assert row['rules_matched'][0]['target_label'] == 'weather_or_cloud_event'
+    assert row['rules_matched'][0]['reason'] == 'sky_trend_degrading,possible_condensation,reason_condensation_onset'
+
+
+def test_weather_or_cloud_rule_ignores_weak_ambiguous_timeline():
+    timeline = _timeline_with_context(
+        reasons=['brightness_spike'],
+        environment_context_summary={
+            'cloud_condition': {'mostly_clear': 1},
+            'sky_trend': {'stable': 1},
+            'possible_condensation': False,
+        },
+    )
+    registry = ClassificationRuleRegistry([WeatherOrCloudEventRule()])
+
+    row = RuleBasedEventClassifierV1(registry=registry).classify_timeline(
+        timeline,
+        created_at='2026-06-21T22:16:00+00:00',
+    ).to_dict()
+
+    assert row['label'] == 'unknown_event'
+    assert row['confidence'] == 0.0
+    assert row['rules_matched'] == []
+
+
+def test_weather_or_cloud_rule_ignores_missing_environment_summary():
+    timeline = _timeline_with_context(
+        reasons=['brightness_spike'],
+        environment_context_summary={},
+    )
+    registry = ClassificationRuleRegistry([WeatherOrCloudEventRule()])
+
+    row = RuleBasedEventClassifierV1(registry=registry).classify_timeline(
+        timeline,
+        created_at='2026-06-21T22:16:00+00:00',
+    ).to_dict()
+
+    assert row['label'] == 'unknown_event'
+    assert row['rules_matched'] == []
+
+
 def test_event_foundation_smoke_cleanup_removes_candidates_and_timelines():
     with tempfile.TemporaryDirectory() as tmpdir:
         date = '2026-06-21'
@@ -1025,6 +1134,10 @@ if __name__ == '__main__':
     test_rule_based_event_classifier_v1_selects_best_rule_match()
     test_rule_based_event_classifier_v1_uses_registration_order_for_ties()
     test_event_classification_explainable_rule_match_reason()
+    test_weather_or_cloud_rule_classifies_strong_cloudy_timeline()
+    test_weather_or_cloud_rule_classifies_condensation_timeline()
+    test_weather_or_cloud_rule_ignores_weak_ambiguous_timeline()
+    test_weather_or_cloud_rule_ignores_missing_environment_summary()
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
     test_candidate_trigger_smoke_cases_and_cleanup()
     test_runtime_shadow_integration_disabled_by_default()

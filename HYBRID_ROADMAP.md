@@ -281,6 +281,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - `rules_matched` contiene `rule_id`, `target_label`, `score`, `reason`;
       - `features_used` include candidate ids, timestamp inizio/fine, summary quality e summary environment della timeline;
       - rende auditabili regole future senza introdurre regole reali.
+    - prima regola shadow-only non registrata di default:
+      - `WeatherOrCloudEventRule`;
+      - `target_label=weather_or_cloud_event`;
+      - matcha solo segnali ambientali forti da timeline summary/reasons;
+      - confidence conservativa `0.35-0.65`;
+      - usabile solo in test/manual registry finche' non verra' deciso un path runtime/dashboard dedicato.
     - semantica:
       - `unclassified` = non processato da classifier;
       - `unknown_event` = processato dal classifier ma nessuna regola ha matchato;
@@ -1222,3 +1228,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-22: Aggiunta Event Classification v1 foundation shadow-only: contratto JSONL, writer e classifier rule-based no-op che restituisce `unknown_event`, senza classificazione reale o impatto runtime.
 - 2026-06-22: Aggiunta foundation Event Classification Rule Registry: contratti regola/risultato, registry ordinato e classifier shadow che resta no-op con registry vuoto.
 - 2026-06-22: Aggiunta explainability foundation Event Classification: `rules_matched` strutturato con score/reason e `features_used` arricchito con summary quality/environment della timeline.
+- 2026-06-22: Aggiunta `WeatherOrCloudEventRule` shadow-only e non registrata di default: prima regola classificazione conservativa basata solo su segnali ambientali forti.
