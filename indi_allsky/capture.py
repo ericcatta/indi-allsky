@@ -249,15 +249,10 @@ class CaptureWorker(Process):
         self.primary_profile = bool(self.capture_profile.primary)
         self.profile_outputs = self.capture_profile.outputs
         self.multi_camera_diag = bool(self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False))
-        self.images_only_profile = not all((
+        self.images_only_profile = not any((
             self.profile_outputs.get('timelapse', True),
             self.profile_outputs.get('keogram', True),
-            self.profile_outputs.get('realtime_keogram', True),
-            self.profile_outputs.get('longterm_keogram', True),
             self.profile_outputs.get('startrails', True),
-            self.profile_outputs.get('panorama', True),
-            self.profile_outputs.get('panorama_loop', True),
-            self.profile_outputs.get('extra_uploads', True),
         ))
         # MULTI_CAMERA_PREP: passive mirror for future per-camera runtime
         # state. Existing variables/shared arrays remain authoritative.
