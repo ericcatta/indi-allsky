@@ -379,7 +379,7 @@ class ImageProcessor(object):
         # binning_av needs to be populated before running this
 
         self._detection_mask_dict = self._load_detection_mask()
-        self._adu_mask_dict = self._detection_mask_dict  # reuse detection mask for ADU mask (if defined)
+        self._adu_mask_dict = dict()
 
         self._sqm = IndiAllskySqm(self.config, self.gain_av, mask=self._detection_mask_dict)
         self._stars_detect = IndiAllSkyStars(self.config, mask=self._detection_mask_dict)
@@ -1303,12 +1303,15 @@ class ImageProcessor(object):
 
 
     def _calculate_8bit_adu(self, i_ref):
-        if isinstance(self._adu_mask_dict[i_ref.binning], type(None)):
+        image_height, image_width = self.image.shape[:2]
+        mask_key = (i_ref.binning, image_width, image_height)
+
+        if isinstance(self._adu_mask_dict.get(mask_key), type(None)):
             # This only needs to be done once if a mask is not provided
             self._generateAduMask(self.image, i_ref.binning)
 
 
-        adu_mask = self._adu_mask_dict[i_ref.binning]
+        adu_mask = self._adu_mask_dict.get(mask_key)
         image_dimensions = self.image.shape[:2]
 
         if adu_mask is None:
@@ -4177,6 +4180,7 @@ class ImageProcessor(object):
         logger.info('Generating mask based on ADU_ROI')
 
         image_height, image_width = img.shape[:2]
+        mask_key = (binning, image_width, image_height)
 
         # create a black background
         mask = numpy.zeros((image_height, image_width), dtype=numpy.uint8)
@@ -4205,7 +4209,7 @@ class ImageProcessor(object):
             thickness=cv2.FILLED,
         )
 
-        self._adu_mask_dict[binning] = mask
+        self._adu_mask_dict[mask_key] = mask
 
 
     def _generate_image_circle_mask(self, image, binning):

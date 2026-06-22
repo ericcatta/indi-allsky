@@ -19,8 +19,6 @@ class IndiAllSkyStars(object):
         self._sqm_mask_dict = mask
 
         self._star_mask_dict = dict()
-        for binning in self._sqm_mask_dict.keys():
-            self._star_mask_dict[binning] = None
 
 
         self._detectionThreshold = self.config.get('DETECT_STARS_THOLD', 0.6)
@@ -54,17 +52,14 @@ class IndiAllSkyStars(object):
 
     def detectObjects(self, original_data, binning):
         image_shape = original_data.shape[:2]
+        image_height, image_width = image_shape
+        mask_key = (binning, image_width, image_height)
 
-        if binning not in self._star_mask_dict:
-            logger.warning('No star mask cache entry for binning %s; generating star mask', binning)
-            self._star_mask_dict[binning] = None
-
-
-        if isinstance(self._star_mask_dict[binning], type(None)):
+        if isinstance(self._star_mask_dict.get(mask_key), type(None)):
             # This only needs to be done once if a mask is not provided
             self._generateStarMask(original_data, binning)
 
-        star_mask = self._star_mask_dict[binning]
+        star_mask = self._star_mask_dict.get(mask_key)
         if star_mask is None:
             logger.warning(
                 'Star mask is not available for binning %s, image_shape=%s; using unmasked image',
@@ -88,10 +83,10 @@ class IndiAllSkyStars(object):
                 image_shape,
                 binning,
             )
-            self._star_mask_dict[binning] = None
+            self._star_mask_dict[mask_key] = None
             self._generateStarMask(original_data, binning)
 
-            star_mask = self._star_mask_dict[binning]
+            star_mask = self._star_mask_dict.get(mask_key)
             if star_mask is None or star_mask.dtype not in (numpy.uint8, numpy.int8) or star_mask.shape[:2] != image_shape:
                 logger.warning(
                     'Regenerated star mask is still incompatible for binning %s, mask_shape=%s, image_shape=%s; using unmasked image',
@@ -141,11 +136,13 @@ class IndiAllSkyStars(object):
     def _generateStarMask(self, img, binning):
         logger.info('Generating mask based on SQM_ROI')
 
+        image_height, image_width = img.shape[:2]
+        mask_key = (binning, image_width, image_height)
 
         sqm_mask = self._sqm_mask_dict.get(binning)
         if not isinstance(sqm_mask, type(None)):
             if sqm_mask.dtype in (numpy.uint8, numpy.int8) and sqm_mask.shape[:2] == img.shape[:2]:
-                self._star_mask_dict[binning] = sqm_mask
+                self._star_mask_dict[mask_key] = sqm_mask
                 return
 
             logger.warning(
@@ -158,8 +155,6 @@ class IndiAllSkyStars(object):
         elif binning not in self._sqm_mask_dict:
             logger.warning('No SQM mask cache entry for binning %s; generating central star mask', binning)
 
-
-        image_height, image_width = img.shape[:2]
 
         # create a black background
         mask = numpy.zeros((image_height, image_width), dtype=numpy.uint8)
@@ -188,7 +183,7 @@ class IndiAllSkyStars(object):
             thickness=cv2.FILLED,
         )
 
-        self._star_mask_dict[binning] = mask
+        self._star_mask_dict[mask_key] = mask
 
 
     def _drawCircles(self, sep_data, blob_list):

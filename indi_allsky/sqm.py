@@ -27,8 +27,6 @@ class IndiAllskySqm(object):
 
 
         self._sqm_mask_dict = dict()
-        for x in self._external_mask_dict.keys():
-            self._sqm_mask_dict[x] = None
 
 
     def averageAdu(self, i_ref):
@@ -45,12 +43,15 @@ class IndiAllskySqm(object):
             sqm_img = fits_data[1]  # green channel
 
 
-        if isinstance(self._sqm_mask_dict[i_ref.binning], type(None)):
+        image_height, image_width = sqm_img.shape[:2]
+        mask_key = (i_ref.binning, image_width, image_height)
+
+        if isinstance(self._sqm_mask_dict.get(mask_key), type(None)):
             # This only needs to be done once if a mask is not provided
             self._generateSqmMask(sqm_img, i_ref.binning)
 
 
-        sqm_mask = self._sqm_mask_dict[i_ref.binning]
+        sqm_mask = self._sqm_mask_dict.get(mask_key)
         if isinstance(sqm_mask, type(None)):
             logger.warning(
                 'Skipping SQM average: no usable mask for binning %s, image shape=%s',
@@ -107,6 +108,7 @@ class IndiAllskySqm(object):
         logger.info('Generating mask based on SQM_ROI')
 
         image_height, image_width = img.shape[:2]
+        mask_key = (binning, image_width, image_height)
 
         # create a black background
         mask = numpy.zeros((image_height, image_width), dtype=numpy.uint8)
@@ -138,21 +140,22 @@ class IndiAllskySqm(object):
 
 
         # combine masks in case there is overlapping regions
-        if not isinstance(self._external_mask_dict[binning], type(None)):
-            if self._external_mask_dict[binning].shape[:2] != mask.shape[:2]:
+        external_mask = self._external_mask_dict.get(binning)
+        if not isinstance(external_mask, type(None)):
+            if external_mask.shape[:2] != mask.shape[:2]:
                 logger.warning(
                     'Skipping external SQM mask merge: external mask shape %s does not match SQM mask shape %s for binning %s',
-                    self._external_mask_dict[binning].shape,
+                    external_mask.shape,
                     mask.shape,
                     binning,
                 )
-                self._sqm_mask_dict[binning] = mask
+                self._sqm_mask_dict[mask_key] = mask
                 return
 
             # combine existing mask with a central ROI
             logger.info('Merging SQM mask with central ROI')
-            self._sqm_mask_dict[binning] = cv2.bitwise_and(mask, self._external_mask_dict[binning])
+            self._sqm_mask_dict[mask_key] = cv2.bitwise_and(mask, external_mask)
             return
 
 
-        self._sqm_mask_dict[binning] = mask
+        self._sqm_mask_dict[mask_key] = mask
