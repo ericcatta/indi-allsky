@@ -399,6 +399,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - `ImageWorker` seleziona runtime context per `profile_id`/`camera_id` e logga warning se cade sul fallback globale.
 - Risolto bug INDI BLOB multicamera: un worker non tratta piu' come errore i BLOB legittimi di un altro device.
 - Ridotto rumore log libcamera/rpicam e diagnostici normali.
+- Stabilizzato processing multicamera con risoluzioni diverse:
+  - SQM non e' piu' fatale se la mask non combacia con il frame;
+  - ADU fallback usa media non mascherata se la mask non e' compatibile;
+  - star detection non fa piu' crashare OpenCV con mask incompatibili;
+  - cache ADU/SQM/Stars keyed da `(binning, image_width, image_height)` per evitare riuso cross-camera tra IMX708 e ASI678MC;
+  - detection mask globale viene usata solo se compatibile con la shape corrente, altrimenti viene generata una ROI locale.
 
 ### Libcamera / IMX708
 
@@ -1245,3 +1251,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-22: Aggiunto runner offline/manuale Event Classification: classifica Event Timeline JSONL in shadow mode e scrive Event Classification JSONL senza runtime hook.
 - 2026-06-22: Raffinata `WeatherOrCloudEventRule`: `sky_condition_transition` e `partly_cloudy` da soli non generano piu' `weather_or_cloud_event`.
 - 2026-06-22: Aggiunto report offline/read-only Event Pipeline per riassumere candidate, timeline e classification JSONL senza modificare dati o runtime.
+- 2026-06-23: Stabilizzate mask processing multicamera per IMX708/ASI678MC: SQM, ADU e star detection ora usano cache shape-aware `(binning, image_width, image_height)` e fallback anti-crash quando una mask esterna non combacia con il frame.
