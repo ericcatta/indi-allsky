@@ -270,6 +270,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - Modern Admin mostra card read-only `Event Candidate Runtime`;
     - Nightly Summary espone `event_trigger_evaluations`, `event_trigger_candidates`, `event_trigger_failures`;
     - ancora shadow-only: nessuna AI, RMS, meteor detection, classificazione, notification o decisione runtime.
+  - Event Classification v1 foundation:
+    - contratto `EventClassification` con `schema_version=event_classification_v1`;
+    - writer JSONL append-only in directory `event_classifications/YYYY-MM-DD.jsonl`;
+    - classifier `RuleBasedEventClassifierV1` solo no-op/shadow;
+    - semantica:
+      - `unclassified` = non processato da classifier;
+      - `unknown_event` = processato dal classifier ma nessuna regola ha matchato;
+    - output forza sempre `label=unknown_event`, `status=shadow`, `method=rule_based_v1`;
+    - nessuna AI, RMS, meteor/satellite/aircraft/aurora detection, notification o decisione runtime.
 - NEXT:
   - Raspberry validation Controlled Enablement v0:
     - abilitare temporaneamente `event_candidate_triggers.enabled=True` in configurazione controllata;
@@ -283,6 +292,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - collegare segmenti a frame/candidate per ispezione manuale;
     - mantenere tutti i segmenti `unclassified`;
     - nessuna azione runtime o pubblicazione automatica.
+  - Event Classification analytics/dashboard read-only:
+    - contatori per label/status/method quando la classificazione sara' generata da job/manual hook;
+    - mantenere label reali future separate da `unknown_event`.
 - LATER:
   - Meteor detection.
   - Aurora detection.
@@ -1200,3 +1212,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Aggiunto Candidate Trigger Smoke Test v0 manual-only con metadata sintetici, persistence candidate/timeline, analytics dashboard e cleanup sicuro.
 - 2026-06-22: Esposti in Web UI config i controlli shadow-only `EVENT_CANDIDATE_TRIGGERS.enabled` e `max_candidates_per_hour`; default resta disabilitato e la logica runtime trigger non e' stata modificata.
 - 2026-06-22: Resa osservabile la Runtime Shadow Integration Event Candidate anche con zero candidate: `event_candidate_runtime.json` viene aggiornato con evaluation count e `last_status`, senza generare fake candidate o cambiare capture/runtime.
+- 2026-06-22: Aggiunta Event Classification v1 foundation shadow-only: contratto JSONL, writer e classifier rule-based no-op che restituisce `unknown_event`, senza classificazione reale o impatto runtime.

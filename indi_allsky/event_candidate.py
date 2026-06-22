@@ -11,6 +11,10 @@ EVENT_CANDIDATE_SCHEMA_VERSION = 'event_candidate_v0'
 EVENT_CANDIDATE_TYPE = 'unclassified'
 EVENT_TIMELINE_SCHEMA_VERSION = 'event_timeline_segment_v0'
 EVENT_TIMELINE_TYPE = 'unclassified'
+EVENT_CLASSIFICATION_SCHEMA_VERSION = 'event_classification_v1'
+EVENT_CLASSIFICATION_LABEL = 'unknown_event'
+EVENT_CLASSIFICATION_STATUS = 'shadow'
+EVENT_CLASSIFICATION_METHOD = 'rule_based_v1'
 DEFAULT_TRIGGER_CONFIG = {
     'enabled': True,
     'brightness_spike_meter_delta': 60.0,
@@ -104,6 +108,40 @@ class EventTimelineSegment:
         return asdict(self)
 
 
+@dataclass
+class EventClassification:
+    timeline_id: str
+    camera_id: int
+    profile_id: str
+    created_at: str
+    confidence: float = 0.0
+    rules_matched: list = field(default_factory=list)
+    alternative_labels: list = field(default_factory=list)
+    features_used: dict = field(default_factory=dict)
+    schema_version: str = EVENT_CLASSIFICATION_SCHEMA_VERSION
+    label: str = EVENT_CLASSIFICATION_LABEL
+    status: str = EVENT_CLASSIFICATION_STATUS
+    method: str = EVENT_CLASSIFICATION_METHOD
+
+    def __post_init__(self):
+        self.schema_version = EVENT_CLASSIFICATION_SCHEMA_VERSION
+        self.label = EVENT_CLASSIFICATION_LABEL
+        self.status = EVENT_CLASSIFICATION_STATUS
+        self.method = EVENT_CLASSIFICATION_METHOD
+
+        if self.rules_matched is None:
+            self.rules_matched = []
+        if self.alternative_labels is None:
+            self.alternative_labels = []
+        if self.features_used is None:
+            self.features_used = {}
+
+        self.confidence = float(self.confidence or 0.0)
+
+    def to_dict(self):
+        return asdict(self)
+
+
 class EventCandidateWriter:
     """Append-only JSONL persistence for shadow event candidates."""
 
@@ -159,6 +197,49 @@ class EventTimelineWriter:
 
     def _timeline_path_for(self, segment):
         return self.timeline_dir.joinpath('{0:s}.jsonl'.format(_date_from_timestamp(segment.start_timestamp_utc)))
+
+
+class EventClassificationWriter:
+    """Append-only JSONL persistence for shadow event classifications."""
+
+    def __init__(self, classification_dir):
+        self.classification_dir = Path(classification_dir)
+
+    def write(self, classification):
+        classification_path = self._classification_path_for(classification)
+        classification_path.parent.mkdir(parents=True, exist_ok=True)
+        with classification_path.open('a', encoding='utf-8') as f_classification:
+            json.dump(classification.to_dict(), f_classification, sort_keys=True, separators=(',', ':'))
+            f_classification.write('\n')
+        return classification_path
+
+    def _classification_path_for(self, classification):
+        return self.classification_dir.joinpath('{0:s}.jsonl'.format(_date_from_timestamp(classification.created_at)))
+
+
+class RuleBasedEventClassifierV1:
+    """Shadow-only no-op classifier foundation for event timelines."""
+
+    def classify_timeline(self, timeline, created_at=None):
+        timeline_dict = timeline.to_dict() if hasattr(timeline, 'to_dict') else dict(timeline)
+        created_at_value = created_at or datetime.utcnow().replace(microsecond=0).isoformat()
+
+        return EventClassification(
+            timeline_id=timeline_dict.get('timeline_id'),
+            camera_id=timeline_dict.get('camera_id'),
+            profile_id=timeline_dict.get('profile_id'),
+            created_at=created_at_value,
+            confidence=0.0,
+            rules_matched=[],
+            alternative_labels=[],
+            features_used={
+                'candidate_count': timeline_dict.get('candidate_count'),
+                'duration_seconds': timeline_dict.get('duration_seconds'),
+                'max_candidate_score': timeline_dict.get('max_candidate_score'),
+                'average_candidate_score': timeline_dict.get('average_candidate_score'),
+                'reasons': timeline_dict.get('reasons') or [],
+            },
+        )
 
 
 class EventCandidateAnalytics:
@@ -453,6 +534,10 @@ def default_event_candidate_dir(varlib_folder):
 
 def default_event_timeline_dir(varlib_folder):
     return Path(varlib_folder).joinpath('event_timelines')
+
+
+def default_event_classification_dir(varlib_folder):
+    return Path(varlib_folder).joinpath('event_classifications')
 
 
 def default_event_candidate_runtime_path(varlib_folder):

@@ -10,11 +10,15 @@ from indi_allsky.event_candidate import EventCandidate
 from indi_allsky.event_candidate import EventCandidateAnalytics
 from indi_allsky.event_candidate import EventCandidateRuntimeDiagnostics
 from indi_allsky.event_candidate import EventCandidateWriter
+from indi_allsky.event_candidate import EventClassification
+from indi_allsky.event_candidate import EventClassificationWriter
 from indi_allsky.event_candidate import EventTimelineAnalytics
 from indi_allsky.event_candidate import EventTimelineSegment
 from indi_allsky.event_candidate import EventTimelineWriter
+from indi_allsky.event_candidate import RuleBasedEventClassifierV1
 from indi_allsky.event_candidate import build_event_candidate_from_metadata
 from indi_allsky.event_candidate import build_event_timeline_segments
+from indi_allsky.event_candidate import default_event_classification_dir
 from indi_allsky.event_candidate import default_event_candidate_dir
 from indi_allsky.event_candidate import default_event_candidate_runtime_path
 from indi_allsky.event_candidate import default_event_timeline_dir
@@ -483,6 +487,91 @@ def test_event_timeline_analytics_missing_empty_and_malformed_files():
         assert analytics.get_nightly_timeline_summary('2026-06-21')['total_timeline_segments'] == 1
 
 
+def test_event_classification_v1_serialization():
+    classification = EventClassification(
+        timeline_id='timeline-1',
+        camera_id=2,
+        profile_id='asi678mc',
+        created_at='2026-06-21T22:15:00+00:00',
+        confidence=0.25,
+        rules_matched=['synthetic_rule'],
+        alternative_labels=['meteor'],
+        features_used={'candidate_count': 2},
+    )
+    classification.label = 'meteor'
+    classification.status = 'active'
+    classification.method = 'ai'
+    classification.__post_init__()
+
+    row = classification.to_dict()
+
+    assert row['schema_version'] == 'event_classification_v1'
+    assert row['timeline_id'] == 'timeline-1'
+    assert row['camera_id'] == 2
+    assert row['profile_id'] == 'asi678mc'
+    assert row['label'] == 'unknown_event'
+    assert row['confidence'] == 0.25
+    assert row['status'] == 'shadow'
+    assert row['method'] == 'rule_based_v1'
+    assert row['rules_matched'] == ['synthetic_rule']
+    assert row['alternative_labels'] == ['meteor']
+    assert row['features_used']['candidate_count'] == 2
+
+
+def test_event_classification_jsonl_persistence():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        classification_dir = Path(tmpdir).joinpath('event_classifications')
+        writer = EventClassificationWriter(classification_dir)
+        classification = EventClassification(
+            timeline_id='timeline-1',
+            camera_id=2,
+            profile_id='asi678mc',
+            created_at='2026-06-21T22:15:00+00:00',
+        )
+
+        written_path = writer.write(classification)
+
+        assert written_path == classification_dir.joinpath('2026-06-21.jsonl')
+        rows = written_path.read_text(encoding='utf-8').splitlines()
+        assert len(rows) == 1
+        row = json.loads(rows[0])
+        assert row['timeline_id'] == 'timeline-1'
+        assert row['label'] == 'unknown_event'
+        assert row['status'] == 'shadow'
+        assert row['method'] == 'rule_based_v1'
+
+
+def test_event_classification_default_directory():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        assert default_event_classification_dir(tmpdir) == Path(tmpdir).joinpath('event_classifications')
+
+
+def test_rule_based_event_classifier_v1_noop_unknown_event():
+    timeline = build_event_timeline_segments([
+        _candidate(candidate_id='asi678mc:2:1', frame_id=1, timestamp='2026-06-21T22:15:00+00:00', score=10.0),
+        _candidate(candidate_id='asi678mc:2:2', frame_id=2, timestamp='2026-06-21T22:15:01+00:00', score=30.0, reasons=['high_meter']),
+    ])[0]
+
+    classification = RuleBasedEventClassifierV1().classify_timeline(
+        timeline,
+        created_at='2026-06-21T22:16:00+00:00',
+    )
+    row = classification.to_dict()
+
+    assert row['timeline_id'] == timeline.timeline_id
+    assert row['camera_id'] == 2
+    assert row['profile_id'] == 'asi678mc'
+    assert row['label'] == 'unknown_event'
+    assert row['confidence'] == 0.0
+    assert row['status'] == 'shadow'
+    assert row['method'] == 'rule_based_v1'
+    assert row['rules_matched'] == []
+    assert row['alternative_labels'] == []
+    assert row['features_used']['candidate_count'] == 2
+    assert row['features_used']['duration_seconds'] == 1.0
+    assert row['features_used']['reasons'] == ['high_meter', 'low_quality']
+
+
 def test_event_foundation_smoke_cleanup_removes_candidates_and_timelines():
     with tempfile.TemporaryDirectory() as tmpdir:
         date = '2026-06-21'
@@ -778,6 +867,10 @@ if __name__ == '__main__':
     test_event_timeline_default_directory()
     test_event_timeline_nightly_analytics_counts()
     test_event_timeline_analytics_missing_empty_and_malformed_files()
+    test_event_classification_v1_serialization()
+    test_event_classification_jsonl_persistence()
+    test_event_classification_default_directory()
+    test_rule_based_event_classifier_v1_noop_unknown_event()
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
     test_candidate_trigger_smoke_cases_and_cleanup()
     test_runtime_shadow_integration_disabled_by_default()
