@@ -263,12 +263,18 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - candidates by reason;
       - trigger evaluation failures;
       - rate-limit hits.
+      - `last_status`, incluso `disabled`, `evaluated`, `generated`, `failure`, `rate_limited`.
+    - la diagnostica runtime viene scritta anche quando:
+      - `enabled=True` ma nessuna regola produce candidate (`status=no_candidates`, `reason=no_trigger_rules_matched`);
+      - `enabled=False`, cosi' la dashboard puo' distinguere runtime spento da path non eseguito.
     - Modern Admin mostra card read-only `Event Candidate Runtime`;
     - Nightly Summary espone `event_trigger_evaluations`, `event_trigger_candidates`, `event_trigger_failures`;
     - ancora shadow-only: nessuna AI, RMS, meteor detection, classificazione, notification o decisione runtime.
 - NEXT:
   - Raspberry validation Controlled Enablement v0:
     - abilitare temporaneamente `event_candidate_triggers.enabled=True` in configurazione controllata;
+    - verificare che `/var/lib/indi-allsky/event_candidate_runtime.json` venga creato anche con zero candidate;
+    - verificare che `total_evaluations` cresca e `last_status` rifletta `evaluated`/`generated`/`disabled`;
     - verificare che candidate/timeline reali compaiano nei JSONL e nella dashboard;
     - verificare che con `enabled=False` non vengano generati nuovi record;
     - verificare che `max_candidates_per_hour` limiti correttamente il volume candidate;
@@ -1193,3 +1199,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-21: Aggiunte Candidate Trigger Rules v0 test-only metadata-based per candidate `unclassified`, senza hook runtime o classificazione eventi.
 - 2026-06-21: Aggiunto Candidate Trigger Smoke Test v0 manual-only con metadata sintetici, persistence candidate/timeline, analytics dashboard e cleanup sicuro.
 - 2026-06-22: Esposti in Web UI config i controlli shadow-only `EVENT_CANDIDATE_TRIGGERS.enabled` e `max_candidates_per_hour`; default resta disabilitato e la logica runtime trigger non e' stata modificata.
+- 2026-06-22: Resa osservabile la Runtime Shadow Integration Event Candidate anche con zero candidate: `event_candidate_runtime.json` viene aggiornato con evaluation count e `last_status`, senza generare fake candidate o cambiare capture/runtime.
