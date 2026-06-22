@@ -152,6 +152,7 @@ var camera_id = {{ camera_id }};
     const fieldNames = {{ modern_admin_full_settings_field_names | tojson }};
     const checkboxNames = new Set({{ modern_admin_full_settings_checkbox_names | tojson }});
     const ajaxUrl = new URL({{ url_for('indi_allsky.ajax_config_view') | tojson }}, window.location.href).toString();
+    const csrfToken = {{ csrf_token() | tojson }};
 
     function setMessage(text, tone) {
         message.hidden = false;
@@ -251,17 +252,20 @@ var camera_id = {{ camera_id }};
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-CSRFToken': csrfToken
                 },
                 body: stringifyPayload(payload)
             });
 
             let data = {};
+            let responseText = '';
             try {
                 saveStage = 'response json parse';
-                data = await response.json();
+                responseText = await response.text();
+                data = responseText ? JSON.parse(responseText) : {};
             } catch (error) {
-                throw new Error('Unable to parse save response as JSON: HTTP ' + response.status + ' ' + response.statusText + ' error=' + error.message);
+                throw new Error('Unable to parse save response as JSON: HTTP ' + response.status + ' ' + response.statusText + ' body=' + JSON.stringify(responseText.slice(0, 500)) + ' error=' + error.message);
             }
             if (!response.ok) {
                 saveStage = 'server validation';

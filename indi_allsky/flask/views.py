@@ -3176,6 +3176,29 @@ class AjaxConfigView(BaseView):
     methods = ['POST']
     decorators = [login_required]
 
+    def log_config_validation_errors(self, form_config):
+        for field_name, errors in form_config.errors.items():
+            field = getattr(form_config, field_name, None)
+            if field is None:
+                app.logger.warning(
+                    'Config save validation failed: field=%s errors=%s value=<missing> validators=<unknown>',
+                    field_name,
+                    errors,
+                )
+                continue
+
+            field_type = field.__class__.__name__
+            validators = [validator.__class__.__name__ for validator in getattr(field, 'validators', [])]
+            value = '<redacted>' if field_type == 'PasswordField' else field.data
+            app.logger.warning(
+                'Config save validation failed: field=%s type=%s validators=%s value=%r errors=%s',
+                field_name,
+                field_type,
+                validators,
+                value,
+                errors,
+            )
+
     def dispatch_request(self):
         form_config = IndiAllskyConfigForm(data=request.json)
 
@@ -3189,6 +3212,7 @@ class AjaxConfigView(BaseView):
 
         if not form_config.validate():
             form_errors = form_config.errors  # this must be a property
+            self.log_config_validation_errors(form_config)
             form_errors['form_global'] = ['Please fix the errors above']
             return jsonify(form_errors), 400
 
