@@ -285,6 +285,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - `WeatherOrCloudEventRule`;
       - `target_label=weather_or_cloud_event`;
       - matcha solo segnali ambientali forti da timeline summary/reasons;
+      - `sky_condition_transition` e `partly_cloudy` da soli non bastano per classificare;
+      - `sky_condition_transition` contribuisce solo come segnale di supporto quando e' presente almeno un segnale forte;
       - confidence conservativa `0.35-0.65`;
       - usabile solo in test/manual registry finche' non verra' deciso un path runtime/dashboard dedicato.
     - runner offline/manuale:
@@ -1236,3 +1238,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-22: Aggiunta explainability foundation Event Classification: `rules_matched` strutturato con score/reason e `features_used` arricchito con summary quality/environment della timeline.
 - 2026-06-22: Aggiunta `WeatherOrCloudEventRule` shadow-only e non registrata di default: prima regola classificazione conservativa basata solo su segnali ambientali forti.
 - 2026-06-22: Aggiunto runner offline/manuale Event Classification: classifica Event Timeline JSONL in shadow mode e scrive Event Classification JSONL senza runtime hook.
+- 2026-06-22: Raffinata `WeatherOrCloudEventRule`: `sky_condition_transition` e `partly_cloudy` da soli non generano piu' `weather_or_cloud_event`.

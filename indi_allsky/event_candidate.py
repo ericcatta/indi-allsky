@@ -246,33 +246,35 @@ class WeatherOrCloudEventRule(ClassificationRule):
         features = features or {}
         timeline_reasons = set(_string_value(reason) for reason in features.get('reasons') or [] if _string_value(reason))
         environment_summary = features.get('environment_context_summary') or {}
-        signals = []
+        strong_signals = []
+        supporting_signals = []
 
         cloud_conditions = self._counter(environment_summary.get('cloud_condition'))
         cloudy_count = cloud_conditions.get('cloudy', 0)
         overcast_count = cloud_conditions.get('overcast', 0)
         if overcast_count:
-            signals.append('cloud_condition_overcast')
+            strong_signals.append('cloud_condition_overcast')
         elif cloudy_count:
-            signals.append('cloud_condition_cloudy')
+            strong_signals.append('cloud_condition_cloudy')
 
         sky_trends = self._counter(environment_summary.get('sky_trend'))
         if sky_trends.get('degrading', 0):
-            signals.append('sky_trend_degrading')
+            strong_signals.append('sky_trend_degrading')
 
         if bool(environment_summary.get('possible_condensation')):
-            signals.append('possible_condensation')
+            strong_signals.append('possible_condensation')
 
         if 'condensation_onset' in timeline_reasons:
-            signals.append('reason_condensation_onset')
+            strong_signals.append('reason_condensation_onset')
 
         if 'sky_condition_transition' in timeline_reasons:
-            signals.append('reason_sky_condition_transition')
+            supporting_signals.append('reason_sky_condition_transition')
 
-        if not signals:
+        if not strong_signals:
             return ClassificationRuleResult(matched=False, reason='no_strong_environmental_signal')
 
-        score = min(0.65, 0.35 + (0.10 * min(len(signals), 3)))
+        signals = strong_signals + supporting_signals
+        score = min(0.65, 0.35 + (0.10 * min(len(strong_signals), 3)) + (0.05 * len(supporting_signals)))
         return ClassificationRuleResult(
             matched=True,
             score=score,
