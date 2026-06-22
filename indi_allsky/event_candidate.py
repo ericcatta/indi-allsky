@@ -125,7 +125,8 @@ class EventClassification:
 
     def __post_init__(self):
         self.schema_version = EVENT_CLASSIFICATION_SCHEMA_VERSION
-        self.label = EVENT_CLASSIFICATION_LABEL
+        if not self.label:
+            self.label = EVENT_CLASSIFICATION_LABEL
         self.status = EVENT_CLASSIFICATION_STATUS
         self.method = EVENT_CLASSIFICATION_METHOD
 
@@ -217,29 +218,101 @@ class EventClassificationWriter:
         return self.classification_dir.joinpath('{0:s}.jsonl'.format(_date_from_timestamp(classification.created_at)))
 
 
+@dataclass
+class ClassificationRuleResult:
+    matched: bool = False
+    score: float = 0.0
+    reason: str = ''
+
+    def __post_init__(self):
+        self.matched = bool(self.matched)
+        self.score = float(self.score or 0.0)
+        self.reason = _string_value(self.reason)
+
+
+class ClassificationRule:
+    rule_id = ''
+    target_label = EVENT_CLASSIFICATION_LABEL
+
+    def evaluate(self, timeline, features=None):
+        raise NotImplementedError('ClassificationRule.evaluate must be implemented by subclasses')
+
+
+class ClassificationRuleRegistry:
+    def __init__(self, rules=None):
+        self._rules = []
+        for rule in rules or []:
+            self.register(rule)
+
+    def register(self, rule):
+        if not getattr(rule, 'rule_id', None):
+            raise ValueError('Classification rule must define rule_id')
+        if not getattr(rule, 'target_label', None):
+            raise ValueError('Classification rule must define target_label')
+        self._rules.append(rule)
+        return rule
+
+    def get_rules(self):
+        return list(self._rules)
+
+
 class RuleBasedEventClassifierV1:
-    """Shadow-only no-op classifier foundation for event timelines."""
+    """Shadow-only rule-based classifier foundation for event timelines."""
+
+    def __init__(self, registry=None):
+        self.registry = registry or ClassificationRuleRegistry()
 
     def classify_timeline(self, timeline, created_at=None):
         timeline_dict = timeline.to_dict() if hasattr(timeline, 'to_dict') else dict(timeline)
         created_at_value = created_at or datetime.utcnow().replace(microsecond=0).isoformat()
+        features = self._features_from_timeline(timeline_dict)
+        matches = []
+
+        for order, rule in enumerate(self.registry.get_rules()):
+            result = rule.evaluate(timeline_dict, features=features)
+            if not isinstance(result, ClassificationRuleResult):
+                continue
+            if not result.matched:
+                continue
+            matches.append((order, rule, result))
+
+        best_match = None
+        if matches:
+            best_match = sorted(matches, key=lambda item: (-item[2].score, item[0]))[0]
+
+        label = EVENT_CLASSIFICATION_LABEL
+        confidence = 0.0
+        rules_matched = []
+        alternative_labels = []
+        if best_match is not None:
+            label = best_match[1].target_label
+            confidence = best_match[2].score
+            rules_matched = [rule.rule_id for order, rule, result in matches]
+            alternative_labels = [
+                rule.target_label for order, rule, result in matches
+                if rule.target_label != label
+            ]
 
         return EventClassification(
             timeline_id=timeline_dict.get('timeline_id'),
             camera_id=timeline_dict.get('camera_id'),
             profile_id=timeline_dict.get('profile_id'),
             created_at=created_at_value,
-            confidence=0.0,
-            rules_matched=[],
-            alternative_labels=[],
-            features_used={
-                'candidate_count': timeline_dict.get('candidate_count'),
-                'duration_seconds': timeline_dict.get('duration_seconds'),
-                'max_candidate_score': timeline_dict.get('max_candidate_score'),
-                'average_candidate_score': timeline_dict.get('average_candidate_score'),
-                'reasons': timeline_dict.get('reasons') or [],
-            },
+            label=label,
+            confidence=confidence,
+            rules_matched=rules_matched,
+            alternative_labels=alternative_labels,
+            features_used=features,
         )
+
+    def _features_from_timeline(self, timeline_dict):
+        return {
+            'candidate_count': timeline_dict.get('candidate_count'),
+            'duration_seconds': timeline_dict.get('duration_seconds'),
+            'max_candidate_score': timeline_dict.get('max_candidate_score'),
+            'average_candidate_score': timeline_dict.get('average_candidate_score'),
+            'reasons': timeline_dict.get('reasons') or [],
+        }
 
 
 class EventCandidateAnalytics:

@@ -12,6 +12,9 @@ from indi_allsky.event_candidate import EventCandidateRuntimeDiagnostics
 from indi_allsky.event_candidate import EventCandidateWriter
 from indi_allsky.event_candidate import EventClassification
 from indi_allsky.event_candidate import EventClassificationWriter
+from indi_allsky.event_candidate import ClassificationRule
+from indi_allsky.event_candidate import ClassificationRuleRegistry
+from indi_allsky.event_candidate import ClassificationRuleResult
 from indi_allsky.event_candidate import EventTimelineAnalytics
 from indi_allsky.event_candidate import EventTimelineSegment
 from indi_allsky.event_candidate import EventTimelineWriter
@@ -35,6 +38,22 @@ _TRIGGER_SMOKE_SCRIPT_PATH = Path(__file__).resolve().parent.joinpath('candidate
 _TRIGGER_SMOKE_SPEC = importlib.util.spec_from_file_location('candidate_trigger_smoke_test', _TRIGGER_SMOKE_SCRIPT_PATH)
 candidate_trigger_smoke_test = importlib.util.module_from_spec(_TRIGGER_SMOKE_SPEC)
 _TRIGGER_SMOKE_SPEC.loader.exec_module(candidate_trigger_smoke_test)
+
+
+class _SyntheticClassificationRule(ClassificationRule):
+    def __init__(self, rule_id, target_label, matched=True, score=0.0, reason='synthetic'):
+        self.rule_id = rule_id
+        self.target_label = target_label
+        self.matched = matched
+        self.score = score
+        self.reason = reason
+
+    def evaluate(self, timeline, features=None):
+        return ClassificationRuleResult(
+            matched=self.matched,
+            score=self.score,
+            reason=self.reason,
+        )
 
 
 def _candidate(candidate_id='asi678mc:2:42', camera_id=2, profile_id='asi678mc', frame_id=42, score=12.5, reasons=None, timestamp='2026-06-21T22:15:00+00:00'):
@@ -509,7 +528,7 @@ def test_event_classification_v1_serialization():
     assert row['timeline_id'] == 'timeline-1'
     assert row['camera_id'] == 2
     assert row['profile_id'] == 'asi678mc'
-    assert row['label'] == 'unknown_event'
+    assert row['label'] == 'meteor'
     assert row['confidence'] == 0.25
     assert row['status'] == 'shadow'
     assert row['method'] == 'rule_based_v1'
@@ -570,6 +589,75 @@ def test_rule_based_event_classifier_v1_noop_unknown_event():
     assert row['features_used']['candidate_count'] == 2
     assert row['features_used']['duration_seconds'] == 1.0
     assert row['features_used']['reasons'] == ['high_meter', 'low_quality']
+
+
+def test_classification_rule_registry_registration_and_ordering():
+    registry = ClassificationRuleRegistry()
+    first = _SyntheticClassificationRule('first_rule', 'synthetic_first')
+    second = _SyntheticClassificationRule('second_rule', 'synthetic_second')
+
+    registry.register(first)
+    registry.register(second)
+
+    assert registry.get_rules() == [first, second]
+
+
+def test_classification_rule_registry_requires_rule_id_and_label():
+    registry = ClassificationRuleRegistry()
+
+    try:
+        registry.register(_SyntheticClassificationRule('', 'synthetic'))
+        assert False, 'missing rule_id should raise'
+    except ValueError:
+        pass
+
+    try:
+        registry.register(_SyntheticClassificationRule('synthetic_rule', ''))
+        assert False, 'missing target_label should raise'
+    except ValueError:
+        pass
+
+
+def test_rule_based_event_classifier_v1_selects_best_rule_match():
+    timeline = build_event_timeline_segments([
+        _candidate(candidate_id='asi678mc:2:1', frame_id=1, timestamp='2026-06-21T22:15:00+00:00', score=10.0),
+    ])[0]
+    registry = ClassificationRuleRegistry([
+        _SyntheticClassificationRule('low_score_rule', 'synthetic_low', score=0.25),
+        _SyntheticClassificationRule('high_score_rule', 'synthetic_high', score=0.75),
+    ])
+
+    row = RuleBasedEventClassifierV1(registry=registry).classify_timeline(
+        timeline,
+        created_at='2026-06-21T22:16:00+00:00',
+    ).to_dict()
+
+    assert row['label'] == 'synthetic_high'
+    assert row['confidence'] == 0.75
+    assert row['rules_matched'] == ['low_score_rule', 'high_score_rule']
+    assert row['alternative_labels'] == ['synthetic_low']
+    assert row['status'] == 'shadow'
+    assert row['method'] == 'rule_based_v1'
+
+
+def test_rule_based_event_classifier_v1_uses_registration_order_for_ties():
+    timeline = build_event_timeline_segments([
+        _candidate(candidate_id='asi678mc:2:1', frame_id=1, timestamp='2026-06-21T22:15:00+00:00', score=10.0),
+    ])[0]
+    registry = ClassificationRuleRegistry([
+        _SyntheticClassificationRule('first_rule', 'synthetic_first', score=0.50),
+        _SyntheticClassificationRule('second_rule', 'synthetic_second', score=0.50),
+    ])
+
+    row = RuleBasedEventClassifierV1(registry=registry).classify_timeline(
+        timeline,
+        created_at='2026-06-21T22:16:00+00:00',
+    ).to_dict()
+
+    assert row['label'] == 'synthetic_first'
+    assert row['confidence'] == 0.50
+    assert row['rules_matched'] == ['first_rule', 'second_rule']
+    assert row['alternative_labels'] == ['synthetic_second']
 
 
 def test_event_foundation_smoke_cleanup_removes_candidates_and_timelines():
@@ -871,6 +959,10 @@ if __name__ == '__main__':
     test_event_classification_jsonl_persistence()
     test_event_classification_default_directory()
     test_rule_based_event_classifier_v1_noop_unknown_event()
+    test_classification_rule_registry_registration_and_ordering()
+    test_classification_rule_registry_requires_rule_id_and_label()
+    test_rule_based_event_classifier_v1_selects_best_rule_match()
+    test_rule_based_event_classifier_v1_uses_registration_order_for_ties()
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
     test_candidate_trigger_smoke_cases_and_cleanup()
     test_runtime_shadow_integration_disabled_by_default()

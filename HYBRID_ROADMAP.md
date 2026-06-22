@@ -273,11 +273,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Event Classification v1 foundation:
     - contratto `EventClassification` con `schema_version=event_classification_v1`;
     - writer JSONL append-only in directory `event_classifications/YYYY-MM-DD.jsonl`;
-    - classifier `RuleBasedEventClassifierV1` solo no-op/shadow;
+    - classifier `RuleBasedEventClassifierV1` shadow-only;
+    - registry regole `ClassificationRuleRegistry` con contratti `ClassificationRule` e `ClassificationRuleResult`;
+    - registry vuoto di default, quindi il comportamento resta no-op e produce `unknown_event`;
+    - se in futuro piu' regole shadow matchano, il classifier sceglie il label con score piu' alto e tie-break deterministico per ordine registrazione;
     - semantica:
       - `unclassified` = non processato da classifier;
       - `unknown_event` = processato dal classifier ma nessuna regola ha matchato;
-    - output forza sempre `label=unknown_event`, `status=shadow`, `method=rule_based_v1`;
+    - con registry vuoto produce `label=unknown_event`; `status=shadow` e `method=rule_based_v1` restano forzati;
     - nessuna AI, RMS, meteor/satellite/aircraft/aurora detection, notification o decisione runtime.
 - NEXT:
   - Raspberry validation Controlled Enablement v0:
@@ -1213,3 +1216,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-22: Esposti in Web UI config i controlli shadow-only `EVENT_CANDIDATE_TRIGGERS.enabled` e `max_candidates_per_hour`; default resta disabilitato e la logica runtime trigger non e' stata modificata.
 - 2026-06-22: Resa osservabile la Runtime Shadow Integration Event Candidate anche con zero candidate: `event_candidate_runtime.json` viene aggiornato con evaluation count e `last_status`, senza generare fake candidate o cambiare capture/runtime.
 - 2026-06-22: Aggiunta Event Classification v1 foundation shadow-only: contratto JSONL, writer e classifier rule-based no-op che restituisce `unknown_event`, senza classificazione reale o impatto runtime.
+- 2026-06-22: Aggiunta foundation Event Classification Rule Registry: contratti regola/risultato, registry ordinato e classifier shadow che resta no-op con registry vuoto.
