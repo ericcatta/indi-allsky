@@ -320,6 +320,43 @@ def test_candidate_triggers_sky_condition_transition():
     assert candidates[0].reasons == ['sky_condition_transition']
 
 
+def test_candidate_triggers_suppress_sky_condition_transition_when_exposure_adjusting():
+    current_metadata = _metadata(frame_id=2, quality=80.0, sky_condition='poor', cloud_condition='cloudy')
+    current_metadata['quality_flags'] = ['exposure_adjusting']
+
+    candidates = evaluate_candidate_triggers(
+        current_metadata,
+        previous_metadata=_metadata(frame_id=1, quality=82.0, sky_condition='excellent', cloud_condition='clear'),
+    )
+
+    assert candidates == []
+
+
+def test_candidate_triggers_suppress_sky_condition_transition_when_meter_near_edge():
+    current_metadata = _metadata(frame_id=2, quality=80.0, sky_condition='poor', cloud_condition='cloudy')
+    current_metadata['quality_flags'] = ['meter_near_edge']
+
+    candidates = evaluate_candidate_triggers(
+        current_metadata,
+        previous_metadata=_metadata(frame_id=1, quality=82.0, sky_condition='excellent', cloud_condition='clear'),
+    )
+
+    assert candidates == []
+
+
+def test_candidate_triggers_quality_drop_with_unstable_metering_flag_still_creates_candidate():
+    current_metadata = _metadata(frame_id=2, meter=95.0, quality=35.0)
+    current_metadata['quality_flags'] = ['exposure_adjusting']
+
+    candidates = evaluate_candidate_triggers(
+        current_metadata,
+        previous_metadata=_metadata(frame_id=1, meter=95.0, quality=94.0),
+    )
+
+    assert len(candidates) == 1
+    assert candidates[0].reasons == ['quality_drop']
+
+
 def test_candidate_triggers_missing_fields_create_no_candidate():
     assert evaluate_candidate_triggers({'quality_score': 20.0}) == []
     assert evaluate_candidate_triggers(_metadata(frame_id=2, quality=None)) == []

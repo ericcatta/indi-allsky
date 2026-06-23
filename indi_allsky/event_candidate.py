@@ -22,6 +22,10 @@ DEFAULT_TRIGGER_CONFIG = {
     'quality_drop_score': 45.0,
     'quality_drop_delta': 25.0,
 }
+UNSTABLE_METERING_QUALITY_FLAGS = frozenset((
+    'exposure_adjusting',
+    'meter_near_edge',
+))
 DEFAULT_RUNTIME_TRIGGER_CONFIG = {
     **DEFAULT_TRIGGER_CONFIG,
     'enabled': False,
@@ -1045,7 +1049,7 @@ def _candidate_trigger_reasons(current_metadata, previous_metadata, config):
     if _condensation_onset(current_metadata, previous_metadata):
         reasons.append(('condensation_onset', 35.0))
 
-    if _sky_condition_transition(current_metadata, previous_metadata):
+    if _sky_condition_transition(current_metadata, previous_metadata) and not _has_unstable_metering_quality_flags(current_metadata):
         reasons.append(('sky_condition_transition', 30.0))
 
     return reasons
@@ -1111,6 +1115,30 @@ def _sky_condition_transition(current_metadata, previous_metadata):
     previous_cloud = _condition_rank(_metadata_value(previous_metadata, 'cloud_condition'), ('clear', 'mostly_clear', 'partly_cloudy', 'cloudy', 'overcast'))
     current_cloud = _condition_rank(_metadata_value(current_metadata, 'cloud_condition'), ('clear', 'mostly_clear', 'partly_cloudy', 'cloudy', 'overcast'))
     return previous_cloud is not None and current_cloud is not None and current_cloud - previous_cloud >= 2
+
+
+def _has_unstable_metering_quality_flags(metadata):
+    return bool(UNSTABLE_METERING_QUALITY_FLAGS.intersection(_metadata_quality_flags(metadata)))
+
+
+def _metadata_quality_flags(metadata):
+    if not isinstance(metadata, dict):
+        return set()
+
+    flags = metadata.get('quality_flags')
+    if not isinstance(flags, list):
+        quality_context = metadata.get('quality_context')
+        if isinstance(quality_context, dict):
+            flags = quality_context.get('quality_flags')
+
+    if not isinstance(flags, list):
+        return set()
+
+    return {
+        _string_value(flag)
+        for flag in flags
+        if _string_value(flag)
+    }
 
 
 def _condition_rank(value, ordered_values):
