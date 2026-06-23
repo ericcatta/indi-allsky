@@ -1140,6 +1140,26 @@ def test_event_pipeline_offline_report_counts_jsonl_inputs():
         assert report['possible_condensation_true'] == 2
 
 
+def test_event_pipeline_offline_report_includes_candidate_suppression_counters():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        diagnostics_path = default_event_candidate_runtime_path(base_dir)
+        diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path)
+        diagnostics.record_suppressed_sky_condition_transition({
+            'suppressed_sky_condition_transition_total': 1,
+            'suppressed_sky_condition_transition_exposure_adjusting': 1,
+            'suppressed_sky_condition_transition_meter_near_edge': 1,
+        }, True, 100)
+
+        report = build_event_pipeline_offline_report(runtime_diagnostics_path=diagnostics_path)
+
+        assert report['candidate_suppression'] == {
+            'suppressed_sky_condition_transition_total': 1,
+            'suppressed_sky_condition_transition_exposure_adjusting': 1,
+            'suppressed_sky_condition_transition_meter_near_edge': 1,
+        }
+
+
 def test_event_pipeline_offline_report_tolerates_missing_empty_and_malformed_files():
     with tempfile.TemporaryDirectory() as tmpdir:
         base_dir = Path(tmpdir)
@@ -1282,6 +1302,94 @@ def test_runtime_shadow_integration_enabled_no_candidates_records_evaluation():
         assert diagnostics['total_generated_candidates'] == 0
         assert not candidate_dir.exists()
         assert not timeline_dir.exists()
+
+
+def test_runtime_shadow_integration_counts_suppressed_sky_transition_exposure_adjusting():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        diagnostics_path = default_event_candidate_runtime_path(base_dir)
+        current_metadata = _metadata(frame_id=2, quality=80.0, sky_condition='poor', cloud_condition='cloudy')
+        current_metadata['quality_flags'] = ['exposure_adjusting']
+
+        result = persist_event_candidates_shadow(
+            current_metadata,
+            previous_metadata=_metadata(frame_id=1, quality=82.0, sky_condition='excellent', cloud_condition='clear'),
+            profile_config={'event_candidate_triggers': {'enabled': True}},
+            candidate_dir=default_event_candidate_dir(base_dir),
+            timeline_dir=default_event_timeline_dir(base_dir),
+            diagnostics_path=diagnostics_path,
+        )
+        diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path).read_summary()
+
+        assert result['status'] == 'no_candidates'
+        assert diagnostics['suppressed_sky_condition_transition_total'] == 1
+        assert diagnostics['suppressed_sky_condition_transition_exposure_adjusting'] == 1
+        assert diagnostics['suppressed_sky_condition_transition_meter_near_edge'] == 0
+
+
+def test_runtime_shadow_integration_counts_suppressed_sky_transition_meter_near_edge():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        diagnostics_path = default_event_candidate_runtime_path(base_dir)
+        current_metadata = _metadata(frame_id=2, quality=80.0, sky_condition='poor', cloud_condition='cloudy')
+        current_metadata['quality_flags'] = ['meter_near_edge']
+
+        persist_event_candidates_shadow(
+            current_metadata,
+            previous_metadata=_metadata(frame_id=1, quality=82.0, sky_condition='excellent', cloud_condition='clear'),
+            profile_config={'event_candidate_triggers': {'enabled': True}},
+            candidate_dir=default_event_candidate_dir(base_dir),
+            timeline_dir=default_event_timeline_dir(base_dir),
+            diagnostics_path=diagnostics_path,
+        )
+        diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path).read_summary()
+
+        assert diagnostics['suppressed_sky_condition_transition_total'] == 1
+        assert diagnostics['suppressed_sky_condition_transition_exposure_adjusting'] == 0
+        assert diagnostics['suppressed_sky_condition_transition_meter_near_edge'] == 1
+
+
+def test_runtime_shadow_integration_counts_suppressed_sky_transition_both_flags_once():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        diagnostics_path = default_event_candidate_runtime_path(base_dir)
+        current_metadata = _metadata(frame_id=2, quality=80.0, sky_condition='poor', cloud_condition='cloudy')
+        current_metadata['quality_flags'] = ['exposure_adjusting', 'meter_near_edge']
+
+        persist_event_candidates_shadow(
+            current_metadata,
+            previous_metadata=_metadata(frame_id=1, quality=82.0, sky_condition='excellent', cloud_condition='clear'),
+            profile_config={'event_candidate_triggers': {'enabled': True}},
+            candidate_dir=default_event_candidate_dir(base_dir),
+            timeline_dir=default_event_timeline_dir(base_dir),
+            diagnostics_path=diagnostics_path,
+        )
+        diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path).read_summary()
+
+        assert diagnostics['suppressed_sky_condition_transition_total'] == 1
+        assert diagnostics['suppressed_sky_condition_transition_exposure_adjusting'] == 1
+        assert diagnostics['suppressed_sky_condition_transition_meter_near_edge'] == 1
+
+
+def test_runtime_shadow_integration_does_not_count_unsuppressed_sky_transition():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        diagnostics_path = default_event_candidate_runtime_path(base_dir)
+
+        result = persist_event_candidates_shadow(
+            _metadata(frame_id=2, quality=80.0, sky_condition='poor', cloud_condition='cloudy'),
+            previous_metadata=_metadata(frame_id=1, quality=82.0, sky_condition='excellent', cloud_condition='clear'),
+            profile_config={'event_candidate_triggers': {'enabled': True}},
+            candidate_dir=default_event_candidate_dir(base_dir),
+            timeline_dir=default_event_timeline_dir(base_dir),
+            diagnostics_path=diagnostics_path,
+        )
+        diagnostics = EventCandidateRuntimeDiagnostics(diagnostics_path).read_summary()
+
+        assert result['status'] == 'written'
+        assert diagnostics['suppressed_sky_condition_transition_total'] == 0
+        assert diagnostics['suppressed_sky_condition_transition_exposure_adjusting'] == 0
+        assert diagnostics['suppressed_sky_condition_transition_meter_near_edge'] == 0
 
 
 def test_runtime_shadow_integration_enabled_persists_candidates_and_timelines():
@@ -1441,6 +1549,9 @@ if __name__ == '__main__':
     test_candidate_triggers_quality_drop()
     test_candidate_triggers_condensation_onset()
     test_candidate_triggers_sky_condition_transition()
+    test_candidate_triggers_suppress_sky_condition_transition_when_exposure_adjusting()
+    test_candidate_triggers_suppress_sky_condition_transition_when_meter_near_edge()
+    test_candidate_triggers_quality_drop_with_unstable_metering_flag_still_creates_candidate()
     test_candidate_triggers_missing_fields_create_no_candidate()
     test_candidate_triggers_preserve_multi_camera_profile_fields()
     test_candidate_triggers_profile_config_can_disable_all()
@@ -1478,11 +1589,16 @@ if __name__ == '__main__':
     test_offline_event_classification_runner_writes_classifications_and_counts_labels()
     test_offline_event_classification_runner_does_not_change_default_classifier_registry()
     test_event_pipeline_offline_report_counts_jsonl_inputs()
+    test_event_pipeline_offline_report_includes_candidate_suppression_counters()
     test_event_pipeline_offline_report_tolerates_missing_empty_and_malformed_files()
     test_event_foundation_smoke_cleanup_removes_candidates_and_timelines()
     test_candidate_trigger_smoke_cases_and_cleanup()
     test_runtime_shadow_integration_disabled_by_default()
     test_runtime_shadow_integration_enabled_no_candidates_records_evaluation()
+    test_runtime_shadow_integration_counts_suppressed_sky_transition_exposure_adjusting()
+    test_runtime_shadow_integration_counts_suppressed_sky_transition_meter_near_edge()
+    test_runtime_shadow_integration_counts_suppressed_sky_transition_both_flags_once()
+    test_runtime_shadow_integration_does_not_count_unsuppressed_sky_transition()
     test_runtime_shadow_integration_enabled_persists_candidates_and_timelines()
     test_runtime_shadow_integration_populates_diagnostics()
     test_runtime_shadow_integration_rate_limit_caps_candidates()

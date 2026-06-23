@@ -230,6 +230,7 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - valuta solo metadata gia' esistenti e contesto quality/environment;
     - trigger conservativi v0: `brightness_spike`, `quality_drop`, `condensation_onset`, `sky_condition_transition`;
     - `sky_condition_transition` viene soppresso quando `quality_flags` contiene `exposure_adjusting` o `meter_near_edge`, per evitare candidate rumorose durante settling exposure/metering;
+    - la soppressione `sky_condition_transition` viene conteggiata in `event_candidate_runtime.json` e nell'offline pipeline report, con breakdown per `exposure_adjusting` e `meter_near_edge`;
     - supporta override opzionali via `profile_config`;
     - puo' essere disabilitata via `event_candidate_triggers.enabled=False`;
     - non persiste e non viene chiamata automaticamente;
@@ -1254,3 +1255,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-22: Aggiunto report offline/read-only Event Pipeline per riassumere candidate, timeline e classification JSONL senza modificare dati o runtime.
 - 2026-06-23: Stabilizzate mask processing multicamera per IMX708/ASI678MC: SQM, ADU e star detection ora usano cache shape-aware `(binning, image_width, image_height)` e fallback anti-crash quando una mask esterna non combacia con il frame.
 - 2026-06-23: Ridotto rumore EventCandidate `sky_condition_transition` dopo report Raspberry con candidate/timeline eccessive durante `exposure_adjusting` e `meter_near_edge`; gli altri trigger restano invariati.
+- 2026-06-23: Aggiunta analytics per candidate suppression: `suppressed_sky_condition_transition_total`, breakdown `exposure_adjusting` e `meter_near_edge` nel runtime diagnostics JSON e nell'offline event pipeline report.

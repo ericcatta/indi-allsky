@@ -438,11 +438,12 @@ def classify_event_timelines_offline(timeline_path, classification_dir, created_
     return summary
 
 
-def build_event_pipeline_offline_report(candidate_path=None, timeline_path=None, classification_path=None):
+def build_event_pipeline_offline_report(candidate_path=None, timeline_path=None, classification_path=None, runtime_diagnostics_path=None):
     """Read existing event JSONL files and return a compact diagnostic report."""
     candidates, candidate_malformed = _load_jsonl_rows(candidate_path)
     timelines, timeline_malformed = _load_jsonl_rows(timeline_path)
     classifications, classification_malformed = _load_jsonl_rows(classification_path)
+    runtime_diagnostics = EventCandidateRuntimeDiagnostics(runtime_diagnostics_path).read_summary() if runtime_diagnostics_path else {}
 
     report = {
         'total_candidate_lines': len(candidates),
@@ -463,6 +464,11 @@ def build_event_pipeline_offline_report(candidate_path=None, timeline_path=None,
         'counts_by_sky_condition': {},
         'counts_by_sky_trend': {},
         'possible_condensation_true': 0,
+        'candidate_suppression': {
+            'suppressed_sky_condition_transition_total': int(runtime_diagnostics.get('suppressed_sky_condition_transition_total') or 0),
+            'suppressed_sky_condition_transition_exposure_adjusting': int(runtime_diagnostics.get('suppressed_sky_condition_transition_exposure_adjusting') or 0),
+            'suppressed_sky_condition_transition_meter_near_edge': int(runtime_diagnostics.get('suppressed_sky_condition_transition_meter_near_edge') or 0),
+        },
     }
 
     profile_counts = Counter()
@@ -711,6 +717,9 @@ class EventCandidateRuntimeDiagnostics:
         summary['candidates_by_reason'] = self._counter_dict(summary.get('candidates_by_reason'))
         summary['candidates_by_hour'] = self._counter_dict(summary.get('candidates_by_hour'))
         summary['rate_limited_events'] = int(summary.get('rate_limited_events') or 0)
+        summary['suppressed_sky_condition_transition_total'] = int(summary.get('suppressed_sky_condition_transition_total') or 0)
+        summary['suppressed_sky_condition_transition_exposure_adjusting'] = int(summary.get('suppressed_sky_condition_transition_exposure_adjusting') or 0)
+        summary['suppressed_sky_condition_transition_meter_near_edge'] = int(summary.get('suppressed_sky_condition_transition_meter_near_edge') or 0)
         return summary
 
     def candidates_this_hour(self, timestamp):
@@ -775,6 +784,27 @@ class EventCandidateRuntimeDiagnostics:
         self.write_summary(summary)
         return summary
 
+    def record_suppressed_sky_condition_transition(self, suppression_counts, enabled, max_candidates_per_hour):
+        total = int(suppression_counts.get('suppressed_sky_condition_transition_total') or 0)
+        if total <= 0:
+            return self.read_summary()
+
+        summary = self.read_summary()
+        summary['enabled'] = bool(enabled)
+        summary['max_candidates_per_hour'] = int(max_candidates_per_hour)
+        summary['suppressed_sky_condition_transition_total'] = int(summary.get('suppressed_sky_condition_transition_total') or 0) + total
+        summary['suppressed_sky_condition_transition_exposure_adjusting'] = (
+            int(summary.get('suppressed_sky_condition_transition_exposure_adjusting') or 0)
+            + int(suppression_counts.get('suppressed_sky_condition_transition_exposure_adjusting') or 0)
+        )
+        summary['suppressed_sky_condition_transition_meter_near_edge'] = (
+            int(summary.get('suppressed_sky_condition_transition_meter_near_edge') or 0)
+            + int(suppression_counts.get('suppressed_sky_condition_transition_meter_near_edge') or 0)
+        )
+        summary['last_status'] = 'suppressed_sky_condition_transition'
+        self.write_summary(summary)
+        return summary
+
     def write_summary(self, summary):
         self.diagnostics_path.parent.mkdir(parents=True, exist_ok=True)
         tmp_path = self.diagnostics_path.with_suffix('{0:s}.tmp'.format(self.diagnostics_path.suffix))
@@ -793,6 +823,9 @@ class EventCandidateRuntimeDiagnostics:
             'trigger_evaluation_failures': 0,
             'rate_limited_events': 0,
             'candidates_by_hour': {},
+            'suppressed_sky_condition_transition_total': 0,
+            'suppressed_sky_condition_transition_exposure_adjusting': 0,
+            'suppressed_sky_condition_transition_meter_near_edge': 0,
             'last_status': 'none',
         }
 
@@ -953,6 +986,10 @@ def persist_event_candidates_shadow(
 
         if diagnostics:
             diagnostics.record_evaluation(True, max_candidates_per_hour)
+
+        suppression_counts = _sky_condition_transition_suppression_counts(current_metadata, previous_metadata)
+        if diagnostics:
+            diagnostics.record_suppressed_sky_condition_transition(suppression_counts, True, max_candidates_per_hour)
 
         candidates = trigger_evaluator(
             current_metadata,
@@ -1119,6 +1156,27 @@ def _sky_condition_transition(current_metadata, previous_metadata):
 
 def _has_unstable_metering_quality_flags(metadata):
     return bool(UNSTABLE_METERING_QUALITY_FLAGS.intersection(_metadata_quality_flags(metadata)))
+
+
+def _sky_condition_transition_suppression_counts(current_metadata, previous_metadata):
+    counts = {
+        'suppressed_sky_condition_transition_total': 0,
+        'suppressed_sky_condition_transition_exposure_adjusting': 0,
+        'suppressed_sky_condition_transition_meter_near_edge': 0,
+    }
+    if not _sky_condition_transition(current_metadata, previous_metadata):
+        return counts
+
+    flags = _metadata_quality_flags(current_metadata)
+    if not UNSTABLE_METERING_QUALITY_FLAGS.intersection(flags):
+        return counts
+
+    counts['suppressed_sky_condition_transition_total'] = 1
+    if 'exposure_adjusting' in flags:
+        counts['suppressed_sky_condition_transition_exposure_adjusting'] = 1
+    if 'meter_near_edge' in flags:
+        counts['suppressed_sky_condition_transition_meter_near_edge'] = 1
+    return counts
 
 
 def _metadata_quality_flags(metadata):
