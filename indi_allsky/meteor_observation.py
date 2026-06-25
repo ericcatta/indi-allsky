@@ -397,6 +397,36 @@ def build_meteor_intelligence_offline_report(
     }
 
 
+def render_meteor_intelligence_text_summary(report, date=None):
+    report = report or {}
+    lines = []
+
+    title = 'Meteor Intelligence Summary'
+    if date:
+        title = '{0:s} - {1:s}'.format(title, _string_value(date))
+    lines.append(title)
+    lines.append('Observations: {0:d}'.format(_int_value(report.get('total_observation_lines'))))
+    lines.append('Validated: {0:d}'.format(_int_value(report.get('validated_meteor_count'))))
+    lines.append('Rejected: {0:d}'.format(_int_value(report.get('rejected_meteor_count'))))
+    lines.append('Ground truth: {0:d}'.format(_int_value(report.get('ground_truth_meteor_count'))))
+    lines.append('Benchmark: {0:d}'.format(_int_value(report.get('benchmark_meteor_count'))))
+
+    detector_counts = _dict_value(report.get('counts_by_detector_id'))
+    if detector_counts:
+        lines.append('By detector: {0:s}'.format(_format_counts(detector_counts)))
+
+    validation_counts = _dict_value(report.get('counts_by_validation_state'))
+    if validation_counts:
+        lines.append('By validation state: {0:s}'.format(_format_counts(validation_counts)))
+
+    malformed_counts = _dict_value(report.get('malformed_lines'))
+    malformed_total = sum(_int_value(value) for value in malformed_counts.values())
+    if malformed_total:
+        lines.append('Warning: malformed JSONL lines: {0:s}'.format(_format_counts(malformed_counts)))
+
+    return '\n'.join(lines)
+
+
 def _required_string(value, field_name):
     value = _string_value(value)
     if not value:
@@ -416,6 +446,27 @@ def _list_value(value):
     if isinstance(value, (list, tuple)):
         return [_string_value(item) for item in value if _string_value(item)]
     return [_string_value(value)] if _string_value(value) else []
+
+
+def _dict_value(value):
+    if isinstance(value, dict):
+        return value
+    return {}
+
+
+def _int_value(value):
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _format_counts(counts):
+    return ', '.join(
+        '{0:s}={1:d}'.format(_string_value(key), _int_value(value))
+        for key, value in sorted(counts.items())
+        if _string_value(key)
+    )
 
 
 def _utc_now():

@@ -21,6 +21,7 @@ from indi_allsky.meteor_observation import build_meteor_intelligence_offline_rep
 from indi_allsky.meteor_observation import default_meteor_observation_dir
 from indi_allsky.meteor_observation import default_meteor_review_dir
 from indi_allsky.meteor_observation import default_meteor_validation_dir
+from indi_allsky.meteor_observation import render_meteor_intelligence_text_summary
 
 
 def _meteor_observation(**overrides):
@@ -614,6 +615,81 @@ def test_meteor_intelligence_report_is_read_only():
         assert before == after
 
 
+def test_meteor_intelligence_text_summary_empty_report_renders_safely():
+    summary = render_meteor_intelligence_text_summary({}, date='2026-06-25')
+
+    assert 'Meteor Intelligence Summary - 2026-06-25' in summary
+    assert 'Observations: 0' in summary
+    assert 'Validated: 0' in summary
+    assert 'Rejected: 0' in summary
+    assert 'Ground truth: 0' in summary
+    assert 'Benchmark: 0' in summary
+    assert 'Warning:' not in summary
+
+
+def test_meteor_intelligence_text_summary_populated_report_renders_counts():
+    report = {
+        'total_observation_lines': 7,
+        'validated_meteor_count': 3,
+        'rejected_meteor_count': 2,
+        'ground_truth_meteor_count': 1,
+        'benchmark_meteor_count': 1,
+    }
+
+    summary = render_meteor_intelligence_text_summary(report)
+
+    assert 'Meteor Intelligence Summary' in summary
+    assert 'Observations: 7' in summary
+    assert 'Validated: 3' in summary
+    assert 'Rejected: 2' in summary
+    assert 'Ground truth: 1' in summary
+    assert 'Benchmark: 1' in summary
+
+
+def test_meteor_intelligence_text_summary_malformed_warning_only_when_needed():
+    clean_summary = render_meteor_intelligence_text_summary({
+        'malformed_lines': {
+            'observations': 0,
+            'reviews': 0,
+            'validations': 0,
+        },
+    })
+    noisy_summary = render_meteor_intelligence_text_summary({
+        'malformed_lines': {
+            'observations': 2,
+            'reviews': 0,
+            'validations': 1,
+        },
+    })
+
+    assert 'Warning:' not in clean_summary
+    assert 'Warning: malformed JSONL lines:' in noisy_summary
+    assert 'observations=2' in noisy_summary
+    assert 'validations=1' in noisy_summary
+
+
+def test_meteor_intelligence_text_summary_detector_counts_when_present():
+    summary = render_meteor_intelligence_text_summary({
+        'counts_by_detector_id': {
+            'detector_b': 2,
+            'detector_a': 1,
+        },
+    })
+
+    assert 'By detector: detector_a=1, detector_b=2' in summary
+
+
+def test_meteor_intelligence_text_summary_validation_state_counts_when_present():
+    summary = render_meteor_intelligence_text_summary({
+        'counts_by_validation_state': {
+            'human_validated': 2,
+            'rejected': 1,
+        },
+    })
+
+    assert 'By validation state: human_validated=2, rejected=1' in summary
+
+
 if __name__ == '__main__':
     test_meteor_observation_serialization()
     test_meteor_observation_schema_version_is_forced()
@@ -650,4 +726,9 @@ if __name__ == '__main__':
     test_meteor_intelligence_report_missing_files_return_zero_counts()
     test_meteor_intelligence_report_counts_and_skips_malformed_lines()
     test_meteor_intelligence_report_is_read_only()
+    test_meteor_intelligence_text_summary_empty_report_renders_safely()
+    test_meteor_intelligence_text_summary_populated_report_renders_counts()
+    test_meteor_intelligence_text_summary_malformed_warning_only_when_needed()
+    test_meteor_intelligence_text_summary_detector_counts_when_present()
+    test_meteor_intelligence_text_summary_validation_state_counts_when_present()
     print('meteor observation tests OK')

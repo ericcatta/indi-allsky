@@ -384,6 +384,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - produce conteggi per profilo, camera, detector, observation status, review actor/result e validation actor/state;
     - espone conteggi foundation per meteor validati, rejected, ground truth e benchmark;
     - non crea record, non muta file e non introduce dashboard, Telegram, RMS, AI o detection.
+  - Meteor Intelligence text summary renderer:
+    - funzione read-only `render_meteor_intelligence_text_summary(...)`;
+    - converte il report offline in testo breve human-readable;
+    - include date opzionale, observation count, validated/rejected/ground truth/benchmark count, detector counts, validation state counts e warning malformed solo se presenti;
+    - foundation futura per Telegram text summary, CLI output e dashboard text block;
+    - non invia messaggi, non scrive file e non assume UI.
 - NEXT:
   - Validare il contratto rispetto ai futuri output RMS prima di implementare l'adapter.
   - Definire il mapping EventClassification/EventTimeline -> MeteorObservation senza collegarlo al runtime.
