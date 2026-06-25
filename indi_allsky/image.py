@@ -1082,7 +1082,7 @@ class ImageWorker(Process):
         )
 
 
-    def _persist_frame_metadata(self, *, frame_id, timestamp, camera_id, profile_id, image_file_path, exposure, gain, capture_status='processed', error_message=''):
+    def _persist_frame_metadata(self, *, frame_id, timestamp, camera_id, profile_id, image_file_path, exposure, gain, capture_status='processed', error_message='', source_image_path=None, detector_image_path=None, detector_image_type=None, fits_path=None, raw_path=None, thumbnail_path=None):
         try:
             state = self.auto_meter_states.get(self._adu_key(profile_id, camera_id), {})
             auto_exposure_decision = state.get('last_decision')
@@ -1112,6 +1112,11 @@ class ImageWorker(Process):
             meter_error_float = self._optional_float(meter_error)
             exposure_us = int(round(float(exposure) * 1000000.0))
             gain_float = float(gain)
+            fits_path_str = str(fits_path) if fits_path else None
+            raw_path_str = str(raw_path) if raw_path else None
+            source_image_path_str = str(source_image_path) if source_image_path else None
+            detector_image_path_str = str(detector_image_path) if detector_image_path else None
+            thumbnail_path_str = str(thumbnail_path) if thumbnail_path else None
             quality_score, quality_flags = compute_frame_quality(
                 meter_value=meter_value_smoothed,
                 target_meter=target_meter_float,
@@ -1131,12 +1136,12 @@ class ImageWorker(Process):
                 profile_id=str(profile_id),
                 image_file_path=str(image_file_path),
                 display_image_path=str(image_file_path),
-                source_image_path=None,
-                detector_image_path=None,
-                detector_image_type=None,
-                fits_path=None,
-                raw_path=None,
-                thumbnail_path=None,
+                source_image_path=source_image_path_str,
+                detector_image_path=detector_image_path_str,
+                detector_image_type=detector_image_type,
+                fits_path=fits_path_str,
+                raw_path=raw_path_str,
+                thumbnail_path=thumbnail_path_str,
                 overlay_applied=self._frame_metadata_overlay_applied(capture_status),
                 stretch_applied=self._frame_metadata_stretch_applied(capture_status),
                 rendering_profile='indi-allsky-display-v1',
@@ -2575,10 +2580,13 @@ class ImageWorker(Process):
             self.start_image_save_pre_hook(exposure, gain, binning)
 
 
+        fits_result = None
+        raw_result = None
+
         if not images_only and self.config.get('IMAGE_SAVE_FITS'):
             if self.config.get('IMAGE_SAVE_FITS_PRE_DARK'):
                 logger.warning('Saving FITS without dark frame calibration')
-                self.write_fit(i_ref, camera)
+                fits_result = self.write_fit(i_ref, camera)
 
 
         # use original value if not defined
@@ -2613,7 +2621,7 @@ class ImageWorker(Process):
 
         if not images_only and self.config.get('IMAGE_SAVE_FITS'):
             if not self.config.get('IMAGE_SAVE_FITS_PRE_DARK'):
-                self.write_fit(i_ref, camera)
+                fits_result = self.write_fit(i_ref, camera)
 
 
         self.image_processor.calculateJankySqm()
@@ -2775,7 +2783,7 @@ class ImageWorker(Process):
 
 
         if not images_only and self.config.get('IMAGE_EXPORT_RAW'):
-            self.export_raw_image(i_ref, camera, jpeg_exif=jpeg_exif)
+            raw_result = self.export_raw_image(i_ref, camera, jpeg_exif=jpeg_exif)
 
 
         # Calculate ADU before stretch
@@ -3212,12 +3220,25 @@ class ImageWorker(Process):
             if images_only_diag:
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_ADDIMAGE_OK', image_id=image_entry.id, filename=str(new_filename))
 
+            fits_path = fits_result.get('path') if fits_result else None
+            raw_path = raw_result.get('path') if raw_result else None
+            detector_image_type = None
+            if fits_result:
+                detector_image_type = fits_result.get('type')
+            elif raw_result:
+                detector_image_type = raw_result.get('type')
+
             self._persist_frame_metadata(
                 frame_id=image_entry.id,
                 timestamp=exp_date.astimezone(timezone.utc).isoformat(),
                 camera_id=camera_id,
                 profile_id=profile_id,
                 image_file_path=new_filename,
+                source_image_path=fits_path or raw_path or None,
+                detector_image_path=fits_path or raw_path or None,
+                detector_image_type=detector_image_type,
+                fits_path=fits_path,
+                raw_path=raw_path,
                 exposure=exposure,
                 gain=gain,
                 capture_status='processed',
@@ -3678,14 +3699,14 @@ class ImageWorker(Process):
     def write_fit(self, i_ref, camera):
         now_time = time.time()
         if now_time < self.next_save_fits_time:
-            return
+            return None
 
         self.next_save_fits_time = time.time() + self.next_save_fits_offset
 
 
         ### Do not write daytime image files if daytime capture is disabled
         if not self.night_av[constants.NIGHT_NIGHT] and not self.config.get('DAYTIME_CAPTURE_SAVE', True):
-            return
+            return None
 
 
         data = i_ref.hdulist[0].data
@@ -3780,7 +3801,7 @@ class ImageWorker(Process):
         if filename.exists():
             logger.error('File exists: %s (skipping)', filename)
             tmpfile_p.unlink()
-            return
+            return None
 
 
         shutil.copy2(str(tmpfile_p), str(filename))
@@ -3795,19 +3816,25 @@ class ImageWorker(Process):
         self._miscUpload.s3_upload_fits(fits_entry, fits_metadata)
         self._miscUpload.upload_fits_image(fits_entry)
 
+        return {
+            'path'  : str(filename),
+            'db_id' : fits_entry.id,
+            'type'  : 'fits.gz' if fits_ext == 'fit.gz' else 'fits',
+        }
+
 
     def export_raw_image(self, i_ref, camera, jpeg_exif=None):
         if not self.config.get('IMAGE_EXPORT_RAW'):
-            return
+            return None
 
         if not self.config.get('IMAGE_EXPORT_FOLDER'):
             logger.error('IMAGE_EXPORT_FOLDER not defined')
-            return
+            return None
 
 
         ### Do not write daytime image files if daytime capture is disabled
         if not self.night_av[constants.NIGHT_NIGHT] and not self.config.get('DAYTIME_CAPTURE_SAVE', True):
-            return
+            return None
 
 
         f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.{0}'.format(self.config['IMAGE_EXPORT_RAW']))
@@ -3972,7 +3999,7 @@ class ImageWorker(Process):
         if filename.exists():
             logger.error('File exists: %s (skipping)', filename)
             tmpfile_name.unlink()
-            return
+            return None
 
 
         shutil.copy2(str(tmpfile_name), str(filename))
@@ -3985,6 +4012,12 @@ class ImageWorker(Process):
 
         self._miscUpload.s3_upload_raw(raw_entry, raw_metadata)
         self._miscUpload.upload_raw_image(raw_entry)
+
+        return {
+            'path'  : str(filename),
+            'db_id' : raw_entry.id,
+            'type'  : self.config['IMAGE_EXPORT_RAW'],
+        }
 
 
     def write_mask_base_img(self, data):

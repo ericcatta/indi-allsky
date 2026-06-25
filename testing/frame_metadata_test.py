@@ -10,7 +10,7 @@ from indi_allsky.frame_metadata import FrameMetadataWriter
 from indi_allsky.frame_metadata import default_frame_metadata_dir
 
 
-def _metadata(frame_id=42, timestamp='2026-06-21T12:00:00+00:00'):
+def _metadata(frame_id=42, timestamp='2026-06-21T12:00:00+00:00', **kwargs):
     return FrameMetadata(
         frame_id=frame_id,
         timestamp=timestamp,
@@ -30,6 +30,7 @@ def _metadata(frame_id=42, timestamp='2026-06-21T12:00:00+00:00'):
         error_message='',
         quality_score=0.0,
         quality_flags=[],
+        **kwargs,
     )
 
 
@@ -60,6 +61,28 @@ def test_frame_metadata_fixed_jsonl_write():
         assert row['overlay_applied'] is False
         assert row['stretch_applied'] is False
         assert row['rendering_profile'] == 'indi-allsky-display-v1'
+
+
+def test_frame_metadata_scientific_source_paths_are_serialized():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_path = Path(tmpdir).joinpath('frame_metadata.jsonl')
+        writer = FrameMetadataWriter(metadata_path)
+
+        writer.write(_metadata(
+            source_image_path='/var/lib/indi-allsky/images/ccd_uuid/fits/20260621/night/21_23/ccd2_20260621_235959.fit',
+            detector_image_path='/var/lib/indi-allsky/images/ccd_uuid/fits/20260621/night/21_23/ccd2_20260621_235959.fit',
+            detector_image_type='fits',
+            fits_path='/var/lib/indi-allsky/images/ccd_uuid/fits/20260621/night/21_23/ccd2_20260621_235959.fit',
+            raw_path='/var/www/html/allsky/images/export/ccd_uuid/20260621/night/21_23/raw_ccd2_20260621_235959.tif',
+        ))
+        row = json.loads(metadata_path.read_text(encoding='utf-8').splitlines()[0])
+
+        assert row['source_image_path'].endswith('.fit')
+        assert row['detector_image_path'].endswith('.fit')
+        assert row['detector_image_type'] == 'fits'
+        assert row['fits_path'].endswith('.fit')
+        assert row['raw_path'].endswith('.tif')
+        assert row['thumbnail_path'] is None
 
 
 def test_frame_metadata_daily_filename_selection():

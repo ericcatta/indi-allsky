@@ -83,23 +83,33 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - `FrameMetadata` resta backward-compatible mantenendo `image_file_path`;
     - aggiunti campi opzionali per separare immagine display, sorgente scientifica, input detector, FITS/RAW, thumbnail e rendering;
     - per ora `display_image_path=image_file_path`;
-    - `source_image_path`, `detector_image_path`, `detector_image_type`, `fits_path`, `raw_path` e `thumbnail_path` restano `None` finche' non vengono collegati in modo sicuro;
+    - `thumbnail_path` resta `None` finche' non viene collegato in modo sicuro;
     - `rendering_profile=indi-allsky-display-v1`;
     - `overlay_applied` e `stretch_applied` sono popolati con helper conservativi basati su config/capture status;
     - nessun cambio a processing, salvataggio FITS/RAW, detector, dashboard o runtime capture.
+  - Raw-first / Scientific Source Image Architecture micro-step 2:
+    - `write_fit()` e `export_raw_image()` ritornano metadata linkabili solo dopo copia file riuscita;
+    - `FrameMetadata` collega opzionalmente `fits_path`, `raw_path`, `source_image_path`, `detector_image_path` e `detector_image_type`;
+    - `source_image_path` / `detector_image_path` preferiscono FITS quando presente, poi RAW;
+    - skip, file gia' esistente, export disabilitato e period FITS non maturo restano `None`;
+    - nessun cambio a frequenza FITS, export RAW, detector, UI, processing o capture.
 - IN TEST:
   - Quality Score v1 metadata-only: usa meter/target, exposure/gain state, capture status e decision state; non usa AI, image analysis o star detection.
   - Nightly Summary v1 sul Raspberry: validare una giornata/notte completa multicamera con gap, anomaly events e trend reali.
   - Metadata Health sul Raspberry: validare coverage/completeness reali sui JSONL giornalieri dopo pull/restart.
+  - Raw-first micro-step 2 sul Raspberry:
+    - verificare che i metadata giornalieri contengano `fits_path` quando `IMAGE_SAVE_FITS` scrive effettivamente un file;
+    - verificare `raw_path` quando `IMAGE_EXPORT_RAW` e `IMAGE_EXPORT_FOLDER` sono configurati;
+    - confermare che JPEG/PNG/WebP restino solo display/review rendering.
 - NEXT:
   - Validare Quality Score v1 sul Raspberry con frame buoni, saturi, scuri e capture error.
   - Validare Nightly Summary v1 sul Raspberry con giornata completa e metadata multicamera.
   - Aggiungere filtri dashboard/gallery basati su metadata e quality flags.
   - Grafici storici giornalieri piu' ricchi per brightness/exposure/gain.
-  - Raw-first micro-step 2:
-    - collegare in modo sicuro `fits_path` e/o `raw_path` ai record DB `IndiAllSkyDbFitsImageTable` / `IndiAllSkyDbRawImageTable` quando esistono;
-    - definire `detector_image_path` e `detector_image_type` senza cambiare frequenza o comportamento di salvataggio FITS/RAW;
-    - mantenere JPEG/PNG/WebP come display/review rendering, non come source scientifica.
+  - Raw-first micro-step 3:
+    - collegare `thumbnail_path` senza cambiare ordine di processing o introdurre update fragili;
+    - valutare se salvare anche `fits_db_id` / `raw_db_id` in metadata o lasciare il link path-only;
+    - definire un `TimelineFrameSet` offline/read-only per recuperare frame display/source/detector in sequenza.
 - LATER:
   - Retention policy metadata.
   - Export/debug metadata.
@@ -1373,3 +1383,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-25: Fix affidabilita' Modern Admin dashboard: `FrameMetadataAnalytics` salta righe frame metadata JSONL vuote/malformate e continua a caricare le righe valide.
 - 2026-06-25: Audit image/frame data per futura meteor detection: confermato join necessario `EventTimeline -> EventCandidate -> FrameMetadata -> image_file_path`; prossimo micro-step consigliato `TimelineFrameSet` offline read-only prima di qualsiasi detector.
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 1: esteso `FrameMetadata` con contratto opzionale display/source/detector/FITS/RAW/thumbnail/rendering senza cambiare processing o salvataggio immagini.
+- 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 2: collegati opzionalmente FITS/RAW persistiti a `FrameMetadata` tramite ritorni sicuri da `write_fit()` / `export_raw_image()`, senza cambiare frequenza o comportamento di salvataggio.
