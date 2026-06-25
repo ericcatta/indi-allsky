@@ -24,6 +24,7 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - I global settings restano fallback legacy/single-camera/advanced, non UI operativa primaria.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
+- UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
 
 ## Stato Attuale
 
