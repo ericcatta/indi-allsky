@@ -29,6 +29,20 @@ class FrameMetadata:
     error_message: str
     quality_score: float
     quality_flags: list
+    display_image_path: str = None
+    source_image_path: str = None
+    detector_image_path: str = None
+    detector_image_type: str = None
+    fits_path: str = None
+    raw_path: str = None
+    thumbnail_path: str = None
+    overlay_applied: bool = False
+    stretch_applied: bool = False
+    rendering_profile: str = 'indi-allsky-display-v1'
+
+    def __post_init__(self):
+        if self.display_image_path is None:
+            self.display_image_path = self.image_file_path
 
     def to_dict(self):
         return asdict(self)

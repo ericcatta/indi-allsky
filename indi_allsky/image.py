@@ -1130,6 +1130,16 @@ class ImageWorker(Process):
                 camera_id=int(camera_id),
                 profile_id=str(profile_id),
                 image_file_path=str(image_file_path),
+                display_image_path=str(image_file_path),
+                source_image_path=None,
+                detector_image_path=None,
+                detector_image_type=None,
+                fits_path=None,
+                raw_path=None,
+                thumbnail_path=None,
+                overlay_applied=self._frame_metadata_overlay_applied(capture_status),
+                stretch_applied=self._frame_metadata_stretch_applied(capture_status),
+                rendering_profile='indi-allsky-display-v1',
                 exposure_us=exposure_us,
                 gain=gain_float,
                 meter_value_raw=meter_value_raw,
@@ -1161,6 +1171,38 @@ class ImageWorker(Process):
                 frame_id,
                 str(e),
             )
+
+
+    def _frame_metadata_overlay_applied(self, capture_status):
+        if str(capture_status) != 'processed':
+            return False
+
+        return bool(
+            self.config.get('LOGO_OVERLAY') or
+            self.config.get('DETECT_DRAW') or
+            self.config.get('IMAGE_CIRCLE_MASK', {}).get('ENABLE') or
+            self.config.get('MOON_OVERLAY', {}).get('ENABLE', True) or
+            self.config.get('LIGHTGRAPH_OVERLAY', {}).get('ENABLE', True) or
+            self.config.get('IMAGE_OVERLAY', {}).get('ENABLE', True) or
+            self.config.get('ORB_PROPERTIES', {}).get('MODE', 'ha') != 'off' or
+            self.config.get('IMAGE_LABEL_SYSTEM', 'pillow') != 'off'
+        )
+
+
+    def _frame_metadata_stretch_applied(self, capture_status):
+        if str(capture_status) != 'processed':
+            return False
+
+        image_stretch = self.config.get('IMAGE_STRETCH', {})
+        if not image_stretch.get('CLASSNAME'):
+            return False
+
+        if self.night_av[constants.NIGHT_NIGHT]:
+            if self.night_av[constants.NIGHT_MOONMODE] and not image_stretch.get('MOONMODE'):
+                return False
+            return True
+
+        return bool(image_stretch.get('DAYTIME'))
 
 
     def _persist_event_candidates_shadow(self, metadata):

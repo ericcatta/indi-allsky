@@ -49,6 +49,17 @@ def test_frame_metadata_fixed_jsonl_write():
         assert row['exposure_us'] == 21686
         assert row['auto_gain_action'] == 'increase_gain'
         assert row['quality_flags'] == []
+        assert row['image_file_path'] == '/var/lib/indi-allsky/images/ccd2.jpg'
+        assert row['display_image_path'] == '/var/lib/indi-allsky/images/ccd2.jpg'
+        assert row['source_image_path'] is None
+        assert row['detector_image_path'] is None
+        assert row['detector_image_type'] is None
+        assert row['fits_path'] is None
+        assert row['raw_path'] is None
+        assert row['thumbnail_path'] is None
+        assert row['overlay_applied'] is False
+        assert row['stretch_applied'] is False
+        assert row['rendering_profile'] == 'indi-allsky-display-v1'
 
 
 def test_frame_metadata_daily_filename_selection():
