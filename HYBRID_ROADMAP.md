@@ -364,10 +364,22 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - directory default `meteor_reviews/`;
     - file giornalieri `YYYY-MM-DD.jsonl` derivati da `review_timestamp`;
     - nessuna UI, RMS, AI, dashboard o integrazione runtime.
+  - MeteorValidation domain model:
+    - contratto `MeteorValidation` con `schema_version=meteor_validation_v1`;
+    - registra la trust decision assegnata a una `MeteorObservation` dopo review/evidence;
+    - separa chiaramente trust state da detection e review;
+    - include `validation_id`, `meteor_id`, `validation_state`, `validation_actor`, `validation_timestamp`, `confidence`, `evidence_review_ids`, `evidence_sources`, `reason` e `created_at`;
+    - `validation_id` deterministico da meteor, stato, actor, timestamp, review ids e evidence sources;
+    - puo' referenziare uno o piu' `MeteorReview` tramite `evidence_review_ids`;
+    - stati ammessi: `unvalidated`, `automatically_validated`, `human_validated`, `rejected`, `ground_truth`, `benchmark`;
+    - actor ammessi: `automatic_policy`, `human`, `cross_camera`, `external_detector`, `ai_assisted`;
+    - persistenza append-only JSONL tramite `MeteorValidationWriter`;
+    - directory default `meteor_validations/`;
+    - file giornalieri `YYYY-MM-DD.jsonl` derivati da `validation_timestamp`;
+    - nessuna validation algorithm, RMS, AI, dashboard, UI o integrazione runtime.
 - NEXT:
   - Validare il contratto rispetto ai futuri output RMS prima di implementare l'adapter.
   - Definire il mapping EventClassification/EventTimeline -> MeteorObservation senza collegarlo al runtime.
-  - Definire MeteorValidation come contratto separato da MeteorReview.
 - LATER:
   - RMS adapter verso MeteorObservation.
   - Campi fisici meteor estesi: magnitude, shower, radiant, velocity, persistent train e orbit.
