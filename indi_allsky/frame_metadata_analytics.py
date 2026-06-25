@@ -1,4 +1,5 @@
 import json
+import logging
 from collections import Counter
 from datetime import datetime
 from datetime import timedelta
@@ -9,6 +10,9 @@ from .cloud_detection import classify_cloud_condition
 from .condensation_detection import detect_possible_condensation
 from .sky_condition import compute_sky_condition_from_frame
 from .sky_trend import classify_sky_trend
+
+
+logger = logging.getLogger('indi_allsky')
 
 
 class FrameMetadataAnalytics:
@@ -39,15 +43,7 @@ class FrameMetadataAnalytics:
         if not metadata_path.exists():
             return []
 
-        rows = []
-        with metadata_path.open('r', encoding='utf-8') as f_metadata:
-            for line in f_metadata:
-                line = line.strip()
-                if not line:
-                    continue
-                rows.append(json.loads(line))
-
-        return rows
+        return self._load_file(metadata_path)
 
 
     def get_latest_frames(self, limit=100):
@@ -197,12 +193,21 @@ class FrameMetadataAnalytics:
 
     def _load_file(self, metadata_path):
         rows = []
-        with metadata_path.open('r', encoding='utf-8') as f_metadata:
-            for line in f_metadata:
+        with Path(metadata_path).open('r', encoding='utf-8') as f_metadata:
+            for line_number, line in enumerate(f_metadata, start=1):
                 line = line.strip()
                 if not line:
                     continue
-                rows.append(json.loads(line))
+                try:
+                    rows.append(json.loads(line))
+                except json.JSONDecodeError as exc:
+                    logger.warning(
+                        'Skipping malformed frame metadata row: path=%s line=%d error=%s',
+                        metadata_path,
+                        line_number,
+                        str(exc),
+                    )
+                    continue
         return rows
 
 

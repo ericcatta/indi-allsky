@@ -55,6 +55,53 @@ def test_load_day():
         assert rows[1]['frame_id'] == 2
 
 
+def test_load_day_ignores_empty_and_malformed_lines():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_dir = Path(tmpdir)
+        metadata_dir.mkdir(parents=True, exist_ok=True)
+        metadata_path = metadata_dir.joinpath('2026-06-21.jsonl')
+        with metadata_path.open('w', encoding='utf-8') as f_metadata:
+            json.dump(_frame(1, '2026-06-21T00:00:00+00:00', 2, 1000, 0.0, 90.0), f_metadata, sort_keys=True, separators=(',', ':'))
+            f_metadata.write('\n')
+            f_metadata.write('\n')
+            f_metadata.write('not-json\n')
+            f_metadata.write('   \n')
+            json.dump(_frame(2, '2026-06-21T00:01:00+00:00', 2, 2000, 1.0, 95.0), f_metadata, sort_keys=True, separators=(',', ':'))
+            f_metadata.write('\n')
+
+        rows = FrameMetadataAnalytics(metadata_dir).load_day('2026-06-21')
+
+        assert [row['frame_id'] for row in rows] == [1, 2]
+
+
+def test_camera_summary_ignores_malformed_rows():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_dir = Path(tmpdir)
+        metadata_dir.mkdir(parents=True, exist_ok=True)
+        metadata_path = metadata_dir.joinpath('2026-06-21.jsonl')
+        with metadata_path.open('w', encoding='utf-8') as f_metadata:
+            json.dump(_frame(1, '2026-06-21T00:00:00+00:00', 2, 1000, 0.0, 90.0), f_metadata, sort_keys=True, separators=(',', ':'))
+            f_metadata.write('\n')
+            f_metadata.write('{broken-json\n')
+            json.dump(_frame(2, '2026-06-21T00:01:00+00:00', 2, 3000, 2.0, 100.0), f_metadata, sort_keys=True, separators=(',', ':'))
+            f_metadata.write('\n')
+
+        summary = FrameMetadataAnalytics(metadata_dir).get_camera_summary(camera_id=2)
+
+        assert summary['frame_count'] == 2
+        assert summary['average_exposure'] == 2000.0
+        assert summary['average_meter_value'] == 95.0
+
+
+def test_load_day_missing_file_returns_empty_list():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        metadata_dir = Path(tmpdir)
+
+        rows = FrameMetadataAnalytics(metadata_dir).load_day('2026-06-21')
+
+        assert rows == []
+
+
 def test_latest_frames_across_days():
     with tempfile.TemporaryDirectory() as tmpdir:
         metadata_dir = Path(tmpdir)
@@ -218,6 +265,9 @@ def test_nightly_summary_tolerates_legacy_rows():
 
 if __name__ == '__main__':
     test_load_day()
+    test_load_day_ignores_empty_and_malformed_lines()
+    test_camera_summary_ignores_malformed_rows()
+    test_load_day_missing_file_returns_empty_list()
     test_latest_frames_across_days()
     test_camera_summary()
     test_recent_frames_filters_by_timestamp()

@@ -982,6 +982,7 @@ Validazione runtime Raspberry Auto Gain convergence del 2026-06-21:
   - verifica presenza dei campi core `frame_id`, `timestamp`, `camera_id`, `profile_id`, exposure/gain/meter, `capture_status`, `quality_score`, `quality_flags`;
   - valida timestamp, exposure/gain non negativi, `quality_score` 0-100, `quality_flags` lista e identita' camera/profilo;
   - righe legacy senza `quality_score`/`quality_flags` vengono conteggiate in completeness/quality coverage ma non rompono analytics e non sono invalid rows;
+  - righe JSONL vuote o malformate vengono saltate dal reader, cosi' una riga corrotta non rompe Modern Admin dashboard/summary/health;
   - Dashboard mostra una card compatta `Metadata Health` con frames checked, completeness, quality coverage, invalid rows, missing fields e invalid values.
 - Validare runtime JSONL su Raspberry con entrambe le camere.
 - Decidere retention per `frame_metadata/YYYY-MM-DD.jsonl`.
@@ -1256,3 +1257,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-23: Stabilizzate mask processing multicamera per IMX708/ASI678MC: SQM, ADU e star detection ora usano cache shape-aware `(binning, image_width, image_height)` e fallback anti-crash quando una mask esterna non combacia con il frame.
 - 2026-06-23: Ridotto rumore EventCandidate `sky_condition_transition` dopo report Raspberry con candidate/timeline eccessive durante `exposure_adjusting` e `meter_near_edge`; gli altri trigger restano invariati.
 - 2026-06-23: Aggiunta analytics per candidate suppression: `suppressed_sky_condition_transition_total`, breakdown `exposure_adjusting` e `meter_near_edge` nel runtime diagnostics JSON e nell'offline event pipeline report.
+- 2026-06-25: Fix affidabilita' Modern Admin dashboard: `FrameMetadataAnalytics` salta righe frame metadata JSONL vuote/malformate e continua a caricare le righe valide.
