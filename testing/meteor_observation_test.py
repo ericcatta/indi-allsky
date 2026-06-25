@@ -10,9 +10,11 @@ from indi_allsky.meteor_observation import METEOR_REVIEW_SCHEMA_VERSION
 from indi_allsky.meteor_observation import MeteorObservation
 from indi_allsky.meteor_observation import MeteorObservationWriter
 from indi_allsky.meteor_observation import MeteorReview
+from indi_allsky.meteor_observation import MeteorReviewWriter
 from indi_allsky.meteor_observation import build_meteor_observation_id
 from indi_allsky.meteor_observation import build_meteor_review_id
 from indi_allsky.meteor_observation import default_meteor_observation_dir
+from indi_allsky.meteor_observation import default_meteor_review_dir
 
 
 def _meteor_observation(**overrides):
@@ -266,6 +268,63 @@ def test_meteor_review_is_not_validation_or_detector_specific():
     assert 'shower' not in row
 
 
+def test_meteor_review_jsonl_persistence_writes_one_review():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        review_dir = Path(tmpdir).joinpath('meteor_reviews')
+        writer = MeteorReviewWriter(review_dir)
+
+        written_path = writer.write(_meteor_review())
+
+        assert written_path == review_dir.joinpath('2026-06-25.jsonl')
+        rows = written_path.read_text(encoding='utf-8').splitlines()
+        assert len(rows) == 1
+        row = json.loads(rows[0])
+        assert row['schema_version'] == 'meteor_review_v1'
+        assert row['review_id'].startswith('meteor-review-')
+        assert row['meteor_id'] == 'meteor-abc123'
+
+
+def test_meteor_review_jsonl_persistence_appends_multiple_reviews():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        review_dir = Path(tmpdir).joinpath('meteor_reviews')
+        writer = MeteorReviewWriter(review_dir)
+
+        writer.write(_meteor_review(review_actor='automatic_policy', review_result='pending'))
+        writer.write(_meteor_review(review_actor='human', review_result='accepted'))
+
+        rows = [
+            json.loads(line)
+            for line in review_dir.joinpath('2026-06-25.jsonl').read_text(encoding='utf-8').splitlines()
+        ]
+        assert len(rows) == 2
+        assert rows[0]['review_actor'] == 'automatic_policy'
+        assert rows[1]['review_actor'] == 'human'
+        assert rows[0]['review_id'] != rows[1]['review_id']
+
+
+def test_meteor_review_default_directory():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        assert default_meteor_review_dir(tmpdir) == Path(tmpdir).joinpath('meteor_reviews')
+
+
+def test_meteor_review_jsonl_lines_are_valid_assessments_only():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        writer = MeteorReviewWriter(Path(tmpdir).joinpath('meteor_reviews'))
+        written_path = writer.write(_meteor_review())
+
+        for line in written_path.read_text(encoding='utf-8').splitlines():
+            row = json.loads(line)
+            assert row['schema_version'] == METEOR_REVIEW_SCHEMA_VERSION
+            assert 'validation_state' not in row
+            assert 'rms' not in row
+            assert 'ai_model' not in row
+            assert 'magnitude' not in row
+            assert 'shower' not in row
+            assert 'radiant' not in row
+            assert 'velocity' not in row
+            assert 'orbit' not in row
+
+
 if __name__ == '__main__':
     test_meteor_observation_serialization()
     test_meteor_observation_schema_version_is_forced()
@@ -283,4 +342,8 @@ if __name__ == '__main__':
     test_meteor_review_requires_core_fields()
     test_meteor_review_actor_and_result_are_constrained()
     test_meteor_review_is_not_validation_or_detector_specific()
+    test_meteor_review_jsonl_persistence_writes_one_review()
+    test_meteor_review_jsonl_persistence_appends_multiple_reviews()
+    test_meteor_review_default_directory()
+    test_meteor_review_jsonl_lines_are_valid_assessments_only()
     print('meteor observation tests OK')

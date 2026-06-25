@@ -360,6 +360,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - `review_id` deterministico da meteor, actor, timestamp, result ed evidence sources;
     - actor ammessi: `automatic_policy`, `human`, `external_detector`, `cross_camera`, `ai_assisted`;
     - result ammessi: `pending`, `accepted`, `rejected`, `needs_more_evidence`, `ground_truth`;
+    - persistenza append-only JSONL tramite `MeteorReviewWriter`;
+    - directory default `meteor_reviews/`;
+    - file giornalieri `YYYY-MM-DD.jsonl` derivati da `review_timestamp`;
     - nessuna UI, RMS, AI, dashboard o integrazione runtime.
 - NEXT:
   - Validare il contratto rispetto ai futuri output RMS prima di implementare l'adapter.

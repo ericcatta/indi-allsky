@@ -202,8 +202,30 @@ class MeteorObservationWriter:
         return self.observation_dir.joinpath('{0:s}.jsonl'.format(_date_from_timestamp(observation.observation_timestamp)))
 
 
+class MeteorReviewWriter:
+    """Append-only JSONL persistence for meteor review assessments."""
+
+    def __init__(self, review_dir):
+        self.review_dir = Path(review_dir)
+
+    def write(self, review):
+        review_path = self._review_path_for(review)
+        review_path.parent.mkdir(parents=True, exist_ok=True)
+        with review_path.open('a', encoding='utf-8') as f_review:
+            json.dump(review.to_dict(), f_review, sort_keys=True, separators=(',', ':'))
+            f_review.write('\n')
+        return review_path
+
+    def _review_path_for(self, review):
+        return self.review_dir.joinpath('{0:s}.jsonl'.format(_date_from_timestamp(review.review_timestamp)))
+
+
 def default_meteor_observation_dir(varlib_folder):
     return Path(varlib_folder).joinpath('meteor_observations')
+
+
+def default_meteor_review_dir(varlib_folder):
+    return Path(varlib_folder).joinpath('meteor_reviews')
 
 
 def _required_string(value, field_name):
