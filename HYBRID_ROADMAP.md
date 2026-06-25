@@ -93,6 +93,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - `source_image_path` / `detector_image_path` preferiscono FITS quando presente, poi RAW;
     - skip, file gia' esistente, export disabilitato e period FITS non maturo restano `None`;
     - nessun cambio a frequenza FITS, export RAW, detector, UI, processing o capture.
+  - Raw-first / Scientific Source Image Architecture micro-step 3:
+    - introdotto contratto immutabile `ScientificFrame`;
+    - rappresenta l'acquisizione scientifica associata a un capture, indipendente da rendering display, overlay, JPEG, dashboard, thumbnail e futuri detector;
+    - supporta campi opzionali per timestamp, camera, source/detector image, FITS/RAW, bit depth, dimensioni, exposure/gain/binning, lossless/calibrated e metadata version;
+    - aggiunto helper offline `from_frame_metadata()` per costruzione da dict/oggetto metadata-like;
+    - nessuna integrazione runtime, nessun cambio a processing, capture, EventTimeline, dashboard o detector.
 - IN TEST:
   - Quality Score v1 metadata-only: usa meter/target, exposure/gain state, capture status e decision state; non usa AI, image analysis o star detection.
   - Nightly Summary v1 sul Raspberry: validare una giornata/notte completa multicamera con gap, anomaly events e trend reali.
@@ -106,7 +112,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Validare Nightly Summary v1 sul Raspberry con giornata completa e metadata multicamera.
   - Aggiungere filtri dashboard/gallery basati su metadata e quality flags.
   - Grafici storici giornalieri piu' ricchi per brightness/exposure/gain.
-  - Raw-first micro-step 3:
+  - Raw-first micro-step 4:
+    - introdurre `ScientificFrameProvider` offline/read-only per costruire `ScientificFrame` da `FrameMetadata` JSONL e path FITS/RAW gia' persistiti;
     - collegare `thumbnail_path` senza cambiare ordine di processing o introdurre update fragili;
     - valutare se salvare anche `fits_db_id` / `raw_db_id` in metadata o lasciare il link path-only;
     - definire un `TimelineFrameSet` offline/read-only per recuperare frame display/source/detector in sequenza.
@@ -1384,3 +1391,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-25: Audit image/frame data per futura meteor detection: confermato join necessario `EventTimeline -> EventCandidate -> FrameMetadata -> image_file_path`; prossimo micro-step consigliato `TimelineFrameSet` offline read-only prima di qualsiasi detector.
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 1: esteso `FrameMetadata` con contratto opzionale display/source/detector/FITS/RAW/thumbnail/rendering senza cambiare processing o salvataggio immagini.
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 2: collegati opzionalmente FITS/RAW persistiti a `FrameMetadata` tramite ritorni sicuri da `write_fit()` / `export_raw_image()`, senza cambiare frequenza o comportamento di salvataggio.
+- 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 3: introdotto contratto immutabile `ScientificFrame` senza integrazione runtime; prossimo step `ScientificFrameProvider` offline/read-only.
