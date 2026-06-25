@@ -1,5 +1,6 @@
 import json
 import hashlib
+from collections import Counter
 from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import datetime
@@ -340,6 +341,62 @@ def default_meteor_validation_dir(varlib_folder):
     return Path(varlib_folder).joinpath('meteor_validations')
 
 
+def build_meteor_intelligence_offline_report(
+        observation_path=None,
+        review_path=None,
+        validation_path=None,
+):
+    observation_rows, malformed_observations = _load_jsonl_rows(observation_path)
+    review_rows, malformed_reviews = _load_jsonl_rows(review_path)
+    validation_rows, malformed_validations = _load_jsonl_rows(validation_path)
+
+    profile_counter = Counter()
+    camera_counter = Counter()
+    detector_counter = Counter()
+    observation_status_counter = Counter()
+    review_actor_counter = Counter()
+    review_result_counter = Counter()
+    validation_actor_counter = Counter()
+    validation_state_counter = Counter()
+
+    for row in observation_rows:
+        _count_value(profile_counter, row.get('profile_id'))
+        _count_value(camera_counter, row.get('camera_id'))
+        _count_value(detector_counter, row.get('detector_id'))
+        _count_value(observation_status_counter, row.get('status'))
+
+    for row in review_rows:
+        _count_value(review_actor_counter, row.get('review_actor'))
+        _count_value(review_result_counter, row.get('review_result'))
+
+    for row in validation_rows:
+        _count_value(validation_actor_counter, row.get('validation_actor'))
+        _count_value(validation_state_counter, row.get('validation_state'))
+
+    return {
+        'total_observation_lines': len(observation_rows),
+        'total_review_lines': len(review_rows),
+        'total_validation_lines': len(validation_rows),
+        'malformed_lines': {
+            'observations': malformed_observations,
+            'reviews': malformed_reviews,
+            'validations': malformed_validations,
+        },
+        'counts_by_profile_id': dict(sorted(profile_counter.items())),
+        'counts_by_camera_id': dict(sorted(camera_counter.items())),
+        'counts_by_detector_id': dict(sorted(detector_counter.items())),
+        'counts_by_observation_status': dict(sorted(observation_status_counter.items())),
+        'counts_by_review_actor': dict(sorted(review_actor_counter.items())),
+        'counts_by_review_result': dict(sorted(review_result_counter.items())),
+        'counts_by_validation_actor': dict(sorted(validation_actor_counter.items())),
+        'counts_by_validation_state': dict(sorted(validation_state_counter.items())),
+        'validated_meteor_count': _count_validated_meteors(validation_rows),
+        'rejected_meteor_count': _count_validation_state(validation_rows, 'rejected'),
+        'ground_truth_meteor_count': _count_validation_state(validation_rows, 'ground_truth'),
+        'benchmark_meteor_count': _count_validation_state(validation_rows, 'benchmark'),
+    }
+
+
 def _required_string(value, field_name):
     value = _string_value(value)
     if not value:
@@ -376,3 +433,50 @@ def _date_from_timestamp(timestamp):
         if len(timestamp_str) >= 10:
             return datetime.fromisoformat(timestamp_str[:10]).date().isoformat()
         raise
+
+
+def _load_jsonl_rows(path):
+    if not path:
+        return [], 0
+
+    path = Path(path)
+    if not path.exists() or not path.is_file():
+        return [], 0
+
+    rows = []
+    malformed = 0
+    with path.open('r', encoding='utf-8') as f_jsonl:
+        for line in f_jsonl:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                malformed += 1
+                continue
+            if isinstance(row, dict):
+                rows.append(row)
+            else:
+                malformed += 1
+    return rows, malformed
+
+
+def _count_value(counter, value):
+    value = _string_value(value)
+    if value:
+        counter[value] += 1
+
+
+def _count_validation_state(validation_rows, state):
+    return sum(1 for row in validation_rows if _string_value(row.get('validation_state')) == state)
+
+
+def _count_validated_meteors(validation_rows):
+    validated_states = frozenset((
+        'automatically_validated',
+        'human_validated',
+        'ground_truth',
+        'benchmark',
+    ))
+    return sum(1 for row in validation_rows if _string_value(row.get('validation_state')) in validated_states)

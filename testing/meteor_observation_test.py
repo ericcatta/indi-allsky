@@ -17,6 +17,7 @@ from indi_allsky.meteor_observation import MeteorValidationWriter
 from indi_allsky.meteor_observation import build_meteor_observation_id
 from indi_allsky.meteor_observation import build_meteor_review_id
 from indi_allsky.meteor_observation import build_meteor_validation_id
+from indi_allsky.meteor_observation import build_meteor_intelligence_offline_report
 from indi_allsky.meteor_observation import default_meteor_observation_dir
 from indi_allsky.meteor_observation import default_meteor_review_dir
 from indi_allsky.meteor_observation import default_meteor_validation_dir
@@ -478,6 +479,141 @@ def test_meteor_validation_jsonl_lines_are_valid_trust_decisions_only():
             assert 'orbit' not in row
 
 
+def test_meteor_intelligence_report_with_only_observations():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        observation_path = Path(tmpdir).joinpath('meteor_observations.jsonl')
+        with observation_path.open('w', encoding='utf-8') as f_observations:
+            json.dump(_meteor_observation(profile_id='asi678mc', camera_id=2, status='shadow').to_dict(), f_observations)
+            f_observations.write('\n')
+            json.dump(_meteor_observation(profile_id='imx708-wide', camera_id=1, status='reviewed', detector_id='detector-b').to_dict(), f_observations)
+            f_observations.write('\n')
+
+        report = build_meteor_intelligence_offline_report(observation_path=observation_path)
+
+        assert report['total_observation_lines'] == 2
+        assert report['total_review_lines'] == 0
+        assert report['total_validation_lines'] == 0
+        assert report['counts_by_profile_id'] == {'asi678mc': 1, 'imx708-wide': 1}
+        assert report['counts_by_camera_id'] == {'1': 1, '2': 1}
+        assert report['counts_by_detector_id'] == {'detector-b': 1, 'synthetic_meteor_contract_test': 1}
+        assert report['counts_by_observation_status'] == {'reviewed': 1, 'shadow': 1}
+
+
+def test_meteor_intelligence_report_with_observations_reviews_and_validations():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        observation_path = Path(tmpdir).joinpath('meteor_observations.jsonl')
+        review_path = Path(tmpdir).joinpath('meteor_reviews.jsonl')
+        validation_path = Path(tmpdir).joinpath('meteor_validations.jsonl')
+
+        with observation_path.open('w', encoding='utf-8') as f_observations:
+            json.dump(_meteor_observation().to_dict(), f_observations)
+            f_observations.write('\n')
+        with review_path.open('w', encoding='utf-8') as f_reviews:
+            json.dump(_meteor_review(review_actor='human', review_result='accepted').to_dict(), f_reviews)
+            f_reviews.write('\n')
+            json.dump(_meteor_review(review_actor='external_detector', review_result='needs_more_evidence').to_dict(), f_reviews)
+            f_reviews.write('\n')
+        with validation_path.open('w', encoding='utf-8') as f_validations:
+            json.dump(_meteor_validation(validation_state='automatically_validated', validation_actor='automatic_policy').to_dict(), f_validations)
+            f_validations.write('\n')
+            json.dump(_meteor_validation(validation_state='rejected', validation_actor='human').to_dict(), f_validations)
+            f_validations.write('\n')
+            json.dump(_meteor_validation(validation_state='ground_truth', validation_actor='human').to_dict(), f_validations)
+            f_validations.write('\n')
+            json.dump(_meteor_validation(validation_state='benchmark', validation_actor='human').to_dict(), f_validations)
+            f_validations.write('\n')
+
+        report = build_meteor_intelligence_offline_report(
+            observation_path=observation_path,
+            review_path=review_path,
+            validation_path=validation_path,
+        )
+
+        assert report['total_observation_lines'] == 1
+        assert report['total_review_lines'] == 2
+        assert report['total_validation_lines'] == 4
+        assert report['counts_by_review_actor'] == {'external_detector': 1, 'human': 1}
+        assert report['counts_by_review_result'] == {'accepted': 1, 'needs_more_evidence': 1}
+        assert report['counts_by_validation_actor'] == {'automatic_policy': 1, 'human': 3}
+        assert report['counts_by_validation_state'] == {
+            'automatically_validated': 1,
+            'benchmark': 1,
+            'ground_truth': 1,
+            'rejected': 1,
+        }
+        assert report['validated_meteor_count'] == 3
+        assert report['rejected_meteor_count'] == 1
+        assert report['ground_truth_meteor_count'] == 1
+        assert report['benchmark_meteor_count'] == 1
+
+
+def test_meteor_intelligence_report_missing_files_return_zero_counts():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        report = build_meteor_intelligence_offline_report(
+            observation_path=Path(tmpdir).joinpath('missing_observations.jsonl'),
+            review_path=Path(tmpdir).joinpath('missing_reviews.jsonl'),
+            validation_path=Path(tmpdir).joinpath('missing_validations.jsonl'),
+        )
+
+        assert report['total_observation_lines'] == 0
+        assert report['total_review_lines'] == 0
+        assert report['total_validation_lines'] == 0
+        assert report['malformed_lines'] == {'observations': 0, 'reviews': 0, 'validations': 0}
+        assert report['validated_meteor_count'] == 0
+
+
+def test_meteor_intelligence_report_counts_and_skips_malformed_lines():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        observation_path = Path(tmpdir).joinpath('meteor_observations.jsonl')
+        validation_path = Path(tmpdir).joinpath('meteor_validations.jsonl')
+        observation_path.write_text(
+            '\nnot-json\n{0:s}\n[]\n'.format(json.dumps(_meteor_observation().to_dict())),
+            encoding='utf-8',
+        )
+        validation_path.write_text(
+            '{0:s}\nnot-json\n'.format(json.dumps(_meteor_validation(validation_state='human_validated').to_dict())),
+            encoding='utf-8',
+        )
+
+        report = build_meteor_intelligence_offline_report(
+            observation_path=observation_path,
+            validation_path=validation_path,
+        )
+
+        assert report['total_observation_lines'] == 1
+        assert report['total_validation_lines'] == 1
+        assert report['malformed_lines'] == {'observations': 2, 'reviews': 0, 'validations': 1}
+        assert report['validated_meteor_count'] == 1
+
+
+def test_meteor_intelligence_report_is_read_only():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        observation_path = Path(tmpdir).joinpath('meteor_observations.jsonl')
+        review_path = Path(tmpdir).joinpath('meteor_reviews.jsonl')
+        validation_path = Path(tmpdir).joinpath('meteor_validations.jsonl')
+        observation_path.write_text(json.dumps(_meteor_observation().to_dict()) + '\n', encoding='utf-8')
+        review_path.write_text(json.dumps(_meteor_review().to_dict()) + '\n', encoding='utf-8')
+        validation_path.write_text(json.dumps(_meteor_validation().to_dict()) + '\n', encoding='utf-8')
+        before = {
+            observation_path: observation_path.read_text(encoding='utf-8'),
+            review_path: review_path.read_text(encoding='utf-8'),
+            validation_path: validation_path.read_text(encoding='utf-8'),
+        }
+
+        build_meteor_intelligence_offline_report(
+            observation_path=observation_path,
+            review_path=review_path,
+            validation_path=validation_path,
+        )
+
+        after = {
+            observation_path: observation_path.read_text(encoding='utf-8'),
+            review_path: review_path.read_text(encoding='utf-8'),
+            validation_path: validation_path.read_text(encoding='utf-8'),
+        }
+        assert before == after
+
+
 if __name__ == '__main__':
     test_meteor_observation_serialization()
     test_meteor_observation_schema_version_is_forced()
@@ -509,4 +645,9 @@ if __name__ == '__main__':
     test_meteor_validation_jsonl_persistence_appends_multiple_validations()
     test_meteor_validation_default_directory()
     test_meteor_validation_jsonl_lines_are_valid_trust_decisions_only()
+    test_meteor_intelligence_report_with_only_observations()
+    test_meteor_intelligence_report_with_observations_reviews_and_validations()
+    test_meteor_intelligence_report_missing_files_return_zero_counts()
+    test_meteor_intelligence_report_counts_and_skips_malformed_lines()
+    test_meteor_intelligence_report_is_read_only()
     print('meteor observation tests OK')

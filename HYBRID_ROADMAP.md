@@ -377,6 +377,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - directory default `meteor_validations/`;
     - file giornalieri `YYYY-MM-DD.jsonl` derivati da `validation_timestamp`;
     - nessuna validation algorithm, RMS, AI, dashboard, UI o integrazione runtime.
+  - Meteor Intelligence offline report:
+    - funzione read-only `build_meteor_intelligence_offline_report(...)`;
+    - legge JSONL di `MeteorObservation`, `MeteorReview` e `MeteorValidation`;
+    - tollera file mancanti, vuoti e righe JSONL malformate;
+    - produce conteggi per profilo, camera, detector, observation status, review actor/result e validation actor/state;
+    - espone conteggi foundation per meteor validati, rejected, ground truth e benchmark;
+    - non crea record, non muta file e non introduce dashboard, Telegram, RMS, AI o detection.
 - NEXT:
   - Validare il contratto rispetto ai futuri output RMS prima di implementare l'adapter.
   - Definire il mapping EventClassification/EventTimeline -> MeteorObservation senza collegarlo al runtime.
