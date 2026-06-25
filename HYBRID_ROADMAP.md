@@ -331,7 +331,33 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Light pollution/event detection futura.
   - Timeline diagnostica giornaliera con eventi camera restart, exposure jump, saturation, missing frame, service restart.
 
-### 5. AI / Smart Features
+### 5. Meteor Intelligence
+
+- Scopo della fase:
+  - Aprire il dominio Meteor Intelligence senza implementare detection, RMS, AI o integrazione runtime.
+  - Separare il concetto scientifico `MeteorObservation` dai contratti generici `EventCandidate` e `EventTimeline`.
+  - Mantenere il paradigma Event Framework: shadow-first, profile-first, multi-camera, explainability e provenance.
+- IN TEST:
+  - MeteorObservation domain model:
+    - modulo isolato `meteor_observation.py`;
+    - contratto `MeteorObservation` con `schema_version=meteor_observation_v1`;
+    - rappresenta una osservazione meteor indipendente dal detector che l'ha prodotta;
+    - collega l'osservazione a `source_event_id` e `source_timeline_id`;
+    - include `detector_id`, `detector_version`, `confidence`, `validation_state`, `observation_timestamp`, `camera_id`, `profile_id`, `created_at` e `status`;
+    - genera `meteor_id` deterministico dai riferimenti di evidenza, detector, camera/profilo e timestamp;
+    - stati ammessi iniziali:
+      - `status`: `shadow`, `validated`, `reviewed`, `ground_truth`;
+      - `validation_state`: `unknown`, `automatic`, `human_reviewed`, `ground_truth`;
+    - non include ancora magnitude, shower, radiant, velocity, duration, persistent train, orbit o campi RMS-specifici.
+- NEXT:
+  - Validare il contratto rispetto ai futuri output RMS prima di implementare l'adapter.
+  - Definire il mapping EventClassification/EventTimeline -> MeteorObservation senza collegarlo al runtime.
+- LATER:
+  - RMS adapter verso MeteorObservation.
+  - Campi fisici meteor estesi: magnitude, shower, radiant, velocity, persistent train e orbit.
+  - Workflow review/ground truth meteor.
+
+### 6. AI / Smart Features
 
 - IDEAS:
   - AI classification per frame o per sequenza.
@@ -345,7 +371,7 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - mossi/artefatti.
   - Eventuali modelli futuri devono scrivere output come metadata persistente e restare opzionali.
 
-### 6. Future / Backlog
+### 7. Future / Backlog
 
 - Dashboard pubblica esterna piu' pulita.
 - Dashboard con visione simultanea dell'ultima foto di entrambe le camere.
