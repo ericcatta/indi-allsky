@@ -345,6 +345,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - collega l'osservazione a `source_event_id` e `source_timeline_id`;
     - include `detector_id`, `detector_version`, `confidence`, `validation_state`, `observation_timestamp`, `camera_id`, `profile_id`, `created_at` e `status`;
     - genera `meteor_id` deterministico dai riferimenti di evidenza, detector, camera/profilo e timestamp;
+    - persistenza append-only JSONL tramite `MeteorObservationWriter`;
+    - directory default `meteor_observations/`;
+    - file giornalieri `YYYY-MM-DD.jsonl` derivati da `observation_timestamp`;
     - stati ammessi iniziali:
       - `status`: `shadow`, `validated`, `reviewed`, `ground_truth`;
       - `validation_state`: `unknown`, `automatic`, `human_reviewed`, `ground_truth`;

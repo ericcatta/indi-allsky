@@ -1,8 +1,10 @@
+import json
 import hashlib
 from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import datetime
 from datetime import timezone
+from pathlib import Path
 
 
 METEOR_OBSERVATION_SCHEMA_VERSION = 'meteor_observation_v1'
@@ -99,6 +101,28 @@ class MeteorObservation:
         return asdict(self)
 
 
+class MeteorObservationWriter:
+    """Append-only JSONL persistence for detector-independent meteor observations."""
+
+    def __init__(self, observation_dir):
+        self.observation_dir = Path(observation_dir)
+
+    def write(self, observation):
+        observation_path = self._observation_path_for(observation)
+        observation_path.parent.mkdir(parents=True, exist_ok=True)
+        with observation_path.open('a', encoding='utf-8') as f_observation:
+            json.dump(observation.to_dict(), f_observation, sort_keys=True, separators=(',', ':'))
+            f_observation.write('\n')
+        return observation_path
+
+    def _observation_path_for(self, observation):
+        return self.observation_dir.joinpath('{0:s}.jsonl'.format(_date_from_timestamp(observation.observation_timestamp)))
+
+
+def default_meteor_observation_dir(varlib_folder):
+    return Path(varlib_folder).joinpath('meteor_observations')
+
+
 def _required_string(value, field_name):
     value = _string_value(value)
     if not value:
@@ -114,3 +138,16 @@ def _string_value(value):
 
 def _utc_now():
     return datetime.now(tz=timezone.utc).isoformat()
+
+
+def _date_from_timestamp(timestamp):
+    timestamp_str = _string_value(timestamp)
+    if timestamp_str.endswith('Z'):
+        timestamp_str = '{0:s}+00:00'.format(timestamp_str[:-1])
+
+    try:
+        return datetime.fromisoformat(timestamp_str).date().isoformat()
+    except ValueError:
+        if len(timestamp_str) >= 10:
+            return datetime.fromisoformat(timestamp_str[:10]).date().isoformat()
+        raise
