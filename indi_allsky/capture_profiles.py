@@ -859,16 +859,10 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
         mqttpublish_config['ENABLE'] = False
         profile_config['MQTTPUBLISH'] = mqttpublish_config
 
-    if profile.outputs.get('images') and not all((
+    if profile.outputs.get('images') and not any((
         profile.outputs.get('timelapse', True),
-        profile.outputs.get('mini_timelapse', True),
         profile.outputs.get('keogram', True),
-        profile.outputs.get('realtime_keogram', True),
-        profile.outputs.get('longterm_keogram', True),
         profile.outputs.get('startrails', True),
-        profile.outputs.get('panorama', True),
-        profile.outputs.get('panorama_loop', True),
-        profile.outputs.get('extra_uploads', True),
     )):
         profile_config['IMAGE_SAVE_FITS'] = False
         profile_config['IMAGE_SAVE_FITS_PRE_DARK'] = False

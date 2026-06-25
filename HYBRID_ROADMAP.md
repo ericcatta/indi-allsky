@@ -117,6 +117,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - conserva diagnostica per candidate mancanti, frame senza `frame_id` e frame metadata non risolti;
     - non promuove immagini display a sorgenti scientifiche o detector input;
     - nessun image loading, filesystem read di immagini, DB read, file write, runtime integration, dashboard, detector o classificazione.
+  - Raw-first / Scientific Source Image Architecture micro-step 8:
+    - corretto il resolver multicamera per non spegnere `IMAGE_SAVE_FITS`, `IMAGE_SAVE_FITS_PRE_DARK` e `IMAGE_EXPORT_RAW` quando sono disabilitati solo output opzionali/extra;
+    - la disabilitazione FITS/RAW resta attiva solo per profili davvero images-only, cioe' senza `timelapse`, `keogram` e `startrails`;
+    - nessun cambio a frequenza FITS, export RAW, detector, dashboard, EventTimeline, Meteor Intelligence o processing immagini.
 - IN TEST:
   - Quality Score v1 metadata-only: usa meter/target, exposure/gain state, capture status e decision state; non usa AI, image analysis o star detection.
   - Nightly Summary v1 sul Raspberry: validare una giornata/notte completa multicamera con gap, anomaly events e trend reali.
@@ -130,7 +134,7 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Validare Nightly Summary v1 sul Raspberry con giornata completa e metadata multicamera.
   - Aggiungere filtri dashboard/gallery basati su metadata e quality flags.
   - Grafici storici giornalieri piu' ricchi per brightness/exposure/gain.
-  - Raw-first micro-step 8:
+  - Raw-first micro-step 9:
     - collegare `thumbnail_path` senza cambiare ordine di processing o introdurre update fragili;
     - valutare se salvare anche `fits_db_id` / `raw_db_id` in metadata o lasciare il link path-only;
     - progettare il successivo contratto detector-neutral sopra `TimelineFrameSet`, senza introdurre detector o runtime integration.
@@ -1412,3 +1416,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 4/5: introdotto `ScientificFrameProvider` offline/read-only per convertire metadata in `ScientificFrame` senza promuovere immagini display a sorgenti scientifiche.
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 6: introdotto `ScientificFrameSequence` ordinato e detector-neutral, senza integrazione runtime o dipendenze da EventTimeline.
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 7: introdotto `TimelineFrameSet` offline/read-only per risolvere timeline/candidate JSONL in `ScientificFrameSequence` con diagnostica missing-data, senza image loading, DB read, runtime integration o detector.
+- 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 8: corretto resolver multicamera per preservare FITS/RAW quando sono disabilitati solo output extra, mantenendo disabilitazione per profili davvero images-only.
