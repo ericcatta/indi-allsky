@@ -323,6 +323,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Event Classification analytics/dashboard read-only:
     - contatori per label/status/method quando la classificazione sara' generata da job/manual hook;
     - mantenere label reali future separate da `unknown_event`.
+  - Event Timeline frame traceability:
+    - aggiungere un reader offline che colleghi `EventTimeline.candidate_ids` ai rispettivi `EventCandidate.frame_id`;
+    - collegare poi `frame_id/camera_id/profile_id` ai `FrameMetadata.image_file_path`;
+    - restituire una sequenza ordinata di frame prima/durante/dopo la timeline, senza eseguire detection;
+    - questo e' prerequisito per qualsiasi detector meteor responsabile, per review manuale e per futuri input RMS/AI;
+    - mantenere tutto read-only/offline e profile-first.
 - LATER:
   - Meteor detection.
   - Aurora detection.
@@ -400,9 +406,27 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - tollera file mancanti, righe malformate, label non meteor e campi opzionali mancanti;
     - non deduplica: esecuzioni ripetute appendono duplicati, come gli altri writer append-only foundation;
     - non crea `MeteorReview`, `MeteorValidation`, campi scientifici, RMS adapter, AI, dashboard o integrazione runtime.
+  - Audit image/frame data per futura meteor detection:
+    - immagini processate salvate sotto `IMAGE_FOLDER`, default `/var/www/html/allsky/images`;
+    - path per camera/profilo: `ccd_<camera_uuid>/exposures/YYYYMMDD/day|night/DD_HH/ccd<camera_id>_YYYYMMDD_HHMMSS.<type>`;
+    - `FrameMetadata` JSONL contiene `frame_id`, `timestamp`, `camera_id`, `profile_id`, `image_file_path`, exposure/gain, meter, quality flags e capture status;
+    - `EventCandidate` contiene `frame_id`, `camera_id`, `profile_id`, `timestamp_utc`, quality context ed environment context, ma non contiene direttamente `image_file_path`;
+    - `EventTimeline` contiene `candidate_ids` e summary quality/environment, ma non espande ancora i frame sorgente;
+    - per risalire all'immagine serve join esplicito `timeline -> candidate -> frame_metadata -> image_file_path`;
+    - multiple consecutive frames sono recuperabili dai metadata per `camera_id/profile_id/timestamp`, ma manca un helper ufficiale per timeline;
+    - formati immagini processate supportati: `jpg/jpeg`, `png`, `webp`, `tif/tiff`; FITS e raw export sono opzionali e non garantiti per ogni frame;
+    - thumbnail esistono via `IndiAllSkyDbThumbnailTable` e sono adatte a UI/review, non a detector scientifico;
+    - mask e ROI esistono per SQM/ADU/star/line detection, ora con cache shape-aware multicamera;
+    - logica riusabile ma non sufficiente: `detectLines.py` usa Canny + HoughLinesP dietro `DETECT_METEORS`, mentre `stars.py` usa template matching per stelle;
+    - non esiste ancora un contratto detector input stabile per sequenze frame, mask, provenance e output evidence;
+    - conclusione: un detector rule-based meteor e' supportabile solo come esperimento offline, non ancora responsabilmente in runtime.
 - NEXT:
   - Validare il contratto rispetto ai futuri output RMS prima di implementare l'adapter.
   - Validare il bridge offline su file `EventClassification` reali quando esisteranno label `meteor_candidate`.
+  - Implementare `TimelineFrameSet` / `DetectorInputBundle` offline read-only:
+    - input: EventTimeline JSONL, EventCandidate JSONL e FrameMetadata JSONL;
+    - output: frame ordinati con `image_file_path`, timestamp, exposure/gain, quality/environment e riferimenti candidate/timeline;
+    - nessuna detection, nessuna RMS/AI, nessuna modifica runtime.
 - LATER:
   - RMS adapter verso MeteorObservation.
   - Campi fisici meteor estesi: magnitude, shower, radiant, velocity, persistent train e orbit.
@@ -1335,3 +1359,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-23: Ridotto rumore EventCandidate `sky_condition_transition` dopo report Raspberry con candidate/timeline eccessive durante `exposure_adjusting` e `meter_near_edge`; gli altri trigger restano invariati.
 - 2026-06-23: Aggiunta analytics per candidate suppression: `suppressed_sky_condition_transition_total`, breakdown `exposure_adjusting` e `meter_near_edge` nel runtime diagnostics JSON e nell'offline event pipeline report.
 - 2026-06-25: Fix affidabilita' Modern Admin dashboard: `FrameMetadataAnalytics` salta righe frame metadata JSONL vuote/malformate e continua a caricare le righe valide.
+- 2026-06-25: Audit image/frame data per futura meteor detection: confermato join necessario `EventTimeline -> EventCandidate -> FrameMetadata -> image_file_path`; prossimo micro-step consigliato `TimelineFrameSet` offline read-only prima di qualsiasi detector.
