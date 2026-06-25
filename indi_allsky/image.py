@@ -41,6 +41,7 @@ from .frame_metadata import FrameMetadata
 from .frame_metadata import FrameMetadataWriter
 from .frame_metadata import default_frame_metadata_dir
 from .frame_quality import compute_frame_quality
+from .fits_schedule import FitsSchedule
 from .cloud_detection import classify_cloud_condition
 from .event_candidate import default_event_candidate_dir
 from .event_candidate import default_event_candidate_runtime_path
@@ -197,8 +198,7 @@ class ImageWorker(Process):
         self.pre_hook_datajson_name_p = None
 
 
-        self.next_save_fits_offset = self.config.get('IMAGE_SAVE_FITS_PERIOD', 7200)
-        self.next_save_fits_time = time.time() + self.next_save_fits_offset
+        self.fits_schedule = FitsSchedule()
 
         self._libcamera_raw = False
 
@@ -3698,10 +3698,12 @@ class ImageWorker(Process):
 
     def write_fit(self, i_ref, camera):
         now_time = time.time()
-        if now_time < self.next_save_fits_time:
+        fits_schedule_key = self.fits_schedule.key(
+            getattr(self, 'profile_id', 'default'),
+            getattr(self, 'current_camera_id', None) or getattr(i_ref, 'camera_id', None),
+        )
+        if not self.fits_schedule.is_due(fits_schedule_key, now=now_time):
             return None
-
-        self.next_save_fits_time = time.time() + self.next_save_fits_offset
 
 
         ### Do not write daytime image files if daytime capture is disabled
@@ -3812,6 +3814,12 @@ class ImageWorker(Process):
 
         tmpfile_p.unlink()
 
+
+        self.fits_schedule.mark_written(
+            fits_schedule_key,
+            self.config.get('IMAGE_SAVE_FITS_PERIOD', 7200),
+            now=now_time,
+        )
 
         self._miscUpload.s3_upload_fits(fits_entry, fits_metadata)
         self._miscUpload.upload_fits_image(fits_entry)
