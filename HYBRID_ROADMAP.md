@@ -364,6 +364,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - `unknown_event` = processato dal classifier ma nessuna regola ha matchato;
     - con registry vuoto produce `label=unknown_event`; `status=shadow` e `method=rule_based_v1` restano forzati;
     - nessuna AI, RMS, meteor/satellite/aircraft/aurora detection, notification o decisione runtime.
+  - Detector Result domain foundation:
+    - modulo isolato `detector_result.py`;
+    - contratto generico `DetectorEvidence` per evidenze detector-agnostic;
+    - contratto `DetectorResult` con `schema_version=detector_result_v1`;
+    - output generico per futuri detector, non validazione e non prova di evento reale;
+    - supporta label generiche come `unclassified`, `meteor_candidate`, `satellite_or_aircraft_candidate`, `weather_or_cloud_event`, `light_pollution_or_artifact`, `unknown_event`;
+    - `DetectorResultWriter` append-only JSONL in `detector_results/YYYY-MM-DD.jsonl`;
+    - nessun campo meteor/RMS/science-specific richiesto;
+    - nessuna creazione di `MeteorObservation`, runtime integration, dashboard, Telegram, image processing, RMS o AI.
 - NEXT:
   - Raspberry validation Controlled Enablement v0:
     - abilitare temporaneamente `event_candidate_triggers.enabled=True` in configurazione controllata;
@@ -1425,3 +1434,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 7: introdotto `TimelineFrameSet` offline/read-only per risolvere timeline/candidate JSONL in `ScientificFrameSequence` con diagnostica missing-data, senza image loading, DB read, runtime integration o detector.
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 8: corretto resolver multicamera per preservare FITS/RAW quando sono disabilitati solo output extra, mantenendo disabilitazione per profili davvero images-only.
 - 2026-06-26: Raw-first / Scientific Source Image Architecture micro-step 9: FITS scheduling reso profile/camera-aware nell'ImageWorker, con primo FITS immediatamente eleggibile per ogni camera/profilo e timer indipendenti.
+- 2026-06-26: Introdotta Detector Result domain foundation: `DetectorEvidence`, `DetectorResult` e writer JSONL append-only come contratto detector-agnostic prima di qualsiasi detector reale o bridge verso MeteorObservation.
