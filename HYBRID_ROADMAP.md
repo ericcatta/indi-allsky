@@ -99,6 +99,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - supporta campi opzionali per timestamp, camera, source/detector image, FITS/RAW, bit depth, dimensioni, exposure/gain/binning, lossless/calibrated e metadata version;
     - aggiunto helper offline `from_frame_metadata()` per costruzione da dict/oggetto metadata-like;
     - nessuna integrazione runtime, nessun cambio a processing, capture, EventTimeline, dashboard o detector.
+  - Raw-first / Scientific Source Image Architecture micro-step 4/5:
+    - introdotto `ScientificFrameProvider` offline/read-only;
+    - converte `FrameMetadata` dict/object in `ScientificFrame`;
+    - mantiene priorita' FITS-first, poi RAW, e conserva `None` quando non esiste sorgente scientifica;
+    - non promuove mai `display_image_path` / JPEG display a sorgente scientifica;
+    - nessuna lettura filesystem, query DB, integrazione runtime, dashboard o detector.
 - IN TEST:
   - Quality Score v1 metadata-only: usa meter/target, exposure/gain state, capture status e decision state; non usa AI, image analysis o star detection.
   - Nightly Summary v1 sul Raspberry: validare una giornata/notte completa multicamera con gap, anomaly events e trend reali.
@@ -112,8 +118,7 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - Validare Nightly Summary v1 sul Raspberry con giornata completa e metadata multicamera.
   - Aggiungere filtri dashboard/gallery basati su metadata e quality flags.
   - Grafici storici giornalieri piu' ricchi per brightness/exposure/gain.
-  - Raw-first micro-step 4:
-    - introdurre `ScientificFrameProvider` offline/read-only per costruire `ScientificFrame` da `FrameMetadata` JSONL e path FITS/RAW gia' persistiti;
+  - Raw-first micro-step 6:
     - collegare `thumbnail_path` senza cambiare ordine di processing o introdurre update fragili;
     - valutare se salvare anche `fits_db_id` / `raw_db_id` in metadata o lasciare il link path-only;
     - definire un `TimelineFrameSet` offline/read-only per recuperare frame display/source/detector in sequenza.
@@ -1392,3 +1397,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 1: esteso `FrameMetadata` con contratto opzionale display/source/detector/FITS/RAW/thumbnail/rendering senza cambiare processing o salvataggio immagini.
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 2: collegati opzionalmente FITS/RAW persistiti a `FrameMetadata` tramite ritorni sicuri da `write_fit()` / `export_raw_image()`, senza cambiare frequenza o comportamento di salvataggio.
 - 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 3: introdotto contratto immutabile `ScientificFrame` senza integrazione runtime; prossimo step `ScientificFrameProvider` offline/read-only.
+- 2026-06-25: Raw-first / Scientific Source Image Architecture micro-step 4/5: introdotto `ScientificFrameProvider` offline/read-only per convertire metadata in `ScientificFrame` senza promuovere immagini display a sorgenti scientifiche.
