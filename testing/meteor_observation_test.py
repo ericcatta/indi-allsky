@@ -6,9 +6,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.meteor_observation import METEOR_OBSERVATION_SCHEMA_VERSION
+from indi_allsky.meteor_observation import METEOR_REVIEW_SCHEMA_VERSION
 from indi_allsky.meteor_observation import MeteorObservation
 from indi_allsky.meteor_observation import MeteorObservationWriter
+from indi_allsky.meteor_observation import MeteorReview
 from indi_allsky.meteor_observation import build_meteor_observation_id
+from indi_allsky.meteor_observation import build_meteor_review_id
 from indi_allsky.meteor_observation import default_meteor_observation_dir
 
 
@@ -28,6 +31,21 @@ def _meteor_observation(**overrides):
     }
     kwargs.update(overrides)
     return MeteorObservation(**kwargs)
+
+
+def _meteor_review(**overrides):
+    kwargs = {
+        'meteor_id': 'meteor-abc123',
+        'review_actor': 'automatic_policy',
+        'review_timestamp': '2026-06-25T22:20:00+00:00',
+        'review_result': 'pending',
+        'confidence': 0.25,
+        'evidence_sources': ['timeline-2026-06-25-0001', 'event-2026-06-25-0001'],
+        'notes': 'shadow assessment only',
+        'created_at': '2026-06-25T22:21:00+00:00',
+    }
+    kwargs.update(overrides)
+    return MeteorReview(**kwargs)
 
 
 def test_meteor_observation_serialization():
@@ -175,6 +193,79 @@ def test_meteor_observation_jsonl_lines_are_valid_and_detector_independent():
             assert 'rms' not in row
 
 
+def test_meteor_review_serialization():
+    row = _meteor_review().to_dict()
+
+    assert row['schema_version'] == METEOR_REVIEW_SCHEMA_VERSION
+    assert row['review_id'].startswith('meteor-review-')
+    assert row['meteor_id'] == 'meteor-abc123'
+    assert row['review_actor'] == 'automatic_policy'
+    assert row['review_timestamp'] == '2026-06-25T22:20:00+00:00'
+    assert row['review_result'] == 'pending'
+    assert row['confidence'] == 0.25
+    assert row['evidence_sources'] == ['timeline-2026-06-25-0001', 'event-2026-06-25-0001']
+    assert row['notes'] == 'shadow assessment only'
+    assert row['created_at'] == '2026-06-25T22:21:00+00:00'
+    json.dumps(row, sort_keys=True)
+
+
+def test_meteor_review_schema_version_is_forced():
+    row = _meteor_review(schema_version='future').to_dict()
+
+    assert row['schema_version'] == 'meteor_review_v1'
+
+
+def test_meteor_review_deterministic_id():
+    review_a = _meteor_review(evidence_sources=['b', 'a'])
+    review_b = _meteor_review(created_at='2026-06-26T00:00:00+00:00', evidence_sources=['a', 'b'])
+
+    assert review_a.review_id == review_b.review_id
+    assert review_a.review_id == build_meteor_review_id(
+        'meteor-abc123',
+        'automatic_policy',
+        '2026-06-25T22:20:00+00:00',
+        'pending',
+        ['a', 'b'],
+    )
+
+
+def test_meteor_review_requires_core_fields():
+    for field_name in (
+            'meteor_id',
+            'review_actor',
+            'review_timestamp',
+            'review_result',
+    ):
+        try:
+            _meteor_review(**{field_name: ''})
+        except ValueError as exc:
+            assert field_name in str(exc)
+        else:
+            raise AssertionError('Expected ValueError for missing {0:s}'.format(field_name))
+
+
+def test_meteor_review_actor_and_result_are_constrained():
+    for field_name, value in (
+            ('review_actor', 'unknown_bot'),
+            ('review_result', 'validated'),
+    ):
+        try:
+            _meteor_review(**{field_name: value})
+        except ValueError as exc:
+            assert field_name in str(exc)
+        else:
+            raise AssertionError('Expected ValueError for invalid {0:s}'.format(field_name))
+
+
+def test_meteor_review_is_not_validation_or_detector_specific():
+    row = _meteor_review().to_dict()
+
+    assert 'validation_state' not in row
+    assert 'rms' not in row
+    assert 'magnitude' not in row
+    assert 'shower' not in row
+
+
 if __name__ == '__main__':
     test_meteor_observation_serialization()
     test_meteor_observation_schema_version_is_forced()
@@ -186,4 +277,10 @@ if __name__ == '__main__':
     test_meteor_observation_jsonl_persistence_appends_multiple_observations()
     test_meteor_observation_default_directory()
     test_meteor_observation_jsonl_lines_are_valid_and_detector_independent()
+    test_meteor_review_serialization()
+    test_meteor_review_schema_version_is_forced()
+    test_meteor_review_deterministic_id()
+    test_meteor_review_requires_core_fields()
+    test_meteor_review_actor_and_result_are_constrained()
+    test_meteor_review_is_not_validation_or_detector_specific()
     print('meteor observation tests OK')

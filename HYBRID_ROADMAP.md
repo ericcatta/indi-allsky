@@ -352,9 +352,19 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - `status`: `shadow`, `validated`, `reviewed`, `ground_truth`;
       - `validation_state`: `unknown`, `automatic`, `human_reviewed`, `ground_truth`;
     - non include ancora magnitude, shower, radiant, velocity, duration, persistent train, orbit o campi RMS-specifici.
+  - MeteorReview domain model:
+    - contratto `MeteorReview` con `schema_version=meteor_review_v1`;
+    - rappresenta l'assessment corrente di una `MeteorObservation`;
+    - non rileva nulla e non valida nulla: review registra valutazione, validation registrera' trust in una fase successiva;
+    - include `review_id`, `meteor_id`, `review_actor`, `review_timestamp`, `review_result`, `confidence`, `evidence_sources`, `notes` e `created_at`;
+    - `review_id` deterministico da meteor, actor, timestamp, result ed evidence sources;
+    - actor ammessi: `automatic_policy`, `human`, `external_detector`, `cross_camera`, `ai_assisted`;
+    - result ammessi: `pending`, `accepted`, `rejected`, `needs_more_evidence`, `ground_truth`;
+    - nessuna UI, RMS, AI, dashboard o integrazione runtime.
 - NEXT:
   - Validare il contratto rispetto ai futuri output RMS prima di implementare l'adapter.
   - Definire il mapping EventClassification/EventTimeline -> MeteorObservation senza collegarlo al runtime.
+  - Definire MeteorValidation come contratto separato da MeteorReview.
 - LATER:
   - RMS adapter verso MeteorObservation.
   - Campi fisici meteor estesi: magnitude, shower, radiant, velocity, persistent train e orbit.
