@@ -18,6 +18,46 @@ The long-term goal is not merely to operate an AllSky camera.
 
 The long-term goal is to build a scientific observatory capable of understanding what happened in the sky during the night.
 
+### 1.1 Relationship to the Broader Hybrid Architecture
+
+Hybrid AllSky as a complete platform transforms sky observations into verifiable knowledge.
+
+The broader conceptual flow is:
+
+```text
+Reality
+  -> Observation
+  -> Evidence
+  -> Knowledge
+```
+
+This document defines only the Event Framework.
+
+The Event Framework lives inside the Evidence layer. It governs evidence that represents possible, suspected, reviewed, or confirmed events.
+
+The name Event Framework remains correct because this document governs the lifecycle of event-related evidence:
+
+- EventCandidate.
+- EventTimeline.
+- EventClassification.
+- EventReview.
+- EventValidation.
+- Event promotion.
+
+The broader Evidence and Knowledge paradigm must not force every project concept into an event.
+
+Future Hybrid AllSky frameworks may manage non-event evidence such as:
+
+- Sky quality.
+- Observatory health.
+- Weather.
+- SQM.
+- Seeing.
+- Environmental statistics.
+- Long-term equipment performance.
+
+Those frameworks may share metadata, provenance, review, and dataset principles with the Event Framework, but they should not be incorrectly modeled as event detectors unless they produce event-like evidence.
+
 ## 2. System Context
 
 Hybrid AllSky is organized into layered responsibilities.
@@ -174,6 +214,21 @@ The default assumption is isolation.
 
 Cross-camera association must be explicit and explainable.
 
+One physical phenomenon may produce multiple camera-specific timelines.
+
+Those timelines must not be silently merged.
+
+Cross-camera association creates a higher-level event relationship that references the source timelines and explains why they are believed to describe the same physical phenomenon.
+
+Association evidence may include:
+
+- Timestamp overlap.
+- Directional or geometric consistency.
+- Similar candidate reasons.
+- Similar environmental context.
+- External detector agreement.
+- Site or node timing metadata.
+
 ### 3.3 Explainability-First
 
 Every decision must be able to answer:
@@ -260,6 +315,18 @@ Suppression, promotion, classification, and rejection must all be represented ex
 
 Silence is not an acceptable decision record.
 
+### 3.11 Autonomous Operation with Optional Human Review
+
+Human review is a first-class capability, but it is not a requirement for normal operation.
+
+The system must be able to operate fully autonomously.
+
+Manual review enriches trust, improves ground truth, and strengthens datasets, but autonomous validation policies may promote events when evidence is strong enough and the configured site/profile policy allows it.
+
+Manual review is required only for high-risk promotion, benchmark dataset inclusion, disputed or ambiguous evidence, or cases where the configured policy explicitly requires human approval.
+
+Automated validation must remain explainable and auditable.
+
 ## 4. Event Lifecycle
 
 The canonical lifecycle is:
@@ -272,8 +339,8 @@ Raw Frames
   -> Event Candidate
   -> Event Timeline
   -> Event Classification
-  -> Event Review
-  -> Event Validation
+  -> Optional Event Review
+  -> Validation Gate
   -> Promotion Pipeline
   -> Runtime Detector
   -> Historical Dataset
@@ -422,6 +489,8 @@ Validation state may be manual, automated, or hybrid.
 
 Validation is required before an event becomes part of a trusted historical dataset.
 
+Validation may be satisfied by a human reviewer, a deterministic validation policy, external detector agreement, cross-camera agreement, high-confidence rule-based evidence, or a configured site/profile policy.
+
 ### 4.10 Promotion Pipeline
 
 Promotion determines whether an algorithm can move toward runtime use.
@@ -459,7 +528,7 @@ Idea
   -> Offline Test
   -> Shadow Mode
   -> Offline Validation
-  -> Manual Review
+  -> Validation Gate
   -> Night Benchmark
   -> Regression Validation
   -> Limited Runtime Enablement
@@ -539,17 +608,30 @@ Required:
 - False positive estimate.
 - Missed event examples if known.
 
-### 5.7 Manual Review
+### 5.7 Validation Gate
 
-Humans review detector outputs.
+The validation gate determines whether detector outputs have enough evidence to move forward.
 
-Required:
+The gate may be satisfied by:
 
-- Reviewable evidence.
+- Human review.
+- Strong deterministic evidence.
+- External detector agreement such as RMS.
+- Cross-camera agreement.
+- High-confidence rule-based evidence.
+- A configured site/profile policy.
+
+Required evidence:
+
+- Reviewable or auditable evidence.
 - Clear reasons.
-- Confidence.
+- Confidence or uncertainty.
 - Frame references.
 - Environmental context.
+- Validation policy used.
+- Actor or component that satisfied the gate.
+
+Human review remains available at this stage, but it is not mandatory for low-risk autonomous operation.
 
 ### 5.8 Night Benchmark
 
@@ -602,6 +684,24 @@ Required:
 - Drift indicators.
 - Version history.
 
+### 5.13 Detector Risk Levels
+
+Promotion requirements become stricter as detector risk increases.
+
+Risk levels:
+
+- `low`: dashboard/report-only outputs with no external action.
+- `medium`: counts, statistics, summaries, trend reports, or internal observatory records.
+- `high`: notifications, public claims, benchmark dataset inclusion, dataset export, or any output likely to be treated as authoritative.
+
+Low-risk detectors may rely on deterministic validation policy and monitoring after sufficient offline and shadow validation.
+
+Medium-risk detectors require stronger regression evidence, night benchmarks, and explicit uncertainty reporting.
+
+High-risk detectors require the strictest validation. This may include human review, external detector agreement, cross-camera agreement, curated benchmark testing, or an explicitly approved site/profile policy.
+
+No detector may silently promote itself to a higher risk level.
+
 ## 6. Event Review Contract
 
 An EventReview must provide enough information for a human or future AI assistant to understand and audit an event.
@@ -643,7 +743,24 @@ Required fields:
 - Review history.
 - Explainability payload.
 
-### 6.1 Review State
+### 6.1 Review Actor Types
+
+Review actors may include:
+
+- `human_reviewer`.
+- `automated_validation_policy`.
+- `deterministic_detector`.
+- `external_detector`, such as RMS.
+- `cross_camera_association`.
+- `ai_assisted_reviewer`.
+
+AI may support review, classification, explanation, and summary.
+
+AI must not silently create ground truth.
+
+AI-generated conclusions must remain explainable, traceable to evidence, and marked with model provenance.
+
+### 6.2 Review State
 
 Allowed review states should include:
 
@@ -654,7 +771,7 @@ Allowed review states should include:
 - `rejected`.
 - `accepted`.
 
-### 6.2 Validation State
+### 6.3 Validation State
 
 Allowed validation states should include:
 
@@ -666,7 +783,7 @@ Allowed validation states should include:
 - `validated_artifact`.
 - `validated_unknown`.
 
-### 6.3 Review History
+### 6.4 Review History
 
 Review history is append-only.
 
@@ -710,7 +827,24 @@ Dataset units should include:
 - Detector run record.
 - Dataset export record.
 
-### 7.2 Validated Events
+### 7.2 Dataset Trust Tiers
+
+Event data should be organized into explicit trust tiers.
+
+Suggested tiers:
+
+- `tier_0_raw_observations`: raw frames and frame metadata without event interpretation.
+- `tier_1_event_hypotheses`: shadow candidates, timelines, and unvalidated classifications.
+- `tier_2_automatically_validated_events`: events promoted by deterministic or configured automated validation policy.
+- `tier_3_human_reviewed_events`: events reviewed by a human actor.
+- `tier_4_ground_truth_events`: events accepted as ground truth with strong provenance and review history.
+- `tier_5_trusted_benchmark_dataset`: curated datasets suitable for regression validation, detector comparison, publication, or training reference.
+
+Higher tiers must preserve links to lower-tier evidence.
+
+Promotion between tiers must be explicit, auditable, and reversible by later review.
+
+### 7.3 Validated Events
 
 Validated events are trusted examples.
 
@@ -724,7 +858,7 @@ They must include:
 - Detector versions.
 - Human review history.
 
-### 7.3 False Positives
+### 7.4 False Positives
 
 False positives are scientifically valuable.
 
@@ -738,7 +872,7 @@ False positive records should include:
 - Environmental context.
 - Correct label if known.
 
-### 7.4 Unknown Events
+### 7.5 Unknown Events
 
 Unknown events must not be discarded.
 
@@ -746,7 +880,7 @@ They may become useful after future detectors improve.
 
 Unknown events should preserve all evidence and review notes.
 
-### 7.5 Dataset Versioning
+### 7.6 Dataset Versioning
 
 Datasets must be versioned.
 
@@ -760,7 +894,7 @@ Dataset version metadata should include:
 - Review policy version.
 - Validation policy version.
 
-### 7.6 AI Dataset Use
+### 7.7 AI Dataset Use
 
 AI training data should be derived only from reviewed or explicitly marked weakly supervised data.
 
@@ -774,11 +908,80 @@ AI datasets must preserve:
 - Environmental context.
 - Detector history.
 
-## 8. Detector Contract
+## 8. Schema and ID Governance
+
+Long-lived scientific datasets require stable identity and schema governance.
+
+Every persisted event object must include a `schema_version`.
+
+Schema versions must change when persisted structure, required fields, field semantics, or validation expectations change.
+
+### 8.1 Stable Identifiers
+
+Stable identifiers should exist for:
+
+- EventCandidate.
+- EventTimeline.
+- EventClassification.
+- EventReview.
+- EventValidation.
+- Detector run.
+- Camera.
+- Profile.
+- Site.
+- Node.
+- Dataset export.
+
+Identifiers must remain stable across offline processing, remote processing, repeated analytics runs, and delayed classification.
+
+### 8.2 Migration Expectations
+
+Historical event datasets may live for years.
+
+Schema migration rules must therefore be explicit.
+
+Migration expectations:
+
+- New readers should tolerate older schema versions when practical.
+- Migration tools should preserve original evidence.
+- Derived fields may be regenerated, but raw evidence must not be overwritten.
+- Deprecated fields should remain readable until a formal migration removes them.
+- Migration actions must be recorded in dataset provenance.
+
+### 8.3 Remote and Offline Provenance
+
+Remote or offline processors must record:
+
+- Source node.
+- Processing node.
+- Input paths or object references.
+- Input timestamps.
+- Processing timestamp.
+- Detector or classifier version.
+- Configuration reference.
+- Compute mode.
+- Processing delay.
+
+Delayed results must be marked as delayed and must not silently replace newer evidence without an explicit update record.
+
+### 8.4 Stale Result Handling
+
+Delayed processors may produce outputs after configuration, schemas, or source data have changed.
+
+Stale results must be detectable.
+
+Stale result records should include:
+
+- Source evidence version.
+- Current evidence version if known.
+- Staleness reason.
+- Whether the result was accepted, ignored, or queued for review.
+
+## 9. Detector Contract
 
 Every detector must conform to the same contract.
 
-### 8.1 Detector Identity
+### 9.1 Detector Identity
 
 Required:
 
@@ -793,7 +996,7 @@ Required:
 - Compute expectations.
 - Supported deployment modes.
 
-### 8.2 Inputs
+### 9.2 Inputs
 
 Detector inputs must be explicit.
 
@@ -813,7 +1016,7 @@ Possible inputs:
 
 The detector must declare which inputs are required, optional, and ignored.
 
-### 8.3 Compute Expectations
+### 9.3 Compute Expectations
 
 Every detector must declare its compute expectations before promotion.
 
@@ -837,7 +1040,7 @@ No event capability should be abandoned merely because it is too heavy for the R
 
 Heavy detectors must instead be designed as optional, asynchronous, offline, remote, or distributed components.
 
-### 8.4 Outputs
+### 9.4 Outputs
 
 Detector outputs must be structured.
 
@@ -851,7 +1054,7 @@ Possible outputs:
 - Diagnostic counters.
 - Failure record.
 
-### 8.5 Confidence
+### 9.5 Confidence
 
 Confidence must be bounded and documented.
 
@@ -864,7 +1067,7 @@ Confidence must explain:
 - Whether confidence is calibrated.
 - Whether confidence is comparable across detectors.
 
-### 8.6 Explainability
+### 9.6 Explainability
 
 Detector explainability must include:
 
@@ -876,7 +1079,7 @@ Detector explainability must include:
 - Suppression reasons.
 - Uncertainty reasons.
 
-### 8.7 Validation
+### 9.7 Validation
 
 Detector validation must include:
 
@@ -887,7 +1090,7 @@ Detector validation must include:
 - Regression corpus.
 - Runtime shadow report.
 
-### 8.8 Promotion
+### 9.8 Promotion
 
 Detector promotion state must be recorded.
 
@@ -898,14 +1101,14 @@ Allowed promotion states:
 - `offline_test`.
 - `shadow`.
 - `offline_validated`.
-- `manual_review`.
+- `validation_gate`.
 - `night_benchmark`.
 - `regression_validated`.
 - `limited_runtime`.
 - `production`.
 - `deprecated`.
 
-### 8.9 Regression
+### 9.9 Regression
 
 Every detector must have regression expectations before production.
 
@@ -918,7 +1121,7 @@ Regression checks should include:
 - Performance cost.
 - Multi-camera isolation.
 
-### 8.10 Versioning
+### 9.10 Versioning
 
 Any change that can alter detector output requires a version change.
 
@@ -931,7 +1134,7 @@ Versioned components:
 - External catalogs.
 - Configuration defaults.
 
-## 9. RMS Integration Contract
+## 10. RMS Integration Contract
 
 RMS is a detector provider, not the Event Framework.
 
@@ -953,7 +1156,7 @@ The framework must not assume RMS is always present.
 
 The framework must not make meteor-specific concepts mandatory for non-meteor detectors.
 
-## 10. AI Contract
+## 11. AI Contract
 
 AI integrates after the Event Framework, not before it.
 
@@ -988,7 +1191,7 @@ AI must not:
 - Promote events without provenance.
 - Override human validation without a recorded decision.
 
-### 10.1 AI Output Requirements
+### 11.1 AI Output Requirements
 
 Every AI output must include:
 
@@ -1001,7 +1204,7 @@ Every AI output must include:
 - Explanation.
 - Review state.
 
-### 10.2 AI and Event Detection
+### 11.2 AI and Event Detection
 
 AI may assist event interpretation.
 
@@ -1009,7 +1212,7 @@ AI is not the primary event detection architecture.
 
 Detection should remain reproducible and explainable through deterministic metadata, detectors, rules, RMS outputs, or reviewed datasets.
 
-## 11. Compute Architecture and Deployment Modes
+## 12. Compute Architecture and Deployment Modes
 
 The Raspberry Pi 5 remains the preferred acquisition-first node.
 
@@ -1019,7 +1222,7 @@ The Event Framework must not assume that all processing runs on the acquisition 
 
 The framework must support capabilities that are too expensive for the Raspberry Pi by making them optional, asynchronous, delayed, offline, remote, or distributed.
 
-### 11.1 Acquisition-First Principle
+### 12.1 Acquisition-First Principle
 
 Acquisition reliability has priority over event intelligence.
 
@@ -1036,7 +1239,7 @@ If compute resources are constrained, event processing must degrade first.
 
 Capture must continue.
 
-### 11.2 Standalone Raspberry Pi Mode
+### 12.2 Standalone Raspberry Pi Mode
 
 Standalone mode is the baseline deployment.
 
@@ -1054,7 +1257,7 @@ Detectors running in this mode must declare that they are suitable for Pi-local 
 
 Heavy detectors may be disabled by default in standalone mode.
 
-### 11.3 Offline Processing Mode
+### 12.3 Offline Processing Mode
 
 Offline mode processes already captured data.
 
@@ -1071,7 +1274,7 @@ Offline processing is appropriate for:
 
 Offline mode must preserve reproducibility by recording input paths, versions, configuration, and timestamps.
 
-### 11.4 Raspberry Pi Plus External Processing Node
+### 12.4 Raspberry Pi Plus External Processing Node
 
 Hybrid deployments may use the Raspberry Pi as the acquisition node and an external machine as the processing node.
 
@@ -1090,7 +1293,7 @@ Event outputs may arrive late.
 
 Delayed results must be marked with processing timestamps and source node identity.
 
-### 11.5 Remote Processing Mode
+### 12.5 Remote Processing Mode
 
 Remote processing may occur on a server or cloud-like host.
 
@@ -1102,7 +1305,7 @@ Remote processing should use explicit transfer, queue, or sync mechanisms with a
 
 Failures must be visible but non-fatal to acquisition.
 
-### 11.6 Distributed Observatory Mode
+### 12.6 Distributed Observatory Mode
 
 Future deployments may include multiple acquisition nodes.
 
@@ -1118,7 +1321,7 @@ Distributed mode must support:
 
 No detector may assume all frames come from one physical system.
 
-### 11.7 Compute Mode Declaration
+### 12.7 Compute Mode Declaration
 
 Every detector must declare supported compute modes.
 
@@ -1133,7 +1336,7 @@ Allowed compute modes:
 
 The declaration must state whether the mode is required, optional, experimental, or unsupported.
 
-### 11.8 Asynchronous Processing
+### 12.8 Asynchronous Processing
 
 Heavy processing should be asynchronous by default.
 
@@ -1147,7 +1350,7 @@ Asynchronous detectors must define:
 - Maximum expected delay.
 - How duplicate work is avoided.
 
-### 11.9 Compute Failure Isolation
+### 12.9 Compute Failure Isolation
 
 Compute failures must not affect acquisition.
 
@@ -1159,7 +1362,7 @@ If heavy processing fails:
 - Diagnostics record the failure.
 - No event evidence is silently discarded.
 
-### 11.10 Capability Preservation
+### 12.10 Capability Preservation
 
 The framework must not reject a future scientific capability because it is too heavy for the Raspberry Pi.
 
@@ -1173,33 +1376,33 @@ Examples:
 - Cross-camera/cross-node correlation: delayed or distributed.
 - Dataset training: offline.
 
-## 12. Operational Modes
+## 13. Operational Modes
 
 The framework supports multiple operational modes.
 
-### 12.1 Offline
+### 13.1 Offline
 
 Offline mode reads historical data and produces diagnostics or outputs without touching runtime.
 
-### 12.2 Shadow
+### 13.2 Shadow
 
 Shadow mode runs near runtime but has no operational effect.
 
-### 12.3 Read-Only
+### 13.3 Read-Only
 
 Read-only mode exposes results in dashboards or reports.
 
-### 12.4 Advisory
+### 13.4 Advisory
 
 Advisory mode may produce recommendations but not execute them.
 
-### 12.5 Operational
+### 13.5 Operational
 
 Operational mode may affect notifications, publishing, or future control loops.
 
 Operational mode requires explicit promotion and monitoring.
 
-## 13. Failure Handling
+## 14. Failure Handling
 
 Event systems must fail closed and isolated.
 
@@ -1219,7 +1422,7 @@ Failures must:
 - Be visible in diagnostics.
 - Preserve partial valid outputs when safe.
 
-## 14. Suppression Architecture
+## 15. Suppression Architecture
 
 Suppression is a first-class decision.
 
@@ -1252,7 +1455,7 @@ Suppression examples:
 
 Suppression analytics are required before production promotion.
 
-## 15. Reproducibility Requirements
+## 16. Reproducibility Requirements
 
 Every event artifact should be reproducible from stored inputs.
 
@@ -1271,7 +1474,7 @@ Minimum reproducibility context:
 
 If a result cannot be reproduced, it must be marked as non-reproducible.
 
-## 16. Audit Requirements
+## 17. Audit Requirements
 
 Every major event artifact must answer:
 
@@ -1286,7 +1489,7 @@ Every major event artifact must answer:
 - Who or what changed it?
 - Which version of the algorithm was used?
 
-## 17. Long-Term Architecture Direction
+## 18. Long-Term Architecture Direction
 
 The Event Framework should evolve toward:
 
@@ -1305,7 +1508,7 @@ The framework must remain conservative.
 
 It must prefer missing a speculative claim over producing an unexplained false certainty.
 
-## 18. Non-Goals
+## 19. Non-Goals
 
 The Event Framework does not:
 
@@ -1321,11 +1524,11 @@ The Event Framework does not:
 - Control exposure.
 - Control gain.
 - Send notifications by default.
-- Replace human review.
+- Replace human review where human review is required by policy.
 
 These capabilities may be implemented by future detectors or modules that comply with this architecture.
 
-## 19. Architectural Summary
+## 20. Architectural Summary
 
 The Event Framework is the layer that turns AllSky observations into auditable scientific knowledge.
 
