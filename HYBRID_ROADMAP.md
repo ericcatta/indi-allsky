@@ -390,9 +390,19 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - include date opzionale, observation count, validated/rejected/ground truth/benchmark count, detector counts, validation state counts e warning malformed solo se presenti;
     - foundation futura per Telegram text summary, CLI output e dashboard text block;
     - non invia messaggi, non scrive file e non assume UI.
+  - Offline EventClassification -> MeteorObservation bridge:
+    - funzione manuale `convert_meteor_classifications_offline(...)`;
+    - legge JSONL `EventClassification` e converte solo righe con `label=meteor_candidate`;
+    - scrive `MeteorObservation` append-only tramite `MeteorObservationWriter`;
+    - usa `event_id` come `source_event_id`, con fallback a `timeline_id`;
+    - usa `features_used.start_timestamp_utc` come `observation_timestamp`, con fallback a `created_at`;
+    - imposta `status=shadow` e `validation_state=unknown`;
+    - tollera file mancanti, righe malformate, label non meteor e campi opzionali mancanti;
+    - non deduplica: esecuzioni ripetute appendono duplicati, come gli altri writer append-only foundation;
+    - non crea `MeteorReview`, `MeteorValidation`, campi scientifici, RMS adapter, AI, dashboard o integrazione runtime.
 - NEXT:
   - Validare il contratto rispetto ai futuri output RMS prima di implementare l'adapter.
-  - Definire il mapping EventClassification/EventTimeline -> MeteorObservation senza collegarlo al runtime.
+  - Validare il bridge offline su file `EventClassification` reali quando esisteranno label `meteor_candidate`.
 - LATER:
   - RMS adapter verso MeteorObservation.
   - Campi fisici meteor estesi: magnitude, shower, radiant, velocity, persistent train e orbit.

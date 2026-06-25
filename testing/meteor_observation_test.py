@@ -18,6 +18,7 @@ from indi_allsky.meteor_observation import build_meteor_observation_id
 from indi_allsky.meteor_observation import build_meteor_review_id
 from indi_allsky.meteor_observation import build_meteor_validation_id
 from indi_allsky.meteor_observation import build_meteor_intelligence_offline_report
+from indi_allsky.meteor_observation import convert_meteor_classifications_offline
 from indi_allsky.meteor_observation import default_meteor_observation_dir
 from indi_allsky.meteor_observation import default_meteor_review_dir
 from indi_allsky.meteor_observation import default_meteor_validation_dir
@@ -71,6 +72,26 @@ def _meteor_validation(**overrides):
     }
     kwargs.update(overrides)
     return MeteorValidation(**kwargs)
+
+
+def _event_classification_row(**overrides):
+    row = {
+        'schema_version': 'event_classification_v1',
+        'event_id': 'event-2026-06-25-0001',
+        'timeline_id': 'timeline-2026-06-25-0001',
+        'camera_id': 2,
+        'profile_id': 'asi678mc',
+        'label': 'meteor_candidate',
+        'confidence': 0.73,
+        'status': 'shadow',
+        'method': 'rule_based_v1',
+        'features_used': {
+            'start_timestamp_utc': '2026-06-25T22:15:00+00:00',
+        },
+        'created_at': '2026-06-25T22:16:00+00:00',
+    }
+    row.update(overrides)
+    return row
 
 
 def test_meteor_observation_serialization():
@@ -690,6 +711,146 @@ def test_meteor_intelligence_text_summary_validation_state_counts_when_present()
     assert 'By validation state: human_validated=2, rejected=1' in summary
 
 
+def test_convert_meteor_classifications_offline_writes_meteor_observation():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        classification_path = Path(tmpdir).joinpath('event_classifications', '2026-06-25.jsonl')
+        output_dir = Path(tmpdir).joinpath('meteor_observations')
+        classification_path.parent.mkdir(parents=True)
+        classification_path.write_text(json.dumps(_event_classification_row()) + '\n', encoding='utf-8')
+
+        report = convert_meteor_classifications_offline(classification_path, output_dir=output_dir)
+
+        assert report['total_lines'] == 1
+        assert report['meteor_classifications_found'] == 1
+        assert report['observations_written'] == 1
+        assert report['skipped_lines'] == 0
+        assert report['labels_count'] == {'meteor_candidate': 1}
+        assert report['append_only_duplicates_possible'] is True
+
+        observation_path = output_dir.joinpath('2026-06-25.jsonl')
+        rows = [json.loads(line) for line in observation_path.read_text(encoding='utf-8').splitlines()]
+        assert len(rows) == 1
+        row = rows[0]
+        assert row['schema_version'] == METEOR_OBSERVATION_SCHEMA_VERSION
+        assert row['source_event_id'] == 'event-2026-06-25-0001'
+        assert row['source_timeline_id'] == 'timeline-2026-06-25-0001'
+        assert row['detector_id'] == 'event_classification_rule_based_v1'
+        assert row['detector_version'] == 'meteor_bridge_v1'
+        assert row['confidence'] == 0.73
+        assert row['observation_timestamp'] == '2026-06-25T22:15:00+00:00'
+        assert row['camera_id'] == 2
+        assert row['profile_id'] == 'asi678mc'
+        assert row['status'] == 'shadow'
+        assert row['validation_state'] == 'unknown'
+
+
+def test_convert_meteor_classifications_offline_skips_non_meteor_labels():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        classification_path = Path(tmpdir).joinpath('event_classifications', '2026-06-25.jsonl')
+        output_dir = Path(tmpdir).joinpath('meteor_observations')
+        classification_path.parent.mkdir(parents=True)
+        classification_path.write_text(
+            json.dumps(_event_classification_row(label='weather_or_cloud_event')) + '\n',
+            encoding='utf-8',
+        )
+
+        report = convert_meteor_classifications_offline(classification_path, output_dir=output_dir)
+
+        assert report['total_lines'] == 1
+        assert report['meteor_classifications_found'] == 0
+        assert report['observations_written'] == 0
+        assert report['skipped_non_meteor_labels'] == 1
+        assert report['labels_count'] == {'weather_or_cloud_event': 1}
+        assert not output_dir.exists()
+
+
+def test_convert_meteor_classifications_offline_counts_malformed_lines():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        classification_path = Path(tmpdir).joinpath('event_classifications', '2026-06-25.jsonl')
+        output_dir = Path(tmpdir).joinpath('meteor_observations')
+        classification_path.parent.mkdir(parents=True)
+        classification_path.write_text(
+            'not-json\n{0:s}\n'.format(json.dumps(_event_classification_row())),
+            encoding='utf-8',
+        )
+
+        report = convert_meteor_classifications_offline(classification_path, output_dir=output_dir)
+
+        assert report['total_lines'] == 2
+        assert report['malformed_lines'] == 1
+        assert report['observations_written'] == 1
+        assert report['skipped_lines'] == 1
+
+
+def test_convert_meteor_classifications_offline_missing_file_returns_zero_counts():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        classification_path = Path(tmpdir).joinpath('missing_classifications.jsonl')
+        output_dir = Path(tmpdir).joinpath('meteor_observations')
+
+        report = convert_meteor_classifications_offline(classification_path, output_dir=output_dir)
+
+        assert report['total_lines'] == 0
+        assert report['meteor_classifications_found'] == 0
+        assert report['observations_written'] == 0
+        assert report['skipped_lines'] == 0
+        assert report['malformed_lines'] == 0
+        assert report['labels_count'] == {}
+        assert not output_dir.exists()
+
+
+def test_convert_meteor_classifications_offline_repeated_runs_append_duplicates():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        classification_path = Path(tmpdir).joinpath('event_classifications', '2026-06-25.jsonl')
+        output_dir = Path(tmpdir).joinpath('meteor_observations')
+        classification_path.parent.mkdir(parents=True)
+        classification_path.write_text(json.dumps(_event_classification_row()) + '\n', encoding='utf-8')
+
+        convert_meteor_classifications_offline(classification_path, output_dir=output_dir)
+        convert_meteor_classifications_offline(classification_path, output_dir=output_dir)
+
+        rows = output_dir.joinpath('2026-06-25.jsonl').read_text(encoding='utf-8').splitlines()
+        assert len(rows) == 2
+
+
+def test_convert_meteor_classifications_offline_creates_no_reviews_or_validations():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        classification_path = Path(tmpdir).joinpath('event_classifications', '2026-06-25.jsonl')
+        classification_path.parent.mkdir(parents=True)
+        classification_path.write_text(json.dumps(_event_classification_row()) + '\n', encoding='utf-8')
+
+        convert_meteor_classifications_offline(
+            classification_path,
+            output_dir=Path(tmpdir).joinpath('meteor_observations'),
+        )
+
+        assert not Path(tmpdir).joinpath('meteor_reviews').exists()
+        assert not Path(tmpdir).joinpath('meteor_validations').exists()
+
+
+def test_convert_meteor_classifications_offline_persists_no_rms_ai_or_science_fields():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        classification_path = Path(tmpdir).joinpath('event_classifications', '2026-06-25.jsonl')
+        output_dir = Path(tmpdir).joinpath('meteor_observations')
+        classification_path.parent.mkdir(parents=True)
+        classification_path.write_text(json.dumps(_event_classification_row()) + '\n', encoding='utf-8')
+
+        convert_meteor_classifications_offline(classification_path, output_dir=output_dir)
+
+        row = json.loads(output_dir.joinpath('2026-06-25.jsonl').read_text(encoding='utf-8').splitlines()[0])
+        for field_name in (
+                'rms',
+                'ai_model',
+                'magnitude',
+                'shower',
+                'radiant',
+                'velocity',
+                'duration',
+                'persistent_train',
+                'orbit',
+        ):
+            assert field_name not in row
+
+
 if __name__ == '__main__':
     test_meteor_observation_serialization()
     test_meteor_observation_schema_version_is_forced()
@@ -731,4 +892,11 @@ if __name__ == '__main__':
     test_meteor_intelligence_text_summary_malformed_warning_only_when_needed()
     test_meteor_intelligence_text_summary_detector_counts_when_present()
     test_meteor_intelligence_text_summary_validation_state_counts_when_present()
+    test_convert_meteor_classifications_offline_writes_meteor_observation()
+    test_convert_meteor_classifications_offline_skips_non_meteor_labels()
+    test_convert_meteor_classifications_offline_counts_malformed_lines()
+    test_convert_meteor_classifications_offline_missing_file_returns_zero_counts()
+    test_convert_meteor_classifications_offline_repeated_runs_append_duplicates()
+    test_convert_meteor_classifications_offline_creates_no_reviews_or_validations()
+    test_convert_meteor_classifications_offline_persists_no_rms_ai_or_science_fields()
     print('meteor observation tests OK')

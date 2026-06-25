@@ -427,6 +427,62 @@ def render_meteor_intelligence_text_summary(report, date=None):
     return '\n'.join(lines)
 
 
+def convert_meteor_classifications_offline(
+        classification_path,
+        output_dir=None,
+        detector_id='event_classification_rule_based_v1',
+        detector_version='meteor_bridge_v1',
+):
+    """Convert offline meteor_candidate classifications into MeteorObservation JSONL."""
+    classification_rows, malformed_lines = _load_jsonl_rows(classification_path)
+    labels_counter = Counter()
+    meteor_classifications_found = 0
+    observations_written = 0
+    skipped_non_meteor_labels = 0
+    skipped_missing_required = 0
+    written_paths = set()
+
+    writer = None
+    if classification_rows:
+        writer = MeteorObservationWriter(_resolve_meteor_observation_output_dir(classification_path, output_dir))
+
+    for row in classification_rows:
+        label = _string_value(row.get('label')) or 'unknown'
+        labels_counter[label] += 1
+
+        if label != 'meteor_candidate':
+            skipped_non_meteor_labels += 1
+            continue
+
+        meteor_classifications_found += 1
+        observation = _meteor_observation_from_classification(
+            row,
+            detector_id=detector_id,
+            detector_version=detector_version,
+        )
+        if observation is None:
+            skipped_missing_required += 1
+            continue
+
+        written_path = writer.write(observation)
+        written_paths.add(str(written_path))
+        observations_written += 1
+
+    skipped_lines = malformed_lines + skipped_non_meteor_labels + skipped_missing_required
+    return {
+        'total_lines': len(classification_rows) + malformed_lines,
+        'meteor_classifications_found': meteor_classifications_found,
+        'observations_written': observations_written,
+        'skipped_lines': skipped_lines,
+        'skipped_non_meteor_labels': skipped_non_meteor_labels,
+        'skipped_missing_required': skipped_missing_required,
+        'malformed_lines': malformed_lines,
+        'labels_count': dict(sorted(labels_counter.items())),
+        'output_paths': sorted(written_paths),
+        'append_only_duplicates_possible': True,
+    }
+
+
 def _required_string(value, field_name):
     value = _string_value(value)
     if not value:
@@ -467,6 +523,50 @@ def _format_counts(counts):
         for key, value in sorted(counts.items())
         if _string_value(key)
     )
+
+
+def _resolve_meteor_observation_output_dir(classification_path, output_dir):
+    if output_dir:
+        return Path(output_dir)
+
+    classification_path = Path(classification_path)
+    if classification_path.parent.name == 'event_classifications':
+        return classification_path.parent.parent.joinpath('meteor_observations')
+
+    return classification_path.parent.joinpath('meteor_observations')
+
+
+def _meteor_observation_from_classification(row, detector_id, detector_version):
+    features_used = _dict_value(row.get('features_used'))
+    source_timeline_id = _string_value(row.get('timeline_id'))
+    source_event_id = _string_value(row.get('event_id')) or source_timeline_id
+    observation_timestamp = (
+        _string_value(features_used.get('start_timestamp_utc')) or
+        _string_value(row.get('created_at'))
+    )
+    profile_id = _string_value(row.get('profile_id'))
+    camera_id = row.get('camera_id')
+    created_at = _string_value(row.get('created_at')) or observation_timestamp
+
+    if not source_event_id or not source_timeline_id or not observation_timestamp or not profile_id or camera_id is None:
+        return None
+
+    try:
+        return MeteorObservation(
+            source_event_id=source_event_id,
+            source_timeline_id=source_timeline_id,
+            detector_id=detector_id,
+            detector_version=detector_version,
+            confidence=float(row.get('confidence') or 0.0),
+            validation_state='unknown',
+            observation_timestamp=observation_timestamp,
+            camera_id=int(camera_id),
+            profile_id=profile_id,
+            created_at=created_at,
+            status='shadow',
+        )
+    except (TypeError, ValueError):
+        return None
 
 
 def _utc_now():
