@@ -92,7 +92,7 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Config History | A | B | S | Medium | Classic-only, read-only history is useful and low mutation risk. |
+| 1 | Config History | B | B | S | Medium | Read-only list has a Modern view with safe metadata only. |
 | 2 | Config Restore | A | B/D first | S | High | Restore is mutative, but read-only inspection can be ported safely first. |
 | 3 | FITS Image Viewer | A | B | M | High | Important for scientific source workflow; start read-only. |
 | 4 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
@@ -210,7 +210,7 @@ These should not be removed. They are transitional.
 | Quality Scoring | modern | PROTECTED MODERN WORK | Protect | 90% | Quality | Critical | L | Protect | Protected evidence layer. |
 | Metadata Review | modern | PARTIAL MODERN | C | 55% | Metadata analytics | Critical | M | Medium | No row-level browser yet. |
 | Config Editor | modern | PARTIAL MODERN | C | 55% | Ajax config, settings redesign | Critical | M | High | Needs Basic/Advanced/Developer redesign. |
-| Config History | classic | CLASSIC ONLY | A | 0% | Config DB | High | S | High | Good read-only next candidate. |
+| Config History | modern | PARTIAL MODERN | B | 30% | Config DB | High | S | High | Read-only listing in Modern now available. |
 | Config Restore | classic | CLASSIC ONLY | A | 0% | Config history, rollback design | High | S | High | Read-only first; restore action later. |
 | System Info | modern | PARTIAL MODERN | C | 55% | System pages | Medium | M | Medium | Some actions remain legacy-backed. |
 | Logs | shared_api | PARTIAL MODERN | C | 55% | Log APIs | Critical | M | Medium | Download parity needs verification. |
@@ -252,8 +252,8 @@ and the completed Task Queue/User Management work.
 
 ### Phase 1 - Finish Safe Read-only Admin Gaps
 
-1. Config History read-only list.
-2. Config Restore read-only inspection only.
+1. Config Restore read-only restore-context list.
+2. Config History read-only list.
 3. FITS Image Viewer read-only source/review page.
 4. User Management read-only detail page.
 5. Notifications read-only usability.
@@ -314,7 +314,7 @@ and the completed Task Queue/User Management work.
 These can proceed in parallel because they touch different surfaces and can stay
 read-only:
 
-- Config History read-only list.
+- Config Restore read-only inspection only.
 - Notifications read-only usability.
 - FITS/source read-only detail.
 - Logs download/detail parity audit.
