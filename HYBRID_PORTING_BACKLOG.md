@@ -17,7 +17,7 @@ still active and cannot be removed. The real state is mixed:
 - Protected Hybrid work is already Modern-first or shared-framework-first.
 - Several media, system, observatory and storage surfaces have Modern pages.
 - Task Queue has reached read-only list, usability, and detail coverage.
-- User Management has reached read-only list coverage.
+- User Management has reached read-only list and usability coverage.
 - Notifications has reached read-only list coverage.
 - Multiple system tools are still Modern wrappers over Classic/back-end logic.
 - Some important operational pages remain Classic-only.
@@ -92,10 +92,10 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
-| 2 | Notifications | B | C | S | Medium | Read-only list exists; next safe step is usability, not ack actions. |
-| 3 | FITS Image Viewer | B | C | M | High | Read-only FITS metadata inspection is now available; next step is usability only. |
-| 4 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
+| 1 | Notifications | B | C | S | Medium | Read-only list exists; next safe step is usability, not ack actions. |
+| 2 | FITS Image Viewer | B | C | M | High | Read-only FITS metadata inspection is now available; next step is usability only. |
+| 3 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
+| 4 | User Management | C | D only after auth field review | S | High | Read-only usability exists; detail requires careful field/security review. |
 | 5 | Logs | D | stop/E only after contract | S | Medium | Modern read-only log detail exists; no new download/action work without contract review. |
 | 6 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
 | 7 | Config History | B | C | S | Medium | Read-only list exists; next step is usability only. |
@@ -216,7 +216,7 @@ These should not be removed. They are transitional.
 | Logs | shared_api | PARTIAL MODERN | D | 65% | Log APIs | Critical | M | Medium | Read-only detail exists; download parity still uses Classic endpoints. |
 | Charts | shared_api | PARTIAL MODERN | C | 55% | Chart APIs | Medium | M | Medium | Legacy chart options may differ. |
 | Task Queue | modern | PARTIAL MODERN | D | 65% | Task model | High | S | High | List/usability/detail done; mutations blocked. |
-| User Management | modern | PARTIAL MODERN | B | 35% | Auth model | High | S | High | Read-only list done; no mutations. |
+| User Management | modern | PARTIAL MODERN | C | 45% | Auth model | High | S | High | Read-only list usability done; no mutations. |
 | Authentication | shared_api | SHARED ACTIVE | Preserve | 70% | Flask login | High | XS | Preserve | Security-critical shared surface. |
 | Notifications | modern | PARTIAL MODERN | B | 35% | Notification model/forms | High | S | High | Read-only list exists; acknowledgement remains Classic/shared. |
 | Admin Tools | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Medium | M | Medium | Native pages later. |
@@ -252,10 +252,10 @@ and the completed Task Queue/User Management work.
 
 ### Phase 1 - Finish Safe Read-only Admin Gaps
 
-1. User Management read-only detail page.
-2. Notifications read-only usability.
-3. FITS Image Viewer read-only usability improvements.
-4. Config Restore read-only usability/detail inspection.
+1. Notifications read-only usability.
+2. FITS Image Viewer read-only usability improvements.
+3. Config Restore read-only usability/detail inspection.
+4. User Management read-only detail only after auth field review.
 5. Config History read-only usability.
 
 ### Phase 2 - Complete Read-only Details for Existing Modern Pages
@@ -297,10 +297,10 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | User Management | Modern user detail/read-only inspection enhancement | Extends current list without mutations. |
-| 2 | Notifications | Modern read-only usability | Extends existing safe page without acknowledgement actions. |
-| 3 | FITS Image Viewer | Modern read-only FITS/source usability | Aligns with scientific-first direction. |
-| 4 | Config Restore | Modern read-only restore inspection usability | Keeps restore action Classic-only while improving visibility. |
+| 1 | Notifications | Modern read-only usability | Extends existing safe page without acknowledgement actions. |
+| 2 | FITS Image Viewer | Modern read-only FITS/source usability | Aligns with scientific-first direction. |
+| 3 | Config Restore | Modern read-only restore inspection usability | Keeps restore action Classic-only while improving visibility. |
+| 4 | User Management | Modern read-only detail field/security review | Usability exists; detail must remain auth-safe. |
 | 5 | Config History | Modern read-only usability | Existing read-only list can be made easier to scan. |
 | 6 | Logs | Safe action/download contract review only | Detail exists; further work needs explicit backend/download policy. |
 | 7 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
@@ -351,7 +351,7 @@ and several legacy table/action pages.
 ### 2. Which features are further ahead than expected?
 
 - Task Queue: now at Phase D read-only detail.
-- User Management: now at Phase B read-only list.
+- User Management: now at Phase C read-only usability.
 - Media lists: broader Modern coverage than the first plan implied.
 - Camera/profile/settings work: already canonical Modern/protected.
 - Scientific source and detector foundations: architecture is ahead of UI.
@@ -371,12 +371,12 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-User Management read-only detail.
+Notifications read-only usability.
 
 ### 6. Why that feature?
 
-The read-only user list exists. The next safe step is a detail/inspection page
-that does not modify users, passwords, roles, sessions, or auth settings.
+The read-only notification list exists. The next safe step is usability only,
+not acknowledgement, delete, or delivery actions.
 
 ### 7. Which features can be ported in parallel?
 
@@ -400,13 +400,13 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Implement **User Management read-only detail Phase B/C - Modern inspection**.
+Implement **Notifications read-only usability Phase B - Modern filters/scanability**.
 
 Scope:
 
-- Analyze Classic user detail/edit routes and the existing Modern user list.
-- Add only read-only detail if fields are safe.
-- Do not add user mutation, password, role, enable/disable, or auth actions.
+- Analyze Classic notification routes/actions and the existing Modern notification list.
+- Add only read-only filters, counts, labels or scanability improvements.
+- Do not add acknowledgement, delete, send, retry or notification mutation actions.
 - Preserve Classic fallback.
 - Update ownership/inventory.
 

@@ -40,8 +40,39 @@ var camera_id = {{ camera_id }};
             <p class="modern-admin-eyebrow">User Management</p>
             <h2 id="modern-users-title">Accounts</h2>
         </div>
+        <div class="modern-admin-filter-row" aria-label="User filters">
+            <label>
+                Search
+                <input id="modern-users-search" type="search" placeholder="username or name" autocomplete="off">
+            </label>
+            <label>
+                Active
+                <select id="modern-users-active-filter">
+                    <option value="">All</option>
+                    <option value="yes">Active</option>
+                    <option value="no">Inactive</option>
+                </select>
+            </label>
+            <label>
+                Staff
+                <select id="modern-users-staff-filter">
+                    <option value="">All</option>
+                    <option value="yes">Staff</option>
+                    <option value="no">Non-staff</option>
+                </select>
+            </label>
+            <label>
+                Admin
+                <select id="modern-users-admin-filter">
+                    <option value="">All</option>
+                    <option value="yes">Admin</option>
+                    <option value="no">Non-admin</option>
+                </select>
+            </label>
+            <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-users-filter-count">{{ modern_admin_user_count }} shown</span>
+        </div>
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
+            <table class="modern-admin-data-table" id="modern-users-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -56,21 +87,24 @@ var camera_id = {{ camera_id }};
                 </thead>
                 <tbody>
                     {% for user in modern_admin_user_rows %}
-                    <tr>
+                    <tr data-search="{{ (user.username ~ ' ' ~ user.name)|lower }}" data-active="{{ user.active|lower }}" data-staff="{{ user.staff|lower }}" data-admin="{{ user.admin|lower }}">
                         <td>{{ user.id }}</td>
                         <td>{{ user.created }}</td>
                         <td>{{ user.username }}</td>
                         <td>{{ user.name }}</td>
                         <td><span class="modern-admin-status-pill {{ user.active_tone }}">{{ user.active }}</span></td>
-                        <td>{{ user.staff }}</td>
+                        <td><span class="modern-admin-status-pill {{ user.staff_tone }}">{{ user.staff }}</span></td>
                         <td><span class="modern-admin-status-pill {{ user.admin_tone }}">{{ user.admin }}</span></td>
                         <td>{{ user.last_login }}</td>
                     </tr>
                     {% else %}
-                    <tr>
+                    <tr id="modern-users-empty-row">
                         <td colspan="8">No user accounts are available.</td>
                     </tr>
                     {% endfor %}
+                    <tr id="modern-users-filter-empty-row" hidden>
+                        <td colspan="8">No user accounts match the current filters.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -84,4 +118,45 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 </main>
+<script>
+(function() {
+    const searchInput = document.getElementById('modern-users-search');
+    const activeFilter = document.getElementById('modern-users-active-filter');
+    const staffFilter = document.getElementById('modern-users-staff-filter');
+    const adminFilter = document.getElementById('modern-users-admin-filter');
+    const countBadge = document.getElementById('modern-users-filter-count');
+    const rows = Array.from(document.querySelectorAll('#modern-users-table tbody tr[data-search]'));
+    const emptyRow = document.getElementById('modern-users-filter-empty-row');
+
+    function applyFilters() {
+        const searchText = searchInput.value.trim().toLowerCase();
+        const activeValue = activeFilter.value;
+        const staffValue = staffFilter.value;
+        const adminValue = adminFilter.value;
+        let visibleCount = 0;
+
+        rows.forEach(function(row) {
+            const matchesSearch = !searchText || row.dataset.search.includes(searchText);
+            const matchesActive = !activeValue || row.dataset.active === activeValue;
+            const matchesStaff = !staffValue || row.dataset.staff === staffValue;
+            const matchesAdmin = !adminValue || row.dataset.admin === adminValue;
+            const visible = matchesSearch && matchesActive && matchesStaff && matchesAdmin;
+            row.hidden = !visible;
+            if (visible) {
+                visibleCount += 1;
+            }
+        });
+
+        countBadge.textContent = visibleCount + ' shown';
+        if (emptyRow) {
+            emptyRow.hidden = visibleCount !== 0 || rows.length === 0;
+        }
+    }
+
+    [searchInput, activeFilter, staffFilter, adminFilter].forEach(function(control) {
+        control.addEventListener('input', applyFilters);
+        control.addEventListener('change', applyFilters);
+    });
+})();
+</script>
 {% endblock %}

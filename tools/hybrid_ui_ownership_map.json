@@ -2039,10 +2039,11 @@
       ],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "Modern Admin has read-only account inventory; profile/password/role changes remain Classic-only.",
+      "modern_gap": "Modern Admin has read-only account inventory with local usability filters; profile/password/role changes remain Classic-only.",
       "removal_risk": "high",
       "notes": [
-        "Modern page must not show password hashes, API keys, login IPs or raw user data."
+        "Modern page must not show password hashes, API keys, login IPs or raw user data.",
+        "Modern usability filters are client-side and read-only."
       ]
     },
     "authentication": {

@@ -11862,6 +11862,7 @@ class ModernAdminUsersView(ModernAdminContextMixin, TemplateView):
                 'active'     : self.format_user_bool(user.active),
                 'active_tone': 'modern-admin-status-good' if user.active else 'modern-admin-status-muted',
                 'staff'      : self.format_user_bool(user.staff),
+                'staff_tone' : 'modern-admin-status-good' if user.staff else 'modern-admin-status-muted',
                 'admin'      : self.format_user_bool(user.admin),
                 'admin_tone' : 'modern-admin-status-warning' if user.admin else 'modern-admin-status-muted',
                 'created'    : self.format_user_datetime(user.createDate),
