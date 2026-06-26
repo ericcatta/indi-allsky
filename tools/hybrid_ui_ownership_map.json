@@ -71,6 +71,7 @@
         "/modern-admin/cameras/start-indi",
         "/modern-admin/capture/service",
         "/modern-admin/config-restore",
+        "/modern-admin/fits",
         "/modern-admin/media/*",
         "/modern-admin/mode/*",
         "/modern-admin/notifications",
@@ -103,6 +104,7 @@
         "modern_admin/config_restore.html",
         "modern_admin/dark_library.html",
         "modern_admin/file_space_usage.html",
+        "modern_admin/fits.html",
         "modern_admin/image_lag.html",
         "modern_admin/index.html",
         "modern_admin/log.html",
@@ -1235,17 +1237,19 @@
     },
     "fits_image_viewer": {
       "label": "FITS Image Viewer",
-      "status": "CLASSIC ONLY",
-      "owner": "classic",
+      "status": "PARTIAL MODERN",
+      "owner": "modern",
       "porting_priority": "high",
       "routes": [
         "/fitsimageviewer",
         "/ajax/fitsimageviewer",
         "/fits2jpeg",
+        "/modern-admin/fits",
         "/modern-admin/media/fits"
       ],
       "templates": [
         "fitsimageviewer.html",
+        "modern_admin/fits.html",
         "modern_admin/media_list.html"
       ],
       "assets": [],
@@ -1257,10 +1261,10 @@
         "IMAGE_SAVE_FITS*"
       ],
       "protected": true,
-      "modern_gap": "Modern has FITS list, not full viewer/conversion parity.",
+      "modern_gap": "Modern has read-only FITS metadata inspection, not conversion/viewer parity.",
       "removal_risk": "high",
       "notes": [
-        "Do not remove before scientific source review UX exists."
+        "Do not remove Classic before scientific source review UX and conversion/viewer parity are understood."
       ]
     },
     "gallery": {

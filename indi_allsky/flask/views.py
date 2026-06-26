@@ -7425,6 +7425,7 @@ class ModernAdminStorageView(ModernAdminView):
             ('Drives', 'indi_allsky.modern_admin_drive_manager_view'),
             ('Gallery', 'indi_allsky.modern_admin_media_gallery_view'),
             ('Images', 'indi_allsky.modern_admin_media_images_view'),
+            ('FITS Inspection', 'indi_allsky.modern_admin_fits_view'),
             ('FITS Viewer', 'indi_allsky.modern_admin_media_fits_view'),
             ('Generate', 'indi_allsky.modern_admin_generate_view'),
             ('Process FITS', 'indi_allsky.modern_admin_image_processing_view'),
@@ -13874,6 +13875,123 @@ class ModernAdminMediaFitsView(ModernAdminMediaListView):
 
     def get_media_preview_url(self, media_entry):
         return url_for('indi_allsky.fits2jpeg_view', id=media_entry.id)
+
+
+class ModernAdminFitsView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin FITS Inspection'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+    fits_display_limit = 100
+
+    def get_context(self):
+        context = super(ModernAdminFitsView, self).get_context()
+
+        fits_rows = list()
+        try:
+            fits_entries = IndiAllSkyDbFitsImageTable.query\
+                .join(IndiAllSkyDbFitsImageTable.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(IndiAllSkyDbFitsImageTable.createDate.desc())\
+                .limit(self.fits_display_limit)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin FITS inspection rows: %s', str(e))
+            fits_entries = list()
+            context['modern_admin_fits_error'] = 'Unable to load FITS metadata.'
+
+        for entry in fits_entries:
+            fits_rows.append({
+                'id'          : entry.id,
+                'created'     : self.format_fits_datetime(entry.createDate),
+                'camera_id'   : entry.camera_id,
+                'filename'    : self.format_fits_filename(entry.filename),
+                'file_type'   : self.format_fits_file_type(entry.filename),
+                'dimensions'  : self.format_fits_dimensions(entry.width, entry.height),
+                'exposure'    : self.format_fits_number(entry.exposure, suffix='s'),
+                'gain'        : self.format_fits_number(entry.gain),
+                'binmode'     : entry.binmode if entry.binmode is not None else 'Unknown',
+                'file_size'   : self.format_file_size(entry.fileSize),
+                'timeofday'   : 'Night' if entry.night else 'Day',
+                'uploaded'    : 'Yes' if bool(entry.uploaded) else 'No',
+                'source'      : self.format_fits_source(entry),
+            })
+
+        context['modern_admin_fits_rows'] = fits_rows
+        context['modern_admin_fits_count'] = len(fits_rows)
+        context['modern_admin_fits_display_limit'] = self.fits_display_limit
+        context['modern_admin_fits_with_dimensions_count'] = len([
+            row for row in fits_rows if row['dimensions'] != 'Unknown'
+        ])
+
+        return context
+
+
+    def format_fits_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+    def format_fits_filename(self, value):
+        if not value:
+            return 'Unknown'
+        return Path(str(value)).name
+
+
+    def format_fits_file_type(self, value):
+        filename = self.format_fits_filename(value).lower()
+        if filename.endswith('.fits.gz') or filename.endswith('.fit.gz'):
+            return 'FITS compressed'
+        if filename.endswith('.fits') or filename.endswith('.fit'):
+            return 'FITS'
+        return 'Unknown'
+
+
+    def format_fits_dimensions(self, width, height):
+        if width and height:
+            return '{0:d} x {1:d}'.format(int(width), int(height))
+        return 'Unknown'
+
+
+    def format_fits_number(self, value, suffix=''):
+        if value is None:
+            return 'Unknown'
+        try:
+            number = '{0:.3f}'.format(float(value)).rstrip('0').rstrip('.')
+            return '{0:s}{1:s}'.format(number, suffix)
+        except (TypeError, ValueError):
+            return str(value)
+
+
+    def format_file_size(self, value):
+        if value is None:
+            return 'Unknown'
+
+        try:
+            size = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+
+        units = ('B', 'KB', 'MB', 'GB', 'TB')
+        unit_index = 0
+        while size >= 1024.0 and unit_index < len(units) - 1:
+            size /= 1024.0
+            unit_index += 1
+
+        if unit_index == 0:
+            return '{0:d} {1:s}'.format(int(size), units[unit_index])
+        return '{0:.1f} {1:s}'.format(size, units[unit_index])
+
+
+    def format_fits_source(self, entry):
+        if entry.remote_url:
+            return 'Remote URL recorded'
+        if entry.s3_key:
+            return 'S3 key recorded'
+        return 'Local DB entry'
 
 
 class LongTermKeogramView(TemplateView):
@@ -20632,6 +20750,7 @@ bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAd
 bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/fits', view_func=ModernAdminFitsView.as_view('modern_admin_fits_view', template_name='modern_admin/fits.html'))
 
 bp_allsky.add_url_rule('/view_image', view_func=TimelapseImageView.as_view('timelapse_image_view', template_name='view_image.html'))
 bp_allsky.add_url_rule('/view_panorama', view_func=PanoramaImageView.as_view('panorama_image_view', template_name='view_image.html'))

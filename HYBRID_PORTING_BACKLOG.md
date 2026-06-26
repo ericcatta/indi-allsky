@@ -94,7 +94,7 @@ read-only first.
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Config History | B | B | S | Medium | Read-only list has a Modern view with safe metadata only. |
 | 2 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
-| 3 | FITS Image Viewer | A | B | M | High | Important for scientific source workflow; start read-only. |
+| 3 | FITS Image Viewer | B | C | M | High | Read-only FITS metadata inspection is now available; next step is usability only. |
 | 4 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
 | 5 | Notifications | B | C | S | Medium | Read-only list exists; next safe step is usability, not ack actions. |
 | 6 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
@@ -186,7 +186,7 @@ These should not be removed. They are transitional.
 | Camera Simulator | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Low | L | Low | Low-risk but low-value. |
 | Image Lag | modern | PARTIAL MODERN | C | 55% | Camera pages | Medium | M | Medium | Modern page exists; semantics need validation. |
 | Image Viewer | modern | PARTIAL MODERN | C | 55% | Media list | Medium | M | Medium | Advanced actions/exclude remain unclear. |
-| FITS Image Viewer | classic | CLASSIC ONLY | A | 0% | Scientific source layer | High | M | High | Important Classic-only scientific/review surface. |
+| FITS Image Viewer | modern | PARTIAL MODERN | B | 30% | Scientific source layer | High | M | High | Read-only Modern FITS metadata inspection exists; conversion/viewer parity remains Classic-only. |
 | Gallery | modern | PARTIAL MODERN | C | 55% | Media list | Medium | M | Medium | Modern gallery exists; PhotoSwipe parity unknown. |
 | Panorama | public | SHARED LEGACY | Preserve | 70% | Public endpoints | Medium | M | Medium | Preserve public/latest behavior. |
 | Raw Viewer | public | SHARED LEGACY | Preserve | 70% | Raw/source files | Critical | M | Medium | Needs source review, but public routes preserved. |
@@ -254,7 +254,7 @@ and the completed Task Queue/User Management work.
 
 1. Config Restore read-only restore-context list.
 2. Config History read-only list.
-3. FITS Image Viewer read-only source/review page.
+3. FITS Image Viewer read-only usability improvements.
 4. User Management read-only detail page.
 5. Notifications read-only usability.
 
@@ -299,7 +299,7 @@ and the completed Task Queue/User Management work.
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
 | 1 | Config History | Modern read-only list | Classic-only and useful for configuration safety. |
-| 2 | FITS Image Viewer | Modern read-only FITS/source detail | Aligns with scientific-first direction. |
+| 2 | FITS Image Viewer | Modern read-only FITS/source usability | Aligns with scientific-first direction. |
 | 3 | User Management | Modern user detail/read-only inspection enhancement | Extends current list without mutations. |
 | 4 | User Management | Modern read-only user detail | Extends existing safe page without auth mutation. |
 | 5 | Notifications | Modern read-only usability | Extends existing safe page without acknowledgement actions. |
