@@ -12039,6 +12039,55 @@ class ModernAdminConfigRestoreView(ModernAdminContextMixin, TemplateView):
         return summary, size_display
 
 
+class ModernAdminConfigRestoreDetailView(ModernAdminConfigRestoreView):
+    page_title = 'Modern Admin Config Restore Detail'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+
+    def dispatch_request(self, config_id):
+        self.config_id = config_id
+        return super(ModernAdminConfigRestoreDetailView, self).dispatch_request()
+
+
+    def get_context(self):
+        context = super(ModernAdminConfigRestoreView, self).get_context()
+
+        try:
+            entry = IndiAllSkyDbConfigTable.query\
+                .filter(IndiAllSkyDbConfigTable.id == self.config_id)\
+                .one()
+        except NoResultFound:
+            abort(404)
+
+        user_row = getattr(entry, 'user', None)
+        entry_data = entry.data if isinstance(entry.data, dict) else {}
+        summary, data_size = self.summarize_config_data(entry_data)
+        has_payload = bool(entry_data)
+        restore_state = 'Unavailable'
+
+        if has_payload and summary != 'Non-dict payload':
+            restore_state = 'Likely restore candidate'
+
+        context['modern_admin_config_restore_detail'] = {
+            'id'            : entry.id,
+            'created'       : self.format_config_datetime(entry.createDate),
+            'user'          : user_row.username if user_row else 'Deleted user',
+            'user_id'       : user_row.id if user_row else 'N/A',
+            'level'         : entry.level or 'Unknown',
+            'encrypted'     : 'Yes' if bool(entry.encrypted) else 'No',
+            'note'          : entry.note or 'No note',
+            'summary'       : summary,
+            'data_size'     : data_size,
+            'restore_state' : restore_state,
+        }
+        context['modern_admin_config_restore_warning'] = (
+            'Read-only metadata inspection only. Raw config payload and restore actions are intentionally hidden.'
+        )
+
+        return context
+
+
 class ConfigListView(TemplateView):
     page_title = 'Config History'
     decorators = [login_required]
@@ -20959,6 +21008,7 @@ bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdmi
 bp_allsky.add_url_rule('/modern-admin/users', view_func=ModernAdminUsersView.as_view('modern_admin_users_view', template_name='modern_admin/users.html'))
 bp_allsky.add_url_rule('/modern-admin/config-history', view_func=ModernAdminConfigHistoryView.as_view('modern_admin_config_history_view', template_name='modern_admin/config_history.html'))
 bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
+bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/notifications', view_func=ModernAdminNotificationsView.as_view('modern_admin_notifications_view', template_name='modern_admin/notifications.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))

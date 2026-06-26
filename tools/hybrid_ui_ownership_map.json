@@ -1887,17 +1887,19 @@
       "routes": [
         "/config/restore",
         "/ajax/config/restore",
-        "/modern-admin/config-restore"
+        "/modern-admin/config-restore",
+        "/modern-admin/config-restore/*"
       ],
       "templates": [
         "config_restore.html",
-        "modern_admin/config_restore.html"
+        "modern_admin/config_restore.html",
+        "modern_admin/config_restore_detail.html"
       ],
       "assets": [],
       "apis": [],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "Modern read-only inspection with local usability filters exists; restore action still Classic-only.",
+      "modern_gap": "Modern read-only inspection with local usability filters and metadata-only detail exists; restore action still Classic-only.",
       "removal_risk": "high",
       "notes": [
         "Modern page must not call /ajax/config/restore, expose raw config payload, download config data, or mutate active configuration."

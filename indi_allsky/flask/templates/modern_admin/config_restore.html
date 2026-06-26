@@ -91,6 +91,7 @@ var camera_id = {{ camera_id }};
                         <th>Payload Size</th>
                         <th>Restore status</th>
                         <th>Note</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,14 +107,15 @@ var camera_id = {{ camera_id }};
                         <td>{{ config.data_size }}</td>
                         <td>{{ config.restore_state }}</td>
                         <td>{{ config.note }}</td>
+                        <td><a href="{{ url_for('indi_allsky.modern_admin_config_restore_detail_view', config_id=config.id) }}">Details</a></td>
                     </tr>
                     {% else %}
                     <tr id="modern-config-restore-empty-row">
-                        <td colspan="9">No config entries are available for inspection.</td>
+                        <td colspan="11">No config entries are available for inspection.</td>
                     </tr>
                     {% endfor %}
                     <tr id="modern-config-restore-filter-empty-row" hidden>
-                        <td colspan="9">No config restore inspection rows match the current filters.</td>
+                        <td colspan="11">No config restore inspection rows match the current filters.</td>
                     </tr>
                 </tbody>
             </table>
