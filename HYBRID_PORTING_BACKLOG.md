@@ -93,7 +93,7 @@ read-only first.
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Config History | B | B | S | Medium | Read-only list has a Modern view with safe metadata only. |
-| 2 | Config Restore | A | B/D first | S | High | Restore is mutative, but read-only inspection can be ported safely first. |
+| 2 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
 | 3 | FITS Image Viewer | A | B | M | High | Important for scientific source workflow; start read-only. |
 | 4 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
 | 5 | Notifications | B | C | S | Medium | Read-only list exists; next safe step is usability, not ack actions. |
@@ -211,7 +211,7 @@ These should not be removed. They are transitional.
 | Metadata Review | modern | PARTIAL MODERN | C | 55% | Metadata analytics | Critical | M | Medium | No row-level browser yet. |
 | Config Editor | modern | PARTIAL MODERN | C | 55% | Ajax config, settings redesign | Critical | M | High | Needs Basic/Advanced/Developer redesign. |
 | Config History | modern | PARTIAL MODERN | B | 30% | Config DB | High | S | High | Read-only listing in Modern now available. |
-| Config Restore | classic | CLASSIC ONLY | A | 0% | Config history, rollback design | High | S | High | Read-only first; restore action later. |
+| Config Restore | modern | PARTIAL MODERN | B | 30% | Config history, rollback design | High | S | High | Read-only inspection exists in Modern; restore action still Classic-only. |
 | System Info | modern | PARTIAL MODERN | C | 55% | System pages | Medium | M | Medium | Some actions remain legacy-backed. |
 | Logs | shared_api | PARTIAL MODERN | C | 55% | Log APIs | Critical | M | Medium | Download parity needs verification. |
 | Charts | shared_api | PARTIAL MODERN | C | 55% | Chart APIs | Medium | M | Medium | Legacy chart options may differ. |
@@ -299,8 +299,8 @@ and the completed Task Queue/User Management work.
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
 | 1 | Config History | Modern read-only list | Classic-only and useful for configuration safety. |
-| 2 | Config Restore | Modern read-only restore-detail page | Important, but mutation must wait. |
-| 3 | FITS Image Viewer | Modern read-only FITS/source detail | Aligns with scientific-first direction. |
+| 2 | FITS Image Viewer | Modern read-only FITS/source detail | Aligns with scientific-first direction. |
+| 3 | User Management | Modern user detail/read-only inspection enhancement | Extends current list without mutations. |
 | 4 | User Management | Modern read-only user detail | Extends existing safe page without auth mutation. |
 | 5 | Notifications | Modern read-only usability | Extends existing safe page without acknowledgement actions. |
 | 6 | Logs | Modern download/detail parity audit/fix | Low risk, useful operational parity. |

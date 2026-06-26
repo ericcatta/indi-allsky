@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-config-restore-title">
+    {% set modern_admin_header_label = 'Config Restore' %}
+    {% set modern_admin_heading = 'Config Restore' %}
+    {% set modern_admin_title_id = 'modern-admin-config-restore-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Config restore summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Recent entries</div>
+            <h3>{{ modern_admin_config_restore_count }} / {{ modern_admin_config_restore_display_limit }}</h3>
+            <p>Showing recent snapshots from configuration history.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Likely restore candidates</div>
+            <h3>{{ modern_admin_config_restore_likely_count }}</h3>
+            <p>Rows with readable snapshot data.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Password entries</div>
+            <h3>{{ modern_admin_config_restore_encrypted_count }}</h3>
+            <p>Rows saved with encrypted values.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="modern-config-restore-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Config Restore</p>
+            <h2 id="modern-config-restore-title">Inspection candidates</h2>
+        </div>
+
+        <p class="modern-admin-note">{{ modern_admin_config_restore_warning }}</p>
+
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User ID</th>
+                        <th>Created</th>
+                        <th>User</th>
+                        <th>Type/Level</th>
+                        <th>Encrypted</th>
+                        <th>Summary</th>
+                        <th>Payload Size</th>
+                        <th>Restore status</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for config in modern_admin_config_restore_rows %}
+                    <tr>
+                        <td>{{ config.id }}</td>
+                        <td>{{ config.user_id }}</td>
+                        <td>{{ config.created }}</td>
+                        <td>{{ config.user }}</td>
+                        <td>{{ config.level }}</td>
+                        <td>{{ config.encrypted }}</td>
+                        <td>{{ config.summary }}</td>
+                        <td>{{ config.data_size }}</td>
+                        <td>{{ config.restore_state }}</td>
+                        <td>{{ config.note }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9">No config entries are available for inspection.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <section class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.config_list_view') }}">Open Classic Config History</a>
+            <a href="{{ url_for('indi_allsky.config_restore_view') }}">Open Classic Config Restore</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_config_history_view') }}">Open Modern Config History</a>
+        </section>
+
+        <p class="modern-admin-note">Raw config payload is intentionally hidden to avoid exposing secrets. Restore actions remain available only in Classic UI.</p>
+    </section>
+</main>
+{% endblock %}

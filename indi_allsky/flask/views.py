@@ -7564,6 +7564,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('Camera Settings', 'indi_allsky.modern_admin_camera_settings_view'),
             ('Config', 'indi_allsky.modern_admin_config_view'),
             ('Config History', 'indi_allsky.modern_admin_config_history_view'),
+            ('Config Restore (read-only)', 'indi_allsky.modern_admin_config_restore_view'),
             ('Network', 'indi_allsky.modern_admin_network_view'),
             ('GPIO Control', 'indi_allsky.modern_admin_manual_gpio_view'),
             ('Updates', 'indi_allsky.modern_admin_updates_view'),
@@ -11924,6 +11925,84 @@ class ModernAdminConfigHistoryView(ModernAdminContextMixin, TemplateView):
         context['modern_admin_config_history_encrypted_count'] = len([
             row for row in config_rows if row['encrypted'] == 'Yes'
         ])
+
+        return context
+
+
+    def format_config_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+    def summarize_config_data(self, data):
+        if not isinstance(data, dict):
+            if data is None:
+                return 'No config snapshot', 'N/A'
+            return 'Non-dict payload', 'N/A'
+
+        try:
+            size_bytes = len(json.dumps(data, default=str).encode('utf-8'))
+            size_display = '{:.1f} KB'.format(size_bytes / 1024.0)
+        except (TypeError, ValueError):
+            size_display = 'Unavailable'
+
+        summary = 'Keys: {0:d}'.format(len(data))
+        return summary, size_display
+
+
+class ModernAdminConfigRestoreView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Config Restore'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    config_display_limit = 25
+
+    def get_context(self):
+        context = super(ModernAdminConfigRestoreView, self).get_context()
+
+        restore_rows = list()
+        config_list = IndiAllSkyDbConfigTable.query\
+            .order_by(IndiAllSkyDbConfigTable.createDate.desc())\
+            .limit(self.config_display_limit)
+
+        for entry in config_list:
+            user_row = getattr(entry, 'user', None)
+            entry_data = entry.data if isinstance(entry.data, dict) else {}
+            summary, data_size = self.summarize_config_data(entry_data)
+            has_payload = bool(entry_data)
+            restore_state = 'Unavailable'
+
+            if has_payload and summary != 'Non-dict payload':
+                restore_state = 'Likely restore candidate'
+
+            restore_rows.append({
+                'id'            : entry.id,
+                'created'       : self.format_config_datetime(entry.createDate),
+                'user'          : user_row.username if user_row else 'Deleted user',
+                'user_id'       : user_row.id if user_row else 'N/A',
+                'level'         : entry.level or 'Unknown',
+                'encrypted'     : 'Yes' if bool(entry.encrypted) else 'No',
+                'note'          : entry.note or 'No note',
+                'summary'       : summary,
+                'data_size'     : data_size,
+                'restore_state' : restore_state,
+            })
+
+        context['modern_admin_config_restore_rows'] = restore_rows
+        context['modern_admin_config_restore_count'] = len(restore_rows)
+        context['modern_admin_config_restore_display_limit'] = self.config_display_limit
+        context['modern_admin_config_restore_likely_count'] = len([
+            row for row in restore_rows if row['restore_state'] == 'Likely restore candidate'
+        ])
+        context['modern_admin_config_restore_encrypted_count'] = len([
+            row for row in restore_rows if row['encrypted'] == 'Yes'
+        ])
+        context['modern_admin_config_restore_warning'] = (
+            'Read-only inspection only. Actual restore flow remains in Classic UI.'
+        )
 
         return context
 
@@ -20606,6 +20685,7 @@ bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView
 bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdminTaskDetailView.as_view('modern_admin_task_detail_view', template_name='modern_admin/task_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/users', view_func=ModernAdminUsersView.as_view('modern_admin_users_view', template_name='modern_admin/users.html'))
 bp_allsky.add_url_rule('/modern-admin/config-history', view_func=ModernAdminConfigHistoryView.as_view('modern_admin_config_history_view', template_name='modern_admin/config_history.html'))
+bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
 bp_allsky.add_url_rule('/modern-admin/notifications', view_func=ModernAdminNotificationsView.as_view('modern_admin_notifications_view', template_name='modern_admin/notifications.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))

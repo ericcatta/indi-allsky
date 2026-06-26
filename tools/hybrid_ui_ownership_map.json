@@ -70,8 +70,10 @@
         "/modern-admin/cameras/mask-base",
         "/modern-admin/cameras/start-indi",
         "/modern-admin/capture/service",
+        "/modern-admin/config-restore",
         "/modern-admin/media/*",
         "/modern-admin/mode/*",
+        "/modern-admin/notifications",
         "/modern-admin/observatory",
         "/modern-admin/observatory/*",
         "/modern-admin/settings",
@@ -86,10 +88,9 @@
         "/modern-admin/system/support",
         "/modern-admin/tasks",
         "/modern-admin/tasks/*",
-        "/modern-admin/notifications",
         "/modern-admin/updates",
-        "/modern-admin/users",
-        "/modern-admin/uploads"
+        "/modern-admin/uploads",
+        "/modern-admin/users"
       ],
       "templates": [
         "modern_admin/_shell_header.html",
@@ -99,6 +100,7 @@
         "modern_admin/camera_info.html",
         "modern_admin/cameras.html",
         "modern_admin/charts.html",
+        "modern_admin/config_restore.html",
         "modern_admin/dark_library.html",
         "modern_admin/file_space_usage.html",
         "modern_admin/image_lag.html",
@@ -107,12 +109,13 @@
         "modern_admin/longterm_keogram.html",
         "modern_admin/mask.html",
         "modern_admin/media_list.html",
+        "modern_admin/notifications.html",
         "modern_admin/observatory.html",
         "modern_admin/observatory_status.html",
         "modern_admin/realtime_keogram.html",
         "modern_admin/sensor_panel.html",
-        "modern_admin/settings_capture.html",
         "modern_admin/settings_cameras.html",
+        "modern_admin/settings_capture.html",
         "modern_admin/settings_full.html",
         "modern_admin/settings_inventory.html",
         "modern_admin/storage.html",
@@ -121,10 +124,9 @@
         "modern_admin/system_info.html",
         "modern_admin/task_detail.html",
         "modern_admin/tasks.html",
-        "modern_admin/notifications.html",
         "modern_admin/updates.html",
-        "modern_admin/users.html",
         "modern_admin/uploads.html",
+        "modern_admin/users.html",
         "modern_admin/virtualsky.html"
       ],
       "assets": [
@@ -317,180 +319,335 @@
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/cameras", "/modern-admin/cameras", "/modern-admin/settings/cameras"],
-      "templates": ["cameras.html", "modern_admin/camera_add.html", "modern_admin/cameras.html", "modern_admin/settings_cameras.html"],
-      "assets": ["modern_admin/modern-admin.css"],
-      "apis": ["/modern-admin/cameras/detect-indi", "/modern-admin/cameras/start-indi"],
-      "config_keys": ["MULTI_CAMERA", "MULTI_CAMERA_CAPTURE_ENABLE"],
+      "routes": [
+        "/cameras",
+        "/modern-admin/cameras",
+        "/modern-admin/settings/cameras"
+      ],
+      "templates": [
+        "cameras.html",
+        "modern_admin/camera_add.html",
+        "modern_admin/cameras.html",
+        "modern_admin/settings_cameras.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "/modern-admin/cameras/detect-indi",
+        "/modern-admin/cameras/start-indi"
+      ],
+      "config_keys": [
+        "MULTI_CAMERA",
+        "MULTI_CAMERA_CAPTURE_ENABLE"
+      ],
       "protected": true,
       "modern_gap": "Some wrapped legacy tools may still assume single-camera behavior.",
       "removal_risk": "critical",
-      "notes": ["Do not flatten camera_id/profile_id semantics."]
+      "notes": [
+        "Do not flatten camera_id/profile_id semantics."
+      ]
     },
     "camera_profiles": {
       "label": "Camera Profiles",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/cameras", "/modern-admin/cameras", "/modern-admin/settings/cameras"],
-      "templates": ["cameras.html", "modern_admin/cameras.html", "modern_admin/settings_cameras.html"],
-      "assets": ["modern_admin/modern-admin.css"],
+      "routes": [
+        "/cameras",
+        "/modern-admin/cameras",
+        "/modern-admin/settings/cameras"
+      ],
+      "templates": [
+        "cameras.html",
+        "modern_admin/cameras.html",
+        "modern_admin/settings_cameras.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
       "apis": [],
-      "config_keys": ["MULTI_CAMERA.profiles"],
+      "config_keys": [
+        "MULTI_CAMERA.profiles"
+      ],
       "protected": true,
       "modern_gap": "Needs clearer ownership labels for profile-scoped settings.",
       "removal_risk": "critical",
-      "notes": ["Modern Camera Settings is canonical for profile-owned camera fields."]
+      "notes": [
+        "Modern Camera Settings is canonical for profile-owned camera fields."
+      ]
     },
     "profile_first_configuration": {
       "label": "Profile-first configuration",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/settings", "/modern-admin/settings/cameras", "/modern-admin/settings/capture", "/modern-admin/settings/full"],
-      "templates": ["modern_admin/settings_inventory.html", "modern_admin/settings_cameras.html", "modern_admin/settings_capture.html", "modern_admin/settings_full.html"],
-      "assets": ["modern_admin/modern-admin.css"],
-      "apis": ["/ajax/config"],
-      "config_keys": ["MULTI_CAMERA.profiles", "TARGET_ADU_*", "AUTO_GAIN_*", "AUTO_EXPOSURE_*"],
+      "routes": [
+        "/modern-admin/settings",
+        "/modern-admin/settings/cameras",
+        "/modern-admin/settings/capture",
+        "/modern-admin/settings/full"
+      ],
+      "templates": [
+        "modern_admin/settings_inventory.html",
+        "modern_admin/settings_cameras.html",
+        "modern_admin/settings_capture.html",
+        "modern_admin/settings_full.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "/ajax/config"
+      ],
+      "config_keys": [
+        "MULTI_CAMERA.profiles",
+        "TARGET_ADU_*",
+        "AUTO_GAIN_*",
+        "AUTO_EXPOSURE_*"
+      ],
       "protected": true,
       "modern_gap": "Basic/Advanced/Developer UX split is not implemented yet.",
       "removal_risk": "critical",
-      "notes": ["Classic global config must not become canonical over profile values."]
+      "notes": [
+        "Classic global config must not become canonical over profile values."
+      ]
     },
     "auto_exposure": {
       "label": "Auto Exposure",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/settings/cameras", "/adu", "/modern-admin/cameras/adu-history"],
-      "templates": ["modern_admin/settings_cameras.html", "adu.html", "modern_admin/adu_history.html"],
+      "routes": [
+        "/modern-admin/settings/cameras",
+        "/adu",
+        "/modern-admin/cameras/adu-history"
+      ],
+      "templates": [
+        "modern_admin/settings_cameras.html",
+        "adu.html",
+        "modern_admin/adu_history.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["AUTO_EXPOSURE_*", "TARGET_ADU_*", "CCD_EXPOSURE_*"],
+      "config_keys": [
+        "AUTO_EXPOSURE_*",
+        "TARGET_ADU_*",
+        "CCD_EXPOSURE_*"
+      ],
       "protected": true,
       "modern_gap": "Decision/blocker explanation is mostly logs and dashboard context.",
       "removal_risk": "critical",
-      "notes": ["Exposure-first remains binding."]
+      "notes": [
+        "Exposure-first remains binding."
+      ]
     },
     "auto_gain": {
       "label": "Auto Gain",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/settings/cameras"],
-      "templates": ["modern_admin/settings_cameras.html"],
+      "routes": [
+        "/modern-admin/settings/cameras"
+      ],
+      "templates": [
+        "modern_admin/settings_cameras.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["AUTO_GAIN_*", "GAIN_MAX_*", "GAIN_MIN_*"],
+      "config_keys": [
+        "AUTO_GAIN_*",
+        "GAIN_MAX_*",
+        "GAIN_MIN_*"
+      ],
       "protected": true,
       "modern_gap": "Runtime apply/restore behavior needs clear UI explanation.",
       "removal_risk": "critical",
-      "notes": ["Default apply remains disabled unless explicitly configured."]
+      "notes": [
+        "Default apply remains disabled unless explicitly configured."
+      ]
     },
     "hybrid_awb": {
       "label": "Hybrid AWB",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/settings/cameras"],
-      "templates": ["modern_admin/settings_cameras.html"],
+      "routes": [
+        "/modern-admin/settings/cameras"
+      ],
+      "templates": [
+        "modern_admin/settings_cameras.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["AWB_*", "CFA_PATTERN", "DEBAYER_PATTERN"],
+      "config_keys": [
+        "AWB_*",
+        "CFA_PATTERN",
+        "DEBAYER_PATTERN"
+      ],
       "protected": true,
       "modern_gap": "Hardware-specific fields need more explanatory help.",
       "removal_risk": "high",
-      "notes": ["Do not sync CFA/debayer blindly between different cameras."]
+      "notes": [
+        "Do not sync CFA/debayer blindly between different cameras."
+      ]
     },
     "metadata": {
       "label": "Metadata",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin"],
-      "templates": ["modern_admin/index.html"],
-      "assets": ["modern_admin/modern-admin.css"],
+      "routes": [
+        "/modern-admin"
+      ],
+      "templates": [
+        "modern_admin/index.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
       "apis": [],
-      "config_keys": ["FRAME_METADATA_PATH", "FRAME_METADATA_ROTATE_DAILY"],
+      "config_keys": [
+        "FRAME_METADATA_PATH",
+        "FRAME_METADATA_ROTATE_DAILY"
+      ],
       "protected": true,
       "modern_gap": "Metadata source readiness needs clearer UX.",
       "removal_risk": "critical",
-      "notes": ["Daily JSONL metadata is shared infrastructure, not UI-only."]
+      "notes": [
+        "Daily JSONL metadata is shared infrastructure, not UI-only."
+      ]
     },
     "analytics": {
       "label": "Analytics",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin", "/charts", "/modern-admin/observatory/charts"],
-      "templates": ["modern_admin/index.html", "chart.html", "modern_admin/charts.html"],
-      "assets": ["js/chart.umd.js", "modern_admin/modern-admin.css"],
-      "apis": ["/js/charts"],
+      "routes": [
+        "/modern-admin",
+        "/charts",
+        "/modern-admin/observatory/charts"
+      ],
+      "templates": [
+        "modern_admin/index.html",
+        "chart.html",
+        "modern_admin/charts.html"
+      ],
+      "assets": [
+        "js/chart.umd.js",
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "/js/charts"
+      ],
       "config_keys": [],
       "protected": true,
       "modern_gap": "Classic chart options may not be fully ported.",
       "removal_risk": "high",
-      "notes": ["Keep shared chart APIs until parity is proven."]
+      "notes": [
+        "Keep shared chart APIs until parity is proven."
+      ]
     },
     "quality": {
       "label": "Quality",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin"],
-      "templates": ["modern_admin/index.html"],
-      "assets": ["modern_admin/modern-admin.css"],
+      "routes": [
+        "/modern-admin"
+      ],
+      "templates": [
+        "modern_admin/index.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": true,
       "modern_gap": "Quality flags need richer user-facing explanations.",
       "removal_risk": "high",
-      "notes": ["Quality metadata must stay backward compatible with older rows."]
+      "notes": [
+        "Quality metadata must stay backward compatible with older rows."
+      ]
     },
     "environmental_awareness": {
       "label": "Environmental Awareness",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin"],
-      "templates": ["modern_admin/index.html"],
-      "assets": ["modern_admin/modern-admin.css"],
+      "routes": [
+        "/modern-admin"
+      ],
+      "templates": [
+        "modern_admin/index.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": true,
       "modern_gap": "Needs Raspberry field validation and threshold tuning.",
       "removal_risk": "high",
-      "notes": ["Read-only diagnostics; no runtime decisions."]
+      "notes": [
+        "Read-only diagnostics; no runtime decisions."
+      ]
     },
     "event_foundation": {
       "label": "Event Foundation",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin"],
-      "templates": ["modern_admin/index.html"],
-      "assets": ["modern_admin/modern-admin.css"],
+      "routes": [
+        "/modern-admin"
+      ],
+      "templates": [
+        "modern_admin/index.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
       "apis": [],
-      "config_keys": ["EVENT_CANDIDATE_TRIGGERS"],
+      "config_keys": [
+        "EVENT_CANDIDATE_TRIGGERS"
+      ],
       "protected": true,
       "modern_gap": "No review UI and no production detector yet.",
       "removal_risk": "critical",
-      "notes": ["Shadow-only event evidence must not be promoted silently."]
+      "notes": [
+        "Shadow-only event evidence must not be promoted silently."
+      ]
     },
     "scientific_source_layer": {
       "label": "Scientific Source Layer",
       "status": "PROTECTED MODERN WORK",
       "owner": "shared_api",
       "porting_priority": "protect",
-      "routes": ["/fitsimageviewer", "/modern-admin/media/fits"],
-      "templates": ["fitsimageviewer.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/fitsimageviewer",
+        "/modern-admin/media/fits"
+      ],
+      "templates": [
+        "fitsimageviewer.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/fitsimageviewer", "/fits2jpeg"],
-      "config_keys": ["IMAGE_SAVE_FITS", "IMAGE_SAVE_FITS_PERIOD", "IMAGE_EXPORT_RAW"],
+      "apis": [
+        "/ajax/fitsimageviewer",
+        "/fits2jpeg"
+      ],
+      "config_keys": [
+        "IMAGE_SAVE_FITS",
+        "IMAGE_SAVE_FITS_PERIOD",
+        "IMAGE_EXPORT_RAW"
+      ],
       "protected": true,
       "modern_gap": "Native scientific source review UX is not complete.",
       "removal_risk": "critical",
-      "notes": ["Never promote display images to scientific detector input."]
+      "notes": [
+        "Never promote display images to scientific detector input."
+      ]
     },
     "detector_meteor_foundations": {
       "label": "Detector / Meteor foundations",
@@ -505,168 +662,308 @@
       "protected": true,
       "modern_gap": "Detector implementation is blocked pending real outdoor FITS validation.",
       "removal_risk": "critical",
-      "notes": ["Domain contracts are separate from UI and runtime detection."]
+      "notes": [
+        "Domain contracts are separate from UI and runtime detection."
+      ]
     },
     "modern_admin_shell": {
       "label": "Modern Admin shell",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin", "/modern-admin/classic/*", "/modern-admin/mode/*", "/modern-admin/capture/service", "/modern-admin/updates"],
-      "templates": ["modern_admin/index.html", "modern_admin/_shell_header.html", "modern_admin/placeholder.html", "modern_admin/updates.html"],
-      "assets": ["modern_admin/modern-admin.css"],
-      "apis": ["/modern-admin/capture/service", "/modern-admin/mode/*"],
+      "routes": [
+        "/modern-admin",
+        "/modern-admin/classic/*",
+        "/modern-admin/mode/*",
+        "/modern-admin/capture/service",
+        "/modern-admin/updates"
+      ],
+      "templates": [
+        "modern_admin/index.html",
+        "modern_admin/_shell_header.html",
+        "modern_admin/placeholder.html",
+        "modern_admin/updates.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "/modern-admin/capture/service",
+        "/modern-admin/mode/*"
+      ],
       "config_keys": [],
       "protected": true,
       "modern_gap": "Some nav targets are wrappers or placeholders.",
       "removal_risk": "critical",
-      "notes": ["Future admin shell is Modern."]
+      "notes": [
+        "Future admin shell is Modern."
+      ]
     },
     "modern_safe_controls": {
       "label": "Modern safe controls",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern_wrapper",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/storage/drives", "/modern-admin/system/config", "/modern-admin/system/gpio-control", "/modern-admin/system/network", "/modern-admin/tools/*"],
-      "templates": ["modern_admin/safe_controls.html"],
-      "assets": ["modern_admin/modern-admin.css"],
+      "routes": [
+        "/modern-admin/storage/drives",
+        "/modern-admin/system/config",
+        "/modern-admin/system/gpio-control",
+        "/modern-admin/system/network",
+        "/modern-admin/tools/*"
+      ],
+      "templates": [
+        "modern_admin/safe_controls.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": true,
       "modern_gap": "Wrappers are transitional and need native replacements later.",
       "removal_risk": "high",
-      "notes": ["Wrapper means partial parity, not removal readiness."]
+      "notes": [
+        "Wrapper means partial parity, not removal readiness."
+      ]
     },
     "image_capture": {
       "label": "Image Capture",
       "status": "MODERN CANONICAL",
       "owner": "shared_api",
       "porting_priority": "high",
-      "routes": ["/modern-admin/capture/service", "/modern-admin/settings/capture"],
-      "templates": ["modern_admin/settings_capture.html", "modern_admin/_shell_header.html"],
-      "assets": ["modern_admin/modern-admin.css"],
-      "apis": ["/modern-admin/capture/service"],
-      "config_keys": ["CAPTURE_*", "CCD_*"],
+      "routes": [
+        "/modern-admin/capture/service",
+        "/modern-admin/settings/capture"
+      ],
+      "templates": [
+        "modern_admin/settings_capture.html",
+        "modern_admin/_shell_header.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "/modern-admin/capture/service"
+      ],
+      "config_keys": [
+        "CAPTURE_*",
+        "CCD_*"
+      ],
       "protected": true,
       "modern_gap": "Settings ownership is still split across multiple pages.",
       "removal_risk": "high",
-      "notes": ["Do not change capture timing from UI consolidation."]
+      "notes": [
+        "Do not change capture timing from UI consolidation."
+      ]
     },
     "camera_settings": {
       "label": "Camera Settings",
       "status": "MODERN CANONICAL",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/settings/cameras"],
-      "templates": ["modern_admin/settings_cameras.html"],
-      "assets": ["modern_admin/modern-admin.css"],
-      "apis": ["/ajax/config"],
-      "config_keys": ["MULTI_CAMERA.profiles"],
+      "routes": [
+        "/modern-admin/settings/cameras"
+      ],
+      "templates": [
+        "modern_admin/settings_cameras.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "/ajax/config"
+      ],
+      "config_keys": [
+        "MULTI_CAMERA.profiles"
+      ],
       "protected": true,
       "modern_gap": "Needs final Basic/Advanced/Developer organization.",
       "removal_risk": "critical",
-      "notes": ["Save & Sync must preserve hardware identity fields."]
+      "notes": [
+        "Save & Sync must preserve hardware identity fields."
+      ]
     },
     "exposure": {
       "label": "Exposure",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/settings/cameras"],
-      "templates": ["modern_admin/settings_cameras.html"],
+      "routes": [
+        "/modern-admin/settings/cameras"
+      ],
+      "templates": [
+        "modern_admin/settings_cameras.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["CCD_EXPOSURE_*", "AUTO_EXPOSURE_*"],
+      "config_keys": [
+        "CCD_EXPOSURE_*",
+        "AUTO_EXPOSURE_*"
+      ],
       "protected": true,
       "modern_gap": "See Auto Exposure.",
       "removal_risk": "critical",
-      "notes": ["Exposure remains the primary brightness control."]
+      "notes": [
+        "Exposure remains the primary brightness control."
+      ]
     },
     "gain": {
       "label": "Gain",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/settings/cameras"],
-      "templates": ["modern_admin/settings_cameras.html"],
+      "routes": [
+        "/modern-admin/settings/cameras"
+      ],
+      "templates": [
+        "modern_admin/settings_cameras.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["GAIN_*", "AUTO_GAIN_*"],
+      "config_keys": [
+        "GAIN_*",
+        "AUTO_GAIN_*"
+      ],
       "protected": true,
       "modern_gap": "See Auto Gain.",
       "removal_risk": "critical",
-      "notes": ["Gain is last-resort after exposure."]
+      "notes": [
+        "Gain is last-resort after exposure."
+      ]
     },
     "white_balance_awb": {
       "label": "White Balance / AWB",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/settings/cameras"],
-      "templates": ["modern_admin/settings_cameras.html"],
+      "routes": [
+        "/modern-admin/settings/cameras"
+      ],
+      "templates": [
+        "modern_admin/settings_cameras.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["AWB_*", "WB_*"],
+      "config_keys": [
+        "AWB_*",
+        "WB_*"
+      ],
       "protected": true,
       "modern_gap": "Needs final help text.",
       "removal_risk": "high",
-      "notes": ["Hardware-specific."]
+      "notes": [
+        "Hardware-specific."
+      ]
     },
     "image_save": {
       "label": "Image Save",
       "status": "PARTIAL MODERN",
       "owner": "shared_api",
       "porting_priority": "medium",
-      "routes": ["/modern-admin/settings/capture", "/config"],
-      "templates": ["modern_admin/settings_capture.html", "config.html"],
+      "routes": [
+        "/modern-admin/settings/capture",
+        "/config"
+      ],
+      "templates": [
+        "modern_admin/settings_capture.html",
+        "config.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/config"],
-      "config_keys": ["IMAGE_*", "IMAGE_FILE_TYPE", "IMAGE_FOLDER"],
+      "apis": [
+        "/ajax/config"
+      ],
+      "config_keys": [
+        "IMAGE_*",
+        "IMAGE_FILE_TYPE",
+        "IMAGE_FOLDER"
+      ],
       "protected": false,
       "modern_gap": "Display/source/storage modes need clearer UX.",
       "removal_risk": "high",
-      "notes": ["Do not confuse display save with scientific source save."]
+      "notes": [
+        "Do not confuse display save with scientific source save."
+      ]
     },
     "fits_save": {
       "label": "FITS Save",
       "status": "PARTIAL MODERN",
       "owner": "shared_api",
       "porting_priority": "high",
-      "routes": ["/fitsimageviewer", "/modern-admin/media/fits"],
-      "templates": ["fitsimageviewer.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/fitsimageviewer",
+        "/modern-admin/media/fits"
+      ],
+      "templates": [
+        "fitsimageviewer.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/fitsimageviewer", "/fits2jpeg"],
-      "config_keys": ["IMAGE_SAVE_FITS", "IMAGE_SAVE_FITS_PERIOD", "IMAGE_SAVE_FITS_PRE_DARK"],
+      "apis": [
+        "/ajax/fitsimageviewer",
+        "/fits2jpeg"
+      ],
+      "config_keys": [
+        "IMAGE_SAVE_FITS",
+        "IMAGE_SAVE_FITS_PERIOD",
+        "IMAGE_SAVE_FITS_PRE_DARK"
+      ],
       "protected": true,
       "modern_gap": "Scientific source persistence modes are not user-friendly yet.",
       "removal_risk": "critical",
-      "notes": ["FITS paths are detector-grade source candidates."]
+      "notes": [
+        "FITS paths are detector-grade source candidates."
+      ]
     },
     "raw_source_files": {
       "label": "RAW / Source Files",
       "status": "PARTIAL MODERN",
       "owner": "shared_api",
       "porting_priority": "high",
-      "routes": ["/raw*", "/modern-admin/media/fits"],
-      "templates": ["index_img.html", "index_canvas.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/raw*",
+        "/modern-admin/media/fits"
+      ],
+      "templates": [
+        "index_img.html",
+        "index_canvas.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/js/latest_rawimage"],
-      "config_keys": ["IMAGE_EXPORT_RAW", "IMAGE_EXPORT_FOLDER"],
+      "apis": [
+        "/js/latest_rawimage"
+      ],
+      "config_keys": [
+        "IMAGE_EXPORT_RAW",
+        "IMAGE_EXPORT_FOLDER"
+      ],
       "protected": true,
       "modern_gap": "No native source file review workflow yet.",
       "removal_risk": "critical",
-      "notes": ["RAW export remains optional and detector-neutral."]
+      "notes": [
+        "RAW export remains optional and detector-neutral."
+      ]
     },
     "darks": {
       "label": "Darks",
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/darks", "/modern-admin/cameras/dark-library"],
-      "templates": ["darks.html", "modern_admin/dark_library.html"],
-      "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
+      "routes": [
+        "/darks",
+        "/modern-admin/cameras/dark-library"
+      ],
+      "templates": [
+        "darks.html",
+        "modern_admin/dark_library.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js"
+      ],
       "apis": [],
-      "config_keys": ["DARK_*"],
+      "config_keys": [
+        "DARK_*"
+      ],
       "protected": false,
       "modern_gap": "Dark management parity needs runtime validation.",
       "removal_risk": "medium",
@@ -677,26 +974,52 @@
       "status": "NEEDS VERIFICATION",
       "owner": "shared_api",
       "porting_priority": "medium",
-      "routes": ["/processing", "/js/processing", "/modern-admin/tools/process-fits"],
-      "templates": ["imageprocessing.html", "modern_admin/safe_controls.html"],
+      "routes": [
+        "/processing",
+        "/js/processing",
+        "/modern-admin/tools/process-fits"
+      ],
+      "templates": [
+        "imageprocessing.html",
+        "modern_admin/safe_controls.html"
+      ],
       "assets": [],
-      "apis": ["/js/processing"],
-      "config_keys": ["BAD_PIXEL*", "BPM*"],
+      "apis": [
+        "/js/processing"
+      ],
+      "config_keys": [
+        "BAD_PIXEL*",
+        "BPM*"
+      ],
       "protected": false,
       "modern_gap": "Exact UI ownership needs verification.",
       "removal_risk": "high",
-      "notes": ["Backend exists but UI mapping is not fully confirmed."]
+      "notes": [
+        "Backend exists but UI mapping is not fully confirmed."
+      ]
     },
     "defect_maps": {
       "label": "Defect Maps",
       "status": "NEEDS VERIFICATION",
       "owner": "shared_api",
       "porting_priority": "medium",
-      "routes": ["/processing", "/js/processing", "/modern-admin/tools/process-fits"],
-      "templates": ["imageprocessing.html", "modern_admin/safe_controls.html"],
+      "routes": [
+        "/processing",
+        "/js/processing",
+        "/modern-admin/tools/process-fits"
+      ],
+      "templates": [
+        "imageprocessing.html",
+        "modern_admin/safe_controls.html"
+      ],
       "assets": [],
-      "apis": ["/js/processing"],
-      "config_keys": ["DETECT_MASK", "DEFECT*"],
+      "apis": [
+        "/js/processing"
+      ],
+      "config_keys": [
+        "DETECT_MASK",
+        "DEFECT*"
+      ],
       "protected": false,
       "modern_gap": "Needs code/config audit before porting.",
       "removal_risk": "high",
@@ -707,11 +1030,24 @@
       "status": "WRAPPER ONLY",
       "owner": "modern_wrapper",
       "porting_priority": "medium",
-      "routes": ["/camera", "/imagecirclehelper", "/modern-admin/cameras/info", "/modern-admin/tools/image-circle-helper"],
-      "templates": ["cameraLens.html", "imagecirclehelper.html", "modern_admin/camera_info.html", "modern_admin/safe_controls.html"],
+      "routes": [
+        "/camera",
+        "/imagecirclehelper",
+        "/modern-admin/cameras/info",
+        "/modern-admin/tools/image-circle-helper"
+      ],
+      "templates": [
+        "cameraLens.html",
+        "imagecirclehelper.html",
+        "modern_admin/camera_info.html",
+        "modern_admin/safe_controls.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["IMAGE_CIRCLE_*", "LENS_*"],
+      "config_keys": [
+        "IMAGE_CIRCLE_*",
+        "LENS_*"
+      ],
       "protected": false,
       "modern_gap": "Native Modern helper missing.",
       "removal_risk": "medium",
@@ -722,26 +1058,49 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/mask", "/modern-admin/cameras/mask-base"],
-      "templates": ["mask.html", "modern_admin/mask.html"],
+      "routes": [
+        "/mask",
+        "/modern-admin/cameras/mask-base"
+      ],
+      "templates": [
+        "mask.html",
+        "modern_admin/mask.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["DETECT_MASK", "SQM_MASK", "ADU_MASK"],
+      "config_keys": [
+        "DETECT_MASK",
+        "SQM_MASK",
+        "ADU_MASK"
+      ],
       "protected": true,
       "modern_gap": "Shape-aware multicamera behavior needs UI clarity.",
       "removal_risk": "high",
-      "notes": ["Do not reintroduce binning-only mask caches."]
+      "notes": [
+        "Do not reintroduce binning-only mask caches."
+      ]
     },
     "adu": {
       "label": "ADU",
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/adu", "/modern-admin/cameras/adu-history"],
-      "templates": ["adu.html", "modern_admin/adu_history.html"],
-      "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
+      "routes": [
+        "/adu",
+        "/modern-admin/cameras/adu-history"
+      ],
+      "templates": [
+        "adu.html",
+        "modern_admin/adu_history.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js"
+      ],
       "apis": [],
-      "config_keys": ["TARGET_ADU_*"],
+      "config_keys": [
+        "TARGET_ADU_*"
+      ],
       "protected": true,
       "modern_gap": "Needs clearer relation to Auto Exposure/Gain.",
       "removal_risk": "high",
@@ -752,26 +1111,51 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/sqm", "/modern-admin/observatory/sqm"],
-      "templates": ["sqm.html", "modern_admin/observatory_status.html"],
+      "routes": [
+        "/sqm",
+        "/modern-admin/observatory/sqm"
+      ],
+      "templates": [
+        "sqm.html",
+        "modern_admin/observatory_status.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["SQM_*"],
+      "config_keys": [
+        "SQM_*"
+      ],
       "protected": true,
       "modern_gap": "Native Modern SQM status is limited.",
       "removal_risk": "medium",
-      "notes": ["SQM failures must remain non-fatal."]
+      "notes": [
+        "SQM failures must remain non-fatal."
+      ]
     },
     "focus": {
       "label": "Focus",
       "status": "WRAPPER ONLY",
       "owner": "modern_wrapper",
       "porting_priority": "medium",
-      "routes": ["/focus", "/js/focus", "/ajax/focuscontroller", "/modern-admin/tools/focus"],
-      "templates": ["focus.html", "modern_admin/safe_controls.html"],
-      "assets": ["js/chart.umd.js"],
-      "apis": ["/js/focus", "/ajax/focuscontroller"],
-      "config_keys": ["FOCUS_*"],
+      "routes": [
+        "/focus",
+        "/js/focus",
+        "/ajax/focuscontroller",
+        "/modern-admin/tools/focus"
+      ],
+      "templates": [
+        "focus.html",
+        "modern_admin/safe_controls.html"
+      ],
+      "assets": [
+        "js/chart.umd.js"
+      ],
+      "apis": [
+        "/js/focus",
+        "/ajax/focuscontroller"
+      ],
+      "config_keys": [
+        "FOCUS_*"
+      ],
       "protected": false,
       "modern_gap": "Native Modern focus tool missing.",
       "removal_risk": "medium",
@@ -782,11 +1166,21 @@
       "status": "WRAPPER ONLY",
       "owner": "modern_wrapper",
       "porting_priority": "low",
-      "routes": ["/camerasimulator", "/modern-admin/tools/camera-simulator"],
-      "templates": ["camera_simulator.html", "modern_admin/safe_controls.html"],
-      "assets": ["js/clipboard.min.js"],
+      "routes": [
+        "/camerasimulator",
+        "/modern-admin/tools/camera-simulator"
+      ],
+      "templates": [
+        "camera_simulator.html",
+        "modern_admin/safe_controls.html"
+      ],
+      "assets": [
+        "js/clipboard.min.js"
+      ],
       "apis": [],
-      "config_keys": ["CAMERA_SIMULATOR*"],
+      "config_keys": [
+        "CAMERA_SIMULATOR*"
+      ],
       "protected": false,
       "modern_gap": "Native Modern simulator page missing.",
       "removal_risk": "low",
@@ -797,8 +1191,14 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/lag", "/modern-admin/cameras/image-lag"],
-      "templates": ["lag.html", "modern_admin/image_lag.html"],
+      "routes": [
+        "/lag",
+        "/modern-admin/cameras/image-lag"
+      ],
+      "templates": [
+        "lag.html",
+        "modern_admin/image_lag.html"
+      ],
       "assets": [],
       "apis": [],
       "config_keys": [],
@@ -812,10 +1212,21 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/imageviewer", "/ajax/imageviewer", "/ajax/exclude", "/modern-admin/media/images"],
-      "templates": ["imageviewer.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/imageviewer",
+        "/ajax/imageviewer",
+        "/ajax/exclude",
+        "/modern-admin/media/images"
+      ],
+      "templates": [
+        "imageviewer.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/imageviewer", "/ajax/exclude"],
+      "apis": [
+        "/ajax/imageviewer",
+        "/ajax/exclude"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Advanced actions/exclude parity unclear.",
@@ -827,25 +1238,54 @@
       "status": "CLASSIC ONLY",
       "owner": "classic",
       "porting_priority": "high",
-      "routes": ["/fitsimageviewer", "/ajax/fitsimageviewer", "/fits2jpeg", "/modern-admin/media/fits"],
-      "templates": ["fitsimageviewer.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/fitsimageviewer",
+        "/ajax/fitsimageviewer",
+        "/fits2jpeg",
+        "/modern-admin/media/fits"
+      ],
+      "templates": [
+        "fitsimageviewer.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/fitsimageviewer", "/fits2jpeg"],
-      "config_keys": ["IMAGE_SAVE_FITS*"],
+      "apis": [
+        "/ajax/fitsimageviewer",
+        "/fits2jpeg"
+      ],
+      "config_keys": [
+        "IMAGE_SAVE_FITS*"
+      ],
       "protected": true,
       "modern_gap": "Modern has FITS list, not full viewer/conversion parity.",
       "removal_risk": "high",
-      "notes": ["Do not remove before scientific source review UX exists."]
+      "notes": [
+        "Do not remove before scientific source review UX exists."
+      ]
     },
     "gallery": {
       "label": "Gallery",
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/gallery", "/ajax/gallery", "/modern-admin/media/gallery", "/modern-admin/media/gallery/page"],
-      "templates": ["gallery.html", "modern_admin/media_list.html"],
-      "assets": ["photoswipe/dist/photoswipe.css", "photoswipe/dist/umd/photoswipe-lightbox.umd.min.js", "photoswipe/dist/umd/photoswipe.umd.min.js"],
-      "apis": ["/ajax/gallery"],
+      "routes": [
+        "/gallery",
+        "/ajax/gallery",
+        "/modern-admin/media/gallery",
+        "/modern-admin/media/gallery/page"
+      ],
+      "templates": [
+        "gallery.html",
+        "modern_admin/media_list.html"
+      ],
+      "assets": [
+        "photoswipe/dist/photoswipe.css",
+        "photoswipe/dist/umd/photoswipe-lightbox.umd.min.js",
+        "photoswipe/dist/umd/photoswipe.umd.min.js"
+      ],
+      "apis": [
+        "/ajax/gallery"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "PhotoSwipe-style review parity needs verification.",
@@ -857,11 +1297,25 @@
       "status": "SHARED LEGACY",
       "owner": "public",
       "porting_priority": "medium",
-      "routes": ["/panorama*", "/latestpanorama*", "/js/latest_panorama", "/modern-admin/media/panorama", "/modern-admin/media/panorama-loop"],
-      "templates": ["index_img.html", "index_canvas.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/panorama*",
+        "/latestpanorama*",
+        "/js/latest_panorama",
+        "/modern-admin/media/panorama",
+        "/modern-admin/media/panorama-loop"
+      ],
+      "templates": [
+        "index_img.html",
+        "index_canvas.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/js/latest_panorama"],
-      "config_keys": ["PANORAMA*"],
+      "apis": [
+        "/js/latest_panorama"
+      ],
+      "config_keys": [
+        "PANORAMA*"
+      ],
       "protected": false,
       "modern_gap": "Public/latest behavior is not replaced by Modern Admin.",
       "removal_risk": "high",
@@ -872,11 +1326,22 @@
       "status": "SHARED LEGACY",
       "owner": "public",
       "porting_priority": "medium",
-      "routes": ["/raw*", "/latestraw*", "/js/latest_rawimage"],
-      "templates": ["index_img.html", "index_canvas.html"],
+      "routes": [
+        "/raw*",
+        "/latestraw*",
+        "/js/latest_rawimage"
+      ],
+      "templates": [
+        "index_img.html",
+        "index_canvas.html"
+      ],
       "assets": [],
-      "apis": ["/js/latest_rawimage"],
-      "config_keys": ["IMAGE_EXPORT_RAW"],
+      "apis": [
+        "/js/latest_rawimage"
+      ],
+      "config_keys": [
+        "IMAGE_EXPORT_RAW"
+      ],
       "protected": true,
       "modern_gap": "No native source review view yet.",
       "removal_risk": "high",
@@ -887,10 +1352,19 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/videoviewer", "/ajax/videoviewer", "/modern-admin/media/timelapses"],
-      "templates": ["videoviewer.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/videoviewer",
+        "/ajax/videoviewer",
+        "/modern-admin/media/timelapses"
+      ],
+      "templates": [
+        "videoviewer.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/videoviewer"],
+      "apis": [
+        "/ajax/videoviewer"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Upload/share parity unclear.",
@@ -902,10 +1376,19 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "low",
-      "routes": ["/minivideoviewer", "/ajax/minivideoviewer", "/modern-admin/media/mini-timelapses"],
-      "templates": ["minivideoviewer.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/minivideoviewer",
+        "/ajax/minivideoviewer",
+        "/modern-admin/media/mini-timelapses"
+      ],
+      "templates": [
+        "minivideoviewer.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/minivideoviewer"],
+      "apis": [
+        "/ajax/minivideoviewer"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Mini media parity unclear.",
@@ -917,26 +1400,62 @@
       "status": "WRAPPER ONLY",
       "owner": "modern_wrapper",
       "porting_priority": "high",
-      "routes": ["/generate", "/ajax/generate", "/latesttimelapse*", "/modern-admin/tools/generate", "/modern-admin/media/timelapses"],
-      "templates": ["generate.html", "watch_video.html", "modern_admin/safe_controls.html", "modern_admin/media_list.html"],
-      "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
-      "apis": ["/ajax/generate"],
-      "config_keys": ["TIMELAPSE_ENABLE", "DAYTIME_TIMELAPSE"],
+      "routes": [
+        "/generate",
+        "/ajax/generate",
+        "/latesttimelapse*",
+        "/modern-admin/tools/generate",
+        "/modern-admin/media/timelapses"
+      ],
+      "templates": [
+        "generate.html",
+        "watch_video.html",
+        "modern_admin/safe_controls.html",
+        "modern_admin/media_list.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js"
+      ],
+      "apis": [
+        "/ajax/generate"
+      ],
+      "config_keys": [
+        "TIMELAPSE_ENABLE",
+        "DAYTIME_TIMELAPSE"
+      ],
       "protected": true,
       "modern_gap": "Native multicamera generation UI missing.",
       "removal_risk": "high",
-      "notes": ["Generated products must remain camera-scoped."]
+      "notes": [
+        "Generated products must remain camera-scoped."
+      ]
     },
     "mini_timelapse": {
       "label": "Mini Timelapse",
       "status": "CLASSIC ONLY",
       "owner": "classic",
       "porting_priority": "low",
-      "routes": ["/minigenerate", "/ajax/minigenerate", "/minivideoviewer", "/ajax/minivideoviewer", "/modern-admin/media/mini-timelapses"],
-      "templates": ["mini_generate.html", "minivideoviewer.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/minigenerate",
+        "/ajax/minigenerate",
+        "/minivideoviewer",
+        "/ajax/minivideoviewer",
+        "/modern-admin/media/mini-timelapses"
+      ],
+      "templates": [
+        "mini_generate.html",
+        "minivideoviewer.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/minigenerate", "/ajax/minivideoviewer"],
-      "config_keys": ["MINI_TIMELAPSE*"],
+      "apis": [
+        "/ajax/minigenerate",
+        "/ajax/minivideoviewer"
+      ],
+      "config_keys": [
+        "MINI_TIMELAPSE*"
+      ],
       "protected": false,
       "modern_gap": "Generation is not native Modern.",
       "removal_risk": "medium",
@@ -947,11 +1466,29 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/realtime_keogram", "/longtermkeogram", "/js/longtermkeogram", "/modern-admin/observatory/realtime-keogram", "/modern-admin/observatory/long-term-keogram", "/latestkeogram*"],
-      "templates": ["realtime_keogram.html", "longterm_keogram.html", "modern_admin/realtime_keogram.html", "modern_admin/longterm_keogram.html"],
+      "routes": [
+        "/realtime_keogram",
+        "/longtermkeogram",
+        "/js/longtermkeogram",
+        "/modern-admin/observatory/realtime-keogram",
+        "/modern-admin/observatory/long-term-keogram",
+        "/latestkeogram*"
+      ],
+      "templates": [
+        "realtime_keogram.html",
+        "longterm_keogram.html",
+        "modern_admin/realtime_keogram.html",
+        "modern_admin/longterm_keogram.html"
+      ],
       "assets": [],
-      "apis": ["/js/longtermkeogram"],
-      "config_keys": ["KEOGRAM*", "REALTIME_KEOGRAM*", "LONGTERM_KEOGRAM*"],
+      "apis": [
+        "/js/longtermkeogram"
+      ],
+      "config_keys": [
+        "KEOGRAM*",
+        "REALTIME_KEOGRAM*",
+        "LONGTERM_KEOGRAM*"
+      ],
       "protected": false,
       "modern_gap": "Generation/status parity needs validation.",
       "removal_risk": "medium",
@@ -962,11 +1499,18 @@
       "status": "PARTIAL MODERN",
       "owner": "public",
       "porting_priority": "medium",
-      "routes": ["/lateststartrail*", "/view_startrail"],
-      "templates": ["view_image.html"],
+      "routes": [
+        "/lateststartrail*",
+        "/view_startrail"
+      ],
+      "templates": [
+        "view_image.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["STARTRAILS*"],
+      "config_keys": [
+        "STARTRAILS*"
+      ],
       "protected": false,
       "modern_gap": "Native generation/status parity unclear.",
       "removal_risk": "medium",
@@ -977,11 +1521,18 @@
       "status": "PUBLIC ACTIVE",
       "owner": "public",
       "porting_priority": "medium",
-      "routes": ["/lateststartrailvideo*", "/watch_startrail"],
-      "templates": ["watch_video.html"],
+      "routes": [
+        "/lateststartrailvideo*",
+        "/watch_startrail"
+      ],
+      "templates": [
+        "watch_video.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["STARTRAILS_VIDEO*"],
+      "config_keys": [
+        "STARTRAILS_VIDEO*"
+      ],
       "protected": false,
       "modern_gap": "Public watch/share parity must be preserved.",
       "removal_risk": "high",
@@ -992,10 +1543,21 @@
       "status": "PUBLIC ACTIVE",
       "owner": "public",
       "porting_priority": "preserve",
-      "routes": ["/", "/index_img", "/index_canvas", "/latestimage", "/latestimageview"],
-      "templates": ["index_img.html", "index_canvas.html"],
+      "routes": [
+        "/",
+        "/index_img",
+        "/index_canvas",
+        "/latestimage",
+        "/latestimageview"
+      ],
+      "templates": [
+        "index_img.html",
+        "index_canvas.html"
+      ],
       "assets": [],
-      "apis": ["/js/latest"],
+      "apis": [
+        "/js/latest"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Modern Admin is not a public route replacement.",
@@ -1007,8 +1569,12 @@
       "status": "PUBLIC ACTIVE",
       "owner": "public",
       "porting_priority": "preserve",
-      "routes": ["/latesttimelapse*"],
-      "templates": ["watch_video.html"],
+      "routes": [
+        "/latesttimelapse*"
+      ],
+      "templates": [
+        "watch_video.html"
+      ],
       "assets": [],
       "apis": [],
       "config_keys": [],
@@ -1022,10 +1588,18 @@
       "status": "PUBLIC ACTIVE",
       "owner": "public",
       "porting_priority": "preserve",
-      "routes": ["/latestraw*", "/raw*"],
-      "templates": ["index_img.html", "index_canvas.html"],
+      "routes": [
+        "/latestraw*",
+        "/raw*"
+      ],
+      "templates": [
+        "index_img.html",
+        "index_canvas.html"
+      ],
       "assets": [],
-      "apis": ["/js/latest_rawimage"],
+      "apis": [
+        "/js/latest_rawimage"
+      ],
       "config_keys": [],
       "protected": true,
       "modern_gap": "Raw/source public semantics need review.",
@@ -1037,8 +1611,13 @@
       "status": "PUBLIC ACTIVE",
       "owner": "public",
       "porting_priority": "preserve",
-      "routes": ["/lateststartrail*"],
-      "templates": ["view_image.html", "watch_video.html"],
+      "routes": [
+        "/lateststartrail*"
+      ],
+      "templates": [
+        "view_image.html",
+        "watch_video.html"
+      ],
       "assets": [],
       "apis": [],
       "config_keys": [],
@@ -1052,15 +1631,41 @@
       "status": "PUBLIC ACTIVE",
       "owner": "public",
       "porting_priority": "preserve",
-      "routes": ["/images/<path:path>", "/latest*", "/loop*", "/looppanorama*", "/loopraw*", "/public", "/view_*", "/watch_*", "/js/latest", "/js/loop", "/js/looppanorama", "/js/loopraw"],
-      "templates": ["loop_canvas.html", "loop_img.html", "modern_admin/loop.html", "view_image.html", "watch_video.html"],
+      "routes": [
+        "/images/<path:path>",
+        "/latest*",
+        "/loop*",
+        "/looppanorama*",
+        "/loopraw*",
+        "/public",
+        "/view_*",
+        "/watch_*",
+        "/js/latest",
+        "/js/loop",
+        "/js/looppanorama",
+        "/js/loopraw"
+      ],
+      "templates": [
+        "loop_canvas.html",
+        "loop_img.html",
+        "modern_admin/loop.html",
+        "view_image.html",
+        "watch_video.html"
+      ],
       "assets": [],
-      "apis": ["/js/latest", "/js/loop", "/js/looppanorama", "/js/loopraw"],
+      "apis": [
+        "/js/latest",
+        "/js/loop",
+        "/js/looppanorama",
+        "/js/loopraw"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "External usage is not statically knowable.",
       "removal_risk": "critical",
-      "notes": ["Do not remove because static consumer is absent."]
+      "notes": [
+        "Do not remove because static consumer is absent."
+      ]
     },
     "meteor_detection": {
       "label": "Meteor Detection",
@@ -1071,11 +1676,16 @@
       "templates": [],
       "assets": [],
       "apis": [],
-      "config_keys": ["DETECT_METEORS", "DETECT_METEORS_THOLD"],
+      "config_keys": [
+        "DETECT_METEORS",
+        "DETECT_METEORS_THOLD"
+      ],
       "protected": false,
       "modern_gap": "No real Hybrid detector yet; blocked pending outdoor FITS validation.",
       "removal_risk": "high",
-      "notes": ["Legacy Hough code is not yet a real detector."]
+      "notes": [
+        "Legacy Hough code is not yet a real detector."
+      ]
     },
     "star_detection": {
       "label": "Star Detection",
@@ -1086,26 +1696,39 @@
       "templates": [],
       "assets": [],
       "apis": [],
-      "config_keys": ["DETECT_STARS*", "DETECT_MASK"],
+      "config_keys": [
+        "DETECT_STARS*",
+        "DETECT_MASK"
+      ],
       "protected": true,
       "modern_gap": "No dedicated UI ownership map yet.",
       "removal_risk": "high",
-      "notes": ["Shape-aware masks must remain multicamera-safe."]
+      "notes": [
+        "Shape-aware masks must remain multicamera-safe."
+      ]
     },
     "event_candidate_triggers": {
       "label": "Event Candidate Triggers",
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin"],
-      "templates": ["modern_admin/index.html"],
+      "routes": [
+        "/modern-admin"
+      ],
+      "templates": [
+        "modern_admin/index.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["EVENT_CANDIDATE_TRIGGERS"],
+      "config_keys": [
+        "EVENT_CANDIDATE_TRIGGERS"
+      ],
       "protected": true,
       "modern_gap": "Runtime diagnostics visible; no review UI yet.",
       "removal_risk": "critical",
-      "notes": ["Shadow-only."]
+      "notes": [
+        "Shadow-only."
+      ]
     },
     "event_review": {
       "label": "Event Review",
@@ -1120,18 +1743,31 @@
       "protected": true,
       "modern_gap": "Not implemented as UI workflow.",
       "removal_risk": "medium",
-      "notes": ["Architecture exists in Event Framework; UI absent."]
+      "notes": [
+        "Architecture exists in Event Framework; UI absent."
+      ]
     },
     "scientific_sources": {
       "label": "Scientific Sources",
       "status": "PROTECTED MODERN WORK",
       "owner": "shared_api",
       "porting_priority": "protect",
-      "routes": ["/fitsimageviewer", "/modern-admin/media/fits"],
-      "templates": ["fitsimageviewer.html", "modern_admin/media_list.html"],
+      "routes": [
+        "/fitsimageviewer",
+        "/modern-admin/media/fits"
+      ],
+      "templates": [
+        "fitsimageviewer.html",
+        "modern_admin/media_list.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/fitsimageviewer"],
-      "config_keys": ["IMAGE_SAVE_FITS", "IMAGE_EXPORT_RAW"],
+      "apis": [
+        "/ajax/fitsimageviewer"
+      ],
+      "config_keys": [
+        "IMAGE_SAVE_FITS",
+        "IMAGE_EXPORT_RAW"
+      ],
       "protected": true,
       "modern_gap": "Storage/source policy UX needed.",
       "removal_risk": "critical",
@@ -1142,8 +1778,12 @@
       "status": "PROTECTED MODERN WORK",
       "owner": "modern",
       "porting_priority": "protect",
-      "routes": ["/modern-admin"],
-      "templates": ["modern_admin/index.html"],
+      "routes": [
+        "/modern-admin"
+      ],
+      "templates": [
+        "modern_admin/index.html"
+      ],
       "assets": [],
       "apis": [],
       "config_keys": [],
@@ -1157,11 +1797,17 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/modern-admin"],
-      "templates": ["modern_admin/index.html"],
+      "routes": [
+        "/modern-admin"
+      ],
+      "templates": [
+        "modern_admin/index.html"
+      ],
       "assets": [],
       "apis": [],
-      "config_keys": ["FRAME_METADATA_*"],
+      "config_keys": [
+        "FRAME_METADATA_*"
+      ],
       "protected": true,
       "modern_gap": "No row-level metadata browser yet.",
       "removal_risk": "medium",
@@ -1172,11 +1818,26 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/config", "/ajax/config", "/modern-admin/settings/full", "/modern-admin/settings/capture", "/modern-admin/settings/cameras"],
-      "templates": ["config.html", "modern_admin/settings_full.html", "modern_admin/settings_capture.html", "modern_admin/settings_cameras.html"],
+      "routes": [
+        "/config",
+        "/ajax/config",
+        "/modern-admin/settings/full",
+        "/modern-admin/settings/capture",
+        "/modern-admin/settings/cameras"
+      ],
+      "templates": [
+        "config.html",
+        "modern_admin/settings_full.html",
+        "modern_admin/settings_capture.html",
+        "modern_admin/settings_cameras.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/config"],
-      "config_keys": ["*"],
+      "apis": [
+        "/ajax/config"
+      ],
+      "config_keys": [
+        "*"
+      ],
       "protected": true,
       "modern_gap": "Needs Basic/Advanced/Developer redesign.",
       "removal_risk": "critical",
@@ -1187,9 +1848,19 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/config/list", "/config/download", "/modern-admin/config-history"],
-      "templates": ["config_list.html", "modern_admin/config_history.html"],
-      "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
+      "routes": [
+        "/config/list",
+        "/config/download",
+        "/modern-admin/config-history"
+      ],
+      "templates": [
+        "config_list.html",
+        "modern_admin/config_history.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": false,
@@ -1199,16 +1870,23 @@
     },
     "config_restore": {
       "label": "Config Restore",
-      "status": "CLASSIC ONLY",
-      "owner": "classic",
+      "status": "PARTIAL MODERN",
+      "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/config/restore", "/ajax/config/restore"],
-      "templates": ["config_restore.html"],
+      "routes": [
+        "/config/restore",
+        "/ajax/config/restore",
+        "/modern-admin/config-restore"
+      ],
+      "templates": [
+        "config_restore.html",
+        "modern_admin/config_restore.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/config/restore"],
+      "apis": [],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "Modern restore workflow missing.",
+      "modern_gap": "Modern read-only inspection exists; restore action still Classic-only.",
       "removal_risk": "high",
       "notes": []
     },
@@ -1217,10 +1895,27 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/system", "/ajax/system", "/support", "/js/support", "/modern-admin/system", "/modern-admin/system/info", "/modern-admin/system/support"],
-      "templates": ["system.html", "support_info.html", "modern_admin/system.html", "modern_admin/system_info.html", "modern_admin/support_info.html"],
+      "routes": [
+        "/system",
+        "/ajax/system",
+        "/support",
+        "/js/support",
+        "/modern-admin/system",
+        "/modern-admin/system/info",
+        "/modern-admin/system/support"
+      ],
+      "templates": [
+        "system.html",
+        "support_info.html",
+        "modern_admin/system.html",
+        "modern_admin/system_info.html",
+        "modern_admin/support_info.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/system", "/js/support"],
+      "apis": [
+        "/ajax/system",
+        "/js/support"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Some system actions remain legacy-backed.",
@@ -1232,25 +1927,48 @@
       "status": "PARTIAL MODERN",
       "owner": "shared_api",
       "porting_priority": "medium",
-      "routes": ["/log", "/log/*", "/js/log", "/modern-admin/system/log"],
-      "templates": ["log.html", "modern_admin/log.html"],
+      "routes": [
+        "/log",
+        "/log/*",
+        "/js/log",
+        "/modern-admin/system/log"
+      ],
+      "templates": [
+        "log.html",
+        "modern_admin/log.html"
+      ],
       "assets": [],
-      "apis": ["/js/log"],
+      "apis": [
+        "/js/log"
+      ],
       "config_keys": [],
       "protected": true,
       "modern_gap": "Download parity needs verification.",
       "removal_risk": "medium",
-      "notes": ["Logs support explainability."]
+      "notes": [
+        "Logs support explainability."
+      ]
     },
     "charts": {
       "label": "Charts",
       "status": "PARTIAL MODERN",
       "owner": "shared_api",
       "porting_priority": "medium",
-      "routes": ["/charts", "/js/charts", "/modern-admin/observatory/charts"],
-      "templates": ["chart.html", "modern_admin/charts.html"],
-      "assets": ["js/chart.umd.js"],
-      "apis": ["/js/charts"],
+      "routes": [
+        "/charts",
+        "/js/charts",
+        "/modern-admin/observatory/charts"
+      ],
+      "templates": [
+        "chart.html",
+        "modern_admin/charts.html"
+      ],
+      "assets": [
+        "js/chart.umd.js"
+      ],
+      "apis": [
+        "/js/charts"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Legacy chart options may not be fully ported.",
@@ -1262,39 +1980,78 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/tasks", "/modern-admin/tasks", "/modern-admin/tasks/*"],
-      "templates": ["taskqueue.html", "modern_admin/tasks.html", "modern_admin/task_detail.html"],
-      "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
+      "routes": [
+        "/tasks",
+        "/modern-admin/tasks",
+        "/modern-admin/tasks/*"
+      ],
+      "templates": [
+        "taskqueue.html",
+        "modern_admin/tasks.html",
+        "modern_admin/task_detail.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Modern Admin has read-only task queue visibility; Classic fallback remains for legacy parity.",
       "removal_risk": "high",
-      "notes": ["Modern page is read-only and must not add delete, retry, cancel or edit actions."]
+      "notes": [
+        "Modern page is read-only and must not add delete, retry, cancel or edit actions."
+      ]
     },
     "user_management": {
       "label": "User Management",
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/user", "/ajax/user", "/users", "/modern-admin/users"],
-      "templates": ["user.html", "users.html", "modern_admin/users.html"],
-      "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
-      "apis": ["/ajax/user"],
+      "routes": [
+        "/user",
+        "/ajax/user",
+        "/users",
+        "/modern-admin/users"
+      ],
+      "templates": [
+        "user.html",
+        "users.html",
+        "modern_admin/users.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js"
+      ],
+      "apis": [
+        "/ajax/user"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Modern Admin has read-only account inventory; profile/password/role changes remain Classic-only.",
       "removal_risk": "high",
-      "notes": ["Modern page must not show password hashes, API keys, login IPs or raw user data."]
+      "notes": [
+        "Modern page must not show password hashes, API keys, login IPs or raw user data."
+      ]
     },
     "authentication": {
       "label": "Authentication",
       "status": "SHARED ACTIVE",
       "owner": "shared_api",
       "porting_priority": "preserve",
-      "routes": ["/login", "/logout"],
-      "templates": ["login.html"],
-      "assets": ["bootstrap/bootstrap.min.css", "bootstrap/bootstrap.bundle.min.js", "css/style.css", "js/jquery-3.7.1.min.js"],
+      "routes": [
+        "/login",
+        "/logout"
+      ],
+      "templates": [
+        "login.html"
+      ],
+      "assets": [
+        "bootstrap/bootstrap.min.css",
+        "bootstrap/bootstrap.bundle.min.js",
+        "css/style.css",
+        "js/jquery-3.7.1.min.js"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": false,
@@ -1307,25 +2064,53 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/notifications", "/ajax/notification", "/modern-admin/notifications"],
-      "templates": ["notifications.html", "modern_admin/notifications.html"],
-      "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
-      "apis": ["/ajax/notification"],
-      "config_keys": ["NOTIFICATION_*"],
+      "routes": [
+        "/notifications",
+        "/ajax/notification",
+        "/modern-admin/notifications"
+      ],
+      "templates": [
+        "notifications.html",
+        "modern_admin/notifications.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js"
+      ],
+      "apis": [
+        "/ajax/notification"
+      ],
+      "config_keys": [
+        "NOTIFICATION_*"
+      ],
       "protected": false,
       "modern_gap": "Modern Admin has read-only notification inventory; acknowledgement and modal flow remain Classic/shared.",
       "removal_risk": "medium",
-      "notes": ["Modern page must not call /ajax/notification POST or acknowledge notifications."]
+      "notes": [
+        "Modern page must not call /ajax/notification POST or acknowledge notifications."
+      ]
     },
     "admin_tools": {
       "label": "Admin Tools",
       "status": "WRAPPER ONLY",
       "owner": "modern_wrapper",
       "porting_priority": "medium",
-      "routes": ["/modern-admin/tools/*", "/processing", "/imagecirclehelper", "/camerasimulator"],
-      "templates": ["modern_admin/safe_controls.html", "imageprocessing.html", "imagecirclehelper.html", "camera_simulator.html"],
+      "routes": [
+        "/modern-admin/tools/*",
+        "/processing",
+        "/imagecirclehelper",
+        "/camerasimulator"
+      ],
+      "templates": [
+        "modern_admin/safe_controls.html",
+        "imageprocessing.html",
+        "imagecirclehelper.html",
+        "camera_simulator.html"
+      ],
       "assets": [],
-      "apis": ["/js/processing"],
+      "apis": [
+        "/js/processing"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Several admin tools are wrappers only.",
@@ -1337,9 +2122,19 @@
       "status": "WRAPPER ONLY",
       "owner": "modern_wrapper",
       "porting_priority": "protect",
-      "routes": ["/modern-admin/storage/drives", "/modern-admin/system/config", "/modern-admin/system/gpio-control", "/modern-admin/system/network", "/modern-admin/tools/*"],
-      "templates": ["modern_admin/safe_controls.html"],
-      "assets": ["modern_admin/modern-admin.css"],
+      "routes": [
+        "/modern-admin/storage/drives",
+        "/modern-admin/system/config",
+        "/modern-admin/system/gpio-control",
+        "/modern-admin/system/network",
+        "/modern-admin/tools/*"
+      ],
+      "templates": [
+        "modern_admin/safe_controls.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": true,
@@ -1352,11 +2147,22 @@
       "status": "WRAPPER ONLY",
       "owner": "modern_wrapper",
       "porting_priority": "medium",
-      "routes": ["/network", "/ajax/network", "/modern-admin/system/network"],
-      "templates": ["network.html", "modern_admin/safe_controls.html"],
+      "routes": [
+        "/network",
+        "/ajax/network",
+        "/modern-admin/system/network"
+      ],
+      "templates": [
+        "network.html",
+        "modern_admin/safe_controls.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/network"],
-      "config_keys": ["NETWORK_*"],
+      "apis": [
+        "/ajax/network"
+      ],
+      "config_keys": [
+        "NETWORK_*"
+      ],
       "protected": false,
       "modern_gap": "Native Modern network page missing.",
       "removal_risk": "high",
@@ -1367,26 +2173,61 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/drives", "/ajax/drives", "/filespaceusage", "/modern-admin/storage", "/modern-admin/storage/drives", "/modern-admin/storage/file-space-usage"],
-      "templates": ["drive_manager.html", "filespaceusage.html", "modern_admin/storage.html", "modern_admin/safe_controls.html", "modern_admin/file_space_usage.html"],
-      "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
-      "apis": ["/ajax/drives"],
-      "config_keys": ["FILETRANSFER*", "STORAGE*", "IMAGE_FOLDER"],
+      "routes": [
+        "/drives",
+        "/ajax/drives",
+        "/filespaceusage",
+        "/modern-admin/storage",
+        "/modern-admin/storage/drives",
+        "/modern-admin/storage/file-space-usage"
+      ],
+      "templates": [
+        "drive_manager.html",
+        "filespaceusage.html",
+        "modern_admin/storage.html",
+        "modern_admin/safe_controls.html",
+        "modern_admin/file_space_usage.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js"
+      ],
+      "apis": [
+        "/ajax/drives"
+      ],
+      "config_keys": [
+        "FILETRANSFER*",
+        "STORAGE*",
+        "IMAGE_FOLDER"
+      ],
       "protected": false,
       "modern_gap": "Drive actions are wrapper-only.",
       "removal_risk": "high",
-      "notes": ["FITS/RAW storage impact should become user-visible."]
+      "notes": [
+        "FITS/RAW storage impact should become user-visible."
+      ]
     },
     "gpio": {
       "label": "GPIO",
       "status": "WRAPPER ONLY",
       "owner": "modern_wrapper",
       "porting_priority": "medium",
-      "routes": ["/manual_gpio", "/ajax/manual_gpio", "/modern-admin/system/gpio-control"],
-      "templates": ["manual_gpio.html", "modern_admin/safe_controls.html"],
+      "routes": [
+        "/manual_gpio",
+        "/ajax/manual_gpio",
+        "/modern-admin/system/gpio-control"
+      ],
+      "templates": [
+        "manual_gpio.html",
+        "modern_admin/safe_controls.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/manual_gpio"],
-      "config_keys": ["GPIO_*"],
+      "apis": [
+        "/ajax/manual_gpio"
+      ],
+      "config_keys": [
+        "GPIO_*"
+      ],
       "protected": false,
       "modern_gap": "Native Modern GPIO controls missing.",
       "removal_risk": "high",
@@ -1397,11 +2238,21 @@
       "status": "NEEDS VERIFICATION",
       "owner": "shared_api",
       "porting_priority": "low",
-      "routes": ["/system", "/modern-admin/system/info"],
-      "templates": ["system.html", "modern_admin/system_info.html"],
+      "routes": [
+        "/system",
+        "/modern-admin/system/info"
+      ],
+      "templates": [
+        "system.html",
+        "modern_admin/system_info.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/system"],
-      "config_keys": ["GPS_*"],
+      "apis": [
+        "/ajax/system"
+      ],
+      "config_keys": [
+        "GPS_*"
+      ],
       "protected": false,
       "modern_gap": "Exact UI fields need verification.",
       "removal_risk": "medium",
@@ -1412,11 +2263,22 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/sensor_panel", "/modern-admin/observatory/sensor-panel", "/js/sensor_panel"],
-      "templates": ["sensor_panel.html", "modern_admin/sensor_panel.html"],
+      "routes": [
+        "/sensor_panel",
+        "/modern-admin/observatory/sensor-panel",
+        "/js/sensor_panel"
+      ],
+      "templates": [
+        "sensor_panel.html",
+        "modern_admin/sensor_panel.html"
+      ],
       "assets": [],
-      "apis": ["/js/sensor_panel"],
-      "config_keys": ["SENSOR_*"],
+      "apis": [
+        "/js/sensor_panel"
+      ],
+      "config_keys": [
+        "SENSOR_*"
+      ],
       "protected": false,
       "modern_gap": "Sensor configuration ownership needs verification.",
       "removal_risk": "medium",
@@ -1427,11 +2289,31 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/sensor_panel", "/modern-admin/observatory", "/modern-admin/observatory/sensor-panel", "/astropanel", "/ajax/astropanel"],
-      "templates": ["modern_admin/observatory.html", "modern_admin/sensor_panel.html", "sensor_panel.html", "astropanel.html", "modern_admin/astropanel.html"],
-      "assets": ["astropanel/css/style.css"],
-      "apis": ["/ajax/astropanel"],
-      "config_keys": ["TEMP_*", "HUMIDITY_*", "WEATHER_*"],
+      "routes": [
+        "/sensor_panel",
+        "/modern-admin/observatory",
+        "/modern-admin/observatory/sensor-panel",
+        "/astropanel",
+        "/ajax/astropanel"
+      ],
+      "templates": [
+        "modern_admin/observatory.html",
+        "modern_admin/sensor_panel.html",
+        "sensor_panel.html",
+        "astropanel.html",
+        "modern_admin/astropanel.html"
+      ],
+      "assets": [
+        "astropanel/css/style.css"
+      ],
+      "apis": [
+        "/ajax/astropanel"
+      ],
+      "config_keys": [
+        "TEMP_*",
+        "HUMIDITY_*",
+        "WEATHER_*"
+      ],
       "protected": false,
       "modern_gap": "Weather awareness is not implemented as operational logic.",
       "removal_risk": "medium",
@@ -1442,11 +2324,22 @@
       "status": "NEEDS VERIFICATION",
       "owner": "shared_api",
       "porting_priority": "low",
-      "routes": ["/system", "/modern-admin/system/info"],
-      "templates": ["system.html", "modern_admin/system_info.html"],
+      "routes": [
+        "/system",
+        "/modern-admin/system/info"
+      ],
+      "templates": [
+        "system.html",
+        "modern_admin/system_info.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/system"],
-      "config_keys": ["UPS_*", "POWER_*"],
+      "apis": [
+        "/ajax/system"
+      ],
+      "config_keys": [
+        "UPS_*",
+        "POWER_*"
+      ],
       "protected": false,
       "modern_gap": "Presence and UI ownership need verification.",
       "removal_risk": "medium",
@@ -1457,11 +2350,24 @@
       "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
-      "routes": ["/modern-admin/uploads", "/ajax/uploadyoutube"],
-      "templates": ["modern_admin/uploads.html", "videoviewer.html", "minivideoviewer.html"],
+      "routes": [
+        "/modern-admin/uploads",
+        "/ajax/uploadyoutube"
+      ],
+      "templates": [
+        "modern_admin/uploads.html",
+        "videoviewer.html",
+        "minivideoviewer.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/uploadyoutube"],
-      "config_keys": ["FILETRANSFER*", "S3UPLOAD*", "UPLOAD_*"],
+      "apis": [
+        "/ajax/uploadyoutube"
+      ],
+      "config_keys": [
+        "FILETRANSFER*",
+        "S3UPLOAD*",
+        "UPLOAD_*"
+      ],
       "protected": false,
       "modern_gap": "Provider parity unclear.",
       "removal_risk": "high",
@@ -1472,40 +2378,65 @@
       "status": "CLASSIC ONLY",
       "owner": "classic",
       "porting_priority": "medium",
-      "routes": ["/youtube/*", "/ajax/uploadyoutube"],
-      "templates": ["videoviewer.html", "minivideoviewer.html", "config.html"],
+      "routes": [
+        "/youtube/*",
+        "/ajax/uploadyoutube"
+      ],
+      "templates": [
+        "videoviewer.html",
+        "minivideoviewer.html",
+        "config.html"
+      ],
       "assets": [],
-      "apis": ["/ajax/uploadyoutube"],
-      "config_keys": ["YOUTUBE*"],
+      "apis": [
+        "/ajax/uploadyoutube"
+      ],
+      "config_keys": [
+        "YOUTUBE*"
+      ],
       "protected": false,
       "modern_gap": "Modern OAuth workflow missing.",
       "removal_risk": "high",
-      "notes": ["External callback routes must be preserved until replaced."]
+      "notes": [
+        "External callback routes must be preserved until replaced."
+      ]
     },
     "sync_api": {
       "label": "Sync API",
       "status": "EXTERNAL API",
       "owner": "external_api",
       "porting_priority": "preserve",
-      "routes": ["/sync/v1/*"],
+      "routes": [
+        "/sync/v1/*"
+      ],
       "templates": [],
       "assets": [],
-      "apis": ["/sync/v1/*"],
-      "config_keys": ["SYNCAPI_*"],
+      "apis": [
+        "/sync/v1/*"
+      ],
+      "config_keys": [
+        "SYNCAPI_*"
+      ],
       "protected": false,
       "modern_gap": "Not a UI feature.",
       "removal_risk": "critical",
-      "notes": ["Do not treat as Classic UI."]
+      "notes": [
+        "Do not treat as Classic UI."
+      ]
     },
     "action_api": {
       "label": "Action API",
       "status": "EXTERNAL API",
       "owner": "external_api",
       "porting_priority": "preserve",
-      "routes": ["/action/*"],
+      "routes": [
+        "/action/*"
+      ],
       "templates": [],
       "assets": [],
-      "apis": ["/action/*"],
+      "apis": [
+        "/action/*"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Modern capture service action is separate.",
@@ -1517,10 +2448,18 @@
       "status": "EXTERNAL API",
       "owner": "external_api",
       "porting_priority": "preserve",
-      "routes": ["/sync/v1/*", "/action/*", "/latest*"],
+      "routes": [
+        "/sync/v1/*",
+        "/action/*",
+        "/latest*"
+      ],
       "templates": [],
       "assets": [],
-      "apis": ["/sync/v1/*", "/action/*", "/latest*"],
+      "apis": [
+        "/sync/v1/*",
+        "/action/*",
+        "/latest*"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "External use is not statically knowable.",
@@ -1532,40 +2471,85 @@
       "status": "LEGACY ACTIVE",
       "owner": "classic",
       "porting_priority": "later",
-      "routes": ["/", "/config", "/gallery", "/imageviewer", "/system", "/log", "/support"],
-      "templates": ["base.html", "index_img.html", "config.html", "gallery.html", "imageviewer.html", "system.html", "log.html", "support_info.html"],
-      "assets": ["css/style.css", "js/jquery-3.7.1.min.js", "js/indi-allsky-tabs.js", "bootstrap/bootstrap.min.css", "bootstrap/bootstrap.bundle.min.js"],
+      "routes": [
+        "/",
+        "/config",
+        "/gallery",
+        "/imageviewer",
+        "/system",
+        "/log",
+        "/support"
+      ],
+      "templates": [
+        "base.html",
+        "index_img.html",
+        "config.html",
+        "gallery.html",
+        "imageviewer.html",
+        "system.html",
+        "log.html",
+        "support_info.html"
+      ],
+      "assets": [
+        "css/style.css",
+        "js/jquery-3.7.1.min.js",
+        "js/indi-allsky-tabs.js",
+        "bootstrap/bootstrap.min.css",
+        "bootstrap/bootstrap.bundle.min.js"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Classic still hosts active features.",
       "removal_risk": "critical",
-      "notes": ["Do not remove shell until parity and deprecation are complete."]
+      "notes": [
+        "Do not remove shell until parity and deprecation are complete."
+      ]
     },
     "legacy_ajax_endpoints": {
       "label": "Legacy AJAX endpoints",
       "status": "LEGACY ACTIVE",
       "owner": "classic",
       "porting_priority": "map",
-      "routes": ["/ajax/*"],
+      "routes": [
+        "/ajax/*"
+      ],
       "templates": [],
       "assets": [],
-      "apis": ["/ajax/*"],
+      "apis": [
+        "/ajax/*"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Some are shared and some are legacy-only.",
       "removal_risk": "high",
-      "notes": ["Needs endpoint-by-endpoint ownership refinement."]
+      "notes": [
+        "Needs endpoint-by-endpoint ownership refinement."
+      ]
     },
     "shared_ajax_endpoints": {
       "label": "Shared AJAX endpoints",
       "status": "SHARED ACTIVE",
       "owner": "shared_api",
       "porting_priority": "preserve",
-      "routes": ["/ajax/config", "/ajax/generate", "/ajax/network", "/ajax/drives", "/ajax/manual_gpio", "/ajax/status_update"],
+      "routes": [
+        "/ajax/config",
+        "/ajax/generate",
+        "/ajax/network",
+        "/ajax/drives",
+        "/ajax/manual_gpio",
+        "/ajax/status_update"
+      ],
       "templates": [],
       "assets": [],
-      "apis": ["/ajax/config", "/ajax/generate", "/ajax/network", "/ajax/drives", "/ajax/manual_gpio", "/ajax/status_update"],
+      "apis": [
+        "/ajax/config",
+        "/ajax/generate",
+        "/ajax/network",
+        "/ajax/drives",
+        "/ajax/manual_gpio",
+        "/ajax/status_update"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Modern sometimes uses shared legacy save/action paths.",
@@ -1579,22 +2563,54 @@
       "porting_priority": "verify",
       "routes": [],
       "templates": [],
-      "assets": ["DataTables/*", "photoswipe/*", "virtualsky/*", "bootstrap/*", "js/jquery-3.7.1.min.js", "js/chart.umd.js"],
+      "assets": [
+        "DataTables/*",
+        "photoswipe/*",
+        "virtualsky/*",
+        "bootstrap/*",
+        "js/jquery-3.7.1.min.js",
+        "js/chart.umd.js"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Vendor policy is not formalized.",
       "removal_risk": "medium",
-      "notes": ["Do not remove vendor assets without runtime verification."]
+      "notes": [
+        "Do not remove vendor assets without runtime verification."
+      ]
     },
     "datatables": {
       "label": "DataTables",
       "status": "LEGACY ACTIVE",
       "owner": "classic",
       "porting_priority": "later",
-      "routes": ["/tasks", "/users", "/adu", "/filespaceusage", "/generate", "/drives", "/darks", "/notifications"],
-      "templates": ["taskqueue.html", "users.html", "adu.html", "filespaceusage.html", "generate.html", "drive_manager.html", "darks.html", "notifications.html"],
-      "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js", "DataTables/datatables.css", "DataTables/datatables.js"],
+      "routes": [
+        "/tasks",
+        "/users",
+        "/adu",
+        "/filespaceusage",
+        "/generate",
+        "/drives",
+        "/darks",
+        "/notifications"
+      ],
+      "templates": [
+        "taskqueue.html",
+        "users.html",
+        "adu.html",
+        "filespaceusage.html",
+        "generate.html",
+        "drive_manager.html",
+        "darks.html",
+        "notifications.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js",
+        "DataTables/datatables.css",
+        "DataTables/datatables.js"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": false,
@@ -1607,9 +2623,15 @@
       "status": "LEGACY ACTIVE",
       "owner": "classic",
       "porting_priority": "later",
-      "routes": ["/gallery"],
-      "templates": ["gallery.html"],
-      "assets": ["photoswipe/*"],
+      "routes": [
+        "/gallery"
+      ],
+      "templates": [
+        "gallery.html"
+      ],
+      "assets": [
+        "photoswipe/*"
+      ],
       "apis": [],
       "config_keys": [],
       "protected": false,
@@ -1622,10 +2644,22 @@
       "status": "SHARED ACTIVE",
       "owner": "shared_api",
       "porting_priority": "verify",
-      "routes": ["/virtualsky", "/modern-admin/observatory/virtualsky"],
-      "templates": ["virtualsky.html", "modern_admin/virtualsky.html"],
-      "assets": ["virtualsky/*", "html2canvas/html2canvas.min.js"],
-      "apis": ["/images/<path:path>", "/js/loop"],
+      "routes": [
+        "/virtualsky",
+        "/modern-admin/observatory/virtualsky"
+      ],
+      "templates": [
+        "virtualsky.html",
+        "modern_admin/virtualsky.html"
+      ],
+      "assets": [
+        "virtualsky/*",
+        "html2canvas/html2canvas.min.js"
+      ],
+      "apis": [
+        "/images/<path:path>",
+        "/js/loop"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Modern wraps legacy VirtualSky behavior.",
@@ -1639,8 +2673,16 @@
       "porting_priority": "verify",
       "routes": [],
       "templates": [],
-      "assets": ["virtualsky/*", "photoswipe/dist/*.esm*.js", "DataTables/datatables.js"],
-      "apis": ["dynamic:*", "static", "{{ url_for*"],
+      "assets": [
+        "virtualsky/*",
+        "photoswipe/dist/*.esm*.js",
+        "DataTables/datatables.js"
+      ],
+      "apis": [
+        "dynamic:*",
+        "static",
+        "{{ url_for*"
+      ],
       "config_keys": [],
       "protected": false,
       "modern_gap": "Static analysis may miss runtime loading.",
@@ -1652,7 +2694,17 @@
       "status": "NEEDS VERIFICATION",
       "owner": "known_dynamic",
       "porting_priority": "preserve",
-      "routes": ["/modern-admin/*", "/config", "/gallery", "/imageviewer", "/latest*", "/loop*", "/looppanorama*", "/loopraw*", "/public"],
+      "routes": [
+        "/modern-admin/*",
+        "/config",
+        "/gallery",
+        "/imageviewer",
+        "/latest*",
+        "/loop*",
+        "/looppanorama*",
+        "/loopraw*",
+        "/public"
+      ],
       "templates": [],
       "assets": [],
       "apis": [],
@@ -1667,8 +2719,19 @@
       "status": "PUBLIC ACTIVE",
       "owner": "public",
       "porting_priority": "preserve",
-      "routes": ["/", "/latest*", "/images/<path:path>", "/view_*", "/watch_*"],
-      "templates": ["index_img.html", "index_canvas.html", "view_image.html", "watch_video.html"],
+      "routes": [
+        "/",
+        "/latest*",
+        "/images/<path:path>",
+        "/view_*",
+        "/watch_*"
+      ],
+      "templates": [
+        "index_img.html",
+        "index_canvas.html",
+        "view_image.html",
+        "watch_video.html"
+      ],
       "assets": [],
       "apis": [],
       "config_keys": [],
@@ -1690,7 +2753,9 @@
       "protected": false,
       "modern_gap": "Catch-all feature used only to prevent unmapped inventory items from being invisible.",
       "removal_risk": "unknown",
-      "notes": ["Items matching this feature may also match more specific features; do not use this as evidence of removal safety."]
+      "notes": [
+        "Items matching this feature may also match more specific features; do not use this as evidence of removal safety."
+      ]
     }
   }
 }
