@@ -92,8 +92,8 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | FITS Image Viewer | B | C | M | High | Read-only FITS metadata inspection is now available; next step is usability only. |
-| 2 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
+| 1 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
+| 2 | FITS Image Viewer | C | D only after viewer/conversion safety review | M | High | Read-only metadata usability exists; preview/download/conversion remain out of scope. |
 | 3 | Notifications | C | D only after notification action review | S | Medium | Read-only usability exists; detail/actions need explicit non-mutative scope. |
 | 4 | User Management | C | D only after auth field review | S | High | Read-only usability exists; detail requires careful field/security review. |
 | 5 | Logs | D | stop/E only after contract | S | Medium | Modern read-only log detail exists; no new download/action work without contract review. |
@@ -186,7 +186,7 @@ These should not be removed. They are transitional.
 | Camera Simulator | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Low | L | Low | Low-risk but low-value. |
 | Image Lag | modern | PARTIAL MODERN | C | 55% | Camera pages | Medium | M | Medium | Modern page exists; semantics need validation. |
 | Image Viewer | modern | PARTIAL MODERN | C | 55% | Media list | Medium | M | Medium | Advanced actions/exclude remain unclear. |
-| FITS Image Viewer | modern | PARTIAL MODERN | B | 30% | Scientific source layer | High | M | High | Read-only Modern FITS metadata inspection exists; conversion/viewer parity remains Classic-only. |
+| FITS Image Viewer | modern | PARTIAL MODERN | C | 45% | Scientific source layer | High | M | High | Read-only Modern FITS metadata usability exists; conversion/viewer parity remains Classic-only. |
 | Gallery | modern | PARTIAL MODERN | C | 55% | Media list | Medium | M | Medium | Modern gallery exists; PhotoSwipe parity unknown. |
 | Panorama | public | SHARED LEGACY | Preserve | 70% | Public endpoints | Medium | M | Medium | Preserve public/latest behavior. |
 | Raw Viewer | public | SHARED LEGACY | Preserve | 70% | Raw/source files | Critical | M | Medium | Needs source review, but public routes preserved. |
@@ -252,8 +252,8 @@ and the completed Task Queue/User Management work.
 
 ### Phase 1 - Finish Safe Read-only Admin Gaps
 
-1. FITS Image Viewer read-only usability improvements.
-2. Config Restore read-only usability/detail inspection.
+1. Config Restore read-only usability/detail inspection.
+2. FITS Image Viewer read-only detail only after viewer/conversion safety review.
 3. Notifications read-only detail only after notification action review.
 4. User Management read-only detail only after auth field review.
 5. Config History read-only usability.
@@ -297,8 +297,8 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | FITS Image Viewer | Modern read-only FITS/source usability | Aligns with scientific-first direction. |
-| 2 | Config Restore | Modern read-only restore inspection usability | Keeps restore action Classic-only while improving visibility. |
+| 1 | Config Restore | Modern read-only restore inspection usability | Keeps restore action Classic-only while improving visibility. |
+| 2 | FITS Image Viewer | Modern read-only detail/viewer safety review | Usability exists; conversion/download/preview remain out of scope. |
 | 3 | Notifications | Modern read-only detail/action-safety review | Usability exists; acknowledgement remains out of scope. |
 | 4 | User Management | Modern read-only detail field/security review | Usability exists; detail must remain auth-safe. |
 | 5 | Config History | Modern read-only usability | Existing read-only list can be made easier to scan. |
@@ -371,17 +371,16 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-FITS Image Viewer read-only usability.
+Config Restore read-only usability.
 
 ### 6. Why that feature?
 
-The read-only FITS/source inspection page exists. The next safe step is
-usability only, with no conversion, download, delete, filesystem scan or
-processing action.
+The read-only config restore inspection page exists. The next safe step is
+usability only, with restore still Classic-only and no config mutation.
 
 ### 7. Which features can be ported in parallel?
 
-FITS/source read-only usability, Upload provider status
+Upload provider status
 read-only, and supporting
 documentation/inventory updates.
 
@@ -401,13 +400,13 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Implement **FITS Image Viewer read-only usability Phase B - Modern filters/scanability**.
+Implement **Config Restore read-only usability Phase B - Modern filters/scanability**.
 
 Scope:
 
-- Analyze Classic FITS viewer routes/actions and the existing Modern FITS metadata page.
+- Analyze Classic config restore route/action and the existing Modern restore inspection page.
 - Add only read-only filters, counts, labels or scanability improvements.
-- Do not add conversion, download, delete, processing, filesystem scan or arbitrary path access.
+- Do not add restore, download, raw config exposure, delete, write or active config mutation.
 - Preserve Classic fallback.
 - Update ownership/inventory.
 

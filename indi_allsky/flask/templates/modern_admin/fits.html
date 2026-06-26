@@ -29,9 +29,27 @@ var camera_id = {{ camera_id }};
             <p>Rows that include width and height metadata.</p>
         </article>
         <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Uploaded</div>
+            <h3>{{ modern_admin_fits_uploaded_count }}</h3>
+            <p>Rows marked uploaded in the database.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="FITS safety summary">
+        <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Classic Fallback</div>
             <h3>Available</h3>
             <p><a href="{{ url_for('indi_allsky.fitsimageviewer_view') }}">Open Classic FITS Viewer</a></p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Mode</div>
+            <h3>Metadata only</h3>
+            <p>No file reads, conversion, download, processing or deletion.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Camera Scope</div>
+            <h3>{{ camera_id }}</h3>
+            <p>Latest database entries for the active camera.</p>
         </article>
     </section>
 
@@ -45,8 +63,50 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-note">{{ modern_admin_fits_error }}</p>
         {% endif %}
 
+        <div class="modern-admin-filter-row" aria-label="FITS metadata filters">
+            <label>
+                Search
+                <input id="modern-fits-search" type="search" placeholder="id or filename" autocomplete="off">
+            </label>
+            <label>
+                Type
+                <select id="modern-fits-type-filter">
+                    <option value="">All</option>
+                    {% for file_type in modern_admin_fits_file_types %}
+                    <option value="{{ file_type|lower }}">{{ file_type }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Day/Night
+                <select id="modern-fits-timeofday-filter">
+                    <option value="">All</option>
+                    <option value="day">Day</option>
+                    <option value="night">Night</option>
+                </select>
+            </label>
+            <label>
+                Uploaded
+                <select id="modern-fits-uploaded-filter">
+                    <option value="">All</option>
+                    <option value="yes">Uploaded</option>
+                    <option value="no">Not uploaded</option>
+                </select>
+            </label>
+            <label>
+                Source
+                <select id="modern-fits-source-filter">
+                    <option value="">All</option>
+                    {% for source in modern_admin_fits_sources %}
+                    <option value="{{ source|lower }}">{{ source }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-fits-filter-count">{{ modern_admin_fits_count }} shown</span>
+        </div>
+
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
+            <table class="modern-admin-data-table" id="modern-fits-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -66,7 +126,7 @@ var camera_id = {{ camera_id }};
                 </thead>
                 <tbody>
                     {% for fits in modern_admin_fits_rows %}
-                    <tr>
+                    <tr data-search="{{ (fits.id ~ ' ' ~ fits.filename)|lower }}" data-file-type="{{ fits.file_type|lower }}" data-timeofday="{{ fits.timeofday|lower }}" data-uploaded="{{ fits.uploaded|lower }}" data-source="{{ fits.source|lower }}">
                         <td>{{ fits.id }}</td>
                         <td>{{ fits.created }}</td>
                         <td>{{ fits.camera_id }}</td>
@@ -77,15 +137,18 @@ var camera_id = {{ camera_id }};
                         <td>{{ fits.gain }}</td>
                         <td>{{ fits.binmode }}</td>
                         <td>{{ fits.file_size }}</td>
-                        <td>{{ fits.timeofday }}</td>
-                        <td>{{ fits.uploaded }}</td>
+                        <td><span class="modern-admin-status-pill modern-admin-status-muted">{{ fits.timeofday }}</span></td>
+                        <td><span class="modern-admin-status-pill {% if fits.uploaded == 'Yes' %}modern-admin-status-good{% else %}modern-admin-status-muted{% endif %}">{{ fits.uploaded }}</span></td>
                         <td>{{ fits.source }}</td>
                     </tr>
                     {% else %}
-                    <tr>
+                    <tr id="modern-fits-empty-row">
                         <td colspan="13">No FITS database rows are available for this camera.</td>
                     </tr>
                     {% endfor %}
+                    <tr id="modern-fits-filter-empty-row" hidden>
+                        <td colspan="13">No FITS metadata rows match the current filters.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -99,4 +162,48 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-note">This page shows database metadata only. It does not convert, download, delete, process, or inspect FITS file contents.</p>
     </section>
 </main>
+<script>
+(function() {
+    const searchInput = document.getElementById('modern-fits-search');
+    const typeFilter = document.getElementById('modern-fits-type-filter');
+    const timeofdayFilter = document.getElementById('modern-fits-timeofday-filter');
+    const uploadedFilter = document.getElementById('modern-fits-uploaded-filter');
+    const sourceFilter = document.getElementById('modern-fits-source-filter');
+    const countBadge = document.getElementById('modern-fits-filter-count');
+    const rows = Array.from(document.querySelectorAll('#modern-fits-table tbody tr[data-search]'));
+    const emptyRow = document.getElementById('modern-fits-filter-empty-row');
+
+    function applyFilters() {
+        const searchText = searchInput.value.trim().toLowerCase();
+        const typeValue = typeFilter.value;
+        const timeofdayValue = timeofdayFilter.value;
+        const uploadedValue = uploadedFilter.value;
+        const sourceValue = sourceFilter.value;
+        let visibleCount = 0;
+
+        rows.forEach(function(row) {
+            const matchesSearch = !searchText || row.dataset.search.includes(searchText);
+            const matchesType = !typeValue || row.dataset.fileType === typeValue;
+            const matchesTimeofday = !timeofdayValue || row.dataset.timeofday === timeofdayValue;
+            const matchesUploaded = !uploadedValue || row.dataset.uploaded === uploadedValue;
+            const matchesSource = !sourceValue || row.dataset.source === sourceValue;
+            const visible = matchesSearch && matchesType && matchesTimeofday && matchesUploaded && matchesSource;
+            row.hidden = !visible;
+            if (visible) {
+                visibleCount += 1;
+            }
+        });
+
+        countBadge.textContent = visibleCount + ' shown';
+        if (emptyRow) {
+            emptyRow.hidden = visibleCount !== 0 || rows.length === 0;
+        }
+    }
+
+    [searchInput, typeFilter, timeofdayFilter, uploadedFilter, sourceFilter].forEach(function(control) {
+        control.addEventListener('input', applyFilters);
+        control.addEventListener('change', applyFilters);
+    });
+})();
+</script>
 {% endblock %}

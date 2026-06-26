@@ -14067,6 +14067,11 @@ class ModernAdminFitsView(ModernAdminContextMixin, TemplateView):
         context['modern_admin_fits_with_dimensions_count'] = len([
             row for row in fits_rows if row['dimensions'] != 'Unknown'
         ])
+        context['modern_admin_fits_uploaded_count'] = len([
+            row for row in fits_rows if row['uploaded'] == 'Yes'
+        ])
+        context['modern_admin_fits_file_types'] = sorted({row['file_type'] for row in fits_rows})
+        context['modern_admin_fits_sources'] = sorted({row['source'] for row in fits_rows})
 
         return context
 
