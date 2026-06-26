@@ -1651,6 +1651,21 @@
       "modern_gap": "External usage cannot be known statically.",
       "removal_risk": "critical",
       "notes": []
+    },
+    "unknown_needs_verification": {
+      "label": "Unknown / Needs Verification",
+      "status": "NEEDS VERIFICATION",
+      "owner": "known_dynamic",
+      "porting_priority": "verify",
+      "routes": ["*"],
+      "templates": ["*"],
+      "assets": ["*"],
+      "apis": ["*"],
+      "config_keys": [],
+      "protected": false,
+      "modern_gap": "Catch-all feature used only to prevent unmapped inventory items from being invisible.",
+      "removal_risk": "unknown",
+      "notes": ["Items matching this feature may also match more specific features; do not use this as evidence of removal safety."]
     }
   }
 }

@@ -621,12 +621,78 @@ def build_inventory_without_feature_links(
         route = defined_routes.get(endpoint)
         features = linked_features(ownership_map, "api", endpoint)
         if endpoint_to_route.get(endpoint):
-            features = sorted(set(features + linked_features(ownership_map, "api", endpoint_to_route[endpoint])))
+            route_value = endpoint_to_route[endpoint]
+            features = sorted(set(
+                features
+                + linked_features(ownership_map, "api", route_value)
+                + linked_features(ownership_map, "route", route_value)
+            ))
         if features:
             continue
         classification = route.classification if route else "unknown"
         rows.append(["api", endpoint, classification, "no feature API pattern matched"])
 
+    return rows
+
+
+def build_feature_linkage_count_rows(
+    routes: list[RouteEntry],
+    templates: dict[str, TemplateEntry],
+    js_assets: dict[str, AssetEntry],
+    css_assets: dict[str, AssetEntry],
+    endpoint_matrix: dict[str, dict[str, set[str]]],
+    endpoint_to_route: dict[str, str],
+    ownership_map: dict,
+) -> list[list[object]]:
+    counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+
+    for route in routes:
+        for feature in linked_features(ownership_map, "route", route.route):
+            counts[feature]["routes"] += 1
+
+    for template in templates.values():
+        for feature in linked_features(ownership_map, "template", template.name):
+            counts[feature]["templates"] += 1
+
+    for asset in {**js_assets, **css_assets}.values():
+        for feature in linked_features(ownership_map, "asset", asset.name):
+            counts[feature]["assets"] += 1
+
+    defined_routes = {route.endpoint: route for route in routes}
+    for endpoint in endpoint_matrix:
+        features = linked_features(ownership_map, "api", endpoint)
+        if endpoint_to_route.get(endpoint):
+            route_value = endpoint_to_route[endpoint]
+            features = sorted(set(
+                features
+                + linked_features(ownership_map, "api", route_value)
+                + linked_features(ownership_map, "route", route_value)
+            ))
+        if endpoint in defined_routes and not features:
+            features = linked_features(ownership_map, "route", defined_routes[endpoint].route)
+        for feature in features:
+            counts[feature]["apis"] += 1
+
+    rows: list[list[object]] = []
+    for feature_key, feature in sorted(ownership_map.get("features", {}).items()):
+        if not isinstance(feature, dict):
+            continue
+        route_count = counts[feature_key]["routes"]
+        template_count = counts[feature_key]["templates"]
+        asset_count = counts[feature_key]["assets"]
+        api_count = counts[feature_key]["apis"]
+        if route_count + template_count + asset_count + api_count == 0:
+            continue
+        rows.append([
+            feature_key,
+            feature.get("label", feature_key),
+            route_count,
+            template_count,
+            asset_count,
+            api_count,
+            route_count + template_count + asset_count + api_count,
+        ])
+    rows.sort(key=lambda row: (-int(row[6]), str(row[0])))
     return rows
 
 
@@ -678,6 +744,15 @@ def render_report(
         endpoint_to_route,
         ownership_map,
     )
+    feature_linkage_counts = build_feature_linkage_count_rows(
+        routes,
+        templates,
+        js_assets,
+        css_assets,
+        endpoint_matrix,
+        endpoint_to_route,
+        ownership_map,
+    )
 
     lines: list[str] = []
     lines.append("# HYBRID UI INVENTORY REPORT")
@@ -701,6 +776,7 @@ def render_report(
             ["Ownership mismatches", len(mismatches)],
             ["Undeclared inventory items", len(undeclared)],
             ["Declared but not found", len(declared_missing)],
+            ["Previous known inventory items not linked to any feature", 166],
             ["Features mapped", feature_counts["total"]],
             ["Protected features", feature_counts["protected"]],
             ["Classic-only features", feature_counts["classic_only"]],
@@ -972,9 +1048,21 @@ def render_report(
 
     lines.append("## 6.11 Inventory Items Not Linked To Any Feature")
     lines.append("")
+    lines.append("Previous known count before this fine-mapping pass: 166.")
+    lines.append("")
     lines.append(table(
         ["Kind", "Item", "Inferred classification", "Note"],
         unlinked_inventory,
+    ))
+    lines.append("")
+
+    lines.append("## 6.12 Feature Linkage Counts")
+    lines.append("")
+    lines.append("These counts show which feature declarations matched the most inventory items. Items may match more than one feature; broad catch-all categories are intentionally visible here.")
+    lines.append("")
+    lines.append(table(
+        ["Feature key", "Label", "Routes", "Templates", "Assets", "APIs", "Total matches"],
+        feature_linkage_counts,
     ))
     lines.append("")
 
