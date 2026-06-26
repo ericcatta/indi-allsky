@@ -84,8 +84,8 @@ Operational backlog snapshot:
 | State | Current examples |
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
-| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,9 +128,8 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Upload | A | B | M | Medium | Provider/status inventory can be read-only before any upload action. |
-| 2 | Focus | B-wrapper | C | M | Medium | Native status/usability can improve wrapper parity without hardware action. |
-| 3 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
+| 1 | Focus | B-wrapper | C | M | Medium | Native status/usability can improve wrapper parity without hardware action. |
+| 2 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
 
 ### Blocked
 
@@ -145,6 +144,7 @@ the next available feature.
 | Task Queue mutations | No safe user-facing backend contract for retry/cancel/delete/requeue. | No mutation; only diagnostics/detail. |
 | Image Viewer actions/exclude | Exclude/delete/download/processing require explicit media action and path policy. | Metadata-only list/detail only. |
 | Video Viewer upload/share/actions | Upload/share/download/delete require explicit media action and path policy. | Metadata-only list/detail only. |
+| Upload actions/remote operations | Upload tests, OAuth flows and remote operations require explicit provider action and credential policy. | Read-only provider/status inventory only. |
 | Logs download/actions | Log download/action work requires explicit backend, filesystem and sensitive-data policy. | Existing read-only list/detail only. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
@@ -267,7 +267,7 @@ These should not be removed. They are transitional.
 | Sensors | modern | PARTIAL MODERN | C | 55% | Observatory | Medium | M | Medium | Config ownership unclear. |
 | Environmental sensors | modern | PARTIAL MODERN | C | 55% | Sensors/weather | Medium | M | Medium | Operational weather awareness incomplete. |
 | Power / UPS | shared_api | NEEDS VERIFICATION | A | 10% | Sensor/config audit | Low | L | Low | Verify presence and ownership. |
-| Upload | modern | PARTIAL MODERN | C | 55% | Filetransfer providers | Medium | M | Medium | Provider parity unclear. |
+| Upload | modern | PARTIAL MODERN | C | 60% | Filetransfer providers | Medium | M | Medium | Read-only provider/status inventory and usability exist; upload actions and remote operations remain blocked. |
 | YouTube / OAuth | classic | CLASSIC ONLY | A | 0% | External OAuth | Medium | M | Medium | Modern OAuth missing; risky. |
 | Sync API | external_api | EXTERNAL API | Preserve | 70% | External clients | Critical | XS | Preserve | Not UI cleanup. |
 | Action API | external_api | EXTERNAL API | Preserve | 70% | External clients | Critical | XS | Preserve | Not UI cleanup. |
@@ -334,15 +334,15 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
-| 2 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
-| 3 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
-| 4 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
-| 5 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
-| 6 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
-| 7 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
-| 8 | Image Viewer | Exclude/delete/download/processing contract review only | Metadata-only detail exists; further action/download work remains blocked. |
-| 9 | Video Viewer | Upload/share/download/delete contract review only | Metadata-only detail exists; further action/download work remains blocked. |
+| 1 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
+| 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
+| 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
+| 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
+| 5 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
+| 6 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
+| 7 | Image Viewer | Exclude/delete/download/processing contract review only | Metadata-only detail exists; further action/download work remains blocked. |
+| 8 | Video Viewer | Upload/share/download/delete contract review only | Metadata-only detail exists; further action/download work remains blocked. |
+| 9 | Upload | Upload/OAuth/provider action contract review only | Read-only provider/status usability exists; mutative provider work remains blocked. |
 | 10 | Logs | Download/action contract review only | Read-only detail exists; further action/download work remains blocked. |
 
 ## 7. Parallelizable Work
@@ -408,13 +408,12 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Upload provider status read-only.
+Focus native read-only status.
 
 ### 6. Why that feature?
 
-Upload has Classic/backend surfaces and Modern navigation coverage. The next
-safe step is read-only provider/status inventory only, with no upload action,
-credential exposure or remote operation.
+Focus has a Modern wrapper surface. The next safe step is native read-only
+status/usability only, with no autofocus, hardware movement or camera action.
 
 ### 7. Which features can be ported in parallel?
 
@@ -438,9 +437,9 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Upload Phase A/B** can be implemented as read-only provider
-status without upload actions, credential exposure, path-freeform access or
-remote mutation. Mark the feature locally blocked if that cannot be guaranteed.
+Review whether **Focus Phase B to C** can be implemented as native read-only
+status/usability without autofocus, hardware movement, capture changes or
+camera actions. Mark the feature locally blocked if that cannot be guaranteed.
 
 Scope:
 

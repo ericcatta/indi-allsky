@@ -144,6 +144,7 @@
         "/modern-admin/capture/service",
         "/modern-admin/cameras/detect-indi",
         "/modern-admin/cameras/start-indi",
+        "modern_admin_uploads_view",
         "modern_admin_media_image_detail_view",
         "modern_admin_media_video_detail_view",
         "/modern-admin/mode/*"
@@ -2403,7 +2404,7 @@
         "UPLOAD_*"
       ],
       "protected": false,
-      "modern_gap": "Provider parity unclear.",
+      "modern_gap": "Modern provider/status inventory and read-only usability exist; upload actions, OAuth flows and remote operations remain blocked pending explicit provider action policy.",
       "removal_risk": "high",
       "notes": []
     },

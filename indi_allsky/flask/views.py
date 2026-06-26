@@ -7474,20 +7474,29 @@ class ModernAdminUploadsView(ModernAdminView):
                 'label'  : 'File Transfer',
                 'detail' : filetransfer_config.get('CLASSNAME', 'Not configured'),
                 'status' : 'Configured' if filetransfer_config.get('HOST') else 'No host',
+                'tone'   : 'modern-admin-status-good' if filetransfer_config.get('HOST') else 'modern-admin-status-muted',
             },
             {
                 'label'  : 'S3 Upload',
                 'detail' : s3_config.get('CLASSNAME', 'Not configured'),
                 'status' : 'Enabled' if s3_config.get('ENABLE') else 'Disabled',
+                'tone'   : 'modern-admin-status-good' if s3_config.get('ENABLE') else 'modern-admin-status-muted',
             },
             {
                 'label'  : 'YouTube',
                 'detail' : 'Video uploads',
                 'status' : 'Enabled' if youtube_config.get('UPLOAD_VIDEO') else 'Disabled',
+                'tone'   : 'modern-admin-status-good' if youtube_config.get('UPLOAD_VIDEO') else 'modern-admin-status-muted',
             },
         )
         context['modern_admin_upload_tasks'] = self.get_task_queue_summary()
         context['modern_admin_upload_notifications'] = self.get_upload_notifications()
+        context['modern_admin_upload_target_count'] = len(context['modern_admin_upload_targets'])
+        context['modern_admin_upload_enabled_count'] = len([
+            target for target in context['modern_admin_upload_targets']
+            if target['status'] in ('Configured', 'Enabled')
+        ])
+        context['modern_admin_upload_notification_count'] = len(context['modern_admin_upload_notifications'])
 
         return context
 

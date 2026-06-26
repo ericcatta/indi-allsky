@@ -16,13 +16,31 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-uploads-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Upload summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Providers</div>
+            <h3>{{ modern_admin_upload_target_count }}</h3>
+            <p>{{ modern_admin_upload_enabled_count }} configured or enabled.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Recent messages</div>
+            <h3>{{ modern_admin_upload_notification_count }}</h3>
+            <p>Read-only upload notifications.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Mode</div>
+            <h3>Inspection</h3>
+            <p>No upload action is available here.</p>
+        </article>
+    </section>
+
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Upload targets">
         {% for target in modern_admin_upload_targets %}
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">{{ target.label }}</div>
             <h3>{{ target.status }}</h3>
             <p>{{ target.detail }}</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+            <span class="modern-admin-status-pill {{ target.tone }}">Read-only</span>
         </article>
         {% endfor %}
     </section>
@@ -38,7 +56,7 @@ var camera_id = {{ camera_id }};
                     <thead><tr><th>State</th><th>Tasks</th></tr></thead>
                     <tbody>
                         {% for row in modern_admin_upload_tasks %}
-                        <tr><td>{{ row.label }}</td><td>{{ row.count }}</td></tr>
+                        <tr><td>{{ row.label }}</td><td><span class="modern-admin-status-pill {% if row.count %}modern-admin-status-warning{% else %}modern-admin-status-muted{% endif %}">{{ row.count }}</span></td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -50,19 +68,60 @@ var camera_id = {{ camera_id }};
                 <p class="modern-admin-eyebrow">Upload Notifications</p>
                 <h2>Recent messages</h2>
             </div>
+            <div class="modern-admin-filter-bar" aria-label="Upload notification filters">
+                <label>
+                    Search
+                    <input id="modern-upload-search" type="search" placeholder="item or message" autocomplete="off">
+                </label>
+                <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-upload-filter-count">{{ modern_admin_upload_notification_count }} shown</span>
+            </div>
             <div class="modern-admin-table-scroll">
-                <table class="modern-admin-data-table">
+                <table class="modern-admin-data-table" id="modern-upload-notifications-table">
                     <thead><tr><th>Date</th><th>Item</th><th>Message</th></tr></thead>
                     <tbody>
                         {% for note in modern_admin_upload_notifications %}
-                        <tr><td>{{ note.createDate.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{ note.item }}</td><td>{{ note.notification }}</td></tr>
+                        <tr data-search="{{ (note.item ~ ' ' ~ note.notification)|lower }}"><td>{{ note.createDate.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{ note.item }}</td><td>{{ note.notification }}</td></tr>
                         {% else %}
                         <tr><td colspan="3">No recent upload notifications.</td></tr>
                         {% endfor %}
+                        <tr id="modern-upload-filter-empty-row" hidden>
+                            <td colspan="3">No upload notifications match the current filter.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </article>
     </section>
 </main>
+
+<script>
+(() => {
+    const searchInput = document.getElementById('modern-upload-search');
+    const countBadge = document.getElementById('modern-upload-filter-count');
+    const rows = Array.from(document.querySelectorAll('#modern-upload-notifications-table tbody tr[data-search]'));
+    const emptyRow = document.getElementById('modern-upload-filter-empty-row');
+
+    if (!searchInput || !countBadge || !emptyRow) {
+        return;
+    }
+
+    function applyUploadFilter() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visible = 0;
+
+        rows.forEach((row) => {
+            const matches = !query || row.dataset.search.includes(query);
+            row.hidden = !matches;
+            if (matches) {
+                visible += 1;
+            }
+        });
+
+        emptyRow.hidden = visible !== 0 || rows.length === 0;
+        countBadge.textContent = visible + ' shown';
+    }
+
+    searchInput.addEventListener('input', applyUploadFilter);
+})();
+</script>
 {% endblock %}
