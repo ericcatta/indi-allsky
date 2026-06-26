@@ -128,6 +128,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - il primo FITS e' eleggibile subito per ogni camera/profilo quando `IMAGE_SAVE_FITS` e' attivo;
     - `IMAGE_SAVE_FITS_PERIOD=0` resta every eligible frame;
     - metadata linking continua a ricevere `fits_path`, `source_image_path` e `detector_image_path` quando `write_fit()` produce un file.
+  - Scientific Source offline report:
+    - legge FrameMetadata JSONL e converte le righe valide in `ScientificFrame` tramite `ScientificFrameProvider`;
+    - conta source/detector path, profili, camere, tipi sorgente e file detector presenti/mancanti/non leggibili;
+    - ispeziona solo header FITS quando possibile, senza caricare immagini complete;
+    - produce text summary conciso per validazione manuale prima di qualunque detector Hough/RMS/AI;
+    - read-only/offline: nessun detector, nessuna mutazione file, nessun runtime hook.
 - IN TEST:
   - Quality Score v1 metadata-only: usa meter/target, exposure/gain state, capture status e decision state; non usa AI, image analysis o star detection.
   - Nightly Summary v1 sul Raspberry: validare una giornata/notte completa multicamera con gap, anomaly events e trend reali.
@@ -1460,3 +1466,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-26: Aggiunto bridge offline/manuale `DetectorResult -> MeteorObservation` per risultati `meteor_candidate`, append-only e shadow, senza EventClassification, review, validation, RMS, AI o campi scientifici meteor-specific.
 - 2026-06-26: Aggiunta Detector API foundation: `DetectorContract`, `DetectorRunContext` e `DetectorRunner` offline/manuale per futuri detector RMS/OpenCV/AI/manuali, senza detector reale, image read o runtime integration.
 - 2026-06-26: Aggiunto smoke test sintetico offline della detector pipeline: frame scientifici finti con path FITS inesistenti, dummy detector, DetectorResult JSONL, report/text summary e bridge verso EventClassification/MeteorObservation.
+- 2026-06-26: Aggiunto Scientific Source offline report per validare FrameMetadata/FITS/RAW detector paths, presenza file e header FITS prima di qualsiasi detector reale.
