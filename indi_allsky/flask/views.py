@@ -8328,27 +8328,38 @@ class TaskQueueView(TemplateView):
 class ModernAdminTaskQueueView(ModernAdminContextMixin, TaskQueueView):
     page_title = 'Modern Admin Task Queue'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+    modern_admin_task_display_limit = 200
 
     def get_context(self):
         context = super(ModernAdminTaskQueueView, self).get_context()
 
         task_rows = list()
-        for task in context.get('task_list', []):
+        task_list = context.get('task_list', [])
+        for task in task_list[:self.modern_admin_task_display_limit]:
+            created_date = task.get('createDate')
             message = task.get('message') or task.get('result') or ''
             task_rows.append({
                 'id'         : task.get('id'),
-                'created'    : self.format_task_datetime(task.get('createDate')),
+                'created'    : self.format_task_datetime(created_date),
+                'age'        : self.format_task_age(created_date),
                 'updated'    : self.format_task_datetime(task.get('updateDate'), default='Not tracked'),
                 'queue'      : task.get('queue') or 'Unknown',
                 'action'     : task.get('action') or 'Unknown',
                 'state'      : task.get('state') or 'Unknown',
+                'state_tone' : self.get_task_state_tone(task.get('state')),
                 'camera_id'  : task.get('camera_id') or 'Any',
                 'profile_id' : task.get('profile_id') or 'Any',
                 'message'    : message or 'No message',
             })
 
         context['modern_admin_task_rows'] = task_rows
-        context['modern_admin_task_count'] = len(task_rows)
+        context['modern_admin_task_count'] = len(task_list)
+        context['modern_admin_task_display_count'] = len(task_rows)
+        context['modern_admin_task_display_limit'] = self.modern_admin_task_display_limit
+        context['modern_admin_task_states'] = self.get_task_filter_values(task_rows, 'state')
+        context['modern_admin_task_queues'] = self.get_task_filter_values(task_rows, 'queue')
+        context['modern_admin_task_actions'] = self.get_task_filter_values(task_rows, 'action')
+        context['modern_admin_task_recent_count'] = self.get_recent_task_count(task_list)
 
         return context
 
@@ -8359,6 +8370,50 @@ class ModernAdminTaskQueueView(ModernAdminContextMixin, TaskQueueView):
         if hasattr(value, 'strftime'):
             return value.strftime('%Y-%m-%d %H:%M:%S')
         return str(value)
+
+
+    def format_task_age(self, value):
+        if not value:
+            return 'Unknown age'
+
+        try:
+            age_s = max(0, int((self.camera_now - value).total_seconds()))
+        except TypeError:
+            return 'Unknown age'
+
+        if age_s < 60:
+            return '{0:d}s ago'.format(age_s)
+        if age_s < 3600:
+            return '{0:d}m ago'.format(int(age_s / 60))
+        if age_s < 86400:
+            return '{0:d}h ago'.format(int(age_s / 3600))
+        return '{0:d}d ago'.format(int(age_s / 86400))
+
+
+    def get_task_state_tone(self, state):
+        state_name = str(state or '').upper()
+        if state_name == 'SUCCESS':
+            return 'modern-admin-status-good'
+        if state_name == 'FAILED':
+            return 'modern-admin-status-warning'
+        if state_name in ('QUEUED', 'RUNNING'):
+            return 'modern-admin-status-neutral'
+        return 'modern-admin-status-muted'
+
+
+    def get_task_filter_values(self, task_rows, key):
+        values = {str(row.get(key) or 'Unknown') for row in task_rows}
+        return sorted(values)
+
+
+    def get_recent_task_count(self, task_list):
+        recent_cutoff = self.camera_now - timedelta(hours=1)
+        recent_count = 0
+        for task in task_list:
+            create_date = task.get('createDate')
+            if create_date and create_date >= recent_cutoff:
+                recent_count += 1
+        return recent_count
 
 
 class AjaxSystemInfoView(BaseView):

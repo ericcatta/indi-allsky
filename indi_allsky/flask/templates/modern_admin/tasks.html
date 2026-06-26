@@ -19,14 +19,14 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Task queue summary">
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Visible Tasks</div>
-            <h3>{{ modern_admin_task_count }}</h3>
-            <p>Recent manual, queued, running, successful and failed tasks.</p>
+            <h3>{{ modern_admin_task_display_count }} / {{ modern_admin_task_count }}</h3>
+            <p>Newest task rows first. Display is capped at {{ modern_admin_task_display_limit }} rows for readability.</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Scope</div>
-            <h3>3 days</h3>
-            <p>Image and upload worker queues are intentionally excluded, matching the Classic view.</p>
+            <div class="modern-admin-card-label">Recent Tasks</div>
+            <h3>{{ modern_admin_task_recent_count }}</h3>
+            <p>Tasks created in the last hour within the Classic Task Queue scope.</p>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Classic Fallback</div>
@@ -40,12 +40,49 @@ var camera_id = {{ camera_id }};
             <p class="modern-admin-eyebrow">Task Queue</p>
             <h2 id="task-queue-title">Recent tasks</h2>
         </div>
+
+        <section class="modern-admin-control-strip" aria-label="Task queue filters">
+            <label for="modern-admin-task-search">
+                <span>Search</span>
+                <input id="modern-admin-task-search" type="search" autocomplete="off" placeholder="ID, action, queue, camera, profile or message">
+            </label>
+            <label for="modern-admin-task-state">
+                <span>State</span>
+                <select id="modern-admin-task-state">
+                    <option value="">All states</option>
+                    {% for state in modern_admin_task_states %}
+                    <option value="{{ state|lower }}">{{ state }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label for="modern-admin-task-queue">
+                <span>Queue</span>
+                <select id="modern-admin-task-queue">
+                    <option value="">All queues</option>
+                    {% for queue in modern_admin_task_queues %}
+                    <option value="{{ queue|lower }}">{{ queue }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label for="modern-admin-task-action">
+                <span>Action</span>
+                <select id="modern-admin-task-action">
+                    <option value="">All actions</option>
+                    {% for action in modern_admin_task_actions %}
+                    <option value="{{ action|lower }}">{{ action }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </section>
+        <p class="modern-admin-note"><span id="modern-admin-task-visible-count">{{ modern_admin_task_display_count }}</span> displayed rows match the current read-only filters.</p>
+
         <div class="modern-admin-table-scroll">
             <table class="modern-admin-data-table">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Created</th>
+                        <th>Age</th>
                         <th>Updated</th>
                         <th>Queue</th>
                         <th>Action</th>
@@ -57,26 +94,75 @@ var camera_id = {{ camera_id }};
                 </thead>
                 <tbody>
                     {% for task in modern_admin_task_rows %}
-                    <tr>
+                    <tr class="modern-admin-task-row" data-task-state="{{ task.state|lower }}" data-task-queue="{{ task.queue|lower }}" data-task-action="{{ task.action|lower }}" data-task-search="{{ task.id }} {{ task.created }} {{ task.age }} {{ task.updated }} {{ task.queue }} {{ task.action }} {{ task.state }} {{ task.camera_id }} {{ task.profile_id }} {{ task.message }}">
                         <td>{{ task.id }}</td>
                         <td>{{ task.created }}</td>
+                        <td>{{ task.age }}</td>
                         <td>{{ task.updated }}</td>
                         <td>{{ task.queue }}</td>
                         <td>{{ task.action }}</td>
-                        <td>{{ task.state }}</td>
+                        <td><span class="modern-admin-status-pill {{ task.state_tone }}">{{ task.state }}</span></td>
                         <td>{{ task.camera_id }}</td>
                         <td>{{ task.profile_id }}</td>
                         <td>{{ task.message }}</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="9">No recent task queue rows matched the Classic Task Queue scope.</td>
+                        <td colspan="10">No recent task queue rows matched the Classic Task Queue scope.</td>
                     </tr>
                     {% endfor %}
+                    <tr id="modern-admin-task-no-filter-match" hidden>
+                        <td colspan="10">No task rows match the current filters.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
         <p class="modern-admin-note">This Modern Admin page is diagnostic only. Use the Classic Task Queue fallback for the legacy table view.</p>
     </section>
 </main>
+
+<script>
+(function () {
+    const searchInput = document.getElementById('modern-admin-task-search');
+    const stateSelect = document.getElementById('modern-admin-task-state');
+    const queueSelect = document.getElementById('modern-admin-task-queue');
+    const actionSelect = document.getElementById('modern-admin-task-action');
+    const visibleCount = document.getElementById('modern-admin-task-visible-count');
+    const noMatchRow = document.getElementById('modern-admin-task-no-filter-match');
+    const rows = Array.from(document.querySelectorAll('.modern-admin-task-row'));
+
+    function normalize(value) {
+        return (value || '').toString().toLowerCase().trim();
+    }
+
+    function applyTaskFilters() {
+        const query = normalize(searchInput.value);
+        const state = normalize(stateSelect.value);
+        const queue = normalize(queueSelect.value);
+        const action = normalize(actionSelect.value);
+        let matches = 0;
+
+        rows.forEach((row) => {
+            const rowMatches = (
+                (!query || normalize(row.dataset.taskSearch).includes(query)) &&
+                (!state || normalize(row.dataset.taskState) === state) &&
+                (!queue || normalize(row.dataset.taskQueue) === queue) &&
+                (!action || normalize(row.dataset.taskAction) === action)
+            );
+            row.hidden = !rowMatches;
+            if (rowMatches) {
+                matches += 1;
+            }
+        });
+
+        visibleCount.textContent = matches;
+        noMatchRow.hidden = matches !== 0 || rows.length === 0;
+    }
+
+    [searchInput, stateSelect, queueSelect, actionSelect].forEach((control) => {
+        control.addEventListener('input', applyTaskFilters);
+        control.addEventListener('change', applyTaskFilters);
+    });
+})();
+</script>
 {% endblock %}
