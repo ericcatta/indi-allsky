@@ -84,6 +84,7 @@
         "/modern-admin/system/info",
         "/modern-admin/system/log",
         "/modern-admin/system/support",
+        "/modern-admin/tasks",
         "/modern-admin/updates",
         "/modern-admin/uploads"
       ],
@@ -115,6 +116,7 @@
         "modern_admin/support_info.html",
         "modern_admin/system.html",
         "modern_admin/system_info.html",
+        "modern_admin/tasks.html",
         "modern_admin/updates.html",
         "modern_admin/uploads.html",
         "modern_admin/virtualsky.html"
@@ -1251,18 +1253,18 @@
     },
     "task_queue": {
       "label": "Task Queue",
-      "status": "CLASSIC ONLY",
-      "owner": "classic",
+      "status": "PARTIAL MODERN",
+      "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/tasks"],
-      "templates": ["taskqueue.html"],
+      "routes": ["/tasks", "/modern-admin/tasks"],
+      "templates": ["taskqueue.html", "modern_admin/tasks.html"],
       "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
       "apis": [],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "No clear Modern task queue page.",
+      "modern_gap": "Modern Admin has read-only task queue visibility; Classic fallback remains for legacy parity.",
       "removal_risk": "high",
-      "notes": ["Operational diagnostics should be ported early."]
+      "notes": ["Modern page is read-only and must not add delete, retry, cancel or edit actions."]
     },
     "user_management": {
       "label": "User Management",

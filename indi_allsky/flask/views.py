@@ -7555,6 +7555,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('System Info', 'indi_allsky.modern_admin_system_info_view'),
             ('Support Info', 'indi_allsky.modern_admin_support_info_view'),
             ('Log', 'indi_allsky.modern_admin_log_view'),
+            ('Task Queue', 'indi_allsky.modern_admin_taskqueue_view'),
             ('Settings Inventory', 'indi_allsky.modern_admin_settings_view'),
             ('Global Capture Defaults', 'indi_allsky.modern_admin_capture_settings_view'),
             ('Camera Settings', 'indi_allsky.modern_admin_camera_settings_view'),
@@ -8252,6 +8253,22 @@ class TaskQueueView(TemplateView):
     page_title = 'Task Queue'
     decorators = [login_required]
 
+    def get_task_data_value(self, task_data, key, default=''):
+        if not isinstance(task_data, dict):
+            return default
+
+        value = task_data.get(key)
+        if value not in (None, ''):
+            return value
+
+        task_kwargs = task_data.get('kwargs')
+        if isinstance(task_kwargs, dict):
+            value = task_kwargs.get(key)
+            if value not in (None, ''):
+                return value
+
+        return default
+
     def get_context(self):
         context = super(TaskQueueView, self).get_context()
 
@@ -8283,7 +8300,7 @@ class TaskQueueView(TemplateView):
 
         task_list = list()
         for task in tasks:
-            if task.data:
+            if isinstance(task.data, dict):
                 task_data = task.data
             else:
                 task_data = {}
@@ -8291,9 +8308,13 @@ class TaskQueueView(TemplateView):
             t = {
                 'id'         : task.id,
                 'createDate' : task.createDate,
+                'updateDate' : getattr(task, 'updateDate', None),
                 'queue'      : task.queue.name,
                 'state'      : task.state.name,
-                'action'     : task_data.get('action', 'MISSING'),
+                'action'     : self.get_task_data_value(task_data, 'action', 'MISSING'),
+                'camera_id'  : self.get_task_data_value(task_data, 'camera_id'),
+                'profile_id' : self.get_task_data_value(task_data, 'profile_id'),
+                'message'    : self.get_task_data_value(task_data, 'message') or self.get_task_data_value(task_data, 'error'),
                 'result'     : task.result,
             }
 
@@ -8302,6 +8323,42 @@ class TaskQueueView(TemplateView):
         context['task_list'] = task_list
 
         return context
+
+
+class ModernAdminTaskQueueView(ModernAdminContextMixin, TaskQueueView):
+    page_title = 'Modern Admin Task Queue'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    def get_context(self):
+        context = super(ModernAdminTaskQueueView, self).get_context()
+
+        task_rows = list()
+        for task in context.get('task_list', []):
+            message = task.get('message') or task.get('result') or ''
+            task_rows.append({
+                'id'         : task.get('id'),
+                'created'    : self.format_task_datetime(task.get('createDate')),
+                'updated'    : self.format_task_datetime(task.get('updateDate'), default='Not tracked'),
+                'queue'      : task.get('queue') or 'Unknown',
+                'action'     : task.get('action') or 'Unknown',
+                'state'      : task.get('state') or 'Unknown',
+                'camera_id'  : task.get('camera_id') or 'Any',
+                'profile_id' : task.get('profile_id') or 'Any',
+                'message'    : message or 'No message',
+            })
+
+        context['modern_admin_task_rows'] = task_rows
+        context['modern_admin_task_count'] = len(task_rows)
+
+        return context
+
+
+    def format_task_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
 
 
 class AjaxSystemInfoView(BaseView):
@@ -20236,6 +20293,7 @@ bp_allsky.add_url_rule('/modern-admin/system', view_func=ModernAdminSystemView.a
 bp_allsky.add_url_rule('/modern-admin/system/info', view_func=ModernAdminSystemInfoView.as_view('modern_admin_system_info_view', template_name='modern_admin/system_info.html'))
 bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupportInfoView.as_view('modern_admin_support_info_view', template_name='modern_admin/support_info.html'))
 bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.as_view('modern_admin_log_view', template_name='modern_admin/log.html'))
+bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView.as_view('modern_admin_taskqueue_view', template_name='modern_admin/tasks.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/safe_controls.html'))
