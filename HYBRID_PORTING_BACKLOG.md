@@ -85,7 +85,7 @@ Operational backlog snapshot:
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
 | In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs |
-| Locally blocked | Task Queue mutations, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,11 +128,10 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Logs | D | stop/E only after contract | S | Medium | Modern read-only log detail exists; no new download/action work without contract review. |
-| 2 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
-| 3 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
-| 4 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
-| 5 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
+| 1 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
+| 2 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
+| 3 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
+| 4 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
 
 ### Blocked
 
@@ -145,6 +144,7 @@ the next available feature.
 | Meteor Detection (global for detector work) | Real outdoor FITS validation is missing. | Offline reports, validation tooling, documentation. |
 | Event Review (global for event UI/action work) | Event review workflow has no UI contract yet. | Architecture/design/read-only evidence browser. |
 | Task Queue mutations | No safe user-facing backend contract for retry/cancel/delete/requeue. | No mutation; only diagnostics/detail. |
+| Logs download/actions | Log download/action work requires explicit backend, filesystem and sensitive-data policy. | Existing read-only list/detail only. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
 | Notification acknowledge/delete | Mutative notification actions need explicit backend and UX contract. | Read-only inventory/detail only. |
@@ -335,16 +335,16 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Logs | Safe action/download contract review only | Detail exists; further work needs explicit backend/download policy. |
-| 2 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
-| 3 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
-| 4 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
-| 5 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
-| 6 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
-| 7 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
-| 8 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
-| 9 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
-| 10 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
+| 1 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
+| 2 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
+| 3 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
+| 4 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
+| 5 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
+| 6 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
+| 7 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
+| 8 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
+| 9 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
+| 10 | Logs | Download/action contract review only | Read-only detail exists; further action/download work remains blocked. |
 
 ## 7. Parallelizable Work
 
@@ -409,13 +409,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Logs safe action/download contract review only.
+Image Viewer read-only media detail.
 
 ### 6. Why that feature?
 
-Logs read-only detail exists. Further work needs explicit backend/download
-policy and must not add unreviewed download, delete, rotate, truncate or
-filesystem mutation.
+Image Viewer has Modern media list coverage. The next safe step is read-only
+media detail only, with no delete, exclude, processing, download, path-freeform
+access or filesystem mutation.
 
 ### 7. Which features can be ported in parallel?
 
@@ -439,15 +439,16 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Mark **Logs Phase E/download/action work** locally blocked unless an explicit
-safe backend/download contract is provided. Continue to the next non-blocked
-feature if no safe read-only phase remains.
+Review whether **Image Viewer Phase C to D** can be implemented as metadata-only
+detail without delete, exclude, processing, download, path-freeform access or
+filesystem mutation. Mark the feature locally blocked if that cannot be
+guaranteed.
 
 Scope:
 
-- Analyze existing Modern log detail, Classic log download endpoints and action surface.
-- Do not add download, delete, rotate, truncate, filesystem writes or path-freeform access.
-- If no safe read-only phase remains, mark Logs locally blocked and continue.
+- Analyze Classic image viewer, `/ajax/imageviewer`, `/ajax/exclude`, and the existing Modern media/image pages.
+- Add only read-only metadata detail if it can remain path-safe.
+- Do not add delete, exclude, processing, download, filesystem reads or arbitrary path access.
 - Preserve Classic fallback.
 - Update ownership/inventory.
 
