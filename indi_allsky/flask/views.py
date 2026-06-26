@@ -14219,6 +14219,98 @@ class ModernAdminMediaTimelapsesView(ModernAdminMediaListView):
     modern_admin_media_kind = 'video'
 
 
+class ModernAdminMediaVideoDetailView(ModernAdminMediaTimelapsesView):
+    page_title = 'Modern Admin Video Detail'
+
+
+    def dispatch_request(self, video_id):
+        self.video_id = video_id
+        return super(ModernAdminMediaVideoDetailView, self).dispatch_request()
+
+
+    def get_context(self):
+        context = super(ModernAdminMediaListView, self).get_context()
+
+        try:
+            entry = IndiAllSkyDbVideoTable.query\
+                .join(IndiAllSkyDbVideoTable.camera)\
+                .filter(IndiAllSkyDbVideoTable.id == self.video_id)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .one()
+        except NoResultFound:
+            abort(404)
+
+        context['modern_admin_video_detail'] = {
+            'id'         : entry.id,
+            'created'    : self.format_video_datetime(entry.createDate),
+            'day_date'   : entry.dayDate if entry.dayDate else 'Unknown',
+            'camera_id'  : entry.camera_id,
+            'filename'   : self.format_video_filename(entry.filename),
+            'dimensions' : self.format_video_dimensions(entry.width, entry.height),
+            'frames'     : entry.frames if entry.frames is not None else 'Unknown',
+            'framerate'  : self.format_video_number(entry.framerate, suffix=' fps'),
+            'file_size'  : self.format_media_size(entry.fileSize) if entry.fileSize else 'Unknown',
+            'timeofday'  : 'Night' if entry.night else 'Day',
+            'uploaded'   : self.format_video_bool(entry.uploaded),
+            'success'    : self.format_video_bool(entry.success),
+            'source'     : self.format_video_source(entry),
+            'sync_id'    : entry.sync_id if entry.sync_id is not None else 'N/A',
+            'metadata'   : self.format_video_data_summary(entry.data),
+        }
+
+        return context
+
+
+    def format_video_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+    def format_video_filename(self, value):
+        if not value:
+            return 'Unknown'
+        return Path(str(value)).name
+
+
+    def format_video_dimensions(self, width, height):
+        if width and height:
+            return '{0:d} x {1:d}'.format(int(width), int(height))
+        return 'Unknown'
+
+
+    def format_video_number(self, value, suffix=''):
+        if value is None:
+            return 'Unknown'
+        try:
+            number = '{0:.3f}'.format(float(value)).rstrip('0').rstrip('.')
+            return '{0:s}{1:s}'.format(number, suffix)
+        except (TypeError, ValueError):
+            return str(value)
+
+
+    def format_video_bool(self, value):
+        return 'Yes' if bool(value) else 'No'
+
+
+    def format_video_source(self, entry):
+        if entry.remote_url:
+            return 'Remote URL recorded'
+        if entry.s3_key:
+            return 'S3 key recorded'
+        return 'Local DB entry'
+
+
+    def format_video_data_summary(self, value):
+        if isinstance(value, dict):
+            return 'Keys: {0:d}'.format(len(value))
+        if value is None:
+            return 'No metadata payload'
+        return 'Non-dict metadata payload'
+
+
 class ModernAdminMediaMiniTimelapsesView(ModernAdminMediaListView):
     page_title = 'Modern Admin Mini-Timelapses'
     modern_admin_section = 'Mini-Timelapses'
@@ -21185,6 +21277,7 @@ bp_allsky.add_url_rule('/modern-admin/media/gallery/page', view_func=ModernAdmin
 bp_allsky.add_url_rule('/modern-admin/media/images', view_func=ModernAdminMediaImagesView.as_view('modern_admin_media_images_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/images/<int:image_id>', view_func=ModernAdminMediaImageDetailView.as_view('modern_admin_media_image_detail_view', template_name='modern_admin/image_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/media/timelapses', view_func=ModernAdminMediaTimelapsesView.as_view('modern_admin_media_timelapses_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/timelapses/<int:video_id>', view_func=ModernAdminMediaVideoDetailView.as_view('modern_admin_media_video_detail_view', template_name='modern_admin/video_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))

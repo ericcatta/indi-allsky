@@ -134,6 +134,7 @@
         "modern_admin/updates.html",
         "modern_admin/uploads.html",
         "modern_admin/users.html",
+        "modern_admin/video_detail.html",
         "modern_admin/virtualsky.html"
       ],
       "assets": [
@@ -144,6 +145,7 @@
         "/modern-admin/cameras/detect-indi",
         "/modern-admin/cameras/start-indi",
         "modern_admin_media_image_detail_view",
+        "modern_admin_media_video_detail_view",
         "/modern-admin/mode/*"
       ]
     },
@@ -1370,11 +1372,13 @@
       "routes": [
         "/videoviewer",
         "/ajax/videoviewer",
-        "/modern-admin/media/timelapses"
+        "/modern-admin/media/timelapses",
+        "/modern-admin/media/timelapses/*"
       ],
       "templates": [
         "videoviewer.html",
-        "modern_admin/media_list.html"
+        "modern_admin/media_list.html",
+        "modern_admin/video_detail.html"
       ],
       "assets": [],
       "apis": [
@@ -1382,7 +1386,7 @@
       ],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "Upload/share parity unclear.",
+      "modern_gap": "Read-only Modern timelapse list/detail exists; upload/share/download/delete parity remains blocked pending explicit media action and path policy.",
       "removal_risk": "medium",
       "notes": []
     },
