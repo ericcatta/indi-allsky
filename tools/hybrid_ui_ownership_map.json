@@ -1,0 +1,304 @@
+{
+  "version": 1,
+  "description": "Declared ownership map for Hybrid AllSky UI consolidation.",
+  "owners": {
+    "classic": {
+      "description": "Legacy Classic UI pages, templates, APIs and assets that still need parity review before removal.",
+      "routes": [
+        "/ajax/config/restore",
+        "/ajax/fitsimageviewer",
+        "/ajax/imageviewer",
+        "/ajax/minigenerate",
+        "/ajax/notification",
+        "/ajax/uploadyoutube",
+        "/ajax/user",
+        "/cameras",
+        "/config/download",
+        "/config/list",
+        "/config/restore",
+        "/fits2jpeg",
+        "/fitsimageviewer",
+        "/imageviewer",
+        "/minigenerate",
+        "/notifications",
+        "/tasks",
+        "/user",
+        "/users",
+        "/youtube/*"
+      ],
+      "templates": [
+        "cameras.html",
+        "config_list.html",
+        "config_restore.html",
+        "fitsimageviewer.html",
+        "imageviewer.html",
+        "mini_generate.html",
+        "notifications.html",
+        "taskqueue.html",
+        "user.html",
+        "users.html"
+      ],
+      "assets": [
+        "DataTables/datatables.min.css",
+        "DataTables/datatables.min.js",
+        "photoswipe/dist/photoswipe.css",
+        "photoswipe/dist/umd/photoswipe-lightbox.umd.min.js",
+        "photoswipe/dist/umd/photoswipe.umd.min.js"
+      ],
+      "apis": [
+        "/ajax/config/restore",
+        "/ajax/fitsimageviewer",
+        "/ajax/imageviewer",
+        "/ajax/minigenerate",
+        "/ajax/notification",
+        "/ajax/uploadyoutube",
+        "/ajax/user",
+        "/fits2jpeg"
+      ]
+    },
+    "modern": {
+      "description": "Native Modern UI pages and assets.",
+      "routes": [
+        "/modern-admin",
+        "/modern-admin/cameras",
+        "/modern-admin/cameras/add",
+        "/modern-admin/cameras/adu-history",
+        "/modern-admin/cameras/dark-library",
+        "/modern-admin/cameras/detect-indi",
+        "/modern-admin/cameras/image-lag",
+        "/modern-admin/cameras/info",
+        "/modern-admin/cameras/mask-base",
+        "/modern-admin/cameras/start-indi",
+        "/modern-admin/capture/service",
+        "/modern-admin/media/*",
+        "/modern-admin/mode/*",
+        "/modern-admin/observatory",
+        "/modern-admin/observatory/*",
+        "/modern-admin/settings",
+        "/modern-admin/settings/cameras",
+        "/modern-admin/settings/capture",
+        "/modern-admin/settings/full",
+        "/modern-admin/storage",
+        "/modern-admin/storage/file-space-usage",
+        "/modern-admin/system",
+        "/modern-admin/system/info",
+        "/modern-admin/system/log",
+        "/modern-admin/system/support",
+        "/modern-admin/updates",
+        "/modern-admin/uploads"
+      ],
+      "templates": [
+        "modern_admin/_shell_header.html",
+        "modern_admin/adu_history.html",
+        "modern_admin/astropanel.html",
+        "modern_admin/camera_add.html",
+        "modern_admin/camera_info.html",
+        "modern_admin/cameras.html",
+        "modern_admin/charts.html",
+        "modern_admin/dark_library.html",
+        "modern_admin/file_space_usage.html",
+        "modern_admin/image_lag.html",
+        "modern_admin/index.html",
+        "modern_admin/log.html",
+        "modern_admin/longterm_keogram.html",
+        "modern_admin/mask.html",
+        "modern_admin/media_list.html",
+        "modern_admin/observatory.html",
+        "modern_admin/observatory_status.html",
+        "modern_admin/realtime_keogram.html",
+        "modern_admin/sensor_panel.html",
+        "modern_admin/settings_capture.html",
+        "modern_admin/settings_cameras.html",
+        "modern_admin/settings_full.html",
+        "modern_admin/settings_inventory.html",
+        "modern_admin/storage.html",
+        "modern_admin/support_info.html",
+        "modern_admin/system.html",
+        "modern_admin/system_info.html",
+        "modern_admin/updates.html",
+        "modern_admin/uploads.html",
+        "modern_admin/virtualsky.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "/modern-admin/capture/service",
+        "/modern-admin/cameras/detect-indi",
+        "/modern-admin/cameras/start-indi",
+        "/modern-admin/mode/*"
+      ]
+    },
+    "modern_wrapper": {
+      "description": "Modern UI safe-control wrappers over legacy/backend actions.",
+      "routes": [
+        "/modern-admin/storage/drives",
+        "/modern-admin/system/config",
+        "/modern-admin/system/gpio-control",
+        "/modern-admin/system/network",
+        "/modern-admin/tools/camera-simulator",
+        "/modern-admin/tools/focus",
+        "/modern-admin/tools/generate",
+        "/modern-admin/tools/image-circle-helper",
+        "/modern-admin/tools/process-fits"
+      ],
+      "templates": [
+        "modern_admin/safe_controls.html"
+      ],
+      "assets": [],
+      "apis": []
+    },
+    "shared_api": {
+      "description": "APIs and shared routes used by Classic, Modern or backend consumers.",
+      "routes": [
+        "/ajax/astropanel",
+        "/ajax/config",
+        "/ajax/drives",
+        "/ajax/focuscontroller",
+        "/ajax/generate",
+        "/ajax/indiserver",
+        "/ajax/manual_gpio",
+        "/ajax/network",
+        "/ajax/selectcamera",
+        "/ajax/settime",
+        "/ajax/settimezone",
+        "/ajax/status_update",
+        "/ajax/system",
+        "/images/<path:path>",
+        "/js/charts",
+        "/js/focus",
+        "/js/latest",
+        "/js/log",
+        "/js/loop",
+        "/js/processing",
+        "/js/sensor_panel",
+        "/js/support",
+        "/login",
+        "/logout"
+      ],
+      "templates": [
+        "base.html",
+        "login.html"
+      ],
+      "assets": [
+        "bootstrap/bootstrap.bundle.min.js",
+        "bootstrap/bootstrap.min.css",
+        "css/style.css",
+        "js/chart.umd.js",
+        "js/clipboard.min.js",
+        "js/indi-allsky-tabs.js",
+        "js/jquery-3.7.1.min.js"
+      ],
+      "apis": [
+        "/ajax/config",
+        "/ajax/drives",
+        "/ajax/focuscontroller",
+        "/ajax/generate",
+        "/ajax/manual_gpio",
+        "/ajax/network",
+        "/ajax/status_update",
+        "/js/charts",
+        "/js/focus",
+        "/js/latest",
+        "/js/log",
+        "/js/loop",
+        "/js/processing",
+        "/js/support"
+      ]
+    },
+    "external_api": {
+      "description": "APIs intended for sync/action/external clients.",
+      "routes": [
+        "/action/*",
+        "/sync/v1/*"
+      ],
+      "templates": [],
+      "assets": [],
+      "apis": [
+        "/action/*",
+        "/sync/v1/*"
+      ]
+    },
+    "public": {
+      "description": "Public routes and latest media endpoints.",
+      "routes": [
+        "/",
+        "/index_canvas",
+        "/index_img",
+        "/latest*",
+        "/latestimage",
+        "/latestimageview",
+        "/latestkeogram",
+        "/latestkeogramview",
+        "/latestpanorama*",
+        "/latestraw*",
+        "/lateststartrail*",
+        "/latestthumbnail",
+        "/latesttimelapse*",
+        "/panorama*",
+        "/public",
+        "/raw*"
+      ],
+      "templates": [
+        "index_canvas.html",
+        "index_img.html"
+      ],
+      "assets": [],
+      "apis": [
+        "/latest*",
+        "/js/latest_panorama",
+        "/js/latest_rawimage"
+      ]
+    },
+    "known_dynamic": {
+      "description": "Routes/assets/templates referenced dynamically and not reliably detected by static analysis.",
+      "routes": [
+        "/modern-admin/classic/*",
+        "/modern-admin/classic/<classic_page>",
+        "/view_*",
+        "/watch_*"
+      ],
+      "templates": [
+        "modern_admin/placeholder.html",
+        "view_image.html",
+        "watch_video.html"
+      ],
+      "assets": [
+        "DataTables/datatables.css",
+        "DataTables/datatables.js",
+        "photoswipe/dist/photoswipe-lightbox.esm.js",
+        "photoswipe/dist/photoswipe-lightbox.esm.min.js",
+        "photoswipe/dist/photoswipe.esm.js",
+        "photoswipe/dist/photoswipe.esm.min.js",
+        "virtualsky/*"
+      ],
+      "apis": [
+        "dynamic:*"
+      ]
+    },
+    "protected_modern_work": {
+      "description": "Modern/profile/multicamera/scientific features that must not be broken during porting.",
+      "routes": [],
+      "templates": [],
+      "assets": [],
+      "apis": [],
+      "features": [
+        "Multi-camera",
+        "Camera Profiles",
+        "Profile-first configuration",
+        "Auto Exposure",
+        "Auto Gain",
+        "Hybrid AWB",
+        "Metadata",
+        "Analytics",
+        "Quality",
+        "Environmental Awareness",
+        "Event Foundation",
+        "Scientific Source Layer",
+        "Detector/Meteor foundations",
+        "Modern Admin shell",
+        "Modern safe controls"
+      ]
+    }
+  }
+}

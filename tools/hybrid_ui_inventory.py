@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field
+import fnmatch
+import json
 from pathlib import Path
 import re
 from typing import Iterable
@@ -20,6 +22,7 @@ FLASK_DIR = REPO_ROOT / "indi_allsky" / "flask"
 TEMPLATE_DIR = FLASK_DIR / "templates"
 STATIC_DIR = FLASK_DIR / "static"
 REPORT_PATH = REPO_ROOT / "HYBRID_UI_INVENTORY_REPORT.md"
+OWNERSHIP_MAP_PATH = REPO_ROOT / "tools" / "hybrid_ui_ownership_map.json"
 
 
 ADD_URL_RE = re.compile(r"bp_[A-Za-z0-9_]+\.add_url_rule\(\s*['\"]([^'\"]+)['\"](?P<rest>.*)")
@@ -101,6 +104,54 @@ def md(value: object) -> str:
 def join(values: Iterable[str]) -> str:
     items = [str(v) for v in values if str(v)]
     return ", ".join(sorted(set(items))) if items else "-"
+
+
+def load_ownership_map() -> tuple[dict, list[str]]:
+    if not OWNERSHIP_MAP_PATH.exists():
+        return {}, [f"Ownership map not found: {rel(OWNERSHIP_MAP_PATH)}"]
+
+    try:
+        data = json.loads(OWNERSHIP_MAP_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return {}, [f"Invalid ownership map JSON: {rel(OWNERSHIP_MAP_PATH)} line {exc.lineno}: {exc.msg}"]
+    except OSError as exc:
+        return {}, [f"Unable to read ownership map {rel(OWNERSHIP_MAP_PATH)}: {exc}"]
+
+    if not isinstance(data, dict) or not isinstance(data.get("owners"), dict):
+        return {}, [f"Ownership map has no valid owners object: {rel(OWNERSHIP_MAP_PATH)}"]
+
+    return data, []
+
+
+def ownership_entries(ownership_map: dict, kind: str) -> list[tuple[str, str]]:
+    key = {
+        "route": "routes",
+        "template": "templates",
+        "asset": "assets",
+        "api": "apis",
+    }[kind]
+    entries: list[tuple[str, str]] = []
+    for owner, owner_data in ownership_map.get("owners", {}).items():
+        if not isinstance(owner_data, dict):
+            continue
+        for pattern in owner_data.get(key, []) or []:
+            entries.append((owner, str(pattern)))
+    return entries
+
+
+def declared_owners(ownership_map: dict, kind: str, value: str) -> list[str]:
+    owners = [
+        owner
+        for owner, pattern in ownership_entries(ownership_map, kind)
+        if fnmatch.fnmatchcase(value, pattern)
+    ]
+    return sorted(set(owners))
+
+
+def ownership_mismatch(classification: str, owners: list[str]) -> str:
+    if not owners:
+        return "-"
+    return "no" if classification in owners else "yes"
 
 
 def parse_methods(rest: str) -> list[str]:
@@ -349,12 +400,113 @@ def table(headers: list[str], rows: list[list[object]]) -> str:
     return "\n".join(lines)
 
 
+def declared_ownership_summary_rows(ownership_map: dict) -> list[list[object]]:
+    rows: list[list[object]] = []
+    for owner, owner_data in ownership_map.get("owners", {}).items():
+        if not isinstance(owner_data, dict):
+            continue
+        rows.append([
+            owner,
+            len(owner_data.get("routes", []) or []),
+            len(owner_data.get("templates", []) or []),
+            len(owner_data.get("assets", []) or []),
+            len(owner_data.get("apis", []) or []),
+            len(owner_data.get("features", []) or []),
+        ])
+    return rows
+
+
+def build_ownership_mismatches(
+    routes: list[RouteEntry],
+    templates: dict[str, TemplateEntry],
+    js_assets: dict[str, AssetEntry],
+    css_assets: dict[str, AssetEntry],
+    endpoint_matrix: dict[str, dict[str, set[str]]],
+    endpoint_to_route: dict[str, str],
+    ownership_map: dict,
+) -> list[list[object]]:
+    rows: list[list[object]] = []
+    for route in routes:
+        owners = declared_owners(ownership_map, "route", route.route)
+        if owners and route.classification not in owners:
+            rows.append(["route", route.route, route.classification, join(owners), "declared route ownership differs"])
+
+    for template in templates.values():
+        owners = declared_owners(ownership_map, "template", template.name)
+        if owners and template.classification not in owners:
+            rows.append(["template", template.name, template.classification, join(owners), "declared template ownership differs"])
+
+    for asset in sorted({**js_assets, **css_assets}.values(), key=lambda item: item.name):
+        owners = declared_owners(ownership_map, "asset", asset.name)
+        if owners and asset.classification not in owners:
+            rows.append(["asset", asset.name, asset.classification, join(owners), "declared asset ownership differs"])
+
+    defined_routes = {route.endpoint: route for route in routes}
+    for endpoint in sorted(endpoint_matrix):
+        route = defined_routes.get(endpoint)
+        classification = route.classification if route else "unknown"
+        owners = declared_owners(ownership_map, "api", endpoint)
+        if endpoint_to_route.get(endpoint):
+            owners = sorted(set(owners + declared_owners(ownership_map, "api", endpoint_to_route[endpoint])))
+        if owners and classification not in owners:
+            rows.append(["api", endpoint, classification, join(owners), "declared API ownership differs"])
+
+    return rows
+
+
+def build_undeclared_items(
+    routes: list[RouteEntry],
+    templates: dict[str, TemplateEntry],
+    js_assets: dict[str, AssetEntry],
+    css_assets: dict[str, AssetEntry],
+    endpoint_matrix: dict[str, dict[str, set[str]]],
+    endpoint_to_route: dict[str, str],
+    ownership_map: dict,
+) -> list[list[object]]:
+    rows: list[list[object]] = []
+    for route in routes:
+        if not declared_owners(ownership_map, "route", route.route):
+            rows.append(["route", route.route, route.classification, "not yet declared in ownership map"])
+
+    for template in sorted(templates.values(), key=lambda item: item.name):
+        if not declared_owners(ownership_map, "template", template.name):
+            rows.append(["template", template.name, template.classification, "not yet declared in ownership map"])
+
+    for asset in sorted({**js_assets, **css_assets}.values(), key=lambda item: item.name):
+        if not declared_owners(ownership_map, "asset", asset.name):
+            rows.append(["asset", asset.name, asset.classification, "not yet declared in ownership map"])
+
+    defined_routes = {route.endpoint: route for route in routes}
+    for endpoint in sorted(endpoint_matrix):
+        route = defined_routes.get(endpoint)
+        owners = declared_owners(ownership_map, "api", endpoint)
+        if endpoint_to_route.get(endpoint):
+            owners = sorted(set(owners + declared_owners(ownership_map, "api", endpoint_to_route[endpoint])))
+        if owners:
+            continue
+        classification = route.classification if route else "unknown"
+        rows.append(["api", endpoint, classification, "not yet declared in ownership map"])
+
+    return rows
+
+
+def build_declared_missing(found_by_kind: dict[str, list[str]], ownership_map: dict) -> list[list[object]]:
+    rows: list[list[object]] = []
+    for kind in ("route", "template", "asset", "api"):
+        found_values = found_by_kind[kind]
+        for owner, pattern in ownership_entries(ownership_map, kind):
+            if not any(fnmatch.fnmatchcase(value, pattern) for value in found_values):
+                rows.append([owner, kind, pattern, "declared pattern did not match static inventory"])
+    return rows
+
+
 def render_report(
     routes: list[RouteEntry],
     templates: dict[str, TemplateEntry],
     js_assets: dict[str, AssetEntry],
     css_assets: dict[str, AssetEntry],
     endpoint_matrix: dict[str, dict[str, set[str]]],
+    ownership_map: dict,
     warnings: list[str],
 ) -> str:
     template_orphans = [
@@ -372,6 +524,20 @@ def render_report(
         r for r in routes
         if r.endpoint not in consumed_endpoints
     ]
+    all_assets = {**js_assets, **css_assets}
+    endpoint_to_route = {
+        route.endpoint: route.route
+        for route in routes
+    }
+    found_by_kind = {
+        "route": sorted({route.route for route in routes}),
+        "template": sorted(templates),
+        "asset": sorted(all_assets),
+        "api": sorted(set(endpoint_matrix) | {route.route for route in routes}),
+    }
+    mismatches = build_ownership_mismatches(routes, templates, js_assets, css_assets, endpoint_matrix, endpoint_to_route, ownership_map)
+    undeclared = build_undeclared_items(routes, templates, js_assets, css_assets, endpoint_matrix, endpoint_to_route, ownership_map)
+    declared_missing = build_declared_missing(found_by_kind, ownership_map)
 
     lines: list[str] = []
     lines.append("# HYBRID UI INVENTORY REPORT")
@@ -392,6 +558,9 @@ def render_report(
             ["Possible JS orphan candidates", len(js_orphans)],
             ["Possible CSS orphan candidates", len(css_orphans)],
             ["Routes/API without static consumers", len(routes_without_static_consumers)],
+            ["Ownership mismatches", len(mismatches)],
+            ["Undeclared inventory items", len(undeclared)],
+            ["Declared but not found", len(declared_missing)],
         ],
     ))
     if warnings:
@@ -404,7 +573,18 @@ def render_report(
     lines.append("## 2. Route Inventory")
     lines.append("")
     lines.append(table(
-        ["Route", "Methods", "Endpoint/function", "File", "Line", "Template", "Classification", "Notes"],
+        [
+            "Route",
+            "Methods",
+            "Endpoint/function",
+            "File",
+            "Line",
+            "Template",
+            "Classification",
+            "Declared ownership",
+            "Mismatch",
+            "Notes",
+        ],
         [
             [
                 r.route,
@@ -414,6 +594,8 @@ def render_report(
                 r.line,
                 r.template,
                 r.classification,
+                join(declared_owners(ownership_map, "route", r.route)),
+                ownership_mismatch(r.classification, declared_owners(ownership_map, "route", r.route)),
                 join(r.notes),
             ]
             for r in routes
@@ -434,6 +616,8 @@ def render_report(
             "JS assets",
             "CSS assets",
             "Classification",
+            "Declared ownership",
+            "Mismatch",
             "Orphan candidate",
         ],
         [
@@ -447,6 +631,8 @@ def render_report(
                 join(t.js_assets),
                 join(t.css_assets),
                 t.classification,
+                join(declared_owners(ownership_map, "template", t.name)),
+                ownership_mismatch(t.classification, declared_owners(ownership_map, "template", t.name)),
                 "yes" if t in template_orphans else "no",
             ]
             for t in sorted(templates.values(), key=lambda item: item.name)
@@ -457,7 +643,16 @@ def render_report(
     lines.append("## 4. JavaScript Inventory")
     lines.append("")
     lines.append(table(
-        ["JS file", "Path", "Referenced by templates", "API/endpoints called", "Classification", "Orphan candidate"],
+        [
+            "JS file",
+            "Path",
+            "Referenced by templates",
+            "API/endpoints called",
+            "Classification",
+            "Declared ownership",
+            "Mismatch",
+            "Orphan candidate",
+        ],
         [
             [
                 a.name,
@@ -465,6 +660,8 @@ def render_report(
                 join(a.referenced_by_templates),
                 join(a.api_endpoints_called),
                 a.classification,
+                join(declared_owners(ownership_map, "asset", a.name)),
+                ownership_mismatch(a.classification, declared_owners(ownership_map, "asset", a.name)),
                 "yes" if a in js_orphans else "no",
             ]
             for a in sorted(js_assets.values(), key=lambda item: item.name)
@@ -475,13 +672,15 @@ def render_report(
     lines.append("## 5. CSS Inventory")
     lines.append("")
     lines.append(table(
-        ["CSS file", "Path", "Referenced by templates", "Classification", "Orphan candidate"],
+        ["CSS file", "Path", "Referenced by templates", "Classification", "Declared ownership", "Mismatch", "Orphan candidate"],
         [
             [
                 a.name,
                 a.path,
                 join(a.referenced_by_templates),
                 a.classification,
+                join(declared_owners(ownership_map, "asset", a.name)),
+                ownership_mismatch(a.classification, declared_owners(ownership_map, "asset", a.name)),
                 "yes" if a in css_orphans else "no",
             ]
             for a in sorted(css_assets.values(), key=lambda item: item.name)
@@ -498,6 +697,9 @@ def render_report(
         defined_route = join(consumers.get("defined_by_route", set()))
         route_entry = defined_routes.get(endpoint)
         classification = route_entry.classification if route_entry else "unknown"
+        api_owners = declared_owners(ownership_map, "api", endpoint)
+        if route_entry:
+            api_owners = sorted(set(api_owners + declared_owners(ownership_map, "api", route_entry.route)))
         notes = []
         if not route_entry:
             notes.append("not matched to static route definition")
@@ -508,11 +710,47 @@ def render_report(
             join(consumers.get("called_by_js", set())),
             defined_route,
             classification,
+            join(api_owners),
+            ownership_mismatch(classification, api_owners),
             join(notes),
         ])
     lines.append(table(
-        ["Endpoint", "Called by JS", "Defined by route", "Classification", "Notes"],
+        ["Endpoint", "Called by JS", "Defined by route", "Classification", "Declared ownership", "Mismatch", "Notes"],
         endpoint_rows,
+    ))
+    lines.append("")
+
+    lines.append("## 6.1 Declared Ownership Summary")
+    lines.append("")
+    lines.append(table(
+        ["Owner", "Routes", "Templates", "Assets", "APIs", "Features"],
+        declared_ownership_summary_rows(ownership_map),
+    ))
+    lines.append("")
+
+    lines.append("## 6.2 Ownership Mismatches")
+    lines.append("")
+    lines.append("Mismatch means the declared ownership differs from the static inferred classification. It can indicate wrappers, shared usage, or incomplete detection; it is not automatically an error.")
+    lines.append("")
+    lines.append(table(
+        ["Kind", "Item", "Inferred", "Declared", "Note"],
+        mismatches,
+    ))
+    lines.append("")
+
+    lines.append("## 6.3 Undeclared Inventory Items")
+    lines.append("")
+    lines.append(table(
+        ["Kind", "Item", "Inferred classification", "Note"],
+        undeclared,
+    ))
+    lines.append("")
+
+    lines.append("## 6.4 Declared But Not Found")
+    lines.append("")
+    lines.append(table(
+        ["Owner", "Kind", "Pattern", "Note"],
+        declared_missing,
     ))
     lines.append("")
 
@@ -587,13 +825,15 @@ def main() -> int:
     templates, template_warnings = parse_templates(routes)
     js_assets, css_assets, asset_warnings = parse_assets(templates)
     endpoint_matrix = build_endpoint_matrix(routes, templates, js_assets)
+    ownership_map, ownership_warnings = load_ownership_map()
     report = render_report(
         routes,
         templates,
         js_assets,
         css_assets,
         endpoint_matrix,
-        route_warnings + template_warnings + asset_warnings,
+        ownership_map,
+        route_warnings + template_warnings + asset_warnings + ownership_warnings,
     )
     REPORT_PATH.write_text(report, encoding="utf-8")
     print(f"Wrote {REPORT_PATH.relative_to(REPO_ROOT)}")
