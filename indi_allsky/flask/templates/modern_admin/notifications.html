@@ -90,6 +90,7 @@ var camera_id = {{ camera_id }};
                         <th>Item</th>
                         <th>Acked</th>
                         <th>Notification</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -102,14 +103,15 @@ var camera_id = {{ camera_id }};
                         <td>{{ notice.item }}</td>
                         <td><span class="modern-admin-status-pill {{ notice.ack_tone }}">{{ notice.ack }}</span></td>
                         <td>{{ notice.notification }}</td>
+                        <td><a href="{{ url_for('indi_allsky.modern_admin_notification_detail_view', notification_id=notice.id) }}">Details</a></td>
                     </tr>
                     {% else %}
                     <tr id="modern-notifications-empty-row">
-                        <td colspan="7">No notifications are available.</td>
+                        <td colspan="8">No notifications are available.</td>
                     </tr>
                     {% endfor %}
                     <tr id="modern-notifications-filter-empty-row" hidden>
-                        <td colspan="7">No notifications match the current filters.</td>
+                        <td colspan="8">No notifications match the current filters.</td>
                     </tr>
                 </tbody>
             </table>

@@ -85,7 +85,7 @@ Operational backlog snapshot:
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
 | In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs |
-| Locally blocked | Task Queue mutations, Config Restore mutation, User Management mutation/detail safety, FITS preview/download/conversion |
+| Locally blocked | Task Queue mutations, Config Restore mutation, Notification acknowledge/delete, User Management mutation/detail safety, FITS preview/download/conversion |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,13 +128,12 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Notifications | C | D only after notification action review | S | Medium | Read-only usability exists; detail/actions need explicit non-mutative scope. |
-| 2 | User Management | C | D only after auth field review | S | High | Read-only usability exists; detail requires careful field/security review. |
-| 3 | Logs | D | stop/E only after contract | S | Medium | Modern read-only log detail exists; no new download/action work without contract review. |
-| 4 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
-| 5 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
-| 6 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
-| 7 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
+| 1 | User Management | C | D only after auth field review | S | High | Read-only usability exists; detail requires careful field/security review. |
+| 2 | Logs | D | stop/E only after contract | S | Medium | Modern read-only log detail exists; no new download/action work without contract review. |
+| 3 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
+| 4 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
+| 5 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
+| 6 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
 
 ### Blocked
 
@@ -149,6 +148,7 @@ the next available feature.
 | Task Queue mutations | No safe user-facing backend contract for retry/cancel/delete/requeue. | No mutation; only diagnostics/detail. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
+| Notification acknowledge/delete | Mutative notification actions need explicit backend and UX contract. | Read-only inventory/detail only. |
 | YouTube / OAuth | External auth and upload behavior need safety review. | Read-only provider/status inventory first. |
 
 ### Needs Backend First
@@ -256,7 +256,7 @@ These should not be removed. They are transitional.
 | Task Queue | modern | PARTIAL MODERN | D | 65% | Task model | High | S | High | List/usability/detail done; mutations blocked. |
 | User Management | modern | PARTIAL MODERN | C | 45% | Auth model | High | S | High | Read-only list usability done; no mutations. |
 | Authentication | shared_api | SHARED ACTIVE | Preserve | 70% | Flask login | High | XS | Preserve | Security-critical shared surface. |
-| Notifications | modern | PARTIAL MODERN | C | 45% | Notification model/forms | High | S | High | Read-only list usability done; acknowledgement remains Classic/shared. |
+| Notifications | modern | PARTIAL MODERN | D | 65% | Notification model/forms | High | S | High | Read-only detail exists; acknowledgement remains Classic/shared and locally blocked. |
 | Admin Tools | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Medium | M | Medium | Native pages later. |
 | Safe Controls | modern_wrapper | WRAPPER ONLY | B | 35% | Classic tools | Critical | L | Protect | Do not remove. |
 | Network | modern_wrapper | WRAPPER ONLY | B | 35% | System/network backend | Medium | M | Medium | High operational risk. |
@@ -290,11 +290,11 @@ and the completed Task Queue/User Management work.
 
 ### Phase 1 - Finish Safe Read-only Admin Gaps
 
-1. Notifications read-only detail only after notification action review.
-2. User Management read-only detail only after auth field review.
-3. Config History restore/download parity only after explicit safety review.
-4. Config Restore safe actions only after rollback and restore contract review.
-5. FITS viewer/conversion/download only after filesystem and path policy review.
+1. User Management read-only detail only after auth field review.
+2. Config History restore/download parity only after explicit safety review.
+3. Config Restore safe actions only after rollback and restore contract review.
+4. FITS viewer/conversion/download only after filesystem and path policy review.
+5. Notifications acknowledge/delete only after action contract review.
 
 ### Phase 2 - Complete Read-only Details for Existing Modern Pages
 
@@ -335,16 +335,16 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Notifications | Modern read-only detail/action-safety review | Usability exists; acknowledgement remains out of scope. |
-| 2 | User Management | Modern read-only detail field/security review | Usability exists; detail must remain auth-safe. |
-| 3 | Logs | Safe action/download contract review only | Detail exists; further work needs explicit backend/download policy. |
-| 4 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
-| 5 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
-| 6 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
-| 7 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
-| 8 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
-| 9 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
-| 10 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
+| 1 | User Management | Modern read-only detail field/security review | Usability exists; detail must remain auth-safe. |
+| 2 | Logs | Safe action/download contract review only | Detail exists; further work needs explicit backend/download policy. |
+| 3 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
+| 4 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
+| 5 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
+| 6 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
+| 7 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
+| 8 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
+| 9 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
+| 10 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
 
 ## 7. Parallelizable Work
 
@@ -409,13 +409,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Notifications read-only detail/action-safety review.
+User Management read-only detail field/security review.
 
 ### 6. Why that feature?
 
-Notifications read-only usability exists, but any detail work must remain
-non-mutative and must not acknowledge, delete, create, edit, send or test
-notifications.
+User Management read-only usability exists, but any detail work must remain
+auth-safe and must not expose password hashes, API keys, tokens, login IPs,
+session data, raw configs, or role/password mutation.
 
 ### 7. Which features can be ported in parallel?
 
@@ -439,15 +439,15 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Notifications Phase C to D** has a read-only detail step that
-can be implemented without acknowledge/delete/edit/create/send/test behavior.
-Mark the feature locally blocked if that cannot be guaranteed.
+Review whether **User Management Phase C to D** has a read-only detail step that
+can be implemented without exposing sensitive auth fields or adding user
+mutation. Mark the feature locally blocked if that cannot be guaranteed.
 
 Scope:
 
-- Analyze Classic notification route, `/ajax/notification`, and the existing Modern notifications page.
-- Add only read-only detail if it can remain non-mutative.
-- Do not add acknowledge, delete, edit, create, send/test, or any notification mutation.
+- Analyze Classic user routes, `/ajax/user`, and the existing Modern users page.
+- Add only read-only detail if it can remain privacy-safe.
+- Do not add edit, create, delete, password reset, role change, enable/disable, or any auth mutation.
 - Preserve Classic fallback.
 - Update ownership/inventory.
 

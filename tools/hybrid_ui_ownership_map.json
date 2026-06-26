@@ -2088,11 +2088,13 @@
       "routes": [
         "/notifications",
         "/ajax/notification",
-        "/modern-admin/notifications"
+        "/modern-admin/notifications",
+        "/modern-admin/notifications/*"
       ],
       "templates": [
         "notifications.html",
-        "modern_admin/notifications.html"
+        "modern_admin/notifications.html",
+        "modern_admin/notification_detail.html"
       ],
       "assets": [
         "DataTables/datatables.min.css",
@@ -2105,7 +2107,7 @@
         "NOTIFICATION_*"
       ],
       "protected": false,
-      "modern_gap": "Modern Admin has read-only notification inventory with local usability filters; acknowledgement and modal flow remain Classic/shared.",
+      "modern_gap": "Modern Admin has read-only notification inventory, local usability filters, and read-only detail; acknowledgement and modal flow remain Classic/shared.",
       "removal_risk": "medium",
       "notes": [
         "Modern page must not call /ajax/notification POST or acknowledge notifications.",

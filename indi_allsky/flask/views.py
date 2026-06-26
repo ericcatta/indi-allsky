@@ -11669,6 +11669,42 @@ class ModernAdminNotificationsView(ModernAdminContextMixin, TemplateView):
         return str(value)
 
 
+class ModernAdminNotificationDetailView(ModernAdminNotificationsView):
+    page_title = 'Modern Admin Notification Detail'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+
+    def dispatch_request(self, notification_id):
+        self.notification_id = notification_id
+        return super(ModernAdminNotificationDetailView, self).dispatch_request()
+
+
+    def get_context(self):
+        context = super(ModernAdminNotificationsView, self).get_context()
+
+        try:
+            notice = IndiAllSkyDbNotificationTable.query\
+                .filter(IndiAllSkyDbNotificationTable.id == self.notification_id)\
+                .one()
+        except NoResultFound:
+            abort(404)
+
+        is_ack = bool(notice.ack)
+        context['modern_admin_notification_detail'] = {
+            'id'           : notice.id,
+            'category'     : notice.category.value if notice.category else 'Unknown',
+            'item'         : notice.item or 'Not set',
+            'created'      : self.format_notification_datetime(notice.createDate),
+            'expires'      : self.format_notification_datetime(notice.expireDate),
+            'ack'          : 'Yes' if is_ack else 'No',
+            'ack_tone'     : 'modern-admin-status-muted' if is_ack else 'modern-admin-status-warning',
+            'notification' : notice.notification,
+        }
+
+        return context
+
+
 class AjaxNotificationView(BaseView):
     methods = ['GET', 'POST']
     decorators = []  # manually handle if user is logged in
@@ -21064,6 +21100,7 @@ bp_allsky.add_url_rule('/modern-admin/config-history', view_func=ModernAdminConf
 bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
 bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/notifications', view_func=ModernAdminNotificationsView.as_view('modern_admin_notifications_view', template_name='modern_admin/notifications.html'))
+bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>', view_func=ModernAdminNotificationDetailView.as_view('modern_admin_notification_detail_view', template_name='modern_admin/notification_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/safe_controls.html'))
