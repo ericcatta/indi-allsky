@@ -128,10 +128,9 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
-| 2 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
-| 3 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
-| 4 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
+| 1 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
+| 2 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
+| 3 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
 
 ### Blocked
 
