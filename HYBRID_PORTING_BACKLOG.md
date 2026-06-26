@@ -92,13 +92,13 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Config History | B | B | S | Medium | Read-only list has a Modern view with safe metadata only. |
-| 2 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
-| 3 | FITS Image Viewer | B | C | M | High | Read-only FITS metadata inspection is now available; next step is usability only. |
-| 4 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
-| 5 | Notifications | B | C | S | Medium | Read-only list exists; next safe step is usability, not ack actions. |
+| 1 | Logs | C | D | S | Medium | Modern log exists; download/detail parity should be verified next. |
+| 2 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
+| 3 | Notifications | B | C | S | Medium | Read-only list exists; next safe step is usability, not ack actions. |
+| 4 | FITS Image Viewer | B | C | M | High | Read-only FITS metadata inspection is now available; next step is usability only. |
+| 5 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
 | 6 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
-| 7 | Logs | C | D | S | Medium | Modern log exists; download/detail parity should be verified. |
+| 7 | Config History | B | C | S | Medium | Read-only list exists; next step is usability only. |
 | 8 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
 | 9 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
 | 10 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
@@ -252,19 +252,18 @@ and the completed Task Queue/User Management work.
 
 ### Phase 1 - Finish Safe Read-only Admin Gaps
 
-1. Config Restore read-only restore-context list.
-2. Config History read-only list.
-3. FITS Image Viewer read-only usability improvements.
-4. User Management read-only detail page.
-5. Notifications read-only usability.
+1. Logs download/detail parity audit.
+2. User Management read-only detail page.
+3. Notifications read-only usability.
+4. FITS Image Viewer read-only usability improvements.
+5. Config Restore read-only usability/detail inspection.
 
 ### Phase 2 - Complete Read-only Details for Existing Modern Pages
 
-1. Logs download/detail parity audit.
-2. Image Viewer media detail.
-3. Video Viewer media detail.
-4. FITS/source detail.
-5. Upload provider status read-only.
+1. Image Viewer media detail.
+2. Video Viewer media detail.
+3. FITS/source detail.
+4. Upload provider status read-only.
 
 ### Phase 3 - Native Replacements for Wrappers
 
@@ -298,12 +297,12 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Config History | Modern read-only list | Classic-only and useful for configuration safety. |
-| 2 | FITS Image Viewer | Modern read-only FITS/source usability | Aligns with scientific-first direction. |
-| 3 | User Management | Modern user detail/read-only inspection enhancement | Extends current list without mutations. |
-| 4 | User Management | Modern read-only user detail | Extends existing safe page without auth mutation. |
-| 5 | Notifications | Modern read-only usability | Extends existing safe page without acknowledgement actions. |
-| 6 | Logs | Modern download/detail parity audit/fix | Low risk, useful operational parity. |
+| 1 | Logs | Modern download/detail parity audit/fix | Low risk, useful operational parity. |
+| 2 | User Management | Modern user detail/read-only inspection enhancement | Extends current list without mutations. |
+| 3 | Notifications | Modern read-only usability | Extends existing safe page without acknowledgement actions. |
+| 4 | FITS Image Viewer | Modern read-only FITS/source usability | Aligns with scientific-first direction. |
+| 5 | Config Restore | Modern read-only restore inspection usability | Keeps restore action Classic-only while improving visibility. |
+| 6 | Config History | Modern read-only usability | Existing read-only list can be made easier to scan. |
 | 7 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
 | 8 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
 | 9 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
@@ -372,19 +371,18 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Config History read-only.
+Logs detail/download parity.
 
 ### 6. Why that feature?
 
-It is Classic-only, operationally useful, likely small, does not require runtime
-or auth mutation, and follows the successful Task Queue/User Management/Notifications pattern:
-read-only first, Classic fallback preserved, no action porting until the backend
-contract is understood.
+The Modern log page already exists, and the remaining gap is a bounded
+read-only parity audit around detail/download behavior. It is operationally
+useful and should not require capture/runtime changes.
 
 ### 7. Which features can be ported in parallel?
 
-Config History read-only, FITS/source read-only detail, Notifications usability,
-Logs detail/download parity, Upload provider status read-only, and supporting
+FITS/source read-only usability, Notifications usability, Logs detail/download
+parity, Upload provider status read-only, and supporting
 documentation/inventory updates.
 
 ### 8. What percentage is really Modern?
@@ -403,13 +401,13 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Implement **Config History Phase A - Modern read-only**.
+Implement **Logs detail/download parity Phase A - Modern read-only audit**.
 
 Scope:
 
-- Analyze Classic `/config/list` and related config history model/query.
-- Add a Modern read-only config history list if fields are safe.
-- Do not add restore, download or mutation actions.
+- Analyze Classic log/detail/download routes and the existing Modern log page.
+- Add only read-only parity if the existing backend contract is already safe.
+- Do not add mutative log actions.
 - Preserve Classic fallback.
 - Update ownership/inventory.
 
