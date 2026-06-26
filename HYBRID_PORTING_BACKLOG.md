@@ -56,6 +56,42 @@ a measure of lines of code.
 
 The project is Modern-first, but not yet Modern-only.
 
+### Backlog Progress
+
+Backlog Progress tracks execution progress separately from Modern Coverage. It
+should be updated after each micro-step and after each feature is marked blocked
+or unblocked.
+
+Current ownership snapshot:
+
+| Category | Count |
+| --- | ---: |
+| Total tracked features | 92 |
+| Protected Modern Work | 21 |
+| Modern Canonical | 2 |
+| Partial Modern / in progress | 29 |
+| Wrapper Only | 8 |
+| Public Active | 7 |
+| Shared Active | 5 |
+| External API | 3 |
+| Shared Legacy | 2 |
+| Legacy Active | 4 |
+| Classic Only | 2 |
+| Needs Verification | 9 |
+
+Operational backlog snapshot:
+
+| State | Current examples |
+| --- | --- |
+| Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs |
+| Locally blocked | Task Queue mutations, Config Restore mutation, User Management mutation/detail safety, FITS preview/download/conversion |
+| Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
+
+Local blockers should not stop the overall porting effort. Mark the feature
+blocked, document the smallest safe unblocker, and continue with the next
+available feature. Stop only for global blockers or protected-feature risk.
+
 ### Main Finding
 
 The highest-value remaining work is not raw UI cleanup. It is completing native
@@ -104,10 +140,14 @@ read-only first.
 
 ### Blocked
 
+The entries below are local blockers unless explicitly marked global. A local
+blocker blocks that feature or phase only; it should not stop porting work on
+the next available feature.
+
 | Feature | Blocker | Allowed next work |
 | --- | --- | --- |
-| Meteor Detection | Real outdoor FITS validation is missing. | Offline reports, validation tooling, documentation. |
-| Event Review | Event review workflow has no UI contract yet. | Architecture/design/read-only evidence browser. |
+| Meteor Detection (global for detector work) | Real outdoor FITS validation is missing. | Offline reports, validation tooling, documentation. |
+| Event Review (global for event UI/action work) | Event review workflow has no UI contract yet. | Architecture/design/read-only evidence browser. |
 | Task Queue mutations | No safe user-facing backend contract for retry/cancel/delete/requeue. | No mutation; only diagnostics/detail. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | YouTube / OAuth | External auth and upload behavior need safety review. | Read-only provider/status inventory first. |

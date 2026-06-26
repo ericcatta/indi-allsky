@@ -228,26 +228,66 @@ For every new porting step:
 
 6. Implement only the next phase for that feature.
 
-7. Update:
+7. If the feature hits a local blocker:
+   - mark that feature as blocked in `HYBRID_PORTING_BACKLOG.md`;
+   - document the blocking condition and the smallest safe unblocker;
+   - update `tools/hybrid_ui_ownership_map.json` if ownership/status notes
+     changed;
+   - regenerate `HYBRID_UI_INVENTORY_REPORT.md` if inventory surfaces changed;
+   - continue with the next available feature instead of stopping the whole
+     porting effort.
+
+8. Stop only for global blockers:
+   - new architecture;
+   - new backend contract;
+   - database migration;
+   - settings redesign;
+   - Classic removal/deprecation;
+   - Detector, RMS or AI changes;
+   - Scientific Source Layer changes;
+   - Event Foundation changes;
+   - protected-feature regression risk;
+   - unresolved auth, permission, secret or destructive-action uncertainty.
+
+9. Update:
    - `HYBRID_PORTING_BACKLOG.md`;
    - `tools/hybrid_ui_ownership_map.json`, if routes/templates/assets/APIs or
      owner/status changed;
    - `HYBRID_UI_INVENTORY_REPORT.md`, if inventory surfaces changed.
 
-8. Verify.
+10. Verify.
 
-9. Commit.
+11. Commit.
 
-10. Report the next recommended feature and phase.
+12. Report the next recommended feature and phase.
 
-### Current Next Feature
+### Blocked Feature Policy
 
-The current dynamic backlog recommends:
+A local blocker belongs to one feature. It should not stop the overall porting
+program.
 
-**Notifications Phase A/B - Modern read-only**
+When a local blocker is found:
 
-Reason: it is Classic-only, operationally useful, small enough for a safe
-read-only port, and does not require mutative action support.
+- do not force the implementation;
+- do not broaden scope to work around it;
+- mark the feature as `BLOCKED` or document the blocked phase in
+  `HYBRID_PORTING_BACKLOG.md`;
+- record the reason, risk and smallest safe unblocker;
+- update ownership notes when useful;
+- move to the next incomplete, non-blocked feature.
+
+Examples of local blockers:
+
+- Task Queue retry/cancel/delete lacks a safe user-facing contract;
+- Config Restore mutation lacks rollback UX;
+- FITS preview/download would require conversion or filesystem policy;
+- Notification acknowledge/delete lacks a safe Modern action contract;
+- User detail/mutation requires auth field review.
+
+A global blocker stops autonomous porting. Global blockers include new
+architecture, backend contracts, database migrations, settings redesign,
+Classic deprecation/removal, Detector/RMS/AI work, Scientific Source Layer work,
+Event Foundation work, or uncertainty around protected Modern behavior.
 
 ## 7. Commit Policy
 
@@ -270,18 +310,22 @@ Codex may commit automatically when all of these are true:
 
 ### Codex Must Stop When
 
-Codex must stop and ask for instructions when any of these occur:
+Codex must stop and ask for instructions when any of these global conditions
+occur:
 
 - current code contradicts backlog and the correct update is ambiguous;
 - a protected feature may be affected;
 - auth, permissions, password, token, API key or secrets handling is unclear;
-- a mutative action lacks a safe backend contract;
 - tests or required checks fail;
 - unexpected files are modified;
 - runtime/capture behavior would change outside scope;
 - public/external/shared route usage is uncertain and removal is implied;
 - implementation requires broad refactor;
 - a rollback path is unclear.
+
+If a mutative action or detail phase lacks a safe backend contract for only the
+current feature, treat it as a local blocker: mark the feature blocked, document
+the reason and continue with the next available feature.
 
 ### Commit Shape
 
@@ -301,6 +345,7 @@ At minimum:
 
 - feature phase;
 - feature percentage;
+- backlog progress counts;
 - project Modern coverage estimate;
 - Classic removal readiness estimate;
 - blockers discovered or cleared;
@@ -357,6 +402,39 @@ current estimate from the dynamic backlog is about **57%**.
 
 Percentage of tracked features that are realistically safe from a Classic
 removal perspective. The current estimate is about **35-40%**.
+
+### Backlog Progress
+
+Backlog Progress is a work-progress metric that should increase as micro-steps
+complete, even when Project Modern Coverage changes only slightly.
+
+Track at least:
+
+- completed or protected/canonical features;
+- in-progress features;
+- blocked features;
+- preserve/public/shared features;
+- phases completed versus phases planned, when this can be estimated cleanly.
+
+Current ownership snapshot:
+
+| Category | Count |
+| --- | ---: |
+| Total tracked features | 92 |
+| Protected Modern Work | 21 |
+| Modern Canonical | 2 |
+| Partial Modern / in progress | 29 |
+| Wrapper Only | 8 |
+| Public Active | 7 |
+| Shared Active | 5 |
+| External API | 3 |
+| Shared Legacy | 2 |
+| Legacy Active | 4 |
+| Classic Only | 2 |
+| Needs Verification | 9 |
+
+This metric is intentionally operational. It should be updated from the current
+ownership map and backlog, not from the original planning documents.
 
 ### Outstanding Blockers
 
@@ -418,6 +496,7 @@ Every future feature implementation must report:
 - Feature completion percentage:
 - Project Modern coverage:
 - Classic removal readiness:
+- Backlog progress:
 - Files changed:
 - Protected work touched: yes/no
 - Classic fallback: kept/changed/removed with reason
@@ -431,9 +510,11 @@ Every future feature implementation must report:
 For blocked work, report:
 
 - blocking condition;
+- local or global blocker;
 - why it blocks the current phase;
 - smallest safe unblocker;
-- whether backlog was updated.
+- whether backlog was updated;
+- next available feature if the blocker is local.
 
 ## 12. Continuous Improvement
 
