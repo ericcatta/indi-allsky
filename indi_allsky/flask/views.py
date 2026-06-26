@@ -11929,6 +11929,8 @@ class ModernAdminConfigHistoryView(ModernAdminContextMixin, TemplateView):
         context['modern_admin_config_history_encrypted_count'] = len([
             row for row in config_rows if row['encrypted'] == 'Yes'
         ])
+        context['modern_admin_config_history_levels'] = sorted({row['level'] for row in config_rows})
+        context['modern_admin_config_history_encrypted_states'] = sorted({row['encrypted'] for row in config_rows})
 
         return context
 

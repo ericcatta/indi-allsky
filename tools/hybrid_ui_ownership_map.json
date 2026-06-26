@@ -1873,9 +1873,11 @@
       "apis": [],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "Read-only config history is now available in Modern Admin. Restore/download remain Classic-only.",
+      "modern_gap": "Modern read-only config history with local usability filters exists. Restore/download remain Classic-only.",
       "removal_risk": "high",
-      "notes": []
+      "notes": [
+        "Modern page must not expose raw config payload, download config data, or mutate active configuration."
+      ]
     },
     "config_restore": {
       "label": "Config Restore",

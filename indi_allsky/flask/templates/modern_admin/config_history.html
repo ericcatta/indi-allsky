@@ -41,8 +41,34 @@ var camera_id = {{ camera_id }};
             <h2 id="modern-config-history-title">Recent configuration snapshots</h2>
         </div>
 
+        <div class="modern-admin-filter-bar" aria-label="Config history filters">
+            <label class="modern-admin-filter-field">
+                <span>Search</span>
+                <input type="search" id="modern-config-history-search" placeholder="ID, user, note, summary">
+            </label>
+            <label class="modern-admin-filter-field">
+                <span>Type/Level</span>
+                <select id="modern-config-history-level">
+                    <option value="">All</option>
+                    {% for level in modern_admin_config_history_levels %}
+                    <option value="{{ level|lower }}">{{ level }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="modern-admin-filter-field">
+                <span>Encrypted</span>
+                <select id="modern-config-history-encrypted">
+                    <option value="">All</option>
+                    {% for encrypted_state in modern_admin_config_history_encrypted_states %}
+                    <option value="{{ encrypted_state|lower }}">{{ encrypted_state }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-config-history-filter-count">{{ modern_admin_config_history_count }} shown</span>
+        </div>
+
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
+            <table class="modern-admin-data-table" id="modern-config-history-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -58,22 +84,27 @@ var camera_id = {{ camera_id }};
                 </thead>
                 <tbody>
                     {% for config in modern_admin_config_history_rows %}
-                    <tr>
+                    <tr data-search="{{ (config.id|string ~ ' ' ~ config.user_id|string ~ ' ' ~ config.created ~ ' ' ~ config.user ~ ' ' ~ config.level ~ ' ' ~ config.encrypted ~ ' ' ~ config.summary ~ ' ' ~ config.data_size ~ ' ' ~ config.note)|lower }}"
+                        data-level="{{ config.level|lower }}"
+                        data-encrypted="{{ config.encrypted|lower }}">
                         <td>{{ config.id }}</td>
                         <td>{{ config.user_id }}</td>
                         <td>{{ config.created }}</td>
                         <td>{{ config.user }}</td>
                         <td>{{ config.level }}</td>
-                        <td>{{ config.encrypted }}</td>
+                        <td><span class="modern-admin-status-pill {% if config.encrypted == 'Yes' %}modern-admin-status-warning{% else %}modern-admin-status-muted{% endif %}">{{ config.encrypted }}</span></td>
                         <td>{{ config.summary }}</td>
                         <td>{{ config.data_size }}</td>
                         <td>{{ config.note }}</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8">No recent config history rows are available.</td>
+                        <td colspan="9">No recent config history rows are available.</td>
                     </tr>
                     {% endfor %}
+                    <tr id="modern-config-history-filter-empty" hidden>
+                        <td colspan="9">No config history rows match the current filters.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -85,4 +116,54 @@ var camera_id = {{ camera_id }};
         </section>
     </section>
 </main>
+
+<script>
+(function() {
+    const table = document.getElementById('modern-config-history-table');
+    if (!table) {
+        return;
+    }
+
+    const searchInput = document.getElementById('modern-config-history-search');
+    const levelInput = document.getElementById('modern-config-history-level');
+    const encryptedInput = document.getElementById('modern-config-history-encrypted');
+    const countBadge = document.getElementById('modern-config-history-filter-count');
+    const emptyRow = document.getElementById('modern-config-history-filter-empty');
+    const rows = Array.from(table.querySelectorAll('tbody tr[data-search]'));
+
+    function applyFilters() {
+        const searchText = (searchInput && searchInput.value ? searchInput.value : '').trim().toLowerCase();
+        const levelValue = levelInput && levelInput.value ? levelInput.value : '';
+        const encryptedValue = encryptedInput && encryptedInput.value ? encryptedInput.value : '';
+        let visibleCount = 0;
+
+        rows.forEach(function(row) {
+            const matchesSearch = !searchText || row.dataset.search.indexOf(searchText) !== -1;
+            const matchesLevel = !levelValue || row.dataset.level === levelValue;
+            const matchesEncrypted = !encryptedValue || row.dataset.encrypted === encryptedValue;
+            const visible = matchesSearch && matchesLevel && matchesEncrypted;
+            row.hidden = !visible;
+            if (visible) {
+                visibleCount += 1;
+            }
+        });
+
+        if (countBadge) {
+            countBadge.textContent = visibleCount + ' shown';
+        }
+        if (emptyRow) {
+            emptyRow.hidden = visibleCount !== 0;
+        }
+    }
+
+    [searchInput, levelInput, encryptedInput].forEach(function(input) {
+        if (input) {
+            input.addEventListener('input', applyFilters);
+            input.addEventListener('change', applyFilters);
+        }
+    });
+
+    applyFilters();
+})();
+</script>
 {% endblock %}
