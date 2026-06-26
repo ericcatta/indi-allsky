@@ -84,8 +84,8 @@ Operational backlog snapshot:
 | State | Current examples |
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
-| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,8 +128,7 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Focus | B-wrapper | C | M | Medium | Native status/usability can improve wrapper parity without hardware action. |
-| 2 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
+| 1 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
 
 ### Blocked
 
@@ -145,6 +144,7 @@ the next available feature.
 | Image Viewer actions/exclude | Exclude/delete/download/processing require explicit media action and path policy. | Metadata-only list/detail only. |
 | Video Viewer upload/share/actions | Upload/share/download/delete require explicit media action and path policy. | Metadata-only list/detail only. |
 | Upload actions/remote operations | Upload tests, OAuth flows and remote operations require explicit provider action and credential policy. | Read-only provider/status inventory only. |
+| Focus hardware movement | Focuser movement, autofocus and capture changes require explicit hardware action policy. | Existing Modern safe read-only status/preview only. |
 | Logs download/actions | Log download/action work requires explicit backend, filesystem and sensitive-data policy. | Existing read-only list/detail only. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
@@ -221,7 +221,7 @@ These should not be removed. They are transitional.
 | Mask | modern | PARTIAL MODERN | C | 55% | Multicamera mask safety | Critical | M | High | Processing-sensitive; port carefully. |
 | ADU | modern | PARTIAL MODERN | C | 55% | Auto exposure/gain | Critical | M | High | Modern history exists; needs clearer UX. |
 | SQM | modern | PARTIAL MODERN | C | 55% | Observatory | Critical | M | Medium | Native status limited. |
-| Focus | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Medium | M | Medium | Native Modern focus tool missing. |
+| Focus | modern_wrapper | WRAPPER ONLY | C | 55% | Safe controls | Medium | M | Medium | Modern safe wrapper has read-only status/preview; hardware movement remains blocked. |
 | Camera Simulator | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Low | L | Low | Low-risk but low-value. |
 | Image Lag | modern | PARTIAL MODERN | C | 55% | Camera pages | Medium | M | Medium | Modern page exists; semantics need validation. |
 | Image Viewer | modern | PARTIAL MODERN | D | 65% | Media list | Medium | M | Medium | Read-only Modern image metadata detail exists; exclude/delete/download/processing remain blocked. |
@@ -334,7 +334,7 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
+| 1 | Timelapse | Modern read-only generation/status usability review | Valuable but high risk; keep read-only and multicamera-safe. |
 | 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
 | 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
 | 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
@@ -408,12 +408,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Focus native read-only status.
+Timelapse read-only generation/status usability review.
 
 ### 6. Why that feature?
 
-Focus has a Modern wrapper surface. The next safe step is native read-only
-status/usability only, with no autofocus, hardware movement or camera action.
+Timelapse has Modern media surfaces and a history of multicamera queue issues.
+The next safe step is read-only generation/status usability review only, with
+no generate action, scheduler change, queue mutation or video processing.
 
 ### 7. Which features can be ported in parallel?
 
@@ -437,9 +438,10 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Focus Phase B to C** can be implemented as native read-only
-status/usability without autofocus, hardware movement, capture changes or
-camera actions. Mark the feature locally blocked if that cannot be guaranteed.
+Review whether **Timelapse Phase B-wrapper to C** can be implemented as
+read-only status/usability without generate actions, scheduler changes, queue
+mutation or video processing. Mark the feature locally blocked if that cannot
+be guaranteed.
 
 Scope:
 

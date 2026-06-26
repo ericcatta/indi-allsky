@@ -1162,13 +1162,14 @@
       ],
       "apis": [
         "/js/focus",
-        "/ajax/focuscontroller"
+        "/ajax/focuscontroller",
+        "modern_admin_focus_view"
       ],
       "config_keys": [
         "FOCUS_*"
       ],
       "protected": false,
-      "modern_gap": "Native Modern focus tool missing.",
+      "modern_gap": "Modern safe wrapper has read-only focus status and preview; native focus controls and hardware movement remain blocked pending explicit hardware action policy.",
       "removal_risk": "medium",
       "notes": []
     },

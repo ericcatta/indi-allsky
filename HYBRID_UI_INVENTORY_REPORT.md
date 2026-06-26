@@ -998,7 +998,7 @@ Mismatch means the declared ownership differs from the static inferred classific
 | external_api_clients | External API clients | EXTERNAL API | external_api | preserve | no | 3 | 0 | 0 | 3 | 0 | External use is not statically knowable. | critical |
 | fits_image_viewer | FITS Image Viewer | PARTIAL MODERN | modern | high | yes | 6 | 4 | 0 | 2 | 1 | Modern has read-only FITS metadata inspection, local usability filters, and metadata-only detail; conversion/viewer parity remains Classic-only. | high |
 | fits_save | FITS Save | PARTIAL MODERN | shared_api | high | yes | 2 | 2 | 0 | 2 | 3 | Scientific source persistence modes are not user-friendly yet. | critical |
-| focus | Focus | WRAPPER ONLY | modern_wrapper | medium | no | 4 | 2 | 1 | 2 | 1 | Native Modern focus tool missing. | medium |
+| focus | Focus | WRAPPER ONLY | modern_wrapper | medium | no | 4 | 2 | 1 | 3 | 1 | Modern safe wrapper has read-only focus status and preview; native focus controls and hardware movement remain blocked pending explicit hardware action policy. | medium |
 | gain | Gain | PROTECTED MODERN WORK | modern | protect | yes | 1 | 1 | 0 | 0 | 2 | See Auto Gain. | critical |
 | gallery | Gallery | PARTIAL MODERN | modern | medium | no | 4 | 2 | 3 | 1 | 0 | PhotoSwipe-style review parity needs verification. | medium |
 | gpio | GPIO | WRAPPER ONLY | modern_wrapper | medium | no | 3 | 2 | 0 | 1 | 1 | Native Modern GPIO controls missing. | high |
@@ -1115,7 +1115,7 @@ Mismatch means the declared ownership differs from the static inferred classific
 | --- | --- | --- | --- | --- | --- | --- |
 | admin_tools | Admin Tools | WRAPPER ONLY | modern_wrapper | medium | Several admin tools are wrappers only. | medium |
 | camera_simulator | Camera Simulator | WRAPPER ONLY | modern_wrapper | low | Native Modern simulator page missing. | low |
-| focus | Focus | WRAPPER ONLY | modern_wrapper | medium | Native Modern focus tool missing. | medium |
+| focus | Focus | WRAPPER ONLY | modern_wrapper | medium | Modern safe wrapper has read-only focus status and preview; native focus controls and hardware movement remain blocked pending explicit hardware action policy. | medium |
 | gpio | GPIO | WRAPPER ONLY | modern_wrapper | medium | Native Modern GPIO controls missing. | high |
 | lens_image_circle | Lens / Image Circle | WRAPPER ONLY | modern_wrapper | medium | Native Modern helper missing. | medium |
 | modern_safe_controls | Modern safe controls | PROTECTED MODERN WORK | modern_wrapper | protect | Wrappers are transitional and need native replacements later. | high |
