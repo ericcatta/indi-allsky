@@ -385,6 +385,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - salta risultati `status=error`, label non meteor e righe malformate;
       - preserva detector id/version/confidence e collega `source_event_id` al `detector_result_id`;
       - scrive `meteor_observations` JSONL append-only senza deduplica;
+    - Detector API foundation:
+      - contratto base `DetectorContract` con id/version/type, label supportate e input richiesto;
+      - `DetectorRunContext` serializzabile e leggero, senza DB/session/filesystem;
+      - `DetectorRunner` offline/manuale che invoca `detect(...)`, valida `DetectorResult`, conta label/status e scrive JSONL solo se viene passato un output dir;
+      - le eccezioni detector diventano `DetectorResult(status=error, label=unknown_event)` auditabili;
     - nessun campo meteor/RMS/science-specific richiesto;
     - nessuna creazione runtime/automatica di `MeteorObservation`, runtime integration, dashboard, Telegram, image processing, RMS o AI.
 - NEXT:
@@ -1452,3 +1457,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-26: Aggiunti report offline/read-only e text summary per `DetectorResult` JSONL, come base futura per CLI/dashboard/Telegram senza detector, runtime hook o creazione MeteorObservation.
 - 2026-06-26: Aggiunto bridge offline/manuale `DetectorResult -> EventClassification`, append-only e shadow, con provenance detector in `features_used` e senza runtime integration, review/validation o creazione MeteorObservation.
 - 2026-06-26: Aggiunto bridge offline/manuale `DetectorResult -> MeteorObservation` per risultati `meteor_candidate`, append-only e shadow, senza EventClassification, review, validation, RMS, AI o campi scientifici meteor-specific.
+- 2026-06-26: Aggiunta Detector API foundation: `DetectorContract`, `DetectorRunContext` e `DetectorRunner` offline/manuale per futuri detector RMS/OpenCV/AI/manuali, senza detector reale, image read o runtime integration.

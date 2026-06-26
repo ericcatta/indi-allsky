@@ -31,6 +31,26 @@ DETECTOR_RESULT_LABEL_VALUES = frozenset((
 ))
 
 
+def build_detector_run_id(
+        mode='offline',
+        profile_id=None,
+        camera_id=None,
+        timeline_id=None,
+        sequence_id=None,
+        created_at=None,
+):
+    identity_parts = (
+        _string_value(mode),
+        _string_value(profile_id),
+        _string_value(camera_id),
+        _string_value(timeline_id),
+        _string_value(sequence_id),
+        _string_value(created_at),
+    )
+    digest = hashlib.sha256('|'.join(identity_parts).encode('utf-8')).hexdigest()[:24]
+    return 'detector-run-{0:s}'.format(digest)
+
+
 def build_detector_evidence_id(
         evidence_type,
         frame_ids=None,
@@ -80,6 +100,70 @@ def build_detector_result_id(
     )
     digest = hashlib.sha256('|'.join(identity_parts).encode('utf-8')).hexdigest()[:24]
     return 'detector-result-{0:s}'.format(digest)
+
+
+@dataclass
+class DetectorRunContext:
+    mode: str = 'offline'
+    profile_id: str = ''
+    camera_id: int = None
+    timeline_id: str = ''
+    sequence_id: str = ''
+    config: dict = field(default_factory=dict)
+    notes: str = ''
+    created_at: str = ''
+    run_id: str = ''
+
+    def __post_init__(self):
+        self.mode = _string_value(self.mode) or 'offline'
+        self.profile_id = _string_value(self.profile_id)
+        self.camera_id = None if self.camera_id is None else int(self.camera_id)
+        self.timeline_id = _string_value(self.timeline_id)
+        self.sequence_id = _string_value(self.sequence_id)
+        self.config = _dict_value(self.config)
+        self.notes = _string_value(self.notes)
+        self.created_at = _string_value(self.created_at) or _utc_now()
+        self.run_id = _string_value(self.run_id)
+        if not self.run_id:
+            self.run_id = build_detector_run_id(
+                self.mode,
+                self.profile_id,
+                self.camera_id,
+                self.timeline_id,
+                self.sequence_id,
+                self.created_at,
+            )
+
+    @classmethod
+    def from_sequence(cls, input_sequence, **overrides):
+        kwargs = {
+            'profile_id': getattr(input_sequence, 'profile_id', ''),
+            'camera_id': getattr(input_sequence, 'camera_id', None),
+            'sequence_id': getattr(input_sequence, 'sequence_id', ''),
+        }
+        kwargs.update(overrides)
+        return cls(**kwargs)
+
+    def to_dict(self):
+        return asdict(self)
+
+
+class DetectorContract:
+    """Minimal detector API contract.
+
+    Future detectors implement these properties and return DetectorResult
+    objects from detect().  The contract is detector-agnostic and intentionally
+    does not read images, write files, or perform runtime integration itself.
+    """
+
+    detector_id = ''
+    detector_version = ''
+    detector_type = ''
+    supported_labels = ()
+    required_input_type = 'ScientificFrameSequence'
+
+    def detect(self, input_sequence, context=None):
+        raise NotImplementedError('DetectorContract.detect() must return a list of DetectorResult objects')
 
 
 @dataclass
@@ -210,6 +294,79 @@ class DetectorResultWriter:
 
 def default_detector_result_dir(varlib_folder):
     return Path(varlib_folder).joinpath('detector_results')
+
+
+class DetectorRunner:
+    """Small offline/manual runner for detector contract implementations."""
+
+    def __init__(self, detector, output_dir=None):
+        self.detector = detector
+        self.output_dir = Path(output_dir) if output_dir else None
+
+    def run(self, input_sequence, context=None):
+        context = context or DetectorRunContext.from_sequence(input_sequence)
+        results = self._detect(input_sequence, context)
+
+        labels_counter = Counter()
+        statuses_counter = Counter()
+        output_paths = set()
+        writer = DetectorResultWriter(self.output_dir) if self.output_dir else None
+
+        for result in results:
+            _count_value(labels_counter, result.label)
+            _count_value(statuses_counter, result.status)
+            if writer:
+                output_path = writer.write(result)
+                output_paths.add(str(output_path))
+
+        return {
+            'detector_id': _detector_attr(self.detector, 'detector_id'),
+            'detector_version': _detector_attr(self.detector, 'detector_version'),
+            'total_results': len(results),
+            'labels_count': dict(sorted(labels_counter.items())),
+            'statuses_count': dict(sorted(statuses_counter.items())),
+            'results_written': len(results) if writer else 0,
+            'output_paths': sorted(output_paths),
+        }
+
+    def _detect(self, input_sequence, context):
+        try:
+            raw_results = self.detector.detect(input_sequence, context=context)
+        except Exception as exc:
+            return [self._error_result(input_sequence, context, exc)]
+
+        results = []
+        for raw_result in raw_results or []:
+            if isinstance(raw_result, DetectorResult):
+                results.append(raw_result)
+            elif isinstance(raw_result, dict):
+                try:
+                    results.append(DetectorResult(**raw_result))
+                except (TypeError, ValueError) as exc:
+                    results.append(self._error_result(input_sequence, context, exc))
+            else:
+                results.append(self._error_result(
+                    input_sequence,
+                    context,
+                    TypeError('Detector returned non-DetectorResult item'),
+                ))
+        return results
+
+    def _error_result(self, input_sequence, context, exc):
+        return DetectorResult(
+            detector_id=_detector_attr(self.detector, 'detector_id') or 'unknown_detector',
+            detector_version=_detector_attr(self.detector, 'detector_version') or 'unknown',
+            detector_type=_detector_attr(self.detector, 'detector_type') or 'unknown',
+            status='error',
+            label='unknown_event',
+            confidence=0.0,
+            profile_id=_context_or_sequence_value(context, input_sequence, 'profile_id'),
+            camera_id=_context_or_sequence_value(context, input_sequence, 'camera_id'),
+            sequence_id=_context_or_sequence_value(context, input_sequence, 'sequence_id'),
+            timeline_id=getattr(context, 'timeline_id', ''),
+            evidence=[],
+            reasons=['detector_error:{0:s}:{1:s}'.format(type(exc).__name__, _string_value(exc))],
+        )
 
 
 def build_detector_result_offline_report(result_path=None):
@@ -520,6 +677,17 @@ def _format_counts(counts):
         '{0:s}={1:d}'.format(_string_value(key), _int_value(value))
         for key, value in sorted(_dict_value(counts).items())
     )
+
+
+def _detector_attr(detector, attr_name):
+    return _string_value(getattr(detector, attr_name, ''))
+
+
+def _context_or_sequence_value(context, input_sequence, attr_name):
+    value = getattr(context, attr_name, None)
+    if value not in (None, ''):
+        return value
+    return getattr(input_sequence, attr_name, '')
 
 
 def _event_classification_from_detector_result(row, method):

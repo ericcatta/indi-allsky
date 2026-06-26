@@ -7,14 +7,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.detector_result import DETECTOR_RESULT_SCHEMA_VERSION
 from indi_allsky.detector_result import DetectorEvidence
+from indi_allsky.detector_result import DetectorContract
+from indi_allsky.detector_result import DetectorRunContext
 from indi_allsky.detector_result import DetectorResult
+from indi_allsky.detector_result import DetectorRunner
 from indi_allsky.detector_result import DetectorResultWriter
 from indi_allsky.detector_result import build_detector_result_id
+from indi_allsky.detector_result import build_detector_run_id
 from indi_allsky.detector_result import build_detector_result_offline_report
 from indi_allsky.detector_result import convert_detector_results_to_event_classifications_offline
 from indi_allsky.detector_result import convert_detector_results_to_meteor_observations_offline
 from indi_allsky.detector_result import default_detector_result_dir
 from indi_allsky.detector_result import render_detector_result_text_summary
+from indi_allsky.scientific_frame import ScientificFrame
+from indi_allsky.scientific_frame import build_scientific_frame_sequence
 
 
 def _evidence(**overrides):
@@ -66,6 +72,72 @@ def _result(**overrides):
     }
     kwargs.update(overrides)
     return DetectorResult(**kwargs)
+
+
+class DummyDetector(DetectorContract):
+    detector_id = 'dummy_detector'
+    detector_version = '1.0'
+    detector_type = 'test_shadow'
+    supported_labels = ('meteor_candidate',)
+    required_input_type = 'ScientificFrameSequence'
+
+    def __init__(self):
+        self.last_context = None
+        self.last_sequence = None
+
+    def detect(self, input_sequence, context=None):
+        self.last_sequence = input_sequence
+        self.last_context = context
+        return [
+            DetectorResult(
+                detector_id=self.detector_id,
+                detector_version=self.detector_version,
+                detector_type=self.detector_type,
+                status='candidate',
+                label='meteor_candidate',
+                confidence=0.44,
+                profile_id=input_sequence.profile_id,
+                camera_id=input_sequence.camera_id,
+                sequence_id=input_sequence.sequence_id,
+                timeline_id=context.timeline_id if context else '',
+                reasons=['dummy_result'],
+                created_at='2026-06-26T04:00:00+00:00',
+            ),
+        ]
+
+
+class FailingDetector(DetectorContract):
+    detector_id = 'failing_detector'
+    detector_version = '1.0'
+    detector_type = 'test_shadow'
+    supported_labels = ('unknown_event',)
+    required_input_type = 'ScientificFrameSequence'
+
+    def detect(self, input_sequence, context=None):
+        raise RuntimeError('synthetic failure')
+
+
+def _sequence():
+    return build_scientific_frame_sequence([
+        ScientificFrame(
+            timestamp='2026-06-26T00:00:00+00:00',
+            camera_uuid='camera-uuid-2',
+            camera_id=2,
+            profile_id='asi678mc',
+            source_image_path='/tmp/frame-a.fits',
+            detector_image_path='/tmp/frame-a.fits',
+            detector_image_type='fits',
+        ),
+        ScientificFrame(
+            timestamp='2026-06-26T00:00:10+00:00',
+            camera_uuid='camera-uuid-2',
+            camera_id=2,
+            profile_id='asi678mc',
+            source_image_path='/tmp/frame-b.fits',
+            detector_image_path='/tmp/frame-b.fits',
+            detector_image_type='fits',
+        ),
+    ])
 
 
 def test_detector_evidence_serializes_correctly():
@@ -617,6 +689,138 @@ def test_detector_result_meteor_bridge_appends_duplicates_without_reviews_or_val
         assert not base_dir.joinpath('meteor_validations').exists()
 
 
+def test_detector_run_context_serializes_and_builds_run_id():
+    context = DetectorRunContext(
+        mode='offline_test',
+        profile_id='asi678mc',
+        camera_id=2,
+        timeline_id='timeline-abc',
+        sequence_id='sequence-abc',
+        config={'threshold': 0.5},
+        notes='contract test',
+        created_at='2026-06-26T04:00:00+00:00',
+    )
+    row = context.to_dict()
+
+    assert row['run_id'] == build_detector_run_id(
+        'offline_test',
+        'asi678mc',
+        2,
+        'timeline-abc',
+        'sequence-abc',
+        '2026-06-26T04:00:00+00:00',
+    )
+    assert row['config'] == {'threshold': 0.5}
+    assert row['notes'] == 'contract test'
+    json.dumps(row, sort_keys=True)
+
+
+def test_detector_contract_can_be_implemented_by_dummy_detector():
+    detector = DummyDetector()
+
+    assert detector.detector_id == 'dummy_detector'
+    assert detector.detector_version == '1.0'
+    assert detector.detector_type == 'test_shadow'
+    assert detector.supported_labels == ('meteor_candidate',)
+    assert detector.required_input_type == 'ScientificFrameSequence'
+
+
+def test_detector_runner_calls_detector_and_returns_counts_without_writing():
+    detector = DummyDetector()
+    sequence = _sequence()
+    context = DetectorRunContext.from_sequence(
+        sequence,
+        mode='manual',
+        timeline_id='timeline-abc',
+        created_at='2026-06-26T04:00:00+00:00',
+    )
+
+    summary = DetectorRunner(detector).run(sequence, context=context)
+
+    assert detector.last_sequence is sequence
+    assert detector.last_context is context
+    assert summary == {
+        'detector_id': 'dummy_detector',
+        'detector_version': '1.0',
+        'total_results': 1,
+        'labels_count': {'meteor_candidate': 1},
+        'statuses_count': {'candidate': 1},
+        'results_written': 0,
+        'output_paths': [],
+    }
+
+
+def test_detector_runner_writes_detector_result_jsonl_when_output_dir_is_provided():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir).joinpath('detector_results')
+        detector = DummyDetector()
+        sequence = _sequence()
+        context = DetectorRunContext.from_sequence(
+            sequence,
+            timeline_id='timeline-abc',
+            created_at='2026-06-26T04:00:00+00:00',
+        )
+
+        summary = DetectorRunner(detector, output_dir=output_dir).run(sequence, context=context)
+
+        rows = [
+            json.loads(line)
+            for line in output_dir.joinpath('2026-06-26.jsonl').read_text(encoding='utf-8').splitlines()
+        ]
+
+    assert summary['results_written'] == 1
+    assert len(summary['output_paths']) == 1
+    assert rows[0]['schema_version'] == DETECTOR_RESULT_SCHEMA_VERSION
+    assert rows[0]['detector_id'] == 'dummy_detector'
+    assert rows[0]['label'] == 'meteor_candidate'
+    assert rows[0]['timeline_id'] == 'timeline-abc'
+
+
+def test_detector_runner_handles_detector_exception_as_error_result():
+    detector = FailingDetector()
+    sequence = _sequence()
+    context = DetectorRunContext.from_sequence(
+        sequence,
+        timeline_id='timeline-abc',
+        created_at='2026-06-26T04:00:00+00:00',
+    )
+
+    summary = DetectorRunner(detector).run(sequence, context=context)
+
+    assert summary['detector_id'] == 'failing_detector'
+    assert summary['total_results'] == 1
+    assert summary['labels_count'] == {'unknown_event': 1}
+    assert summary['statuses_count'] == {'error': 1}
+    assert summary['results_written'] == 0
+
+
+def test_detector_runner_writes_error_result_for_detector_exception():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir).joinpath('detector_results')
+        sequence = _sequence()
+        context = DetectorRunContext.from_sequence(
+            sequence,
+            timeline_id='timeline-abc',
+            created_at='2026-06-26T04:00:00+00:00',
+        )
+
+        DetectorRunner(FailingDetector(), output_dir=output_dir).run(sequence, context=context)
+
+        rows = [
+            json.loads(line)
+            for line in output_dir.joinpath('2026-06-26.jsonl').read_text(encoding='utf-8').splitlines()
+        ]
+
+    assert len(rows) == 1
+    assert rows[0]['status'] == 'error'
+    assert rows[0]['label'] == 'unknown_event'
+    assert rows[0]['profile_id'] == 'asi678mc'
+    assert rows[0]['camera_id'] == 2
+    assert rows[0]['sequence_id'] == sequence.sequence_id
+    assert rows[0]['timeline_id'] == 'timeline-abc'
+    assert rows[0]['reasons'][0].startswith('detector_error:RuntimeError:')
+
+
 if __name__ == '__main__':
     test_detector_evidence_serializes_correctly()
     test_detector_result_serializes_correctly()
@@ -644,4 +848,10 @@ if __name__ == '__main__':
     test_detector_result_meteor_bridge_skips_non_meteor_error_and_malformed()
     test_detector_result_meteor_bridge_missing_file_is_safe()
     test_detector_result_meteor_bridge_appends_duplicates_without_reviews_or_validations()
+    test_detector_run_context_serializes_and_builds_run_id()
+    test_detector_contract_can_be_implemented_by_dummy_detector()
+    test_detector_runner_calls_detector_and_returns_counts_without_writing()
+    test_detector_runner_writes_detector_result_jsonl_when_output_dir_is_provided()
+    test_detector_runner_handles_detector_exception_as_error_result()
+    test_detector_runner_writes_error_result_for_detector_exception()
     print('detector result tests OK')
