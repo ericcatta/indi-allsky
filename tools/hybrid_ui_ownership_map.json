@@ -86,6 +86,7 @@
         "/modern-admin/system/support",
         "/modern-admin/tasks",
         "/modern-admin/tasks/*",
+        "/modern-admin/notifications",
         "/modern-admin/updates",
         "/modern-admin/users",
         "/modern-admin/uploads"
@@ -120,6 +121,7 @@
         "modern_admin/system_info.html",
         "modern_admin/task_detail.html",
         "modern_admin/tasks.html",
+        "modern_admin/notifications.html",
         "modern_admin/updates.html",
         "modern_admin/users.html",
         "modern_admin/uploads.html",
@@ -1302,18 +1304,18 @@
     },
     "notifications": {
       "label": "Notifications",
-      "status": "CLASSIC ONLY",
-      "owner": "classic",
+      "status": "PARTIAL MODERN",
+      "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/notifications", "/ajax/notification"],
-      "templates": ["notifications.html"],
+      "routes": ["/notifications", "/ajax/notification", "/modern-admin/notifications"],
+      "templates": ["notifications.html", "modern_admin/notifications.html"],
       "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
       "apis": ["/ajax/notification"],
       "config_keys": ["NOTIFICATION_*"],
       "protected": false,
-      "modern_gap": "Modern notifications page missing.",
+      "modern_gap": "Modern Admin has read-only notification inventory; acknowledgement and modal flow remain Classic/shared.",
       "removal_risk": "medium",
-      "notes": []
+      "notes": ["Modern page must not call /ajax/notification POST or acknowledge notifications."]
     },
     "admin_tools": {
       "label": "Admin Tools",

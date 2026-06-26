@@ -7558,6 +7558,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('Log', 'indi_allsky.modern_admin_log_view'),
             ('Task Queue', 'indi_allsky.modern_admin_taskqueue_view'),
             ('Users', 'indi_allsky.modern_admin_users_view'),
+            ('Notifications', 'indi_allsky.modern_admin_notifications_view'),
             ('Settings Inventory', 'indi_allsky.modern_admin_settings_view'),
             ('Global Capture Defaults', 'indi_allsky.modern_admin_capture_settings_view'),
             ('Camera Settings', 'indi_allsky.modern_admin_camera_settings_view'),
@@ -11614,6 +11615,53 @@ class NotificationsView(TemplateView):
         context['notice_list'] = notice_list
 
         return context
+
+
+class ModernAdminNotificationsView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Notifications'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    def get_context(self):
+        context = super(ModernAdminNotificationsView, self).get_context()
+
+        try:
+            notices = IndiAllSkyDbNotificationTable.query\
+                .order_by(IndiAllSkyDbNotificationTable.createDate.desc())\
+                .limit(100)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin notifications: %s', str(e))
+            notices = list()
+            context['modern_admin_notifications_error'] = 'Unable to load notifications.'
+
+        notification_rows = list()
+        for notice in notices:
+            is_ack = bool(notice.ack)
+            notification_rows.append({
+                'id'          : notice.id,
+                'category'    : notice.category.value if notice.category else 'Unknown',
+                'item'        : notice.item or 'Not set',
+                'created'     : self.format_notification_datetime(notice.createDate),
+                'expires'     : self.format_notification_datetime(notice.expireDate),
+                'ack'         : 'Yes' if is_ack else 'No',
+                'ack_tone'    : 'modern-admin-status-muted' if is_ack else 'modern-admin-status-warning',
+                'notification': notice.notification,
+            })
+
+        context['modern_admin_notification_rows'] = notification_rows
+        context['modern_admin_notification_count'] = len(notification_rows)
+        context['modern_admin_notification_unacked_count'] = len([row for row in notification_rows if row['ack'] == 'No'])
+
+        return context
+
+
+    def format_notification_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
 
 
 class AjaxNotificationView(BaseView):
@@ -20490,6 +20538,7 @@ bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.
 bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView.as_view('modern_admin_taskqueue_view', template_name='modern_admin/tasks.html'))
 bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdminTaskDetailView.as_view('modern_admin_task_detail_view', template_name='modern_admin/task_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/users', view_func=ModernAdminUsersView.as_view('modern_admin_users_view', template_name='modern_admin/users.html'))
+bp_allsky.add_url_rule('/modern-admin/notifications', view_func=ModernAdminNotificationsView.as_view('modern_admin_notifications_view', template_name='modern_admin/notifications.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/safe_controls.html'))

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-notifications-title">
+    {% set modern_admin_header_label = 'Notifications header' %}
+    {% set modern_admin_heading = 'Notifications' %}
+    {% set modern_admin_title_id = 'modern-admin-notifications-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Notification summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Notifications</div>
+            <h3>{{ modern_admin_notification_count }}</h3>
+            <p>Most recent notification records.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Unacked</div>
+            <h3>{{ modern_admin_notification_unacked_count }}</h3>
+            <p>Notifications not acknowledged yet.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Classic Fallback</div>
+            <h3>Available</h3>
+            <p><a href="{{ url_for('indi_allsky.notifications_view') }}">Open Classic Notifications</a></p>
+        </article>
+    </section>
+
+    {% if modern_admin_notifications_error %}
+    <section class="modern-admin-table-panel" aria-label="Notification loading warning">
+        <p class="modern-admin-note">{{ modern_admin_notifications_error }}</p>
+    </section>
+    {% endif %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="modern-notifications-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">System</p>
+            <h2 id="modern-notifications-title">Recent Notifications</h2>
+        </div>
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Created</th>
+                        <th>Expires</th>
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>Acked</th>
+                        <th>Notification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notice in modern_admin_notification_rows %}
+                    <tr>
+                        <td>{{ notice.id }}</td>
+                        <td>{{ notice.created }}</td>
+                        <td>{{ notice.expires }}</td>
+                        <td>{{ notice.category }}</td>
+                        <td>{{ notice.item }}</td>
+                        <td><span class="modern-admin-status-pill {{ notice.ack_tone }}">{{ notice.ack }}</span></td>
+                        <td>{{ notice.notification }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7">No notifications are available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="modern-admin-note">Acknowledgement remains in the existing notification modal flow. This page does not change notification state.</p>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-label="Notification fallbacks">
+        <div class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.notifications_view') }}">Open Classic Notifications</a>
+        </div>
+    </section>
+</main>
+{% endblock %}

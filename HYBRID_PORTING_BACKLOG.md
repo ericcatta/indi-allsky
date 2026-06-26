@@ -18,6 +18,7 @@ still active and cannot be removed. The real state is mixed:
 - Several media, system, observatory and storage surfaces have Modern pages.
 - Task Queue has reached read-only list, usability, and detail coverage.
 - User Management has reached read-only list coverage.
+- Notifications has reached read-only list coverage.
 - Multiple system tools are still Modern wrappers over Classic/back-end logic.
 - Some important operational pages remain Classic-only.
 - Public/latest routes, Sync API, Action API and shared AJAX endpoints are not
@@ -46,9 +47,9 @@ a measure of lines of code.
 ### Real Porting Estimate
 
 - Feature map total: 92 tracked features.
-- Features with a Modern or shared active surface: about 57%.
-- Features that are truly safe from a Classic-removal perspective: about 35-40%.
-- Features that are Classic-only or legacy-active: about 13%.
+- Features with a Modern or shared active surface: about 58%.
+- Features that are truly safe from a Classic-removal perspective: about 36-41%.
+- Features that are Classic-only or legacy-active: about 12%.
 - Features that are wrapper-only: about 7%.
 - Features that must be preserved as public/external/shared contracts: about 17%.
 - Current Classic UI removability: 0%.
@@ -91,11 +92,11 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Notifications | A | B | S | Medium | Classic-only, operational, likely readable before actions. |
-| 2 | Config History | A | B | S | Medium | Classic-only, read-only history is useful and low mutation risk. |
-| 3 | Config Restore | A | B/D first | S | High | Restore is mutative, but read-only inspection can be ported safely first. |
-| 4 | FITS Image Viewer | A | B | M | High | Important for scientific source workflow; start read-only. |
-| 5 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
+| 1 | Config History | A | B | S | Medium | Classic-only, read-only history is useful and low mutation risk. |
+| 2 | Config Restore | A | B/D first | S | High | Restore is mutative, but read-only inspection can be ported safely first. |
+| 3 | FITS Image Viewer | A | B | M | High | Important for scientific source workflow; start read-only. |
+| 4 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
+| 5 | Notifications | B | C | S | Medium | Read-only list exists; next safe step is usability, not ack actions. |
 | 6 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
 | 7 | Logs | C | D | S | Medium | Modern log exists; download/detail parity should be verified. |
 | 8 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
@@ -217,7 +218,7 @@ These should not be removed. They are transitional.
 | Task Queue | modern | PARTIAL MODERN | D | 65% | Task model | High | S | High | List/usability/detail done; mutations blocked. |
 | User Management | modern | PARTIAL MODERN | B | 35% | Auth model | High | S | High | Read-only list done; no mutations. |
 | Authentication | shared_api | SHARED ACTIVE | Preserve | 70% | Flask login | High | XS | Preserve | Security-critical shared surface. |
-| Notifications | classic | CLASSIC ONLY | A | 0% | Notification model/forms | High | S | High | Best next read-only candidate. |
+| Notifications | modern | PARTIAL MODERN | B | 35% | Notification model/forms | High | S | High | Read-only list exists; acknowledgement remains Classic/shared. |
 | Admin Tools | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Medium | M | Medium | Native pages later. |
 | Safe Controls | modern_wrapper | WRAPPER ONLY | B | 35% | Classic tools | Critical | L | Protect | Do not remove. |
 | Network | modern_wrapper | WRAPPER ONLY | B | 35% | System/network backend | Medium | M | Medium | High operational risk. |
@@ -251,11 +252,11 @@ and the completed Task Queue/User Management work.
 
 ### Phase 1 - Finish Safe Read-only Admin Gaps
 
-1. Notifications read-only list.
-2. Config History read-only list.
-3. Config Restore read-only inspection only.
-4. FITS Image Viewer read-only source/review page.
-5. User Management read-only detail page.
+1. Config History read-only list.
+2. Config Restore read-only inspection only.
+3. FITS Image Viewer read-only source/review page.
+4. User Management read-only detail page.
+5. Notifications read-only usability.
 
 ### Phase 2 - Complete Read-only Details for Existing Modern Pages
 
@@ -297,11 +298,11 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Notifications | Modern read-only list | Classic-only, small, operational, no mutation required. |
-| 2 | Config History | Modern read-only list | Classic-only and useful for configuration safety. |
-| 3 | Config Restore | Modern read-only restore-detail page | Important, but mutation must wait. |
-| 4 | FITS Image Viewer | Modern read-only FITS/source detail | Aligns with scientific-first direction. |
-| 5 | User Management | Modern read-only user detail | Extends existing safe page without auth mutation. |
+| 1 | Config History | Modern read-only list | Classic-only and useful for configuration safety. |
+| 2 | Config Restore | Modern read-only restore-detail page | Important, but mutation must wait. |
+| 3 | FITS Image Viewer | Modern read-only FITS/source detail | Aligns with scientific-first direction. |
+| 4 | User Management | Modern read-only user detail | Extends existing safe page without auth mutation. |
+| 5 | Notifications | Modern read-only usability | Extends existing safe page without acknowledgement actions. |
 | 6 | Logs | Modern download/detail parity audit/fix | Low risk, useful operational parity. |
 | 7 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
 | 8 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
@@ -313,8 +314,8 @@ and the completed Task Queue/User Management work.
 These can proceed in parallel because they touch different surfaces and can stay
 read-only:
 
-- Notifications read-only list.
 - Config History read-only list.
+- Notifications read-only usability.
 - FITS/source read-only detail.
 - Logs download/detail parity audit.
 - Upload provider status read-only.
@@ -371,25 +372,25 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Notifications read-only.
+Config History read-only.
 
 ### 6. Why that feature?
 
 It is Classic-only, operationally useful, likely small, does not require runtime
-or auth mutation, and follows the successful Task Queue/User Management pattern:
+or auth mutation, and follows the successful Task Queue/User Management/Notifications pattern:
 read-only first, Classic fallback preserved, no action porting until the backend
 contract is understood.
 
 ### 7. Which features can be ported in parallel?
 
-Notifications read-only, Config History read-only, FITS/source read-only detail,
+Config History read-only, FITS/source read-only detail, Notifications usability,
 Logs detail/download parity, Upload provider status read-only, and supporting
 documentation/inventory updates.
 
 ### 8. What percentage is really Modern?
 
-By feature count, roughly 57% has a Modern or shared active surface. By Classic
-removal readiness, the safer estimate is 35-40%. By operational center of
+By feature count, roughly 58% has a Modern or shared active surface. By Classic
+removal readiness, the safer estimate is 36-41%. By operational center of
 gravity, the project is already Modern-first.
 
 ### 9. How much remains before Classic UI can be removed?
@@ -402,14 +403,14 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Implement **Notifications Phase A - Modern read-only**.
+Implement **Config History Phase A - Modern read-only**.
 
 Scope:
 
-- Analyze Classic `/notifications` and `/ajax/notification`.
-- Add `/modern-admin/notifications` read-only list if fields are safe.
-- Do not add create/edit/delete/test-send actions.
+- Analyze Classic `/config/list` and related config history model/query.
+- Add a Modern read-only config history list if fields are safe.
+- Do not add restore, download or mutation actions.
 - Preserve Classic fallback.
 - Update ownership/inventory.
 
-This is the smallest useful next porting step with the best risk/value ratio.
+This is the next smallest useful porting step with the best risk/value ratio.
