@@ -10,7 +10,9 @@ from indi_allsky.detector_result import DetectorEvidence
 from indi_allsky.detector_result import DetectorResult
 from indi_allsky.detector_result import DetectorResultWriter
 from indi_allsky.detector_result import build_detector_result_id
+from indi_allsky.detector_result import build_detector_result_offline_report
 from indi_allsky.detector_result import default_detector_result_dir
+from indi_allsky.detector_result import render_detector_result_text_summary
 
 
 def _evidence(**overrides):
@@ -199,6 +201,140 @@ def test_detector_result_default_directory():
     assert default_detector_result_dir('/var/lib/indi-allsky') == Path('/var/lib/indi-allsky/detector_results')
 
 
+def test_detector_result_offline_report_missing_file_is_safe():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        report = build_detector_result_offline_report(Path(tmpdir).joinpath('missing.jsonl'))
+
+    assert report['total_result_lines'] == 0
+    assert report['malformed_lines'] == 0
+    assert report['counts_by_label'] == {}
+    assert report['evidence_count_total'] == 0
+
+
+def test_detector_result_offline_report_counts_malformed_lines():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result_path = Path(tmpdir).joinpath('detector_results.jsonl')
+        with result_path.open('w', encoding='utf-8') as f_result:
+            f_result.write(json.dumps(_result(label='unknown_event').to_dict()))
+            f_result.write('\n')
+            f_result.write('not-json\n')
+            f_result.write('\n')
+            f_result.write('[]\n')
+
+        report = build_detector_result_offline_report(result_path)
+
+    assert report['total_result_lines'] == 1
+    assert report['malformed_lines'] == 2
+    assert report['counts_by_label'] == {'unknown_event': 1}
+
+
+def test_detector_result_offline_report_counts_populated_fields():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result_path = Path(tmpdir).joinpath('detector_results.jsonl')
+        rows = [
+            _result(
+                detector_id='detector-a',
+                detector_type='rule_based_shadow',
+                status='shadow',
+                label='meteor_candidate',
+                confidence=0.40,
+                camera_id=1,
+                profile_id='imx708-wide',
+                sequence_id='sequence-a',
+                timeline_id='timeline-a',
+                evidence=[_evidence(evidence_type='line_like_signal', camera_id=1, profile_id='imx708-wide')],
+            ).to_dict(),
+            _result(
+                detector_id='detector-a',
+                detector_type='rule_based_shadow',
+                status='candidate',
+                label='meteor_candidate',
+                confidence=0.60,
+                camera_id=1,
+                profile_id='imx708-wide',
+                sequence_id='sequence-a',
+                timeline_id='timeline-b',
+                evidence=[_evidence(evidence_type='motion_signal', camera_id=1, profile_id='imx708-wide')],
+            ).to_dict(),
+            _result(
+                detector_id='detector-b',
+                detector_type='external_shadow',
+                status='rejected',
+                label='weather_or_cloud_event',
+                confidence=0.20,
+                camera_id=2,
+                profile_id='asi678mc',
+                sequence_id='sequence-b',
+                timeline_id='timeline-c',
+                evidence=[],
+            ).to_dict(),
+        ]
+        with result_path.open('w', encoding='utf-8') as f_result:
+            for row in rows:
+                f_result.write(json.dumps(row, sort_keys=True))
+                f_result.write('\n')
+
+        report = build_detector_result_offline_report(result_path)
+
+    assert report['total_result_lines'] == 3
+    assert report['counts_by_detector_id'] == {'detector-a': 2, 'detector-b': 1}
+    assert report['counts_by_detector_type'] == {'external_shadow': 1, 'rule_based_shadow': 2}
+    assert report['counts_by_status'] == {'candidate': 1, 'rejected': 1, 'shadow': 1}
+    assert report['counts_by_label'] == {'meteor_candidate': 2, 'weather_or_cloud_event': 1}
+    assert report['counts_by_profile_id'] == {'asi678mc': 1, 'imx708-wide': 2}
+    assert report['counts_by_camera_id'] == {'1': 2, '2': 1}
+    assert report['counts_by_sequence_id'] == {'sequence-a': 2, 'sequence-b': 1}
+    assert report['counts_by_timeline_id'] == {'timeline-a': 1, 'timeline-b': 1, 'timeline-c': 1}
+    assert report['evidence_count_total'] == 2
+    assert report['counts_by_evidence_type'] == {'line_like_signal': 1, 'motion_signal': 1}
+    assert report['average_confidence_by_label'] == {
+        'meteor_candidate': 0.5,
+        'weather_or_cloud_event': 0.2,
+    }
+
+
+def test_detector_result_text_summary_empty_report():
+    summary = render_detector_result_text_summary({}, date='2026-06-26')
+
+    assert 'Detector Result Summary - 2026-06-26' in summary
+    assert 'Results: 0' in summary
+    assert 'Warning' not in summary
+
+
+def test_detector_result_text_summary_populated_report():
+    summary = render_detector_result_text_summary({
+        'total_result_lines': 3,
+        'counts_by_label': {
+            'meteor_candidate': 2,
+            'weather_or_cloud_event': 1,
+        },
+        'counts_by_detector_id': {
+            'detector-a': 2,
+            'detector-b': 1,
+        },
+        'malformed_lines': 0,
+    })
+
+    assert 'Results: 3' in summary
+    assert 'By label: meteor_candidate=2, weather_or_cloud_event=1' in summary
+    assert 'By detector: detector-a=2, detector-b=1' in summary
+    assert 'Warning' not in summary
+
+
+def test_detector_result_text_summary_malformed_warning_only_when_nonzero():
+    clean_summary = render_detector_result_text_summary({
+        'total_result_lines': 1,
+        'malformed_lines': 0,
+    })
+    noisy_summary = render_detector_result_text_summary({
+        'total_result_lines': 1,
+        'malformed_lines': 2,
+    })
+
+    assert 'Warning' not in clean_summary
+    assert 'Warning: malformed JSONL lines: 2' in noisy_summary
+
+
 if __name__ == '__main__':
     test_detector_evidence_serializes_correctly()
     test_detector_result_serializes_correctly()
@@ -211,4 +347,10 @@ if __name__ == '__main__':
     test_detector_result_stays_detector_agnostic()
     test_detector_result_writer_writes_append_only_jsonl()
     test_detector_result_default_directory()
+    test_detector_result_offline_report_missing_file_is_safe()
+    test_detector_result_offline_report_counts_malformed_lines()
+    test_detector_result_offline_report_counts_populated_fields()
+    test_detector_result_text_summary_empty_report()
+    test_detector_result_text_summary_populated_report()
+    test_detector_result_text_summary_malformed_warning_only_when_nonzero()
     print('detector result tests OK')

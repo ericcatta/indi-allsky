@@ -1,5 +1,6 @@
 import hashlib
 import json
+from collections import Counter
 from dataclasses import asdict
 from dataclasses import dataclass
 from dataclasses import field
@@ -206,6 +207,86 @@ def default_detector_result_dir(varlib_folder):
     return Path(varlib_folder).joinpath('detector_results')
 
 
+def build_detector_result_offline_report(result_path=None):
+    result_rows, malformed_lines = _load_jsonl_rows(result_path)
+
+    detector_counter = Counter()
+    detector_type_counter = Counter()
+    status_counter = Counter()
+    label_counter = Counter()
+    profile_counter = Counter()
+    camera_counter = Counter()
+    sequence_counter = Counter()
+    timeline_counter = Counter()
+    evidence_type_counter = Counter()
+    confidence_by_label = {}
+    evidence_count_total = 0
+
+    for row in result_rows:
+        _count_value(detector_counter, row.get('detector_id'))
+        _count_value(detector_type_counter, row.get('detector_type'))
+        _count_value(status_counter, row.get('status'))
+        _count_value(label_counter, row.get('label'))
+        _count_value(profile_counter, row.get('profile_id'))
+        _count_value(camera_counter, row.get('camera_id'))
+        _count_value(sequence_counter, row.get('sequence_id'))
+        _count_value(timeline_counter, row.get('timeline_id'))
+
+        label = _string_value(row.get('label'))
+        if label:
+            confidence_by_label.setdefault(label, []).append(float(row.get('confidence') or 0.0))
+
+        evidence_items = row.get('evidence') or []
+        if not isinstance(evidence_items, list):
+            continue
+
+        evidence_count_total += len(evidence_items)
+        for evidence_item in evidence_items:
+            if isinstance(evidence_item, dict):
+                _count_value(evidence_type_counter, evidence_item.get('evidence_type'))
+
+    return {
+        'total_result_lines': len(result_rows),
+        'malformed_lines': malformed_lines,
+        'counts_by_detector_id': dict(sorted(detector_counter.items())),
+        'counts_by_detector_type': dict(sorted(detector_type_counter.items())),
+        'counts_by_status': dict(sorted(status_counter.items())),
+        'counts_by_label': dict(sorted(label_counter.items())),
+        'counts_by_profile_id': dict(sorted(profile_counter.items())),
+        'counts_by_camera_id': dict(sorted(camera_counter.items())),
+        'counts_by_sequence_id': dict(sorted(sequence_counter.items())),
+        'counts_by_timeline_id': dict(sorted(timeline_counter.items())),
+        'evidence_count_total': evidence_count_total,
+        'counts_by_evidence_type': dict(sorted(evidence_type_counter.items())),
+        'average_confidence_by_label': _average_confidence_by_label(confidence_by_label),
+    }
+
+
+def render_detector_result_text_summary(report, date=None):
+    report = report or {}
+    lines = []
+
+    title = 'Detector Result Summary'
+    if date:
+        title = '{0:s} - {1:s}'.format(title, _string_value(date))
+    lines.append(title)
+    lines.append('Results: {0:d}'.format(_int_value(report.get('total_result_lines'))))
+
+    label_counts = _dict_value(report.get('counts_by_label'))
+    if label_counts:
+        lines.append('By label: {0:s}'.format(_format_counts(label_counts)))
+
+    detector_counts = _dict_value(report.get('counts_by_detector_id'))
+    if detector_counts:
+        lines.append('By detector: {0:s}'.format(_format_counts(detector_counts)))
+
+    malformed_lines = _int_value(report.get('malformed_lines'))
+    if malformed_lines:
+        lines.append('Warning: malformed JSONL lines: {0:d}'.format(malformed_lines))
+
+    return '\n'.join(lines)
+
+
 def _clamp_confidence(value):
     confidence = float(value or 0.0)
     return max(0.0, min(1.0, confidence))
@@ -253,3 +334,59 @@ def _date_from_timestamp(timestamp):
         if len(timestamp_str) >= 10:
             return datetime.fromisoformat(timestamp_str[:10]).date().isoformat()
         raise
+
+
+def _load_jsonl_rows(path):
+    if not path:
+        return [], 0
+
+    path = Path(path)
+    if not path.exists() or not path.is_file():
+        return [], 0
+
+    rows = []
+    malformed = 0
+    with path.open('r', encoding='utf-8') as f_jsonl:
+        for line in f_jsonl:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                malformed += 1
+                continue
+            if isinstance(row, dict):
+                rows.append(row)
+            else:
+                malformed += 1
+    return rows, malformed
+
+
+def _count_value(counter, value):
+    value = _string_value(value)
+    if value:
+        counter[value] += 1
+
+
+def _average_confidence_by_label(confidence_by_label):
+    averages = {}
+    for label, confidence_values in confidence_by_label.items():
+        if not confidence_values:
+            continue
+        averages[label] = sum(confidence_values) / len(confidence_values)
+    return dict(sorted(averages.items()))
+
+
+def _int_value(value):
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _format_counts(counts):
+    return ', '.join(
+        '{0:s}={1:d}'.format(_string_value(key), _int_value(value))
+        for key, value in sorted(_dict_value(counts).items())
+    )
