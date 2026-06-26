@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-user-detail-title">
+    {% set modern_admin_header_label = 'Users' %}
+    {% set modern_admin_heading = 'User Detail' %}
+    {% set modern_admin_title_id = 'modern-admin-user-detail-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="User detail summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">User ID</div>
+            <h3>{{ modern_admin_user_detail.id }}</h3>
+            <p>{{ modern_admin_user_detail.username }}</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Active</div>
+            <h3>{{ modern_admin_user_detail.active }}</h3>
+            <p>No account action is available here.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Admin</div>
+            <h3>{{ modern_admin_user_detail.admin }}</h3>
+            <p>Role changes are intentionally unavailable.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="modern-user-detail-heading">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">User Management</p>
+            <h2 id="modern-user-detail-heading">Account metadata</h2>
+        </div>
+
+        <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
+            <div><dt>ID</dt><dd>{{ modern_admin_user_detail.id }}</dd></div>
+            <div><dt>Created</dt><dd>{{ modern_admin_user_detail.created }}</dd></div>
+            <div><dt>Username</dt><dd>{{ modern_admin_user_detail.username }}</dd></div>
+            <div><dt>Name</dt><dd>{{ modern_admin_user_detail.name }}</dd></div>
+            <div><dt>Active</dt><dd><span class="modern-admin-status-pill {{ modern_admin_user_detail.active_tone }}">{{ modern_admin_user_detail.active }}</span></dd></div>
+            <div><dt>Staff</dt><dd><span class="modern-admin-status-pill {{ modern_admin_user_detail.staff_tone }}">{{ modern_admin_user_detail.staff }}</span></dd></div>
+            <div><dt>Admin</dt><dd><span class="modern-admin-status-pill {{ modern_admin_user_detail.admin_tone }}">{{ modern_admin_user_detail.admin }}</span></dd></div>
+            <div><dt>Last login</dt><dd>{{ modern_admin_user_detail.last_login }}</dd></div>
+            <div><dt>Config snapshots</dt><dd>{{ modern_admin_user_detail.config_count }}</dd></div>
+        </dl>
+
+        <p class="modern-admin-note">Password hashes, API keys, login IPs, email, session data, role mutation and raw user data are intentionally not shown.</p>
+
+        <section class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_users_view') }}">Back to Modern Users</a>
+            <a href="{{ url_for('indi_allsky.users_view') }}">Open Classic Users</a>
+            <a href="{{ url_for('indi_allsky.user_view') }}">Open Classic User Profile</a>
+        </section>
+    </section>
+</main>
+{% endblock %}

@@ -11927,6 +11927,49 @@ class ModernAdminUsersView(ModernAdminContextMixin, TemplateView):
         return 'Yes' if bool(value) else 'No'
 
 
+class ModernAdminUserDetailView(ModernAdminUsersView):
+    page_title = 'Modern Admin User Detail'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+
+    def dispatch_request(self, user_id):
+        self.user_id = user_id
+        return super(ModernAdminUserDetailView, self).dispatch_request()
+
+
+    def get_context(self):
+        context = super(ModernAdminUsersView, self).get_context()
+
+        try:
+            user = IndiAllSkyDbUserTable.query\
+                .filter(IndiAllSkyDbUserTable.id == self.user_id)\
+                .one()
+        except NoResultFound:
+            abort(404)
+
+        config_count = db.session.query(func.count(IndiAllSkyDbConfigTable.id))\
+            .filter(IndiAllSkyDbConfigTable.user_id == user.id)\
+            .scalar()
+
+        context['modern_admin_user_detail'] = {
+            'id'            : user.id,
+            'username'      : user.username,
+            'name'          : user.name or 'Not set',
+            'active'        : self.format_user_bool(user.active),
+            'active_tone'   : 'modern-admin-status-good' if user.active else 'modern-admin-status-muted',
+            'staff'         : self.format_user_bool(user.staff),
+            'staff_tone'    : 'modern-admin-status-good' if user.staff else 'modern-admin-status-muted',
+            'admin'         : self.format_user_bool(user.admin),
+            'admin_tone'    : 'modern-admin-status-warning' if user.admin else 'modern-admin-status-muted',
+            'created'       : self.format_user_datetime(user.createDate),
+            'last_login'    : self.format_user_datetime(user.loginDate, default='Never'),
+            'config_count'  : config_count or 0,
+        }
+
+        return context
+
+
 class ModernAdminConfigHistoryView(ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Config History'
     decorators = [login_required]
@@ -21096,6 +21139,7 @@ bp_allsky.add_url_rule('/modern-admin/system/log/<log_name>', view_func=ModernAd
 bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView.as_view('modern_admin_taskqueue_view', template_name='modern_admin/tasks.html'))
 bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdminTaskDetailView.as_view('modern_admin_task_detail_view', template_name='modern_admin/task_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/users', view_func=ModernAdminUsersView.as_view('modern_admin_users_view', template_name='modern_admin/users.html'))
+bp_allsky.add_url_rule('/modern-admin/users/<int:user_id>', view_func=ModernAdminUserDetailView.as_view('modern_admin_user_detail_view', template_name='modern_admin/user_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/config-history', view_func=ModernAdminConfigHistoryView.as_view('modern_admin_config_history_view', template_name='modern_admin/config_history.html'))
 bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
 bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
