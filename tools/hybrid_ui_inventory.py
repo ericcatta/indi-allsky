@@ -554,6 +554,13 @@ def feature_summary(ownership_map: dict) -> dict[str, int]:
     return counts
 
 
+def current_unknown_feature_matches(feature_linkage_counts: list[list[object]]) -> int:
+    for row in feature_linkage_counts:
+        if row and row[0] == "unknown_needs_verification":
+            return int(row[6])
+    return 0
+
+
 def feature_summary_rows(ownership_map: dict) -> list[list[object]]:
     rows: list[list[object]] = []
     for feature_key, feature in sorted(ownership_map.get("features", {}).items()):
@@ -753,6 +760,7 @@ def render_report(
         endpoint_to_route,
         ownership_map,
     )
+    unknown_matches = current_unknown_feature_matches(feature_linkage_counts)
 
     lines: list[str] = []
     lines.append("# HYBRID UI INVENTORY REPORT")
@@ -784,6 +792,8 @@ def render_report(
             ["Shared/public/external features", feature_counts["shared_public_external"]],
             ["Features needing verification", feature_counts["needs_verification"]],
             ["Inventory items not linked to any feature", len(unlinked_inventory)],
+            ["Previous known unknown_needs_verification matches", 511],
+            ["Current unknown_needs_verification matches", unknown_matches],
         ],
     ))
     if warnings:
@@ -1054,6 +1064,24 @@ def render_report(
         ["Kind", "Item", "Inferred classification", "Note"],
         unlinked_inventory,
     ))
+    lines.append("")
+
+    lines.append("## 6.11.1 Unknown Needs Verification Refinement")
+    lines.append("")
+    lines.append(table(
+        ["Metric", "Count"],
+        [
+            ["Previous known unknown_needs_verification matches", 511],
+            ["Current unknown_needs_verification matches", unknown_matches],
+        ],
+    ))
+    lines.append("")
+    if unknown_matches:
+        lines.append("Remaining unknown items are listed through the `unknown_needs_verification` rows in Feature Linkage Counts.")
+    else:
+        lines.append("No inventory item currently relies on `unknown_needs_verification` for feature linkage. The feature remains as an explicit future fallback only.")
+    lines.append("")
+    lines.append("Primary reclassification targets in this pass: Public media endpoints, Direct navigation routes, System Info/Support, Sensors, Camera Profiles/Multi-camera, Image Lag, Bad Pixel/Defect Maps, Classic UI shell, and Dynamically loaded assets.")
     lines.append("")
 
     lines.append("## 6.12 Feature Linkage Counts")
