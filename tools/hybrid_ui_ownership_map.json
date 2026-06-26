@@ -1249,11 +1249,13 @@
         "/ajax/fitsimageviewer",
         "/fits2jpeg",
         "/modern-admin/fits",
+        "/modern-admin/fits/*",
         "/modern-admin/media/fits"
       ],
       "templates": [
         "fitsimageviewer.html",
         "modern_admin/fits.html",
+        "modern_admin/fits_detail.html",
         "modern_admin/media_list.html"
       ],
       "assets": [],
@@ -1265,7 +1267,7 @@
         "IMAGE_SAVE_FITS*"
       ],
       "protected": true,
-      "modern_gap": "Modern has read-only FITS metadata inspection with local usability filters, not conversion/viewer parity.",
+      "modern_gap": "Modern has read-only FITS metadata inspection, local usability filters, and metadata-only detail; conversion/viewer parity remains Classic-only.",
       "removal_risk": "high",
       "notes": [
         "Do not remove Classic before scientific source review UX and conversion/viewer parity are understood.",

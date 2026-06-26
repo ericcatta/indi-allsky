@@ -14196,6 +14196,59 @@ class ModernAdminFitsView(ModernAdminContextMixin, TemplateView):
         return 'Local DB entry'
 
 
+    def format_fits_data_summary(self, value):
+        if isinstance(value, dict):
+            return 'Keys: {0:d}'.format(len(value))
+        if value is None:
+            return 'No metadata payload'
+        return 'Non-dict metadata payload'
+
+
+class ModernAdminFitsDetailView(ModernAdminFitsView):
+    page_title = 'Modern Admin FITS Detail'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+
+    def dispatch_request(self, fits_id):
+        self.fits_id = fits_id
+        return super(ModernAdminFitsDetailView, self).dispatch_request()
+
+
+    def get_context(self):
+        context = super(ModernAdminFitsView, self).get_context()
+
+        try:
+            entry = IndiAllSkyDbFitsImageTable.query\
+                .join(IndiAllSkyDbFitsImageTable.camera)\
+                .filter(IndiAllSkyDbFitsImageTable.id == self.fits_id)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .one()
+        except NoResultFound:
+            abort(404)
+
+        context['modern_admin_fits_detail'] = {
+            'id'            : entry.id,
+            'created'       : self.format_fits_datetime(entry.createDate),
+            'day_date'      : entry.dayDate if entry.dayDate else 'Unknown',
+            'camera_id'     : entry.camera_id,
+            'filename'      : self.format_fits_filename(entry.filename),
+            'file_type'     : self.format_fits_file_type(entry.filename),
+            'dimensions'    : self.format_fits_dimensions(entry.width, entry.height),
+            'exposure'      : self.format_fits_number(entry.exposure, suffix='s'),
+            'gain'          : self.format_fits_number(entry.gain),
+            'binmode'       : entry.binmode if entry.binmode is not None else 'Unknown',
+            'file_size'     : self.format_file_size(entry.fileSize),
+            'timeofday'     : 'Night' if entry.night else 'Day',
+            'uploaded'      : 'Yes' if bool(entry.uploaded) else 'No',
+            'sync_id'       : entry.sync_id if entry.sync_id is not None else 'N/A',
+            'source'        : self.format_fits_source(entry),
+            'data_summary'  : self.format_fits_data_summary(entry.data),
+        }
+
+        return context
+
+
 class LongTermKeogramView(TemplateView):
     page_title = 'Long Term Keogram'
 
@@ -20953,6 +21006,7 @@ bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMedi
 bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/fits', view_func=ModernAdminFitsView.as_view('modern_admin_fits_view', template_name='modern_admin/fits.html'))
+bp_allsky.add_url_rule('/modern-admin/fits/<int:fits_id>', view_func=ModernAdminFitsDetailView.as_view('modern_admin_fits_detail_view', template_name='modern_admin/fits_detail.html'))
 
 bp_allsky.add_url_rule('/view_image', view_func=TimelapseImageView.as_view('timelapse_image_view', template_name='view_image.html'))
 bp_allsky.add_url_rule('/view_panorama', view_func=PanoramaImageView.as_view('panorama_image_view', template_name='view_image.html'))

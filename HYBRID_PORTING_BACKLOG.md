@@ -128,14 +128,13 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | FITS Image Viewer | C | D only after viewer/conversion safety review | M | High | Read-only metadata usability exists; preview/download/conversion remain out of scope. |
-| 2 | Notifications | C | D only after notification action review | S | Medium | Read-only usability exists; detail/actions need explicit non-mutative scope. |
-| 3 | User Management | C | D only after auth field review | S | High | Read-only usability exists; detail requires careful field/security review. |
-| 4 | Logs | D | stop/E only after contract | S | Medium | Modern read-only log detail exists; no new download/action work without contract review. |
-| 5 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
-| 6 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
-| 7 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
-| 8 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
+| 1 | Notifications | C | D only after notification action review | S | Medium | Read-only usability exists; detail/actions need explicit non-mutative scope. |
+| 2 | User Management | C | D only after auth field review | S | High | Read-only usability exists; detail requires careful field/security review. |
+| 3 | Logs | D | stop/E only after contract | S | Medium | Modern read-only log detail exists; no new download/action work without contract review. |
+| 4 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
+| 5 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
+| 6 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
+| 7 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
 
 ### Blocked
 
@@ -149,6 +148,7 @@ the next available feature.
 | Event Review (global for event UI/action work) | Event review workflow has no UI contract yet. | Architecture/design/read-only evidence browser. |
 | Task Queue mutations | No safe user-facing backend contract for retry/cancel/delete/requeue. | No mutation; only diagnostics/detail. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
+| FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
 | YouTube / OAuth | External auth and upload behavior need safety review. | Read-only provider/status inventory first. |
 
 ### Needs Backend First
@@ -224,7 +224,7 @@ These should not be removed. They are transitional.
 | Camera Simulator | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Low | L | Low | Low-risk but low-value. |
 | Image Lag | modern | PARTIAL MODERN | C | 55% | Camera pages | Medium | M | Medium | Modern page exists; semantics need validation. |
 | Image Viewer | modern | PARTIAL MODERN | C | 55% | Media list | Medium | M | Medium | Advanced actions/exclude remain unclear. |
-| FITS Image Viewer | modern | PARTIAL MODERN | C | 45% | Scientific source layer | High | M | High | Read-only Modern FITS metadata usability exists; conversion/viewer parity remains Classic-only. |
+| FITS Image Viewer | modern | PARTIAL MODERN | D | 65% | Scientific source layer | High | M | High | Read-only Modern FITS metadata detail exists; conversion/viewer parity remains Classic-only and locally blocked. |
 | Gallery | modern | PARTIAL MODERN | C | 55% | Media list | Medium | M | Medium | Modern gallery exists; PhotoSwipe parity unknown. |
 | Panorama | public | SHARED LEGACY | Preserve | 70% | Public endpoints | Medium | M | Medium | Preserve public/latest behavior. |
 | Raw Viewer | public | SHARED LEGACY | Preserve | 70% | Raw/source files | Critical | M | Medium | Needs source review, but public routes preserved. |
@@ -290,11 +290,11 @@ and the completed Task Queue/User Management work.
 
 ### Phase 1 - Finish Safe Read-only Admin Gaps
 
-1. FITS Image Viewer read-only detail only after viewer/conversion safety review.
-2. Notifications read-only detail only after notification action review.
-3. User Management read-only detail only after auth field review.
-4. Config History restore/download parity only after explicit safety review.
-5. Config Restore safe actions only after rollback and restore contract review.
+1. Notifications read-only detail only after notification action review.
+2. User Management read-only detail only after auth field review.
+3. Config History restore/download parity only after explicit safety review.
+4. Config Restore safe actions only after rollback and restore contract review.
+5. FITS viewer/conversion/download only after filesystem and path policy review.
 
 ### Phase 2 - Complete Read-only Details for Existing Modern Pages
 
@@ -335,16 +335,16 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | FITS Image Viewer | Modern read-only detail/viewer safety review | Usability exists; conversion/download/preview remain out of scope. |
-| 2 | Notifications | Modern read-only detail/action-safety review | Usability exists; acknowledgement remains out of scope. |
-| 3 | User Management | Modern read-only detail field/security review | Usability exists; detail must remain auth-safe. |
-| 4 | Logs | Safe action/download contract review only | Detail exists; further work needs explicit backend/download policy. |
-| 5 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
-| 6 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
-| 7 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
-| 8 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
-| 9 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
-| 10 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
+| 1 | Notifications | Modern read-only detail/action-safety review | Usability exists; acknowledgement remains out of scope. |
+| 2 | User Management | Modern read-only detail field/security review | Usability exists; detail must remain auth-safe. |
+| 3 | Logs | Safe action/download contract review only | Detail exists; further work needs explicit backend/download policy. |
+| 4 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
+| 5 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
+| 6 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
+| 7 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
+| 8 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
+| 9 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
+| 10 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
 
 ## 7. Parallelizable Work
 
@@ -409,13 +409,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-FITS Image Viewer read-only detail/viewer safety review.
+Notifications read-only detail/action-safety review.
 
 ### 6. Why that feature?
 
-FITS metadata inspection exists with usability filters, but any detail work must
-remain metadata-only and must not call `fits2jpeg`, download files, generate
-previews, expose arbitrary paths, or read the filesystem.
+Notifications read-only usability exists, but any detail work must remain
+non-mutative and must not acknowledge, delete, create, edit, send or test
+notifications.
 
 ### 7. Which features can be ported in parallel?
 
@@ -439,16 +439,15 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **FITS Image Viewer Phase C to D** has a metadata-only detail
-step that can be implemented without conversion, download, preview generation,
-filesystem reads, or arbitrary path exposure. Mark the feature locally blocked
-if that cannot be guaranteed.
+Review whether **Notifications Phase C to D** has a read-only detail step that
+can be implemented without acknowledge/delete/edit/create/send/test behavior.
+Mark the feature locally blocked if that cannot be guaranteed.
 
 Scope:
 
-- Analyze Classic FITS viewer routes, `/ajax/fitsimageviewer`, `/fits2jpeg`, and the existing Modern FITS metadata page.
-- Add only metadata-level detail if it can remain read-only and path-safe.
-- Do not add conversion, download, preview generation, delete, filesystem reads or arbitrary path access.
+- Analyze Classic notification route, `/ajax/notification`, and the existing Modern notifications page.
+- Add only read-only detail if it can remain non-mutative.
+- Do not add acknowledge, delete, edit, create, send/test, or any notification mutation.
 - Preserve Classic fallback.
 - Update ownership/inventory.
 
