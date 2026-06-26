@@ -2096,10 +2096,11 @@
         "NOTIFICATION_*"
       ],
       "protected": false,
-      "modern_gap": "Modern Admin has read-only notification inventory; acknowledgement and modal flow remain Classic/shared.",
+      "modern_gap": "Modern Admin has read-only notification inventory with local usability filters; acknowledgement and modal flow remain Classic/shared.",
       "removal_risk": "medium",
       "notes": [
-        "Modern page must not call /ajax/notification POST or acknowledge notifications."
+        "Modern page must not call /ajax/notification POST or acknowledge notifications.",
+        "Modern usability filters are client-side and read-only."
       ]
     },
     "admin_tools": {

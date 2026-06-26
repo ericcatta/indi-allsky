@@ -46,8 +46,41 @@ var camera_id = {{ camera_id }};
             <p class="modern-admin-eyebrow">System</p>
             <h2 id="modern-notifications-title">Recent Notifications</h2>
         </div>
+        <div class="modern-admin-filter-row" aria-label="Notification filters">
+            <label>
+                Search
+                <input id="modern-notifications-search" type="search" placeholder="notification text" autocomplete="off">
+            </label>
+            <label>
+                Category
+                <select id="modern-notifications-category-filter">
+                    <option value="">All</option>
+                    {% for category in modern_admin_notification_categories %}
+                    <option value="{{ category|lower }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Item
+                <select id="modern-notifications-item-filter">
+                    <option value="">All</option>
+                    {% for item in modern_admin_notification_items %}
+                    <option value="{{ item|lower }}">{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Acked
+                <select id="modern-notifications-ack-filter">
+                    <option value="">All</option>
+                    <option value="no">Unacked</option>
+                    <option value="yes">Acked</option>
+                </select>
+            </label>
+            <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-notifications-filter-count">{{ modern_admin_notification_count }} shown</span>
+        </div>
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
+            <table class="modern-admin-data-table" id="modern-notifications-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -61,7 +94,7 @@ var camera_id = {{ camera_id }};
                 </thead>
                 <tbody>
                     {% for notice in modern_admin_notification_rows %}
-                    <tr>
+                    <tr data-search="{{ (notice.category ~ ' ' ~ notice.item ~ ' ' ~ notice.notification)|lower }}" data-category="{{ notice.category|lower }}" data-item="{{ notice.item|lower }}" data-ack="{{ notice.ack|lower }}">
                         <td>{{ notice.id }}</td>
                         <td>{{ notice.created }}</td>
                         <td>{{ notice.expires }}</td>
@@ -71,10 +104,13 @@ var camera_id = {{ camera_id }};
                         <td>{{ notice.notification }}</td>
                     </tr>
                     {% else %}
-                    <tr>
+                    <tr id="modern-notifications-empty-row">
                         <td colspan="7">No notifications are available.</td>
                     </tr>
                     {% endfor %}
+                    <tr id="modern-notifications-filter-empty-row" hidden>
+                        <td colspan="7">No notifications match the current filters.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -87,4 +123,45 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 </main>
+<script>
+(function() {
+    const searchInput = document.getElementById('modern-notifications-search');
+    const categoryFilter = document.getElementById('modern-notifications-category-filter');
+    const itemFilter = document.getElementById('modern-notifications-item-filter');
+    const ackFilter = document.getElementById('modern-notifications-ack-filter');
+    const countBadge = document.getElementById('modern-notifications-filter-count');
+    const rows = Array.from(document.querySelectorAll('#modern-notifications-table tbody tr[data-search]'));
+    const emptyRow = document.getElementById('modern-notifications-filter-empty-row');
+
+    function applyFilters() {
+        const searchText = searchInput.value.trim().toLowerCase();
+        const categoryValue = categoryFilter.value;
+        const itemValue = itemFilter.value;
+        const ackValue = ackFilter.value;
+        let visibleCount = 0;
+
+        rows.forEach(function(row) {
+            const matchesSearch = !searchText || row.dataset.search.includes(searchText);
+            const matchesCategory = !categoryValue || row.dataset.category === categoryValue;
+            const matchesItem = !itemValue || row.dataset.item === itemValue;
+            const matchesAck = !ackValue || row.dataset.ack === ackValue;
+            const visible = matchesSearch && matchesCategory && matchesItem && matchesAck;
+            row.hidden = !visible;
+            if (visible) {
+                visibleCount += 1;
+            }
+        });
+
+        countBadge.textContent = visibleCount + ' shown';
+        if (emptyRow) {
+            emptyRow.hidden = visibleCount !== 0 || rows.length === 0;
+        }
+    }
+
+    [searchInput, categoryFilter, itemFilter, ackFilter].forEach(function(control) {
+        control.addEventListener('input', applyFilters);
+        control.addEventListener('change', applyFilters);
+    });
+})();
+</script>
 {% endblock %}
