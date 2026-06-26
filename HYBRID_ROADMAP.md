@@ -375,6 +375,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - conteggi per detector, type, status, label, profilo, camera, sequence, timeline ed evidence type;
       - tollera file mancanti, vuoti e righe JSONL malformate;
       - text summary conciso per futuri CLI/dashboard/Telegram, senza invio messaggi o UI;
+    - bridge offline/manuale `DetectorResult -> EventClassification`:
+      - legge `detector_results` JSONL e scrive `event_classifications` JSONL append-only;
+      - salta risultati `status=error`, label vuote e righe malformate;
+      - preserva provenance detector in `features_used`;
+      - nessuna deduplica per ora, run ripetute appendono duplicati;
     - nessun campo meteor/RMS/science-specific richiesto;
     - nessuna creazione di `MeteorObservation`, runtime integration, dashboard, Telegram, image processing, RMS o AI.
 - NEXT:
@@ -1440,3 +1445,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-26: Raw-first / Scientific Source Image Architecture micro-step 9: FITS scheduling reso profile/camera-aware nell'ImageWorker, con primo FITS immediatamente eleggibile per ogni camera/profilo e timer indipendenti.
 - 2026-06-26: Introdotta Detector Result domain foundation: `DetectorEvidence`, `DetectorResult` e writer JSONL append-only come contratto detector-agnostic prima di qualsiasi detector reale o bridge verso MeteorObservation.
 - 2026-06-26: Aggiunti report offline/read-only e text summary per `DetectorResult` JSONL, come base futura per CLI/dashboard/Telegram senza detector, runtime hook o creazione MeteorObservation.
+- 2026-06-26: Aggiunto bridge offline/manuale `DetectorResult -> EventClassification`, append-only e shadow, con provenance detector in `features_used` e senza runtime integration, review/validation o creazione MeteorObservation.

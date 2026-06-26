@@ -11,6 +11,7 @@ from indi_allsky.detector_result import DetectorResult
 from indi_allsky.detector_result import DetectorResultWriter
 from indi_allsky.detector_result import build_detector_result_id
 from indi_allsky.detector_result import build_detector_result_offline_report
+from indi_allsky.detector_result import convert_detector_results_to_event_classifications_offline
 from indi_allsky.detector_result import default_detector_result_dir
 from indi_allsky.detector_result import render_detector_result_text_summary
 
@@ -335,6 +336,128 @@ def test_detector_result_text_summary_malformed_warning_only_when_nonzero():
     assert 'Warning: malformed JSONL lines: 2' in noisy_summary
 
 
+def test_detector_result_classification_bridge_writes_event_classification():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        result_path = base_dir.joinpath('detector_results', '2026-06-26.jsonl')
+        classification_dir = base_dir.joinpath('event_classifications')
+        result_path.parent.mkdir(parents=True, exist_ok=True)
+
+        detector_result = _result(
+            label='meteor_candidate',
+            status='candidate',
+            confidence=0.62,
+            created_at='2026-06-26T02:00:00+00:00',
+        ).to_dict()
+        with result_path.open('w', encoding='utf-8') as f_result:
+            json.dump(detector_result, f_result, sort_keys=True, separators=(',', ':'))
+            f_result.write('\n')
+
+        summary = convert_detector_results_to_event_classifications_offline(
+            result_path,
+            output_dir=classification_dir,
+        )
+
+        assert summary['total_lines'] == 1
+        assert summary['classifications_written'] == 1
+        assert summary['skipped_error_results'] == 0
+        assert summary['skipped_missing_label'] == 0
+        assert summary['malformed_lines'] == 0
+        assert summary['labels_count'] == {'meteor_candidate': 1}
+        assert summary['append_only_duplicates_possible'] is True
+
+        rows = [
+            json.loads(line)
+            for line in classification_dir.joinpath('2026-06-26.jsonl').read_text(encoding='utf-8').splitlines()
+        ]
+        assert len(rows) == 1
+        assert rows[0]['schema_version'] == 'event_classification_v1'
+        assert rows[0]['label'] == 'meteor_candidate'
+        assert rows[0]['status'] == 'shadow'
+        assert rows[0]['method'] == 'detector_result_bridge_v1'
+        assert rows[0]['timeline_id'] == 'timeline-abc'
+        assert rows[0]['camera_id'] == 2
+        assert rows[0]['profile_id'] == 'asi678mc'
+        assert rows[0]['confidence'] == 0.62
+        assert rows[0]['rules_matched'] == []
+        assert rows[0]['features_used']['detector_result_id'] == detector_result['detector_result_id']
+        assert rows[0]['features_used']['detector_id'] == 'synthetic_detector'
+        assert rows[0]['features_used']['detector_version'] == '0.0.1'
+        assert rows[0]['features_used']['detector_type'] == 'rule_based_shadow'
+        assert rows[0]['features_used']['sequence_id'] == 'scientific-sequence-abc'
+        assert rows[0]['features_used']['evidence_count'] == 1
+        assert rows[0]['features_used']['reasons'] == ['contract_test']
+
+
+def test_detector_result_classification_bridge_skips_error_and_missing_label_and_malformed():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result_path = Path(tmpdir).joinpath('detector_results', '2026-06-26.jsonl')
+        classification_dir = Path(tmpdir).joinpath('event_classifications')
+        result_path.parent.mkdir(parents=True, exist_ok=True)
+
+        error_result = _result(status='error', label='unknown_event').to_dict()
+        missing_label = _result().to_dict()
+        missing_label['label'] = ''
+        with result_path.open('w', encoding='utf-8') as f_result:
+            json.dump(error_result, f_result, sort_keys=True, separators=(',', ':'))
+            f_result.write('\n')
+            json.dump(missing_label, f_result, sort_keys=True, separators=(',', ':'))
+            f_result.write('\n')
+            f_result.write('not-json\n')
+
+        summary = convert_detector_results_to_event_classifications_offline(
+            result_path,
+            output_dir=classification_dir,
+        )
+
+        assert summary['total_lines'] == 3
+        assert summary['classifications_written'] == 0
+        assert summary['skipped_error_results'] == 1
+        assert summary['skipped_missing_label'] == 1
+        assert summary['malformed_lines'] == 1
+        assert summary['labels_count'] == {'unknown_event': 1}
+        assert summary['output_paths'] == []
+        assert not classification_dir.exists()
+
+
+def test_detector_result_classification_bridge_missing_file_is_safe():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        summary = convert_detector_results_to_event_classifications_offline(
+            Path(tmpdir).joinpath('detector_results', 'missing.jsonl'),
+            output_dir=Path(tmpdir).joinpath('event_classifications'),
+        )
+
+    assert summary == {
+        'total_lines': 0,
+        'classifications_written': 0,
+        'skipped_error_results': 0,
+        'skipped_missing_label': 0,
+        'skipped_missing_required': 0,
+        'malformed_lines': 0,
+        'labels_count': {},
+        'output_paths': [],
+        'append_only_duplicates_possible': True,
+    }
+
+
+def test_detector_result_classification_bridge_appends_duplicates():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result_path = Path(tmpdir).joinpath('detector_results', '2026-06-26.jsonl')
+        classification_dir = Path(tmpdir).joinpath('event_classifications')
+        result_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with result_path.open('w', encoding='utf-8') as f_result:
+            json.dump(_result(label='meteor_candidate').to_dict(), f_result, sort_keys=True, separators=(',', ':'))
+            f_result.write('\n')
+
+        convert_detector_results_to_event_classifications_offline(result_path, output_dir=classification_dir)
+        convert_detector_results_to_event_classifications_offline(result_path, output_dir=classification_dir)
+
+        rows = classification_dir.joinpath('2026-06-26.jsonl').read_text(encoding='utf-8').splitlines()
+
+    assert len(rows) == 2
+
+
 if __name__ == '__main__':
     test_detector_evidence_serializes_correctly()
     test_detector_result_serializes_correctly()
@@ -353,4 +476,8 @@ if __name__ == '__main__':
     test_detector_result_text_summary_empty_report()
     test_detector_result_text_summary_populated_report()
     test_detector_result_text_summary_malformed_warning_only_when_nonzero()
+    test_detector_result_classification_bridge_writes_event_classification()
+    test_detector_result_classification_bridge_skips_error_and_missing_label_and_malformed()
+    test_detector_result_classification_bridge_missing_file_is_safe()
+    test_detector_result_classification_bridge_appends_duplicates()
     print('detector result tests OK')

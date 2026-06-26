@@ -8,6 +8,9 @@ from datetime import datetime
 from datetime import timezone
 from pathlib import Path
 
+from .event_candidate import EventClassification
+from .event_candidate import EventClassificationWriter
+
 
 DETECTOR_RESULT_SCHEMA_VERSION = 'detector_result_v1'
 DETECTOR_RESULT_STATUS_VALUES = frozenset((
@@ -287,6 +290,64 @@ def render_detector_result_text_summary(report, date=None):
     return '\n'.join(lines)
 
 
+def convert_detector_results_to_event_classifications_offline(
+        detector_result_path,
+        output_dir=None,
+        method='detector_result_bridge_v1',
+):
+    """Convert DetectorResult JSONL rows into shadow EventClassification JSONL.
+
+    This is an offline/manual bridge only.  It does not validate events, review
+    events, create MeteorObservation records, or integrate with runtime capture.
+    """
+    result_rows, malformed_lines = _load_jsonl_rows(detector_result_path)
+    labels_counter = Counter()
+    classifications_written = 0
+    skipped_error_results = 0
+    skipped_missing_label = 0
+    skipped_missing_required = 0
+    output_paths = set()
+
+    writer = None
+    if result_rows:
+        writer = EventClassificationWriter(
+            _resolve_event_classification_output_dir(detector_result_path, output_dir)
+        )
+
+    for row in result_rows:
+        label = _string_value(row.get('label'))
+        if not label:
+            skipped_missing_label += 1
+            continue
+
+        labels_counter[label] += 1
+
+        if _string_value(row.get('status')) == 'error':
+            skipped_error_results += 1
+            continue
+
+        classification = _event_classification_from_detector_result(row, method)
+        if classification is None:
+            skipped_missing_required += 1
+            continue
+
+        output_path = writer.write(classification)
+        output_paths.add(str(output_path))
+        classifications_written += 1
+
+    return {
+        'total_lines': len(result_rows) + malformed_lines,
+        'classifications_written': classifications_written,
+        'skipped_error_results': skipped_error_results,
+        'skipped_missing_label': skipped_missing_label,
+        'skipped_missing_required': skipped_missing_required,
+        'malformed_lines': malformed_lines,
+        'labels_count': dict(sorted(labels_counter.items())),
+        'output_paths': sorted(output_paths),
+        'append_only_duplicates_possible': True,
+    }
+
+
 def _clamp_confidence(value):
     confidence = float(value or 0.0)
     return max(0.0, min(1.0, confidence))
@@ -390,3 +451,52 @@ def _format_counts(counts):
         '{0:s}={1:d}'.format(_string_value(key), _int_value(value))
         for key, value in sorted(_dict_value(counts).items())
     )
+
+
+def _event_classification_from_detector_result(row, method):
+    try:
+        classification = EventClassification(
+            timeline_id=_string_value(row.get('timeline_id')),
+            camera_id=int(row.get('camera_id')),
+            profile_id=_required_string(row.get('profile_id'), 'profile_id'),
+            created_at=_string_value(row.get('created_at')) or _utc_now(),
+            confidence=_clamp_confidence(row.get('confidence')),
+            rules_matched=[],
+            alternative_labels=[],
+            features_used={
+                'detector_result_id': _string_value(row.get('detector_result_id')),
+                'detector_id': _string_value(row.get('detector_id')),
+                'detector_version': _string_value(row.get('detector_version')),
+                'detector_type': _string_value(row.get('detector_type')),
+                'sequence_id': _string_value(row.get('sequence_id')),
+                'evidence_count': _evidence_count(row.get('evidence')),
+                'reasons': _list_value(row.get('reasons')),
+            },
+            label=_string_value(row.get('label')),
+        )
+    except (TypeError, ValueError):
+        return None
+
+    classification.method = _string_value(method) or 'detector_result_bridge_v1'
+    return classification
+
+
+def _evidence_count(evidence_items):
+    if isinstance(evidence_items, list):
+        return len(evidence_items)
+    return 0
+
+
+def _resolve_event_classification_output_dir(detector_result_path, output_dir):
+    if output_dir:
+        return Path(output_dir)
+
+    if not detector_result_path:
+        return Path('event_classifications')
+
+    detector_result_path = Path(detector_result_path)
+    parent = detector_result_path.parent
+    if parent.name == 'detector_results':
+        return parent.parent.joinpath('event_classifications')
+
+    return parent.joinpath('event_classifications')
