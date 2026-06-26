@@ -84,8 +84,8 @@ Operational backlog snapshot:
 | State | Current examples |
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
-| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,9 +128,8 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
-| 2 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
-| 3 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
+| 1 | Video Viewer | C | D | M | Medium | Modern media exists; upload/share parity must be separated. |
+| 2 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
 
 ### Blocked
 
@@ -143,6 +142,7 @@ the next available feature.
 | Meteor Detection (global for detector work) | Real outdoor FITS validation is missing. | Offline reports, validation tooling, documentation. |
 | Event Review (global for event UI/action work) | Event review workflow has no UI contract yet. | Architecture/design/read-only evidence browser. |
 | Task Queue mutations | No safe user-facing backend contract for retry/cancel/delete/requeue. | No mutation; only diagnostics/detail. |
+| Image Viewer actions/exclude | Exclude/delete/download/processing require explicit media action and path policy. | Metadata-only list/detail only. |
 | Logs download/actions | Log download/action work requires explicit backend, filesystem and sensitive-data policy. | Existing read-only list/detail only. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
@@ -222,7 +222,7 @@ These should not be removed. They are transitional.
 | Focus | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Medium | M | Medium | Native Modern focus tool missing. |
 | Camera Simulator | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Low | L | Low | Low-risk but low-value. |
 | Image Lag | modern | PARTIAL MODERN | C | 55% | Camera pages | Medium | M | Medium | Modern page exists; semantics need validation. |
-| Image Viewer | modern | PARTIAL MODERN | C | 55% | Media list | Medium | M | Medium | Advanced actions/exclude remain unclear. |
+| Image Viewer | modern | PARTIAL MODERN | D | 65% | Media list | Medium | M | Medium | Read-only Modern image metadata detail exists; exclude/delete/download/processing remain blocked. |
 | FITS Image Viewer | modern | PARTIAL MODERN | D | 65% | Scientific source layer | High | M | High | Read-only Modern FITS metadata detail exists; conversion/viewer parity remains Classic-only and locally blocked. |
 | Gallery | modern | PARTIAL MODERN | C | 55% | Media list | Medium | M | Medium | Modern gallery exists; PhotoSwipe parity unknown. |
 | Panorama | public | SHARED LEGACY | Preserve | 70% | Public endpoints | Medium | M | Medium | Preserve public/latest behavior. |
@@ -297,10 +297,9 @@ and the completed Task Queue/User Management work.
 
 ### Phase 2 - Complete Read-only Details for Existing Modern Pages
 
-1. Image Viewer media detail.
-2. Video Viewer media detail.
-3. FITS/source detail.
-4. Upload provider status read-only.
+1. Video Viewer media detail.
+2. FITS/source detail.
+3. Upload provider status read-only.
 
 ### Phase 3 - Native Replacements for Wrappers
 
@@ -334,15 +333,15 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
-| 2 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
-| 3 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
-| 4 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
-| 5 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
-| 6 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
-| 7 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
-| 8 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
-| 9 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
+| 1 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
+| 2 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
+| 3 | Focus | Native read-only focus status | Replaces wrapper slowly, no hardware action. |
+| 4 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
+| 5 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
+| 6 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
+| 7 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
+| 8 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
+| 9 | Image Viewer | Exclude/delete/download/processing contract review only | Metadata-only detail exists; further action/download work remains blocked. |
 | 10 | Logs | Download/action contract review only | Read-only detail exists; further action/download work remains blocked. |
 
 ## 7. Parallelizable Work
@@ -408,13 +407,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Image Viewer read-only media detail.
+Video Viewer read-only media/video detail.
 
 ### 6. Why that feature?
 
-Image Viewer has Modern media list coverage. The next safe step is read-only
-media detail only, with no delete, exclude, processing, download, path-freeform
-access or filesystem mutation.
+Video Viewer has Modern media list coverage. The next safe step is read-only
+media detail only, with no upload, share, delete, download, path-freeform access
+or filesystem mutation.
 
 ### 7. Which features can be ported in parallel?
 
@@ -438,7 +437,7 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Image Viewer Phase C to D** can be implemented as metadata-only
+Review whether **Video Viewer Phase C to D** can be implemented as metadata-only
 detail without delete, exclude, processing, download, path-freeform access or
 filesystem mutation. Mark the feature locally blocked if that cannot be
 guaranteed.

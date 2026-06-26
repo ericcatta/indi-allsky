@@ -108,6 +108,7 @@
         "modern_admin/dark_library.html",
         "modern_admin/file_space_usage.html",
         "modern_admin/fits.html",
+        "modern_admin/image_detail.html",
         "modern_admin/image_lag.html",
         "modern_admin/index.html",
         "modern_admin/log.html",
@@ -142,6 +143,7 @@
         "/modern-admin/capture/service",
         "/modern-admin/cameras/detect-indi",
         "/modern-admin/cameras/start-indi",
+        "modern_admin_media_image_detail_view",
         "/modern-admin/mode/*"
       ]
     },
@@ -1222,11 +1224,13 @@
         "/imageviewer",
         "/ajax/imageviewer",
         "/ajax/exclude",
-        "/modern-admin/media/images"
+        "/modern-admin/media/images",
+        "/modern-admin/media/images/*"
       ],
       "templates": [
         "imageviewer.html",
-        "modern_admin/media_list.html"
+        "modern_admin/media_list.html",
+        "modern_admin/image_detail.html"
       ],
       "assets": [],
       "apis": [
@@ -1235,7 +1239,7 @@
       ],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "Advanced actions/exclude parity unclear.",
+      "modern_gap": "Read-only Modern image list/detail exists; exclude/delete/processing/download parity remains blocked pending explicit media action and path policy.",
       "removal_risk": "medium",
       "notes": []
     },

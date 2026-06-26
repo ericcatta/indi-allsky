@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-image-detail-title">
+    {% set modern_admin_header_label = 'Images' %}
+    {% set modern_admin_heading = 'Image Detail' %}
+    {% set modern_admin_title_id = 'modern-admin-image-detail-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Image detail summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Image ID</div>
+            <h3>{{ modern_admin_image_detail.id }}</h3>
+            <p>{{ modern_admin_image_detail.created }}</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Capture</div>
+            <h3>{{ modern_admin_image_detail.timeofday }}</h3>
+            <p>{{ modern_admin_image_detail.dimensions }}</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Source</div>
+            <h3>{{ modern_admin_image_detail.source }}</h3>
+            <p>No file contents are opened or inspected.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="modern-image-detail-heading">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Image Viewer</p>
+            <h2 id="modern-image-detail-heading">Capture metadata</h2>
+        </div>
+
+        <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
+            <div><dt>ID</dt><dd>{{ modern_admin_image_detail.id }}</dd></div>
+            <div><dt>Created</dt><dd>{{ modern_admin_image_detail.created }}</dd></div>
+            <div><dt>Day date</dt><dd>{{ modern_admin_image_detail.day_date }}</dd></div>
+            <div><dt>Camera ID</dt><dd>{{ modern_admin_image_detail.camera_id }}</dd></div>
+            <div><dt>Filename</dt><dd>{{ modern_admin_image_detail.filename }}</dd></div>
+            <div><dt>Dimensions</dt><dd>{{ modern_admin_image_detail.dimensions }}</dd></div>
+            <div><dt>Exposure</dt><dd>{{ modern_admin_image_detail.exposure }}</dd></div>
+            <div><dt>Exposure elapsed</dt><dd>{{ modern_admin_image_detail.exp_elapsed }}</dd></div>
+            <div><dt>Processing elapsed</dt><dd>{{ modern_admin_image_detail.process_elapsed }}</dd></div>
+            <div><dt>Gain</dt><dd>{{ modern_admin_image_detail.gain }}</dd></div>
+            <div><dt>Binning</dt><dd>{{ modern_admin_image_detail.binmode }}</dd></div>
+            <div><dt>Temperature</dt><dd>{{ modern_admin_image_detail.temperature }}</dd></div>
+            <div><dt>ADU</dt><dd>{{ modern_admin_image_detail.adu }}</dd></div>
+            <div><dt>SQM</dt><dd>{{ modern_admin_image_detail.sqm }}</dd></div>
+            <div><dt>Stars</dt><dd>{{ modern_admin_image_detail.stars }}</dd></div>
+            <div><dt>Detections</dt><dd>{{ modern_admin_image_detail.detections }}</dd></div>
+            <div><dt>Size</dt><dd>{{ modern_admin_image_detail.file_size }}</dd></div>
+            <div><dt>Day/Night</dt><dd>{{ modern_admin_image_detail.timeofday }}</dd></div>
+            <div><dt>Uploaded</dt><dd>{{ modern_admin_image_detail.uploaded }}</dd></div>
+            <div><dt>Stable</dt><dd>{{ modern_admin_image_detail.stable }}</dd></div>
+            <div><dt>Calibrated</dt><dd>{{ modern_admin_image_detail.calibrated }}</dd></div>
+            <div><dt>Viewer state</dt><dd>{{ modern_admin_image_detail.excluded }}</dd></div>
+            <div><dt>Moon mode</dt><dd>{{ modern_admin_image_detail.moon_mode }}</dd></div>
+            <div><dt>Moon phase</dt><dd>{{ modern_admin_image_detail.moon_phase }}</dd></div>
+            <div><dt>Sync ID</dt><dd>{{ modern_admin_image_detail.sync_id }}</dd></div>
+            <div><dt>Source</dt><dd>{{ modern_admin_image_detail.source }}</dd></div>
+            <div><dt>Metadata</dt><dd>{{ modern_admin_image_detail.metadata }}</dd></div>
+        </dl>
+
+        <p class="modern-admin-note">This page shows database metadata only. It does not download, delete, exclude, process, preview, open image paths or inspect file contents.</p>
+
+        <section class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_media_images_view') }}">Back to Modern Images</a>
+            <a href="{{ url_for('indi_allsky.imageviewer_view') }}">Open Classic Image Viewer</a>
+        </section>
+    </section>
+</main>
+{% endblock %}

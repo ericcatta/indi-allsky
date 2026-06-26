@@ -127,6 +127,9 @@ var camera_id = {{ camera_id }};
                 {% if item.url %}
                 <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ item.url }}" target="_blank" rel="noopener">Open read-only</a>
                 {% endif %}
+                {% if modern_admin_media_kind == 'image' %}
+                <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ url_for('indi_allsky.modern_admin_media_image_detail_view', image_id=item.id) }}">Details</a>
+                {% endif %}
             </div>
             {% else %}
             <span class="modern-admin-visually-hidden">{{ item.created }}</span>

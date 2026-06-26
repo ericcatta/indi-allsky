@@ -14107,6 +14107,110 @@ class ModernAdminMediaImagesView(ModernAdminMediaListView):
     modern_admin_media_layout = 'viewer'
 
 
+class ModernAdminMediaImageDetailView(ModernAdminMediaImagesView):
+    page_title = 'Modern Admin Image Detail'
+
+
+    def dispatch_request(self, image_id):
+        self.image_id = image_id
+        return super(ModernAdminMediaImageDetailView, self).dispatch_request()
+
+
+    def get_context(self):
+        context = super(ModernAdminMediaListView, self).get_context()
+
+        try:
+            entry = IndiAllSkyDbImageTable.query\
+                .join(IndiAllSkyDbImageTable.camera)\
+                .filter(IndiAllSkyDbImageTable.id == self.image_id)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .one()
+        except NoResultFound:
+            abort(404)
+
+        context['modern_admin_image_detail'] = {
+            'id'              : entry.id,
+            'created'         : self.format_image_datetime(entry.createDate),
+            'day_date'        : entry.dayDate if entry.dayDate else 'Unknown',
+            'camera_id'       : entry.camera_id,
+            'filename'        : self.format_image_filename(entry.filename),
+            'dimensions'      : self.format_media_dimensions(entry.width, entry.height),
+            'exposure'        : self.format_image_number(entry.exposure, suffix='s'),
+            'exp_elapsed'     : self.format_image_number(entry.exp_elapsed, suffix='s'),
+            'process_elapsed' : self.format_image_number(entry.process_elapsed, suffix='s'),
+            'gain'            : self.format_image_number(entry.gain),
+            'binmode'         : entry.binmode if entry.binmode is not None else 'Unknown',
+            'temperature'     : self.format_image_number(entry.temp, suffix='C'),
+            'adu'             : self.format_image_number(entry.adu),
+            'sqm'             : self.format_image_number(entry.sqm),
+            'stars'           : entry.stars if entry.stars is not None else 'Unknown',
+            'detections'      : entry.detections if entry.detections is not None else 'Unknown',
+            'file_size'       : self.format_media_size(entry.fileSize) if entry.fileSize else 'Unknown',
+            'timeofday'       : 'Night' if entry.night else 'Day',
+            'uploaded'        : self.format_image_bool(entry.uploaded),
+            'stable'          : self.format_image_bool(entry.stable),
+            'calibrated'      : self.format_image_bool(entry.calibrated),
+            'excluded'        : 'Excluded' if bool(entry.exclude) else 'Included',
+            'moon_mode'       : self.format_image_bool(entry.moonmode),
+            'moon_phase'      : self.format_image_number(entry.moonphase),
+            'source'          : self.format_image_source(entry),
+            'sync_id'         : entry.sync_id if entry.sync_id is not None else 'N/A',
+            'metadata'        : self.format_image_data_summary(entry.data),
+        }
+
+        return context
+
+
+    def format_image_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+    def format_image_filename(self, value):
+        if not value:
+            return 'Unknown'
+        return Path(str(value)).name
+
+
+    def format_media_dimensions(self, width, height):
+        if width and height:
+            return '{0:d} x {1:d}'.format(int(width), int(height))
+        return 'Unknown'
+
+
+    def format_image_number(self, value, suffix=''):
+        if value is None:
+            return 'Unknown'
+        try:
+            number = '{0:.3f}'.format(float(value)).rstrip('0').rstrip('.')
+            return '{0:s}{1:s}'.format(number, suffix)
+        except (TypeError, ValueError):
+            return str(value)
+
+
+    def format_image_bool(self, value):
+        return 'Yes' if bool(value) else 'No'
+
+
+    def format_image_source(self, entry):
+        if entry.remote_url:
+            return 'Remote URL recorded'
+        if entry.s3_key:
+            return 'S3 key recorded'
+        return 'Local DB entry'
+
+
+    def format_image_data_summary(self, value):
+        if isinstance(value, dict):
+            return 'Keys: {0:d}'.format(len(value))
+        if value is None:
+            return 'No metadata payload'
+        return 'Non-dict metadata payload'
+
+
 class ModernAdminMediaTimelapsesView(ModernAdminMediaListView):
     page_title = 'Modern Admin Timelapses'
     modern_admin_section = 'Timelapses'
@@ -21079,6 +21183,7 @@ bp_allsky.add_url_rule('/ajax/minivideoviewer', view_func=AjaxMiniVideoViewerVie
 bp_allsky.add_url_rule('/modern-admin/media/gallery', view_func=ModernAdminMediaGalleryView.as_view('modern_admin_media_gallery_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/gallery/page', view_func=ModernAdminMediaGalleryPageView.as_view('modern_admin_media_gallery_page_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/images', view_func=ModernAdminMediaImagesView.as_view('modern_admin_media_images_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/images/<int:image_id>', view_func=ModernAdminMediaImageDetailView.as_view('modern_admin_media_image_detail_view', template_name='modern_admin/image_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/media/timelapses', view_func=ModernAdminMediaTimelapsesView.as_view('modern_admin_media_timelapses_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/media_list.html'))
