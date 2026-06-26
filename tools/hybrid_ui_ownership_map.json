@@ -87,6 +87,7 @@
         "/modern-admin/system",
         "/modern-admin/system/info",
         "/modern-admin/system/log",
+        "/modern-admin/system/log/<log_name>",
         "/modern-admin/system/support",
         "/modern-admin/tasks",
         "/modern-admin/tasks/*",
@@ -110,6 +111,7 @@
         "modern_admin/image_lag.html",
         "modern_admin/index.html",
         "modern_admin/log.html",
+        "modern_admin/log_detail.html",
         "modern_admin/longterm_keogram.html",
         "modern_admin/mask.html",
         "modern_admin/media_list.html",
@@ -1937,11 +1939,14 @@
         "/log",
         "/log/*",
         "/js/log",
-        "/modern-admin/system/log"
+        "/modern-admin/system/log",
+        "/modern-admin/system/log/<log_name>",
+        "/modern-admin/system/log/*"
       ],
       "templates": [
         "log.html",
-        "modern_admin/log.html"
+        "modern_admin/log.html",
+        "modern_admin/log_detail.html"
       ],
       "assets": [],
       "apis": [
@@ -1949,7 +1954,7 @@
       ],
       "config_keys": [],
       "protected": true,
-      "modern_gap": "Download parity needs verification.",
+      "modern_gap": "Modern read-only detail exists; download parity still uses Classic endpoints.",
       "removal_risk": "medium",
       "notes": [
         "Logs support explainability."

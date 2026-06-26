@@ -13326,6 +13326,147 @@ class ModernAdminLogView(ModernAdminContextMixin, LogView):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
+class ModernAdminLogDetailView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Log Detail'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    max_detail_lines = 500
+    default_detail_lines = 200
+    line_size = 180
+    log_sources = {
+        'capture' : {
+            'label'       : 'Capture Log',
+            'path'        : Path('/var/log/indi-allsky/indi-allsky.log'),
+            'classic_url' : 'indi_allsky.log_view',
+        },
+        'webapp' : {
+            'label'       : 'Webapp Log',
+            'path'        : Path('/var/log/indi-allsky/webapp-indi-allsky.log'),
+            'classic_url' : 'indi_allsky.log_view',
+        },
+        'syslog' : {
+            'label'       : 'OS System Log',
+            'path'        : Path('/var/log/syslog'),
+            'classic_url' : 'indi_allsky.log_view',
+        },
+        'kernel' : {
+            'label'       : 'Kernel Log',
+            'path'        : Path('/var/log/kern.log'),
+            'classic_url' : 'indi_allsky.log_view',
+        },
+    }
+    sensitive_line_regexes = (
+        re.compile(r'(?i)(password\s*[:=]\s*)(\S+)'),
+        re.compile(r'(?i)(token\s*[:=]\s*)(\S+)'),
+        re.compile(r'(?i)(api[_-]?key\s*[:=]\s*)(\S+)'),
+        re.compile(r'(?i)(secret\s*[:=]\s*)(\S+)'),
+    )
+
+    def dispatch_request(self, log_name, *args, **kwargs):
+        if log_name not in self.log_sources:
+            abort(404)
+
+        context = self.get_context(log_name=log_name)
+        return self.render_template(context)
+
+
+    def get_context(self, log_name=None):
+        context = super(ModernAdminLogDetailView, self).get_context()
+
+        log_source = self.log_sources[log_name]
+        line_limit = self.get_requested_line_limit()
+        log_lines, log_status, log_file_size = self.read_log_tail(log_source['path'], line_limit)
+
+        context['modern_admin_log_name'] = log_name
+        context['modern_admin_log_label'] = log_source['label']
+        context['modern_admin_log_lines'] = log_lines
+        context['modern_admin_log_status'] = log_status
+        context['modern_admin_log_line_limit'] = line_limit
+        context['modern_admin_log_file_size'] = self.format_file_size(log_file_size)
+        context['modern_admin_log_sources'] = [
+            {
+                'name'   : source_name,
+                'label'  : source['label'],
+                'active' : source_name == log_name,
+            }
+            for source_name, source in self.log_sources.items()
+        ]
+
+        return context
+
+
+    def get_requested_line_limit(self):
+        line_limit = request.args.get('lines', self.default_detail_lines, type=int)
+        if line_limit <= 0:
+            return self.default_detail_lines
+        return min(line_limit, self.max_detail_lines)
+
+
+    def read_log_tail(self, log_file_p, line_limit):
+        if not log_file_p.exists():
+            return ['Log file is not available in this environment.'], 'Missing', None
+
+        try:
+            log_file_size = log_file_p.stat().st_size
+        except OSError as e:
+            return ['Unable to stat log file: {0:s}'.format(str(e))], 'Unavailable', None
+
+        if log_file_size == 0:
+            return ['Log file is empty.'], 'Empty', log_file_size
+
+        read_bytes = line_limit * self.line_size
+        log_file_seek = max(log_file_size - read_bytes, 0)
+
+        try:
+            with io.open(log_file_p, 'r', errors='replace') as log_file_f:
+                log_file_f.seek(log_file_seek)
+                log_lines = log_file_f.readlines()
+        except PermissionError as e:
+            return ['PermissionError: {0:s}'.format(str(e))], 'Permission denied', log_file_size
+        except OSError as e:
+            return ['Unable to read log file: {0:s}'.format(str(e))], 'Unavailable', log_file_size
+
+        if log_file_seek > 0 and log_lines:
+            log_lines.pop(0)
+
+        log_lines = log_lines[-line_limit:]
+        log_lines.reverse()
+
+        if not log_lines:
+            return ['Log file is empty.'], 'Empty', log_file_size
+
+        return [self.redact_log_line(line.rstrip('\n')) for line in log_lines], 'Available', log_file_size
+
+
+    def redact_log_line(self, line):
+        redacted_line = line
+        for sensitive_regex in self.sensitive_line_regexes:
+            redacted_line = sensitive_regex.sub(r'\1[REDACTED]', redacted_line)
+
+        return redacted_line
+
+
+    def format_file_size(self, value):
+        if value is None:
+            return 'Unknown'
+
+        try:
+            size = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+
+        units = ('B', 'KB', 'MB', 'GB', 'TB')
+        unit_index = 0
+        while size >= 1024.0 and unit_index < len(units) - 1:
+            size /= 1024.0
+            unit_index += 1
+
+        if unit_index == 0:
+            return '{0:d} {1:s}'.format(int(size), units[unit_index])
+        return '{0:.1f} {1:s}'.format(size, units[unit_index])
+
+
 class ModernAdminMaskView(ModernAdminContextMixin, MaskView):
     page_title = 'Modern Admin Mask Base'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
@@ -20800,6 +20941,7 @@ bp_allsky.add_url_rule('/modern-admin/system', view_func=ModernAdminSystemView.a
 bp_allsky.add_url_rule('/modern-admin/system/info', view_func=ModernAdminSystemInfoView.as_view('modern_admin_system_info_view', template_name='modern_admin/system_info.html'))
 bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupportInfoView.as_view('modern_admin_support_info_view', template_name='modern_admin/support_info.html'))
 bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.as_view('modern_admin_log_view', template_name='modern_admin/log.html'))
+bp_allsky.add_url_rule('/modern-admin/system/log/<log_name>', view_func=ModernAdminLogDetailView.as_view('modern_admin_log_detail_view', template_name='modern_admin/log_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView.as_view('modern_admin_taskqueue_view', template_name='modern_admin/tasks.html'))
 bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdminTaskDetailView.as_view('modern_admin_task_detail_view', template_name='modern_admin/task_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/users', view_func=ModernAdminUsersView.as_view('modern_admin_users_view', template_name='modern_admin/users.html'))

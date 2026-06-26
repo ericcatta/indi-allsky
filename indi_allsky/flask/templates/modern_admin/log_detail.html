@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-log-detail-title">
+    {% set modern_admin_header_label = 'Log Detail' %}
+    {% set modern_admin_heading = modern_admin_log_label %}
+    {% set modern_admin_title_id = 'modern-admin-log-detail-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Log detail summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Log</div>
+            <h3>{{ modern_admin_log_label }}</h3>
+            <p>Allowlisted log source: {{ modern_admin_log_name }}</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Status</div>
+            <h3>{{ modern_admin_log_status }}</h3>
+            <p>Size: {{ modern_admin_log_file_size }}</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Displayed Lines</div>
+            <h3>{{ modern_admin_log_line_limit }}</h3>
+            <p>Newest lines are shown first.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="log-source-selector-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Logs</p>
+            <h2 id="log-source-selector-title">Known log sources</h2>
+        </div>
+        <div class="modern-admin-link-grid">
+            {% for source in modern_admin_log_sources %}
+            <a href="{{ url_for('indi_allsky.modern_admin_log_detail_view', log_name=source.name) }}"{% if source.active %} aria-current="page"{% endif %}>{{ source.label }}</a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="log-lines-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Inspection</p>
+            <h2 id="log-lines-title">Recent log lines</h2>
+        </div>
+
+        <pre class="modern-admin-log-output">{% for line in modern_admin_log_lines %}{{ line }}
+{% endfor %}</pre>
+
+        <section class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_log_view') }}">Back to Modern Log</a>
+            <a href="{{ url_for('indi_allsky.log_view') }}">Open Classic Log Viewer</a>
+        </section>
+
+        <p class="modern-admin-note">This page reads only allowlisted log files. It does not download, delete, rotate, truncate, or modify logs.</p>
+    </section>
+</main>
+{% endblock %}

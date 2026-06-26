@@ -92,11 +92,11 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Logs | C | D | S | Medium | Modern log exists; download/detail parity should be verified next. |
-| 2 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
-| 3 | Notifications | B | C | S | Medium | Read-only list exists; next safe step is usability, not ack actions. |
-| 4 | FITS Image Viewer | B | C | M | High | Read-only FITS metadata inspection is now available; next step is usability only. |
-| 5 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
+| 1 | User Management | B | C/D | S | High | Read-only page exists; next safe step is detail only, not mutation. |
+| 2 | Notifications | B | C | S | Medium | Read-only list exists; next safe step is usability, not ack actions. |
+| 3 | FITS Image Viewer | B | C | M | High | Read-only FITS metadata inspection is now available; next step is usability only. |
+| 4 | Config Restore | B | C | S | High | Read-only modern inspection is now available; restore action still Classic-only. |
+| 5 | Logs | D | stop/E only after contract | S | Medium | Modern read-only log detail exists; no new download/action work without contract review. |
 | 6 | Task Queue | D | stop/E only after contract | S | High | Detail exists; mutative actions remain blocked. |
 | 7 | Config History | B | C | S | Medium | Read-only list exists; next step is usability only. |
 | 8 | Image Viewer | C | D | M | Medium | Modern media exists; detail/exclude parity needs careful split. |
@@ -213,7 +213,7 @@ These should not be removed. They are transitional.
 | Config History | modern | PARTIAL MODERN | B | 30% | Config DB | High | S | High | Read-only listing in Modern now available. |
 | Config Restore | modern | PARTIAL MODERN | B | 30% | Config history, rollback design | High | S | High | Read-only inspection exists in Modern; restore action still Classic-only. |
 | System Info | modern | PARTIAL MODERN | C | 55% | System pages | Medium | M | Medium | Some actions remain legacy-backed. |
-| Logs | shared_api | PARTIAL MODERN | C | 55% | Log APIs | Critical | M | Medium | Download parity needs verification. |
+| Logs | shared_api | PARTIAL MODERN | D | 65% | Log APIs | Critical | M | Medium | Read-only detail exists; download parity still uses Classic endpoints. |
 | Charts | shared_api | PARTIAL MODERN | C | 55% | Chart APIs | Medium | M | Medium | Legacy chart options may differ. |
 | Task Queue | modern | PARTIAL MODERN | D | 65% | Task model | High | S | High | List/usability/detail done; mutations blocked. |
 | User Management | modern | PARTIAL MODERN | B | 35% | Auth model | High | S | High | Read-only list done; no mutations. |
@@ -252,11 +252,11 @@ and the completed Task Queue/User Management work.
 
 ### Phase 1 - Finish Safe Read-only Admin Gaps
 
-1. Logs download/detail parity audit.
-2. User Management read-only detail page.
-3. Notifications read-only usability.
-4. FITS Image Viewer read-only usability improvements.
-5. Config Restore read-only usability/detail inspection.
+1. User Management read-only detail page.
+2. Notifications read-only usability.
+3. FITS Image Viewer read-only usability improvements.
+4. Config Restore read-only usability/detail inspection.
+5. Config History read-only usability.
 
 ### Phase 2 - Complete Read-only Details for Existing Modern Pages
 
@@ -297,12 +297,12 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Logs | Modern download/detail parity audit/fix | Low risk, useful operational parity. |
-| 2 | User Management | Modern user detail/read-only inspection enhancement | Extends current list without mutations. |
-| 3 | Notifications | Modern read-only usability | Extends existing safe page without acknowledgement actions. |
-| 4 | FITS Image Viewer | Modern read-only FITS/source usability | Aligns with scientific-first direction. |
-| 5 | Config Restore | Modern read-only restore inspection usability | Keeps restore action Classic-only while improving visibility. |
-| 6 | Config History | Modern read-only usability | Existing read-only list can be made easier to scan. |
+| 1 | User Management | Modern user detail/read-only inspection enhancement | Extends current list without mutations. |
+| 2 | Notifications | Modern read-only usability | Extends existing safe page without acknowledgement actions. |
+| 3 | FITS Image Viewer | Modern read-only FITS/source usability | Aligns with scientific-first direction. |
+| 4 | Config Restore | Modern read-only restore inspection usability | Keeps restore action Classic-only while improving visibility. |
+| 5 | Config History | Modern read-only usability | Existing read-only list can be made easier to scan. |
+| 6 | Logs | Safe action/download contract review only | Detail exists; further work needs explicit backend/download policy. |
 | 7 | Image Viewer | Modern read-only media detail | Moves media parity forward without actions. |
 | 8 | Video Viewer | Modern read-only media/video detail | Useful before upload/share actions. |
 | 9 | Upload | Modern provider status read-only | Avoids touching OAuth/actions first. |
@@ -371,18 +371,17 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Logs detail/download parity.
+User Management read-only detail.
 
 ### 6. Why that feature?
 
-The Modern log page already exists, and the remaining gap is a bounded
-read-only parity audit around detail/download behavior. It is operationally
-useful and should not require capture/runtime changes.
+The read-only user list exists. The next safe step is a detail/inspection page
+that does not modify users, passwords, roles, sessions, or auth settings.
 
 ### 7. Which features can be ported in parallel?
 
-FITS/source read-only usability, Notifications usability, Logs detail/download
-parity, Upload provider status read-only, and supporting
+FITS/source read-only usability, Notifications usability, Upload provider status
+read-only, and supporting
 documentation/inventory updates.
 
 ### 8. What percentage is really Modern?
@@ -401,13 +400,13 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Implement **Logs detail/download parity Phase A - Modern read-only audit**.
+Implement **User Management read-only detail Phase B/C - Modern inspection**.
 
 Scope:
 
-- Analyze Classic log/detail/download routes and the existing Modern log page.
-- Add only read-only parity if the existing backend contract is already safe.
-- Do not add mutative log actions.
+- Analyze Classic user detail/edit routes and the existing Modern user list.
+- Add only read-only detail if fields are safe.
+- Do not add user mutation, password, role, enable/disable, or auth actions.
 - Preserve Classic fallback.
 - Update ownership/inventory.
 

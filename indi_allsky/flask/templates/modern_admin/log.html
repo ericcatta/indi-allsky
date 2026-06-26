@@ -30,6 +30,12 @@ var camera_id = {{ camera_id }};
             <label>Filter {{ form_logviewer.FILTER() }}</label>
         </div>
         <pre class="modern-admin-log-output" id="modern-admin-log-output">Loading log...</pre>
+        <div class="modern-admin-link-grid" aria-label="Log details">
+            <a href="{{ url_for('indi_allsky.modern_admin_log_detail_view', log_name='capture') }}">Capture Log Detail</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_log_detail_view', log_name='webapp') }}">Webapp Log Detail</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_log_detail_view', log_name='syslog') }}">OS System Log Detail</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_log_detail_view', log_name='kernel') }}">Kernel Log Detail</a>
+        </div>
         <div class="modern-admin-link-grid" aria-label="Log downloads">
             <a href="{{ url_for('indi_allsky.log_download_view') }}">Capture Log Download</a>
             <a href="{{ url_for('indi_allsky.log_webapp_download_view') }}">Webapp Log Download</a>
