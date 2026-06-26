@@ -422,7 +422,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - questo e' prerequisito per qualsiasi detector meteor responsabile, per review manuale e per futuri input RMS/AI;
     - mantenere tutto read-only/offline e profile-first.
 - LATER:
-  - Meteor detection.
+  - Meteor detection:
+    - BLOCKED finche' non esistono sequenze FITS outdoor reali validate con `Scientific Source offline report`;
+    - il codice legacy `DETECT_METEORS` / `detectLines.py` e' un rilevatore Canny/Hough di linee su immagine processata 8-bit, non un vero detector meteor scientifico;
+    - qualunque adapter Hough deve restare offline/shadow finche' non viene testato su sequenze FITS outdoor multicamera;
+    - il blocco attuale e' enclosure/weather e disponibilita' dati, non architettura.
   - Aurora detection.
   - Satellite detection.
   - Aircraft detection, se utile per il sito pubblico o per debug.
@@ -513,12 +517,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     - non esiste ancora un contratto detector input stabile per sequenze frame, mask, provenance e output evidence;
     - conclusione: un detector rule-based meteor e' supportabile solo come esperimento offline, non ancora responsabilmente in runtime.
 - NEXT:
-  - Validare il contratto rispetto ai futuri output RMS prima di implementare l'adapter.
+  - Detector validation gate:
+    - BLOCKED per detector meteor/Hough/RMS finche' non sono disponibili sequenze FITS outdoor reali;
+    - usare `Scientific Source offline report` per confermare detector paths, esistenza file, header FITS, camera/profile/timestamp e copertura multicamera;
+    - qualunque Hough adapter deve rimanere offline/shadow fino a validazione su FITS outdoor e report falsi positivi;
+    - lavoro consentito durante il blocco: documentazione, report, UX/storage policy e tool offline di validazione;
+    - non implementare detection reale, runtime hook o promozione MeteorObservation automatica durante il blocco.
+  - Validare il contratto rispetto ai futuri output RMS solo dopo dati outdoor/FITS validati.
   - Validare il bridge offline su file `EventClassification` reali quando esisteranno label `meteor_candidate`.
-  - Implementare `TimelineFrameSet` / `DetectorInputBundle` offline read-only:
-    - input: EventTimeline JSONL, EventCandidate JSONL e FrameMetadata JSONL;
-    - output: frame ordinati con `image_file_path`, timestamp, exposure/gain, quality/environment e riferimenti candidate/timeline;
-    - nessuna detection, nessuna RMS/AI, nessuna modifica runtime.
 - LATER:
   - RMS adapter verso MeteorObservation.
   - Campi fisici meteor estesi: magnitude, shower, radiant, velocity, persistent train e orbit.
@@ -1467,3 +1473,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-26: Aggiunta Detector API foundation: `DetectorContract`, `DetectorRunContext` e `DetectorRunner` offline/manuale per futuri detector RMS/OpenCV/AI/manuali, senza detector reale, image read o runtime integration.
 - 2026-06-26: Aggiunto smoke test sintetico offline della detector pipeline: frame scientifici finti con path FITS inesistenti, dummy detector, DetectorResult JSONL, report/text summary e bridge verso EventClassification/MeteorObservation.
 - 2026-06-26: Aggiunto Scientific Source offline report per validare FrameMetadata/FITS/RAW detector paths, presenza file e header FITS prima di qualsiasi detector reale.
+- 2026-06-26: Documentato detector validation gate: implementazione detector meteor/Hough/RMS bloccata finche' enclosure/weather non permettono sequenze FITS outdoor reali; nel frattempo sono ammessi solo documentazione, report, UX/storage policy e tool offline di validazione.
