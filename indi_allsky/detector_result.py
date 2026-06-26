@@ -10,6 +10,8 @@ from pathlib import Path
 
 from .event_candidate import EventClassification
 from .event_candidate import EventClassificationWriter
+from .meteor_observation import MeteorObservation
+from .meteor_observation import MeteorObservationWriter
 
 
 DETECTOR_RESULT_SCHEMA_VERSION = 'detector_result_v1'
@@ -348,6 +350,73 @@ def convert_detector_results_to_event_classifications_offline(
     }
 
 
+def convert_detector_results_to_meteor_observations_offline(
+        detector_result_path,
+        output_dir=None,
+        detector_id_fallback='detector_result_bridge',
+        detector_version_fallback='detector_result_bridge_v1',
+):
+    """Convert meteor_candidate DetectorResult JSONL rows into MeteorObservation JSONL.
+
+    This is an offline/manual bridge only.  It does not create reviews,
+    validations, EventClassification records, detector output, or runtime hooks.
+    """
+    result_rows, malformed_lines = _load_jsonl_rows(detector_result_path)
+    labels_counter = Counter()
+    meteor_results_found = 0
+    observations_written = 0
+    skipped_non_meteor_labels = 0
+    skipped_error_results = 0
+    skipped_missing_required = 0
+    output_paths = set()
+
+    writer = None
+    if result_rows:
+        writer = MeteorObservationWriter(
+            _resolve_meteor_observation_output_dir(detector_result_path, output_dir)
+        )
+
+    for row in result_rows:
+        label = _string_value(row.get('label'))
+        if label:
+            labels_counter[label] += 1
+
+        if _string_value(row.get('status')) == 'error':
+            skipped_error_results += 1
+            continue
+
+        if label != 'meteor_candidate':
+            skipped_non_meteor_labels += 1
+            continue
+
+        meteor_results_found += 1
+        observation = _meteor_observation_from_detector_result(
+            row,
+            detector_id_fallback=detector_id_fallback,
+            detector_version_fallback=detector_version_fallback,
+        )
+        if observation is None:
+            skipped_missing_required += 1
+            continue
+
+        output_path = writer.write(observation)
+        output_paths.add(str(output_path))
+        observations_written += 1
+
+    return {
+        'total_lines': len(result_rows) + malformed_lines,
+        'meteor_results_found': meteor_results_found,
+        'observations_written': observations_written,
+        'skipped_non_meteor_labels': skipped_non_meteor_labels,
+        'skipped_error_results': skipped_error_results,
+        'skipped_missing_required': skipped_missing_required,
+        'malformed_lines': malformed_lines,
+        'labels_count': dict(sorted(labels_counter.items())),
+        'output_paths': sorted(output_paths),
+        'append_only_duplicates_possible': True,
+    }
+
+
 def _clamp_confidence(value):
     confidence = float(value or 0.0)
     return max(0.0, min(1.0, confidence))
@@ -500,3 +569,61 @@ def _resolve_event_classification_output_dir(detector_result_path, output_dir):
         return parent.parent.joinpath('event_classifications')
 
     return parent.joinpath('event_classifications')
+
+
+def _meteor_observation_from_detector_result(
+        row,
+        detector_id_fallback='detector_result_bridge',
+        detector_version_fallback='detector_result_bridge_v1',
+):
+    try:
+        return MeteorObservation(
+            source_event_id=_required_string(row.get('detector_result_id'), 'detector_result_id'),
+            source_timeline_id=_string_value(row.get('timeline_id')),
+            detector_id=_string_value(row.get('detector_id')) or detector_id_fallback,
+            detector_version=_string_value(row.get('detector_version')) or detector_version_fallback,
+            confidence=_clamp_confidence(row.get('confidence')),
+            validation_state='unknown',
+            observation_timestamp=_detector_result_observation_timestamp(row),
+            camera_id=int(row.get('camera_id')),
+            profile_id=_required_string(row.get('profile_id'), 'profile_id'),
+            created_at=_string_value(row.get('created_at')) or _utc_now(),
+            status='shadow',
+        )
+    except (TypeError, ValueError):
+        return None
+
+
+def _detector_result_observation_timestamp(row):
+    created_at = _string_value(row.get('created_at'))
+    if created_at:
+        return created_at
+
+    evidence_items = row.get('evidence') or []
+    if not isinstance(evidence_items, list):
+        return ''
+
+    for evidence_item in evidence_items:
+        if not isinstance(evidence_item, dict):
+            continue
+        timestamps = _list_value(evidence_item.get('timestamps_utc'))
+        for timestamp in timestamps:
+            timestamp = _string_value(timestamp)
+            if timestamp:
+                return timestamp
+    return ''
+
+
+def _resolve_meteor_observation_output_dir(detector_result_path, output_dir):
+    if output_dir:
+        return Path(output_dir)
+
+    if not detector_result_path:
+        return Path('meteor_observations')
+
+    detector_result_path = Path(detector_result_path)
+    parent = detector_result_path.parent
+    if parent.name == 'detector_results':
+        return parent.parent.joinpath('meteor_observations')
+
+    return parent.joinpath('meteor_observations')

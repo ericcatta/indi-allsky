@@ -12,6 +12,7 @@ from indi_allsky.detector_result import DetectorResultWriter
 from indi_allsky.detector_result import build_detector_result_id
 from indi_allsky.detector_result import build_detector_result_offline_report
 from indi_allsky.detector_result import convert_detector_results_to_event_classifications_offline
+from indi_allsky.detector_result import convert_detector_results_to_meteor_observations_offline
 from indi_allsky.detector_result import default_detector_result_dir
 from indi_allsky.detector_result import render_detector_result_text_summary
 
@@ -458,6 +459,164 @@ def test_detector_result_classification_bridge_appends_duplicates():
     assert len(rows) == 2
 
 
+def test_detector_result_meteor_bridge_writes_meteor_observation():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        result_path = base_dir.joinpath('detector_results', '2026-06-26.jsonl')
+        observation_dir = base_dir.joinpath('meteor_observations')
+        result_path.parent.mkdir(parents=True, exist_ok=True)
+
+        detector_result = _result(
+            label='meteor_candidate',
+            status='candidate',
+            confidence=0.72,
+            created_at='2026-06-26T03:00:00+00:00',
+        ).to_dict()
+        with result_path.open('w', encoding='utf-8') as f_result:
+            json.dump(detector_result, f_result, sort_keys=True, separators=(',', ':'))
+            f_result.write('\n')
+
+        summary = convert_detector_results_to_meteor_observations_offline(
+            result_path,
+            output_dir=observation_dir,
+        )
+
+        assert summary['total_lines'] == 1
+        assert summary['meteor_results_found'] == 1
+        assert summary['observations_written'] == 1
+        assert summary['skipped_non_meteor_labels'] == 0
+        assert summary['skipped_error_results'] == 0
+        assert summary['malformed_lines'] == 0
+        assert summary['labels_count'] == {'meteor_candidate': 1}
+        assert summary['append_only_duplicates_possible'] is True
+
+        rows = [
+            json.loads(line)
+            for line in observation_dir.joinpath('2026-06-26.jsonl').read_text(encoding='utf-8').splitlines()
+        ]
+        assert len(rows) == 1
+        assert rows[0]['schema_version'] == 'meteor_observation_v1'
+        assert rows[0]['source_event_id'] == detector_result['detector_result_id']
+        assert rows[0]['source_timeline_id'] == 'timeline-abc'
+        assert rows[0]['detector_id'] == 'synthetic_detector'
+        assert rows[0]['detector_version'] == '0.0.1'
+        assert rows[0]['confidence'] == 0.72
+        assert rows[0]['observation_timestamp'] == '2026-06-26T03:00:00+00:00'
+        assert rows[0]['camera_id'] == 2
+        assert rows[0]['profile_id'] == 'asi678mc'
+        assert rows[0]['status'] == 'shadow'
+        assert rows[0]['validation_state'] == 'unknown'
+        assert 'review_id' not in rows[0]
+        assert 'validation_id' not in rows[0]
+        assert 'rms' not in rows[0]
+        assert 'radiant' not in rows[0]
+        assert 'magnitude' not in rows[0]
+
+
+def test_detector_result_meteor_bridge_uses_fallback_detector_provenance_and_evidence_timestamp():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result_path = Path(tmpdir).joinpath('detector_results', '2026-06-26.jsonl')
+        observation_dir = Path(tmpdir).joinpath('meteor_observations')
+        result_path.parent.mkdir(parents=True, exist_ok=True)
+
+        detector_result = _result(label='meteor_candidate').to_dict()
+        detector_result['created_at'] = ''
+        detector_result['detector_id'] = ''
+        detector_result['detector_version'] = ''
+        with result_path.open('w', encoding='utf-8') as f_result:
+            json.dump(detector_result, f_result, sort_keys=True, separators=(',', ':'))
+            f_result.write('\n')
+
+        convert_detector_results_to_meteor_observations_offline(
+            result_path,
+            output_dir=observation_dir,
+            detector_id_fallback='fallback_detector',
+            detector_version_fallback='fallback_v1',
+        )
+
+        rows = [
+            json.loads(line)
+            for line in observation_dir.joinpath('2026-06-26.jsonl').read_text(encoding='utf-8').splitlines()
+        ]
+
+    assert rows[0]['detector_id'] == 'fallback_detector'
+    assert rows[0]['detector_version'] == 'fallback_v1'
+    assert rows[0]['observation_timestamp'] == '2026-06-26T00:00:00+00:00'
+
+
+def test_detector_result_meteor_bridge_skips_non_meteor_error_and_malformed():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        result_path = Path(tmpdir).joinpath('detector_results', '2026-06-26.jsonl')
+        observation_dir = Path(tmpdir).joinpath('meteor_observations')
+        result_path.parent.mkdir(parents=True, exist_ok=True)
+
+        non_meteor = _result(label='weather_or_cloud_event').to_dict()
+        error_result = _result(status='error', label='meteor_candidate').to_dict()
+        with result_path.open('w', encoding='utf-8') as f_result:
+            json.dump(non_meteor, f_result, sort_keys=True, separators=(',', ':'))
+            f_result.write('\n')
+            json.dump(error_result, f_result, sort_keys=True, separators=(',', ':'))
+            f_result.write('\n')
+            f_result.write('not-json\n')
+
+        summary = convert_detector_results_to_meteor_observations_offline(
+            result_path,
+            output_dir=observation_dir,
+        )
+
+        assert summary['total_lines'] == 3
+        assert summary['meteor_results_found'] == 0
+        assert summary['observations_written'] == 0
+        assert summary['skipped_non_meteor_labels'] == 1
+        assert summary['skipped_error_results'] == 1
+        assert summary['malformed_lines'] == 1
+        assert summary['labels_count'] == {'meteor_candidate': 1, 'weather_or_cloud_event': 1}
+        assert summary['output_paths'] == []
+        assert not observation_dir.exists()
+
+
+def test_detector_result_meteor_bridge_missing_file_is_safe():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        summary = convert_detector_results_to_meteor_observations_offline(
+            Path(tmpdir).joinpath('detector_results', 'missing.jsonl'),
+            output_dir=Path(tmpdir).joinpath('meteor_observations'),
+        )
+
+    assert summary == {
+        'total_lines': 0,
+        'meteor_results_found': 0,
+        'observations_written': 0,
+        'skipped_non_meteor_labels': 0,
+        'skipped_error_results': 0,
+        'skipped_missing_required': 0,
+        'malformed_lines': 0,
+        'labels_count': {},
+        'output_paths': [],
+        'append_only_duplicates_possible': True,
+    }
+
+
+def test_detector_result_meteor_bridge_appends_duplicates_without_reviews_or_validations():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base_dir = Path(tmpdir)
+        result_path = base_dir.joinpath('detector_results', '2026-06-26.jsonl')
+        observation_dir = base_dir.joinpath('meteor_observations')
+        result_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with result_path.open('w', encoding='utf-8') as f_result:
+            json.dump(_result(label='meteor_candidate').to_dict(), f_result, sort_keys=True, separators=(',', ':'))
+            f_result.write('\n')
+
+        convert_detector_results_to_meteor_observations_offline(result_path, output_dir=observation_dir)
+        convert_detector_results_to_meteor_observations_offline(result_path, output_dir=observation_dir)
+
+        rows = observation_dir.joinpath('2026-06-26.jsonl').read_text(encoding='utf-8').splitlines()
+
+        assert len(rows) == 2
+        assert not base_dir.joinpath('meteor_reviews').exists()
+        assert not base_dir.joinpath('meteor_validations').exists()
+
+
 if __name__ == '__main__':
     test_detector_evidence_serializes_correctly()
     test_detector_result_serializes_correctly()
@@ -480,4 +639,9 @@ if __name__ == '__main__':
     test_detector_result_classification_bridge_skips_error_and_missing_label_and_malformed()
     test_detector_result_classification_bridge_missing_file_is_safe()
     test_detector_result_classification_bridge_appends_duplicates()
+    test_detector_result_meteor_bridge_writes_meteor_observation()
+    test_detector_result_meteor_bridge_uses_fallback_detector_provenance_and_evidence_timestamp()
+    test_detector_result_meteor_bridge_skips_non_meteor_error_and_malformed()
+    test_detector_result_meteor_bridge_missing_file_is_safe()
+    test_detector_result_meteor_bridge_appends_duplicates_without_reviews_or_validations()
     print('detector result tests OK')

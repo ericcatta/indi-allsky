@@ -380,8 +380,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - salta risultati `status=error`, label vuote e righe malformate;
       - preserva provenance detector in `features_used`;
       - nessuna deduplica per ora, run ripetute appendono duplicati;
+    - bridge offline/manuale `DetectorResult -> MeteorObservation`:
+      - converte solo risultati `label=meteor_candidate`;
+      - salta risultati `status=error`, label non meteor e righe malformate;
+      - preserva detector id/version/confidence e collega `source_event_id` al `detector_result_id`;
+      - scrive `meteor_observations` JSONL append-only senza deduplica;
     - nessun campo meteor/RMS/science-specific richiesto;
-    - nessuna creazione di `MeteorObservation`, runtime integration, dashboard, Telegram, image processing, RMS o AI.
+    - nessuna creazione runtime/automatica di `MeteorObservation`, runtime integration, dashboard, Telegram, image processing, RMS o AI.
 - NEXT:
   - Raspberry validation Controlled Enablement v0:
     - abilitare temporaneamente `event_candidate_triggers.enabled=True` in configurazione controllata;
@@ -1446,3 +1451,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-26: Introdotta Detector Result domain foundation: `DetectorEvidence`, `DetectorResult` e writer JSONL append-only come contratto detector-agnostic prima di qualsiasi detector reale o bridge verso MeteorObservation.
 - 2026-06-26: Aggiunti report offline/read-only e text summary per `DetectorResult` JSONL, come base futura per CLI/dashboard/Telegram senza detector, runtime hook o creazione MeteorObservation.
 - 2026-06-26: Aggiunto bridge offline/manuale `DetectorResult -> EventClassification`, append-only e shadow, con provenance detector in `features_used` e senza runtime integration, review/validation o creazione MeteorObservation.
+- 2026-06-26: Aggiunto bridge offline/manuale `DetectorResult -> MeteorObservation` per risultati `meteor_candidate`, append-only e shadow, senza EventClassification, review, validation, RMS, AI o campi scientifici meteor-specific.
