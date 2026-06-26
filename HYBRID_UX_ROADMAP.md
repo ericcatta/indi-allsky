@@ -30,6 +30,9 @@ detector o infrastruttura scientifica.
   dei detector.
 - Help text, tooltip e descrizioni devono spiegare l'impatto operativo e i rischi
   delle impostazioni critiche.
+- Finche' il detector validation gate e' bloccato da enclosure/weather e mancano
+  sequenze FITS outdoor reali, il lavoro UX ammesso riguarda solo
+  documentazione, report, storage policy e validazione offline.
 
 ## Concetti Utente Da Rendere Espliciti
 
@@ -128,6 +131,11 @@ policy future senza esporre solo quei nomi.
   - candidate/timeline counts;
   - reason/camera breakdown;
   - runtime trigger diagnostics.
+- Detector pipeline foundation e' visibile solo come infrastruttura offline:
+  - DetectorResult report/text summary;
+  - bridge offline verso EventClassification/MeteorObservation;
+  - smoke test sintetico senza immagini reali;
+  - nessun detector reale, RMS, AI o runtime hook.
 
 ## IN TEST
 
@@ -178,6 +186,14 @@ policy future senza esporre solo quei nomi.
   - periodic FITS a 30/60 secondi;
   - controllo spazio disco;
   - ritorno a periodicita' normale.
+- Usare Scientific Source offline report come base diagnostica per mostrare:
+  - quanti frame hanno detector path;
+  - quanti file FITS/RAW esistono davvero;
+  - profilo/camera/tipo sorgente;
+  - eventuali failure header FITS.
+- Detector meteor/Hough/RMS resta bloccato finche' non ci sono sequenze FITS
+  outdoor reali validate; la UI deve comunicare che il blocco e' dati/weather,
+  non architettura.
 
 ## NEXT
 
@@ -199,6 +215,10 @@ policy future senza esporre solo quei nomi.
 - Spiegare che Event-window buffered richiede pre-event buffer per eventi a
   singolo frame come meteore e lightning.
 - Non implementare buffer/event windows finche' la parte tecnica non e' pronta.
+- Non presentare `DETECT_METEORS` legacy come vero detector meteor:
+  - e' line detection Canny/Hough su immagine processata 8-bit;
+  - qualunque futuro Hough adapter deve essere etichettato offline/shadow finche'
+    non viene validato su FITS outdoor.
 
 ### Dashboard / Gallery
 
