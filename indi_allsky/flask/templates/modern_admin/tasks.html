@@ -90,6 +90,7 @@ var camera_id = {{ camera_id }};
                         <th>Camera</th>
                         <th>Profile</th>
                         <th>Message</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,14 +106,15 @@ var camera_id = {{ camera_id }};
                         <td>{{ task.camera_id }}</td>
                         <td>{{ task.profile_id }}</td>
                         <td>{{ task.message }}</td>
+                        <td><a href="{{ task.details_url }}">Details</a></td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="10">No recent task queue rows matched the Classic Task Queue scope.</td>
+                        <td colspan="11">No recent task queue rows matched the Classic Task Queue scope.</td>
                     </tr>
                     {% endfor %}
                     <tr id="modern-admin-task-no-filter-match" hidden>
-                        <td colspan="10">No task rows match the current filters.</td>
+                        <td colspan="11">No task rows match the current filters.</td>
                     </tr>
                 </tbody>
             </table>

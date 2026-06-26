@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-task-detail-title">
+    {% set modern_admin_header_label = 'Task detail header' %}
+    {% set modern_admin_heading = 'Task Detail' %}
+    {% set modern_admin_title_id = 'modern-admin-task-detail-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Task detail summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Task ID</div>
+            <h3>{{ modern_admin_task_detail.id }}</h3>
+            <p>Read-only task queue record.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">State</div>
+            <h3>{{ modern_admin_task_detail.state }}</h3>
+            <p>{{ modern_admin_task_detail.state_value }}</p>
+            <span class="modern-admin-status-pill {{ modern_admin_task_detail.state_tone }}">{{ modern_admin_task_detail.state }}</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Classic Fallback</div>
+            <h3>Available</h3>
+            <p><a href="{{ url_for('indi_allsky.taskqueue_view') }}">Open Classic Task Queue</a></p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="task-detail-fields-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Task Queue</p>
+            <h2 id="task-detail-fields-title">Task fields</h2>
+        </div>
+        <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
+            <div><dt>ID</dt><dd>{{ modern_admin_task_detail.id }}</dd></div>
+            <div><dt>Queue</dt><dd>{{ modern_admin_task_detail.queue }} ({{ modern_admin_task_detail.queue_value }})</dd></div>
+            <div><dt>State</dt><dd>{{ modern_admin_task_detail.state }} ({{ modern_admin_task_detail.state_value }})</dd></div>
+            <div><dt>Action</dt><dd>{{ modern_admin_task_detail.action }}</dd></div>
+            <div><dt>Created</dt><dd>{{ modern_admin_task_detail.created }}</dd></div>
+            <div><dt>Updated</dt><dd>{{ modern_admin_task_detail.updated }}</dd></div>
+            <div><dt>Priority</dt><dd>{{ modern_admin_task_detail.priority }}</dd></div>
+            <div><dt>Camera</dt><dd>{{ modern_admin_task_detail.camera_id }}</dd></div>
+            <div><dt>Profile</dt><dd>{{ modern_admin_task_detail.profile_id }}</dd></div>
+            <div><dt>Message</dt><dd>{{ modern_admin_task_detail.message }}</dd></div>
+            <div><dt>Result</dt><dd>{{ modern_admin_task_detail.result }}</dd></div>
+        </dl>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="task-detail-payload-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Diagnostics</p>
+            <h2 id="task-detail-payload-title">Task payload</h2>
+        </div>
+        {% if modern_admin_task_detail.has_payload %}
+        <pre class="modern-admin-log-output">{{ modern_admin_task_detail.payload_text }}</pre>
+        {% else %}
+        <p class="modern-admin-note">No task payload is available for this row.</p>
+        {% endif %}
+        <p class="modern-admin-note">Sensitive-looking payload fields are redacted before rendering. This page does not execute or mutate task data.</p>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-label="Task detail navigation">
+        <div class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Back to Modern Task Queue</a>
+            <a href="{{ url_for('indi_allsky.taskqueue_view') }}">Open Classic Task Queue</a>
+        </div>
+    </section>
+</main>
+{% endblock %}

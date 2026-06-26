@@ -42,6 +42,7 @@ from flask import redirect
 from flask import flash
 from flask import Response
 from flask import url_for
+from flask import abort
 from flask import send_from_directory
 from flask import send_file
 from flask import current_app as app
@@ -8340,6 +8341,7 @@ class ModernAdminTaskQueueView(ModernAdminContextMixin, TaskQueueView):
             message = task.get('message') or task.get('result') or ''
             task_rows.append({
                 'id'         : task.get('id'),
+                'details_url': url_for('indi_allsky.modern_admin_task_detail_view', task_id=task.get('id')),
                 'created'    : self.format_task_datetime(created_date),
                 'age'        : self.format_task_age(created_date),
                 'updated'    : self.format_task_datetime(task.get('updateDate'), default='Not tracked'),
@@ -8414,6 +8416,96 @@ class ModernAdminTaskQueueView(ModernAdminContextMixin, TaskQueueView):
             if create_date and create_date >= recent_cutoff:
                 recent_count += 1
         return recent_count
+
+
+class ModernAdminTaskDetailView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Task Detail'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    sensitive_payload_keys = (
+        'password',
+        'passwd',
+        'token',
+        'secret',
+        'credential',
+        'authorization',
+        'auth_header',
+        'api_key',
+        'access_key',
+        'private_key',
+    )
+
+    def dispatch_request(self, task_id):
+        self.task_id = task_id
+        return super(ModernAdminTaskDetailView, self).dispatch_request()
+
+
+    def get_context(self):
+        context = super(ModernAdminTaskDetailView, self).get_context()
+
+        try:
+            task = IndiAllSkyDbTaskQueueTable.query\
+                .filter(IndiAllSkyDbTaskQueueTable.id == self.task_id)\
+                .one()
+        except NoResultFound:
+            abort(404)
+
+        task_data = task.data if isinstance(task.data, dict) else {}
+        sanitized_payload = self.redact_task_payload(task.data)
+        payload_text = self.format_task_payload(sanitized_payload)
+
+        context['modern_admin_task_detail'] = {
+            'id'           : task.id,
+            'queue'        : task.queue.name if task.queue else 'Unknown',
+            'queue_value'  : task.queue.value if task.queue else 'Unknown',
+            'state'        : task.state.name if task.state else 'Unknown',
+            'state_value'  : task.state.value if task.state else 'Unknown',
+            'state_tone'   : ModernAdminTaskQueueView.get_task_state_tone(self, task.state.name if task.state else None),
+            'action'       : TaskQueueView.get_task_data_value(self, task_data, 'action', 'MISSING'),
+            'created'      : ModernAdminTaskQueueView.format_task_datetime(self, task.createDate),
+            'updated'      : ModernAdminTaskQueueView.format_task_datetime(self, getattr(task, 'updateDate', None), default='Not tracked'),
+            'priority'     : task.priority if task.priority is not None else 'Not set',
+            'camera_id'    : TaskQueueView.get_task_data_value(self, task_data, 'camera_id') or 'Any',
+            'profile_id'   : TaskQueueView.get_task_data_value(self, task_data, 'profile_id') or 'Any',
+            'message'      : TaskQueueView.get_task_data_value(self, task_data, 'message') or TaskQueueView.get_task_data_value(self, task_data, 'error') or 'No message',
+            'result'       : task.result or 'No result',
+            'payload_text' : payload_text,
+            'has_payload'  : payload_text != '',
+        }
+
+        return context
+
+
+    def redact_task_payload(self, value):
+        if isinstance(value, dict):
+            redacted = {}
+            for key, item in value.items():
+                if self.is_sensitive_payload_key(key):
+                    redacted[key] = '<redacted>'
+                else:
+                    redacted[key] = self.redact_task_payload(item)
+            return redacted
+
+        if isinstance(value, list):
+            return [self.redact_task_payload(item) for item in value]
+
+        return value
+
+
+    def is_sensitive_payload_key(self, key):
+        key_str = str(key).lower()
+        return any(sensitive_key in key_str for sensitive_key in self.sensitive_payload_keys)
+
+
+    def format_task_payload(self, value):
+        if value in (None, ''):
+            return ''
+
+        try:
+            return json.dumps(value, indent=2, sort_keys=True, default=str)
+        except TypeError:
+            return str(value)
 
 
 class AjaxSystemInfoView(BaseView):
@@ -20349,6 +20441,7 @@ bp_allsky.add_url_rule('/modern-admin/system/info', view_func=ModernAdminSystemI
 bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupportInfoView.as_view('modern_admin_support_info_view', template_name='modern_admin/support_info.html'))
 bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.as_view('modern_admin_log_view', template_name='modern_admin/log.html'))
 bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView.as_view('modern_admin_taskqueue_view', template_name='modern_admin/tasks.html'))
+bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdminTaskDetailView.as_view('modern_admin_task_detail_view', template_name='modern_admin/task_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/safe_controls.html'))
