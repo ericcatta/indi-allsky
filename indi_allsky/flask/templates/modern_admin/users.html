@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-users-title">
+    {% set modern_admin_header_label = 'Users header' %}
+    {% set modern_admin_heading = 'Users' %}
+    {% set modern_admin_title_id = 'modern-admin-users-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="User summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Users</div>
+            <h3>{{ modern_admin_user_count }}</h3>
+            <p>Read-only account inventory.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Active</div>
+            <h3>{{ modern_admin_user_active_count }}</h3>
+            <p>Accounts currently marked active.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Classic Fallback</div>
+            <h3>Available</h3>
+            <p><a href="{{ url_for('indi_allsky.users_view') }}">Open Classic Users</a></p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="modern-users-title">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">User Management</p>
+            <h2 id="modern-users-title">Accounts</h2>
+        </div>
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Created</th>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Active</th>
+                        <th>Staff</th>
+                        <th>Admin</th>
+                        <th>Last Login</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in modern_admin_user_rows %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.created }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.name }}</td>
+                        <td><span class="modern-admin-status-pill {{ user.active_tone }}">{{ user.active }}</span></td>
+                        <td>{{ user.staff }}</td>
+                        <td><span class="modern-admin-status-pill {{ user.admin_tone }}">{{ user.admin }}</span></td>
+                        <td>{{ user.last_login }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8">No user accounts are available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="modern-admin-note">Password hashes, API keys, login IPs, session data and raw user JSON are intentionally not shown.</p>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-label="User management fallbacks">
+        <div class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.users_view') }}">Open Classic Users</a>
+            <a href="{{ url_for('indi_allsky.user_view') }}">Open Classic User Profile</a>
+        </div>
+    </section>
+</main>
+{% endblock %}

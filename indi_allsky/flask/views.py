@@ -7557,6 +7557,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('Support Info', 'indi_allsky.modern_admin_support_info_view'),
             ('Log', 'indi_allsky.modern_admin_log_view'),
             ('Task Queue', 'indi_allsky.modern_admin_taskqueue_view'),
+            ('Users', 'indi_allsky.modern_admin_users_view'),
             ('Settings Inventory', 'indi_allsky.modern_admin_settings_view'),
             ('Global Capture Defaults', 'indi_allsky.modern_admin_capture_settings_view'),
             ('Camera Settings', 'indi_allsky.modern_admin_camera_settings_view'),
@@ -11788,6 +11789,52 @@ class UsersView(TemplateView):
         context['user_list'] = user_list
 
         return context
+
+
+class ModernAdminUsersView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Users'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    def get_context(self):
+        context = super(ModernAdminUsersView, self).get_context()
+
+        users = IndiAllSkyDbUserTable.query\
+            .order_by(IndiAllSkyDbUserTable.createDate.asc())
+
+        user_rows = list()
+        for user in users:
+            user_rows.append({
+                'id'         : user.id,
+                'username'   : user.username,
+                'name'       : user.name or 'Not set',
+                'active'     : self.format_user_bool(user.active),
+                'active_tone': 'modern-admin-status-good' if user.active else 'modern-admin-status-muted',
+                'staff'      : self.format_user_bool(user.staff),
+                'admin'      : self.format_user_bool(user.admin),
+                'admin_tone' : 'modern-admin-status-warning' if user.admin else 'modern-admin-status-muted',
+                'created'    : self.format_user_datetime(user.createDate),
+                'last_login' : self.format_user_datetime(user.loginDate, default='Never'),
+            })
+
+        context['modern_admin_user_rows'] = user_rows
+        context['modern_admin_user_count'] = len(user_rows)
+        context['modern_admin_user_active_count'] = len([row for row in user_rows if row['active'] == 'Yes'])
+        context['modern_admin_user_admin_count'] = len([row for row in user_rows if row['admin'] == 'Yes'])
+
+        return context
+
+
+    def format_user_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+    def format_user_bool(self, value):
+        return 'Yes' if bool(value) else 'No'
 
 
 class ConfigListView(TemplateView):
@@ -20442,6 +20489,7 @@ bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupp
 bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.as_view('modern_admin_log_view', template_name='modern_admin/log.html'))
 bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView.as_view('modern_admin_taskqueue_view', template_name='modern_admin/tasks.html'))
 bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdminTaskDetailView.as_view('modern_admin_task_detail_view', template_name='modern_admin/task_detail.html'))
+bp_allsky.add_url_rule('/modern-admin/users', view_func=ModernAdminUsersView.as_view('modern_admin_users_view', template_name='modern_admin/users.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/safe_controls.html'))

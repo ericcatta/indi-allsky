@@ -87,6 +87,7 @@
         "/modern-admin/tasks",
         "/modern-admin/tasks/*",
         "/modern-admin/updates",
+        "/modern-admin/users",
         "/modern-admin/uploads"
       ],
       "templates": [
@@ -120,6 +121,7 @@
         "modern_admin/task_detail.html",
         "modern_admin/tasks.html",
         "modern_admin/updates.html",
+        "modern_admin/users.html",
         "modern_admin/uploads.html",
         "modern_admin/virtualsky.html"
       ],
@@ -1270,18 +1272,18 @@
     },
     "user_management": {
       "label": "User Management",
-      "status": "CLASSIC ONLY",
-      "owner": "classic",
+      "status": "PARTIAL MODERN",
+      "owner": "modern",
       "porting_priority": "high",
-      "routes": ["/user", "/ajax/user", "/users"],
-      "templates": ["user.html", "users.html"],
+      "routes": ["/user", "/ajax/user", "/users", "/modern-admin/users"],
+      "templates": ["user.html", "users.html", "modern_admin/users.html"],
       "assets": ["DataTables/datatables.min.css", "DataTables/datatables.min.js"],
       "apis": ["/ajax/user"],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "Modern user/admin pages missing.",
+      "modern_gap": "Modern Admin has read-only account inventory; profile/password/role changes remain Classic-only.",
       "removal_risk": "high",
-      "notes": []
+      "notes": ["Modern page must not show password hashes, API keys, login IPs or raw user data."]
     },
     "authentication": {
       "label": "Authentication",
