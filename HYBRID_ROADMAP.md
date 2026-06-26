@@ -390,6 +390,7 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
       - `DetectorRunContext` serializzabile e leggero, senza DB/session/filesystem;
       - `DetectorRunner` offline/manuale che invoca `detect(...)`, valida `DetectorResult`, conta label/status e scrive JSONL solo se viene passato un output dir;
       - le eccezioni detector diventano `DetectorResult(status=error, label=unknown_event)` auditabili;
+      - smoke test sintetico offline dimostra `ScientificFrameSequence -> DetectorRunner -> DetectorResult -> report/text summary -> EventClassification/MeteorObservation bridge`;
     - nessun campo meteor/RMS/science-specific richiesto;
     - nessuna creazione runtime/automatica di `MeteorObservation`, runtime integration, dashboard, Telegram, image processing, RMS o AI.
 - NEXT:
@@ -1458,3 +1459,4 @@ cat /var/lib/indi-allsky/auto_gain_runtime_state.json
 - 2026-06-26: Aggiunto bridge offline/manuale `DetectorResult -> EventClassification`, append-only e shadow, con provenance detector in `features_used` e senza runtime integration, review/validation o creazione MeteorObservation.
 - 2026-06-26: Aggiunto bridge offline/manuale `DetectorResult -> MeteorObservation` per risultati `meteor_candidate`, append-only e shadow, senza EventClassification, review, validation, RMS, AI o campi scientifici meteor-specific.
 - 2026-06-26: Aggiunta Detector API foundation: `DetectorContract`, `DetectorRunContext` e `DetectorRunner` offline/manuale per futuri detector RMS/OpenCV/AI/manuali, senza detector reale, image read o runtime integration.
+- 2026-06-26: Aggiunto smoke test sintetico offline della detector pipeline: frame scientifici finti con path FITS inesistenti, dummy detector, DetectorResult JSONL, report/text summary e bridge verso EventClassification/MeteorObservation.
