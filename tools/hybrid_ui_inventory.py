@@ -148,6 +148,31 @@ def declared_owners(ownership_map: dict, kind: str, value: str) -> list[str]:
     return sorted(set(owners))
 
 
+def feature_items(ownership_map: dict, kind: str) -> list[tuple[str, str]]:
+    key = {
+        "route": "routes",
+        "template": "templates",
+        "asset": "assets",
+        "api": "apis",
+    }[kind]
+    items: list[tuple[str, str]] = []
+    for feature_key, feature in ownership_map.get("features", {}).items():
+        if not isinstance(feature, dict):
+            continue
+        for pattern in feature.get(key, []) or []:
+            items.append((str(feature_key), str(pattern)))
+    return items
+
+
+def linked_features(ownership_map: dict, kind: str, value: str) -> list[str]:
+    features = [
+        feature_key
+        for feature_key, pattern in feature_items(ownership_map, kind)
+        if fnmatch.fnmatchcase(value, pattern)
+    ]
+    return sorted(set(features))
+
+
 def ownership_mismatch(classification: str, owners: list[str]) -> str:
     if not owners:
         return "-"
@@ -500,6 +525,111 @@ def build_declared_missing(found_by_kind: dict[str, list[str]], ownership_map: d
     return rows
 
 
+def feature_summary(ownership_map: dict) -> dict[str, int]:
+    features = ownership_map.get("features", {})
+    counts = {
+        "total": 0,
+        "protected": 0,
+        "classic_only": 0,
+        "wrapper": 0,
+        "shared_public_external": 0,
+        "needs_verification": 0,
+    }
+    for feature in features.values():
+        if not isinstance(feature, dict):
+            continue
+        counts["total"] += 1
+        status = str(feature.get("status", "UNKNOWN"))
+        owner = str(feature.get("owner", "unknown"))
+        if feature.get("protected") is True or status == "PROTECTED MODERN WORK":
+            counts["protected"] += 1
+        if status == "CLASSIC ONLY":
+            counts["classic_only"] += 1
+        if status == "WRAPPER ONLY" or owner == "modern_wrapper":
+            counts["wrapper"] += 1
+        if status in {"SHARED LEGACY", "SHARED ACTIVE", "PUBLIC ACTIVE", "EXTERNAL API"} or owner in {"shared_api", "public", "external_api"}:
+            counts["shared_public_external"] += 1
+        if status in {"NEEDS VERIFICATION", "UNKNOWN"}:
+            counts["needs_verification"] += 1
+    return counts
+
+
+def feature_summary_rows(ownership_map: dict) -> list[list[object]]:
+    rows: list[list[object]] = []
+    for feature_key, feature in sorted(ownership_map.get("features", {}).items()):
+        if not isinstance(feature, dict):
+            continue
+        rows.append([
+            feature_key,
+            feature.get("label", feature_key),
+            feature.get("status", "UNKNOWN"),
+            feature.get("owner", "unknown"),
+            feature.get("porting_priority", "unknown"),
+            "yes" if feature.get("protected") is True else "no",
+            len(feature.get("routes", []) or []),
+            len(feature.get("templates", []) or []),
+            len(feature.get("assets", []) or []),
+            len(feature.get("apis", []) or []),
+            len(feature.get("config_keys", []) or []),
+            feature.get("modern_gap", ""),
+            feature.get("removal_risk", ""),
+        ])
+    return rows
+
+
+def feature_list_rows(ownership_map: dict, predicate) -> list[list[object]]:
+    rows: list[list[object]] = []
+    for feature_key, feature in sorted(ownership_map.get("features", {}).items()):
+        if not isinstance(feature, dict) or not predicate(feature):
+            continue
+        rows.append([
+            feature_key,
+            feature.get("label", feature_key),
+            feature.get("status", "UNKNOWN"),
+            feature.get("owner", "unknown"),
+            feature.get("porting_priority", "unknown"),
+            feature.get("modern_gap", ""),
+            feature.get("removal_risk", ""),
+        ])
+    return rows
+
+
+def build_inventory_without_feature_links(
+    routes: list[RouteEntry],
+    templates: dict[str, TemplateEntry],
+    js_assets: dict[str, AssetEntry],
+    css_assets: dict[str, AssetEntry],
+    endpoint_matrix: dict[str, dict[str, set[str]]],
+    endpoint_to_route: dict[str, str],
+    ownership_map: dict,
+) -> list[list[object]]:
+    rows: list[list[object]] = []
+    for route in routes:
+        if not linked_features(ownership_map, "route", route.route):
+            rows.append(["route", route.route, route.classification, "no feature route pattern matched"])
+
+    for template in sorted(templates.values(), key=lambda item: item.name):
+        if not linked_features(ownership_map, "template", template.name):
+            rows.append(["template", template.name, template.classification, "no feature template pattern matched"])
+
+    for asset in sorted({**js_assets, **css_assets}.values(), key=lambda item: item.name):
+        if not linked_features(ownership_map, "asset", asset.name):
+            rows.append(["asset", asset.name, asset.classification, "no feature asset pattern matched"])
+
+    defined_routes = {route.endpoint: route for route in routes}
+    for endpoint in sorted(endpoint_matrix):
+        route = defined_routes.get(endpoint)
+        features = linked_features(ownership_map, "api", endpoint)
+        if endpoint_to_route.get(endpoint):
+            features = sorted(set(features + linked_features(ownership_map, "api", endpoint_to_route[endpoint])))
+        if features:
+            continue
+        classification = route.classification if route else "unknown"
+        rows.append(["api", endpoint, classification, "no feature API pattern matched"])
+
+    return rows
+
+
 def render_report(
     routes: list[RouteEntry],
     templates: dict[str, TemplateEntry],
@@ -535,9 +665,19 @@ def render_report(
         "asset": sorted(all_assets),
         "api": sorted(set(endpoint_matrix) | {route.route for route in routes}),
     }
+    feature_counts = feature_summary(ownership_map)
     mismatches = build_ownership_mismatches(routes, templates, js_assets, css_assets, endpoint_matrix, endpoint_to_route, ownership_map)
     undeclared = build_undeclared_items(routes, templates, js_assets, css_assets, endpoint_matrix, endpoint_to_route, ownership_map)
     declared_missing = build_declared_missing(found_by_kind, ownership_map)
+    unlinked_inventory = build_inventory_without_feature_links(
+        routes,
+        templates,
+        js_assets,
+        css_assets,
+        endpoint_matrix,
+        endpoint_to_route,
+        ownership_map,
+    )
 
     lines: list[str] = []
     lines.append("# HYBRID UI INVENTORY REPORT")
@@ -561,6 +701,13 @@ def render_report(
             ["Ownership mismatches", len(mismatches)],
             ["Undeclared inventory items", len(undeclared)],
             ["Declared but not found", len(declared_missing)],
+            ["Features mapped", feature_counts["total"]],
+            ["Protected features", feature_counts["protected"]],
+            ["Classic-only features", feature_counts["classic_only"]],
+            ["Wrapper features", feature_counts["wrapper"]],
+            ["Shared/public/external features", feature_counts["shared_public_external"]],
+            ["Features needing verification", feature_counts["needs_verification"]],
+            ["Inventory items not linked to any feature", len(unlinked_inventory)],
         ],
     ))
     if warnings:
@@ -751,6 +898,83 @@ def render_report(
     lines.append(table(
         ["Owner", "Kind", "Pattern", "Note"],
         declared_missing,
+    ))
+    lines.append("")
+
+    lines.append("## 6.5 Feature Ownership Summary")
+    lines.append("")
+    lines.append(table(
+        ["Metric", "Count"],
+        [
+            ["Features mapped", feature_counts["total"]],
+            ["Protected Modern Work features", feature_counts["protected"]],
+            ["Classic-only features", feature_counts["classic_only"]],
+            ["Wrapper features", feature_counts["wrapper"]],
+            ["Shared/public/external features", feature_counts["shared_public_external"]],
+            ["Features needing verification", feature_counts["needs_verification"]],
+        ],
+    ))
+    lines.append("")
+
+    lines.append("## 6.6 Feature Coverage Matrix")
+    lines.append("")
+    lines.append(table(
+        [
+            "Feature key",
+            "Label",
+            "Status",
+            "Owner",
+            "Priority",
+            "Protected",
+            "Routes",
+            "Templates",
+            "Assets",
+            "APIs",
+            "Config keys",
+            "Modern gap",
+            "Removal risk",
+        ],
+        feature_summary_rows(ownership_map),
+    ))
+    lines.append("")
+
+    lines.append("## 6.7 Protected Modern Work Coverage")
+    lines.append("")
+    lines.append(table(
+        ["Feature key", "Label", "Status", "Owner", "Priority", "Modern gap", "Removal risk"],
+        feature_list_rows(ownership_map, lambda feature: feature.get("protected") is True or feature.get("status") == "PROTECTED MODERN WORK"),
+    ))
+    lines.append("")
+
+    lines.append("## 6.8 Classic-only Feature List")
+    lines.append("")
+    lines.append(table(
+        ["Feature key", "Label", "Status", "Owner", "Priority", "Modern gap", "Removal risk"],
+        feature_list_rows(ownership_map, lambda feature: feature.get("status") == "CLASSIC ONLY"),
+    ))
+    lines.append("")
+
+    lines.append("## 6.9 Wrapper Feature List")
+    lines.append("")
+    lines.append(table(
+        ["Feature key", "Label", "Status", "Owner", "Priority", "Modern gap", "Removal risk"],
+        feature_list_rows(ownership_map, lambda feature: feature.get("status") == "WRAPPER ONLY" or feature.get("owner") == "modern_wrapper"),
+    ))
+    lines.append("")
+
+    lines.append("## 6.10 Features Marked NEEDS VERIFICATION")
+    lines.append("")
+    lines.append(table(
+        ["Feature key", "Label", "Status", "Owner", "Priority", "Modern gap", "Removal risk"],
+        feature_list_rows(ownership_map, lambda feature: feature.get("status") in {"NEEDS VERIFICATION", "UNKNOWN"}),
+    ))
+    lines.append("")
+
+    lines.append("## 6.11 Inventory Items Not Linked To Any Feature")
+    lines.append("")
+    lines.append(table(
+        ["Kind", "Item", "Inferred classification", "Note"],
+        unlinked_inventory,
     ))
     lines.append("")
 
