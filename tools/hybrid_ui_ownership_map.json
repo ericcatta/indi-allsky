@@ -1895,9 +1895,11 @@
       "apis": [],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "Modern read-only inspection exists; restore action still Classic-only.",
+      "modern_gap": "Modern read-only inspection with local usability filters exists; restore action still Classic-only.",
       "removal_risk": "high",
-      "notes": []
+      "notes": [
+        "Modern page must not call /ajax/config/restore, expose raw config payload, download config data, or mutate active configuration."
+      ]
     },
     "system_info": {
       "label": "System Info",

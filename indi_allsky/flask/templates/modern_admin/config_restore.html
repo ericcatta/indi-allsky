@@ -43,8 +43,42 @@ var camera_id = {{ camera_id }};
 
         <p class="modern-admin-note">{{ modern_admin_config_restore_warning }}</p>
 
+        <div class="modern-admin-filter-row" aria-label="Config restore filters">
+            <label>
+                Search
+                <input id="modern-config-restore-search" type="search" placeholder="id, user, note" autocomplete="off">
+            </label>
+            <label>
+                Type/Level
+                <select id="modern-config-restore-level-filter">
+                    <option value="">All</option>
+                    {% for level in modern_admin_config_restore_levels %}
+                    <option value="{{ level|lower }}">{{ level }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Encrypted
+                <select id="modern-config-restore-encrypted-filter">
+                    <option value="">All</option>
+                    <option value="yes">Encrypted</option>
+                    <option value="no">Not encrypted</option>
+                </select>
+            </label>
+            <label>
+                Restore status
+                <select id="modern-config-restore-state-filter">
+                    <option value="">All</option>
+                    {% for state in modern_admin_config_restore_states %}
+                    <option value="{{ state|lower }}">{{ state }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-config-restore-filter-count">{{ modern_admin_config_restore_count }} shown</span>
+        </div>
+
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
+            <table class="modern-admin-data-table" id="modern-config-restore-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -61,23 +95,26 @@ var camera_id = {{ camera_id }};
                 </thead>
                 <tbody>
                     {% for config in modern_admin_config_restore_rows %}
-                    <tr>
+                    <tr data-search="{{ (config.id ~ ' ' ~ config.user ~ ' ' ~ config.user_id ~ ' ' ~ config.note)|lower }}" data-level="{{ config.level|lower }}" data-encrypted="{{ config.encrypted|lower }}" data-restore-state="{{ config.restore_state|lower }}">
                         <td>{{ config.id }}</td>
                         <td>{{ config.user_id }}</td>
                         <td>{{ config.created }}</td>
                         <td>{{ config.user }}</td>
                         <td>{{ config.level }}</td>
-                        <td>{{ config.encrypted }}</td>
+                        <td><span class="modern-admin-status-pill {% if config.encrypted == 'Yes' %}modern-admin-status-warning{% else %}modern-admin-status-muted{% endif %}">{{ config.encrypted }}</span></td>
                         <td>{{ config.summary }}</td>
                         <td>{{ config.data_size }}</td>
                         <td>{{ config.restore_state }}</td>
                         <td>{{ config.note }}</td>
                     </tr>
                     {% else %}
-                    <tr>
+                    <tr id="modern-config-restore-empty-row">
                         <td colspan="9">No config entries are available for inspection.</td>
                     </tr>
                     {% endfor %}
+                    <tr id="modern-config-restore-filter-empty-row" hidden>
+                        <td colspan="9">No config restore inspection rows match the current filters.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -91,4 +128,45 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-note">Raw config payload is intentionally hidden to avoid exposing secrets. Restore actions remain available only in Classic UI.</p>
     </section>
 </main>
+<script>
+(function() {
+    const searchInput = document.getElementById('modern-config-restore-search');
+    const levelFilter = document.getElementById('modern-config-restore-level-filter');
+    const encryptedFilter = document.getElementById('modern-config-restore-encrypted-filter');
+    const stateFilter = document.getElementById('modern-config-restore-state-filter');
+    const countBadge = document.getElementById('modern-config-restore-filter-count');
+    const rows = Array.from(document.querySelectorAll('#modern-config-restore-table tbody tr[data-search]'));
+    const emptyRow = document.getElementById('modern-config-restore-filter-empty-row');
+
+    function applyFilters() {
+        const searchText = searchInput.value.trim().toLowerCase();
+        const levelValue = levelFilter.value;
+        const encryptedValue = encryptedFilter.value;
+        const stateValue = stateFilter.value;
+        let visibleCount = 0;
+
+        rows.forEach(function(row) {
+            const matchesSearch = !searchText || row.dataset.search.includes(searchText);
+            const matchesLevel = !levelValue || row.dataset.level === levelValue;
+            const matchesEncrypted = !encryptedValue || row.dataset.encrypted === encryptedValue;
+            const matchesState = !stateValue || row.dataset.restoreState === stateValue;
+            const visible = matchesSearch && matchesLevel && matchesEncrypted && matchesState;
+            row.hidden = !visible;
+            if (visible) {
+                visibleCount += 1;
+            }
+        });
+
+        countBadge.textContent = visibleCount + ' shown';
+        if (emptyRow) {
+            emptyRow.hidden = visibleCount !== 0 || rows.length === 0;
+        }
+    }
+
+    [searchInput, levelFilter, encryptedFilter, stateFilter].forEach(function(control) {
+        control.addEventListener('input', applyFilters);
+        control.addEventListener('change', applyFilters);
+    });
+})();
+</script>
 {% endblock %}

@@ -12004,6 +12004,8 @@ class ModernAdminConfigRestoreView(ModernAdminContextMixin, TemplateView):
         context['modern_admin_config_restore_encrypted_count'] = len([
             row for row in restore_rows if row['encrypted'] == 'Yes'
         ])
+        context['modern_admin_config_restore_levels'] = sorted({row['level'] for row in restore_rows})
+        context['modern_admin_config_restore_states'] = sorted({row['restore_state'] for row in restore_rows})
         context['modern_admin_config_restore_warning'] = (
             'Read-only inspection only. Actual restore flow remains in Classic UI.'
         )
