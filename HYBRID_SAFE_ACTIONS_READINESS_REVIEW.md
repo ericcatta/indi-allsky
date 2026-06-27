@@ -40,8 +40,10 @@ Current boundary:
 - a lightweight append-only JSONL audit log utility exists, but it is not wired
   to execute endpoints, UI, DB sessions, or application logging
 - `NotificationAcknowledgeService` exists as a testable service boundary for
-  lookup and explicit acknowledge behavior, but no endpoint or UI invokes it for
-  real execution
+  lookup and explicit acknowledge behavior, including transaction/error/audit
+  tests, but no endpoint or UI invokes it for real execution
+- legacy `IndiAllSkyDbNotificationTable.setAck()` commits directly, so future
+  execute work must explicitly account for that transaction boundary
 
 ## 3. Evidence Reviewed
 
@@ -73,7 +75,7 @@ Reviewed files and patterns:
 | Is confirmation UX missing? | Yes. This is not required for dry-run endpoints, but is required before real mutation UI. |
 | Is Flask integration testing missing? | Yes. Unit tests exist; endpoint-level tests do not. |
 | Is a dry-run-only endpoint safe? | Conservatively yes, if it is authenticated, CSRF-protected, does not inject execute callbacks, returns only redacted results, and is covered by Flask tests. |
-| Is a real execute endpoint for notification acknowledge safe now? | Not yet. The service boundary now exists, but execute still needs CSRF/auth wrapper, persistent audit wiring, permission policy, integration tests, and confirmation/UX decision. |
+| Is a real execute endpoint for notification acknowledge safe now? | Not yet. The service boundary now has error, idempotency, and audit tests, but execute still needs CSRF/auth wrapper, persistent audit wiring, permission policy, Flask integration tests, and confirmation/UX decision. |
 | What is the safest next micro-step? | Add a dry-run-only Flask wrapper endpoint for `notification.acknowledge`, behind login/admin policy and CSRF, with tests, but no UI button and no execute callback. |
 
 ## 5. Readiness Matrix

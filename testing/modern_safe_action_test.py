@@ -61,6 +61,20 @@ class FakeNotificationRepository:
         return self.notifications.get(notification_id)
 
 
+class FakeAuditLog:
+    def __init__(self):
+        self.records = []
+
+
+    def append(self, audit_record):
+        self.records.append(audit_record.to_dict())
+        return {
+            'written': True,
+            'path': 'fake-audit.jsonl',
+            'bytes': len(json.dumps(self.records[-1])),
+        }
+
+
 class AdminActor:
     username = 'admin'
     is_admin = True
@@ -378,7 +392,7 @@ def test_notification_acknowledge_service_invalid_id():
 
     result = service.acknowledge(notification_id=0)
 
-    assert result.status == 'validation_failed'
+    assert result.status == 'invalid_id'
     assert result.allowed is False
     assert repo.lookup_calls == []
 
@@ -401,7 +415,7 @@ def test_notification_acknowledge_service_already_acked_is_noop():
 
     result = service.acknowledge(notification_id=5)
 
-    assert result.status == 'already_acknowledged'
+    assert result.status == 'already_acked'
     assert result.allowed is True
     assert result.details['idempotent'] is True
     assert notification.set_ack_calls == 0
@@ -421,7 +435,7 @@ def test_notification_acknowledge_service_calls_set_ack_when_explicitly_executed
 
 
 def test_notification_acknowledge_service_repository_error_is_structured():
-    repo = FakeNotificationRepository(error=RuntimeError('repository down'))
+    repo = FakeNotificationRepository(error=RuntimeError('repository down api_token=secret'))
     service = NotificationAcknowledgeService(repo.lookup)
 
     result = service.acknowledge(notification_id=7)
@@ -429,7 +443,8 @@ def test_notification_acknowledge_service_repository_error_is_structured():
     assert result.status == 'repository_error'
     assert result.allowed is False
     assert result.details['notification_id'] == 7
-    assert 'repository down' in result.details['error']
+    assert result.details['error_type'] == 'RuntimeError'
+    assert 'secret' not in str(result.to_dict())
 
 
 def test_notification_acknowledge_service_set_ack_error_is_structured():
@@ -439,8 +454,9 @@ def test_notification_acknowledge_service_set_ack_error_is_structured():
 
     result = service.acknowledge(notification_id=8)
 
-    assert result.status == 'execute_failed'
+    assert result.status == 'acknowledge_failed'
     assert result.allowed is False
+    assert result.details['error_type'] == 'RuntimeError'
     assert notification.set_ack_calls == 1
 
 
@@ -496,6 +512,90 @@ def test_notification_acknowledge_service_has_no_flask_request_dependency():
 
     assert result.status == 'acknowledged'
     assert notification.ack is True
+
+
+def test_notification_acknowledge_service_with_audit_success():
+    notification = FakeNotification(12)
+    repo = FakeNotificationRepository({12: notification})
+    audit_log = FakeAuditLog()
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result, audit_record, audit_write = service.acknowledge_with_audit(
+        notification_id=12,
+        actor=Actor(),
+        payload={'notification_id': 12},
+        audit_log=audit_log,
+        dry_run=False,
+    )
+
+    assert result.status == 'acknowledged'
+    assert audit_record.status == 'acknowledged'
+    assert audit_write['written'] is True
+    assert len(audit_log.records) == 1
+    assert notification.set_ack_calls == 1
+
+
+def test_notification_acknowledge_service_with_audit_failure():
+    notification = FailingSetAckNotification(13)
+    repo = FakeNotificationRepository({13: notification})
+    audit_log = FakeAuditLog()
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result, audit_record, audit_write = service.acknowledge_with_audit(
+        notification_id=13,
+        actor=Actor(),
+        payload={'notification_id': 13},
+        audit_log=audit_log,
+        dry_run=False,
+    )
+
+    assert result.status == 'acknowledge_failed'
+    assert audit_record.status == 'acknowledge_failed'
+    assert audit_record.allowed is False
+    assert audit_write['written'] is True
+    assert len(audit_log.records) == 1
+
+
+def test_notification_acknowledge_service_with_audit_redacts_fake_log_record():
+    notification = FakeNotification(14)
+    repo = FakeNotificationRepository({14: notification})
+    audit_log = FakeAuditLog()
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    _result, _audit_record, _audit_write = service.acknowledge_with_audit(
+        notification_id=14,
+        actor=Actor(),
+        payload={
+            'notification_id': 14,
+            'refresh_token': 'log-secret',
+        },
+        audit_log=audit_log,
+        dry_run=False,
+    )
+
+    assert 'log-secret' not in str(audit_log.records)
+    assert audit_log.records[0]['payload_summary']['refresh_token'] == '[REDACTED]'
+
+
+def test_notification_acknowledge_service_dry_run_with_audit_does_not_set_ack():
+    notification = FakeNotification(15)
+    repo = FakeNotificationRepository({15: notification})
+    audit_log = FakeAuditLog()
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result, audit_record, audit_write = service.acknowledge_with_audit(
+        notification_id=15,
+        actor=Actor(),
+        payload={'notification_id': 15},
+        audit_log=audit_log,
+        dry_run=True,
+    )
+
+    assert result.status == 'dry_run'
+    assert result.dry_run is True
+    assert audit_record.status == 'dry_run'
+    assert audit_write['written'] is True
+    assert notification.set_ack_calls == 0
 
 
 def build_notification_runner(permission_check=None, lookup=None, callback=None):
@@ -1104,6 +1204,10 @@ if __name__ == '__main__':
     test_notification_acknowledge_safe_action_uses_service_only_on_execute()
     test_notification_acknowledge_service_audit_record_is_redacted()
     test_notification_acknowledge_service_has_no_flask_request_dependency()
+    test_notification_acknowledge_service_with_audit_success()
+    test_notification_acknowledge_service_with_audit_failure()
+    test_notification_acknowledge_service_with_audit_redacts_fake_log_record()
+    test_notification_acknowledge_service_dry_run_with_audit_does_not_set_ack()
     test_runner_missing_action_id()
     test_runner_unknown_action_id()
     test_runner_permission_denied_does_not_execute()

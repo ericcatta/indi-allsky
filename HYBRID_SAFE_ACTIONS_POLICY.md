@@ -271,6 +271,13 @@ First Pilot Safe Action: `notification.acknowledge`:
   future lookup/acknowledge behavior. It can call a notification object's
   `setAck()` only through an explicit service `acknowledge()` call or injected
   safe-action callback.
+- The service boundary has tests for invalid IDs, missing notifications,
+  already-acked idempotency, explicit `setAck()` execution, repository errors,
+  `setAck()` failures, dry-run audit generation, and redacted persistent-audit
+  integration.
+- Legacy `IndiAllSkyDbNotificationTable.setAck()` commits directly, so any
+  future execute endpoint must treat it as the transaction boundary unless that
+  legacy behavior is explicitly redesigned later.
 - It does not call `/ajax/notification`, does not require Flask request context,
   and does not write the database unless a future endpoint deliberately injects
   a tested acknowledge callback.

@@ -365,7 +365,7 @@ class NotificationAcknowledgeService:
         notification_id_i, error = self.validate_notification_id(notification_id)
         if error:
             return self.result(
-                status='validation_failed',
+                status='invalid_id',
                 message=error,
                 dry_run=False,
                 allowed=False,
@@ -383,7 +383,7 @@ class NotificationAcknowledgeService:
                 allowed=False,
                 details={
                     'notification_id': notification_id_i,
-                    'error': str(e),
+                    'error_type': type(e).__name__,
                 },
             )
 
@@ -398,7 +398,7 @@ class NotificationAcknowledgeService:
 
         if bool(getattr(notification, 'ack', False)):
             return self.result(
-                status='already_acknowledged',
+                status='already_acked',
                 message='Notification is already acknowledged',
                 dry_run=False,
                 allowed=True,
@@ -412,13 +412,13 @@ class NotificationAcknowledgeService:
             notification.setAck()
         except Exception as e:
             return self.result(
-                status='execute_failed',
+                status='acknowledge_failed',
                 message='Notification acknowledge failed',
                 dry_run=False,
                 allowed=False,
                 details={
                     'notification_id': notification_id_i,
-                    'error': str(e),
+                    'error_type': type(e).__name__,
                 },
             )
 
@@ -426,6 +426,86 @@ class NotificationAcknowledgeService:
             status='acknowledged',
             message='Notification acknowledged',
             dry_run=False,
+            allowed=True,
+            details={'notification_id': notification_id_i},
+        )
+
+
+    def acknowledge_with_audit(self, notification_id, actor=None, payload=None, audit_log=None, dry_run=False):
+        payload = dict(payload or {})
+        payload.setdefault('notification_id', notification_id)
+
+        if dry_run:
+            result = self.dry_run(notification_id)
+        else:
+            result = self.acknowledge(
+                notification_id=notification_id,
+                actor=actor,
+                payload=payload,
+            )
+
+        audit_record = ModernAdminSafeActionAuditRecord.from_result(
+            result,
+            actor=actor,
+            payload=payload,
+        )
+        audit_write = None
+        if audit_log is not None:
+            audit_write = audit_log.append(audit_record)
+
+        return result, audit_record, audit_write
+
+
+    def dry_run(self, notification_id):
+        notification_id_i, error = self.validate_notification_id(notification_id)
+        if error:
+            return self.result(
+                status='invalid_id',
+                message=error,
+                dry_run=True,
+                allowed=False,
+                details={'notification_id': notification_id},
+            )
+
+        try:
+            notification = self.notification_lookup(notification_id_i)
+        except Exception as e:
+            return self.result(
+                status='repository_error',
+                message='Notification lookup failed',
+                dry_run=True,
+                allowed=False,
+                details={
+                    'notification_id': notification_id_i,
+                    'error_type': type(e).__name__,
+                },
+            )
+
+        if notification is None:
+            return self.result(
+                status='not_found',
+                message='Notification does not exist',
+                dry_run=True,
+                allowed=False,
+                details={'notification_id': notification_id_i},
+            )
+
+        if bool(getattr(notification, 'ack', False)):
+            return self.result(
+                status='already_acked',
+                message='Notification is already acknowledged',
+                dry_run=True,
+                allowed=True,
+                details={
+                    'notification_id': notification_id_i,
+                    'idempotent': True,
+                },
+            )
+
+        return self.result(
+            status='dry_run',
+            message='Dry run only; no action executed',
+            dry_run=True,
             allowed=True,
             details={'notification_id': notification_id_i},
         )
