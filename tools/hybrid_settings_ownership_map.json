@@ -1,0 +1,701 @@
+{
+  "schema_version": "hybrid_settings_ownership_map_v1",
+  "purpose": "Read-only metadata map for Hybrid AllSky settings product consolidation. This file does not drive runtime configuration, UI rendering, config writes, or Classic removal.",
+  "allowed_values": {
+    "owner": [
+      "global",
+      "camera",
+      "camera_profile",
+      "media_product",
+      "scientific_source",
+      "external_integration",
+      "developer_legacy",
+      "runtime_system"
+    ],
+    "level": [
+      "basic",
+      "advanced",
+      "developer"
+    ],
+    "status": [
+      "keep",
+      "redesign",
+      "developer",
+      "legacy_fallback",
+      "protected_modern_work",
+      "needs_evidence"
+    ],
+    "risk": [
+      "low",
+      "medium",
+      "high"
+    ]
+  },
+  "groups": {
+    "camera_connection": {
+      "label": "Camera Connection",
+      "owner": "camera",
+      "level": "basic",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern /modern-admin/settings/cameras",
+        "Modern /modern-admin/settings/capture"
+      ],
+      "risk": "high",
+      "do_not_move_yet": false,
+      "notes": [
+        "Covers physical camera identity, driver/interface selection, INDI/libcamera connection metadata, and camera row association.",
+        "Keep per-camera identity explicit; do not flatten connection fields into global-only settings."
+      ]
+    },
+    "camera_profile_identity": {
+      "label": "Camera Profile Identity",
+      "owner": "camera_profile",
+      "level": "basic",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Modern /modern-admin/settings/cameras",
+        "Modern camera profile resolver",
+        "Classic /config fallback"
+      ],
+      "risk": "high",
+      "do_not_move_yet": false,
+      "notes": [
+        "Covers profile id, label, enabled/primary state, camera association, and profile-first ownership.",
+        "Protected Modern work; every future settings view must preserve camera/profile separation."
+      ]
+    },
+    "exposure": {
+      "label": "Exposure",
+      "owner": "camera_profile",
+      "level": "basic",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern /modern-admin/settings/capture",
+        "Modern /modern-admin/settings/cameras"
+      ],
+      "risk": "high",
+      "do_not_move_yet": false,
+      "notes": [
+        "Covers exposure defaults, day/night exposure behavior, and profile overrides.",
+        "Global fields may remain fallback, but profile values are the product-facing owner."
+      ]
+    },
+    "gain": {
+      "label": "Gain",
+      "owner": "camera_profile",
+      "level": "basic",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern /modern-admin/settings/capture",
+        "Modern /modern-admin/settings/cameras"
+      ],
+      "risk": "high",
+      "do_not_move_yet": false,
+      "notes": [
+        "Covers gain defaults, day/night gain behavior, sensor gain controls, and profile overrides.",
+        "Must remain compatible with Auto Gain gating and camera-specific capabilities."
+      ]
+    },
+    "auto_exposure": {
+      "label": "Auto Exposure",
+      "owner": "camera_profile",
+      "level": "basic",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern /modern-admin/settings/capture",
+        "Modern /modern-admin/settings/full",
+        "Modern camera profile controls"
+      ],
+      "risk": "high",
+      "do_not_move_yet": false,
+      "notes": [
+        "Covers auto exposure enablement, target ADU behavior, metering, and profile-aware tuning.",
+        "Settings UX should expose concepts rather than raw key names."
+      ]
+    },
+    "auto_gain": {
+      "label": "Auto Gain",
+      "owner": "camera_profile",
+      "level": "basic",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern /modern-admin/settings/capture",
+        "Modern /modern-admin/settings/full",
+        "Modern camera profile controls"
+      ],
+      "risk": "high",
+      "do_not_move_yet": false,
+      "notes": [
+        "Covers auto gain enablement, min/max behavior, target ADU support, and profile-aware tuning.",
+        "Do not hide runtime apply gates or collapse per-profile gain limits."
+      ]
+    },
+    "hybrid_awb": {
+      "label": "Hybrid AWB",
+      "owner": "camera_profile",
+      "level": "basic",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Modern camera settings",
+        "Modern profile controls",
+        "Classic /config fallback"
+      ],
+      "risk": "high",
+      "do_not_move_yet": false,
+      "notes": [
+        "Covers Hybrid AWB mode, hardware AWB interaction, RGB factors, and camera-specific color behavior.",
+        "Must remain camera/profile-aware because sensor/color pipelines differ."
+      ]
+    },
+    "image_acquisition": {
+      "label": "Image Acquisition",
+      "owner": "camera_profile",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern /modern-admin/settings/capture",
+        "Modern /modern-admin/settings/full"
+      ],
+      "risk": "high",
+      "do_not_move_yet": false,
+      "notes": [
+        "Covers capture cadence, day/night behavior, binning, pause behavior, and camera runtime acquisition options.",
+        "Needs clearer split between daily operator controls and legacy fallback keys."
+      ]
+    },
+    "image_save_formats": {
+      "label": "Image Save Formats",
+      "owner": "global",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern /modern-admin/settings/full",
+        "Modern media metadata pages"
+      ],
+      "risk": "medium",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers display image save choices, thumbnails, file type, day/night save flags, and derived output formats.",
+        "Must not be confused with FITS/RAW scientific source persistence."
+      ]
+    },
+    "fits_source_files": {
+      "label": "FITS / Source Files",
+      "owner": "scientific_source",
+      "level": "advanced",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Classic /fitsimageviewer",
+        "Modern /modern-admin/fits",
+        "Modern scientific source reports",
+        "Classic /config"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers IMAGE_SAVE_FITS, IMAGE_SAVE_FITS_PERIOD, RAW/source exports, detector image paths, and source persistence policy.",
+        "Future UX should use Never, Periodic, Every frame, and Event-window buffered concepts."
+      ]
+    },
+    "metadata": {
+      "label": "Metadata",
+      "owner": "scientific_source",
+      "level": "advanced",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Modern metadata/status pages",
+        "Modern scientific source reports",
+        "JSONL frame metadata"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers FrameMetadata persistence, source/detector paths, timestamps, camera/profile association, and report inputs.",
+        "Do not weaken schema tolerance or source linkage."
+      ]
+    },
+    "analytics": {
+      "label": "Analytics",
+      "owner": "runtime_system",
+      "level": "advanced",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Classic charts",
+        "Modern analytics/status pages",
+        "Modern reports"
+      ],
+      "risk": "medium",
+      "do_not_move_yet": false,
+      "notes": [
+        "Covers operational analytics, charts, ADU/SQM summaries, and status rollups.",
+        "Settings should link to analytics configuration rather than duplicate chart logic."
+      ]
+    },
+    "quality": {
+      "label": "Quality",
+      "owner": "scientific_source",
+      "level": "advanced",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Modern quality pages",
+        "Modern metadata and environmental context"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers quality scoring, stable frame markers, environmental quality context, and future detector readiness.",
+        "Explainability must remain visible."
+      ]
+    },
+    "environmental_awareness": {
+      "label": "Environmental Awareness",
+      "owner": "runtime_system",
+      "level": "advanced",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Modern environmental awareness pages",
+        "Modern observatory/status pages",
+        "Classic /config fallback"
+      ],
+      "risk": "medium",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers smoke, aurora, weather, cloud, and other environmental context.",
+        "Provider and sensor ownership should be verified before settings are reorganized."
+      ]
+    },
+    "scientific_source_layer": {
+      "label": "Scientific Source Layer",
+      "owner": "scientific_source",
+      "level": "advanced",
+      "status": "protected_modern_work",
+      "current_surfaces": [
+        "Modern scientific source reports",
+        "Modern FITS metadata pages",
+        "ScientificFrame domain objects"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers ScientificFrame, ScientificFrameProvider, source image paths, detector image paths, and raw-first semantics.",
+        "Display images, overlays, and stretch are rendering concepts, not destructive source-data changes."
+      ]
+    },
+    "timelapse": {
+      "label": "Timelapse",
+      "owner": "media_product",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic media generation pages",
+        "Modern media status/usability pages",
+        "Classic /config"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers timelapse settings, generated products, and status metadata.",
+        "Generation, upload, delete, and download actions remain blocked pending Safe Actions policy."
+      ]
+    },
+    "keogram": {
+      "label": "Keogram",
+      "owner": "media_product",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic keogram generation/settings",
+        "Modern media metadata/status pages",
+        "Classic /config"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers realtime/longterm keogram settings and product metadata.",
+        "Generation and download are action-policy surfaces, not settings redesign targets yet."
+      ]
+    },
+    "startrail": {
+      "label": "Startrail",
+      "owner": "media_product",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic startrail generation/settings",
+        "Modern media metadata/status pages",
+        "Classic /config"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers startrail generation settings and metadata.",
+        "Generation, delete, and download remain blocked until queue/media action policy exists."
+      ]
+    },
+    "startrail_video": {
+      "label": "Startrail Video",
+      "owner": "media_product",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic startrail video settings",
+        "Modern media status pages",
+        "Public watch/latest routes"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers startrail video product settings and public compatibility surfaces.",
+        "Public route behavior must be preserved while settings ownership is clarified."
+      ]
+    },
+    "mini_timelapse": {
+      "label": "Mini Timelapse",
+      "owner": "media_product",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic mini timelapse generation/settings",
+        "Modern media metadata/status pages",
+        "Classic /config"
+      ],
+      "risk": "medium",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers mini timelapse settings and product metadata.",
+        "Lower product priority, but still explicitly owned so it is not lost."
+      ]
+    },
+    "upload_providers": {
+      "label": "Upload Providers",
+      "owner": "external_integration",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern upload provider status/detail pages",
+        "Upload pipeline"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers S3, file transfer, sync/upload flags, remote destinations, and provider state.",
+        "Remote operations, upload tests, and credential changes remain blocked."
+      ]
+    },
+    "youtube_oauth": {
+      "label": "YouTube / OAuth",
+      "owner": "external_integration",
+      "level": "developer",
+      "status": "legacy_fallback",
+      "current_surfaces": [
+        "Classic YouTube/OAuth routes",
+        "Modern sanitized YouTube status audit",
+        "Classic /config"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers OAuth credential presence, upload flags, and sanitized integration status.",
+        "Never expose client secret, tokens, refresh token, credential payloads, or raw OAuth data."
+      ]
+    },
+    "notifications": {
+      "label": "Notifications",
+      "owner": "runtime_system",
+      "level": "basic",
+      "status": "keep",
+      "current_surfaces": [
+        "Classic /notifications",
+        "Classic /ajax/notification",
+        "Modern /modern-admin/notifications",
+        "Safe Action notification.acknowledge service boundary"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers notification status, delivery metadata, and future acknowledge/delete actions.",
+        "Acknowledge is service-ready but execute/UI remain blocked pending Flask auth/session/CSRF tests."
+      ]
+    },
+    "users_auth": {
+      "label": "Users / Authentication",
+      "owner": "runtime_system",
+      "level": "developer",
+      "status": "developer",
+      "current_surfaces": [
+        "Classic /user",
+        "Classic /users",
+        "Classic /ajax/user",
+        "Modern /modern-admin/users"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers users, roles, password metadata, API key metadata, and authentication-sensitive state.",
+        "Mutations require explicit auth policy, confirmation UX, and self-lockout prevention."
+      ]
+    },
+    "logs": {
+      "label": "Logs",
+      "owner": "runtime_system",
+      "level": "developer",
+      "status": "keep",
+      "current_surfaces": [
+        "Classic log pages",
+        "Modern log list/detail pages",
+        "Log download Safe Action policy foundation"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers log visibility, safe metadata, and future download policy.",
+        "Real download remains blocked pending path allowlist, redaction, Flask tests, and endpoint policy."
+      ]
+    },
+    "task_queue": {
+      "label": "Task Queue",
+      "owner": "runtime_system",
+      "level": "developer",
+      "status": "keep",
+      "current_surfaces": [
+        "Classic /tasks",
+        "Modern /modern-admin/tasks",
+        "Modern /modern-admin/tasks/<task_id>"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers queue visibility, task state, action name, payload/result metadata, and diagnostics.",
+        "Retry, cancel, requeue, and delete remain blocked by queue action contract requirements."
+      ]
+    },
+    "focus": {
+      "label": "Focus",
+      "owner": "runtime_system",
+      "level": "advanced",
+      "status": "legacy_fallback",
+      "current_surfaces": [
+        "Classic focus controls",
+        "Modern focus status/safe-control wrappers",
+        "Classic /config"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers focuser configuration, status, and future movement/autofocus actions.",
+        "Hardware movement is blocked until hardware Safe Action policy and tests exist."
+      ]
+    },
+    "gpio": {
+      "label": "GPIO",
+      "owner": "runtime_system",
+      "level": "developer",
+      "status": "legacy_fallback",
+      "current_surfaces": [
+        "Classic GPIO/system tools",
+        "Modern safe-control wrappers",
+        "Classic /config"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers GPIO pins, relay-style controls, and hardware interactions.",
+        "Do not expose as Basic; hardware side effects need explicit policy."
+      ]
+    },
+    "network": {
+      "label": "Network",
+      "owner": "runtime_system",
+      "level": "developer",
+      "status": "legacy_fallback",
+      "current_surfaces": [
+        "Classic network/system tools",
+        "Modern network wrapper/status pages"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers host/network settings and OS-level operations.",
+        "Network mutations can disconnect the device and must remain guarded."
+      ]
+    },
+    "storage_drives": {
+      "label": "Storage / Drives",
+      "owner": "runtime_system",
+      "level": "basic",
+      "status": "keep",
+      "current_surfaces": [
+        "Classic/system status pages",
+        "Modern storage/drive status pages",
+        "Classic /config"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers storage health, drive status, retention policies, and path summaries.",
+        "RPi5-first: avoid unbounded filesystem scans and large table queries."
+      ]
+    },
+    "gps": {
+      "label": "GPS",
+      "owner": "runtime_system",
+      "level": "advanced",
+      "status": "needs_evidence",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern observatory/status surfaces if enabled"
+      ],
+      "risk": "medium",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers GPS source/status/configuration when present.",
+        "Needs evidence for provider ownership and current runtime usage before redesign."
+      ]
+    },
+    "sensors": {
+      "label": "Sensors",
+      "owner": "runtime_system",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern observatory/status pages",
+        "Modern ADU/SQM/status pages"
+      ],
+      "risk": "medium",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers environmental sensors, SQM, ADU, weather providers, and related status sources.",
+        "Ownership is mixed across hardware, external providers, and runtime status."
+      ]
+    },
+    "mask_lens_image_circle": {
+      "label": "Mask / Lens / Image Circle",
+      "owner": "camera_profile",
+      "level": "advanced",
+      "status": "redesign",
+      "current_surfaces": [
+        "Classic mask/lens tools",
+        "Classic /config",
+        "Modern camera settings"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers mask, lens metadata, image circle, crop, rotate, flip, and camera geometry.",
+        "Geometry should be camera/profile-owned, not global-only."
+      ]
+    },
+    "public_latest_endpoints": {
+      "label": "Public / Latest Endpoints",
+      "owner": "global",
+      "level": "advanced",
+      "status": "keep",
+      "current_surfaces": [
+        "Public /latest* routes",
+        "Public media routes",
+        "Classic and external clients"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers public latest image/video/raw/panorama behavior and bookmark/external compatibility.",
+        "Do not treat as Classic dead code just because static consumers are absent."
+      ]
+    },
+    "config_history": {
+      "label": "Config History",
+      "owner": "runtime_system",
+      "level": "developer",
+      "status": "keep",
+      "current_surfaces": [
+        "Classic /config/list",
+        "Classic /config/download",
+        "Modern /modern-admin/config-history"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers metadata for historical config records.",
+        "Raw config contents and downloads require redaction and Safe Action/download policy."
+      ]
+    },
+    "config_restore": {
+      "label": "Config Restore",
+      "owner": "runtime_system",
+      "level": "developer",
+      "status": "legacy_fallback",
+      "current_surfaces": [
+        "Classic /config/restore",
+        "Classic /ajax/config/restore",
+        "Modern /modern-admin/config-restore"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers restore inspection and future active restore behavior.",
+        "Active restore remains Classic fallback until preview/diff/rollback/redaction policy exists."
+      ]
+    },
+    "config_import_export": {
+      "label": "Config Import / Export / Download",
+      "owner": "developer_legacy",
+      "level": "developer",
+      "status": "legacy_fallback",
+      "current_surfaces": [
+        "Classic /config/download",
+        "Classic /config/restore",
+        "Classic raw config workflows"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers raw config download, import, export, and restore payload handling.",
+        "Must not expose raw config, tokens, passwords, API keys, or secrets without redaction policy."
+      ]
+    },
+    "developer_debug": {
+      "label": "Developer / Debug Options",
+      "owner": "developer_legacy",
+      "level": "developer",
+      "status": "developer",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern /modern-admin/settings/full",
+        "Developer documentation"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers hooks, debug flags, experimental toggles, compatibility options, and raw full settings.",
+        "Keep possible for experts, but do not expose in Basic."
+      ]
+    },
+    "legacy_detector": {
+      "label": "Legacy Detector / Meteor Toggles",
+      "owner": "developer_legacy",
+      "level": "developer",
+      "status": "legacy_fallback",
+      "current_surfaces": [
+        "Classic /config",
+        "Modern /modern-admin/settings/full",
+        "Legacy DETECT_METEORS code"
+      ],
+      "risk": "high",
+      "do_not_move_yet": true,
+      "notes": [
+        "Covers DETECT_METEORS, legacy line/Hough toggles, masks, and detector-like compatibility settings.",
+        "Do not present this as the real Hybrid meteor detector; real detector work remains blocked pending outdoor FITS validation."
+      ]
+    }
+  }
+}
