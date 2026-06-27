@@ -14434,6 +14434,120 @@ class ModernAdminMediaKeogramsView(ModernAdminContextMixin, TemplateView):
         return 'Non-dict metadata payload'
 
 
+class ModernAdminMediaStartrailsView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Startrails'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_startrails_view'
+    startrail_display_limit = 100
+
+
+    def get_context(self):
+        context = super(ModernAdminMediaStartrailsView, self).get_context()
+
+        startrail_rows = list()
+        try:
+            startrail_entries = IndiAllSkyDbStarTrailsTable.query\
+                .join(IndiAllSkyDbStarTrailsTable.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(IndiAllSkyDbStarTrailsTable.createDate.desc())\
+                .limit(self.startrail_display_limit)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin startrail metadata rows: %s', str(e))
+            startrail_entries = list()
+            context['modern_admin_startrails_error'] = 'Unable to load startrail metadata.'
+
+        for entry in startrail_entries:
+            startrail_rows.append({
+                'id'         : entry.id,
+                'created'    : self.format_startrail_datetime(entry.createDate),
+                'day_date'   : entry.dayDate if entry.dayDate else 'Unknown',
+                'camera_id'  : entry.camera_id,
+                'filename'   : self.format_startrail_filename(entry.filename),
+                'dimensions' : self.format_startrail_dimensions(entry.width, entry.height),
+                'frames'     : entry.frames if entry.frames is not None else 'Unknown',
+                'file_size'  : self.format_media_size(entry.fileSize) if entry.fileSize else 'Unknown',
+                'timeofday'  : 'Night' if entry.night else 'Day',
+                'uploaded'   : self.format_startrail_bool(entry.uploaded),
+                'success'    : self.format_startrail_bool(entry.success),
+                'source'     : self.format_startrail_source(entry),
+                'sync_id'    : entry.sync_id if entry.sync_id is not None else 'N/A',
+                'metadata'   : self.format_startrail_data_summary(entry.data),
+            })
+
+        context['modern_admin_startrail_rows'] = startrail_rows
+        context['modern_admin_startrail_count'] = len(startrail_rows)
+        context['modern_admin_startrail_uploaded_count'] = len([
+            row for row in startrail_rows if row['uploaded'] == 'Yes'
+        ])
+        context['modern_admin_startrail_success_count'] = len([
+            row for row in startrail_rows if row['success'] == 'Yes'
+        ])
+        context['modern_admin_startrail_sources'] = sorted({row['source'] for row in startrail_rows})
+        context['modern_admin_startrail_display_limit'] = self.startrail_display_limit
+
+        return context
+
+
+    def format_startrail_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+    def format_startrail_filename(self, value):
+        if not value:
+            return 'Unknown'
+        return Path(str(value)).name
+
+
+    def format_startrail_dimensions(self, width, height):
+        if width and height:
+            return '{0:d} x {1:d}'.format(int(width), int(height))
+        return 'Unknown'
+
+
+    def format_media_size(self, value):
+        if value is None:
+            return 'Unknown'
+
+        try:
+            size = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+
+        units = ('B', 'KB', 'MB', 'GB', 'TB')
+        unit_index = 0
+        while size >= 1024.0 and unit_index < len(units) - 1:
+            size /= 1024.0
+            unit_index += 1
+
+        if unit_index == 0:
+            return '{0:d} {1:s}'.format(int(size), units[unit_index])
+        return '{0:.1f} {1:s}'.format(size, units[unit_index])
+
+
+    def format_startrail_bool(self, value):
+        return 'Yes' if bool(value) else 'No'
+
+
+    def format_startrail_source(self, entry):
+        if entry.remote_url:
+            return 'Remote URL recorded'
+        if entry.s3_key:
+            return 'S3 key recorded'
+        return 'Local DB entry'
+
+
+    def format_startrail_data_summary(self, value):
+        if isinstance(value, dict):
+            return 'Keys: {0:d}'.format(len(value))
+        if value is None:
+            return 'No metadata payload'
+        return 'Non-dict metadata payload'
+
+
 class ModernAdminMediaMiniTimelapsesView(ModernAdminMediaListView):
     page_title = 'Modern Admin Mini-Timelapses'
     modern_admin_section = 'Mini-Timelapses'
@@ -21445,6 +21559,7 @@ bp_allsky.add_url_rule('/modern-admin/media/images/<int:image_id>', view_func=Mo
 bp_allsky.add_url_rule('/modern-admin/media/timelapses', view_func=ModernAdminMediaTimelapsesView.as_view('modern_admin_media_timelapses_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/timelapses/<int:video_id>', view_func=ModernAdminMediaVideoDetailView.as_view('modern_admin_media_video_detail_view', template_name='modern_admin/video_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/media/keograms', view_func=ModernAdminMediaKeogramsView.as_view('modern_admin_media_keograms_view', template_name='modern_admin/keograms.html'))
+bp_allsky.add_url_rule('/modern-admin/media/startrails', view_func=ModernAdminMediaStartrailsView.as_view('modern_admin_media_startrails_view', template_name='modern_admin/startrails.html'))
 bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))

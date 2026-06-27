@@ -1316,7 +1316,7 @@
     "panorama": {
       "label": "Panorama",
       "status": "SHARED LEGACY",
-      "owner": "public",
+      "owner": "modern",
       "porting_priority": "medium",
       "routes": [
         "/panorama*",
@@ -1523,22 +1523,26 @@
     "startrail": {
       "label": "Startrail",
       "status": "PARTIAL MODERN",
-      "owner": "public",
+      "owner": "modern",
       "porting_priority": "medium",
       "routes": [
+        "/modern-admin/media/startrails",
         "/lateststartrail*",
         "/view_startrail"
       ],
       "templates": [
+        "modern_admin/startrails.html",
         "view_image.html"
       ],
       "assets": [],
-      "apis": [],
+      "apis": [
+        "modern_admin_media_startrails_view"
+      ],
       "config_keys": [
         "STARTRAILS*"
       ],
       "protected": false,
-      "modern_gap": "Native generation/status parity unclear.",
+      "modern_gap": "Modern read-only startrail metadata/status list exists; generation, download and conversion remain blocked pending media action policy.",
       "removal_risk": "medium",
       "notes": []
     },
