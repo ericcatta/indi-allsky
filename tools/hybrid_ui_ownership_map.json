@@ -128,6 +128,7 @@
         "modern_admin/observatory_status.html",
         "modern_admin/realtime_keogram.html",
         "modern_admin/sensor_panel.html",
+        "modern_admin/_settings_dedicated_sections.html",
         "modern_admin/settings_analytics.html",
         "modern_admin/settings_basic.html",
         "modern_admin/settings_cameras.html",
@@ -417,6 +418,7 @@
         "/modern-admin/settings/storage"
       ],
       "templates": [
+        "modern_admin/_settings_dedicated_sections.html",
         "modern_admin/settings_inventory.html",
         "modern_admin/settings_analytics.html",
         "modern_admin/settings_basic.html",

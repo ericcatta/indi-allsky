@@ -1,0 +1,145 @@
+{% if modern_admin_settings_map_error %}
+<section class="modern-admin-alert modern-admin-alert-danger" role="alert">
+    {{ modern_admin_settings_map_error }}
+</section>
+{% endif %}
+
+<section class="modern-admin-table-panel" aria-labelledby="{{ dedicated_settings_slug }}-ownership-title">
+    <div class="modern-admin-section-heading">
+        <div>
+            <p class="modern-admin-eyebrow">Ownership metadata</p>
+            <h2 id="{{ dedicated_settings_slug }}-ownership-title">{{ dedicated_settings_title }} ownership</h2>
+        </div>
+        {% if dedicated_settings_group %}
+        <span class="modern-admin-status-pill modern-admin-status-neutral">{{ dedicated_settings_group.status | replace('_', ' ') | title }}</span>
+        {% else %}
+        <span class="modern-admin-status-pill modern-admin-status-warning">Missing map row</span>
+        {% endif %}
+    </div>
+
+    {% if dedicated_settings_group %}
+    <div class="modern-admin-link-grid">
+        <article class="modern-admin-settings-action-card">
+            <span>
+                <strong>{{ dedicated_settings_group.label }}</strong>
+                <small><code>{{ dedicated_settings_group.group_id }}</code></small>
+                <small>
+                    <span class="modern-admin-settings-badge">{{ dedicated_settings_group.level | replace('_', ' ') | title }}</span>
+                    <span class="modern-admin-settings-badge">{{ dedicated_settings_group.owner | replace('_', ' ') | title }}</span>
+                    <span class="modern-admin-settings-badge">{{ dedicated_settings_group.status | replace('_', ' ') | title }}</span>
+                    <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ dedicated_settings_group.risk }}">{{ dedicated_settings_group.risk | title }} risk</span>
+                    {% if dedicated_settings_group.do_not_move_yet %}
+                    <span class="modern-admin-settings-badge modern-admin-settings-risk-high">Do not move yet</span>
+                    {% endif %}
+                </small>
+                <small>
+                    {% for note in dedicated_settings_group.notes %}
+                    {{ note }}{% if not loop.last %}<br>{% endif %}
+                    {% else %}
+                    No ownership notes.
+                    {% endfor %}
+                </small>
+            </span>
+        </article>
+    </div>
+    {% else %}
+    <p class="modern-admin-note">{{ dedicated_settings_missing_message }}</p>
+    {% endif %}
+</section>
+
+<section class="modern-admin-table-panel" aria-labelledby="{{ dedicated_settings_slug }}-surfaces-title">
+    <div class="modern-admin-section-heading">
+        <div>
+            <p class="modern-admin-eyebrow">Current references</p>
+            <h2 id="{{ dedicated_settings_slug }}-surfaces-title">Current surfaces</h2>
+        </div>
+        <span class="modern-admin-status-pill modern-admin-status-neutral">Metadata only</span>
+    </div>
+    <div class="modern-admin-link-grid">
+        {% if dedicated_settings_group %}
+            {% for surface in dedicated_settings_group.current_surfaces %}
+            <span>{{ surface }}</span>
+            {% else %}
+            <span>No known surfaces.</span>
+            {% endfor %}
+        {% else %}
+        <span>No ownership map row loaded.</span>
+        {% endif %}
+    </div>
+</section>
+
+<section class="modern-admin-table-panel" aria-labelledby="{{ dedicated_settings_slug }}-proposed-layout-title">
+    <div class="modern-admin-section-heading">
+        <div>
+            <p class="modern-admin-eyebrow">Future product shape</p>
+            <h2 id="{{ dedicated_settings_slug }}-proposed-layout-title">Proposed final layout</h2>
+        </div>
+        <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only proposal</span>
+    </div>
+    <p class="modern-admin-note">{{ dedicated_settings_proposed_note }}</p>
+    <div class="modern-admin-link-grid">
+        {% for layout_card in dedicated_settings_proposed_layout %}
+        <article class="modern-admin-settings-action-card">
+            <span>
+                <strong>{{ layout_card.label }}</strong>
+                <small>{{ layout_card.purpose }}</small>
+                <small>
+                    <span class="modern-admin-settings-badge">{{ layout_card.proposed_level }}</span>
+                    <span class="modern-admin-settings-badge">{{ layout_card.note }}</span>
+                </small>
+                <small>
+                    {% for source_key in layout_card.source_keys %}
+                    <code>{{ source_key }}</code>{% if not loop.last %}<br>{% endif %}
+                    {% else %}
+                    No source keys listed.
+                    {% endfor %}
+                </small>
+            </span>
+        </article>
+        {% else %}
+        <span>{{ dedicated_settings_proposed_empty }}</span>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="modern-admin-table-panel" aria-labelledby="{{ dedicated_settings_slug }}-config-keys-title">
+    <div class="modern-admin-section-heading">
+        <div>
+            <p class="modern-admin-eyebrow">{{ dedicated_settings_config_eyebrow }}</p>
+            <h2 id="{{ dedicated_settings_slug }}-config-keys-title">{{ dedicated_settings_config_title }}</h2>
+        </div>
+        <span class="modern-admin-status-pill modern-admin-status-neutral">{{ dedicated_settings_config_sections | length }} sections</span>
+    </div>
+    <p class="modern-admin-note">{{ dedicated_settings_config_note }}</p>
+    <div class="modern-admin-link-grid">
+        {% for section in dedicated_settings_config_sections %}
+        <article class="modern-admin-settings-action-card">
+            <span>
+                <strong>{{ section.label }}</strong>
+                <small>{{ section.description }}</small>
+                <small>
+                    <span class="modern-admin-settings-badge">{{ section.key_count }} keys</span>
+                    <span class="modern-admin-settings-badge">Read-only</span>
+                </small>
+                <small>
+                    {% for key_row in section.keys %}
+                    <code>{{ key_row.key }}</code>{% if not loop.last %}<br>{% endif %}
+                    {% else %}
+                    No static keys listed.
+                    {% endfor %}
+                </small>
+                <small>
+                    {% for key_row in section.keys %}
+                    {{ key_row.notes }}{% if not loop.last %}<br>{% endif %}
+                    {% else %}
+                    No notes.
+                    {% endfor %}
+                </small>
+                <small>No runtime settings are changed here.</small>
+            </span>
+        </article>
+        {% else %}
+        <span>{{ dedicated_settings_config_empty }}</span>
+        {% endfor %}
+    </div>
+</section>

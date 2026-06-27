@@ -35,150 +35,18 @@ var camera_id = {{ camera_id }};
         </p>
     </section>
 
-    {% if modern_admin_settings_map_error %}
-    <section class="modern-admin-alert modern-admin-alert-danger" role="alert">
-        {{ modern_admin_settings_map_error }}
-    </section>
-    {% endif %}
-
-    <section class="modern-admin-table-panel" aria-labelledby="analytics-ownership-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Ownership metadata</p>
-                <h2 id="analytics-ownership-title">Analytics ownership</h2>
-            </div>
-            {% if modern_admin_analytics_settings_group %}
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_analytics_settings_group.status | replace('_', ' ') | title }}</span>
-            {% else %}
-            <span class="modern-admin-status-pill modern-admin-status-warning">Missing map row</span>
-            {% endif %}
-        </div>
-
-        {% if modern_admin_analytics_settings_group %}
-        <div class="modern-admin-link-grid">
-            <article class="modern-admin-settings-action-card">
-                <span>
-                    <strong>{{ modern_admin_analytics_settings_group.label }}</strong>
-                    <small><code>{{ modern_admin_analytics_settings_group.group_id }}</code></small>
-                    <small>
-                        <span class="modern-admin-settings-badge">{{ modern_admin_analytics_settings_group.level | replace('_', ' ') | title }}</span>
-                        <span class="modern-admin-settings-badge">{{ modern_admin_analytics_settings_group.owner | replace('_', ' ') | title }}</span>
-                        <span class="modern-admin-settings-badge">{{ modern_admin_analytics_settings_group.status | replace('_', ' ') | title }}</span>
-                        <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ modern_admin_analytics_settings_group.risk }}">{{ modern_admin_analytics_settings_group.risk | title }} risk</span>
-                        {% if modern_admin_analytics_settings_group.do_not_move_yet %}
-                        <span class="modern-admin-settings-badge modern-admin-settings-risk-high">Do not move yet</span>
-                        {% endif %}
-                    </small>
-                    <small>
-                        {% for note in modern_admin_analytics_settings_group.notes %}
-                        {{ note }}{% if not loop.last %}<br>{% endif %}
-                        {% else %}
-                        No ownership notes.
-                        {% endfor %}
-                    </small>
-                </span>
-            </article>
-        </div>
-        {% else %}
-        <p class="modern-admin-note">The analytics settings group was not found in the ownership map.</p>
-        {% endif %}
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="analytics-surfaces-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Current references</p>
-                <h2 id="analytics-surfaces-title">Current surfaces</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Metadata only</span>
-        </div>
-        <div class="modern-admin-link-grid">
-            {% if modern_admin_analytics_settings_group %}
-                {% for surface in modern_admin_analytics_settings_group.current_surfaces %}
-                <span>{{ surface }}</span>
-                {% else %}
-                <span>No known surfaces.</span>
-                {% endfor %}
-            {% else %}
-            <span>No ownership map row loaded.</span>
-            {% endif %}
-        </div>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="analytics-proposed-layout-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Future product shape</p>
-                <h2 id="analytics-proposed-layout-title">Proposed final layout</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only proposal</span>
-        </div>
-        <p class="modern-admin-note">This proposal describes how Analytics should be organized in the final Modern settings experience. It does not expose editing controls or active runtime values.</p>
-        <div class="modern-admin-link-grid">
-            {% for layout_card in modern_admin_analytics_proposed_layout %}
-            <article class="modern-admin-settings-action-card">
-                <span>
-                    <strong>{{ layout_card.label }}</strong>
-                    <small>{{ layout_card.purpose }}</small>
-                    <small>
-                        <span class="modern-admin-settings-badge">{{ layout_card.proposed_level }}</span>
-                        <span class="modern-admin-settings-badge">{{ layout_card.note }}</span>
-                    </small>
-                    <small>
-                        {% for source_key in layout_card.source_keys %}
-                        <code>{{ source_key }}</code>{% if not loop.last %}<br>{% endif %}
-                        {% else %}
-                        No source keys listed.
-                        {% endfor %}
-                    </small>
-                </span>
-            </article>
-            {% else %}
-            <span>No proposed Analytics layout cards were listed.</span>
-            {% endfor %}
-        </div>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="analytics-config-keys-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Product groups</p>
-                <h2 id="analytics-config-keys-title">Analytics settings areas</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_analytics_config_sections | length }} sections</span>
-        </div>
-        <p class="modern-admin-note">These sections are grouped from static Classic config/form evidence only. Active runtime config values are not loaded here.</p>
-        <div class="modern-admin-link-grid">
-            {% for section in modern_admin_analytics_config_sections %}
-            <article class="modern-admin-settings-action-card">
-                <span>
-                    <strong>{{ section.label }}</strong>
-                    <small>{{ section.description }}</small>
-                    <small>
-                        <span class="modern-admin-settings-badge">{{ section.key_count }} keys</span>
-                        <span class="modern-admin-settings-badge">Read-only</span>
-                    </small>
-                    <small>
-                        {% for key_row in section.keys %}
-                        <code>{{ key_row.key }}</code>{% if not loop.last %}<br>{% endif %}
-                        {% else %}
-                        No static keys listed.
-                        {% endfor %}
-                    </small>
-                    <small>
-                        {% for key_row in section.keys %}
-                        {{ key_row.notes }}{% if not loop.last %}<br>{% endif %}
-                        {% else %}
-                        No notes.
-                        {% endfor %}
-                    </small>
-                    <small>No runtime settings are changed here.</small>
-                </span>
-            </article>
-            {% else %}
-            <span>No static Analytics settings sections were listed.</span>
-            {% endfor %}
-        </div>
-    </section>
+    {% set dedicated_settings_slug = 'analytics' %}
+    {% set dedicated_settings_title = 'Analytics' %}
+    {% set dedicated_settings_group = modern_admin_analytics_settings_group %}
+    {% set dedicated_settings_missing_message = 'The analytics settings group was not found in the ownership map.' %}
+    {% set dedicated_settings_proposed_layout = modern_admin_analytics_proposed_layout %}
+    {% set dedicated_settings_proposed_note = 'This proposal describes how Analytics should be organized in the final Modern settings experience. It does not expose editing controls or active runtime values.' %}
+    {% set dedicated_settings_proposed_empty = 'No proposed Analytics layout cards were listed.' %}
+    {% set dedicated_settings_config_sections = modern_admin_analytics_config_sections %}
+    {% set dedicated_settings_config_eyebrow = 'Product groups' %}
+    {% set dedicated_settings_config_title = 'Analytics settings areas' %}
+    {% set dedicated_settings_config_note = 'These sections are grouped from static Classic config/form evidence only. Active runtime config values are not loaded here.' %}
+    {% set dedicated_settings_config_empty = 'No static Analytics settings sections were listed.' %}
+    {% include 'modern_admin/_settings_dedicated_sections.html' %}
 </main>
 {% endblock %}
