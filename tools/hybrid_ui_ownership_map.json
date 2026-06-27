@@ -87,6 +87,7 @@
         "/modern-admin/settings/cameras",
         "/modern-admin/settings/capture",
         "/modern-admin/settings/full",
+        "/modern-admin/settings/storage",
         "/modern-admin/storage",
         "/modern-admin/storage/file-space-usage",
         "/modern-admin/system",
@@ -133,6 +134,7 @@
         "modern_admin/settings_capture.html",
         "modern_admin/settings_full.html",
         "modern_admin/settings_inventory.html",
+        "modern_admin/settings_storage.html",
         "modern_admin/storage.html",
         "modern_admin/support_info.html",
         "modern_admin/system.html",
@@ -411,7 +413,8 @@
         "/modern-admin/settings/ready",
         "/modern-admin/settings/cameras",
         "/modern-admin/settings/capture",
-        "/modern-admin/settings/full"
+        "/modern-admin/settings/full",
+        "/modern-admin/settings/storage"
       ],
       "templates": [
         "modern_admin/settings_inventory.html",
@@ -419,7 +422,8 @@
         "modern_admin/settings_basic.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
-        "modern_admin/settings_full.html"
+        "modern_admin/settings_full.html",
+        "modern_admin/settings_storage.html"
       ],
       "assets": [
         "modern_admin/modern-admin.css"
@@ -2264,6 +2268,7 @@
         "/drives",
         "/ajax/drives",
         "/filespaceusage",
+        "/modern-admin/settings/storage",
         "/modern-admin/storage",
         "/modern-admin/storage/drives",
         "/modern-admin/storage/file-space-usage"
@@ -2271,6 +2276,7 @@
       "templates": [
         "drive_manager.html",
         "filespaceusage.html",
+        "modern_admin/settings_storage.html",
         "modern_admin/storage.html",
         "modern_admin/safe_controls.html",
         "modern_admin/file_space_usage.html"
@@ -2285,7 +2291,12 @@
       "config_keys": [
         "FILETRANSFER*",
         "STORAGE*",
-        "IMAGE_FOLDER"
+        "IMAGE_FOLDER",
+        "VARLIB_FOLDER",
+        "HEALTHCHECK__DISK_USAGE",
+        "IMAGE_*_EXPIRE_DAYS",
+        "DRIVES_SELECT",
+        "DEVICES_SELECT"
       ],
       "protected": false,
       "modern_gap": "Drive actions are wrapper-only.",

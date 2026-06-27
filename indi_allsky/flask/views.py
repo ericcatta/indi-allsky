@@ -18238,6 +18238,160 @@ class ModernAdminAnalyticsSettingsView(ModernAdminSettingsInventoryView):
         )
 
 
+class ModernAdminStorageSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Storage Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    STORAGE_CONFIG_SECTIONS = (
+        {
+            'label'       : 'Storage health',
+            'description' : 'Status and threshold metadata for local disk health without performing filesystem checks here.',
+            'keys'        : (
+                {
+                    'key'     : 'HEALTHCHECK__DISK_USAGE',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Disk usage warning threshold used by health/status surfaces.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Local paths / data retention',
+            'description' : 'Local storage roots and retention windows that affect image, RAW, FITS, and timelapse product storage.',
+            'keys'        : (
+                {
+                    'key'     : 'VARLIB_FOLDER',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Project data root path; high-risk to move without migration planning.',
+                },
+                {
+                    'key'     : 'IMAGE_FOLDER',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Image storage folder path.',
+                },
+                {
+                    'key'     : 'IMAGE_EXPORT_FOLDER',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'RAW export folder path.',
+                },
+                {
+                    'key'     : 'IMAGE_RAW_EXPIRE_DAYS',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'RAW image retention period.',
+                },
+                {
+                    'key'     : 'IMAGE_FITS_EXPIRE_DAYS',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'FITS image retention period.',
+                },
+                {
+                    'key'     : 'TIMELAPSE_EXPIRE_DAYS',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Timelapse retention period.',
+                },
+            ),
+        },
+        {
+            'label'       : 'External drives / mount points',
+            'description' : 'Drive and mount selection concepts surfaced by Classic and Modern drive manager pages.',
+            'keys'        : (
+                {
+                    'key'     : 'DRIVES_SELECT',
+                    'source'  : 'Drive manager form',
+                    'notes'   : 'Drive selector metadata; this settings page does not enumerate drives.',
+                },
+                {
+                    'key'     : 'DEVICES_SELECT',
+                    'source'  : 'Drive manager form',
+                    'notes'   : 'Mount selector metadata; this settings page does not enumerate mounts.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Backup / maintenance notes',
+            'description' : 'Remote backup folder and file transfer storage hooks that influence maintenance planning.',
+            'keys'        : (
+                {
+                    'key'     : 'FILETRANSFER__REMOTE_DB_BACKUP_FOLDER',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Remote folder used for database backup publishing.',
+                },
+            ),
+        },
+    )
+
+    STORAGE_PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Storage health',
+            'purpose'        : 'Show capacity warnings, thresholds, and status links without live filesystem scans.',
+            'source_keys'    : ('HEALTHCHECK__DISK_USAGE',),
+            'proposed_level' : 'Future Basic / Storage',
+        },
+        {
+            'label'          : 'Local paths / data retention',
+            'purpose'        : 'Group local storage roots and retention windows with clear migration warnings.',
+            'source_keys'    : ('VARLIB_FOLDER', 'IMAGE_FOLDER', 'IMAGE_EXPORT_FOLDER', 'IMAGE_RAW_EXPIRE_DAYS', 'IMAGE_FITS_EXPIRE_DAYS', 'TIMELAPSE_EXPIRE_DAYS'),
+            'proposed_level' : 'Future Advanced / Storage',
+        },
+        {
+            'label'          : 'External drives / mount points',
+            'purpose'        : 'Keep drive and mount concepts visible while leaving mount/unmount actions behind safe controls.',
+            'source_keys'    : ('DRIVES_SELECT', 'DEVICES_SELECT'),
+            'proposed_level' : 'Future Advanced / Maintenance',
+        },
+        {
+            'label'          : 'Backup / maintenance notes',
+            'purpose'        : 'Surface backup-related storage destinations separately from upload credentials and actions.',
+            'source_keys'    : ('FILETRANSFER__REMOTE_DB_BACKUP_FOLDER',),
+            'proposed_level' : 'Future Developer / Maintenance',
+        },
+    )
+
+    def get_context(self):
+        context = super(ModernAdminStorageSettingsView, self).get_context()
+        storage_group = None
+        for group in context.get('modern_admin_settings_groups', []):
+            if group.get('group_id') == 'storage_drives':
+                storage_group = group
+                break
+
+        context['modern_admin_storage_settings_group'] = storage_group
+        context['modern_admin_storage_config_sections'] = self.get_storage_config_sections()
+        context['modern_admin_storage_proposed_layout'] = self.get_storage_proposed_layout()
+        return context
+
+
+    def get_storage_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_settings_text(section.get('label')),
+                'description' : self.safe_settings_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_settings_text(row.get('key')),
+                        'source' : self.safe_settings_text(row.get('source')),
+                        'notes'  : self.safe_settings_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.STORAGE_CONFIG_SECTIONS
+        )
+
+
+    def get_storage_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_settings_text(row.get('label')),
+                'purpose'        : self.safe_settings_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_settings_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_settings_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.STORAGE_PROPOSED_LAYOUT
+        )
+
+
 class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
     page_title = 'Modern Admin Full Settings'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
@@ -22759,6 +22913,7 @@ bp_allsky.add_url_rule('/modern-admin/settings/advanced', view_func=ModernAdminA
 bp_allsky.add_url_rule('/modern-admin/settings/developer', view_func=ModernAdminDeveloperSettingsPreviewView.as_view('modern_admin_developer_settings_view', template_name='modern_admin/settings_basic.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/ready', view_func=ModernAdminReadySettingsPreviewView.as_view('modern_admin_ready_settings_view', template_name='modern_admin/settings_basic.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/analytics', view_func=ModernAdminAnalyticsSettingsView.as_view('modern_admin_analytics_settings_view', template_name='modern_admin/settings_analytics.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/storage', view_func=ModernAdminStorageSettingsView.as_view('modern_admin_storage_settings_view', template_name='modern_admin/settings_storage.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))

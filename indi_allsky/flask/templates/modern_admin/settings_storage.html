@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-storage-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-storage-settings-title">
+    {% set modern_admin_header_label = 'Storage settings preview header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-storage-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Storage settings summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Product consolidation</p>
+                <h2 id="modern-admin-storage-settings-title">Storage / Drives Settings</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> This page describes the future Storage / Drives settings group using ownership metadata and static config-key evidence.</p>
+        <p class="modern-admin-note">No runtime settings are changed here. No filesystem scan, mount check, or drive enumeration runs from this page.</p>
+        <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Index</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_basic_settings_view') }}">Basic Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_storage_view') }}">Storage Status</a>
+        </p>
+    </section>
+
+    {% if modern_admin_settings_map_error %}
+    <section class="modern-admin-alert modern-admin-alert-danger" role="alert">
+        {{ modern_admin_settings_map_error }}
+    </section>
+    {% endif %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="storage-ownership-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Ownership metadata</p>
+                <h2 id="storage-ownership-title">Storage / Drives ownership</h2>
+            </div>
+            {% if modern_admin_storage_settings_group %}
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_storage_settings_group.status | replace('_', ' ') | title }}</span>
+            {% else %}
+            <span class="modern-admin-status-pill modern-admin-status-warning">Missing map row</span>
+            {% endif %}
+        </div>
+
+        {% if modern_admin_storage_settings_group %}
+        <div class="modern-admin-link-grid">
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ modern_admin_storage_settings_group.label }}</strong>
+                    <small><code>{{ modern_admin_storage_settings_group.group_id }}</code></small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ modern_admin_storage_settings_group.level | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ modern_admin_storage_settings_group.owner | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ modern_admin_storage_settings_group.status | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ modern_admin_storage_settings_group.risk }}">{{ modern_admin_storage_settings_group.risk | title }} risk</span>
+                        {% if modern_admin_storage_settings_group.do_not_move_yet %}
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-high">Do not move yet</span>
+                        {% endif %}
+                    </small>
+                    <small>
+                        {% for note in modern_admin_storage_settings_group.notes %}
+                        {{ note }}{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No ownership notes.
+                        {% endfor %}
+                    </small>
+                </span>
+            </article>
+        </div>
+        {% else %}
+        <p class="modern-admin-note">The storage_drives settings group was not found in the ownership map.</p>
+        {% endif %}
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="storage-surfaces-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Current references</p>
+                <h2 id="storage-surfaces-title">Current surfaces</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Metadata only</span>
+        </div>
+        <div class="modern-admin-link-grid">
+            {% if modern_admin_storage_settings_group %}
+                {% for surface in modern_admin_storage_settings_group.current_surfaces %}
+                <span>{{ surface }}</span>
+                {% else %}
+                <span>No known surfaces.</span>
+                {% endfor %}
+            {% else %}
+            <span>No ownership map row loaded.</span>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="storage-proposed-layout-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Future product shape</p>
+                <h2 id="storage-proposed-layout-title">Proposed final layout</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only proposal</span>
+        </div>
+        <p class="modern-admin-note">This proposal describes a lightweight RPi5-first settings layout. It does not inspect disks, mount points, or folders.</p>
+        <div class="modern-admin-link-grid">
+            {% for layout_card in modern_admin_storage_proposed_layout %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ layout_card.label }}</strong>
+                    <small>{{ layout_card.purpose }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ layout_card.proposed_level }}</span>
+                        <span class="modern-admin-settings-badge">{{ layout_card.note }}</span>
+                    </small>
+                    <small>
+                        {% for source_key in layout_card.source_keys %}
+                        <code>{{ source_key }}</code>{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No source keys listed.
+                        {% endfor %}
+                    </small>
+                </span>
+            </article>
+            {% else %}
+            <span>No proposed Storage layout cards were listed.</span>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="storage-config-keys-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Static key evidence</p>
+                <h2 id="storage-config-keys-title">Storage config key candidates</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_storage_config_sections | length }} sections</span>
+        </div>
+        <p class="modern-admin-note">These sections are grouped from static Classic config/form evidence only. Active runtime config values are not loaded here.</p>
+        <div class="modern-admin-link-grid">
+            {% for section in modern_admin_storage_config_sections %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ section.label }}</strong>
+                    <small>{{ section.description }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ section.key_count }} keys</span>
+                        <span class="modern-admin-settings-badge">Read-only</span>
+                    </small>
+                    <small>
+                        {% for key_row in section.keys %}
+                        <code>{{ key_row.key }}</code>{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No static keys listed.
+                        {% endfor %}
+                    </small>
+                    <small>
+                        {% for key_row in section.keys %}
+                        {{ key_row.notes }}{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No notes.
+                        {% endfor %}
+                    </small>
+                    <small>No runtime settings are changed here.</small>
+                </span>
+            </article>
+            {% else %}
+            <span>No static Storage settings sections were listed.</span>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}
