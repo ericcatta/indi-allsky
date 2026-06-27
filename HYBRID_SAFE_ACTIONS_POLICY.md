@@ -271,6 +271,9 @@ First Pilot Safe Action: `notification.acknowledge`:
   future lookup/acknowledge behavior. It can call a notification object's
   `setAck()` only through an explicit service `acknowledge()` call or injected
   safe-action callback.
+- `NotificationAcknowledgeDbAdapter` provides a lookup-only bridge from the
+  notification DB model/query to the service boundary. It does not call
+  `setAck()`, does not commit, and does not depend on Flask request context.
 - The service boundary has tests for invalid IDs, missing notifications,
   already-acked idempotency, explicit `setAck()` execution, repository errors,
   `setAck()` failures, dry-run audit generation, and redacted persistent-audit

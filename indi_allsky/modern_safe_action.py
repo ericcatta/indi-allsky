@@ -321,6 +321,59 @@ class ModernAdminSafeActionPlaceholder(ModernAdminSafeAction):
         self.risk_level = risk_level
 
 
+class NotificationAcknowledgeRepositoryError(RuntimeError):
+    """Sanitized repository error for notification acknowledge lookup."""
+
+
+class NotificationAcknowledgeDbAdapter:
+    """DB adapter between notification models and the acknowledge service.
+
+    The adapter performs lookup only. It does not call setAck(), commit, mutate
+    database state, depend on Flask request context, or expose raw repository
+    exception messages.
+    """
+
+    def __init__(self, notification_model=None, query=None, no_result_exceptions=None):
+        self.notification_model = notification_model
+        self.query = query
+        self.no_result_exceptions = tuple(no_result_exceptions or ())
+
+
+    def lookup(self, notification_id):
+        try:
+            query = self.query_for_lookup()
+
+            if hasattr(query, 'filter_by'):
+                return query.filter_by(id=notification_id).one()
+
+            if self.notification_model is None:
+                raise NotificationAcknowledgeRepositoryError('notification_model is required')
+
+            return query.filter(self.notification_model.id == notification_id).one()
+        except Exception as e:
+            if self.is_no_result(e):
+                return None
+
+            raise NotificationAcknowledgeRepositoryError(type(e).__name__) from e
+
+
+    def query_for_lookup(self):
+        if self.query is not None:
+            return self.query
+
+        if self.notification_model is None:
+            raise NotificationAcknowledgeRepositoryError('notification_model is required')
+
+        return self.notification_model.query
+
+
+    def is_no_result(self, error):
+        if self.no_result_exceptions and isinstance(error, self.no_result_exceptions):
+            return True
+
+        return type(error).__name__ == 'NoResultFound'
+
+
 class NotificationAcknowledgeService:
     """Service boundary for notification acknowledge operations.
 

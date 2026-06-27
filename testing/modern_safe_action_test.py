@@ -14,6 +14,8 @@ from indi_allsky.modern_safe_action import ModernAdminSafeActionAuditRecord
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRegistry
 from indi_allsky.modern_safe_action import ModernAdminSafeActionResult
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRunner
+from indi_allsky.modern_safe_action import NotificationAcknowledgeDbAdapter
+from indi_allsky.modern_safe_action import NotificationAcknowledgeRepositoryError
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
 from indi_allsky.modern_safe_action import NotificationAcknowledgeService
 from indi_allsky.modern_safe_action import build_default_modern_safe_action_registry
@@ -73,6 +75,31 @@ class FakeAuditLog:
             'path': 'fake-audit.jsonl',
             'bytes': len(json.dumps(self.records[-1])),
         }
+
+
+class FakeNoResultFound(Exception):
+    pass
+
+
+class FakeQuery:
+    def __init__(self, notification=None, error=None):
+        self.notification = notification
+        self.error = error
+        self.filter_by_calls = []
+        self.one_calls = 0
+
+
+    def filter_by(self, **kwargs):
+        self.filter_by_calls.append(kwargs)
+        return self
+
+
+    def one(self):
+        self.one_calls += 1
+        if self.error:
+            raise self.error
+
+        return self.notification
 
 
 class AdminActor:
@@ -395,6 +422,109 @@ def test_notification_acknowledge_service_invalid_id():
     assert result.status == 'invalid_id'
     assert result.allowed is False
     assert repo.lookup_calls == []
+
+
+def test_notification_acknowledge_db_adapter_lookup_success():
+    notification = FakeNotification(21)
+    query = FakeQuery(notification=notification)
+    adapter = NotificationAcknowledgeDbAdapter(
+        query=query,
+        no_result_exceptions=(FakeNoResultFound,),
+    )
+
+    result = adapter.lookup(21)
+
+    assert result is notification
+    assert query.filter_by_calls == [{'id': 21}]
+    assert query.one_calls == 1
+
+
+def test_notification_acknowledge_db_adapter_not_found():
+    query = FakeQuery(error=FakeNoResultFound())
+    adapter = NotificationAcknowledgeDbAdapter(
+        query=query,
+        no_result_exceptions=(FakeNoResultFound,),
+    )
+
+    result = adapter.lookup(22)
+
+    assert result is None
+    assert query.filter_by_calls == [{'id': 22}]
+
+
+def test_notification_acknowledge_db_adapter_query_exception_is_sanitized():
+    query = FakeQuery(error=RuntimeError('database exploded api_token=secret'))
+    adapter = NotificationAcknowledgeDbAdapter(query=query)
+
+    try:
+        adapter.lookup(23)
+    except NotificationAcknowledgeRepositoryError as e:
+        assert str(e) == 'RuntimeError'
+        assert 'secret' not in str(e)
+    else:
+        raise AssertionError('Repository exception was not raised')
+
+
+def test_notification_acknowledge_db_adapter_lookup_does_not_ack():
+    notification = FakeNotification(24)
+    query = FakeQuery(notification=notification)
+    adapter = NotificationAcknowledgeDbAdapter(query=query)
+
+    result = adapter.lookup(24)
+
+    assert result is notification
+    assert notification.set_ack_calls == 0
+    assert notification.ack is False
+
+
+def test_notification_acknowledge_service_with_db_adapter_already_acked():
+    notification = FakeNotification(25, ack=True)
+    adapter = NotificationAcknowledgeDbAdapter(query=FakeQuery(notification=notification))
+    service = NotificationAcknowledgeService(adapter.lookup)
+
+    result = service.acknowledge(notification_id=25)
+
+    assert result.status == 'already_acked'
+    assert result.allowed is True
+    assert notification.set_ack_calls == 0
+
+
+def test_notification_acknowledge_service_with_db_adapter_not_acked():
+    notification = FakeNotification(26, ack=False)
+    adapter = NotificationAcknowledgeDbAdapter(query=FakeQuery(notification=notification))
+    service = NotificationAcknowledgeService(adapter.lookup)
+
+    result = service.acknowledge(notification_id=26)
+
+    assert result.status == 'acknowledged'
+    assert result.allowed is True
+    assert notification.ack is True
+    assert notification.set_ack_calls == 1
+
+
+def test_notification_acknowledge_service_with_db_adapter_set_ack_error():
+    notification = FailingSetAckNotification(27)
+    adapter = NotificationAcknowledgeDbAdapter(query=FakeQuery(notification=notification))
+    service = NotificationAcknowledgeService(adapter.lookup)
+
+    result = service.acknowledge(notification_id=27)
+
+    assert result.status == 'acknowledge_failed'
+    assert result.allowed is False
+    assert result.details['error_type'] == 'RuntimeError'
+
+
+def test_notification_acknowledge_service_with_db_adapter_repository_error_redacted():
+    query = FakeQuery(error=RuntimeError('database exploded refresh_token=secret'))
+    adapter = NotificationAcknowledgeDbAdapter(query=query)
+    service = NotificationAcknowledgeService(adapter.lookup)
+
+    result = service.acknowledge(notification_id=28)
+
+    assert result.status == 'repository_error'
+    assert result.allowed is False
+    assert result.details['error_type'] == 'NotificationAcknowledgeRepositoryError'
+    assert 'secret' not in str(result.to_dict())
 
 
 def test_notification_acknowledge_service_missing_notification():
@@ -1262,6 +1392,14 @@ if __name__ == '__main__':
     test_notification_acknowledge_already_acked_is_idempotent()
     test_notification_acknowledge_audit_redacts_sensitive_payload()
     test_notification_acknowledge_service_invalid_id()
+    test_notification_acknowledge_db_adapter_lookup_success()
+    test_notification_acknowledge_db_adapter_not_found()
+    test_notification_acknowledge_db_adapter_query_exception_is_sanitized()
+    test_notification_acknowledge_db_adapter_lookup_does_not_ack()
+    test_notification_acknowledge_service_with_db_adapter_already_acked()
+    test_notification_acknowledge_service_with_db_adapter_not_acked()
+    test_notification_acknowledge_service_with_db_adapter_set_ack_error()
+    test_notification_acknowledge_service_with_db_adapter_repository_error_redacted()
     test_notification_acknowledge_service_missing_notification()
     test_notification_acknowledge_service_already_acked_is_noop()
     test_notification_acknowledge_service_calls_set_ack_when_explicitly_executed()

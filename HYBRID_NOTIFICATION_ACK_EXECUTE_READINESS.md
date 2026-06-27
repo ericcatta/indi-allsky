@@ -70,7 +70,7 @@ model method is changed or wrapped carefully.
 | --- | --- |
 | Is the service boundary sufficient for execute real? | Sufficient as a domain/service boundary, not sufficient alone for a browser-exposed execute endpoint. |
 | Is direct commit inside `setAck()` acceptable? | Acceptable only if the execute endpoint treats `setAck()` as the transaction boundary and records audit/result around it. It is not ideal for broader rollback semantics. |
-| Is a DB adapter needed before the endpoint? | Yes. The endpoint should use a small DB adapter that performs lookup by ID and delegates acknowledge through the service, rather than querying directly in the view. |
+| Is a DB adapter needed before the endpoint? | Implemented as `NotificationAcknowledgeDbAdapter`; the future endpoint should use it rather than querying directly in the view. |
 | Is explicit rollback needed? | Not for this exact idempotent `ack=True` mutation if `setAck()` remains the transaction boundary. But rollback/no-rollback semantics must be documented in the endpoint contract. |
 | Is persistent audit mandatory before execute? | Yes. Real execute must write a redacted audit record for success, already-acked no-op, validation failure, lookup failure, permission denial, and acknowledge failure. |
 | Are true Flask session/CSRF tests needed before execute? | Yes. Current tests are unit/static/helper level. Browser-exposed mutation needs Flask-level auth, admin, CSRF, JSON, and failure-path coverage. |
@@ -78,7 +78,7 @@ model method is changed or wrapped carefully.
 | Is rate limiting needed? | Not a hard blocker for a single acknowledge action, but repeated acknowledge calls should remain bounded by normal auth/CSRF protections and audit logging. |
 | Admin-only or authenticated user? | Admin-only is the safer first execute policy. A later policy can decide whether notification acknowledge should be allowed for all authenticated users. |
 | Is a disabled-by-default execute endpoint safe? | Safer than a real execute endpoint if it always returns disabled/not enabled and is covered by tests. It may be useful as a route/contract skeleton, but is not required yet. |
-| Is a real functioning execute endpoint safe now? | Not yet. Flask integration tests, DB adapter, audit wiring, and permission/CSRF policy must be completed first. |
+| Is a real functioning execute endpoint safe now? | Not yet. DB adapter exists, but Flask integration tests, audit wiring, response mapping, and permission/CSRF policy must be completed first. |
 | Safest next micro-step? | Add Flask-level tests or a disabled-by-default execute skeleton with tests. Prefer Flask-level dry-run/auth/CSRF tests first if the test environment supports it. |
 
 ## 5. Readiness Matrix
@@ -98,7 +98,7 @@ model method is changed or wrapped carefully.
 | Permission model | Admin check exists in dry-run endpoint | Medium | Yes | Define execute permission policy, preferably admin-only first | Required |
 | CSRF behavior | Existing Flask-WTF pattern, not fully tested for safe-action JSON execute | High | Yes | Flask integration tests required | Required |
 | Flask session/auth tests | Missing for safe-action endpoint | High | Yes | Required before real execute | Required before UI button |
-| DB adapter | Missing | Medium | Yes | Required before endpoint invokes service against real DB | Required |
+| DB adapter | Implemented and unit-tested, not endpoint-wired | Medium | No | Wire through execute endpoint, not directly in view logic | Required |
 | Endpoint response mapping | Not implemented for execute | Medium | Yes | Required for invalid, denied, not_found, already_acked, acknowledged, repository_error, acknowledge_failed | Required |
 | UI confirmation copy | Not implemented | Low-medium | No for endpoint, yes for UI | Not required for endpoint | Required before button |
 | Rate limiting | Not implemented | Low-medium | No | Optional after audit/admin/CSRF | Optional unless abuse observed |
@@ -110,8 +110,9 @@ model method is changed or wrapped carefully.
 Blockers for a real functioning execute endpoint:
 
 1. No Flask integration tests for safe-action auth/session/CSRF behavior.
-2. No DB adapter that cleanly bridges `IndiAllSkyDbNotificationTable` lookup to
-   `NotificationAcknowledgeService`.
+2. `NotificationAcknowledgeDbAdapter` exists for lookup bridging, but it is not
+   endpoint-wired and has not been exercised through real Flask/DB integration
+   tests.
 3. Persistent audit log is implemented, but not wired into an execute endpoint.
 4. Execute permission policy is not yet written as an endpoint contract.
 5. Endpoint response/status mapping for all service states does not exist.
@@ -160,15 +161,16 @@ request routing, or response status codes at runtime.
 A disabled-by-default execute skeleton could be safe if it is non-mutating,
 admin-protected, CSRF-protected, tested, and always returns disabled. However,
 that skeleton does not advance the real mutation as much as Flask integration
-tests and a DB adapter would.
+tests and audit/permission wiring would.
 
 The preferred next micro-step is:
 
 1. Add Flask-level tests for Safe Action auth/session/CSRF behavior if the test
    environment can support them.
-2. If full Flask tests are still too heavy, create a DB adapter for
-   `notification.acknowledge` with unit tests, but do not expose it.
-3. Only after that, consider a disabled-by-default execute endpoint skeleton.
+2. Wire the DB adapter only inside a tested execute wrapper; do not let a future
+   view query `IndiAllSkyDbNotificationTable` directly.
+3. Only after Flask-level tests are available, consider a disabled-by-default
+   execute endpoint skeleton.
 
 ## 9. Decision
 
@@ -179,5 +181,5 @@ Do not add a UI button yet.
 Do not call `/ajax/notification`.
 
 Keep the dry-run endpoint and service boundary as the active Modern foundation
-until Flask integration tests, DB adapter, audit wiring, and endpoint response
-mapping are in place.
+until Flask integration tests, DB adapter endpoint wiring, audit wiring, and
+endpoint response mapping are in place.
