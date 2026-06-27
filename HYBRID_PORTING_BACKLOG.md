@@ -84,8 +84,8 @@ Operational backlog snapshot:
 | State | Current examples |
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
-| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse, Gallery |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,7 +128,7 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Gallery | B | C | M | Medium | Modern/read-only media browsing exists; usability parity can remain non-mutative. |
+| 1 | Panorama | Preserve | B | M | Medium | Public endpoints exist; metadata/status inspection can remain read-only. |
 
 ### Blocked
 
@@ -143,6 +143,7 @@ the next available feature.
 | Task Queue mutations | No safe user-facing backend contract for retry/cancel/delete/requeue. | No mutation; only diagnostics/detail. |
 | Image Viewer actions/exclude | Exclude/delete/download/processing require explicit media action and path policy. | Metadata-only list/detail only. |
 | Video Viewer upload/share/actions | Upload/share/download/delete require explicit media action and path policy. | Metadata-only list/detail only. |
+| Gallery delete/exclude/download/share | Gallery media actions require explicit media action and path policy. | Read-only browsing/usability only. |
 | Upload actions/remote operations | Upload tests, OAuth flows and remote operations require explicit provider action and credential policy. | Read-only provider/status inventory only. |
 | Focus hardware movement | Focuser movement, autofocus and capture changes require explicit hardware action policy. | Existing Modern safe read-only status/preview only. |
 | Timelapse generation actions | Generate/regenerate/delete requires queue/video generation and processing policy. | Existing Modern read-only status/usability only. |
@@ -231,7 +232,7 @@ These should not be removed. They are transitional.
 | Image Lag | modern | PARTIAL MODERN | C | 55% | Camera pages | Medium | M | Medium | Modern page exists; semantics need validation. |
 | Image Viewer | modern | PARTIAL MODERN | D | 65% | Media list | Medium | M | Medium | Read-only Modern image metadata detail exists; exclude/delete/download/processing remain blocked. |
 | FITS Image Viewer | modern | PARTIAL MODERN | D | 65% | Scientific source layer | High | M | High | Read-only Modern FITS metadata detail exists; conversion/viewer parity remains Classic-only and locally blocked. |
-| Gallery | modern | PARTIAL MODERN | C | 55% | Media list | Medium | M | Medium | Modern gallery exists; PhotoSwipe parity unknown. |
+| Gallery | modern | PARTIAL MODERN | C | 60% | Media list | Medium | M | Medium | Modern gallery read-only usability improved; delete/exclude/download/share remain blocked. |
 | Panorama | public | SHARED LEGACY | Preserve | 70% | Public endpoints | Medium | M | Medium | Preserve public/latest behavior. |
 | Raw Viewer | public | SHARED LEGACY | Preserve | 70% | Raw/source files | Critical | M | Medium | Needs source review, but public routes preserved. |
 | Video Viewer | modern | PARTIAL MODERN | D | 65% | Media list | Medium | M | Medium | Read-only Modern timelapse metadata detail exists; upload/share/download/delete remain blocked. |
@@ -339,7 +340,7 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Gallery | Modern read-only usability | Useful media browsing parity without delete/download/action changes. |
+| 1 | Panorama | Modern read-only metadata/status inspection | Useful media product parity without generation, conversion or download. |
 | 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
 | 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
 | 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
@@ -413,13 +414,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Gallery read-only usability.
+Panorama read-only metadata/status inspection.
 
 ### 6. Why that feature?
 
-Gallery has existing Classic and Modern media browsing surfaces. The next safe
-step is read-only usability only, with no delete, download, exclude or media
-action changes.
+Panorama has public media surfaces and database-backed image records. The next
+safe step is read-only metadata/status inspection only, with no generation,
+conversion, download or filesystem writes.
 
 ### 7. Which features can be ported in parallel?
 
@@ -443,10 +444,10 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Gallery Phase B to C** can be implemented as read-only
-usability without delete actions, downloads, exclude changes, path-freeform
-access or filesystem writes. Mark the feature locally blocked if that cannot
-be guaranteed.
+Review whether **Panorama Preserve to B** can be implemented as metadata-only
+status inspection without generation actions, conversion, queue mutation,
+downloads, path-freeform access or filesystem writes. Mark the feature locally
+blocked if that cannot be guaranteed.
 
 Scope:
 

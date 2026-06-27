@@ -13799,6 +13799,8 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
         context['modern_admin_gallery_has_more'] = len(context['modern_admin_media_items']) == self.modern_admin_media_limit
         context['modern_admin_gallery_camera_filters'] = camera_filters
         context['modern_admin_gallery_selected_filter'] = selected_filter
+        context['modern_admin_gallery_loaded_count'] = len(context['modern_admin_media_items'])
+        context['modern_admin_gallery_selected_label'] = selected_filter.get('label') or 'All Cameras'
 
         return context
 

@@ -23,6 +23,23 @@ var camera_id = {{ camera_id }};
         <h2 id="modern-admin-media-title">{{ modern_admin_section }}</h2>
         <p>{{ modern_admin_description }}</p>
         {% if modern_admin_media_layout == 'gallery' %}
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Gallery summary">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Loaded</div>
+                <h3>{{ modern_admin_gallery_loaded_count }}</h3>
+                <p>Images currently loaded in this browser view.</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Filter</div>
+                <h3>{{ modern_admin_gallery_selected_label }}</h3>
+                <p>Camera/profile filter applied to the gallery query.</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Page size</div>
+                <h3>{{ modern_admin_gallery_limit }}</h3>
+                <p>Older images load in read-only batches.</p>
+            </article>
+        </section>
         <div class="modern-admin-gallery-filter-bar" role="group" aria-label="Camera filter">
             {% for camera_filter in modern_admin_gallery_camera_filters %}
             {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view') %}

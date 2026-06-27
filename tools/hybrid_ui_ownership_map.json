@@ -1309,7 +1309,7 @@
       ],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "PhotoSwipe-style review parity needs verification.",
+      "modern_gap": "Modern gallery has read-only camera/profile filters, loaded-count status and archive paging; PhotoSwipe/action parity remains blocked pending media action policy.",
       "removal_risk": "medium",
       "notes": []
     },
