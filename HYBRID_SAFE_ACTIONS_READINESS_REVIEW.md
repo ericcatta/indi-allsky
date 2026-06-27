@@ -37,6 +37,11 @@ Current boundary:
 - no safe action writes the database unless a future endpoint injects a callback
 - no full Flask `test_client` safe-action test exists yet in the lightweight
   test runner because Flask is not available there
+- static/helper-level tests cover dry-run route declaration, POST-only routing,
+  `login_required`, CSRF non-exemption of the main blueprint, admin permission
+  policy shape, response shapes, forced dry-run behavior, redaction, and absence
+  of `/ajax/notification`, `setAck()`, `db.session`, or `commit()` in the
+  dry-run view
 - a lightweight append-only JSONL audit log utility exists, but it is not wired
   to execute endpoints, UI, DB sessions, or application logging
 - `NotificationAcknowledgeService` exists as a testable service boundary for

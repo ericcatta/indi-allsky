@@ -139,6 +139,24 @@ Recommendation: **NOT READY, NEEDS FLASK INTEGRATION TESTS**.
 The service boundary is now strong enough for a future execute path, but the
 project should not expose a real functioning execute endpoint yet.
 
+Additional static/helper-level coverage now exists for the dry-run endpoint:
+
+- route declaration exists;
+- route is POST-only;
+- route class has `login_required`;
+- the main `bp_allsky` blueprint is not CSRF-exempt;
+- permission policy is admin-oriented, with `LOGIN_DISABLED` as the test/dev
+  escape hatch;
+- helper responses cover missing action ID, unknown action, permission denied,
+  successful `notification.acknowledge` dry-run, forced dry-run, and redaction;
+- source checks confirm the dry-run view does not call `/ajax/notification`,
+  `setAck()`, `db.session`, or `commit()`.
+
+This coverage reduces risk, but it is not a substitute for a real Flask
+`test_client` test. The current lightweight test environment does not have Flask
+installed, so it cannot validate actual session behavior, CSRF rejection,
+request routing, or response status codes at runtime.
+
 A disabled-by-default execute skeleton could be safe if it is non-mutating,
 admin-protected, CSRF-protected, tested, and always returns disabled. However,
 that skeleton does not advance the real mutation as much as Flask integration

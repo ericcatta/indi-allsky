@@ -864,12 +864,50 @@ def get_safe_action_dry_run_view_source():
     return source[class_start:class_end], source
 
 
+def get_flask_init_source():
+    return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / '__init__.py').read_text()
+
+
 def test_safe_action_dry_run_route_exists_and_is_post_only_static():
     view_source, full_source = get_safe_action_dry_run_view_source()
 
     assert "methods = ['POST']" in view_source
     assert "bp_allsky.add_url_rule('/modern-admin/safe-action/dry-run'" in full_source
     assert "methods=['POST']" in full_source
+
+
+def test_safe_action_dry_run_route_requires_login_static():
+    view_source, _full_source = get_safe_action_dry_run_view_source()
+
+    assert 'decorators = [login_required]' in view_source
+
+
+def test_safe_action_dry_run_route_is_not_csrf_exempt_static():
+    init_source = get_flask_init_source()
+
+    assert 'csrf.init_app(app)' in init_source
+    assert 'csrf.exempt(bp_syncapi_allsky)' in init_source
+    assert 'csrf.exempt(bp_actionapi_allsky)' in init_source
+    assert 'csrf.exempt(bp_allsky)' not in init_source
+
+
+def test_safe_action_dry_run_view_permission_policy_static():
+    view_source, _full_source = get_safe_action_dry_run_view_source()
+
+    assert 'def has_safe_action_permission' in view_source
+    assert "app.config.get('LOGIN_DISABLED')" in view_source
+    assert "getattr(actor, 'is_admin', False)" in view_source
+
+
+def test_safe_action_dry_run_view_status_mapping_static():
+    view_source, _full_source = get_safe_action_dry_run_view_source()
+
+    assert "result.status == 'permission_denied'" in view_source
+    assert 'return 403' in view_source
+    assert "'missing_action_id'" in view_source
+    assert "'not_found'" in view_source
+    assert "'validation_failed'" in view_source
+    assert 'return 400' in view_source
 
 
 def test_safe_action_dry_run_view_has_no_legacy_ack_path_static():
@@ -894,6 +932,34 @@ def test_safe_action_dry_run_helper_response_shape():
     assert data['status'] == 'dry_run'
     assert data['dry_run'] is True
     assert data['allowed'] is True
+
+
+def test_safe_action_dry_run_helper_missing_action_id_response_shape():
+    result = run_modern_safe_action_dry_run(
+        action_id=None,
+        actor=AdminActor(),
+        payload={'notification_id': 1},
+        permission_check=lambda actor: bool(getattr(actor, 'is_admin', False)),
+    )
+    data = result.to_dict()
+
+    assert data['status'] == 'missing_action_id'
+    assert data['allowed'] is False
+    assert data['dry_run'] is True
+
+
+def test_safe_action_dry_run_helper_unknown_action_response_shape():
+    result = run_modern_safe_action_dry_run(
+        action_id='unknown.action',
+        actor=AdminActor(),
+        payload={'notification_id': 1},
+        permission_check=lambda actor: bool(getattr(actor, 'is_admin', False)),
+    )
+    data = result.to_dict()
+
+    assert data['status'] == 'not_found'
+    assert data['allowed'] is False
+    assert data['dry_run'] is True
 
 
 def test_safe_action_dry_run_helper_permission_denied_response_shape():
@@ -1224,8 +1290,14 @@ if __name__ == '__main__':
     test_dry_run_helper_permission_denied()
     test_dry_run_helper_redacts_secret_payload()
     test_safe_action_dry_run_route_exists_and_is_post_only_static()
+    test_safe_action_dry_run_route_requires_login_static()
+    test_safe_action_dry_run_route_is_not_csrf_exempt_static()
+    test_safe_action_dry_run_view_permission_policy_static()
+    test_safe_action_dry_run_view_status_mapping_static()
     test_safe_action_dry_run_view_has_no_legacy_ack_path_static()
     test_safe_action_dry_run_helper_response_shape()
+    test_safe_action_dry_run_helper_missing_action_id_response_shape()
+    test_safe_action_dry_run_helper_unknown_action_response_shape()
     test_safe_action_dry_run_helper_permission_denied_response_shape()
     test_safe_action_dry_run_helper_forces_dry_run_true()
     test_safe_action_dry_run_helper_response_redacts_sensitive_payload()
