@@ -69,14 +69,14 @@ Current ownership snapshot:
 | Total tracked features | 92 |
 | Protected Modern Work | 21 |
 | Modern Canonical | 2 |
-| Partial Modern / in progress | 33 |
+| Partial Modern / in progress | 34 |
 | Wrapper Only | 8 |
 | Public Active | 6 |
 | Shared Active | 5 |
 | External API | 3 |
 | Shared Legacy | 0 |
 | Legacy Active | 4 |
-| Classic Only | 1 |
+| Classic Only | 0 |
 | Needs Verification | 9 |
 
 Operational backlog snapshot:
@@ -128,7 +128,7 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | YouTube / OAuth | A | B | M | High | Read-only status audit may be possible only if credentials, OAuth payloads, upload tests and remote operations stay hidden/disabled. |
+| 1 | Config History | C | Review | S | High | Restore/download parity requires explicit safety review before any action. |
 
 ### Blocked
 
@@ -158,7 +158,7 @@ the next available feature.
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
 | Notification acknowledge/delete | Mutative notification actions need explicit backend and UX contract. | Read-only inventory/detail only. |
 | User Management mutations | Password, role, active state and profile updates require explicit auth policy. | Read-only inventory/detail only. |
-| YouTube / OAuth | External auth and upload behavior need safety review. | Read-only provider/status inventory first. |
+| YouTube / OAuth actions | External auth, OAuth authorize/refresh/revoke, upload tests and remote operations require explicit provider action and credential policy. | Read-only status audit only. |
 
 ### Needs Backend First
 
@@ -276,7 +276,7 @@ These should not be removed. They are transitional.
 | Environmental sensors | modern | PARTIAL MODERN | C | 55% | Sensors/weather | Medium | M | Medium | Operational weather awareness incomplete. |
 | Power / UPS | shared_api | NEEDS VERIFICATION | A | 10% | Sensor/config audit | Low | L | Low | Verify presence and ownership. |
 | Upload | modern | PARTIAL MODERN | D | 70% | Filetransfer providers | Medium | M | Medium | Read-only provider/status inventory, usability and provider detail exist; upload actions and remote operations remain blocked. |
-| YouTube / OAuth | classic | CLASSIC ONLY | A | 0% | External OAuth | Medium | M | Medium | Modern OAuth missing; risky. |
+| YouTube / OAuth | modern | PARTIAL MODERN | B | 35% | External OAuth | Medium | M | Medium | Sanitized read-only status audit exists; OAuth actions and remote operations remain blocked. |
 | Sync API | external_api | EXTERNAL API | Preserve | 70% | External clients | Critical | XS | Preserve | Not UI cleanup. |
 | Action API | external_api | EXTERNAL API | Preserve | 70% | External clients | Critical | XS | Preserve | Not UI cleanup. |
 | External API clients | external_api | EXTERNAL API | Preserve | 70% | External clients | Critical | XS | Preserve | Not UI cleanup. |
@@ -342,16 +342,16 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | YouTube / OAuth | Read-only provider/OAuth status audit | Useful only if credentials and OAuth payloads remain hidden. |
-| 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
-| 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
-| 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
-| 5 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
-| 6 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
-| 7 | Image Viewer | Exclude/delete/download/processing contract review only | Metadata-only detail exists; further action/download work remains blocked. |
-| 8 | Video Viewer | Upload/share/download/delete contract review only | Metadata-only detail exists; further action/download work remains blocked. |
-| 9 | Upload | Upload/OAuth/provider action contract review only | Read-only provider/status usability exists; mutative provider work remains blocked. |
-| 10 | Logs | Download/action contract review only | Read-only detail exists; further action/download work remains blocked. |
+| 1 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
+| 2 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
+| 3 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
+| 4 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
+| 5 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
+| 6 | Image Viewer | Exclude/delete/download/processing contract review only | Metadata-only detail exists; further action/download work remains blocked. |
+| 7 | Video Viewer | Upload/share/download/delete contract review only | Metadata-only detail exists; further action/download work remains blocked. |
+| 8 | Upload | Upload/OAuth/provider action contract review only | Read-only provider/status usability exists; mutative provider work remains blocked. |
+| 9 | Logs | Download/action contract review only | Read-only detail exists; further action/download work remains blocked. |
+| 10 | Network | Read-only native status review | Wrapper exists; native status may be possible without network changes. |
 
 ## 7. Parallelizable Work
 
@@ -416,13 +416,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-YouTube / OAuth read-only status audit.
+Config History restore/download safety review.
 
 ### 6. Why that feature?
 
-YouTube / OAuth remains risky because it touches external auth. The next safe
-step is read-only status audit only, with no OAuth flow, upload test,
-credential exposure or remote operation.
+YouTube / OAuth now has a sanitized read-only status audit. The next safe step
+is to review Config History restore/download parity without implementing active
+restore, downloads, credential exposure or configuration changes.
 
 ### 7. Which features can be ported in parallel?
 
@@ -446,10 +446,9 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **YouTube / OAuth Phase A to B** can be represented as read-only
-status audit without OAuth flows, upload tests, credential exposure, remote
-operations or queue mutations. Mark the feature locally blocked if that cannot
-be guaranteed.
+Review whether **Config History restore/download parity** has a safe read-only
+or policy-only step. Mark active restore/download work locally blocked if that
+cannot be guaranteed.
 
 Scope:
 

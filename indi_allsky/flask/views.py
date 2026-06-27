@@ -73,6 +73,7 @@ from .models import IndiAllSkyDbTaskQueueTable
 from .models import IndiAllSkyDbNotificationTable
 from .models import IndiAllSkyDbUserTable
 from .models import IndiAllSkyDbConfigTable
+from .models import IndiAllSkyDbStateTable
 from .models import IndiAllSkyDbTleDataTable
 
 from .models import TaskQueueQueue
@@ -7641,6 +7642,81 @@ class ModernAdminUploadDetailView(ModernAdminUploadsView):
         if isinstance(value, bool):
             return 'Enabled' if value else 'Disabled'
         return str(value)
+
+
+class ModernAdminYoutubeView(ModernAdminView):
+    page_title = 'Modern Admin YouTube'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_youtube_view'
+
+    def get_context(self):
+        context = super(ModernAdminYoutubeView, self).get_context()
+        youtube_config = self.indi_allsky_config.get('YOUTUBE', {})
+        if not isinstance(youtube_config, dict):
+            youtube_config = {}
+
+        credentials_status = self.get_youtube_credentials_status()
+        upload_flags = (
+            ('Timelapse uploads', youtube_config.get('UPLOAD_VIDEO', False)),
+            ('Mini timelapse uploads', youtube_config.get('UPLOAD_MINI_VIDEO', False)),
+            ('Startrail video uploads', youtube_config.get('UPLOAD_STARTRAIL_VIDEO', False)),
+            ('Panorama video uploads', youtube_config.get('UPLOAD_PANORAMA_VIDEO', False)),
+        )
+
+        context['modern_admin_youtube_rows'] = (
+            {
+                'label' : 'YouTube integration',
+                'value' : self.format_youtube_bool(youtube_config.get('ENABLE', False)),
+                'tone'  : self.get_youtube_tone(bool(youtube_config.get('ENABLE', False))),
+            },
+            {
+                'label' : 'Client configuration present',
+                'value' : self.format_youtube_bool(bool(youtube_config.get('SECRETS_FILE'))),
+                'tone'  : self.get_youtube_tone(bool(youtube_config.get('SECRETS_FILE'))),
+            },
+            {
+                'label' : 'Credentials stored',
+                'value' : credentials_status,
+                'tone'  : self.get_youtube_tone(credentials_status == 'Yes'),
+            },
+        )
+        context['modern_admin_youtube_upload_rows'] = [
+            {
+                'label' : label,
+                'value' : self.format_youtube_bool(bool(value)),
+                'tone'  : self.get_youtube_tone(bool(value)),
+            }
+            for label, value in upload_flags
+        ]
+        context['modern_admin_youtube_enabled_count'] = len([
+            row for row in context['modern_admin_youtube_upload_rows']
+            if row['value'] == 'Yes'
+        ])
+
+        return context
+
+
+    def get_youtube_credentials_status(self):
+        try:
+            IndiAllSkyDbStateTable.query\
+                .filter(IndiAllSkyDbStateTable.key == 'YOUTUBE_CREDENTIALS')\
+                .one()
+        except NoResultFound:
+            return 'No'
+        except Exception as e:
+            app.logger.warning('Unable to read YouTube credential state for Modern Admin audit: %s', str(e))
+            return 'Unknown'
+
+        return 'Yes'
+
+
+    def format_youtube_bool(self, value):
+        return 'Yes' if value else 'No'
+
+
+    def get_youtube_tone(self, enabled):
+        if enabled:
+            return 'modern-admin-status-good'
+        return 'modern-admin-status-muted'
 
 
 class ModernAdminObservatoryView(ModernAdminView):
@@ -22248,6 +22324,7 @@ bp_allsky.add_url_rule('/modern-admin/storage', view_func=ModernAdminStorageView
 bp_allsky.add_url_rule('/modern-admin/storage/file-space-usage', view_func=ModernAdminFileSpaceUsageView.as_view('modern_admin_file_space_usage_view', template_name='modern_admin/file_space_usage.html'))
 bp_allsky.add_url_rule('/modern-admin/uploads', view_func=ModernAdminUploadsView.as_view('modern_admin_uploads_view', template_name='modern_admin/uploads.html'))
 bp_allsky.add_url_rule('/modern-admin/uploads/<provider_slug>', view_func=ModernAdminUploadDetailView.as_view('modern_admin_upload_detail_view', template_name='modern_admin/upload_detail.html'))
+bp_allsky.add_url_rule('/modern-admin/youtube', view_func=ModernAdminYoutubeView.as_view('modern_admin_youtube_view', template_name='modern_admin/youtube.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory', view_func=ModernAdminObservatoryView.as_view('modern_admin_observatory_view', template_name='modern_admin/observatory.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory/sqm', view_func=ModernAdminSqmView.as_view('modern_admin_sqm_view', template_name='modern_admin/observatory_status.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory/charts', view_func=ModernAdminChartsView.as_view('modern_admin_charts_view', template_name='modern_admin/charts.html'))

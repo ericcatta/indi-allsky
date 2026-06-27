@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-youtube-title">
+    {% set modern_admin_header_label = 'YouTube Audit' %}
+    {% set modern_admin_heading = 'YouTube / OAuth' %}
+    {% set modern_admin_title_id = 'modern-admin-youtube-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="YouTube audit summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Mode</div>
+            <h3>Read-only</h3>
+            <p>Status audit only.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Upload flags</div>
+            <h3>{{ modern_admin_youtube_enabled_count }}</h3>
+            <p>Enabled upload categories.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Classic fallback</div>
+            <h3>Available</h3>
+            <p>OAuth actions remain in Classic.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-management-grid" aria-label="YouTube status">
+        <article class="modern-admin-table-panel">
+            <div class="modern-admin-section-heading">
+                <p class="modern-admin-eyebrow">OAuth</p>
+                <h2>Status audit</h2>
+            </div>
+            <div class="modern-admin-table-scroll">
+                <table class="modern-admin-data-table">
+                    <thead>
+                        <tr><th>Field</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in modern_admin_youtube_rows %}
+                        <tr>
+                            <td>{{ row.label }}</td>
+                            <td><span class="modern-admin-status-pill {{ row.tone }}">{{ row.value }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="modern-admin-table-panel">
+            <div class="modern-admin-section-heading">
+                <p class="modern-admin-eyebrow">Uploads</p>
+                <h2>Configured flags</h2>
+            </div>
+            <div class="modern-admin-table-scroll">
+                <table class="modern-admin-data-table">
+                    <thead>
+                        <tr><th>Category</th><th>Enabled</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in modern_admin_youtube_upload_rows %}
+                        <tr>
+                            <td>{{ row.label }}</td>
+                            <td><span class="modern-admin-status-pill {{ row.tone }}">{{ row.value }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-label="YouTube safety note">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Safety</p>
+            <h2>Inspection only</h2>
+        </div>
+        <p class="modern-admin-note">This page is a read-only audit. It does not start authorization, change stored authorization, perform external service operations, create upload tasks, modify configuration, or show sensitive OAuth/configuration values.</p>
+        <section class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_uploads_view') }}">Back to Modern Uploads</a>
+            <a href="{{ url_for('indi_allsky.config_view') }}#nav-youtube">Classic YouTube settings</a>
+        </section>
+    </section>
+</main>
+{% endblock %}

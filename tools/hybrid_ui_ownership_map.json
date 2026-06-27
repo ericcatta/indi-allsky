@@ -2437,27 +2437,30 @@
     },
     "youtube_oauth": {
       "label": "YouTube / OAuth",
-      "status": "CLASSIC ONLY",
-      "owner": "classic",
+      "status": "PARTIAL MODERN",
+      "owner": "modern",
       "porting_priority": "medium",
       "routes": [
+        "/modern-admin/youtube",
         "/youtube/*",
         "/ajax/uploadyoutube"
       ],
       "templates": [
+        "modern_admin/youtube.html",
         "videoviewer.html",
         "minivideoviewer.html",
         "config.html"
       ],
       "assets": [],
       "apis": [
+        "modern_admin_youtube_view",
         "/ajax/uploadyoutube"
       ],
       "config_keys": [
         "YOUTUBE*"
       ],
       "protected": false,
-      "modern_gap": "Modern OAuth workflow missing.",
+      "modern_gap": "Modern read-only status audit exists; OAuth authorize/refresh/revoke, upload tests, credential payloads and remote operations remain Classic-only and locally blocked.",
       "removal_risk": "high",
       "notes": [
         "External callback routes must be preserved until replaced."
