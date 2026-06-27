@@ -341,7 +341,56 @@ directly. They call explicit read-only APIs or Safe Action endpoints. Safe
 Actions validate permissions, inputs, state, risk, dry-run behavior, audit, and
 rollback/no-rollback semantics before any real mutation is allowed.
 
-## 9. Migration Roadmap From Here
+## 9. Raspberry Pi 5 First Constraint
+
+Raspberry Pi 5 remains the primary target hardware for Hybrid AllSky. The V2
+architecture must not drift into a heavyweight enterprise platform that competes
+with capture, acquisition, or processing.
+
+Every new layer must be:
+
+- lazy;
+- optional where possible;
+- testable without a full runtime stack;
+- disableable when practical;
+- light in RAM and CPU;
+- free of aggressive polling;
+- free of heavy processing inside UI request paths.
+
+The UI must not compete with capture or processing. Modern Admin pages should
+prefer bounded metadata/status reads, pagination, cached summaries, and explicit
+operator-triggered actions.
+
+Raspberry Pi 5-first rules:
+
+- No live dashboard polling without rate limits.
+- No unpaginated queries over large tables.
+- No frequent filesystem scans.
+- No FITS, raw, video, or panorama conversion on demand without queueing,
+  limits, and timeouts.
+- No heavy media preview generation inside normal page rendering.
+- Safe Actions must stay lightweight and run only on explicit request.
+- Persistent audit storage must include retention, pruning, or bounded storage
+  behavior.
+- Background processing must remain subordinate to acquisition-first operation.
+
+A future React, Vue, Svelte, or other separate frontend is optional, not a
+destination by default. If considered, it must be evaluated for:
+
+- build size;
+- browser and server RAM;
+- CPU use on Raspberry Pi 5;
+- static asset size;
+- caching behavior;
+- startup cost;
+- whether a large bundle is actually justified.
+
+The target design may support external clients, but the Pi should not become a
+heavy general-purpose application server. UI independence can mean a cleaner
+Flask Modern UI, lightweight read-only APIs, optional external clients, or a
+minimal local dashboard. It does not mean a heavyweight frontend is mandatory.
+
+## 10. Migration Roadmap From Here
 
 ### Phase 1 - Modern read-only surfaces
 
@@ -386,9 +435,12 @@ known, public/external routes are excluded, and rollback is possible.
 
 Consider a separate frontend only after enough read-only APIs, service
 boundaries, Safe Actions, and audit semantics exist to prevent duplicating the
-current Flask/Jinja coupling.
+current Flask/Jinja coupling. UI independence does not require a heavyweight
+frontend; a cleaner Flask Modern UI, lightweight API contracts, optional external
+clients, or a minimal local dashboard may be the better Raspberry Pi 5-first
+outcome.
 
-## 10. Design Principles
+## 11. Design Principles
 
 - Profile-first.
 - Multicamera-first.
@@ -400,12 +452,14 @@ current Flask/Jinja coupling.
 - No UI action without audit.
 - No Classic removal without parity.
 - No frontend rewrite until service boundaries exist.
+- No heavyweight frontend or polling loop that competes with Raspberry Pi 5
+  acquisition and processing.
 - Preserve public/latest, Sync API, Action API, shared AJAX, and bookmarked
   routes as compatibility surfaces.
 - Keep Classic fallback until the feature has proven Modern parity and a
   deprecation path.
 
-## 11. Current Maturity Estimate
+## 12. Current Maturity Estimate
 
 These are qualitative estimates, not precision metrics.
 
@@ -416,10 +470,11 @@ These are qualitative estimates, not precision metrics.
 | Safe Actions infrastructure | Medium | Contract, registry, runner, dry-run endpoint, pilot wrapper, tests, and in-memory audit record exist. Execute is still blocked. |
 | Service separation | Low-medium | Some domain modules exist, but many workflows remain in Flask views, legacy AJAX, and model/view coupling. |
 | API readiness | Low-medium | Public/shared endpoints exist, but a clean service/API layer for Modern or external clients is not complete. |
-| UI independence | Low-medium | Modern UI is broad, but a separate frontend would still need many service/action contracts first. |
+| UI independence | Low-medium | Modern UI is broad, but independence should remain Raspberry Pi 5-first. It may mean cleaner Flask Modern pages, lightweight APIs, optional clients, or a minimal dashboard rather than a large frontend. |
 | Classic removal readiness | Low | Classic removability remains effectively 0% because mutations, downloads, restore, media generation, OAuth, auth, and hardware actions are not safely ported. |
+| Raspberry Pi 5 fit | Medium | The current approach is mostly lightweight/read-only, but future APIs, dashboards, audit persistence, and UI rewrites must be explicitly bounded. |
 
-## 12. Recommended Next Steps
+## 13. Recommended Next Steps
 
 Recommended next work should stay small and contract-driven:
 
@@ -437,8 +492,10 @@ Recommended next work should stay small and contract-driven:
    camera-profile-first, global, and developer-only ownership.
 7. Keep Classic fallback and compatibility routes unchanged until parity and
    deprecation criteria are met.
+8. Review future dashboard/API/frontend ideas against the Raspberry Pi 5-first
+   constraint before implementation.
 
-## 13. Risks
+## 14. Risks
 
 - Over-engineering before the next safe action proves the pattern end to end.
 - Treating Classic-only count of zero as Classic removal readiness.
@@ -455,3 +512,5 @@ Recommended next work should stay small and contract-driven:
 - Assuming static inventory proves external compatibility safety. Public,
   bookmarked, Sync, Action, shared AJAX, and latest/media endpoints may have
   external consumers.
+- Designing a future dashboard, API layer, audit log, or frontend that is too
+  heavy for Raspberry Pi 5 and competes with acquisition, capture, or processing.
