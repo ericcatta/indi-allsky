@@ -286,6 +286,15 @@ First Pilot Safe Action: `notification.acknowledge`:
   a tested acknowledge callback.
 - Status: wrapper/service/test only, not exposed in Modern UI and not exposed as
   an execute endpoint.
+- Current readiness: `notification.acknowledge` is service-ready, meaning the
+  contract, registry, runner, audit record, persistent audit log, dry-run
+  endpoint, service boundary, and DB adapter exist. Live acknowledge remains
+  blocked.
+- Blocked surfaces: execute endpoint, Modern UI button, and any browser-triggered
+  live acknowledge.
+- Minimum unblocker: run real Flask `test_client` coverage for auth/session/CSRF
+  behavior, then add a tested execute endpoint with DB adapter wiring, persistent
+  audit-log wiring, final permission policy, and explicit HTTP/status mapping.
 - Required before UI exposure: Modern CSRF/auth endpoint wrapper, audit log,
   confirmation UX, integration test, and Classic fallback/rollback decision.
 

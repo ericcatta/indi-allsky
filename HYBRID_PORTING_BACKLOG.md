@@ -85,7 +85,7 @@ Operational backlog snapshot:
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
 | In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse, Gallery, Panorama, Raw Viewer, Public media endpoints |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share, Panorama generation/download/conversion/actions, Raw decode/download/file inspection |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge execute/UI, Notification delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share, Panorama generation/download/conversion/actions, Raw decode/download/file inspection |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -265,7 +265,7 @@ These should not be removed. They are transitional.
 | Task Queue | modern | PARTIAL MODERN | D | 65% | Task model | High | S | High | List/usability/detail done; mutations blocked. |
 | User Management | modern | PARTIAL MODERN | D | 65% | Auth model | High | S | High | Privacy-safe read-only detail exists; user mutations remain Classic-only and locally blocked. |
 | Authentication | shared_api | SHARED ACTIVE | Preserve | 70% | Flask login | High | XS | Preserve | Security-critical shared surface. |
-| Notifications | modern | PARTIAL MODERN | D | 65% | Notification model/forms | High | S | High | Read-only detail exists; acknowledgement remains Classic/shared and locally blocked. |
+| Notifications | modern | PARTIAL MODERN | D | 65% | Notification model/forms, Safe Actions | High | S | High | Read-only detail exists. `notification.acknowledge` is service-ready via contract, registry, runner, audit record/log, dry-run endpoint, service boundary, and DB adapter; execute endpoint/UI remain locally blocked pending real Flask auth/session/CSRF tests, final permission policy, HTTP/status mapping, and audit wiring in the real endpoint. |
 | Admin Tools | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Medium | M | Medium | Native pages later. |
 | Safe Controls | modern_wrapper | WRAPPER ONLY | B | 35% | Classic tools | Critical | L | Protect | Do not remove. |
 | Network | modern_wrapper | WRAPPER ONLY | B | 35% | System/network backend | Medium | M | Medium | High operational risk. |

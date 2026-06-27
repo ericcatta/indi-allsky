@@ -137,8 +137,22 @@ Additional blockers before any Modern UI button:
 
 Recommendation: **NOT READY, NEEDS FLASK INTEGRATION TESTS**.
 
-The service boundary is now strong enough for a future execute path, but the
-project should not expose a real functioning execute endpoint yet.
+The service boundary and DB adapter are now strong enough for a future execute
+path, but the project should not expose a real functioning execute endpoint yet.
+
+Current state:
+
+- Ready: Safe Action contract, registry, runner, audit record, persistent audit
+  log, dry-run endpoint, `NotificationAcknowledgeSafeAction`,
+  `NotificationAcknowledgeService`, and `NotificationAcknowledgeDbAdapter`.
+- Blocked: execute endpoint, Modern UI button, and live acknowledge from Modern.
+- Blockers: missing real Flask integration tests for auth/session/CSRF, final
+  permission policy, HTTP/status mapping, and persistent audit-log wiring in the
+  real execute endpoint.
+- Minimum unblocker: make Flask available in the test environment, add
+  `test_client` coverage for the dry-run endpoint, then add a tested execute
+  endpoint that wires the DB adapter and audit log; only after that should a UI
+  button be considered.
 
 Additional static/helper-level coverage now exists for the dry-run endpoint:
 

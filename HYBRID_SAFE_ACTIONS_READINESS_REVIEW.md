@@ -86,6 +86,16 @@ Reviewed files and patterns:
 | Is a real execute endpoint for notification acknowledge safe now? | Not yet. The service boundary and DB adapter now have unit coverage, but execute still needs CSRF/auth wrapper, persistent audit wiring, permission policy, Flask integration tests, and confirmation/UX decision. |
 | What is the safest next micro-step? | Add a dry-run-only Flask wrapper endpoint for `notification.acknowledge`, behind login/admin policy and CSRF, with tests, but no UI button and no execute callback. |
 
+Current `notification.acknowledge` state after the DB adapter:
+
+- Ready: contract, registry, runner, audit record, persistent audit log, dry-run
+  endpoint, service boundary, and DB adapter.
+- Blocked: execute endpoint, Modern UI button, and live acknowledge in Modern.
+- Minimum unblocker: provide a test environment with Flask available, add real
+  `test_client` coverage for dry-run auth/session/CSRF behavior, then add a
+  tested execute endpoint that wires the DB adapter, persistent audit log,
+  final permission policy, and HTTP/status mapping before any UI button.
+
 ## 5. Readiness Matrix
 
 | Requirement | Status | Risk | Needed Before Dry-Run Endpoint | Needed Before Execute Endpoint |
