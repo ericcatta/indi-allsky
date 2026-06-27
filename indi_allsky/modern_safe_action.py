@@ -697,6 +697,395 @@ class NotificationAcknowledgeSafeAction(ModernAdminSafeAction):
             return None
 
 
+class ImageExcludeRepositoryError(RuntimeError):
+    """Sanitized repository error for image exclude lookup."""
+
+
+class ImageExcludeDbAdapter:
+    """DB adapter between image models and the exclude service.
+
+    The adapter performs lookup only. It does not change exclude state, commit,
+    depend on Flask request context, or expose raw repository exception
+    messages.
+    """
+
+    def __init__(self, image_model=None, query=None, no_result_exceptions=None):
+        self.image_model = image_model
+        self.query = query
+        self.no_result_exceptions = tuple(no_result_exceptions or ())
+
+
+    def lookup(self, image_id, camera_id):
+        try:
+            query = self.query_for_lookup()
+
+            if hasattr(query, 'filter_by'):
+                return query.filter_by(id=image_id, camera_id=camera_id).one()
+
+            if self.image_model is None:
+                raise ImageExcludeRepositoryError('image_model is required')
+
+            return query.filter(
+                self.image_model.id == image_id,
+                self.image_model.camera_id == camera_id,
+            ).one()
+        except Exception as e:
+            if self.is_no_result(e):
+                return None
+
+            raise ImageExcludeRepositoryError(type(e).__name__) from e
+
+
+    def query_for_lookup(self):
+        if self.query is not None:
+            return self.query
+
+        if self.image_model is None:
+            raise ImageExcludeRepositoryError('image_model is required')
+
+        return self.image_model.query
+
+
+    def is_no_result(self, error):
+        if self.no_result_exceptions and isinstance(error, self.no_result_exceptions):
+            return True
+
+        return type(error).__name__ == 'NoResultFound'
+
+
+class ImageExcludeService:
+    """Service boundary for image exclude/unexclude operations.
+
+    The service is not exposed to Flask or the UI. It can change exclude state
+    only through an explicit injected apply callback.
+    """
+
+    action_id = 'image.exclude'
+    feature = 'Image Viewer'
+    risk_level = 'medium'
+
+    def __init__(self, image_lookup, apply_callback=None):
+        self.image_lookup = image_lookup
+        self.apply_callback = apply_callback
+
+
+    def validate_positive_int(self, value, field_name):
+        if value is None or isinstance(value, bool):
+            return None, '{0:s} is required'.format(field_name)
+
+        try:
+            value_i = int(value)
+        except (TypeError, ValueError):
+            return None, '{0:s} must be a positive integer'.format(field_name)
+
+        if value_i < 1:
+            return None, '{0:s} must be a positive integer'.format(field_name)
+
+        return value_i, None
+
+
+    def validate_exclude(self, exclude):
+        if not isinstance(exclude, bool):
+            return None, 'exclude must be a boolean'
+
+        return exclude, None
+
+
+    def set_exclude(self, image_id, camera_id, exclude, image=None, actor=None, payload=None, dry_run=False):
+        payload = payload or {}
+        image_id_i, image_error = self.validate_positive_int(image_id, 'image_id')
+        if image_error:
+            return self.result(
+                status='invalid_id',
+                message=image_error,
+                dry_run=dry_run,
+                allowed=False,
+                details={'image_id': image_id},
+            )
+
+        camera_id_i, camera_error = self.validate_positive_int(camera_id, 'camera_id')
+        if camera_error:
+            return self.result(
+                status='invalid_camera_id',
+                message=camera_error,
+                dry_run=dry_run,
+                allowed=False,
+                details={
+                    'image_id': image_id_i,
+                    'camera_id': camera_id,
+                },
+            )
+
+        exclude_b, exclude_error = self.validate_exclude(exclude)
+        if exclude_error:
+            return self.result(
+                status='invalid_exclude',
+                message=exclude_error,
+                dry_run=dry_run,
+                allowed=False,
+                details={
+                    'image_id': image_id_i,
+                    'camera_id': camera_id_i,
+                },
+            )
+
+        try:
+            if image is None:
+                image = self.image_lookup(image_id_i, camera_id_i)
+        except Exception as e:
+            return self.result(
+                status='repository_error',
+                message='Image lookup failed',
+                dry_run=dry_run,
+                allowed=False,
+                details={
+                    'image_id': image_id_i,
+                    'camera_id': camera_id_i,
+                    'error_type': type(e).__name__,
+                },
+            )
+
+        if image is None:
+            return self.result(
+                status='not_found',
+                message='Image does not exist',
+                dry_run=dry_run,
+                allowed=False,
+                details={
+                    'image_id': image_id_i,
+                    'camera_id': camera_id_i,
+                },
+            )
+
+        if bool(getattr(image, 'exclude', False)) is exclude_b:
+            return self.result(
+                status='already_set',
+                message='Image exclude state is already set',
+                dry_run=dry_run,
+                allowed=True,
+                details={
+                    'image_id': image_id_i,
+                    'camera_id': camera_id_i,
+                    'exclude': exclude_b,
+                    'idempotent': True,
+                },
+            )
+
+        if dry_run:
+            return self.result(
+                status='dry_run',
+                message='Dry run only; no image exclude state changed',
+                dry_run=True,
+                allowed=True,
+                details={
+                    'image_id': image_id_i,
+                    'camera_id': camera_id_i,
+                    'exclude': exclude_b,
+                },
+            )
+
+        if self.apply_callback is None:
+            return self.result(
+                status='not_implemented',
+                message='Image exclude apply callback is not configured',
+                dry_run=False,
+                allowed=False,
+                details={
+                    'image_id': image_id_i,
+                    'camera_id': camera_id_i,
+                    'exclude': exclude_b,
+                },
+            )
+
+        try:
+            callback_result = self.apply_callback(
+                image_id=image_id_i,
+                camera_id=camera_id_i,
+                image=image,
+                exclude=exclude_b,
+                actor=actor,
+                payload=payload,
+            )
+        except Exception as e:
+            return self.result(
+                status='update_failed',
+                message='Image exclude update failed',
+                dry_run=False,
+                allowed=False,
+                details={
+                    'image_id': image_id_i,
+                    'camera_id': camera_id_i,
+                    'exclude': exclude_b,
+                    'error_type': type(e).__name__,
+                },
+            )
+
+        callback_details = {}
+        if isinstance(callback_result, dict):
+            callback_details = dict(callback_result.get('details', callback_result))
+
+        return self.result(
+            status='excluded' if exclude_b else 'unexcluded',
+            message='Image excluded' if exclude_b else 'Image unexcluded',
+            dry_run=False,
+            allowed=True,
+            details={
+                'image_id': image_id_i,
+                'camera_id': camera_id_i,
+                'exclude': exclude_b,
+                **callback_details,
+            },
+        )
+
+
+    def set_exclude_with_audit(self, image_id, camera_id, exclude, actor=None, payload=None, audit_log=None, dry_run=False):
+        payload = dict(payload or {})
+        payload.setdefault('image_id', image_id)
+        payload.setdefault('camera_id', camera_id)
+        payload.setdefault('exclude', exclude)
+
+        result = self.set_exclude(
+            image_id=image_id,
+            camera_id=camera_id,
+            exclude=exclude,
+            actor=actor,
+            payload=payload,
+            dry_run=dry_run,
+        )
+
+        audit_record = ModernAdminSafeActionAuditRecord.from_result(
+            result,
+            actor=actor,
+            payload=payload,
+        )
+        audit_write = None
+        if audit_log is not None:
+            audit_write = audit_log.append(audit_record)
+
+        return result, audit_record, audit_write
+
+
+    def result(self, status, message, dry_run=False, allowed=False, details=None):
+        return ModernAdminSafeActionResult(
+            action_id=self.action_id,
+            feature=self.feature,
+            risk_level=self.risk_level,
+            status=status,
+            message=message,
+            dry_run=dry_run,
+            allowed=allowed,
+            audit_message='service action={0:s} status={1:s}'.format(self.action_id, status),
+            details=details or {},
+        )
+
+
+class ImageExcludeSafeAction(ModernAdminSafeAction):
+    action_id = 'image.exclude'
+    label = 'Exclude Image'
+    feature = 'Image Viewer'
+    risk_level = 'medium'
+    target_exclude = True
+
+    def __init__(self, permission_check=None, image_lookup=None, apply_callback=None, image_service=None):
+        super().__init__(permission_check=permission_check)
+        if image_service is not None:
+            image_lookup = image_service.image_lookup
+            apply_callback = image_service.apply_callback
+
+        self.image_lookup = image_lookup
+        self.apply_callback = apply_callback
+
+
+    def validate(self, payload):
+        image_id = self.image_id_from_payload(payload)
+        if image_id is None:
+            return 'image_id is required'
+
+        if image_id < 1:
+            return 'image_id must be a positive integer'
+
+        camera_id = self.camera_id_from_payload(payload)
+        if camera_id is None:
+            return 'camera_id is required'
+
+        if camera_id < 1:
+            return 'camera_id must be a positive integer'
+
+        if self.image_lookup is None:
+            return True
+
+        try:
+            image = self.image_lookup(image_id, camera_id)
+        except Exception:
+            return 'image lookup failed'
+
+        if image is None:
+            return 'image does not exist'
+
+        return True
+
+
+    def execute(self, actor=None, payload=None):
+        payload = payload or {}
+        image_id = self.image_id_from_payload(payload)
+        camera_id = self.camera_id_from_payload(payload)
+        service = ImageExcludeService(
+            self.image_lookup or (lambda image_id, camera_id: None),
+            apply_callback=self.apply_callback,
+        )
+
+        result = service.set_exclude(
+            image_id=image_id,
+            camera_id=camera_id,
+            exclude=self.target_exclude,
+            actor=actor,
+            payload=payload,
+            dry_run=False,
+        )
+
+        return result
+
+
+    def image_id_from_payload(self, payload):
+        payload = payload or {}
+
+        if 'image_id' in payload:
+            value = payload.get('image_id')
+        else:
+            value = payload.get('EXCLUDE_IMAGE_ID')
+
+        if value is None or isinstance(value, bool):
+            return None
+
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+
+    def camera_id_from_payload(self, payload):
+        payload = payload or {}
+
+        if 'camera_id' in payload:
+            value = payload.get('camera_id')
+        else:
+            value = payload.get('CAMERA_ID')
+
+        if value is None or isinstance(value, bool):
+            return None
+
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+
+class ImageUnexcludeSafeAction(ImageExcludeSafeAction):
+    action_id = 'image.unexclude'
+    label = 'Unexclude Image'
+    target_exclude = False
+
+
 class ModernAdminSafeActionRegistry:
     def __init__(self):
         self._actions = {}
@@ -832,10 +1221,14 @@ def build_default_modern_safe_action_registry():
     registry.register(NotificationAcknowledgeSafeAction(
         permission_check=allow_no_one,
     ))
+    registry.register(ImageExcludeSafeAction(
+        permission_check=allow_no_one,
+    ))
+    registry.register(ImageUnexcludeSafeAction(
+        permission_check=allow_no_one,
+    ))
 
     for action_id, label, feature, risk_level in (
-        ('image.exclude', 'Exclude Image', 'Image Viewer', 'medium'),
-        ('image.unexclude', 'Unexclude Image', 'Image Viewer', 'medium'),
         ('log.download', 'Download Log', 'Logs', 'high'),
         ('task.retry', 'Retry Task', 'Task Queue', 'high'),
         ('task.cancel', 'Cancel Task', 'Task Queue', 'high'),

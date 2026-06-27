@@ -85,7 +85,7 @@ Operational backlog snapshot:
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
 | In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse, Gallery, Panorama, Raw Viewer, Public media endpoints |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge execute/UI, Notification delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share, Panorama generation/download/conversion/actions, Raw decode/download/file inspection |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge execute/UI, Notification delete, User Management mutations, FITS preview/download/conversion, Image Viewer exclude/unexclude execute/UI, Image Viewer delete/download/processing, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share, Panorama generation/download/conversion/actions, Raw decode/download/file inspection |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -141,7 +141,7 @@ the next available feature.
 | Meteor Detection (global for detector work) | Real outdoor FITS validation is missing. | Offline reports, validation tooling, documentation. |
 | Event Review (global for event UI/action work) | Event review workflow has no UI contract yet. | Architecture/design/read-only evidence browser. |
 | Task Queue mutations | No safe user-facing backend contract for retry/cancel/delete/requeue. | No mutation; only diagnostics/detail. |
-| Image Viewer actions/exclude | Exclude/delete/download/processing require explicit media action and path policy. | Metadata-only list/detail only. |
+| Image Viewer actions/exclude | Exclude/unexclude service boundary and DB adapter exist, but endpoint/UI remain blocked pending Flask auth/session/CSRF tests, permission policy, audit wiring and HTTP/status mapping. Delete/download/processing still require explicit media action and path policy. | Metadata-only list/detail only; service-ready safe action tests only. |
 | Video Viewer upload/share/actions | Upload/share/download/delete require explicit media action and path policy. | Metadata-only list/detail only. |
 | Gallery delete/exclude/download/share | Gallery media actions require explicit media action and path policy. | Read-only browsing/usability only. |
 | Panorama generation/download/conversion/actions | Panorama generation, conversion, download, exclude/delete and loop playback require explicit media action and path policy. | Metadata-only list/status only. |
@@ -232,7 +232,7 @@ These should not be removed. They are transitional.
 | Focus | modern_wrapper | WRAPPER ONLY | C | 55% | Safe controls | Medium | M | Medium | Modern safe wrapper has read-only status/preview; hardware movement remains blocked. |
 | Camera Simulator | modern_wrapper | WRAPPER ONLY | B | 35% | Safe controls | Low | L | Low | Low-risk but low-value. |
 | Image Lag | modern | PARTIAL MODERN | C | 55% | Camera pages | Medium | M | Medium | Modern page exists; semantics need validation. |
-| Image Viewer | modern | PARTIAL MODERN | D | 65% | Media list | Medium | M | Medium | Read-only Modern image metadata detail exists; exclude/delete/download/processing remain blocked. |
+| Image Viewer | modern | PARTIAL MODERN | D | 65% | Media list, Safe Actions | Medium | M | Medium | Read-only Modern image metadata detail exists. `image.exclude` and `image.unexclude` now have service boundary, DB adapter, safe action wrappers, audit integration and fake-callback tests; endpoint/UI remain blocked. Delete/download/processing remain blocked. |
 | FITS Image Viewer | modern | PARTIAL MODERN | D | 65% | Scientific source layer | High | M | High | Read-only Modern FITS metadata detail exists; conversion/viewer parity remains Classic-only and locally blocked. |
 | Gallery | modern | PARTIAL MODERN | C | 60% | Media list | Medium | M | Medium | Modern gallery read-only usability improved; delete/exclude/download/share remain blocked. |
 | Panorama | modern | PARTIAL MODERN | B | 75% | Public endpoints | Medium | M | Medium | Modern read-only metadata/status list exists; public/latest and panorama loop behavior remain preserved. |

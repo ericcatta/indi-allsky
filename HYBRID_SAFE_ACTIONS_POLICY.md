@@ -82,7 +82,7 @@ Status values:
 | FITS Viewer | metadata browsing | `/ajax/fitsimageviewer`; `AjaxFitsImageViewerView` | POST | Exists and mostly read-only | DB reads | FITS filenames/metadata | Low | SAFE AFTER WRAPPER | Prefer existing Modern metadata pages; wrap AJAX only if needed |
 | FITS Viewer | preview/conversion | `/fits2jpeg`; `Fits2JpegView` | GET | Exists | Reads FITS, opens file, runs processing/conversion | FITS path/content, image data | High | SAFE AFTER POLICY | Path allowlist by DB ID, conversion sandbox, size limits, timeout, no arbitrary path, cache policy, tests |
 | FITS Viewer | download | Existing direct policy not verified | GET/unknown | Not safe enough | Reads and returns FITS/source files | Scientific source paths | High | SAFE AFTER POLICY | Download/file policy, source allowlist, MIME, size, auth, no path exposure |
-| Image Viewer | exclude/unexclude | `/ajax/exclude`; `AjaxImageExcludeView` | POST | Exists | Mutates image exclude flag | Image IDs/camera IDs | Medium | SAFE AFTER WRAPPER | Modern media action wrapper, admin-only, camera ownership validation, idempotency, audit log, tests |
+| Image Viewer | exclude/unexclude | `/ajax/exclude`; `AjaxImageExcludeView` | POST | Exists | Mutates image exclude flag | Image IDs/camera IDs | Medium | SAFE AFTER WRAPPER | Service boundary and DB adapter now exist; still needs Modern endpoint wrapper, admin-only policy, CSRF/auth integration tests, audit-log wiring, camera ownership validation, idempotency tests at endpoint level |
 | Image Viewer | delete/download/share/process | Classic viewer/media actions | Mixed | Existing behavior spread across media endpoints | Deletes assets, serves files, processes images | File paths, media content | High | SAFE AFTER POLICY | Media action policy, file allowlist, confirmation, soft-delete/rollback where possible |
 | Video Viewer | upload to YouTube | `/ajax/uploadyoutube`; `AjaxUploadYoutubeView` | POST | Exists | Creates upload task | Video IDs, upload metadata, external provider behavior | High | SAFE AFTER POLICY | Upload/OAuth policy, task duplication checks, credential status checks, audit log |
 | Video Viewer | download/share/delete | Classic video viewer/actions | Mixed | Existing behavior not wrapped safely | File serving/deletion/public sharing | File paths/media URLs | High | SAFE AFTER POLICY | Media action policy, public URL policy, confirmation, tests |
@@ -204,7 +204,9 @@ Recommended order is based on risk, value, and smallest safe wrapper:
 1. Notification acknowledge wrapper: bounded DB mutation, clear idempotency, low
    blast radius.
 2. Image exclude/unexclude wrapper: simple DB flag, camera ownership validation,
-   no filesystem mutation.
+   no filesystem mutation. Service boundary, DB adapter, safe action wrappers,
+   audit integration and fake-callback tests now exist; execute endpoint/UI
+   remain blocked until Flask auth/session/CSRF tests and audit wiring exist.
 3. Log download wrapper: existing read path, but only after redaction/size policy.
 4. Queue generation dry-run/status contract: no task creation at first.
 5. Timelapse/keogram/startrail generation wrapper: only after duplicate
@@ -354,6 +356,23 @@ Recommended next micro-step:
 4. Keep Classic fallback unchanged.
 5. Do not add delete/download/restore/OAuth/hardware actions until their specific
    policy sections are satisfied.
+
+Second Pilot Safe Actions: `image.exclude` and `image.unexclude`:
+
+- `ImageExcludeSafeAction` and `ImageUnexcludeSafeAction` are service/test-only
+  pilots for the existing `/ajax/exclude` behavior.
+- `ImageExcludeService` validates image id, camera id, desired exclude state,
+  repository lookup, idempotent already-set state, dry-run, fake apply callbacks,
+  update failures, and redacted audit records.
+- `ImageExcludeDbAdapter` provides a lookup-only bridge from the image DB
+  model/query to the service boundary. It does not change exclude state, does
+  not commit, and does not depend on Flask request context.
+- Status: service-ready and registry-ready only. No endpoint, UI button,
+  browser-triggered exclude, delete, download, processing, or Classic route
+  change has been added.
+- Minimum unblocker: real Flask integration tests for auth/session/CSRF,
+  endpoint response mapping, persistent audit-log wiring, final admin/camera
+  ownership policy, and explicit confirmation/copy before any Modern UI button.
 
 If action work is still considered too risky, the next safe alternative is
 Settings Redesign preparation: document ownership and grouping without changing

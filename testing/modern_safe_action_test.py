@@ -14,6 +14,11 @@ from indi_allsky.modern_safe_action import ModernAdminSafeActionAuditRecord
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRegistry
 from indi_allsky.modern_safe_action import ModernAdminSafeActionResult
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRunner
+from indi_allsky.modern_safe_action import ImageExcludeDbAdapter
+from indi_allsky.modern_safe_action import ImageExcludeRepositoryError
+from indi_allsky.modern_safe_action import ImageExcludeSafeAction
+from indi_allsky.modern_safe_action import ImageExcludeService
+from indi_allsky.modern_safe_action import ImageUnexcludeSafeAction
 from indi_allsky.modern_safe_action import NotificationAcknowledgeDbAdapter
 from indi_allsky.modern_safe_action import NotificationAcknowledgeRepositoryError
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
@@ -40,6 +45,13 @@ class FakeNotification:
     def setAck(self):
         self.set_ack_calls += 1
         self.ack = True
+
+
+class FakeImage:
+    def __init__(self, image_id, camera_id=1, exclude=False):
+        self.id = image_id
+        self.camera_id = camera_id
+        self.exclude = exclude
 
 
 class FailingSetAckNotification(FakeNotification):
@@ -82,8 +94,9 @@ class FakeNoResultFound(Exception):
 
 
 class FakeQuery:
-    def __init__(self, notification=None, error=None):
+    def __init__(self, notification=None, image=None, error=None):
         self.notification = notification
+        self.image = image
         self.error = error
         self.filter_by_calls = []
         self.one_calls = 0
@@ -98,6 +111,9 @@ class FakeQuery:
         self.one_calls += 1
         if self.error:
             raise self.error
+
+        if self.image is not None:
+            return self.image
 
         return self.notification
 
@@ -525,6 +541,305 @@ def test_notification_acknowledge_service_with_db_adapter_repository_error_redac
     assert result.allowed is False
     assert result.details['error_type'] == 'NotificationAcknowledgeRepositoryError'
     assert 'secret' not in str(result.to_dict())
+
+
+def test_image_exclude_db_adapter_lookup_success():
+    image = FakeImage(101, camera_id=3)
+    query = FakeQuery(image=image)
+    adapter = ImageExcludeDbAdapter(
+        query=query,
+        no_result_exceptions=(FakeNoResultFound,),
+    )
+
+    result = adapter.lookup(101, 3)
+
+    assert result is image
+    assert query.filter_by_calls == [{'id': 101, 'camera_id': 3}]
+    assert query.one_calls == 1
+
+
+def test_image_exclude_db_adapter_not_found():
+    query = FakeQuery(error=FakeNoResultFound())
+    adapter = ImageExcludeDbAdapter(
+        query=query,
+        no_result_exceptions=(FakeNoResultFound,),
+    )
+
+    result = adapter.lookup(102, 3)
+
+    assert result is None
+    assert query.filter_by_calls == [{'id': 102, 'camera_id': 3}]
+
+
+def test_image_exclude_db_adapter_query_exception_is_sanitized():
+    query = FakeQuery(error=RuntimeError('database exploded api_key=secret'))
+    adapter = ImageExcludeDbAdapter(query=query)
+
+    try:
+        adapter.lookup(103, 3)
+    except ImageExcludeRepositoryError as e:
+        assert str(e) == 'RuntimeError'
+        assert 'secret' not in str(e)
+    else:
+        raise AssertionError('Repository exception was not raised')
+
+
+def test_image_exclude_db_adapter_lookup_does_not_mutate():
+    image = FakeImage(104, camera_id=3, exclude=False)
+    adapter = ImageExcludeDbAdapter(query=FakeQuery(image=image))
+
+    result = adapter.lookup(104, 3)
+
+    assert result is image
+    assert image.exclude is False
+
+
+def test_image_exclude_service_invalid_ids():
+    calls = []
+    service = ImageExcludeService(lambda image_id, camera_id: calls.append((image_id, camera_id)))
+
+    result = service.set_exclude(image_id=0, camera_id=3, exclude=True)
+
+    assert result.status == 'invalid_id'
+    assert result.allowed is False
+    assert calls == []
+
+    result = service.set_exclude(image_id=1, camera_id=0, exclude=True)
+
+    assert result.status == 'invalid_camera_id'
+    assert result.allowed is False
+    assert calls == []
+
+
+def test_image_exclude_service_invalid_exclude_value():
+    calls = []
+    service = ImageExcludeService(lambda image_id, camera_id: calls.append((image_id, camera_id)))
+
+    result = service.set_exclude(image_id=1, camera_id=3, exclude='true')
+
+    assert result.status == 'invalid_exclude'
+    assert result.allowed is False
+    assert calls == []
+
+
+def test_image_exclude_service_missing_image():
+    service = ImageExcludeService(lambda image_id, camera_id: None)
+
+    result = service.set_exclude(image_id=105, camera_id=3, exclude=True)
+
+    assert result.status == 'not_found'
+    assert result.allowed is False
+
+
+def test_image_exclude_service_repository_error_redacted():
+    def lookup(image_id, camera_id):
+        raise RuntimeError('lookup failed refresh_token=secret')
+
+    service = ImageExcludeService(lookup)
+
+    result = service.set_exclude(image_id=106, camera_id=3, exclude=True)
+
+    assert result.status == 'repository_error'
+    assert result.allowed is False
+    assert result.details['error_type'] == 'RuntimeError'
+    assert 'secret' not in str(result.to_dict())
+
+
+def test_image_exclude_service_already_set_is_noop():
+    image = FakeImage(107, camera_id=3, exclude=True)
+    calls = []
+    service = ImageExcludeService(
+        lambda image_id, camera_id: image,
+        apply_callback=lambda **kwargs: calls.append(kwargs),
+    )
+
+    result = service.set_exclude(image_id=107, camera_id=3, exclude=True)
+
+    assert result.status == 'already_set'
+    assert result.allowed is True
+    assert result.details['idempotent'] is True
+    assert calls == []
+
+
+def test_image_exclude_service_dry_run_does_not_apply():
+    image = FakeImage(108, camera_id=3, exclude=False)
+    calls = []
+    service = ImageExcludeService(
+        lambda image_id, camera_id: image,
+        apply_callback=lambda **kwargs: calls.append(kwargs),
+    )
+
+    result = service.set_exclude(image_id=108, camera_id=3, exclude=True, dry_run=True)
+
+    assert result.status == 'dry_run'
+    assert result.allowed is True
+    assert image.exclude is False
+    assert calls == []
+
+
+def test_image_exclude_service_without_apply_callback_is_not_implemented():
+    image = FakeImage(109, camera_id=3, exclude=False)
+    service = ImageExcludeService(lambda image_id, camera_id: image)
+
+    result = service.set_exclude(image_id=109, camera_id=3, exclude=True)
+
+    assert result.status == 'not_implemented'
+    assert result.allowed is False
+    assert image.exclude is False
+
+
+def test_image_exclude_service_with_fake_apply_excludes_image():
+    image = FakeImage(110, camera_id=3, exclude=False)
+    calls = []
+
+    def apply(**kwargs):
+        calls.append(kwargs)
+        kwargs['image'].exclude = kwargs['exclude']
+        return {'details': {'source': 'fake_apply'}}
+
+    service = ImageExcludeService(
+        lambda image_id, camera_id: image,
+        apply_callback=apply,
+    )
+
+    result = service.set_exclude(image_id=110, camera_id=3, exclude=True)
+
+    assert result.status == 'excluded'
+    assert result.allowed is True
+    assert image.exclude is True
+    assert len(calls) == 1
+    assert result.details['source'] == 'fake_apply'
+
+
+def test_image_exclude_service_with_fake_apply_unexcludes_image():
+    image = FakeImage(111, camera_id=3, exclude=True)
+
+    def apply(**kwargs):
+        kwargs['image'].exclude = kwargs['exclude']
+
+    service = ImageExcludeService(
+        lambda image_id, camera_id: image,
+        apply_callback=apply,
+    )
+
+    result = service.set_exclude(image_id=111, camera_id=3, exclude=False)
+
+    assert result.status == 'unexcluded'
+    assert result.allowed is True
+    assert image.exclude is False
+
+
+def test_image_exclude_service_apply_error_is_structured():
+    image = FakeImage(112, camera_id=3, exclude=False)
+
+    def apply(**kwargs):
+        raise RuntimeError('commit failed token=secret')
+
+    service = ImageExcludeService(
+        lambda image_id, camera_id: image,
+        apply_callback=apply,
+    )
+
+    result = service.set_exclude(image_id=112, camera_id=3, exclude=True)
+
+    assert result.status == 'update_failed'
+    assert result.allowed is False
+    assert result.details['error_type'] == 'RuntimeError'
+    assert 'secret' not in str(result.to_dict())
+
+
+def test_image_exclude_service_audit_redacts_payload():
+    image = FakeImage(113, camera_id=3, exclude=False)
+    audit_log = FakeAuditLog()
+
+    def apply(**kwargs):
+        kwargs['image'].exclude = kwargs['exclude']
+
+    service = ImageExcludeService(
+        lambda image_id, camera_id: image,
+        apply_callback=apply,
+    )
+
+    result, audit_record, audit_write = service.set_exclude_with_audit(
+        image_id=113,
+        camera_id=3,
+        exclude=True,
+        payload={'image_id': 113, 'api_key': 'secret'},
+        audit_log=audit_log,
+    )
+
+    assert result.status == 'excluded'
+    assert audit_write['written'] is True
+    assert audit_record.status == 'excluded'
+    assert 'secret' not in str(audit_record.to_dict())
+    assert 'secret' not in str(audit_log.records)
+
+
+def test_image_exclude_safe_action_dry_run_uses_no_apply_callback():
+    image = FakeImage(114, camera_id=3, exclude=False)
+    calls = []
+    action = ImageExcludeSafeAction(
+        permission_check=lambda actor: True,
+        image_lookup=lambda image_id, camera_id: image,
+        apply_callback=lambda **kwargs: calls.append(kwargs),
+    )
+
+    result = action.run(
+        actor=Actor(),
+        payload={'image_id': 114, 'camera_id': 3},
+        dry_run=True,
+    )
+
+    assert result.status == 'dry_run'
+    assert result.allowed is True
+    assert image.exclude is False
+    assert calls == []
+
+
+def test_image_exclude_safe_action_execute_with_fake_callback():
+    image = FakeImage(115, camera_id=3, exclude=False)
+
+    def apply(**kwargs):
+        kwargs['image'].exclude = kwargs['exclude']
+
+    action = ImageExcludeSafeAction(
+        permission_check=lambda actor: True,
+        image_lookup=lambda image_id, camera_id: image,
+        apply_callback=apply,
+    )
+
+    result = action.run(
+        actor=Actor(),
+        payload={'image_id': 115, 'camera_id': 3},
+        dry_run=False,
+    )
+
+    assert result.status == 'excluded'
+    assert result.allowed is True
+    assert image.exclude is True
+
+
+def test_image_unexclude_safe_action_execute_with_fake_callback():
+    image = FakeImage(116, camera_id=3, exclude=True)
+
+    def apply(**kwargs):
+        kwargs['image'].exclude = kwargs['exclude']
+
+    action = ImageUnexcludeSafeAction(
+        permission_check=lambda actor: True,
+        image_lookup=lambda image_id, camera_id: image,
+        apply_callback=apply,
+    )
+
+    result = action.run(
+        actor=Actor(),
+        payload={'image_id': 116, 'camera_id': 3},
+        dry_run=False,
+    )
+
+    assert result.status == 'unexcluded'
+    assert result.allowed is True
+    assert image.exclude is False
 
 
 def test_notification_acknowledge_service_missing_notification():
@@ -1400,6 +1715,24 @@ if __name__ == '__main__':
     test_notification_acknowledge_service_with_db_adapter_not_acked()
     test_notification_acknowledge_service_with_db_adapter_set_ack_error()
     test_notification_acknowledge_service_with_db_adapter_repository_error_redacted()
+    test_image_exclude_db_adapter_lookup_success()
+    test_image_exclude_db_adapter_not_found()
+    test_image_exclude_db_adapter_query_exception_is_sanitized()
+    test_image_exclude_db_adapter_lookup_does_not_mutate()
+    test_image_exclude_service_invalid_ids()
+    test_image_exclude_service_invalid_exclude_value()
+    test_image_exclude_service_missing_image()
+    test_image_exclude_service_repository_error_redacted()
+    test_image_exclude_service_already_set_is_noop()
+    test_image_exclude_service_dry_run_does_not_apply()
+    test_image_exclude_service_without_apply_callback_is_not_implemented()
+    test_image_exclude_service_with_fake_apply_excludes_image()
+    test_image_exclude_service_with_fake_apply_unexcludes_image()
+    test_image_exclude_service_apply_error_is_structured()
+    test_image_exclude_service_audit_redacts_payload()
+    test_image_exclude_safe_action_dry_run_uses_no_apply_callback()
+    test_image_exclude_safe_action_execute_with_fake_callback()
+    test_image_unexclude_safe_action_execute_with_fake_callback()
     test_notification_acknowledge_service_missing_notification()
     test_notification_acknowledge_service_already_acked_is_noop()
     test_notification_acknowledge_service_calls_set_ack_when_explicitly_executed()
