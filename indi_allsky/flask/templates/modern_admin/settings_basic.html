@@ -10,32 +10,38 @@ var camera_id = {{ camera_id }};
 {% endblock %}
 
 {% block content %}
-<main class="modern-admin-shell" aria-labelledby="modern-admin-basic-settings-title">
-    {% set modern_admin_header_label = 'Basic settings preview header' %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-settings-preview-title">
+    {% set modern_admin_header_label = modern_admin_settings_preview_label ~ ' settings preview header' %}
     {% set modern_admin_heading = 'Settings' %}
-    {% set modern_admin_title_id = 'modern-admin-basic-settings-title' %}
+    {% set modern_admin_title_id = 'modern-admin-settings-preview-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
-    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Basic settings preview summary">
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="{{ modern_admin_settings_preview_label }} settings preview summary">
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Product consolidation</p>
-                <h2 id="modern-admin-basic-settings-title">Basic Settings Preview</h2>
+                <h2 id="modern-admin-settings-preview-title">{{ modern_admin_settings_preview_label }} Settings Preview</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
         </div>
-        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> These are the settings groups currently classified as Basic in the ownership map. This page does not show active config values and does not write configuration.</p>
+        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> These are the {{ modern_admin_settings_preview_description }} currently classified as {{ modern_admin_settings_preview_label }} in the ownership map. This page does not show active config values and does not write configuration.</p>
         <p class="modern-admin-note">
             <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Index</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_basic_settings_view') }}">Basic</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_advanced_settings_view') }}">Advanced</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_developer_settings_view') }}">Developer</a>
         </p>
 
         <div class="modern-admin-settings-summary-grid">
             <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_basic_settings_count }}</span>
-                <p>Basic groups</p>
+                <span>{{ modern_admin_settings_preview_count }}</span>
+                <p>{{ modern_admin_settings_preview_label }} groups</p>
             </div>
             <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_basic_settings_do_not_move_count }}</span>
+                <span>{{ modern_admin_settings_preview_do_not_move_count }}</span>
                 <p>Do not move yet</p>
             </div>
             <div class="modern-admin-settings-summary-card">
@@ -51,17 +57,17 @@ var camera_id = {{ camera_id }};
     </section>
     {% endif %}
 
-    <section class="modern-admin-table-panel" aria-labelledby="basic-settings-groups-title">
+    <section class="modern-admin-table-panel" aria-labelledby="settings-preview-groups-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Daily-use concepts</p>
-                <h2 id="basic-settings-groups-title">Basic groups</h2>
+                <p class="modern-admin-eyebrow">{{ modern_admin_settings_preview_label }} concepts</p>
+                <h2 id="settings-preview-groups-title">{{ modern_admin_settings_preview_label }} groups</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_basic_settings_count }} groups</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_settings_preview_count }} groups</span>
         </div>
 
         <div class="modern-admin-link-grid">
-            {% for group in modern_admin_basic_settings_groups %}
+            {% for group in modern_admin_settings_preview_groups %}
             <article class="modern-admin-settings-action-card">
                 <span>
                     <strong>{{ group.label }}</strong>
@@ -91,7 +97,7 @@ var camera_id = {{ camera_id }};
                 </span>
             </article>
             {% else %}
-            <span>No Basic settings groups were loaded.</span>
+            <span>No {{ modern_admin_settings_preview_label }} settings groups were loaded.</span>
             {% endfor %}
         </div>
     </section>
