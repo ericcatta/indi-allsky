@@ -17446,6 +17446,9 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         status_counts = OrderedDict()
         risk_counts = OrderedDict()
         do_not_move_count = 0
+        high_risk_count = 0
+        ready_to_redesign_groups = list()
+        do_not_move_groups = list()
 
         for group_id, group_data in sorted(groups.items(), key=self.sort_settings_ownership_group):
             if not isinstance(group_data, dict):
@@ -17459,6 +17462,12 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             self.increment_count(risk_counts, row['risk'])
             if row['do_not_move_yet']:
                 do_not_move_count += 1
+                do_not_move_groups.append(row)
+            elif row['risk'] != 'high':
+                ready_to_redesign_groups.append(row)
+
+            if row['risk'] == 'high':
+                high_risk_count += 1
 
         return {
             'modern_admin_settings_map_error'         : None,
@@ -17466,6 +17475,9 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_groups'            : rows,
             'modern_admin_settings_group_count'       : len(rows),
             'modern_admin_settings_do_not_move_count' : do_not_move_count,
+            'modern_admin_settings_high_risk_count'   : high_risk_count,
+            'modern_admin_settings_ready_groups'       : ready_to_redesign_groups,
+            'modern_admin_settings_do_not_move_groups' : do_not_move_groups,
             'modern_admin_settings_owner_counts'      : self.counter_rows(owner_counts),
             'modern_admin_settings_level_counts'      : self.counter_rows(level_counts),
             'modern_admin_settings_status_counts'     : self.counter_rows(status_counts),
@@ -17484,6 +17496,9 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_groups'            : list(),
             'modern_admin_settings_group_count'       : 0,
             'modern_admin_settings_do_not_move_count' : 0,
+            'modern_admin_settings_high_risk_count'   : 0,
+            'modern_admin_settings_ready_groups'       : list(),
+            'modern_admin_settings_do_not_move_groups' : list(),
             'modern_admin_settings_owner_counts'      : tuple(),
             'modern_admin_settings_level_counts'      : tuple(),
             'modern_admin_settings_status_counts'     : tuple(),

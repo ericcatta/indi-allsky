@@ -24,7 +24,7 @@ var camera_id = {{ camera_id }};
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
         </div>
-        <p class="modern-admin-note">This index is generated from the settings ownership map. It shows where each settings group should live in the future product model. It does not read or write active configuration values.</p>
+        <p class="modern-admin-note"><strong>This is a product consolidation index, not a config editor.</strong> It is generated from the settings ownership map and shows where each settings group should live in the future product model. It does not read or write active configuration values.</p>
         <p class="modern-admin-note">Schema: <code>{{ modern_admin_settings_map_schema }}</code></p>
 
         <div class="modern-admin-settings-action-grid">
@@ -53,16 +53,28 @@ var camera_id = {{ camera_id }};
 
         <div class="modern-admin-settings-summary-grid">
             <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_settings_group_count }}</span>
-                <p>Mapped groups</p>
+                <span>
+                    {% for row in modern_admin_settings_level_counts %}
+                    {% if row.value == 'basic' %}{{ row.count }}{% endif %}
+                    {% endfor %}
+                </span>
+                <p>Basic groups</p>
             </div>
             <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_settings_do_not_move_count }}</span>
-                <p>Do not move yet</p>
+                <span>
+                    {% for row in modern_admin_settings_level_counts %}
+                    {% if row.value == 'advanced' %}{{ row.count }}{% endif %}
+                    {% endfor %}
+                </span>
+                <p>Advanced groups</p>
             </div>
             <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_settings_profile_count }}</span>
-                <p>Multi-camera profiles</p>
+                <span>
+                    {% for row in modern_admin_settings_level_counts %}
+                    {% if row.value == 'developer' %}{{ row.count }}{% endif %}
+                    {% endfor %}
+                </span>
+                <p>Developer groups</p>
             </div>
         </div>
     </section>
@@ -75,29 +87,54 @@ var camera_id = {{ camera_id }};
 
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Settings ownership counts">
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Levels</div>
-            {% for row in modern_admin_settings_level_counts %}
-            <p>{{ row.label }}: {{ row.count }}</p>
-            {% else %}
-            <p>No level data.</p>
-            {% endfor %}
+            <div class="modern-admin-card-label">Mapped groups</div>
+            <h3>{{ modern_admin_settings_group_count }}</h3>
+            <p>Read-only ownership records.</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Owners</div>
-            {% for row in modern_admin_settings_owner_counts %}
-            <p>{{ row.label }}: {{ row.count }}</p>
-            {% else %}
-            <p>No owner data.</p>
-            {% endfor %}
+            <div class="modern-admin-card-label">Do not move yet</div>
+            <h3>{{ modern_admin_settings_do_not_move_count }}</h3>
+            <p>Blocked by risk, policy, ownership, or evidence.</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Risk</div>
-            {% for row in modern_admin_settings_risk_counts %}
-            <p>{{ row.label }}: {{ row.count }}</p>
-            {% else %}
-            <p>No risk data.</p>
-            {% endfor %}
+            <div class="modern-admin-card-label">High risk</div>
+            <h3>{{ modern_admin_settings_high_risk_count }}</h3>
+            <p>Requires extra care before UI redesign.</p>
         </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="settings-ready-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Low-friction candidates</p>
+                <h2 id="settings-ready-title">Ready to redesign</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_settings_ready_groups | length }} groups</span>
+        </div>
+        <div class="modern-admin-link-grid">
+            {% for group in modern_admin_settings_ready_groups %}
+            <span>{{ group.label }} · {{ group.level | replace('_', ' ') | title }} · {{ group.owner | replace('_', ' ') | title }}</span>
+            {% else %}
+            <span>No groups are ready without additional evidence.</span>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="settings-blocked-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Guarded areas</p>
+                <h2 id="settings-blocked-title">Do not move yet</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-warning">{{ modern_admin_settings_do_not_move_count }} groups</span>
+        </div>
+        <div class="modern-admin-link-grid">
+            {% for group in modern_admin_settings_do_not_move_groups %}
+            <span>{{ group.label }} · {{ group.status | replace('_', ' ') | title }} · {{ group.risk | title }} risk</span>
+            {% else %}
+            <span>No groups are currently marked do not move yet.</span>
+            {% endfor %}
+        </div>
     </section>
 
     <section class="modern-admin-settings-toolbar" aria-label="Settings ownership filters">
