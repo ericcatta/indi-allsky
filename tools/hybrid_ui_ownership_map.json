@@ -80,6 +80,7 @@
         "/modern-admin/observatory/*",
         "/modern-admin/settings",
         "/modern-admin/settings/advanced",
+        "/modern-admin/settings/analytics",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/developer",
         "/modern-admin/settings/ready",
@@ -126,6 +127,7 @@
         "modern_admin/observatory_status.html",
         "modern_admin/realtime_keogram.html",
         "modern_admin/sensor_panel.html",
+        "modern_admin/settings_analytics.html",
         "modern_admin/settings_basic.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
@@ -403,6 +405,7 @@
       "routes": [
         "/modern-admin/settings",
         "/modern-admin/settings/advanced",
+        "/modern-admin/settings/analytics",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/developer",
         "/modern-admin/settings/ready",
@@ -412,6 +415,7 @@
       ],
       "templates": [
         "modern_admin/settings_inventory.html",
+        "modern_admin/settings_analytics.html",
         "modern_admin/settings_basic.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
@@ -549,12 +553,14 @@
       "routes": [
         "/modern-admin",
         "/charts",
-        "/modern-admin/observatory/charts"
+        "/modern-admin/observatory/charts",
+        "/modern-admin/settings/analytics"
       ],
       "templates": [
         "modern_admin/index.html",
         "chart.html",
-        "modern_admin/charts.html"
+        "modern_admin/charts.html",
+        "modern_admin/settings_analytics.html"
       ],
       "assets": [
         "js/chart.umd.js",
@@ -563,7 +569,12 @@
       "apis": [
         "/js/charts"
       ],
-      "config_keys": [],
+      "config_keys": [
+        "CHARTS__CUSTOM_SLOT_*",
+        "ADU_ROI_*",
+        "SQM_ROI_*",
+        "CAMERA_SQM__*"
+      ],
       "protected": true,
       "modern_gap": "Classic chart options may not be fully ported.",
       "removal_risk": "high",

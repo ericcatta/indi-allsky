@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-analytics-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-analytics-settings-title">
+    {% set modern_admin_header_label = 'Analytics settings preview header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-analytics-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Analytics settings summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Product consolidation</p>
+                <h2 id="modern-admin-analytics-settings-title">Analytics Settings</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> This page describes the future Analytics settings group using ownership metadata and static config-key evidence.</p>
+        <p class="modern-admin-note">No runtime settings are changed here.</p>
+        <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Index</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_ready_settings_view') }}">Ready to Redesign</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_advanced_settings_view') }}">Advanced Preview</a>
+        </p>
+    </section>
+
+    {% if modern_admin_settings_map_error %}
+    <section class="modern-admin-alert modern-admin-alert-danger" role="alert">
+        {{ modern_admin_settings_map_error }}
+    </section>
+    {% endif %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="analytics-ownership-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Ownership metadata</p>
+                <h2 id="analytics-ownership-title">Analytics ownership</h2>
+            </div>
+            {% if modern_admin_analytics_settings_group %}
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_analytics_settings_group.status | replace('_', ' ') | title }}</span>
+            {% else %}
+            <span class="modern-admin-status-pill modern-admin-status-warning">Missing map row</span>
+            {% endif %}
+        </div>
+
+        {% if modern_admin_analytics_settings_group %}
+        <div class="modern-admin-link-grid">
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ modern_admin_analytics_settings_group.label }}</strong>
+                    <small><code>{{ modern_admin_analytics_settings_group.group_id }}</code></small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ modern_admin_analytics_settings_group.level | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ modern_admin_analytics_settings_group.owner | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ modern_admin_analytics_settings_group.status | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ modern_admin_analytics_settings_group.risk }}">{{ modern_admin_analytics_settings_group.risk | title }} risk</span>
+                        {% if modern_admin_analytics_settings_group.do_not_move_yet %}
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-high">Do not move yet</span>
+                        {% endif %}
+                    </small>
+                    <small>
+                        {% for note in modern_admin_analytics_settings_group.notes %}
+                        {{ note }}{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No ownership notes.
+                        {% endfor %}
+                    </small>
+                </span>
+            </article>
+        </div>
+        {% else %}
+        <p class="modern-admin-note">The analytics settings group was not found in the ownership map.</p>
+        {% endif %}
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="analytics-surfaces-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Current references</p>
+                <h2 id="analytics-surfaces-title">Current surfaces</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Metadata only</span>
+        </div>
+        <div class="modern-admin-link-grid">
+            {% if modern_admin_analytics_settings_group %}
+                {% for surface in modern_admin_analytics_settings_group.current_surfaces %}
+                <span>{{ surface }}</span>
+                {% else %}
+                <span>No known surfaces.</span>
+                {% endfor %}
+            {% else %}
+            <span>No ownership map row loaded.</span>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="analytics-config-keys-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Static key evidence</p>
+                <h2 id="analytics-config-keys-title">Analytics config key candidates</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_analytics_config_keys | length }} groups</span>
+        </div>
+        <p class="modern-admin-note">These keys are listed from static Classic config/form evidence only. Active runtime config values are not loaded here.</p>
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-table">
+                <thead>
+                    <tr>
+                        <th>Key or pattern</th>
+                        <th>Source</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key_row in modern_admin_analytics_config_keys %}
+                    <tr>
+                        <td><code>{{ key_row.key }}</code></td>
+                        <td>{{ key_row.source }}</td>
+                        <td>{{ key_row.notes }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3">No static Analytics key candidates were listed.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+{% endblock %}

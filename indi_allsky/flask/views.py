@@ -18111,6 +18111,72 @@ class ModernAdminReadySettingsPreviewView(ModernAdminBasicSettingsPreviewView):
         return context
 
 
+class ModernAdminAnalyticsSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Analytics Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    ANALYTICS_CONFIG_KEYS = (
+        {
+            'key'     : 'CHARTS__CUSTOM_SLOT_1..9',
+            'source'  : 'Classic config form',
+            'notes'   : 'Custom chart slot metric selectors shown by the Classic config surface.',
+        },
+        {
+            'key'     : 'CHARTS__CUSTOM_SLOT_1_MIN..9_MIN',
+            'source'  : 'Classic config form',
+            'notes'   : 'Optional minimum bounds for custom chart slots.',
+        },
+        {
+            'key'     : 'ADU_ROI_*',
+            'source'  : 'Classic config form',
+            'notes'   : 'ADU region metadata used by operational brightness analytics.',
+        },
+        {
+            'key'     : 'ADU_FOV_DIV',
+            'source'  : 'Classic config form',
+            'notes'   : 'Fallback ADU field-of-view division when no ROI is configured.',
+        },
+        {
+            'key'     : 'SQM_ROI_*',
+            'source'  : 'Classic config form',
+            'notes'   : 'SQM/star region metadata used by brightness and sky quality summaries.',
+        },
+        {
+            'key'     : 'SQM_FOV_DIV',
+            'source'  : 'Classic config form',
+            'notes'   : 'Fallback SQM/star field-of-view division when no ROI is configured.',
+        },
+        {
+            'key'     : 'CAMERA_SQM__*',
+            'source'  : 'Classic config form',
+            'notes'   : 'Camera SQM sensor settings that feed analytics/status surfaces.',
+        },
+    )
+
+    def get_context(self):
+        context = super(ModernAdminAnalyticsSettingsView, self).get_context()
+        analytics_group = None
+        for group in context.get('modern_admin_settings_groups', []):
+            if group.get('group_id') == 'analytics':
+                analytics_group = group
+                break
+
+        context['modern_admin_analytics_settings_group'] = analytics_group
+        context['modern_admin_analytics_config_keys'] = self.get_analytics_config_keys()
+        return context
+
+
+    def get_analytics_config_keys(self):
+        return tuple(
+            {
+                'key'    : self.safe_settings_text(row.get('key')),
+                'source' : self.safe_settings_text(row.get('source')),
+                'notes'  : self.safe_settings_text(row.get('notes')),
+            }
+            for row in self.ANALYTICS_CONFIG_KEYS
+        )
+
+
 class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
     page_title = 'Modern Admin Full Settings'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
@@ -22631,6 +22697,7 @@ bp_allsky.add_url_rule('/modern-admin/settings/basic', view_func=ModernAdminBasi
 bp_allsky.add_url_rule('/modern-admin/settings/advanced', view_func=ModernAdminAdvancedSettingsPreviewView.as_view('modern_admin_advanced_settings_view', template_name='modern_admin/settings_basic.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/developer', view_func=ModernAdminDeveloperSettingsPreviewView.as_view('modern_admin_developer_settings_view', template_name='modern_admin/settings_basic.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/ready', view_func=ModernAdminReadySettingsPreviewView.as_view('modern_admin_ready_settings_view', template_name='modern_admin/settings_basic.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/analytics', view_func=ModernAdminAnalyticsSettingsView.as_view('modern_admin_analytics_settings_view', template_name='modern_admin/settings_analytics.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))
