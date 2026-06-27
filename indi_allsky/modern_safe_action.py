@@ -45,6 +45,60 @@ class ModernAdminSafeActionResult:
         }
 
 
+@dataclass(frozen=True)
+class ModernAdminSafeActionAuditRecord:
+    action_id: str
+    feature: str
+    actor: str
+    dry_run: bool
+    allowed: bool
+    status: str
+    risk_level: str
+    payload_summary: dict[str, Any] = field(default_factory=dict)
+    result_summary: dict[str, Any] = field(default_factory=dict)
+    reason: str = ''
+    created_at: str = field(default_factory=lambda: datetime.utcnow().replace(microsecond=0).isoformat() + 'Z')
+
+    @classmethod
+    def from_result(cls, result, actor=None, payload=None, sanitizer=None):
+        sanitizer = sanitizer or ModernAdminSafeAction()
+        result_summary = {
+            'status'  : result.status,
+            'message' : result.message,
+            'details' : result.details,
+        }
+
+        return cls(
+            action_id=result.action_id,
+            feature=result.feature,
+            actor=sanitizer.actor_label(actor),
+            dry_run=result.dry_run,
+            allowed=result.allowed,
+            status=result.status,
+            risk_level=result.risk_level,
+            payload_summary=sanitizer.sanitize_payload(payload or {}),
+            result_summary=sanitizer.sanitize_payload(result_summary),
+            reason=result.message,
+            created_at=result.created_at,
+        )
+
+
+    def to_dict(self):
+        return {
+            'action_id'      : self.action_id,
+            'feature'        : self.feature,
+            'actor'          : self.actor,
+            'dry_run'        : self.dry_run,
+            'allowed'        : self.allowed,
+            'status'         : self.status,
+            'risk_level'     : self.risk_level,
+            'payload_summary': dict(self.payload_summary),
+            'result_summary' : dict(self.result_summary),
+            'reason'         : self.reason,
+            'created_at'     : self.created_at,
+        }
+
+
 class ModernAdminSafeAction:
     """Contract-only base for future Modern Admin actions.
 
@@ -381,6 +435,23 @@ class ModernAdminSafeActionRunner:
             return action
 
         return action.run(actor=actor, payload=payload or {}, dry_run=dry_run)
+
+
+    def run_with_audit(self, action_id=None, payload=None, actor=None, dry_run=True):
+        payload = payload or {}
+        result = self.run(
+            action_id=action_id,
+            payload=payload,
+            actor=actor,
+            dry_run=dry_run,
+        )
+        audit_record = ModernAdminSafeActionAuditRecord.from_result(
+            result,
+            actor=actor,
+            payload=payload,
+        )
+
+        return result, audit_record
 
 
 def allow_no_one(actor):

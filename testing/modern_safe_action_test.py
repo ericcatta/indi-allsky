@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import sys
 from pathlib import Path
 
@@ -7,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_safe_action import ModernAdminSafeAction
 from indi_allsky.modern_safe_action import ModernAdminSafeActionPlaceholder
+from indi_allsky.modern_safe_action import ModernAdminSafeActionAuditRecord
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRegistry
 from indi_allsky.modern_safe_action import ModernAdminSafeActionResult
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRunner
@@ -37,6 +39,7 @@ class AdminActor:
 class NonAdminActor:
     username = 'operator'
     is_admin = False
+    password = 'do-not-render'
 
 
 class ExampleAction(ModernAdminSafeAction):
@@ -681,6 +684,146 @@ def test_safe_action_dry_run_helper_response_redacts_sensitive_payload():
     assert '[REDACTED]' in data['audit_message']
 
 
+def test_audit_record_generated_for_dry_run_success():
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+    result, audit_record = runner.run_with_audit(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 10},
+        dry_run=True,
+    )
+
+    assert result.status == 'dry_run'
+    assert audit_record.action_id == 'notification.acknowledge'
+    assert audit_record.status == 'dry_run'
+    assert audit_record.dry_run is True
+    assert audit_record.allowed is True
+    assert audit_record.payload_summary['notification_id'] == 10
+
+
+def test_audit_record_generated_for_permission_denied():
+    runner = build_notification_runner(
+        permission_check=lambda actor: False,
+        lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+    result, audit_record = runner.run_with_audit(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 10},
+        dry_run=False,
+    )
+
+    assert result.status == 'permission_denied'
+    assert audit_record.status == 'permission_denied'
+    assert audit_record.allowed is False
+    assert audit_record.reason == 'Permission denied'
+
+
+def test_audit_record_generated_for_validation_failure():
+    runner = build_notification_runner(
+        lookup=lambda notification_id: None,
+    )
+    result, audit_record = runner.run_with_audit(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 10},
+        dry_run=False,
+    )
+
+    assert result.status == 'validation_failed'
+    assert audit_record.status == 'validation_failed'
+    assert audit_record.allowed is False
+    assert 'does not exist' in audit_record.reason
+
+
+def test_audit_record_redacts_sensitive_payload():
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+    _result, audit_record = runner.run_with_audit(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={
+            'notification_id': 10,
+            'api_token': 'payload-secret',
+        },
+        dry_run=True,
+    )
+    data = audit_record.to_dict()
+
+    assert 'payload-secret' not in str(data)
+    assert data['payload_summary']['api_token'] == '[REDACTED]'
+
+
+def test_audit_record_redacts_sensitive_result_details():
+    result = ModernAdminSafeActionResult(
+        action_id='test.result',
+        feature='Testing',
+        risk_level='high',
+        status='execute_failed',
+        message='Failed',
+        details={
+            'refresh_token': 'result-secret',
+            'safe': 'visible',
+        },
+    )
+    audit_record = ModernAdminSafeActionAuditRecord.from_result(
+        result,
+        actor=Actor(),
+        payload={},
+    )
+    data = audit_record.to_dict()
+
+    assert 'result-secret' not in str(data)
+    assert data['result_summary']['details']['refresh_token'] == '[REDACTED]'
+    assert data['result_summary']['details']['safe'] == 'visible'
+
+
+def test_audit_record_actor_is_safe_label_only():
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+    _result, audit_record = runner.run_with_audit(
+        action_id='notification.acknowledge',
+        actor=NonAdminActor(),
+        payload={'notification_id': 10},
+        dry_run=True,
+    )
+
+    assert audit_record.actor == 'operator'
+    assert 'do-not-render' not in str(audit_record.to_dict())
+
+
+def test_audit_record_to_dict_is_json_safe():
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+    _result, audit_record = runner.run_with_audit(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 10},
+        dry_run=True,
+    )
+
+    json.dumps(audit_record.to_dict())
+
+
+def test_audit_record_has_no_flask_request_dependency():
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+    _result, audit_record = runner.run_with_audit(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 10},
+        dry_run=True,
+    )
+
+    assert audit_record.status == 'dry_run'
+
+
 if __name__ == '__main__':
     test_default_action_does_not_execute()
     test_dry_run_does_not_mutate()
@@ -724,4 +867,12 @@ if __name__ == '__main__':
     test_safe_action_dry_run_helper_permission_denied_response_shape()
     test_safe_action_dry_run_helper_forces_dry_run_true()
     test_safe_action_dry_run_helper_response_redacts_sensitive_payload()
+    test_audit_record_generated_for_dry_run_success()
+    test_audit_record_generated_for_permission_denied()
+    test_audit_record_generated_for_validation_failure()
+    test_audit_record_redacts_sensitive_payload()
+    test_audit_record_redacts_sensitive_result_details()
+    test_audit_record_actor_is_safe_label_only()
+    test_audit_record_to_dict_is_json_safe()
+    test_audit_record_has_no_flask_request_dependency()
     print('Modern safe action tests passed')

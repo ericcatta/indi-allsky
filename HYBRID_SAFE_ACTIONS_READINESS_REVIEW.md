@@ -25,6 +25,8 @@ Implemented foundation:
 - static/helper-level endpoint tests for the dry-run route registration,
   POST-only declaration, no legacy ack path, response shape, permission denied,
   forced dry-run, and redaction
+- structured in-memory audit records for result, actor, payload, status, risk,
+  allowed/denied state, reason, and redacted result summaries
 
 Current boundary:
 
@@ -35,6 +37,7 @@ Current boundary:
 - no safe action writes the database unless a future endpoint injects a callback
 - no full Flask `test_client` safe-action test exists yet in the lightweight
   test runner because Flask is not available there
+- no persistent audit log exists yet
 
 ## 3. Evidence Reviewed
 
@@ -61,7 +64,7 @@ Reviewed files and patterns:
 | Is the registry sufficient? | Yes for lookup/catalog behavior; no for HTTP exposure, auth, CSRF, or audit. |
 | Is the runner sufficient? | Yes for testable invocation and future Flask wrappers; no for browser exposure by itself. |
 | Is CSRF missing? | Yes. No Modern Safe Action endpoint should execute without explicit CSRF/auth handling. |
-| Is persistent audit logging missing? | Yes. Current audit messages are structured/redacted result fields only. They are not persisted as an audit trail. |
+| Is persistent audit logging missing? | Yes. Structured in-memory audit records exist, but they are not persisted as an audit trail. |
 | Is a permission model missing? | Partially. The contract supports injected permission checks, but no canonical Modern Safe Action permission policy exists yet. |
 | Is confirmation UX missing? | Yes. This is not required for dry-run endpoints, but is required before real mutation UI. |
 | Is Flask integration testing missing? | Yes. Unit tests exist; endpoint-level tests do not. |
@@ -78,6 +81,7 @@ Reviewed files and patterns:
 | Runner invocation | Implemented | Low | Yes, already present | Yes, already present |
 | Missing/unknown action handling | Implemented | Low | Yes, already present | Yes, already present |
 | Payload redaction | Implemented at contract level | Medium | Yes, already present; verify endpoint response does not add raw payload | Yes, plus persistent audit redaction |
+| Structured audit record | Implemented in memory only | Medium | Useful for dry-run observability | Required as source for persistent audit |
 | Notification id validation | Implemented in wrapper | Low | Yes, already present | Yes, already present |
 | Idempotent already-acknowledged handling | Implemented in wrapper | Low | Not required for dry-run, but present | Required and present at wrapper level |
 | Permission check hook | Implemented as injection | Medium | Endpoint must inject canonical permission check | Endpoint must inject canonical permission check |
@@ -111,7 +115,7 @@ Missing before real execution:
 
 - canonical Modern Safe Action permission policy
 - CSRF-protected endpoint wrapper
-- persistent audit event
+- persistent audit event backed by the structured audit record
 - Flask integration tests
 - DB-backed notification lookup callback
 - DB-backed acknowledge callback

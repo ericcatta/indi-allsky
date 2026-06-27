@@ -288,6 +288,19 @@ Safe Action Runner:
 - Required before UI exposure: CSRF/auth Flask wrapper, confirmation UX,
   integration tests, real audit log, and explicit rollback/fallback decision.
 
+Structured Audit Record:
+
+- `ModernAdminSafeActionAuditRecord` provides an in-memory, serializable audit
+  record for safe action results.
+- It captures action id, feature, actor label, dry-run state, allowed/denied
+  state, status, risk level, redacted payload summary, redacted result summary,
+  reason, and timestamp.
+- It does not write to the database, filesystem, application log, or any remote
+  service.
+- It redacts secret-bearing payload/result keys before serialization.
+- Status: structured contract only; persistent audit storage remains required
+  before any execute endpoint.
+
 Dry-Run Endpoint:
 
 - `/modern-admin/safe-action/dry-run` is the first Modern Safe Action endpoint.
@@ -302,7 +315,7 @@ Dry-Run Endpoint:
 Recommended next micro-step:
 
 1. Add Flask-level tests for the dry-run endpoint, including CSRF/auth behavior.
-2. Add persistent audit design before any execute endpoint.
+2. Add persistent audit storage design before any execute endpoint.
 3. Do not wire any Modern UI button until endpoint tests and confirmation UX
    exist.
 4. Keep Classic fallback unchanged.
