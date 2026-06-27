@@ -249,6 +249,19 @@ Contract foundation:
 - The contract is not wired to UI, routes, buttons, or existing Classic
   endpoints yet.
 
+Safe Action Registry:
+
+- `ModernAdminSafeActionRegistry` is a catalog for future safe action contracts.
+- The default registry contains placeholder actions only; they are not wired to
+  UI, routes, buttons, Classic endpoints, database writes, filesystem writes, or
+  remote operations.
+- Placeholder actions are denied by default and remain non-operative even if
+  permission is later supplied unless a future subclass implements and tests a
+  concrete wrapper.
+- Registering a placeholder is not authorization to expose that action in Modern
+  Admin. Each action still needs its own wrapper, tests, policy review, and
+  rollback/fallback decision.
+
 Recommended next micro-step:
 
 1. Define a `ModernAdminSafeAction` contract for one action class only.

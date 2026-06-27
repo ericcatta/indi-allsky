@@ -183,3 +183,98 @@ class ModernAdminSafeAction:
     def is_secret_key(self, key):
         key_l = key.lower()
         return any(token in key_l for token in SECRET_TOKENS)
+
+
+class ModernAdminSafeActionPlaceholder(ModernAdminSafeAction):
+    def __init__(self, action_id, label, feature, risk_level, permission_check=None):
+        super().__init__(permission_check=permission_check)
+        self.action_id = action_id
+        self.label = label
+        self.feature = feature
+        self.risk_level = risk_level
+
+
+class ModernAdminSafeActionRegistry:
+    def __init__(self):
+        self._actions = {}
+
+
+    def register(self, action):
+        if action.action_id in self._actions:
+            raise ValueError('Duplicate safe action id: {0:s}'.format(action.action_id))
+
+        self._actions[action.action_id] = action
+        return action
+
+
+    def get(self, action_id):
+        return self._actions[action_id]
+
+
+    def find(self, action_id):
+        action = self._actions.get(action_id)
+        if action:
+            return action
+
+        return ModernAdminSafeActionResult(
+            action_id=str(action_id),
+            feature='unknown',
+            risk_level='unknown',
+            status='not_found',
+            message='Safe action is not registered',
+            dry_run=True,
+            allowed=False,
+        )
+
+
+    def list_actions(self, feature=None, risk_level=None):
+        actions = list(self._actions.values())
+
+        if feature is not None:
+            actions = [action for action in actions if action.feature == feature]
+
+        if risk_level is not None:
+            actions = [action for action in actions if action.risk_level == risk_level]
+
+        return sorted(actions, key=lambda action: action.action_id)
+
+
+    def to_dict(self):
+        return [
+            {
+                'action_id'  : action.action_id,
+                'label'      : action.label,
+                'feature'    : action.feature,
+                'risk_level' : action.risk_level,
+            }
+            for action in self.list_actions()
+        ]
+
+
+def allow_no_one(actor):
+    return False
+
+
+def build_default_modern_safe_action_registry():
+    registry = ModernAdminSafeActionRegistry()
+
+    for action_id, label, feature, risk_level in (
+        ('notification.acknowledge', 'Acknowledge Notification', 'Notifications', 'medium'),
+        ('image.exclude', 'Exclude Image', 'Image Viewer', 'medium'),
+        ('image.unexclude', 'Unexclude Image', 'Image Viewer', 'medium'),
+        ('log.download', 'Download Log', 'Logs', 'high'),
+        ('task.retry', 'Retry Task', 'Task Queue', 'high'),
+        ('task.cancel', 'Cancel Task', 'Task Queue', 'high'),
+        ('config.restore_preview', 'Preview Config Restore', 'Config Restore', 'critical'),
+        ('youtube.oauth_status_refresh', 'Refresh YouTube OAuth Status', 'YouTube / OAuth', 'critical'),
+        ('focus.move', 'Move Focuser', 'Focus', 'critical'),
+    ):
+        registry.register(ModernAdminSafeActionPlaceholder(
+            action_id=action_id,
+            label=label,
+            feature=feature,
+            risk_level=risk_level,
+            permission_check=allow_no_one,
+        ))
+
+    return registry
