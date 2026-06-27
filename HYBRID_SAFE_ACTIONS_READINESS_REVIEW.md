@@ -176,3 +176,17 @@ Stop before implementing an endpoint if any of these are unclear:
 - how endpoint tests should initialize Flask app context and users
 - whether a dry-run endpoint may validate notification existence without a DB
   mutation
+
+## 10. Other Safe Action Families
+
+`image.exclude` / `image.unexclude` are service-ready only. They have a service
+boundary, DB adapter, safe action wrappers, audit integration and fake-callback
+tests, but no endpoint or UI exposure.
+
+`log.download` now has a policy/service foundation only. It supports symbolic
+allowlisted log names, basename/path validation, metadata-only size checks via
+an injected provider, redaction helpers and audit records. It does not read log
+files, stream files, create download responses, expose an endpoint, or add UI.
+Real download remains blocked until runtime path/download policy, Flask
+auth/session/CSRF tests, endpoint response mapping, persistent audit wiring,
+line/size limits, redaction verification and no-arbitrary-path tests exist.

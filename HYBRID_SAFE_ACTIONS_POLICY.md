@@ -71,7 +71,7 @@ Status values:
 | Area | Action | Existing route / class | Method | Backend support | Side effect | Sensitive data | Risk | Status | Prerequisites |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Task Queue | retry/cancel/delete/requeue | `/tasks`, `TaskQueueView` | GET page only | No safe user-facing mutation contract found | Would change task lifecycle | Task payloads may contain camera/profile/path/action data | High | BLOCKED UNTIL BACKEND CONTRACT | Define task state machine, allowed transitions, ownership, audit log, race handling, rollback/no-op behavior, tests for queued/running/failed tasks |
-| Logs | download logs | `/log/download`, `/log/webapp_download`, `/log/syslog_download`, `/log/kern_download`; `Log*DownloadView` | GET | Exists as direct download | Reads log files, returns gzip | Logs may contain tokens, paths, IPs, errors, config fragments | High | SAFE AFTER POLICY | File allowlist, max lines/size clamp, redaction pipeline, content disposition policy, tests for missing/large/permission-denied files |
+| Logs | download logs | `/log/download`, `/log/webapp_download`, `/log/syslog_download`, `/log/kern_download`; `Log*DownloadView` | GET | Exists as direct download | Reads log files, returns gzip | Logs may contain tokens, paths, IPs, errors, config fragments | High | SAFE AFTER POLICY | Policy/service foundation now exists with allowlist, basename/path checks, size metadata and redaction helpers; real download still needs endpoint wrapper, runtime path/download policy, Flask tests, no arbitrary path, streaming limits and redaction verification |
 | Logs | clear/rotate/truncate | No safe Modern contract found | N/A | Not suitable from current evidence | Would mutate log files/services | Logs may contain sensitive data | Critical | DO NOT PORT | Keep outside Modern until explicit operational maintenance design exists |
 | Config Restore | upload/active restore | `/config/restore`, `/ajax/config/restore`; `ConfigRestoreView`, `AjaxConfigRestoreView` | POST | Exists in Classic | Writes active config, may flush config history, may reset secret keys, writes temporary file | Full config, secrets, password keys, flask secrets | Critical | BLOCKED UNTIL BACKEND CONTRACT | Restore preview, diff, redaction, backup snapshot, rollback, confirmation, admin-only, audit log, tests for invalid/large/secret-reset/flush paths |
 | Config History | restore/download parity | `/config/list`, `/config/download`, `/config/restore` | GET/POST | Classic supports list/download/restore surfaces | Download exposes config; restore mutates active config | Full config may contain credentials and secrets | Critical | SAFE AFTER POLICY | Redacted preview first, safe export policy, rollback contract, restore wrapper, no raw config display in Modern |
@@ -207,7 +207,9 @@ Recommended order is based on risk, value, and smallest safe wrapper:
    no filesystem mutation. Service boundary, DB adapter, safe action wrappers,
    audit integration and fake-callback tests now exist; execute endpoint/UI
    remain blocked until Flask auth/session/CSRF tests and audit wiring exist.
-3. Log download wrapper: existing read path, but only after redaction/size policy.
+3. Log download wrapper: existing read path, but only after redaction/size
+   policy. Policy/service foundation now exists; real download remains blocked
+   until endpoint/runtime path policy and Flask tests exist.
 4. Queue generation dry-run/status contract: no task creation at first.
 5. Timelapse/keogram/startrail generation wrapper: only after duplicate
    prevention and per-camera task policy.
@@ -373,6 +375,25 @@ Second Pilot Safe Actions: `image.exclude` and `image.unexclude`:
 - Minimum unblocker: real Flask integration tests for auth/session/CSRF,
   endpoint response mapping, persistent audit-log wiring, final admin/camera
   ownership policy, and explicit confirmation/copy before any Modern UI button.
+
+Third Pilot Safe Action: `log.download`:
+
+- `LogDownloadPolicy`, `LogDownloadService`, and `LogDownloadSafeAction` provide
+  a service-only foundation for future Modern log downloads.
+- The policy accepts only symbolic allowlisted log names such as capture,
+  webapp, syslog, and kernel. It rejects traversal-like names, relative paths,
+  and paths outside the allowlist.
+- The service supports dry-run metadata only. Metadata can include basename,
+  expected download name, redaction-required flag, size supplied by an injected
+  fake/stat provider, max size, and too-large status.
+- Redaction helpers cover token/password/secret-like key/value strings for
+  future preview or audit summaries.
+- Status: policy/service/test only. It does not read log files, stream files,
+  create a download response, add an endpoint, add a UI link, or modify Classic
+  routes.
+- Minimum unblocker: runtime download policy, real Flask auth/session/CSRF
+  tests, endpoint response mapping, persistent audit-log wiring, line/size
+  limits, redaction verification, and explicit no-arbitrary-path tests.
 
 If action work is still considered too risky, the next safe alternative is
 Settings Redesign preparation: document ownership and grouping without changing

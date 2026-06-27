@@ -85,7 +85,7 @@ Operational backlog snapshot:
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
 | In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse, Gallery, Panorama, Raw Viewer, Public media endpoints |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge execute/UI, Notification delete, User Management mutations, FITS preview/download/conversion, Image Viewer exclude/unexclude execute/UI, Image Viewer delete/download/processing, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share, Panorama generation/download/conversion/actions, Raw decode/download/file inspection |
+| Locally blocked | Task Queue mutations, Logs download endpoint/UI, Logs clear/rotate/actions, Config Restore mutation, Notification acknowledge execute/UI, Notification delete, User Management mutations, FITS preview/download/conversion, Image Viewer exclude/unexclude execute/UI, Image Viewer delete/download/processing, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share, Panorama generation/download/conversion/actions, Raw decode/download/file inspection |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -153,7 +153,7 @@ the next available feature.
 | Startrail generation/download | Startrail generation, conversion, download and file inspection require explicit media action and path policy. | Metadata-only list/status only. |
 | Startrail Video watch/share/download | Startrail video playback/download/share behavior is public-facing and requires explicit media action and compatibility policy. | Metadata-only list/status only. |
 | Mini Timelapse generation/download | Mini timelapse generation, playback/download and file inspection require explicit media action and path policy. | Metadata-only list/status only. |
-| Logs download/actions | Log download/action work requires explicit backend, filesystem and sensitive-data policy. | Existing read-only list/detail only. |
+| Logs download/actions | `log.download` policy/service foundation exists, but endpoint/UI remain blocked pending runtime path/download policy, real Flask auth/session/CSRF tests, audit wiring, redaction verification and no-arbitrary-path tests. Clear/rotate/truncate remain out of scope. | Existing read-only list/detail and service-only policy tests. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
 | Notification acknowledge/delete | Mutative notification actions need explicit backend and UX contract. | Read-only inventory/detail only. |
@@ -260,7 +260,7 @@ These should not be removed. They are transitional.
 | Config History | modern | PARTIAL MODERN | C | 45% | Config DB | High | S | High | Read-only listing and usability filters are now available in Modern. |
 | Config Restore | modern | PARTIAL MODERN | D | 65% | Config history, rollback design | High | S | High | Read-only metadata detail exists in Modern; restore action still Classic-only and locally blocked. |
 | System Info | modern | PARTIAL MODERN | C | 55% | System pages | Medium | M | Medium | Some actions remain legacy-backed. |
-| Logs | shared_api | PARTIAL MODERN | D | 65% | Log APIs | Critical | M | Medium | Read-only detail exists; download parity still uses Classic endpoints. |
+| Logs | shared_api | PARTIAL MODERN | D | 65% | Log APIs, Safe Actions | Critical | M | Medium | Read-only detail exists. `log.download` now has allowlist/path/size/redaction service foundation and tests; real download endpoint/UI remain blocked. |
 | Charts | shared_api | PARTIAL MODERN | C | 55% | Chart APIs | Medium | M | Medium | Legacy chart options may differ. |
 | Task Queue | modern | PARTIAL MODERN | D | 65% | Task model | High | S | High | List/usability/detail done; mutations blocked. |
 | User Management | modern | PARTIAL MODERN | D | 65% | Auth model | High | S | High | Privacy-safe read-only detail exists; user mutations remain Classic-only and locally blocked. |

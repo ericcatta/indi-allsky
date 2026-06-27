@@ -1,4 +1,5 @@
 import json
+import re
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
@@ -1086,6 +1087,324 @@ class ImageUnexcludeSafeAction(ImageExcludeSafeAction):
     target_exclude = False
 
 
+class LogDownloadPolicy:
+    """Allowlist and redaction policy for future log downloads.
+
+    This policy does not read, stream, or download files. It only validates
+    symbolic log names and metadata from an injected stat provider.
+    """
+
+    DEFAULT_LOGS = {
+        'capture': {
+            'label': 'Capture Log',
+            'path': '/var/log/indi-allsky/indi-allsky.log',
+            'download_name': 'indi-allsky_log.txt.gz',
+        },
+        'webapp': {
+            'label': 'Webapp Log',
+            'path': '/var/log/indi-allsky/webapp-indi-allsky.log',
+            'download_name': 'indi-allsky_webapp_log.txt.gz',
+        },
+        'syslog': {
+            'label': 'OS System Log',
+            'path': '/var/log/syslog',
+            'download_name': 'indi-allsky_syslog_log.txt.gz',
+        },
+        'kernel': {
+            'label': 'Kernel Log',
+            'path': '/var/log/kern.log',
+            'download_name': 'indi-allsky_kern_log.txt.gz',
+        },
+    }
+
+    SECRET_VALUE_RE = re.compile(
+        r'(?i)\b(api[_-]?key|password|refresh[_-]?token|secret|token|credential)\b\s*[:=]\s*([^\s,;]+)'
+    )
+
+    def __init__(self, allowed_logs=None, max_bytes=5 * 1024 * 1024):
+        self.allowed_logs = dict(allowed_logs or self.DEFAULT_LOGS)
+        self.max_bytes = max_bytes
+
+
+    def normalize_log_name(self, log_name):
+        if log_name is None or isinstance(log_name, bool):
+            return None
+
+        try:
+            log_name_s = str(log_name).strip().lower()
+        except (TypeError, ValueError):
+            return None
+
+        if not re.match(r'^[a-z0-9_-]+$', log_name_s):
+            return None
+
+        return log_name_s
+
+
+    def resolve(self, log_name):
+        log_name_s = self.normalize_log_name(log_name)
+        if not log_name_s:
+            return None, 'invalid_log_name'
+
+        log_info = self.allowed_logs.get(log_name_s)
+        if log_info is None:
+            return None, 'not_allowlisted'
+
+        path = Path(str(log_info.get('path', '')))
+        if self.path_is_unsafe(path):
+            return None, 'unsafe_path'
+
+        resolved = dict(log_info)
+        resolved['log_name'] = log_name_s
+        resolved['basename'] = path.name
+        return resolved, None
+
+
+    def path_is_unsafe(self, path):
+        if not path.is_absolute():
+            return True
+
+        path_parts = path.parts
+        if '..' in path_parts:
+            return True
+
+        for allowed_info in self.allowed_logs.values():
+            allowed_path = Path(str(allowed_info.get('path', '')))
+            if path == allowed_path:
+                return False
+
+        return True
+
+
+    def inspect_metadata(self, log_info, stat_provider=None):
+        metadata = {
+            'log_name': log_info.get('log_name'),
+            'label': log_info.get('label'),
+            'basename': log_info.get('basename'),
+            'download_name': log_info.get('download_name'),
+            'redaction_required': True,
+            'size_bytes': None,
+            'max_bytes': self.max_bytes,
+            'too_large': False,
+        }
+
+        if stat_provider is None:
+            return metadata
+
+        stat_data = stat_provider(log_info)
+        if stat_data is None:
+            return metadata
+
+        stat_data = dict(stat_data)
+        size_bytes = stat_data.get('size_bytes')
+        if size_bytes is not None:
+            try:
+                size_bytes = int(size_bytes)
+            except (TypeError, ValueError):
+                size_bytes = None
+
+        metadata['size_bytes'] = size_bytes
+        if size_bytes is not None:
+            metadata['too_large'] = bool(self.max_bytes and size_bytes > self.max_bytes)
+
+        return metadata
+
+
+    def redact_text(self, text):
+        text_s = str(text)
+        text_s = self.SECRET_VALUE_RE.sub(lambda match: '{0:s}=[REDACTED]'.format(match.group(1)), text_s)
+
+        for token in SECRET_TOKENS:
+            text_s = re.sub(
+                r'(?i)({0:s})\s*[:=]\s*([^\s,;]+)'.format(re.escape(token)),
+                r'\1=[REDACTED]',
+                text_s,
+            )
+
+        return text_s
+
+
+class LogDownloadService:
+    """Service-only foundation for future log download actions.
+
+    The service performs no file reads, no streaming, and no downloads. Metadata
+    inspection uses an injected provider so tests can remain filesystem-free.
+    """
+
+    action_id = 'log.download'
+    feature = 'Logs'
+    risk_level = 'high'
+
+    def __init__(self, policy=None, stat_provider=None):
+        self.policy = policy or LogDownloadPolicy()
+        self.stat_provider = stat_provider
+
+
+    def inspect(self, log_name, actor=None, payload=None, dry_run=True):
+        payload = payload or {}
+        log_info, error = self.policy.resolve(log_name)
+        if error:
+            return self.result(
+                status=error,
+                message='Log is not available for safe download',
+                dry_run=True,
+                allowed=False,
+                details={'log_name': log_name},
+            )
+
+        try:
+            metadata = self.policy.inspect_metadata(log_info, stat_provider=self.stat_provider)
+        except Exception as e:
+            return self.result(
+                status='metadata_error',
+                message='Log metadata lookup failed',
+                dry_run=True,
+                allowed=False,
+                details={
+                    'log_name': log_info.get('log_name'),
+                    'error_type': type(e).__name__,
+                },
+            )
+
+        if metadata.get('too_large'):
+            return self.result(
+                status='too_large',
+                message='Log exceeds safe download size limit',
+                dry_run=True,
+                allowed=False,
+                details=metadata,
+            )
+
+        if not dry_run:
+            return self.result(
+                status='not_implemented',
+                message='Real log download is not implemented in Modern Safe Actions',
+                dry_run=False,
+                allowed=False,
+                details=metadata,
+            )
+
+        return self.result(
+            status='dry_run',
+            message='Dry run only; no log file read or streamed',
+            dry_run=True,
+            allowed=True,
+            details=metadata,
+        )
+
+
+    def inspect_with_audit(self, log_name, actor=None, payload=None, audit_log=None, dry_run=True):
+        payload = dict(payload or {})
+        payload.setdefault('log_name', log_name)
+
+        result = self.inspect(
+            log_name=log_name,
+            actor=actor,
+            payload=payload,
+            dry_run=dry_run,
+        )
+        audit_record = ModernAdminSafeActionAuditRecord.from_result(
+            result,
+            actor=actor,
+            payload=payload,
+        )
+        audit_write = None
+        if audit_log is not None:
+            audit_write = audit_log.append(audit_record)
+
+        return result, audit_record, audit_write
+
+
+    def result(self, status, message, dry_run=True, allowed=False, details=None):
+        return ModernAdminSafeActionResult(
+            action_id=self.action_id,
+            feature=self.feature,
+            risk_level=self.risk_level,
+            status=status,
+            message=message,
+            dry_run=dry_run,
+            allowed=allowed,
+            audit_message='service action={0:s} status={1:s}'.format(self.action_id, status),
+            details=details or {},
+        )
+
+
+class LogDownloadSafeAction(ModernAdminSafeAction):
+    action_id = 'log.download'
+    label = 'Download Log'
+    feature = 'Logs'
+    risk_level = 'high'
+
+    def __init__(self, permission_check=None, log_service=None):
+        super().__init__(permission_check=permission_check)
+        self.log_service = log_service or LogDownloadService()
+
+
+    def run(self, actor=None, payload=None, dry_run=True):
+        payload = payload or {}
+
+        if not self.has_permission(actor):
+            return self.result(
+                status='permission_denied',
+                message='Permission denied',
+                dry_run=dry_run,
+                allowed=False,
+                audit_message=self.audit_message(actor, payload, 'permission_denied'),
+            )
+
+        validation_result = self.validate(payload)
+        if validation_result is not True:
+            return self.result(
+                status='validation_failed',
+                message=str(validation_result or 'Validation failed'),
+                dry_run=dry_run,
+                allowed=False,
+                audit_message=self.audit_message(actor, payload, 'validation_failed'),
+            )
+
+        result = self.log_service.inspect(
+            log_name=self.log_name_from_payload(payload),
+            actor=actor,
+            payload=payload,
+            dry_run=dry_run,
+        )
+
+        return result
+
+
+    def validate(self, payload):
+        log_name = self.log_name_from_payload(payload)
+        if log_name is None:
+            return 'log_name is required'
+
+        _, error = self.log_service.policy.resolve(log_name)
+        if error:
+            return 'log_name is not allowlisted'
+
+        return True
+
+
+    def execute(self, actor=None, payload=None):
+        payload = payload or {}
+        return self.log_service.inspect(
+            log_name=self.log_name_from_payload(payload),
+            actor=actor,
+            payload=payload,
+            dry_run=False,
+        )
+
+
+    def log_name_from_payload(self, payload):
+        payload = payload or {}
+
+        if 'log_name' in payload:
+            value = payload.get('log_name')
+        else:
+            value = payload.get('log')
+
+        return self.log_service.policy.normalize_log_name(value)
+
+
 class ModernAdminSafeActionRegistry:
     def __init__(self):
         self._actions = {}
@@ -1227,9 +1546,11 @@ def build_default_modern_safe_action_registry():
     registry.register(ImageUnexcludeSafeAction(
         permission_check=allow_no_one,
     ))
+    registry.register(LogDownloadSafeAction(
+        permission_check=allow_no_one,
+    ))
 
     for action_id, label, feature, risk_level in (
-        ('log.download', 'Download Log', 'Logs', 'high'),
         ('task.retry', 'Retry Task', 'Task Queue', 'high'),
         ('task.cancel', 'Cancel Task', 'Task Queue', 'high'),
         ('config.restore_preview', 'Preview Config Restore', 'Config Restore', 'critical'),

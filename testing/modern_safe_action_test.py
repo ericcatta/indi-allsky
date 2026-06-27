@@ -19,6 +19,9 @@ from indi_allsky.modern_safe_action import ImageExcludeRepositoryError
 from indi_allsky.modern_safe_action import ImageExcludeSafeAction
 from indi_allsky.modern_safe_action import ImageExcludeService
 from indi_allsky.modern_safe_action import ImageUnexcludeSafeAction
+from indi_allsky.modern_safe_action import LogDownloadPolicy
+from indi_allsky.modern_safe_action import LogDownloadSafeAction
+from indi_allsky.modern_safe_action import LogDownloadService
 from indi_allsky.modern_safe_action import NotificationAcknowledgeDbAdapter
 from indi_allsky.modern_safe_action import NotificationAcknowledgeRepositoryError
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
@@ -840,6 +843,196 @@ def test_image_unexclude_safe_action_execute_with_fake_callback():
     assert result.status == 'unexcluded'
     assert result.allowed is True
     assert image.exclude is False
+
+
+def test_log_download_policy_valid_log_name():
+    policy = LogDownloadPolicy()
+
+    log_info, error = policy.resolve('capture')
+
+    assert error is None
+    assert log_info['log_name'] == 'capture'
+    assert log_info['basename'] == 'indi-allsky.log'
+
+
+def test_log_download_policy_rejects_unknown_log_name():
+    policy = LogDownloadPolicy()
+
+    log_info, error = policy.resolve('unknown')
+
+    assert log_info is None
+    assert error == 'not_allowlisted'
+
+
+def test_log_download_policy_rejects_path_traversal_log_name():
+    policy = LogDownloadPolicy()
+
+    log_info, error = policy.resolve('../syslog')
+
+    assert log_info is None
+    assert error == 'invalid_log_name'
+
+
+def test_log_download_policy_rejects_relative_allowlist_path():
+    policy = LogDownloadPolicy(allowed_logs={
+        'bad': {
+            'label': 'Bad Log',
+            'path': '../bad.log',
+            'download_name': 'bad.log.gz',
+        },
+    })
+
+    log_info, error = policy.resolve('bad')
+
+    assert log_info is None
+    assert error == 'unsafe_path'
+
+
+def test_log_download_policy_rejects_absolute_path_not_in_allowlist():
+    policy = LogDownloadPolicy()
+
+    assert policy.path_is_unsafe(Path('/etc/passwd')) is True
+
+
+def test_log_download_service_valid_dry_run_uses_fake_stat_provider():
+    calls = []
+
+    def stat_provider(log_info):
+        calls.append(log_info['log_name'])
+        return {'size_bytes': 1234}
+
+    service = LogDownloadService(stat_provider=stat_provider)
+
+    result = service.inspect('capture', dry_run=True)
+
+    assert result.status == 'dry_run'
+    assert result.allowed is True
+    assert result.details['size_bytes'] == 1234
+    assert result.details['basename'] == 'indi-allsky.log'
+    assert result.details['redaction_required'] is True
+    assert calls == ['capture']
+
+
+def test_log_download_service_rejects_too_large_file_metadata():
+    service = LogDownloadService(
+        policy=LogDownloadPolicy(max_bytes=100),
+        stat_provider=lambda log_info: {'size_bytes': 101},
+    )
+
+    result = service.inspect('capture', dry_run=True)
+
+    assert result.status == 'too_large'
+    assert result.allowed is False
+    assert result.details['too_large'] is True
+
+
+def test_log_download_service_metadata_error_is_structured_and_redacted():
+    def stat_provider(log_info):
+        raise RuntimeError('stat failed token=secret')
+
+    service = LogDownloadService(stat_provider=stat_provider)
+
+    result = service.inspect('capture', dry_run=True)
+
+    assert result.status == 'metadata_error'
+    assert result.allowed is False
+    assert result.details['error_type'] == 'RuntimeError'
+    assert 'secret' not in str(result.to_dict())
+
+
+def test_log_download_service_non_dry_run_is_not_implemented():
+    service = LogDownloadService(stat_provider=lambda log_info: {'size_bytes': 1})
+
+    result = service.inspect('capture', dry_run=False)
+
+    assert result.status == 'not_implemented'
+    assert result.allowed is False
+    assert result.dry_run is False
+
+
+def test_log_download_redacts_secret_values():
+    policy = LogDownloadPolicy()
+
+    redacted = policy.redact_text('api_key=abc password:super refresh_token=zzz ordinary=value')
+
+    assert 'abc' not in redacted
+    assert 'super' not in redacted
+    assert 'zzz' not in redacted
+    assert '[REDACTED]' in redacted
+
+
+def test_log_download_service_audit_records_success_and_failure():
+    audit_log = FakeAuditLog()
+    service = LogDownloadService(stat_provider=lambda log_info: {'size_bytes': 10})
+
+    result, audit_record, audit_write = service.inspect_with_audit(
+        'capture',
+        payload={'log_name': 'capture', 'token': 'secret'},
+        audit_log=audit_log,
+    )
+
+    assert result.status == 'dry_run'
+    assert audit_record.status == 'dry_run'
+    assert audit_write['written'] is True
+    assert 'secret' not in str(audit_record.to_dict())
+    assert 'secret' not in str(audit_log.records)
+
+    result, audit_record, audit_write = service.inspect_with_audit(
+        'unknown',
+        audit_log=audit_log,
+    )
+
+    assert result.status == 'not_allowlisted'
+    assert audit_record.status == 'not_allowlisted'
+    assert audit_write['written'] is True
+
+
+def test_log_download_safe_action_dry_run_does_not_stream_file():
+    calls = []
+
+    def stat_provider(log_info):
+        calls.append(log_info['log_name'])
+        return {'size_bytes': 11}
+
+    action = LogDownloadSafeAction(
+        permission_check=lambda actor: True,
+        log_service=LogDownloadService(stat_provider=stat_provider),
+    )
+
+    result = action.run(
+        actor=Actor(),
+        payload={'log_name': 'capture'},
+        dry_run=True,
+    )
+
+    assert result.status == 'dry_run'
+    assert result.allowed is True
+    assert calls == ['capture']
+
+
+def test_log_download_safe_action_execute_is_not_implemented():
+    action = LogDownloadSafeAction(
+        permission_check=lambda actor: True,
+        log_service=LogDownloadService(stat_provider=lambda log_info: {'size_bytes': 11}),
+    )
+
+    result = action.run(
+        actor=Actor(),
+        payload={'log_name': 'capture'},
+        dry_run=False,
+    )
+
+    assert result.status == 'not_implemented'
+    assert result.allowed is False
+
+
+def test_log_download_has_no_flask_request_dependency():
+    service = LogDownloadService(stat_provider=lambda log_info: {'size_bytes': 1})
+
+    result = service.inspect('capture')
+
+    assert result.status == 'dry_run'
+    assert result.allowed is True
 
 
 def test_notification_acknowledge_service_missing_notification():
@@ -1733,6 +1926,20 @@ if __name__ == '__main__':
     test_image_exclude_safe_action_dry_run_uses_no_apply_callback()
     test_image_exclude_safe_action_execute_with_fake_callback()
     test_image_unexclude_safe_action_execute_with_fake_callback()
+    test_log_download_policy_valid_log_name()
+    test_log_download_policy_rejects_unknown_log_name()
+    test_log_download_policy_rejects_path_traversal_log_name()
+    test_log_download_policy_rejects_relative_allowlist_path()
+    test_log_download_policy_rejects_absolute_path_not_in_allowlist()
+    test_log_download_service_valid_dry_run_uses_fake_stat_provider()
+    test_log_download_service_rejects_too_large_file_metadata()
+    test_log_download_service_metadata_error_is_structured_and_redacted()
+    test_log_download_service_non_dry_run_is_not_implemented()
+    test_log_download_redacts_secret_values()
+    test_log_download_service_audit_records_success_and_failure()
+    test_log_download_safe_action_dry_run_does_not_stream_file()
+    test_log_download_safe_action_execute_is_not_implemented()
+    test_log_download_has_no_flask_request_dependency()
     test_notification_acknowledge_service_missing_notification()
     test_notification_acknowledge_service_already_acked_is_noop()
     test_notification_acknowledge_service_calls_set_ack_when_explicitly_executed()
