@@ -7760,7 +7760,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('Task Queue', 'indi_allsky.modern_admin_taskqueue_view'),
             ('Users', 'indi_allsky.modern_admin_users_view'),
             ('Notifications', 'indi_allsky.modern_admin_notifications_view'),
-            ('Settings Inventory', 'indi_allsky.modern_admin_settings_view'),
+            ('Settings Index', 'indi_allsky.modern_admin_settings_view'),
             ('Global Capture Defaults', 'indi_allsky.modern_admin_capture_settings_view'),
             ('Camera Settings', 'indi_allsky.modern_admin_camera_settings_view'),
             ('Config', 'indi_allsky.modern_admin_config_view'),
@@ -17378,6 +17378,7 @@ class ModernAdminConfigView(ModernAdminSafeControlsMixin, ConfigView):
 class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
     page_title = 'Modern Admin Settings'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+    SETTINGS_OWNERSHIP_MAP_PATH = Path(__file__).resolve().parents[2] / 'tools' / 'hybrid_settings_ownership_map.json'
 
     SETTINGS_GROUP_ORDER = (
         'Camera / Capture',
@@ -17412,16 +17413,159 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
 
     def get_context(self):
         context = super(ModernAdminSettingsInventoryView, self).get_context()
-        form = context['form_config']
-        settings_groups = self.get_settings_inventory_groups(form)
+        ownership_context = self.get_settings_ownership_context()
 
-        context['modern_admin_settings_groups'] = settings_groups
-        context['modern_admin_settings_field_count'] = sum([group['count'] for group in settings_groups])
-        context['modern_admin_settings_form_field_count'] = len([field for field in form])
+        context.update(ownership_context)
         context['modern_admin_settings_profile_count'] = self.get_multi_camera_profile_count()
-        context['modern_admin_settings_group_counts'] = [(group['title'], group['count']) for group in settings_groups]
 
         return context
+
+
+    def get_settings_ownership_context(self):
+        try:
+            ownership_map = json.loads(self.SETTINGS_OWNERSHIP_MAP_PATH.read_text(encoding='utf-8'))
+        except FileNotFoundError:
+            return self.empty_settings_ownership_context(
+                'Settings ownership map not found: {0:s}'.format(str(self.SETTINGS_OWNERSHIP_MAP_PATH.name))
+            )
+        except json.JSONDecodeError as e:
+            return self.empty_settings_ownership_context(
+                'Settings ownership map JSON is invalid at line {0:d}: {1:s}'.format(e.lineno, e.msg)
+            )
+        except OSError as e:
+            app.logger.error('Error reading settings ownership map: %s', str(e))
+            return self.empty_settings_ownership_context('Settings ownership map could not be read.')
+
+        groups = ownership_map.get('groups')
+        if not isinstance(groups, dict):
+            return self.empty_settings_ownership_context('Settings ownership map has no groups object.')
+
+        rows = list()
+        owner_counts = OrderedDict()
+        level_counts = OrderedDict()
+        status_counts = OrderedDict()
+        risk_counts = OrderedDict()
+        do_not_move_count = 0
+
+        for group_id, group_data in sorted(groups.items(), key=self.sort_settings_ownership_group):
+            if not isinstance(group_data, dict):
+                continue
+
+            row = self.format_settings_ownership_group(group_id, group_data)
+            rows.append(row)
+            self.increment_count(owner_counts, row['owner'])
+            self.increment_count(level_counts, row['level'])
+            self.increment_count(status_counts, row['status'])
+            self.increment_count(risk_counts, row['risk'])
+            if row['do_not_move_yet']:
+                do_not_move_count += 1
+
+        return {
+            'modern_admin_settings_map_error'         : None,
+            'modern_admin_settings_map_schema'        : self.safe_settings_text(ownership_map.get('schema_version') or 'unknown'),
+            'modern_admin_settings_groups'            : rows,
+            'modern_admin_settings_group_count'       : len(rows),
+            'modern_admin_settings_do_not_move_count' : do_not_move_count,
+            'modern_admin_settings_owner_counts'      : self.counter_rows(owner_counts),
+            'modern_admin_settings_level_counts'      : self.counter_rows(level_counts),
+            'modern_admin_settings_status_counts'     : self.counter_rows(status_counts),
+            'modern_admin_settings_risk_counts'       : self.counter_rows(risk_counts),
+            'modern_admin_settings_level_options'     : self.counter_keys(level_counts),
+            'modern_admin_settings_owner_options'     : self.counter_keys(owner_counts),
+            'modern_admin_settings_status_options'    : self.counter_keys(status_counts),
+            'modern_admin_settings_risk_options'      : self.counter_keys(risk_counts),
+        }
+
+
+    def empty_settings_ownership_context(self, message):
+        return {
+            'modern_admin_settings_map_error'         : message,
+            'modern_admin_settings_map_schema'        : 'unavailable',
+            'modern_admin_settings_groups'            : list(),
+            'modern_admin_settings_group_count'       : 0,
+            'modern_admin_settings_do_not_move_count' : 0,
+            'modern_admin_settings_owner_counts'      : tuple(),
+            'modern_admin_settings_level_counts'      : tuple(),
+            'modern_admin_settings_status_counts'     : tuple(),
+            'modern_admin_settings_risk_counts'       : tuple(),
+            'modern_admin_settings_level_options'     : tuple(),
+            'modern_admin_settings_owner_options'     : tuple(),
+            'modern_admin_settings_status_options'    : tuple(),
+            'modern_admin_settings_risk_options'      : tuple(),
+        }
+
+
+    def sort_settings_ownership_group(self, item):
+        group_id, group_data = item
+        level_order = {
+            'basic'     : 0,
+            'advanced'  : 1,
+            'developer' : 2,
+        }
+        risk_order = {
+            'high'   : 0,
+            'medium' : 1,
+            'low'    : 2,
+        }
+        return (
+            level_order.get(str(group_data.get('level', 'developer')), 9),
+            risk_order.get(str(group_data.get('risk', 'medium')), 9),
+            str(group_data.get('label') or group_id).lower(),
+        )
+
+
+    def format_settings_ownership_group(self, group_id, group_data):
+        current_surfaces = group_data.get('current_surfaces') or []
+        notes = group_data.get('notes') or []
+        row = {
+            'group_id'          : self.safe_settings_text(group_id),
+            'label'             : self.safe_settings_text(group_data.get('label') or group_id),
+            'owner'             : self.safe_settings_text(group_data.get('owner') or 'unknown'),
+            'level'             : self.safe_settings_text(group_data.get('level') or 'unknown'),
+            'status'            : self.safe_settings_text(group_data.get('status') or 'unknown'),
+            'risk'              : self.safe_settings_text(group_data.get('risk') or 'unknown'),
+            'do_not_move_yet'   : bool(group_data.get('do_not_move_yet', False)),
+            'current_surfaces'  : [self.safe_settings_text(surface) for surface in current_surfaces],
+            'notes'             : [self.safe_settings_text(note) for note in notes],
+        }
+        row['search_text'] = ' '.join([
+            row['group_id'],
+            row['label'],
+            row['owner'],
+            row['level'],
+            row['status'],
+            row['risk'],
+            'do not move' if row['do_not_move_yet'] else 'movable later',
+            ' '.join(row['current_surfaces']),
+            ' '.join(row['notes']),
+        ]).lower()
+        return row
+
+
+    def safe_settings_text(self, value):
+        if value is None:
+            return ''
+        return str(value)
+
+
+    def increment_count(self, counter, key):
+        key = self.safe_settings_text(key) or 'unknown'
+        counter[key] = counter.get(key, 0) + 1
+
+
+    def counter_rows(self, counter):
+        return tuple(
+            {
+                'label' : key.replace('_', ' ').title(),
+                'value' : key,
+                'count' : count,
+            }
+            for key, count in sorted(counter.items())
+        )
+
+
+    def counter_keys(self, counter):
+        return tuple(sorted(counter.keys()))
 
 
     def get_settings_inventory_groups(self, form):

@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-inventory-v2') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-product-index-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -16,46 +16,49 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-settings-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
-    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Settings inventory summary">
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Settings product index summary">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Read-only inventory</p>
-                <h2 id="modern-admin-settings-title">Modern Settings Inventory</h2>
+                <p class="modern-admin-eyebrow">Product consolidation</p>
+                <h2 id="modern-admin-settings-title">Settings Index</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">No save actions</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
         </div>
-        <p class="modern-admin-note">Configuration values are loaded from the existing classic config form and grouped for the future Modern Settings framework. Passwords and tokens are masked. This inventory is read-only.</p>
+        <p class="modern-admin-note">This index is generated from the settings ownership map. It shows where each settings group should live in the future product model. It does not read or write active configuration values.</p>
+        <p class="modern-admin-note">Schema: <code>{{ modern_admin_settings_map_schema }}</code></p>
+
         <div class="modern-admin-settings-action-grid">
-            <a class="modern-admin-settings-action-card modern-admin-settings-action-card-readonly" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
+            <a class="modern-admin-settings-action-card modern-admin-settings-action-card-readonly" href="{{ url_for('indi_allsky.modern_admin_camera_settings_view') }}">
                 <span>
                     <strong>Camera Profile Settings</strong>
-                    <small>Primary entrypoint for acquisition, gain, exposure, target ADU, AWB, driver, lens, processing, and hybrid controls.</small>
+                    <small>Operational profile-first camera controls.</small>
                 </span>
                 <span aria-hidden="true">›</span>
             </a>
             <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.modern_admin_capture_settings_view') }}">
                 <span>
                     <strong>Legacy Capture Fallbacks</strong>
-                    <small>Read-only fallback values for compatibility. Use Camera Profile Settings for operational tuning.</small>
+                    <small>Read-only fallback values for compatibility.</small>
                 </span>
                 <span aria-hidden="true">›</span>
             </a>
             <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.modern_admin_full_settings_view') }}">
                 <span>
                     <strong>Full Settings</strong>
-                    <small>Modern editor for remaining global legacy settings: image, processing, upload, web, timelapse, sensors, and advanced options.</small>
+                    <small>Global editor for remaining legacy settings.</small>
                 </span>
                 <span aria-hidden="true">›</span>
             </a>
         </div>
+
         <div class="modern-admin-settings-summary-grid">
             <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_settings_form_field_count }}</span>
-                <p>Classic form fields</p>
+                <span>{{ modern_admin_settings_group_count }}</span>
+                <p>Mapped groups</p>
             </div>
             <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_settings_field_count }}</span>
-                <p>Displayed rows</p>
+                <span>{{ modern_admin_settings_do_not_move_count }}</span>
+                <p>Do not move yet</p>
             </div>
             <div class="modern-admin-settings-summary-card">
                 <span>{{ modern_admin_settings_profile_count }}</span>
@@ -64,137 +67,186 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 
-    <section class="modern-admin-settings-toolbar" aria-label="Settings filter">
-        <label for="modern-admin-settings-filter">Search settings</label>
-        <input id="modern-admin-settings-filter" class="modern-admin-settings-filter" type="search" placeholder="Filter by label, field, value, type, risk, or scope" autocomplete="off">
+    {% if modern_admin_settings_map_error %}
+    <section class="modern-admin-alert modern-admin-alert-danger" role="alert">
+        {{ modern_admin_settings_map_error }}
+    </section>
+    {% endif %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Settings ownership counts">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Levels</div>
+            {% for row in modern_admin_settings_level_counts %}
+            <p>{{ row.label }}: {{ row.count }}</p>
+            {% else %}
+            <p>No level data.</p>
+            {% endfor %}
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Owners</div>
+            {% for row in modern_admin_settings_owner_counts %}
+            <p>{{ row.label }}: {{ row.count }}</p>
+            {% else %}
+            <p>No owner data.</p>
+            {% endfor %}
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Risk</div>
+            {% for row in modern_admin_settings_risk_counts %}
+            <p>{{ row.label }}: {{ row.count }}</p>
+            {% else %}
+            <p>No risk data.</p>
+            {% endfor %}
+        </article>
     </section>
 
-    <section class="modern-admin-settings-sections" aria-label="Settings sections">
-        {% for group in modern_admin_settings_groups %}
-        <details class="modern-admin-settings-section" data-settings-section="{{ group.key }}" {% if group.default_open %}open{% endif %}>
-            <summary>
-                <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
-                <span class="modern-admin-settings-section-title">{{ group.title }}</span>
-                <span class="modern-admin-settings-count" data-settings-visible-count>{{ group.count }}</span>
-            </summary>
-            <div class="modern-admin-table-scroll">
-                <table class="modern-admin-data-table modern-admin-settings-table">
-                    <thead>
-                        <tr>
-                            <th>Setting</th>
-                            <th>Field</th>
-                            <th>Current value</th>
-                            <th>Type</th>
-                            <th>Validators</th>
-                            <th>Scope</th>
-                            <th>Risk</th>
-                            <th>Restart</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for field in group.fields %}
-                        <tr data-settings-row data-settings-search="{{ field.search_text | e }}">
-                            <td>
-                                <strong>{{ field.label }}</strong>
-                                <span>{{ field.group }}</span>
-                            </td>
-                            <td>
-                                <code>{{ field.name }}</code>
-                                <span>{{ field.config_key }}</span>
-                            </td>
-                            <td><code>{{ field.current_value }}</code></td>
-                            <td>{{ field.field_type }}</td>
-                            <td>{{ field.validators }}</td>
-                            <td><span class="modern-admin-settings-badge">{{ field.scope }}</span></td>
-                            <td><span class="modern-admin-settings-badge modern-admin-settings-risk-{{ field.risk }}">{{ field.risk }}</span></td>
-                            <td><span class="modern-admin-settings-badge modern-admin-settings-restart-{{ field.restart_required }}">{{ field.restart_required }}</span></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <section class="modern-admin-settings-toolbar" aria-label="Settings ownership filters">
+        <label for="modern-admin-settings-filter">Search groups</label>
+        <input id="modern-admin-settings-filter" class="modern-admin-settings-filter" type="search" placeholder="Filter by group, owner, status, risk, notes, or surface" autocomplete="off">
+
+        <label for="modern-admin-settings-level-filter">Level</label>
+        <select id="modern-admin-settings-level-filter" class="modern-admin-settings-filter">
+            <option value="">All levels</option>
+            {% for option in modern_admin_settings_level_options %}
+            <option value="{{ option }}">{{ option | replace('_', ' ') | title }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="modern-admin-settings-owner-filter">Owner</label>
+        <select id="modern-admin-settings-owner-filter" class="modern-admin-settings-filter">
+            <option value="">All owners</option>
+            {% for option in modern_admin_settings_owner_options %}
+            <option value="{{ option }}">{{ option | replace('_', ' ') | title }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="modern-admin-settings-status-filter">Status</label>
+        <select id="modern-admin-settings-status-filter" class="modern-admin-settings-filter">
+            <option value="">All statuses</option>
+            {% for option in modern_admin_settings_status_options %}
+            <option value="{{ option }}">{{ option | replace('_', ' ') | title }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="modern-admin-settings-risk-filter">Risk</label>
+        <select id="modern-admin-settings-risk-filter" class="modern-admin-settings-filter">
+            <option value="">All risks</option>
+            {% for option in modern_admin_settings_risk_options %}
+            <option value="{{ option }}">{{ option | replace('_', ' ') | title }}</option>
+            {% endfor %}
+        </select>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="settings-index-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Ownership map</p>
+                <h2 id="settings-index-title">Settings groups</h2>
             </div>
-        </details>
-        {% else %}
-        <section class="modern-admin-table-panel">
-            <p class="modern-admin-note">No settings were found.</p>
-        </section>
-        {% endfor %}
+            <span class="modern-admin-status-pill modern-admin-status-neutral"><span id="modern-admin-settings-visible-count">{{ modern_admin_settings_group_count }}</span> visible</span>
+        </div>
+
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table modern-admin-settings-table">
+                <thead>
+                    <tr>
+                        <th>Group</th>
+                        <th>Level</th>
+                        <th>Owner</th>
+                        <th>Status</th>
+                        <th>Risk</th>
+                        <th>Do not move yet</th>
+                        <th>Current surfaces</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in modern_admin_settings_groups %}
+                    <tr data-settings-row
+                        data-settings-search="{{ group.search_text | e }}"
+                        data-settings-level="{{ group.level }}"
+                        data-settings-owner="{{ group.owner }}"
+                        data-settings-status="{{ group.status }}"
+                        data-settings-risk="{{ group.risk }}">
+                        <td>
+                            <strong>{{ group.label }}</strong>
+                            <span><code>{{ group.group_id }}</code></span>
+                        </td>
+                        <td><span class="modern-admin-settings-badge">{{ group.level | replace('_', ' ') | title }}</span></td>
+                        <td><span class="modern-admin-settings-badge">{{ group.owner | replace('_', ' ') | title }}</span></td>
+                        <td><span class="modern-admin-settings-badge">{{ group.status | replace('_', ' ') | title }}</span></td>
+                        <td><span class="modern-admin-settings-badge modern-admin-settings-risk-{{ group.risk }}">{{ group.risk | title }}</span></td>
+                        <td>
+                            {% if group.do_not_move_yet %}
+                            <span class="modern-admin-settings-badge modern-admin-settings-risk-high">Yes</span>
+                            {% else %}
+                            <span class="modern-admin-settings-badge modern-admin-settings-risk-safe">No</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for surface in group.current_surfaces %}
+                            <span>{{ surface }}</span>{% if not loop.last %}<br>{% endif %}
+                            {% else %}
+                            <span>-</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for note in group.notes %}
+                            <span>{{ note }}</span>{% if not loop.last %}<br>{% endif %}
+                            {% else %}
+                            <span>-</span>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8">No settings ownership groups were loaded.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </section>
 </main>
 
 <script>
 (function () {
-    const storageKey = 'indi-allsky-modern-settings-sections';
-    const sections = Array.from(document.querySelectorAll('[data-settings-section]'));
-    const filter = document.getElementById('modern-admin-settings-filter');
-    let savedState = {};
+    const search = document.getElementById('modern-admin-settings-filter');
+    const level = document.getElementById('modern-admin-settings-level-filter');
+    const owner = document.getElementById('modern-admin-settings-owner-filter');
+    const status = document.getElementById('modern-admin-settings-status-filter');
+    const risk = document.getElementById('modern-admin-settings-risk-filter');
+    const rows = Array.from(document.querySelectorAll('[data-settings-row]'));
+    const count = document.getElementById('modern-admin-settings-visible-count');
 
-    try {
-        savedState = JSON.parse(window.localStorage.getItem(storageKey) || '{}');
-    } catch (error) {
-        savedState = {};
+    function matchesSelect(row, name, value) {
+        return !value || row.getAttribute(name) === value;
     }
 
-    sections.forEach((section) => {
-        const key = section.dataset.settingsSection;
-        section.dataset.settingsDefaultOpen = section.open ? '1' : '0';
-        if (Object.prototype.hasOwnProperty.call(savedState, key)) {
-            section.open = Boolean(savedState[key]);
-        }
+    function filterRows() {
+        const query = search.value.trim().toLowerCase();
+        let visible = 0;
 
-        section.addEventListener('toggle', () => {
-            if (filter.value.trim()) {
-                return;
+        rows.forEach((row) => {
+            const matches = (!query || row.dataset.settingsSearch.indexOf(query) !== -1)
+                && matchesSelect(row, 'data-settings-level', level.value)
+                && matchesSelect(row, 'data-settings-owner', owner.value)
+                && matchesSelect(row, 'data-settings-status', status.value)
+                && matchesSelect(row, 'data-settings-risk', risk.value);
+
+            row.hidden = !matches;
+            if (matches) {
+                visible += 1;
             }
-
-            savedState[key] = section.open;
-            window.localStorage.setItem(storageKey, JSON.stringify(savedState));
         });
+
+        count.textContent = visible;
+    }
+
+    [search, level, owner, status, risk].forEach((control) => {
+        control.addEventListener('input', filterRows);
+        control.addEventListener('change', filterRows);
     });
-
-    function restoreSectionState() {
-        sections.forEach((section) => {
-            const key = section.dataset.settingsSection;
-            if (Object.prototype.hasOwnProperty.call(savedState, key)) {
-                section.open = Boolean(savedState[key]);
-            } else {
-                section.open = section.dataset.settingsDefaultOpen === '1';
-            }
-        });
-    }
-
-    function filterSettings() {
-        const query = filter.value.trim().toLowerCase();
-
-        sections.forEach((section) => {
-            const rows = Array.from(section.querySelectorAll('[data-settings-row]'));
-            let visibleCount = 0;
-
-            rows.forEach((row) => {
-                const matches = !query || row.dataset.settingsSearch.indexOf(query) !== -1;
-                row.hidden = !matches;
-                if (matches) {
-                    visibleCount += 1;
-                }
-            });
-
-            const count = section.querySelector('[data-settings-visible-count]');
-            if (count) {
-                count.textContent = visibleCount;
-            }
-
-            section.hidden = visibleCount === 0;
-            if (query && visibleCount > 0) {
-                section.open = true;
-            }
-        });
-
-        if (!query) {
-            restoreSectionState();
-        }
-    }
-
-    filter.addEventListener('input', filterSettings);
 })();
 </script>
 {% endblock %}
