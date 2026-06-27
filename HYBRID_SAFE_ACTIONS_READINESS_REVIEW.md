@@ -37,7 +37,8 @@ Current boundary:
 - no safe action writes the database unless a future endpoint injects a callback
 - no full Flask `test_client` safe-action test exists yet in the lightweight
   test runner because Flask is not available there
-- no persistent audit log exists yet
+- a lightweight append-only JSONL audit log utility exists, but it is not wired
+  to execute endpoints, UI, DB sessions, or application logging
 
 ## 3. Evidence Reviewed
 
@@ -64,7 +65,7 @@ Reviewed files and patterns:
 | Is the registry sufficient? | Yes for lookup/catalog behavior; no for HTTP exposure, auth, CSRF, or audit. |
 | Is the runner sufficient? | Yes for testable invocation and future Flask wrappers; no for browser exposure by itself. |
 | Is CSRF missing? | Yes. No Modern Safe Action endpoint should execute without explicit CSRF/auth handling. |
-| Is persistent audit logging missing? | Yes. Structured in-memory audit records exist, but they are not persisted as an audit trail. |
+| Is persistent audit logging missing? | Partially. `ModernAdminSafeActionAuditLog` can persist redacted JSONL records with retention/limits, but no execute endpoint uses it yet. |
 | Is a permission model missing? | Partially. The contract supports injected permission checks, but no canonical Modern Safe Action permission policy exists yet. |
 | Is confirmation UX missing? | Yes. This is not required for dry-run endpoints, but is required before real mutation UI. |
 | Is Flask integration testing missing? | Yes. Unit tests exist; endpoint-level tests do not. |
@@ -88,7 +89,7 @@ Reviewed files and patterns:
 | Flask auth | Existing project pattern via `login_required` | Medium | Required | Required |
 | CSRF protection | Existing form ecosystem, not yet applied to safe actions | High | Required | Required |
 | JSON response pattern | Existing via `jsonify(...)` | Low | Required | Required |
-| Persistent audit log | Missing | High | Optional for dry-run if response remains non-mutating; recommended | Required |
+| Persistent audit log | Utility implemented, not wired to execute | High | Optional for dry-run if response remains non-mutating | Required and must be wired/tested before execute |
 | Endpoint integration tests | Static/helper coverage only | High | Full Flask client test still recommended | Required |
 | Confirmation UX | Missing | Medium | Not required for dry-run-only endpoint | Required before UI execution |
 | DB-backed lookup callback | Not implemented | Medium | Not required for dry-run-only validation if endpoint remains conservative; recommended for target existence validation | Required |
@@ -115,7 +116,8 @@ Missing before real execution:
 
 - canonical Modern Safe Action permission policy
 - CSRF-protected endpoint wrapper
-- persistent audit event backed by the structured audit record
+- persistent audit event backed by the structured audit record and JSONL audit
+  log utility
 - Flask integration tests
 - DB-backed notification lookup callback
 - DB-backed acknowledge callback
@@ -132,7 +134,8 @@ The safest next micro-step is:
 1. Add Flask-level tests for the dry-run endpoint authentication, CSRF, missing
    action id, unknown action id, invalid notification id, and dry-run response
    shape once a lightweight Flask test environment is available.
-2. Define persistent audit storage before any execute endpoint.
+2. Wire the persistent audit utility only after a concrete execute wrapper has
+   permission policy, DB-backed callbacks, and integration tests.
 3. Keep `notification.acknowledge` execute blocked until the execute
    prerequisites are complete.
 

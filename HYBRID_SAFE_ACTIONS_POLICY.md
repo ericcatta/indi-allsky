@@ -298,8 +298,15 @@ Structured Audit Record:
 - It does not write to the database, filesystem, application log, or any remote
   service.
 - It redacts secret-bearing payload/result keys before serialization.
-- Status: structured contract only; persistent audit storage remains required
-  before any execute endpoint.
+- `ModernAdminSafeActionAuditLog` provides explicit-call, append-only JSONL
+  persistence for these records with date-based files, record size limits, and
+  file retention.
+- The persistent audit log is lightweight and Raspberry Pi 5-first: it is not
+  attached to Flask, UI, DB sessions, app logging, background polling, or action
+  execution by itself.
+- Status: persistent audit utility exists, but no execute endpoint may use it
+  until permission policy, Flask integration tests, DB-backed callbacks, and
+  confirmation UX are complete.
 
 Dry-Run Endpoint:
 
@@ -315,7 +322,8 @@ Dry-Run Endpoint:
 Recommended next micro-step:
 
 1. Add Flask-level tests for the dry-run endpoint, including CSRF/auth behavior.
-2. Add persistent audit storage design before any execute endpoint.
+2. Define DB-backed lookup/execute callbacks and permission policy for the
+   first low-risk action before any execute endpoint.
 3. Do not wire any Modern UI button until endpoint tests and confirmation UX
    exist.
 4. Keep Classic fallback unchanged.

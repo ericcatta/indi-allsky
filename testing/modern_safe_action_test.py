@@ -2,11 +2,13 @@
 
 import json
 import sys
+from tempfile import TemporaryDirectory
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_safe_action import ModernAdminSafeAction
+from indi_allsky.modern_safe_action import ModernAdminSafeActionAuditLog
 from indi_allsky.modern_safe_action import ModernAdminSafeActionPlaceholder
 from indi_allsky.modern_safe_action import ModernAdminSafeActionAuditRecord
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRegistry
@@ -824,6 +826,99 @@ def test_audit_record_has_no_flask_request_dependency():
     assert audit_record.status == 'dry_run'
 
 
+def build_sample_audit_record(created_at='2026-06-27T10:00:00Z'):
+    return ModernAdminSafeActionAuditRecord(
+        action_id='notification.acknowledge',
+        feature='Notifications',
+        actor='operator',
+        dry_run=True,
+        allowed=True,
+        status='dry_run',
+        risk_level='medium',
+        payload_summary={
+            'notification_id': 1,
+            'api_token': 'payload-secret',
+        },
+        result_summary={
+            'status': 'dry_run',
+            'details': {
+                'refresh_token': 'result-secret',
+            },
+        },
+        reason='Dry run only',
+        created_at=created_at,
+    )
+
+
+def test_audit_log_writes_one_record():
+    with TemporaryDirectory() as tmpdir:
+        audit_log = ModernAdminSafeActionAuditLog(tmpdir)
+        result = audit_log.append(build_sample_audit_record())
+        path = Path(result['path'])
+
+        assert result['written'] is True
+        assert path.exists()
+        lines = path.read_text().splitlines()
+        assert len(lines) == 1
+        data = json.loads(lines[0])
+        assert data['action_id'] == 'notification.acknowledge'
+        assert data['status'] == 'dry_run'
+
+
+def test_audit_log_appends_multiple_records():
+    with TemporaryDirectory() as tmpdir:
+        audit_log = ModernAdminSafeActionAuditLog(tmpdir)
+        audit_log.append(build_sample_audit_record())
+        audit_log.append(build_sample_audit_record())
+
+        path = Path(tmpdir) / '2026-06-27.jsonl'
+        assert len(path.read_text().splitlines()) == 2
+
+
+def test_audit_log_creates_directory():
+    with TemporaryDirectory() as tmpdir:
+        audit_dir = Path(tmpdir) / 'nested' / 'audit'
+        audit_log = ModernAdminSafeActionAuditLog(audit_dir)
+        audit_log.append(build_sample_audit_record())
+
+        assert audit_dir.exists()
+        assert (audit_dir / '2026-06-27.jsonl').exists()
+
+
+def test_audit_log_redacts_sensitive_fields():
+    with TemporaryDirectory() as tmpdir:
+        audit_log = ModernAdminSafeActionAuditLog(tmpdir)
+        result = audit_log.append(build_sample_audit_record())
+        contents = Path(result['path']).read_text()
+
+        assert 'payload-secret' not in contents
+        assert 'result-secret' not in contents
+        assert '[REDACTED]' in contents
+
+
+def test_audit_log_retention_limits_files():
+    with TemporaryDirectory() as tmpdir:
+        audit_log = ModernAdminSafeActionAuditLog(tmpdir, max_files=2)
+        audit_log.append(build_sample_audit_record(created_at='2026-06-25T10:00:00Z'))
+        audit_log.append(build_sample_audit_record(created_at='2026-06-26T10:00:00Z'))
+        audit_log.append(build_sample_audit_record(created_at='2026-06-27T10:00:00Z'))
+
+        files = sorted(path.name for path in Path(tmpdir).glob('*.jsonl'))
+        assert files == ['2026-06-26.jsonl', '2026-06-27.jsonl']
+
+
+def test_audit_log_record_size_limit():
+    with TemporaryDirectory() as tmpdir:
+        audit_log = ModernAdminSafeActionAuditLog(tmpdir, max_record_bytes=64)
+
+        try:
+            audit_log.append(build_sample_audit_record())
+        except ValueError as e:
+            assert 'max_record_bytes' in str(e)
+        else:
+            raise AssertionError('Oversized audit record did not fail')
+
+
 if __name__ == '__main__':
     test_default_action_does_not_execute()
     test_dry_run_does_not_mutate()
@@ -875,4 +970,10 @@ if __name__ == '__main__':
     test_audit_record_actor_is_safe_label_only()
     test_audit_record_to_dict_is_json_safe()
     test_audit_record_has_no_flask_request_dependency()
+    test_audit_log_writes_one_record()
+    test_audit_log_appends_multiple_records()
+    test_audit_log_creates_directory()
+    test_audit_log_redacts_sensitive_fields()
+    test_audit_log_retention_limits_files()
+    test_audit_log_record_size_limit()
     print('Modern safe action tests passed')

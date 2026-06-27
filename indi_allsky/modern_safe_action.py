@@ -1,6 +1,8 @@
+import json
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 from typing import Callable
 
@@ -97,6 +99,77 @@ class ModernAdminSafeActionAuditRecord:
             'reason'         : self.reason,
             'created_at'     : self.created_at,
         }
+
+
+class ModernAdminSafeActionAuditLog:
+    """Append-only JSONL persistence for safe-action audit records.
+
+    The log is intentionally lightweight and explicit-call only. It does not
+    hook into Flask, logging, DB sessions, or action execution by itself.
+    """
+
+    def __init__(self, base_dir, max_files=30, max_record_bytes=16384):
+        self.base_dir = Path(base_dir)
+        self.max_files = max_files
+        self.max_record_bytes = max_record_bytes
+
+
+    def append(self, audit_record):
+        data = self.record_to_dict(audit_record)
+        path = self.path_for_record(data)
+        serialized = json.dumps(data, sort_keys=True, separators=(',', ':'))
+
+        if self.max_record_bytes and len(serialized.encode('utf-8')) > self.max_record_bytes:
+            raise ValueError('Safe action audit record exceeds max_record_bytes')
+
+        self.base_dir.mkdir(parents=True, exist_ok=True)
+        with path.open('a', encoding='utf-8') as audit_file:
+            audit_file.write(serialized + '\n')
+
+        self.enforce_retention()
+
+        return {
+            'path'   : str(path),
+            'bytes'  : len(serialized.encode('utf-8')),
+            'written': True,
+        }
+
+
+    def record_to_dict(self, audit_record):
+        if hasattr(audit_record, 'to_dict'):
+            data = audit_record.to_dict()
+        else:
+            data = dict(audit_record)
+
+        sanitizer = ModernAdminSafeAction()
+        return sanitizer.sanitize_payload(data)
+
+
+    def path_for_record(self, record_data):
+        date_label = self.date_label(record_data.get('created_at'))
+        return self.base_dir / '{0:s}.jsonl'.format(date_label)
+
+
+    def date_label(self, created_at):
+        if isinstance(created_at, str) and len(created_at) >= 10:
+            candidate = created_at[:10]
+            try:
+                datetime.strptime(candidate, '%Y-%m-%d')
+                return candidate
+            except ValueError:
+                pass
+
+        return datetime.utcnow().strftime('%Y-%m-%d')
+
+
+    def enforce_retention(self):
+        if not self.max_files or self.max_files < 1:
+            return
+
+        files = sorted(self.base_dir.glob('*.jsonl'))
+        stale_files = files[:-self.max_files]
+        for stale_file in stale_files:
+            stale_file.unlink()
 
 
 class ModernAdminSafeAction:
