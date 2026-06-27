@@ -275,7 +275,7 @@ These should not be removed. They are transitional.
 | Sensors | modern | PARTIAL MODERN | C | 55% | Observatory | Medium | M | Medium | Config ownership unclear. |
 | Environmental sensors | modern | PARTIAL MODERN | C | 55% | Sensors/weather | Medium | M | Medium | Operational weather awareness incomplete. |
 | Power / UPS | shared_api | NEEDS VERIFICATION | A | 10% | Sensor/config audit | Low | L | Low | Verify presence and ownership. |
-| Upload | modern | PARTIAL MODERN | C | 60% | Filetransfer providers | Medium | M | Medium | Read-only provider/status inventory and usability exist; upload actions and remote operations remain blocked. |
+| Upload | modern | PARTIAL MODERN | D | 70% | Filetransfer providers | Medium | M | Medium | Read-only provider/status inventory, usability and provider detail exist; upload actions and remote operations remain blocked. |
 | YouTube / OAuth | classic | CLASSIC ONLY | A | 0% | External OAuth | Medium | M | Medium | Modern OAuth missing; risky. |
 | Sync API | external_api | EXTERNAL API | Preserve | 70% | External clients | Critical | XS | Preserve | Not UI cleanup. |
 | Action API | external_api | EXTERNAL API | Preserve | 70% | External clients | Critical | XS | Preserve | Not UI cleanup. |
@@ -342,7 +342,7 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Upload | Read-only provider detail | Useful operational parity without tests, OAuth or remote operations. |
+| 1 | YouTube / OAuth | Read-only provider/OAuth status audit | Useful only if credentials and OAuth payloads remain hidden. |
 | 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
 | 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
 | 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
@@ -416,13 +416,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Upload provider detail read-only.
+YouTube / OAuth read-only status audit.
 
 ### 6. Why that feature?
 
-Upload already has read-only provider/status inventory. The next safe step is
-read-only provider detail only, with no upload tests, OAuth, credential changes
-or remote operations.
+YouTube / OAuth remains risky because it touches external auth. The next safe
+step is read-only status audit only, with no OAuth flow, upload test,
+credential exposure or remote operation.
 
 ### 7. Which features can be ported in parallel?
 
@@ -446,8 +446,8 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Upload Phase C to D** can be represented as read-only provider
-detail without upload tests, OAuth flows, credential exposure, remote
+Review whether **YouTube / OAuth Phase A to B** can be represented as read-only
+status audit without OAuth flows, upload tests, credential exposure, remote
 operations or queue mutations. Mark the feature locally blocked if that cannot
 be guaranteed.
 

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-upload-detail-title">
+    {% set modern_admin_header_label = 'Upload Detail' %}
+    {% set modern_admin_heading = modern_admin_upload_provider_label %}
+    {% set modern_admin_title_id = 'modern-admin-upload-detail-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Upload provider detail summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Provider</div>
+            <h3>{{ modern_admin_upload_provider_label }}</h3>
+            <p>Read-only provider inspection.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Visible fields</div>
+            <h3>{{ modern_admin_upload_provider_rows|length }}</h3>
+            <p>Safe allowlisted configuration fields.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Hidden fields</div>
+            <h3>{{ modern_admin_upload_provider_hidden_count }}</h3>
+            <p>Fields intentionally hidden from this view.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="modern-upload-detail-heading">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Provider Configuration</p>
+            <h2 id="modern-upload-detail-heading">Safe metadata</h2>
+        </div>
+
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in modern_admin_upload_provider_rows %}
+                    <tr>
+                        <td>{{ row.key }}</td>
+                        <td>{{ row.value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="modern-admin-note">Credentials, hostnames, usernames, passwords, tokens, private keys, OAuth payloads and raw provider configuration are intentionally not shown. This page does not run tests, upload files, start OAuth, create tasks or contact remote services.</p>
+
+        <section class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_uploads_view') }}">Back to Modern Uploads</a>
+        </section>
+    </section>
+</main>
+{% endblock %}

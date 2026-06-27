@@ -41,6 +41,7 @@ var camera_id = {{ camera_id }};
             <h3>{{ target.status }}</h3>
             <p>{{ target.detail }}</p>
             <span class="modern-admin-status-pill {{ target.tone }}">Read-only</span>
+            <p><a href="{{ url_for('indi_allsky.modern_admin_upload_detail_view', provider_slug=target.slug) }}">Details</a></p>
         </article>
         {% endfor %}
     </section>

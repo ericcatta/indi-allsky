@@ -2411,15 +2411,18 @@
       "porting_priority": "medium",
       "routes": [
         "/modern-admin/uploads",
+        "/modern-admin/uploads/<provider_slug>",
         "/ajax/uploadyoutube"
       ],
       "templates": [
         "modern_admin/uploads.html",
+        "modern_admin/upload_detail.html",
         "videoviewer.html",
         "minivideoviewer.html"
       ],
       "assets": [],
       "apis": [
+        "modern_admin_upload_detail_view",
         "/ajax/uploadyoutube"
       ],
       "config_keys": [
@@ -2428,7 +2431,7 @@
         "UPLOAD_*"
       ],
       "protected": false,
-      "modern_gap": "Modern provider/status inventory and read-only usability exist; upload actions, OAuth flows and remote operations remain blocked pending explicit provider action policy.",
+      "modern_gap": "Modern provider/status inventory, read-only usability and provider detail exist; upload actions, OAuth flows and remote operations remain blocked pending explicit provider action policy.",
       "removal_risk": "high",
       "notes": []
     },

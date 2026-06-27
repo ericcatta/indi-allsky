@@ -7472,18 +7472,21 @@ class ModernAdminUploadsView(ModernAdminView):
         context['modern_admin_upload_targets'] = (
             {
                 'label'  : 'File Transfer',
+                'slug'   : 'filetransfer',
                 'detail' : filetransfer_config.get('CLASSNAME', 'Not configured'),
                 'status' : 'Configured' if filetransfer_config.get('HOST') else 'No host',
                 'tone'   : 'modern-admin-status-good' if filetransfer_config.get('HOST') else 'modern-admin-status-muted',
             },
             {
                 'label'  : 'S3 Upload',
+                'slug'   : 's3',
                 'detail' : s3_config.get('CLASSNAME', 'Not configured'),
                 'status' : 'Enabled' if s3_config.get('ENABLE') else 'Disabled',
                 'tone'   : 'modern-admin-status-good' if s3_config.get('ENABLE') else 'modern-admin-status-muted',
             },
             {
                 'label'  : 'YouTube',
+                'slug'   : 'youtube',
                 'detail' : 'Video uploads',
                 'status' : 'Enabled' if youtube_config.get('UPLOAD_VIDEO') else 'Disabled',
                 'tone'   : 'modern-admin-status-good' if youtube_config.get('UPLOAD_VIDEO') else 'modern-admin-status-muted',
@@ -7527,6 +7530,117 @@ class ModernAdminUploadsView(ModernAdminView):
         except Exception as e:
             app.logger.error('Error loading modern admin upload notifications: %s', str(e))
             return list()
+
+
+class ModernAdminUploadDetailView(ModernAdminUploadsView):
+    page_title = 'Modern Admin Upload Detail'
+
+    provider_configs = {
+        'filetransfer' : {
+            'label'      : 'File Transfer',
+            'config_key' : 'FILETRANSFER',
+            'safe_keys'  : (
+                'CLASSNAME',
+                'CONNECT_TIMEOUT',
+                'TIMEOUT',
+                'CERT_BYPASS',
+                'ATOMIC_TRANSFERS',
+                'FORCE_IPV4',
+                'FORCE_IPV6',
+                'UPLOAD_IMAGE',
+                'UPLOAD_PANORAMA',
+                'UPLOAD_METADATA',
+                'UPLOAD_RAW',
+                'UPLOAD_FITS',
+                'UPLOAD_VIDEO',
+                'UPLOAD_MINI_VIDEO',
+                'UPLOAD_KEOGRAM',
+                'UPLOAD_STARTRAIL',
+                'UPLOAD_STARTRAIL_VIDEO',
+                'UPLOAD_PANORAMA_VIDEO',
+                'UPLOAD_REALTIME_KEOGRAM',
+                'UPLOAD_ENDOFNIGHT',
+                'UPLOAD_LATEST_IMAGE',
+                'UPLOAD_LATEST_PANORAMA',
+                'UPLOAD_LATEST_RAW',
+                'UPLOAD_LATEST_VIDEO',
+                'UPLOAD_DB_BACKUP',
+            ),
+        },
+        's3' : {
+            'label'      : 'S3 Upload',
+            'config_key' : 'S3UPLOAD',
+            'safe_keys'  : (
+                'ENABLE',
+                'CLASSNAME',
+                'UPLOAD_IMAGE',
+                'UPLOAD_PANORAMA',
+                'UPLOAD_RAW',
+                'UPLOAD_FITS',
+                'UPLOAD_VIDEO',
+                'UPLOAD_MINI_VIDEO',
+                'UPLOAD_KEOGRAM',
+                'UPLOAD_STARTRAIL',
+                'UPLOAD_STARTRAIL_VIDEO',
+                'UPLOAD_PANORAMA_VIDEO',
+                'UPLOAD_LATEST_IMAGE',
+                'UPLOAD_LATEST_PANORAMA',
+                'UPLOAD_LATEST_RAW',
+                'UPLOAD_LATEST_VIDEO',
+            ),
+        },
+        'youtube' : {
+            'label'      : 'YouTube',
+            'config_key' : 'YOUTUBE',
+            'safe_keys'  : (
+                'UPLOAD_VIDEO',
+                'UPLOAD_TIMELAPSE',
+                'UPLOAD_MINI_VIDEO',
+                'UPLOAD_STARTRAIL_VIDEO',
+                'UPLOAD_PANORAMA_VIDEO',
+            ),
+        },
+    }
+
+
+    def dispatch_request(self, provider_slug, *args, **kwargs):
+        if provider_slug not in self.provider_configs:
+            abort(404)
+
+        self.provider_slug = provider_slug
+        return super(ModernAdminUploadDetailView, self).dispatch_request(*args, **kwargs)
+
+
+    def get_context(self):
+        context = super(ModernAdminUploadDetailView, self).get_context()
+        provider_config = self.provider_configs[self.provider_slug]
+        raw_config = self.indi_allsky_config.get(provider_config['config_key'], {})
+        if not isinstance(raw_config, dict):
+            raw_config = {}
+
+        context['modern_admin_upload_provider_slug'] = self.provider_slug
+        context['modern_admin_upload_provider_label'] = provider_config['label']
+        context['modern_admin_upload_provider_rows'] = [
+            {
+                'key'   : safe_key,
+                'value' : self.format_upload_detail_value(raw_config.get(safe_key)),
+            }
+            for safe_key in provider_config['safe_keys']
+        ]
+        context['modern_admin_upload_provider_hidden_count'] = len([
+            key for key in raw_config.keys()
+            if key not in provider_config['safe_keys']
+        ])
+
+        return context
+
+
+    def format_upload_detail_value(self, value):
+        if value is None:
+            return 'Not configured'
+        if isinstance(value, bool):
+            return 'Enabled' if value else 'Disabled'
+        return str(value)
 
 
 class ModernAdminObservatoryView(ModernAdminView):
@@ -22133,6 +22247,7 @@ bp_allsky.add_url_rule('/modern-admin/cameras/adu-history', view_func=ModernAdmi
 bp_allsky.add_url_rule('/modern-admin/storage', view_func=ModernAdminStorageView.as_view('modern_admin_storage_view', template_name='modern_admin/storage.html'))
 bp_allsky.add_url_rule('/modern-admin/storage/file-space-usage', view_func=ModernAdminFileSpaceUsageView.as_view('modern_admin_file_space_usage_view', template_name='modern_admin/file_space_usage.html'))
 bp_allsky.add_url_rule('/modern-admin/uploads', view_func=ModernAdminUploadsView.as_view('modern_admin_uploads_view', template_name='modern_admin/uploads.html'))
+bp_allsky.add_url_rule('/modern-admin/uploads/<provider_slug>', view_func=ModernAdminUploadDetailView.as_view('modern_admin_upload_detail_view', template_name='modern_admin/upload_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory', view_func=ModernAdminObservatoryView.as_view('modern_admin_observatory_view', template_name='modern_admin/observatory.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory/sqm', view_func=ModernAdminSqmView.as_view('modern_admin_sqm_view', template_name='modern_admin/observatory_status.html'))
 bp_allsky.add_url_rule('/modern-admin/observatory/charts', view_func=ModernAdminChartsView.as_view('modern_admin_charts_view', template_name='modern_admin/charts.html'))
