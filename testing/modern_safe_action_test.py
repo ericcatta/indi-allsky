@@ -9,11 +9,18 @@ from indi_allsky.modern_safe_action import ModernAdminSafeAction
 from indi_allsky.modern_safe_action import ModernAdminSafeActionPlaceholder
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRegistry
 from indi_allsky.modern_safe_action import ModernAdminSafeActionResult
+from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
 from indi_allsky.modern_safe_action import build_default_modern_safe_action_registry
 
 
 class Actor:
     username = 'safe-admin'
+
+
+class FakeNotification:
+    def __init__(self, notification_id, ack=False):
+        self.id = notification_id
+        self.ack = ack
 
 
 class ExampleAction(ModernAdminSafeAction):
@@ -196,6 +203,126 @@ def test_placeholder_dry_run_is_safe_when_permission_allows():
     assert execute.allowed is False
 
 
+def test_notification_acknowledge_permission_denied():
+    action = NotificationAcknowledgeSafeAction(permission_check=lambda actor: False)
+    result = action.run(actor=Actor(), payload={'notification_id': 1}, dry_run=False)
+
+    assert result.status == 'permission_denied'
+    assert result.allowed is False
+
+
+def test_notification_acknowledge_missing_notification_id():
+    action = NotificationAcknowledgeSafeAction(permission_check=lambda actor: True)
+    result = action.run(actor=Actor(), payload={}, dry_run=True)
+
+    assert result.status == 'validation_failed'
+    assert 'notification_id is required' in result.message
+
+
+def test_notification_acknowledge_invalid_notification_id():
+    action = NotificationAcknowledgeSafeAction(permission_check=lambda actor: True)
+    result = action.run(actor=Actor(), payload={'notification_id': 0}, dry_run=True)
+
+    assert result.status == 'validation_failed'
+    assert 'positive integer' in result.message
+
+
+def test_notification_acknowledge_missing_lookup_result():
+    action = NotificationAcknowledgeSafeAction(
+        permission_check=lambda actor: True,
+        notification_lookup=lambda notification_id: None,
+    )
+    result = action.run(actor=Actor(), payload={'notification_id': 99}, dry_run=True)
+
+    assert result.status == 'validation_failed'
+    assert 'does not exist' in result.message
+
+
+def test_notification_acknowledge_dry_run_does_not_call_callback():
+    calls = []
+    action = NotificationAcknowledgeSafeAction(
+        permission_check=lambda actor: True,
+        notification_lookup=lambda notification_id: FakeNotification(notification_id),
+        acknowledge_callback=lambda **kwargs: calls.append(kwargs),
+    )
+
+    result = action.run(actor=Actor(), payload={'notification_id': 1}, dry_run=True)
+
+    assert result.status == 'dry_run'
+    assert result.allowed is True
+    assert calls == []
+
+
+def test_notification_acknowledge_without_callback_is_not_implemented():
+    action = NotificationAcknowledgeSafeAction(
+        permission_check=lambda actor: True,
+        notification_lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+
+    result = action.run(actor=Actor(), payload={'notification_id': 1}, dry_run=False)
+
+    assert result.status == 'not_implemented'
+    assert result.allowed is False
+
+
+def test_notification_acknowledge_with_callback_returns_success():
+    calls = []
+
+    def fake_acknowledge(**kwargs):
+        calls.append(kwargs)
+        kwargs['notification'].ack = True
+        return {'details': {'source': 'fake_callback'}}
+
+    action = NotificationAcknowledgeSafeAction(
+        permission_check=lambda actor: True,
+        notification_lookup=lambda notification_id: FakeNotification(notification_id),
+        acknowledge_callback=fake_acknowledge,
+    )
+
+    result = action.run(actor=Actor(), payload={'notification_id': 7}, dry_run=False)
+
+    assert result.status == 'acknowledged'
+    assert result.allowed is True
+    assert result.details['notification_id'] == 7
+    assert result.details['source'] == 'fake_callback'
+    assert len(calls) == 1
+
+
+def test_notification_acknowledge_already_acked_is_idempotent():
+    calls = []
+    action = NotificationAcknowledgeSafeAction(
+        permission_check=lambda actor: True,
+        notification_lookup=lambda notification_id: FakeNotification(notification_id, ack=True),
+        acknowledge_callback=lambda **kwargs: calls.append(kwargs),
+    )
+
+    result = action.run(actor=Actor(), payload={'notification_id': 5}, dry_run=False)
+
+    assert result.status == 'already_acknowledged'
+    assert result.allowed is True
+    assert result.details['idempotent'] is True
+    assert calls == []
+
+
+def test_notification_acknowledge_audit_redacts_sensitive_payload():
+    action = NotificationAcknowledgeSafeAction(
+        permission_check=lambda actor: True,
+        notification_lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+
+    result = action.run(
+        actor=Actor(),
+        payload={
+            'notification_id': 1,
+            'refresh_token': 'do-not-render',
+        },
+        dry_run=True,
+    )
+
+    assert 'do-not-render' not in result.audit_message
+    assert '[REDACTED]' in result.audit_message
+
+
 if __name__ == '__main__':
     test_default_action_does_not_execute()
     test_dry_run_does_not_mutate()
@@ -209,4 +336,13 @@ if __name__ == '__main__':
     test_registry_filters_by_feature_and_risk()
     test_default_placeholder_actions_do_not_execute()
     test_placeholder_dry_run_is_safe_when_permission_allows()
+    test_notification_acknowledge_permission_denied()
+    test_notification_acknowledge_missing_notification_id()
+    test_notification_acknowledge_invalid_notification_id()
+    test_notification_acknowledge_missing_lookup_result()
+    test_notification_acknowledge_dry_run_does_not_call_callback()
+    test_notification_acknowledge_without_callback_is_not_implemented()
+    test_notification_acknowledge_with_callback_returns_success()
+    test_notification_acknowledge_already_acked_is_idempotent()
+    test_notification_acknowledge_audit_redacts_sensitive_payload()
     print('Modern safe action tests passed')

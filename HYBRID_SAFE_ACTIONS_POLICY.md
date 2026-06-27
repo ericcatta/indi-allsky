@@ -252,15 +252,27 @@ Contract foundation:
 Safe Action Registry:
 
 - `ModernAdminSafeActionRegistry` is a catalog for future safe action contracts.
-- The default registry contains placeholder actions only; they are not wired to
-  UI, routes, buttons, Classic endpoints, database writes, filesystem writes, or
-  remote operations.
+- The default registry is not wired to UI, routes, buttons, Classic endpoints,
+  database writes, filesystem writes, or remote operations.
 - Placeholder actions are denied by default and remain non-operative even if
   permission is later supplied unless a future subclass implements and tests a
   concrete wrapper.
-- Registering a placeholder is not authorization to expose that action in Modern
-  Admin. Each action still needs its own wrapper, tests, policy review, and
-  rollback/fallback decision.
+- Registering a placeholder or wrapper is not authorization to expose that
+  action in Modern Admin. Each action still needs its own endpoint wrapper,
+  integration tests, policy review, and rollback/fallback decision.
+
+First Pilot Safe Action: `notification.acknowledge`:
+
+- `NotificationAcknowledgeSafeAction` is the first wrapper/test-only pilot.
+- It validates a positive notification id, can use an injected notification
+  lookup function, supports dry-run, and treats an already acknowledged
+  notification as an idempotent safe no-op.
+- It does not call `/ajax/notification`, does not require Flask request context,
+  and does not write the database unless a future endpoint deliberately injects
+  a tested acknowledge callback.
+- Status: wrapper/test only, not exposed in Modern UI.
+- Required before UI exposure: Modern CSRF/auth endpoint wrapper, audit log,
+  confirmation UX, integration test, and Classic fallback/rollback decision.
 
 Recommended next micro-step:
 

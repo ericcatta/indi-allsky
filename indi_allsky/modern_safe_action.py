@@ -194,6 +194,108 @@ class ModernAdminSafeActionPlaceholder(ModernAdminSafeAction):
         self.risk_level = risk_level
 
 
+class NotificationAcknowledgeSafeAction(ModernAdminSafeAction):
+    action_id = 'notification.acknowledge'
+    label = 'Acknowledge Notification'
+    feature = 'Notifications'
+    risk_level = 'medium'
+
+    def __init__(self, permission_check=None, notification_lookup=None, acknowledge_callback=None):
+        super().__init__(permission_check=permission_check)
+        self.notification_lookup = notification_lookup
+        self.acknowledge_callback = acknowledge_callback
+
+
+    def validate(self, payload):
+        notification_id = self.notification_id_from_payload(payload)
+        if notification_id is None:
+            return 'notification_id is required'
+
+        if notification_id < 1:
+            return 'notification_id must be a positive integer'
+
+        if self.notification_lookup is None:
+            return True
+
+        notification = self.notification_lookup(notification_id)
+        if notification is None:
+            return 'notification does not exist'
+
+        return True
+
+
+    def execute(self, actor=None, payload=None):
+        payload = payload or {}
+        notification_id = self.notification_id_from_payload(payload)
+        notification = self.lookup_notification(notification_id)
+
+        if notification is not None and bool(getattr(notification, 'ack', False)):
+            return self.result(
+                status='already_acknowledged',
+                message='Notification is already acknowledged',
+                dry_run=False,
+                allowed=True,
+                audit_message=self.audit_message(actor, payload, 'already_acknowledged'),
+                details={
+                    'notification_id': notification_id,
+                    'idempotent': True,
+                },
+            )
+
+        if self.acknowledge_callback is None:
+            return super().execute(actor=actor, payload=payload)
+
+        callback_result = self.acknowledge_callback(
+            notification_id=notification_id,
+            notification=notification,
+            actor=actor,
+            payload=payload,
+        )
+
+        if isinstance(callback_result, ModernAdminSafeActionResult):
+            return callback_result
+
+        callback_details = {}
+        if isinstance(callback_result, dict):
+            callback_details = dict(callback_result.get('details', callback_result))
+
+        return self.result(
+            status='acknowledged',
+            message='Notification acknowledged',
+            dry_run=False,
+            allowed=True,
+            audit_message=self.audit_message(actor, payload, 'acknowledged'),
+            details={
+                'notification_id': notification_id,
+                **callback_details,
+            },
+        )
+
+
+    def lookup_notification(self, notification_id):
+        if self.notification_lookup is None:
+            return None
+
+        return self.notification_lookup(notification_id)
+
+
+    def notification_id_from_payload(self, payload):
+        payload = payload or {}
+
+        if 'notification_id' in payload:
+            value = payload.get('notification_id')
+        else:
+            value = payload.get('ack_id')
+
+        if value is None or isinstance(value, bool):
+            return None
+
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+
 class ModernAdminSafeActionRegistry:
     def __init__(self):
         self._actions = {}
@@ -258,8 +360,11 @@ def allow_no_one(actor):
 def build_default_modern_safe_action_registry():
     registry = ModernAdminSafeActionRegistry()
 
+    registry.register(NotificationAcknowledgeSafeAction(
+        permission_check=allow_no_one,
+    ))
+
     for action_id, label, feature, risk_level in (
-        ('notification.acknowledge', 'Acknowledge Notification', 'Notifications', 'medium'),
         ('image.exclude', 'Exclude Image', 'Image Viewer', 'medium'),
         ('image.unexclude', 'Unexclude Image', 'Image Viewer', 'medium'),
         ('log.download', 'Download Log', 'Logs', 'high'),
