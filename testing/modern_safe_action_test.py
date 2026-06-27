@@ -9,6 +9,7 @@ from indi_allsky.modern_safe_action import ModernAdminSafeAction
 from indi_allsky.modern_safe_action import ModernAdminSafeActionPlaceholder
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRegistry
 from indi_allsky.modern_safe_action import ModernAdminSafeActionResult
+from indi_allsky.modern_safe_action import ModernAdminSafeActionRunner
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
 from indi_allsky.modern_safe_action import build_default_modern_safe_action_registry
 
@@ -323,6 +324,177 @@ def test_notification_acknowledge_audit_redacts_sensitive_payload():
     assert '[REDACTED]' in result.audit_message
 
 
+def build_notification_runner(permission_check=None, lookup=None, callback=None):
+    registry = ModernAdminSafeActionRegistry()
+    registry.register(NotificationAcknowledgeSafeAction(
+        permission_check=permission_check or (lambda actor: True),
+        notification_lookup=lookup,
+        acknowledge_callback=callback,
+    ))
+    return ModernAdminSafeActionRunner(registry)
+
+
+def test_runner_missing_action_id():
+    runner = ModernAdminSafeActionRunner(ModernAdminSafeActionRegistry())
+    result = runner.run(action_id='', actor=Actor(), payload={}, dry_run=True)
+
+    assert result.status == 'missing_action_id'
+    assert result.allowed is False
+
+
+def test_runner_unknown_action_id():
+    runner = ModernAdminSafeActionRunner(ModernAdminSafeActionRegistry())
+    result = runner.run(action_id='missing.action', actor=Actor(), payload={}, dry_run=True)
+
+    assert result.status == 'not_found'
+    assert result.allowed is False
+
+
+def test_runner_permission_denied_does_not_execute():
+    calls = []
+    runner = build_notification_runner(
+        permission_check=lambda actor: False,
+        lookup=lambda notification_id: FakeNotification(notification_id),
+        callback=lambda **kwargs: calls.append(kwargs),
+    )
+
+    result = runner.run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 1},
+        dry_run=False,
+    )
+
+    assert result.status == 'permission_denied'
+    assert result.allowed is False
+    assert calls == []
+
+
+def test_runner_validation_failure_does_not_execute():
+    calls = []
+    runner = build_notification_runner(
+        lookup=lambda notification_id: None,
+        callback=lambda **kwargs: calls.append(kwargs),
+    )
+
+    result = runner.run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 42},
+        dry_run=False,
+    )
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert calls == []
+
+
+def test_runner_dry_run_success_without_execute_callback():
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+
+    result = runner.run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 2},
+        dry_run=True,
+    )
+
+    assert result.status == 'dry_run'
+    assert result.allowed is True
+
+
+def test_runner_execute_success_with_fake_callback():
+    calls = []
+
+    def fake_acknowledge(**kwargs):
+        calls.append(kwargs)
+        return {'details': {'runner': 'safe'}}
+
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+        callback=fake_acknowledge,
+    )
+
+    result = runner.run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 3},
+        dry_run=False,
+    )
+
+    assert result.status == 'acknowledged'
+    assert result.allowed is True
+    assert result.details['notification_id'] == 3
+    assert result.details['runner'] == 'safe'
+    assert len(calls) == 1
+
+
+def test_runner_execute_failure_structured():
+    def fake_failure(**kwargs):
+        action = NotificationAcknowledgeSafeAction(permission_check=lambda actor: True)
+        return action.result(
+            status='execute_failed',
+            message='Fake failure',
+            dry_run=False,
+            allowed=False,
+            audit_message=action.audit_message(kwargs.get('actor'), kwargs.get('payload', {}), 'execute_failed'),
+            details={'notification_id': kwargs['notification_id']},
+        )
+
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+        callback=fake_failure,
+    )
+
+    result = runner.run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 4},
+        dry_run=False,
+    )
+
+    assert result.status == 'execute_failed'
+    assert result.allowed is False
+    assert result.details['notification_id'] == 4
+
+
+def test_runner_audit_redaction():
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+
+    result = runner.run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={
+            'notification_id': 5,
+            'client_secret': 'do-not-log',
+        },
+        dry_run=True,
+    )
+
+    assert 'do-not-log' not in result.audit_message
+    assert '[REDACTED]' in result.audit_message
+
+
+def test_runner_has_no_flask_request_dependency():
+    runner = build_notification_runner(
+        lookup=lambda notification_id: FakeNotification(notification_id),
+    )
+
+    result = runner.run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 6},
+        dry_run=True,
+    )
+
+    assert result.status == 'dry_run'
+    assert result.allowed is True
+
+
 if __name__ == '__main__':
     test_default_action_does_not_execute()
     test_dry_run_does_not_mutate()
@@ -345,4 +517,13 @@ if __name__ == '__main__':
     test_notification_acknowledge_with_callback_returns_success()
     test_notification_acknowledge_already_acked_is_idempotent()
     test_notification_acknowledge_audit_redacts_sensitive_payload()
+    test_runner_missing_action_id()
+    test_runner_unknown_action_id()
+    test_runner_permission_denied_does_not_execute()
+    test_runner_validation_failure_does_not_execute()
+    test_runner_dry_run_success_without_execute_callback()
+    test_runner_execute_success_with_fake_callback()
+    test_runner_execute_failure_structured()
+    test_runner_audit_redaction()
+    test_runner_has_no_flask_request_dependency()
     print('Modern safe action tests passed')

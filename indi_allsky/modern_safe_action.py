@@ -353,6 +353,36 @@ class ModernAdminSafeActionRegistry:
         ]
 
 
+class ModernAdminSafeActionRunner:
+    """Small invocation helper for tests and future Flask wrappers.
+
+    The runner intentionally has no Flask dependency and exposes no route. It
+    only resolves an action from a registry and returns a structured result.
+    """
+
+    def __init__(self, registry):
+        self.registry = registry
+
+
+    def run(self, action_id=None, payload=None, actor=None, dry_run=True):
+        if not action_id:
+            return ModernAdminSafeActionResult(
+                action_id='',
+                feature='unknown',
+                risk_level='unknown',
+                status='missing_action_id',
+                message='Safe action id is required',
+                dry_run=True,
+                allowed=False,
+            )
+
+        action = self.registry.find(action_id)
+        if isinstance(action, ModernAdminSafeActionResult):
+            return action
+
+        return action.run(actor=actor, payload=payload or {}, dry_run=dry_run)
+
+
 def allow_no_one(actor):
     return False
 

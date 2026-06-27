@@ -274,11 +274,25 @@ First Pilot Safe Action: `notification.acknowledge`:
 - Required before UI exposure: Modern CSRF/auth endpoint wrapper, audit log,
   confirmation UX, integration test, and Classic fallback/rollback decision.
 
+Safe Action Runner:
+
+- `ModernAdminSafeActionRunner` is a small helper layer for tests and future
+  Flask wrappers.
+- It resolves an action from the registry, rejects missing or unknown action ids,
+  passes actor, payload, and dry-run state into the action contract, and always
+  returns a structured `ModernAdminSafeActionResult`.
+- The runner has no Flask request dependency and does not expose routes,
+  buttons, POST handlers, Classic endpoint calls, database writes, filesystem
+  writes, or remote operations.
+- Status: helper/test layer only, not exposed in Modern UI.
+- Required before UI exposure: CSRF/auth Flask wrapper, confirmation UX,
+  integration tests, real audit log, and explicit rollback/fallback decision.
+
 Recommended next micro-step:
 
-1. Define a `ModernAdminSafeAction` contract for one action class only.
-2. Start with Notification acknowledge or Image exclude/unexclude.
-3. Add tests before wiring it into Modern UI.
+1. Define a Modern CSRF/auth endpoint wrapper for one low-risk action only.
+2. Keep the wrapper dry-run first unless the action-specific policy is complete.
+3. Add integration tests before wiring any button into Modern UI.
 4. Keep Classic fallback unchanged.
 5. Do not add delete/download/restore/OAuth/hardware actions until their specific
    policy sections are satisfied.
