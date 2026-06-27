@@ -17583,6 +17583,31 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         return tuple(sorted(counter.keys()))
 
 
+class ModernAdminBasicSettingsPreviewView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Basic Settings Preview'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    def get_context(self):
+        context = super(ModernAdminBasicSettingsPreviewView, self).get_context()
+        basic_groups = [
+            group
+            for group in context.get('modern_admin_settings_groups', [])
+            if group.get('level') == 'basic'
+        ]
+
+        context['modern_admin_basic_settings_groups'] = sorted(
+            basic_groups,
+            key=lambda group: (group.get('label') or group.get('group_id') or '').lower(),
+        )
+        context['modern_admin_basic_settings_count'] = len(basic_groups)
+        context['modern_admin_basic_settings_do_not_move_count'] = len([
+            group
+            for group in basic_groups
+            if group.get('do_not_move_yet')
+        ])
+        return context
+
+
     def get_settings_inventory_groups(self, form):
         grouped_fields = OrderedDict()
         for group_title in self.SETTINGS_GROUP_ORDER:
@@ -22554,6 +22579,7 @@ bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusVi
 bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))
 bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsInventoryView.as_view('modern_admin_settings_view', template_name='modern_admin/settings_inventory.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/basic', view_func=ModernAdminBasicSettingsPreviewView.as_view('modern_admin_basic_settings_view', template_name='modern_admin/settings_basic.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))

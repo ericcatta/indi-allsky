@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-basic-preview-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-basic-settings-title">
+    {% set modern_admin_header_label = 'Basic settings preview header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-basic-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Basic settings preview summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Product consolidation</p>
+                <h2 id="modern-admin-basic-settings-title">Basic Settings Preview</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> These are the settings groups currently classified as Basic in the ownership map. This page does not show active config values and does not write configuration.</p>
+        <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Index</a>
+        </p>
+
+        <div class="modern-admin-settings-summary-grid">
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ modern_admin_basic_settings_count }}</span>
+                <p>Basic groups</p>
+            </div>
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ modern_admin_basic_settings_do_not_move_count }}</span>
+                <p>Do not move yet</p>
+            </div>
+            <div class="modern-admin-settings-summary-card">
+                <span>{{ modern_admin_settings_map_schema }}</span>
+                <p>Map schema</p>
+            </div>
+        </div>
+    </section>
+
+    {% if modern_admin_settings_map_error %}
+    <section class="modern-admin-alert modern-admin-alert-danger" role="alert">
+        {{ modern_admin_settings_map_error }}
+    </section>
+    {% endif %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="basic-settings-groups-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Daily-use concepts</p>
+                <h2 id="basic-settings-groups-title">Basic groups</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_basic_settings_count }} groups</span>
+        </div>
+
+        <div class="modern-admin-link-grid">
+            {% for group in modern_admin_basic_settings_groups %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ group.label }}</strong>
+                    <small><code>{{ group.group_id }}</code></small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ group.owner | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ group.status | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ group.risk }}">{{ group.risk | title }} risk</span>
+                        {% if group.do_not_move_yet %}
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-high">Do not move yet</span>
+                        {% endif %}
+                    </small>
+                    <small>
+                        {% for note in group.notes %}
+                        {{ note }}{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No notes.
+                        {% endfor %}
+                    </small>
+                    <small>
+                        {% for surface in group.current_surfaces %}
+                        {{ surface }}{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No known surfaces.
+                        {% endfor %}
+                    </small>
+                </span>
+            </article>
+            {% else %}
+            <span>No Basic settings groups were loaded.</span>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

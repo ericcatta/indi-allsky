@@ -79,6 +79,7 @@
         "/modern-admin/observatory",
         "/modern-admin/observatory/*",
         "/modern-admin/settings",
+        "/modern-admin/settings/basic",
         "/modern-admin/settings/cameras",
         "/modern-admin/settings/capture",
         "/modern-admin/settings/full",
@@ -122,6 +123,7 @@
         "modern_admin/observatory_status.html",
         "modern_admin/realtime_keogram.html",
         "modern_admin/sensor_panel.html",
+        "modern_admin/settings_basic.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
         "modern_admin/settings_full.html",
@@ -397,12 +399,14 @@
       "porting_priority": "protect",
       "routes": [
         "/modern-admin/settings",
+        "/modern-admin/settings/basic",
         "/modern-admin/settings/cameras",
         "/modern-admin/settings/capture",
         "/modern-admin/settings/full"
       ],
       "templates": [
         "modern_admin/settings_inventory.html",
+        "modern_admin/settings_basic.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
         "modern_admin/settings_full.html"
