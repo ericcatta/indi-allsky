@@ -18055,6 +18055,7 @@ class ModernAdminBasicSettingsPreviewView(ModernAdminSettingsInventoryView):
 
         context['modern_admin_settings_preview_level'] = self.settings_preview_level
         context['modern_admin_settings_preview_label'] = self.settings_preview_label
+        context['modern_admin_settings_preview_title'] = '{0:s} Settings Preview'.format(self.settings_preview_label)
         context['modern_admin_settings_preview_description'] = self.settings_preview_description
         context['modern_admin_settings_preview_groups'] = sorted(
             level_groups,
@@ -18081,6 +18082,33 @@ class ModernAdminDeveloperSettingsPreviewView(ModernAdminBasicSettingsPreviewVie
     settings_preview_level = 'developer'
     settings_preview_label = 'Developer'
     settings_preview_description = 'diagnostic, compatibility, and high-risk settings groups'
+
+
+class ModernAdminReadySettingsPreviewView(ModernAdminBasicSettingsPreviewView):
+    page_title = 'Modern Admin Ready Settings Preview'
+    settings_preview_label = 'Ready to Redesign'
+    settings_preview_description = 'low-risk settings groups that can become final Modern UI first'
+
+    def get_context(self):
+        context = ModernAdminSettingsInventoryView.get_context(self)
+
+        ready_groups = [
+            group
+            for group in context.get('modern_admin_settings_groups', [])
+            if not group.get('do_not_move_yet') and group.get('risk') != 'high'
+        ]
+
+        context['modern_admin_settings_preview_level'] = 'ready'
+        context['modern_admin_settings_preview_label'] = self.settings_preview_label
+        context['modern_admin_settings_preview_title'] = 'Ready to Redesign'
+        context['modern_admin_settings_preview_description'] = self.settings_preview_description
+        context['modern_admin_settings_preview_groups'] = sorted(
+            ready_groups,
+            key=lambda group: (group.get('label') or group.get('group_id') or '').lower(),
+        )
+        context['modern_admin_settings_preview_count'] = len(ready_groups)
+        context['modern_admin_settings_preview_do_not_move_count'] = 0
+        return context
 
 
 class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
@@ -22602,6 +22630,7 @@ bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsIn
 bp_allsky.add_url_rule('/modern-admin/settings/basic', view_func=ModernAdminBasicSettingsPreviewView.as_view('modern_admin_basic_settings_view', template_name='modern_admin/settings_basic.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/advanced', view_func=ModernAdminAdvancedSettingsPreviewView.as_view('modern_admin_advanced_settings_view', template_name='modern_admin/settings_basic.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/developer', view_func=ModernAdminDeveloperSettingsPreviewView.as_view('modern_admin_developer_settings_view', template_name='modern_admin/settings_basic.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/ready', view_func=ModernAdminReadySettingsPreviewView.as_view('modern_admin_ready_settings_view', template_name='modern_admin/settings_basic.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))

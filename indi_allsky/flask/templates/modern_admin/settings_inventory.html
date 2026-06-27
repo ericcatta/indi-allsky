@@ -28,6 +28,13 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-note">Schema: <code>{{ modern_admin_settings_map_schema }}</code></p>
 
         <div class="modern-admin-settings-action-grid">
+            <a class="modern-admin-settings-action-card modern-admin-settings-action-card-readonly" href="{{ url_for('indi_allsky.modern_admin_ready_settings_view') }}">
+                <span>
+                    <strong>Ready to Redesign</strong>
+                    <small>Low-risk settings groups that can become final Modern UI first.</small>
+                </span>
+                <span aria-hidden="true">›</span>
+            </a>
             <a class="modern-admin-settings-action-card modern-admin-settings-action-card-readonly" href="{{ url_for('indi_allsky.modern_admin_basic_settings_view') }}">
                 <span>
                     <strong>Basic Settings Preview</strong>

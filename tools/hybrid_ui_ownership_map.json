@@ -82,6 +82,7 @@
         "/modern-admin/settings/advanced",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/developer",
+        "/modern-admin/settings/ready",
         "/modern-admin/settings/cameras",
         "/modern-admin/settings/capture",
         "/modern-admin/settings/full",
@@ -404,6 +405,7 @@
         "/modern-admin/settings/advanced",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/developer",
+        "/modern-admin/settings/ready",
         "/modern-admin/settings/cameras",
         "/modern-admin/settings/capture",
         "/modern-admin/settings/full"
