@@ -69,14 +69,14 @@ Current ownership snapshot:
 | Total tracked features | 92 |
 | Protected Modern Work | 21 |
 | Modern Canonical | 2 |
-| Partial Modern / in progress | 29 |
+| Partial Modern / in progress | 33 |
 | Wrapper Only | 8 |
-| Public Active | 7 |
+| Public Active | 6 |
 | Shared Active | 5 |
 | External API | 3 |
-| Shared Legacy | 2 |
+| Shared Legacy | 0 |
 | Legacy Active | 4 |
-| Classic Only | 2 |
+| Classic Only | 1 |
 | Needs Verification | 9 |
 
 Operational backlog snapshot:
