@@ -84,8 +84,8 @@ Operational backlog snapshot:
 | State | Current examples |
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
-| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,8 +128,7 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Keogram | C | D | M | Medium | Modern media/status exists; detail inspection can remain read-only. |
-| 2 | Startrail | C | D | M | Medium | Modern media/status exists; detail inspection can remain read-only. |
+| 1 | Startrail | C | D | M | Medium | Modern media/status exists; detail inspection can remain read-only. |
 
 ### Blocked
 
@@ -147,6 +146,7 @@ the next available feature.
 | Upload actions/remote operations | Upload tests, OAuth flows and remote operations require explicit provider action and credential policy. | Read-only provider/status inventory only. |
 | Focus hardware movement | Focuser movement, autofocus and capture changes require explicit hardware action policy. | Existing Modern safe read-only status/preview only. |
 | Timelapse generation actions | Generate/regenerate/delete requires queue/video generation and processing policy. | Existing Modern read-only status/usability only. |
+| Keogram generation/download | Keogram generation, conversion, download and file inspection require explicit media action and path policy. | Metadata-only list/status only. |
 | Logs download/actions | Log download/action work requires explicit backend, filesystem and sensitive-data policy. | Existing read-only list/detail only. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
@@ -235,7 +235,7 @@ These should not be removed. They are transitional.
 | Mini Video Viewer | modern | PARTIAL MODERN | C | 55% | Media list | Low | L | Low | Lower-value parity. |
 | Timelapse | modern_wrapper | WRAPPER ONLY | C | 55% | Video queue, media products | Critical | M | High | Modern safe wrapper has read-only generation status/usability; queue/video actions remain blocked. |
 | Mini Timelapse | classic | CLASSIC ONLY | A | 0% | Timelapse | Low | L | Low | Lower-value legacy product. |
-| Keogram | modern | PARTIAL MODERN | C | 55% | Media products | Medium | M | Medium | Generation/status parity needs validation. |
+| Keogram | modern | PARTIAL MODERN | C | 60% | Media products | Medium | M | Medium | Modern read-only metadata/status list exists; generation/download/conversion remain blocked. |
 | Startrail | public | PARTIAL MODERN | C | 55% | Media products | Medium | M | Medium | Generation/status parity unclear. |
 | Startrail Video | public | PUBLIC ACTIVE | Preserve | 70% | Public endpoints | Critical | XS | Preserve | Not a removal target. |
 | Latest Image | public | PUBLIC ACTIVE | Preserve | 70% | Public endpoints | Critical | XS | Preserve | Not a removal target. |
@@ -336,16 +336,16 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Keogram | Modern read-only metadata/detail inspection | Useful media product parity without generation. |
-| 2 | Startrail | Modern read-only metadata/detail inspection | Useful media product parity without generation. |
-| 3 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
-| 4 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
-| 5 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
-| 6 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
-| 7 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
-| 8 | Image Viewer | Exclude/delete/download/processing contract review only | Metadata-only detail exists; further action/download work remains blocked. |
-| 9 | Video Viewer | Upload/share/download/delete contract review only | Metadata-only detail exists; further action/download work remains blocked. |
-| 10 | Upload | Upload/OAuth/provider action contract review only | Read-only provider/status usability exists; mutative provider work remains blocked. |
+| 1 | Startrail | Modern read-only metadata/detail inspection | Useful media product parity without generation. |
+| 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
+| 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
+| 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
+| 5 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
+| 6 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
+| 7 | Image Viewer | Exclude/delete/download/processing contract review only | Metadata-only detail exists; further action/download work remains blocked. |
+| 8 | Video Viewer | Upload/share/download/delete contract review only | Metadata-only detail exists; further action/download work remains blocked. |
+| 9 | Upload | Upload/OAuth/provider action contract review only | Read-only provider/status usability exists; mutative provider work remains blocked. |
+| 10 | Logs | Download/action contract review only | Read-only detail exists; further action/download work remains blocked. |
 
 ## 7. Parallelizable Work
 
@@ -410,11 +410,11 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Keogram read-only metadata/detail inspection.
+Startrail read-only metadata/detail inspection.
 
 ### 6. Why that feature?
 
-Keogram has Modern media/status surfaces. The next safe step is read-only
+Startrail has Modern/public media surfaces. The next safe step is read-only
 metadata/detail inspection only, with no generation, conversion, queue mutation
 or filesystem writes.
 
@@ -440,7 +440,7 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Keogram Phase C to D** can be implemented as metadata-only
+Review whether **Startrail Phase C to D** can be implemented as metadata-only
 detail without generate actions, conversion, queue mutation, downloads,
 path-freeform access or filesystem writes. Mark the feature locally blocked if
 that cannot be guaranteed.

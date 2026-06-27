@@ -111,6 +111,7 @@
         "modern_admin/image_detail.html",
         "modern_admin/image_lag.html",
         "modern_admin/index.html",
+        "modern_admin/keograms.html",
         "modern_admin/log.html",
         "modern_admin/log_detail.html",
         "modern_admin/longterm_keogram.html",
@@ -146,6 +147,7 @@
         "/modern-admin/cameras/start-indi",
         "modern_admin_uploads_view",
         "modern_admin_media_image_detail_view",
+        "modern_admin_media_keograms_view",
         "modern_admin_media_video_detail_view",
         "/modern-admin/mode/*"
       ]
@@ -1494,11 +1496,13 @@
         "/js/longtermkeogram",
         "/modern-admin/observatory/realtime-keogram",
         "/modern-admin/observatory/long-term-keogram",
+        "/modern-admin/media/keograms",
         "/latestkeogram*"
       ],
       "templates": [
         "realtime_keogram.html",
         "longterm_keogram.html",
+        "modern_admin/keograms.html",
         "modern_admin/realtime_keogram.html",
         "modern_admin/longterm_keogram.html"
       ],
@@ -1512,7 +1516,7 @@
         "LONGTERM_KEOGRAM*"
       ],
       "protected": false,
-      "modern_gap": "Generation/status parity needs validation.",
+      "modern_gap": "Modern read-only keogram metadata/status list exists; generation, download and conversion remain blocked pending media action policy.",
       "removal_risk": "medium",
       "notes": []
     },
