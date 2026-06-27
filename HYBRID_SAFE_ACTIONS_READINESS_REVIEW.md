@@ -22,6 +22,9 @@ Implemented foundation:
 - unit tests for permission, validation, dry-run, execution callback,
   idempotent already-acknowledged behavior, missing action ids, unknown action
   ids, structured failures, and audit redaction
+- static/helper-level endpoint tests for the dry-run route registration,
+  POST-only declaration, no legacy ack path, response shape, permission denied,
+  forced dry-run, and redaction
 
 Current boundary:
 
@@ -30,6 +33,8 @@ Current boundary:
 - no Modern UI path or button invokes a safe action
 - no safe action calls `/ajax/notification`
 - no safe action writes the database unless a future endpoint injects a callback
+- no full Flask `test_client` safe-action test exists yet in the lightweight
+  test runner because Flask is not available there
 
 ## 3. Evidence Reviewed
 
@@ -80,7 +85,7 @@ Reviewed files and patterns:
 | CSRF protection | Existing form ecosystem, not yet applied to safe actions | High | Required | Required |
 | JSON response pattern | Existing via `jsonify(...)` | Low | Required | Required |
 | Persistent audit log | Missing | High | Optional for dry-run if response remains non-mutating; recommended | Required |
-| Endpoint integration tests | Missing | High | Required | Required |
+| Endpoint integration tests | Static/helper coverage only | High | Full Flask client test still recommended | Required |
 | Confirmation UX | Missing | Medium | Not required for dry-run-only endpoint | Required before UI execution |
 | DB-backed lookup callback | Not implemented | Medium | Not required for dry-run-only validation if endpoint remains conservative; recommended for target existence validation | Required |
 | DB-backed execute callback | Not implemented | High | Must not be injected for dry-run-only endpoint | Required |
@@ -122,7 +127,7 @@ The safest next micro-step is:
 
 1. Add Flask-level tests for the dry-run endpoint authentication, CSRF, missing
    action id, unknown action id, invalid notification id, and dry-run response
-   shape.
+   shape once a lightweight Flask test environment is available.
 2. Define persistent audit storage before any execute endpoint.
 3. Keep `notification.acknowledge` execute blocked until the execute
    prerequisites are complete.

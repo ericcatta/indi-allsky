@@ -16,6 +16,9 @@ from indi_allsky.modern_safe_action import build_notification_acknowledge_dry_ru
 from indi_allsky.modern_safe_action import run_modern_safe_action_dry_run
 
 
+SAFE_ACTION_DRY_RUN_ROUTE = '/modern-admin/safe-action/dry-run'
+
+
 class Actor:
     username = 'safe-admin'
 
@@ -24,6 +27,16 @@ class FakeNotification:
     def __init__(self, notification_id, ack=False):
         self.id = notification_id
         self.ack = ack
+
+
+class AdminActor:
+    username = 'admin'
+    is_admin = True
+
+
+class NonAdminActor:
+    username = 'operator'
+    is_admin = False
 
 
 class ExampleAction(ModernAdminSafeAction):
@@ -585,6 +598,89 @@ def test_dry_run_helper_redacts_secret_payload():
     assert '[REDACTED]' in result.audit_message
 
 
+def get_safe_action_dry_run_view_source():
+    source = (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    class_start = source.index('class ModernAdminSafeActionDryRunView')
+    class_end = source.index('class ModernAdminCaptureServiceActionView')
+    return source[class_start:class_end], source
+
+
+def test_safe_action_dry_run_route_exists_and_is_post_only_static():
+    view_source, full_source = get_safe_action_dry_run_view_source()
+
+    assert "methods = ['POST']" in view_source
+    assert "bp_allsky.add_url_rule('/modern-admin/safe-action/dry-run'" in full_source
+    assert "methods=['POST']" in full_source
+
+
+def test_safe_action_dry_run_view_has_no_legacy_ack_path_static():
+    view_source, _full_source = get_safe_action_dry_run_view_source()
+
+    assert '/ajax/notification' not in view_source
+    assert 'setAck(' not in view_source
+    assert 'db.session' not in view_source
+    assert 'commit(' not in view_source
+
+
+def test_safe_action_dry_run_helper_response_shape():
+    result = run_modern_safe_action_dry_run(
+        action_id='notification.acknowledge',
+        actor=AdminActor(),
+        payload={'notification_id': 1},
+        permission_check=lambda actor: bool(getattr(actor, 'is_admin', False)),
+    )
+    data = result.to_dict()
+
+    assert data['action_id'] == 'notification.acknowledge'
+    assert data['status'] == 'dry_run'
+    assert data['dry_run'] is True
+    assert data['allowed'] is True
+
+
+def test_safe_action_dry_run_helper_permission_denied_response_shape():
+    result = run_modern_safe_action_dry_run(
+        action_id='notification.acknowledge',
+        actor=NonAdminActor(),
+        payload={'notification_id': 1},
+        permission_check=lambda actor: bool(getattr(actor, 'is_admin', False)),
+    )
+    data = result.to_dict()
+
+    assert data['status'] == 'permission_denied'
+    assert data['allowed'] is False
+
+
+def test_safe_action_dry_run_helper_forces_dry_run_true():
+    result = run_modern_safe_action_dry_run(
+        action_id='notification.acknowledge',
+        actor=AdminActor(),
+        payload={
+            'notification_id': 1,
+            'dry_run': False,
+        },
+        permission_check=lambda actor: True,
+    )
+
+    assert result.status == 'dry_run'
+    assert result.dry_run is True
+
+
+def test_safe_action_dry_run_helper_response_redacts_sensitive_payload():
+    result = run_modern_safe_action_dry_run(
+        action_id='notification.acknowledge',
+        actor=AdminActor(),
+        payload={
+            'notification_id': 1,
+            'refresh_token': 'never-render',
+        },
+        permission_check=lambda actor: True,
+    )
+    data = result.to_dict()
+
+    assert 'never-render' not in str(data)
+    assert '[REDACTED]' in data['audit_message']
+
+
 if __name__ == '__main__':
     test_default_action_does_not_execute()
     test_dry_run_does_not_mutate()
@@ -622,4 +718,10 @@ if __name__ == '__main__':
     test_dry_run_helper_notification_acknowledge_success()
     test_dry_run_helper_permission_denied()
     test_dry_run_helper_redacts_secret_payload()
+    test_safe_action_dry_run_route_exists_and_is_post_only_static()
+    test_safe_action_dry_run_view_has_no_legacy_ack_path_static()
+    test_safe_action_dry_run_helper_response_shape()
+    test_safe_action_dry_run_helper_permission_denied_response_shape()
+    test_safe_action_dry_run_helper_forces_dry_run_true()
+    test_safe_action_dry_run_helper_response_redacts_sensitive_payload()
     print('Modern safe action tests passed')
