@@ -1439,14 +1439,15 @@
         "DataTables/datatables.min.js"
       ],
       "apis": [
-        "/ajax/generate"
+        "/ajax/generate",
+        "modern_admin_generate_view"
       ],
       "config_keys": [
         "TIMELAPSE_ENABLE",
         "DAYTIME_TIMELAPSE"
       ],
       "protected": true,
-      "modern_gap": "Native multicamera generation UI missing.",
+      "modern_gap": "Modern safe wrapper has read-only generation status, task summary and related links; generate/regenerate actions remain blocked pending explicit queue/video generation policy.",
       "removal_risk": "high",
       "notes": [
         "Generated products must remain camera-scoped."

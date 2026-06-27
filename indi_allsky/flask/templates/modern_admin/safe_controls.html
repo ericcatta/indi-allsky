@@ -27,6 +27,18 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-note">{{ modern_admin_safe_note }}</p>
     </section>
 
+    {% if modern_admin_safe_summary_cards %}
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Read-only status summary">
+        {% for card in modern_admin_safe_summary_cards %}
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">{{ card.label }}</div>
+            <h3>{{ card.value }}</h3>
+            <p>{{ card.detail }}</p>
+        </article>
+        {% endfor %}
+    </section>
+    {% endif %}
+
     {% if modern_admin_preview_url %}
     <section class="modern-admin-table-panel" aria-label="Preview">
         <figure class="modern-admin-live-frame">
@@ -123,6 +135,14 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
     {% endfor %}
+
+    {% if modern_admin_safe_links %}
+    <section class="modern-admin-link-grid" aria-label="Related pages">
+        {% for link in modern_admin_safe_links %}
+        <a href="{{ url_for(link.endpoint) }}">{{ link.label }}</a>
+        {% endfor %}
+    </section>
+    {% endif %}
 </main>
 
 {% if modern_admin_focus_monitor %}

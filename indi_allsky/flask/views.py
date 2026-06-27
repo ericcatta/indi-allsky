@@ -16108,6 +16108,8 @@ class ModernAdminSafeControlsMixin(ModernAdminContextMixin):
         context.setdefault('modern_admin_safe_sections', tuple())
         context.setdefault('modern_admin_safe_actions', tuple())
         context.setdefault('modern_admin_safe_tables', tuple())
+        context.setdefault('modern_admin_safe_summary_cards', tuple())
+        context.setdefault('modern_admin_safe_links', tuple())
         return context
 
 
@@ -16175,10 +16177,37 @@ class ModernAdminGenerateView(ModernAdminSafeControlsMixin, TimelapseGeneratorVi
     def get_context(self):
         context = super(ModernAdminGenerateView, self).get_context()
         form = context['form_timelapsegen']
+        task_list = context.get('task_list', tuple())
+        task_state_counts = self.get_task_state_counts(task_list)
 
         context['modern_admin_safe_title'] = 'Generate'
         context['modern_admin_safe_note'] = 'Recent generation tasks are real. Creating new media tasks is disabled in Modern Admin safe mode.'
+        context['modern_admin_safe_summary_cards'] = (
+            {
+                'label' : 'Recent VIDEO tasks',
+                'value' : len(task_list),
+                'detail' : 'Last 12 hours.',
+            },
+            {
+                'label' : 'Queued or running',
+                'value' : task_state_counts.get('QUEUED', 0) + task_state_counts.get('RUNNING', 0),
+                'detail' : 'Read-only queue status.',
+            },
+            {
+                'label' : 'Failed',
+                'value' : task_state_counts.get('FAILED', 0),
+                'detail' : 'Generation action remains disabled.',
+            },
+        )
         context['modern_admin_safe_sections'] = (
+            {
+                'title' : 'Timelapse configuration',
+                'rows'  : (
+                    {'label' : 'Timelapse', 'value' : 'Enabled' if self.indi_allsky_config.get('TIMELAPSE_ENABLE', True) else 'Disabled'},
+                    {'label' : 'Daytime timelapse', 'value' : 'Enabled' if self.indi_allsky_config.get('DAYTIME_TIMELAPSE', False) else 'Disabled'},
+                    {'label' : 'Camera ID', 'value' : self.camera.id},
+                ),
+            },
             {
                 'title' : 'Generation request',
                 'rows'  : self.field_rows(form, ('ACTION_SELECT', 'DAY_SELECT')),
@@ -16204,7 +16233,21 @@ class ModernAdminGenerateView(ModernAdminSafeControlsMixin, TimelapseGeneratorVi
                 ],
             },
         )
+        context['modern_admin_safe_links'] = (
+            {'label' : 'Open Classic Generate', 'endpoint' : 'indi_allsky.generate_view'},
+            {'label' : 'Open Modern Timelapses', 'endpoint' : 'indi_allsky.modern_admin_media_timelapses_view'},
+            {'label' : 'Open Modern Task Queue', 'endpoint' : 'indi_allsky.modern_admin_taskqueue_view'},
+        )
         return context
+
+
+    def get_task_state_counts(self, task_list):
+        counts = dict()
+        for task in task_list:
+            state = task.get('state', 'UNKNOWN')
+            counts[state] = counts.get(state, 0) + 1
+
+        return counts
 
 
 class ModernAdminFocusView(ModernAdminSafeControlsMixin, FocusView):

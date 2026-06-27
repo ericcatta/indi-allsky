@@ -84,8 +84,8 @@ Operational backlog snapshot:
 | State | Current examples |
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
-| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,7 +128,8 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Timelapse | B-wrapper | C | M | High | Native multicamera generation UX is valuable but riskier. |
+| 1 | Keogram | C | D | M | Medium | Modern media/status exists; detail inspection can remain read-only. |
+| 2 | Startrail | C | D | M | Medium | Modern media/status exists; detail inspection can remain read-only. |
 
 ### Blocked
 
@@ -145,6 +146,7 @@ the next available feature.
 | Video Viewer upload/share/actions | Upload/share/download/delete require explicit media action and path policy. | Metadata-only list/detail only. |
 | Upload actions/remote operations | Upload tests, OAuth flows and remote operations require explicit provider action and credential policy. | Read-only provider/status inventory only. |
 | Focus hardware movement | Focuser movement, autofocus and capture changes require explicit hardware action policy. | Existing Modern safe read-only status/preview only. |
+| Timelapse generation actions | Generate/regenerate/delete requires queue/video generation and processing policy. | Existing Modern read-only status/usability only. |
 | Logs download/actions | Log download/action work requires explicit backend, filesystem and sensitive-data policy. | Existing read-only list/detail only. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
@@ -231,7 +233,7 @@ These should not be removed. They are transitional.
 | Raw Viewer | public | SHARED LEGACY | Preserve | 70% | Raw/source files | Critical | M | Medium | Needs source review, but public routes preserved. |
 | Video Viewer | modern | PARTIAL MODERN | D | 65% | Media list | Medium | M | Medium | Read-only Modern timelapse metadata detail exists; upload/share/download/delete remain blocked. |
 | Mini Video Viewer | modern | PARTIAL MODERN | C | 55% | Media list | Low | L | Low | Lower-value parity. |
-| Timelapse | modern_wrapper | WRAPPER ONLY | B | 35% | Video queue, media products | Critical | M | High | Native multicamera generation UX missing. |
+| Timelapse | modern_wrapper | WRAPPER ONLY | C | 55% | Video queue, media products | Critical | M | High | Modern safe wrapper has read-only generation status/usability; queue/video actions remain blocked. |
 | Mini Timelapse | classic | CLASSIC ONLY | A | 0% | Timelapse | Low | L | Low | Lower-value legacy product. |
 | Keogram | modern | PARTIAL MODERN | C | 55% | Media products | Medium | M | Medium | Generation/status parity needs validation. |
 | Startrail | public | PARTIAL MODERN | C | 55% | Media products | Medium | M | Medium | Generation/status parity unclear. |
@@ -334,16 +336,16 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Timelapse | Modern read-only generation/status usability review | Valuable but high risk; keep read-only and multicamera-safe. |
-| 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
-| 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
-| 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
-| 5 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
-| 6 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
-| 7 | Image Viewer | Exclude/delete/download/processing contract review only | Metadata-only detail exists; further action/download work remains blocked. |
-| 8 | Video Viewer | Upload/share/download/delete contract review only | Metadata-only detail exists; further action/download work remains blocked. |
-| 9 | Upload | Upload/OAuth/provider action contract review only | Read-only provider/status usability exists; mutative provider work remains blocked. |
-| 10 | Logs | Download/action contract review only | Read-only detail exists; further action/download work remains blocked. |
+| 1 | Keogram | Modern read-only metadata/detail inspection | Useful media product parity without generation. |
+| 2 | Startrail | Modern read-only metadata/detail inspection | Useful media product parity without generation. |
+| 3 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
+| 4 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
+| 5 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
+| 6 | Notifications | Acknowledge/delete contract review only | Read-only detail exists; mutative actions remain blocked. |
+| 7 | User Management | Auth mutation policy review only | Privacy-safe detail exists; user mutations remain blocked. |
+| 8 | Image Viewer | Exclude/delete/download/processing contract review only | Metadata-only detail exists; further action/download work remains blocked. |
+| 9 | Video Viewer | Upload/share/download/delete contract review only | Metadata-only detail exists; further action/download work remains blocked. |
+| 10 | Upload | Upload/OAuth/provider action contract review only | Read-only provider/status usability exists; mutative provider work remains blocked. |
 
 ## 7. Parallelizable Work
 
@@ -408,13 +410,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Timelapse read-only generation/status usability review.
+Keogram read-only metadata/detail inspection.
 
 ### 6. Why that feature?
 
-Timelapse has Modern media surfaces and a history of multicamera queue issues.
-The next safe step is read-only generation/status usability review only, with
-no generate action, scheduler change, queue mutation or video processing.
+Keogram has Modern media/status surfaces. The next safe step is read-only
+metadata/detail inspection only, with no generation, conversion, queue mutation
+or filesystem writes.
 
 ### 7. Which features can be ported in parallel?
 
@@ -438,10 +440,10 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Timelapse Phase B-wrapper to C** can be implemented as
-read-only status/usability without generate actions, scheduler changes, queue
-mutation or video processing. Mark the feature locally blocked if that cannot
-be guaranteed.
+Review whether **Keogram Phase C to D** can be implemented as metadata-only
+detail without generate actions, conversion, queue mutation, downloads,
+path-freeform access or filesystem writes. Mark the feature locally blocked if
+that cannot be guaranteed.
 
 Scope:
 
