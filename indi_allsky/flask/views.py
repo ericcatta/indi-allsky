@@ -14672,12 +14672,132 @@ class ModernAdminMediaStartrailsView(ModernAdminContextMixin, TemplateView):
         return 'Non-dict metadata payload'
 
 
-class ModernAdminMediaMiniTimelapsesView(ModernAdminMediaListView):
+class ModernAdminMediaMiniTimelapsesView(ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Mini-Timelapses'
-    modern_admin_section = 'Mini-Timelapses'
-    modern_admin_description = 'Recent short capture-window timelapses.'
-    modern_admin_media_model = IndiAllSkyDbMiniVideoTable
-    modern_admin_media_kind = 'video'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_mini_timelapses_view'
+    mini_timelapse_display_limit = 100
+
+
+    def get_context(self):
+        context = super(ModernAdminMediaMiniTimelapsesView, self).get_context()
+
+        mini_timelapse_rows = list()
+        try:
+            mini_timelapse_entries = IndiAllSkyDbMiniVideoTable.query\
+                .join(IndiAllSkyDbMiniVideoTable.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(IndiAllSkyDbMiniVideoTable.createDate.desc())\
+                .limit(self.mini_timelapse_display_limit)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin mini-timelapse metadata rows: %s', str(e))
+            mini_timelapse_entries = list()
+            context['modern_admin_mini_timelapses_error'] = 'Unable to load mini-timelapse metadata.'
+
+        for entry in mini_timelapse_entries:
+            mini_timelapse_rows.append({
+                'id'          : entry.id,
+                'created'     : self.format_mini_timelapse_datetime(entry.createDate),
+                'target_date' : self.format_mini_timelapse_datetime(entry.targetDate),
+                'start_date'  : self.format_mini_timelapse_datetime(entry.startDate),
+                'end_date'    : self.format_mini_timelapse_datetime(entry.endDate),
+                'day_date'    : entry.dayDate if entry.dayDate else 'Unknown',
+                'camera_id'   : entry.camera_id,
+                'filename'    : self.format_mini_timelapse_filename(entry.filename),
+                'dimensions'  : self.format_mini_timelapse_dimensions(entry.width, entry.height),
+                'frames'      : entry.frames if entry.frames is not None else 'Unknown',
+                'framerate'   : self.format_mini_timelapse_number(entry.framerate, suffix=' fps'),
+                'file_size'   : self.format_media_size(entry.fileSize) if entry.fileSize else 'Unknown',
+                'timeofday'   : 'Night' if entry.night else 'Day',
+                'uploaded'    : self.format_mini_timelapse_bool(entry.uploaded),
+                'success'     : self.format_mini_timelapse_bool(entry.success),
+                'source'      : self.format_mini_timelapse_source(entry),
+                'sync_id'     : entry.sync_id if entry.sync_id is not None else 'N/A',
+                'note'        : entry.note if entry.note else 'None',
+                'metadata'    : self.format_mini_timelapse_data_summary(entry.data),
+            })
+
+        context['modern_admin_mini_timelapse_rows'] = mini_timelapse_rows
+        context['modern_admin_mini_timelapse_count'] = len(mini_timelapse_rows)
+        context['modern_admin_mini_timelapse_uploaded_count'] = len([
+            row for row in mini_timelapse_rows if row['uploaded'] == 'Yes'
+        ])
+        context['modern_admin_mini_timelapse_success_count'] = len([
+            row for row in mini_timelapse_rows if row['success'] == 'Yes'
+        ])
+        context['modern_admin_mini_timelapse_display_limit'] = self.mini_timelapse_display_limit
+
+        return context
+
+
+    def format_mini_timelapse_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+    def format_mini_timelapse_filename(self, value):
+        if not value:
+            return 'Unknown'
+        return Path(str(value)).name
+
+
+    def format_mini_timelapse_dimensions(self, width, height):
+        if width and height:
+            return '{0:d} x {1:d}'.format(int(width), int(height))
+        return 'Unknown'
+
+
+    def format_mini_timelapse_number(self, value, suffix=''):
+        if value is None:
+            return 'Unknown'
+        try:
+            number = '{0:.3f}'.format(float(value)).rstrip('0').rstrip('.')
+            return '{0:s}{1:s}'.format(number, suffix)
+        except (TypeError, ValueError):
+            return str(value)
+
+
+    def format_media_size(self, value):
+        if value is None:
+            return 'Unknown'
+
+        try:
+            size = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+
+        units = ('B', 'KB', 'MB', 'GB', 'TB')
+        unit_index = 0
+        while size >= 1024.0 and unit_index < len(units) - 1:
+            size /= 1024.0
+            unit_index += 1
+
+        if unit_index == 0:
+            return '{0:d} {1:s}'.format(int(size), units[unit_index])
+        return '{0:.1f} {1:s}'.format(size, units[unit_index])
+
+
+    def format_mini_timelapse_bool(self, value):
+        return 'Yes' if bool(value) else 'No'
+
+
+    def format_mini_timelapse_source(self, entry):
+        if entry.remote_url:
+            return 'Remote URL recorded'
+        if entry.s3_key:
+            return 'S3 key recorded'
+        return 'Local DB entry'
+
+
+    def format_mini_timelapse_data_summary(self, value):
+        if isinstance(value, dict):
+            return 'Keys: {0:d}'.format(len(value))
+        if value is None:
+            return 'No metadata payload'
+        return 'Non-dict metadata payload'
 
 
 class ModernAdminMediaPanoramaView(ModernAdminMediaListView):
@@ -21685,7 +21805,7 @@ bp_allsky.add_url_rule('/modern-admin/media/timelapses/<int:video_id>', view_fun
 bp_allsky.add_url_rule('/modern-admin/media/keograms', view_func=ModernAdminMediaKeogramsView.as_view('modern_admin_media_keograms_view', template_name='modern_admin/keograms.html'))
 bp_allsky.add_url_rule('/modern-admin/media/startrails', view_func=ModernAdminMediaStartrailsView.as_view('modern_admin_media_startrails_view', template_name='modern_admin/startrails.html'))
 bp_allsky.add_url_rule('/modern-admin/media/startrail-videos', view_func=ModernAdminMediaStartrailVideosView.as_view('modern_admin_media_startrail_videos_view', template_name='modern_admin/startrail_videos.html'))
-bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/mini_timelapses.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))

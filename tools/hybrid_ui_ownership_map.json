@@ -1406,15 +1406,16 @@
       ],
       "templates": [
         "minivideoviewer.html",
-        "modern_admin/media_list.html"
+        "modern_admin/mini_timelapses.html"
       ],
       "assets": [],
       "apis": [
-        "/ajax/minivideoviewer"
+        "/ajax/minivideoviewer",
+        "modern_admin_media_mini_timelapses_view"
       ],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "Mini media parity unclear.",
+      "modern_gap": "Modern read-only mini timelapse metadata/status list exists; playback, download and actions remain blocked pending media action policy.",
       "removal_risk": "medium",
       "notes": []
     },
@@ -1457,8 +1458,8 @@
     },
     "mini_timelapse": {
       "label": "Mini Timelapse",
-      "status": "CLASSIC ONLY",
-      "owner": "classic",
+      "status": "PARTIAL MODERN",
+      "owner": "modern",
       "porting_priority": "low",
       "routes": [
         "/minigenerate",
@@ -1470,18 +1471,19 @@
       "templates": [
         "mini_generate.html",
         "minivideoviewer.html",
-        "modern_admin/media_list.html"
+        "modern_admin/mini_timelapses.html"
       ],
       "assets": [],
       "apis": [
         "/ajax/minigenerate",
-        "/ajax/minivideoviewer"
+        "/ajax/minivideoviewer",
+        "modern_admin_media_mini_timelapses_view"
       ],
       "config_keys": [
         "MINI_TIMELAPSE*"
       ],
       "protected": false,
-      "modern_gap": "Generation is not native Modern.",
+      "modern_gap": "Modern read-only mini timelapse metadata/status list exists; generation and download remain blocked pending explicit media action policy.",
       "removal_risk": "medium",
       "notes": []
     },

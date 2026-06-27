@@ -84,8 +84,8 @@ Operational backlog snapshot:
 | State | Current examples |
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
-| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,7 +128,7 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Mini Timelapse | A | B | L | Low | Metadata/status list can reuse existing media-list pattern without generation actions. |
+| 1 | Gallery | B | C | M | Medium | Modern/read-only media browsing exists; usability parity can remain non-mutative. |
 
 ### Blocked
 
@@ -149,6 +149,7 @@ the next available feature.
 | Keogram generation/download | Keogram generation, conversion, download and file inspection require explicit media action and path policy. | Metadata-only list/status only. |
 | Startrail generation/download | Startrail generation, conversion, download and file inspection require explicit media action and path policy. | Metadata-only list/status only. |
 | Startrail Video watch/share/download | Startrail video playback/download/share behavior is public-facing and requires explicit media action and compatibility policy. | Metadata-only list/status only. |
+| Mini Timelapse generation/download | Mini timelapse generation, playback/download and file inspection require explicit media action and path policy. | Metadata-only list/status only. |
 | Logs download/actions | Log download/action work requires explicit backend, filesystem and sensitive-data policy. | Existing read-only list/detail only. |
 | Config Restore mutation | Restore is risky without rollback UX. | Read-only restore history/details first. |
 | FITS preview/download/conversion | Preview/download requires conversion, filesystem and path policy review. | Metadata-only inspection/detail only. |
@@ -234,9 +235,9 @@ These should not be removed. They are transitional.
 | Panorama | public | SHARED LEGACY | Preserve | 70% | Public endpoints | Medium | M | Medium | Preserve public/latest behavior. |
 | Raw Viewer | public | SHARED LEGACY | Preserve | 70% | Raw/source files | Critical | M | Medium | Needs source review, but public routes preserved. |
 | Video Viewer | modern | PARTIAL MODERN | D | 65% | Media list | Medium | M | Medium | Read-only Modern timelapse metadata detail exists; upload/share/download/delete remain blocked. |
-| Mini Video Viewer | modern | PARTIAL MODERN | C | 55% | Media list | Low | L | Low | Lower-value parity. |
+| Mini Video Viewer | modern | PARTIAL MODERN | C | 60% | Media list | Low | M | Low | Modern metadata-only list exists; playback/download remain blocked. |
 | Timelapse | modern_wrapper | WRAPPER ONLY | C | 55% | Video queue, media products | Critical | M | High | Modern safe wrapper has read-only generation status/usability; queue/video actions remain blocked. |
-| Mini Timelapse | classic | CLASSIC ONLY | A | 0% | Timelapse | Low | L | Low | Lower-value legacy product; metadata/status list appears feasible. |
+| Mini Timelapse | modern | PARTIAL MODERN | B | 45% | Timelapse | Low | M | Low | Modern read-only metadata/status list exists; generation/download remain blocked. |
 | Keogram | modern | PARTIAL MODERN | C | 60% | Media products | Medium | M | Medium | Modern read-only metadata/status list exists; generation/download/conversion remain blocked. |
 | Startrail | modern | PARTIAL MODERN | C | 60% | Media products | Medium | M | Medium | Modern read-only metadata/status list exists; generation/download/conversion remain blocked. |
 | Startrail Video | modern | PARTIAL MODERN | B | 75% | Public endpoints | Critical | S | Medium | Modern read-only metadata/status list exists; public watch/share/download behavior remains preserved and blocked from mutation. |
@@ -338,7 +339,7 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Mini Timelapse | Modern read-only metadata/status inspection | Useful low-risk media inventory without generation or download. |
+| 1 | Gallery | Modern read-only usability | Useful media browsing parity without delete/download/action changes. |
 | 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
 | 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
 | 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
@@ -412,13 +413,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Mini Timelapse read-only metadata/status inspection.
+Gallery read-only usability.
 
 ### 6. Why that feature?
 
-Mini Timelapse has existing DB/media-list patterns. The next safe step is
-read-only metadata/status inspection only, with no generation, queue mutation,
-download or filesystem writes.
+Gallery has existing Classic and Modern media browsing surfaces. The next safe
+step is read-only usability only, with no delete, download, exclude or media
+action changes.
 
 ### 7. Which features can be ported in parallel?
 
@@ -442,10 +443,10 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Mini Timelapse Phase A to B** can be implemented as
-metadata-only status inspection without generate actions, conversion, queue
-mutation, downloads, path-freeform access or filesystem writes. Mark the
-feature locally blocked if that cannot be guaranteed.
+Review whether **Gallery Phase B to C** can be implemented as read-only
+usability without delete actions, downloads, exclude changes, path-freeform
+access or filesystem writes. Mark the feature locally blocked if that cannot
+be guaranteed.
 
 Scope:
 
