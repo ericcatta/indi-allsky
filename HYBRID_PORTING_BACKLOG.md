@@ -84,7 +84,7 @@ Operational backlog snapshot:
 | State | Current examples |
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
-| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse, Gallery, Panorama, Raw Viewer |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse, Gallery, Panorama, Raw Viewer, Public media endpoints |
 | Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share, Panorama generation/download/conversion/actions, Raw decode/download/file inspection |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
@@ -128,7 +128,7 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Public latest endpoints | Preserve | B | S | Medium | Compatibility surface can be documented/status-inspected without changing endpoints. |
+| 1 | Upload | C | D | M | Medium | Provider detail can remain read-only without remote operations. |
 
 ### Blocked
 
@@ -248,7 +248,7 @@ These should not be removed. They are transitional.
 | Latest Timelapse | public | PUBLIC ACTIVE | Preserve | 70% | Public endpoints | Critical | XS | Preserve | Not a removal target. |
 | Latest Raw | public | PUBLIC ACTIVE | Preserve | 70% | Public endpoints | Critical | XS | Preserve | Not a removal target. |
 | Latest Startrail | public | PUBLIC ACTIVE | Preserve | 70% | Public endpoints | Critical | XS | Preserve | Not a removal target. |
-| Public media endpoints | public | PUBLIC ACTIVE | Preserve | 70% | External/bookmarks | Critical | XS | Preserve | Preserve compatibility. |
+| Public media endpoints | public | PUBLIC ACTIVE | Preserve | 75% | External/bookmarks | Critical | XS | Preserve | Modern compatibility summary exists; preserve endpoint behavior. |
 | Meteor Detection | shared_api | NEEDS VERIFICATION | A | 10% | Outdoor FITS validation | High | L | Blocked | Architecture ready; detector not allowed yet. |
 | Star Detection | shared_api | SHARED ACTIVE | Preserve | 70% | Image processing | Critical | XS | Preserve | Shared runtime, not UI cleanup. |
 | Event Candidate Triggers | modern | PROTECTED MODERN WORK | Protect | 90% | Event Foundation | Critical | L | Protect | Runtime diagnostics exist. |
@@ -342,7 +342,7 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Public latest endpoints | Modern/Admin read-only compatibility summary | Useful compatibility visibility without changing public routes. |
+| 1 | Upload | Read-only provider detail | Useful operational parity without tests, OAuth or remote operations. |
 | 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
 | 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
 | 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
@@ -416,13 +416,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Public latest endpoints read-only compatibility summary.
+Upload provider detail read-only.
 
 ### 6. Why that feature?
 
-Public latest endpoints are external/bookmark compatibility surfaces. The next
-safe step is read-only documentation/status visibility only, with no endpoint
-behavior changes or redirects.
+Upload already has read-only provider/status inventory. The next safe step is
+read-only provider detail only, with no upload tests, OAuth, credential changes
+or remote operations.
 
 ### 7. Which features can be ported in parallel?
 
@@ -446,10 +446,10 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Public latest endpoints Preserve to B** can be represented in
-Modern/Admin as a read-only compatibility summary without changing endpoint
-behavior, redirects, downloads, public semantics or cache behavior. Mark the
-feature locally blocked if that cannot be guaranteed.
+Review whether **Upload Phase C to D** can be represented as read-only provider
+detail without upload tests, OAuth flows, credential exposure, remote
+operations or queue mutations. Mark the feature locally blocked if that cannot
+be guaranteed.
 
 Scope:
 

@@ -15058,6 +15058,49 @@ class ModernAdminMediaRawImagesView(ModernAdminContextMixin, TemplateView):
         return 'Non-dict metadata payload'
 
 
+class ModernAdminPublicMediaEndpointsView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Public Media Endpoints'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_public_media_endpoints_view'
+
+
+    def get_context(self):
+        context = super(ModernAdminPublicMediaEndpointsView, self).get_context()
+        endpoint_rows = [
+            ('Latest image redirect', '/latestimage', 'indi_allsky.latest_image_redirect_view', 'Image'),
+            ('Latest image viewer', '/latestimageview', 'indi_allsky.latest_image_view_redirect_view', 'Image'),
+            ('Latest timelapse redirect', '/latesttimelapse', 'indi_allsky.latest_timelapse_video_redirect_view', 'Video'),
+            ('Latest timelapse watch', '/latesttimelapsewatch', 'indi_allsky.latest_timelapse_video_watch_redirect_view', 'Video'),
+            ('Latest raw redirect', '/latestraw', 'indi_allsky.latest_raw_image_redirect_view', 'Raw'),
+            ('Latest raw viewer', '/latestrawview', 'indi_allsky.latest_raw_image_view_redirect_view', 'Raw'),
+            ('Latest panorama redirect', '/latestpanorama', 'indi_allsky.latest_panorama_image_redirect_view', 'Panorama'),
+            ('Latest panorama viewer', '/latestpanoramaview', 'indi_allsky.latest_panorama_image_view_redirect_view', 'Panorama'),
+            ('Latest panorama video redirect', '/latestpanoramavideo', 'indi_allsky.latest_panorama_video_redirect_view', 'Panorama Video'),
+            ('Latest panorama video watch', '/latestpanoramavideowatch', 'indi_allsky.latest_panorama_video_watch_redirect_view', 'Panorama Video'),
+            ('Latest keogram redirect', '/latestkeogram', 'indi_allsky.latest_keogram_redirect_view', 'Keogram'),
+            ('Latest keogram viewer', '/latestkeogramview', 'indi_allsky.latest_keogram_view_redirect_view', 'Keogram'),
+            ('Latest startrail redirect', '/lateststartrail', 'indi_allsky.latest_startrail_redirect_view', 'Startrail'),
+            ('Latest startrail viewer', '/lateststartrailview', 'indi_allsky.latest_startrail_view_redirect_view', 'Startrail'),
+            ('Latest startrail video redirect', '/lateststartrailvideo', 'indi_allsky.latest_startrail_video_redirect_view', 'Startrail Video'),
+            ('Latest startrail video watch', '/lateststartrailvideowatch', 'indi_allsky.latest_startrail_video_watch_redirect_view', 'Startrail Video'),
+        ]
+
+        context['modern_admin_public_endpoint_rows'] = [
+            {
+                'label'    : label,
+                'route'    : route,
+                'endpoint' : endpoint,
+                'category' : category,
+            }
+            for label, route, endpoint, category in endpoint_rows
+        ]
+        context['modern_admin_public_endpoint_count'] = len(endpoint_rows)
+        context['modern_admin_public_endpoint_categories'] = sorted({
+            category for _, _, _, category in endpoint_rows
+        })
+
+        return context
+
+
 class ModernAdminMediaFitsView(ModernAdminMediaListView):
     page_title = 'Modern Admin FITS Viewer'
     modern_admin_section = 'FITS Viewer'
@@ -22049,6 +22092,7 @@ bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAd
 bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/panoramas.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/raw', view_func=ModernAdminMediaRawImagesView.as_view('modern_admin_media_raw_images_view', template_name='modern_admin/raw_images.html'))
+bp_allsky.add_url_rule('/modern-admin/media/public-endpoints', view_func=ModernAdminPublicMediaEndpointsView.as_view('modern_admin_public_media_endpoints_view', template_name='modern_admin/public_media_endpoints.html'))
 bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/fits', view_func=ModernAdminFitsView.as_view('modern_admin_fits_view', template_name='modern_admin/fits.html'))
 bp_allsky.add_url_rule('/modern-admin/fits/<int:fits_id>', view_func=ModernAdminFitsDetailView.as_view('modern_admin_fits_detail_view', template_name='modern_admin/fits_detail.html'))

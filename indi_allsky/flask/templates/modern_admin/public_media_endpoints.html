@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-public-endpoints-title">
+    {% set modern_admin_header_label = 'Public Media Endpoints' %}
+    {% set modern_admin_heading = 'Public Media Endpoints' %}
+    {% set modern_admin_title_id = 'modern-admin-public-endpoints-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Public media endpoint summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Endpoints</div>
+            <h3>{{ modern_admin_public_endpoint_count }}</h3>
+            <p>Known latest/public compatibility routes.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Categories</div>
+            <h3>{{ modern_admin_public_endpoint_categories|length }}</h3>
+            <p>Media families represented by the compatibility routes.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Mode</div>
+            <h3>Read-only</h3>
+            <p>This page does not modify route behavior.</p>
+        </article>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="modern-public-endpoints-heading">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Compatibility</p>
+            <h2 id="modern-public-endpoints-heading">Latest and public media routes</h2>
+        </div>
+
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table">
+                <thead>
+                    <tr>
+                        <th>Label</th>
+                        <th>Route</th>
+                        <th>Category</th>
+                        <th>Flask endpoint</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for endpoint in modern_admin_public_endpoint_rows %}
+                    <tr>
+                        <td>{{ endpoint.label }}</td>
+                        <td><a href="{{ endpoint.route }}" rel="noopener">{{ endpoint.route }}</a></td>
+                        <td>{{ endpoint.category }}</td>
+                        <td>{{ endpoint.endpoint }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="modern-admin-note">These routes are compatibility surfaces for bookmarks, embeds and external clients. This page does not change redirects, downloads, cache behavior, public/latest semantics or media generation.</p>
+    </section>
+</main>
+{% endblock %}

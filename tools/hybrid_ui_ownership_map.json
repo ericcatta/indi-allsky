@@ -1673,6 +1673,7 @@
       "owner": "public",
       "porting_priority": "preserve",
       "routes": [
+        "/modern-admin/media/public-endpoints",
         "/images/<path:path>",
         "/latest*",
         "/loop*",
@@ -1687,6 +1688,7 @@
         "/js/loopraw"
       ],
       "templates": [
+        "modern_admin/public_media_endpoints.html",
         "loop_canvas.html",
         "loop_img.html",
         "modern_admin/loop.html",
@@ -1695,6 +1697,7 @@
       ],
       "assets": [],
       "apis": [
+        "modern_admin_public_media_endpoints_view",
         "/js/latest",
         "/js/loop",
         "/js/looppanorama",
@@ -1702,7 +1705,7 @@
       ],
       "config_keys": [],
       "protected": false,
-      "modern_gap": "External usage is not statically knowable.",
+      "modern_gap": "Modern read-only compatibility summary exists; endpoint behavior, redirects, cache behavior and public/latest semantics remain preserved.",
       "removal_risk": "critical",
       "notes": [
         "Do not remove because static consumer is absent."
