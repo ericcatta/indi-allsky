@@ -84,8 +84,8 @@ Operational backlog snapshot:
 | State | Current examples |
 | --- | --- |
 | Completed/protected | Multi-camera, Camera Profiles, Metadata, Analytics, Event Foundation, Scientific Source Layer |
-| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse, Gallery |
-| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share |
+| In progress | Task Queue, User Management, Notifications, Config History, Config Restore, FITS Image Viewer, Logs, Image Viewer, Video Viewer, Upload, Focus, Timelapse, Keogram, Startrail, Startrail Video, Mini Timelapse, Gallery, Panorama |
+| Locally blocked | Task Queue mutations, Logs download/actions, Config Restore mutation, Notification acknowledge/delete, User Management mutations, FITS preview/download/conversion, Image Viewer actions/exclude, Video Viewer upload/share/actions, Upload actions/remote operations, Focus hardware movement, Timelapse generation actions, Keogram generation/download, Startrail generation/download, Startrail Video watch/share/download, Mini Timelapse generation/download, Gallery delete/exclude/download/share, Panorama generation/download/conversion/actions |
 | Global blockers | Detector/RMS/AI work, Event Foundation changes, Scientific Source Layer changes, settings redesign, Classic removal |
 
 Local blockers should not stop the overall porting effort. Mark the feature
@@ -128,7 +128,7 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Panorama | Preserve | B | M | Medium | Public endpoints exist; metadata/status inspection can remain read-only. |
+| 1 | Raw Viewer | Preserve | B | M | High | Source/raw routes exist; metadata/status only may be possible without file reads. |
 
 ### Blocked
 
@@ -144,6 +144,7 @@ the next available feature.
 | Image Viewer actions/exclude | Exclude/delete/download/processing require explicit media action and path policy. | Metadata-only list/detail only. |
 | Video Viewer upload/share/actions | Upload/share/download/delete require explicit media action and path policy. | Metadata-only list/detail only. |
 | Gallery delete/exclude/download/share | Gallery media actions require explicit media action and path policy. | Read-only browsing/usability only. |
+| Panorama generation/download/conversion/actions | Panorama generation, conversion, download, exclude/delete and loop playback require explicit media action and path policy. | Metadata-only list/status only. |
 | Upload actions/remote operations | Upload tests, OAuth flows and remote operations require explicit provider action and credential policy. | Read-only provider/status inventory only. |
 | Focus hardware movement | Focuser movement, autofocus and capture changes require explicit hardware action policy. | Existing Modern safe read-only status/preview only. |
 | Timelapse generation actions | Generate/regenerate/delete requires queue/video generation and processing policy. | Existing Modern read-only status/usability only. |
@@ -233,7 +234,7 @@ These should not be removed. They are transitional.
 | Image Viewer | modern | PARTIAL MODERN | D | 65% | Media list | Medium | M | Medium | Read-only Modern image metadata detail exists; exclude/delete/download/processing remain blocked. |
 | FITS Image Viewer | modern | PARTIAL MODERN | D | 65% | Scientific source layer | High | M | High | Read-only Modern FITS metadata detail exists; conversion/viewer parity remains Classic-only and locally blocked. |
 | Gallery | modern | PARTIAL MODERN | C | 60% | Media list | Medium | M | Medium | Modern gallery read-only usability improved; delete/exclude/download/share remain blocked. |
-| Panorama | public | SHARED LEGACY | Preserve | 70% | Public endpoints | Medium | M | Medium | Preserve public/latest behavior. |
+| Panorama | modern | PARTIAL MODERN | B | 75% | Public endpoints | Medium | M | Medium | Modern read-only metadata/status list exists; public/latest and panorama loop behavior remain preserved. |
 | Raw Viewer | public | SHARED LEGACY | Preserve | 70% | Raw/source files | Critical | M | Medium | Needs source review, but public routes preserved. |
 | Video Viewer | modern | PARTIAL MODERN | D | 65% | Media list | Medium | M | Medium | Read-only Modern timelapse metadata detail exists; upload/share/download/delete remain blocked. |
 | Mini Video Viewer | modern | PARTIAL MODERN | C | 60% | Media list | Low | M | Low | Modern metadata-only list exists; playback/download remain blocked. |
@@ -340,7 +341,7 @@ and the completed Task Queue/User Management work.
 
 | Rank | Feature | Next micro-step | Why |
 | --- | --- | --- | --- |
-| 1 | Panorama | Modern read-only metadata/status inspection | Useful media product parity without generation, conversion or download. |
+| 1 | Raw Viewer | Modern read-only metadata/status inspection | Useful source-file visibility if it can avoid file reads and downloads. |
 | 2 | Config History | Restore/download safety review only | Usability exists; restore/download remain Classic-only. |
 | 3 | Config Restore | Restore action contract review only | Metadata-only detail exists; active restore remains blocked. |
 | 4 | FITS Image Viewer | Viewer/conversion/download contract review only | Metadata-only detail exists; preview/download/conversion remain blocked. |
@@ -414,13 +415,13 @@ ownership clarity, wrapper replacement, and public/external compatibility.
 
 ### 5. What is the next feature to port?
 
-Panorama read-only metadata/status inspection.
+Raw Viewer read-only metadata/status inspection.
 
 ### 6. Why that feature?
 
-Panorama has public media surfaces and database-backed image records. The next
-safe step is read-only metadata/status inspection only, with no generation,
-conversion, download or filesystem writes.
+Raw Viewer has public/source-file surfaces. The next safe step is metadata-only
+inspection if DB records expose enough safe fields, with no downloads, raw
+decoding, conversion or filesystem reads.
 
 ### 7. Which features can be ported in parallel?
 
@@ -444,10 +445,10 @@ are complete and a deprecation window exists.
 
 ## 10. Recommended Next Micro-step
 
-Review whether **Panorama Preserve to B** can be implemented as metadata-only
-status inspection without generation actions, conversion, queue mutation,
-downloads, path-freeform access or filesystem writes. Mark the feature locally
-blocked if that cannot be guaranteed.
+Review whether **Raw Viewer Preserve to B** can be implemented as metadata-only
+status inspection without raw decoding, conversion, downloads, path-freeform
+access or filesystem reads. Mark the feature locally blocked if that cannot be
+guaranteed.
 
 Scope:
 

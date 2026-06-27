@@ -14802,13 +14802,129 @@ class ModernAdminMediaMiniTimelapsesView(ModernAdminContextMixin, TemplateView):
         return 'Non-dict metadata payload'
 
 
-class ModernAdminMediaPanoramaView(ModernAdminMediaListView):
+class ModernAdminMediaPanoramaView(ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Panorama'
-    modern_admin_section = 'Panorama'
-    modern_admin_description = 'Recent panorama image captures.'
-    modern_admin_media_model = IndiAllSkyDbPanoramaImageTable
-    modern_admin_media_kind = 'image'
-    modern_admin_media_layout = 'viewer'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_panorama_view'
+    panorama_display_limit = 100
+
+
+    def get_context(self):
+        context = super(ModernAdminMediaPanoramaView, self).get_context()
+
+        panorama_rows = list()
+        try:
+            panorama_entries = IndiAllSkyDbPanoramaImageTable.query\
+                .join(IndiAllSkyDbPanoramaImageTable.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(IndiAllSkyDbPanoramaImageTable.createDate.desc())\
+                .limit(self.panorama_display_limit)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin panorama metadata rows: %s', str(e))
+            panorama_entries = list()
+            context['modern_admin_panoramas_error'] = 'Unable to load panorama metadata.'
+
+        for entry in panorama_entries:
+            panorama_rows.append({
+                'id'         : entry.id,
+                'created'    : self.format_panorama_datetime(entry.createDate),
+                'day_date'   : entry.dayDate if entry.dayDate else 'Unknown',
+                'camera_id'  : entry.camera_id,
+                'filename'   : self.format_panorama_filename(entry.filename),
+                'dimensions' : self.format_panorama_dimensions(entry.width, entry.height),
+                'exposure'   : self.format_panorama_number(entry.exposure, suffix='s'),
+                'gain'       : self.format_panorama_number(entry.gain),
+                'binmode'    : entry.binmode if entry.binmode is not None else 'Unknown',
+                'file_size'  : self.format_media_size(entry.fileSize) if entry.fileSize else 'Unknown',
+                'timeofday'  : 'Night' if entry.night else 'Day',
+                'uploaded'   : self.format_panorama_bool(entry.uploaded),
+                'excluded'   : 'Excluded' if bool(entry.exclude) else 'Included',
+                'source'     : self.format_panorama_source(entry),
+                'sync_id'    : entry.sync_id if entry.sync_id is not None else 'N/A',
+                'metadata'   : self.format_panorama_data_summary(entry.data),
+            })
+
+        context['modern_admin_panorama_rows'] = panorama_rows
+        context['modern_admin_panorama_count'] = len(panorama_rows)
+        context['modern_admin_panorama_uploaded_count'] = len([
+            row for row in panorama_rows if row['uploaded'] == 'Yes'
+        ])
+        context['modern_admin_panorama_excluded_count'] = len([
+            row for row in panorama_rows if row['excluded'] == 'Excluded'
+        ])
+        context['modern_admin_panorama_display_limit'] = self.panorama_display_limit
+
+        return context
+
+
+    def format_panorama_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+    def format_panorama_filename(self, value):
+        if not value:
+            return 'Unknown'
+        return Path(str(value)).name
+
+
+    def format_panorama_dimensions(self, width, height):
+        if width and height:
+            return '{0:d} x {1:d}'.format(int(width), int(height))
+        return 'Unknown'
+
+
+    def format_panorama_number(self, value, suffix=''):
+        if value is None:
+            return 'Unknown'
+        try:
+            number = '{0:.3f}'.format(float(value)).rstrip('0').rstrip('.')
+            return '{0:s}{1:s}'.format(number, suffix)
+        except (TypeError, ValueError):
+            return str(value)
+
+
+    def format_media_size(self, value):
+        if value is None:
+            return 'Unknown'
+
+        try:
+            size = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+
+        units = ('B', 'KB', 'MB', 'GB', 'TB')
+        unit_index = 0
+        while size >= 1024.0 and unit_index < len(units) - 1:
+            size /= 1024.0
+            unit_index += 1
+
+        if unit_index == 0:
+            return '{0:d} {1:s}'.format(int(size), units[unit_index])
+        return '{0:.1f} {1:s}'.format(size, units[unit_index])
+
+
+    def format_panorama_bool(self, value):
+        return 'Yes' if bool(value) else 'No'
+
+
+    def format_panorama_source(self, entry):
+        if entry.remote_url:
+            return 'Remote URL recorded'
+        if entry.s3_key:
+            return 'S3 key recorded'
+        return 'Local DB entry'
+
+
+    def format_panorama_data_summary(self, value):
+        if isinstance(value, dict):
+            return 'Keys: {0:d}'.format(len(value))
+        if value is None:
+            return 'No metadata payload'
+        return 'Non-dict metadata payload'
 
 
 class ModernAdminMediaPanoramaLoopView(ModernAdminMediaListView):
@@ -21808,7 +21924,7 @@ bp_allsky.add_url_rule('/modern-admin/media/keograms', view_func=ModernAdminMedi
 bp_allsky.add_url_rule('/modern-admin/media/startrails', view_func=ModernAdminMediaStartrailsView.as_view('modern_admin_media_startrails_view', template_name='modern_admin/startrails.html'))
 bp_allsky.add_url_rule('/modern-admin/media/startrail-videos', view_func=ModernAdminMediaStartrailVideosView.as_view('modern_admin_media_startrail_videos_view', template_name='modern_admin/startrail_videos.html'))
 bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/mini_timelapses.html'))
-bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/panoramas.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/fits', view_func=ModernAdminFitsView.as_view('modern_admin_fits_view', template_name='modern_admin/fits.html'))

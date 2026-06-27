@@ -1315,7 +1315,7 @@
     },
     "panorama": {
       "label": "Panorama",
-      "status": "SHARED LEGACY",
+      "status": "PARTIAL MODERN",
       "owner": "modern",
       "porting_priority": "medium",
       "routes": [
@@ -1328,17 +1328,19 @@
       "templates": [
         "index_img.html",
         "index_canvas.html",
+        "modern_admin/panoramas.html",
         "modern_admin/media_list.html"
       ],
       "assets": [],
       "apis": [
-        "/js/latest_panorama"
+        "/js/latest_panorama",
+        "modern_admin_media_panorama_view"
       ],
       "config_keys": [
         "PANORAMA*"
       ],
       "protected": false,
-      "modern_gap": "Public/latest behavior is not replaced by Modern Admin.",
+      "modern_gap": "Modern read-only panorama metadata/status list exists; public/latest behavior, panorama loop, generation, conversion and download remain blocked or preserved.",
       "removal_risk": "high",
       "notes": []
     },
