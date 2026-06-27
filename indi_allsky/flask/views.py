@@ -30,6 +30,7 @@ from ..event_candidate import default_event_candidate_runtime_path
 from ..event_candidate import default_event_timeline_dir
 from ..frame_metadata import default_frame_metadata_dir
 from ..frame_metadata_analytics import FrameMetadataAnalytics
+from ..modern_safe_action import run_modern_safe_action_dry_run
 from ..processing import ImageProcessor
 
 from cryptography.fernet import InvalidToken
@@ -7878,6 +7879,44 @@ class ModernAdminModeView(BaseView):
 
         session['admin_mode'] = 'modern'
         return redirect(url_for('indi_allsky.modern_admin_view'))
+
+
+class ModernAdminSafeActionDryRunView(BaseView):
+    methods = ['POST']
+    decorators = [login_required]
+
+    def dispatch_request(self):
+        request_data = request.get_json(silent=True) or {}
+        payload = request_data.get('payload') or {}
+
+        if not isinstance(payload, dict):
+            payload = {}
+
+        result = run_modern_safe_action_dry_run(
+            action_id=request_data.get('action_id'),
+            payload=payload,
+            actor=current_user,
+            permission_check=self.has_safe_action_permission,
+        )
+
+        return jsonify(result.to_dict()), self.status_code_for_result(result)
+
+
+    def has_safe_action_permission(self, actor):
+        if app.config.get('LOGIN_DISABLED'):
+            return True
+
+        return bool(getattr(actor, 'is_admin', False))
+
+
+    def status_code_for_result(self, result):
+        if result.status == 'permission_denied':
+            return 403
+
+        if result.status in ('missing_action_id', 'not_found', 'validation_failed'):
+            return 400
+
+        return 200
 
 
 class ModernAdminCaptureServiceActionView(BaseView):
@@ -22312,6 +22351,7 @@ bp_allsky.add_url_rule('/config/restore', view_func=ConfigRestoreView.as_view('c
 bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.as_view('ajax_config_restore_view'))
 
 bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
+bp_allsky.add_url_rule('/modern-admin/safe-action/dry-run', view_func=ModernAdminSafeActionDryRunView.as_view('modern_admin_safe_action_dry_run_view'), methods=['POST'])
 bp_allsky.add_url_rule('/modern-admin/capture/service', view_func=ModernAdminCaptureServiceActionView.as_view('modern_admin_capture_service_action_view'))
 bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/add', view_func=ModernAdminCameraAddView.as_view('modern_admin_camera_add_view', template_name='modern_admin/camera_add.html'))

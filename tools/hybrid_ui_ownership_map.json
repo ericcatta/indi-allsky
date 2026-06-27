@@ -722,7 +722,8 @@
         "/modern-admin/system/config",
         "/modern-admin/system/gpio-control",
         "/modern-admin/system/network",
-        "/modern-admin/tools/*"
+        "/modern-admin/tools/*",
+        "/modern-admin/safe-action/dry-run"
       ],
       "templates": [
         "modern_admin/safe_controls.html"
@@ -730,13 +731,16 @@
       "assets": [
         "modern_admin/modern-admin.css"
       ],
-      "apis": [],
+      "apis": [
+        "modern_admin_safe_action_dry_run_view"
+      ],
       "config_keys": [],
       "protected": true,
       "modern_gap": "Wrappers are transitional and need native replacements later.",
       "removal_risk": "high",
       "notes": [
-        "Wrapper means partial parity, not removal readiness."
+        "Wrapper means partial parity, not removal readiness.",
+        "Safe action dry-run endpoint is plumbing only and is not exposed by Modern UI."
       ]
     },
     "image_capture": {
@@ -2124,7 +2128,8 @@
         "/notifications",
         "/ajax/notification",
         "/modern-admin/notifications",
-        "/modern-admin/notifications/*"
+        "/modern-admin/notifications/*",
+        "/modern-admin/safe-action/dry-run"
       ],
       "templates": [
         "notifications.html",
@@ -2136,16 +2141,18 @@
         "DataTables/datatables.min.js"
       ],
       "apis": [
-        "/ajax/notification"
+        "/ajax/notification",
+        "modern_admin_safe_action_dry_run_view"
       ],
       "config_keys": [
         "NOTIFICATION_*"
       ],
       "protected": false,
-      "modern_gap": "Modern Admin has read-only notification inventory, local usability filters, and read-only detail; acknowledgement and modal flow remain Classic/shared.",
+      "modern_gap": "Modern Admin has read-only notification inventory, local usability filters, read-only detail, and dry-run-only safe action plumbing; real acknowledgement and modal flow remain Classic/shared.",
       "removal_risk": "medium",
       "notes": [
         "Modern page must not call /ajax/notification POST or acknowledge notifications.",
+        "Modern dry-run endpoint is not wired to UI and must not execute notification acknowledgement.",
         "Modern usability filters are client-side and read-only."
       ]
     },

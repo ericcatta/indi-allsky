@@ -387,6 +387,27 @@ def allow_no_one(actor):
     return False
 
 
+def build_notification_acknowledge_dry_run_registry(permission_check):
+    registry = ModernAdminSafeActionRegistry()
+    registry.register(NotificationAcknowledgeSafeAction(
+        permission_check=permission_check,
+    ))
+    return registry
+
+
+def run_modern_safe_action_dry_run(action_id=None, payload=None, actor=None, permission_check=None):
+    registry = build_notification_acknowledge_dry_run_registry(
+        permission_check=permission_check or allow_no_one,
+    )
+    runner = ModernAdminSafeActionRunner(registry)
+    return runner.run(
+        action_id=action_id,
+        payload=payload or {},
+        actor=actor,
+        dry_run=True,
+    )
+
+
 def build_default_modern_safe_action_registry():
     registry = ModernAdminSafeActionRegistry()
 

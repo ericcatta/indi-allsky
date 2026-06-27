@@ -288,11 +288,23 @@ Safe Action Runner:
 - Required before UI exposure: CSRF/auth Flask wrapper, confirmation UX,
   integration tests, real audit log, and explicit rollback/fallback decision.
 
+Dry-Run Endpoint:
+
+- `/modern-admin/safe-action/dry-run` is the first Modern Safe Action endpoint.
+- It is authenticated and covered by the normal Flask-WTF CSRF protection for
+  the `indi_allsky` blueprint.
+- It forces `dry_run=True`, uses the safe action runner, and currently registers
+  only the `notification.acknowledge` dry-run action.
+- It does not inject an acknowledge callback, does not call `/ajax/notification`,
+  does not write the database or filesystem, and is not wired to any UI button.
+- Status: endpoint plumbing only; execute remains blocked.
+
 Recommended next micro-step:
 
-1. Define a Modern CSRF/auth endpoint wrapper for one low-risk action only.
-2. Keep the wrapper dry-run first unless the action-specific policy is complete.
-3. Add integration tests before wiring any button into Modern UI.
+1. Add Flask-level tests for the dry-run endpoint, including CSRF/auth behavior.
+2. Add persistent audit design before any execute endpoint.
+3. Do not wire any Modern UI button until endpoint tests and confirmation UX
+   exist.
 4. Keep Classic fallback unchanged.
 5. Do not add delete/download/restore/OAuth/hardware actions until their specific
    policy sections are satisfied.

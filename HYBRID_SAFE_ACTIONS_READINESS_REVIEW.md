@@ -25,9 +25,9 @@ Implemented foundation:
 
 Current boundary:
 
-- no Modern endpoint exists
+- a dry-run-only Modern endpoint exists at `/modern-admin/safe-action/dry-run`
 - no Modern UI button exists
-- no browser path can invoke a safe action
+- no Modern UI path or button invokes a safe action
 - no safe action calls `/ajax/notification`
 - no safe action writes the database unless a future endpoint injects a callback
 
@@ -89,12 +89,11 @@ Reviewed files and patterns:
 
 ## 6. Recommendation
 
-Recommendation: **READY FOR DRY-RUN ENDPOINT ONLY**.
+Recommendation: **DRY-RUN ENDPOINT CREATED; EXECUTE NOT READY**.
 
-Hybrid AllSky is not ready for a real execute endpoint. The current foundation
-is strong enough to create a Modern Safe Action endpoint that only runs
-`dry_run=True`, never injects a mutating callback, and returns a redacted
-`ModernAdminSafeActionResult`.
+Hybrid AllSky is not ready for a real execute endpoint. The current dry-run
+endpoint only runs `dry_run=True`, does not inject a mutating callback, and
+returns a redacted `ModernAdminSafeActionResult`.
 
 This dry-run endpoint should be treated as endpoint plumbing validation, not
 feature parity and not user-facing action support.
@@ -121,16 +120,12 @@ Missing before real execution:
 
 The safest next micro-step is:
 
-1. Create a dry-run-only Modern Safe Action Flask endpoint for
-   `notification.acknowledge`.
-2. Require login and the existing/admin permission pattern selected for Modern
-   Safe Actions.
-3. Require CSRF protection.
-4. Do not inject `acknowledge_callback`.
-5. Do not expose a UI button.
-6. Return only `ModernAdminSafeActionResult.to_dict()`.
-7. Add Flask-level tests for authentication, CSRF, missing action id, unknown
-   action id, invalid notification id, and dry-run response shape.
+1. Add Flask-level tests for the dry-run endpoint authentication, CSRF, missing
+   action id, unknown action id, invalid notification id, and dry-run response
+   shape.
+2. Define persistent audit storage before any execute endpoint.
+3. Keep `notification.acknowledge` execute blocked until the execute
+   prerequisites are complete.
 
 Do not implement real `ack` execution until the execute prerequisites in this
 review are complete.

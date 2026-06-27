@@ -12,6 +12,8 @@ from indi_allsky.modern_safe_action import ModernAdminSafeActionResult
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRunner
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
 from indi_allsky.modern_safe_action import build_default_modern_safe_action_registry
+from indi_allsky.modern_safe_action import build_notification_acknowledge_dry_run_registry
+from indi_allsky.modern_safe_action import run_modern_safe_action_dry_run
 
 
 class Actor:
@@ -495,6 +497,94 @@ def test_runner_has_no_flask_request_dependency():
     assert result.allowed is True
 
 
+def test_notification_acknowledge_dry_run_registry_has_no_execute_callback():
+    registry = build_notification_acknowledge_dry_run_registry(
+        permission_check=lambda actor: True,
+    )
+    runner = ModernAdminSafeActionRunner(registry)
+
+    dry_run = runner.run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 8},
+        dry_run=True,
+    )
+    execute = runner.run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 8},
+        dry_run=False,
+    )
+
+    assert dry_run.status == 'dry_run'
+    assert dry_run.allowed is True
+    assert execute.status == 'not_implemented'
+    assert execute.allowed is False
+
+
+def test_dry_run_helper_missing_action_id():
+    result = run_modern_safe_action_dry_run(
+        action_id=None,
+        actor=Actor(),
+        payload={},
+        permission_check=lambda actor: True,
+    )
+
+    assert result.status == 'missing_action_id'
+    assert result.allowed is False
+
+
+def test_dry_run_helper_unknown_action_id():
+    result = run_modern_safe_action_dry_run(
+        action_id='unknown.action',
+        actor=Actor(),
+        payload={},
+        permission_check=lambda actor: True,
+    )
+
+    assert result.status == 'not_found'
+    assert result.allowed is False
+
+
+def test_dry_run_helper_notification_acknowledge_success():
+    result = run_modern_safe_action_dry_run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 9},
+        permission_check=lambda actor: True,
+    )
+
+    assert result.status == 'dry_run'
+    assert result.allowed is True
+
+
+def test_dry_run_helper_permission_denied():
+    result = run_modern_safe_action_dry_run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={'notification_id': 9},
+        permission_check=lambda actor: False,
+    )
+
+    assert result.status == 'permission_denied'
+    assert result.allowed is False
+
+
+def test_dry_run_helper_redacts_secret_payload():
+    result = run_modern_safe_action_dry_run(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={
+            'notification_id': 9,
+            'api_token': 'do-not-return',
+        },
+        permission_check=lambda actor: True,
+    )
+
+    assert 'do-not-return' not in result.audit_message
+    assert '[REDACTED]' in result.audit_message
+
+
 if __name__ == '__main__':
     test_default_action_does_not_execute()
     test_dry_run_does_not_mutate()
@@ -526,4 +616,10 @@ if __name__ == '__main__':
     test_runner_execute_failure_structured()
     test_runner_audit_redaction()
     test_runner_has_no_flask_request_dependency()
+    test_notification_acknowledge_dry_run_registry_has_no_execute_callback()
+    test_dry_run_helper_missing_action_id()
+    test_dry_run_helper_unknown_action_id()
+    test_dry_run_helper_notification_acknowledge_success()
+    test_dry_run_helper_permission_denied()
+    test_dry_run_helper_redacts_secret_payload()
     print('Modern safe action tests passed')
