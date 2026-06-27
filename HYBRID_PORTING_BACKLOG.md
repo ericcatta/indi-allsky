@@ -128,7 +128,7 @@ read-only first.
 
 | Rank | Feature | Current phase | Next phase | Effort | Risk | Why now |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Upload | C | D | M | Medium | Provider detail can remain read-only without remote operations. |
+| 1 | YouTube / OAuth | A | B | M | High | Read-only status audit may be possible only if credentials, OAuth payloads, upload tests and remote operations stay hidden/disabled. |
 
 ### Blocked
 
