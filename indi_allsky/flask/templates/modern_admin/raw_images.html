@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-raw-images-title">
+    {% set modern_admin_header_label = 'Raw Images' %}
+    {% set modern_admin_heading = 'Raw Images' %}
+    {% set modern_admin_title_id = 'modern-admin-raw-images-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Raw image summary">
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Rows</div>
+            <h3>{{ modern_admin_raw_image_count }}</h3>
+            <p>Latest {{ modern_admin_raw_image_display_limit }} metadata rows.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Uploaded</div>
+            <h3>{{ modern_admin_raw_image_uploaded_count }}</h3>
+            <p>Rows marked uploaded in the database.</p>
+        </article>
+        <article class="modern-admin-status-card">
+            <div class="modern-admin-card-label">Sources</div>
+            <h3>{{ modern_admin_raw_image_sources|length }}</h3>
+            <p>Recorded storage source categories.</p>
+        </article>
+    </section>
+
+    {% if modern_admin_raw_images_error %}
+    <section class="modern-admin-table-panel">
+        <p class="modern-admin-note">{{ modern_admin_raw_images_error }}</p>
+    </section>
+    {% endif %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="modern-raw-images-heading">
+        <div class="modern-admin-section-heading">
+            <p class="modern-admin-eyebrow">Scientific Source</p>
+            <h2 id="modern-raw-images-heading">Raw image metadata</h2>
+        </div>
+
+        <div class="modern-admin-filter-bar" aria-label="Raw image filters">
+            <label>
+                Search
+                <input id="modern-raw-image-search" type="search" placeholder="id or filename" autocomplete="off">
+            </label>
+            <label>
+                Day/Night
+                <select id="modern-raw-image-timeofday-filter">
+                    <option value="">All</option>
+                    <option value="day">Day</option>
+                    <option value="night">Night</option>
+                </select>
+            </label>
+            <label>
+                Uploaded
+                <select id="modern-raw-image-uploaded-filter">
+                    <option value="">All</option>
+                    <option value="yes">Uploaded</option>
+                    <option value="no">Not uploaded</option>
+                </select>
+            </label>
+            <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-raw-image-filter-count">{{ modern_admin_raw_image_count }} shown</span>
+        </div>
+
+        <div class="modern-admin-table-scroll">
+            <table class="modern-admin-data-table" id="modern-raw-image-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Created</th>
+                        <th>Day</th>
+                        <th>Camera</th>
+                        <th>Filename</th>
+                        <th>Size</th>
+                        <th>Dimensions</th>
+                        <th>Exposure</th>
+                        <th>Gain</th>
+                        <th>Bin</th>
+                        <th>Day/Night</th>
+                        <th>Uploaded</th>
+                        <th>Source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for raw_image in modern_admin_raw_image_rows %}
+                    <tr data-search="{{ (raw_image.id ~ ' ' ~ raw_image.filename)|lower }}" data-timeofday="{{ raw_image.timeofday|lower }}" data-uploaded="{{ raw_image.uploaded|lower }}">
+                        <td>{{ raw_image.id }}</td>
+                        <td>{{ raw_image.created }}</td>
+                        <td>{{ raw_image.day_date }}</td>
+                        <td>{{ raw_image.camera_id }}</td>
+                        <td>{{ raw_image.filename }}</td>
+                        <td>{{ raw_image.file_size }}</td>
+                        <td>{{ raw_image.dimensions }}</td>
+                        <td>{{ raw_image.exposure }}</td>
+                        <td>{{ raw_image.gain }}</td>
+                        <td>{{ raw_image.binmode }}</td>
+                        <td>{{ raw_image.timeofday }}</td>
+                        <td><span class="modern-admin-status-pill {% if raw_image.uploaded == 'Yes' %}modern-admin-status-good{% else %}modern-admin-status-muted{% endif %}">{{ raw_image.uploaded }}</span></td>
+                        <td>{{ raw_image.source }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="13">No raw image metadata rows are available.</td>
+                    </tr>
+                    {% endfor %}
+                    <tr id="modern-raw-image-filter-empty-row" hidden>
+                        <td colspan="13">No raw images match the current filters.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="modern-admin-note">This page shows database metadata only. It does not decode, convert, download, delete, open paths or inspect file contents.</p>
+
+        <section class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.latest_rawimage_view') }}">Open Classic Raw Latest</a>
+            <a href="{{ url_for('indi_allsky.raw_image_view') }}">Open Classic Raw Viewer</a>
+        </section>
+    </section>
+</main>
+
+<script>
+(() => {
+    const searchInput = document.getElementById('modern-raw-image-search');
+    const timeofdayFilter = document.getElementById('modern-raw-image-timeofday-filter');
+    const uploadedFilter = document.getElementById('modern-raw-image-uploaded-filter');
+    const countBadge = document.getElementById('modern-raw-image-filter-count');
+    const rows = Array.from(document.querySelectorAll('#modern-raw-image-table tbody tr[data-search]'));
+    const emptyRow = document.getElementById('modern-raw-image-filter-empty-row');
+
+    function applyRawImageFilters() {
+        const query = searchInput.value.trim().toLowerCase();
+        const timeofday = timeofdayFilter.value;
+        const uploaded = uploadedFilter.value;
+        let visible = 0;
+
+        rows.forEach((row) => {
+            const matchesSearch = !query || row.dataset.search.includes(query);
+            const matchesTimeofday = !timeofday || row.dataset.timeofday === timeofday;
+            const matchesUploaded = !uploaded || row.dataset.uploaded === uploaded;
+            const matches = matchesSearch && matchesTimeofday && matchesUploaded;
+            row.hidden = !matches;
+            if (matches) {
+                visible += 1;
+            }
+        });
+
+        emptyRow.hidden = visible !== 0 || rows.length === 0;
+        countBadge.textContent = visible + ' shown';
+    }
+
+    [searchInput, timeofdayFilter, uploadedFilter].forEach((control) => {
+        control.addEventListener('input', applyRawImageFilters);
+        control.addEventListener('change', applyRawImageFilters);
+    });
+})();
+</script>
+{% endblock %}

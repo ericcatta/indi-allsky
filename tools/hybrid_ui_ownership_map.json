@@ -1346,27 +1346,30 @@
     },
     "raw_viewer": {
       "label": "Raw Viewer",
-      "status": "SHARED LEGACY",
-      "owner": "public",
+      "status": "PARTIAL MODERN",
+      "owner": "modern",
       "porting_priority": "medium",
       "routes": [
+        "/modern-admin/media/raw",
         "/raw*",
         "/latestraw*",
         "/js/latest_rawimage"
       ],
       "templates": [
+        "modern_admin/raw_images.html",
         "index_img.html",
         "index_canvas.html"
       ],
       "assets": [],
       "apis": [
-        "/js/latest_rawimage"
+        "/js/latest_rawimage",
+        "modern_admin_media_raw_images_view"
       ],
       "config_keys": [
         "IMAGE_EXPORT_RAW"
       ],
       "protected": true,
-      "modern_gap": "No native source review view yet.",
+      "modern_gap": "Modern read-only raw image metadata/status list exists; raw decoding, download and public/latest behavior remain blocked or preserved.",
       "removal_risk": "high",
       "notes": []
     },

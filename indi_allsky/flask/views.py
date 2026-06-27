@@ -14936,6 +14936,128 @@ class ModernAdminMediaPanoramaLoopView(ModernAdminMediaListView):
     modern_admin_media_layout = 'loop'
 
 
+class ModernAdminMediaRawImagesView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Modern Admin Raw Images'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_raw_images_view'
+    raw_image_display_limit = 100
+
+
+    def get_context(self):
+        context = super(ModernAdminMediaRawImagesView, self).get_context()
+
+        raw_image_rows = list()
+        try:
+            raw_image_entries = IndiAllSkyDbRawImageTable.query\
+                .join(IndiAllSkyDbRawImageTable.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(IndiAllSkyDbRawImageTable.createDate.desc())\
+                .limit(self.raw_image_display_limit)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin raw image metadata rows: %s', str(e))
+            raw_image_entries = list()
+            context['modern_admin_raw_images_error'] = 'Unable to load raw image metadata.'
+
+        for entry in raw_image_entries:
+            raw_image_rows.append({
+                'id'         : entry.id,
+                'created'    : self.format_raw_image_datetime(entry.createDate),
+                'day_date'   : entry.dayDate if entry.dayDate else 'Unknown',
+                'camera_id'  : entry.camera_id,
+                'filename'   : self.format_raw_image_filename(entry.filename),
+                'dimensions' : self.format_raw_image_dimensions(entry.width, entry.height),
+                'exposure'   : self.format_raw_image_number(entry.exposure, suffix='s'),
+                'gain'       : self.format_raw_image_number(entry.gain),
+                'binmode'    : entry.binmode if entry.binmode is not None else 'Unknown',
+                'file_size'  : self.format_media_size(entry.fileSize) if entry.fileSize else 'Unknown',
+                'timeofday'  : 'Night' if entry.night else 'Day',
+                'uploaded'   : self.format_raw_image_bool(entry.uploaded),
+                'source'     : self.format_raw_image_source(entry),
+                'sync_id'    : entry.sync_id if entry.sync_id is not None else 'N/A',
+                'metadata'   : self.format_raw_image_data_summary(entry.data),
+            })
+
+        context['modern_admin_raw_image_rows'] = raw_image_rows
+        context['modern_admin_raw_image_count'] = len(raw_image_rows)
+        context['modern_admin_raw_image_uploaded_count'] = len([
+            row for row in raw_image_rows if row['uploaded'] == 'Yes'
+        ])
+        context['modern_admin_raw_image_sources'] = sorted({row['source'] for row in raw_image_rows})
+        context['modern_admin_raw_image_display_limit'] = self.raw_image_display_limit
+
+        return context
+
+
+    def format_raw_image_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+    def format_raw_image_filename(self, value):
+        if not value:
+            return 'Unknown'
+        return Path(str(value)).name
+
+
+    def format_raw_image_dimensions(self, width, height):
+        if width and height:
+            return '{0:d} x {1:d}'.format(int(width), int(height))
+        return 'Unknown'
+
+
+    def format_raw_image_number(self, value, suffix=''):
+        if value is None:
+            return 'Unknown'
+        try:
+            number = '{0:.3f}'.format(float(value)).rstrip('0').rstrip('.')
+            return '{0:s}{1:s}'.format(number, suffix)
+        except (TypeError, ValueError):
+            return str(value)
+
+
+    def format_media_size(self, value):
+        if value is None:
+            return 'Unknown'
+
+        try:
+            size = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+
+        units = ('B', 'KB', 'MB', 'GB', 'TB')
+        unit_index = 0
+        while size >= 1024.0 and unit_index < len(units) - 1:
+            size /= 1024.0
+            unit_index += 1
+
+        if unit_index == 0:
+            return '{0:d} {1:s}'.format(int(size), units[unit_index])
+        return '{0:.1f} {1:s}'.format(size, units[unit_index])
+
+
+    def format_raw_image_bool(self, value):
+        return 'Yes' if bool(value) else 'No'
+
+
+    def format_raw_image_source(self, entry):
+        if entry.remote_url:
+            return 'Remote URL recorded'
+        if entry.s3_key:
+            return 'S3 key recorded'
+        return 'Local DB entry'
+
+
+    def format_raw_image_data_summary(self, value):
+        if isinstance(value, dict):
+            return 'Keys: {0:d}'.format(len(value))
+        if value is None:
+            return 'No metadata payload'
+        return 'Non-dict metadata payload'
+
+
 class ModernAdminMediaFitsView(ModernAdminMediaListView):
     page_title = 'Modern Admin FITS Viewer'
     modern_admin_section = 'FITS Viewer'
@@ -21926,6 +22048,7 @@ bp_allsky.add_url_rule('/modern-admin/media/startrail-videos', view_func=ModernA
 bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/mini_timelapses.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/panoramas.html'))
 bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))
+bp_allsky.add_url_rule('/modern-admin/media/raw', view_func=ModernAdminMediaRawImagesView.as_view('modern_admin_media_raw_images_view', template_name='modern_admin/raw_images.html'))
 bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))
 bp_allsky.add_url_rule('/modern-admin/fits', view_func=ModernAdminFitsView.as_view('modern_admin_fits_view', template_name='modern_admin/fits.html'))
 bp_allsky.add_url_rule('/modern-admin/fits/<int:fits_id>', view_func=ModernAdminFitsDetailView.as_view('modern_admin_fits_detail_view', template_name='modern_admin/fits_detail.html'))
