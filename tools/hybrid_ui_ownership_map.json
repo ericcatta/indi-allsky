@@ -1548,23 +1548,27 @@
     },
     "startrail_video": {
       "label": "Startrail Video",
-      "status": "PUBLIC ACTIVE",
-      "owner": "public",
+      "status": "PARTIAL MODERN",
+      "owner": "modern",
       "porting_priority": "medium",
       "routes": [
+        "/modern-admin/media/startrail-videos",
         "/lateststartrailvideo*",
         "/watch_startrail"
       ],
       "templates": [
+        "modern_admin/startrail_videos.html",
         "watch_video.html"
       ],
       "assets": [],
-      "apis": [],
+      "apis": [
+        "modern_admin_media_startrail_videos_view"
+      ],
       "config_keys": [
         "STARTRAILS_VIDEO*"
       ],
       "protected": false,
-      "modern_gap": "Public watch/share parity must be preserved.",
+      "modern_gap": "Modern read-only startrail video metadata/status list exists; public watch/share parity must be preserved.",
       "removal_risk": "high",
       "notes": []
     },
