@@ -18171,6 +18171,27 @@ class ModernAdminAnalyticsSettingsView(ModernAdminSettingsInventoryView):
         },
     )
 
+    ANALYTICS_PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Sky brightness / SQM',
+            'purpose'        : 'Group sky-quality sampling controls and camera-SQM sensor context in one analytics-oriented area.',
+            'source_keys'    : ('SQM_ROI_*', 'SQM_FOV_DIV', 'CAMERA_SQM__*'),
+            'proposed_level' : 'Future Advanced / Analytics',
+        },
+        {
+            'label'          : 'Image signal / ADU',
+            'purpose'        : 'Keep image brightness sampling controls close to analytics and signal-health reporting.',
+            'source_keys'    : ('ADU_ROI_*', 'ADU_FOV_DIV'),
+            'proposed_level' : 'Future Advanced / Analytics',
+        },
+        {
+            'label'          : 'Charts / Custom slots',
+            'purpose'        : 'Treat custom chart slots as chart composition controls, separate from daily operational settings.',
+            'source_keys'    : ('CHARTS__CUSTOM_SLOT_*', 'CHARTS__CUSTOM_SLOT_*_MIN'),
+            'proposed_level' : 'Future Developer / Advanced depending on use',
+        },
+    )
+
     def get_context(self):
         context = super(ModernAdminAnalyticsSettingsView, self).get_context()
         analytics_group = None
@@ -18181,6 +18202,7 @@ class ModernAdminAnalyticsSettingsView(ModernAdminSettingsInventoryView):
 
         context['modern_admin_analytics_settings_group'] = analytics_group
         context['modern_admin_analytics_config_sections'] = self.get_analytics_config_sections()
+        context['modern_admin_analytics_proposed_layout'] = self.get_analytics_proposed_layout()
         return context
 
 
@@ -18200,6 +18222,19 @@ class ModernAdminAnalyticsSettingsView(ModernAdminSettingsInventoryView):
                 ),
             }
             for section in self.ANALYTICS_CONFIG_SECTIONS
+        )
+
+
+    def get_analytics_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_settings_text(row.get('label')),
+                'purpose'        : self.safe_settings_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_settings_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_settings_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.ANALYTICS_PROPOSED_LAYOUT
         )
 
 

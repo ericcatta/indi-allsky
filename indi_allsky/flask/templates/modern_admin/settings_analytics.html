@@ -105,6 +105,40 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 
+    <section class="modern-admin-table-panel" aria-labelledby="analytics-proposed-layout-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Future product shape</p>
+                <h2 id="analytics-proposed-layout-title">Proposed final layout</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only proposal</span>
+        </div>
+        <p class="modern-admin-note">This proposal describes how Analytics should be organized in the final Modern settings experience. It does not expose editing controls or active runtime values.</p>
+        <div class="modern-admin-link-grid">
+            {% for layout_card in modern_admin_analytics_proposed_layout %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ layout_card.label }}</strong>
+                    <small>{{ layout_card.purpose }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ layout_card.proposed_level }}</span>
+                        <span class="modern-admin-settings-badge">{{ layout_card.note }}</span>
+                    </small>
+                    <small>
+                        {% for source_key in layout_card.source_keys %}
+                        <code>{{ source_key }}</code>{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No source keys listed.
+                        {% endfor %}
+                    </small>
+                </span>
+            </article>
+            {% else %}
+            <span>No proposed Analytics layout cards were listed.</span>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="modern-admin-table-panel" aria-labelledby="analytics-config-keys-title">
         <div class="modern-admin-section-heading">
             <div>
