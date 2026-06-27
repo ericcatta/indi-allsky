@@ -15,6 +15,7 @@ from indi_allsky.modern_safe_action import ModernAdminSafeActionRegistry
 from indi_allsky.modern_safe_action import ModernAdminSafeActionResult
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRunner
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
+from indi_allsky.modern_safe_action import NotificationAcknowledgeService
 from indi_allsky.modern_safe_action import build_default_modern_safe_action_registry
 from indi_allsky.modern_safe_action import build_notification_acknowledge_dry_run_registry
 from indi_allsky.modern_safe_action import run_modern_safe_action_dry_run
@@ -31,6 +32,33 @@ class FakeNotification:
     def __init__(self, notification_id, ack=False):
         self.id = notification_id
         self.ack = ack
+        self.set_ack_calls = 0
+
+
+    def setAck(self):
+        self.set_ack_calls += 1
+        self.ack = True
+
+
+class FailingSetAckNotification(FakeNotification):
+    def setAck(self):
+        self.set_ack_calls += 1
+        raise RuntimeError('fake setAck failure')
+
+
+class FakeNotificationRepository:
+    def __init__(self, notifications=None, error=None):
+        self.notifications = notifications or {}
+        self.error = error
+        self.lookup_calls = []
+
+
+    def lookup(self, notification_id):
+        self.lookup_calls.append(notification_id)
+        if self.error:
+            raise self.error
+
+        return self.notifications.get(notification_id)
 
 
 class AdminActor:
@@ -342,6 +370,132 @@ def test_notification_acknowledge_audit_redacts_sensitive_payload():
 
     assert 'do-not-render' not in result.audit_message
     assert '[REDACTED]' in result.audit_message
+
+
+def test_notification_acknowledge_service_invalid_id():
+    repo = FakeNotificationRepository()
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result = service.acknowledge(notification_id=0)
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert repo.lookup_calls == []
+
+
+def test_notification_acknowledge_service_missing_notification():
+    repo = FakeNotificationRepository()
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result = service.acknowledge(notification_id=99)
+
+    assert result.status == 'not_found'
+    assert result.allowed is False
+    assert repo.lookup_calls == [99]
+
+
+def test_notification_acknowledge_service_already_acked_is_noop():
+    notification = FakeNotification(5, ack=True)
+    repo = FakeNotificationRepository({5: notification})
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result = service.acknowledge(notification_id=5)
+
+    assert result.status == 'already_acknowledged'
+    assert result.allowed is True
+    assert result.details['idempotent'] is True
+    assert notification.set_ack_calls == 0
+
+
+def test_notification_acknowledge_service_calls_set_ack_when_explicitly_executed():
+    notification = FakeNotification(6, ack=False)
+    repo = FakeNotificationRepository({6: notification})
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result = service.acknowledge(notification_id=6)
+
+    assert result.status == 'acknowledged'
+    assert result.allowed is True
+    assert notification.ack is True
+    assert notification.set_ack_calls == 1
+
+
+def test_notification_acknowledge_service_repository_error_is_structured():
+    repo = FakeNotificationRepository(error=RuntimeError('repository down'))
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result = service.acknowledge(notification_id=7)
+
+    assert result.status == 'repository_error'
+    assert result.allowed is False
+    assert result.details['notification_id'] == 7
+    assert 'repository down' in result.details['error']
+
+
+def test_notification_acknowledge_service_set_ack_error_is_structured():
+    notification = FailingSetAckNotification(8)
+    repo = FakeNotificationRepository({8: notification})
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result = service.acknowledge(notification_id=8)
+
+    assert result.status == 'execute_failed'
+    assert result.allowed is False
+    assert notification.set_ack_calls == 1
+
+
+def test_notification_acknowledge_safe_action_uses_service_only_on_execute():
+    notification = FakeNotification(9, ack=False)
+    repo = FakeNotificationRepository({9: notification})
+    service = NotificationAcknowledgeService(repo.lookup)
+    action = NotificationAcknowledgeSafeAction(
+        permission_check=lambda actor: True,
+        acknowledge_service=service,
+    )
+
+    dry_run = action.run(actor=Actor(), payload={'notification_id': 9}, dry_run=True)
+    assert dry_run.status == 'dry_run'
+    assert notification.set_ack_calls == 0
+
+    execute = action.run(actor=Actor(), payload={'notification_id': 9}, dry_run=False)
+    assert execute.status == 'acknowledged'
+    assert notification.set_ack_calls == 1
+
+
+def test_notification_acknowledge_service_audit_record_is_redacted():
+    notification = FakeNotification(10)
+    repo = FakeNotificationRepository({10: notification})
+    service = NotificationAcknowledgeService(repo.lookup)
+    runner = build_notification_runner(
+        lookup=service.lookup_notification,
+        callback=service.acknowledge_callback,
+    )
+
+    _result, audit_record = runner.run_with_audit(
+        action_id='notification.acknowledge',
+        actor=Actor(),
+        payload={
+            'notification_id': 10,
+            'api_token': 'service-secret',
+        },
+        dry_run=False,
+    )
+    data = audit_record.to_dict()
+
+    assert data['status'] == 'acknowledged'
+    assert 'service-secret' not in str(data)
+    assert data['payload_summary']['api_token'] == '[REDACTED]'
+
+
+def test_notification_acknowledge_service_has_no_flask_request_dependency():
+    notification = FakeNotification(11)
+    repo = FakeNotificationRepository({11: notification})
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result = service.acknowledge(notification_id=11, actor=Actor())
+
+    assert result.status == 'acknowledged'
+    assert notification.ack is True
 
 
 def build_notification_runner(permission_check=None, lookup=None, callback=None):
@@ -941,6 +1095,15 @@ if __name__ == '__main__':
     test_notification_acknowledge_with_callback_returns_success()
     test_notification_acknowledge_already_acked_is_idempotent()
     test_notification_acknowledge_audit_redacts_sensitive_payload()
+    test_notification_acknowledge_service_invalid_id()
+    test_notification_acknowledge_service_missing_notification()
+    test_notification_acknowledge_service_already_acked_is_noop()
+    test_notification_acknowledge_service_calls_set_ack_when_explicitly_executed()
+    test_notification_acknowledge_service_repository_error_is_structured()
+    test_notification_acknowledge_service_set_ack_error_is_structured()
+    test_notification_acknowledge_safe_action_uses_service_only_on_execute()
+    test_notification_acknowledge_service_audit_record_is_redacted()
+    test_notification_acknowledge_service_has_no_flask_request_dependency()
     test_runner_missing_action_id()
     test_runner_unknown_action_id()
     test_runner_permission_denied_does_not_execute()

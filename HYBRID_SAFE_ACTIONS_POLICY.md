@@ -267,10 +267,15 @@ First Pilot Safe Action: `notification.acknowledge`:
 - It validates a positive notification id, can use an injected notification
   lookup function, supports dry-run, and treats an already acknowledged
   notification as an idempotent safe no-op.
+- `NotificationAcknowledgeService` provides the DB-backed service boundary for
+  future lookup/acknowledge behavior. It can call a notification object's
+  `setAck()` only through an explicit service `acknowledge()` call or injected
+  safe-action callback.
 - It does not call `/ajax/notification`, does not require Flask request context,
   and does not write the database unless a future endpoint deliberately injects
   a tested acknowledge callback.
-- Status: wrapper/test only, not exposed in Modern UI.
+- Status: wrapper/service/test only, not exposed in Modern UI and not exposed as
+  an execute endpoint.
 - Required before UI exposure: Modern CSRF/auth endpoint wrapper, audit log,
   confirmation UX, integration test, and Classic fallback/rollback decision.
 
@@ -322,8 +327,9 @@ Dry-Run Endpoint:
 Recommended next micro-step:
 
 1. Add Flask-level tests for the dry-run endpoint, including CSRF/auth behavior.
-2. Define DB-backed lookup/execute callbacks and permission policy for the
-   first low-risk action before any execute endpoint.
+2. Define the execute endpoint wrapper for `notification.acknowledge` only after
+   DB-backed service tests, permission policy, persistent audit wiring, and
+   Flask integration tests are complete.
 3. Do not wire any Modern UI button until endpoint tests and confirmation UX
    exist.
 4. Keep Classic fallback unchanged.

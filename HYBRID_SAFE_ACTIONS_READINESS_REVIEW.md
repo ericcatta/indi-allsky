@@ -39,6 +39,9 @@ Current boundary:
   test runner because Flask is not available there
 - a lightweight append-only JSONL audit log utility exists, but it is not wired
   to execute endpoints, UI, DB sessions, or application logging
+- `NotificationAcknowledgeService` exists as a testable service boundary for
+  lookup and explicit acknowledge behavior, but no endpoint or UI invokes it for
+  real execution
 
 ## 3. Evidence Reviewed
 
@@ -70,7 +73,7 @@ Reviewed files and patterns:
 | Is confirmation UX missing? | Yes. This is not required for dry-run endpoints, but is required before real mutation UI. |
 | Is Flask integration testing missing? | Yes. Unit tests exist; endpoint-level tests do not. |
 | Is a dry-run-only endpoint safe? | Conservatively yes, if it is authenticated, CSRF-protected, does not inject execute callbacks, returns only redacted results, and is covered by Flask tests. |
-| Is a real execute endpoint for notification acknowledge safe now? | Not yet. It needs CSRF/auth wrapper, persistent audit, permission policy, integration test, and explicit idempotency behavior with DB-backed lookup/callback. |
+| Is a real execute endpoint for notification acknowledge safe now? | Not yet. The service boundary now exists, but execute still needs CSRF/auth wrapper, persistent audit wiring, permission policy, integration tests, and confirmation/UX decision. |
 | What is the safest next micro-step? | Add a dry-run-only Flask wrapper endpoint for `notification.acknowledge`, behind login/admin policy and CSRF, with tests, but no UI button and no execute callback. |
 
 ## 5. Readiness Matrix
@@ -92,8 +95,8 @@ Reviewed files and patterns:
 | Persistent audit log | Utility implemented, not wired to execute | High | Optional for dry-run if response remains non-mutating | Required and must be wired/tested before execute |
 | Endpoint integration tests | Static/helper coverage only | High | Full Flask client test still recommended | Required |
 | Confirmation UX | Missing | Medium | Not required for dry-run-only endpoint | Required before UI execution |
-| DB-backed lookup callback | Not implemented | Medium | Not required for dry-run-only validation if endpoint remains conservative; recommended for target existence validation | Required |
-| DB-backed execute callback | Not implemented | High | Must not be injected for dry-run-only endpoint | Required |
+| DB-backed lookup callback | Service boundary implemented, not endpoint-wired | Medium | Not required for dry-run-only validation if endpoint remains conservative | Required and must be endpoint-tested |
+| DB-backed execute callback | Service boundary implemented, not endpoint-wired | High | Must not be injected for dry-run-only endpoint | Required and must be endpoint-tested |
 | Browser/UI exposure | Missing by design | Medium | Not needed | Required only after endpoint and UX policy |
 | Classic fallback | Preserved | Low | Required | Required |
 
@@ -119,8 +122,8 @@ Missing before real execution:
 - persistent audit event backed by the structured audit record and JSONL audit
   log utility
 - Flask integration tests
-- DB-backed notification lookup callback
-- DB-backed acknowledge callback
+- DB-backed notification lookup callback wired into the execute endpoint
+- DB-backed acknowledge callback wired into the execute endpoint
 - tests for missing notification, already acknowledged notification,
   unauthorized user, malformed payload, stale/expired notification, and DB
   failure
@@ -134,8 +137,9 @@ The safest next micro-step is:
 1. Add Flask-level tests for the dry-run endpoint authentication, CSRF, missing
    action id, unknown action id, invalid notification id, and dry-run response
    shape once a lightweight Flask test environment is available.
-2. Wire the persistent audit utility only after a concrete execute wrapper has
-   permission policy, DB-backed callbacks, and integration tests.
+2. Design the execute endpoint wrapper for `notification.acknowledge` around the
+   service boundary, but keep it unexposed until permission policy, persistent
+   audit wiring, and integration tests are ready.
 3. Keep `notification.acknowledge` execute blocked until the execute
    prerequisites are complete.
 
