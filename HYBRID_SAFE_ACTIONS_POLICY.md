@@ -238,6 +238,17 @@ These features should remain read-only/status/detail until their policies exist:
 The next safest work is not to add an action. It is to create the first small
 safe wrapper contract and tests for a low-risk action.
 
+Contract foundation:
+
+- `indi_allsky/modern_safe_action.py` defines `ModernAdminSafeAction` with the
+  minimum action metadata, permission check, dry-run behavior, validation hook,
+  execution hook, structured result, and sanitized audit message.
+- The base contract is safe by default: no real action is implemented, and
+  execution returns `not_implemented` unless a future subclass explicitly
+  overrides it.
+- The contract is not wired to UI, routes, buttons, or existing Classic
+  endpoints yet.
+
 Recommended next micro-step:
 
 1. Define a `ModernAdminSafeAction` contract for one action class only.
