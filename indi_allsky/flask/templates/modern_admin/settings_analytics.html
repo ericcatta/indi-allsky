@@ -108,33 +108,42 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-table-panel" aria-labelledby="analytics-config-keys-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Static key evidence</p>
-                <h2 id="analytics-config-keys-title">Analytics config key candidates</h2>
+                <p class="modern-admin-eyebrow">Product groups</p>
+                <h2 id="analytics-config-keys-title">Analytics settings areas</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_analytics_config_keys | length }} groups</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_analytics_config_sections | length }} sections</span>
         </div>
-        <p class="modern-admin-note">These keys are listed from static Classic config/form evidence only. Active runtime config values are not loaded here.</p>
-        <div class="modern-admin-table-scroll">
-            <table class="modern-admin-table">
-                <thead>
-                    <tr>
-                        <th>Key or pattern</th>
-                        <th>Source</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for key_row in modern_admin_analytics_config_keys %}
-                    <tr>
-                        <td><code>{{ key_row.key }}</code></td>
-                        <td>{{ key_row.source }}</td>
-                        <td>{{ key_row.notes }}</td>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="3">No static Analytics key candidates were listed.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <p class="modern-admin-note">These sections are grouped from static Classic config/form evidence only. Active runtime config values are not loaded here.</p>
+        <div class="modern-admin-link-grid">
+            {% for section in modern_admin_analytics_config_sections %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ section.label }}</strong>
+                    <small>{{ section.description }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ section.key_count }} keys</span>
+                        <span class="modern-admin-settings-badge">Read-only</span>
+                    </small>
+                    <small>
+                        {% for key_row in section.keys %}
+                        <code>{{ key_row.key }}</code>{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No static keys listed.
+                        {% endfor %}
+                    </small>
+                    <small>
+                        {% for key_row in section.keys %}
+                        {{ key_row.notes }}{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No notes.
+                        {% endfor %}
+                    </small>
+                    <small>No runtime settings are changed here.</small>
+                </span>
+            </article>
+            {% else %}
+            <span>No static Analytics settings sections were listed.</span>
+            {% endfor %}
         </div>
     </section>
 </main>

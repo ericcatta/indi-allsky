@@ -18115,41 +18115,59 @@ class ModernAdminAnalyticsSettingsView(ModernAdminSettingsInventoryView):
     page_title = 'Modern Admin Analytics Settings'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
 
-    ANALYTICS_CONFIG_KEYS = (
+    ANALYTICS_CONFIG_SECTIONS = (
         {
-            'key'     : 'CHARTS__CUSTOM_SLOT_1..9',
-            'source'  : 'Classic config form',
-            'notes'   : 'Custom chart slot metric selectors shown by the Classic config surface.',
+            'label'       : 'Charts / Custom Slots',
+            'description' : 'Controls which metrics are selected for Classic chart custom slots and their optional display floors.',
+            'keys'        : (
+                {
+                    'key'     : 'CHARTS__CUSTOM_SLOT_*',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Custom chart slot metric selectors shown by the Classic config surface.',
+                },
+                {
+                    'key'     : 'CHARTS__CUSTOM_SLOT_*_MIN',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Optional minimum bounds for custom chart slots.',
+                },
+            ),
         },
         {
-            'key'     : 'CHARTS__CUSTOM_SLOT_1_MIN..9_MIN',
-            'source'  : 'Classic config form',
-            'notes'   : 'Optional minimum bounds for custom chart slots.',
+            'label'       : 'ADU Analytics',
+            'description' : 'Defines the brightness sampling area used by operational ADU summaries and related status views.',
+            'keys'        : (
+                {
+                    'key'     : 'ADU_ROI_*',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'ADU region metadata used by operational brightness analytics.',
+                },
+                {
+                    'key'     : 'ADU_FOV_DIV',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Fallback ADU field-of-view division when no ROI is configured.',
+                },
+            ),
         },
         {
-            'key'     : 'ADU_ROI_*',
-            'source'  : 'Classic config form',
-            'notes'   : 'ADU region metadata used by operational brightness analytics.',
-        },
-        {
-            'key'     : 'ADU_FOV_DIV',
-            'source'  : 'Classic config form',
-            'notes'   : 'Fallback ADU field-of-view division when no ROI is configured.',
-        },
-        {
-            'key'     : 'SQM_ROI_*',
-            'source'  : 'Classic config form',
-            'notes'   : 'SQM/star region metadata used by brightness and sky quality summaries.',
-        },
-        {
-            'key'     : 'SQM_FOV_DIV',
-            'source'  : 'Classic config form',
-            'notes'   : 'Fallback SQM/star field-of-view division when no ROI is configured.',
-        },
-        {
-            'key'     : 'CAMERA_SQM__*',
-            'source'  : 'Classic config form',
-            'notes'   : 'Camera SQM sensor settings that feed analytics/status surfaces.',
+            'label'       : 'SQM Analytics',
+            'description' : 'Groups sky quality sampling metadata and camera-SQM sensor settings used by analytics/status surfaces.',
+            'keys'        : (
+                {
+                    'key'     : 'SQM_ROI_*',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'SQM/star region metadata used by brightness and sky quality summaries.',
+                },
+                {
+                    'key'     : 'SQM_FOV_DIV',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Fallback SQM/star field-of-view division when no ROI is configured.',
+                },
+                {
+                    'key'     : 'CAMERA_SQM__*',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Camera SQM sensor settings that feed analytics/status surfaces.',
+                },
+            ),
         },
     )
 
@@ -18162,18 +18180,26 @@ class ModernAdminAnalyticsSettingsView(ModernAdminSettingsInventoryView):
                 break
 
         context['modern_admin_analytics_settings_group'] = analytics_group
-        context['modern_admin_analytics_config_keys'] = self.get_analytics_config_keys()
+        context['modern_admin_analytics_config_sections'] = self.get_analytics_config_sections()
         return context
 
 
-    def get_analytics_config_keys(self):
+    def get_analytics_config_sections(self):
         return tuple(
             {
-                'key'    : self.safe_settings_text(row.get('key')),
-                'source' : self.safe_settings_text(row.get('source')),
-                'notes'  : self.safe_settings_text(row.get('notes')),
+                'label'       : self.safe_settings_text(section.get('label')),
+                'description' : self.safe_settings_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_settings_text(row.get('key')),
+                        'source' : self.safe_settings_text(row.get('source')),
+                        'notes'  : self.safe_settings_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
             }
-            for row in self.ANALYTICS_CONFIG_KEYS
+            for section in self.ANALYTICS_CONFIG_SECTIONS
         )
 
 
