@@ -17454,6 +17454,38 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'description' : 'Hybrid AWB mode, apply strategy, backend limits, and color-quality relationships.',
         },
     )
+    SETTINGS_BASIC_CAMERA_STACK_PAGES = (
+        {
+            'group_id'    : 'camera_profile_identity',
+            'title'       : 'Camera Profile Identity',
+            'endpoint'    : 'indi_allsky.modern_admin_camera_profile_settings_view',
+            'description' : 'Active profile identity, purpose, and camera/profile ownership.',
+        },
+        {
+            'group_id'    : 'camera_connection',
+            'title'       : 'Camera Connection',
+            'endpoint'    : 'indi_allsky.modern_admin_camera_connection_settings_view',
+            'description' : 'Driver/backend, device identity, connection status, and fallback boundaries.',
+        },
+        {
+            'group_id'    : 'exposure',
+            'title'       : 'Exposure / Gain',
+            'endpoint'    : 'indi_allsky.modern_admin_exposure_gain_settings_view',
+            'description' : 'Manual exposure and gain settings with profile-specific behavior.',
+        },
+        {
+            'group_id'    : 'auto_exposure',
+            'title'       : 'Auto Exposure / Auto Gain',
+            'endpoint'    : 'indi_allsky.modern_admin_auto_exposure_gain_settings_view',
+            'description' : 'Target ADU, automation gates, and manual-control relationships.',
+        },
+        {
+            'group_id'    : 'hybrid_awb',
+            'title'       : 'Hybrid AWB',
+            'endpoint'    : 'indi_allsky.modern_admin_hybrid_awb_settings_view',
+            'description' : 'AWB mode, strategy, backend constraints, and image-quality relationship.',
+        },
+    )
 
     def get_context(self):
         context = super(ModernAdminSettingsInventoryView, self).get_context()
@@ -17513,7 +17545,8 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             if row['risk'] == 'high':
                 high_risk_count += 1
 
-        product_preview_pages = self.format_settings_product_preview_pages(rows)
+        product_preview_pages = self.format_settings_preview_pages(rows, self.SETTINGS_PRODUCT_PREVIEW_PAGES)
+        basic_camera_stack_pages = self.format_settings_preview_pages(rows, self.SETTINGS_BASIC_CAMERA_STACK_PAGES)
 
         return {
             'modern_admin_settings_map_error'         : None,
@@ -17533,6 +17566,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_status_options'    : self.counter_keys(status_counts),
             'modern_admin_settings_risk_options'      : self.counter_keys(risk_counts),
             'modern_admin_settings_product_preview_pages' : product_preview_pages,
+            'modern_admin_settings_basic_camera_stack_pages' : basic_camera_stack_pages,
         }
 
 
@@ -17555,6 +17589,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_status_options'    : tuple(),
             'modern_admin_settings_risk_options'      : tuple(),
             'modern_admin_settings_product_preview_pages' : tuple(),
+            'modern_admin_settings_basic_camera_stack_pages' : tuple(),
         }
 
 
@@ -17605,14 +17640,14 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         return row
 
 
-    def format_settings_product_preview_pages(self, rows):
+    def format_settings_preview_pages(self, rows, page_definitions):
         rows_by_group_id = {
             row['group_id'] : row
             for row in rows
         }
         product_pages = list()
 
-        for page in self.SETTINGS_PRODUCT_PREVIEW_PAGES:
+        for page in page_definitions:
             group = rows_by_group_id.get(page['group_id'])
             if not group:
                 continue
