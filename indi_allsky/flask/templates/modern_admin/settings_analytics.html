@@ -35,6 +35,42 @@ var camera_id = {{ camera_id }};
         </p>
     </section>
 
+    <section class="modern-admin-table-panel" aria-labelledby="analytics-overview-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Final read-only product view</p>
+                <h2 id="analytics-overview-title">Analytics Overview</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_analytics_overview_cards | length }} areas</span>
+        </div>
+        <p class="modern-admin-note">This overview is product-oriented and read-only. It does not calculate analytics, query historical data, read active configuration values, or evaluate live sensor state.</p>
+
+        <div class="modern-admin-link-grid">
+            {% for card in modern_admin_analytics_overview_cards %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ card.label }}</strong>
+                    <small>{{ card.purpose }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">Current status: {{ card.current_status }}</span>
+                        <span class="modern-admin-settings-badge">Future editable: {{ card.future_editable }}</span>
+                    </small>
+                    <small>
+                        {% for key in card.related_keys %}
+                        <code>{{ key }}</code>{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No related keys listed.
+                        {% endfor %}
+                    </small>
+                    <small>{{ card.safety_note }}</small>
+                </span>
+            </article>
+            {% else %}
+            <span>No Analytics Overview cards were listed.</span>
+            {% endfor %}
+        </div>
+    </section>
+
     {% set dedicated_settings_slug = 'analytics' %}
     {% set dedicated_settings_title = 'Analytics' %}
     {% set dedicated_settings_group = modern_admin_analytics_settings_group %}
