@@ -18504,6 +18504,50 @@ class ModernAdminStorageSettingsView(ModernAdminSettingsInventoryView):
             'proposed_level' : 'Future Developer / Maintenance',
         },
     )
+    STORAGE_OVERVIEW_CARDS = (
+        {
+            'label'           : 'Data folders',
+            'purpose'         : 'Identify where local all-sky images and application data conceptually belong.',
+            'related_keys'    : ('VARLIB_FOLDER', 'IMAGE_FOLDER'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'Do not edit or validate paths here; moving data folders needs migration planning.',
+        },
+        {
+            'label'           : 'Export folders',
+            'purpose'         : 'Separate exported RAW/source destinations from normal display-image storage.',
+            'related_keys'    : ('IMAGE_EXPORT_FOLDER', 'IMAGE_EXPORT_RAW'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'No filesystem access or export action is triggered from this page.',
+        },
+        {
+            'label'           : 'RAW/FITS retention',
+            'purpose'         : 'Show source-file retention concepts that affect disk growth and scientific traceability.',
+            'related_keys'    : ('IMAGE_RAW_EXPIRE_DAYS', 'IMAGE_FITS_EXPIRE_DAYS'),
+            'future_editable' : 'yes',
+            'safety_note'     : 'Future editing needs validation and clear source-data loss warnings.',
+        },
+        {
+            'label'           : 'Disk usage policy',
+            'purpose'         : 'Expose disk warning thresholds as policy metadata without polling disk state here.',
+            'related_keys'    : ('HEALTHCHECK__DISK_USAGE',),
+            'future_editable' : 'yes',
+            'safety_note'     : 'RPi5-first: status pages may measure disk usage; this settings page does not.',
+        },
+        {
+            'label'           : 'External drives',
+            'purpose'         : 'Keep drive and mount point concepts visible while separating them from mount actions.',
+            'related_keys'    : ('DRIVES_SELECT', 'DEVICES_SELECT'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'Mount/unmount and drive operations remain safe-control or Classic fallback territory.',
+        },
+        {
+            'label'           : 'Remote backup',
+            'purpose'         : 'Show backup destination concepts without remote checks or credential exposure.',
+            'related_keys'    : ('FILETRANSFER__REMOTE_DB_BACKUP_FOLDER',),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'Remote operations and credentials require separate upload/provider policy.',
+        },
+    )
 
     def get_context(self):
         context = super(ModernAdminStorageSettingsView, self).get_context()
@@ -18514,6 +18558,7 @@ class ModernAdminStorageSettingsView(ModernAdminSettingsInventoryView):
                 break
 
         context['modern_admin_storage_settings_group'] = storage_group
+        context['modern_admin_storage_overview_cards'] = self.get_storage_overview_cards()
         context['modern_admin_storage_config_sections'] = self.get_storage_config_sections()
         context['modern_admin_storage_proposed_layout'] = self.get_storage_proposed_layout()
         return context
@@ -18548,6 +18593,20 @@ class ModernAdminStorageSettingsView(ModernAdminSettingsInventoryView):
                 'note'           : 'read-only proposal',
             }
             for row in self.STORAGE_PROPOSED_LAYOUT
+        )
+
+
+    def get_storage_overview_cards(self):
+        return tuple(
+            {
+                'label'          : self.safe_settings_text(row.get('label')),
+                'purpose'        : self.safe_settings_text(row.get('purpose')),
+                'related_keys'   : tuple(self.safe_settings_text(key) for key in row.get('related_keys', tuple())),
+                'current_status' : 'not evaluated here',
+                'future_editable': self.safe_settings_text(row.get('future_editable')),
+                'safety_note'    : self.safe_settings_text(row.get('safety_note')),
+            }
+            for row in self.STORAGE_OVERVIEW_CARDS
         )
 
 
