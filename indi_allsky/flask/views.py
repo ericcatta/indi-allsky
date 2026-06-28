@@ -17410,6 +17410,23 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         'WEBHOOK',
         'PSK',
     )
+    SETTINGS_PRODUCT_PREVIEW_PAGES = (
+        {
+            'group_id'    : 'analytics',
+            'endpoint'    : 'indi_allsky.modern_admin_analytics_settings_view',
+            'description' : 'Future product layout for SQM, ADU, and chart analytics settings.',
+        },
+        {
+            'group_id'    : 'storage_drives',
+            'endpoint'    : 'indi_allsky.modern_admin_storage_settings_view',
+            'description' : 'Storage health, local retention, drive, and maintenance concepts.',
+        },
+        {
+            'group_id'    : 'notifications',
+            'endpoint'    : 'indi_allsky.modern_admin_notifications_settings_view',
+            'description' : 'Notification categories, visibility, acknowledge behavior, and retention.',
+        },
+    )
 
     def get_context(self):
         context = super(ModernAdminSettingsInventoryView, self).get_context()
@@ -17469,6 +17486,8 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             if row['risk'] == 'high':
                 high_risk_count += 1
 
+        product_preview_pages = self.format_settings_product_preview_pages(rows)
+
         return {
             'modern_admin_settings_map_error'         : None,
             'modern_admin_settings_map_schema'        : self.safe_settings_text(ownership_map.get('schema_version') or 'unknown'),
@@ -17486,6 +17505,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_owner_options'     : self.counter_keys(owner_counts),
             'modern_admin_settings_status_options'    : self.counter_keys(status_counts),
             'modern_admin_settings_risk_options'      : self.counter_keys(risk_counts),
+            'modern_admin_settings_product_preview_pages' : product_preview_pages,
         }
 
 
@@ -17507,6 +17527,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_owner_options'     : tuple(),
             'modern_admin_settings_status_options'    : tuple(),
             'modern_admin_settings_risk_options'      : tuple(),
+            'modern_admin_settings_product_preview_pages' : tuple(),
         }
 
 
@@ -17555,6 +17576,32 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             ' '.join(row['notes']),
         ]).lower()
         return row
+
+
+    def format_settings_product_preview_pages(self, rows):
+        rows_by_group_id = {
+            row['group_id'] : row
+            for row in rows
+        }
+        product_pages = list()
+
+        for page in self.SETTINGS_PRODUCT_PREVIEW_PAGES:
+            group = rows_by_group_id.get(page['group_id'])
+            if not group:
+                continue
+
+            product_pages.append({
+                'group_id'    : group['group_id'],
+                'label'       : group['label'],
+                'owner'       : group['owner'],
+                'level'       : group['level'],
+                'status'      : group['status'],
+                'risk'        : group['risk'],
+                'description' : self.safe_settings_text(page.get('description')),
+                'endpoint'    : page['endpoint'],
+            })
+
+        return tuple(product_pages)
 
 
     def safe_settings_text(self, value):

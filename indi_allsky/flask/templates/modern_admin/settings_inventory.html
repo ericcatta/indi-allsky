@@ -113,6 +113,37 @@ var camera_id = {{ camera_id }};
     </section>
     {% endif %}
 
+    <section class="modern-admin-table-panel" aria-labelledby="settings-product-preview-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Final product previews</p>
+                <h2 id="settings-product-preview-title">Product Preview Pages</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_settings_product_preview_pages | length }} pages</span>
+        </div>
+        <p class="modern-admin-note">Dedicated read-only previews show how selected settings groups should become final Modern product experiences. They are not config editors and do not read or write runtime configuration.</p>
+
+        <div class="modern-admin-settings-action-grid">
+            {% for page in modern_admin_settings_product_preview_pages %}
+            <a class="modern-admin-settings-action-card modern-admin-settings-action-card-readonly" href="{{ url_for(page.endpoint) }}">
+                <span>
+                    <strong>{{ page.label }}</strong>
+                    <small>{{ page.description }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ page.status | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ page.level | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ page.owner | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ page.risk }}">{{ page.risk | title }} risk</span>
+                    </small>
+                </span>
+                <span aria-hidden="true">›</span>
+            </a>
+            {% else %}
+            <span>No dedicated product preview pages are available.</span>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Settings ownership counts">
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Mapped groups</div>
