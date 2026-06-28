@@ -18392,6 +18392,145 @@ class ModernAdminStorageSettingsView(ModernAdminSettingsInventoryView):
         )
 
 
+class ModernAdminNotificationsSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Notifications Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    NOTIFICATIONS_CONFIG_SECTIONS = (
+        {
+            'label'       : 'Notification categories',
+            'description' : 'Classification metadata used to group notification rows in Classic and Modern notification views.',
+            'keys'        : (
+                {
+                    'key'     : 'category',
+                    'source'  : 'IndiAllSkyDbNotificationTable / notification views',
+                    'notes'   : 'Notification category shown by Classic and Modern notification surfaces.',
+                },
+                {
+                    'key'     : 'item',
+                    'source'  : 'IndiAllSkyDbNotificationTable / notification views',
+                    'notes'   : 'Optional item/scope metadata used by Modern filters and detail views.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Delivery / visibility',
+            'description' : 'Read-only notification text and display metadata surfaced to operators.',
+            'keys'        : (
+                {
+                    'key'     : 'notification',
+                    'source'  : 'IndiAllSkyDbNotificationTable / notification views',
+                    'notes'   : 'Notification message text displayed by list and detail pages.',
+                },
+                {
+                    'key'     : 'createDate',
+                    'source'  : 'IndiAllSkyDbNotificationTable / notification views',
+                    'notes'   : 'Creation timestamp used for ordering and detail context.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Acknowledge behavior',
+            'description' : 'Acknowledgement metadata and future Safe Action boundary. This page does not acknowledge anything.',
+            'keys'        : (
+                {
+                    'key'     : 'ack',
+                    'source'  : 'IndiAllSkyDbNotificationTable / notification views',
+                    'notes'   : 'Acknowledgement state shown read-only in Modern views.',
+                },
+                {
+                    'key'     : 'notification.acknowledge',
+                    'source'  : 'Modern Safe Action registry/service boundary',
+                    'notes'   : 'Service-ready action remains blocked from UI execute pending Flask auth/session/CSRF tests.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Retention / expiry',
+            'description' : 'Notification expiry metadata used to determine visible/current notification records.',
+            'keys'        : (
+                {
+                    'key'     : 'expireDate',
+                    'source'  : 'IndiAllSkyDbNotificationTable / notification views',
+                    'notes'   : 'Expiry timestamp shown read-only and used by legacy AJAX notification lookup.',
+                },
+            ),
+        },
+    )
+
+    NOTIFICATIONS_PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Notification categories',
+            'purpose'        : 'Group operator messages by category and item before exposing future controls.',
+            'source_keys'    : ('category', 'item'),
+            'proposed_level' : 'Future Basic / Notifications',
+        },
+        {
+            'label'          : 'Delivery / visibility',
+            'purpose'        : 'Separate what operators can see from how notifications are delivered or produced.',
+            'source_keys'    : ('notification', 'createDate'),
+            'proposed_level' : 'Future Basic / Notifications',
+        },
+        {
+            'label'          : 'Acknowledge behavior',
+            'purpose'        : 'Keep acknowledgement state visible while execute remains behind Safe Actions and Flask tests.',
+            'source_keys'    : ('ack', 'notification.acknowledge'),
+            'proposed_level' : 'Future Advanced / Safe Actions',
+        },
+        {
+            'label'          : 'Retention / expiry',
+            'purpose'        : 'Make expiry semantics understandable before any retention or cleanup controls exist.',
+            'source_keys'    : ('expireDate',),
+            'proposed_level' : 'Future Advanced / Notifications',
+        },
+    )
+
+    def get_context(self):
+        context = super(ModernAdminNotificationsSettingsView, self).get_context()
+        notifications_group = None
+        for group in context.get('modern_admin_settings_groups', []):
+            if group.get('group_id') == 'notifications':
+                notifications_group = group
+                break
+
+        context['modern_admin_notifications_settings_group'] = notifications_group
+        context['modern_admin_notifications_config_sections'] = self.get_notifications_config_sections()
+        context['modern_admin_notifications_proposed_layout'] = self.get_notifications_proposed_layout()
+        return context
+
+
+    def get_notifications_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_settings_text(section.get('label')),
+                'description' : self.safe_settings_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_settings_text(row.get('key')),
+                        'source' : self.safe_settings_text(row.get('source')),
+                        'notes'  : self.safe_settings_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.NOTIFICATIONS_CONFIG_SECTIONS
+        )
+
+
+    def get_notifications_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_settings_text(row.get('label')),
+                'purpose'        : self.safe_settings_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_settings_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_settings_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.NOTIFICATIONS_PROPOSED_LAYOUT
+        )
+
+
 class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
     page_title = 'Modern Admin Full Settings'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
@@ -22914,6 +23053,7 @@ bp_allsky.add_url_rule('/modern-admin/settings/developer', view_func=ModernAdmin
 bp_allsky.add_url_rule('/modern-admin/settings/ready', view_func=ModernAdminReadySettingsPreviewView.as_view('modern_admin_ready_settings_view', template_name='modern_admin/settings_basic.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/analytics', view_func=ModernAdminAnalyticsSettingsView.as_view('modern_admin_analytics_settings_view', template_name='modern_admin/settings_analytics.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/storage', view_func=ModernAdminStorageSettingsView.as_view('modern_admin_storage_settings_view', template_name='modern_admin/settings_storage.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/notifications', view_func=ModernAdminNotificationsSettingsView.as_view('modern_admin_notifications_settings_view', template_name='modern_admin/settings_notifications.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))

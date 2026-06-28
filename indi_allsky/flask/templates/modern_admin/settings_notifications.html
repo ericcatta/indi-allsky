@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-notifications-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-notifications-settings-title">
+    {% set modern_admin_header_label = 'Notifications settings preview header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-notifications-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Notifications settings summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Product consolidation</p>
+                <h2 id="modern-admin-notifications-settings-title">Notifications Settings</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> This page describes the future Notifications settings group using ownership metadata, notification schema evidence, and Safe Actions context.</p>
+        <p class="modern-admin-note">No runtime settings are changed here. This page does not acknowledge notifications and does not call notification AJAX endpoints.</p>
+        <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Index</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_basic_settings_view') }}">Basic Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_notifications_view') }}">Modern Notifications</a>
+        </p>
+    </section>
+
+    {% set dedicated_settings_slug = 'notifications' %}
+    {% set dedicated_settings_title = 'Notifications' %}
+    {% set dedicated_settings_group = modern_admin_notifications_settings_group %}
+    {% set dedicated_settings_missing_message = 'The notifications settings group was not found in the ownership map.' %}
+    {% set dedicated_settings_proposed_layout = modern_admin_notifications_proposed_layout %}
+    {% set dedicated_settings_proposed_note = 'This proposal describes how Notifications should be organized in the final Modern settings experience. It does not expose acknowledgement, delete, delivery, or retention controls.' %}
+    {% set dedicated_settings_proposed_empty = 'No proposed Notifications layout cards were listed.' %}
+    {% set dedicated_settings_config_sections = modern_admin_notifications_config_sections %}
+    {% set dedicated_settings_config_eyebrow = 'Static schema evidence' %}
+    {% set dedicated_settings_config_title = 'Notifications key candidates' %}
+    {% set dedicated_settings_config_note = 'These sections are grouped from notification model/view evidence only. Active runtime notification rows are not loaded here.' %}
+    {% set dedicated_settings_config_empty = 'No static Notifications settings sections were listed.' %}
+    {% include 'modern_admin/_settings_dedicated_sections.html' %}
+</main>
+{% endblock %}

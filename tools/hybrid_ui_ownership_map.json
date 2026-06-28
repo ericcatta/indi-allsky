@@ -83,6 +83,7 @@
         "/modern-admin/settings/analytics",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/developer",
+        "/modern-admin/settings/notifications",
         "/modern-admin/settings/ready",
         "/modern-admin/settings/cameras",
         "/modern-admin/settings/capture",
@@ -135,6 +136,7 @@
         "modern_admin/settings_capture.html",
         "modern_admin/settings_full.html",
         "modern_admin/settings_inventory.html",
+        "modern_admin/settings_notifications.html",
         "modern_admin/settings_storage.html",
         "modern_admin/storage.html",
         "modern_admin/support_info.html",
@@ -159,6 +161,7 @@
         "modern_admin_media_image_detail_view",
         "modern_admin_media_keograms_view",
         "modern_admin_media_video_detail_view",
+        "modern_admin_notifications_settings_view",
         "/modern-admin/mode/*"
       ]
     },
@@ -411,6 +414,7 @@
         "/modern-admin/settings/analytics",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/developer",
+        "/modern-admin/settings/notifications",
         "/modern-admin/settings/ready",
         "/modern-admin/settings/cameras",
         "/modern-admin/settings/capture",
@@ -425,6 +429,7 @@
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
         "modern_admin/settings_full.html",
+        "modern_admin/settings_notifications.html",
         "modern_admin/settings_storage.html"
       ],
       "assets": [
@@ -2156,12 +2161,14 @@
         "/ajax/notification",
         "/modern-admin/notifications",
         "/modern-admin/notifications/*",
+        "/modern-admin/settings/notifications",
         "/modern-admin/safe-action/dry-run"
       ],
       "templates": [
         "notifications.html",
         "modern_admin/notifications.html",
-        "modern_admin/notification_detail.html"
+        "modern_admin/notification_detail.html",
+        "modern_admin/settings_notifications.html"
       ],
       "assets": [
         "DataTables/datatables.min.css",
@@ -2169,10 +2176,18 @@
       ],
       "apis": [
         "/ajax/notification",
+        "modern_admin_notifications_settings_view",
         "modern_admin_safe_action_dry_run_view"
       ],
       "config_keys": [
-        "NOTIFICATION_*"
+        "NOTIFICATION_*",
+        "category",
+        "item",
+        "notification",
+        "createDate",
+        "expireDate",
+        "ack",
+        "notification.acknowledge"
       ],
       "protected": false,
       "modern_gap": "Modern Admin has read-only notification inventory, local usability filters, read-only detail, and dry-run-only safe action plumbing; real acknowledgement and modal flow remain Classic/shared.",
