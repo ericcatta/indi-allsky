@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-camera-connection-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-camera-connection-settings-title">
+    {% set modern_admin_header_label = 'Camera connection settings preview header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-camera-connection-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Camera connection settings summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Product consolidation</p>
+                <h2 id="modern-admin-camera-connection-settings-title">Camera Connection Settings</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> This page describes the future Camera Connection settings group using ownership metadata and static connection-field evidence.</p>
+        <p class="modern-admin-note">No runtime settings are changed here. This page does not query cameras, contact hardware, test INDI/libcamera, or modify profiles.</p>
+        <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Index</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_basic_settings_view') }}">Basic Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_camera_profile_settings_view') }}">Camera Profile Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_camera_settings_view') }}">Camera Profile Settings</a>
+        </p>
+    </section>
+
+    {% set dedicated_settings_slug = 'camera-connection' %}
+    {% set dedicated_settings_title = 'Camera Connection' %}
+    {% set dedicated_settings_group = modern_admin_camera_connection_settings_group %}
+    {% set dedicated_settings_missing_message = 'The camera_connection settings group was not found in the ownership map.' %}
+    {% set dedicated_settings_proposed_layout = modern_admin_camera_connection_proposed_layout %}
+    {% set dedicated_settings_proposed_note = 'This proposal documents camera connection concepts without detecting hardware, opening sockets, or changing camera bindings.' %}
+    {% set dedicated_settings_proposed_empty = 'No proposed Camera Connection layout cards were listed.' %}
+    {% set dedicated_settings_config_sections = modern_admin_camera_connection_config_sections %}
+    {% set dedicated_settings_config_eyebrow = 'Static connection evidence' %}
+    {% set dedicated_settings_config_title = 'Camera connection field candidates' %}
+    {% set dedicated_settings_config_note = 'These sections are grouped from static Classic config and Modern camera settings evidence only. Active runtime camera/profile values are not loaded here.' %}
+    {% set dedicated_settings_config_empty = 'No static Camera Connection settings sections were listed.' %}
+    {% include 'modern_admin/_settings_dedicated_sections.html' %}
+</main>
+{% endblock %}

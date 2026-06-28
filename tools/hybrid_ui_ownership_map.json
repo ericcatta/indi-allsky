@@ -82,6 +82,7 @@
         "/modern-admin/settings/advanced",
         "/modern-admin/settings/analytics",
         "/modern-admin/settings/basic",
+        "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
         "/modern-admin/settings/developer",
         "/modern-admin/settings/notifications",
@@ -133,6 +134,7 @@
         "modern_admin/_settings_dedicated_sections.html",
         "modern_admin/settings_analytics.html",
         "modern_admin/settings_basic.html",
+        "modern_admin/settings_camera_connection.html",
         "modern_admin/settings_camera_profile.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
@@ -421,6 +423,7 @@
         "/modern-admin/settings/advanced",
         "/modern-admin/settings/analytics",
         "/modern-admin/settings/basic",
+        "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
         "/modern-admin/settings/developer",
         "/modern-admin/settings/notifications",
@@ -435,6 +438,7 @@
         "modern_admin/settings_inventory.html",
         "modern_admin/settings_analytics.html",
         "modern_admin/settings_basic.html",
+        "modern_admin/settings_camera_connection.html",
         "modern_admin/settings_camera_profile.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
@@ -496,9 +500,11 @@
       "owner": "modern",
       "porting_priority": "protect",
       "routes": [
+        "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/cameras"
       ],
       "templates": [
+        "modern_admin/settings_camera_connection.html",
         "modern_admin/settings_cameras.html"
       ],
       "assets": [],
@@ -833,7 +839,12 @@
         "/ajax/config"
       ],
       "config_keys": [
-        "MULTI_CAMERA.profiles"
+        "MULTI_CAMERA.profiles",
+        "CAMERA_INTERFACE",
+        "INDI_SERVER",
+        "INDI_PORT",
+        "INDI_CAMERA_NAME",
+        "LIBCAMERA.CAMERA_ID"
       ],
       "protected": true,
       "modern_gap": "Needs final Basic/Advanced/Developer organization.",
