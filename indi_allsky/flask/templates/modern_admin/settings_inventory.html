@@ -143,6 +143,36 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 
+    <section class="modern-admin-table-panel" aria-labelledby="settings-capture-source-stack-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Capture and source product path</p>
+                <h2 id="settings-capture-source-stack-title">Capture &amp; Source Stack</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_settings_capture_source_stack_pages | length }} pages</span>
+        </div>
+        <p class="modern-admin-note">Read-only previews for acquisition, display output formats, FITS/RAW source persistence, and scientific source boundaries. These pages do not edit runtime configuration or touch files.</p>
+
+        <div class="modern-admin-settings-action-grid">
+            {% for page in modern_admin_settings_capture_source_stack_pages %}
+            <a class="modern-admin-settings-action-card modern-admin-settings-action-card-readonly" href="{{ url_for(page.endpoint) }}">
+                <span>
+                    <strong>{{ page.label }}</strong>
+                    <small>{{ page.description }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ page.level | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ page.owner | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ page.risk }}">{{ page.risk | title }} risk</span>
+                    </small>
+                </span>
+                <span aria-hidden="true">›</span>
+            </a>
+            {% else %}
+            <span>No Capture &amp; Source stack pages are available.</span>
+            {% endfor %}
+        </div>
+    </section>
+
     <section class="modern-admin-table-panel" aria-labelledby="settings-product-preview-title">
         <div class="modern-admin-section-heading">
             <div>

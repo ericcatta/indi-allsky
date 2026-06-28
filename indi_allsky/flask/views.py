@@ -17498,6 +17498,20 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'description' : 'AWB mode, strategy, backend constraints, and image-quality relationship.',
         },
     )
+    SETTINGS_CAPTURE_SOURCE_STACK_PAGES = (
+        {
+            'group_id'    : 'image_acquisition',
+            'title'       : 'Acquisition / Save',
+            'endpoint'    : 'indi_allsky.modern_admin_acquisition_save_settings_view',
+            'description' : 'Capture cadence, day/night acquisition, display formats, source files, and storage impact.',
+        },
+        {
+            'group_id'    : 'fits_source_files',
+            'title'       : 'FITS / Source Files',
+            'endpoint'    : 'indi_allsky.modern_admin_fits_source_settings_view',
+            'description' : 'FITS, RAW/source persistence, headers, retention, and source-data safety boundaries.',
+        },
+    )
 
     def get_context(self):
         context = super(ModernAdminSettingsInventoryView, self).get_context()
@@ -17559,6 +17573,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
 
         product_preview_pages = self.format_settings_preview_pages(rows, self.SETTINGS_PRODUCT_PREVIEW_PAGES)
         basic_camera_stack_pages = self.format_settings_preview_pages(rows, self.SETTINGS_BASIC_CAMERA_STACK_PAGES)
+        capture_source_stack_pages = self.format_settings_preview_pages(rows, self.SETTINGS_CAPTURE_SOURCE_STACK_PAGES)
 
         return {
             'modern_admin_settings_map_error'         : None,
@@ -17579,6 +17594,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_risk_options'      : self.counter_keys(risk_counts),
             'modern_admin_settings_product_preview_pages' : product_preview_pages,
             'modern_admin_settings_basic_camera_stack_pages' : basic_camera_stack_pages,
+            'modern_admin_settings_capture_source_stack_pages' : capture_source_stack_pages,
         }
 
 
@@ -17602,6 +17618,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_risk_options'      : tuple(),
             'modern_admin_settings_product_preview_pages' : tuple(),
             'modern_admin_settings_basic_camera_stack_pages' : tuple(),
+            'modern_admin_settings_capture_source_stack_pages' : tuple(),
         }
 
 
