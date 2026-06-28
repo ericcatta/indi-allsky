@@ -47,7 +47,9 @@
       "notes": [
         "Covers physical camera identity, driver/interface selection, INDI/libcamera connection metadata, and camera row association.",
         "Keep per-camera identity explicit; do not flatten connection fields into global-only settings."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/camera-connection",
+      "preview_status": "dedicated_read_only"
     },
     "camera_profile_identity": {
       "label": "Camera Profile Identity",
@@ -64,7 +66,9 @@
       "notes": [
         "Covers profile id, label, enabled/primary state, camera association, and profile-first ownership.",
         "Protected Modern work; every future settings view must preserve camera/profile separation."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/camera-profile",
+      "preview_status": "dedicated_read_only"
     },
     "exposure": {
       "label": "Exposure",
@@ -81,7 +85,9 @@
       "notes": [
         "Covers exposure defaults, day/night exposure behavior, and profile overrides.",
         "Global fields may remain fallback, but profile values are the product-facing owner."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/exposure-gain",
+      "preview_status": "dedicated_read_only"
     },
     "gain": {
       "label": "Gain",
@@ -98,7 +104,9 @@
       "notes": [
         "Covers gain defaults, day/night gain behavior, sensor gain controls, and profile overrides.",
         "Must remain compatible with Auto Gain gating and camera-specific capabilities."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/exposure-gain",
+      "preview_status": "dedicated_read_only"
     },
     "auto_exposure": {
       "label": "Auto Exposure",
@@ -116,7 +124,9 @@
       "notes": [
         "Covers auto exposure enablement, target ADU behavior, metering, and profile-aware tuning.",
         "Settings UX should expose concepts rather than raw key names."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/auto-exposure-gain",
+      "preview_status": "dedicated_read_only"
     },
     "auto_gain": {
       "label": "Auto Gain",
@@ -134,7 +144,9 @@
       "notes": [
         "Covers auto gain enablement, min/max behavior, target ADU support, and profile-aware tuning.",
         "Do not hide runtime apply gates or collapse per-profile gain limits."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/auto-exposure-gain",
+      "preview_status": "dedicated_read_only"
     },
     "hybrid_awb": {
       "label": "Hybrid AWB",
@@ -151,7 +163,9 @@
       "notes": [
         "Covers Hybrid AWB mode, hardware AWB interaction, RGB factors, and camera-specific color behavior.",
         "Must remain camera/profile-aware because sensor/color pipelines differ."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/hybrid-awb",
+      "preview_status": "dedicated_read_only"
     },
     "image_acquisition": {
       "label": "Image Acquisition",
@@ -168,7 +182,9 @@
       "notes": [
         "Covers capture cadence, day/night behavior, binning, pause behavior, and camera runtime acquisition options.",
         "Needs clearer split between daily operator controls and legacy fallback keys."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/acquisition-save",
+      "preview_status": "dedicated_read_only"
     },
     "image_save_formats": {
       "label": "Image Save Formats",
@@ -185,7 +201,9 @@
       "notes": [
         "Covers display image save choices, thumbnails, file type, day/night save flags, and derived output formats.",
         "Must not be confused with FITS/RAW scientific source persistence."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/acquisition-save",
+      "preview_status": "dedicated_read_only"
     },
     "fits_source_files": {
       "label": "FITS / Source Files",
@@ -203,7 +221,9 @@
       "notes": [
         "Covers IMAGE_SAVE_FITS, IMAGE_SAVE_FITS_PERIOD, RAW/source exports, detector image paths, and source persistence policy.",
         "Future UX should use Never, Periodic, Every frame, and Event-window buffered concepts."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/fits-source",
+      "preview_status": "dedicated_read_only"
     },
     "metadata": {
       "label": "Metadata",
@@ -237,7 +257,9 @@
       "notes": [
         "Covers operational analytics, charts, ADU/SQM summaries, and status rollups.",
         "Settings should link to analytics configuration rather than duplicate chart logic."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/analytics",
+      "preview_status": "dedicated_read_only"
     },
     "quality": {
       "label": "Quality",
@@ -424,7 +446,9 @@
       "notes": [
         "Covers notification status, delivery metadata, and future acknowledge/delete actions.",
         "Acknowledge is service-ready but execute/UI remain blocked pending Flask auth/session/CSRF tests."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/notifications",
+      "preview_status": "dedicated_read_only"
     },
     "users_auth": {
       "label": "Users / Authentication",
@@ -543,7 +567,9 @@
       "notes": [
         "Covers storage health, drive status, retention policies, and path summaries.",
         "RPi5-first: avoid unbounded filesystem scans and large table queries."
-      ]
+      ],
+      "preview_route": "/modern-admin/settings/storage",
+      "preview_status": "dedicated_read_only"
     },
     "gps": {
       "label": "GPS",

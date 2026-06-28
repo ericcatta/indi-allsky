@@ -94,6 +94,10 @@ def validate_map(data: dict[str, Any]) -> dict[str, dict[str, Any]]:
             errors.append(f"{group_id}: notes must be a list")
         if "do_not_move_yet" in group and not isinstance(group["do_not_move_yet"], bool):
             errors.append(f"{group_id}: do_not_move_yet must be a boolean")
+        if "preview_route" in group and group["preview_route"] is not None and not isinstance(group["preview_route"], str):
+            errors.append(f"{group_id}: preview_route must be a string or null")
+        if "preview_status" in group and group["preview_status"] is not None and group["preview_status"] != "dedicated_read_only":
+            errors.append(f"{group_id}: preview_status must be 'dedicated_read_only' or null")
 
     if errors:
         joined = "\n".join(f"- {error}" for error in errors)
@@ -115,18 +119,20 @@ def join(values: list[object]) -> str:
 
 def group_rows(groups: dict[str, dict[str, Any]]) -> list[str]:
     rows = [
-        "| Group | Label | Owner | Level | Status | Risk | Do not move yet? | Current surfaces | Notes |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| Group | Label | Owner | Level | Status | Risk | Preview route | Preview status | Do not move yet? | Current surfaces | Notes |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for group_id, group in sorted(groups.items()):
         rows.append(
-            "| {group_id} | {label} | {owner} | {level} | {status} | {risk} | {do_not_move} | {surfaces} | {notes} |".format(
+            "| {group_id} | {label} | {owner} | {level} | {status} | {risk} | {preview_route} | {preview_status} | {do_not_move} | {surfaces} | {notes} |".format(
                 group_id=md(group_id),
                 label=md(group.get("label", group_id)),
                 owner=md(group["owner"]),
                 level=md(group["level"]),
                 status=md(group["status"]),
                 risk=md(group["risk"]),
+                preview_route=md(group.get("preview_route")),
+                preview_status=md(group.get("preview_status")),
                 do_not_move=md(group["do_not_move_yet"]),
                 surfaces=md(join(group["current_surfaces"])),
                 notes=md(join(group["notes"])),
@@ -144,7 +150,7 @@ def count_rows(title: str, counts: Counter[str]) -> list[str]:
     return rows
 
 
-def list_groups(title: str, groups: dict[str, dict[str, Any]], predicate) -> list[str]:
+def list_groups(title: str, groups: dict[str, dict[str, Any]], predicate, include_preview: bool = False) -> list[str]:
     matches = [
         (group_id, group)
         for group_id, group in sorted(groups.items())
@@ -155,11 +161,19 @@ def list_groups(title: str, groups: dict[str, dict[str, Any]], predicate) -> lis
         rows.append("- None")
         return rows
 
-    rows.extend(["| Group | Label | Owner | Status | Risk | Do not move yet? |", "| --- | --- | --- | --- | --- | --- |"])
+    if include_preview:
+        rows.extend(["| Group | Label | Owner | Level | Status | Risk | Preview route | Do not move yet? |", "| --- | --- | --- | --- | --- | --- | --- | --- |"])
+    else:
+        rows.extend(["| Group | Label | Owner | Status | Risk | Do not move yet? |", "| --- | --- | --- | --- | --- | --- |"])
     for group_id, group in matches:
-        rows.append(
-            f"| {md(group_id)} | {md(group.get('label', group_id))} | {md(group['owner'])} | {md(group['status'])} | {md(group['risk'])} | {md(group['do_not_move_yet'])} |"
-        )
+        if include_preview:
+            rows.append(
+                f"| {md(group_id)} | {md(group.get('label', group_id))} | {md(group['owner'])} | {md(group['level'])} | {md(group['status'])} | {md(group['risk'])} | {md(group.get('preview_route'))} | {md(group['do_not_move_yet'])} |"
+            )
+        else:
+            rows.append(
+                f"| {md(group_id)} | {md(group.get('label', group_id))} | {md(group['owner'])} | {md(group['status'])} | {md(group['risk'])} | {md(group['do_not_move_yet'])} |"
+            )
     return rows
 
 
@@ -170,6 +184,16 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
     risks = Counter(group["risk"] for group in groups.values())
     do_not_move_count = sum(1 for group in groups.values() if group["do_not_move_yet"])
     high_risk_count = risks.get("high", 0)
+    preview_groups = {
+        group_id: group
+        for group_id, group in groups.items()
+        if group.get("preview_status") == "dedicated_read_only" and group.get("preview_route")
+    }
+    preview_route_count = len({group.get("preview_route") for group in preview_groups.values()})
+    preview_basic_count = sum(1 for group in preview_groups.values() if group["level"] == "basic")
+    preview_advanced_count = sum(1 for group in preview_groups.values() if group["level"] == "advanced")
+    preview_developer_count = sum(1 for group in preview_groups.values() if group["level"] == "developer")
+    preview_do_not_move_count = sum(1 for group in preview_groups.values() if group["do_not_move_yet"])
 
     lines: list[str] = [
         "# HYBRID SETTINGS INVENTORY REPORT",
@@ -184,6 +208,12 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
         f"- Total groups: {len(groups)}",
         f"- High-risk groups: {high_risk_count}",
         f"- `do_not_move_yet` groups: {do_not_move_count}",
+        f"- Groups with dedicated preview: {len(preview_groups)}",
+        f"- Dedicated preview routes: {preview_route_count}",
+        f"- Basic groups with preview: {preview_basic_count}",
+        f"- Advanced groups with preview: {preview_advanced_count}",
+        f"- Developer groups with preview: {preview_developer_count}",
+        f"- `do_not_move_yet` groups with preview: {preview_do_not_move_count}",
         "",
     ]
 
@@ -206,6 +236,33 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
     lines.extend(list_groups("Do Not Move Yet Groups", groups, lambda group: group["do_not_move_yet"]))
     lines.append("")
     lines.extend(
+        list_groups(
+            "Groups With Dedicated Preview",
+            groups,
+            lambda group: group.get("preview_status") == "dedicated_read_only" and bool(group.get("preview_route")),
+            include_preview=True,
+        )
+    )
+    lines.append("")
+    lines.extend(
+        list_groups(
+            "Groups Without Dedicated Preview",
+            groups,
+            lambda group: not (group.get("preview_status") == "dedicated_read_only" and group.get("preview_route")),
+            include_preview=True,
+        )
+    )
+    lines.append("")
+    lines.extend(
+        list_groups(
+            "Do Not Move Yet Groups With Preview",
+            groups,
+            lambda group: group["do_not_move_yet"] and group.get("preview_status") == "dedicated_read_only" and bool(group.get("preview_route")),
+            include_preview=True,
+        )
+    )
+    lines.append("")
+    lines.extend(
         [
             "## Full Matrix",
             "",
@@ -214,6 +271,7 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
             "## Notes",
             "",
             "- `do_not_move_yet` means the group should not be moved into active redesigned settings UI yet.",
+            "- `preview_status=dedicated_read_only` means a product-preview page exists, but it is not a config editor.",
             "- High-risk groups usually involve profile/camera ownership, credentials, filesystem paths, hardware, restore/download behavior, or mutating actions.",
             "- This inventory is intentionally separate from runtime configuration and can be reviewed before any UI wiring.",
             "",
@@ -236,6 +294,15 @@ def main() -> int:
     print(f"Groups: {len(groups)}")
     print(f"High risk: {sum(1 for group in groups.values() if group['risk'] == 'high')}")
     print(f"Do not move yet: {sum(1 for group in groups.values() if group['do_not_move_yet'])}")
+    print(
+        "Dedicated preview groups: {0}".format(
+            sum(
+                1
+                for group in groups.values()
+                if group.get("preview_status") == "dedicated_read_only" and group.get("preview_route")
+            )
+        )
+    )
     return 0
 
 
