@@ -17574,6 +17574,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         product_preview_pages = self.format_settings_preview_pages(rows, self.SETTINGS_PRODUCT_PREVIEW_PAGES)
         basic_camera_stack_pages = self.format_settings_preview_pages(rows, self.SETTINGS_BASIC_CAMERA_STACK_PAGES)
         capture_source_stack_pages = self.format_settings_preview_pages(rows, self.SETTINGS_CAPTURE_SOURCE_STACK_PAGES)
+        product_preview_level_counts = self.count_settings_preview_pages_by_level(product_preview_pages)
 
         return {
             'modern_admin_settings_map_error'         : None,
@@ -17595,6 +17596,9 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_product_preview_pages' : product_preview_pages,
             'modern_admin_settings_basic_camera_stack_pages' : basic_camera_stack_pages,
             'modern_admin_settings_capture_source_stack_pages' : capture_source_stack_pages,
+            'modern_admin_settings_product_preview_basic_count' : product_preview_level_counts.get('basic', 0),
+            'modern_admin_settings_product_preview_advanced_count' : product_preview_level_counts.get('advanced', 0),
+            'modern_admin_settings_product_preview_developer_count' : product_preview_level_counts.get('developer', 0),
         }
 
 
@@ -17619,6 +17623,9 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'modern_admin_settings_product_preview_pages' : tuple(),
             'modern_admin_settings_basic_camera_stack_pages' : tuple(),
             'modern_admin_settings_capture_source_stack_pages' : tuple(),
+            'modern_admin_settings_product_preview_basic_count' : 0,
+            'modern_admin_settings_product_preview_advanced_count' : 0,
+            'modern_admin_settings_product_preview_developer_count' : 0,
         }
 
 
@@ -17693,6 +17700,20 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             })
 
         return tuple(product_pages)
+
+
+    def count_settings_preview_pages_by_level(self, product_pages):
+        counts = {
+            'basic'     : 0,
+            'advanced'  : 0,
+            'developer' : 0,
+        }
+        for page in product_pages:
+            level = page.get('level')
+            if level in counts:
+                counts[level] += 1
+
+        return counts
 
 
     def safe_settings_text(self, value):
