@@ -81,6 +81,7 @@
         "/modern-admin/settings",
         "/modern-admin/settings/advanced",
         "/modern-admin/settings/analytics",
+        "/modern-admin/settings/auto-exposure-gain",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
@@ -134,6 +135,7 @@
         "modern_admin/sensor_panel.html",
         "modern_admin/_settings_dedicated_sections.html",
         "modern_admin/settings_analytics.html",
+        "modern_admin/settings_auto_exposure_gain.html",
         "modern_admin/settings_basic.html",
         "modern_admin/settings_camera_connection.html",
         "modern_admin/settings_camera_profile.html",
@@ -424,6 +426,7 @@
         "/modern-admin/settings",
         "/modern-admin/settings/advanced",
         "/modern-admin/settings/analytics",
+        "/modern-admin/settings/auto-exposure-gain",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
@@ -440,6 +443,7 @@
         "modern_admin/_settings_dedicated_sections.html",
         "modern_admin/settings_inventory.html",
         "modern_admin/settings_analytics.html",
+        "modern_admin/settings_auto_exposure_gain.html",
         "modern_admin/settings_basic.html",
         "modern_admin/settings_camera_connection.html",
         "modern_admin/settings_camera_profile.html",
@@ -475,11 +479,13 @@
       "owner": "modern",
       "porting_priority": "protect",
       "routes": [
+        "/modern-admin/settings/auto-exposure-gain",
         "/modern-admin/settings/cameras",
         "/adu",
         "/modern-admin/cameras/adu-history"
       ],
       "templates": [
+        "modern_admin/settings_auto_exposure_gain.html",
         "modern_admin/settings_cameras.html",
         "adu.html",
         "modern_admin/adu_history.html"
@@ -504,9 +510,11 @@
       "owner": "modern",
       "porting_priority": "protect",
       "routes": [
+        "/modern-admin/settings/auto-exposure-gain",
         "/modern-admin/settings/cameras"
       ],
       "templates": [
+        "modern_admin/settings_auto_exposure_gain.html",
         "modern_admin/settings_cameras.html"
       ],
       "assets": [],
