@@ -85,6 +85,7 @@
         "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
         "/modern-admin/settings/developer",
+        "/modern-admin/settings/exposure-gain",
         "/modern-admin/settings/notifications",
         "/modern-admin/settings/ready",
         "/modern-admin/settings/cameras",
@@ -138,6 +139,7 @@
         "modern_admin/settings_camera_profile.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
+        "modern_admin/settings_exposure_gain.html",
         "modern_admin/settings_full.html",
         "modern_admin/settings_inventory.html",
         "modern_admin/settings_notifications.html",
@@ -426,6 +428,7 @@
         "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
         "/modern-admin/settings/developer",
+        "/modern-admin/settings/exposure-gain",
         "/modern-admin/settings/notifications",
         "/modern-admin/settings/ready",
         "/modern-admin/settings/cameras",
@@ -442,6 +445,7 @@
         "modern_admin/settings_camera_profile.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
+        "modern_admin/settings_exposure_gain.html",
         "modern_admin/settings_full.html",
         "modern_admin/settings_notifications.html",
         "modern_admin/settings_storage.html"
@@ -500,11 +504,9 @@
       "owner": "modern",
       "porting_priority": "protect",
       "routes": [
-        "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/cameras"
       ],
       "templates": [
-        "modern_admin/settings_camera_connection.html",
         "modern_admin/settings_cameras.html"
       ],
       "assets": [],
@@ -527,9 +529,11 @@
       "owner": "modern",
       "porting_priority": "protect",
       "routes": [
+        "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/cameras"
       ],
       "templates": [
+        "modern_admin/settings_camera_connection.html",
         "modern_admin/settings_cameras.html"
       ],
       "assets": [],
@@ -827,9 +831,13 @@
       "owner": "modern",
       "porting_priority": "protect",
       "routes": [
+        "/modern-admin/settings/camera-connection",
+        "/modern-admin/settings/exposure-gain",
         "/modern-admin/settings/cameras"
       ],
       "templates": [
+        "modern_admin/settings_camera_connection.html",
+        "modern_admin/settings_exposure_gain.html",
         "modern_admin/settings_cameras.html"
       ],
       "assets": [
@@ -859,9 +867,11 @@
       "owner": "modern",
       "porting_priority": "protect",
       "routes": [
+        "/modern-admin/settings/exposure-gain",
         "/modern-admin/settings/cameras"
       ],
       "templates": [
+        "modern_admin/settings_exposure_gain.html",
         "modern_admin/settings_cameras.html"
       ],
       "assets": [],
@@ -883,9 +893,11 @@
       "owner": "modern",
       "porting_priority": "protect",
       "routes": [
+        "/modern-admin/settings/exposure-gain",
         "/modern-admin/settings/cameras"
       ],
       "templates": [
+        "modern_admin/settings_exposure_gain.html",
         "modern_admin/settings_cameras.html"
       ],
       "assets": [],

@@ -17436,6 +17436,12 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'endpoint'    : 'indi_allsky.modern_admin_camera_connection_settings_view',
             'description' : 'Driver/backend, device identity, connection status, and fallback boundaries.',
         },
+        {
+            'group_id'    : 'exposure',
+            'title'       : 'Exposure / Gain',
+            'endpoint'    : 'indi_allsky.modern_admin_exposure_gain_settings_view',
+            'description' : 'Manual exposure and gain concepts, profile behavior, and automation boundaries.',
+        },
     )
 
     def get_context(self):
@@ -17602,7 +17608,7 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
 
             product_pages.append({
                 'group_id'    : group['group_id'],
-                'label'       : group['label'],
+                'label'       : self.safe_settings_text(page.get('title') or group['label']),
                 'owner'       : group['owner'],
                 'level'       : group['level'],
                 'status'      : group['status'],
@@ -18926,6 +18932,219 @@ class ModernAdminCameraConnectionSettingsView(ModernAdminSettingsInventoryView):
                 'note'           : 'read-only proposal',
             }
             for row in self.CAMERA_CONNECTION_PROPOSED_LAYOUT
+        )
+
+
+class ModernAdminExposureGainSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Exposure Gain Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    EXPOSURE_GAIN_CONFIG_SECTIONS = (
+        {
+            'label'       : 'Manual exposure',
+            'description' : 'Exposure limits, defaults, cadence, and timeout fields used by Classic fallback and Modern camera profiles.',
+            'keys'        : (
+                {
+                    'key'     : 'CCD_EXPOSURE_MIN / exposure_min',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Night minimum exposure; profile-owned when multicamera profiles are active.',
+                },
+                {
+                    'key'     : 'CCD_EXPOSURE_MIN_DAY / exposure_min_day',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Day minimum exposure boundary.',
+                },
+                {
+                    'key'     : 'CCD_EXPOSURE_DEF / exposure_default',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Startup/default exposure seed; treated carefully in profile mode.',
+                },
+                {
+                    'key'     : 'CCD_EXPOSURE_MAX / exposure_max',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Maximum exposure cap used by capture cadence and UI refresh timing.',
+                },
+                {
+                    'key'     : 'CCD_EXPOSURE_TIMEOUT / exposure_timeout',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Camera exposure timeout metadata.',
+                },
+                {
+                    'key'     : 'EXPOSURE_PERIOD / exposure_period',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Night capture cadence/period.',
+                },
+                {
+                    'key'     : 'EXPOSURE_PERIOD_DAY / exposure_period_day',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Day capture cadence/period.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Manual gain',
+            'description' : 'Day, night, and moon-mode gain values plus optional gain caps.',
+            'keys'        : (
+                {
+                    'key'     : 'CCD_CONFIG.NIGHT.GAIN / gain_night',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Night gain profile value.',
+                },
+                {
+                    'key'     : 'CCD_CONFIG.MOONMODE.GAIN / gain_moonmode',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Moon mode gain profile value.',
+                },
+                {
+                    'key'     : 'CCD_CONFIG.DAY.GAIN / gain_day',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Day gain profile value.',
+                },
+                {
+                    'key'     : 'GAIN_MAX_DAY / gain_max_day',
+                    'source'  : 'Modern camera profile fields',
+                    'notes'   : 'Day gain cap used by Auto Gain boundaries.',
+                },
+                {
+                    'key'     : 'GAIN_MAX_NIGHT / gain_max_night',
+                    'source'  : 'Modern camera profile fields',
+                    'notes'   : 'Night gain cap used by Auto Gain boundaries.',
+                },
+                {
+                    'key'     : 'GAIN_MAX_MOONMODE / gain_max_moonmode',
+                    'source'  : 'Modern camera profile fields',
+                    'notes'   : 'Moon mode gain cap used by Auto Gain boundaries.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Profile-specific behavior',
+            'description' : 'Profile-owned fields and fallback behavior that must stay separated during redesign.',
+            'keys'        : (
+                {
+                    'key'     : 'profile_id',
+                    'source'  : 'Modern camera profile settings',
+                    'notes'   : 'Exposure/gain values are scoped to selected profiles when multicamera is enabled.',
+                },
+                {
+                    'key'     : 'MULTI_CAMERA.profiles',
+                    'source'  : 'Settings ownership map / Modern profile resolver',
+                    'notes'   : 'Profile collection that owns final camera-facing values.',
+                },
+                {
+                    'key'     : 'Global Capture Defaults',
+                    'source'  : 'Modern /modern-admin/settings/capture',
+                    'notes'   : 'Compatibility fallback only; should not become canonical over profile values.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Automation relationship',
+            'description' : 'Automation flags that influence exposure/gain but remain separate protected settings groups.',
+            'keys'        : (
+                {
+                    'key'     : 'AUTO_EXPOSURE_*',
+                    'source'  : 'Modern camera profile fields',
+                    'notes'   : 'Auto Exposure relationship only; not edited from this preview.',
+                },
+                {
+                    'key'     : 'AUTO_GAIN_* / CCD_CONFIG.AUTO_GAIN_*',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Auto Gain relationship only; not edited from this preview.',
+                },
+                {
+                    'key'     : 'TARGET_ADU_*',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Auto Exposure/Auto Gain target signal relationship.',
+                },
+            ),
+        },
+    )
+
+    EXPOSURE_GAIN_PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Manual exposure',
+            'purpose'        : 'Keep min/default/max/timeout/cadence together as profile-owned camera behavior.',
+            'source_keys'    : ('CCD_EXPOSURE_*', 'EXPOSURE_PERIOD*', 'exposure_*'),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Manual gain',
+            'purpose'        : 'Group day/night/moon gain values and caps without mixing them into sensor or SQM gain.',
+            'source_keys'    : ('CCD_CONFIG.*.GAIN', 'gain_day', 'gain_night', 'gain_moonmode', 'GAIN_MAX_*'),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Profile-specific behavior',
+            'purpose'        : 'Make clear whether values come from the active profile or global fallback.',
+            'source_keys'    : ('profile_id', 'MULTI_CAMERA.profiles', 'Global Capture Defaults'),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Camera/backend constraints',
+            'purpose'        : 'Leave room for backend capability warnings without probing hardware from the settings preview.',
+            'source_keys'    : ('CAMERA_INTERFACE', 'db_camera_driver', 'capture capabilities'),
+            'proposed_level' : 'Future Advanced / Camera Connection',
+        },
+        {
+            'label'          : 'Relationship to Auto Exposure / Auto Gain',
+            'purpose'        : 'Show automation dependencies without collapsing manual and automatic controls into one unsafe editor.',
+            'source_keys'    : ('AUTO_EXPOSURE_*', 'AUTO_GAIN_*', 'TARGET_ADU_*'),
+            'proposed_level' : 'Future Advanced / Automation',
+        },
+    )
+
+    def get_context(self):
+        context = super(ModernAdminExposureGainSettingsView, self).get_context()
+        groups_by_id = {
+            group.get('group_id') : group
+            for group in context.get('modern_admin_settings_groups', [])
+        }
+
+        context['modern_admin_exposure_settings_group'] = groups_by_id.get('exposure')
+        context['modern_admin_gain_settings_group'] = groups_by_id.get('gain')
+        context['modern_admin_exposure_gain_settings_groups'] = tuple(
+            group
+            for group in (
+                context['modern_admin_exposure_settings_group'],
+                context['modern_admin_gain_settings_group'],
+            )
+            if group
+        )
+        context['modern_admin_exposure_gain_config_sections'] = self.get_exposure_gain_config_sections()
+        context['modern_admin_exposure_gain_proposed_layout'] = self.get_exposure_gain_proposed_layout()
+        return context
+
+
+    def get_exposure_gain_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_settings_text(section.get('label')),
+                'description' : self.safe_settings_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_settings_text(row.get('key')),
+                        'source' : self.safe_settings_text(row.get('source')),
+                        'notes'  : self.safe_settings_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.EXPOSURE_GAIN_CONFIG_SECTIONS
+        )
+
+
+    def get_exposure_gain_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_settings_text(row.get('label')),
+                'purpose'        : self.safe_settings_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_settings_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_settings_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.EXPOSURE_GAIN_PROPOSED_LAYOUT
         )
 
 
@@ -23454,6 +23673,7 @@ bp_allsky.add_url_rule('/modern-admin/settings/storage', view_func=ModernAdminSt
 bp_allsky.add_url_rule('/modern-admin/settings/notifications', view_func=ModernAdminNotificationsSettingsView.as_view('modern_admin_notifications_settings_view', template_name='modern_admin/settings_notifications.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/camera-profile', view_func=ModernAdminCameraProfileSettingsView.as_view('modern_admin_camera_profile_settings_view', template_name='modern_admin/settings_camera_profile.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/camera-connection', view_func=ModernAdminCameraConnectionSettingsView.as_view('modern_admin_camera_connection_settings_view', template_name='modern_admin/settings_camera_connection.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/exposure-gain', view_func=ModernAdminExposureGainSettingsView.as_view('modern_admin_exposure_gain_settings_view', template_name='modern_admin/settings_exposure_gain.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))
