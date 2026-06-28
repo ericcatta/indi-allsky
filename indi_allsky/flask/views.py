@@ -17426,6 +17426,11 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'endpoint'    : 'indi_allsky.modern_admin_notifications_settings_view',
             'description' : 'Notification categories, visibility, acknowledge behavior, and retention.',
         },
+        {
+            'group_id'    : 'camera_profile_identity',
+            'endpoint'    : 'indi_allsky.modern_admin_camera_profile_settings_view',
+            'description' : 'Profile identity, active camera binding, and multicamera ownership semantics.',
+        },
     )
 
     def get_context(self):
@@ -18575,6 +18580,166 @@ class ModernAdminNotificationsSettingsView(ModernAdminSettingsInventoryView):
                 'note'           : 'read-only proposal',
             }
             for row in self.NOTIFICATIONS_PROPOSED_LAYOUT
+        )
+
+
+class ModernAdminCameraProfileSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Camera Profile Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    CAMERA_PROFILE_CONFIG_SECTIONS = (
+        {
+            'label'       : 'Profile identity',
+            'description' : 'Stable profile identifiers and labels that keep settings scoped to the intended camera profile.',
+            'keys'        : (
+                {
+                    'key'     : 'profile_id',
+                    'source'  : 'Modern camera settings profile fields',
+                    'notes'   : 'Protected identity field used by Modern camera settings, galleries, tasks, and metadata filters.',
+                },
+                {
+                    'key'     : 'profile_label',
+                    'source'  : 'Modern camera settings profile fields',
+                    'notes'   : 'Operator-facing profile label/purpose metadata.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Profile state',
+            'description' : 'Read-only state concepts that decide whether a profile participates in capture/runtime selection.',
+            'keys'        : (
+                {
+                    'key'     : 'profile_enabled',
+                    'source'  : 'Modern camera settings profile fields',
+                    'notes'   : 'Enabled flag used to decide whether a profile can participate in multicamera capture.',
+                },
+                {
+                    'key'     : 'profile_primary',
+                    'source'  : 'Modern camera settings profile fields',
+                    'notes'   : 'Primary profile marker used by profile-first runtime selection.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Camera relationship',
+            'description' : 'Database camera metadata that links a profile to a physical/logical camera without editing it here.',
+            'keys'        : (
+                {
+                    'key'     : 'db_camera_id',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Database camera row identifier shown for relationship clarity.',
+                },
+                {
+                    'key'     : 'db_camera_name',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Database camera name associated with the selected profile.',
+                },
+                {
+                    'key'     : 'db_camera_driver',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Driver/interface metadata for the associated camera.',
+                },
+                {
+                    'key'     : 'db_camera_status',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Read-only camera status metadata surfaced by Modern camera settings.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Multicamera binding',
+            'description' : 'Configuration concepts that preserve camera/profile separation for future settings redesign.',
+            'keys'        : (
+                {
+                    'key'     : 'MULTI_CAMERA.profiles',
+                    'source'  : 'Config ownership map / Modern profile resolver',
+                    'notes'   : 'Profile collection that must stay profile-first and must not be flattened into global config.',
+                },
+                {
+                    'key'     : 'camera_id / profile_id filters',
+                    'source'  : 'Modern media/tasks/metadata views',
+                    'notes'   : 'Read-only relationship metadata used across Modern pages to avoid single-camera assumptions.',
+                },
+            ),
+        },
+    )
+
+    CAMERA_PROFILE_PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Active camera',
+            'purpose'        : 'Show the camera relationship for the active profile without editing camera binding here.',
+            'source_keys'    : ('db_camera_id', 'db_camera_name', 'db_camera_driver', 'db_camera_status'),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Active profile',
+            'purpose'        : 'Make profile identity and enabled/primary state visible before exposing any edits.',
+            'source_keys'    : ('profile_id', 'profile_enabled', 'profile_primary'),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Profile label / purpose',
+            'purpose'        : 'Separate operator-facing label/purpose from stable profile identifiers.',
+            'source_keys'    : ('profile_label',),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Profile-camera relationship',
+            'purpose'        : 'Keep the camera/profile binding explicit so settings stay profile-first and multicamera-safe.',
+            'source_keys'    : ('MULTI_CAMERA.profiles', 'camera_id / profile_id filters'),
+            'proposed_level' : 'Future Advanced / Multicamera',
+        },
+        {
+            'label'          : 'Multicamera notes',
+            'purpose'        : 'Document constraints that prevent flattening profile-owned fields into global settings.',
+            'source_keys'    : ('profile_id', 'MULTI_CAMERA.profiles'),
+            'proposed_level' : 'Future Developer / Guardrails',
+        },
+    )
+
+    def get_context(self):
+        context = super(ModernAdminCameraProfileSettingsView, self).get_context()
+        camera_profile_group = None
+        for group in context.get('modern_admin_settings_groups', []):
+            if group.get('group_id') == 'camera_profile_identity':
+                camera_profile_group = group
+                break
+
+        context['modern_admin_camera_profile_settings_group'] = camera_profile_group
+        context['modern_admin_camera_profile_config_sections'] = self.get_camera_profile_config_sections()
+        context['modern_admin_camera_profile_proposed_layout'] = self.get_camera_profile_proposed_layout()
+        return context
+
+
+    def get_camera_profile_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_settings_text(section.get('label')),
+                'description' : self.safe_settings_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_settings_text(row.get('key')),
+                        'source' : self.safe_settings_text(row.get('source')),
+                        'notes'  : self.safe_settings_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.CAMERA_PROFILE_CONFIG_SECTIONS
+        )
+
+
+    def get_camera_profile_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_settings_text(row.get('label')),
+                'purpose'        : self.safe_settings_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_settings_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_settings_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.CAMERA_PROFILE_PROPOSED_LAYOUT
         )
 
 
@@ -23101,6 +23266,7 @@ bp_allsky.add_url_rule('/modern-admin/settings/ready', view_func=ModernAdminRead
 bp_allsky.add_url_rule('/modern-admin/settings/analytics', view_func=ModernAdminAnalyticsSettingsView.as_view('modern_admin_analytics_settings_view', template_name='modern_admin/settings_analytics.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/storage', view_func=ModernAdminStorageSettingsView.as_view('modern_admin_storage_settings_view', template_name='modern_admin/settings_storage.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/notifications', view_func=ModernAdminNotificationsSettingsView.as_view('modern_admin_notifications_settings_view', template_name='modern_admin/settings_notifications.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/camera-profile', view_func=ModernAdminCameraProfileSettingsView.as_view('modern_admin_camera_profile_settings_view', template_name='modern_admin/settings_camera_profile.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))

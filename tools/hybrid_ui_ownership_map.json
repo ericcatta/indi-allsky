@@ -82,6 +82,7 @@
         "/modern-admin/settings/advanced",
         "/modern-admin/settings/analytics",
         "/modern-admin/settings/basic",
+        "/modern-admin/settings/camera-profile",
         "/modern-admin/settings/developer",
         "/modern-admin/settings/notifications",
         "/modern-admin/settings/ready",
@@ -132,6 +133,7 @@
         "modern_admin/_settings_dedicated_sections.html",
         "modern_admin/settings_analytics.html",
         "modern_admin/settings_basic.html",
+        "modern_admin/settings_camera_profile.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
         "modern_admin/settings_full.html",
@@ -382,11 +384,13 @@
       "routes": [
         "/cameras",
         "/modern-admin/cameras",
+        "/modern-admin/settings/camera-profile",
         "/modern-admin/settings/cameras"
       ],
       "templates": [
         "cameras.html",
         "modern_admin/cameras.html",
+        "modern_admin/settings_camera_profile.html",
         "modern_admin/settings_cameras.html"
       ],
       "assets": [
@@ -394,7 +398,11 @@
       ],
       "apis": [],
       "config_keys": [
-        "MULTI_CAMERA.profiles"
+        "MULTI_CAMERA.profiles",
+        "profile_id",
+        "profile_label",
+        "profile_enabled",
+        "profile_primary"
       ],
       "protected": true,
       "modern_gap": "Needs clearer ownership labels for profile-scoped settings.",
@@ -413,6 +421,7 @@
         "/modern-admin/settings/advanced",
         "/modern-admin/settings/analytics",
         "/modern-admin/settings/basic",
+        "/modern-admin/settings/camera-profile",
         "/modern-admin/settings/developer",
         "/modern-admin/settings/notifications",
         "/modern-admin/settings/ready",
@@ -426,6 +435,7 @@
         "modern_admin/settings_inventory.html",
         "modern_admin/settings_analytics.html",
         "modern_admin/settings_basic.html",
+        "modern_admin/settings_camera_profile.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
         "modern_admin/settings_full.html",

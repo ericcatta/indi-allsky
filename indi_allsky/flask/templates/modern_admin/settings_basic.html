@@ -105,6 +105,9 @@ var camera_id = {{ camera_id }};
                     {% if modern_admin_settings_preview_level == 'basic' and group.group_id == 'notifications' %}
                     <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_notifications_settings_view') }}">Open Notifications Settings</a></small>
                     {% endif %}
+                    {% if modern_admin_settings_preview_level == 'basic' and group.group_id == 'camera_profile_identity' %}
+                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_camera_profile_settings_view') }}">Open Camera Profile Settings</a></small>
+                    {% endif %}
                 </span>
             </article>
             {% else %}
