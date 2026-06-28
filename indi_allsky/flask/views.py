@@ -17453,6 +17453,12 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'endpoint'    : 'indi_allsky.modern_admin_hybrid_awb_settings_view',
             'description' : 'Hybrid AWB mode, apply strategy, backend limits, and color-quality relationships.',
         },
+        {
+            'group_id'    : 'image_acquisition',
+            'title'       : 'Acquisition / Save Formats',
+            'endpoint'    : 'indi_allsky.modern_admin_acquisition_save_settings_view',
+            'description' : 'Capture cadence, day/night acquisition, display formats, source files, and storage impact.',
+        },
     )
     SETTINGS_BASIC_CAMERA_STACK_PAGES = (
         {
@@ -19627,6 +19633,231 @@ class ModernAdminHybridAwbSettingsView(ModernAdminSettingsInventoryView):
                 'note'           : 'read-only proposal',
             }
             for row in self.HYBRID_AWB_PROPOSED_LAYOUT
+        )
+
+
+class ModernAdminAcquisitionSaveSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Acquisition Save Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    ACQUISITION_SAVE_CONFIG_SECTIONS = (
+        {
+            'label'       : 'Capture cadence',
+            'description' : 'Timing and cadence keys that shape when frames are acquired without changing capture behavior here.',
+            'keys'        : (
+                {
+                    'key'     : 'EXPOSURE_PERIOD / exposure_period',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Night capture cadence metadata.',
+                },
+                {
+                    'key'     : 'EXPOSURE_PERIOD_DAY / exposure_period_day',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Day capture cadence metadata.',
+                },
+                {
+                    'key'     : 'CCD_EXPOSURE_TIMEOUT / exposure_timeout',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Capture timeout boundary; not changed from this preview.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Day/night acquisition behavior',
+            'description' : 'Capture mode fields that differ by day, night, and moon-mode profile behavior.',
+            'keys'        : (
+                {
+                    'key'     : 'CCD_CONFIG.*.BINNING / binning_*',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Day, night, and moon-mode binning values.',
+                },
+                {
+                    'key'     : 'CCD_BIT_DEPTH / bit_depth',
+                    'source'  : 'Classic config form / Modern camera settings',
+                    'notes'   : 'Camera bit depth metadata used by capture and FITS processing.',
+                },
+                {
+                    'key'     : 'DAYTIME_CAPTURE / night/day capture gates',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Acquisition mode gates remain static evidence here.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Save JPEG/PNG behavior',
+            'description' : 'Display-image output format and compression settings used by Classic and Modern media surfaces.',
+            'keys'        : (
+                {
+                    'key'     : 'IMAGE_FILE_TYPE',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Primary display image file type.',
+                },
+                {
+                    'key'     : 'IMAGE_FILE_COMPRESSION__JPG',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'JPEG compression quality metadata.',
+                },
+                {
+                    'key'     : 'IMAGE_FILE_COMPRESSION__PNG',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'PNG compression level metadata.',
+                },
+                {
+                    'key'     : 'LIBCAMERA__IMAGE_FILE_TYPE* / PYCURL_CAMERA__IMAGE_FILE_TYPE',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Backend-specific display image type overrides.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Save RAW/FITS/source behavior',
+            'description' : 'Scientific/source persistence keys. This page does not create, convert, inspect, or download files.',
+            'keys'        : (
+                {
+                    'key'     : 'IMAGE_SAVE_FITS',
+                    'source'  : 'Classic config form / Modern FITS metadata pages',
+                    'notes'   : 'FITS persistence gate; protected by scientific-source guardrails.',
+                },
+                {
+                    'key'     : 'IMAGE_SAVE_FITS_COMPRESSED',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'FITS compression metadata.',
+                },
+                {
+                    'key'     : 'IMAGE_SAVE_FITS_PERIOD',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Periodic FITS persistence interval.',
+                },
+                {
+                    'key'     : 'IMAGE_EXPORT_RAW',
+                    'source'  : 'Classic config form / Modern RAW metadata pages',
+                    'notes'   : 'RAW/source export setting; no filesystem scan is performed here.',
+                },
+                {
+                    'key'     : 'FITSHEADERS__*',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Static FITS header metadata candidates.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Retention / storage impact',
+            'description' : 'Retention and storage-impact keys that connect acquisition outputs to Storage / Drives.',
+            'keys'        : (
+                {
+                    'key'     : 'IMAGE_FOLDER',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Image storage root; listed as key evidence only, not read from disk.',
+                },
+                {
+                    'key'     : 'IMAGE_RAW_EXPIRE_DAYS',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'RAW/source retention period.',
+                },
+                {
+                    'key'     : 'IMAGE_FITS_EXPIRE_DAYS',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'FITS retention period.',
+                },
+                {
+                    'key'     : 'IMAGE_SAVE_HOOK_*',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Pre/post save hook metadata; execution remains outside this preview.',
+                },
+            ),
+        },
+    )
+
+    ACQUISITION_SAVE_PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Capture cadence',
+            'purpose'        : 'Group exposure period and timeout concepts as profile-owned acquisition behavior.',
+            'source_keys'    : ('EXPOSURE_PERIOD', 'EXPOSURE_PERIOD_DAY', 'CCD_EXPOSURE_TIMEOUT'),
+            'proposed_level' : 'Future Advanced / Acquisition',
+        },
+        {
+            'label'          : 'Day/night acquisition behavior',
+            'purpose'        : 'Keep day, night, and moon-mode acquisition differences visible without changing capture state.',
+            'source_keys'    : ('CCD_CONFIG.*.BINNING', 'CCD_BIT_DEPTH', 'DAYTIME_CAPTURE'),
+            'proposed_level' : 'Future Advanced / Camera Profile',
+        },
+        {
+            'label'          : 'Save JPEG/PNG behavior',
+            'purpose'        : 'Separate display-image format/compression choices from scientific source persistence.',
+            'source_keys'    : ('IMAGE_FILE_TYPE', 'IMAGE_FILE_COMPRESSION__JPG', 'IMAGE_FILE_COMPRESSION__PNG'),
+            'proposed_level' : 'Future Advanced / Output Formats',
+        },
+        {
+            'label'          : 'Save RAW/FITS/source behavior',
+            'purpose'        : 'Treat source files as scientific/output policy, not as ordinary image display settings.',
+            'source_keys'    : ('IMAGE_SAVE_FITS*', 'IMAGE_EXPORT_RAW', 'FITSHEADERS__*'),
+            'proposed_level' : 'Future Advanced / Scientific Source',
+        },
+        {
+            'label'          : 'Retention / storage impact',
+            'purpose'        : 'Show storage cost and retention relationships without scanning the filesystem.',
+            'source_keys'    : ('IMAGE_FOLDER', 'IMAGE_RAW_EXPIRE_DAYS', 'IMAGE_FITS_EXPIRE_DAYS', 'IMAGE_SAVE_HOOK_*'),
+            'proposed_level' : 'Future Advanced / Storage',
+        },
+        {
+            'label'          : 'Relationship to Scientific Source Layer',
+            'purpose'        : 'Preserve FITS/RAW/source semantics so final UI does not degrade protected scientific work.',
+            'source_keys'    : ('Scientific Source Layer', 'FITS metadata', 'RAW/source exports'),
+            'proposed_level' : 'Future Advanced / Scientific Source',
+        },
+    )
+
+    def get_context(self):
+        context = super(ModernAdminAcquisitionSaveSettingsView, self).get_context()
+        groups_by_id = {
+            group.get('group_id') : group
+            for group in context.get('modern_admin_settings_groups', [])
+        }
+
+        context['modern_admin_image_acquisition_settings_group'] = groups_by_id.get('image_acquisition')
+        context['modern_admin_image_save_formats_settings_group'] = groups_by_id.get('image_save_formats')
+        context['modern_admin_acquisition_save_settings_groups'] = tuple(
+            group
+            for group in (
+                context['modern_admin_image_acquisition_settings_group'],
+                context['modern_admin_image_save_formats_settings_group'],
+            )
+            if group
+        )
+        context['modern_admin_acquisition_save_config_sections'] = self.get_acquisition_save_config_sections()
+        context['modern_admin_acquisition_save_proposed_layout'] = self.get_acquisition_save_proposed_layout()
+        return context
+
+
+    def get_acquisition_save_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_settings_text(section.get('label')),
+                'description' : self.safe_settings_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_settings_text(row.get('key')),
+                        'source' : self.safe_settings_text(row.get('source')),
+                        'notes'  : self.safe_settings_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.ACQUISITION_SAVE_CONFIG_SECTIONS
+        )
+
+
+    def get_acquisition_save_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_settings_text(row.get('label')),
+                'purpose'        : self.safe_settings_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_settings_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_settings_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.ACQUISITION_SAVE_PROPOSED_LAYOUT
         )
 
 
@@ -24158,6 +24389,7 @@ bp_allsky.add_url_rule('/modern-admin/settings/camera-connection', view_func=Mod
 bp_allsky.add_url_rule('/modern-admin/settings/exposure-gain', view_func=ModernAdminExposureGainSettingsView.as_view('modern_admin_exposure_gain_settings_view', template_name='modern_admin/settings_exposure_gain.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/auto-exposure-gain', view_func=ModernAdminAutoExposureGainSettingsView.as_view('modern_admin_auto_exposure_gain_settings_view', template_name='modern_admin/settings_auto_exposure_gain.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/hybrid-awb', view_func=ModernAdminHybridAwbSettingsView.as_view('modern_admin_hybrid_awb_settings_view', template_name='modern_admin/settings_hybrid_awb.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/acquisition-save', view_func=ModernAdminAcquisitionSaveSettingsView.as_view('modern_admin_acquisition_save_settings_view', template_name='modern_admin/settings_acquisition_save.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))

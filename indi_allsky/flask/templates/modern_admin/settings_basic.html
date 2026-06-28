@@ -120,6 +120,9 @@ var camera_id = {{ camera_id }};
                     {% if modern_admin_settings_preview_level == 'basic' and group.group_id == 'hybrid_awb' %}
                     <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_hybrid_awb_settings_view') }}">Open Hybrid AWB Settings</a></small>
                     {% endif %}
+                    {% if modern_admin_settings_preview_level == 'advanced' and (group.group_id == 'image_acquisition' or group.group_id == 'image_save_formats') %}
+                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_acquisition_save_settings_view') }}">Open Acquisition / Save Settings</a></small>
+                    {% endif %}
                 </span>
             </article>
             {% else %}

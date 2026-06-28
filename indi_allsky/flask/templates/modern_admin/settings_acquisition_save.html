@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-acquisition-save-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-acquisition-save-settings-title">
+    {% set modern_admin_header_label = 'Acquisition save settings preview header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-acquisition-save-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Acquisition save settings summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Product consolidation</p>
+                <h2 id="modern-admin-acquisition-save-settings-title">Acquisition / Save Formats Settings</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> This page describes future acquisition and save-format settings using ownership metadata and static field evidence.</p>
+        <p class="modern-admin-note">No runtime settings are changed here. This page does not acquire images, scan the filesystem, save files, or change source/output behavior.</p>
+        <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Index</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_advanced_settings_view') }}">Advanced Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_basic_settings_view') }}">Basic Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_camera_profile_settings_view') }}">Camera Profile Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_camera_connection_settings_view') }}">Camera Connection Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_exposure_gain_settings_view') }}">Exposure / Gain Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_auto_exposure_gain_settings_view') }}">Auto Exposure / Auto Gain Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_hybrid_awb_settings_view') }}">Hybrid AWB Preview</a>
+        </p>
+    </section>
+
+    {% if modern_admin_settings_map_error %}
+    <section class="modern-admin-alert modern-admin-alert-danger" role="alert">
+        {{ modern_admin_settings_map_error }}
+    </section>
+    {% endif %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="acquisition-save-ownership-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Ownership metadata</p>
+                <h2 id="acquisition-save-ownership-title">Acquisition / Save ownership</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_acquisition_save_settings_groups | length }} groups</span>
+        </div>
+        <div class="modern-admin-link-grid">
+            {% for group in modern_admin_acquisition_save_settings_groups %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ group.label }}</strong>
+                    <small><code>{{ group.group_id }}</code></small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ group.level | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ group.owner | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge">{{ group.status | replace('_', ' ') | title }}</span>
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ group.risk }}">{{ group.risk | title }} risk</span>
+                        {% if group.do_not_move_yet %}
+                        <span class="modern-admin-settings-badge modern-admin-settings-risk-high">Do not move yet</span>
+                        {% endif %}
+                    </small>
+                    <small>
+                        {% for note in group.notes %}
+                        {{ note }}{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No ownership notes.
+                        {% endfor %}
+                    </small>
+                </span>
+            </article>
+            {% else %}
+            <span>The image_acquisition and image_save_formats settings groups were not found in the ownership map.</span>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="acquisition-save-surfaces-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Current references</p>
+                <h2 id="acquisition-save-surfaces-title">Current surfaces</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Metadata only</span>
+        </div>
+        <div class="modern-admin-link-grid">
+            {% for group in modern_admin_acquisition_save_settings_groups %}
+                {% for surface in group.current_surfaces %}
+                <span>{{ group.label }} · {{ surface }}</span>
+                {% else %}
+                <span>{{ group.label }} · No known surfaces.</span>
+                {% endfor %}
+            {% else %}
+            <span>No ownership map rows loaded.</span>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% set dedicated_settings_slug = 'acquisition-save' %}
+    {% set dedicated_settings_title = 'Acquisition / Save Formats' %}
+    {% set dedicated_settings_proposed_layout = modern_admin_acquisition_save_proposed_layout %}
+    {% set dedicated_settings_proposed_note = 'This proposal describes capture cadence, day/night behavior, display output formats, source file persistence, retention, and Scientific Source Layer relationships. It does not acquire, save, convert, download, or delete files.' %}
+    {% set dedicated_settings_proposed_empty = 'No proposed Acquisition / Save layout cards were listed.' %}
+    {% set dedicated_settings_config_sections = modern_admin_acquisition_save_config_sections %}
+    {% set dedicated_settings_config_eyebrow = 'Static acquisition/save evidence' %}
+    {% set dedicated_settings_config_title = 'Acquisition / Save key candidates' %}
+    {% set dedicated_settings_config_note = 'These sections are grouped from static Classic config and Modern camera settings evidence only. Active runtime config values are not loaded here.' %}
+    {% set dedicated_settings_config_empty = 'No static Acquisition / Save settings sections were listed.' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="{{ dedicated_settings_slug }}-proposed-layout-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Future product shape</p>
+                <h2 id="{{ dedicated_settings_slug }}-proposed-layout-title">Proposed final layout</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only proposal</span>
+        </div>
+        <p class="modern-admin-note">{{ dedicated_settings_proposed_note }}</p>
+        <div class="modern-admin-link-grid">
+            {% for layout_card in dedicated_settings_proposed_layout %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ layout_card.label }}</strong>
+                    <small>{{ layout_card.purpose }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ layout_card.proposed_level }}</span>
+                        <span class="modern-admin-settings-badge">{{ layout_card.note }}</span>
+                    </small>
+                    <small>
+                        {% for source_key in layout_card.source_keys %}
+                        <code>{{ source_key }}</code>{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No source keys listed.
+                        {% endfor %}
+                    </small>
+                </span>
+            </article>
+            {% else %}
+            <span>{{ dedicated_settings_proposed_empty }}</span>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="{{ dedicated_settings_slug }}-config-keys-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">{{ dedicated_settings_config_eyebrow }}</p>
+                <h2 id="{{ dedicated_settings_slug }}-config-keys-title">{{ dedicated_settings_config_title }}</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ dedicated_settings_config_sections | length }} sections</span>
+        </div>
+        <p class="modern-admin-note">{{ dedicated_settings_config_note }}</p>
+        <div class="modern-admin-link-grid">
+            {% for section in dedicated_settings_config_sections %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ section.label }}</strong>
+                    <small>{{ section.description }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">{{ section.key_count }} keys</span>
+                        <span class="modern-admin-settings-badge">Read-only</span>
+                    </small>
+                    <small>
+                        {% for key_row in section.keys %}
+                        <code>{{ key_row.key }}</code>{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No static keys listed.
+                        {% endfor %}
+                    </small>
+                    <small>
+                        {% for key_row in section.keys %}
+                        {{ key_row.notes }}{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No notes.
+                        {% endfor %}
+                    </small>
+                    <small>No runtime settings are changed here.</small>
+                </span>
+            </article>
+            {% else %}
+            <span>{{ dedicated_settings_config_empty }}</span>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

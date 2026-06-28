@@ -78,10 +78,11 @@
         "/modern-admin/notifications",
         "/modern-admin/observatory",
         "/modern-admin/observatory/*",
-        "/modern-admin/settings",
-        "/modern-admin/settings/advanced",
-        "/modern-admin/settings/analytics",
-        "/modern-admin/settings/auto-exposure-gain",
+                "/modern-admin/settings",
+                "/modern-admin/settings/advanced",
+                "/modern-admin/settings/analytics",
+                "/modern-admin/settings/acquisition-save",
+                "/modern-admin/settings/auto-exposure-gain",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
@@ -135,8 +136,9 @@
         "modern_admin/realtime_keogram.html",
         "modern_admin/sensor_panel.html",
         "modern_admin/_settings_dedicated_sections.html",
-        "modern_admin/settings_analytics.html",
-        "modern_admin/settings_auto_exposure_gain.html",
+                "modern_admin/settings_analytics.html",
+                "modern_admin/settings_acquisition_save.html",
+                "modern_admin/settings_auto_exposure_gain.html",
         "modern_admin/settings_basic.html",
         "modern_admin/settings_camera_connection.html",
         "modern_admin/settings_camera_profile.html",
@@ -425,10 +427,11 @@
       "owner": "modern",
       "porting_priority": "protect",
       "routes": [
-        "/modern-admin/settings",
-        "/modern-admin/settings/advanced",
-        "/modern-admin/settings/analytics",
-        "/modern-admin/settings/auto-exposure-gain",
+                "/modern-admin/settings",
+                "/modern-admin/settings/advanced",
+                "/modern-admin/settings/analytics",
+                "/modern-admin/settings/acquisition-save",
+                "/modern-admin/settings/auto-exposure-gain",
         "/modern-admin/settings/basic",
         "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
@@ -443,10 +446,11 @@
         "/modern-admin/settings/storage"
       ],
       "templates": [
-        "modern_admin/_settings_dedicated_sections.html",
-        "modern_admin/settings_inventory.html",
-        "modern_admin/settings_analytics.html",
-        "modern_admin/settings_auto_exposure_gain.html",
+                "modern_admin/_settings_dedicated_sections.html",
+                "modern_admin/settings_inventory.html",
+                "modern_admin/settings_analytics.html",
+                "modern_admin/settings_acquisition_save.html",
+                "modern_admin/settings_auto_exposure_gain.html",
         "modern_admin/settings_basic.html",
         "modern_admin/settings_camera_connection.html",
         "modern_admin/settings_camera_profile.html",
@@ -812,13 +816,15 @@
       "status": "MODERN CANONICAL",
       "owner": "shared_api",
       "porting_priority": "high",
-      "routes": [
-        "/modern-admin/capture/service",
-        "/modern-admin/settings/capture"
-      ],
-      "templates": [
-        "modern_admin/settings_capture.html",
-        "modern_admin/_shell_header.html"
+            "routes": [
+                "/modern-admin/settings/acquisition-save",
+                "/modern-admin/capture/service",
+                "/modern-admin/settings/capture"
+            ],
+            "templates": [
+                "modern_admin/settings_acquisition_save.html",
+                "modern_admin/settings_capture.html",
+                "modern_admin/_shell_header.html"
       ],
       "assets": [
         "modern_admin/modern-admin.css"
@@ -954,13 +960,15 @@
       "status": "PARTIAL MODERN",
       "owner": "shared_api",
       "porting_priority": "medium",
-      "routes": [
-        "/modern-admin/settings/capture",
-        "/config"
-      ],
-      "templates": [
-        "modern_admin/settings_capture.html",
-        "config.html"
+            "routes": [
+                "/modern-admin/settings/acquisition-save",
+                "/modern-admin/settings/capture",
+                "/config"
+            ],
+            "templates": [
+                "modern_admin/settings_acquisition_save.html",
+                "modern_admin/settings_capture.html",
+                "config.html"
       ],
       "assets": [],
       "apis": [
