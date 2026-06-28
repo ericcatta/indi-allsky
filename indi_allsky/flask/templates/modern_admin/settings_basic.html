@@ -117,6 +117,9 @@ var camera_id = {{ camera_id }};
                     {% if modern_admin_settings_preview_level == 'basic' and (group.group_id == 'auto_exposure' or group.group_id == 'auto_gain') %}
                     <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_auto_exposure_gain_settings_view') }}">Open Auto Exposure / Auto Gain Settings</a></small>
                     {% endif %}
+                    {% if modern_admin_settings_preview_level == 'basic' and group.group_id == 'hybrid_awb' %}
+                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_hybrid_awb_settings_view') }}">Open Hybrid AWB Settings</a></small>
+                    {% endif %}
                 </span>
             </article>
             {% else %}

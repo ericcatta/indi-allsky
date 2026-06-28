@@ -17448,6 +17448,11 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
             'endpoint'    : 'indi_allsky.modern_admin_auto_exposure_gain_settings_view',
             'description' : 'Target ADU, automation gates, day/night behavior, and safe manual-control relationships.',
         },
+        {
+            'group_id'    : 'hybrid_awb',
+            'endpoint'    : 'indi_allsky.modern_admin_hybrid_awb_settings_view',
+            'description' : 'Hybrid AWB mode, apply strategy, backend limits, and color-quality relationships.',
+        },
     )
 
     def get_context(self):
@@ -19376,6 +19381,217 @@ class ModernAdminAutoExposureGainSettingsView(ModernAdminSettingsInventoryView):
                 'note'           : 'read-only proposal',
             }
             for row in self.AUTO_EXPOSURE_GAIN_PROPOSED_LAYOUT
+        )
+
+
+class ModernAdminHybridAwbSettingsView(ModernAdminSettingsInventoryView):
+    page_title = 'Modern Admin Hybrid AWB Settings'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
+
+    HYBRID_AWB_CONFIG_SECTIONS = (
+        {
+            'label'       : 'Hybrid AWB mode / strategy',
+            'description' : 'Modern Hybrid Controller fields that select processing mode and AWB apply behavior.',
+            'keys'        : (
+                {
+                    'key'     : 'PROCESSING_MODE / awb.mode',
+                    'source'  : 'Modern camera settings Hybrid Controller',
+                    'notes'   : 'Profile-aware processing mode used by the Hybrid controller.',
+                },
+                {
+                    'key'     : 'HYBRID.AWB.APPLY_MODE / awb.apply_mode',
+                    'source'  : 'Modern camera settings Hybrid Controller',
+                    'notes'   : 'Controls whether AWB is auto, capture-driver, postprocess RGB, or disabled.',
+                },
+            ),
+        },
+        {
+            'label'       : 'libcamera AWB backend',
+            'description' : 'Capture-side AWB controls for libcamera profiles. This page does not apply driver values.',
+            'keys'        : (
+                {
+                    'key'     : 'LIBCAMERA.AWB / libcamera_awb',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Night libcamera AWB mode fallback/profile value.',
+                },
+                {
+                    'key'     : 'LIBCAMERA.AWB_DAY / libcamera_awb_day',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Day libcamera AWB mode fallback/profile value.',
+                },
+                {
+                    'key'     : 'LIBCAMERA.AWB_ENABLE / libcamera_awb_enable',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Night libcamera AWB enable gate.',
+                },
+                {
+                    'key'     : 'LIBCAMERA.AWB_ENABLE_DAY / libcamera_awb_enable_day',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Day libcamera AWB enable gate.',
+                },
+                {
+                    'key'     : 'LIBCAMERA.AWB_MODE / libcamera_awb_mode',
+                    'source'  : 'Modern camera profile fields',
+                    'notes'   : 'libcamera AWB strategy; fixed mode requires explicit gains.',
+                },
+                {
+                    'key'     : 'LIBCAMERA.AWB_RED_GAIN / libcamera_awb_red_gain',
+                    'source'  : 'Modern camera profile fields',
+                    'notes'   : 'Capture-side red gain used only when supported and explicitly configured.',
+                },
+                {
+                    'key'     : 'LIBCAMERA.AWB_BLUE_GAIN / libcamera_awb_blue_gain',
+                    'source'  : 'Modern camera profile fields',
+                    'notes'   : 'Capture-side blue gain used only when supported and explicitly configured.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Post-process RGB / legacy white balance',
+            'description' : 'Postprocess RGB fields that remain separate from capture-driver AWB.',
+            'keys'        : (
+                {
+                    'key'     : 'AUTO_WB / auto_wb',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Legacy night postprocess auto white balance gate.',
+                },
+                {
+                    'key'     : 'AUTO_WB_DAY / auto_wb_day',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Legacy day postprocess auto white balance gate.',
+                },
+                {
+                    'key'     : 'WBR_FACTOR* / wbr_factor*',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Manual red multipliers for night/day postprocess white balance.',
+                },
+                {
+                    'key'     : 'WBG_FACTOR* / wbg_factor*',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Manual green multipliers for night/day postprocess white balance.',
+                },
+                {
+                    'key'     : 'WBB_FACTOR* / wbb_factor*',
+                    'source'  : 'Classic config form / Modern camera profile fields',
+                    'notes'   : 'Manual blue multipliers for night/day postprocess white balance.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Backend constraints',
+            'description' : 'Capability and fallback concepts used by the Hybrid AWB controller.',
+            'keys'        : (
+                {
+                    'key'     : 'camera_interface',
+                    'source'  : 'Modern camera settings capabilities',
+                    'notes'   : 'Determines whether capture-driver AWB is supported.',
+                },
+                {
+                    'key'     : 'capture_driver / postprocess_rgb / disabled',
+                    'source'  : 'Hybrid AWB apply mode choices',
+                    'notes'   : 'Apply-mode choices exposed by Modern camera settings, not executed from this preview.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Profile-specific color behavior',
+            'description' : 'Profile ownership and image-quality relationship for camera-specific color pipelines.',
+            'keys'        : (
+                {
+                    'key'     : 'profile_id',
+                    'source'  : 'Modern camera profile settings',
+                    'notes'   : 'AWB settings must remain profile-aware because sensors and color pipelines differ.',
+                },
+                {
+                    'key'     : 'profile.awb',
+                    'source'  : 'Modern camera profile config',
+                    'notes'   : 'Profile-scoped AWB block used by Modern Camera Settings.',
+                },
+                {
+                    'key'     : 'image quality / color pipeline',
+                    'source'  : 'Settings ownership map',
+                    'notes'   : 'Relationship to final image quality; this page is descriptive only.',
+                },
+            ),
+        },
+    )
+
+    HYBRID_AWB_PROPOSED_LAYOUT = (
+        {
+            'label'          : 'AWB mode / strategy',
+            'purpose'        : 'Show Hybrid AWB mode and apply strategy as the product concept, not as raw scattered keys.',
+            'source_keys'    : ('PROCESSING_MODE', 'HYBRID.AWB.APPLY_MODE', 'profile.awb'),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Day/night behavior',
+            'purpose'        : 'Keep day and night color behavior visible without flattening separate profile values.',
+            'source_keys'    : ('LIBCAMERA.AWB_DAY', 'AUTO_WB_DAY', 'WBR/WBG/WBB *_DAY'),
+            'proposed_level' : 'Future Advanced / Hybrid AWB',
+        },
+        {
+            'label'          : 'Camera/backend constraints',
+            'purpose'        : 'Explain capture-driver and postprocess availability without probing hardware from the preview.',
+            'source_keys'    : ('camera_interface', 'capture_driver', 'postprocess_rgb', 'disabled'),
+            'proposed_level' : 'Future Advanced / Camera Connection',
+        },
+        {
+            'label'          : 'Profile-specific behavior',
+            'purpose'        : 'Keep AWB settings profile-first and multicamera-safe because sensors differ.',
+            'source_keys'    : ('profile_id', 'profile.awb', 'MULTI_CAMERA.profiles'),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Relationship to image quality',
+            'purpose'        : 'Connect AWB strategy to color quality and processing without introducing image processing controls here.',
+            'source_keys'    : ('AUTO_WB*', 'WBR/WBG/WBB*', 'LIBCAMERA.AWB_*'),
+            'proposed_level' : 'Future Advanced / Quality',
+        },
+    )
+
+    def get_context(self):
+        context = super(ModernAdminHybridAwbSettingsView, self).get_context()
+        hybrid_awb_group = None
+        for group in context.get('modern_admin_settings_groups', []):
+            if group.get('group_id') == 'hybrid_awb':
+                hybrid_awb_group = group
+                break
+
+        context['modern_admin_hybrid_awb_settings_group'] = hybrid_awb_group
+        context['modern_admin_hybrid_awb_config_sections'] = self.get_hybrid_awb_config_sections()
+        context['modern_admin_hybrid_awb_proposed_layout'] = self.get_hybrid_awb_proposed_layout()
+        return context
+
+
+    def get_hybrid_awb_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_settings_text(section.get('label')),
+                'description' : self.safe_settings_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_settings_text(row.get('key')),
+                        'source' : self.safe_settings_text(row.get('source')),
+                        'notes'  : self.safe_settings_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.HYBRID_AWB_CONFIG_SECTIONS
+        )
+
+
+    def get_hybrid_awb_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_settings_text(row.get('label')),
+                'purpose'        : self.safe_settings_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_settings_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_settings_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.HYBRID_AWB_PROPOSED_LAYOUT
         )
 
 
@@ -23906,6 +24122,7 @@ bp_allsky.add_url_rule('/modern-admin/settings/camera-profile', view_func=Modern
 bp_allsky.add_url_rule('/modern-admin/settings/camera-connection', view_func=ModernAdminCameraConnectionSettingsView.as_view('modern_admin_camera_connection_settings_view', template_name='modern_admin/settings_camera_connection.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/exposure-gain', view_func=ModernAdminExposureGainSettingsView.as_view('modern_admin_exposure_gain_settings_view', template_name='modern_admin/settings_exposure_gain.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/auto-exposure-gain', view_func=ModernAdminAutoExposureGainSettingsView.as_view('modern_admin_auto_exposure_gain_settings_view', template_name='modern_admin/settings_auto_exposure_gain.html'))
+bp_allsky.add_url_rule('/modern-admin/settings/hybrid-awb', view_func=ModernAdminHybridAwbSettingsView.as_view('modern_admin_hybrid_awb_settings_view', template_name='modern_admin/settings_hybrid_awb.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
 bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))

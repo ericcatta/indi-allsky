@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-hybrid-awb-v1') }}" rel="stylesheet">
+<script type="text/javascript">
+var camera_id = {{ camera_id }};
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="modern-admin-hybrid-awb-settings-title">
+    {% set modern_admin_header_label = 'Hybrid AWB settings preview header' %}
+    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_title_id = 'modern-admin-hybrid-awb-settings-title' %}
+    {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Hybrid AWB settings summary">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Product consolidation</p>
+                <h2 id="modern-admin-hybrid-awb-settings-title">Hybrid AWB Settings</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> This page describes future Hybrid AWB settings using ownership metadata and static field evidence.</p>
+        <p class="modern-admin-note">No runtime settings are changed here. This page does not query cameras, modify profiles, apply AWB, or change image processing behavior.</p>
+        <p class="modern-admin-note">
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Index</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_basic_settings_view') }}">Basic Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_exposure_gain_settings_view') }}">Exposure / Gain Preview</a>
+            ·
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_auto_exposure_gain_settings_view') }}">Auto Exposure / Auto Gain Preview</a>
+        </p>
+    </section>
+
+    {% set dedicated_settings_slug = 'hybrid-awb' %}
+    {% set dedicated_settings_title = 'Hybrid AWB' %}
+    {% set dedicated_settings_group = modern_admin_hybrid_awb_settings_group %}
+    {% set dedicated_settings_missing_message = 'The hybrid_awb settings group was not found in the ownership map.' %}
+    {% set dedicated_settings_proposed_layout = modern_admin_hybrid_awb_proposed_layout %}
+    {% set dedicated_settings_proposed_note = 'This proposal describes AWB mode, backend constraints, profile ownership, and image-quality relationships. It does not apply AWB or change processing.' %}
+    {% set dedicated_settings_proposed_empty = 'No proposed Hybrid AWB layout cards were listed.' %}
+    {% set dedicated_settings_config_sections = modern_admin_hybrid_awb_config_sections %}
+    {% set dedicated_settings_config_eyebrow = 'Static AWB evidence' %}
+    {% set dedicated_settings_config_title = 'Hybrid AWB key candidates' %}
+    {% set dedicated_settings_config_note = 'These sections are grouped from static Classic config and Modern camera settings evidence only. Active runtime config values are not loaded here.' %}
+    {% set dedicated_settings_config_empty = 'No static Hybrid AWB settings sections were listed.' %}
+    {% include 'modern_admin/_settings_dedicated_sections.html' %}
+</main>
+{% endblock %}
