@@ -87,8 +87,9 @@
         "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
         "/modern-admin/settings/developer",
-        "/modern-admin/settings/exposure-gain",
-        "/modern-admin/settings/hybrid-awb",
+                "/modern-admin/settings/exposure-gain",
+                "/modern-admin/settings/fits-source",
+                "/modern-admin/settings/hybrid-awb",
         "/modern-admin/settings/notifications",
         "/modern-admin/settings/ready",
         "/modern-admin/settings/cameras",
@@ -144,8 +145,9 @@
         "modern_admin/settings_camera_profile.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
-        "modern_admin/settings_exposure_gain.html",
-        "modern_admin/settings_full.html",
+                "modern_admin/settings_exposure_gain.html",
+                "modern_admin/settings_fits_source.html",
+                "modern_admin/settings_full.html",
         "modern_admin/settings_hybrid_awb.html",
         "modern_admin/settings_inventory.html",
         "modern_admin/settings_notifications.html",
@@ -436,8 +438,9 @@
         "/modern-admin/settings/camera-connection",
         "/modern-admin/settings/camera-profile",
         "/modern-admin/settings/developer",
-        "/modern-admin/settings/exposure-gain",
-        "/modern-admin/settings/hybrid-awb",
+                "/modern-admin/settings/exposure-gain",
+                "/modern-admin/settings/fits-source",
+                "/modern-admin/settings/hybrid-awb",
         "/modern-admin/settings/notifications",
         "/modern-admin/settings/ready",
         "/modern-admin/settings/cameras",
@@ -456,8 +459,9 @@
         "modern_admin/settings_camera_profile.html",
         "modern_admin/settings_cameras.html",
         "modern_admin/settings_capture.html",
-        "modern_admin/settings_exposure_gain.html",
-        "modern_admin/settings_full.html",
+                "modern_admin/settings_exposure_gain.html",
+                "modern_admin/settings_fits_source.html",
+                "modern_admin/settings_full.html",
         "modern_admin/settings_hybrid_awb.html",
         "modern_admin/settings_notifications.html",
         "modern_admin/settings_storage.html"
@@ -707,10 +711,12 @@
       "porting_priority": "protect",
       "routes": [
         "/fitsimageviewer",
+        "/modern-admin/settings/fits-source",
         "/modern-admin/media/fits"
       ],
       "templates": [
         "fitsimageviewer.html",
+        "modern_admin/settings_fits_source.html",
         "modern_admin/media_list.html"
       ],
       "assets": [],
@@ -993,10 +999,12 @@
       "porting_priority": "high",
       "routes": [
         "/fitsimageviewer",
+        "/modern-admin/settings/fits-source",
         "/modern-admin/media/fits"
       ],
       "templates": [
         "fitsimageviewer.html",
+        "modern_admin/settings_fits_source.html",
         "modern_admin/media_list.html"
       ],
       "assets": [],
@@ -1023,11 +1031,13 @@
       "porting_priority": "high",
       "routes": [
         "/raw*",
+        "/modern-admin/settings/fits-source",
         "/modern-admin/media/fits"
       ],
       "templates": [
         "index_img.html",
         "index_canvas.html",
+        "modern_admin/settings_fits_source.html",
         "modern_admin/media_list.html"
       ],
       "assets": [],
@@ -1347,12 +1357,14 @@
         "/fitsimageviewer",
         "/ajax/fitsimageviewer",
         "/fits2jpeg",
+        "/modern-admin/settings/fits-source",
         "/modern-admin/fits",
         "/modern-admin/fits/*",
         "/modern-admin/media/fits"
       ],
       "templates": [
         "fitsimageviewer.html",
+        "modern_admin/settings_fits_source.html",
         "modern_admin/fits.html",
         "modern_admin/fits_detail.html",
         "modern_admin/media_list.html"
