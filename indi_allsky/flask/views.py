@@ -19992,6 +19992,51 @@ class ModernAdminHybridAwbSettingsView(ModernAdminSettingsInventoryView):
         },
     )
 
+    HYBRID_AWB_OVERVIEW_CARDS = (
+        {
+            'label'           : 'AWB strategy',
+            'purpose'         : 'Summarize the Hybrid AWB product mode and whether color is handled at capture, postprocess, or disabled.',
+            'related_fields'  : ('PROCESSING_MODE / awb.mode', 'HYBRID.AWB.APPLY_MODE / awb.apply_mode', 'profile.awb'),
+            'future_editable' : 'yes after AWB validation policy',
+            'safety_note'     : 'Future edits must remain profile-aware and must not apply AWB from this page.',
+        },
+        {
+            'label'           : 'libcamera AWB controls',
+            'purpose'         : 'Group capture-driver AWB enablement, mode, and fixed gains without contacting libcamera.',
+            'related_fields'  : ('LIBCAMERA.AWB / libcamera_awb', 'LIBCAMERA.AWB_ENABLE / libcamera_awb_enable', 'LIBCAMERA.AWB_MODE / libcamera_awb_mode', 'LIBCAMERA.AWB_RED_GAIN / libcamera_awb_red_gain', 'LIBCAMERA.AWB_BLUE_GAIN / libcamera_awb_blue_gain'),
+            'future_editable' : 'blocked until camera capability policy exists',
+            'safety_note'     : 'This page does not probe hardware or apply driver AWB values.',
+        },
+        {
+            'label'           : 'Manual RGB factors',
+            'purpose'         : 'Keep postprocess RGB factors visible as a separate manual color path.',
+            'related_fields'  : ('WBR_FACTOR* / wbr_factor*', 'WBG_FACTOR* / wbg_factor*', 'WBB_FACTOR* / wbb_factor*', 'AUTO_WB / auto_wb'),
+            'future_editable' : 'yes after image-processing policy',
+            'safety_note'     : 'Manual RGB factors can affect image quality and should remain separate from capture-driver AWB.',
+        },
+        {
+            'label'           : 'Day/night color behavior',
+            'purpose'         : 'Show day and night color settings as distinct profile behavior instead of flattening them.',
+            'related_fields'  : ('LIBCAMERA.AWB_DAY / libcamera_awb_day', 'LIBCAMERA.AWB_ENABLE_DAY / libcamera_awb_enable_day', 'AUTO_WB_DAY / auto_wb_day', 'WBR/WBG/WBB *_DAY'),
+            'future_editable' : 'yes after day/night AWB policy',
+            'safety_note'     : 'Day/night AWB choices must not override profile-specific color behavior silently.',
+        },
+        {
+            'label'           : 'Profile-specific AWB',
+            'purpose'         : 'Make AWB ownership explicit because camera sensors and profiles may need different color pipelines.',
+            'related_fields'  : ('profile_id', 'profile.awb', 'MULTI_CAMERA.profiles', 'camera_interface'),
+            'future_editable' : 'blocked until profile AWB editor policy exists',
+            'safety_note'     : 'Future controls must stay profile-first and multicamera-safe.',
+        },
+        {
+            'label'           : 'Image quality relationship',
+            'purpose'         : 'Connect AWB strategy to final color quality without introducing processing controls here.',
+            'related_fields'  : ('image quality / color pipeline', 'AUTO_WB*', 'WBR/WBG/WBB*', 'LIBCAMERA.AWB_*'),
+            'future_editable' : 'no from this page',
+            'safety_note'     : 'This page does not process images, recalculate color, or change quality outputs.',
+        },
+    )
+
     def get_context(self):
         context = super(ModernAdminHybridAwbSettingsView, self).get_context()
         hybrid_awb_group = None
@@ -20001,9 +20046,24 @@ class ModernAdminHybridAwbSettingsView(ModernAdminSettingsInventoryView):
                 break
 
         context['modern_admin_hybrid_awb_settings_group'] = hybrid_awb_group
+        context['modern_admin_hybrid_awb_overview_cards'] = self.get_hybrid_awb_overview_cards()
         context['modern_admin_hybrid_awb_config_sections'] = self.get_hybrid_awb_config_sections()
         context['modern_admin_hybrid_awb_proposed_layout'] = self.get_hybrid_awb_proposed_layout()
         return context
+
+
+    def get_hybrid_awb_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_settings_text(row.get('label')),
+                'purpose'         : self.safe_settings_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_settings_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_settings_text(row.get('future_editable')),
+                'safety_note'     : self.safe_settings_text(row.get('safety_note')),
+            }
+            for row in self.HYBRID_AWB_OVERVIEW_CARDS
+        )
 
 
     def get_hybrid_awb_config_sections(self):

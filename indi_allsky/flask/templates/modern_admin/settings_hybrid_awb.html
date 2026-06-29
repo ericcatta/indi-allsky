@@ -37,6 +37,42 @@ var camera_id = {{ camera_id }};
         </p>
     </section>
 
+    <section class="modern-admin-table-panel" aria-labelledby="hybrid-awb-overview-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Final read-only product view</p>
+                <h2 id="hybrid-awb-overview-title">Hybrid AWB Overview</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_hybrid_awb_overview_cards | length }} areas</span>
+        </div>
+        <p class="modern-admin-note">This overview is product-oriented and read-only. It does not query the database, read active configuration values, contact cameras, apply AWB, or run image processing.</p>
+
+        <div class="modern-admin-link-grid">
+            {% for card in modern_admin_hybrid_awb_overview_cards %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ card.label }}</strong>
+                    <small>{{ card.purpose }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">Current status: {{ card.current_status }}</span>
+                        <span class="modern-admin-settings-badge">Future editable: {{ card.future_editable }}</span>
+                    </small>
+                    <small>
+                        {% for field in card.related_fields %}
+                        <code>{{ field }}</code>{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No related fields listed.
+                        {% endfor %}
+                    </small>
+                    <small>{{ card.safety_note }}</small>
+                </span>
+            </article>
+            {% else %}
+            <span>No Hybrid AWB Overview cards were listed.</span>
+            {% endfor %}
+        </div>
+    </section>
+
     {% set dedicated_settings_slug = 'hybrid-awb' %}
     {% set dedicated_settings_title = 'Hybrid AWB' %}
     {% set dedicated_settings_group = modern_admin_hybrid_awb_settings_group %}
