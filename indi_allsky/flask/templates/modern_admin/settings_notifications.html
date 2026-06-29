@@ -35,6 +35,42 @@ var camera_id = {{ camera_id }};
         </p>
     </section>
 
+    <section class="modern-admin-table-panel" aria-labelledby="notifications-overview-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Final read-only product view</p>
+                <h2 id="notifications-overview-title">Notifications Overview</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_notifications_overview_cards | length }} areas</span>
+        </div>
+        <p class="modern-admin-note">This overview is product-oriented and read-only. It does not query notification rows, call notification AJAX endpoints, acknowledge records, delete records, or change delivery behavior.</p>
+
+        <div class="modern-admin-link-grid">
+            {% for card in modern_admin_notifications_overview_cards %}
+            <article class="modern-admin-settings-action-card">
+                <span>
+                    <strong>{{ card.label }}</strong>
+                    <small>{{ card.purpose }}</small>
+                    <small>
+                        <span class="modern-admin-settings-badge">Current status: {{ card.current_status }}</span>
+                        <span class="modern-admin-settings-badge">Future editable/actionable: {{ card.future_editable_actionable }}</span>
+                    </small>
+                    <small>
+                        {% for field in card.related_fields %}
+                        <code>{{ field }}</code>{% if not loop.last %}<br>{% endif %}
+                        {% else %}
+                        No related fields listed.
+                        {% endfor %}
+                    </small>
+                    <small>{{ card.safety_note }}</small>
+                </span>
+            </article>
+            {% else %}
+            <span>No Notifications Overview cards were listed.</span>
+            {% endfor %}
+        </div>
+    </section>
+
     {% set dedicated_settings_slug = 'notifications' %}
     {% set dedicated_settings_title = 'Notifications' %}
     {% set dedicated_settings_group = modern_admin_notifications_settings_group %}

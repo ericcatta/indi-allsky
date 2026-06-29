@@ -16,12 +16,12 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 - Advanced groups with preview: 4
 - Developer groups with preview: 0
 - `do_not_move_yet` groups with preview: 4
-- Final read-only groups: 12
-- Final read-only routes: 9
-- Final read-only Basic groups: 8
+- Final read-only groups: 13
+- Final read-only routes: 10
+- Final read-only Basic groups: 9
 - Final read-only Advanced groups: 4
 - Final read-only Developer groups: 0
-- Dedicated-but-not-final groups: 1
+- Dedicated-but-not-final groups: 0
 
 ### Counts By Owner
 
@@ -222,13 +222,12 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 | hybrid_awb | Hybrid AWB | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/hybrid-awb | False |
 | image_acquisition | Image Acquisition | camera_profile | advanced | redesign | high | /modern-admin/settings/acquisition-save | False |
 | image_save_formats | Image Save Formats | global | advanced | redesign | medium | /modern-admin/settings/acquisition-save | True |
+| notifications | Notifications | runtime_system | basic | keep | high | /modern-admin/settings/notifications | True |
 | storage_drives | Storage / Drives | runtime_system | basic | keep | high | /modern-admin/settings/storage | True |
 
 ## Dedicated Preview But Not Final
 
-| Group | Label | Owner | Level | Status | Risk | Preview route | Do not move yet? |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| notifications | Notifications | runtime_system | basic | keep | high | /modern-admin/settings/notifications | True |
+- None
 
 ## Groups Without Dedicated Preview
 
@@ -300,7 +299,7 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 | metadata | Metadata | scientific_source | advanced | protected_modern_work | high | - | - | True | Modern metadata/status pages, Modern scientific source reports, JSONL frame metadata | Covers FrameMetadata persistence, source/detector paths, timestamps, camera/profile association, and report inputs., Do not weaken schema tolerance or source linkage. |
 | mini_timelapse | Mini Timelapse | media_product | advanced | redesign | medium | - | - | True | Classic mini timelapse generation/settings, Modern media metadata/status pages, Classic /config | Covers mini timelapse settings and product metadata., Lower product priority, but still explicitly owned so it is not lost. |
 | network | Network | runtime_system | developer | legacy_fallback | high | - | - | True | Classic network/system tools, Modern network wrapper/status pages | Covers host/network settings and OS-level operations., Network mutations can disconnect the device and must remain guarded. |
-| notifications | Notifications | runtime_system | basic | keep | high | /modern-admin/settings/notifications | dedicated_read_only | True | Classic /notifications, Classic /ajax/notification, Modern /modern-admin/notifications, Safe Action notification.acknowledge service boundary | Covers notification status, delivery metadata, and future acknowledge/delete actions., Acknowledge is service-ready but execute/UI remain blocked pending Flask auth/session/CSRF tests. |
+| notifications | Notifications | runtime_system | basic | keep | high | /modern-admin/settings/notifications | final_read_only | True | Classic /notifications, Classic /ajax/notification, Modern /modern-admin/notifications, Safe Action notification.acknowledge service boundary | Covers notification status, delivery metadata, and future acknowledge/delete actions., Acknowledge is service-ready but execute/UI remain blocked pending Flask auth/session/CSRF tests. |
 | public_latest_endpoints | Public / Latest Endpoints | global | advanced | keep | high | - | - | True | Public /latest* routes, Public media routes, Classic and external clients | Covers public latest image/video/raw/panorama behavior and bookmark/external compatibility., Do not treat as Classic dead code just because static consumers are absent. |
 | quality | Quality | scientific_source | advanced | protected_modern_work | high | - | - | True | Modern quality pages, Modern metadata and environmental context | Covers quality scoring, stable frame markers, environmental quality context, and future detector readiness., Explainability must remain visible. |
 | scientific_source_layer | Scientific Source Layer | scientific_source | advanced | protected_modern_work | high | - | - | True | Modern scientific source reports, Modern FITS metadata pages, ScientificFrame domain objects | Covers ScientificFrame, ScientificFrameProvider, source image paths, detector image paths, and raw-first semantics., Display images, overlays, and stretch are rendering concepts, not destructive source-data changes. |

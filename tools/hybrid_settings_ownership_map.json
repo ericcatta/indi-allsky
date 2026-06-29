@@ -448,7 +448,7 @@
         "Acknowledge is service-ready but execute/UI remain blocked pending Flask auth/session/CSRF tests."
       ],
       "preview_route": "/modern-admin/settings/notifications",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "users_auth": {
       "label": "Users / Authentication",

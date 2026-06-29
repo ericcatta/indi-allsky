@@ -18762,6 +18762,51 @@ class ModernAdminNotificationsSettingsView(ModernAdminSettingsInventoryView):
         },
     )
 
+    NOTIFICATIONS_OVERVIEW_CARDS = (
+        {
+            'label'                      : 'Notification categories',
+            'purpose'                    : 'Summarize how notifications are grouped for operators and future settings.',
+            'related_fields'             : ('category', 'item'),
+            'future_editable_actionable' : 'no from this page',
+            'safety_note'                : 'Category metadata is shown as schema evidence only; no rows are loaded here.',
+        },
+        {
+            'label'                      : 'Notification items',
+            'purpose'                    : 'Show that notification scope/item values exist without exposing live notification data.',
+            'related_fields'             : ('item', 'notification', 'createDate'),
+            'future_editable_actionable' : 'no from this page',
+            'safety_note'                : 'This page does not query notification rows or expose runtime notification payloads.',
+        },
+        {
+            'label'                      : 'Acknowledge state',
+            'purpose'                    : 'Keep acknowledgement visible as a future Safe Action boundary, not as an editor control.',
+            'related_fields'             : ('ack', 'notification.acknowledge', 'Modern Safe Action registry/service boundary'),
+            'future_editable_actionable' : 'blocked until Flask auth/session/CSRF tests',
+            'safety_note'                : 'No acknowledge action is exposed; execute/UI remain blocked.',
+        },
+        {
+            'label'                      : 'Expiry / retention',
+            'purpose'                    : 'Document expiry semantics before any retention or cleanup controls exist.',
+            'related_fields'             : ('expireDate', 'createDate'),
+            'future_editable_actionable' : 'blocked until retention policy exists',
+            'safety_note'                : 'This page does not delete, expire, or mutate notification records.',
+        },
+        {
+            'label'                      : 'Delivery / visibility',
+            'purpose'                    : 'Separate what operators can see from how notifications are produced or delivered.',
+            'related_fields'             : ('notification', 'category', 'Modern /modern-admin/notifications'),
+            'future_editable_actionable' : 'yes after delivery policy exists',
+            'safety_note'                : 'Delivery behavior and visibility controls are not changed from this page.',
+        },
+        {
+            'label'                      : 'Future notification actions',
+            'purpose'                    : 'Reserve product space for future acknowledge/delete controls once Safe Actions are ready.',
+            'related_fields'             : ('notification.acknowledge', 'notification.delete', 'audit log', 'permission policy'),
+            'future_editable_actionable' : 'blocked',
+            'safety_note'                : 'No buttons, forms, AJAX calls, or mutative endpoints are exposed here.',
+        },
+    )
+
     def get_context(self):
         context = super(ModernAdminNotificationsSettingsView, self).get_context()
         notifications_group = None
@@ -18771,9 +18816,24 @@ class ModernAdminNotificationsSettingsView(ModernAdminSettingsInventoryView):
                 break
 
         context['modern_admin_notifications_settings_group'] = notifications_group
+        context['modern_admin_notifications_overview_cards'] = self.get_notifications_overview_cards()
         context['modern_admin_notifications_config_sections'] = self.get_notifications_config_sections()
         context['modern_admin_notifications_proposed_layout'] = self.get_notifications_proposed_layout()
         return context
+
+
+    def get_notifications_overview_cards(self):
+        return tuple(
+            {
+                'label'                      : self.safe_settings_text(row.get('label')),
+                'purpose'                    : self.safe_settings_text(row.get('purpose')),
+                'related_fields'             : tuple(self.safe_settings_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'             : 'not evaluated here',
+                'future_editable_actionable' : self.safe_settings_text(row.get('future_editable_actionable')),
+                'safety_note'                : self.safe_settings_text(row.get('safety_note')),
+            }
+            for row in self.NOTIFICATIONS_OVERVIEW_CARDS
+        )
 
 
     def get_notifications_config_sections(self):
