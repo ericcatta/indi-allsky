@@ -16,12 +16,12 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 - Advanced groups with preview: 4
 - Developer groups with preview: 0
 - `do_not_move_yet` groups with preview: 4
-- Final read-only groups: 11
-- Final read-only routes: 8
+- Final read-only groups: 12
+- Final read-only routes: 9
 - Final read-only Basic groups: 8
-- Final read-only Advanced groups: 3
+- Final read-only Advanced groups: 4
 - Final read-only Developer groups: 0
-- Dedicated-but-not-final groups: 2
+- Dedicated-but-not-final groups: 1
 
 ### Counts By Owner
 
@@ -217,6 +217,7 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 | camera_connection | Camera Connection | camera | basic | redesign | high | /modern-admin/settings/camera-connection | False |
 | camera_profile_identity | Camera Profile Identity | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/camera-profile | False |
 | exposure | Exposure | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | False |
+| fits_source_files | FITS / Source Files | scientific_source | advanced | protected_modern_work | high | /modern-admin/settings/fits-source | True |
 | gain | Gain | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | False |
 | hybrid_awb | Hybrid AWB | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/hybrid-awb | False |
 | image_acquisition | Image Acquisition | camera_profile | advanced | redesign | high | /modern-admin/settings/acquisition-save | False |
@@ -227,7 +228,6 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 
 | Group | Label | Owner | Level | Status | Risk | Preview route | Do not move yet? |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| fits_source_files | FITS / Source Files | scientific_source | advanced | protected_modern_work | high | /modern-admin/settings/fits-source | True |
 | notifications | Notifications | runtime_system | basic | keep | high | /modern-admin/settings/notifications | True |
 
 ## Groups Without Dedicated Preview
@@ -285,7 +285,7 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 | developer_debug | Developer / Debug Options | developer_legacy | developer | developer | high | - | - | True | Classic /config, Modern /modern-admin/settings/full, Developer documentation | Covers hooks, debug flags, experimental toggles, compatibility options, and raw full settings., Keep possible for experts, but do not expose in Basic. |
 | environmental_awareness | Environmental Awareness | runtime_system | advanced | protected_modern_work | medium | - | - | True | Modern environmental awareness pages, Modern observatory/status pages, Classic /config fallback | Covers smoke, aurora, weather, cloud, and other environmental context., Provider and sensor ownership should be verified before settings are reorganized. |
 | exposure | Exposure | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | final_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/cameras | Covers exposure defaults, day/night exposure behavior, and profile overrides., Global fields may remain fallback, but profile values are the product-facing owner. |
-| fits_source_files | FITS / Source Files | scientific_source | advanced | protected_modern_work | high | /modern-admin/settings/fits-source | dedicated_read_only | True | Classic /fitsimageviewer, Modern /modern-admin/fits, Modern scientific source reports, Classic /config | Covers IMAGE_SAVE_FITS, IMAGE_SAVE_FITS_PERIOD, RAW/source exports, detector image paths, and source persistence policy., Future UX should use Never, Periodic, Every frame, and Event-window buffered concepts. |
+| fits_source_files | FITS / Source Files | scientific_source | advanced | protected_modern_work | high | /modern-admin/settings/fits-source | final_read_only | True | Classic /fitsimageviewer, Modern /modern-admin/fits, Modern scientific source reports, Classic /config | Covers IMAGE_SAVE_FITS, IMAGE_SAVE_FITS_PERIOD, RAW/source exports, detector image paths, and source persistence policy., Future UX should use Never, Periodic, Every frame, and Event-window buffered concepts. |
 | focus | Focus | runtime_system | advanced | legacy_fallback | high | - | - | True | Classic focus controls, Modern focus status/safe-control wrappers, Classic /config | Covers focuser configuration, status, and future movement/autofocus actions., Hardware movement is blocked until hardware Safe Action policy and tests exist. |
 | gain | Gain | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | final_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/cameras | Covers gain defaults, day/night gain behavior, sensor gain controls, and profile overrides., Must remain compatible with Auto Gain gating and camera-specific capabilities. |
 | gpio | GPIO | runtime_system | developer | legacy_fallback | high | - | - | True | Classic GPIO/system tools, Modern safe-control wrappers, Classic /config | Covers GPIO pins, relay-style controls, and hardware interactions., Do not expose as Basic; hardware side effects need explicit policy. |

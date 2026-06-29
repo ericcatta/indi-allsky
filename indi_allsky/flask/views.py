@@ -20539,6 +20539,51 @@ class ModernAdminFitsSourceSettingsView(ModernAdminSettingsInventoryView):
         },
     )
 
+    FITS_SOURCE_OVERVIEW_CARDS = (
+        {
+            'label'           : 'FITS persistence',
+            'purpose'         : 'Summarize FITS save policy as scientific source persistence, not ordinary display output.',
+            'related_fields'  : ('IMAGE_SAVE_FITS', 'IMAGE_SAVE_FITS_COMPRESSED', 'IMAGE_SAVE_FITS_PERIOD', 'IMAGE_SAVE_FITS_PRE_DARK'),
+            'future_editable' : 'blocked until Scientific Source policy is preserved',
+            'safety_note'     : 'This page does not create, inspect, convert, or download FITS files.',
+        },
+        {
+            'label'           : 'RAW/source persistence',
+            'purpose'         : 'Keep RAW/source export behavior separate from display-image save formats.',
+            'related_fields'  : ('IMAGE_EXPORT_RAW', 'FILETRANSFER__UPLOAD_RAW', 'FILETRANSFER__UPLOAD_FITS / S3UPLOAD__UPLOAD_FITS'),
+            'future_editable' : 'blocked until source export policy exists',
+            'safety_note'     : 'This page does not read source files or trigger remote upload/export behavior.',
+        },
+        {
+            'label'           : 'FITS headers',
+            'purpose'         : 'Show FITS header metadata as scientific context rather than generic raw config rows.',
+            'related_fields'  : ('FITSHEADERS__*_KEY / FITSHEADERS__*_VAL', 'CCD_BIT_DEPTH', 'IndiAllSkyDbFitsImageTable metadata'),
+            'future_editable' : 'yes after metadata validation policy',
+            'safety_note'     : 'Header edits must preserve metadata quality and avoid leaking sensitive values.',
+        },
+        {
+            'label'           : 'Upload/export source files',
+            'purpose'         : 'Document source-file upload/export flags without running network or filesystem actions.',
+            'related_fields'  : ('FILETRANSFER__UPLOAD_RAW', 'FILETRANSFER__UPLOAD_FITS', 'S3UPLOAD__UPLOAD_FITS', 'IMAGE_EXPORT_RAW'),
+            'future_editable' : 'blocked until upload/source action policy exists',
+            'safety_note'     : 'Remote operations, credential use, and source export actions remain out of scope here.',
+        },
+        {
+            'label'           : 'Retention and storage impact',
+            'purpose'         : 'Make source-data footprint visible with Raspberry Pi storage constraints in mind.',
+            'related_fields'  : ('IMAGE_FITS_EXPIRE_DAYS', 'IMAGE_RAW_EXPIRE_DAYS', 'IMAGE_FOLDER / IMAGE_EXPORT_FOLDER'),
+            'future_editable' : 'yes after retention/storage policy',
+            'safety_note'     : 'This page does not scan folders, estimate disk usage, or delete expired files.',
+        },
+        {
+            'label'           : 'Viewer/download safety boundary',
+            'purpose'         : 'Keep preview, conversion, and download actions separated from this read-only settings product page.',
+            'related_fields'  : ('Classic conversion route', 'Modern FITS inspection/detail', 'path allowlist / basename-only UI'),
+            'future_editable' : 'no from this page',
+            'safety_note'     : 'No fits2jpeg, file streaming, arbitrary path access, or download link is exposed here.',
+        },
+    )
+
     def get_context(self):
         context = super(ModernAdminFitsSourceSettingsView, self).get_context()
         fits_source_group = None
@@ -20548,9 +20593,24 @@ class ModernAdminFitsSourceSettingsView(ModernAdminSettingsInventoryView):
                 break
 
         context['modern_admin_fits_source_settings_group'] = fits_source_group
+        context['modern_admin_fits_source_overview_cards'] = self.get_fits_source_overview_cards()
         context['modern_admin_fits_source_config_sections'] = self.get_fits_source_config_sections()
         context['modern_admin_fits_source_proposed_layout'] = self.get_fits_source_proposed_layout()
         return context
+
+
+    def get_fits_source_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_settings_text(row.get('label')),
+                'purpose'         : self.safe_settings_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_settings_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_settings_text(row.get('future_editable')),
+                'safety_note'     : self.safe_settings_text(row.get('safety_note')),
+            }
+            for row in self.FITS_SOURCE_OVERVIEW_CARDS
+        )
 
 
     def get_fits_source_config_sections(self):

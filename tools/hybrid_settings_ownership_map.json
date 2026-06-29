@@ -223,7 +223,7 @@
         "Future UX should use Never, Periodic, Every frame, and Event-window buffered concepts."
       ],
       "preview_route": "/modern-admin/settings/fits-source",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "metadata": {
       "label": "Metadata",
