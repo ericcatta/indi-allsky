@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import indi_allsky.product_view_models as product_view_models
 from indi_allsky.product_view_models import build_now_view
+from indi_allsky.product_view_models import LatestFrameSummaryProvider
 from indi_allsky.product_view_models import validate_now_view_payload
 
 
@@ -51,6 +52,17 @@ SENSITIVE_PATTERNS = (
     'refresh_token',
     'client_secret',
 )
+
+
+class FakeLatestFrameRepository:
+    def __init__(self, metadata=None, raises=False):
+        self.metadata = metadata
+        self.raises = raises
+
+    def get_latest_frame_metadata(self):
+        if self.raises:
+            raise RuntimeError('fake repository failure')
+        return self.metadata
 
 
 def walk_payload(value):
@@ -145,13 +157,104 @@ def test_latest_frame_summary_contract_is_fake_safe():
     now_view = build_now_view()
     latest_frame = now_view['latest_frame_summary']
 
-    assert latest_frame['status'] == 'Latest frame summary pending backend source.'
+    assert latest_frame['status'] == 'No recent frame metadata available.'
     assert latest_frame['camera_label'] == 'Camera not evaluated yet'
     assert latest_frame['profile_label'] == 'Profile not evaluated yet'
     assert latest_frame['image_available'] is False
     assert latest_frame['safe_preview_url'] is None
     assert latest_frame['source_status'] == 'Source status not evaluated yet.'
-    assert latest_frame['data_status'] == 'future_backend_contract'
+    assert latest_frame['data_status'] == 'not_evaluated'
+
+
+def test_latest_frame_provider_with_frame_present():
+    provider = LatestFrameSummaryProvider(FakeLatestFrameRepository({
+        'camera_label': 'North Sky Camera',
+        'profile_label': 'Day/Night Primary',
+        'timestamp': '2026-06-29 05:32:10',
+        'age_label': '2 minutes ago',
+        'image_available': True,
+        'source_status': 'Metadata row available',
+    }))
+    latest_frame = provider.build()
+
+    assert latest_frame['status'] == 'Latest frame metadata available.'
+    assert latest_frame['camera_label'] == 'North Sky Camera'
+    assert latest_frame['profile_label'] == 'Day/Night Primary'
+    assert latest_frame['timestamp'] == '2026-06-29 05:32:10'
+    assert latest_frame['age_label'] == '2 minutes ago'
+    assert latest_frame['image_available'] is True
+    assert latest_frame['safe_preview_url'] is None
+    assert latest_frame['data_status'] == 'not_evaluated'
+    validate_now_view_payload(dict(build_now_view(latest_frame_provider=provider)))
+
+
+def test_latest_frame_provider_with_no_frame():
+    provider = LatestFrameSummaryProvider(FakeLatestFrameRepository(None))
+    latest_frame = provider.build()
+
+    assert latest_frame['status'] == 'No recent frame metadata available.'
+    assert latest_frame['image_available'] is False
+    assert latest_frame['safe_preview_url'] is None
+    assert latest_frame['data_status'] == 'not_evaluated'
+
+
+def test_latest_frame_provider_with_missing_timestamp():
+    provider = LatestFrameSummaryProvider(FakeLatestFrameRepository({
+        'camera_label': 'North Sky Camera',
+        'profile_label': 'Primary',
+        'image_available': True,
+        'source_status': 'Metadata row available',
+    }))
+    latest_frame = provider.build()
+
+    assert latest_frame['timestamp'] == 'Not evaluated yet'
+    assert latest_frame['age_label'] == 'Not evaluated yet'
+    assert latest_frame['safe_preview_url'] is None
+
+
+def test_latest_frame_provider_with_repository_error():
+    provider = LatestFrameSummaryProvider(FakeLatestFrameRepository(raises=True))
+    latest_frame = provider.build()
+
+    assert latest_frame['status'] == 'Latest frame metadata unavailable.'
+    assert latest_frame['source_status'] == 'Repository error.'
+    assert latest_frame['safe_preview_url'] is None
+    assert_no_sensitive_text(latest_frame)
+
+
+def test_latest_frame_provider_rejects_suspicious_metadata():
+    provider = LatestFrameSummaryProvider(FakeLatestFrameRepository({
+        'camera_label': 'North Sky Camera',
+        'profile_label': 'Primary',
+        'timestamp': '2026-06-29 05:32:10',
+        'age_label': '2 minutes ago',
+        'image_available': True,
+        'source_status': 'Metadata row available',
+        'filename': '/var/lib/indi-allsky/latest.jpg',
+    }))
+    latest_frame = provider.build()
+
+    assert latest_frame['status'] == 'Latest frame metadata rejected.'
+    assert latest_frame['image_available'] is False
+    assert latest_frame['safe_preview_url'] is None
+    assert 'filename' not in json.dumps(latest_frame, sort_keys=True).lower()
+    assert_no_absolute_paths(latest_frame)
+
+
+def test_build_now_view_accepts_injected_latest_frame_provider():
+    provider = LatestFrameSummaryProvider(FakeLatestFrameRepository({
+        'camera_label': 'North Sky Camera',
+        'profile_label': 'Primary',
+        'timestamp': '2026-06-29 05:32:10',
+        'age_label': '2 minutes ago',
+        'image_available': True,
+        'source_status': 'Metadata row available',
+    }))
+    now_view = build_now_view(latest_frame_provider=provider)
+
+    assert now_view['latest_frame_summary']['camera_label'] == 'North Sky Camera'
+    assert now_view['latest_frame_summary']['safe_preview_url'] is None
+    json.dumps(now_view, sort_keys=True)
 
 
 def test_safe_actions_are_metadata_only():
@@ -274,6 +377,7 @@ def test_product_view_model_module_has_no_framework_or_db_imports():
     assert 'import flask' not in source
     assert 'db.session' not in source
     assert 'open(' not in source
+    assert 'filename' not in source
 
 
 def main():
@@ -283,6 +387,12 @@ def main():
         test_build_now_view_has_explicit_placeholder_status,
         test_build_now_view_contains_no_sensitive_payload,
         test_latest_frame_summary_contract_is_fake_safe,
+        test_latest_frame_provider_with_frame_present,
+        test_latest_frame_provider_with_no_frame,
+        test_latest_frame_provider_with_missing_timestamp,
+        test_latest_frame_provider_with_repository_error,
+        test_latest_frame_provider_rejects_suspicious_metadata,
+        test_build_now_view_accepts_injected_latest_frame_provider,
         test_safe_actions_are_metadata_only,
         test_validate_now_view_payload_success,
         test_validate_now_view_payload_requires_sections,

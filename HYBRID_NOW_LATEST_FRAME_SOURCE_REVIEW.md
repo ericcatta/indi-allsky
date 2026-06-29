@@ -303,3 +303,19 @@ The provider tests should cover:
 - `safe_preview_url` remains `None`.
 
 Only after that should a DB-backed adapter be considered.
+
+## Mission 010 Update
+
+`LatestFrameSummaryProvider` now exists as a fake-repository-backed contract in
+`indi_allsky/product_view_models.py`.
+
+It remains framework-free and does not connect to Flask, database rows, runtime
+camera state, filesystem paths, RAW/FITS files, media generation, public latest
+routes, or preview URLs.
+
+The provider accepts only a small allowlisted metadata shape from an injected
+repository and returns a redacted "rejected" summary if unsupported or unsafe
+metadata appears. `safe_preview_url` remains `None`.
+
+The DB-backed adapter remains future work and should still be bounded to one
+latest image metadata row with no source path leakage.

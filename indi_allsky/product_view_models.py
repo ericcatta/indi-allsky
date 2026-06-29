@@ -99,6 +99,15 @@ NOW_LATEST_FRAME_REQUIRED_KEYS = frozenset((
     'is_placeholder',
 ))
 
+NOW_LATEST_FRAME_REPOSITORY_KEYS = frozenset((
+    'camera_label',
+    'profile_label',
+    'timestamp',
+    'age_label',
+    'image_available',
+    'source_status',
+))
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -169,6 +178,51 @@ class LatestFrameSummary:
         return asdict(self)
 
 
+class StaticLatestFrameRepository:
+    """Default repository for the static NowView contract."""
+
+    def get_latest_frame_metadata(self):
+        return None
+
+
+class LatestFrameSummaryProvider:
+    """Build a sanitized latest frame summary from an injected repository."""
+
+    def __init__(self, repository=None):
+        self.repository = repository or StaticLatestFrameRepository()
+
+    def build(self):
+        try:
+            metadata = self.repository.get_latest_frame_metadata()
+        except Exception:
+            return _build_latest_frame_repository_error_summary()
+
+        if not metadata:
+            return _build_latest_frame_no_row_summary()
+
+        try:
+            sanitized_metadata = _sanitize_latest_frame_metadata(metadata)
+        except ValueError:
+            return _build_latest_frame_rejected_summary()
+
+        return LatestFrameSummary(
+            id='latest_frame.repository',
+            label='Latest Frame Summary',
+            status='Latest frame metadata available.',
+            data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+            camera_label=sanitized_metadata['camera_label'],
+            profile_label=sanitized_metadata['profile_label'],
+            timestamp=sanitized_metadata['timestamp'],
+            age_label=sanitized_metadata['age_label'],
+            image_available=sanitized_metadata['image_available'],
+            safe_preview_url=None,
+            source_status=sanitized_metadata['source_status'],
+            note='Metadata accepted from injected repository. Preview remains disabled.',
+            evidence='Bounded latest frame metadata accepted; no preview URL or source path is exposed.',
+            is_placeholder=True,
+        ).to_dict()
+
+
 @dataclass(frozen=True)
 class NowMoment:
     id: str
@@ -210,7 +264,7 @@ class PrimaryQuestionAnswer:
         return asdict(self)
 
 
-def build_now_view():
+def build_now_view(latest_frame_provider=None):
     """Return the first backend-owned NowView contract.
 
     The payload is static and fake-safe by design. It gives the Product UI a
@@ -228,7 +282,7 @@ def build_now_view():
         'is_placeholder': True,
         'safe_actions_available': [],
         'current_sky': _build_current_sky(),
-        'latest_frame_summary': _build_latest_frame_summary(),
+        'latest_frame_summary': _build_latest_frame_summary(latest_frame_provider=latest_frame_provider),
         'sky_cycle_briefing': _build_sky_cycle_briefing(),
         'primary_question_answers': _build_primary_question_answers(),
         'evidence_summary': _build_evidence_summary(),
@@ -282,12 +336,17 @@ def _build_current_sky():
     ).to_dict()
 
 
-def _build_latest_frame_summary():
+def _build_latest_frame_summary(latest_frame_provider=None):
+    provider = latest_frame_provider or LatestFrameSummaryProvider()
+    return provider.build()
+
+
+def _build_latest_frame_no_row_summary():
     return LatestFrameSummary(
-        id='latest_frame.placeholder',
+        id='latest_frame.no_row',
         label='Latest Frame Summary',
-        status='Latest frame summary pending backend source.',
-        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        status='No recent frame metadata available.',
+        data_status=NOW_DATA_STATUS_NOT_EVALUATED,
         camera_label='Camera not evaluated yet',
         profile_label='Profile not evaluated yet',
         timestamp='Not evaluated yet',
@@ -295,8 +354,46 @@ def _build_latest_frame_summary():
         image_available=False,
         safe_preview_url=None,
         source_status='Source status not evaluated yet.',
-        note='Preview not connected yet.',
-        evidence='No latest image metadata source is connected in this fake/static provider.',
+        note='Repository returned no latest frame metadata.',
+        evidence='No bounded latest frame row is available from the injected repository.',
+        is_placeholder=True,
+    ).to_dict()
+
+
+def _build_latest_frame_repository_error_summary():
+    return LatestFrameSummary(
+        id='latest_frame.repository_error',
+        label='Latest Frame Summary',
+        status='Latest frame metadata unavailable.',
+        data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+        camera_label='Camera not evaluated yet',
+        profile_label='Profile not evaluated yet',
+        timestamp='Not evaluated yet',
+        age_label='Not evaluated yet',
+        image_available=False,
+        safe_preview_url=None,
+        source_status='Repository error.',
+        note='Latest frame repository failed; error details are not exposed.',
+        evidence='Provider returned a redacted repository error.',
+        is_placeholder=True,
+    ).to_dict()
+
+
+def _build_latest_frame_rejected_summary():
+    return LatestFrameSummary(
+        id='latest_frame.rejected',
+        label='Latest Frame Summary',
+        status='Latest frame metadata rejected.',
+        data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+        camera_label='Camera not evaluated yet',
+        profile_label='Profile not evaluated yet',
+        timestamp='Not evaluated yet',
+        age_label='Not evaluated yet',
+        image_available=False,
+        safe_preview_url=None,
+        source_status='Repository metadata rejected.',
+        note='Latest frame repository returned unsafe or unsupported metadata.',
+        evidence='No unsafe repository values are exposed in the NowView payload.',
         is_placeholder=True,
     ).to_dict()
 
@@ -570,6 +667,61 @@ def _validate_required_section(payload, section_key):
     value = payload.get(section_key)
     if value in (None, '', [], {}):
         raise ValueError('NowView section is missing or empty: {0:s}'.format(section_key))
+
+
+def _sanitize_latest_frame_metadata(metadata):
+    if not isinstance(metadata, dict):
+        raise ValueError('latest frame metadata must be a dict')
+
+    metadata_keys = set(metadata.keys())
+    unsupported_keys = metadata_keys.difference(NOW_LATEST_FRAME_REPOSITORY_KEYS)
+    if unsupported_keys:
+        raise ValueError('latest frame metadata contains unsupported keys')
+
+    for key, value in metadata.items():
+        key_lower = str(key).lower()
+        if any(token in key_lower for token in NOW_SENSITIVE_KEY_TOKENS):
+            raise ValueError('latest frame metadata contains sensitive keys')
+
+        if _latest_frame_value_is_unsafe(value):
+            raise ValueError('latest frame metadata contains unsafe values')
+
+    return {
+        'camera_label': _latest_frame_text(metadata.get('camera_label'), 'Camera not evaluated yet'),
+        'profile_label': _latest_frame_text(metadata.get('profile_label'), 'Profile not evaluated yet'),
+        'timestamp': _latest_frame_text(metadata.get('timestamp'), 'Not evaluated yet'),
+        'age_label': _latest_frame_text(metadata.get('age_label'), 'Not evaluated yet'),
+        'image_available': bool(metadata.get('image_available', False)),
+        'source_status': _latest_frame_text(metadata.get('source_status'), 'Source status not evaluated yet.'),
+    }
+
+
+def _latest_frame_text(value, fallback):
+    if value in (None, ''):
+        return fallback
+
+    if not isinstance(value, str):
+        return fallback
+
+    value = value.strip()
+    if not value:
+        return fallback
+
+    return value
+
+
+def _latest_frame_value_is_unsafe(value):
+    value_text = json.dumps(value, sort_keys=True).lower()
+    if NOW_ABSOLUTE_PATH_RE.search(value_text) or NOW_WINDOWS_PATH_RE.search(value_text):
+        return True
+
+    if any(token in value_text for token in NOW_SUSPICIOUS_URL_TOKENS):
+        return True
+
+    if any(token in value_text for token in NOW_SENSITIVE_KEY_TOKENS):
+        return True
+
+    return False
 
 
 def _validate_latest_frame_summary(summary):
