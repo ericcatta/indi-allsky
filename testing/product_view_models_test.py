@@ -14,9 +14,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import indi_allsky.product_view_models as product_view_models
 from indi_allsky.product_view_models import build_now_view
 from indi_allsky.product_view_models import build_current_phase_summary
+from indi_allsky.product_view_models import build_sky_cycle_report_view
 from indi_allsky.product_view_models import build_source_confidence_summary
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
+from indi_allsky.product_view_models import validate_sky_cycle_report_payload
 from indi_allsky.product_view_models import validate_now_view_payload
 
 
@@ -59,6 +61,26 @@ SENSITIVE_PATTERNS = (
     'refresh_token',
     'client_secret',
 )
+
+SKY_CYCLE_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/sky_cycle.html')
+
+REQUIRED_SKY_CYCLE_KEYS = {
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'cycle_summary',
+    'phase_timeline',
+    'moments_summary',
+    'outputs_summary',
+    'source_confidence_summary',
+    'observatory_health_summary',
+    'attention_items',
+    'metadata',
+}
 
 
 class FakeLatestFrameRepository:
@@ -189,6 +211,85 @@ def test_build_now_view_contains_no_sensitive_payload():
     assert_no_sensitive_text(now_view)
     assert_no_absolute_paths(now_view)
     assert_no_callables(now_view)
+
+
+def test_build_sky_cycle_report_view_returns_dict():
+    report = build_sky_cycle_report_view()
+
+    assert isinstance(report, dict)
+    assert REQUIRED_SKY_CYCLE_KEYS.issubset(report.keys())
+    assert report['metadata']['contract'] == 'SkyCycleReportView'
+
+
+def test_build_sky_cycle_report_view_is_json_serializable():
+    report = build_sky_cycle_report_view()
+    json.dumps(report, sort_keys=True)
+
+
+def test_build_sky_cycle_report_view_has_required_sections():
+    report = build_sky_cycle_report_view()
+
+    assert_section_status(report['cycle_summary'])
+    assert_section_status(report['moments_summary'])
+    assert_section_status(report['outputs_summary'])
+    assert_section_status(report['source_confidence_summary'])
+    assert_section_status(report['observatory_health_summary'])
+    assert_section_status(report['attention_items'])
+    assert isinstance(report['phase_timeline'], list)
+    assert [phase['phase'] for phase in report['phase_timeline']] == [
+        'day',
+        'sunset_twilight',
+        'night',
+        'sunrise_twilight',
+    ]
+
+    for phase in report['phase_timeline']:
+        assert_section_status(phase)
+
+
+def test_build_sky_cycle_report_view_contains_no_sensitive_payload():
+    report = build_sky_cycle_report_view()
+
+    assert_no_sensitive_text(report)
+    assert_no_absolute_paths(report)
+    assert_no_callables(report)
+
+
+def test_validate_sky_cycle_report_payload_success():
+    assert validate_sky_cycle_report_payload(build_sky_cycle_report_view()) is True
+
+
+def test_validate_sky_cycle_report_payload_requires_sections():
+    report = build_sky_cycle_report_view()
+    del report['cycle_summary']
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'cycle_summary' in str(e)
+    else:
+        raise AssertionError('missing sky cycle section should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_invalid_status():
+    report = build_sky_cycle_report_view()
+    report['cycle_summary']['data_status'] = 'live_runtime'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Invalid data_status' in str(e)
+    else:
+        raise AssertionError('invalid sky cycle status should fail validation')
+
+
+def test_sky_cycle_template_has_no_mutative_controls():
+    template_text = SKY_CYCLE_TEMPLATE.read_text(encoding='utf-8').lower()
+
+    assert '<form' not in template_text
+    assert 'post' not in template_text
+    assert 'fetch(' not in template_text
+    assert '/ajax/' not in template_text
 
 
 def test_current_phase_summary_maps_day():
@@ -614,6 +715,14 @@ def main():
         test_build_now_view_is_json_serializable,
         test_build_now_view_has_explicit_placeholder_status,
         test_build_now_view_contains_no_sensitive_payload,
+        test_build_sky_cycle_report_view_returns_dict,
+        test_build_sky_cycle_report_view_is_json_serializable,
+        test_build_sky_cycle_report_view_has_required_sections,
+        test_build_sky_cycle_report_view_contains_no_sensitive_payload,
+        test_validate_sky_cycle_report_payload_success,
+        test_validate_sky_cycle_report_payload_requires_sections,
+        test_validate_sky_cycle_report_payload_rejects_invalid_status,
+        test_sky_cycle_template_has_no_mutative_controls,
         test_current_phase_summary_maps_day,
         test_current_phase_summary_maps_night,
         test_current_phase_summary_maps_unknown,

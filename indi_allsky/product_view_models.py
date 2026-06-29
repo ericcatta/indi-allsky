@@ -163,6 +163,57 @@ NOW_SOURCE_CONFIDENCE_REQUIRED_KEYS = frozenset((
     'is_placeholder',
 ))
 
+SKY_CYCLE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'cycle_summary',
+    'phase_timeline',
+    'moments_summary',
+    'outputs_summary',
+    'source_confidence_summary',
+    'observatory_health_summary',
+    'attention_items',
+    'metadata',
+))
+
+SKY_CYCLE_REQUIRED_SECTIONS = frozenset((
+    'cycle_summary',
+    'moments_summary',
+    'outputs_summary',
+    'source_confidence_summary',
+    'observatory_health_summary',
+    'attention_items',
+))
+
+SKY_CYCLE_SUMMARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'title',
+    'cycle_label',
+    'data_status',
+    'current_phase',
+    'cycle_verdict',
+    'time_range_label',
+    'note',
+    'is_placeholder',
+))
+
+SKY_CYCLE_PHASE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'phase',
+    'status',
+    'data_status',
+    'time_range_label',
+    'note',
+    'is_placeholder',
+))
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -264,6 +315,38 @@ class SourceConfidenceSummary:
     note: str
     evidence: list
     next_backend_contract: str
+    is_placeholder: bool
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class SkyCycleSummary:
+    id: str
+    label: str
+    title: str
+    cycle_label: str
+    data_status: str
+    current_phase: str
+    cycle_verdict: str
+    time_range_label: str
+    note: str
+    is_placeholder: bool
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class SkyCyclePhase:
+    id: str
+    label: str
+    phase: str
+    status: str
+    data_status: str
+    time_range_label: str
+    note: str
     is_placeholder: bool
 
     def to_dict(self):
@@ -434,6 +517,30 @@ def build_now_view(latest_frame_provider=None, current_phase_night=None):
     return payload
 
 
+def build_sky_cycle_report_view():
+    """Return the first fake-safe Sky Cycle Report product contract."""
+    payload = {
+        'id': 'sky_cycle_report.placeholder',
+        'label': 'Sky Cycle Report',
+        'status': 'Read-only product prototype',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'generated_at': 'Not evaluated yet',
+        'is_placeholder': True,
+        'safe_actions_available': [],
+        'cycle_summary': _build_sky_cycle_report_summary(),
+        'phase_timeline': _build_sky_cycle_phase_timeline(),
+        'moments_summary': _build_sky_cycle_moments_summary(),
+        'outputs_summary': _build_sky_cycle_outputs_summary(),
+        'source_confidence_summary': build_source_confidence_summary(),
+        'observatory_health_summary': _build_sky_cycle_observatory_health_summary(),
+        'attention_items': _build_sky_cycle_attention_items(),
+        'metadata': _build_sky_cycle_metadata(),
+    }
+
+    validate_sky_cycle_report_payload(payload)
+    return payload
+
+
 def validate_now_view_payload(payload):
     """Validate a NowView payload before it reaches presentation templates."""
     if not isinstance(payload, dict):
@@ -448,6 +555,31 @@ def validate_now_view_payload(payload):
 
     _validate_current_phase_summary(payload.get('current_phase_summary'))
     _validate_latest_frame_summary(payload.get('latest_frame_summary'))
+    _validate_source_confidence_summary(payload.get('source_confidence_summary'))
+    _validate_data_statuses(payload)
+    _validate_no_callables(payload)
+    _validate_no_sensitive_keys(payload)
+    _validate_no_absolute_paths(payload)
+    _validate_safe_actions(payload)
+    _validate_json_safe(payload)
+
+    return True
+
+
+def validate_sky_cycle_report_payload(payload):
+    """Validate a Sky Cycle Report payload before template rendering."""
+    if not isinstance(payload, dict):
+        raise ValueError('SkyCycleReport payload must be a dict')
+
+    missing_keys = sorted(SKY_CYCLE_REQUIRED_KEYS.difference(payload.keys()))
+    if missing_keys:
+        raise ValueError('SkyCycleReport payload missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    for section_key in SKY_CYCLE_REQUIRED_SECTIONS:
+        _validate_required_section(payload, section_key)
+
+    _validate_sky_cycle_summary(payload.get('cycle_summary'))
+    _validate_sky_cycle_phase_timeline(payload.get('phase_timeline'))
     _validate_source_confidence_summary(payload.get('source_confidence_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
@@ -554,6 +686,126 @@ def build_source_confidence_summary():
         next_backend_contract='bounded source coverage summary',
         is_placeholder=True,
     ).to_dict()
+
+
+def _build_sky_cycle_report_summary():
+    return SkyCycleSummary(
+        id='sky_cycle.summary.placeholder',
+        label='Cycle Summary',
+        title='Sky Cycle Report',
+        cycle_label='Current or latest cycle not evaluated yet',
+        data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+        current_phase='Not evaluated yet',
+        cycle_verdict='Sky cycle data pending backend contract.',
+        time_range_label='Time range not evaluated yet',
+        note='This report is a read-only product prototype. It does not evaluate real cycle boundaries, source coverage, moments, outputs, or health.',
+        is_placeholder=True,
+    ).to_dict()
+
+
+def _build_sky_cycle_phase_timeline():
+    phases = (
+        SkyCyclePhase(
+            id='sky_cycle.phase.day',
+            label='Day',
+            phase='day',
+            status='not_evaluated',
+            data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+            time_range_label='Day range not evaluated yet',
+            note='Day phase placeholder pending a bounded Sky Cycle backend contract.',
+            is_placeholder=True,
+        ),
+        SkyCyclePhase(
+            id='sky_cycle.phase.sunset_twilight',
+            label='Sunset / Twilight',
+            phase='sunset_twilight',
+            status='not_evaluated',
+            data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+            time_range_label='Twilight range not evaluated yet',
+            note='Twilight classification is not evaluated in this prototype.',
+            is_placeholder=True,
+        ),
+        SkyCyclePhase(
+            id='sky_cycle.phase.night',
+            label='Night',
+            phase='night',
+            status='not_evaluated',
+            data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+            time_range_label='Night range not evaluated yet',
+            note='Night phase placeholder pending a bounded Sky Cycle backend contract.',
+            is_placeholder=True,
+        ),
+        SkyCyclePhase(
+            id='sky_cycle.phase.sunrise_twilight',
+            label='Sunrise / Twilight',
+            phase='sunrise_twilight',
+            status='not_evaluated',
+            data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+            time_range_label='Twilight range not evaluated yet',
+            note='Sunrise twilight classification is not evaluated in this prototype.',
+            is_placeholder=True,
+        ),
+    )
+
+    return [phase.to_dict() for phase in phases]
+
+
+def _build_sky_cycle_moments_summary():
+    return NowSection(
+        id='sky_cycle.moments.placeholder',
+        label='Notable Moments',
+        status='Moment detection not connected yet.',
+        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        is_placeholder=True,
+        summary='Meteors, clouds, lightning, clear windows, anomalies, and other moments require a future MomentSummary backend contract.',
+        note='No detector evidence is evaluated by this prototype.',
+    ).to_dict()
+
+
+def _build_sky_cycle_outputs_summary():
+    return NowSection(
+        id='sky_cycle.outputs.placeholder',
+        label='Generated Outputs',
+        status='Generated outputs pending rendering contract.',
+        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        is_placeholder=True,
+        summary='Best image, timelapse, keogram, startrail, and highlight readiness are not evaluated yet.',
+        note='No media generation, conversion, preview lookup, or filesystem read is performed.',
+    ).to_dict()
+
+
+def _build_sky_cycle_observatory_health_summary():
+    return NowSection(
+        id='sky_cycle.observatory_health.placeholder',
+        label='Observatory Health',
+        status='Observatory health not evaluated yet.',
+        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        is_placeholder=True,
+        summary='Camera, storage, source preservation, generation, upload, and integration health require bounded backend summaries.',
+        note='No runtime service checks are performed by this prototype.',
+    ).to_dict()
+
+
+def _build_sky_cycle_attention_items():
+    return NowSection(
+        id='sky_cycle.attention.placeholder',
+        label='Attention Items',
+        status='No attention data connected yet.',
+        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        is_placeholder=True,
+        summary='Warnings and blocked items will be summarized here after a safe AttentionItem backend contract exists.',
+        note='No notification, task, or safe-action execution is connected.',
+    ).to_dict()
+
+
+def _build_sky_cycle_metadata():
+    return {
+        'contract': 'SkyCycleReportView',
+        'contract_version': 'v1.static',
+        'source': 'build_sky_cycle_report_view',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'is_placeholder': True,
+    }
 
 
 def _build_latest_frame_no_row_summary():
@@ -1038,6 +1290,37 @@ def _validate_source_confidence_summary(summary):
 
     if not isinstance(summary['evidence'], list):
         raise ValueError('source_confidence_summary.evidence must be a list')
+
+
+def _validate_sky_cycle_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('cycle_summary must be a dict')
+
+    missing_keys = sorted(SKY_CYCLE_SUMMARY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('cycle_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at sky_cycle.cycle_summary: {0!r}'.format(summary['data_status']))
+
+
+def _validate_sky_cycle_phase_timeline(phase_timeline):
+    if not isinstance(phase_timeline, list):
+        raise ValueError('phase_timeline must be a list')
+
+    if not phase_timeline:
+        raise ValueError('phase_timeline must not be empty')
+
+    for index, phase in enumerate(phase_timeline):
+        if not isinstance(phase, dict):
+            raise ValueError('phase_timeline[{0:d}] must be a dict'.format(index))
+
+        missing_keys = sorted(SKY_CYCLE_PHASE_REQUIRED_KEYS.difference(phase.keys()))
+        if missing_keys:
+            raise ValueError('phase_timeline[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_keys)))
+
+        if phase['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+            raise ValueError('Invalid data_status at sky_cycle.phase_timeline[{0:d}]: {1!r}'.format(index, phase['data_status']))
 
 
 def _validate_data_statuses(value, path='now'):

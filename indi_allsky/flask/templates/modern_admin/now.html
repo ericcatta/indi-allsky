@@ -22,6 +22,7 @@
         <p class="modern-admin-note">Contract: <code>{{ modern_admin_now.metadata.contract }}</code> / <code>{{ modern_admin_now.metadata.contract_version }}</code>. Source: <code>{{ modern_admin_now.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle Report</a>
             <a href="{{ url_for('indi_allsky.modern_admin_view') }}">Modern dashboard</a>
             <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
             <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Settings index</a>

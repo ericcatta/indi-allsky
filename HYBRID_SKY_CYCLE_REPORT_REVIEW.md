@@ -1,0 +1,166 @@
+# HYBRID SKY CYCLE REPORT REVIEW
+
+## Purpose
+
+This review evaluates the first `/modern-admin/sky-cycle` product prototype.
+
+Sky Cycle Report is the second domain-first Product UI surface after Now v1. It
+is intentionally read-only, fake/static, contract-first, and Raspberry Pi 5
+first.
+
+## What It Does
+
+Sky Cycle Report v1 introduces a dedicated product surface for the question:
+
+```text
+What happened during the sky cycle?
+```
+
+It presents a sanitized placeholder contract with these sections:
+
+- cycle summary;
+- phase timeline;
+- moments summary;
+- generated outputs summary;
+- source confidence summary;
+- observatory health summary;
+- attention items;
+- metadata.
+
+The page links back to Now and keeps the product navigation moving from:
+
+```text
+Now -> Sky Cycle -> Phase -> Moment -> Source -> Output -> Look -> Observatory
+```
+
+## What Is Fake / Static
+
+Everything in Sky Cycle Report v1 is fake/static.
+
+Specifically:
+
+- cycle boundaries are not evaluated;
+- day/night/twilight ranges are not calculated;
+- twilight is explicitly `not_evaluated`;
+- moment detection is not connected;
+- generated output status is not connected;
+- source coverage is not calculated;
+- observatory health is not evaluated;
+- attention items are placeholders.
+
+This is deliberate. The goal is contract shape and product language, not live
+truth.
+
+## What Is Safe
+
+The prototype does not:
+
+- query the database;
+- scan the filesystem;
+- call `open()`;
+- read RAW/FITS/source data;
+- generate media;
+- create preview URLs;
+- call Classic AJAX endpoints;
+- expose actions;
+- POST/fetch from the browser;
+- modify Classic behavior.
+
+The view model is built in the backend product contract layer and validated
+before template rendering.
+
+## What Is Missing
+
+Sky Cycle Report cannot yet be considered useful product truth because it lacks:
+
+- a real SkyCycle object;
+- a real phase boundary model;
+- source coverage calculation;
+- source lineage;
+- MomentSummary backend data;
+- OutputSummary/backend readiness;
+- observatory health summary;
+- Flask integration tests for the new route.
+
+## Product Score
+
+Initial Sky Cycle Report score: 6.8/10.
+
+Why it scores above a pure mockup:
+
+- it is domain-first;
+- it follows Product Architecture;
+- it has a backend-owned contract;
+- it has validation;
+- it has a product route and template;
+- it is safe and RPi5-first;
+- it avoids Classic copy behavior.
+
+Why it is not higher:
+
+- no real cycle data;
+- no real moments;
+- no real outputs;
+- no real source coverage;
+- no real observatory health;
+- still mounted under `modern-admin`;
+- no integration tests.
+
+## Risks
+
+### Placeholder Drift
+
+Risk: medium.
+
+If more placeholder sections are added without real backend contracts, the page
+could become another aspirational dashboard.
+
+### Premature Runtime Data
+
+Risk: medium-high.
+
+The first real Sky Cycle data source must be chosen carefully. Cycle boundaries
+and source coverage can become expensive or incorrect if implemented casually.
+
+### RPi5 Load
+
+Risk: medium.
+
+Future cycle reports must avoid unbounded image/source scans, large joins, and
+runtime media inspection.
+
+### Product Language
+
+Risk: low-medium.
+
+The prototype is more product-oriented than admin-oriented, but some copy still
+mentions backend contracts. That is acceptable for v1 but should fade as real
+contracts arrive.
+
+## Next Mission Recommended
+
+Do not connect real DB/runtime data yet.
+
+Mission 021 should be a technical review to identify the safest first bounded
+Sky Cycle data source.
+
+Recommended focus:
+
+- cycle identity / time range candidate;
+- latest/current day-night context reuse;
+- existing image metadata timestamps;
+- whether a single bounded query can establish "latest cycle candidate" without
+  full cycle computation;
+- what must remain fake until a real SkyCycle backend object exists.
+
+The safest likely next step is not implementation. It is a source review similar
+to the latest-frame and current-phase reviews.
+
+## Final Verdict
+
+Sky Cycle Report v1 is a good second product surface prototype.
+
+It should now pause until a bounded source review identifies one safe real field
+to connect. The first real data should be small, cached or bounded, and should
+not require filesystem inspection, RAW/FITS reads, media generation, or full
+cycle computation.
