@@ -34,6 +34,7 @@ from ..modern_safe_action import run_modern_safe_action_dry_run
 from ..processing import ImageProcessor
 from ..product_view_models import build_now_view
 from ..product_view_models import build_highlights_view
+from ..product_view_models import build_moment_detail_view
 from ..product_view_models import build_sky_cycle_report_view
 from ..product_view_models import LatestFrameImageTableRepository
 from ..product_view_models import LatestFrameSummaryProvider
@@ -5847,6 +5848,7 @@ class ModernAdminView(TemplateView):
         nav_items = (
             ('Now', 'indi_allsky.modern_admin_now_view'),
             ('Highlights', 'indi_allsky.modern_admin_highlights_view'),
+            ('Moment', 'indi_allsky.modern_admin_moment_detail_view'),
             ('Dashboard', 'indi_allsky.modern_admin_view'),
             ('Cameras', 'indi_allsky.modern_admin_cameras_view'),
             ('Storage', 'indi_allsky.modern_admin_storage_view'),
@@ -7477,6 +7479,19 @@ class ModernAdminHighlightsView(TemplateView):
 
         session['admin_mode'] = 'modern'
         context['highlights_view'] = build_highlights_view()
+
+        return context
+
+
+class ModernAdminMomentDetailView(TemplateView):
+    page_title = 'Moment Detail'
+    decorators = [login_required]
+
+    def get_context(self):
+        context = super(ModernAdminMomentDetailView, self).get_context()
+
+        session['admin_mode'] = 'modern'
+        context['moment_detail'] = build_moment_detail_view()
 
         return context
 
@@ -25258,6 +25273,7 @@ bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.a
 bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
 bp_allsky.add_url_rule('/modern-admin/now', view_func=ModernAdminNowView.as_view('modern_admin_now_view', template_name='modern_admin/now.html'))
 bp_allsky.add_url_rule('/modern-admin/highlights', view_func=ModernAdminHighlightsView.as_view('modern_admin_highlights_view', template_name='modern_admin/highlights.html'))
+bp_allsky.add_url_rule('/modern-admin/moment', view_func=ModernAdminMomentDetailView.as_view('modern_admin_moment_detail_view', template_name='modern_admin/moment_detail.html'))
 bp_allsky.add_url_rule('/modern-admin/sky-cycle', view_func=ModernAdminSkyCycleView.as_view('modern_admin_sky_cycle_view', template_name='modern_admin/sky_cycle.html'))
 bp_allsky.add_url_rule('/modern-admin/safe-action/dry-run', view_func=ModernAdminSafeActionDryRunView.as_view('modern_admin_safe_action_dry_run_view'), methods=['POST'])
 bp_allsky.add_url_rule('/modern-admin/capture/service', view_func=ModernAdminCaptureServiceActionView.as_view('modern_admin_capture_service_action_view'))

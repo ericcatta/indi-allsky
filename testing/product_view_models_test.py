@@ -15,12 +15,14 @@ import indi_allsky.product_view_models as product_view_models
 from indi_allsky.product_view_models import build_now_view
 from indi_allsky.product_view_models import build_current_phase_summary
 from indi_allsky.product_view_models import build_highlights_view
+from indi_allsky.product_view_models import build_moment_detail_view
 from indi_allsky.product_view_models import build_sky_cycle_report_view
 from indi_allsky.product_view_models import build_source_confidence_summary
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
 from indi_allsky.product_view_models import validate_sky_cycle_report_payload
 from indi_allsky.product_view_models import validate_highlights_payload
+from indi_allsky.product_view_models import validate_moment_detail_payload
 from indi_allsky.product_view_models import validate_now_view_payload
 
 
@@ -66,6 +68,7 @@ SENSITIVE_PATTERNS = (
 
 SKY_CYCLE_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/sky_cycle.html')
 HIGHLIGHTS_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/highlights.html')
+MOMENT_DETAIL_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/moment_detail.html')
 
 REQUIRED_SKY_CYCLE_KEYS = {
     'id',
@@ -82,6 +85,23 @@ REQUIRED_SKY_CYCLE_KEYS = {
     'source_confidence_summary',
     'observatory_health_summary',
     'attention_items',
+    'metadata',
+}
+
+REQUIRED_MOMENT_DETAIL_KEYS = {
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'moment_summary',
+    'evidence_summary',
+    'source_trust_summary',
+    'related_outputs',
+    'sky_cycle_context',
+    'observatory_context',
     'metadata',
 }
 
@@ -555,6 +575,192 @@ def test_validate_highlights_payload_rejects_path_secret_callable():
 
 def test_highlights_template_has_no_mutative_controls():
     template_text = HIGHLIGHTS_TEMPLATE.read_text(encoding='utf-8').lower()
+
+    assert '<form' not in template_text
+    assert 'post' not in template_text
+    assert 'fetch' not in template_text
+    assert '/ajax/' not in template_text
+
+
+def test_build_moment_detail_view_returns_dict():
+    moment = build_moment_detail_view()
+
+    assert isinstance(moment, dict)
+    assert REQUIRED_MOMENT_DETAIL_KEYS.issubset(moment.keys())
+    assert moment['id'] == 'moment_detail.placeholder'
+    assert moment['metadata']['contract'] == 'MomentDetailView'
+
+
+def test_build_moment_detail_view_is_json_serializable():
+    moment = build_moment_detail_view()
+
+    json.dumps(moment, sort_keys=True)
+
+
+def test_build_moment_detail_view_has_required_sections():
+    moment = build_moment_detail_view()
+
+    assert_section_status(moment['moment_summary'])
+    assert_section_status(moment['evidence_summary'])
+    assert_section_status(moment['source_trust_summary'])
+    assert_section_status(moment['related_outputs'])
+    assert_section_status(moment['sky_cycle_context'])
+    assert_section_status(moment['observatory_context'])
+
+    assert moment['moment_summary']['type'] in {
+        'meteor_candidate',
+        'aurora_candidate',
+        'lightning_candidate',
+        'storm_activity',
+        'clouds',
+        'clear_window',
+        'sunrise',
+        'sunset',
+        'moon',
+        'sky_quality',
+        'camera_anomaly',
+        'generation_issue',
+        'unknown',
+    }
+    assert moment['moment_summary']['phase'] in {
+        'day',
+        'sunset_twilight',
+        'night',
+        'sunrise_twilight',
+        'unknown',
+    }
+    assert isinstance(moment['evidence_summary']['evidence'], list)
+    assert isinstance(moment['related_outputs']['outputs'], list)
+    for output in moment['related_outputs']['outputs']:
+        assert output['type'] in {
+            'best_image',
+            'latest_image',
+            'timelapse',
+            'keogram',
+            'startrail',
+            'highlight_clip',
+            'unknown',
+        }
+
+
+def test_build_moment_detail_view_contains_no_sensitive_payload():
+    moment = build_moment_detail_view()
+
+    assert_no_sensitive_text(moment)
+    assert_no_absolute_paths(moment)
+    assert_no_callables(moment)
+
+
+def test_validate_moment_detail_payload_success():
+    assert validate_moment_detail_payload(build_moment_detail_view()) is True
+
+
+def test_validate_moment_detail_payload_requires_sections():
+    moment = build_moment_detail_view()
+    del moment['moment_summary']
+
+    try:
+        validate_moment_detail_payload(moment)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('missing moment_summary should fail validation')
+
+
+def test_validate_moment_detail_payload_rejects_invalid_type():
+    moment = build_moment_detail_view()
+    moment['moment_summary']['type'] = 'gallery_item'
+
+    try:
+        validate_moment_detail_payload(moment)
+    except ValueError as e:
+        assert 'Invalid Moment type' in str(e)
+    else:
+        raise AssertionError('invalid Moment type should fail validation')
+
+
+def test_validate_moment_detail_payload_rejects_invalid_phase():
+    moment = build_moment_detail_view()
+    moment['moment_summary']['phase'] = 'golden_hour'
+
+    try:
+        validate_moment_detail_payload(moment)
+    except ValueError as e:
+        assert 'Invalid Moment phase' in str(e)
+    else:
+        raise AssertionError('invalid Moment phase should fail validation')
+
+
+def test_validate_moment_detail_payload_rejects_evidence_not_list():
+    moment = build_moment_detail_view()
+    moment['evidence_summary']['evidence'] = 'Detector evidence pending'
+
+    try:
+        validate_moment_detail_payload(moment)
+    except ValueError as e:
+        assert 'evidence must be a list' in str(e)
+    else:
+        raise AssertionError('Moment evidence string should fail validation')
+
+
+def test_validate_moment_detail_payload_rejects_invalid_output_type():
+    moment = build_moment_detail_view()
+    moment['related_outputs']['outputs'][0]['type'] = 'share_card'
+
+    try:
+        validate_moment_detail_payload(moment)
+    except ValueError as e:
+        assert 'Invalid related output type' in str(e)
+    else:
+        raise AssertionError('invalid related output type should fail validation')
+
+
+def test_validate_moment_detail_payload_rejects_output_not_list():
+    moment = build_moment_detail_view()
+    moment['related_outputs']['outputs'] = 'No output connected'
+
+    try:
+        validate_moment_detail_payload(moment)
+    except ValueError as e:
+        assert 'outputs must be a list' in str(e)
+    else:
+        raise AssertionError('Moment output string should fail validation')
+
+
+def test_validate_moment_detail_payload_rejects_path_secret_callable():
+    moment = build_moment_detail_view()
+    moment['evidence_summary']['evidence'].append('/var/lib/indi-allsky/source.fit')
+
+    try:
+        validate_moment_detail_payload(moment)
+    except ValueError as e:
+        assert 'Absolute paths' in str(e)
+    else:
+        raise AssertionError('Moment evidence path should fail validation')
+
+    moment = build_moment_detail_view()
+    moment['source_trust_summary']['note'] = {'secret': 'value'}
+
+    try:
+        validate_moment_detail_payload(moment)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('Moment secret should fail validation')
+
+    moment = build_moment_detail_view()
+    moment['observatory_context']['note'] = lambda: None
+
+    try:
+        validate_moment_detail_payload(moment)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('Moment callable should fail validation')
+
+
+def test_moment_detail_template_has_no_mutative_controls():
+    template_text = MOMENT_DETAIL_TEMPLATE.read_text(encoding='utf-8').lower()
 
     assert '<form' not in template_text
     assert 'post' not in template_text
@@ -1338,6 +1544,19 @@ def main():
         test_validate_highlights_payload_rejects_direct_safe_action,
         test_validate_highlights_payload_rejects_path_secret_callable,
         test_highlights_template_has_no_mutative_controls,
+        test_build_moment_detail_view_returns_dict,
+        test_build_moment_detail_view_is_json_serializable,
+        test_build_moment_detail_view_has_required_sections,
+        test_build_moment_detail_view_contains_no_sensitive_payload,
+        test_validate_moment_detail_payload_success,
+        test_validate_moment_detail_payload_requires_sections,
+        test_validate_moment_detail_payload_rejects_invalid_type,
+        test_validate_moment_detail_payload_rejects_invalid_phase,
+        test_validate_moment_detail_payload_rejects_evidence_not_list,
+        test_validate_moment_detail_payload_rejects_invalid_output_type,
+        test_validate_moment_detail_payload_rejects_output_not_list,
+        test_validate_moment_detail_payload_rejects_path_secret_callable,
+        test_moment_detail_template_has_no_mutative_controls,
         test_validate_sky_cycle_report_payload_success,
         test_validate_sky_cycle_report_payload_requires_sections,
         test_validate_sky_cycle_report_payload_rejects_invalid_status,

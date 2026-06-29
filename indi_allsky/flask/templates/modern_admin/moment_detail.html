@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-moment-detail-product-v1') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="moment-title">
+    <header class="modern-admin-table-panel" aria-label="Moment Detail product view">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Hybrid AllSky / Moment</p>
+                <h1 id="moment-title">{{ moment_detail.moment_summary.title }}</h1>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ moment_detail.data_status | replace('_', ' ') | title }}</span>
+        </div>
+
+        <h2>{{ moment_detail.moment_summary.selection_reason }}</h2>
+        <p class="modern-admin-note">{{ moment_detail.moment_summary.note }}</p>
+        <p class="modern-admin-note">Contract: <code>{{ moment_detail.metadata.contract }}</code> / <code>{{ moment_detail.metadata.contract_version }}</code>. Source: <code>{{ moment_detail.metadata.source }}</code>.</p>
+
+        <div class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle Report</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
+        </div>
+    </header>
+
+    <section class="modern-admin-table-panel" aria-labelledby="moment-case-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Case analysis</p>
+                <h2 id="moment-case-title">Why This Moment Is Shown</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ moment_detail.moment_summary.confidence_label }}</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Moment case summary">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">What happened</div>
+                <h3>{{ moment_detail.moment_summary.type | replace('_', ' ') | title }}</h3>
+                <p><strong>Phase:</strong> {{ moment_detail.moment_summary.phase | replace('_', ' ') | title }}</p>
+                <p><strong>Time:</strong> {{ moment_detail.moment_summary.timestamp_label }}</p>
+                <p><strong>Status:</strong> {{ moment_detail.moment_summary.data_status | replace('_', ' ') | title }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Selection reason</div>
+                <h3>Explainable attention</h3>
+                <p>{{ moment_detail.moment_summary.selection_reason }}</p>
+                <p>{{ moment_detail.evidence_summary.explanation }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Trust boundary</div>
+                <h3>{{ moment_detail.source_trust_summary.confidence }}</h3>
+                <p>{{ moment_detail.source_trust_summary.source_status }}</p>
+                <p>{{ moment_detail.source_trust_summary.lineage_status }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="moment-evidence-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Evidence</p>
+                <h2 id="moment-evidence-title">Detection and Explanation</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ moment_detail.evidence_summary.data_status | replace('_', ' ') | title }}</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Moment evidence">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Detector status</div>
+                <h3>{{ moment_detail.evidence_summary.detector_status }}</h3>
+                <p>{{ moment_detail.evidence_summary.science_note }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Evidence list</div>
+                <h3>Evidence pending contract</h3>
+                {% for evidence_item in moment_detail.evidence_summary.evidence %}
+                    <p>{{ evidence_item }}</p>
+                {% endfor %}
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Source trust</div>
+                <h3>{{ moment_detail.source_trust_summary.label }}</h3>
+                <p>{{ moment_detail.source_trust_summary.preservation_status }}</p>
+                <p>{{ moment_detail.source_trust_summary.note }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="moment-context-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Context</p>
+                <h2 id="moment-context-title">Output, Cycle, and Observatory Context</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+
+        <section class="modern-admin-status-grid" aria-label="Moment related context">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ moment_detail.related_outputs.label }}</div>
+                <h3>{{ moment_detail.related_outputs.generation_status }}</h3>
+                <p>{{ moment_detail.related_outputs.look_status }}</p>
+                {% for output in moment_detail.related_outputs.outputs %}
+                    <p><strong>{{ output.label }}:</strong> {{ output.status }} {{ output.source_lineage_status }}</p>
+                {% endfor %}
+                <p>{{ moment_detail.related_outputs.note }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ moment_detail.sky_cycle_context.label }}</div>
+                <h3>{{ moment_detail.sky_cycle_context.cycle_label }}</h3>
+                <p><strong>Phase:</strong> {{ moment_detail.sky_cycle_context.phase | replace('_', ' ') | title }}</p>
+                <p>{{ moment_detail.sky_cycle_context.position_in_cycle }}</p>
+                <p>{{ moment_detail.sky_cycle_context.note }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ moment_detail.observatory_context.label }}</div>
+                <h3>{{ moment_detail.observatory_context.health_summary }}</h3>
+                <p><strong>Camera:</strong> {{ moment_detail.observatory_context.camera }}</p>
+                <p><strong>Capture:</strong> {{ moment_detail.observatory_context.capture }}</p>
+                <p>{{ moment_detail.observatory_context.note }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="moment-boundary-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Boundary</p>
+                <h2 id="moment-boundary-title">Static Product Contract</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">No actions</span>
+        </div>
+        <p class="modern-admin-note">This page is a static Moment Detail contract. It does not evaluate detector, source, media, observatory, preview, external delivery, or confirmation behavior.</p>
+    </section>
+</main>
+{% endblock %}

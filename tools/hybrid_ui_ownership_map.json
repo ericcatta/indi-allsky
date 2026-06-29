@@ -75,6 +75,7 @@
                 "/modern-admin/fits",
                 "/modern-admin/highlights",
                 "/modern-admin/media/*",
+        "/modern-admin/moment",
         "/modern-admin/mode/*",
         "/modern-admin/now",
         "/modern-admin/sky-cycle",
@@ -135,6 +136,7 @@
         "modern_admin/longterm_keogram.html",
         "modern_admin/mask.html",
         "modern_admin/media_list.html",
+        "modern_admin/moment_detail.html",
         "modern_admin/now.html",
         "modern_admin/sky_cycle.html",
         "modern_admin/notifications.html",
@@ -179,6 +181,7 @@
         "/modern-admin/cameras/start-indi",
                 "modern_admin_now_view",
                 "modern_admin_highlights_view",
+                "modern_admin_moment_detail_view",
                 "modern_admin_sky_cycle_view",
         "modern_admin_uploads_view",
         "modern_admin_media_image_detail_view",
@@ -862,6 +865,42 @@
       "removal_risk": "critical",
       "notes": [
         "Third concrete surface for the domain-first Product UI.",
+        "Read-only, no controls, no runtime data evaluation.",
+        "Owner label is Modern Product UI; static route/template ownership remains classified as modern."
+      ]
+    },
+    "moment_detail_product_prototype": {
+      "label": "Moment Detail Product Prototype",
+      "status": "PRODUCT PROTOTYPE READ-ONLY",
+      "owner": "modern_product_ui",
+      "porting_priority": "product_prototype",
+      "routes": [
+        "/modern-admin/moment"
+      ],
+      "templates": [
+        "modern_admin/moment_detail.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "modern_admin_moment_detail_view"
+      ],
+      "config_keys": [],
+      "protected": true,
+      "safety": "Read-only static Moment Detail view-model prototype. No database, detector, filesystem, RAW/FITS, media read, media generation, preview URL, download, share, or actions.",
+      "blockers": [
+        "Real Moment backend contract",
+        "Highlight target references",
+        "Detector evidence adapter",
+        "Source trust and lineage contracts",
+        "Related output contract",
+        "Safe actions for any future interaction"
+      ],
+      "modern_gap": "Prototype uses static sanitized placeholders until product domain contracts provide real Moment evidence, source trust, and related outputs.",
+      "removal_risk": "critical",
+      "notes": [
+        "Fourth concrete surface for the domain-first Product UI.",
         "Read-only, no controls, no runtime data evaluation.",
         "Owner label is Modern Product UI; static route/template ownership remains classified as modern."
       ]

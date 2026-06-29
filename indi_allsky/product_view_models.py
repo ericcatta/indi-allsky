@@ -477,6 +477,138 @@ HIGHLIGHT_ALLOWED_ORIGINS = frozenset((
     'unknown',
 ))
 
+MOMENT_DETAIL_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'moment_summary',
+    'evidence_summary',
+    'source_trust_summary',
+    'related_outputs',
+    'sky_cycle_context',
+    'observatory_context',
+    'metadata',
+))
+
+MOMENT_DETAIL_REQUIRED_SECTIONS = frozenset((
+    'moment_summary',
+    'evidence_summary',
+    'source_trust_summary',
+    'related_outputs',
+    'sky_cycle_context',
+    'observatory_context',
+))
+
+MOMENT_DETAIL_SUMMARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'title',
+    'type',
+    'phase',
+    'timestamp_label',
+    'confidence_label',
+    'data_status',
+    'selection_reason',
+    'note',
+    'is_placeholder',
+))
+
+MOMENT_DETAIL_EVIDENCE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'evidence',
+    'detector_status',
+    'explanation',
+    'science_note',
+    'is_placeholder',
+))
+
+MOMENT_DETAIL_SOURCE_TRUST_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'source_status',
+    'lineage_status',
+    'preservation_status',
+    'confidence',
+    'note',
+    'is_placeholder',
+))
+
+MOMENT_DETAIL_RELATED_OUTPUTS_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'generation_status',
+    'look_status',
+    'outputs',
+    'note',
+    'is_placeholder',
+))
+
+MOMENT_DETAIL_OUTPUT_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'type',
+    'status',
+    'data_status',
+    'source_lineage_status',
+    'is_placeholder',
+))
+
+MOMENT_DETAIL_SKY_CYCLE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'phase',
+    'cycle_label',
+    'position_in_cycle',
+    'note',
+    'is_placeholder',
+))
+
+MOMENT_DETAIL_OBSERVATORY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'camera',
+    'capture',
+    'health_summary',
+    'note',
+    'is_placeholder',
+))
+
+MOMENT_DETAIL_ALLOWED_TYPES = frozenset((
+    'meteor_candidate',
+    'aurora_candidate',
+    'lightning_candidate',
+    'storm_activity',
+    'clouds',
+    'clear_window',
+    'sunrise',
+    'sunset',
+    'moon',
+    'sky_quality',
+    'camera_anomaly',
+    'generation_issue',
+    'unknown',
+))
+
+MOMENT_DETAIL_ALLOWED_OUTPUT_TYPES = frozenset((
+    'best_image',
+    'latest_image',
+    'timelapse',
+    'keogram',
+    'startrail',
+    'highlight_clip',
+    'unknown',
+))
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -837,6 +969,29 @@ def build_highlights_view():
     return payload
 
 
+def build_moment_detail_view():
+    """Return the first fake-safe Moment Detail product contract."""
+    payload = {
+        'id': 'moment_detail.placeholder',
+        'label': 'Moment Detail',
+        'status': 'Read-only product prototype',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'generated_at': 'Not evaluated yet',
+        'is_placeholder': True,
+        'safe_actions_available': [],
+        'moment_summary': _build_moment_detail_summary(),
+        'evidence_summary': _build_moment_detail_evidence_summary(),
+        'source_trust_summary': _build_moment_detail_source_trust_summary(),
+        'related_outputs': _build_moment_detail_related_outputs(),
+        'sky_cycle_context': _build_moment_detail_sky_cycle_context(),
+        'observatory_context': _build_moment_detail_observatory_context(),
+        'metadata': _build_moment_detail_metadata(),
+    }
+
+    validate_moment_detail_payload(payload)
+    return payload
+
+
 def validate_now_view_payload(payload):
     """Validate a NowView payload before it reaches presentation templates."""
     if not isinstance(payload, dict):
@@ -879,6 +1034,34 @@ def validate_highlights_payload(payload):
     _validate_highlights_source_trust_summary(payload.get('source_trust_summary'))
     _validate_highlights_review_queue_summary(payload.get('review_queue_summary'))
     _validate_highlights_selection_policy_summary(payload.get('selection_policy_summary'))
+    _validate_data_statuses(payload)
+    _validate_no_callables(payload)
+    _validate_no_sensitive_keys(payload)
+    _validate_no_absolute_paths(payload)
+    _validate_safe_actions(payload)
+    _validate_json_safe(payload)
+
+    return True
+
+
+def validate_moment_detail_payload(payload):
+    """Validate a Moment Detail payload before template rendering."""
+    if not isinstance(payload, dict):
+        raise ValueError('MomentDetail payload must be a dict')
+
+    missing_keys = sorted(MOMENT_DETAIL_REQUIRED_KEYS.difference(payload.keys()))
+    if missing_keys:
+        raise ValueError('MomentDetail payload missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    for section_key in MOMENT_DETAIL_REQUIRED_SECTIONS:
+        _validate_required_section(payload, section_key)
+
+    _validate_moment_detail_summary(payload.get('moment_summary'))
+    _validate_moment_detail_evidence_summary(payload.get('evidence_summary'))
+    _validate_moment_detail_source_trust_summary(payload.get('source_trust_summary'))
+    _validate_moment_detail_related_outputs(payload.get('related_outputs'))
+    _validate_moment_detail_sky_cycle_context(payload.get('sky_cycle_context'))
+    _validate_moment_detail_observatory_context(payload.get('observatory_context'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
     _validate_no_sensitive_keys(payload)
@@ -1518,6 +1701,113 @@ def _build_highlights_metadata():
         'contract': 'HighlightsView',
         'contract_version': 'v1.static',
         'source': 'build_highlights_view',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'is_placeholder': True,
+        'rp5_policy': 'No database, detector, filesystem, media generation, preview URL, or runtime health check.',
+    }
+
+
+def _build_moment_detail_summary():
+    return {
+        'id': 'moment.summary.placeholder',
+        'label': 'Moment Summary',
+        'title': 'Possible meteor candidate',
+        'type': 'meteor_candidate',
+        'phase': 'night',
+        'timestamp_label': 'Timestamp not evaluated yet',
+        'confidence_label': 'Confidence not evaluated yet',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'selection_reason': 'Selected because: brightness changed across consecutive frames; detector evidence is not connected yet.',
+        'note': 'This read-only prototype explains why Hybrid would show this Moment without claiming real detection.',
+        'is_placeholder': True,
+    }
+
+
+def _build_moment_detail_evidence_summary():
+    return {
+        'id': 'moment.evidence.placeholder',
+        'label': 'Evidence Summary',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'evidence': [
+            'Detector evidence not connected yet.',
+            'Brightness changed across four consecutive frames is placeholder microcopy.',
+            'No source frames are read by this prototype.',
+        ],
+        'detector_status': 'Detector evidence not connected yet.',
+        'explanation': 'Hybrid would show this case because a bounded future detector or Highlight target says it deserves review.',
+        'science_note': 'Scientific confidence requires detector evidence, source lineage, and preservation status.',
+        'is_placeholder': True,
+    }
+
+
+def _build_moment_detail_source_trust_summary():
+    return {
+        'id': 'moment.source_trust.placeholder',
+        'label': 'Source Trust',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'source_status': 'Source status not evaluated yet.',
+        'lineage_status': 'Source lineage pending source contract.',
+        'preservation_status': 'Source preservation not evaluated in this prototype.',
+        'confidence': 'Unknown until source trust contract exists.',
+        'note': 'Moment confidence should not be trusted until source lineage and preservation are connected.',
+        'is_placeholder': True,
+    }
+
+
+def _build_moment_detail_related_outputs():
+    return {
+        'id': 'moment.related_outputs.placeholder',
+        'label': 'Related Outputs',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'generation_status': 'Generated output status pending rendering contract.',
+        'look_status': 'Look policy not connected yet.',
+        'outputs': [
+            {
+                'id': 'moment.output.placeholder',
+                'label': 'Potential highlight clip',
+                'type': 'highlight_clip',
+                'status': 'Output not generated or evaluated here.',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'source_lineage_status': 'Source lineage pending source contract.',
+                'is_placeholder': True,
+            },
+        ],
+        'note': 'Related outputs are placeholders until Output Detail and rendering contracts exist.',
+        'is_placeholder': True,
+    }
+
+
+def _build_moment_detail_sky_cycle_context():
+    return {
+        'id': 'moment.sky_cycle_context.placeholder',
+        'label': 'Sky Cycle Context',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'phase': 'night',
+        'cycle_label': 'Sky Cycle not evaluated yet',
+        'position_in_cycle': 'Position in cycle pending backend contract.',
+        'note': 'Sky Cycle context is intentionally static until a bounded cycle context provider exists.',
+        'is_placeholder': True,
+    }
+
+
+def _build_moment_detail_observatory_context():
+    return {
+        'id': 'moment.observatory_context.placeholder',
+        'label': 'Observatory Context',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'camera': 'Camera not evaluated yet',
+        'capture': 'Capture status not evaluated here.',
+        'health_summary': 'Observatory health pending bounded backend contract.',
+        'note': 'No live service check, camera connection, or runtime health evaluation is performed.',
+        'is_placeholder': True,
+    }
+
+
+def _build_moment_detail_metadata():
+    return {
+        'contract': 'MomentDetailView',
+        'contract_version': 'v1.static',
+        'source': 'build_moment_detail_view',
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
         'is_placeholder': True,
         'rp5_policy': 'No database, detector, filesystem, media generation, preview URL, or runtime health check.',
@@ -2230,6 +2520,107 @@ def _validate_highlights_selection_policy_summary(summary):
     invalid_origins = sorted(set(summary['allowed_origins']).difference(HIGHLIGHT_ALLOWED_ORIGINS))
     if invalid_origins:
         raise ValueError('Invalid Highlight origins at highlights.selection_policy_summary: {0:s}'.format(', '.join(invalid_origins)))
+
+
+def _validate_moment_detail_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('moment_summary must be a dict')
+
+    missing_keys = sorted(MOMENT_DETAIL_SUMMARY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('moment_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['type'] not in MOMENT_DETAIL_ALLOWED_TYPES:
+        raise ValueError('Invalid Moment type at moment_detail.moment_summary: {0!r}'.format(summary['type']))
+
+    if summary['phase'] not in SKY_CYCLE_ALLOWED_PHASES:
+        raise ValueError('Invalid Moment phase at moment_detail.moment_summary: {0!r}'.format(summary['phase']))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at moment_detail.moment_summary: {0!r}'.format(summary['data_status']))
+
+
+def _validate_moment_detail_evidence_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('evidence_summary must be a dict')
+
+    missing_keys = sorted(MOMENT_DETAIL_EVIDENCE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('evidence_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at moment_detail.evidence_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['evidence'], list):
+        raise ValueError('evidence_summary.evidence must be a list')
+
+
+def _validate_moment_detail_source_trust_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('source_trust_summary must be a dict')
+
+    missing_keys = sorted(MOMENT_DETAIL_SOURCE_TRUST_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('source_trust_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at moment_detail.source_trust_summary: {0!r}'.format(summary['data_status']))
+
+
+def _validate_moment_detail_related_outputs(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('related_outputs must be a dict')
+
+    missing_keys = sorted(MOMENT_DETAIL_RELATED_OUTPUTS_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('related_outputs missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at moment_detail.related_outputs: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['outputs'], list):
+        raise ValueError('related_outputs.outputs must be a list')
+
+    for index, output in enumerate(summary['outputs']):
+        if not isinstance(output, dict):
+            raise ValueError('related_outputs.outputs[{0:d}] must be a dict'.format(index))
+
+        missing_output_keys = sorted(MOMENT_DETAIL_OUTPUT_REQUIRED_KEYS.difference(output.keys()))
+        if missing_output_keys:
+            raise ValueError('related_outputs.outputs[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_output_keys)))
+
+        if output['type'] not in MOMENT_DETAIL_ALLOWED_OUTPUT_TYPES:
+            raise ValueError('Invalid related output type at moment_detail.related_outputs.outputs[{0:d}]: {1!r}'.format(index, output['type']))
+
+        if output['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+            raise ValueError('Invalid data_status at moment_detail.related_outputs.outputs[{0:d}]: {1!r}'.format(index, output['data_status']))
+
+
+def _validate_moment_detail_sky_cycle_context(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('sky_cycle_context must be a dict')
+
+    missing_keys = sorted(MOMENT_DETAIL_SKY_CYCLE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('sky_cycle_context missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['phase'] not in SKY_CYCLE_ALLOWED_PHASES:
+        raise ValueError('Invalid phase at moment_detail.sky_cycle_context: {0!r}'.format(summary['phase']))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at moment_detail.sky_cycle_context: {0!r}'.format(summary['data_status']))
+
+
+def _validate_moment_detail_observatory_context(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('observatory_context must be a dict')
+
+    missing_keys = sorted(MOMENT_DETAIL_OBSERVATORY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('observatory_context missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at moment_detail.observatory_context: {0!r}'.format(summary['data_status']))
 
 
 def _validate_data_statuses(value, path='now'):
