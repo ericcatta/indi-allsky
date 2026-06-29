@@ -19428,6 +19428,51 @@ class ModernAdminExposureGainSettingsView(ModernAdminSettingsInventoryView):
         },
     )
 
+    EXPOSURE_GAIN_OVERVIEW_CARDS = (
+        {
+            'label'           : 'Manual exposure limits',
+            'purpose'         : 'Summarize the safe boundaries that constrain manual exposure values.',
+            'related_fields'  : ('CCD_EXPOSURE_MIN / exposure_min', 'CCD_EXPOSURE_DEF / exposure_default', 'CCD_EXPOSURE_MAX / exposure_max', 'CCD_EXPOSURE_TIMEOUT / exposure_timeout'),
+            'future_editable' : 'yes after profile-safe validation',
+            'safety_note'     : 'Future edits must respect camera/backend limits and profile ownership.',
+        },
+        {
+            'label'           : 'Day/night exposure cadence',
+            'purpose'         : 'Separate day and night cadence behavior so capture timing stays understandable.',
+            'related_fields'  : ('EXPOSURE_PERIOD / exposure_period', 'EXPOSURE_PERIOD_DAY / exposure_period_day', 'CCD_EXPOSURE_MIN_DAY / exposure_min_day'),
+            'future_editable' : 'yes after capture cadence validation',
+            'safety_note'     : 'Cadence changes can affect capture throughput and should remain profile-aware.',
+        },
+        {
+            'label'           : 'Manual gain profiles',
+            'purpose'         : 'Group day, night, and capped gain values as profile-specific camera behavior.',
+            'related_fields'  : ('CCD_CONFIG.NIGHT.GAIN / gain_night', 'CCD_CONFIG.DAY.GAIN / gain_day', 'GAIN_MAX_DAY / gain_max_day', 'GAIN_MAX_NIGHT / gain_max_night'),
+            'future_editable' : 'yes after gain range validation',
+            'safety_note'     : 'Gain edits must not bypass camera capability constraints or Auto Gain boundaries.',
+        },
+        {
+            'label'           : 'Moon mode gain',
+            'purpose'         : 'Keep moon-mode gain visible as a separate operating profile instead of hiding it inside night gain.',
+            'related_fields'  : ('CCD_CONFIG.MOONMODE.GAIN / gain_moonmode', 'GAIN_MAX_MOONMODE / gain_max_moonmode'),
+            'future_editable' : 'yes after moon-mode policy review',
+            'safety_note'     : 'Moon-mode gain can affect image quality and automation behavior.',
+        },
+        {
+            'label'           : 'Camera/backend constraints',
+            'purpose'         : 'Reserve room for backend capability warnings without probing hardware from this page.',
+            'related_fields'  : ('CAMERA_INTERFACE', 'db_camera_driver', 'capture capabilities'),
+            'future_editable' : 'blocked until capability policy exists',
+            'safety_note'     : 'This page does not check hardware, query cameras, or apply exposure/gain values.',
+        },
+        {
+            'label'           : 'Auto exposure/gain relationship',
+            'purpose'         : 'Show that manual boundaries and automation controls are related but remain separate settings groups.',
+            'related_fields'  : ('AUTO_EXPOSURE_*', 'AUTO_GAIN_*', 'TARGET_ADU_*', 'CCD_EXPOSURE_*', 'GAIN_MAX_*'),
+            'future_editable' : 'blocked until automation editor policy exists',
+            'safety_note'     : 'Manual and automatic controls should not be collapsed into one unsafe editor.',
+        },
+    )
+
     def get_context(self):
         context = super(ModernAdminExposureGainSettingsView, self).get_context()
         groups_by_id = {
@@ -19445,9 +19490,24 @@ class ModernAdminExposureGainSettingsView(ModernAdminSettingsInventoryView):
             )
             if group
         )
+        context['modern_admin_exposure_gain_overview_cards'] = self.get_exposure_gain_overview_cards()
         context['modern_admin_exposure_gain_config_sections'] = self.get_exposure_gain_config_sections()
         context['modern_admin_exposure_gain_proposed_layout'] = self.get_exposure_gain_proposed_layout()
         return context
+
+
+    def get_exposure_gain_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_settings_text(row.get('label')),
+                'purpose'         : self.safe_settings_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_settings_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_settings_text(row.get('future_editable')),
+                'safety_note'     : self.safe_settings_text(row.get('safety_note')),
+            }
+            for row in self.EXPOSURE_GAIN_OVERVIEW_CARDS
+        )
 
 
     def get_exposure_gain_config_sections(self):
