@@ -11,13 +11,15 @@ should eventually provide to product-domain-first UI pages.
 
 The product model follows:
 
-Now -> Sky Cycle -> Phase -> Moment -> Source -> Output -> Look -> Observatory
+Now -> Highlight -> Moment / Output / Source / Observatory Issue
+    -> Sky Cycle Context -> Library
 
 ## 2. Frontend / Backend Separation
 
 The backend owns:
 
 - domain objects and truth;
+- product intelligence and explainable attention selection;
 - source preservation state;
 - source lineage;
 - output recipes;
@@ -78,7 +80,8 @@ Common forbidden data:
 Purpose:
 
 The live 24/7 home model. It summarizes current sky state, current phase,
-latest source/output state, observatory health, and attention items.
+latest source/output state, recent Highlights, observatory health, and
+attention items.
 
 Primary fields:
 
@@ -86,6 +89,7 @@ Primary fields:
 - `current_cycle`: SkyCycleSummary
 - `latest_source`: SourceSummary or null
 - `latest_output`: OutputSummary or null
+- `highlight_candidates`: bounded list of HighlightSummary
 - `latest_moments`: paginated or limited list of MomentSummary
 - `observatory_health`: ObservatoryHealth
 - `source_preservation`: SourceSummary-like aggregate
@@ -127,11 +131,153 @@ Can come from existing DB/code:
 Requires future backend:
 
 - canonical SkyCycle object;
+- canonical Highlight selector;
 - canonical Phase engine;
 - moment detection summaries;
 - source preservation aggregate.
 
-### 4.2 SkyCycleSummary
+### 4.2 HighlightSummary
+
+Purpose:
+
+A compact representation of something that deserves attention.
+
+Highlight is a first-class domain object in the Product UI, but it is also an
+attention layer. It does not replace Moment, Output, Source, Sky Cycle, or
+Observatory. It points to them and explains why they matter.
+
+Primary fields:
+
+- `highlight_id`
+- `title`
+- `summary`
+- `type`: moment, output, cycle, source, observatory_issue, insight, collection,
+  unknown
+- `phenomenon`: meteor, aurora, lightning, storm, clouds, clear_window,
+  sunrise, sunset, moon, sun, sky_quality, camera_anomaly, source_gap,
+  generation_issue, custom, unknown
+- `state`: suggested, confirmed, favorite, ignored, archived, superseded,
+  invalidated, resolved, stale
+- `target_type`
+- `target_refs`: bounded references, never raw paths
+- `created_by`: system, user, ai, imported, unknown
+- `selection_basis`
+- `reason`
+- `confidence_label`
+- `evidence_summary`
+- `source_preservation_status`
+- `source_lineage_status`
+- `output_readiness_status`
+- `camera_profile_summary`
+- `sky_cycle`: SkyCycleSummary or compact reference
+- `primary_moment`: MomentSummary or compact reference
+- `primary_output`: OutputSummary or compact reference
+- `safe_actions_available`: metadata only
+
+Forbidden data:
+
+- raw detector payloads;
+- unredacted AI chain-of-thought or debug payloads;
+- absolute source paths;
+- direct mutating endpoint URLs;
+- unbounded evidence/source lists;
+- secrets, tokens, credentials.
+
+Privacy/safety notes:
+
+Highlights must explain why they were selected. AI-created Highlights must be
+clearly identified as suggestions unless confirmed by user or trusted policy.
+
+Favorite is a state or user flag on a Highlight. It is not the same as a
+Highlight. A Highlight is product attention; Favorite is user preference.
+
+RPi5 notes:
+
+Highlight lists should be bounded, ranked, and cacheable. Selection should not
+trigger heavy detection, source scans, or rendering during page render.
+
+Placeholder today:
+
+- recent highlight cards;
+- suggested meteor/output/health placeholders;
+- all-clear cycle summary.
+
+Can come from existing DB/code:
+
+- notifications;
+- latest frame metadata;
+- generated media metadata;
+- task/generation failures;
+- bounded health/status metadata.
+
+Requires future backend:
+
+- canonical Highlight selector;
+- explainable ranking;
+- user confirmation/favorite/ignore state;
+- source lineage and output linkage;
+- AI/detector evidence adapters.
+
+### 4.3 HighlightDetail
+
+Purpose:
+
+The explanation view model for a Highlight. It answers why this deserves
+attention and what object(s) it points to.
+
+Primary fields:
+
+- `summary`: HighlightSummary
+- `reason`
+- `evidence`
+- `confidence_explanation`
+- `target_objects`
+- `source_lineage`: SourceLineage or summary
+- `related_outputs`: bounded list of OutputSummary
+- `related_moments`: bounded list of MomentSummary
+- `observatory_context`: ObservatoryHealth or compact issue summary
+- `sky_cycle_context`: SkyCycleSummary or compact reference
+- `user_state`: favorite, confirmed, ignored, archived where applicable
+- `safe_actions_available`: metadata only
+
+Forbidden data:
+
+- raw paths;
+- unbounded source/evidence lists;
+- raw logs;
+- unsafe action URLs;
+- unredacted AI/debug payloads.
+
+Privacy/safety notes:
+
+Highlight Detail must not overclaim. Unknown confidence, missing source
+lineage, or partial evidence must be shown as unknown or partial.
+
+RPi5 notes:
+
+Large evidence, output, and source lists must be summarized and lazy/paginated.
+
+Placeholder today:
+
+- static explanation;
+- target placeholders;
+- confidence labels.
+
+Can come from existing DB/code:
+
+- notification records;
+- generated media metadata;
+- bounded source/output metadata;
+- status summaries.
+
+Requires future backend:
+
+- first-class Highlight storage/selector;
+- explainable evidence model;
+- user state persistence;
+- multi-object target references.
+
+### 4.4 SkyCycleSummary
 
 Purpose:
 
@@ -146,6 +292,7 @@ Primary fields:
 - `phase_count`
 - `moment_count`
 - `output_count`
+- `highlight_count`
 - `source_coverage`
 - `health_status`
 - `headline`
@@ -184,7 +331,7 @@ Requires future backend:
 - phase segmentation;
 - source coverage calculation.
 
-### 4.3 SkyCycleDetail
+### 4.5 SkyCycleDetail
 
 Purpose:
 
@@ -197,6 +344,7 @@ Primary fields:
 - `phases`: list of PhaseSummary
 - `moments`: paginated MomentSummary collection
 - `outputs`: paginated OutputSummary collection
+- `highlights`: bounded HighlightSummary collection
 - `source_lineage_summary`
 - `observatory_health`: ObservatoryHealth
 - `attention_items`
@@ -235,10 +383,11 @@ Can come from existing DB/code:
 Requires future backend:
 
 - canonical sky-cycle report generator;
+- Highlight aggregation for the cycle;
 - phase-aware summaries;
 - moment aggregation.
 
-### 4.4 PhaseSummary
+### 4.6 PhaseSummary
 
 Purpose:
 
@@ -287,7 +436,7 @@ Requires future backend:
 
 - canonical phase segmentation.
 
-### 4.5 MomentSummary
+### 4.7 MomentSummary
 
 Purpose:
 
@@ -304,6 +453,7 @@ Primary fields:
 - `thumbnail_output`: OutputSummary or null
 - `source_available`
 - `related_output_count`
+- `highlight_state`: none, suggested, confirmed, favorite, ignored, archived
 - `status`: candidate, confirmed, ignored, system
 - `safe_actions_available`: metadata only
 
@@ -338,10 +488,11 @@ Can come from existing DB/code:
 Requires future backend:
 
 - moment detector/selector;
+- highlight promotion/selection model;
 - event classification model;
 - confidence explanations.
 
-### 4.6 MomentDetail
+### 4.8 MomentDetail
 
 Purpose:
 
@@ -355,6 +506,7 @@ Primary fields:
 - `evidence`
 - `source_lineage`: SourceLineage
 - `related_outputs`: paginated OutputSummary collection
+- `related_highlights`: bounded HighlightSummary collection
 - `related_moments`
 - `explanation`
 - `attention_items`
@@ -391,9 +543,10 @@ Can come from existing DB/code:
 Requires future backend:
 
 - canonical moment storage;
+- Highlight target references;
 - source-to-moment linkage.
 
-### 4.7 SourceSummary
+### 4.9 SourceSummary
 
 Purpose:
 
@@ -444,7 +597,7 @@ Requires future backend:
 - path allowlist service;
 - source coverage calculation.
 
-### 4.8 SourceLineage
+### 4.10 SourceLineage
 
 Purpose:
 
@@ -490,7 +643,7 @@ Requires future backend:
 
 - first-class lineage index.
 
-### 4.9 OutputSummary
+### 4.11 OutputSummary
 
 Purpose:
 
@@ -499,13 +652,14 @@ Compact representation of a generated or displayable derived artifact.
 Primary fields:
 
 - `output_id`
-- `type`: image, timelapse, keogram, startrail, highlight, report
+- `type`: image, timelapse, keogram, startrail, report
 - `label`
 - `created_at`
 - `thumbnail_url`
 - `look`: LookSummary or null
 - `source_lineage_status`
 - `related_moment_count`
+- `highlight_state`: none, suggested, confirmed, favorite, ignored, archived
 - `availability`
 - `safe_actions_available`: metadata only
 
@@ -543,9 +697,10 @@ Requires future backend:
 
 - OutputRecipe linkage;
 - Look association;
+- Highlight target references;
 - moment relationships.
 
-### 4.10 OutputDetail
+### 4.12 OutputDetail
 
 Purpose:
 
@@ -558,6 +713,7 @@ Primary fields:
 - `recipe`: OutputRecipe
 - `source_lineage`: SourceLineage
 - `related_moments`
+- `related_highlights`: bounded HighlightSummary collection
 - `quality_summary`
 - `sharing_status`
 - `safe_actions_available`: metadata only
@@ -595,7 +751,7 @@ Requires future backend:
 - Look association;
 - source lineage.
 
-### 4.11 LookSummary
+### 4.13 LookSummary
 
 Purpose:
 
@@ -641,7 +797,7 @@ Requires future backend:
 - custom Look persistence;
 - rendering validation.
 
-### 4.12 OutputRecipe
+### 4.14 OutputRecipe
 
 Purpose:
 
@@ -693,7 +849,7 @@ Requires future backend:
 - rendering job contract;
 - regeneration safe action.
 
-### 4.13 ObservatoryHealth
+### 4.15 ObservatoryHealth
 
 Purpose:
 
@@ -748,7 +904,7 @@ Requires future backend:
 
 - unified health evaluator.
 
-### 4.14 Warning / AttentionItem
+### 4.16 Warning / AttentionItem
 
 Purpose:
 
@@ -838,8 +994,8 @@ Placeholder rules:
 
 RPi5-first data rules:
 
-- lists of Sky Cycles, Moments, Outputs, Sources, and AttentionItems must be
-  paginated or bounded;
+- lists of Highlights, Sky Cycles, Moments, Outputs, Sources, and
+  AttentionItems must be paginated or bounded;
 - thumbnails should be lazy-loaded;
 - charts should be optional or lazy;
 - source frame ranges should be summarized first;
@@ -854,13 +1010,21 @@ RPi5-first data rules:
 Start here because it defines the product home and integrates current phase,
 latest media, source preservation, and observatory health.
 
-### 2. SkyCycleSummary / SkyCycleDetail
+### 2. HighlightSummary / HighlightDetail
 
-Implement next because it defines the reporting unit for day-and-night cycles.
+Implement next because it defines the attention layer: what deserves review,
+why it matters, what it points to, and whether the underlying source/output or
+health context is trustworthy.
 
-### 3. MomentSummary / MomentDetail
+### 3. SkyCycleSummary / SkyCycleDetail
 
-Implement third because it validates the core domain concept across day,
+Implement after Highlights because it defines the reporting context for
+day-and-night cycles. Sky Cycle is essential, but it should not be the only
+path to Moment or Output.
+
+### 4. MomentSummary / MomentDetail
+
+Implement fourth because it validates the core domain concept across day,
 night, weather, anomalies, and future AI candidates.
 
 ## 9. Risks
@@ -873,14 +1037,20 @@ night, weather, anomalies, and future AI candidates.
 - Adding safe-action UI before backend permission, audit, and Flask tests exist.
 - Losing profile-first or multicamera ownership while simplifying Basic.
 - Presenting "source preserved" without a trustworthy source index.
+- Creating noisy or opaque Highlights that do not explain why they were
+  selected.
+- Confusing Highlight with Favorite, Moment, or Output.
 
 ## 10. Recommendation
 
 Build product-domain contracts before building more final UI pages.
 
-The first future implementation should be a read-only NowView backed by a
-sanitized backend view model. It can begin with placeholders, but it must keep
-the contract honest:
+The first future implementation should be read-only product view models backed
+by sanitized backend contracts. NowView remains the home, but Highlight is the
+next connective contract because it explains what deserves attention before the
+user explores reports or archives.
+
+Contracts may begin with placeholders, but they must keep the model honest:
 
 - source status must be truthful;
 - unknown must be shown as unknown;

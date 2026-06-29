@@ -8,14 +8,15 @@ It records the sky, preserves the original sources, detects meaningful moments,
 generates beautiful derived outputs, and explains the health of the observatory.
 
 The product is not organized around configuration pages. It is organized around
-the continuous sky cycle:
+attention, trust, and the continuous sky cycle:
 
-Now -> Sky Cycle -> Phase -> Moment -> Source -> Output -> Look -> Observatory
+Now -> Highlights -> Moment / Output / Observatory Issue
+    -> Sky Cycle Context -> Library
 
 The product should help a user answer three questions quickly:
 
 - What is happening now?
-- What happened during this sky cycle?
+- What deserves attention?
 - Is the observatory working well and preserving the original data?
 
 ## 2. Non-Goals
@@ -32,6 +33,22 @@ Existing Classic and Modern pages are technical evidence, not the product
 definition.
 
 ## 3. Domain / Object Model
+
+### Highlight
+
+A curated attention object.
+
+A Highlight is not the Moment, Output, Sky Cycle, Source, or Observatory issue
+it points to. It is the product-level selection that says: this deserves
+attention, here is why, here is the evidence, here is the source/output/health
+context, and here is where to go next.
+
+Highlights may be suggested by Hybrid, confirmed or favorited by the user, or
+proposed by future AI. They must remain explainable. A Highlight without a
+reason is only noise.
+
+Highlights are the connective tissue between Now, Moments, Outputs, Sky Cycles,
+Observatory Health, and Library.
 
 ### Sky Cycle
 
@@ -59,7 +76,7 @@ material. Source data is never modified by product UI or rendering.
 ### Output
 
 A derived artifact generated from Source data: image, timelapse, keogram,
-startrail, highlight, report, social/share render, or scientific render.
+startrail, report, social/share render, or scientific render.
 
 ### Look
 
@@ -119,26 +136,44 @@ business rules.
 The product navigation should be domain-first:
 
 - Now
+- Highlights
 - Sky Cycles
 - Moments
 - Outputs
+- Library
 - Observatory
 - Looks
 - Insights
 - Automation
-- Library
 - Engine Room
 
 ### Now
 
 The 24/7 live home. It shows current sky state, current phase, capture health,
-latest source/output state, recent moments, source preservation, and warnings.
+latest source/output state, recent Highlights, source preservation, and
+warnings.
+
+Now is a triage surface. It should not force the user through a complete Sky
+Cycle report before showing what deserves attention.
+
+### Highlights
+
+The attention layer. Highlights surface what Hybrid or the user believes is
+worth reviewing now: a meteor candidate, a strong timelapse, an aurora window,
+an all-clear cycle, a source preservation warning, or an observatory issue.
+
+Highlights can point to Moment, Output, Sky Cycle, Source, Observatory issue, or
+future insight objects. They must explain why they were selected and whether the
+underlying source/output/health context can be trusted.
 
 ### Sky Cycles
 
 Reports and history for complete sky cycles. A Sky Cycle report contains day,
 night, transition phases, moments, outputs, source coverage, and observatory
 health.
+
+Sky Cycle is context and archive. It is not always the mandatory second step
+after Now.
 
 ### Moments
 
@@ -149,10 +184,23 @@ meteors and are not limited to night.
 
 Generated derived media and reports, always linked back to Source and Look.
 
+Outputs can be highlighted, but an Output is not itself a Highlight. The
+Highlight explains why this output deserves attention.
+
+### Library
+
+Search and browse across Highlights, cycles, moments, outputs, source
+availability, Looks, cameras, profiles, and generated artifacts. Library exists
+because users remember phenomena and results more often than exact dates.
+
 ### Observatory
 
 Cameras, profiles, capture state, storage, sensors, connectivity, upload, and
 overall health.
+
+Observatory is both a section and a trust layer. Observatory issues may become
+Highlights when they affect source preservation, output validity, or capture
+reliability.
 
 ### Looks
 
@@ -168,11 +216,6 @@ coverage, and explainable analytics.
 
 Capture policies, generation policies, retention policies, upload policies, and
 future safe-action workflows.
-
-### Library
-
-Search and browse across cycles, moments, outputs, source availability, Looks,
-and generated artifacts.
 
 ### Engine Room
 
@@ -269,6 +312,12 @@ Technical details remain available in Advanced and Developer contexts.
 The first product page. It proves Hybrid is a 24/7 sky-cycle console, not a
 night-only report or an admin dashboard.
 
+### Highlights
+
+The first attention layer. It should prove that Hybrid can select what deserves
+review before asking the user to browse Sky Cycles, Moments, Outputs, or
+Observatory pages.
+
 ### Sky Cycle Report
 
 The first historical/reporting page. It shows day, night, phases, moments,
@@ -315,3 +364,35 @@ phase should move toward product-domain-first pages:
 
 Future pages should be designed around domain objects and user outcomes, not
 around configuration groups or Classic UI parity.
+
+## 13. Revised Product Flow
+
+The official product flow is no longer a strict line:
+
+```text
+Now -> Sky Cycle -> Moment -> Output -> Observatory
+```
+
+That line is too slow for common user intent. Users often want the meteor, the
+best timelapse, the observatory warning, or the all-clear result before they
+want to read the full cycle report.
+
+The official flow becomes:
+
+```text
+Now
+-> Highlights
+-> Moment / Output / Observatory Issue
+-> Source / Lineage / Trust
+-> Sky Cycle Context
+-> Library
+```
+
+Sky Cycle remains essential. It explains the complete observation period. It is
+not demoted; it is repositioned as context, report, and archive instead of a
+mandatory hallway.
+
+Highlights are not perfect by default. They can become noisy if the selection
+logic is weak, if AI suggestions are unexplained, or if Favorites are confused
+with product attention. Therefore Highlights must remain explainable,
+stateful, suppressible, searchable, and source-aware.

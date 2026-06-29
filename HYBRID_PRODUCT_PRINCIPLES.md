@@ -5,8 +5,9 @@
 Hybrid AllSky is no longer defined by a Classic-to-Modern porting effort.
 
 Hybrid AllSky is a product: a 24/7 sky-cycle console that records the sky,
-preserves original source data, detects meaningful moments, generates beautiful
-derived outputs, and explains the health of the observatory.
+preserves original source data, detects meaningful moments, selects explainable
+Highlights, generates beautiful derived outputs, and explains the health of the
+observatory.
 
 This document defines how product decisions should be made.
 
@@ -68,6 +69,7 @@ Every new capability must belong to a product domain object.
 The core domain is:
 
 - Now
+- Highlight
 - Sky Cycle
 - Phase
 - Moment
@@ -75,6 +77,7 @@ The core domain is:
 - Output
 - Look
 - Observatory
+- Library
 - Source Lineage
 - Output Recipe
 - Observatory Health
@@ -229,6 +232,7 @@ Use product language whenever a human concept exists.
 Prefer:
 
 - Current phase
+- Highlight
 - Sky Cycle
 - Source preserved
 - RAW retention
@@ -258,7 +262,9 @@ A feature is valuable only if it improves a real journey.
 Primary journeys:
 
 - Open Hybrid and understand the current sky.
+- See what deserves attention.
 - Review the last Sky Cycle.
+- Open a Highlight and understand why it matters.
 - Find meaningful Moments.
 - Inspect generated Outputs.
 - Confirm source preservation.
@@ -330,7 +336,52 @@ Developer.
 If the system cannot explain a decision, it should be cautious about presenting
 that decision as truth.
 
-## 14. Build For Trust
+## 14. Attention Before Exploration
+
+Hybrid should tell the user what deserves attention before asking the user to
+browse the archive.
+
+The product should not force the user through the domain hierarchy when their
+intent is direct:
+
+- show me the meteor;
+- show me the best timelapse;
+- show me what went wrong;
+- show me whether everything was OK.
+
+Highlights exist for this reason.
+
+A Highlight is not a shortcut around truth. It is an explainable attention
+object that points to Moment, Output, Source, Sky Cycle, Observatory issue, or
+future insight objects.
+
+Do not make users choose between Sky Cycle, Moment, Output, and Observatory
+before the product has shown what is worth their attention.
+
+## 15. Hybrid Suggests, User Decides
+
+Product Intelligence must be explainable and reversible.
+
+Hybrid may suggest Highlights.
+
+The user may confirm, favorite, ignore, archive, or revisit them.
+
+Future AI may help rank or classify Highlights, but AI suggestions must not be
+presented as unquestioned truth.
+
+Every recommendation should carry:
+
+- reason;
+- confidence;
+- evidence;
+- source trust;
+- affected output or observatory context;
+- creator or selection basis.
+
+If Hybrid cannot explain why something was highlighted, it should not promote it
+as important.
+
+## 16. Build For Trust
 
 The user must be able to trust Hybrid AllSky.
 
@@ -352,7 +403,7 @@ Partial is better than pretending complete.
 
 Blocked is better than unsafe.
 
-## 15. Codex Collaboration Principles
+## 17. Codex Collaboration Principles
 
 Codex can work in four modes.
 
@@ -402,15 +453,15 @@ concepts, reorganize navigation, and propose better models.
 Codex should stop and ask only for true product decisions, safety decisions, or
 external constraints that cannot be inferred.
 
-## 16. Decision Framework
+## 18. Decision Framework
 
 Every future product decision should pass this checklist.
 
 ### Product
 
 - Does this improve a real user journey?
-- Does it help explain Now, Sky Cycle, Moment, Source, Output, Look, or
-  Observatory?
+- Does it help explain Now, Highlight, Sky Cycle, Moment, Source, Output, Look,
+  Library, or Observatory?
 - Is it product-domain-first rather than route/config-first?
 
 ### Source Safety
@@ -457,7 +508,7 @@ Every future product decision should pass this checklist.
 
 If a decision fails multiple sections, it is not ready.
 
-## 17. The Standard Of Taste
+## 19. The Standard Of Taste
 
 Hybrid AllSky should feel calm, capable, and trustworthy.
 
@@ -474,11 +525,12 @@ It should feel like:
 - a sky-cycle console;
 - a source-preserving observatory companion;
 - a morning report;
+- a highlight selector;
 - a moment finder;
 - a media generator;
 - a reliable health monitor.
 
-## 18. Final Principle
+## 20. Final Principle
 
 The project should be judged by this question:
 
