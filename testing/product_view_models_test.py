@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import copy
+from datetime import datetime
+from datetime import timedelta
 import inspect
 import json
 import re
@@ -11,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import indi_allsky.product_view_models as product_view_models
 from indi_allsky.product_view_models import build_now_view
+from indi_allsky.product_view_models import LatestFrameImageTableRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
 from indi_allsky.product_view_models import validate_now_view_payload
 
@@ -63,6 +66,35 @@ class FakeLatestFrameRepository:
         if self.raises:
             raise RuntimeError('fake repository failure')
         return self.metadata
+
+
+class FakeImageRow:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
+class FakeImageQuery:
+    def __init__(self, row=None, raises=False):
+        self.row = row
+        self.raises = raises
+        self.order_by_calls = list()
+        self.limit_calls = list()
+        self.first_calls = 0
+
+    def order_by(self, expression):
+        self.order_by_calls.append(expression)
+        return self
+
+    def limit(self, value):
+        self.limit_calls.append(value)
+        return self
+
+    def first(self):
+        self.first_calls += 1
+        if self.raises:
+            raise RuntimeError('fake query failure')
+        return self.row
 
 
 def walk_payload(value):
@@ -257,6 +289,71 @@ def test_build_now_view_accepts_injected_latest_frame_provider():
     json.dumps(now_view, sort_keys=True)
 
 
+def test_latest_frame_image_table_adapter_with_row_present():
+    created_at = datetime(2026, 6, 29, 5, 32, 10)
+    query = FakeImageQuery(FakeImageRow(createDate=created_at, filename='/var/lib/indi-allsky/private.jpg'))
+    adapter = LatestFrameImageTableRepository(
+        query,
+        order_by_expression='created-desc',
+        camera_label='North Sky Camera',
+        profile_label='Primary',
+        clock=lambda: created_at + timedelta(minutes=2),
+    )
+    provider = LatestFrameSummaryProvider(adapter)
+    now_view = build_now_view(latest_frame_provider=provider)
+    latest_frame = now_view['latest_frame_summary']
+
+    assert query.order_by_calls == ['created-desc']
+    assert query.limit_calls == [1]
+    assert query.first_calls == 1
+    assert latest_frame['status'] == 'Latest frame metadata available.'
+    assert latest_frame['camera_label'] == 'North Sky Camera'
+    assert latest_frame['profile_label'] == 'Primary'
+    assert latest_frame['timestamp'] == '2026-06-29 05:32:10'
+    assert latest_frame['age_label'] == '2 minutes ago'
+    assert latest_frame['image_available'] is True
+    assert latest_frame['safe_preview_url'] is None
+    assert_no_absolute_paths(latest_frame)
+    assert 'private.jpg' not in json.dumps(latest_frame, sort_keys=True)
+
+
+def test_latest_frame_image_table_adapter_with_no_row():
+    query = FakeImageQuery(None)
+    adapter = LatestFrameImageTableRepository(query, order_by_expression='created-desc')
+    latest_frame = LatestFrameSummaryProvider(adapter).build()
+
+    assert query.order_by_calls == ['created-desc']
+    assert query.limit_calls == [1]
+    assert query.first_calls == 1
+    assert latest_frame['status'] == 'No recent frame metadata available.'
+    assert latest_frame['image_available'] is False
+    assert latest_frame['safe_preview_url'] is None
+
+
+def test_latest_frame_image_table_adapter_with_query_error():
+    query = FakeImageQuery(raises=True)
+    adapter = LatestFrameImageTableRepository(query, order_by_expression='created-desc')
+    latest_frame = LatestFrameSummaryProvider(adapter).build()
+
+    assert query.limit_calls == [1]
+    assert query.first_calls == 1
+    assert latest_frame['status'] == 'Latest frame metadata unavailable.'
+    assert latest_frame['source_status'] == 'Repository error.'
+    assert latest_frame['safe_preview_url'] is None
+
+
+def test_latest_frame_image_table_adapter_with_missing_attributes():
+    query = FakeImageQuery(FakeImageRow())
+    adapter = LatestFrameImageTableRepository(query)
+    latest_frame = LatestFrameSummaryProvider(adapter).build()
+
+    assert latest_frame['timestamp'] == 'Not evaluated yet'
+    assert latest_frame['age_label'] == 'Not evaluated yet'
+    assert latest_frame['image_available'] is True
+    assert latest_frame['safe_preview_url'] is None
+    json.dumps(latest_frame, sort_keys=True)
+
+
 def test_safe_actions_are_metadata_only():
     now_view = build_now_view()
 
@@ -393,6 +490,10 @@ def main():
         test_latest_frame_provider_with_repository_error,
         test_latest_frame_provider_rejects_suspicious_metadata,
         test_build_now_view_accepts_injected_latest_frame_provider,
+        test_latest_frame_image_table_adapter_with_row_present,
+        test_latest_frame_image_table_adapter_with_no_row,
+        test_latest_frame_image_table_adapter_with_query_error,
+        test_latest_frame_image_table_adapter_with_missing_attributes,
         test_safe_actions_are_metadata_only,
         test_validate_now_view_payload_success,
         test_validate_now_view_payload_requires_sections,

@@ -185,6 +185,47 @@ class StaticLatestFrameRepository:
         return None
 
 
+class LatestFrameImageTableRepository:
+    """Repository adapter for one bounded latest image metadata row."""
+
+    def __init__(
+        self,
+        query,
+        order_by_expression=None,
+        camera_label='Camera not evaluated yet',
+        profile_label='Profile not evaluated yet',
+        clock=None,
+    ):
+        self.query = query
+        self.order_by_expression = order_by_expression
+        self.camera_label = camera_label
+        self.profile_label = profile_label
+        self.clock = clock
+
+    def get_latest_frame_metadata(self):
+        bounded_query = self.query
+
+        if self.order_by_expression is not None:
+            bounded_query = bounded_query.order_by(self.order_by_expression)
+
+        bounded_query = bounded_query.limit(1)
+        row = bounded_query.first()
+
+        if not row:
+            return None
+
+        created_at = getattr(row, 'createDate', None)
+
+        return {
+            'camera_label': self.camera_label,
+            'profile_label': self.profile_label,
+            'timestamp': _latest_frame_timestamp_label(created_at),
+            'age_label': _latest_frame_age_label(created_at, self.clock),
+            'image_available': True,
+            'source_status': 'Metadata row available.',
+        }
+
+
 class LatestFrameSummaryProvider:
     """Build a sanitized latest frame summary from an injected repository."""
 
@@ -708,6 +749,39 @@ def _latest_frame_text(value, fallback):
         return fallback
 
     return value
+
+
+def _latest_frame_timestamp_label(value):
+    if value in (None, ''):
+        return 'Not evaluated yet'
+
+    if hasattr(value, 'strftime'):
+        return value.strftime('%Y-%m-%d %H:%M:%S')
+
+    return _latest_frame_text(value, 'Not evaluated yet')
+
+
+def _latest_frame_age_label(value, clock):
+    if value in (None, '') or not callable(clock):
+        return 'Not evaluated yet'
+
+    try:
+        age_seconds = int((clock() - value).total_seconds())
+    except Exception:
+        return 'Not evaluated yet'
+
+    if age_seconds < 0:
+        return 'Not evaluated yet'
+
+    if age_seconds < 60:
+        return '{0:d} seconds ago'.format(age_seconds)
+
+    age_minutes = int(age_seconds / 60)
+    if age_minutes < 60:
+        return '{0:d} minutes ago'.format(age_minutes)
+
+    age_hours = int(age_minutes / 60)
+    return '{0:d} hours ago'.format(age_hours)
 
 
 def _latest_frame_value_is_unsafe(value):

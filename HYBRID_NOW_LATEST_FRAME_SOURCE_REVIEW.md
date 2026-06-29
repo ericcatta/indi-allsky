@@ -319,3 +319,27 @@ metadata appears. `safe_preview_url` remains `None`.
 
 The DB-backed adapter remains future work and should still be bounded to one
 latest image metadata row with no source path leakage.
+
+## Mission 011 Update
+
+`LatestFrameImageTableRepository` now exists as a DB-shaped adapter contract for
+future `IndiAllSkyDbImageTable` wiring.
+
+It is not wired to `/modern-admin/now` and `build_now_view()` still defaults to
+the static repository path. The adapter receives a query object and ordering
+expression through dependency injection, then applies a bounded `order_by`,
+`limit(1)`, `first()` flow.
+
+The adapter returns only allowlisted metadata:
+
+- camera label;
+- profile label;
+- timestamp;
+- age label;
+- image availability;
+- conservative source status.
+
+It does not return source paths, preview URLs, ORM rows, raw JSON metadata, or
+filesystem-derived values. Runtime wiring remains blocked until a separate
+mission reviews where the query is created, which camera/profile context is
+allowed, and how Flask-level tests will verify the bounded behavior.
