@@ -18922,6 +18922,51 @@ class ModernAdminCameraProfileSettingsView(ModernAdminSettingsInventoryView):
         },
     )
 
+    CAMERA_PROFILE_OVERVIEW_CARDS = (
+        {
+            'label'           : 'Active profile',
+            'purpose'         : 'Summarize which profile concept will anchor the final Basic camera settings experience.',
+            'related_fields'  : ('profile_id', 'profile_enabled', 'profile_primary'),
+            'future_editable' : 'blocked until profile edit contract exists',
+            'safety_note'     : 'This card does not load or change the active runtime profile.',
+        },
+        {
+            'label'           : 'Profile identity',
+            'purpose'         : 'Keep stable profile identifiers separate from operator-facing labels and purpose text.',
+            'related_fields'  : ('profile_id', 'profile_label'),
+            'future_editable' : 'yes after profile validation policy',
+            'safety_note'     : 'Identity changes must preserve existing camera/profile references and metadata filters.',
+        },
+        {
+            'label'           : 'Profile-camera binding',
+            'purpose'         : 'Make the camera relationship visible without rebinding profiles from this read-only page.',
+            'related_fields'  : ('db_camera_id', 'db_camera_name', 'db_camera_driver', 'MULTI_CAMERA.profiles'),
+            'future_editable' : 'blocked until multicamera binding policy exists',
+            'safety_note'     : 'Binding edits can affect capture, media routing, tasks, and profile-first configuration.',
+        },
+        {
+            'label'           : 'Multicamera role',
+            'purpose'         : 'Show that profiles may participate in multicamera operation without flattening them into global settings.',
+            'related_fields'  : ('profile_primary', 'profile_enabled', 'camera_id / profile_id filters'),
+            'future_editable' : 'blocked until multicamera role policy exists',
+            'safety_note'     : 'Future edits must stay profile-first and must not assume a single camera.',
+        },
+        {
+            'label'           : 'Profile fallback behavior',
+            'purpose'         : 'Document future fallback expectations when a profile or camera relationship is unavailable.',
+            'related_fields'  : ('profile_enabled', 'db_camera_status', 'MULTI_CAMERA.profiles'),
+            'future_editable' : 'no until runtime fallback contract exists',
+            'safety_note'     : 'Fallback behavior touches runtime selection and should remain descriptive here.',
+        },
+        {
+            'label'           : 'Future profile editor',
+            'purpose'         : 'Reserve space for a later safe editor once validation, audit, rollback, and multicamera rules exist.',
+            'related_fields'  : ('profile_id', 'profile_label', 'db_camera_id', 'MULTI_CAMERA.profiles'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'No profile editor is exposed from this page.',
+        },
+    )
+
     def get_context(self):
         context = super(ModernAdminCameraProfileSettingsView, self).get_context()
         camera_profile_group = None
@@ -18931,9 +18976,24 @@ class ModernAdminCameraProfileSettingsView(ModernAdminSettingsInventoryView):
                 break
 
         context['modern_admin_camera_profile_settings_group'] = camera_profile_group
+        context['modern_admin_camera_profile_overview_cards'] = self.get_camera_profile_overview_cards()
         context['modern_admin_camera_profile_config_sections'] = self.get_camera_profile_config_sections()
         context['modern_admin_camera_profile_proposed_layout'] = self.get_camera_profile_proposed_layout()
         return context
+
+
+    def get_camera_profile_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_settings_text(row.get('label')),
+                'purpose'         : self.safe_settings_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_settings_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_settings_text(row.get('future_editable')),
+                'safety_note'     : self.safe_settings_text(row.get('safety_note')),
+            }
+            for row in self.CAMERA_PROFILE_OVERVIEW_CARDS
+        )
 
 
     def get_camera_profile_config_sections(self):
