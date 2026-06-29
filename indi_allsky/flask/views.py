@@ -19163,6 +19163,51 @@ class ModernAdminCameraConnectionSettingsView(ModernAdminSettingsInventoryView):
         },
     )
 
+    CAMERA_CONNECTION_OVERVIEW_CARDS = (
+        {
+            'label'           : 'Camera backend',
+            'purpose'         : 'Summarize which camera interface family a future final UI should present first.',
+            'related_fields'  : ('CAMERA_INTERFACE', 'camera_interface'),
+            'future_editable' : 'yes after profile-safe validation',
+            'safety_note'     : 'Changing backend can affect capture startup and must remain profile-aware.',
+        },
+        {
+            'label'           : 'INDI connection',
+            'purpose'         : 'Group INDI host, port, and device identity without opening sockets or testing hardware here.',
+            'related_fields'  : ('INDI_SERVER / indi_server', 'INDI_PORT / indi_port', 'INDI_CAMERA_NAME / indi_camera_name'),
+            'future_editable' : 'blocked until connection test policy exists',
+            'safety_note'     : 'This card does not contact INDI or validate a live connection.',
+        },
+        {
+            'label'           : 'libcamera identity',
+            'purpose'         : 'Describe local libcamera identity fields without enumerating attached cameras.',
+            'related_fields'  : ('LIBCAMERA.CAMERA_ID / libcamera_camera_id', 'LIBCAMERA.IMAGE_FILE_TYPE / libcamera_image_file_type'),
+            'future_editable' : 'blocked until hardware discovery policy exists',
+            'safety_note'     : 'No hardware scan or camera detection is performed by this page.',
+        },
+        {
+            'label'           : 'Database camera identity',
+            'purpose'         : 'Keep database camera row identity visible as product context without querying live rows here.',
+            'related_fields'  : ('db_camera_id', 'db_camera_name', 'db_camera_driver', 'db_camera_status'),
+            'future_editable' : 'no from this page',
+            'safety_note'     : 'Database camera identity is shown as static design evidence only.',
+        },
+        {
+            'label'           : 'Multicamera selection',
+            'purpose'         : 'Preserve the relationship between connection settings, selected camera, and active profile.',
+            'related_fields'  : ('camera_interface', 'db_camera_id', 'MULTI_CAMERA.profiles'),
+            'future_editable' : 'blocked until multicamera selection policy exists',
+            'safety_note'     : 'Future controls must not flatten multicamera/profile ownership into a single global setting.',
+        },
+        {
+            'label'           : 'Failure / fallback behavior',
+            'purpose'         : 'Document how final UI should explain fallback state before exposing connection edits.',
+            'related_fields'  : ('current config fallback', 'profile read-only state', 'db_camera_status'),
+            'future_editable' : 'blocked until fallback contract exists',
+            'safety_note'     : 'Fallback behavior touches runtime capture safety and remains descriptive here.',
+        },
+    )
+
     def get_context(self):
         context = super(ModernAdminCameraConnectionSettingsView, self).get_context()
         camera_connection_group = None
@@ -19172,9 +19217,24 @@ class ModernAdminCameraConnectionSettingsView(ModernAdminSettingsInventoryView):
                 break
 
         context['modern_admin_camera_connection_settings_group'] = camera_connection_group
+        context['modern_admin_camera_connection_overview_cards'] = self.get_camera_connection_overview_cards()
         context['modern_admin_camera_connection_config_sections'] = self.get_camera_connection_config_sections()
         context['modern_admin_camera_connection_proposed_layout'] = self.get_camera_connection_proposed_layout()
         return context
+
+
+    def get_camera_connection_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_settings_text(row.get('label')),
+                'purpose'         : self.safe_settings_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_settings_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_settings_text(row.get('future_editable')),
+                'safety_note'     : self.safe_settings_text(row.get('safety_note')),
+            }
+            for row in self.CAMERA_CONNECTION_OVERVIEW_CARDS
+        )
 
 
     def get_camera_connection_config_sections(self):
