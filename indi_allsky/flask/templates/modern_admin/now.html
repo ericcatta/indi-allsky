@@ -29,6 +29,7 @@
     </header>
 
     <section class="modern-admin-table-panel" aria-labelledby="now-current-title">
+        {% set latest_frame = modern_admin_now.latest_frame_summary %}
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Current</p>
@@ -44,14 +45,18 @@
                 <p>{{ modern_admin_now.current_sky.summary }}</p>
             </article>
             <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Latest frame</div>
-                <h3>{{ modern_admin_now.current_sky.latest_image }}</h3>
-                <p>Observation data is not evaluated yet; no image metadata or thumbnail is connected.</p>
+                <div class="modern-admin-card-label">{{ latest_frame.label }}</div>
+                <h3>{{ latest_frame.status }}</h3>
+                <p>{{ latest_frame.note }}</p>
+                <p>Camera: {{ latest_frame.camera_label }}. Profile: {{ latest_frame.profile_label }}.</p>
+                <p>Timestamp: {{ latest_frame.timestamp }}. Age: {{ latest_frame.age_label }}.</p>
+                <span class="modern-admin-status-pill modern-admin-status-muted">{{ latest_frame.source_status }}</span>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">Capture and source</div>
                 <h3>{{ modern_admin_now.current_sky.source_recording }}</h3>
                 <p>{{ modern_admin_now.current_sky.capture_status }}</p>
+                <p>{{ latest_frame.evidence }}</p>
             </article>
         </section>
     </section>

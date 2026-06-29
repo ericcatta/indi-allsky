@@ -32,6 +32,7 @@ NOW_REQUIRED_KEYS = frozenset((
     'is_placeholder',
     'safe_actions_available',
     'current_sky',
+    'latest_frame_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
     'evidence_summary',
@@ -46,6 +47,7 @@ NOW_REQUIRED_KEYS = frozenset((
 
 NOW_REQUIRED_SECTIONS = frozenset((
     'current_sky',
+    'latest_frame_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
     'evidence_summary',
@@ -78,6 +80,24 @@ NOW_DIRECT_ACTION_KEYS = frozenset((
 
 NOW_ABSOLUTE_PATH_RE = re.compile(r'(^|["\s:])/[A-Za-z0-9_.-]+/')
 NOW_WINDOWS_PATH_RE = re.compile(r'[A-Za-z]:\\\\')
+NOW_SUSPICIOUS_URL_TOKENS = frozenset(('..', 'file:', '\\'))
+
+NOW_LATEST_FRAME_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'camera_label',
+    'profile_label',
+    'timestamp',
+    'age_label',
+    'image_available',
+    'safe_preview_url',
+    'source_status',
+    'note',
+    'evidence',
+    'is_placeholder',
+))
 
 
 @dataclass(frozen=True)
@@ -122,6 +142,27 @@ class SkyCycleBriefingSection:
     notable_moments_count: str
     summary: str
     data_status: str
+    is_placeholder: bool
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class LatestFrameSummary:
+    id: str
+    label: str
+    status: str
+    data_status: str
+    camera_label: str
+    profile_label: str
+    timestamp: str
+    age_label: str
+    image_available: bool
+    safe_preview_url: object
+    source_status: str
+    note: str
+    evidence: str
     is_placeholder: bool
 
     def to_dict(self):
@@ -187,6 +228,7 @@ def build_now_view():
         'is_placeholder': True,
         'safe_actions_available': [],
         'current_sky': _build_current_sky(),
+        'latest_frame_summary': _build_latest_frame_summary(),
         'sky_cycle_briefing': _build_sky_cycle_briefing(),
         'primary_question_answers': _build_primary_question_answers(),
         'evidence_summary': _build_evidence_summary(),
@@ -215,6 +257,7 @@ def validate_now_view_payload(payload):
     for section_key in NOW_REQUIRED_SECTIONS:
         _validate_required_section(payload, section_key)
 
+    _validate_latest_frame_summary(payload.get('latest_frame_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
     _validate_no_sensitive_keys(payload)
@@ -235,6 +278,25 @@ def _build_current_sky():
         source_recording='Source recording status pending backend contract',
         summary='Current phase, latest frame, and source recording status are placeholders until a safe NowView data source is connected.',
         data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+        is_placeholder=True,
+    ).to_dict()
+
+
+def _build_latest_frame_summary():
+    return LatestFrameSummary(
+        id='latest_frame.placeholder',
+        label='Latest Frame Summary',
+        status='Latest frame summary pending backend source.',
+        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        camera_label='Camera not evaluated yet',
+        profile_label='Profile not evaluated yet',
+        timestamp='Not evaluated yet',
+        age_label='Not evaluated yet',
+        image_available=False,
+        safe_preview_url=None,
+        source_status='Source status not evaluated yet.',
+        note='Preview not connected yet.',
+        evidence='No latest image metadata source is connected in this fake/static provider.',
         is_placeholder=True,
     ).to_dict()
 
@@ -508,6 +570,32 @@ def _validate_required_section(payload, section_key):
     value = payload.get(section_key)
     if value in (None, '', [], {}):
         raise ValueError('NowView section is missing or empty: {0:s}'.format(section_key))
+
+
+def _validate_latest_frame_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('latest_frame_summary must be a dict')
+
+    missing_keys = sorted(NOW_LATEST_FRAME_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('latest_frame_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at now.latest_frame_summary: {0!r}'.format(summary['data_status']))
+
+    safe_preview_url = summary.get('safe_preview_url')
+    if safe_preview_url is None:
+        return
+
+    if not isinstance(safe_preview_url, str):
+        raise ValueError('latest_frame_summary.safe_preview_url must be null or string metadata')
+
+    safe_preview_url_lower = safe_preview_url.lower()
+    if safe_preview_url.startswith('/') or safe_preview_url.startswith('~'):
+        raise ValueError('latest_frame_summary.safe_preview_url cannot be an absolute path')
+
+    if any(token in safe_preview_url_lower for token in NOW_SUSPICIOUS_URL_TOKENS):
+        raise ValueError('latest_frame_summary.safe_preview_url contains unsafe path metadata')
 
 
 def _validate_data_statuses(value, path='now'):

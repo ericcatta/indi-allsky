@@ -24,6 +24,7 @@ REQUIRED_NOW_KEYS = {
     'generated_at',
     'is_placeholder',
     'current_sky',
+    'latest_frame_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
     'evidence_summary',
@@ -110,6 +111,7 @@ def test_build_now_view_has_explicit_placeholder_status():
     assert now_view['briefing_title'] == 'Current / Morning Briefing'
     assert now_view['current_verdict'] == 'Observation data not evaluated yet'
     assert_section_status(now_view['current_sky'])
+    assert_section_status(now_view['latest_frame_summary'])
     assert_section_status(now_view['sky_cycle_briefing'])
     assert_section_status(now_view['evidence_summary'])
     assert_section_status(now_view['science_context'])
@@ -137,6 +139,19 @@ def test_build_now_view_contains_no_sensitive_payload():
     assert_no_sensitive_text(now_view)
     assert_no_absolute_paths(now_view)
     assert_no_callables(now_view)
+
+
+def test_latest_frame_summary_contract_is_fake_safe():
+    now_view = build_now_view()
+    latest_frame = now_view['latest_frame_summary']
+
+    assert latest_frame['status'] == 'Latest frame summary pending backend source.'
+    assert latest_frame['camera_label'] == 'Camera not evaluated yet'
+    assert latest_frame['profile_label'] == 'Profile not evaluated yet'
+    assert latest_frame['image_available'] is False
+    assert latest_frame['safe_preview_url'] is None
+    assert latest_frame['source_status'] == 'Source status not evaluated yet.'
+    assert latest_frame['data_status'] == 'future_backend_contract'
 
 
 def test_safe_actions_are_metadata_only():
@@ -173,6 +188,30 @@ def test_validate_now_view_payload_rejects_invalid_data_status():
         assert 'Invalid data_status' in str(e)
     else:
         raise AssertionError('invalid data_status should fail validation')
+
+
+def test_validate_now_view_payload_rejects_latest_frame_absolute_preview_path():
+    now_view = build_now_view()
+    now_view['latest_frame_summary']['safe_preview_url'] = '/var/lib/indi-allsky/latest.jpg'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'safe_preview_url' in str(e)
+    else:
+        raise AssertionError('absolute latest frame preview path should fail validation')
+
+
+def test_validate_now_view_payload_rejects_latest_frame_invalid_status():
+    now_view = build_now_view()
+    now_view['latest_frame_summary']['data_status'] = 'live_runtime'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Invalid data_status' in str(e)
+    else:
+        raise AssertionError('latest_frame_summary invalid data_status should fail validation')
 
 
 def test_validate_now_view_payload_rejects_sensitive_keys():
@@ -243,10 +282,13 @@ def main():
         test_build_now_view_is_json_serializable,
         test_build_now_view_has_explicit_placeholder_status,
         test_build_now_view_contains_no_sensitive_payload,
+        test_latest_frame_summary_contract_is_fake_safe,
         test_safe_actions_are_metadata_only,
         test_validate_now_view_payload_success,
         test_validate_now_view_payload_requires_sections,
         test_validate_now_view_payload_rejects_invalid_data_status,
+        test_validate_now_view_payload_rejects_latest_frame_absolute_preview_path,
+        test_validate_now_view_payload_rejects_latest_frame_invalid_status,
         test_validate_now_view_payload_rejects_sensitive_keys,
         test_validate_now_view_payload_rejects_absolute_paths,
         test_validate_now_view_payload_rejects_direct_safe_actions,

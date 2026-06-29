@@ -255,6 +255,19 @@ is connected. The next gap is not visual polish; it is trustworthy NowView data
 for current phase, latest frame metadata, source confidence, generated output
 readiness, and observatory health.
 
+## Latest Frame Contract Update
+
+`latest_frame_summary` has been added to the NowView contract as the first
+bounded product-data candidate.
+
+It is still fake/static and explicitly reports `future_backend_contract`. The
+provider does not access Flask, database rows, camera runtime state, filesystem
+paths, RAW/FITS files, media generation, or preview URLs. The safe preview URL
+is intentionally `None`.
+
+The real latest-frame provider remains blocked until a separate review defines a
+bounded, sanitized backend source for latest image metadata and preview routing.
+
 ## Final Verdict
 
 The prototype is safe and directionally correct.
