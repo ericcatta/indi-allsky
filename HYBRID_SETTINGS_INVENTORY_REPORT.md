@@ -16,6 +16,12 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 - Advanced groups with preview: 4
 - Developer groups with preview: 0
 - `do_not_move_yet` groups with preview: 4
+- Final read-only groups: 9
+- Final read-only routes: 7
+- Final read-only Basic groups: 8
+- Final read-only Advanced groups: 1
+- Final read-only Developer groups: 0
+- Dedicated-but-not-final groups: 4
 
 ### Counts By Owner
 
@@ -201,6 +207,29 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 | notifications | Notifications | runtime_system | basic | keep | high | /modern-admin/settings/notifications | True |
 | storage_drives | Storage / Drives | runtime_system | basic | keep | high | /modern-admin/settings/storage | True |
 
+## Final Read-Only Product Pages
+
+| Group | Label | Owner | Level | Status | Risk | Preview route | Do not move yet? |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| analytics | Analytics | runtime_system | advanced | protected_modern_work | medium | /modern-admin/settings/analytics | False |
+| auto_exposure | Auto Exposure | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/auto-exposure-gain | False |
+| auto_gain | Auto Gain | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/auto-exposure-gain | False |
+| camera_connection | Camera Connection | camera | basic | redesign | high | /modern-admin/settings/camera-connection | False |
+| camera_profile_identity | Camera Profile Identity | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/camera-profile | False |
+| exposure | Exposure | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | False |
+| gain | Gain | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | False |
+| hybrid_awb | Hybrid AWB | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/hybrid-awb | False |
+| storage_drives | Storage / Drives | runtime_system | basic | keep | high | /modern-admin/settings/storage | True |
+
+## Dedicated Preview But Not Final
+
+| Group | Label | Owner | Level | Status | Risk | Preview route | Do not move yet? |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| fits_source_files | FITS / Source Files | scientific_source | advanced | protected_modern_work | high | /modern-admin/settings/fits-source | True |
+| image_acquisition | Image Acquisition | camera_profile | advanced | redesign | high | /modern-admin/settings/acquisition-save | False |
+| image_save_formats | Image Save Formats | global | advanced | redesign | medium | /modern-admin/settings/acquisition-save | True |
+| notifications | Notifications | runtime_system | basic | keep | high | /modern-admin/settings/notifications | True |
+
 ## Groups Without Dedicated Preview
 
 | Group | Label | Owner | Level | Status | Risk | Preview route | Do not move yet? |
@@ -245,23 +274,23 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 
 | Group | Label | Owner | Level | Status | Risk | Preview route | Preview status | Do not move yet? | Current surfaces | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| analytics | Analytics | runtime_system | advanced | protected_modern_work | medium | /modern-admin/settings/analytics | dedicated_read_only | False | Classic charts, Modern analytics/status pages, Modern reports | Covers operational analytics, charts, ADU/SQM summaries, and status rollups., Settings should link to analytics configuration rather than duplicate chart logic. |
-| auto_exposure | Auto Exposure | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/auto-exposure-gain | dedicated_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/full, Modern camera profile controls | Covers auto exposure enablement, target ADU behavior, metering, and profile-aware tuning., Settings UX should expose concepts rather than raw key names. |
-| auto_gain | Auto Gain | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/auto-exposure-gain | dedicated_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/full, Modern camera profile controls | Covers auto gain enablement, min/max behavior, target ADU support, and profile-aware tuning., Do not hide runtime apply gates or collapse per-profile gain limits. |
-| camera_connection | Camera Connection | camera | basic | redesign | high | /modern-admin/settings/camera-connection | dedicated_read_only | False | Classic /config, Modern /modern-admin/settings/cameras, Modern /modern-admin/settings/capture | Covers physical camera identity, driver/interface selection, INDI/libcamera connection metadata, and camera row association., Keep per-camera identity explicit; do not flatten connection fields into global-only settings. |
-| camera_profile_identity | Camera Profile Identity | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/camera-profile | dedicated_read_only | False | Modern /modern-admin/settings/cameras, Modern camera profile resolver, Classic /config fallback | Covers profile id, label, enabled/primary state, camera association, and profile-first ownership., Protected Modern work; every future settings view must preserve camera/profile separation. |
+| analytics | Analytics | runtime_system | advanced | protected_modern_work | medium | /modern-admin/settings/analytics | final_read_only | False | Classic charts, Modern analytics/status pages, Modern reports | Covers operational analytics, charts, ADU/SQM summaries, and status rollups., Settings should link to analytics configuration rather than duplicate chart logic. |
+| auto_exposure | Auto Exposure | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/auto-exposure-gain | final_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/full, Modern camera profile controls | Covers auto exposure enablement, target ADU behavior, metering, and profile-aware tuning., Settings UX should expose concepts rather than raw key names. |
+| auto_gain | Auto Gain | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/auto-exposure-gain | final_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/full, Modern camera profile controls | Covers auto gain enablement, min/max behavior, target ADU support, and profile-aware tuning., Do not hide runtime apply gates or collapse per-profile gain limits. |
+| camera_connection | Camera Connection | camera | basic | redesign | high | /modern-admin/settings/camera-connection | final_read_only | False | Classic /config, Modern /modern-admin/settings/cameras, Modern /modern-admin/settings/capture | Covers physical camera identity, driver/interface selection, INDI/libcamera connection metadata, and camera row association., Keep per-camera identity explicit; do not flatten connection fields into global-only settings. |
+| camera_profile_identity | Camera Profile Identity | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/camera-profile | final_read_only | False | Modern /modern-admin/settings/cameras, Modern camera profile resolver, Classic /config fallback | Covers profile id, label, enabled/primary state, camera association, and profile-first ownership., Protected Modern work; every future settings view must preserve camera/profile separation. |
 | config_history | Config History | runtime_system | developer | keep | high | - | - | True | Classic /config/list, Classic /config/download, Modern /modern-admin/config-history | Covers metadata for historical config records., Raw config contents and downloads require redaction and Safe Action/download policy. |
 | config_import_export | Config Import / Export / Download | developer_legacy | developer | legacy_fallback | high | - | - | True | Classic /config/download, Classic /config/restore, Classic raw config workflows | Covers raw config download, import, export, and restore payload handling., Must not expose raw config, tokens, passwords, API keys, or secrets without redaction policy. |
 | config_restore | Config Restore | runtime_system | developer | legacy_fallback | high | - | - | True | Classic /config/restore, Classic /ajax/config/restore, Modern /modern-admin/config-restore | Covers restore inspection and future active restore behavior., Active restore remains Classic fallback until preview/diff/rollback/redaction policy exists. |
 | developer_debug | Developer / Debug Options | developer_legacy | developer | developer | high | - | - | True | Classic /config, Modern /modern-admin/settings/full, Developer documentation | Covers hooks, debug flags, experimental toggles, compatibility options, and raw full settings., Keep possible for experts, but do not expose in Basic. |
 | environmental_awareness | Environmental Awareness | runtime_system | advanced | protected_modern_work | medium | - | - | True | Modern environmental awareness pages, Modern observatory/status pages, Classic /config fallback | Covers smoke, aurora, weather, cloud, and other environmental context., Provider and sensor ownership should be verified before settings are reorganized. |
-| exposure | Exposure | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | dedicated_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/cameras | Covers exposure defaults, day/night exposure behavior, and profile overrides., Global fields may remain fallback, but profile values are the product-facing owner. |
+| exposure | Exposure | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | final_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/cameras | Covers exposure defaults, day/night exposure behavior, and profile overrides., Global fields may remain fallback, but profile values are the product-facing owner. |
 | fits_source_files | FITS / Source Files | scientific_source | advanced | protected_modern_work | high | /modern-admin/settings/fits-source | dedicated_read_only | True | Classic /fitsimageviewer, Modern /modern-admin/fits, Modern scientific source reports, Classic /config | Covers IMAGE_SAVE_FITS, IMAGE_SAVE_FITS_PERIOD, RAW/source exports, detector image paths, and source persistence policy., Future UX should use Never, Periodic, Every frame, and Event-window buffered concepts. |
 | focus | Focus | runtime_system | advanced | legacy_fallback | high | - | - | True | Classic focus controls, Modern focus status/safe-control wrappers, Classic /config | Covers focuser configuration, status, and future movement/autofocus actions., Hardware movement is blocked until hardware Safe Action policy and tests exist. |
-| gain | Gain | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | dedicated_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/cameras | Covers gain defaults, day/night gain behavior, sensor gain controls, and profile overrides., Must remain compatible with Auto Gain gating and camera-specific capabilities. |
+| gain | Gain | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | final_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/cameras | Covers gain defaults, day/night gain behavior, sensor gain controls, and profile overrides., Must remain compatible with Auto Gain gating and camera-specific capabilities. |
 | gpio | GPIO | runtime_system | developer | legacy_fallback | high | - | - | True | Classic GPIO/system tools, Modern safe-control wrappers, Classic /config | Covers GPIO pins, relay-style controls, and hardware interactions., Do not expose as Basic; hardware side effects need explicit policy. |
 | gps | GPS | runtime_system | advanced | needs_evidence | medium | - | - | True | Classic /config, Modern observatory/status surfaces if enabled | Covers GPS source/status/configuration when present., Needs evidence for provider ownership and current runtime usage before redesign. |
-| hybrid_awb | Hybrid AWB | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/hybrid-awb | dedicated_read_only | False | Modern camera settings, Modern profile controls, Classic /config fallback | Covers Hybrid AWB mode, hardware AWB interaction, RGB factors, and camera-specific color behavior., Must remain camera/profile-aware because sensor/color pipelines differ. |
+| hybrid_awb | Hybrid AWB | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/hybrid-awb | final_read_only | False | Modern camera settings, Modern profile controls, Classic /config fallback | Covers Hybrid AWB mode, hardware AWB interaction, RGB factors, and camera-specific color behavior., Must remain camera/profile-aware because sensor/color pipelines differ. |
 | image_acquisition | Image Acquisition | camera_profile | advanced | redesign | high | /modern-admin/settings/acquisition-save | dedicated_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/full | Covers capture cadence, day/night behavior, binning, pause behavior, and camera runtime acquisition options., Needs clearer split between daily operator controls and legacy fallback keys. |
 | image_save_formats | Image Save Formats | global | advanced | redesign | medium | /modern-admin/settings/acquisition-save | dedicated_read_only | True | Classic /config, Modern /modern-admin/settings/full, Modern media metadata pages | Covers display image save choices, thumbnails, file type, day/night save flags, and derived output formats., Must not be confused with FITS/RAW scientific source persistence. |
 | keogram | Keogram | media_product | advanced | redesign | high | - | - | True | Classic keogram generation/settings, Modern media metadata/status pages, Classic /config | Covers realtime/longterm keogram settings and product metadata., Generation and download are action-policy surfaces, not settings redesign targets yet. |
@@ -278,7 +307,7 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 | sensors | Sensors | runtime_system | advanced | redesign | medium | - | - | True | Classic /config, Modern observatory/status pages, Modern ADU/SQM/status pages | Covers environmental sensors, SQM, ADU, weather providers, and related status sources., Ownership is mixed across hardware, external providers, and runtime status. |
 | startrail | Startrail | media_product | advanced | redesign | high | - | - | True | Classic startrail generation/settings, Modern media metadata/status pages, Classic /config | Covers startrail generation settings and metadata., Generation, delete, and download remain blocked until queue/media action policy exists. |
 | startrail_video | Startrail Video | media_product | advanced | redesign | high | - | - | True | Classic startrail video settings, Modern media status pages, Public watch/latest routes | Covers startrail video product settings and public compatibility surfaces., Public route behavior must be preserved while settings ownership is clarified. |
-| storage_drives | Storage / Drives | runtime_system | basic | keep | high | /modern-admin/settings/storage | dedicated_read_only | True | Classic/system status pages, Modern storage/drive status pages, Classic /config | Covers storage health, drive status, retention policies, and path summaries., RPi5-first: avoid unbounded filesystem scans and large table queries. |
+| storage_drives | Storage / Drives | runtime_system | basic | keep | high | /modern-admin/settings/storage | final_read_only | True | Classic/system status pages, Modern storage/drive status pages, Classic /config | Covers storage health, drive status, retention policies, and path summaries., RPi5-first: avoid unbounded filesystem scans and large table queries. |
 | task_queue | Task Queue | runtime_system | developer | keep | high | - | - | True | Classic /tasks, Modern /modern-admin/tasks, Modern /modern-admin/tasks/<task_id> | Covers queue visibility, task state, action name, payload/result metadata, and diagnostics., Retry, cancel, requeue, and delete remain blocked by queue action contract requirements. |
 | timelapse | Timelapse | media_product | advanced | redesign | high | - | - | True | Classic media generation pages, Modern media status/usability pages, Classic /config | Covers timelapse settings, generated products, and status metadata., Generation, upload, delete, and download actions remain blocked pending Safe Actions policy. |
 | upload_providers | Upload Providers | external_integration | advanced | redesign | high | - | - | True | Classic /config, Modern upload provider status/detail pages, Upload pipeline | Covers S3, file transfer, sync/upload flags, remote destinations, and provider state., Remote operations, upload tests, and credential changes remain blocked. |
@@ -289,5 +318,6 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 
 - `do_not_move_yet` means the group should not be moved into active redesigned settings UI yet.
 - `preview_status=dedicated_read_only` means a product-preview page exists, but it is not a config editor.
+- `preview_status=final_read_only` means the page has been upgraded from preview inventory to a final read-only product layout. It is still not a config editor.
 - High-risk groups usually involve profile/camera ownership, credentials, filesystem paths, hardware, restore/download behavior, or mutating actions.
 - This inventory is intentionally separate from runtime configuration and can be reviewed before any UI wiring.

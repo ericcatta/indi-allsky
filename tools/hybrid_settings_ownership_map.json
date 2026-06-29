@@ -49,7 +49,7 @@
         "Keep per-camera identity explicit; do not flatten connection fields into global-only settings."
       ],
       "preview_route": "/modern-admin/settings/camera-connection",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "camera_profile_identity": {
       "label": "Camera Profile Identity",
@@ -68,7 +68,7 @@
         "Protected Modern work; every future settings view must preserve camera/profile separation."
       ],
       "preview_route": "/modern-admin/settings/camera-profile",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "exposure": {
       "label": "Exposure",
@@ -87,7 +87,7 @@
         "Global fields may remain fallback, but profile values are the product-facing owner."
       ],
       "preview_route": "/modern-admin/settings/exposure-gain",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "gain": {
       "label": "Gain",
@@ -106,7 +106,7 @@
         "Must remain compatible with Auto Gain gating and camera-specific capabilities."
       ],
       "preview_route": "/modern-admin/settings/exposure-gain",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "auto_exposure": {
       "label": "Auto Exposure",
@@ -126,7 +126,7 @@
         "Settings UX should expose concepts rather than raw key names."
       ],
       "preview_route": "/modern-admin/settings/auto-exposure-gain",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "auto_gain": {
       "label": "Auto Gain",
@@ -146,7 +146,7 @@
         "Do not hide runtime apply gates or collapse per-profile gain limits."
       ],
       "preview_route": "/modern-admin/settings/auto-exposure-gain",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "hybrid_awb": {
       "label": "Hybrid AWB",
@@ -165,7 +165,7 @@
         "Must remain camera/profile-aware because sensor/color pipelines differ."
       ],
       "preview_route": "/modern-admin/settings/hybrid-awb",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "image_acquisition": {
       "label": "Image Acquisition",
@@ -259,7 +259,7 @@
         "Settings should link to analytics configuration rather than duplicate chart logic."
       ],
       "preview_route": "/modern-admin/settings/analytics",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "quality": {
       "label": "Quality",
@@ -569,7 +569,7 @@
         "RPi5-first: avoid unbounded filesystem scans and large table queries."
       ],
       "preview_route": "/modern-admin/settings/storage",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "gps": {
       "label": "GPS",

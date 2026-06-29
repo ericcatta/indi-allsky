@@ -29,6 +29,8 @@ REQUIRED_GROUP_FIELDS = (
     "notes",
 )
 
+PREVIEW_STATUSES = {"dedicated_read_only", "final_read_only"}
+
 
 class SettingsInventoryError(Exception):
     """Raised when the settings ownership map is invalid."""
@@ -96,8 +98,8 @@ def validate_map(data: dict[str, Any]) -> dict[str, dict[str, Any]]:
             errors.append(f"{group_id}: do_not_move_yet must be a boolean")
         if "preview_route" in group and group["preview_route"] is not None and not isinstance(group["preview_route"], str):
             errors.append(f"{group_id}: preview_route must be a string or null")
-        if "preview_status" in group and group["preview_status"] is not None and group["preview_status"] != "dedicated_read_only":
-            errors.append(f"{group_id}: preview_status must be 'dedicated_read_only' or null")
+        if "preview_status" in group and group["preview_status"] is not None and group["preview_status"] not in PREVIEW_STATUSES:
+            errors.append(f"{group_id}: preview_status must be one of {sorted(PREVIEW_STATUSES)} or null")
 
     if errors:
         joined = "\n".join(f"- {error}" for error in errors)
@@ -187,13 +189,27 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
     preview_groups = {
         group_id: group
         for group_id, group in groups.items()
-        if group.get("preview_status") == "dedicated_read_only" and group.get("preview_route")
+        if group.get("preview_status") in PREVIEW_STATUSES and group.get("preview_route")
+    }
+    final_preview_groups = {
+        group_id: group
+        for group_id, group in preview_groups.items()
+        if group.get("preview_status") == "final_read_only"
+    }
+    dedicated_not_final_groups = {
+        group_id: group
+        for group_id, group in preview_groups.items()
+        if group.get("preview_status") == "dedicated_read_only"
     }
     preview_route_count = len({group.get("preview_route") for group in preview_groups.values()})
     preview_basic_count = sum(1 for group in preview_groups.values() if group["level"] == "basic")
     preview_advanced_count = sum(1 for group in preview_groups.values() if group["level"] == "advanced")
     preview_developer_count = sum(1 for group in preview_groups.values() if group["level"] == "developer")
     preview_do_not_move_count = sum(1 for group in preview_groups.values() if group["do_not_move_yet"])
+    final_route_count = len({group.get("preview_route") for group in final_preview_groups.values()})
+    final_basic_count = sum(1 for group in final_preview_groups.values() if group["level"] == "basic")
+    final_advanced_count = sum(1 for group in final_preview_groups.values() if group["level"] == "advanced")
+    final_developer_count = sum(1 for group in final_preview_groups.values() if group["level"] == "developer")
 
     lines: list[str] = [
         "# HYBRID SETTINGS INVENTORY REPORT",
@@ -214,6 +230,12 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
         f"- Advanced groups with preview: {preview_advanced_count}",
         f"- Developer groups with preview: {preview_developer_count}",
         f"- `do_not_move_yet` groups with preview: {preview_do_not_move_count}",
+        f"- Final read-only groups: {len(final_preview_groups)}",
+        f"- Final read-only routes: {final_route_count}",
+        f"- Final read-only Basic groups: {final_basic_count}",
+        f"- Final read-only Advanced groups: {final_advanced_count}",
+        f"- Final read-only Developer groups: {final_developer_count}",
+        f"- Dedicated-but-not-final groups: {len(dedicated_not_final_groups)}",
         "",
     ]
 
@@ -239,6 +261,24 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
         list_groups(
             "Groups With Dedicated Preview",
             groups,
+            lambda group: group.get("preview_status") in PREVIEW_STATUSES and bool(group.get("preview_route")),
+            include_preview=True,
+        )
+    )
+    lines.append("")
+    lines.extend(
+        list_groups(
+            "Final Read-Only Product Pages",
+            groups,
+            lambda group: group.get("preview_status") == "final_read_only" and bool(group.get("preview_route")),
+            include_preview=True,
+        )
+    )
+    lines.append("")
+    lines.extend(
+        list_groups(
+            "Dedicated Preview But Not Final",
+            groups,
             lambda group: group.get("preview_status") == "dedicated_read_only" and bool(group.get("preview_route")),
             include_preview=True,
         )
@@ -248,7 +288,7 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
         list_groups(
             "Groups Without Dedicated Preview",
             groups,
-            lambda group: not (group.get("preview_status") == "dedicated_read_only" and group.get("preview_route")),
+            lambda group: not (group.get("preview_status") in PREVIEW_STATUSES and group.get("preview_route")),
             include_preview=True,
         )
     )
@@ -257,7 +297,7 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
         list_groups(
             "Do Not Move Yet Groups With Preview",
             groups,
-            lambda group: group["do_not_move_yet"] and group.get("preview_status") == "dedicated_read_only" and bool(group.get("preview_route")),
+            lambda group: group["do_not_move_yet"] and group.get("preview_status") in PREVIEW_STATUSES and bool(group.get("preview_route")),
             include_preview=True,
         )
     )
@@ -272,6 +312,7 @@ def render_report(data: dict[str, Any], groups: dict[str, dict[str, Any]]) -> st
             "",
             "- `do_not_move_yet` means the group should not be moved into active redesigned settings UI yet.",
             "- `preview_status=dedicated_read_only` means a product-preview page exists, but it is not a config editor.",
+            "- `preview_status=final_read_only` means the page has been upgraded from preview inventory to a final read-only product layout. It is still not a config editor.",
             "- High-risk groups usually involve profile/camera ownership, credentials, filesystem paths, hardware, restore/download behavior, or mutating actions.",
             "- This inventory is intentionally separate from runtime configuration and can be reviewed before any UI wiring.",
             "",
@@ -299,7 +340,16 @@ def main() -> int:
             sum(
                 1
                 for group in groups.values()
-                if group.get("preview_status") == "dedicated_read_only" and group.get("preview_route")
+                if group.get("preview_status") in PREVIEW_STATUSES and group.get("preview_route")
+            )
+        )
+    )
+    print(
+        "Final read-only groups: {0}".format(
+            sum(
+                1
+                for group in groups.values()
+                if group.get("preview_status") == "final_read_only" and group.get("preview_route")
             )
         )
     )
