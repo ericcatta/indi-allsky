@@ -355,3 +355,33 @@ Mission 013 should implement optional runtime wiring behind the existing
 
 If any uncertainty appears around app context, session, camera setup, or DB
 availability, abort wiring and keep Now static.
+
+## Mission 013 Update
+
+`ModernAdminNowView` now wires `LatestFrameSummaryProvider` through a small
+Flask-layer helper:
+
+```text
+ModernAdminNowView.get_latest_frame_provider()
+```
+
+The helper builds a query filtered by the current camera id, passes
+`IndiAllSkyDbImageTable.createDate.desc()` as the ordering expression, wraps the
+query in `LatestFrameImageTableRepository`, and passes the repository through
+`LatestFrameSummaryProvider` into `build_now_view(...)`.
+
+Runtime behavior remains conservative:
+
+- no preview URL is generated;
+- no filename/path is read or exposed;
+- no filesystem checks are performed;
+- no RAW/FITS files are touched;
+- no public latest route is called;
+- no action or mutation is exposed.
+
+If provider construction fails or camera context is unavailable, the helper
+returns `None`, allowing `build_now_view()` to fall back to the static provider.
+
+Remaining blocker: the lightweight environment still lacks true Flask
+integration tests for `/modern-admin/now` with session/app/DB fixtures. The
+current wiring should be treated as bounded but not fully integration-verified.

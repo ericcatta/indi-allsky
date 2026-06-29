@@ -268,6 +268,19 @@ is intentionally `None`.
 The real latest-frame provider remains blocked until a separate review defines a
 bounded, sanitized backend source for latest image metadata and preview routing.
 
+## Latest Frame Runtime Update
+
+`/modern-admin/now` now uses a bounded runtime provider for latest frame
+metadata when camera context and query construction are available.
+
+The integration remains metadata-only. It does not generate preview URLs, read
+filenames, expose paths, inspect files, read RAW/FITS sources, or call public
+latest routes. If the provider cannot be created safely, Now falls back to the
+static provider contract.
+
+The main remaining gap is true Flask integration testing with app/session/DB
+fixtures.
+
 ## Final Verdict
 
 The prototype is safe and directionally correct.

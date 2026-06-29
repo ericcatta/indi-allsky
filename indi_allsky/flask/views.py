@@ -33,6 +33,8 @@ from ..frame_metadata_analytics import FrameMetadataAnalytics
 from ..modern_safe_action import run_modern_safe_action_dry_run
 from ..processing import ImageProcessor
 from ..product_view_models import build_now_view
+from ..product_view_models import LatestFrameImageTableRepository
+from ..product_view_models import LatestFrameSummaryProvider
 
 from cryptography.fernet import InvalidToken
 
@@ -7425,9 +7427,41 @@ class ModernAdminNowView(TemplateView):
         context = super(ModernAdminNowView, self).get_context()
 
         session['admin_mode'] = 'modern'
-        context['modern_admin_now'] = build_now_view()
+        context['modern_admin_now'] = build_now_view(
+            latest_frame_provider=self.get_latest_frame_provider(),
+        )
 
         return context
+
+
+    def get_latest_frame_provider(self):
+        try:
+            camera = getattr(self, 'camera', None)
+            camera_id = getattr(camera, 'id', None)
+            if not camera_id:
+                return None
+
+            camera_label = str(
+                getattr(camera, 'friendlyName', None)
+                or getattr(camera, 'name', None)
+                or 'Unknown camera'
+            )
+
+            query = IndiAllSkyDbImageTable.query\
+                .filter(IndiAllSkyDbImageTable.camera_id == camera_id)
+
+            repository = LatestFrameImageTableRepository(
+                query=query,
+                order_by_expression=IndiAllSkyDbImageTable.createDate.desc(),
+                camera_label=camera_label,
+                profile_label='Profile not evaluated yet',
+                clock=lambda: self.camera_now,
+            )
+        except Exception:
+            app.logger.error('Unable to build Now latest frame provider')
+            return None
+
+        return LatestFrameSummaryProvider(repository)
 
 
 class ModernAdminStorageView(ModernAdminView):
