@@ -5840,6 +5840,7 @@ class ModernAdminView(TemplateView):
     def get_modern_admin_nav(self):
         # Navigation shell for the future modern admin UI; unfinished sections render read-only placeholders.
         nav_items = (
+            ('Now', 'indi_allsky.modern_admin_now_view'),
             ('Dashboard', 'indi_allsky.modern_admin_view'),
             ('Cameras', 'indi_allsky.modern_admin_cameras_view'),
             ('Storage', 'indi_allsky.modern_admin_storage_view'),
@@ -7413,6 +7414,142 @@ class ModernAdminPlaceholderView(ModernAdminView):
         context['modern_admin_links'] = self.modern_admin_links
 
         return context
+
+
+class ModernAdminNowView(TemplateView):
+    page_title = 'Hybrid Now'
+    decorators = [login_required]
+
+    def get_context(self):
+        context = super(ModernAdminNowView, self).get_context()
+
+        session['admin_mode'] = 'modern'
+        context['modern_admin_now'] = self.get_now_view_model()
+
+        return context
+
+
+    def get_now_view_model(self):
+        return {
+            'status' : 'Read-only product prototype',
+            'generated_at' : 'Not evaluated yet',
+            'current_sky' : {
+                'phase' : 'Unknown',
+                'latest_image' : 'Latest image not evaluated yet',
+                'capture_status' : 'Capture status placeholder',
+                'source_recording' : 'Source recording status placeholder',
+                'summary' : 'Future NowView backend contract will provide sanitized live sky state.',
+            },
+            'cycle_briefing' : {
+                'verdict_label' : 'Cycle Verdict',
+                'verdict' : 'Not evaluated yet',
+                'source_coverage' : 'Placeholder',
+                'outputs_status' : 'Generated outputs not evaluated here',
+                'notable_moments_count' : 'Placeholder',
+                'summary' : 'Future SkyCycleSummary will explain the latest complete day/night cycle.',
+            },
+            'moments' : (
+                {
+                    'label' : 'Meteor candidate',
+                    'confidence' : 'Placeholder',
+                    'evidence' : 'Future MomentSummary evidence',
+                    'status' : 'Not evaluated yet',
+                },
+                {
+                    'label' : 'Lightning or storm candidate',
+                    'confidence' : 'Placeholder',
+                    'evidence' : 'Future weather/sky evidence',
+                    'status' : 'Not evaluated yet',
+                },
+                {
+                    'label' : 'Clear window',
+                    'confidence' : 'Placeholder',
+                    'evidence' : 'Future sky quality timeline',
+                    'status' : 'Not evaluated yet',
+                },
+                {
+                    'label' : 'Anomaly',
+                    'confidence' : 'Placeholder',
+                    'evidence' : 'Future observatory diagnostics',
+                    'status' : 'Not evaluated yet',
+                },
+            ),
+            'outputs' : (
+                {
+                    'label' : 'Best image',
+                    'status' : 'Placeholder',
+                    'look' : 'No look evaluated',
+                    'lineage' : 'Source lineage placeholder',
+                },
+                {
+                    'label' : 'Timelapse',
+                    'status' : 'Placeholder',
+                    'look' : 'No look evaluated',
+                    'lineage' : 'Source lineage placeholder',
+                },
+                {
+                    'label' : 'Keogram',
+                    'status' : 'Placeholder',
+                    'look' : 'No look evaluated',
+                    'lineage' : 'Source lineage placeholder',
+                },
+                {
+                    'label' : 'Startrail',
+                    'status' : 'Placeholder',
+                    'look' : 'No look evaluated',
+                    'lineage' : 'Source lineage placeholder',
+                },
+            ),
+            'health' : (
+                {
+                    'label' : 'Camera',
+                    'status' : 'Not evaluated here',
+                    'note' : 'Future ObservatoryHealth camera state.',
+                },
+                {
+                    'label' : 'Storage',
+                    'status' : 'Not evaluated here',
+                    'note' : 'Future storage health and source preservation state.',
+                },
+                {
+                    'label' : 'Source preservation',
+                    'status' : 'Placeholder',
+                    'note' : 'RAW/FITS/source preservation remains a product invariant.',
+                },
+                {
+                    'label' : 'Generation',
+                    'status' : 'Not evaluated here',
+                    'note' : 'Future output job and rendering status.',
+                },
+                {
+                    'label' : 'Upload / integration',
+                    'status' : 'Not evaluated here',
+                    'note' : 'Future integration health summary.',
+                },
+                {
+                    'label' : 'Warnings',
+                    'status' : 'Placeholder',
+                    'note' : 'Future AttentionItem summary.',
+                },
+            ),
+            'attention_items' : (
+                {
+                    'label' : 'Backend contract needed',
+                    'status' : 'Blocked',
+                    'note' : 'Now will need sanitized domain view models before live data appears here.',
+                },
+                {
+                    'label' : 'Safe actions unavailable',
+                    'status' : 'Read-only',
+                    'note' : 'This prototype exposes no controls.',
+                },
+                {
+                    'label' : 'Source lineage placeholder',
+                    'status' : 'Future contract',
+                    'note' : 'Output lineage is shown as a concept only.',
+                },
+            ),
+        }
 
 
 class ModernAdminStorageView(ModernAdminView):
@@ -25177,6 +25314,7 @@ bp_allsky.add_url_rule('/config/restore', view_func=ConfigRestoreView.as_view('c
 bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.as_view('ajax_config_restore_view'))
 
 bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
+bp_allsky.add_url_rule('/modern-admin/now', view_func=ModernAdminNowView.as_view('modern_admin_now_view', template_name='modern_admin/now.html'))
 bp_allsky.add_url_rule('/modern-admin/safe-action/dry-run', view_func=ModernAdminSafeActionDryRunView.as_view('modern_admin_safe_action_dry_run_view'), methods=['POST'])
 bp_allsky.add_url_rule('/modern-admin/capture/service', view_func=ModernAdminCaptureServiceActionView.as_view('modern_admin_capture_service_action_view'))
 bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
