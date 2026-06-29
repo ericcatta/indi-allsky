@@ -101,7 +101,10 @@
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ sky_cycle_report.moments_summary.label }}</div>
                 <h3>{{ sky_cycle_report.moments_summary.status }}</h3>
-                <p>{{ sky_cycle_report.moments_summary.summary }}</p>
+                <p>{{ sky_cycle_report.moments_summary.count_label }}. Primary: {{ sky_cycle_report.moments_summary.primary_moment }}.</p>
+                <p>Categories: {{ sky_cycle_report.moments_summary.moment_categories | join(', ') }}</p>
+                <p>{{ sky_cycle_report.moments_summary.detection_status }}</p>
+                <p>{{ sky_cycle_report.moments_summary.review_queue_status }}</p>
                 <p>{{ sky_cycle_report.moments_summary.note }}</p>
             </article>
             <article class="modern-admin-status-card">
@@ -116,6 +119,24 @@
                 <p>{{ sky_cycle_report.attention_items.summary }}</p>
                 <p>{{ sky_cycle_report.attention_items.note }}</p>
             </article>
+        </section>
+
+        <section class="modern-admin-status-grid" aria-label="Moment candidates">
+            {% for moment in sky_cycle_report.moments_summary.items %}
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ moment.type | replace('_', ' ') | title }} / {{ moment.phase | replace('_', ' ') | title }}</div>
+                <h3>{{ moment.label }}</h3>
+                <p>{{ moment.time_label }}. {{ moment.confidence_label }}.</p>
+                {% for evidence_item in moment.evidence %}
+                    <p>{{ evidence_item }}</p>
+                {% endfor %}
+                <p>{{ moment.source_lineage_status }}</p>
+                <p>{{ moment.related_outputs_status }}</p>
+                <p><strong>Science:</strong> {{ moment.science_note }}</p>
+                <p><strong>Astrophoto:</strong> {{ moment.astrophoto_note }}</p>
+                <span class="modern-admin-status-pill modern-admin-status-muted">{{ moment.review_status }}</span>
+            </article>
+            {% endfor %}
         </section>
     </section>
 

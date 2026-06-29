@@ -263,6 +263,40 @@ def test_build_sky_cycle_report_view_has_required_sections():
         assert phase['data_status'] == 'future_backend_contract'
         assert 'No phase engine' in phase['unsupported_reason']
 
+    moments_summary = report['moments_summary']
+    assert moments_summary['count_label'] == 'No moments evaluated yet'
+    assert moments_summary['primary_moment'] == 'No primary moment selected'
+    assert moments_summary['detection_status'] == 'Detector evidence pending backend contract.'
+    assert moments_summary['review_queue_status'] == 'Review queue not evaluated yet.'
+    assert isinstance(moments_summary['moment_categories'], list)
+    assert isinstance(moments_summary['items'], list)
+    assert len(moments_summary['items']) >= 3
+
+    for moment in moments_summary['items']:
+        assert_section_status(moment)
+        assert moment['type'] in {
+            'meteor',
+            'aurora',
+            'lightning',
+            'storm',
+            'clouds',
+            'clear_window',
+            'sunrise',
+            'sunset',
+            'moon',
+            'sky_quality',
+            'camera_anomaly',
+            'generation_issue',
+            'unknown',
+        }
+        assert moment['phase'] in {'day', 'sunset_twilight', 'night', 'sunrise_twilight', 'unknown'}
+        assert isinstance(moment['evidence'], list)
+        assert 'source_lineage_status' in moment
+        assert 'related_outputs_status' in moment
+        assert 'science_note' in moment
+        assert 'astrophoto_note' in moment
+        assert 'review_status' in moment
+
 
 def test_build_sky_cycle_report_view_contains_no_sensitive_payload():
     report = build_sky_cycle_report_view()
@@ -334,6 +368,74 @@ def test_validate_sky_cycle_report_payload_rejects_non_boolean_supported():
         assert 'supported must be a boolean' in str(e)
     else:
         raise AssertionError('non-boolean sky cycle supported flag should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_invalid_moment_type():
+    report = build_sky_cycle_report_view()
+    report['moments_summary']['items'][0]['type'] = 'airplane'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Invalid moment type' in str(e)
+    else:
+        raise AssertionError('invalid moment type should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_moment_evidence_not_list():
+    report = build_sky_cycle_report_view()
+    report['moments_summary']['items'][0]['evidence'] = 'detector evidence pending'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'evidence must be a list' in str(e)
+    else:
+        raise AssertionError('moment evidence string should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_incomplete_moment_item():
+    report = build_sky_cycle_report_view()
+    del report['moments_summary']['items'][0]['source_lineage_status']
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('incomplete moment item should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_moment_path_secret_callable():
+    report = build_sky_cycle_report_view()
+    report['moments_summary']['items'][0]['evidence'].append('/var/lib/indi-allsky/source.fit')
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Absolute paths' in str(e)
+    else:
+        raise AssertionError('moment evidence path should fail validation')
+
+    report = build_sky_cycle_report_view()
+    report['moments_summary']['items'][0]['evidence'].append({'secret': 'value'})
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('moment evidence secret should fail validation')
+
+    report = build_sky_cycle_report_view()
+    report['moments_summary']['items'][0]['evidence'].append(lambda: None)
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('moment evidence callable should fail validation')
 
 
 def test_sky_cycle_template_has_no_mutative_controls():
@@ -778,6 +880,10 @@ def main():
         test_validate_sky_cycle_report_payload_rejects_invalid_phase,
         test_validate_sky_cycle_report_payload_rejects_incomplete_phase_item,
         test_validate_sky_cycle_report_payload_rejects_non_boolean_supported,
+        test_validate_sky_cycle_report_payload_rejects_invalid_moment_type,
+        test_validate_sky_cycle_report_payload_rejects_moment_evidence_not_list,
+        test_validate_sky_cycle_report_payload_rejects_incomplete_moment_item,
+        test_validate_sky_cycle_report_payload_rejects_moment_path_secret_callable,
         test_sky_cycle_template_has_no_mutative_controls,
         test_current_phase_summary_maps_day,
         test_current_phase_summary_maps_night,

@@ -229,6 +229,54 @@ SKY_CYCLE_ALLOWED_PHASES = frozenset((
     'unknown',
 ))
 
+SKY_CYCLE_MOMENTS_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'count_label',
+    'primary_moment',
+    'moment_categories',
+    'review_queue_status',
+    'detection_status',
+    'note',
+    'items',
+    'is_placeholder',
+))
+
+SKY_CYCLE_MOMENT_ITEM_REQUIRED_KEYS = frozenset((
+    'id',
+    'type',
+    'label',
+    'phase',
+    'data_status',
+    'time_label',
+    'confidence_label',
+    'evidence',
+    'source_lineage_status',
+    'related_outputs_status',
+    'science_note',
+    'astrophoto_note',
+    'review_status',
+    'is_placeholder',
+))
+
+SKY_CYCLE_ALLOWED_MOMENT_TYPES = frozenset((
+    'meteor',
+    'aurora',
+    'lightning',
+    'storm',
+    'clouds',
+    'clear_window',
+    'sunrise',
+    'sunset',
+    'moon',
+    'sky_quality',
+    'camera_anomaly',
+    'generation_issue',
+    'unknown',
+))
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -602,6 +650,7 @@ def validate_sky_cycle_report_payload(payload):
 
     _validate_sky_cycle_summary(payload.get('cycle_summary'))
     _validate_sky_cycle_phase_timeline(payload.get('phase_timeline'))
+    _validate_sky_cycle_moments_summary(payload.get('moments_summary'))
     _validate_source_confidence_summary(payload.get('source_confidence_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
@@ -801,15 +850,88 @@ def _build_sky_cycle_phase_timeline():
 
 
 def _build_sky_cycle_moments_summary():
-    return NowSection(
-        id='sky_cycle.moments.placeholder',
-        label='Notable Moments',
-        status='Moment detection not connected yet.',
-        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
-        is_placeholder=True,
-        summary='Meteors, clouds, lightning, clear windows, anomalies, and other moments require a future MomentSummary backend contract.',
-        note='No detector evidence is evaluated by this prototype.',
-    ).to_dict()
+    return {
+        'id': 'sky_cycle.moments.placeholder',
+        'label': 'Notable Moments',
+        'status': 'Moment detection not connected yet.',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'count_label': 'No moments evaluated yet',
+        'primary_moment': 'No primary moment selected',
+        'moment_categories': [
+            'meteor',
+            'aurora',
+            'lightning',
+            'storm',
+            'clouds',
+            'clear_window',
+            'sunrise',
+            'sunset',
+            'moon',
+            'sky_quality',
+            'camera_anomaly',
+            'generation_issue',
+        ],
+        'review_queue_status': 'Review queue not evaluated yet.',
+        'detection_status': 'Detector evidence pending backend contract.',
+        'note': 'Moment detection not connected yet.',
+        'items': [
+            {
+                'id': 'sky_cycle.moment.clear_window.placeholder',
+                'type': 'clear_window',
+                'label': 'Clear window candidate',
+                'phase': 'night',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'time_label': 'Time not evaluated yet',
+                'confidence_label': 'Confidence not evaluated yet',
+                'evidence': [
+                    'Clear-window evidence pending backend contract.',
+                ],
+                'source_lineage_status': 'Source lineage pending source contract.',
+                'related_outputs_status': 'Related outputs pending rendering contract.',
+                'science_note': 'Sky quality and cloud evidence are not connected yet.',
+                'astrophoto_note': 'Review value for generated media is not evaluated yet.',
+                'review_status': 'Review queue not evaluated yet.',
+                'is_placeholder': True,
+            },
+            {
+                'id': 'sky_cycle.moment.meteor.placeholder',
+                'type': 'meteor',
+                'label': 'Meteor candidate',
+                'phase': 'night',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'time_label': 'Time not evaluated yet',
+                'confidence_label': 'Detector confidence not connected',
+                'evidence': [
+                    'Detector evidence pending backend contract.',
+                ],
+                'source_lineage_status': 'Source lineage pending source contract.',
+                'related_outputs_status': 'Related outputs pending rendering contract.',
+                'science_note': 'Meteor classification requires detector evidence and source frames.',
+                'astrophoto_note': 'Highlight output status is not evaluated yet.',
+                'review_status': 'Review queue not evaluated yet.',
+                'is_placeholder': True,
+            },
+            {
+                'id': 'sky_cycle.moment.camera_anomaly.placeholder',
+                'type': 'camera_anomaly',
+                'label': 'Camera anomaly placeholder',
+                'phase': 'unknown',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'time_label': 'Time not evaluated yet',
+                'confidence_label': 'Operational confidence not evaluated yet',
+                'evidence': [
+                    'Camera anomaly evidence pending observatory health contract.',
+                ],
+                'source_lineage_status': 'Source lineage pending source contract.',
+                'related_outputs_status': 'Related outputs not evaluated yet.',
+                'science_note': 'Anomaly context requires bounded camera and source summaries.',
+                'astrophoto_note': 'Image-quality impact is not evaluated yet.',
+                'review_status': 'Review queue not evaluated yet.',
+                'is_placeholder': True,
+            },
+        ],
+        'is_placeholder': True,
+    }
 
 
 def _build_sky_cycle_outputs_summary():
@@ -1377,6 +1499,44 @@ def _validate_sky_cycle_phase_timeline(phase_timeline):
 
         if not isinstance(phase['supported'], bool):
             raise ValueError('phase_timeline[{0:d}].supported must be a boolean'.format(index))
+
+
+def _validate_sky_cycle_moments_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('moments_summary must be a dict')
+
+    missing_keys = sorted(SKY_CYCLE_MOMENTS_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('moments_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at sky_cycle.moments_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['moment_categories'], list):
+        raise ValueError('moments_summary.moment_categories must be a list')
+
+    if not isinstance(summary['items'], list):
+        raise ValueError('moments_summary.items must be a list')
+
+    for index, item in enumerate(summary['items']):
+        if not isinstance(item, dict):
+            raise ValueError('moments_summary.items[{0:d}] must be a dict'.format(index))
+
+        missing_item_keys = sorted(SKY_CYCLE_MOMENT_ITEM_REQUIRED_KEYS.difference(item.keys()))
+        if missing_item_keys:
+            raise ValueError('moments_summary.items[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_item_keys)))
+
+        if item['type'] not in SKY_CYCLE_ALLOWED_MOMENT_TYPES:
+            raise ValueError('Invalid moment type at sky_cycle.moments_summary.items[{0:d}]: {1!r}'.format(index, item['type']))
+
+        if item['phase'] not in SKY_CYCLE_ALLOWED_PHASES:
+            raise ValueError('Invalid moment phase at sky_cycle.moments_summary.items[{0:d}]: {1!r}'.format(index, item['phase']))
+
+        if item['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+            raise ValueError('Invalid data_status at sky_cycle.moments_summary.items[{0:d}]: {1!r}'.format(index, item['data_status']))
+
+        if not isinstance(item['evidence'], list):
+            raise ValueError('moments_summary.items[{0:d}].evidence must be a list'.format(index))
 
 
 def _validate_data_statuses(value, path='now'):

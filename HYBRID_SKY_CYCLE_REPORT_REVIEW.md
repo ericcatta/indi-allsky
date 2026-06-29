@@ -203,3 +203,62 @@ health data is connected.
 Next gap: perform a bounded source review for the first real Sky Cycle field,
 preferably cycle identity/time range or a single non-heavy metadata-derived
 candidate. Do not implement real cycle computation yet.
+
+## Mission 022 Update
+
+The moments summary contract has been strengthened.
+
+`moments_summary` now describes the product question "what deserves attention?"
+with explicit fields:
+
+- count label;
+- primary moment;
+- moment categories;
+- review queue status;
+- detection status;
+- item list.
+
+Each moment item now carries:
+
+- moment type;
+- phase;
+- confidence label;
+- evidence list;
+- source lineage status;
+- related outputs status;
+- science note;
+- astrophoto note;
+- review status.
+
+The allowed moment types are:
+
+- meteor;
+- aurora;
+- lightning;
+- storm;
+- clouds;
+- clear window;
+- sunrise;
+- sunset;
+- moon;
+- sky quality;
+- camera anomaly;
+- generation issue;
+- unknown.
+
+The contract remains fake/static. No detector, source lineage, filesystem,
+RAW/FITS, media generation, database query, or review queue is connected.
+
+Validation now enforces required summary fields, required item fields, moment
+type allowlist, compatible phase allowlist, evidence as a list, allowed
+`data_status`, and recursive no-secret/no-path/no-callable checks.
+
+Updated Sky Cycle Report score: 7.4/10.
+
+The score improves because "moments" now has a real product shape instead of a
+single placeholder card. It remains below 8/10 because no real detection
+evidence, source lineage, output relation, or review queue exists yet.
+
+Next gap: harden the generated outputs summary contract, or review the safest
+first bounded runtime source for cycle identity/time range. Do not connect
+detector data yet.
