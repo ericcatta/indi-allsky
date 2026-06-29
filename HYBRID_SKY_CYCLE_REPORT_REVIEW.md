@@ -164,3 +164,42 @@ It should now pause until a bounded source review identifies one safe real field
 to connect. The first real data should be small, cached or bounded, and should
 not require filesystem inspection, RAW/FITS reads, media generation, or full
 cycle computation.
+
+## Mission 021 Update
+
+The phase timeline contract has been strengthened.
+
+Each phase now carries explicit product fields:
+
+- observation value;
+- source expectation;
+- output expectation;
+- science note;
+- astrophoto note;
+- supported flag;
+- unsupported reason.
+
+The timeline remains static/fake. Day and night are supported as placeholder
+product concepts. Sunset and sunrise twilight remain unsupported and
+`future_backend_contract` because no phase engine or astronomical boundary
+contract is connected.
+
+Validation now enforces:
+
+- non-empty phase timeline;
+- required phase fields;
+- phase allowlist;
+- allowed data statuses;
+- boolean `supported`;
+- no secrets, paths, or callables through recursive payload validation.
+
+Updated Sky Cycle Report score: 7.1/10.
+
+The score improves because the timeline is now a clearer product contract
+instead of a thin list of labels. It remains below 8/10 because no real cycle
+boundary, source coverage, moment evidence, output readiness, or observatory
+health data is connected.
+
+Next gap: perform a bounded source review for the first real Sky Cycle field,
+preferably cycle identity/time range or a single non-heavy metadata-derived
+candidate. Do not implement real cycle computation yet.

@@ -71,8 +71,18 @@
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ phase.data_status | replace('_', ' ') | title }}</div>
                 <h3>{{ phase.label }}</h3>
+                <span class="modern-admin-status-pill {% if phase.supported %}modern-admin-status-neutral{% else %}modern-admin-status-muted{% endif %}">
+                    {% if phase.supported %}Supported placeholder{% else %}Not supported yet{% endif %}
+                </span>
                 <p>{{ phase.time_range_label }}</p>
-                <p>{{ phase.note }}</p>
+                <p><strong>Value:</strong> {{ phase.observation_value }}</p>
+                <p><strong>Sources:</strong> {{ phase.source_expectation }}</p>
+                <p><strong>Outputs:</strong> {{ phase.output_expectation }}</p>
+                <p><strong>Science:</strong> {{ phase.science_note }}</p>
+                <p><strong>Astrophoto:</strong> {{ phase.astrophoto_note }}</p>
+                {% if phase.unsupported_reason %}
+                    <p>{{ phase.unsupported_reason }}</p>
+                {% endif %}
             </article>
             {% endfor %}
         </div>

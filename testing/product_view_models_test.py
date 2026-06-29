@@ -245,6 +245,23 @@ def test_build_sky_cycle_report_view_has_required_sections():
 
     for phase in report['phase_timeline']:
         assert_section_status(phase)
+        assert isinstance(phase['supported'], bool)
+        assert 'observation_value' in phase
+        assert 'source_expectation' in phase
+        assert 'output_expectation' in phase
+        assert 'science_note' in phase
+        assert 'astrophoto_note' in phase
+        assert 'unsupported_reason' in phase
+
+    twilight_phases = [
+        phase for phase in report['phase_timeline']
+        if phase['phase'] in ('sunset_twilight', 'sunrise_twilight')
+    ]
+    assert len(twilight_phases) == 2
+    for phase in twilight_phases:
+        assert phase['supported'] is False
+        assert phase['data_status'] == 'future_backend_contract'
+        assert 'No phase engine' in phase['unsupported_reason']
 
 
 def test_build_sky_cycle_report_view_contains_no_sensitive_payload():
@@ -281,6 +298,42 @@ def test_validate_sky_cycle_report_payload_rejects_invalid_status():
         assert 'Invalid data_status' in str(e)
     else:
         raise AssertionError('invalid sky cycle status should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_invalid_phase():
+    report = build_sky_cycle_report_view()
+    report['phase_timeline'][0]['phase'] = 'storm_window'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Invalid phase' in str(e)
+    else:
+        raise AssertionError('invalid sky cycle phase should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_incomplete_phase_item():
+    report = build_sky_cycle_report_view()
+    del report['phase_timeline'][0]['observation_value']
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('incomplete sky cycle phase should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_non_boolean_supported():
+    report = build_sky_cycle_report_view()
+    report['phase_timeline'][0]['supported'] = 'yes'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'supported must be a boolean' in str(e)
+    else:
+        raise AssertionError('non-boolean sky cycle supported flag should fail validation')
 
 
 def test_sky_cycle_template_has_no_mutative_controls():
@@ -722,6 +775,9 @@ def main():
         test_validate_sky_cycle_report_payload_success,
         test_validate_sky_cycle_report_payload_requires_sections,
         test_validate_sky_cycle_report_payload_rejects_invalid_status,
+        test_validate_sky_cycle_report_payload_rejects_invalid_phase,
+        test_validate_sky_cycle_report_payload_rejects_incomplete_phase_item,
+        test_validate_sky_cycle_report_payload_rejects_non_boolean_supported,
         test_sky_cycle_template_has_no_mutative_controls,
         test_current_phase_summary_maps_day,
         test_current_phase_summary_maps_night,

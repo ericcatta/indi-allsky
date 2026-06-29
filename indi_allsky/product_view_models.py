@@ -210,8 +210,23 @@ SKY_CYCLE_PHASE_REQUIRED_KEYS = frozenset((
     'status',
     'data_status',
     'time_range_label',
+    'observation_value',
+    'source_expectation',
+    'output_expectation',
+    'science_note',
+    'astrophoto_note',
+    'supported',
+    'unsupported_reason',
     'note',
     'is_placeholder',
+))
+
+SKY_CYCLE_ALLOWED_PHASES = frozenset((
+    'day',
+    'sunset_twilight',
+    'night',
+    'sunrise_twilight',
+    'unknown',
 ))
 
 
@@ -346,6 +361,13 @@ class SkyCyclePhase:
     status: str
     data_status: str
     time_range_label: str
+    observation_value: str
+    source_expectation: str
+    output_expectation: str
+    science_note: str
+    astrophoto_note: str
+    supported: bool
+    unsupported_reason: str
     note: str
     is_placeholder: bool
 
@@ -712,6 +734,13 @@ def _build_sky_cycle_phase_timeline():
             status='not_evaluated',
             data_status=NOW_DATA_STATUS_NOT_EVALUATED,
             time_range_label='Day range not evaluated yet',
+            observation_value='Daytime sky monitoring placeholder.',
+            source_expectation='Image metadata may define future daytime source coverage.',
+            output_expectation='Daytime outputs are not evaluated yet.',
+            science_note='Daytime cloud, Sun, weather, and anomaly summaries require future backend evidence.',
+            astrophoto_note='Daytime frames may support context and transition media, but no rendering contract is connected.',
+            supported=True,
+            unsupported_reason='',
             note='Day phase placeholder pending a bounded Sky Cycle backend contract.',
             is_placeholder=True,
         ),
@@ -720,8 +749,15 @@ def _build_sky_cycle_phase_timeline():
             label='Sunset / Twilight',
             phase='sunset_twilight',
             status='not_evaluated',
-            data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+            data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             time_range_label='Twilight range not evaluated yet',
+            observation_value='Twilight classification pending phase engine.',
+            source_expectation='Transition source coverage requires a future phase boundary contract.',
+            output_expectation='Sunset/twilight output readiness is not evaluated yet.',
+            science_note='No astronomical boundary calculation connected yet.',
+            astrophoto_note='Twilight may become useful for transition highlights after source lineage exists.',
+            supported=False,
+            unsupported_reason='No phase engine or astronomical boundary contract is connected.',
             note='Twilight classification is not evaluated in this prototype.',
             is_placeholder=True,
         ),
@@ -732,6 +768,13 @@ def _build_sky_cycle_phase_timeline():
             status='not_evaluated',
             data_status=NOW_DATA_STATUS_NOT_EVALUATED,
             time_range_label='Night range not evaluated yet',
+            observation_value='Night source/output evaluation pending backend contract.',
+            source_expectation='Night source coverage should eventually summarize preserved frames and gaps.',
+            output_expectation='Best image, timelapse, keogram, and startrail readiness are not evaluated yet.',
+            science_note='Night quality, meteor, aurora, cloud, and sky brightness evidence are not connected.',
+            astrophoto_note='Night outputs will eventually reference Looks and source lineage.',
+            supported=True,
+            unsupported_reason='',
             note='Night phase placeholder pending a bounded Sky Cycle backend contract.',
             is_placeholder=True,
         ),
@@ -740,8 +783,15 @@ def _build_sky_cycle_phase_timeline():
             label='Sunrise / Twilight',
             phase='sunrise_twilight',
             status='not_evaluated',
-            data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+            data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             time_range_label='Twilight range not evaluated yet',
+            observation_value='Twilight classification pending phase engine.',
+            source_expectation='Transition source coverage requires a future phase boundary contract.',
+            output_expectation='Sunrise/twilight output readiness is not evaluated yet.',
+            science_note='No astronomical boundary calculation connected yet.',
+            astrophoto_note='Sunrise transition highlights require source lineage and output recipes.',
+            supported=False,
+            unsupported_reason='No phase engine or astronomical boundary contract is connected.',
             note='Sunrise twilight classification is not evaluated in this prototype.',
             is_placeholder=True,
         ),
@@ -1319,8 +1369,14 @@ def _validate_sky_cycle_phase_timeline(phase_timeline):
         if missing_keys:
             raise ValueError('phase_timeline[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_keys)))
 
+        if phase['phase'] not in SKY_CYCLE_ALLOWED_PHASES:
+            raise ValueError('Invalid phase at sky_cycle.phase_timeline[{0:d}]: {1!r}'.format(index, phase['phase']))
+
         if phase['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
             raise ValueError('Invalid data_status at sky_cycle.phase_timeline[{0:d}]: {1!r}'.format(index, phase['data_status']))
+
+        if not isinstance(phase['supported'], bool):
+            raise ValueError('phase_timeline[{0:d}].supported must be a boolean'.format(index))
 
 
 def _validate_data_statuses(value, path='now'):
