@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import copy
+import inspect
 import json
 import re
 import sys
@@ -7,7 +9,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import indi_allsky.product_view_models as product_view_models
 from indi_allsky.product_view_models import build_now_view
+from indi_allsky.product_view_models import validate_now_view_payload
 
 
 REQUIRED_NOW_KEYS = {
@@ -129,6 +133,96 @@ def test_safe_actions_are_metadata_only():
     assert now_view['safe_actions_available'] == []
 
 
+def test_validate_now_view_payload_success():
+    assert validate_now_view_payload(build_now_view()) is True
+
+
+def test_validate_now_view_payload_requires_sections():
+    now_view = build_now_view()
+    del now_view['current_sky']
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'current_sky' in str(e)
+    else:
+        raise AssertionError('missing section should fail validation')
+
+
+def test_validate_now_view_payload_rejects_invalid_data_status():
+    now_view = build_now_view()
+    now_view['current_sky']['data_status'] = 'live_runtime'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Invalid data_status' in str(e)
+    else:
+        raise AssertionError('invalid data_status should fail validation')
+
+
+def test_validate_now_view_payload_rejects_sensitive_keys():
+    now_view = build_now_view()
+    now_view['metadata']['api_token'] = 'do-not-render'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('sensitive key should fail validation')
+
+
+def test_validate_now_view_payload_rejects_absolute_paths():
+    now_view = build_now_view()
+    now_view['metadata']['source_hint'] = '/var/lib/indi-allsky/image.fit'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Absolute paths' in str(e)
+    else:
+        raise AssertionError('absolute path should fail validation')
+
+
+def test_validate_now_view_payload_rejects_direct_safe_actions():
+    now_view = build_now_view()
+    now_view['safe_actions_available'] = [
+        {
+            'label': 'Do something',
+            'url': 'modern-admin-action',
+        },
+    ]
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'direct action' in str(e)
+    else:
+        raise AssertionError('direct safe action should fail validation')
+
+
+def test_validate_now_view_payload_rejects_callables():
+    now_view = copy.deepcopy(build_now_view())
+    now_view['metadata']['callable'] = lambda: None
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('callable payload should fail validation')
+
+
+def test_product_view_model_module_has_no_framework_or_db_imports():
+    source = inspect.getsource(product_view_models).lower()
+
+    assert 'from flask' not in source
+    assert 'import flask' not in source
+    assert 'db.session' not in source
+    assert 'open(' not in source
+
+
 def main():
     tests = [
         test_build_now_view_returns_dict,
@@ -136,6 +230,14 @@ def main():
         test_build_now_view_has_explicit_placeholder_status,
         test_build_now_view_contains_no_sensitive_payload,
         test_safe_actions_are_metadata_only,
+        test_validate_now_view_payload_success,
+        test_validate_now_view_payload_requires_sections,
+        test_validate_now_view_payload_rejects_invalid_data_status,
+        test_validate_now_view_payload_rejects_sensitive_keys,
+        test_validate_now_view_payload_rejects_absolute_paths,
+        test_validate_now_view_payload_rejects_direct_safe_actions,
+        test_validate_now_view_payload_rejects_callables,
+        test_product_view_model_module_has_no_framework_or_db_imports,
     ]
 
     for test in tests:

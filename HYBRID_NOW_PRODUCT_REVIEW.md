@@ -220,6 +220,19 @@ Recommended shape:
 This would improve architecture without pretending the product has real Now
 truth before the backend contract exists.
 
+## Contract Update
+
+`build_now_view()` now exists as a backend-owned Product UI contract candidate in
+`indi_allsky/product_view_models.py`.
+
+It remains static and placeholder-only. It does not connect to runtime state,
+database rows, camera services, filesystem paths, RAW/FITS files, media
+generation, or safe actions. The value of this step is contract shape,
+sanitization, and testability, not live product truth.
+
+The next meaningful product step is to connect one bounded, cached, non-mutative
+field through this contract without weakening the RPi5-first guarantees.
+
 ## Final Verdict
 
 The prototype is safe and directionally correct.
