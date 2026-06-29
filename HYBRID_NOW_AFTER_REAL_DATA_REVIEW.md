@@ -354,3 +354,15 @@ Can I trust the sources?
 
 That is the right bridge from latest frame metadata toward real Sky Cycle
 reporting.
+
+## Mission 018 Update
+
+`source_confidence_summary` has been added to NowView as a fake/static contract.
+
+It answers the product question "Can I trust the sources?" only at the contract
+level for now. It does not calculate source coverage, read RAW/FITS files,
+inspect the filesystem, query the database, generate media, or infer real
+preservation state.
+
+Real source coverage remains future work and must be introduced as a bounded
+backend summary before it is treated as product truth.

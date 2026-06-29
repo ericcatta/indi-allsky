@@ -31,6 +31,18 @@ NOW_ALLOWED_PHASES = frozenset((
     NOW_PHASE_UNKNOWN,
 ))
 
+NOW_RISK_LEVEL_UNKNOWN = 'unknown'
+NOW_RISK_LEVEL_LOW = 'low'
+NOW_RISK_LEVEL_MEDIUM = 'medium'
+NOW_RISK_LEVEL_HIGH = 'high'
+
+NOW_ALLOWED_RISK_LEVELS = frozenset((
+    NOW_RISK_LEVEL_UNKNOWN,
+    NOW_RISK_LEVEL_LOW,
+    NOW_RISK_LEVEL_MEDIUM,
+    NOW_RISK_LEVEL_HIGH,
+))
+
 NOW_REQUIRED_KEYS = frozenset((
     'id',
     'label',
@@ -44,6 +56,7 @@ NOW_REQUIRED_KEYS = frozenset((
     'current_sky',
     'current_phase_summary',
     'latest_frame_summary',
+    'source_confidence_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
     'evidence_summary',
@@ -60,6 +73,7 @@ NOW_REQUIRED_SECTIONS = frozenset((
     'current_sky',
     'current_phase_summary',
     'latest_frame_summary',
+    'source_confidence_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
     'evidence_summary',
@@ -130,6 +144,22 @@ NOW_CURRENT_PHASE_REQUIRED_KEYS = frozenset((
     'note',
     'supported_phases',
     'unsupported_phases',
+    'is_placeholder',
+))
+
+NOW_SOURCE_CONFIDENCE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'confidence_label',
+    'coverage_label',
+    'source_types',
+    'preservation_status',
+    'risk_level',
+    'note',
+    'evidence',
+    'next_backend_contract',
     'is_placeholder',
 ))
 
@@ -214,6 +244,26 @@ class LatestFrameSummary:
     source_status: str
     note: str
     evidence: str
+    is_placeholder: bool
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class SourceConfidenceSummary:
+    id: str
+    label: str
+    status: str
+    data_status: str
+    confidence_label: str
+    coverage_label: str
+    source_types: list
+    preservation_status: str
+    risk_level: str
+    note: str
+    evidence: list
+    next_backend_contract: str
     is_placeholder: bool
 
     def to_dict(self):
@@ -367,6 +417,7 @@ def build_now_view(latest_frame_provider=None, current_phase_night=None):
         'current_sky': _build_current_sky(),
         'current_phase_summary': build_current_phase_summary(current_phase_night),
         'latest_frame_summary': _build_latest_frame_summary(latest_frame_provider=latest_frame_provider),
+        'source_confidence_summary': build_source_confidence_summary(),
         'sky_cycle_briefing': _build_sky_cycle_briefing(),
         'primary_question_answers': _build_primary_question_answers(),
         'evidence_summary': _build_evidence_summary(),
@@ -397,6 +448,7 @@ def validate_now_view_payload(payload):
 
     _validate_current_phase_summary(payload.get('current_phase_summary'))
     _validate_latest_frame_summary(payload.get('latest_frame_summary'))
+    _validate_source_confidence_summary(payload.get('source_confidence_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
     _validate_no_sensitive_keys(payload)
@@ -479,6 +531,29 @@ def _map_current_phase(night):
 def _build_latest_frame_summary(latest_frame_provider=None):
     provider = latest_frame_provider or LatestFrameSummaryProvider()
     return provider.build()
+
+
+def build_source_confidence_summary():
+    return SourceConfidenceSummary(
+        id='source_confidence.placeholder',
+        label='Source Confidence',
+        status='not_evaluated',
+        data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+        confidence_label='Pending source coverage contract',
+        coverage_label='Not evaluated yet',
+        source_types=[
+            'image metadata',
+        ],
+        preservation_status='Source preservation not evaluated yet',
+        risk_level=NOW_RISK_LEVEL_UNKNOWN,
+        note='Source coverage not evaluated yet.',
+        evidence=[
+            'No RAW/FITS/source coverage calculation is connected yet.',
+            'This panel will summarize whether generated results are backed by preserved source data.',
+        ],
+        next_backend_contract='bounded source coverage summary',
+        is_placeholder=True,
+    ).to_dict()
 
 
 def _build_latest_frame_no_row_summary():
@@ -942,6 +1017,27 @@ def _validate_current_phase_summary(summary):
 
     if not isinstance(summary['unsupported_phases'], list):
         raise ValueError('current_phase_summary.unsupported_phases must be a list')
+
+
+def _validate_source_confidence_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('source_confidence_summary must be a dict')
+
+    missing_keys = sorted(NOW_SOURCE_CONFIDENCE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('source_confidence_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at now.source_confidence_summary: {0!r}'.format(summary['data_status']))
+
+    if summary['risk_level'] not in NOW_ALLOWED_RISK_LEVELS:
+        raise ValueError('Invalid risk_level at now.source_confidence_summary: {0!r}'.format(summary['risk_level']))
+
+    if not isinstance(summary['source_types'], list):
+        raise ValueError('source_confidence_summary.source_types must be a list')
+
+    if not isinstance(summary['evidence'], list):
+        raise ValueError('source_confidence_summary.evidence must be a list')
 
 
 def _validate_data_statuses(value, path='now'):

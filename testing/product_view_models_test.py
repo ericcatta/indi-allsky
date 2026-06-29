@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import indi_allsky.product_view_models as product_view_models
 from indi_allsky.product_view_models import build_now_view
 from indi_allsky.product_view_models import build_current_phase_summary
+from indi_allsky.product_view_models import build_source_confidence_summary
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
 from indi_allsky.product_view_models import validate_now_view_payload
@@ -31,6 +32,7 @@ REQUIRED_NOW_KEYS = {
     'current_sky',
     'current_phase_summary',
     'latest_frame_summary',
+    'source_confidence_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
     'evidence_summary',
@@ -159,6 +161,7 @@ def test_build_now_view_has_explicit_placeholder_status():
     assert_section_status(now_view['current_sky'])
     assert_section_status(now_view['current_phase_summary'])
     assert_section_status(now_view['latest_frame_summary'])
+    assert_section_status(now_view['source_confidence_summary'])
     assert_section_status(now_view['sky_cycle_briefing'])
     assert_section_status(now_view['evidence_summary'])
     assert_section_status(now_view['science_context'])
@@ -222,6 +225,35 @@ def test_build_now_view_accepts_current_phase_context():
 
     assert day_view['current_phase_summary']['phase'] == 'day'
     assert night_view['current_phase_summary']['phase'] == 'night'
+
+
+def test_source_confidence_summary_contract_is_fake_safe():
+    now_view = build_now_view()
+    source_confidence = now_view['source_confidence_summary']
+
+    assert source_confidence['status'] == 'not_evaluated'
+    assert source_confidence['data_status'] == 'not_evaluated'
+    assert source_confidence['confidence_label'] == 'Pending source coverage contract'
+    assert source_confidence['coverage_label'] == 'Not evaluated yet'
+    assert source_confidence['source_types'] == ['image metadata']
+    assert source_confidence['preservation_status'] == 'Source preservation not evaluated yet'
+    assert source_confidence['risk_level'] == 'unknown'
+    assert source_confidence['next_backend_contract'] == 'bounded source coverage summary'
+    assert isinstance(source_confidence['evidence'], list)
+    assert source_confidence['is_placeholder'] is True
+    json.dumps(source_confidence, sort_keys=True)
+
+
+def test_build_source_confidence_summary_is_static_contract():
+    source_confidence = build_source_confidence_summary()
+
+    assert source_confidence['status'] == 'not_evaluated'
+    assert source_confidence['data_status'] == 'not_evaluated'
+    assert source_confidence['risk_level'] == 'unknown'
+    assert source_confidence['source_types'] == ['image metadata']
+    assert_no_sensitive_text(source_confidence)
+    assert_no_absolute_paths(source_confidence)
+    assert_no_callables(source_confidence)
 
 
 def test_latest_frame_summary_contract_is_fake_safe():
@@ -465,6 +497,54 @@ def test_validate_now_view_payload_rejects_latest_frame_invalid_status():
         raise AssertionError('latest_frame_summary invalid data_status should fail validation')
 
 
+def test_validate_now_view_payload_rejects_invalid_source_confidence_risk():
+    now_view = build_now_view()
+    now_view['source_confidence_summary']['risk_level'] = 'critical'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Invalid risk_level' in str(e)
+    else:
+        raise AssertionError('source_confidence_summary invalid risk_level should fail validation')
+
+
+def test_validate_now_view_payload_rejects_source_confidence_path():
+    now_view = build_now_view()
+    now_view['source_confidence_summary']['evidence'].append('/var/lib/indi-allsky/source')
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Absolute path' in str(e)
+    else:
+        raise AssertionError('source_confidence_summary absolute path should fail validation')
+
+
+def test_validate_now_view_payload_rejects_source_confidence_secret():
+    now_view = build_now_view()
+    now_view['source_confidence_summary']['evidence'].append({'api_key': 'redacted'})
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('source_confidence_summary sensitive key should fail validation')
+
+
+def test_validate_now_view_payload_rejects_source_confidence_callable():
+    now_view = build_now_view()
+    now_view['source_confidence_summary']['evidence'].append(lambda: None)
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('source_confidence_summary callable should fail validation')
+
+
 def test_validate_now_view_payload_rejects_sensitive_keys():
     now_view = build_now_view()
     now_view['metadata']['api_token'] = 'do-not-render'
@@ -538,6 +618,8 @@ def main():
         test_current_phase_summary_maps_night,
         test_current_phase_summary_maps_unknown,
         test_build_now_view_accepts_current_phase_context,
+        test_source_confidence_summary_contract_is_fake_safe,
+        test_build_source_confidence_summary_is_static_contract,
         test_latest_frame_summary_contract_is_fake_safe,
         test_latest_frame_provider_with_frame_present,
         test_latest_frame_provider_with_no_frame,
@@ -556,6 +638,10 @@ def main():
         test_validate_now_view_payload_rejects_invalid_current_phase,
         test_validate_now_view_payload_rejects_latest_frame_absolute_preview_path,
         test_validate_now_view_payload_rejects_latest_frame_invalid_status,
+        test_validate_now_view_payload_rejects_invalid_source_confidence_risk,
+        test_validate_now_view_payload_rejects_source_confidence_path,
+        test_validate_now_view_payload_rejects_source_confidence_secret,
+        test_validate_now_view_payload_rejects_source_confidence_callable,
         test_validate_now_view_payload_rejects_sensitive_keys,
         test_validate_now_view_payload_rejects_absolute_paths,
         test_validate_now_view_payload_rejects_direct_safe_actions,
