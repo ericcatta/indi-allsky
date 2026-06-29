@@ -19713,6 +19713,51 @@ class ModernAdminAutoExposureGainSettingsView(ModernAdminSettingsInventoryView):
         },
     )
 
+    AUTO_EXPOSURE_GAIN_OVERVIEW_CARDS = (
+        {
+            'label'           : 'Target ADU strategy',
+            'purpose'         : 'Summarize the signal target strategy shared by Auto Exposure and Auto Gain.',
+            'related_fields'  : ('TARGET_ADU / target_adu', 'TARGET_ADU_DEV / target_adu_dev', 'AUTO_EXPOSURE_*', 'AUTO_GAIN_*'),
+            'future_editable' : 'yes after automation validation policy',
+            'safety_note'     : 'Future edits must remain profile-aware and must not apply runtime exposure/gain decisions from this page.',
+        },
+        {
+            'label'           : 'Day/night targets',
+            'purpose'         : 'Keep day and night target values visible as separate automation behaviors.',
+            'related_fields'  : ('TARGET_ADU / target_adu', 'TARGET_ADU_DAY / target_adu_day', 'TARGET_ADU_DEV / target_adu_dev', 'TARGET_ADU_DEV_DAY / target_adu_dev_day'),
+            'future_editable' : 'yes after day/night automation policy',
+            'safety_note'     : 'Day/night target changes can affect capture quality and must be bounded by profile settings.',
+        },
+        {
+            'label'           : 'Exposure control limits',
+            'purpose'         : 'Show how Auto Exposure is bounded by manual exposure limits and metering strategy.',
+            'related_fields'  : ('AUTO_EXPOSURE_ENABLED / auto_exposure_enabled', 'AUTO_EXPOSURE_METERING_MODE / auto_exposure_metering_mode', 'CCD_EXPOSURE_* / exposure_*'),
+            'future_editable' : 'blocked until controller safety policy exists',
+            'safety_note'     : 'This page does not enable Auto Exposure or change exposure controller state.',
+        },
+        {
+            'label'           : 'Gain control limits',
+            'purpose'         : 'Show Auto Gain enablement and gain caps as a bounded automation system.',
+            'related_fields'  : ('CCD_CONFIG.AUTO_GAIN_ENABLE / auto_gain_enable', 'AUTO_GAIN_DAY / auto_gain_day', 'AUTO_GAIN_NIGHT / auto_gain_night', 'GAIN_MAX_*'),
+            'future_editable' : 'blocked until controller safety policy exists',
+            'safety_note'     : 'This page does not enable Auto Gain or change camera gain values.',
+        },
+        {
+            'label'           : 'Moon mode behavior',
+            'purpose'         : 'Keep moon-mode automation visible as a separate operating mode.',
+            'related_fields'  : ('AUTO_GAIN_MOONMODE / auto_gain_moonmode', 'GAIN_MAX_MOONMODE / gain_max_moonmode', 'CCD_CONFIG.MOONMODE.GAIN / gain_moonmode'),
+            'future_editable' : 'yes after moon-mode automation policy',
+            'safety_note'     : 'Moon-mode automation must remain explicit because it affects image signal and quality.',
+        },
+        {
+            'label'           : 'Manual override relationship',
+            'purpose'         : 'Make the relationship between manual Exposure/Gain and automation controls clear without merging them.',
+            'related_fields'  : ('Manual Exposure / Gain', 'CCD_EXPOSURE_*', 'CCD_CONFIG.*.GAIN', 'AUTO_EXPOSURE_*', 'AUTO_GAIN_*'),
+            'future_editable' : 'blocked until override semantics exist',
+            'safety_note'     : 'Manual and automatic controls should not be collapsed into one unsafe editor.',
+        },
+    )
+
     def get_context(self):
         context = super(ModernAdminAutoExposureGainSettingsView, self).get_context()
         groups_by_id = {
@@ -19730,9 +19775,24 @@ class ModernAdminAutoExposureGainSettingsView(ModernAdminSettingsInventoryView):
             )
             if group
         )
+        context['modern_admin_auto_exposure_gain_overview_cards'] = self.get_auto_exposure_gain_overview_cards()
         context['modern_admin_auto_exposure_gain_config_sections'] = self.get_auto_exposure_gain_config_sections()
         context['modern_admin_auto_exposure_gain_proposed_layout'] = self.get_auto_exposure_gain_proposed_layout()
         return context
+
+
+    def get_auto_exposure_gain_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_settings_text(row.get('label')),
+                'purpose'         : self.safe_settings_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_settings_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_settings_text(row.get('future_editable')),
+                'safety_note'     : self.safe_settings_text(row.get('safety_note')),
+            }
+            for row in self.AUTO_EXPOSURE_GAIN_OVERVIEW_CARDS
+        )
 
 
     def get_auto_exposure_gain_config_sections(self):
