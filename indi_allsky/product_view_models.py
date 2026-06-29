@@ -25,12 +25,18 @@ NOW_REQUIRED_KEYS = frozenset((
     'id',
     'label',
     'status',
+    'briefing_title',
+    'current_verdict',
     'data_status',
     'generated_at',
     'is_placeholder',
     'safe_actions_available',
     'current_sky',
     'sky_cycle_briefing',
+    'primary_question_answers',
+    'evidence_summary',
+    'science_context',
+    'astrophoto_context',
     'notable_moments',
     'generated_outputs',
     'observatory_health',
@@ -41,6 +47,10 @@ NOW_REQUIRED_KEYS = frozenset((
 NOW_REQUIRED_SECTIONS = frozenset((
     'current_sky',
     'sky_cycle_briefing',
+    'primary_question_answers',
+    'evidence_summary',
+    'science_context',
+    'astrophoto_context',
     'notable_moments',
     'generated_outputs',
     'observatory_health',
@@ -146,6 +156,19 @@ class GeneratedOutput:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class PrimaryQuestionAnswer:
+    id: str
+    question: str
+    answer: str
+    evidence: str
+    data_status: str
+    is_placeholder: bool
+
+    def to_dict(self):
+        return asdict(self)
+
+
 def build_now_view():
     """Return the first backend-owned NowView contract.
 
@@ -157,12 +180,18 @@ def build_now_view():
         'id': 'now.placeholder',
         'label': 'Now',
         'status': 'Read-only product prototype',
+        'briefing_title': 'Current / Morning Briefing',
+        'current_verdict': 'Observation data not evaluated yet',
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
         'generated_at': 'Not evaluated yet',
         'is_placeholder': True,
         'safe_actions_available': [],
         'current_sky': _build_current_sky(),
         'sky_cycle_briefing': _build_sky_cycle_briefing(),
+        'primary_question_answers': _build_primary_question_answers(),
+        'evidence_summary': _build_evidence_summary(),
+        'science_context': _build_science_context(),
+        'astrophoto_context': _build_astrophoto_context(),
         'notable_moments': _build_notable_moments(),
         'generated_outputs': _build_generated_outputs(),
         'observatory_health': _build_observatory_health(),
@@ -201,10 +230,10 @@ def _build_current_sky():
         id='current_sky.placeholder',
         label='Current Sky',
         phase='Unknown',
-        latest_image='Latest image not evaluated yet',
-        capture_status='Capture status placeholder',
-        source_recording='Source recording status placeholder',
-        summary='Future NowView backend contract will provide sanitized live sky state.',
+        latest_image='Latest frame not evaluated yet',
+        capture_status='Capture status pending backend contract',
+        source_recording='Source recording status pending backend contract',
+        summary='Current phase, latest frame, and source recording status are placeholders until a safe NowView data source is connected.',
         data_status=NOW_DATA_STATUS_NOT_EVALUATED,
         is_placeholder=True,
     ).to_dict()
@@ -215,11 +244,84 @@ def _build_sky_cycle_briefing():
         id='sky_cycle.placeholder',
         label='Latest Sky Cycle Briefing',
         verdict_label='Cycle Verdict',
-        verdict='Not evaluated yet',
-        source_coverage='Placeholder',
-        outputs_status='Generated outputs not evaluated here',
-        notable_moments_count='Placeholder',
-        summary='Future SkyCycleSummary will explain the latest complete day/night cycle.',
+        verdict='Observation data not evaluated yet',
+        source_coverage='Source coverage pending backend contract',
+        outputs_status='Generated output status pending rendering contract',
+        notable_moments_count='Moment evidence pending detector contract',
+        summary='A future SkyCycleSummary will turn day, twilight, night, moments, outputs, and observatory health into a bounded briefing.',
+        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        is_placeholder=True,
+    ).to_dict()
+
+
+def _build_primary_question_answers():
+    return [
+        PrimaryQuestionAnswer(
+            id='answer.what_happened.placeholder',
+            question='What happened?',
+            answer='Observation data not evaluated yet.',
+            evidence='No Sky Cycle or Moment evidence is connected to this prototype.',
+            data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+            is_placeholder=True,
+        ).to_dict(),
+        PrimaryQuestionAnswer(
+            id='answer.worth_reviewing.placeholder',
+            question='What is worth reviewing?',
+            answer='No detector evidence connected yet.',
+            evidence='Future moments will rank meteor, storm, cloud, clear-window, and anomaly candidates.',
+            data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+            is_placeholder=True,
+        ).to_dict(),
+        PrimaryQuestionAnswer(
+            id='answer.sources_trust.placeholder',
+            question='Can I trust the sources?',
+            answer='Source coverage pending backend contract.',
+            evidence='Future SourceLineage and preservation summaries will report bounded source confidence.',
+            data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+            is_placeholder=True,
+        ).to_dict(),
+        PrimaryQuestionAnswer(
+            id='answer.attention.placeholder',
+            question='Does anything need attention?',
+            answer='Observatory health summarized from placeholder data.',
+            evidence='Future AttentionItems will summarize camera, storage, generation, and integration warnings.',
+            data_status=NOW_DATA_STATUS_PLACEHOLDER,
+            is_placeholder=True,
+        ).to_dict(),
+    ]
+
+
+def _build_evidence_summary():
+    return NowSection(
+        id='evidence.placeholder',
+        label='Evidence Summary',
+        status='No evidence connected yet',
+        summary='Detector, analytics, output, and source-lineage evidence are intentionally not connected in this prototype.',
+        note='Future NowView evidence should be bounded, cached, and safe for Raspberry Pi 5.',
+        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        is_placeholder=True,
+    ).to_dict()
+
+
+def _build_science_context():
+    return NowSection(
+        id='science_context.placeholder',
+        label='Science Context',
+        status='Pending analytics contract',
+        summary='SQM, ADU, cloud, phase, and quality context will be reported after a safe science summary contract exists.',
+        note='No raw measurements or unbounded analytics are evaluated here.',
+        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        is_placeholder=True,
+    ).to_dict()
+
+
+def _build_astrophoto_context():
+    return NowSection(
+        id='astrophoto_context.placeholder',
+        label='Astrophoto Context',
+        status='Pending rendering contract',
+        summary='Looks, output recipes, and generated media readiness will be summarized after the rendering contract exists.',
+        note='No image processing or media generation is triggered by Now.',
         data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
         is_placeholder=True,
     ).to_dict()
@@ -230,36 +332,36 @@ def _build_notable_moments():
         NowMoment(
             id='moment.meteor_candidate.placeholder',
             label='Meteor candidate',
-            confidence='Placeholder',
-            evidence='Future MomentSummary evidence',
-            status='Not evaluated yet',
+            confidence='Not evaluated',
+            evidence='No detector evidence connected yet',
+            status='Pending detector contract',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),
         NowMoment(
             id='moment.lightning_storm.placeholder',
             label='Lightning or storm candidate',
-            confidence='Placeholder',
-            evidence='Future weather/sky evidence',
-            status='Not evaluated yet',
+            confidence='Not evaluated',
+            evidence='No storm or lightning evidence connected yet',
+            status='Pending weather/sky evidence contract',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),
         NowMoment(
             id='moment.clear_window.placeholder',
             label='Clear window',
-            confidence='Placeholder',
-            evidence='Future sky quality timeline',
-            status='Not evaluated yet',
+            confidence='Not evaluated',
+            evidence='No sky quality timeline connected yet',
+            status='Pending analytics contract',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),
         NowMoment(
             id='moment.anomaly.placeholder',
             label='Anomaly',
-            confidence='Placeholder',
-            evidence='Future observatory diagnostics',
-            status='Not evaluated yet',
+            confidence='Not evaluated',
+            evidence='No observatory anomaly evidence connected yet',
+            status='Pending health contract',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),
@@ -271,36 +373,36 @@ def _build_generated_outputs():
         GeneratedOutput(
             id='output.best_image.placeholder',
             label='Best image',
-            status='Placeholder',
-            look='No look evaluated',
-            lineage='Source lineage placeholder',
+            status='Generated output status pending rendering contract',
+            look='Look not evaluated',
+            lineage='Source lineage pending backend contract',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),
         GeneratedOutput(
             id='output.timelapse.placeholder',
             label='Timelapse',
-            status='Placeholder',
-            look='No look evaluated',
-            lineage='Source lineage placeholder',
+            status='Generated output status pending rendering contract',
+            look='Look not evaluated',
+            lineage='Source lineage pending backend contract',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),
         GeneratedOutput(
             id='output.keogram.placeholder',
             label='Keogram',
-            status='Placeholder',
-            look='No look evaluated',
-            lineage='Source lineage placeholder',
+            status='Generated output status pending rendering contract',
+            look='Look not evaluated',
+            lineage='Source lineage pending backend contract',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),
         GeneratedOutput(
             id='output.startrail.placeholder',
             label='Startrail',
-            status='Placeholder',
-            look='No look evaluated',
-            lineage='Source lineage placeholder',
+            status='Generated output status pending rendering contract',
+            look='Look not evaluated',
+            lineage='Source lineage pending backend contract',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),
@@ -312,48 +414,48 @@ def _build_observatory_health():
         NowSection(
             id='health.camera.placeholder',
             label='Camera',
-            status='Not evaluated here',
-            note='Future ObservatoryHealth camera state.',
+            status='Not evaluated',
+            note='Camera health pending observatory health contract.',
             data_status=NOW_DATA_STATUS_NOT_EVALUATED,
             is_placeholder=True,
         ).to_dict(),
         NowSection(
             id='health.storage.placeholder',
             label='Storage',
-            status='Not evaluated here',
-            note='Future storage health and source preservation state.',
+            status='Not evaluated',
+            note='Storage capacity and retention safety pending backend contract.',
             data_status=NOW_DATA_STATUS_NOT_EVALUATED,
             is_placeholder=True,
         ).to_dict(),
         NowSection(
             id='health.source_preservation.placeholder',
             label='Source preservation',
-            status='Placeholder',
-            note='RAW/FITS/source preservation remains a product invariant.',
+            status='Source confidence pending',
+            note='RAW/FITS/source preservation remains invariant; coverage is not evaluated yet.',
             data_status=NOW_DATA_STATUS_PLACEHOLDER,
             is_placeholder=True,
         ).to_dict(),
         NowSection(
             id='health.generation.placeholder',
             label='Generation',
-            status='Not evaluated here',
-            note='Future output job and rendering status.',
+            status='Not evaluated',
+            note='Rendering and generation queue status pending backend contract.',
             data_status=NOW_DATA_STATUS_NOT_EVALUATED,
             is_placeholder=True,
         ).to_dict(),
         NowSection(
             id='health.upload_integration.placeholder',
             label='Upload / integration',
-            status='Not evaluated here',
-            note='Future integration health summary.',
+            status='Not evaluated',
+            note='Upload and integration health pending safe status contract.',
             data_status=NOW_DATA_STATUS_NOT_EVALUATED,
             is_placeholder=True,
         ).to_dict(),
         NowSection(
             id='health.warnings.placeholder',
             label='Warnings',
-            status='Placeholder',
-            note='Future AttentionItem summary.',
+            status='Attention summary pending',
+            note='Warning state is placeholder-only until AttentionItems are connected.',
             data_status=NOW_DATA_STATUS_PLACEHOLDER,
             is_placeholder=True,
         ).to_dict(),
@@ -366,7 +468,7 @@ def _build_attention_items():
             id='attention.backend_contract.placeholder',
             label='Backend contract needed',
             status='Blocked',
-            note='Now will need sanitized domain view models before live data appears here.',
+            note='Real Now data requires sanitized SkyCycle, Moment, Source, Output, and Observatory contracts.',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),
@@ -374,7 +476,7 @@ def _build_attention_items():
             id='attention.safe_actions.placeholder',
             label='Safe actions unavailable',
             status='Read-only',
-            note='This prototype exposes no controls.',
+            note='No actions are exposed. Future interactions must use Safe Actions.',
             data_status=NOW_DATA_STATUS_PLACEHOLDER,
             is_placeholder=True,
         ).to_dict(),
@@ -382,7 +484,7 @@ def _build_attention_items():
             id='attention.source_lineage.placeholder',
             label='Source lineage placeholder',
             status='Future contract',
-            note='Output lineage is shown as a concept only.',
+            note='Source lineage is shown as a product requirement, not evaluated data.',
             data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
             is_placeholder=True,
         ).to_dict(),

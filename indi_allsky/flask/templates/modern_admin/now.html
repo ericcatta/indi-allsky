@@ -3,94 +3,144 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-now-product-prototype-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-now-product-experience-v1') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <main class="modern-admin-shell" aria-labelledby="modern-admin-now-title">
-    <header class="modern-admin-table-panel" aria-label="Hybrid Now product header">
+    <header class="modern-admin-table-panel" aria-label="Hybrid Now product briefing">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Hybrid AllSky</p>
-                <h1 id="modern-admin-now-title">Now</h1>
+                <p class="modern-admin-eyebrow">Hybrid AllSky Now</p>
+                <h1 id="modern-admin-now-title">{{ modern_admin_now.briefing_title }}</h1>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_now.status }}</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_now.data_status | replace('_', ' ') | title }}</span>
         </div>
-        <p class="modern-admin-note">A first read-only prototype for the product home. It shows the future shape of Now without evaluating live sky data, touching source files, or triggering actions.</p>
-        <p class="modern-admin-note">Contract: <code>{{ modern_admin_now.metadata.contract }}</code> / <code>{{ modern_admin_now.metadata.contract_version }}</code>. Data status: <code>{{ modern_admin_now.data_status }}</code>.</p>
+
+        <h2>{{ modern_admin_now.current_verdict }}</h2>
+        <p class="modern-admin-note">Hybrid AllSky transforms continuous sky observation into trustworthy knowledge and beautiful results. This prototype shows the final product shape without evaluating live sky, source, media, or observatory data.</p>
+        <p class="modern-admin-note">Contract: <code>{{ modern_admin_now.metadata.contract }}</code> / <code>{{ modern_admin_now.metadata.contract_version }}</code>. Source: <code>{{ modern_admin_now.metadata.source }}</code>.</p>
+
         <div class="modern-admin-link-grid">
             <a href="{{ url_for('indi_allsky.modern_admin_view') }}">Modern dashboard</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Settings index</a>
             <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Settings index</a>
         </div>
     </header>
 
-    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Current sky summary">
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Current phase</div>
-            <h3>{{ modern_admin_now.current_sky.phase }}</h3>
-            <p>{{ modern_admin_now.current_sky.summary }}</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">{{ modern_admin_now.current_sky.data_status | replace('_', ' ') | title }}</span>
-        </article>
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Latest image</div>
-            <h3>{{ modern_admin_now.current_sky.latest_image }}</h3>
-            <p>Latest frame status is intentionally placeholder-only in this prototype.</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Placeholder</span>
-        </article>
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Recording</div>
-            <h3>{{ modern_admin_now.current_sky.source_recording }}</h3>
-            <p>Capture and source recording state will come from a future sanitized NowView.</p>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_now.current_sky.capture_status }}</span>
-        </article>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="now-cycle-briefing-title">
+    <section class="modern-admin-table-panel" aria-labelledby="now-current-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Latest Sky Cycle Briefing</p>
-                <h2 id="now-cycle-briefing-title">{{ modern_admin_now.sky_cycle_briefing.verdict_label }}</h2>
+                <p class="modern-admin-eyebrow">Current</p>
+                <h2 id="now-current-title">Current Sky</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_now.sky_cycle_briefing.verdict }}</span>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ modern_admin_now.current_sky.data_status | replace('_', ' ') | title }}</span>
         </div>
-        <p class="modern-admin-note">{{ modern_admin_now.sky_cycle_briefing.summary }}</p>
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Latest Sky Cycle metadata">
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Current sky status">
             <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Source coverage</div>
-                <h3>{{ modern_admin_now.sky_cycle_briefing.source_coverage }}</h3>
-                <p>Future cycle reports will summarize source preservation across day, twilight, and night.</p>
+                <div class="modern-admin-card-label">Current phase</div>
+                <h3>{{ modern_admin_now.current_sky.phase }}</h3>
+                <p>{{ modern_admin_now.current_sky.summary }}</p>
             </article>
             <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Generated outputs</div>
-                <h3>{{ modern_admin_now.sky_cycle_briefing.outputs_status }}</h3>
-                <p>Output readiness will be reported without starting generation work from this view.</p>
+                <div class="modern-admin-card-label">Latest frame</div>
+                <h3>{{ modern_admin_now.current_sky.latest_image }}</h3>
+                <p>Observation data is not evaluated yet; no image metadata or thumbnail is connected.</p>
             </article>
             <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Notable moments</div>
-                <h3>{{ modern_admin_now.sky_cycle_briefing.notable_moments_count }}</h3>
-                <p>Moments will link evidence, source lineage, and generated outputs.</p>
+                <div class="modern-admin-card-label">Capture and source</div>
+                <h3>{{ modern_admin_now.current_sky.source_recording }}</h3>
+                <p>{{ modern_admin_now.current_sky.capture_status }}</p>
             </article>
         </section>
     </section>
 
-    <section class="modern-admin-table-panel" aria-labelledby="now-moments-title">
+    <section class="modern-admin-table-panel" aria-labelledby="now-briefing-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">What deserves attention?</p>
-                <h2 id="now-moments-title">Notable Moments</h2>
+                <p class="modern-admin-eyebrow">Briefing</p>
+                <h2 id="now-briefing-title">{{ modern_admin_now.sky_cycle_briefing.verdict_label }}</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Evidence placeholders</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_now.sky_cycle_briefing.verdict }}</span>
         </div>
+        <p class="modern-admin-note">{{ modern_admin_now.sky_cycle_briefing.summary }}</p>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Sky Cycle briefing status">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Source confidence</div>
+                <h3>{{ modern_admin_now.sky_cycle_briefing.source_coverage }}</h3>
+                <p>Source coverage will summarize preserved frames and source lineage after the backend contract exists.</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Generated results</div>
+                <h3>{{ modern_admin_now.sky_cycle_briefing.outputs_status }}</h3>
+                <p>Output readiness will come from the future rendering and output recipe contract.</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Moment evidence</div>
+                <h3>{{ modern_admin_now.sky_cycle_briefing.notable_moments_count }}</h3>
+                <p>Detector and analytics evidence are intentionally not connected yet.</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="now-questions-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Operator questions</p>
+                <h2 id="now-questions-title">What matters right now?</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Placeholder answers</span>
+        </div>
+
+        <div class="modern-admin-status-grid">
+            {% for answer in modern_admin_now.primary_question_answers %}
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ answer.data_status | replace('_', ' ') | title }}</div>
+                <h3>{{ answer.question }}</h3>
+                <p><strong>{{ answer.answer }}</strong></p>
+                <p>{{ answer.evidence }}</p>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="now-evidence-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Evidence and confidence</p>
+                <h2 id="now-evidence-title">What happened / Worth reviewing</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">No detector evidence connected yet</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Evidence context">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ modern_admin_now.evidence_summary.status }}</div>
+                <h3>{{ modern_admin_now.evidence_summary.label }}</h3>
+                <p>{{ modern_admin_now.evidence_summary.summary }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ modern_admin_now.science_context.status }}</div>
+                <h3>{{ modern_admin_now.science_context.label }}</h3>
+                <p>{{ modern_admin_now.science_context.summary }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ modern_admin_now.astrophoto_context.status }}</div>
+                <h3>{{ modern_admin_now.astrophoto_context.label }}</h3>
+                <p>{{ modern_admin_now.astrophoto_context.summary }}</p>
+            </article>
+        </section>
+
         <div class="modern-admin-status-grid">
             {% for moment in modern_admin_now.notable_moments %}
             <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">{{ moment.status }}</div>
-            <h3>{{ moment.label }}</h3>
-            <p>{{ moment.evidence }}</p>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Confidence: {{ moment.confidence }}</span>
-            <span class="modern-admin-status-pill modern-admin-status-muted">{{ moment.data_status | replace('_', ' ') | title }}</span>
-        </article>
+                <div class="modern-admin-card-label">{{ moment.status }}</div>
+                <h3>{{ moment.label }}</h3>
+                <p>{{ moment.evidence }}</p>
+                <span class="modern-admin-status-pill modern-admin-status-neutral">Confidence: {{ moment.confidence }}</span>
+            </article>
             {% endfor %}
         </div>
     </section>
@@ -98,19 +148,19 @@
     <section class="modern-admin-table-panel" aria-labelledby="now-outputs-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Derived results</p>
-                <h2 id="now-outputs-title">Generated Outputs</h2>
+                <p class="modern-admin-eyebrow">Generated results</p>
+                <h2 id="now-outputs-title">Outputs and Looks</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">Non-destructive</span>
         </div>
+
         <div class="modern-admin-status-grid">
             {% for output in modern_admin_now.generated_outputs %}
             <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ output.status }}</div>
+                <div class="modern-admin-card-label">{{ output.data_status | replace('_', ' ') | title }}</div>
                 <h3>{{ output.label }}</h3>
-                <p>Look applied: {{ output.look }}. {{ output.lineage }}.</p>
-                <span class="modern-admin-status-pill modern-admin-status-muted">Derived output</span>
-                <span class="modern-admin-status-pill modern-admin-status-neutral">{{ output.data_status | replace('_', ' ') | title }}</span>
+                <p>{{ output.status }}</p>
+                <p>Look: {{ output.look }}. {{ output.lineage }}.</p>
             </article>
             {% endfor %}
         </div>
@@ -119,30 +169,33 @@
     <section class="modern-admin-table-panel" aria-labelledby="now-health-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Is the observatory healthy?</p>
-                <h2 id="now-health-title">Observatory Health</h2>
+                <p class="modern-admin-eyebrow">Observatory</p>
+                <h2 id="now-health-title">Health and Attention</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </div>
-        <div class="modern-admin-status-grid modern-admin-status-grid-three">
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory health">
             {% for item in modern_admin_now.observatory_health %}
             <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ item.status }}</div>
+                <div class="modern-admin-card-label">{{ item.data_status | replace('_', ' ') | title }}</div>
                 <h3>{{ item.label }}</h3>
+                <p>{{ item.status }}</p>
                 <p>{{ item.note }}</p>
             </article>
             {% endfor %}
-        </div>
+        </section>
     </section>
 
     <section class="modern-admin-table-panel" aria-labelledby="now-attention-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Needs follow-up</p>
+                <p class="modern-admin-eyebrow">No actions exposed</p>
                 <h2 id="now-attention-title">Attention Items</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">No controls</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Safe-action metadata only</span>
         </div>
+
         <div class="modern-admin-status-grid modern-admin-status-grid-three">
             {% for item in modern_admin_now.attention_items %}
             <article class="modern-admin-status-card">

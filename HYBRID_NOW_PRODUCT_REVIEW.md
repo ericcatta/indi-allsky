@@ -233,6 +233,28 @@ sanitization, and testability, not live product truth.
 The next meaningful product step is to connect one bounded, cached, non-mutative
 field through this contract without weakening the RPi5-first guarantees.
 
+## Experience Update
+
+The Now page has been reorganized around a product briefing rather than an
+admin-style inventory:
+
+- Current / Morning Briefing
+- What happened
+- Worth reviewing
+- Source confidence
+- Generated results
+- Observatory health
+- Attention items
+
+The static NowView contract now includes primary question answers, an evidence
+summary, science context, and astrophoto context. This improves the product
+shape and raises the prototype rating to 7.5/10.
+
+The ceiling remains low until the first real, bounded, safe backend data source
+is connected. The next gap is not visual polish; it is trustworthy NowView data
+for current phase, latest frame metadata, source confidence, generated output
+readiness, and observatory health.
+
 ## Final Verdict
 
 The prototype is safe and directionally correct.

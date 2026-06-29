@@ -18,11 +18,17 @@ REQUIRED_NOW_KEYS = {
     'id',
     'label',
     'status',
+    'briefing_title',
+    'current_verdict',
     'data_status',
     'generated_at',
     'is_placeholder',
     'current_sky',
     'sky_cycle_briefing',
+    'primary_question_answers',
+    'evidence_summary',
+    'science_context',
+    'astrophoto_context',
     'notable_moments',
     'generated_outputs',
     'observatory_health',
@@ -101,8 +107,16 @@ def test_build_now_view_has_explicit_placeholder_status():
 
     assert now_view['is_placeholder'] is True
     assert now_view['data_status'] == 'placeholder'
+    assert now_view['briefing_title'] == 'Current / Morning Briefing'
+    assert now_view['current_verdict'] == 'Observation data not evaluated yet'
     assert_section_status(now_view['current_sky'])
     assert_section_status(now_view['sky_cycle_briefing'])
+    assert_section_status(now_view['evidence_summary'])
+    assert_section_status(now_view['science_context'])
+    assert_section_status(now_view['astrophoto_context'])
+
+    for answer in now_view['primary_question_answers']:
+        assert_section_status(answer)
 
     for moment in now_view['notable_moments']:
         assert_section_status(moment)
