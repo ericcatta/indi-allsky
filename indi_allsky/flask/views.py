@@ -20269,6 +20269,51 @@ class ModernAdminAcquisitionSaveSettingsView(ModernAdminSettingsInventoryView):
         },
     )
 
+    ACQUISITION_SAVE_OVERVIEW_CARDS = (
+        {
+            'label'           : 'Capture cadence',
+            'purpose'         : 'Summarize timing controls that shape how often frames are acquired.',
+            'related_fields'  : ('EXPOSURE_PERIOD / exposure_period', 'EXPOSURE_PERIOD_DAY / exposure_period_day', 'CCD_EXPOSURE_TIMEOUT / exposure_timeout'),
+            'future_editable' : 'yes after cadence validation policy',
+            'safety_note'     : 'Future edits can affect capture load and should remain profile-aware.',
+        },
+        {
+            'label'           : 'Day/night acquisition',
+            'purpose'         : 'Keep day, night, and moon-mode acquisition behavior visible as separate operating contexts.',
+            'related_fields'  : ('DAYTIME_CAPTURE / night/day capture gates', 'CCD_CONFIG.*.BINNING / binning_*', 'profile_id'),
+            'future_editable' : 'yes after day/night capture policy',
+            'safety_note'     : 'This page does not start capture, pause capture, or change acquisition behavior.',
+        },
+        {
+            'label'           : 'Binning / bit depth',
+            'purpose'         : 'Show sensor output shape settings as acquisition metadata rather than generic display options.',
+            'related_fields'  : ('CCD_CONFIG.*.BINNING / binning_*', 'CCD_BIT_DEPTH / bit_depth'),
+            'future_editable' : 'blocked until camera capability policy exists',
+            'safety_note'     : 'Binning and bit depth may be camera/backend constrained and are not applied here.',
+        },
+        {
+            'label'           : 'JPEG/PNG output',
+            'purpose'         : 'Group display-image file type and compression choices separately from source persistence.',
+            'related_fields'  : ('IMAGE_FILE_TYPE', 'IMAGE_FILE_COMPRESSION__JPG', 'IMAGE_FILE_COMPRESSION__PNG', 'LIBCAMERA__IMAGE_FILE_TYPE* / PYCURL_CAMERA__IMAGE_FILE_TYPE'),
+            'future_editable' : 'yes after output-format validation',
+            'safety_note'     : 'This page does not save files, rewrite images, or inspect output folders.',
+        },
+        {
+            'label'           : 'FITS/RAW source output',
+            'purpose'         : 'Keep scientific/source persistence visible as a protected output policy.',
+            'related_fields'  : ('IMAGE_SAVE_FITS', 'IMAGE_SAVE_FITS_COMPRESSED', 'IMAGE_SAVE_FITS_PERIOD', 'IMAGE_EXPORT_RAW', 'FITSHEADERS__*'),
+            'future_editable' : 'blocked until Scientific Source policy is preserved',
+            'safety_note'     : 'This page does not create, convert, inspect, download, or delete FITS/RAW files.',
+        },
+        {
+            'label'           : 'Hooks / post-save behavior',
+            'purpose'         : 'Document pre/post-save hook settings as high-impact behavior that needs policy before editing.',
+            'related_fields'  : ('IMAGE_SAVE_HOOK_*', 'IMAGE_FOLDER', 'IMAGE_RAW_EXPIRE_DAYS', 'IMAGE_FITS_EXPIRE_DAYS'),
+            'future_editable' : 'blocked until hook safety policy exists',
+            'safety_note'     : 'Hooks may execute external behavior and are not invoked or edited from this page.',
+        },
+    )
+
     def get_context(self):
         context = super(ModernAdminAcquisitionSaveSettingsView, self).get_context()
         groups_by_id = {
@@ -20286,9 +20331,24 @@ class ModernAdminAcquisitionSaveSettingsView(ModernAdminSettingsInventoryView):
             )
             if group
         )
+        context['modern_admin_acquisition_save_overview_cards'] = self.get_acquisition_save_overview_cards()
         context['modern_admin_acquisition_save_config_sections'] = self.get_acquisition_save_config_sections()
         context['modern_admin_acquisition_save_proposed_layout'] = self.get_acquisition_save_proposed_layout()
         return context
+
+
+    def get_acquisition_save_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_settings_text(row.get('label')),
+                'purpose'         : self.safe_settings_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_settings_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_settings_text(row.get('future_editable')),
+                'safety_note'     : self.safe_settings_text(row.get('safety_note')),
+            }
+            for row in self.ACQUISITION_SAVE_OVERVIEW_CARDS
+        )
 
 
     def get_acquisition_save_config_sections(self):

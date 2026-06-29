@@ -184,7 +184,7 @@
         "Needs clearer split between daily operator controls and legacy fallback keys."
       ],
       "preview_route": "/modern-admin/settings/acquisition-save",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "image_save_formats": {
       "label": "Image Save Formats",
@@ -203,7 +203,7 @@
         "Must not be confused with FITS/RAW scientific source persistence."
       ],
       "preview_route": "/modern-admin/settings/acquisition-save",
-      "preview_status": "dedicated_read_only"
+      "preview_status": "final_read_only"
     },
     "fits_source_files": {
       "label": "FITS / Source Files",

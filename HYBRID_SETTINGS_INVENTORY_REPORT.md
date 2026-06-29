@@ -16,12 +16,12 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 - Advanced groups with preview: 4
 - Developer groups with preview: 0
 - `do_not_move_yet` groups with preview: 4
-- Final read-only groups: 9
-- Final read-only routes: 7
+- Final read-only groups: 11
+- Final read-only routes: 8
 - Final read-only Basic groups: 8
-- Final read-only Advanced groups: 1
+- Final read-only Advanced groups: 3
 - Final read-only Developer groups: 0
-- Dedicated-but-not-final groups: 4
+- Dedicated-but-not-final groups: 2
 
 ### Counts By Owner
 
@@ -219,6 +219,8 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 | exposure | Exposure | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | False |
 | gain | Gain | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/exposure-gain | False |
 | hybrid_awb | Hybrid AWB | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/hybrid-awb | False |
+| image_acquisition | Image Acquisition | camera_profile | advanced | redesign | high | /modern-admin/settings/acquisition-save | False |
+| image_save_formats | Image Save Formats | global | advanced | redesign | medium | /modern-admin/settings/acquisition-save | True |
 | storage_drives | Storage / Drives | runtime_system | basic | keep | high | /modern-admin/settings/storage | True |
 
 ## Dedicated Preview But Not Final
@@ -226,8 +228,6 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 | Group | Label | Owner | Level | Status | Risk | Preview route | Do not move yet? |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | fits_source_files | FITS / Source Files | scientific_source | advanced | protected_modern_work | high | /modern-admin/settings/fits-source | True |
-| image_acquisition | Image Acquisition | camera_profile | advanced | redesign | high | /modern-admin/settings/acquisition-save | False |
-| image_save_formats | Image Save Formats | global | advanced | redesign | medium | /modern-admin/settings/acquisition-save | True |
 | notifications | Notifications | runtime_system | basic | keep | high | /modern-admin/settings/notifications | True |
 
 ## Groups Without Dedicated Preview
@@ -291,8 +291,8 @@ This report is read-only metadata. It does not modify runtime configuration, UI,
 | gpio | GPIO | runtime_system | developer | legacy_fallback | high | - | - | True | Classic GPIO/system tools, Modern safe-control wrappers, Classic /config | Covers GPIO pins, relay-style controls, and hardware interactions., Do not expose as Basic; hardware side effects need explicit policy. |
 | gps | GPS | runtime_system | advanced | needs_evidence | medium | - | - | True | Classic /config, Modern observatory/status surfaces if enabled | Covers GPS source/status/configuration when present., Needs evidence for provider ownership and current runtime usage before redesign. |
 | hybrid_awb | Hybrid AWB | camera_profile | basic | protected_modern_work | high | /modern-admin/settings/hybrid-awb | final_read_only | False | Modern camera settings, Modern profile controls, Classic /config fallback | Covers Hybrid AWB mode, hardware AWB interaction, RGB factors, and camera-specific color behavior., Must remain camera/profile-aware because sensor/color pipelines differ. |
-| image_acquisition | Image Acquisition | camera_profile | advanced | redesign | high | /modern-admin/settings/acquisition-save | dedicated_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/full | Covers capture cadence, day/night behavior, binning, pause behavior, and camera runtime acquisition options., Needs clearer split between daily operator controls and legacy fallback keys. |
-| image_save_formats | Image Save Formats | global | advanced | redesign | medium | /modern-admin/settings/acquisition-save | dedicated_read_only | True | Classic /config, Modern /modern-admin/settings/full, Modern media metadata pages | Covers display image save choices, thumbnails, file type, day/night save flags, and derived output formats., Must not be confused with FITS/RAW scientific source persistence. |
+| image_acquisition | Image Acquisition | camera_profile | advanced | redesign | high | /modern-admin/settings/acquisition-save | final_read_only | False | Classic /config, Modern /modern-admin/settings/capture, Modern /modern-admin/settings/full | Covers capture cadence, day/night behavior, binning, pause behavior, and camera runtime acquisition options., Needs clearer split between daily operator controls and legacy fallback keys. |
+| image_save_formats | Image Save Formats | global | advanced | redesign | medium | /modern-admin/settings/acquisition-save | final_read_only | True | Classic /config, Modern /modern-admin/settings/full, Modern media metadata pages | Covers display image save choices, thumbnails, file type, day/night save flags, and derived output formats., Must not be confused with FITS/RAW scientific source persistence. |
 | keogram | Keogram | media_product | advanced | redesign | high | - | - | True | Classic keogram generation/settings, Modern media metadata/status pages, Classic /config | Covers realtime/longterm keogram settings and product metadata., Generation and download are action-policy surfaces, not settings redesign targets yet. |
 | legacy_detector | Legacy Detector / Meteor Toggles | developer_legacy | developer | legacy_fallback | high | - | - | True | Classic /config, Modern /modern-admin/settings/full, Legacy DETECT_METEORS code | Covers DETECT_METEORS, legacy line/Hough toggles, masks, and detector-like compatibility settings., Do not present this as the real Hybrid meteor detector; real detector work remains blocked pending outdoor FITS validation. |
 | logs | Logs | runtime_system | developer | keep | high | - | - | True | Classic log pages, Modern log list/detail pages, Log download Safe Action policy foundation | Covers log visibility, safe metadata, and future download policy., Real download remains blocked pending path allowlist, redaction, Flask tests, and endpoint policy. |
