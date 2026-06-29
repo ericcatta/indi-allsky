@@ -333,6 +333,30 @@ def test_build_sky_cycle_report_view_has_required_sections():
         assert 'science_note' in output
         assert output['safe_actions_available'] == []
 
+    source_confidence = report['source_confidence_summary']
+    assert source_confidence['confidence_label'] == 'Pending source coverage contract'
+    assert source_confidence['coverage_label'] == 'Not evaluated yet'
+    assert isinstance(source_confidence['source_types'], list)
+    assert 'image metadata' in source_confidence['source_types']
+    assert 'source files' in source_confidence['source_types']
+    assert 'preservation_status' in source_confidence
+    assert 'retention_status' in source_confidence
+    assert 'lineage_status' in source_confidence
+    assert 'gap_status' in source_confidence
+    assert source_confidence['risk_level'] == 'unknown'
+    assert isinstance(source_confidence['evidence'], list)
+
+    health_summary = report['observatory_health_summary']
+    assert health_summary['overall_label'] == 'Health not evaluated yet'
+    assert health_summary['camera_status'] == 'Camera status not evaluated here.'
+    assert health_summary['capture_status'] == 'Capture continuity not evaluated here.'
+    assert health_summary['storage_status'] == 'Storage status not evaluated here.'
+    assert health_summary['generation_status'] == 'Generation status not evaluated here.'
+    assert health_summary['integration_status'] == 'Upload/integration status not evaluated here.'
+    assert health_summary['warnings_count_label'] == 'Warnings not evaluated yet'
+    assert health_summary['risk_level'] == 'unknown'
+    assert isinstance(health_summary['evidence'], list)
+
 
 def test_build_sky_cycle_report_view_contains_no_sensitive_payload():
     report = build_sky_cycle_report_view()
@@ -547,6 +571,122 @@ def test_validate_sky_cycle_report_payload_rejects_output_path_secret_callable()
         raise AssertionError('output callable should fail validation')
 
 
+def test_validate_sky_cycle_report_payload_rejects_source_invalid_risk():
+    report = build_sky_cycle_report_view()
+    report['source_confidence_summary']['risk_level'] = 'critical'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Invalid risk_level' in str(e)
+    else:
+        raise AssertionError('source confidence invalid risk should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_source_evidence_not_list():
+    report = build_sky_cycle_report_view()
+    report['source_confidence_summary']['evidence'] = 'No evidence connected'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'evidence must be a list' in str(e)
+    else:
+        raise AssertionError('source confidence evidence string should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_source_types_not_list():
+    report = build_sky_cycle_report_view()
+    report['source_confidence_summary']['source_types'] = 'image metadata'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'source_types must be a list' in str(e)
+    else:
+        raise AssertionError('source confidence source_types string should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_source_missing_field():
+    report = build_sky_cycle_report_view()
+    del report['source_confidence_summary']['lineage_status']
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('source confidence missing field should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_health_invalid_risk():
+    report = build_sky_cycle_report_view()
+    report['observatory_health_summary']['risk_level'] = 'critical'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Invalid risk_level' in str(e)
+    else:
+        raise AssertionError('health invalid risk should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_health_evidence_not_list():
+    report = build_sky_cycle_report_view()
+    report['observatory_health_summary']['evidence'] = 'No health evidence connected'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'evidence must be a list' in str(e)
+    else:
+        raise AssertionError('health evidence string should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_health_missing_field():
+    report = build_sky_cycle_report_view()
+    del report['observatory_health_summary']['storage_status']
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('health missing field should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_source_health_path_secret_callable():
+    report = build_sky_cycle_report_view()
+    report['source_confidence_summary']['evidence'].append('/var/lib/indi-allsky/source')
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Absolute paths' in str(e)
+    else:
+        raise AssertionError('source confidence path should fail validation')
+
+    report = build_sky_cycle_report_view()
+    report['observatory_health_summary']['evidence'].append({'password': 'value'})
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('health secret should fail validation')
+
+    report = build_sky_cycle_report_view()
+    report['observatory_health_summary']['evidence'].append(lambda: None)
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('health callable should fail validation')
+
+
 def test_sky_cycle_template_has_no_mutative_controls():
     template_text = SKY_CYCLE_TEMPLATE.read_text(encoding='utf-8').lower()
 
@@ -596,12 +736,15 @@ def test_source_confidence_summary_contract_is_fake_safe():
     now_view = build_now_view()
     source_confidence = now_view['source_confidence_summary']
 
-    assert source_confidence['status'] == 'not_evaluated'
+    assert source_confidence['status'] == 'Source coverage pending bounded backend contract.'
     assert source_confidence['data_status'] == 'not_evaluated'
     assert source_confidence['confidence_label'] == 'Pending source coverage contract'
     assert source_confidence['coverage_label'] == 'Not evaluated yet'
-    assert source_confidence['source_types'] == ['image metadata']
-    assert source_confidence['preservation_status'] == 'Source preservation not evaluated yet'
+    assert source_confidence['source_types'] == ['image metadata', 'source files']
+    assert source_confidence['preservation_status'] == 'RAW/FITS/source preservation not evaluated in this prototype.'
+    assert source_confidence['retention_status'] == 'Source retention policy not evaluated yet.'
+    assert source_confidence['lineage_status'] == 'Lineage between outputs and source frames is not connected yet.'
+    assert source_confidence['gap_status'] == 'Source gaps not evaluated yet.'
     assert source_confidence['risk_level'] == 'unknown'
     assert source_confidence['next_backend_contract'] == 'bounded source coverage summary'
     assert isinstance(source_confidence['evidence'], list)
@@ -612,10 +755,13 @@ def test_source_confidence_summary_contract_is_fake_safe():
 def test_build_source_confidence_summary_is_static_contract():
     source_confidence = build_source_confidence_summary()
 
-    assert source_confidence['status'] == 'not_evaluated'
+    assert source_confidence['status'] == 'Source coverage pending bounded backend contract.'
     assert source_confidence['data_status'] == 'not_evaluated'
     assert source_confidence['risk_level'] == 'unknown'
-    assert source_confidence['source_types'] == ['image metadata']
+    assert source_confidence['source_types'] == ['image metadata', 'source files']
+    assert 'retention_status' in source_confidence
+    assert 'lineage_status' in source_confidence
+    assert 'gap_status' in source_confidence
     assert_no_sensitive_text(source_confidence)
     assert_no_absolute_paths(source_confidence)
     assert_no_callables(source_confidence)
@@ -997,6 +1143,14 @@ def main():
         test_validate_sky_cycle_report_payload_rejects_incomplete_output_item,
         test_validate_sky_cycle_report_payload_rejects_output_direct_safe_action,
         test_validate_sky_cycle_report_payload_rejects_output_path_secret_callable,
+        test_validate_sky_cycle_report_payload_rejects_source_invalid_risk,
+        test_validate_sky_cycle_report_payload_rejects_source_evidence_not_list,
+        test_validate_sky_cycle_report_payload_rejects_source_types_not_list,
+        test_validate_sky_cycle_report_payload_rejects_source_missing_field,
+        test_validate_sky_cycle_report_payload_rejects_health_invalid_risk,
+        test_validate_sky_cycle_report_payload_rejects_health_evidence_not_list,
+        test_validate_sky_cycle_report_payload_rejects_health_missing_field,
+        test_validate_sky_cycle_report_payload_rejects_source_health_path_secret_callable,
         test_sky_cycle_template_has_no_mutative_controls,
         test_current_phase_summary_maps_day,
         test_current_phase_summary_maps_night,

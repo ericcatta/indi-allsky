@@ -156,6 +156,9 @@ NOW_SOURCE_CONFIDENCE_REQUIRED_KEYS = frozenset((
     'coverage_label',
     'source_types',
     'preservation_status',
+    'retention_status',
+    'lineage_status',
+    'gap_status',
     'risk_level',
     'note',
     'evidence',
@@ -309,6 +312,24 @@ SKY_CYCLE_OUTPUT_ITEM_REQUIRED_KEYS = frozenset((
     'is_placeholder',
 ))
 
+SKY_CYCLE_HEALTH_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'overall_label',
+    'camera_status',
+    'capture_status',
+    'storage_status',
+    'generation_status',
+    'integration_status',
+    'warnings_count_label',
+    'risk_level',
+    'evidence',
+    'note',
+    'is_placeholder',
+))
+
 SKY_CYCLE_ALLOWED_OUTPUT_TYPES = frozenset((
     'best_image',
     'latest_image',
@@ -422,6 +443,9 @@ class SourceConfidenceSummary:
     coverage_label: str
     source_types: list
     preservation_status: str
+    retention_status: str
+    lineage_status: str
+    gap_status: str
     risk_level: str
     note: str
     evidence: list
@@ -701,6 +725,7 @@ def validate_sky_cycle_report_payload(payload):
     _validate_sky_cycle_moments_summary(payload.get('moments_summary'))
     _validate_sky_cycle_outputs_summary(payload.get('outputs_summary'))
     _validate_source_confidence_summary(payload.get('source_confidence_summary'))
+    _validate_sky_cycle_observatory_health_summary(payload.get('observatory_health_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
     _validate_no_sensitive_keys(payload)
@@ -789,19 +814,23 @@ def build_source_confidence_summary():
     return SourceConfidenceSummary(
         id='source_confidence.placeholder',
         label='Source Confidence',
-        status='not_evaluated',
+        status='Source coverage pending bounded backend contract.',
         data_status=NOW_DATA_STATUS_NOT_EVALUATED,
         confidence_label='Pending source coverage contract',
         coverage_label='Not evaluated yet',
         source_types=[
             'image metadata',
+            'source files',
         ],
-        preservation_status='Source preservation not evaluated yet',
+        preservation_status='RAW/FITS/source preservation not evaluated in this prototype.',
+        retention_status='Source retention policy not evaluated yet.',
+        lineage_status='Lineage between outputs and source frames is not connected yet.',
+        gap_status='Source gaps not evaluated yet.',
         risk_level=NOW_RISK_LEVEL_UNKNOWN,
-        note='Source coverage not evaluated yet.',
+        note='Source coverage pending bounded backend contract.',
         evidence=[
             'No RAW/FITS/source coverage calculation is connected yet.',
-            'This panel will summarize whether generated results are backed by preserved source data.',
+            'Lineage between outputs and source frames is not connected yet.',
         ],
         next_backend_contract='bounded source coverage summary',
         is_placeholder=True,
@@ -1086,15 +1115,26 @@ def _build_sky_cycle_outputs_summary():
 
 
 def _build_sky_cycle_observatory_health_summary():
-    return NowSection(
-        id='sky_cycle.observatory_health.placeholder',
-        label='Observatory Health',
-        status='Observatory health not evaluated yet.',
-        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
-        is_placeholder=True,
-        summary='Camera, storage, source preservation, generation, upload, and integration health require bounded backend summaries.',
-        note='No runtime service checks are performed by this prototype.',
-    ).to_dict()
+    return {
+        'id': 'sky_cycle.observatory_health.placeholder',
+        'label': 'Observatory Health',
+        'status': 'Observatory health pending bounded backend contract.',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'overall_label': 'Health not evaluated yet',
+        'camera_status': 'Camera status not evaluated here.',
+        'capture_status': 'Capture continuity not evaluated here.',
+        'storage_status': 'Storage status not evaluated here.',
+        'generation_status': 'Generation status not evaluated here.',
+        'integration_status': 'Upload/integration status not evaluated here.',
+        'warnings_count_label': 'Warnings not evaluated yet',
+        'risk_level': NOW_RISK_LEVEL_UNKNOWN,
+        'evidence': [
+            'No live service checks are performed in this prototype.',
+            'Storage and generation status are not evaluated here.',
+        ],
+        'note': 'Observatory health pending bounded backend contract.',
+        'is_placeholder': True,
+    }
 
 
 def _build_sky_cycle_attention_items():
@@ -1713,6 +1753,24 @@ def _validate_sky_cycle_outputs_summary(summary):
             raise ValueError('outputs_summary.items[{0:d}].safe_actions_available must be a list'.format(index))
 
         _validate_safe_actions({'safe_actions_available': item['safe_actions_available']})
+
+
+def _validate_sky_cycle_observatory_health_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('observatory_health_summary must be a dict')
+
+    missing_keys = sorted(SKY_CYCLE_HEALTH_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('observatory_health_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at sky_cycle.observatory_health_summary: {0!r}'.format(summary['data_status']))
+
+    if summary['risk_level'] not in NOW_ALLOWED_RISK_LEVELS:
+        raise ValueError('Invalid risk_level at sky_cycle.observatory_health_summary: {0!r}'.format(summary['risk_level']))
+
+    if not isinstance(summary['evidence'], list):
+        raise ValueError('observatory_health_summary.evidence must be a list')
 
 
 def _validate_data_statuses(value, path='now'):

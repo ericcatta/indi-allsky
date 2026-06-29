@@ -325,3 +325,52 @@ static and none has real cycle/source/output truth.
 Next gap: harden observatory health summary, or perform a bounded source review
 for the first real Sky Cycle field. Do not connect rendering, download, share,
 or generation actions yet.
+
+## Mission 024 Update
+
+The source confidence and observatory health summaries have been strengthened.
+
+`source_confidence_summary` now separates:
+
+- source coverage;
+- source preservation;
+- source retention;
+- output/source lineage;
+- source gaps;
+- risk;
+- evidence;
+- next backend contract.
+
+`observatory_health_summary` is now a dedicated Sky Cycle contract instead of a
+generic placeholder section. It separates:
+
+- overall health;
+- camera status;
+- capture status;
+- storage status;
+- generation status;
+- integration status;
+- warnings;
+- risk;
+- evidence.
+
+The contract remains fake/static. No health check, database query, filesystem
+scan, RAW/FITS read, source coverage calculation, source lineage resolution,
+media generation, upload check, or safe action is connected.
+
+Validation now enforces required fields, `risk_level` allowlist, `source_types`
+as a list, `evidence` as a list, allowed `data_status`, and recursive
+no-secret/no-path/no-callable checks for both source confidence and observatory
+health.
+
+Updated Sky Cycle Report score: 7.8/10.
+
+The score improves because the report now has product-shaped contracts for the
+main questions it asks: what phases happened, what moments matter, what outputs
+exist, whether sources can be trusted, and whether the observatory worked. It
+remains below 8/10 because every Sky Cycle section is still static and source
+truth is not connected yet.
+
+Next gap: run a bounded source review for the first real Sky Cycle field, most
+likely cycle identity/time range or source coverage metadata. Do not connect
+filesystem, RAW/FITS, detector, rendering, download, share, or actions yet.

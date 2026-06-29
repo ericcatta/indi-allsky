@@ -111,7 +111,15 @@
                 <div class="modern-admin-card-label">{{ sky_cycle_report.source_confidence_summary.label }}</div>
                 <h3>{{ sky_cycle_report.source_confidence_summary.confidence_label }}</h3>
                 <p>{{ sky_cycle_report.source_confidence_summary.note }}</p>
-                <p>{{ sky_cycle_report.source_confidence_summary.preservation_status }}. Coverage: {{ sky_cycle_report.source_confidence_summary.coverage_label }}.</p>
+                <p><strong>Coverage:</strong> {{ sky_cycle_report.source_confidence_summary.coverage_label }}</p>
+                <p><strong>Preservation:</strong> {{ sky_cycle_report.source_confidence_summary.preservation_status }}</p>
+                <p><strong>Retention:</strong> {{ sky_cycle_report.source_confidence_summary.retention_status }}</p>
+                <p><strong>Lineage:</strong> {{ sky_cycle_report.source_confidence_summary.lineage_status }}</p>
+                <p><strong>Gaps:</strong> {{ sky_cycle_report.source_confidence_summary.gap_status }}</p>
+                <p><strong>Risk:</strong> {{ sky_cycle_report.source_confidence_summary.risk_level | title }}</p>
+                {% for evidence_item in sky_cycle_report.source_confidence_summary.evidence %}
+                    <p>{{ evidence_item }}</p>
+                {% endfor %}
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ sky_cycle_report.attention_items.label }}</div>
@@ -161,9 +169,17 @@
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ sky_cycle_report.observatory_health_summary.label }}</div>
-                <h3>{{ sky_cycle_report.observatory_health_summary.status }}</h3>
-                <p>{{ sky_cycle_report.observatory_health_summary.summary }}</p>
+                <h3>{{ sky_cycle_report.observatory_health_summary.overall_label }}</h3>
                 <p>{{ sky_cycle_report.observatory_health_summary.note }}</p>
+                <p><strong>Camera:</strong> {{ sky_cycle_report.observatory_health_summary.camera_status }}</p>
+                <p><strong>Capture:</strong> {{ sky_cycle_report.observatory_health_summary.capture_status }}</p>
+                <p><strong>Storage:</strong> {{ sky_cycle_report.observatory_health_summary.storage_status }}</p>
+                <p><strong>Generation:</strong> {{ sky_cycle_report.observatory_health_summary.generation_status }}</p>
+                <p><strong>Integration:</strong> {{ sky_cycle_report.observatory_health_summary.integration_status }}</p>
+                <p><strong>Warnings:</strong> {{ sky_cycle_report.observatory_health_summary.warnings_count_label }}. Risk: {{ sky_cycle_report.observatory_health_summary.risk_level | title }}.</p>
+                {% for evidence_item in sky_cycle_report.observatory_health_summary.evidence %}
+                    <p>{{ evidence_item }}</p>
+                {% endfor %}
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">Safety boundary</div>
