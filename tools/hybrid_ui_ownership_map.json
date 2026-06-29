@@ -790,9 +790,9 @@
       ]
     },
     "now_product_prototype": {
-      "label": "Now product prototype",
-      "status": "MODERN READ-ONLY",
-      "owner": "modern",
+      "label": "Now Product Prototype",
+      "status": "PRODUCT PROTOTYPE READ-ONLY",
+      "owner": "modern_product_ui",
       "porting_priority": "product_prototype",
       "routes": [
         "/modern-admin/now"
@@ -808,10 +808,20 @@
       ],
       "config_keys": [],
       "protected": true,
+      "safety": "Read-only placeholder and sanitized view-model only. No runtime data evaluation, no queries, no filesystem scans, no controls.",
+      "blockers": [
+        "Real NowView backend contract",
+        "Real SkyCycle, Phase, Moment, Source, Output, Look, and Observatory view models",
+        "Source lineage and output recipe contracts",
+        "Safe actions for any future interaction",
+        "RPi5-safe cached summaries for live/current state"
+      ],
       "modern_gap": "Prototype uses static sanitized placeholders until product domain contracts provide live Now data.",
       "removal_risk": "critical",
       "notes": [
-        "Read-only, no controls, no runtime evaluation."
+        "First concrete surface for the domain-first Product UI.",
+        "Read-only, no controls, no runtime evaluation.",
+        "Owner label is Modern Product UI; static route/template ownership remains classified as modern."
       ]
     },
     "modern_safe_controls": {

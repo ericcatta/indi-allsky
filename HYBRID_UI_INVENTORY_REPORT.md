@@ -1126,7 +1126,7 @@ Mismatch means the declared ownership differs from the static inferred classific
 | multi_camera | Multi-camera | PROTECTED MODERN WORK | modern | protect | yes | 3 | 4 | 1 | 2 | 2 | Some wrapped legacy tools may still assume single-camera behavior. | critical |
 | network | Network | WRAPPER ONLY | modern_wrapper | medium | no | 3 | 2 | 0 | 1 | 1 | Native Modern network page missing. | high |
 | notifications | Notifications | PARTIAL MODERN | modern | high | no | 6 | 4 | 2 | 3 | 8 | Modern Admin has read-only notification inventory, local usability filters, read-only detail, and dry-run-only safe action plumbing; real acknowledgement and modal flow remain Classic/shared. | medium |
-| now_product_prototype | Now product prototype | MODERN READ-ONLY | modern | product_prototype | yes | 1 | 1 | 1 | 1 | 0 | Prototype uses static sanitized placeholders until product domain contracts provide live Now data. | critical |
+| now_product_prototype | Now Product Prototype | PRODUCT PROTOTYPE READ-ONLY | modern_product_ui | product_prototype | yes | 1 | 1 | 1 | 1 | 0 | Prototype uses static sanitized placeholders until product domain contracts provide live Now data. | critical |
 | panorama | Panorama | PARTIAL MODERN | modern | medium | no | 5 | 4 | 0 | 2 | 1 | Modern read-only panorama metadata/status list exists; public/latest behavior, panorama loop, generation, conversion and download remain blocked or preserved. | high |
 | photoswipe | PhotoSwipe | LEGACY ACTIVE | classic | later | no | 1 | 1 | 1 | 0 | 0 | Modern gallery does not use PhotoSwipe. | medium |
 | power_ups | Power / UPS | NEEDS VERIFICATION | shared_api | low | no | 2 | 2 | 0 | 1 | 2 | Presence and UI ownership need verification. | medium |
@@ -1189,7 +1189,7 @@ Mismatch means the declared ownership differs from the static inferred classific
 | modern_admin_shell | Modern Admin shell | PROTECTED MODERN WORK | modern | protect | Some nav targets are wrappers or placeholders. | critical |
 | modern_safe_controls | Modern safe controls | PROTECTED MODERN WORK | modern_wrapper | protect | Wrappers are transitional and need native replacements later. | high |
 | multi_camera | Multi-camera | PROTECTED MODERN WORK | modern | protect | Some wrapped legacy tools may still assume single-camera behavior. | critical |
-| now_product_prototype | Now product prototype | MODERN READ-ONLY | modern | product_prototype | Prototype uses static sanitized placeholders until product domain contracts provide live Now data. | critical |
+| now_product_prototype | Now Product Prototype | PRODUCT PROTOTYPE READ-ONLY | modern_product_ui | product_prototype | Prototype uses static sanitized placeholders until product domain contracts provide live Now data. | critical |
 | profile_first_configuration | Profile-first configuration | PROTECTED MODERN WORK | modern | protect | Basic/Advanced/Developer UX split is not implemented yet. | critical |
 | quality | Quality | PROTECTED MODERN WORK | modern | protect | Quality flags need richer user-facing explanations. | high |
 | quality_scoring | Quality Scoring | PROTECTED MODERN WORK | modern | protect | Same as Quality. | high |
@@ -1342,7 +1342,7 @@ These counts show which feature declarations matched the most inventory items. I
 | environmental_awareness | Environmental Awareness | 1 | 1 | 1 | 1 | 4 |
 | event_foundation | Event Foundation | 1 | 1 | 1 | 1 | 4 |
 | metadata | Metadata | 1 | 1 | 1 | 1 | 4 |
-| now_product_prototype | Now product prototype | 1 | 1 | 1 | 1 | 4 |
+| now_product_prototype | Now Product Prototype | 1 | 1 | 1 | 1 | 4 |
 | quality | Quality | 1 | 1 | 1 | 1 | 4 |
 | event_candidate_triggers | Event Candidate Triggers | 1 | 1 | 0 | 1 | 3 |
 | metadata_review | Metadata Review | 1 | 1 | 0 | 1 | 3 |
