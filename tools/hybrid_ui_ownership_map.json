@@ -72,8 +72,9 @@
         "/modern-admin/capture/service",
         "/modern-admin/config-history",
         "/modern-admin/config-restore",
-        "/modern-admin/fits",
-        "/modern-admin/media/*",
+                "/modern-admin/fits",
+                "/modern-admin/highlights",
+                "/modern-admin/media/*",
         "/modern-admin/mode/*",
         "/modern-admin/now",
         "/modern-admin/sky-cycle",
@@ -123,8 +124,9 @@
         "modern_admin/config_restore.html",
         "modern_admin/dark_library.html",
         "modern_admin/file_space_usage.html",
-        "modern_admin/fits.html",
-        "modern_admin/image_detail.html",
+                "modern_admin/fits.html",
+                "modern_admin/highlights.html",
+                "modern_admin/image_detail.html",
         "modern_admin/image_lag.html",
         "modern_admin/index.html",
         "modern_admin/keograms.html",
@@ -175,8 +177,9 @@
         "/modern-admin/capture/service",
         "/modern-admin/cameras/detect-indi",
         "/modern-admin/cameras/start-indi",
-        "modern_admin_now_view",
-        "modern_admin_sky_cycle_view",
+                "modern_admin_now_view",
+                "modern_admin_highlights_view",
+                "modern_admin_sky_cycle_view",
         "modern_admin_uploads_view",
         "modern_admin_media_image_detail_view",
         "modern_admin_media_keograms_view",
@@ -824,6 +827,42 @@
       "notes": [
         "First concrete surface for the domain-first Product UI.",
         "Read-only, no controls, no runtime evaluation.",
+        "Owner label is Modern Product UI; static route/template ownership remains classified as modern."
+      ]
+    },
+    "highlights_product_prototype": {
+      "label": "Highlights Product Prototype",
+      "status": "PRODUCT PROTOTYPE READ-ONLY",
+      "owner": "modern_product_ui",
+      "porting_priority": "product_prototype",
+      "routes": [
+        "/modern-admin/highlights"
+      ],
+      "templates": [
+        "modern_admin/highlights.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "modern_admin_highlights_view"
+      ],
+      "config_keys": [],
+      "protected": true,
+      "safety": "Read-only static Highlights view-model prototype. No database, detector, filesystem, RAW/FITS, media read, media generation, preview URL, download, share, or actions.",
+      "blockers": [
+        "Real Highlight backend contract",
+        "Explainable Highlight selector",
+        "Moment and Output target references",
+        "Source trust and lineage contracts",
+        "User confirmation/favorite/ignore/archive policy",
+        "Safe actions for any future interaction"
+      ],
+      "modern_gap": "Prototype uses static sanitized placeholders until product domain contracts provide real Highlight selection and target references.",
+      "removal_risk": "critical",
+      "notes": [
+        "Third concrete surface for the domain-first Product UI.",
+        "Read-only, no controls, no runtime data evaluation.",
         "Owner label is Modern Product UI; static route/template ownership remains classified as modern."
       ]
     },

@@ -346,6 +346,137 @@ SKY_CYCLE_ALLOWED_OUTPUT_TYPES = frozenset((
     'unknown',
 ))
 
+HIGHLIGHTS_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'highlights_summary',
+    'highlight_items',
+    'source_trust_summary',
+    'review_queue_summary',
+    'selection_policy_summary',
+    'attention_items',
+    'metadata',
+))
+
+HIGHLIGHTS_REQUIRED_SECTIONS = frozenset((
+    'highlights_summary',
+    'source_trust_summary',
+    'review_queue_summary',
+    'selection_policy_summary',
+    'attention_items',
+))
+
+HIGHLIGHTS_SUMMARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'title',
+    'data_status',
+    'count_label',
+    'primary_highlight',
+    'attention_verdict',
+    'note',
+    'is_placeholder',
+))
+
+HIGHLIGHT_ITEM_REQUIRED_KEYS = frozenset((
+    'highlight_id',
+    'title',
+    'type',
+    'target_kind',
+    'target_label',
+    'data_status',
+    'origin',
+    'selection_reason',
+    'confidence_label',
+    'evidence',
+    'phase',
+    'sky_cycle_context',
+    'source_trust_status',
+    'related_output_status',
+    'favorite_status',
+    'review_status',
+    'safe_actions_available',
+    'is_placeholder',
+))
+
+HIGHLIGHTS_SOURCE_TRUST_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'coverage_label',
+    'preservation_status',
+    'lineage_status',
+    'risk_level',
+    'evidence',
+    'note',
+    'is_placeholder',
+))
+
+HIGHLIGHTS_REVIEW_QUEUE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'count_label',
+    'suggested_count_label',
+    'confirmed_count_label',
+    'favorite_count_label',
+    'ignored_count_label',
+    'note',
+    'is_placeholder',
+))
+
+HIGHLIGHTS_SELECTION_POLICY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'policy_label',
+    'explainability_status',
+    'reversibility_status',
+    'allowed_origins',
+    'note',
+    'is_placeholder',
+))
+
+HIGHLIGHT_ALLOWED_TYPES = frozenset((
+    'best_image',
+    'meteor_candidate',
+    'aurora_candidate',
+    'lightning_candidate',
+    'clear_window',
+    'storm_activity',
+    'sky_quality',
+    'generated_output',
+    'observatory_issue',
+    'user_selected',
+    'unknown',
+))
+
+HIGHLIGHT_ALLOWED_TARGET_KINDS = frozenset((
+    'moment',
+    'output',
+    'source',
+    'sky_cycle',
+    'observatory_issue',
+    'unknown',
+))
+
+HIGHLIGHT_ALLOWED_ORIGINS = frozenset((
+    'hybrid_suggested',
+    'user_selected',
+    'future_ai',
+    'detector',
+    'rule',
+    'unknown',
+))
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -683,6 +814,29 @@ def build_sky_cycle_report_view():
     return payload
 
 
+def build_highlights_view():
+    """Return the first fake-safe Highlights product contract."""
+    payload = {
+        'id': 'highlights.placeholder',
+        'label': 'Highlights',
+        'status': 'Read-only product prototype',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'generated_at': 'Not evaluated yet',
+        'is_placeholder': True,
+        'safe_actions_available': [],
+        'highlights_summary': _build_highlights_summary(),
+        'highlight_items': _build_highlight_items(),
+        'source_trust_summary': _build_highlights_source_trust_summary(),
+        'review_queue_summary': _build_highlights_review_queue_summary(),
+        'selection_policy_summary': _build_highlights_selection_policy_summary(),
+        'attention_items': _build_highlights_attention_items(),
+        'metadata': _build_highlights_metadata(),
+    }
+
+    validate_highlights_payload(payload)
+    return payload
+
+
 def validate_now_view_payload(payload):
     """Validate a NowView payload before it reaches presentation templates."""
     if not isinstance(payload, dict):
@@ -698,6 +852,33 @@ def validate_now_view_payload(payload):
     _validate_current_phase_summary(payload.get('current_phase_summary'))
     _validate_latest_frame_summary(payload.get('latest_frame_summary'))
     _validate_source_confidence_summary(payload.get('source_confidence_summary'))
+    _validate_data_statuses(payload)
+    _validate_no_callables(payload)
+    _validate_no_sensitive_keys(payload)
+    _validate_no_absolute_paths(payload)
+    _validate_safe_actions(payload)
+    _validate_json_safe(payload)
+
+    return True
+
+
+def validate_highlights_payload(payload):
+    """Validate a Highlights payload before template rendering."""
+    if not isinstance(payload, dict):
+        raise ValueError('Highlights payload must be a dict')
+
+    missing_keys = sorted(HIGHLIGHTS_REQUIRED_KEYS.difference(payload.keys()))
+    if missing_keys:
+        raise ValueError('Highlights payload missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    for section_key in HIGHLIGHTS_REQUIRED_SECTIONS:
+        _validate_required_section(payload, section_key)
+
+    _validate_highlights_summary(payload.get('highlights_summary'))
+    _validate_highlight_items(payload.get('highlight_items'))
+    _validate_highlights_source_trust_summary(payload.get('source_trust_summary'))
+    _validate_highlights_review_queue_summary(payload.get('review_queue_summary'))
+    _validate_highlights_selection_policy_summary(payload.get('selection_policy_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
     _validate_no_sensitive_keys(payload)
@@ -1156,6 +1337,190 @@ def _build_sky_cycle_metadata():
         'source': 'build_sky_cycle_report_view',
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
         'is_placeholder': True,
+    }
+
+
+def _build_highlights_summary():
+    return {
+        'id': 'highlights.summary.placeholder',
+        'label': 'Highlights Summary',
+        'title': 'Highlights',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'count_label': '4 placeholder Highlights',
+        'primary_highlight': 'No primary Highlight selected from real data',
+        'attention_verdict': 'Highlight selection is not connected to real detector data yet.',
+        'note': 'Highlights are curated attention objects. They explain what deserves review before the user explores reports or archives.',
+        'is_placeholder': True,
+    }
+
+
+def _build_highlight_items():
+    return [
+        {
+            'highlight_id': 'highlight.placeholder.meteor',
+            'title': 'Possible meteor candidate',
+            'type': 'meteor_candidate',
+            'target_kind': 'moment',
+            'target_label': 'Future Moment detail',
+            'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+            'origin': 'detector',
+            'selection_reason': 'Selected because: detector evidence pending backend contract.',
+            'confidence_label': 'Confidence not evaluated yet',
+            'evidence': [
+                'No detector evidence is connected in this prototype.',
+                'Source lineage and related output status are placeholders.',
+            ],
+            'phase': 'night',
+            'sky_cycle_context': 'Sky Cycle context pending backend contract.',
+            'source_trust_status': 'Source trust not evaluated yet.',
+            'related_output_status': 'Related output not evaluated yet.',
+            'favorite_status': 'Favorite is a future user decision, not the same as Highlight.',
+            'review_status': 'Suggested placeholder',
+            'safe_actions_available': [],
+            'is_placeholder': True,
+        },
+        {
+            'highlight_id': 'highlight.placeholder.timelapse',
+            'title': 'Generated timelapse candidate',
+            'type': 'generated_output',
+            'target_kind': 'output',
+            'target_label': 'Future Output detail',
+            'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+            'origin': 'hybrid_suggested',
+            'selection_reason': 'Selected because: generated output readiness will become an attention signal.',
+            'confidence_label': 'Output quality not evaluated yet',
+            'evidence': [
+                'Generated output status pending rendering contract.',
+                'Look policy and share readiness are not connected yet.',
+            ],
+            'phase': 'unknown',
+            'sky_cycle_context': 'Parent Sky Cycle not evaluated yet.',
+            'source_trust_status': 'Source lineage pending source contract.',
+            'related_output_status': 'Output metadata placeholder only.',
+            'favorite_status': 'Not favorited; user decision unavailable in prototype.',
+            'review_status': 'Suggested placeholder',
+            'safe_actions_available': [],
+            'is_placeholder': True,
+        },
+        {
+            'highlight_id': 'highlight.placeholder.storage',
+            'title': 'Source preservation attention item',
+            'type': 'observatory_issue',
+            'target_kind': 'observatory_issue',
+            'target_label': 'Future Observatory issue detail',
+            'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+            'origin': 'rule',
+            'selection_reason': 'Selected because: source trust warnings should be promoted before exploration.',
+            'confidence_label': 'Risk not evaluated yet',
+            'evidence': [
+                'No storage, source coverage, or retention check is performed here.',
+                'Observatory issues can become Highlights when they affect trust.',
+            ],
+            'phase': 'unknown',
+            'sky_cycle_context': 'Affected Sky Cycle not evaluated yet.',
+            'source_trust_status': 'RAW/FITS/source preservation not evaluated in this prototype.',
+            'related_output_status': 'Affected outputs not evaluated yet.',
+            'favorite_status': 'Operational Highlights are not favorites by default.',
+            'review_status': 'Blocked pending bounded health contract',
+            'safe_actions_available': [],
+            'is_placeholder': True,
+        },
+        {
+            'highlight_id': 'highlight.placeholder.clear-window',
+            'title': 'Clear window candidate',
+            'type': 'clear_window',
+            'target_kind': 'sky_cycle',
+            'target_label': 'Future Sky Cycle context',
+            'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+            'origin': 'future_ai',
+            'selection_reason': 'Selected because: future AI may identify visually or scientifically useful clear windows.',
+            'confidence_label': 'Future AI suggestion not evaluated yet',
+            'evidence': [
+                'AI suggestions must be explanatory and reversible.',
+                'Sky quality and cloud evidence are not connected yet.',
+            ],
+            'phase': 'unknown',
+            'sky_cycle_context': 'Cycle phase and time range not evaluated yet.',
+            'source_trust_status': 'Source coverage pending bounded backend contract.',
+            'related_output_status': 'Related best image or timelapse not evaluated yet.',
+            'favorite_status': 'User may favorite a confirmed Highlight in the future.',
+            'review_status': 'Suggested placeholder',
+            'safe_actions_available': [],
+            'is_placeholder': True,
+        },
+    ]
+
+
+def _build_highlights_source_trust_summary():
+    return {
+        'id': 'highlights.source_trust.placeholder',
+        'label': 'Source Trust',
+        'status': 'Source trust not evaluated yet.',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'coverage_label': 'Source coverage pending bounded backend contract.',
+        'preservation_status': 'RAW/FITS/source preservation not evaluated in this prototype.',
+        'lineage_status': 'Highlight to source lineage is not connected yet.',
+        'risk_level': NOW_RISK_LEVEL_UNKNOWN,
+        'evidence': [
+            'No RAW/FITS/source coverage calculation is connected yet.',
+            'Highlights must not imply source safety until lineage exists.',
+        ],
+        'note': 'This panel will explain whether highlighted items are backed by trustworthy preserved source data.',
+        'is_placeholder': True,
+    }
+
+
+def _build_highlights_review_queue_summary():
+    return {
+        'id': 'highlights.review_queue.placeholder',
+        'label': 'Review Queue',
+        'status': 'Review queue not evaluated yet.',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'count_label': 'No real review queue connected',
+        'suggested_count_label': 'Suggested count placeholder',
+        'confirmed_count_label': 'Confirmed count placeholder',
+        'favorite_count_label': 'Favorite count placeholder',
+        'ignored_count_label': 'Ignored count placeholder',
+        'note': 'Hybrid suggestions are explanatory and reversible. Favorites are user decisions; Highlights are curated attention objects.',
+        'is_placeholder': True,
+    }
+
+
+def _build_highlights_selection_policy_summary():
+    return {
+        'id': 'highlights.selection_policy.placeholder',
+        'label': 'Selection Policy',
+        'status': 'Selection policy not connected yet.',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'policy_label': 'Attention before exploration',
+        'explainability_status': 'Every Highlight must explain why it was selected.',
+        'reversibility_status': 'Hybrid suggests; user decides.',
+        'allowed_origins': sorted(HIGHLIGHT_ALLOWED_ORIGINS),
+        'note': 'Product intelligence must be explainable, bounded, and safe for Raspberry Pi 5.',
+        'is_placeholder': True,
+    }
+
+
+def _build_highlights_attention_items():
+    return NowSection(
+        id='highlights.attention.placeholder',
+        label='Attention Items',
+        status='No real attention items connected yet.',
+        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
+        is_placeholder=True,
+        summary='Highlight selection is static and does not call detector, media, source, or health runtime.',
+        note='No safe action, confirmation, favorite, ignore, archive, download, share, or regeneration behavior is connected.',
+    ).to_dict()
+
+
+def _build_highlights_metadata():
+    return {
+        'contract': 'HighlightsView',
+        'contract_version': 'v1.static',
+        'source': 'build_highlights_view',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'is_placeholder': True,
+        'rp5_policy': 'No database, detector, filesystem, media generation, preview URL, or runtime health check.',
     }
 
 
@@ -1771,6 +2136,100 @@ def _validate_sky_cycle_observatory_health_summary(summary):
 
     if not isinstance(summary['evidence'], list):
         raise ValueError('observatory_health_summary.evidence must be a list')
+
+
+def _validate_highlights_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('highlights_summary must be a dict')
+
+    missing_keys = sorted(HIGHLIGHTS_SUMMARY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('highlights_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at highlights.highlights_summary: {0!r}'.format(summary['data_status']))
+
+
+def _validate_highlight_items(items):
+    if not isinstance(items, list):
+        raise ValueError('highlight_items must be a list')
+
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            raise ValueError('highlight_items[{0:d}] must be a dict'.format(index))
+
+        missing_keys = sorted(HIGHLIGHT_ITEM_REQUIRED_KEYS.difference(item.keys()))
+        if missing_keys:
+            raise ValueError('highlight_items[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_keys)))
+
+        if item['type'] not in HIGHLIGHT_ALLOWED_TYPES:
+            raise ValueError('Invalid Highlight type at highlights.highlight_items[{0:d}]: {1!r}'.format(index, item['type']))
+
+        if item['target_kind'] not in HIGHLIGHT_ALLOWED_TARGET_KINDS:
+            raise ValueError('Invalid Highlight target_kind at highlights.highlight_items[{0:d}]: {1!r}'.format(index, item['target_kind']))
+
+        if item['origin'] not in HIGHLIGHT_ALLOWED_ORIGINS:
+            raise ValueError('Invalid Highlight origin at highlights.highlight_items[{0:d}]: {1!r}'.format(index, item['origin']))
+
+        if item['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+            raise ValueError('Invalid data_status at highlights.highlight_items[{0:d}]: {1!r}'.format(index, item['data_status']))
+
+        if not isinstance(item['evidence'], list):
+            raise ValueError('highlight_items[{0:d}].evidence must be a list'.format(index))
+
+        if not isinstance(item['safe_actions_available'], list):
+            raise ValueError('highlight_items[{0:d}].safe_actions_available must be a list'.format(index))
+
+        _validate_safe_actions({'safe_actions_available': item['safe_actions_available']})
+
+
+def _validate_highlights_source_trust_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('source_trust_summary must be a dict')
+
+    missing_keys = sorted(HIGHLIGHTS_SOURCE_TRUST_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('source_trust_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at highlights.source_trust_summary: {0!r}'.format(summary['data_status']))
+
+    if summary['risk_level'] not in NOW_ALLOWED_RISK_LEVELS:
+        raise ValueError('Invalid risk_level at highlights.source_trust_summary: {0!r}'.format(summary['risk_level']))
+
+    if not isinstance(summary['evidence'], list):
+        raise ValueError('source_trust_summary.evidence must be a list')
+
+
+def _validate_highlights_review_queue_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('review_queue_summary must be a dict')
+
+    missing_keys = sorted(HIGHLIGHTS_REVIEW_QUEUE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('review_queue_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at highlights.review_queue_summary: {0!r}'.format(summary['data_status']))
+
+
+def _validate_highlights_selection_policy_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('selection_policy_summary must be a dict')
+
+    missing_keys = sorted(HIGHLIGHTS_SELECTION_POLICY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('selection_policy_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at highlights.selection_policy_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['allowed_origins'], list):
+        raise ValueError('selection_policy_summary.allowed_origins must be a list')
+
+    invalid_origins = sorted(set(summary['allowed_origins']).difference(HIGHLIGHT_ALLOWED_ORIGINS))
+    if invalid_origins:
+        raise ValueError('Invalid Highlight origins at highlights.selection_policy_summary: {0:s}'.format(', '.join(invalid_origins)))
 
 
 def _validate_data_statuses(value, path='now'):

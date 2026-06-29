@@ -14,11 +14,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import indi_allsky.product_view_models as product_view_models
 from indi_allsky.product_view_models import build_now_view
 from indi_allsky.product_view_models import build_current_phase_summary
+from indi_allsky.product_view_models import build_highlights_view
 from indi_allsky.product_view_models import build_sky_cycle_report_view
 from indi_allsky.product_view_models import build_source_confidence_summary
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
 from indi_allsky.product_view_models import validate_sky_cycle_report_payload
+from indi_allsky.product_view_models import validate_highlights_payload
 from indi_allsky.product_view_models import validate_now_view_payload
 
 
@@ -63,6 +65,7 @@ SENSITIVE_PATTERNS = (
 )
 
 SKY_CYCLE_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/sky_cycle.html')
+HIGHLIGHTS_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/highlights.html')
 
 REQUIRED_SKY_CYCLE_KEYS = {
     'id',
@@ -364,6 +367,199 @@ def test_build_sky_cycle_report_view_contains_no_sensitive_payload():
     assert_no_sensitive_text(report)
     assert_no_absolute_paths(report)
     assert_no_callables(report)
+
+
+def test_build_highlights_view_returns_dict():
+    highlights = build_highlights_view()
+
+    assert isinstance(highlights, dict)
+    assert highlights['id'] == 'highlights.placeholder'
+    assert highlights['metadata']['contract'] == 'HighlightsView'
+
+
+def test_build_highlights_view_is_json_serializable():
+    highlights = build_highlights_view()
+
+    json.dumps(highlights, sort_keys=True)
+
+
+def test_build_highlights_view_has_required_sections():
+    highlights = build_highlights_view()
+
+    assert_section_status(highlights['highlights_summary'])
+    assert_section_status(highlights['source_trust_summary'])
+    assert_section_status(highlights['review_queue_summary'])
+    assert_section_status(highlights['selection_policy_summary'])
+    assert_section_status(highlights['attention_items'])
+    assert isinstance(highlights['highlight_items'], list)
+    assert len(highlights['highlight_items']) >= 4
+
+    for item in highlights['highlight_items']:
+        assert item['type'] in {
+            'best_image',
+            'meteor_candidate',
+            'aurora_candidate',
+            'lightning_candidate',
+            'clear_window',
+            'storm_activity',
+            'sky_quality',
+            'generated_output',
+            'observatory_issue',
+            'user_selected',
+            'unknown',
+        }
+        assert item['target_kind'] in {
+            'moment',
+            'output',
+            'source',
+            'sky_cycle',
+            'observatory_issue',
+            'unknown',
+        }
+        assert item['origin'] in {
+            'hybrid_suggested',
+            'user_selected',
+            'future_ai',
+            'detector',
+            'rule',
+            'unknown',
+        }
+        assert isinstance(item['evidence'], list)
+        assert item['safe_actions_available'] == []
+
+    assert highlights['source_trust_summary']['risk_level'] == 'unknown'
+    assert isinstance(highlights['source_trust_summary']['evidence'], list)
+    assert isinstance(highlights['selection_policy_summary']['allowed_origins'], list)
+
+
+def test_build_highlights_view_contains_no_sensitive_payload():
+    highlights = build_highlights_view()
+
+    assert_no_sensitive_text(highlights)
+    assert_no_absolute_paths(highlights)
+    assert_no_callables(highlights)
+
+
+def test_validate_highlights_payload_success():
+    assert validate_highlights_payload(build_highlights_view()) is True
+
+
+def test_validate_highlights_payload_requires_sections():
+    highlights = build_highlights_view()
+    del highlights['highlights_summary']
+
+    try:
+        validate_highlights_payload(highlights)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('missing highlights_summary should fail validation')
+
+
+def test_validate_highlights_payload_rejects_invalid_type():
+    highlights = build_highlights_view()
+    highlights['highlight_items'][0]['type'] = 'meteor_download'
+
+    try:
+        validate_highlights_payload(highlights)
+    except ValueError as e:
+        assert 'Invalid Highlight type' in str(e)
+    else:
+        raise AssertionError('invalid Highlight type should fail validation')
+
+
+def test_validate_highlights_payload_rejects_invalid_target_kind():
+    highlights = build_highlights_view()
+    highlights['highlight_items'][0]['target_kind'] = 'route'
+
+    try:
+        validate_highlights_payload(highlights)
+    except ValueError as e:
+        assert 'Invalid Highlight target_kind' in str(e)
+    else:
+        raise AssertionError('invalid Highlight target_kind should fail validation')
+
+
+def test_validate_highlights_payload_rejects_invalid_origin():
+    highlights = build_highlights_view()
+    highlights['highlight_items'][0]['origin'] = 'crawler'
+
+    try:
+        validate_highlights_payload(highlights)
+    except ValueError as e:
+        assert 'Invalid Highlight origin' in str(e)
+    else:
+        raise AssertionError('invalid Highlight origin should fail validation')
+
+
+def test_validate_highlights_payload_rejects_evidence_not_list():
+    highlights = build_highlights_view()
+    highlights['highlight_items'][0]['evidence'] = 'Detector evidence pending'
+
+    try:
+        validate_highlights_payload(highlights)
+    except ValueError as e:
+        assert 'evidence must be a list' in str(e)
+    else:
+        raise AssertionError('Highlight evidence string should fail validation')
+
+
+def test_validate_highlights_payload_rejects_direct_safe_action():
+    highlights = build_highlights_view()
+    highlights['highlight_items'][0]['safe_actions_available'] = [
+        {
+            'label': 'Confirm Highlight',
+            'url': '/modern-admin/highlights/action',
+        },
+    ]
+
+    try:
+        validate_highlights_payload(highlights)
+    except ValueError as e:
+        assert 'direct action' in str(e)
+    else:
+        raise AssertionError('direct Highlight safe action should fail validation')
+
+
+def test_validate_highlights_payload_rejects_path_secret_callable():
+    highlights = build_highlights_view()
+    highlights['highlight_items'][0]['evidence'].append('/var/lib/indi-allsky/source')
+
+    try:
+        validate_highlights_payload(highlights)
+    except ValueError as e:
+        assert 'Absolute paths' in str(e)
+    else:
+        raise AssertionError('Highlight absolute path should fail validation')
+
+    highlights = build_highlights_view()
+    highlights['source_trust_summary']['evidence'].append({'token': 'value'})
+
+    try:
+        validate_highlights_payload(highlights)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('Highlight secret should fail validation')
+
+    highlights = build_highlights_view()
+    highlights['highlight_items'][0]['evidence'].append(lambda: None)
+
+    try:
+        validate_highlights_payload(highlights)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('Highlight callable should fail validation')
+
+
+def test_highlights_template_has_no_mutative_controls():
+    template_text = HIGHLIGHTS_TEMPLATE.read_text(encoding='utf-8').lower()
+
+    assert '<form' not in template_text
+    assert 'post' not in template_text
+    assert 'fetch' not in template_text
+    assert '/ajax/' not in template_text
 
 
 def test_validate_sky_cycle_report_payload_success():
@@ -1129,6 +1325,19 @@ def main():
         test_build_sky_cycle_report_view_is_json_serializable,
         test_build_sky_cycle_report_view_has_required_sections,
         test_build_sky_cycle_report_view_contains_no_sensitive_payload,
+        test_build_highlights_view_returns_dict,
+        test_build_highlights_view_is_json_serializable,
+        test_build_highlights_view_has_required_sections,
+        test_build_highlights_view_contains_no_sensitive_payload,
+        test_validate_highlights_payload_success,
+        test_validate_highlights_payload_requires_sections,
+        test_validate_highlights_payload_rejects_invalid_type,
+        test_validate_highlights_payload_rejects_invalid_target_kind,
+        test_validate_highlights_payload_rejects_invalid_origin,
+        test_validate_highlights_payload_rejects_evidence_not_list,
+        test_validate_highlights_payload_rejects_direct_safe_action,
+        test_validate_highlights_payload_rejects_path_secret_callable,
+        test_highlights_template_has_no_mutative_controls,
         test_validate_sky_cycle_report_payload_success,
         test_validate_sky_cycle_report_payload_requires_sections,
         test_validate_sky_cycle_report_payload_rejects_invalid_status,

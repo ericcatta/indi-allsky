@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-highlights-product-v1') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="highlights-title">
+    <header class="modern-admin-table-panel" aria-label="Highlights product prototype">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Hybrid AllSky</p>
+                <h1 id="highlights-title">{{ highlights_view.highlights_summary.title }}</h1>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ highlights_view.data_status | replace('_', ' ') | title }}</span>
+        </div>
+
+        <h2>{{ highlights_view.highlights_summary.attention_verdict }}</h2>
+        <p class="modern-admin-note">{{ highlights_view.highlights_summary.note }}</p>
+        <p class="modern-admin-note">Contract: <code>{{ highlights_view.metadata.contract }}</code> / <code>{{ highlights_view.metadata.contract_version }}</code>. Source: <code>{{ highlights_view.metadata.source }}</code>.</p>
+
+        <div class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle Report</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Settings index</a>
+        </div>
+    </header>
+
+    <section class="modern-admin-table-panel" aria-labelledby="highlights-summary-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Attention</p>
+                <h2 id="highlights-summary-title">Curated Attention Objects</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Static prototype</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Highlights summary">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ highlights_view.highlights_summary.label }}</div>
+                <h3>{{ highlights_view.highlights_summary.count_label }}</h3>
+                <p>{{ highlights_view.highlights_summary.primary_highlight }}</p>
+                <p>{{ highlights_view.highlights_summary.attention_verdict }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ highlights_view.review_queue_summary.label }}</div>
+                <h3>{{ highlights_view.review_queue_summary.status }}</h3>
+                <p>{{ highlights_view.review_queue_summary.count_label }}</p>
+                <p>{{ highlights_view.review_queue_summary.suggested_count_label }}. {{ highlights_view.review_queue_summary.confirmed_count_label }}.</p>
+                <p>{{ highlights_view.review_queue_summary.favorite_count_label }}. {{ highlights_view.review_queue_summary.ignored_count_label }}.</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ highlights_view.selection_policy_summary.label }}</div>
+                <h3>{{ highlights_view.selection_policy_summary.policy_label }}</h3>
+                <p>{{ highlights_view.selection_policy_summary.explainability_status }}</p>
+                <p>{{ highlights_view.selection_policy_summary.reversibility_status }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="highlight-items-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Highlights</p>
+                <h2 id="highlight-items-title">What Deserves Attention</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">No real detector data</span>
+        </div>
+        <p class="modern-admin-note">Highlight selection is not connected to real detector data yet. Hybrid suggestions are explanatory and reversible.</p>
+
+        <section class="modern-admin-status-grid" aria-label="Highlight items">
+            {% for highlight in highlights_view.highlight_items %}
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ highlight.type | replace('_', ' ') | title }} / {{ highlight.origin | replace('_', ' ') | title }}</div>
+                <h3>{{ highlight.title }}</h3>
+                <p><strong>Target:</strong> {{ highlight.target_kind | replace('_', ' ') | title }} - {{ highlight.target_label }}</p>
+                <p>{{ highlight.selection_reason }}</p>
+                <p><strong>Confidence:</strong> {{ highlight.confidence_label }}</p>
+                {% for evidence_item in highlight.evidence %}
+                    <p>{{ evidence_item }}</p>
+                {% endfor %}
+                <p><strong>Phase:</strong> {{ highlight.phase | replace('_', ' ') | title }}</p>
+                <p><strong>Sky Cycle:</strong> {{ highlight.sky_cycle_context }}</p>
+                <p><strong>Source trust:</strong> {{ highlight.source_trust_status }}</p>
+                <p><strong>Output:</strong> {{ highlight.related_output_status }}</p>
+                <p><strong>Favorite:</strong> {{ highlight.favorite_status }}</p>
+                <span class="modern-admin-status-pill modern-admin-status-muted">{{ highlight.review_status }}</span>
+                <span class="modern-admin-status-pill modern-admin-status-muted">Safe actions: {{ highlight.safe_actions_available | length }}</span>
+            </article>
+            {% endfor %}
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="highlight-trust-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Trust</p>
+                <h2 id="highlight-trust-title">Source Trust and Selection Policy</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Not evaluated</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Highlight trust and policy">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ highlights_view.source_trust_summary.label }}</div>
+                <h3>{{ highlights_view.source_trust_summary.status }}</h3>
+                <p>{{ highlights_view.source_trust_summary.coverage_label }}</p>
+                <p>{{ highlights_view.source_trust_summary.preservation_status }}</p>
+                <p>{{ highlights_view.source_trust_summary.lineage_status }}</p>
+                <p>Risk: {{ highlights_view.source_trust_summary.risk_level | title }}</p>
+                {% for evidence_item in highlights_view.source_trust_summary.evidence %}
+                    <p>{{ evidence_item }}</p>
+                {% endfor %}
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ highlights_view.selection_policy_summary.label }}</div>
+                <h3>{{ highlights_view.selection_policy_summary.status }}</h3>
+                <p>Allowed origins: {{ highlights_view.selection_policy_summary.allowed_origins | join(', ') }}</p>
+                <p>{{ highlights_view.selection_policy_summary.note }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ highlights_view.attention_items.label }}</div>
+                <h3>{{ highlights_view.attention_items.status }}</h3>
+                <p>{{ highlights_view.attention_items.summary }}</p>
+                <p>{{ highlights_view.attention_items.note }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="highlight-boundary-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Safety</p>
+                <h2 id="highlight-boundary-title">Read-only Boundary</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">No actions</span>
+        </div>
+        <p class="modern-admin-note">No database, detector, filesystem, RAW/FITS, media read, media generation, preview URL, download, share, favorite, ignore, archive, or safe action is connected to this prototype.</p>
+    </section>
+</main>
+{% endblock %}
