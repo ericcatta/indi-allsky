@@ -153,7 +153,10 @@
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ sky_cycle_report.outputs_summary.label }}</div>
                 <h3>{{ sky_cycle_report.outputs_summary.status }}</h3>
-                <p>{{ sky_cycle_report.outputs_summary.summary }}</p>
+                <p>{{ sky_cycle_report.outputs_summary.count_label }}</p>
+                <p>{{ sky_cycle_report.outputs_summary.generation_status }}</p>
+                <p>{{ sky_cycle_report.outputs_summary.look_policy_status }}</p>
+                <p>{{ sky_cycle_report.outputs_summary.share_readiness_status }}</p>
                 <p>{{ sky_cycle_report.outputs_summary.note }}</p>
             </article>
             <article class="modern-admin-status-card">
@@ -167,6 +170,26 @@
                 <h3>No actions connected</h3>
                 <p>No database, filesystem, RAW/FITS, media generation, preview URL, or safe action is connected to this prototype.</p>
             </article>
+        </section>
+
+        <section class="modern-admin-status-grid" aria-label="Generated output candidates">
+            {% for output in sky_cycle_report.outputs_summary.items %}
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ output.type | replace('_', ' ') | title }} / {{ output.phase | replace('_', ' ') | title }}</div>
+                <h3>{{ output.label }}</h3>
+                <p>{{ output.generation_status }}</p>
+                <p>Look: {{ output.look_applied }}</p>
+                <p>{{ output.source_lineage_status }}</p>
+                <p>{{ output.related_moments_status }}</p>
+                <p>{{ output.share_status }}</p>
+                <p><strong>Quality:</strong> {{ output.quality_note }}</p>
+                <p><strong>Astrophoto:</strong> {{ output.astrophoto_note }}</p>
+                <p><strong>Science:</strong> {{ output.science_note }}</p>
+                <span class="modern-admin-status-pill modern-admin-status-muted">
+                    Safe actions: {{ output.safe_actions_available | length }}
+                </span>
+            </article>
+            {% endfor %}
         </section>
     </section>
 </main>

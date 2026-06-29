@@ -277,6 +277,54 @@ SKY_CYCLE_ALLOWED_MOMENT_TYPES = frozenset((
     'unknown',
 ))
 
+SKY_CYCLE_OUTPUTS_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'count_label',
+    'generation_status',
+    'look_policy_status',
+    'share_readiness_status',
+    'note',
+    'items',
+    'is_placeholder',
+))
+
+SKY_CYCLE_OUTPUT_ITEM_REQUIRED_KEYS = frozenset((
+    'id',
+    'type',
+    'label',
+    'phase',
+    'data_status',
+    'generation_status',
+    'look_applied',
+    'source_lineage_status',
+    'related_moments_status',
+    'share_status',
+    'quality_note',
+    'astrophoto_note',
+    'science_note',
+    'safe_actions_available',
+    'is_placeholder',
+))
+
+SKY_CYCLE_ALLOWED_OUTPUT_TYPES = frozenset((
+    'best_image',
+    'latest_image',
+    'timelapse',
+    'day_timelapse',
+    'night_timelapse',
+    'keogram',
+    'startrail',
+    'startrail_video',
+    'storm_highlight',
+    'aurora_highlight',
+    'meteor_highlight',
+    'cycle_summary_video',
+    'unknown',
+))
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -651,6 +699,7 @@ def validate_sky_cycle_report_payload(payload):
     _validate_sky_cycle_summary(payload.get('cycle_summary'))
     _validate_sky_cycle_phase_timeline(payload.get('phase_timeline'))
     _validate_sky_cycle_moments_summary(payload.get('moments_summary'))
+    _validate_sky_cycle_outputs_summary(payload.get('outputs_summary'))
     _validate_source_confidence_summary(payload.get('source_confidence_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
@@ -935,15 +984,105 @@ def _build_sky_cycle_moments_summary():
 
 
 def _build_sky_cycle_outputs_summary():
-    return NowSection(
-        id='sky_cycle.outputs.placeholder',
-        label='Generated Outputs',
-        status='Generated outputs pending rendering contract.',
-        data_status=NOW_DATA_STATUS_FUTURE_CONTRACT,
-        is_placeholder=True,
-        summary='Best image, timelapse, keogram, startrail, and highlight readiness are not evaluated yet.',
-        note='No media generation, conversion, preview lookup, or filesystem read is performed.',
-    ).to_dict()
+    return {
+        'id': 'sky_cycle.outputs.placeholder',
+        'label': 'Generated Outputs',
+        'status': 'Generated output status pending rendering contract.',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'count_label': 'No generated outputs evaluated yet',
+        'generation_status': 'Rendering/generation status not connected yet.',
+        'look_policy_status': 'Look policy not connected yet.',
+        'share_readiness_status': 'Share readiness not evaluated yet.',
+        'note': 'No media generation, conversion, preview lookup, download, or filesystem read is performed.',
+        'items': [
+            {
+                'id': 'sky_cycle.output.best_image.placeholder',
+                'type': 'best_image',
+                'label': 'Best image',
+                'phase': 'unknown',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'generation_status': 'Generated output status pending rendering contract.',
+                'look_applied': 'Look policy not connected yet.',
+                'source_lineage_status': 'Source lineage pending source contract.',
+                'related_moments_status': 'Related moments not evaluated yet.',
+                'share_status': 'Share readiness not evaluated yet.',
+                'quality_note': 'Image quality scoring is not connected yet.',
+                'astrophoto_note': 'Astrophoto review value is not evaluated yet.',
+                'science_note': 'Scientific source relationship is not evaluated yet.',
+                'safe_actions_available': [],
+                'is_placeholder': True,
+            },
+            {
+                'id': 'sky_cycle.output.timelapse.placeholder',
+                'type': 'timelapse',
+                'label': 'Timelapse',
+                'phase': 'unknown',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'generation_status': 'Generated output status pending rendering contract.',
+                'look_applied': 'Look policy not connected yet.',
+                'source_lineage_status': 'Source lineage pending source contract.',
+                'related_moments_status': 'Related moments not evaluated yet.',
+                'share_status': 'Share readiness not evaluated yet.',
+                'quality_note': 'Frame continuity and output quality are not evaluated yet.',
+                'astrophoto_note': 'Timelapse look and cadence are not evaluated yet.',
+                'science_note': 'Cycle coverage evidence is not connected yet.',
+                'safe_actions_available': [],
+                'is_placeholder': True,
+            },
+            {
+                'id': 'sky_cycle.output.keogram.placeholder',
+                'type': 'keogram',
+                'label': 'Keogram',
+                'phase': 'night',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'generation_status': 'Generated output status pending rendering contract.',
+                'look_applied': 'Look policy not connected yet.',
+                'source_lineage_status': 'Source lineage pending source contract.',
+                'related_moments_status': 'Related moments not evaluated yet.',
+                'share_status': 'Share readiness not evaluated yet.',
+                'quality_note': 'Keogram quality is not evaluated yet.',
+                'astrophoto_note': 'Night transition and sky-pattern value are not evaluated yet.',
+                'science_note': 'Sky brightness and cloud continuity evidence are not connected yet.',
+                'safe_actions_available': [],
+                'is_placeholder': True,
+            },
+            {
+                'id': 'sky_cycle.output.startrail.placeholder',
+                'type': 'startrail',
+                'label': 'Startrail',
+                'phase': 'night',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'generation_status': 'Generated output status pending rendering contract.',
+                'look_applied': 'Look policy not connected yet.',
+                'source_lineage_status': 'Source lineage pending source contract.',
+                'related_moments_status': 'Related moments not evaluated yet.',
+                'share_status': 'Share readiness not evaluated yet.',
+                'quality_note': 'Startrail continuity and artifact checks are not evaluated yet.',
+                'astrophoto_note': 'Startrail look and composition are not evaluated yet.',
+                'science_note': 'Source-frame continuity is not connected yet.',
+                'safe_actions_available': [],
+                'is_placeholder': True,
+            },
+            {
+                'id': 'sky_cycle.output.meteor_highlight.placeholder',
+                'type': 'meteor_highlight',
+                'label': 'Meteor highlight',
+                'phase': 'night',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'generation_status': 'Generated output status pending rendering contract.',
+                'look_applied': 'Look policy not connected yet.',
+                'source_lineage_status': 'Source lineage pending source contract.',
+                'related_moments_status': 'Moment relation pending MomentSummary contract.',
+                'share_status': 'Share readiness not evaluated yet.',
+                'quality_note': 'Highlight quality is not evaluated yet.',
+                'astrophoto_note': 'Highlight output depends on future moment evidence and source lineage.',
+                'science_note': 'Meteor evidence is not connected yet.',
+                'safe_actions_available': [],
+                'is_placeholder': True,
+            },
+        ],
+        'is_placeholder': True,
+    }
 
 
 def _build_sky_cycle_observatory_health_summary():
@@ -1537,6 +1676,43 @@ def _validate_sky_cycle_moments_summary(summary):
 
         if not isinstance(item['evidence'], list):
             raise ValueError('moments_summary.items[{0:d}].evidence must be a list'.format(index))
+
+
+def _validate_sky_cycle_outputs_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('outputs_summary must be a dict')
+
+    missing_keys = sorted(SKY_CYCLE_OUTPUTS_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('outputs_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at sky_cycle.outputs_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['items'], list):
+        raise ValueError('outputs_summary.items must be a list')
+
+    for index, item in enumerate(summary['items']):
+        if not isinstance(item, dict):
+            raise ValueError('outputs_summary.items[{0:d}] must be a dict'.format(index))
+
+        missing_item_keys = sorted(SKY_CYCLE_OUTPUT_ITEM_REQUIRED_KEYS.difference(item.keys()))
+        if missing_item_keys:
+            raise ValueError('outputs_summary.items[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_item_keys)))
+
+        if item['type'] not in SKY_CYCLE_ALLOWED_OUTPUT_TYPES:
+            raise ValueError('Invalid output type at sky_cycle.outputs_summary.items[{0:d}]: {1!r}'.format(index, item['type']))
+
+        if item['phase'] not in SKY_CYCLE_ALLOWED_PHASES:
+            raise ValueError('Invalid output phase at sky_cycle.outputs_summary.items[{0:d}]: {1!r}'.format(index, item['phase']))
+
+        if item['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+            raise ValueError('Invalid data_status at sky_cycle.outputs_summary.items[{0:d}]: {1!r}'.format(index, item['data_status']))
+
+        if not isinstance(item['safe_actions_available'], list):
+            raise ValueError('outputs_summary.items[{0:d}].safe_actions_available must be a list'.format(index))
+
+        _validate_safe_actions({'safe_actions_available': item['safe_actions_available']})
 
 
 def _validate_data_statuses(value, path='now'):

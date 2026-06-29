@@ -262,3 +262,66 @@ evidence, source lineage, output relation, or review queue exists yet.
 Next gap: harden the generated outputs summary contract, or review the safest
 first bounded runtime source for cycle identity/time range. Do not connect
 detector data yet.
+
+## Mission 023 Update
+
+The generated outputs summary contract has been strengthened.
+
+`outputs_summary` now represents generated cycle results as product objects,
+not as a single placeholder card.
+
+The summary includes:
+
+- count label;
+- generation status;
+- Look policy status;
+- share readiness status;
+- item list.
+
+Each output item now carries:
+
+- output type;
+- phase;
+- generation status;
+- Look applied;
+- source lineage status;
+- related moments status;
+- share status;
+- quality note;
+- astrophoto note;
+- science note;
+- safe actions metadata list.
+
+The allowed output types are:
+
+- best image;
+- latest image;
+- timelapse;
+- day timelapse;
+- night timelapse;
+- keogram;
+- startrail;
+- startrail video;
+- storm highlight;
+- aurora highlight;
+- meteor highlight;
+- cycle summary video;
+- unknown.
+
+The contract remains fake/static. No generated media, preview URL, download,
+share, filesystem read, source lineage, rendering job, or safe action is
+connected.
+
+Validation now enforces required summary fields, required item fields, output
+type allowlist, compatible phase allowlist, allowed `data_status`, metadata-only
+`safe_actions_available`, and recursive no-secret/no-path/no-callable checks.
+
+Updated Sky Cycle Report score: 7.6/10.
+
+The score improves because Sky Cycle now has product-shaped contracts for
+phases, moments, and outputs. It remains below 8/10 because all three are still
+static and none has real cycle/source/output truth.
+
+Next gap: harden observatory health summary, or perform a bounded source review
+for the first real Sky Cycle field. Do not connect rendering, download, share,
+or generation actions yet.

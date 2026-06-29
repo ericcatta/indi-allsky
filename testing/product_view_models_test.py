@@ -297,6 +297,42 @@ def test_build_sky_cycle_report_view_has_required_sections():
         assert 'astrophoto_note' in moment
         assert 'review_status' in moment
 
+    outputs_summary = report['outputs_summary']
+    assert outputs_summary['count_label'] == 'No generated outputs evaluated yet'
+    assert outputs_summary['generation_status'] == 'Rendering/generation status not connected yet.'
+    assert outputs_summary['look_policy_status'] == 'Look policy not connected yet.'
+    assert outputs_summary['share_readiness_status'] == 'Share readiness not evaluated yet.'
+    assert isinstance(outputs_summary['items'], list)
+    assert len(outputs_summary['items']) >= 5
+
+    for output in outputs_summary['items']:
+        assert_section_status(output)
+        assert output['type'] in {
+            'best_image',
+            'latest_image',
+            'timelapse',
+            'day_timelapse',
+            'night_timelapse',
+            'keogram',
+            'startrail',
+            'startrail_video',
+            'storm_highlight',
+            'aurora_highlight',
+            'meteor_highlight',
+            'cycle_summary_video',
+            'unknown',
+        }
+        assert output['phase'] in {'day', 'sunset_twilight', 'night', 'sunrise_twilight', 'unknown'}
+        assert 'generation_status' in output
+        assert 'look_applied' in output
+        assert 'source_lineage_status' in output
+        assert 'related_moments_status' in output
+        assert 'share_status' in output
+        assert 'quality_note' in output
+        assert 'astrophoto_note' in output
+        assert 'science_note' in output
+        assert output['safe_actions_available'] == []
+
 
 def test_build_sky_cycle_report_view_contains_no_sensitive_payload():
     report = build_sky_cycle_report_view()
@@ -436,6 +472,79 @@ def test_validate_sky_cycle_report_payload_rejects_moment_path_secret_callable()
         assert 'Callable' in str(e)
     else:
         raise AssertionError('moment evidence callable should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_invalid_output_type():
+    report = build_sky_cycle_report_view()
+    report['outputs_summary']['items'][0]['type'] = 'download'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Invalid output type' in str(e)
+    else:
+        raise AssertionError('invalid output type should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_incomplete_output_item():
+    report = build_sky_cycle_report_view()
+    del report['outputs_summary']['items'][0]['source_lineage_status']
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('incomplete output item should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_output_direct_safe_action():
+    report = build_sky_cycle_report_view()
+    report['outputs_summary']['items'][0]['safe_actions_available'] = [
+        {
+            'label': 'Generate output',
+            'url': '/modern-admin/action',
+        },
+    ]
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'direct action' in str(e)
+    else:
+        raise AssertionError('direct output safe action should fail validation')
+
+
+def test_validate_sky_cycle_report_payload_rejects_output_path_secret_callable():
+    report = build_sky_cycle_report_view()
+    report['outputs_summary']['items'][0]['quality_note'] = '/var/lib/indi-allsky/output.mp4'
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Absolute paths' in str(e)
+    else:
+        raise AssertionError('output path should fail validation')
+
+    report = build_sky_cycle_report_view()
+    report['outputs_summary']['items'][0]['science_note'] = {'token': 'value'}
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('output secret should fail validation')
+
+    report = build_sky_cycle_report_view()
+    report['outputs_summary']['items'][0]['astrophoto_note'] = lambda: None
+
+    try:
+        validate_sky_cycle_report_payload(report)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('output callable should fail validation')
 
 
 def test_sky_cycle_template_has_no_mutative_controls():
@@ -884,6 +993,10 @@ def main():
         test_validate_sky_cycle_report_payload_rejects_moment_evidence_not_list,
         test_validate_sky_cycle_report_payload_rejects_incomplete_moment_item,
         test_validate_sky_cycle_report_payload_rejects_moment_path_secret_callable,
+        test_validate_sky_cycle_report_payload_rejects_invalid_output_type,
+        test_validate_sky_cycle_report_payload_rejects_incomplete_output_item,
+        test_validate_sky_cycle_report_payload_rejects_output_direct_safe_action,
+        test_validate_sky_cycle_report_payload_rejects_output_path_secret_callable,
         test_sky_cycle_template_has_no_mutative_controls,
         test_current_phase_summary_maps_day,
         test_current_phase_summary_maps_night,
