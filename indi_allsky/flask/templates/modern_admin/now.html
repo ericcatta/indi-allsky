@@ -30,6 +30,7 @@
 
     <section class="modern-admin-table-panel" aria-labelledby="now-current-title">
         {% set latest_frame = modern_admin_now.latest_frame_summary %}
+        {% set current_phase = modern_admin_now.current_phase_summary %}
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Current</p>
@@ -41,8 +42,12 @@
         <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Current sky status">
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">Current phase</div>
-                <h3>{{ modern_admin_now.current_sky.phase }}</h3>
-                <p>{{ modern_admin_now.current_sky.summary }}</p>
+                <h3>Current phase: {{ current_phase.phase | title }}</h3>
+                <p>{{ current_phase.note }}</p>
+                <p>Source: {{ current_phase.source }}. Confidence: {{ current_phase.confidence | replace('_', ' ') }}.</p>
+                {% for unsupported_phase in current_phase.unsupported_phases %}
+                    <p>{{ unsupported_phase.note }}</p>
+                {% endfor %}
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ latest_frame.label }}</div>

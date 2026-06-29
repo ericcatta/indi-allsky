@@ -281,6 +281,17 @@ static provider contract.
 The main remaining gap is true Flask integration testing with app/session/DB
 fixtures.
 
+## Current Phase Update
+
+NowView now includes `current_phase_summary`, sourced only from the existing
+TemplateView context value `night` after the base context has been built.
+
+This improves the first-glance Current Sky experience with a bounded
+`day / night / unknown` field while avoiding a premature phase engine. Twilight
+classification remains `not_evaluated`, and the implementation does not add new
+astronomical calculations, database queries, filesystem access, runtime camera
+checks, or frontend polling.
+
 ## Final Verdict
 
 The prototype is safe and directionally correct.

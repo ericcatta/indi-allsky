@@ -7429,6 +7429,7 @@ class ModernAdminNowView(TemplateView):
         session['admin_mode'] = 'modern'
         context['modern_admin_now'] = build_now_view(
             latest_frame_provider=self.get_latest_frame_provider(),
+            current_phase_night=context.get('night'),
         )
 
         return context

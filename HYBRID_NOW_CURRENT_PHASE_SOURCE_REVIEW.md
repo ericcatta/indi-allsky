@@ -232,3 +232,18 @@ day / night / unknown
 Do not claim twilight until the backend exposes a sanitized phase classifier or
 retains `sun_alt` from the existing astrometric calculation in a product-safe
 view model.
+
+## Mission 016 Update
+
+`current_phase_summary` has been added to the NowView contract using only the
+existing `context['night']` value after `TemplateView.get_context()`.
+
+The implementation intentionally supports only:
+
+- `night == 0` -> `day`
+- `night == 1` -> `night`
+- missing or unexpected values -> `unknown`
+
+Twilight remains explicitly unsupported and `not_evaluated`. No additional
+astronomical calculation, database query, filesystem access, network call, media
+generation, or runtime camera check was introduced.

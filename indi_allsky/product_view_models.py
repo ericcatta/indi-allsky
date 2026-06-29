@@ -21,6 +21,16 @@ NOW_ALLOWED_DATA_STATUSES = frozenset((
     NOW_DATA_STATUS_FUTURE_CONTRACT,
 ))
 
+NOW_PHASE_DAY = 'day'
+NOW_PHASE_NIGHT = 'night'
+NOW_PHASE_UNKNOWN = 'unknown'
+
+NOW_ALLOWED_PHASES = frozenset((
+    NOW_PHASE_DAY,
+    NOW_PHASE_NIGHT,
+    NOW_PHASE_UNKNOWN,
+))
+
 NOW_REQUIRED_KEYS = frozenset((
     'id',
     'label',
@@ -32,6 +42,7 @@ NOW_REQUIRED_KEYS = frozenset((
     'is_placeholder',
     'safe_actions_available',
     'current_sky',
+    'current_phase_summary',
     'latest_frame_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
@@ -47,6 +58,7 @@ NOW_REQUIRED_KEYS = frozenset((
 
 NOW_REQUIRED_SECTIONS = frozenset((
     'current_sky',
+    'current_phase_summary',
     'latest_frame_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
@@ -108,6 +120,19 @@ NOW_LATEST_FRAME_REPOSITORY_KEYS = frozenset((
     'source_status',
 ))
 
+NOW_CURRENT_PHASE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'phase',
+    'data_status',
+    'source',
+    'confidence',
+    'note',
+    'supported_phases',
+    'unsupported_phases',
+    'is_placeholder',
+))
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -134,6 +159,23 @@ class CurrentSkySection:
     source_recording: str
     summary: str
     data_status: str
+    is_placeholder: bool
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class CurrentPhaseSummary:
+    id: str
+    label: str
+    phase: str
+    data_status: str
+    source: str
+    confidence: str
+    note: str
+    supported_phases: list
+    unsupported_phases: list
     is_placeholder: bool
 
     def to_dict(self):
@@ -305,7 +347,7 @@ class PrimaryQuestionAnswer:
         return asdict(self)
 
 
-def build_now_view(latest_frame_provider=None):
+def build_now_view(latest_frame_provider=None, current_phase_night=None):
     """Return the first backend-owned NowView contract.
 
     The payload is static and fake-safe by design. It gives the Product UI a
@@ -323,6 +365,7 @@ def build_now_view(latest_frame_provider=None):
         'is_placeholder': True,
         'safe_actions_available': [],
         'current_sky': _build_current_sky(),
+        'current_phase_summary': build_current_phase_summary(current_phase_night),
         'latest_frame_summary': _build_latest_frame_summary(latest_frame_provider=latest_frame_provider),
         'sky_cycle_briefing': _build_sky_cycle_briefing(),
         'primary_question_answers': _build_primary_question_answers(),
@@ -352,6 +395,7 @@ def validate_now_view_payload(payload):
     for section_key in NOW_REQUIRED_SECTIONS:
         _validate_required_section(payload, section_key)
 
+    _validate_current_phase_summary(payload.get('current_phase_summary'))
     _validate_latest_frame_summary(payload.get('latest_frame_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
@@ -375,6 +419,61 @@ def _build_current_sky():
         data_status=NOW_DATA_STATUS_NOT_EVALUATED,
         is_placeholder=True,
     ).to_dict()
+
+
+def build_current_phase_summary(night=None):
+    phase = _map_current_phase(night)
+
+    if phase == NOW_PHASE_DAY:
+        confidence = 'bounded_context'
+        note = 'Current phase: Day. Mapped from the existing view context; twilight classification not evaluated yet.'
+        is_placeholder = False
+    elif phase == NOW_PHASE_NIGHT:
+        confidence = 'bounded_context'
+        note = 'Current phase: Night. Mapped from the existing view context; twilight classification not evaluated yet.'
+        is_placeholder = False
+    else:
+        confidence = 'unknown'
+        note = 'Current phase: Unknown. Existing view context did not provide a reliable day/night flag.'
+        is_placeholder = True
+
+    return CurrentPhaseSummary(
+        id='current_phase.context_night',
+        label='Current Phase Summary',
+        phase=phase,
+        data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+        source='template_context.night',
+        confidence=confidence,
+        note=note,
+        supported_phases=[
+            NOW_PHASE_DAY,
+            NOW_PHASE_NIGHT,
+            NOW_PHASE_UNKNOWN,
+        ],
+        unsupported_phases=[
+            {
+                'phase': 'twilight',
+                'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+                'note': 'Twilight classification not evaluated yet.',
+            },
+        ],
+        is_placeholder=is_placeholder,
+    ).to_dict()
+
+
+def _map_current_phase(night):
+    try:
+        night_value = int(night)
+    except (TypeError, ValueError):
+        return NOW_PHASE_UNKNOWN
+
+    if night_value == 0:
+        return NOW_PHASE_DAY
+
+    if night_value == 1:
+        return NOW_PHASE_NIGHT
+
+    return NOW_PHASE_UNKNOWN
 
 
 def _build_latest_frame_summary(latest_frame_provider=None):
@@ -822,6 +921,27 @@ def _validate_latest_frame_summary(summary):
 
     if any(token in safe_preview_url_lower for token in NOW_SUSPICIOUS_URL_TOKENS):
         raise ValueError('latest_frame_summary.safe_preview_url contains unsafe path metadata')
+
+
+def _validate_current_phase_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('current_phase_summary must be a dict')
+
+    missing_keys = sorted(NOW_CURRENT_PHASE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('current_phase_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['phase'] not in NOW_ALLOWED_PHASES:
+        raise ValueError('Invalid phase at now.current_phase_summary: {0!r}'.format(summary['phase']))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at now.current_phase_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['supported_phases'], list):
+        raise ValueError('current_phase_summary.supported_phases must be a list')
+
+    if not isinstance(summary['unsupported_phases'], list):
+        raise ValueError('current_phase_summary.unsupported_phases must be a list')
 
 
 def _validate_data_statuses(value, path='now'):

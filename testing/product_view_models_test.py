@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import indi_allsky.product_view_models as product_view_models
 from indi_allsky.product_view_models import build_now_view
+from indi_allsky.product_view_models import build_current_phase_summary
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
 from indi_allsky.product_view_models import validate_now_view_payload
@@ -28,6 +29,7 @@ REQUIRED_NOW_KEYS = {
     'generated_at',
     'is_placeholder',
     'current_sky',
+    'current_phase_summary',
     'latest_frame_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
@@ -155,6 +157,7 @@ def test_build_now_view_has_explicit_placeholder_status():
     assert now_view['briefing_title'] == 'Current / Morning Briefing'
     assert now_view['current_verdict'] == 'Observation data not evaluated yet'
     assert_section_status(now_view['current_sky'])
+    assert_section_status(now_view['current_phase_summary'])
     assert_section_status(now_view['latest_frame_summary'])
     assert_section_status(now_view['sky_cycle_briefing'])
     assert_section_status(now_view['evidence_summary'])
@@ -183,6 +186,42 @@ def test_build_now_view_contains_no_sensitive_payload():
     assert_no_sensitive_text(now_view)
     assert_no_absolute_paths(now_view)
     assert_no_callables(now_view)
+
+
+def test_current_phase_summary_maps_day():
+    phase_summary = build_current_phase_summary(night=0)
+
+    assert phase_summary['phase'] == 'day'
+    assert phase_summary['source'] == 'template_context.night'
+    assert phase_summary['confidence'] == 'bounded_context'
+    assert phase_summary['is_placeholder'] is False
+    assert phase_summary['unsupported_phases'][0]['phase'] == 'twilight'
+    assert phase_summary['unsupported_phases'][0]['data_status'] == 'not_evaluated'
+
+
+def test_current_phase_summary_maps_night():
+    phase_summary = build_current_phase_summary(night=1)
+
+    assert phase_summary['phase'] == 'night'
+    assert phase_summary['source'] == 'template_context.night'
+    assert phase_summary['confidence'] == 'bounded_context'
+    assert phase_summary['is_placeholder'] is False
+
+
+def test_current_phase_summary_maps_unknown():
+    for night_value in (None, 'unknown', 2):
+        phase_summary = build_current_phase_summary(night=night_value)
+        assert phase_summary['phase'] == 'unknown'
+        assert phase_summary['confidence'] == 'unknown'
+        assert phase_summary['is_placeholder'] is True
+
+
+def test_build_now_view_accepts_current_phase_context():
+    day_view = build_now_view(current_phase_night=0)
+    night_view = build_now_view(current_phase_night=1)
+
+    assert day_view['current_phase_summary']['phase'] == 'day'
+    assert night_view['current_phase_summary']['phase'] == 'night'
 
 
 def test_latest_frame_summary_contract_is_fake_safe():
@@ -390,6 +429,18 @@ def test_validate_now_view_payload_rejects_invalid_data_status():
         raise AssertionError('invalid data_status should fail validation')
 
 
+def test_validate_now_view_payload_rejects_invalid_current_phase():
+    now_view = build_now_view()
+    now_view['current_phase_summary']['phase'] = 'twilight'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Invalid phase' in str(e)
+    else:
+        raise AssertionError('current_phase_summary invalid phase should fail validation')
+
+
 def test_validate_now_view_payload_rejects_latest_frame_absolute_preview_path():
     now_view = build_now_view()
     now_view['latest_frame_summary']['safe_preview_url'] = '/var/lib/indi-allsky/latest.jpg'
@@ -483,6 +534,10 @@ def main():
         test_build_now_view_is_json_serializable,
         test_build_now_view_has_explicit_placeholder_status,
         test_build_now_view_contains_no_sensitive_payload,
+        test_current_phase_summary_maps_day,
+        test_current_phase_summary_maps_night,
+        test_current_phase_summary_maps_unknown,
+        test_build_now_view_accepts_current_phase_context,
         test_latest_frame_summary_contract_is_fake_safe,
         test_latest_frame_provider_with_frame_present,
         test_latest_frame_provider_with_no_frame,
@@ -498,6 +553,7 @@ def main():
         test_validate_now_view_payload_success,
         test_validate_now_view_payload_requires_sections,
         test_validate_now_view_payload_rejects_invalid_data_status,
+        test_validate_now_view_payload_rejects_invalid_current_phase,
         test_validate_now_view_payload_rejects_latest_frame_absolute_preview_path,
         test_validate_now_view_payload_rejects_latest_frame_invalid_status,
         test_validate_now_view_payload_rejects_sensitive_keys,
