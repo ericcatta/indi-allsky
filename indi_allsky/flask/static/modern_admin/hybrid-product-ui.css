@@ -244,8 +244,39 @@
 }
 
 .hybrid-app-content {
+  --hybrid-console-bg: #070806;
+  --hybrid-console-panel: rgba(14, 16, 14, 0.86);
+  --hybrid-console-panel-soft: rgba(23, 25, 22, 0.74);
+  --hybrid-console-ink: #f4f0e8;
+  --hybrid-console-muted: #a9b3ac;
+  --hybrid-console-dim: #747f79;
+  --hybrid-console-line: rgba(215, 219, 202, 0.14);
+  --hybrid-console-line-strong: rgba(232, 227, 209, 0.26);
+  --hybrid-console-cyan: #8fd8d0;
+  --hybrid-console-green: #a8d99b;
+  --hybrid-console-amber: #e7c879;
+  --hybrid-console-red: #e99c92;
+  --hybrid-console-violet: #b9a7ee;
+  --hybrid-console-shadow: rgba(0, 0, 0, 0.5);
   min-height: calc(100vh - 66px);
   padding: 1px 0 42px;
+}
+
+.hybrid-theme-day .hybrid-app-content {
+  --hybrid-console-bg: #f7f8f4;
+  --hybrid-console-panel: rgba(255, 255, 255, 0.9);
+  --hybrid-console-panel-soft: rgba(250, 251, 248, 0.82);
+  --hybrid-console-ink: #20251f;
+  --hybrid-console-muted: #526157;
+  --hybrid-console-dim: #718075;
+  --hybrid-console-line: rgba(33, 43, 38, 0.14);
+  --hybrid-console-line-strong: rgba(33, 43, 38, 0.24);
+  --hybrid-console-cyan: #2f6f78;
+  --hybrid-console-green: #426f3f;
+  --hybrid-console-amber: #8c6b24;
+  --hybrid-console-red: #93443d;
+  --hybrid-console-violet: #6451a2;
+  --hybrid-console-shadow: rgba(31, 42, 36, 0.12);
 }
 
 .hybrid-app-content .modern-admin-shell {
@@ -442,6 +473,414 @@
   border-color: rgba(47, 111, 120, 0.18);
   color: #1d4d55;
   background: rgba(47, 111, 120, 0.07);
+}
+
+/* Design-system convergence for migrated operational pages. */
+.hybrid-app-content .modern-admin-dashboard-section,
+.hybrid-app-content .modern-admin-management-panel,
+.hybrid-app-content .modern-admin-table-panel,
+.hybrid-app-content .modern-admin-empty-state,
+.hybrid-app-content .modern-admin-placeholder-page,
+.hybrid-app-content .modern-admin-message-panel,
+.hybrid-app-content .modern-admin-status-card,
+.hybrid-app-content .modern-admin-summary-panel,
+.hybrid-app-content .modern-admin-event-panel,
+.hybrid-app-content .modern-admin-camera-card,
+.hybrid-app-content .modern-admin-media-card,
+.hybrid-app-content .modern-admin-media-viewer,
+.hybrid-app-content .modern-admin-dashboard-empty {
+  border: 1px solid var(--hybrid-console-line);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+    var(--hybrid-console-panel);
+  color: var(--hybrid-console-ink);
+  box-shadow: 0 18px 46px var(--hybrid-console-shadow);
+  backdrop-filter: none;
+}
+
+.hybrid-theme-day .hybrid-app-content .modern-admin-dashboard-section,
+.hybrid-theme-day .hybrid-app-content .modern-admin-management-panel,
+.hybrid-theme-day .hybrid-app-content .modern-admin-table-panel,
+.hybrid-theme-day .hybrid-app-content .modern-admin-empty-state,
+.hybrid-theme-day .hybrid-app-content .modern-admin-placeholder-page,
+.hybrid-theme-day .hybrid-app-content .modern-admin-message-panel,
+.hybrid-theme-day .hybrid-app-content .modern-admin-status-card,
+.hybrid-theme-day .hybrid-app-content .modern-admin-summary-panel,
+.hybrid-theme-day .hybrid-app-content .modern-admin-event-panel,
+.hybrid-theme-day .hybrid-app-content .modern-admin-camera-card,
+.hybrid-theme-day .hybrid-app-content .modern-admin-media-card,
+.hybrid-theme-day .hybrid-app-content .modern-admin-media-viewer,
+.hybrid-theme-day .hybrid-app-content .modern-admin-dashboard-empty {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.54)),
+    var(--hybrid-console-panel);
+}
+
+.hybrid-app-content .modern-admin-dashboard-section,
+.hybrid-app-content .modern-admin-management-panel,
+.hybrid-app-content .modern-admin-table-panel,
+.hybrid-app-content .modern-admin-empty-state,
+.hybrid-app-content .modern-admin-placeholder-page,
+.hybrid-app-content .modern-admin-message-panel,
+.hybrid-app-content .modern-admin-dashboard-empty {
+  padding: 22px;
+}
+
+.hybrid-app-content .modern-admin-dashboard-section,
+.hybrid-app-content .modern-admin-table-panel,
+.hybrid-app-content .modern-admin-management-panel {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+.hybrid-app-content .modern-admin-dashboard-section + .modern-admin-dashboard-section,
+.hybrid-app-content .modern-admin-table-panel + .modern-admin-table-panel,
+.hybrid-app-content .modern-admin-management-panel + .modern-admin-management-panel {
+  margin-top: 14px;
+}
+
+.hybrid-app-content .modern-admin-section-heading {
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--hybrid-console-line);
+}
+
+.hybrid-app-content .modern-admin-section-heading h1,
+.hybrid-app-content .modern-admin-section-heading h2,
+.hybrid-app-content .modern-admin-section-heading h3,
+.hybrid-app-content .modern-admin-table-panel > h2,
+.hybrid-app-content .modern-admin-empty-state h3,
+.hybrid-app-content .modern-admin-placeholder-page h2 {
+  max-width: 980px;
+  margin: 0;
+  color: var(--hybrid-console-ink);
+  font-weight: 720;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.hybrid-app-content .modern-admin-section-heading h1 {
+  font-size: clamp(1.65rem, 2.4vw, 2.4rem);
+}
+
+.hybrid-app-content .modern-admin-section-heading h2,
+.hybrid-app-content .modern-admin-table-panel > h2 {
+  font-size: clamp(1.18rem, 1.7vw, 1.55rem);
+}
+
+.hybrid-app-content .modern-admin-section-heading p,
+.hybrid-app-content .modern-admin-placeholder-panel p,
+.hybrid-app-content .modern-admin-empty-state p,
+.hybrid-app-content .modern-admin-placeholder-page p {
+  margin: 0;
+  color: var(--hybrid-console-muted);
+  line-height: 1.55;
+}
+
+.hybrid-app-content .modern-admin-card-label,
+.hybrid-app-content .modern-admin-data-table th,
+.hybrid-app-content .modern-admin-detail-list dt,
+.hybrid-app-content .modern-admin-media-meta dt {
+  color: var(--hybrid-console-dim);
+  font-size: 0.68rem;
+  font-weight: 720;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hybrid-app-content .modern-admin-status-grid,
+.hybrid-app-content .modern-admin-summary-grid,
+.hybrid-app-content .modern-admin-dashboard-camera-grid,
+.hybrid-app-content .modern-admin-camera-card-grid,
+.hybrid-app-content .modern-admin-media-grid,
+.hybrid-app-content .modern-admin-events-grid,
+.hybrid-app-content .modern-admin-chart-grid {
+  gap: 13px;
+}
+
+.hybrid-app-content .modern-admin-status-card,
+.hybrid-app-content .modern-admin-event-panel,
+.hybrid-app-content .modern-admin-camera-card,
+.hybrid-app-content .modern-admin-media-card,
+.hybrid-app-content .modern-admin-summary-panel {
+  min-height: 0;
+  padding: 18px;
+  border-radius: 7px;
+  border-color: var(--hybrid-console-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.008)),
+    var(--hybrid-console-panel-soft);
+  box-shadow: none;
+}
+
+.hybrid-app-content .modern-admin-status-card h3,
+.hybrid-app-content .modern-admin-event-panel h3,
+.hybrid-app-content .modern-admin-camera-card-main h3,
+.hybrid-app-content .modern-admin-media-body h3,
+.hybrid-app-content .modern-admin-summary-panel h3 {
+  margin: 0 0 10px;
+  color: var(--hybrid-console-ink);
+  font-size: 1rem;
+  font-weight: 720;
+  line-height: 1.22;
+}
+
+.hybrid-app-content .modern-admin-status-card p,
+.hybrid-app-content .modern-admin-event-panel p,
+.hybrid-app-content .modern-admin-camera-card-main p,
+.hybrid-app-content .modern-admin-media-body p,
+.hybrid-app-content .modern-admin-summary-panel p {
+  min-height: 0;
+  color: var(--hybrid-console-muted);
+  font-size: 0.88rem;
+}
+
+.hybrid-app-content .modern-admin-status-pill {
+  min-height: 26px;
+  border-color: var(--hybrid-console-line-strong);
+  color: var(--hybrid-console-muted);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: none;
+}
+
+.hybrid-app-content .modern-admin-status-good {
+  border-color: rgba(168, 217, 155, 0.32);
+  color: var(--hybrid-console-green);
+  background: rgba(168, 217, 155, 0.08);
+}
+
+.hybrid-app-content .modern-admin-status-neutral {
+  border-color: rgba(143, 216, 208, 0.32);
+  color: var(--hybrid-console-cyan);
+  background: rgba(143, 216, 208, 0.09);
+}
+
+.hybrid-app-content .modern-admin-status-muted {
+  border-color: rgba(231, 200, 121, 0.26);
+  color: var(--hybrid-console-amber);
+  background: rgba(231, 200, 121, 0.08);
+}
+
+.hybrid-app-content .modern-admin-status-warning,
+.hybrid-app-content .modern-admin-message-error {
+  border-color: rgba(233, 156, 146, 0.34);
+  color: var(--hybrid-console-red);
+  background: rgba(233, 156, 146, 0.08);
+}
+
+.hybrid-app-content .modern-admin-message-success {
+  border-color: rgba(168, 217, 155, 0.34);
+  color: var(--hybrid-console-green);
+  background: rgba(168, 217, 155, 0.08);
+}
+
+.hybrid-app-content .modern-admin-link-grid,
+.hybrid-app-content .modern-admin-action-row,
+.hybrid-app-content .modern-admin-camera-badge-row {
+  gap: 8px;
+}
+
+.hybrid-app-content .modern-admin-link-grid a,
+.hybrid-app-content .modern-admin-link-grid span,
+.hybrid-app-content .modern-admin-media-button,
+.hybrid-app-content .modern-admin-placeholder-link,
+.hybrid-app-content .modern-admin-inline-link,
+.hybrid-app-content .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(143, 216, 208, 0.24);
+  border-radius: 999px;
+  color: #def8f3;
+  background: rgba(143, 216, 208, 0.075);
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.hybrid-app-content .modern-admin-link-grid a:hover,
+.hybrid-app-content .modern-admin-media-button:not(:disabled):hover,
+.hybrid-app-content .modern-admin-placeholder-link:hover,
+.hybrid-app-content .modern-admin-inline-link:hover,
+.hybrid-app-content .btn:hover {
+  border-color: rgba(143, 216, 208, 0.52);
+  color: #f4f0e8;
+  background: rgba(143, 216, 208, 0.14);
+  text-decoration: none;
+}
+
+.hybrid-theme-day .hybrid-app-content .modern-admin-link-grid a,
+.hybrid-theme-day .hybrid-app-content .modern-admin-link-grid span,
+.hybrid-theme-day .hybrid-app-content .modern-admin-media-button,
+.hybrid-theme-day .hybrid-app-content .modern-admin-placeholder-link,
+.hybrid-theme-day .hybrid-app-content .modern-admin-inline-link,
+.hybrid-theme-day .hybrid-app-content .btn {
+  border-color: rgba(47, 111, 120, 0.22);
+  color: #1d4d55;
+  background: rgba(47, 111, 120, 0.07);
+}
+
+.hybrid-theme-day .hybrid-app-content .modern-admin-link-grid a:hover,
+.hybrid-theme-day .hybrid-app-content .modern-admin-media-button:not(:disabled):hover,
+.hybrid-theme-day .hybrid-app-content .modern-admin-placeholder-link:hover,
+.hybrid-theme-day .hybrid-app-content .modern-admin-inline-link:hover,
+.hybrid-theme-day .hybrid-app-content .btn:hover {
+  border-color: rgba(47, 111, 120, 0.42);
+  color: #12393f;
+  background: rgba(47, 111, 120, 0.12);
+}
+
+.hybrid-app-content .modern-admin-media-button:disabled,
+.hybrid-app-content .btn:disabled,
+.hybrid-app-content .btn.disabled {
+  border-color: var(--hybrid-console-line);
+  color: var(--hybrid-console-dim);
+  background: rgba(255, 255, 255, 0.035);
+  opacity: 0.68;
+}
+
+.hybrid-app-content .modern-admin-control-strip,
+.hybrid-app-content .modern-admin-filter-bar,
+.hybrid-app-content .modern-admin-filter-row,
+.hybrid-app-content .modern-admin-media-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+  margin: 12px 0 14px;
+  padding: 12px;
+  border: 1px solid var(--hybrid-console-line);
+  border-radius: 7px;
+  background: var(--hybrid-console-panel-soft);
+}
+
+.hybrid-app-content .modern-admin-filter-field,
+.hybrid-app-content .modern-admin-control-strip label {
+  display: grid;
+  gap: 5px;
+  color: var(--hybrid-console-dim);
+  font-size: 0.68rem;
+  font-weight: 720;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hybrid-app-content .modern-admin-control-strip select,
+.hybrid-app-content .modern-admin-control-strip input,
+.hybrid-app-content .modern-admin-filter-bar select,
+.hybrid-app-content .modern-admin-filter-bar input,
+.hybrid-app-content .modern-admin-filter-row select,
+.hybrid-app-content .modern-admin-filter-row input,
+.hybrid-app-content .form-control,
+.hybrid-app-content .form-select,
+.hybrid-app-content .input-group-text {
+  min-height: 34px;
+  border: 1px solid var(--hybrid-console-line-strong);
+  border-radius: 7px;
+  color: var(--hybrid-console-ink);
+  background: rgba(5, 6, 5, 0.5);
+}
+
+.hybrid-theme-day .hybrid-app-content .modern-admin-control-strip select,
+.hybrid-theme-day .hybrid-app-content .modern-admin-control-strip input,
+.hybrid-theme-day .hybrid-app-content .modern-admin-filter-bar select,
+.hybrid-theme-day .hybrid-app-content .modern-admin-filter-bar input,
+.hybrid-theme-day .hybrid-app-content .modern-admin-filter-row select,
+.hybrid-theme-day .hybrid-app-content .modern-admin-filter-row input,
+.hybrid-theme-day .hybrid-app-content .form-control,
+.hybrid-theme-day .hybrid-app-content .form-select,
+.hybrid-theme-day .hybrid-app-content .input-group-text {
+  color: var(--hybrid-console-ink);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.hybrid-app-content .modern-admin-table-scroll {
+  overflow: auto;
+  border: 1px solid var(--hybrid-console-line);
+  border-radius: 7px;
+  background: rgba(5, 6, 5, 0.28);
+}
+
+.hybrid-theme-day .hybrid-app-content .modern-admin-table-scroll {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.hybrid-app-content .modern-admin-data-table {
+  width: 100%;
+  color: var(--hybrid-console-ink);
+}
+
+.hybrid-app-content .modern-admin-data-table th,
+.hybrid-app-content .modern-admin-data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--hybrid-console-line);
+  font-size: 0.88rem;
+}
+
+.hybrid-app-content .modern-admin-data-table tbody tr:hover {
+  background: rgba(143, 216, 208, 0.055);
+}
+
+.hybrid-theme-day .hybrid-app-content .modern-admin-data-table tbody tr:hover {
+  background: rgba(47, 111, 120, 0.06);
+}
+
+.hybrid-app-content .modern-admin-live-frame,
+.hybrid-app-content .modern-admin-dashboard-preview,
+.hybrid-app-content .modern-admin-media-preview,
+.hybrid-app-content .modern-admin-media-viewer-frame {
+  overflow: hidden;
+  border: 1px solid var(--hybrid-console-line-strong);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(143, 216, 208, 0.08), transparent),
+    #020302;
+}
+
+.hybrid-theme-day .hybrid-app-content .modern-admin-live-frame,
+.hybrid-theme-day .hybrid-app-content .modern-admin-dashboard-preview,
+.hybrid-theme-day .hybrid-app-content .modern-admin-media-preview,
+.hybrid-theme-day .hybrid-app-content .modern-admin-media-viewer-frame {
+  background:
+    linear-gradient(135deg, rgba(47, 111, 120, 0.08), transparent),
+    #dfe7e2;
+}
+
+.hybrid-app-content .modern-admin-live-frame figcaption,
+.hybrid-app-content .modern-admin-dashboard-preview figcaption,
+.hybrid-app-content .modern-admin-media-viewer-frame figcaption,
+.hybrid-app-content .modern-admin-media-caption,
+.hybrid-app-content .modern-admin-media-file {
+  color: var(--hybrid-console-muted);
+}
+
+.hybrid-app-content .modern-admin-dashboard-metrics,
+.hybrid-app-content .modern-admin-summary-list,
+.hybrid-app-content .modern-admin-detail-list,
+.hybrid-app-content .modern-admin-media-meta,
+.hybrid-app-content .modern-admin-camera-card-details {
+  color: var(--hybrid-console-muted);
+}
+
+.hybrid-app-content .modern-admin-dashboard-metrics div,
+.hybrid-app-content .modern-admin-summary-list div,
+.hybrid-app-content .modern-admin-media-meta div,
+.hybrid-app-content .modern-admin-camera-card-details div {
+  border-color: var(--hybrid-console-line);
+}
+
+.hybrid-app-content .modern-admin-dashboard-metrics dd,
+.hybrid-app-content .modern-admin-summary-list dd,
+.hybrid-app-content .modern-admin-detail-list dd,
+.hybrid-app-content .modern-admin-media-meta dd,
+.hybrid-app-content .modern-admin-camera-card-details strong {
+  color: var(--hybrid-console-ink);
 }
 
 .hybrid-product-shell {
