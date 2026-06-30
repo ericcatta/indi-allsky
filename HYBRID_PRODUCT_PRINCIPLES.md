@@ -530,7 +530,23 @@ It should feel like:
 - a media generator;
 - a reliable health monitor.
 
-## 20. Final Principle
+## 20. Product Architecture Freeze
+
+Product Architecture v1 is frozen while the v1 product skeleton is
+consolidated.
+
+The v1 flow is:
+
+Now -> Highlights -> Moment -> Output -> Sky Cycle -> Library -> Observatory -> Settings -> Developer / Engine Room
+
+Do not rename, reorder, merge, split, or add primary product surfaces until all
+v1 surfaces have been reviewed together as one product system.
+
+Improvements can still be documented in backlog or v2 ideas. Runtime safety
+fixes and documentation corrections are allowed, but architectural changes wait
+until the consolidated v1 review is complete.
+
+## 21. Final Principle
 
 The project should be judged by this question:
 
