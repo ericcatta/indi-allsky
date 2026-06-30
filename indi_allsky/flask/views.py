@@ -5158,41 +5158,8 @@ class ModernAdminView(TemplateView):
 
         context['modern_admin_mode'] = session.get('admin_mode', 'modern')
         context['modern_admin_nav'] = self.get_modern_admin_nav()
-        context.update(self.get_modern_admin_topbar_context())
         context['modern_admin_camera_name'] = str(camera_name)
         context['modern_admin_camera_model'] = str(camera_model)
-        context['modern_admin_capture_status'] = self.get_capture_status_label()
-        context.update(self.get_storage_context())
-        context['latest_image_url'] = None
-        context['latest_image_updated'] = 'No recent image available'
-        context['latest_image_age'] = 'No recent image'
-        context['latest_image_status'] = 'Waiting for latest frame'
-        context.update(self.get_modern_admin_dashboard_context())
-
-        if not self.latest_image_entry:
-            return context
-
-        # Reuse the existing latest image DB entry and URL rules used by classic image views.
-        local = True
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
-                if not self.latest_image_entry.remote_url and not self.latest_image_entry.s3_key:
-                    return context
-
-        try:
-            context['latest_image_url'] = str(self.latest_image_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
-        except ValueError as e:
-            app.logger.error('Error determining modern admin latest image URL: %s', str(e))
-            return context
-
-        last_update_age = self.format_image_age(self.latest_image_entry.createDate)
-
-        context['latest_image_age'] = last_update_age
-        context['latest_image_updated'] = 'Last frame {0:s}'.format(last_update_age)
-        context['latest_image_status'] = self.latest_image_entry.createDate.strftime('%Y-%m-%d %H:%M:%S')
 
         return context
 
@@ -6137,7 +6104,6 @@ class ModernAdminContextMixin(object):
 
         context['modern_admin_mode'] = session.get('admin_mode', 'modern')
         context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
-        context.update(ModernAdminView.get_modern_admin_topbar_context(self))
 
         return context
 
@@ -7925,6 +7891,7 @@ class ModernAdminStorageView(ModernAdminView):
 
     def get_context(self):
         context = super(ModernAdminStorageView, self).get_context()
+        context.update(self.get_storage_context())
 
         context['modern_admin_section_links'] = (
             ('File Space Usage', 'indi_allsky.modern_admin_file_space_usage_view'),
