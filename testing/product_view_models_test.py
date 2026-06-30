@@ -186,13 +186,26 @@ class FakeImageRow:
             setattr(self, key, value)
 
 
+class FakeImageField:
+    def __init__(self, name):
+        self.name = name
+
+    def __eq__(self, value):
+        return (self.name, '==', value)
+
+
 class FakeImageQuery:
     def __init__(self, row=None, raises=False):
         self.row = row
         self.raises = raises
+        self.filter_calls = list()
         self.order_by_calls = list()
         self.limit_calls = list()
         self.first_calls = 0
+
+    def filter(self, expression):
+        self.filter_calls.append(expression)
+        return self
 
     def order_by(self, expression):
         self.order_by_calls.append(expression)
@@ -1828,18 +1841,42 @@ def test_build_now_view_accepts_injected_latest_frame_provider():
 
 def test_latest_frame_image_table_adapter_with_row_present():
     created_at = datetime(2026, 6, 29, 5, 32, 10)
-    query = FakeImageQuery(FakeImageRow(createDate=created_at, filename='/var/lib/indi-allsky/private.jpg'))
+    query = FakeImageQuery(FakeImageRow(
+        id=42,
+        camera_id=7,
+        createDate=created_at,
+        exposure=15.5,
+        gain=120,
+        binmode=2,
+        temp=-5.25,
+        night=True,
+        adu=88.2,
+        sqm=20.1,
+        stars=144,
+        detections=2,
+        fileSize=123456,
+        width=1920,
+        height=1080,
+        filename='/var/lib/indi-allsky/private.jpg',
+        remote_url='https://example.invalid/private.jpg',
+        s3_key='private/object/key.jpg',
+        thumbnail_uuid='private-thumbnail',
+        data={'token': 'secret'},
+    ))
     adapter = LatestFrameImageTableRepository(
         query,
         order_by_expression='created-desc',
         camera_label='North Sky Camera',
         profile_label='Primary',
         clock=lambda: created_at + timedelta(minutes=2),
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
     )
     provider = LatestFrameSummaryProvider(adapter)
     now_view = build_now_view(latest_frame_provider=provider)
     latest_frame = now_view['latest_frame_summary']
 
+    assert query.filter_calls == [('camera_id', '==', 7)]
     assert query.order_by_calls == ['created-desc']
     assert query.limit_calls == [1]
     assert query.first_calls == 1
@@ -1850,8 +1887,77 @@ def test_latest_frame_image_table_adapter_with_row_present():
     assert latest_frame['age_label'] == '2 minutes ago'
     assert latest_frame['image_available'] is True
     assert latest_frame['safe_preview_url'] is None
+    assert latest_frame['frame_metadata'] == {
+        'id': 42,
+        'camera_id': 7,
+        'timestamp': '2026-06-29 05:32:10',
+        'exposure': 15.5,
+        'gain': 120,
+        'binmode': 2,
+        'temp': -5.25,
+        'night': True,
+        'adu': 88.2,
+        'sqm': 20.1,
+        'stars': 144,
+        'detections': 2,
+        'file_size': 123456,
+        'width': 1920,
+        'height': 1080,
+    }
     assert_no_absolute_paths(latest_frame)
+    serialized = json.dumps(latest_frame, sort_keys=True)
     assert 'private.jpg' not in json.dumps(latest_frame, sort_keys=True)
+    assert 'remote_url' not in serialized
+    assert 's3_key' not in serialized
+    assert 'thumbnail_uuid' not in serialized
+    assert 'token' not in serialized
+    assert 'secret' not in serialized
+
+
+def test_latest_frame_image_table_adapter_handles_missing_fields():
+    created_at = datetime(2026, 6, 29, 5, 32, 10)
+    query = FakeImageQuery(FakeImageRow(createDate=created_at, camera_id=3))
+    adapter = LatestFrameImageTableRepository(query, order_by_expression='created-desc')
+    latest_frame = LatestFrameSummaryProvider(adapter).build()
+
+    assert query.limit_calls == [1]
+    assert query.first_calls == 1
+    assert latest_frame['frame_metadata'] == {
+        'id': None,
+        'camera_id': 3,
+        'timestamp': '2026-06-29 05:32:10',
+        'exposure': None,
+        'gain': None,
+        'binmode': None,
+        'temp': None,
+        'night': None,
+        'adu': None,
+        'sqm': None,
+        'stars': None,
+        'detections': None,
+        'file_size': None,
+        'width': None,
+        'height': None,
+    }
+    json.dumps(latest_frame, sort_keys=True)
+
+
+def test_latest_frame_image_table_adapter_drops_non_primitive_values():
+    created_at = datetime(2026, 6, 29, 5, 32, 10)
+    query = FakeImageQuery(FakeImageRow(
+        createDate=created_at,
+        camera_id=3,
+        exposure=object(),
+        gain=lambda: 1,
+        width=1920,
+    ))
+    adapter = LatestFrameImageTableRepository(query, order_by_expression='created-desc')
+    latest_frame = LatestFrameSummaryProvider(adapter).build()
+
+    assert latest_frame['frame_metadata']['exposure'] is None
+    assert latest_frame['frame_metadata']['gain'] is None
+    assert latest_frame['frame_metadata']['width'] == 1920
+    json.dumps(latest_frame, sort_keys=True)
 
 
 def test_latest_frame_image_table_adapter_with_no_row():
@@ -1961,6 +2067,42 @@ def test_validate_now_view_payload_rejects_latest_frame_invalid_status():
         assert 'Invalid data_status' in str(e)
     else:
         raise AssertionError('latest_frame_summary invalid data_status should fail validation')
+
+
+def test_validate_now_view_payload_rejects_latest_frame_forbidden_metadata_key():
+    now_view = build_now_view()
+    now_view['latest_frame_summary']['frame_metadata']['filename'] = 'private.jpg'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'frame_metadata contains unsupported keys' in str(e)
+    else:
+        raise AssertionError('latest_frame_summary forbidden metadata key should fail validation')
+
+
+def test_validate_now_view_payload_rejects_latest_frame_callable_metadata_value():
+    now_view = build_now_view()
+    now_view['latest_frame_summary']['frame_metadata']['width'] = lambda: 1920
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'non-primitive value' in str(e)
+    else:
+        raise AssertionError('latest_frame_summary callable metadata value should fail validation')
+
+
+def test_validate_now_view_payload_rejects_latest_frame_url_metadata_value():
+    now_view = build_now_view()
+    now_view['latest_frame_summary']['frame_metadata']['timestamp'] = 'https://example.invalid/latest.jpg'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'unsafe value' in str(e)
+    else:
+        raise AssertionError('latest_frame_summary URL metadata value should fail validation')
 
 
 def test_validate_now_view_payload_rejects_invalid_source_confidence_risk():
@@ -2181,6 +2323,8 @@ def main():
         test_latest_frame_provider_rejects_suspicious_metadata,
         test_build_now_view_accepts_injected_latest_frame_provider,
         test_latest_frame_image_table_adapter_with_row_present,
+        test_latest_frame_image_table_adapter_handles_missing_fields,
+        test_latest_frame_image_table_adapter_drops_non_primitive_values,
         test_latest_frame_image_table_adapter_with_no_row,
         test_latest_frame_image_table_adapter_with_query_error,
         test_latest_frame_image_table_adapter_with_missing_attributes,
@@ -2191,6 +2335,9 @@ def main():
         test_validate_now_view_payload_rejects_invalid_current_phase,
         test_validate_now_view_payload_rejects_latest_frame_absolute_preview_path,
         test_validate_now_view_payload_rejects_latest_frame_invalid_status,
+        test_validate_now_view_payload_rejects_latest_frame_forbidden_metadata_key,
+        test_validate_now_view_payload_rejects_latest_frame_callable_metadata_value,
+        test_validate_now_view_payload_rejects_latest_frame_url_metadata_value,
         test_validate_now_view_payload_rejects_invalid_source_confidence_risk,
         test_validate_now_view_payload_rejects_source_confidence_path,
         test_validate_now_view_payload_rejects_source_confidence_secret,

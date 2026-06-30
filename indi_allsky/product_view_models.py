@@ -106,7 +106,7 @@ NOW_DIRECT_ACTION_KEYS = frozenset((
 
 NOW_ABSOLUTE_PATH_RE = re.compile(r'(^|["\s:])/[A-Za-z0-9_.-]+/')
 NOW_WINDOWS_PATH_RE = re.compile(r'[A-Za-z]:\\\\')
-NOW_SUSPICIOUS_URL_TOKENS = frozenset(('..', 'file:', '\\'))
+NOW_SUSPICIOUS_URL_TOKENS = frozenset(('..', 'file:', 'http://', 'https://', '\\'))
 
 NOW_LATEST_FRAME_REQUIRED_KEYS = frozenset((
     'id',
@@ -120,6 +120,7 @@ NOW_LATEST_FRAME_REQUIRED_KEYS = frozenset((
     'image_available',
     'safe_preview_url',
     'source_status',
+    'frame_metadata',
     'note',
     'evidence',
     'is_placeholder',
@@ -132,6 +133,25 @@ NOW_LATEST_FRAME_REPOSITORY_KEYS = frozenset((
     'age_label',
     'image_available',
     'source_status',
+    'frame_metadata',
+))
+
+NOW_LATEST_FRAME_METADATA_KEYS = frozenset((
+    'id',
+    'camera_id',
+    'timestamp',
+    'exposure',
+    'gain',
+    'binmode',
+    'temp',
+    'night',
+    'adu',
+    'sqm',
+    'stars',
+    'detections',
+    'file_size',
+    'width',
+    'height',
 ))
 
 NOW_CURRENT_PHASE_REQUIRED_KEYS = frozenset((
@@ -1113,6 +1133,7 @@ class LatestFrameSummary:
     image_available: bool
     safe_preview_url: object
     source_status: str
+    frame_metadata: dict
     note: str
     evidence: str
     is_placeholder: bool
@@ -1200,15 +1221,22 @@ class LatestFrameImageTableRepository:
         camera_label='Camera not evaluated yet',
         profile_label='Profile not evaluated yet',
         clock=None,
+        camera_id=None,
+        camera_id_field=None,
     ):
         self.query = query
         self.order_by_expression = order_by_expression
         self.camera_label = camera_label
         self.profile_label = profile_label
         self.clock = clock
+        self.camera_id = camera_id
+        self.camera_id_field = camera_id_field
 
     def get_latest_frame_metadata(self):
         bounded_query = self.query
+
+        if self.camera_id is not None and self.camera_id_field is not None:
+            bounded_query = bounded_query.filter(self.camera_id_field == self.camera_id)
 
         if self.order_by_expression is not None:
             bounded_query = bounded_query.order_by(self.order_by_expression)
@@ -1220,6 +1248,7 @@ class LatestFrameImageTableRepository:
             return None
 
         created_at = getattr(row, 'createDate', None)
+        frame_metadata = _latest_frame_row_metadata(row, created_at)
 
         return {
             'camera_label': self.camera_label,
@@ -1228,6 +1257,7 @@ class LatestFrameImageTableRepository:
             'age_label': _latest_frame_age_label(created_at, self.clock),
             'image_available': True,
             'source_status': 'Metadata row available.',
+            'frame_metadata': frame_metadata,
         }
 
 
@@ -1263,6 +1293,7 @@ class LatestFrameSummaryProvider:
             image_available=sanitized_metadata['image_available'],
             safe_preview_url=None,
             source_status=sanitized_metadata['source_status'],
+            frame_metadata=sanitized_metadata['frame_metadata'],
             note='Metadata accepted from injected repository. Preview remains disabled.',
             evidence='Bounded latest frame metadata accepted; no preview URL or source path is exposed.',
             is_placeholder=True,
@@ -2886,6 +2917,7 @@ def _build_latest_frame_no_row_summary():
         image_available=False,
         safe_preview_url=None,
         source_status='Source status not evaluated yet.',
+        frame_metadata={},
         note='Repository returned no latest frame metadata.',
         evidence='No bounded latest frame row is available from the injected repository.',
         is_placeholder=True,
@@ -2905,6 +2937,7 @@ def _build_latest_frame_repository_error_summary():
         image_available=False,
         safe_preview_url=None,
         source_status='Repository error.',
+        frame_metadata={},
         note='Latest frame repository failed; error details are not exposed.',
         evidence='Provider returned a redacted repository error.',
         is_placeholder=True,
@@ -2924,6 +2957,7 @@ def _build_latest_frame_rejected_summary():
         image_available=False,
         safe_preview_url=None,
         source_status='Repository metadata rejected.',
+        frame_metadata={},
         note='Latest frame repository returned unsafe or unsupported metadata.',
         evidence='No unsafe repository values are exposed in the NowView payload.',
         is_placeholder=True,
@@ -3218,6 +3252,26 @@ def _sanitize_latest_frame_metadata(metadata):
         if _latest_frame_value_is_unsafe(value):
             raise ValueError('latest frame metadata contains unsafe values')
 
+    frame_metadata = metadata.get('frame_metadata', {})
+    if not isinstance(frame_metadata, dict):
+        raise ValueError('latest frame metadata frame_metadata must be a dict')
+
+    frame_metadata_keys = set(frame_metadata.keys())
+    unsupported_frame_metadata_keys = frame_metadata_keys.difference(NOW_LATEST_FRAME_METADATA_KEYS)
+    if unsupported_frame_metadata_keys:
+        raise ValueError('latest frame metadata contains unsupported frame metadata keys')
+
+    for key, value in frame_metadata.items():
+        key_lower = str(key).lower()
+        if any(token in key_lower for token in NOW_SENSITIVE_KEY_TOKENS):
+            raise ValueError('latest frame metadata contains sensitive frame metadata keys')
+
+        if not _latest_frame_metadata_value_is_json_safe(value):
+            raise ValueError('latest frame metadata contains non-primitive values')
+
+        if _latest_frame_value_is_unsafe(value):
+            raise ValueError('latest frame metadata contains unsafe frame metadata values')
+
     return {
         'camera_label': _latest_frame_text(metadata.get('camera_label'), 'Camera not evaluated yet'),
         'profile_label': _latest_frame_text(metadata.get('profile_label'), 'Profile not evaluated yet'),
@@ -3225,7 +3279,48 @@ def _sanitize_latest_frame_metadata(metadata):
         'age_label': _latest_frame_text(metadata.get('age_label'), 'Not evaluated yet'),
         'image_available': bool(metadata.get('image_available', False)),
         'source_status': _latest_frame_text(metadata.get('source_status'), 'Source status not evaluated yet.'),
+        'frame_metadata': frame_metadata,
     }
+
+
+def _latest_frame_row_metadata(row, created_at):
+    metadata = {
+        'id': _latest_frame_json_value(getattr(row, 'id', None)),
+        'camera_id': _latest_frame_json_value(getattr(row, 'camera_id', None)),
+        'timestamp': _latest_frame_timestamp_label(created_at),
+        'exposure': _latest_frame_json_value(getattr(row, 'exposure', None)),
+        'gain': _latest_frame_json_value(getattr(row, 'gain', None)),
+        'binmode': _latest_frame_json_value(getattr(row, 'binmode', None)),
+        'temp': _latest_frame_json_value(getattr(row, 'temp', None)),
+        'night': _latest_frame_json_value(getattr(row, 'night', None)),
+        'adu': _latest_frame_json_value(getattr(row, 'adu', None)),
+        'sqm': _latest_frame_json_value(getattr(row, 'sqm', None)),
+        'stars': _latest_frame_json_value(getattr(row, 'stars', None)),
+        'detections': _latest_frame_json_value(getattr(row, 'detections', None)),
+        'file_size': _latest_frame_json_value(getattr(row, 'fileSize', None)),
+        'width': _latest_frame_json_value(getattr(row, 'width', None)),
+        'height': _latest_frame_json_value(getattr(row, 'height', None)),
+    }
+
+    return {
+        key: value
+        for key, value in metadata.items()
+        if _latest_frame_metadata_value_is_json_safe(value) and not _latest_frame_value_is_unsafe(value)
+    }
+
+
+def _latest_frame_json_value(value):
+    if value in (None, ''):
+        return None
+
+    if isinstance(value, (str, int, float, bool)):
+        return value
+
+    return None
+
+
+def _latest_frame_metadata_value_is_json_safe(value):
+    return value is None or isinstance(value, (str, int, float, bool))
 
 
 def _latest_frame_text(value, fallback):
@@ -3276,7 +3371,11 @@ def _latest_frame_age_label(value, clock):
 
 
 def _latest_frame_value_is_unsafe(value):
-    value_text = json.dumps(value, sort_keys=True).lower()
+    try:
+        value_text = json.dumps(value, sort_keys=True).lower()
+    except TypeError:
+        return True
+
     if NOW_ABSOLUTE_PATH_RE.search(value_text) or NOW_WINDOWS_PATH_RE.search(value_text):
         return True
 
@@ -3302,6 +3401,7 @@ def _validate_latest_frame_summary(summary):
 
     safe_preview_url = summary.get('safe_preview_url')
     if safe_preview_url is None:
+        _validate_latest_frame_metadata(summary.get('frame_metadata'))
         return
 
     if not isinstance(safe_preview_url, str):
@@ -3313,6 +3413,28 @@ def _validate_latest_frame_summary(summary):
 
     if any(token in safe_preview_url_lower for token in NOW_SUSPICIOUS_URL_TOKENS):
         raise ValueError('latest_frame_summary.safe_preview_url contains unsafe path metadata')
+
+    _validate_latest_frame_metadata(summary.get('frame_metadata'))
+
+
+def _validate_latest_frame_metadata(frame_metadata):
+    if not isinstance(frame_metadata, dict):
+        raise ValueError('latest_frame_summary.frame_metadata must be a dict')
+
+    unsupported_keys = set(frame_metadata.keys()).difference(NOW_LATEST_FRAME_METADATA_KEYS)
+    if unsupported_keys:
+        raise ValueError(
+            'latest_frame_summary.frame_metadata contains unsupported keys: {0:s}'.format(
+                ', '.join(sorted(unsupported_keys))
+            )
+        )
+
+    for key, value in frame_metadata.items():
+        if not _latest_frame_metadata_value_is_json_safe(value):
+            raise ValueError('latest_frame_summary.frame_metadata contains non-primitive value: {0:s}'.format(str(key)))
+
+        if _latest_frame_value_is_unsafe(value):
+            raise ValueError('latest_frame_summary.frame_metadata contains unsafe value: {0:s}'.format(str(key)))
 
 
 def _validate_current_phase_summary(summary):
