@@ -381,7 +381,7 @@ def test_latest_camera_frames_provider_accepts_safe_image_routes():
             'timestamp': '2026-06-30 07:17:55',
             'age_label': '9 seconds ago',
             'image_available': True,
-            'safe_image_url': '/images/ccd_2/latest.jpg',
+            'safe_image_url': '/indi-allsky/images/ccd_2/latest.jpg',
             'source_status': 'Existing image route available.',
             'note': 'Latest frame shown from existing image URL metadata.',
         },
@@ -394,6 +394,7 @@ def test_latest_camera_frames_provider_accepts_safe_image_routes():
     assert camera_frames['is_placeholder'] is False
     assert [item['camera_label'] for item in camera_frames['items']] == ['North Sky', 'South Sky']
     assert camera_frames['items'][0]['safe_image_url'] == '/images/ccd_1/latest.jpg'
+    assert camera_frames['items'][1]['safe_image_url'] == '/indi-allsky/images/ccd_2/latest.jpg'
     json.dumps(now_view, sort_keys=True)
     assert_no_sensitive_text(now_view)
     assert_no_callables(now_view)

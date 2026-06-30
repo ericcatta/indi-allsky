@@ -2469,7 +2469,10 @@ def _safe_product_image_url(value):
         return False
 
     value = value.strip()
-    if not value.startswith('/images/'):
+    if not value.startswith('/'):
+        return False
+
+    if '/images/' not in value:
         return False
 
     value_lower = value.lower()

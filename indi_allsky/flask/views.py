@@ -7536,13 +7536,27 @@ class ModernAdminLatestCameraFramesRepository:
             return None
 
         normalized_url = str(normalized_url)
-        if not normalized_url.startswith('/images/'):
-            return None
-
-        if any(token in normalized_url.lower() for token in ('..', '\\', '://', 'file:', '\x00')):
+        if not self.is_safe_local_image_route(normalized_url):
             return None
 
         return normalized_url
+
+    def is_safe_local_image_route(self, value):
+        if not value:
+            return False
+
+        value = str(value)
+        value_lower = value.lower()
+        if not value.startswith('/'):
+            return False
+
+        if '/images/' not in value:
+            return False
+
+        if any(token in value_lower for token in ('..', '\\', '://', 'file:', '\x00')):
+            return False
+
+        return True
 
     def normalize_image_url(self, image_url):
         if not image_url:
