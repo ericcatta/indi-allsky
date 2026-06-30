@@ -72,6 +72,15 @@ preview lookup, live refresh, safe actions, or mutations.
 Future real health data must be bounded, cached or cheap, sanitized, and
 RPi5-first.
 
+## DATA003 Decision
+
+DATA003 Current Capture Status is integrated into Now only.
+
+Observatory remains disconnected because current capture status is narrower than
+observatory readiness. A future Observatory data step should define a broader
+readiness contract that can include capture state without adding live service,
+process, hardware, filesystem, network, or camera probes in request paths.
+
 ## Product Score
 
 Initial score: 7.2/10.

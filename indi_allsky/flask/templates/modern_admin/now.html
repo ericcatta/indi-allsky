@@ -35,6 +35,7 @@
         {% set latest_frame = modern_admin_now.latest_frame_summary %}
         {% set latest_output = modern_admin_now.latest_generated_output_summary %}
         {% set current_phase = modern_admin_now.current_phase_summary %}
+        {% set current_capture = modern_admin_now.current_capture_summary %}
         {% set source_confidence = modern_admin_now.source_confidence_summary %}
         <div class="modern-admin-section-heading">
             <div>
@@ -83,10 +84,14 @@
                 <span class="modern-admin-status-pill modern-admin-status-muted">{{ latest_frame.source_status }}</span>
             </article>
             <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Capture and source</div>
-                <h3>{{ modern_admin_now.current_sky.source_recording }}</h3>
-                <p>{{ modern_admin_now.current_sky.capture_status }}</p>
-                <p>{{ latest_frame.evidence }}</p>
+                <div class="modern-admin-card-label">{{ current_capture.label }}</div>
+                <h3>{{ current_capture.capture_state | title }}</h3>
+                <p>{{ current_capture.status }}</p>
+                <p>{{ current_capture.policy_label }}</p>
+                <p>Camera: {{ current_capture.camera_label }}. Phase: {{ current_capture.phase | title }}.</p>
+                <p>{{ current_capture.last_frame_status }}</p>
+                <p>{{ current_capture.coherence_label }}</p>
+                <span class="modern-admin-status-pill modern-admin-status-muted">{{ current_capture.source_status }}</span>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ latest_output.label }}</div>

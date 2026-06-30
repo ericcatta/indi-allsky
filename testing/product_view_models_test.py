@@ -22,6 +22,7 @@ from indi_allsky.product_view_models import build_library_view
 from indi_allsky.product_view_models import build_observatory_view
 from indi_allsky.product_view_models import build_sky_cycle_report_view
 from indi_allsky.product_view_models import build_source_confidence_summary
+from indi_allsky.product_view_models import CurrentCaptureStatusRepository
 from indi_allsky.product_view_models import GeneratedOutputDescriptor
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
 from indi_allsky.product_view_models import LatestGeneratedOutputRepository
@@ -2280,6 +2281,101 @@ def test_validate_now_view_payload_rejects_latest_generated_output_unsafe_value(
         raise AssertionError('unsafe generated output metadata should fail validation')
 
 
+def test_build_now_view_includes_current_capture_summary():
+    now_view = build_now_view()
+    capture = now_view['current_capture_summary']
+
+    assert capture['label'] == 'Current Capture Status'
+    assert capture['capture_state'] == 'unknown'
+    assert capture['is_acquiring'] is False
+    assert capture['phase'] == 'unknown'
+    assert capture['source_status'] == 'Current capture status repository not connected.'
+    json.dumps(now_view, sort_keys=True)
+
+
+def test_current_capture_repository_maps_running_status():
+    repository = CurrentCaptureStatusRepository(
+        status_code=702,
+        status_map={702: 'running'},
+        watchdog_age_seconds=12,
+        camera_label='North Sky Camera',
+    )
+    now_view = build_now_view(
+        current_phase_night=1,
+        latest_frame_provider=LatestFrameSummaryProvider(FakeLatestFrameRepository({
+            'camera_label': 'North Sky Camera',
+            'profile_label': 'Primary',
+            'timestamp': '2026-06-29 05:32:10',
+            'age_label': '2 minutes ago',
+            'image_available': True,
+            'source_status': 'Metadata row available',
+        })),
+        current_capture_repository=repository,
+    )
+    capture = now_view['current_capture_summary']
+
+    assert capture['capture_state'] == 'running'
+    assert capture['is_acquiring'] is True
+    assert capture['camera_label'] == 'North Sky Camera'
+    assert capture['phase'] == 'night'
+    assert capture['policy_label'] == 'Capture policy allows normal acquisition.'
+    assert 'consistent enough' in capture['coherence_label']
+    assert 'Watchdog age: 12 seconds.' in capture['evidence']
+    assert_no_absolute_paths(capture)
+
+
+def test_current_capture_repository_prioritizes_pause_policy():
+    repository = CurrentCaptureStatusRepository(
+        status_code=702,
+        status_map={702: 'running'},
+        capture_pause=True,
+        camera_label='North Sky Camera',
+    )
+    capture = build_now_view(current_capture_repository=repository)['current_capture_summary']
+
+    assert capture['capture_state'] == 'paused'
+    assert capture['is_acquiring'] is False
+    assert capture['policy_label'] == 'Capture intentionally paused.'
+
+
+def test_current_capture_repository_maps_error_status():
+    repository = CurrentCaptureStatusRepository(
+        status_code=710,
+        status_map={710: 'error'},
+        watchdog_age_seconds=700,
+        camera_label='North Sky Camera',
+    )
+    capture = build_now_view(current_capture_repository=repository)['current_capture_summary']
+
+    assert capture['capture_state'] == 'error'
+    assert capture['source_status'] == 'Persisted capture watchdog is stale.'
+    assert 'error' in capture['coherence_label'].lower()
+
+
+def test_validate_now_view_payload_rejects_current_capture_invalid_state():
+    now_view = build_now_view()
+    now_view['current_capture_summary']['capture_state'] = 'capturing_magic'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'Invalid capture_state' in str(e)
+    else:
+        raise AssertionError('invalid current capture state should fail validation')
+
+
+def test_validate_now_view_payload_rejects_current_capture_unsafe_value():
+    now_view = build_now_view()
+    now_view['current_capture_summary']['camera_label'] = '/private/camera'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'current_capture_summary contains unsafe value' in str(e)
+    else:
+        raise AssertionError('unsafe current capture metadata should fail validation')
+
+
 def test_safe_actions_are_metadata_only():
     now_view = build_now_view()
 
@@ -2624,6 +2720,12 @@ def main():
         test_build_now_view_latest_generated_output_repository_no_output,
         test_build_now_view_latest_generated_output_repository_error,
         test_validate_now_view_payload_rejects_latest_generated_output_unsafe_value,
+        test_build_now_view_includes_current_capture_summary,
+        test_current_capture_repository_maps_running_status,
+        test_current_capture_repository_prioritizes_pause_policy,
+        test_current_capture_repository_maps_error_status,
+        test_validate_now_view_payload_rejects_current_capture_invalid_state,
+        test_validate_now_view_payload_rejects_current_capture_unsafe_value,
         test_safe_actions_are_metadata_only,
         test_validate_now_view_payload_success,
         test_validate_now_view_payload_requires_sections,

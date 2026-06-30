@@ -179,6 +179,16 @@ Output Detail remains static/fake because the current route is not
 identifier-specific. A future Output Detail data step should define that runtime
 contract before connecting generated-output metadata there.
 
+## DATA003 Integration Note
+
+Current Capture Status is now integrated into Now as a bounded metadata summary.
+It uses persisted capture status/watchdog metadata and camera policy flags to
+answer whether capture appears running, idle, paused, error, or unknown.
+
+Observatory remains disconnected by design. A future Observatory readiness step
+must define a broader readiness contract without live hardware, process, service,
+filesystem, or network probes in request paths.
+
 ## 8. Next Mission Proposal
 
 The next mission should be the first cautious real-data step after the static UX

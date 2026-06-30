@@ -55,6 +55,7 @@ NOW_REQUIRED_KEYS = frozenset((
     'safe_actions_available',
     'current_sky',
     'current_phase_summary',
+    'current_capture_summary',
     'latest_frame_summary',
     'latest_generated_output_summary',
     'source_confidence_summary',
@@ -73,6 +74,7 @@ NOW_REQUIRED_KEYS = frozenset((
 NOW_REQUIRED_SECTIONS = frozenset((
     'current_sky',
     'current_phase_summary',
+    'current_capture_summary',
     'latest_frame_summary',
     'latest_generated_output_summary',
     'source_confidence_summary',
@@ -188,6 +190,38 @@ NOW_CURRENT_PHASE_REQUIRED_KEYS = frozenset((
     'supported_phases',
     'unsupported_phases',
     'is_placeholder',
+))
+
+NOW_CURRENT_CAPTURE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'capture_state',
+    'is_acquiring',
+    'camera_label',
+    'phase',
+    'policy_label',
+    'last_frame_status',
+    'coherence_label',
+    'source_status',
+    'note',
+    'evidence',
+    'is_placeholder',
+))
+
+NOW_CAPTURE_STATE_RUNNING = 'running'
+NOW_CAPTURE_STATE_IDLE = 'idle'
+NOW_CAPTURE_STATE_PAUSED = 'paused'
+NOW_CAPTURE_STATE_ERROR = 'error'
+NOW_CAPTURE_STATE_UNKNOWN = 'unknown'
+
+NOW_ALLOWED_CAPTURE_STATES = frozenset((
+    NOW_CAPTURE_STATE_RUNNING,
+    NOW_CAPTURE_STATE_IDLE,
+    NOW_CAPTURE_STATE_PAUSED,
+    NOW_CAPTURE_STATE_ERROR,
+    NOW_CAPTURE_STATE_UNKNOWN,
 ))
 
 NOW_SOURCE_CONFIDENCE_REQUIRED_KEYS = frozenset((
@@ -1234,6 +1268,96 @@ class StaticLatestFrameRepository:
         return None
 
 
+class CurrentCaptureStatusRepository:
+    """Repository adapter for bounded current capture status metadata."""
+
+    def __init__(
+        self,
+        status_code=None,
+        status_map=None,
+        watchdog_age_seconds=None,
+        local_camera=True,
+        focus_mode=False,
+        capture_pause=False,
+        daytime_capture=True,
+        daytime_capture_save=True,
+        camera_label='Camera not evaluated yet',
+    ):
+        self.status_code = status_code
+        self.status_map = dict(status_map or {})
+        self.watchdog_age_seconds = watchdog_age_seconds
+        self.local_camera = local_camera
+        self.focus_mode = focus_mode
+        self.capture_pause = capture_pause
+        self.daytime_capture = daytime_capture
+        self.daytime_capture_save = daytime_capture_save
+        self.camera_label = camera_label
+
+    def get_current_capture_metadata(self):
+        raw_state = self.status_map.get(self.status_code, NOW_CAPTURE_STATE_UNKNOWN)
+        capture_state = self._resolve_capture_state(raw_state)
+
+        return {
+            'capture_state': capture_state,
+            'is_acquiring': capture_state == NOW_CAPTURE_STATE_RUNNING,
+            'camera_label': self.camera_label,
+            'policy_label': self._policy_label(),
+            'source_status': self._source_status(raw_state),
+            'watchdog_age_seconds': _latest_frame_json_value(self.watchdog_age_seconds),
+        }
+
+    def _resolve_capture_state(self, raw_state):
+        if self.capture_pause:
+            return NOW_CAPTURE_STATE_PAUSED
+
+        if not self.local_camera:
+            return NOW_CAPTURE_STATE_UNKNOWN
+
+        if self.focus_mode:
+            return NOW_CAPTURE_STATE_IDLE
+
+        if raw_state in (
+            NOW_CAPTURE_STATE_RUNNING,
+            NOW_CAPTURE_STATE_IDLE,
+            NOW_CAPTURE_STATE_PAUSED,
+            NOW_CAPTURE_STATE_ERROR,
+            NOW_CAPTURE_STATE_UNKNOWN,
+        ):
+            return raw_state
+
+        return NOW_CAPTURE_STATE_UNKNOWN
+
+    def _policy_label(self):
+        if self.capture_pause:
+            return 'Capture intentionally paused.'
+
+        if not self.local_camera:
+            return 'Remote camera mode; local capture state is not authoritative.'
+
+        if self.focus_mode:
+            return 'Focus mode active; normal capture status is not evaluated.'
+
+        if not self.daytime_capture:
+            return 'Daytime capture disabled by camera policy.'
+
+        if self.daytime_capture and not self.daytime_capture_save:
+            return 'Daytime capture enabled, but daytime frame saving is disabled.'
+
+        return 'Capture policy allows normal acquisition.'
+
+    def _source_status(self, raw_state):
+        if self.watchdog_age_seconds is None:
+            return 'Persisted capture status read; watchdog age not evaluated.'
+
+        if not isinstance(self.watchdog_age_seconds, (int, float)):
+            return 'Persisted capture status read; watchdog age unavailable.'
+
+        if self.watchdog_age_seconds > 600:
+            return 'Persisted capture watchdog is stale.'
+
+        return 'Persisted capture status and watchdog are available.'
+
+
 @dataclass(frozen=True)
 class GeneratedOutputDescriptor:
     """Descriptor for one bounded generated-output metadata source."""
@@ -1452,13 +1576,26 @@ class PrimaryQuestionAnswer:
         return asdict(self)
 
 
-def build_now_view(latest_frame_provider=None, current_phase_night=None, latest_generated_output_repository=None):
+def build_now_view(
+    latest_frame_provider=None,
+    current_phase_night=None,
+    latest_generated_output_repository=None,
+    current_capture_repository=None,
+):
     """Return the first backend-owned NowView contract.
 
     The payload is built from sanitized view-model inputs. Most sections remain
     fake-safe placeholders while bounded repositories can provide metadata-only
     facts.
     """
+    current_phase_summary = build_current_phase_summary(current_phase_night)
+    latest_frame_summary = _build_latest_frame_summary(latest_frame_provider=latest_frame_provider)
+    current_capture_summary = _build_current_capture_summary(
+        current_capture_repository=current_capture_repository,
+        current_phase_summary=current_phase_summary,
+        latest_frame_summary=latest_frame_summary,
+    )
+
     payload = {
         'id': 'now.placeholder',
         'label': 'Now',
@@ -1470,8 +1607,9 @@ def build_now_view(latest_frame_provider=None, current_phase_night=None, latest_
         'is_placeholder': True,
         'safe_actions_available': [],
         'current_sky': _build_current_sky(),
-        'current_phase_summary': build_current_phase_summary(current_phase_night),
-        'latest_frame_summary': _build_latest_frame_summary(latest_frame_provider=latest_frame_provider),
+        'current_phase_summary': current_phase_summary,
+        'current_capture_summary': current_capture_summary,
+        'latest_frame_summary': latest_frame_summary,
         'latest_generated_output_summary': _build_latest_generated_output_summary(
             latest_generated_output_repository=latest_generated_output_repository,
         ),
@@ -1647,6 +1785,7 @@ def validate_now_view_payload(payload):
         _validate_required_section(payload, section_key)
 
     _validate_current_phase_summary(payload.get('current_phase_summary'))
+    _validate_current_capture_summary(payload.get('current_capture_summary'))
     _validate_latest_frame_summary(payload.get('latest_frame_summary'))
     _validate_latest_generated_output_summary(payload.get('latest_generated_output_summary'))
     _validate_source_confidence_summary(payload.get('source_confidence_summary'))
@@ -1836,9 +1975,9 @@ def _build_current_sky():
         label='Current Sky',
         phase='Unknown',
         latest_image='Latest frame not evaluated yet',
-        capture_status='Capture status pending backend contract',
+        capture_status='Capture status summarized by the bounded Current Capture contract.',
         source_recording='Source recording status pending backend contract',
-        summary='Current phase, latest frame, and source recording status are placeholders until a safe NowView data source is connected.',
+        summary='Current phase, latest frame, and current capture status use bounded metadata where available; source recording remains pending.',
         data_status=NOW_DATA_STATUS_NOT_EVALUATED,
         is_placeholder=True,
     ).to_dict()
@@ -1902,6 +2041,143 @@ def _map_current_phase(night):
 def _build_latest_frame_summary(latest_frame_provider=None):
     provider = latest_frame_provider or LatestFrameSummaryProvider()
     return provider.build()
+
+
+def _build_current_capture_summary(current_capture_repository=None, current_phase_summary=None, latest_frame_summary=None):
+    empty_metadata = {
+        'capture_state': NOW_CAPTURE_STATE_UNKNOWN,
+        'is_acquiring': False,
+        'camera_label': 'Camera not evaluated yet',
+        'policy_label': 'Capture policy not evaluated yet.',
+        'source_status': 'Current capture status repository not connected.',
+        'watchdog_age_seconds': None,
+    }
+
+    if current_capture_repository is None:
+        return _current_capture_summary_from_metadata(
+            status='Current capture status not connected yet.',
+            metadata=empty_metadata,
+            current_phase_summary=current_phase_summary,
+            latest_frame_summary=latest_frame_summary,
+            note='No current capture repository is connected to Now.',
+        )
+
+    try:
+        metadata = current_capture_repository.get_current_capture_metadata()
+    except Exception:
+        return _current_capture_summary_from_metadata(
+            status='Current capture status unavailable.',
+            metadata=empty_metadata,
+            current_phase_summary=current_phase_summary,
+            latest_frame_summary=latest_frame_summary,
+            note='Current capture repository failed; error details are not exposed.',
+        )
+
+    if not isinstance(metadata, dict):
+        return _current_capture_summary_from_metadata(
+            status='Current capture status unavailable.',
+            metadata=empty_metadata,
+            current_phase_summary=current_phase_summary,
+            latest_frame_summary=latest_frame_summary,
+            note='Current capture repository returned unsupported metadata.',
+        )
+
+    sanitized_metadata = {
+        'capture_state': _current_capture_state(metadata.get('capture_state')),
+        'is_acquiring': bool(metadata.get('is_acquiring', False)),
+        'camera_label': _latest_frame_text(metadata.get('camera_label'), 'Camera not evaluated yet'),
+        'policy_label': _latest_frame_text(metadata.get('policy_label'), 'Capture policy not evaluated yet.'),
+        'source_status': _latest_frame_text(metadata.get('source_status'), 'Current capture source status not evaluated.'),
+        'watchdog_age_seconds': _latest_frame_json_value(metadata.get('watchdog_age_seconds')),
+    }
+
+    return _current_capture_summary_from_metadata(
+        status='Current capture status available.',
+        metadata=sanitized_metadata,
+        current_phase_summary=current_phase_summary,
+        latest_frame_summary=latest_frame_summary,
+        note='Capture status is derived from bounded persisted metadata and camera policy flags.',
+    )
+
+
+def _current_capture_summary_from_metadata(status, metadata, current_phase_summary=None, latest_frame_summary=None, note=''):
+    phase = NOW_PHASE_UNKNOWN
+    if isinstance(current_phase_summary, dict):
+        phase = current_phase_summary.get('phase', NOW_PHASE_UNKNOWN)
+
+    last_frame_status = _current_capture_last_frame_status(latest_frame_summary)
+    coherence_label = _current_capture_coherence_label(metadata['capture_state'], latest_frame_summary, phase)
+
+    return {
+        'id': 'current_capture.summary',
+        'label': 'Current Capture Status',
+        'status': status,
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'capture_state': metadata['capture_state'],
+        'is_acquiring': bool(metadata['is_acquiring']),
+        'camera_label': metadata['camera_label'],
+        'phase': phase,
+        'policy_label': metadata['policy_label'],
+        'last_frame_status': last_frame_status,
+        'coherence_label': coherence_label,
+        'source_status': metadata['source_status'],
+        'note': _latest_frame_text(note, 'Current capture status not evaluated.'),
+        'evidence': _current_capture_evidence(metadata),
+        'is_placeholder': metadata['capture_state'] == NOW_CAPTURE_STATE_UNKNOWN,
+    }
+
+
+def _current_capture_state(value):
+    if value in NOW_ALLOWED_CAPTURE_STATES:
+        return value
+
+    return NOW_CAPTURE_STATE_UNKNOWN
+
+
+def _current_capture_last_frame_status(latest_frame_summary):
+    if not isinstance(latest_frame_summary, dict):
+        return 'Latest frame metadata not evaluated.'
+
+    if latest_frame_summary.get('image_available'):
+        timestamp = _latest_frame_text(latest_frame_summary.get('timestamp'), 'timestamp unavailable')
+        return 'Latest frame metadata available: {0:s}.'.format(timestamp)
+
+    return 'Latest frame metadata not available.'
+
+
+def _current_capture_coherence_label(capture_state, latest_frame_summary, phase):
+    if capture_state == NOW_CAPTURE_STATE_RUNNING and isinstance(latest_frame_summary, dict):
+        if latest_frame_summary.get('image_available'):
+            return 'Capture state and latest frame metadata are consistent enough for this bounded summary.'
+
+        return 'Capture reports running, but latest frame metadata is not available.'
+
+    if capture_state == NOW_CAPTURE_STATE_PAUSED:
+        return 'Capture is paused; a recent frame is not expected from the active capture loop.'
+
+    if capture_state == NOW_CAPTURE_STATE_IDLE:
+        return 'Capture is idle; latest frame recency should be interpreted with phase and policy context.'
+
+    if capture_state == NOW_CAPTURE_STATE_ERROR:
+        return 'Capture status indicates an error; latest frame metadata may be stale.'
+
+    if phase == NOW_PHASE_DAY:
+        return 'Capture state is unknown; daytime policy may explain missing frames.'
+
+    return 'Capture coherence not evaluated yet.'
+
+
+def _current_capture_evidence(metadata):
+    evidence = [
+        'Persisted capture status metadata.',
+        'Camera capture policy flags.',
+    ]
+
+    watchdog_age = metadata.get('watchdog_age_seconds')
+    if isinstance(watchdog_age, (int, float)):
+        evidence.append('Watchdog age: {0:g} seconds.'.format(watchdog_age))
+
+    return ' '.join(evidence)
 
 
 def _build_latest_generated_output_summary(latest_generated_output_repository=None):
@@ -3763,6 +4039,40 @@ def _validate_latest_generated_output_summary(summary):
 
         if _latest_frame_value_is_unsafe(value):
             raise ValueError('latest_generated_output_summary contains unsafe value: {0:s}'.format(str(key)))
+
+
+def _validate_current_capture_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('current_capture_summary must be a dict')
+
+    missing_keys = sorted(NOW_CURRENT_CAPTURE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('current_capture_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at now.current_capture_summary: {0!r}'.format(summary['data_status']))
+
+    if summary['capture_state'] not in NOW_ALLOWED_CAPTURE_STATES:
+        raise ValueError('Invalid capture_state at now.current_capture_summary: {0!r}'.format(summary['capture_state']))
+
+    if summary['phase'] not in NOW_ALLOWED_PHASES:
+        raise ValueError('Invalid phase at now.current_capture_summary: {0!r}'.format(summary['phase']))
+
+    if not isinstance(summary['is_acquiring'], bool):
+        raise ValueError('current_capture_summary.is_acquiring must be a boolean')
+
+    if not isinstance(summary['is_placeholder'], bool):
+        raise ValueError('current_capture_summary.is_placeholder must be a boolean')
+
+    for key, value in summary.items():
+        if key in ('is_acquiring', 'is_placeholder'):
+            continue
+
+        if not _latest_frame_metadata_value_is_json_safe(value):
+            raise ValueError('current_capture_summary contains non-primitive value: {0:s}'.format(str(key)))
+
+        if _latest_frame_value_is_unsafe(value):
+            raise ValueError('current_capture_summary contains unsafe value: {0:s}'.format(str(key)))
 
 
 def _validate_current_phase_summary(summary):

@@ -317,6 +317,19 @@ access, downloads, sharing, and generation behavior.
 Output Detail remains disconnected from DATA002 until it has an
 identifier-specific runtime contract.
 
+## DATA003 Current Capture Update
+
+Now now includes bounded Current Capture Status metadata.
+
+The integration uses persisted capture status/watchdog metadata plus already
+loaded camera policy flags. It can summarize whether capture appears running,
+idle, paused, error, or unknown, and it compares that state with latest-frame
+evidence and current day/night phase.
+
+It deliberately excludes systemd checks, process probing, hardware probing,
+INDI/libcamera calls, filesystem reads, media reads, polling, POST/fetch/AJAX,
+and actions.
+
 ## Current Phase Update
 
 NowView now includes `current_phase_summary`, sourced only from the existing

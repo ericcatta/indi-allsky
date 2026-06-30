@@ -39,6 +39,7 @@ from ..product_view_models import build_output_detail_view
 from ..product_view_models import build_library_view
 from ..product_view_models import build_observatory_view
 from ..product_view_models import build_sky_cycle_report_view
+from ..product_view_models import CurrentCaptureStatusRepository
 from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import LatestFrameImageTableRepository
 from ..product_view_models import LatestGeneratedOutputRepository
@@ -7443,6 +7444,7 @@ class ModernAdminNowView(TemplateView):
             latest_frame_provider=self.get_latest_frame_provider(),
             current_phase_night=context.get('night'),
             latest_generated_output_repository=self.get_latest_generated_output_repository(),
+            current_capture_repository=self.get_current_capture_repository(),
         )
 
         return context
@@ -7539,6 +7541,59 @@ class ModernAdminNowView(TemplateView):
             return None
 
         return LatestGeneratedOutputRepository(descriptors=descriptors, camera_id=camera_id)
+
+    def get_current_capture_repository(self):
+        try:
+            camera = getattr(self, 'camera', None)
+            if not camera:
+                return None
+
+            status_code = None
+            try:
+                status_code = int(self._miscDb.getState('STATUS'))
+            except (NoResultFound, ValueError, TypeError):
+                status_code = None
+
+            watchdog_age_seconds = None
+            try:
+                watchdog_time = int(self._miscDb.getState('WATCHDOG'))
+                watchdog_age_seconds = max(0, int(time.time() - watchdog_time))
+            except (NoResultFound, ValueError, TypeError):
+                watchdog_age_seconds = None
+
+            status_map = {
+                constants.STATUS_RUNNING: 'running',
+                constants.STATUS_RELOADING: 'running',
+                constants.STATUS_STARTING: 'running',
+                constants.STATUS_SLEEPING: 'idle',
+                constants.STATUS_STOPPING: 'idle',
+                constants.STATUS_STOPPED: 'idle',
+                constants.STATUS_PAUSED: 'paused',
+                constants.STATUS_NOCAMERA: 'error',
+                constants.STATUS_CAMERAERROR: 'error',
+                constants.STATUS_NOINDISERVER: 'error',
+            }
+
+            camera_label = str(
+                getattr(camera, 'friendlyName', None)
+                or getattr(camera, 'name', None)
+                or 'Unknown camera'
+            )
+
+            return CurrentCaptureStatusRepository(
+                status_code=status_code,
+                status_map=status_map,
+                watchdog_age_seconds=watchdog_age_seconds,
+                local_camera=bool(getattr(camera, 'local', True)),
+                focus_mode=bool(self.indi_allsky_config.get('FOCUS_MODE', False)),
+                capture_pause=bool(getattr(camera, 'capture_pause', False)),
+                daytime_capture=bool(getattr(camera, 'daytime_capture', True)),
+                daytime_capture_save=bool(getattr(camera, 'daytime_capture_save', True)),
+                camera_label=camera_label,
+            )
+        except Exception:
+            app.logger.error('Unable to build Now current capture repository')
+            return None
 
 
 class ModernAdminHighlightsView(TemplateView):
