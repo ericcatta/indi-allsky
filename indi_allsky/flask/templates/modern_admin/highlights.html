@@ -4,10 +4,11 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-highlights-product-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-pass-001') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<main class="modern-admin-shell" aria-labelledby="highlights-title">
+<main class="modern-admin-shell hybrid-product-shell hybrid-product-highlights" aria-labelledby="highlights-title">
     <header class="modern-admin-table-panel" aria-label="Highlights product prototype">
         <div class="modern-admin-section-heading">
             <div>

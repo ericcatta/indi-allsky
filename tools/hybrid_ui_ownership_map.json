@@ -177,6 +177,7 @@
         "modern_admin/virtualsky.html"
       ],
       "assets": [
+        "modern_admin/hybrid-product-ui.css",
         "modern_admin/modern-admin.css"
       ],
       "apis": [
@@ -390,6 +391,7 @@
         "modern_admin/settings_cameras.html"
       ],
       "assets": [
+        "modern_admin/hybrid-product-ui.css",
         "modern_admin/modern-admin.css"
       ],
       "apis": [
@@ -425,6 +427,7 @@
         "modern_admin/settings_cameras.html"
       ],
       "assets": [
+        "modern_admin/hybrid-product-ui.css",
         "modern_admin/modern-admin.css"
       ],
       "apis": [],
@@ -486,6 +489,7 @@
         "modern_admin/settings_storage.html"
       ],
       "assets": [
+        "modern_admin/hybrid-product-ui.css",
         "modern_admin/modern-admin.css"
       ],
       "apis": [
@@ -601,6 +605,7 @@
         "modern_admin/index.html"
       ],
       "assets": [
+        "modern_admin/hybrid-product-ui.css",
         "modern_admin/modern-admin.css"
       ],
       "apis": [],
@@ -664,6 +669,7 @@
         "modern_admin/index.html"
       ],
       "assets": [
+        "modern_admin/hybrid-product-ui.css",
         "modern_admin/modern-admin.css"
       ],
       "apis": [],
@@ -687,6 +693,7 @@
         "modern_admin/index.html"
       ],
       "assets": [
+        "modern_admin/hybrid-product-ui.css",
         "modern_admin/modern-admin.css"
       ],
       "apis": [],
@@ -710,6 +717,7 @@
         "modern_admin/index.html"
       ],
       "assets": [
+        "modern_admin/hybrid-product-ui.css",
         "modern_admin/modern-admin.css"
       ],
       "apis": [],
@@ -791,6 +799,7 @@
         "modern_admin/updates.html"
       ],
       "assets": [
+        "modern_admin/hybrid-product-ui.css",
         "modern_admin/modern-admin.css"
       ],
       "apis": [

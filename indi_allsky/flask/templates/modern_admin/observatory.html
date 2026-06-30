@@ -4,10 +4,11 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-observatory-product-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-pass-001') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<main class="modern-admin-shell" aria-labelledby="observatory-title">
+<main class="modern-admin-shell hybrid-product-shell hybrid-product-observatory" aria-labelledby="observatory-title">
     <header class="modern-admin-table-panel" aria-label="Observatory product view">
         <div class="modern-admin-section-heading">
             <div>
