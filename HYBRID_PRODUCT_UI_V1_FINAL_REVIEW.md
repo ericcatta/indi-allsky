@@ -3,7 +3,7 @@
 ## Purpose
 
 This is the final review of the Product UI v1 skeleton before entering the
-real-data phase.
+real-data phase, updated after the UX hierarchy uplift pass.
 
 No code, routes, templates, builders, contracts, runtime behavior, or Product
 Architecture were changed for this review.
@@ -36,7 +36,7 @@ What still matters before real data:
 
 - keep the real-data phase bounded and incremental;
 - avoid turning fake/static contracts into claims;
-- reduce contract-heavy microcopy as real evidence appears;
+- continue reducing contract-heavy microcopy as real evidence appears;
 - protect the separation between Highlight, Moment, Output, Library, and
   Observatory;
 - keep every runtime provider reviewed before wiring it into a request path.
@@ -45,12 +45,12 @@ What still matters before real data:
 
 | Surface | Score | Product role | Main limit | Next improvement |
 | --- | --- | --- | --- | --- |
-| Now | 8.2/10 | First operational product view; answers what is happening now and whether anything needs attention. | Still partly briefing-by-contract; only two bounded real data points are connected. | Add one more cheap, bounded product signal only after review, or improve product microcopy around existing real data. |
-| Highlights | 6.2/10 | Curated attention layer; tells the user where to start. | Concept is strong, but v1 still feels too contract-driven and not enough like real attention selection. | Do not add AI/detectors yet; first connect only explainable, low-risk metadata after source trust is stronger. |
-| Moment Detail | 7.0/10 | Explains a single case: what happened, why Hybrid surfaced it, and what evidence exists. | No real evidence, detector summary, or lineage yet. | Add bounded evidence metadata later; keep it analytical, not gallery-like. |
-| Output Detail | 7.1/10 | Explains a generated result, its recipe, lineage, readiness, and limitations. | No real output metadata or preview; share/readiness remains placeholder. | Add metadata-only generated output summary before any preview URL or media read. |
+| Now | 8.3/10 | First operational product view; answers what is happening now and points the user toward Highlights. | Still partly briefing-by-contract; only two bounded real data points are connected. | Add one more cheap, bounded product signal only after review. |
+| Highlights | 7.5/10 | Curated attention layer; tells the user where to start. | Concept is strong and hierarchy is better, but recommendations are still static. | Do not add AI/detectors yet; first connect only explainable, low-risk metadata after source trust is stronger. |
+| Moment Detail | 7.5/10 | Explains a single case: what happened, why Hybrid surfaced it, and what evidence exists. | No real evidence, detector summary, or lineage yet. | Add bounded evidence metadata later; keep it analytical, not gallery-like. |
+| Output Detail | 7.5/10 | Explains a generated result, its recipe, lineage, readiness, and limitations. | No real output metadata or preview; share/readiness remains placeholder. | Add metadata-only generated output summary before any preview URL or media read. |
 | Sky Cycle Report | 7.8/10 | Gives cycle context across phase, moments, outputs, source trust, and health. | It is well-structured but entirely fake/static. | Add bounded Sky Cycle metadata only after phase/source contracts are reviewed. |
-| Library | 7.0/10 | Long-term retrieval space for Highlights, Moments, Outputs, Sky Cycles, and future Favorites. | No real index/search; could become generic gallery if previews dominate too early. | Start later with paginated metadata only, not filesystem indexing. |
+| Library | 7.4/10 | Product memory for Highlights, Moments, Outputs, Sky Cycles, and future Favorites. | No real index/search; could become generic gallery if previews dominate too early. | Start later with paginated metadata only, not filesystem indexing. |
 | Observatory | 7.2/10 | Health/readiness console for camera, capture, source preservation, storage, generation, and integrations. | No real health evidence; risk of drifting toward admin panel. | Add cached/cheap health summaries only; avoid live probes in request paths. |
 
 ## 3. Flow End-to-End
@@ -62,17 +62,20 @@ Now -> Highlights -> Moment -> Output -> Sky Cycle -> Library -> Observatory
 What works:
 
 - Now gives a safe starting point.
-- Highlights gives the product a stronger attention-first direction.
-- Moment and Output are distinct enough in contract and intent.
+- Now now points more clearly toward Highlights as the next natural step.
+- Highlights gives the product a stronger attention-first direction and now
+  separates primary recommendation from secondary review items.
+- Moment and Output are distinct enough in contract, intent, and page hierarchy.
 - Sky Cycle provides context without becoming the primary home.
-- Library gives long-term retrieval a place.
+- Library gives long-term retrieval a clearer product-memory role.
 - Observatory keeps health separate from Developer and Settings.
 - Navigation is now minimally connected across the main v1 surfaces.
 
 Where it remains weak:
 
-- Highlights is the conceptual center, but not yet the experiential center.
-- Now still carries much of the burden of explaining the product.
+- Highlights is closer to the experiential center, but still needs real
+  attention data to prove the flow.
+- Now still carries some of the burden of explaining the product.
 - Sky Cycle is contextually rich but could become a second dashboard if not
   disciplined.
 - Library has no real retrieval behavior yet.
@@ -147,25 +150,27 @@ This does not mean the Product UI is final. It means the skeleton is complete,
 safe, coherent, and connected enough to begin replacing carefully selected
 placeholder fields with bounded real metadata.
 
-Overall Product UI v1 skeleton score: 7.4/10.
+Overall Product UI v1 skeleton score: 8.0/10.
 
 Reasoning:
 
 - architecture and safety are strong;
 - Now and Sky Cycle are solid anchors;
 - navigation gaps are closed;
-- Product UI is still too contract-driven;
-- Highlights is strategically correct but experientially underpowered;
+- Highlights, Moment, Output, and Library now have clearer product hierarchy;
+- Product UI remains partly contract-driven, but less so than before;
+- Highlights is strategically correct and now reads more like an attention
+  briefing;
 - real data is now needed to prove whether the product flow works.
 
-## 8. Mission 039 Proposal
+## 8. Next Mission Proposal
 
-Mission 039 should be the first cautious real-data step after v1 skeleton
-freeze.
+The next mission should be the first cautious real-data step after the static UX
+uplift.
 
 Recommended mission:
 
-Mission 039 — Review safe latest generated output metadata source
+Mission 040 - Review safe latest generated output metadata source
 
 Goal:
 

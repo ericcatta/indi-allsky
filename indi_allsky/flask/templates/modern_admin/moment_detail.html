@@ -19,6 +19,7 @@
 
         <h2>{{ moment_detail.moment_summary.selection_reason }}</h2>
         <p class="modern-admin-note">{{ moment_detail.moment_summary.note }}</p>
+        <p class="modern-admin-note"><strong>Case analysis:</strong> this page should help the user understand what happened, why Hybrid surfaced it, what evidence exists, whether the source is trustworthy, and which output explains it.</p>
         <p class="modern-admin-note">Contract: <code>{{ moment_detail.metadata.contract }}</code> / <code>{{ moment_detail.metadata.contract_version }}</code>. Source: <code>{{ moment_detail.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
@@ -34,7 +35,7 @@
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Case analysis</p>
-                <h2 id="moment-case-title">Why This Moment Is Shown</h2>
+                <h2 id="moment-case-title">What Happened and Why It Was Selected</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-muted">{{ moment_detail.moment_summary.confidence_label }}</span>
         </div>
@@ -48,13 +49,13 @@
                 <p><strong>Status:</strong> {{ moment_detail.moment_summary.data_status | replace('_', ' ') | title }}</p>
             </article>
             <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Selection reason</div>
-                <h3>Explainable attention</h3>
+                <div class="modern-admin-card-label">Why Hybrid selected it</div>
+                <h3>Explainable attention, not a claim</h3>
                 <p>{{ moment_detail.moment_summary.selection_reason }}</p>
                 <p>{{ moment_detail.evidence_summary.explanation }}</p>
             </article>
             <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Trust boundary</div>
+                <div class="modern-admin-card-label">Can I trust it?</div>
                 <h3>{{ moment_detail.source_trust_summary.confidence }}</h3>
                 <p>{{ moment_detail.source_trust_summary.source_status }}</p>
                 <p>{{ moment_detail.source_trust_summary.lineage_status }}</p>
@@ -105,12 +106,14 @@
         <section class="modern-admin-status-grid" aria-label="Moment related context">
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ moment_detail.related_outputs.label }}</div>
-                <h3>{{ moment_detail.related_outputs.generation_status }}</h3>
+                <h3>Related output</h3>
+                <p>{{ moment_detail.related_outputs.generation_status }}</p>
                 <p>{{ moment_detail.related_outputs.look_status }}</p>
                 {% for output in moment_detail.related_outputs.outputs %}
                     <p><strong>{{ output.label }}:</strong> {{ output.status }} {{ output.source_lineage_status }}</p>
                 {% endfor %}
                 <p>{{ moment_detail.related_outputs.note }}</p>
+                <p><a href="{{ url_for('indi_allsky.modern_admin_output_detail_view') }}">Open Output Detail</a></p>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ moment_detail.sky_cycle_context.label }}</div>
@@ -135,9 +138,9 @@
                 <p class="modern-admin-eyebrow">Boundary</p>
                 <h2 id="moment-boundary-title">Static Product Contract</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">No actions</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
         </div>
-        <p class="modern-admin-note">This page is a static Moment Detail contract. It does not evaluate detector, source, media, observatory, preview, external delivery, or confirmation behavior.</p>
+        <p class="modern-admin-note">This page is a static Moment case analysis. It does not evaluate detector, source, media, observatory, preview, external delivery, or confirmation behavior.</p>
     </section>
 </main>
 {% endblock %}

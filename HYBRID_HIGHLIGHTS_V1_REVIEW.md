@@ -122,9 +122,11 @@ Residual risk:
 - output-centered Highlights could drift toward a gallery;
 - observatory issue Highlights could drift toward an admin panel.
 
-## Initial Score
+## Product Score
 
-Highlights v1 score: 7.0/10.
+Initial Highlights v1 score: 7.0/10.
+
+Post-uplift Highlights v1 score: 7.5/10.
 
 Why it scores above a mockup:
 
@@ -132,8 +134,12 @@ Why it scores above a mockup:
 - it distinguishes Highlight from Moment, Output, and Favorite;
 - it defines allowed types, target kinds, origins, and safety boundaries;
 - it is contract-first and testable.
+- the page now presents a primary "Start here" recommendation before secondary
+  items;
+- it separates primary recommendation, also-worth-reviewing items, trust, and
+  user decision language.
 
-Why it remains at 7.0:
+Why it remains at 7.5:
 
 - all examples are static;
 - there is no real selector;
@@ -141,21 +147,24 @@ Why it remains at 7.0:
 - source trust is not connected;
 - user decision state is not connected;
 - it does not yet prove the morning flow with real attention data.
+- it is still more explanatory prototype than emotionally convincing daily
+  briefing.
 
 ## Recommended Next Mission
 
-Do not connect real detector or media data yet.
+Do not connect real detector, AI ranking, or media data yet.
 
-Mission 029 should harden the Highlights contract before runtime wiring.
+The next Highlights-specific mission should review the safest bounded source
+for a first explainable Highlight candidate, after source trust and target
+reference rules are explicit.
 
 Recommended focus:
 
-- strengthen `highlight_items` into a more explicit contract;
-- define Highlight states and state rules;
-- define target reference shape without real DB;
-- add validation for state allowlist;
-- add validation that a Highlight always has a reason and evidence list;
-- keep everything fake/static and read-only.
+- preserve the primary recommendation hierarchy;
+- keep recommendations explainable and reversible;
+- require bounded metadata only;
+- avoid detector or AI integration until evidence and trust can be shown;
+- keep everything read-only.
 
 Only after that should the project review the safest bounded source for a first
 real Highlight candidate.

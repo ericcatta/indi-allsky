@@ -17,6 +17,7 @@ It is not a gallery, search engine, file browser, media viewer, or admin index.
 ## What Works
 
 - The page frames Library as an archive of meaning rather than a list of files.
+- The UX uplift makes the page feel more like product memory: find notable sky observations over time, organized by Highlights, Moments, Outputs, Sky Cycles, and future Favorites.
 - Collections separate Highlights, Moments, Outputs, Sky Cycles, Favorites, and
   phenomena without introducing a new product domain.
 - Search and filters are represented as future bounded contracts, not live UI.
@@ -64,9 +65,9 @@ Future real Library data must be bounded, paginated, sanitized, and RPi5-first.
 
 Initial score: 7.0/10.
 
-The product direction is clear: Library should help users find remembered sky
-observations by meaning. The score remains limited because the page has no real
-archive data and cannot yet demonstrate retrieval speed or usefulness.
+Post-uplift score: 7.4/10.
+
+The product direction is clearer after the uplift: Library should help users find remembered sky observations by meaning, not by file paths or thumbnails. The score remains limited because the page has no real archive data and cannot yet demonstrate retrieval speed or usefulness.
 
 ## Risks
 
@@ -81,6 +82,4 @@ archive data and cannot yet demonstrate retrieval speed or usefulness.
 
 Do not connect real search or filesystem data yet.
 
-Recommended Mission 035: critique Library v1 before expanding it, then decide
-whether the next surface should be Observatory v1 or a consolidation review of
-the full v1 product flow.
+Recommended next step: keep Library static until bounded, paginated metadata retrieval is designed. Do not add filesystem indexing, preview thumbnails, or broad search scans.

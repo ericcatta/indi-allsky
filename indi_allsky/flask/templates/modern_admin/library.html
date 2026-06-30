@@ -19,6 +19,7 @@
 
         <h2>{{ library_view.library_summary.scope_label }}</h2>
         <p class="modern-admin-note">{{ library_view.library_summary.note }}</p>
+        <p class="modern-admin-note"><strong>Find notable sky observations over time:</strong> Library is product memory for Highlights, Moments, Outputs, Sky Cycles, and future Favorites. It is not a generic gallery or file browser.</p>
         <p class="modern-admin-note">Contract: <code>{{ library_view.metadata.contract }}</code> / <code>{{ library_view.metadata.contract_version }}</code>. Source: <code>{{ library_view.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
@@ -33,8 +34,8 @@
     <section class="modern-admin-table-panel" aria-labelledby="library-collections-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Archive structure</p>
-                <h2 id="library-collections-title">Collections</h2>
+                <p class="modern-admin-eyebrow">Product memory</p>
+                <h2 id="library-collections-title">What Library Will Remember</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-muted">{{ library_view.library_summary.total_items_label }}</span>
         </div>
@@ -56,8 +57,8 @@
     <section class="modern-admin-table-panel" aria-labelledby="library-find-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Retrieval</p>
-                <h2 id="library-find-title">Search and Filters</h2>
+                <p class="modern-admin-eyebrow">Retrieval model</p>
+                <h2 id="library-find-title">Find by Meaning, Not File Path</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-muted">{{ library_view.search_summary.data_status | replace('_', ' ') | title }}</span>
         </div>
@@ -72,7 +73,7 @@
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">Future indexed fields</div>
                 <h3>{{ library_view.search_summary.indexed_fields | join(', ') }}</h3>
-                <p>Index fields are product requirements only in this prototype.</p>
+                <p>These fields describe how the product should retrieve remembered observations. No search runtime is connected.</p>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ library_view.filter_summary.label }}</div>
@@ -86,8 +87,8 @@
     <section class="modern-admin-table-panel" aria-labelledby="library-recent-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Archive entries</p>
-                <h2 id="library-recent-title">Recent Items Prototype</h2>
+                <p class="modern-admin-eyebrow">Remembered observations</p>
+                <h2 id="library-recent-title">Example Items</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">Static examples</span>
         </div>
@@ -139,7 +140,7 @@
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Boundary</p>
-                <h2 id="library-boundary-title">Static Product Contract</h2>
+                <h2 id="library-boundary-title">Static Product Memory Contract</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">No runtime archive</span>
         </div>

@@ -19,6 +19,7 @@
 
         <h2>{{ highlights_view.highlights_summary.attention_verdict }}</h2>
         <p class="modern-admin-note">{{ highlights_view.highlights_summary.note }}</p>
+        <p class="modern-admin-note"><strong>Start here:</strong> Highlights is the curated attention briefing. It tells the user what to inspect first, why it was selected, and whether the source can be trusted.</p>
         <p class="modern-admin-note">Contract: <code>{{ highlights_view.metadata.contract }}</code> / <code>{{ highlights_view.metadata.contract_version }}</code>. Source: <code>{{ highlights_view.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
@@ -30,11 +31,46 @@
         </div>
     </header>
 
+    {% set primary_highlight = highlights_view.highlight_items[0] %}
+    <section class="modern-admin-table-panel" aria-labelledby="highlights-briefing-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Attention briefing</p>
+                <h2 id="highlights-briefing-title">Start Here</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ primary_highlight.review_status }}</span>
+        </div>
+        <p class="modern-admin-note">This is the first item Hybrid would ask the user to inspect. The recommendation is static in v1, but the experience shape is product-first: one primary item, a reason, evidence, trust, and a next surface.</p>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Primary Highlight briefing">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ primary_highlight.type | replace('_', ' ') | title }}</div>
+                <h3>{{ primary_highlight.title }}</h3>
+                <p>{{ primary_highlight.selection_reason }}</p>
+                <p><strong>Next:</strong> {{ primary_highlight.target_kind | replace('_', ' ') | title }} - {{ primary_highlight.target_label }}</p>
+                <p><a href="{{ url_for('indi_allsky.modern_admin_moment_detail_view') }}">Open the Moment case</a></p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Why this was selected</div>
+                <h3>{{ primary_highlight.confidence_label }}</h3>
+                {% for evidence_item in primary_highlight.evidence %}
+                    <p>{{ evidence_item }}</p>
+                {% endfor %}
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Trust and user decision</div>
+                <h3>{{ primary_highlight.source_trust_status }}</h3>
+                <p>{{ primary_highlight.favorite_status }}</p>
+                <p>Highlight means curated attention. Favorite means a future user decision.</p>
+            </article>
+        </section>
+    </section>
+
     <section class="modern-admin-table-panel" aria-labelledby="highlights-summary-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Attention</p>
-                <h2 id="highlights-summary-title">Curated Attention Objects</h2>
+                <p class="modern-admin-eyebrow">Review queue</p>
+                <h2 id="highlights-summary-title">Primary Recommendation and Queue State</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-muted">Static prototype</span>
         </div>
@@ -65,15 +101,16 @@
     <section class="modern-admin-table-panel" aria-labelledby="highlight-items-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Highlights</p>
-                <h2 id="highlight-items-title">What Deserves Attention</h2>
+                <p class="modern-admin-eyebrow">Also worth reviewing</p>
+                <h2 id="highlight-items-title">Other Candidate Highlights</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-muted">No real detector data</span>
         </div>
-        <p class="modern-admin-note">Highlight selection is not connected to real detector data yet. Hybrid suggestions are explanatory and reversible.</p>
+        <p class="modern-admin-note">These are secondary static examples. In the real product, this list should stay short, explainable, and safe to ignore.</p>
 
         <section class="modern-admin-status-grid" aria-label="Highlight items">
             {% for highlight in highlights_view.highlight_items %}
+            {% if not loop.first %}
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ highlight.type | replace('_', ' ') | title }} / {{ highlight.origin | replace('_', ' ') | title }}</div>
                 <h3>{{ highlight.title }}</h3>
@@ -89,8 +126,8 @@
                 <p><strong>Output:</strong> {{ highlight.related_output_status }}</p>
                 <p><strong>Favorite:</strong> {{ highlight.favorite_status }}</p>
                 <span class="modern-admin-status-pill modern-admin-status-muted">{{ highlight.review_status }}</span>
-                <span class="modern-admin-status-pill modern-admin-status-muted">Safe actions: {{ highlight.safe_actions_available | length }}</span>
             </article>
+            {% endif %}
             {% endfor %}
         </section>
     </section>
@@ -137,9 +174,9 @@
                 <p class="modern-admin-eyebrow">Safety</p>
                 <h2 id="highlight-boundary-title">Read-only Boundary</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">No actions</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">No interaction</span>
         </div>
-        <p class="modern-admin-note">No database, detector, filesystem, RAW/FITS, media read, media generation, preview URL, download, share, favorite, ignore, archive, or safe action is connected to this prototype.</p>
+        <p class="modern-admin-note">No database, detector, filesystem, RAW/FITS, media read, media generation, preview URL, external delivery, or user decision behavior is connected to this prototype.</p>
     </section>
 </main>
 {% endblock %}

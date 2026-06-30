@@ -23,6 +23,7 @@ It is not a gallery, media viewer, editor, export tool, or rendering console.
 ## What Works
 
 - The output is presented as a generated result with lineage and recipe context.
+- The UX uplift makes the page read more like a generated-result dossier: identity, preview boundary, Look/recipe, non-destructive rendering, source lineage, and review readiness.
 - Preview is explicitly disabled and `safe_preview_url` remains null.
 - The contract separates summary, preview, recipe, source lineage, related Moments, Sky Cycle context, and review readiness.
 - Non-destructive rendering is visible in the copy.
@@ -62,7 +63,9 @@ Future real data should arrive only through bounded backend-owned providers and 
 
 Initial score: 7.1/10.
 
-The contract is strong and clearly supports non-destructive rendering and source lineage. The experience is still static and cannot yet deliver the emotional value of seeing a generated result in context.
+Post-uplift score: 7.5/10.
+
+The contract is strong and clearly supports non-destructive rendering and source lineage. The uplift improves product identity and makes disabled preview/share states feel intentional rather than missing. The experience is still static and cannot yet deliver the emotional value of seeing a generated result in context.
 
 ## Risks
 
@@ -75,4 +78,4 @@ The contract is strong and clearly supports non-destructive rendering and source
 
 Do not connect real media or preview yet.
 
-Recommended Mission 034: critique Output Detail v1 before expanding it. Confirm whether the page feels like a derived result with lineage and recipe context, or whether it still reads as a static contract rendered on screen.
+Recommended next step: review and then connect metadata-only generated output data before any preview URL, media read, rendering job, download, or share behavior.

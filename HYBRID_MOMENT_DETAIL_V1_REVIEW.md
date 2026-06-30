@@ -18,6 +18,8 @@ It is not a gallery, detector console, media report, or editor.
 - The Moment is presented as a case to analyze, not as a generic media item.
 - The contract separates summary, evidence, source trust, related outputs, Sky Cycle context, and observatory context.
 - The selection reason is explicit and written in explainable product language.
+- The UX uplift makes the page read more clearly as a case analysis: what happened, why Hybrid selected it, what evidence exists, whether the source can be trusted, and which related output explains it.
+- Related Output now has a clearer path forward without adding media preview or generation.
 - The template stays read-only and renders a backend-owned payload.
 - The builder is framework-free and fake/static.
 - The validation checks allowlisted moment types, phases, related output types, evidence lists, data status, sensitive keys, absolute paths, callables, and safe-action metadata.
@@ -43,7 +45,9 @@ Future real data should arrive only through bounded backend-owned providers and 
 
 Initial score: 7.0/10.
 
-The domain shape is strong because the page explains why a Moment matters, but it is still heavily static. It becomes materially better when linked from a real Highlight target and backed by bounded detector/source/output summaries.
+Post-uplift score: 7.5/10.
+
+The domain shape is strong because the page explains why a Moment matters. The uplift improves hierarchy and makes the page feel more like a case analysis than a rendered schema. It remains limited because detector evidence, source lineage, related output metadata, and real Highlight target identity are still fake/static.
 
 ## Risks
 
@@ -56,4 +60,4 @@ The domain shape is strong because the page explains why a Moment matters, but i
 
 Do not add real detector or source data yet.
 
-Recommended Mission 032: critique Moment Detail v1 before expanding it. Verify that the user journey Highlights -> Moment actually feels natural and that the page explains the case clearly enough before adding more contract surface.
+Recommended next step: do not expand the contract. When real data begins, start with bounded evidence metadata only, then source trust, and only later media or preview context.
