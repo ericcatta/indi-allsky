@@ -30,6 +30,7 @@ from indi_allsky.product_view_models import LatestGeneratedOutputRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
 from indi_allsky.product_view_models import SourceTrustDescriptor
 from indi_allsky.product_view_models import SourceTrustRepository
+from indi_allsky.product_view_models import SkyCycleSummaryRepository
 from indi_allsky.product_view_models import validate_sky_cycle_report_payload
 from indi_allsky.product_view_models import validate_highlights_payload
 from indi_allsky.product_view_models import validate_moment_detail_payload
@@ -492,6 +493,185 @@ def test_build_sky_cycle_report_view_contains_no_sensitive_payload():
     assert_no_sensitive_text(report)
     assert_no_absolute_paths(report)
     assert_no_callables(report)
+
+
+def test_sky_cycle_summary_repository_builds_current_cycle_metadata():
+    latest_query = FakeImageQuery(
+        FakeImageRow(
+            id=20,
+            camera_id=7,
+            createDate=datetime(2026, 6, 30, 6, 30, 0),
+            dayDate=date(2026, 6, 30),
+            night=False,
+        )
+    )
+    start_query = FakeImageQuery(
+        FakeImageRow(
+            id=10,
+            camera_id=7,
+            createDate=datetime(2026, 6, 30, 0, 5, 0),
+            dayDate=date(2026, 6, 30),
+            night=True,
+        )
+    )
+    repository = SkyCycleSummaryRepository(
+        latest_query=latest_query,
+        cycle_start_query=start_query,
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
+        day_date_field=FakeImageField('dayDate'),
+        latest_order_by_expression='created-desc',
+        start_order_by_expression='created-asc',
+        current_date=date(2026, 6, 30),
+    )
+
+    result = repository.get_sky_cycle_metadata()
+
+    assert result['status'] == 'sky_cycle_metadata_available'
+    assert result['latest_frame']['day_date'] == '2026-06-30'
+    assert result['cycle_start']['timestamp'] == '2026-06-30 00:05:00'
+    assert result['current_date'] == '2026-06-30'
+    assert latest_query.filter_calls == [(FakeImageField('camera_id') == 7)]
+    assert latest_query.order_by_calls == ['created-desc']
+    assert latest_query.limit_calls == [1]
+    assert latest_query.first_calls == 1
+    assert start_query.filter_calls == [
+        (FakeImageField('camera_id') == 7),
+        (FakeImageField('dayDate') == date(2026, 6, 30)),
+    ]
+    assert start_query.order_by_calls == ['created-asc']
+    assert start_query.limit_calls == [1]
+    assert start_query.first_calls == 1
+    json.dumps(result, sort_keys=True)
+    assert_no_sensitive_text(result)
+    assert_no_absolute_paths(result)
+    assert_no_callables(result)
+
+
+def test_build_sky_cycle_report_view_accepts_metadata_repository():
+    repository = SkyCycleSummaryRepository(
+        latest_query=FakeImageQuery(
+            FakeImageRow(
+                id=20,
+                camera_id=7,
+                createDate=datetime(2026, 6, 30, 6, 30, 0),
+                dayDate=date(2026, 6, 30),
+                night=False,
+            )
+        ),
+        cycle_start_query=FakeImageQuery(
+            FakeImageRow(
+                id=10,
+                camera_id=7,
+                createDate=datetime(2026, 6, 30, 0, 5, 0),
+                dayDate=date(2026, 6, 30),
+                night=True,
+            )
+        ),
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
+        day_date_field=FakeImageField('dayDate'),
+        latest_order_by_expression='created-desc',
+        start_order_by_expression='created-asc',
+        current_date=date(2026, 6, 30),
+    )
+
+    report = build_sky_cycle_report_view(sky_cycle_repository=repository, current_phase_night=0)
+    summary = report['cycle_summary']
+
+    assert report['is_placeholder'] is False
+    assert summary['cycle_label'] == 'Sky Cycle 2026-06-30'
+    assert summary['current_phase'] == 'day'
+    assert summary['cycle_status'] == 'in_progress'
+    assert summary['cycle_started_label'] == '2026-06-30 00:05:00'
+    assert summary['latest_frame_label'] == '2026-06-30 06:30:00'
+    assert summary['confidence_label'] == 'Medium confidence from image metadata'
+    assert 'sky_day=2026-06-30' in summary['evidence']
+    assert validate_sky_cycle_report_payload(report) is True
+    json.dumps(report, sort_keys=True)
+    assert_no_sensitive_text(report)
+    assert_no_absolute_paths(report)
+    assert_no_callables(report)
+
+
+def test_build_sky_cycle_report_view_marks_completed_cycle():
+    repository = SkyCycleSummaryRepository(
+        latest_query=FakeImageQuery(
+            FakeImageRow(
+                id=20,
+                camera_id=7,
+                createDate=datetime(2026, 6, 29, 23, 30, 0),
+                dayDate=date(2026, 6, 29),
+                night=True,
+            )
+        ),
+        cycle_start_query=FakeImageQuery(
+            FakeImageRow(
+                id=10,
+                camera_id=7,
+                createDate=datetime(2026, 6, 29, 0, 5, 0),
+                dayDate=date(2026, 6, 29),
+                night=False,
+            )
+        ),
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
+        day_date_field=FakeImageField('dayDate'),
+        latest_order_by_expression='created-desc',
+        start_order_by_expression='created-asc',
+        current_date=date(2026, 6, 30),
+    )
+
+    summary = build_sky_cycle_report_view(sky_cycle_repository=repository, current_phase_night=1)['cycle_summary']
+
+    assert summary['cycle_status'] == 'completed'
+    assert summary['cycle_verdict'] == 'Latest Sky Cycle appears completed from metadata.'
+
+
+def test_build_sky_cycle_report_view_handles_incomplete_cycle():
+    repository = SkyCycleSummaryRepository(
+        latest_query=FakeImageQuery(
+            FakeImageRow(
+                id=20,
+                camera_id=7,
+                createDate=datetime(2026, 6, 30, 6, 30, 0),
+                dayDate=date(2026, 6, 30),
+                night=False,
+            )
+        ),
+        cycle_start_query=FakeImageQuery(None),
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
+        day_date_field=FakeImageField('dayDate'),
+        latest_order_by_expression='created-desc',
+        start_order_by_expression='created-asc',
+        current_date=date(2026, 6, 30),
+    )
+
+    summary = build_sky_cycle_report_view(sky_cycle_repository=repository, current_phase_night=None)['cycle_summary']
+
+    assert summary['cycle_status'] == 'incomplete'
+    assert summary['confidence_label'] == 'Low confidence; cycle start unavailable'
+    assert 'cycle_start=not_available' in summary['evidence']
+
+
+def test_sky_cycle_summary_repository_handles_unknown_metadata():
+    repository = SkyCycleSummaryRepository(
+        latest_query=FakeImageQuery(None),
+        cycle_start_query=FakeImageQuery(None),
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
+        day_date_field=FakeImageField('dayDate'),
+        latest_order_by_expression='created-desc',
+        start_order_by_expression='created-asc',
+        current_date=date(2026, 6, 30),
+    )
+
+    report = build_sky_cycle_report_view(sky_cycle_repository=repository, current_phase_night=None)
+
+    assert report['cycle_summary']['is_placeholder'] is True
+    assert report['cycle_summary']['cycle_status'] == 'unknown'
+    assert validate_sky_cycle_report_payload(report) is True
 
 
 def test_build_highlights_view_returns_dict():
@@ -2871,6 +3051,11 @@ def main():
         test_build_sky_cycle_report_view_is_json_serializable,
         test_build_sky_cycle_report_view_has_required_sections,
         test_build_sky_cycle_report_view_contains_no_sensitive_payload,
+        test_sky_cycle_summary_repository_builds_current_cycle_metadata,
+        test_build_sky_cycle_report_view_accepts_metadata_repository,
+        test_build_sky_cycle_report_view_marks_completed_cycle,
+        test_build_sky_cycle_report_view_handles_incomplete_cycle,
+        test_sky_cycle_summary_repository_handles_unknown_metadata,
         test_build_highlights_view_returns_dict,
         test_build_highlights_view_is_json_serializable,
         test_build_highlights_view_has_required_sections,

@@ -374,3 +374,23 @@ truth is not connected yet.
 Next gap: run a bounded source review for the first real Sky Cycle field, most
 likely cycle identity/time range or source coverage metadata. Do not connect
 filesystem, RAW/FITS, detector, rendering, download, share, or actions yet.
+
+## DATA006 Update
+
+Sky Cycle Summary is now connected to bounded image metadata.
+
+The page can summarize the current/latest cycle label, current phase, cycle
+status, first available frame timestamp, latest frame timestamp, coverage label,
+confidence label, and evidence. This is based on `IndiAllSkyDbImageTable`
+metadata only.
+
+Updated Sky Cycle Report score: 8.1/10.
+
+The score improves because the top-level cycle identity is no longer purely
+static. It remains limited because phase timeline, moments, outputs, source
+coverage, and health are still static/fake, and `dayDate` is a metadata grouping
+rather than a full astronomical cycle boundary.
+
+Next gap: discover bounded Sky Cycle output context for the identified
+`dayDate`/phase. Do not add preview, media reads, filesystem coverage,
+detectors, AI scoring, or full cycle reconstruction.

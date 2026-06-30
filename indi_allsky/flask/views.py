@@ -47,6 +47,7 @@ from ..product_view_models import LatestGeneratedOutputRepository
 from ..product_view_models import LatestFrameSummaryProvider
 from ..product_view_models import SourceTrustDescriptor
 from ..product_view_models import SourceTrustRepository
+from ..product_view_models import SkyCycleSummaryRepository
 
 from cryptography.fernet import InvalidToken
 
@@ -7714,9 +7715,33 @@ class ModernAdminSkyCycleView(TemplateView):
         context = super(ModernAdminSkyCycleView, self).get_context()
 
         session['admin_mode'] = 'modern'
-        context['sky_cycle_report'] = build_sky_cycle_report_view()
+        context['sky_cycle_report'] = build_sky_cycle_report_view(
+            sky_cycle_repository=self.get_sky_cycle_repository(),
+            current_phase_night=context.get('night'),
+        )
 
         return context
+
+    def get_sky_cycle_repository(self):
+        try:
+            camera = getattr(self, 'camera', None)
+            camera_id = getattr(camera, 'id', None)
+            if not camera_id:
+                return None
+
+            return SkyCycleSummaryRepository(
+                latest_query=IndiAllSkyDbImageTable.query,
+                cycle_start_query=IndiAllSkyDbImageTable.query,
+                camera_id=camera_id,
+                camera_id_field=IndiAllSkyDbImageTable.camera_id,
+                day_date_field=IndiAllSkyDbImageTable.dayDate,
+                latest_order_by_expression=IndiAllSkyDbImageTable.createDate.desc(),
+                start_order_by_expression=IndiAllSkyDbImageTable.createDate.asc(),
+                current_date=self.camera_now.date(),
+            )
+        except Exception:
+            app.logger.error('Unable to build Sky Cycle metadata repository')
+            return None
 
 
 class ModernAdminStorageView(ModernAdminView):

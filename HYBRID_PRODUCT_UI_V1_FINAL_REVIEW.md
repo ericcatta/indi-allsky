@@ -209,6 +209,17 @@ The integration deliberately excludes detector runtime, AI ranking, media reads,
 preview URLs, filesystem access, target-specific Moment/Output wiring, and user
 decision mutations.
 
+## DATA006 Integration Note
+
+Sky Cycle Summary is now integrated into Sky Cycle Report as bounded image
+metadata. The page can show the current/latest cycle label, cycle status,
+current phase, first available frame time, latest frame time, confidence, and
+evidence without reconstructing the full cycle.
+
+The integration deliberately excludes twilight calculation, full coverage
+analysis, detector/AI scoring, media reads, filesystem access, preview URLs, and
+mutations.
+
 ## 8. Next Mission Proposal
 
 The next mission should be the first cautious real-data step after the static UX

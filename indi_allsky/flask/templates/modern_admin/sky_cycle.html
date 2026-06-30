@@ -45,17 +45,22 @@
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">Current phase</div>
                 <h3>{{ sky_cycle_report.cycle_summary.current_phase }}</h3>
-                <p>Sky cycle data pending backend contract.</p>
+                <p>Status: {{ sky_cycle_report.cycle_summary.cycle_status | replace('_', ' ') | title }}.</p>
+                <p>{{ sky_cycle_report.cycle_summary.confidence_label }}</p>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">Time range</div>
                 <h3>{{ sky_cycle_report.cycle_summary.time_range_label }}</h3>
-                <p>Cycle boundaries are not evaluated yet.</p>
+                <p>Started: {{ sky_cycle_report.cycle_summary.cycle_started_label }}</p>
+                <p>Latest frame: {{ sky_cycle_report.cycle_summary.latest_frame_label }}</p>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">Report status</div>
                 <h3>{{ sky_cycle_report.status }}</h3>
-                <p>Read-only prototype. No live runtime data is evaluated.</p>
+                <p>{{ sky_cycle_report.cycle_summary.coverage_label }}</p>
+                {% for evidence_item in sky_cycle_report.cycle_summary.evidence %}
+                    <p>{{ evidence_item }}</p>
+                {% endfor %}
             </article>
         </section>
     </section>

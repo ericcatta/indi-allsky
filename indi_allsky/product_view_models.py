@@ -282,10 +282,28 @@ SKY_CYCLE_SUMMARY_REQUIRED_KEYS = frozenset((
     'cycle_label',
     'data_status',
     'current_phase',
+    'cycle_status',
     'cycle_verdict',
+    'cycle_started_label',
+    'latest_frame_label',
     'time_range_label',
+    'coverage_label',
+    'confidence_label',
+    'evidence',
     'note',
     'is_placeholder',
+))
+
+SKY_CYCLE_STATUS_UNKNOWN = 'unknown'
+SKY_CYCLE_STATUS_IN_PROGRESS = 'in_progress'
+SKY_CYCLE_STATUS_COMPLETED = 'completed'
+SKY_CYCLE_STATUS_INCOMPLETE = 'incomplete'
+
+SKY_CYCLE_ALLOWED_STATUSES = frozenset((
+    SKY_CYCLE_STATUS_UNKNOWN,
+    SKY_CYCLE_STATUS_IN_PROGRESS,
+    SKY_CYCLE_STATUS_COMPLETED,
+    SKY_CYCLE_STATUS_INCOMPLETE,
 ))
 
 SKY_CYCLE_PHASE_REQUIRED_KEYS = frozenset((
@@ -1255,8 +1273,14 @@ class SkyCycleSummary:
     cycle_label: str
     data_status: str
     current_phase: str
+    cycle_status: str
     cycle_verdict: str
+    cycle_started_label: str
+    latest_frame_label: str
     time_range_label: str
+    coverage_label: str
+    confidence_label: str
+    evidence: list
     note: str
     is_placeholder: bool
 
@@ -1607,6 +1631,80 @@ class HighlightsMetadataRepository:
         }
 
 
+class SkyCycleSummaryRepository:
+    """Bounded adapter for a minimal Sky Cycle summary from image metadata."""
+
+    def __init__(
+        self,
+        latest_query=None,
+        cycle_start_query=None,
+        camera_id=None,
+        camera_id_field=None,
+        day_date_field=None,
+        latest_order_by_expression=None,
+        start_order_by_expression=None,
+        current_date=None,
+    ):
+        self.latest_query = latest_query
+        self.cycle_start_query = cycle_start_query
+        self.camera_id = camera_id
+        self.camera_id_field = camera_id_field
+        self.day_date_field = day_date_field
+        self.latest_order_by_expression = latest_order_by_expression
+        self.start_order_by_expression = start_order_by_expression
+        self.current_date = current_date
+
+    def get_sky_cycle_metadata(self):
+        if self.latest_query is None or self.cycle_start_query is None:
+            return _build_sky_cycle_metadata_unavailable('Sky Cycle metadata query unavailable.')
+
+        if self.camera_id in (None, ''):
+            return _build_sky_cycle_metadata_unavailable('Camera context unavailable.')
+
+        try:
+            latest_query = self.latest_query
+            if self.camera_id_field is not None:
+                latest_query = latest_query.filter(self.camera_id_field == self.camera_id)
+            if self.latest_order_by_expression is not None:
+                latest_query = latest_query.order_by(self.latest_order_by_expression)
+
+            latest_row = latest_query.limit(1).first()
+        except Exception:
+            return _build_sky_cycle_metadata_unavailable('Latest Sky Cycle metadata query failed.')
+
+        if not latest_row:
+            return _build_sky_cycle_metadata_empty()
+
+        latest_metadata = _sky_cycle_image_row_metadata(latest_row)
+        day_date = latest_metadata.get('day_date')
+
+        start_metadata = {}
+        if day_date not in (None, 'Not evaluated yet'):
+            try:
+                start_query = self.cycle_start_query
+                if self.camera_id_field is not None:
+                    start_query = start_query.filter(self.camera_id_field == self.camera_id)
+                if self.day_date_field is not None:
+                    start_query = start_query.filter(self.day_date_field == getattr(latest_row, 'dayDate', None))
+                if self.start_order_by_expression is not None:
+                    start_query = start_query.order_by(self.start_order_by_expression)
+
+                start_row = start_query.limit(1).first()
+                if start_row:
+                    start_metadata = _sky_cycle_image_row_metadata(start_row)
+            except Exception:
+                start_metadata = {}
+
+        return {
+            'status': 'sky_cycle_metadata_available',
+            'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+            'latest_frame': latest_metadata,
+            'cycle_start': start_metadata,
+            'current_date': _latest_generated_output_json_value(self.current_date),
+            'note': 'Sky Cycle summary is based on bounded image metadata.',
+        }
+
+
 class LatestFrameImageTableRepository:
     """Repository adapter for one bounded latest image metadata row."""
 
@@ -1795,17 +1893,23 @@ def build_now_view(
     return payload
 
 
-def build_sky_cycle_report_view():
-    """Return the first fake-safe Sky Cycle Report product contract."""
+def build_sky_cycle_report_view(sky_cycle_repository=None, current_phase_night=None):
+    """Return the first Sky Cycle Report product contract."""
+    current_phase_summary = build_current_phase_summary(current_phase_night)
+    cycle_summary = _build_sky_cycle_report_summary(
+        sky_cycle_repository=sky_cycle_repository,
+        current_phase_summary=current_phase_summary,
+    )
+
     payload = {
         'id': 'sky_cycle_report.placeholder',
         'label': 'Sky Cycle Report',
         'status': 'Read-only product prototype',
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
         'generated_at': 'Not evaluated yet',
-        'is_placeholder': True,
+        'is_placeholder': cycle_summary.get('is_placeholder', True),
         'safe_actions_available': [],
-        'cycle_summary': _build_sky_cycle_report_summary(),
+        'cycle_summary': cycle_summary,
         'phase_timeline': _build_sky_cycle_phase_timeline(),
         'moments_summary': _build_sky_cycle_moments_summary(),
         'outputs_summary': _build_sky_cycle_outputs_summary(),
@@ -2553,7 +2657,18 @@ def _build_source_confidence_summary_from_metadata(metadata, latest_frame_summar
     ).to_dict()
 
 
-def _build_sky_cycle_report_summary():
+def _build_sky_cycle_report_summary(sky_cycle_repository=None, current_phase_summary=None):
+    if sky_cycle_repository is not None:
+        try:
+            metadata = sky_cycle_repository.get_sky_cycle_metadata()
+        except Exception:
+            metadata = _build_sky_cycle_metadata_unavailable('Sky Cycle repository failed safely.')
+
+        if isinstance(metadata, dict):
+            summary = _sky_cycle_report_summary_from_metadata(metadata, current_phase_summary=current_phase_summary)
+            if summary is not None:
+                return summary
+
     return SkyCycleSummary(
         id='sky_cycle.summary.placeholder',
         label='Cycle Summary',
@@ -2561,10 +2676,67 @@ def _build_sky_cycle_report_summary():
         cycle_label='Current or latest cycle not evaluated yet',
         data_status=NOW_DATA_STATUS_NOT_EVALUATED,
         current_phase='Not evaluated yet',
+        cycle_status=SKY_CYCLE_STATUS_UNKNOWN,
         cycle_verdict='Sky cycle data pending backend contract.',
+        cycle_started_label='Cycle start not evaluated yet',
+        latest_frame_label='Latest frame not evaluated yet',
         time_range_label='Time range not evaluated yet',
+        coverage_label='Data coverage not evaluated yet',
+        confidence_label='Confidence not evaluated yet',
+        evidence=[
+            'No Sky Cycle metadata repository is connected.',
+        ],
         note='This report is a read-only product prototype. It does not evaluate real cycle boundaries, source coverage, moments, outputs, or health.',
         is_placeholder=True,
+    ).to_dict()
+
+
+def _sky_cycle_report_summary_from_metadata(metadata, current_phase_summary=None):
+    latest_frame = metadata.get('latest_frame') if isinstance(metadata, dict) else None
+    if not isinstance(latest_frame, dict) or not latest_frame:
+        return None
+
+    cycle_start = metadata.get('cycle_start') if isinstance(metadata.get('cycle_start'), dict) else {}
+    day_date = _latest_frame_text(latest_frame.get('day_date'), 'Unknown sky day')
+    latest_timestamp = _latest_frame_text(latest_frame.get('timestamp'), 'Latest frame time not evaluated')
+    start_timestamp = _latest_frame_text(cycle_start.get('timestamp'), 'Cycle start not evaluated yet')
+    phase = NOW_PHASE_UNKNOWN
+    if isinstance(current_phase_summary, dict):
+        phase = current_phase_summary.get('phase', NOW_PHASE_UNKNOWN)
+
+    current_date = _latest_frame_text(metadata.get('current_date'), 'Not evaluated yet')
+    cycle_status = _sky_cycle_status(day_date, current_date, bool(cycle_start))
+    cycle_verdict = _sky_cycle_verdict(cycle_status, phase)
+    time_range_label = 'From {0:s} to {1:s}'.format(start_timestamp, latest_timestamp)
+    confidence_label = 'Medium confidence from image metadata' if cycle_start else 'Low confidence; cycle start unavailable'
+
+    evidence = [
+        'latest_frame={0:s}'.format(latest_timestamp),
+        'sky_day={0:s}'.format(day_date),
+        'current_phase={0:s}'.format(phase),
+    ]
+    if cycle_start:
+        evidence.append('cycle_start={0:s}'.format(start_timestamp))
+    else:
+        evidence.append('cycle_start=not_available')
+
+    return SkyCycleSummary(
+        id='sky_cycle.summary.metadata',
+        label='Cycle Summary',
+        title='Sky Cycle Report',
+        cycle_label='Sky Cycle {0:s}'.format(day_date),
+        data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+        current_phase=phase,
+        cycle_status=cycle_status,
+        cycle_verdict=cycle_verdict,
+        cycle_started_label=start_timestamp,
+        latest_frame_label=latest_timestamp,
+        time_range_label=time_range_label,
+        coverage_label='Latest and start metadata available' if cycle_start else 'Latest metadata available; start metadata unavailable',
+        confidence_label=confidence_label,
+        evidence=evidence,
+        note='Summary is based on bounded image metadata only. Twilight, full coverage, moments, outputs, and source lineage are not evaluated here.',
+        is_placeholder=False,
     ).to_dict()
 
 
@@ -3789,6 +3961,28 @@ def _build_highlights_metadata_unavailable(note):
     }
 
 
+def _build_sky_cycle_metadata_empty():
+    return {
+        'status': 'no_sky_cycle_metadata',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'latest_frame': {},
+        'cycle_start': {},
+        'current_date': None,
+        'note': 'No image metadata row is available for a Sky Cycle summary.',
+    }
+
+
+def _build_sky_cycle_metadata_unavailable(note):
+    return {
+        'status': 'sky_cycle_metadata_unavailable',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'latest_frame': {},
+        'cycle_start': {},
+        'current_date': None,
+        'note': _latest_frame_text(note, 'Sky Cycle metadata unavailable.'),
+    }
+
+
 def _build_sky_cycle_briefing():
     return SkyCycleBriefingSection(
         id='sky_cycle.placeholder',
@@ -4211,6 +4405,50 @@ def _highlight_image_row_metadata(row):
         and _latest_frame_metadata_value_is_json_safe(value)
         and not _latest_frame_value_is_unsafe(value)
     }
+
+
+def _sky_cycle_image_row_metadata(row):
+    created_at = getattr(row, 'createDate', None)
+    metadata = {
+        'id': _latest_frame_json_value(getattr(row, 'id', None)),
+        'camera_id': _latest_frame_json_value(getattr(row, 'camera_id', None)),
+        'timestamp': _latest_frame_timestamp_label(created_at),
+        'day_date': _latest_generated_output_json_value(getattr(row, 'dayDate', None)),
+        'night': _latest_frame_json_value(getattr(row, 'night', None)),
+    }
+
+    return {
+        key: value
+        for key, value in metadata.items()
+        if _latest_frame_metadata_value_is_json_safe(value)
+        and not _latest_frame_value_is_unsafe(value)
+    }
+
+
+def _sky_cycle_status(day_date, current_date, has_cycle_start):
+    if not has_cycle_start:
+        return SKY_CYCLE_STATUS_INCOMPLETE
+
+    if day_date in (None, '', 'Unknown sky day') or current_date in (None, '', 'Not evaluated yet'):
+        return SKY_CYCLE_STATUS_UNKNOWN
+
+    if day_date == current_date:
+        return SKY_CYCLE_STATUS_IN_PROGRESS
+
+    return SKY_CYCLE_STATUS_COMPLETED
+
+
+def _sky_cycle_verdict(cycle_status, phase):
+    if cycle_status == SKY_CYCLE_STATUS_IN_PROGRESS:
+        return 'Current Sky Cycle in progress.'
+
+    if cycle_status == SKY_CYCLE_STATUS_COMPLETED:
+        return 'Latest Sky Cycle appears completed from metadata.'
+
+    if cycle_status == SKY_CYCLE_STATUS_INCOMPLETE:
+        return 'Sky Cycle metadata is incomplete.'
+
+    return 'Sky Cycle status unknown.'
 
 
 def _highlight_item_from_image_metadata(metadata):
@@ -4666,6 +4904,33 @@ def _validate_sky_cycle_summary(summary):
 
     if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
         raise ValueError('Invalid data_status at sky_cycle.cycle_summary: {0!r}'.format(summary['data_status']))
+
+    if summary['cycle_status'] not in SKY_CYCLE_ALLOWED_STATUSES:
+        raise ValueError('Invalid cycle_status at sky_cycle.cycle_summary: {0!r}'.format(summary['cycle_status']))
+
+    if summary['current_phase'] not in NOW_ALLOWED_PHASES and summary['current_phase'] != 'Not evaluated yet':
+        raise ValueError('Invalid current_phase at sky_cycle.cycle_summary: {0!r}'.format(summary['current_phase']))
+
+    if not isinstance(summary['evidence'], list):
+        raise ValueError('cycle_summary.evidence must be a list')
+
+    for key, value in summary.items():
+        if key == 'evidence':
+            for evidence_item in value:
+                if not _latest_frame_metadata_value_is_json_safe(evidence_item) or _latest_frame_value_is_unsafe(evidence_item):
+                    raise ValueError('cycle_summary.evidence contains unsafe value')
+            continue
+
+        if key == 'is_placeholder':
+            if not isinstance(value, bool):
+                raise ValueError('cycle_summary.is_placeholder must be a boolean')
+            continue
+
+        if not _latest_frame_metadata_value_is_json_safe(value):
+            raise ValueError('cycle_summary contains non-primitive value: {0:s}'.format(str(key)))
+
+        if _latest_frame_value_is_unsafe(value):
+            raise ValueError('cycle_summary contains unsafe value: {0:s}'.format(str(key)))
 
 
 def _validate_sky_cycle_phase_timeline(phase_timeline):
