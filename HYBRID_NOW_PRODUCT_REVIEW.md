@@ -281,6 +281,20 @@ static provider contract.
 The main remaining gap is true Flask integration testing with app/session/DB
 fixtures.
 
+## Latest Frame Metadata Integration Update
+
+The runtime provider now uses the strengthened metadata-only adapter and exposes
+an allowlisted `frame_metadata` block in `latest_frame_summary`.
+
+Now can render compact latest-frame facts such as timestamp, exposure, gain,
+binning, ADU, SQM, stars, detections, and frame size when those DB metadata
+fields are present. The integration remains camera-scoped, bounded to one row,
+read-only, and fallback-safe.
+
+The integration still deliberately excludes preview URLs, filenames, paths,
+storage keys, raw `data`, raw ORM rows, filesystem checks, media reads, RAW/FITS
+reads, and generated media behavior.
+
 ## Current Phase Update
 
 NowView now includes `current_phase_summary`, sourced only from the existing

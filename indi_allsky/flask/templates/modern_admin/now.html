@@ -59,6 +59,26 @@
                 <p>{{ latest_frame.note }}</p>
                 <p>Camera: {{ latest_frame.camera_label }}. Profile: {{ latest_frame.profile_label }}.</p>
                 <p>Timestamp: {{ latest_frame.timestamp }}. Age: {{ latest_frame.age_label }}.</p>
+                {% set frame_metadata = latest_frame.frame_metadata %}
+                {% if frame_metadata %}
+                    <p><strong>Frame metadata:</strong>
+                    {% if frame_metadata.exposure is not none %}Exposure {{ frame_metadata.exposure }}s.{% endif %}
+                    {% if frame_metadata.gain is not none %} Gain {{ frame_metadata.gain }}.{% endif %}
+                    {% if frame_metadata.binmode is not none %} Binning {{ frame_metadata.binmode }}.{% endif %}
+                    {% if frame_metadata.night is not none %} Phase {{ 'Night' if frame_metadata.night else 'Day' }}.{% endif %}
+                    </p>
+                    <p>
+                    {% if frame_metadata.adu is not none %}ADU {{ frame_metadata.adu }}.{% endif %}
+                    {% if frame_metadata.sqm is not none %} SQM {{ frame_metadata.sqm }}.{% endif %}
+                    {% if frame_metadata.stars is not none %} Stars {{ frame_metadata.stars }}.{% endif %}
+                    {% if frame_metadata.detections is not none %} Detections {{ frame_metadata.detections }}.{% endif %}
+                    </p>
+                    {% if frame_metadata.width is not none and frame_metadata.height is not none %}
+                        <p>Frame size: {{ frame_metadata.width }} x {{ frame_metadata.height }}.</p>
+                    {% endif %}
+                {% else %}
+                    <p>Frame metadata is not available from the bounded source yet.</p>
+                {% endif %}
                 <span class="modern-admin-status-pill modern-admin-status-muted">{{ latest_frame.source_status }}</span>
             </article>
             <article class="modern-admin-status-card">

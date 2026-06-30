@@ -7458,15 +7458,14 @@ class ModernAdminNowView(TemplateView):
                 or 'Unknown camera'
             )
 
-            query = IndiAllSkyDbImageTable.query\
-                .filter(IndiAllSkyDbImageTable.camera_id == camera_id)
-
             repository = LatestFrameImageTableRepository(
-                query=query,
+                query=IndiAllSkyDbImageTable.query,
                 order_by_expression=IndiAllSkyDbImageTable.createDate.desc(),
                 camera_label=camera_label,
                 profile_label='Profile not evaluated yet',
                 clock=lambda: self.camera_now,
+                camera_id=camera_id,
+                camera_id_field=IndiAllSkyDbImageTable.camera_id,
             )
         except Exception:
             app.logger.error('Unable to build Now latest frame provider')

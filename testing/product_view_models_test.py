@@ -1839,6 +1839,21 @@ def test_build_now_view_accepts_injected_latest_frame_provider():
     json.dumps(now_view, sort_keys=True)
 
 
+def test_now_template_shows_latest_frame_metadata_without_mutative_controls():
+    template_text = Path('indi_allsky/flask/templates/modern_admin/now.html').read_text()
+
+    assert 'Frame metadata' in template_text
+    assert 'frame_metadata.exposure' in template_text
+    assert 'frame_metadata.gain' in template_text
+    assert 'frame_metadata.adu' in template_text
+    assert 'frame_metadata.sqm' in template_text
+    assert '<form' not in template_text
+    assert 'POST' not in template_text
+    assert 'fetch' not in template_text
+    assert '/ajax/' not in template_text
+    assert 'safe_preview_url' not in template_text
+
+
 def test_latest_frame_image_table_adapter_with_row_present():
     created_at = datetime(2026, 6, 29, 5, 32, 10)
     query = FakeImageQuery(FakeImageRow(
@@ -2322,6 +2337,7 @@ def main():
         test_latest_frame_provider_with_repository_error,
         test_latest_frame_provider_rejects_suspicious_metadata,
         test_build_now_view_accepts_injected_latest_frame_provider,
+        test_now_template_shows_latest_frame_metadata_without_mutative_controls,
         test_latest_frame_image_table_adapter_with_row_present,
         test_latest_frame_image_table_adapter_handles_missing_fields,
         test_latest_frame_image_table_adapter_drops_non_primitive_values,
