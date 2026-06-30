@@ -14369,13 +14369,15 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
         width = getattr(media_entry, 'width', None)
         height = getattr(media_entry, 'height', None)
         frames = getattr(media_entry, 'frames', None)
+        media_url = self.get_media_url(media_entry)
+        preview_url = self.get_media_preview_url(media_entry, media_url=media_url)
 
         return {
             'id'          : media_entry.id,
             'camera_id'   : getattr(media_entry, 'camera_id', None),
             'title'       : self.format_media_title(media_entry),
-            'url'         : self.get_media_url(media_entry),
-            'preview_url' : self.get_media_preview_url(media_entry),
+            'url'         : media_url,
+            'preview_url' : preview_url,
             'filename'    : Path(media_entry.filename).name,
             'created'     : create_date.strftime('%Y-%m-%d %H:%M:%S') if create_date else 'Unknown date',
             'day_date'    : day_date.strftime('%Y-%m-%d') if day_date else 'Unknown day',
@@ -14405,8 +14407,8 @@ class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
             return None
 
 
-    def get_media_preview_url(self, media_entry):
-        return self.get_media_url(media_entry)
+    def get_media_preview_url(self, media_entry, media_url=None):
+        return media_url if media_url is not None else self.get_media_url(media_entry)
 
 
     def normalize_media_url(self, media_url):
@@ -14531,6 +14533,10 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
 
 
     def get_gallery_camera_filters(self):
+        cached_filters = getattr(self, '_modern_admin_gallery_camera_filters', None)
+        if cached_filters is not None:
+            return cached_filters
+
         filters = [{
             'label'      : 'All Cameras',
             'profile_id' : '',
@@ -14565,6 +14571,7 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
                     'active'     : False,
                 })
 
+        self._modern_admin_gallery_camera_filters = filters
         return filters
 
 
@@ -14717,16 +14724,16 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
         return ' '.join(formatted_parts)
 
 
-    def get_media_preview_url(self, media_entry):
+    def get_media_preview_url(self, media_entry, media_url=None):
         if not media_entry.thumbnail_uuid:
-            return self.get_media_url(media_entry)
+            return media_url if media_url is not None else self.get_media_url(media_entry)
 
         try:
             thumbnail_entry = IndiAllSkyDbThumbnailTable.query\
                 .filter(IndiAllSkyDbThumbnailTable.uuid == media_entry.thumbnail_uuid)\
                 .one()
         except NoResultFound:
-            return self.get_media_url(media_entry)
+            return media_url if media_url is not None else self.get_media_url(media_entry)
 
         local = True
         if self.web_nonlocal_images:
@@ -14735,13 +14742,13 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
             else:
                 local = False
                 if not thumbnail_entry.remote_url and not thumbnail_entry.s3_key:
-                    return self.get_media_url(media_entry)
+                    return media_url if media_url is not None else self.get_media_url(media_entry)
 
         try:
             return self.normalize_media_url(thumbnail_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
         except Exception as e:
             app.logger.error('Error determining modern admin thumbnail URL: %s', str(e))
-            return self.get_media_url(media_entry)
+            return media_url if media_url is not None else self.get_media_url(media_entry)
 
 
 class ModernAdminMediaGalleryPageView(ModernAdminMediaGalleryView):
@@ -15796,7 +15803,7 @@ class ModernAdminMediaFitsView(ModernAdminMediaListView):
     modern_admin_media_kind = 'fits'
     modern_admin_media_layout = 'viewer'
 
-    def get_media_preview_url(self, media_entry):
+    def get_media_preview_url(self, media_entry, media_url=None):
         return url_for('indi_allsky.fits2jpeg_view', id=media_entry.id)
 
 
