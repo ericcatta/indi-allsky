@@ -113,7 +113,8 @@ The Product UI v1 skeleton is ready for a cautious real-data phase.
 Recommended order:
 
 1. Keep latest frame metadata and current day/night phase as the baseline real
-   data already started in Now.
+   data in Now. DATA001 latest frame metadata is now integrated as a bounded,
+   metadata-only `latest_frame_summary.frame_metadata` block.
 2. Add bounded latest generated output metadata, metadata-only, with no preview
    URL and no filesystem/media read.
 3. Add bounded source preservation summary from existing metadata only, with no

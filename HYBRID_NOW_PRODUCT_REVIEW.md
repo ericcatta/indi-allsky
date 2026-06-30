@@ -295,6 +295,14 @@ The integration still deliberately excludes preview URLs, filenames, paths,
 storage keys, raw `data`, raw ORM rows, filesystem checks, media reads, RAW/FITS
 reads, and generated media behavior.
 
+## DATA001 Completion Update
+
+DATA001 Latest Frame Metadata is complete with minor risks.
+
+Now now has its first real, bounded, metadata-only product fact. The remaining
+risks are limited to missing full Flask/DB integration tests, timestamp semantics,
+and preserving the strict adapter allowlist in future edits.
+
 ## Current Phase Update
 
 NowView now includes `current_phase_summary`, sourced only from the existing
