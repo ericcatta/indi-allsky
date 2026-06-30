@@ -74,6 +74,7 @@
         "/modern-admin/config-restore",
                 "/modern-admin/fits",
                 "/modern-admin/highlights",
+        "/modern-admin/library",
                 "/modern-admin/media/*",
         "/modern-admin/moment",
         "/modern-admin/mode/*",
@@ -132,6 +133,7 @@
         "modern_admin/image_lag.html",
         "modern_admin/index.html",
         "modern_admin/keograms.html",
+        "modern_admin/library.html",
         "modern_admin/log.html",
         "modern_admin/log_detail.html",
         "modern_admin/longterm_keogram.html",
@@ -185,6 +187,7 @@
                 "modern_admin_highlights_view",
                 "modern_admin_moment_detail_view",
                 "modern_admin_output_detail_view",
+                "modern_admin_library_view",
                 "modern_admin_sky_cycle_view",
         "modern_admin_uploads_view",
         "modern_admin_media_image_detail_view",
@@ -940,6 +943,42 @@
       "removal_risk": "critical",
       "notes": [
         "Fifth concrete surface for the domain-first Product UI.",
+        "Read-only, no controls, no runtime data evaluation.",
+        "Owner label is Modern Product UI; static route/template ownership remains classified as modern."
+      ]
+    },
+    "library_product_prototype": {
+      "label": "Library Product Prototype",
+      "status": "PRODUCT PROTOTYPE READ-ONLY",
+      "owner": "modern_product_ui",
+      "porting_priority": "product_prototype",
+      "routes": [
+        "/modern-admin/library"
+      ],
+      "templates": [
+        "modern_admin/library.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "modern_admin_library_view"
+      ],
+      "config_keys": [],
+      "protected": true,
+      "safety": "Read-only static Library view-model prototype. No database, query, filesystem, RAW/FITS, media read, preview URL, real search, real indexing, download, share, or actions.",
+      "blockers": [
+        "Real Library backend contract",
+        "Bounded archive index",
+        "Pagination and query limits",
+        "Favorites and saved searches policy",
+        "Source lineage references",
+        "Safe actions for any future curation behavior"
+      ],
+      "modern_gap": "Prototype uses static sanitized placeholders until product domain contracts provide real Library collections, search, filters, recent items, and memory model.",
+      "removal_risk": "critical",
+      "notes": [
+        "Sixth concrete surface for the domain-first Product UI.",
         "Read-only, no controls, no runtime data evaluation.",
         "Owner label is Modern Product UI; static route/template ownership remains classified as modern."
       ]

@@ -17,6 +17,7 @@ from indi_allsky.product_view_models import build_current_phase_summary
 from indi_allsky.product_view_models import build_highlights_view
 from indi_allsky.product_view_models import build_moment_detail_view
 from indi_allsky.product_view_models import build_output_detail_view
+from indi_allsky.product_view_models import build_library_view
 from indi_allsky.product_view_models import build_sky_cycle_report_view
 from indi_allsky.product_view_models import build_source_confidence_summary
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
@@ -26,6 +27,7 @@ from indi_allsky.product_view_models import validate_highlights_payload
 from indi_allsky.product_view_models import validate_moment_detail_payload
 from indi_allsky.product_view_models import validate_now_view_payload
 from indi_allsky.product_view_models import validate_output_detail_payload
+from indi_allsky.product_view_models import validate_library_payload
 
 
 REQUIRED_NOW_KEYS = {
@@ -72,6 +74,7 @@ SKY_CYCLE_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/sky_cycle.ht
 HIGHLIGHTS_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/highlights.html')
 MOMENT_DETAIL_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/moment_detail.html')
 OUTPUT_DETAIL_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/output_detail.html')
+LIBRARY_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/library.html')
 
 REQUIRED_SKY_CYCLE_KEYS = {
     'id',
@@ -123,6 +126,23 @@ REQUIRED_OUTPUT_DETAIL_KEYS = {
     'related_moments',
     'sky_cycle_context',
     'share_readiness_summary',
+    'metadata',
+}
+
+REQUIRED_LIBRARY_KEYS = {
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'library_summary',
+    'collection_summary',
+    'search_summary',
+    'filter_summary',
+    'recent_items',
+    'memory_model_summary',
     'metadata',
 }
 
@@ -965,6 +985,169 @@ def test_output_detail_template_has_no_mutative_controls():
     assert '/ajax/' not in template_text
 
 
+def test_build_library_view_returns_dict():
+    library = build_library_view()
+
+    assert isinstance(library, dict)
+    assert REQUIRED_LIBRARY_KEYS.issubset(library.keys())
+    assert library['id'] == 'library.placeholder'
+    assert library['metadata']['contract'] == 'LibraryView'
+
+
+def test_build_library_view_is_json_serializable():
+    library = build_library_view()
+
+    json.dumps(library, sort_keys=True)
+
+
+def test_build_library_view_has_required_sections():
+    library = build_library_view()
+
+    assert_section_status(library['library_summary'])
+    assert_section_status(library['collection_summary'])
+    assert_section_status(library['search_summary'])
+    assert_section_status(library['filter_summary'])
+    assert_section_status(library['recent_items'])
+    assert_section_status(library['memory_model_summary'])
+
+    assert isinstance(library['collection_summary']['collections'], list)
+    assert len(library['collection_summary']['collections']) >= 5
+    for collection in library['collection_summary']['collections']:
+        assert collection['type'] in {
+            'highlights',
+            'moments',
+            'outputs',
+            'sky_cycles',
+            'favorites',
+            'source_backed',
+            'phenomena',
+            'unknown',
+        }
+
+    assert isinstance(library['search_summary']['indexed_fields'], list)
+    assert isinstance(library['filter_summary']['available_filters'], list)
+    assert isinstance(library['filter_summary']['disabled_filters'], list)
+    assert isinstance(library['recent_items']['items'], list)
+    for item in library['recent_items']['items']:
+        assert item['kind'] in {
+            'highlight',
+            'moment',
+            'output',
+            'sky_cycle',
+            'source',
+            'favorite',
+            'unknown',
+        }
+        assert item['phase'] in {
+            'day',
+            'sunset_twilight',
+            'night',
+            'sunrise_twilight',
+            'unknown',
+        }
+
+
+def test_build_library_view_contains_no_sensitive_payload():
+    library = build_library_view()
+
+    assert_no_sensitive_text(library)
+    assert_no_absolute_paths(library)
+    assert_no_callables(library)
+
+
+def test_validate_library_payload_success():
+    assert validate_library_payload(build_library_view()) is True
+
+
+def test_validate_library_payload_requires_sections():
+    library = build_library_view()
+    del library['library_summary']
+
+    try:
+        validate_library_payload(library)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('missing library_summary should fail validation')
+
+
+def test_validate_library_payload_rejects_invalid_kind():
+    library = build_library_view()
+    library['recent_items']['items'][0]['kind'] = 'gallery'
+
+    try:
+        validate_library_payload(library)
+    except ValueError as e:
+        assert 'Invalid Library item kind' in str(e)
+    else:
+        raise AssertionError('invalid Library item kind should fail validation')
+
+
+def test_validate_library_payload_rejects_invalid_collection_type():
+    library = build_library_view()
+    library['collection_summary']['collections'][0]['type'] = 'albums'
+
+    try:
+        validate_library_payload(library)
+    except ValueError as e:
+        assert 'Invalid collection type' in str(e)
+    else:
+        raise AssertionError('invalid Library collection type should fail validation')
+
+
+def test_validate_library_payload_rejects_indexed_fields_not_list():
+    library = build_library_view()
+    library['search_summary']['indexed_fields'] = 'kind,date'
+
+    try:
+        validate_library_payload(library)
+    except ValueError as e:
+        assert 'indexed_fields must be a list' in str(e)
+    else:
+        raise AssertionError('Library indexed_fields string should fail validation')
+
+
+def test_validate_library_payload_rejects_path_secret_callable():
+    library = build_library_view()
+    library['recent_items']['items'][0]['note'] = '/var/lib/indi-allsky/archive'
+
+    try:
+        validate_library_payload(library)
+    except ValueError as e:
+        assert 'Absolute paths' in str(e)
+    else:
+        raise AssertionError('Library path should fail validation')
+
+    library = build_library_view()
+    library['search_summary']['note'] = {'password': 'value'}
+
+    try:
+        validate_library_payload(library)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('Library secret should fail validation')
+
+    library = build_library_view()
+    library['memory_model_summary']['explanation'] = lambda: None
+
+    try:
+        validate_library_payload(library)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('Library callable should fail validation')
+
+
+def test_library_template_has_no_mutative_controls():
+    template_text = LIBRARY_TEMPLATE.read_text(encoding='utf-8').lower()
+
+    assert '<form' not in template_text
+    assert 'post' not in template_text
+    assert 'fetch' not in template_text
+    assert '/ajax/' not in template_text
+
+
 def test_validate_sky_cycle_report_payload_success():
     assert validate_sky_cycle_report_payload(build_sky_cycle_report_view()) is True
 
@@ -1766,6 +1949,17 @@ def main():
         test_validate_output_detail_payload_rejects_direct_safe_action,
         test_validate_output_detail_payload_rejects_path_secret_callable,
         test_output_detail_template_has_no_mutative_controls,
+        test_build_library_view_returns_dict,
+        test_build_library_view_is_json_serializable,
+        test_build_library_view_has_required_sections,
+        test_build_library_view_contains_no_sensitive_payload,
+        test_validate_library_payload_success,
+        test_validate_library_payload_requires_sections,
+        test_validate_library_payload_rejects_invalid_kind,
+        test_validate_library_payload_rejects_invalid_collection_type,
+        test_validate_library_payload_rejects_indexed_fields_not_list,
+        test_validate_library_payload_rejects_path_secret_callable,
+        test_library_template_has_no_mutative_controls,
         test_validate_sky_cycle_report_payload_success,
         test_validate_sky_cycle_report_payload_requires_sections,
         test_validate_sky_cycle_report_payload_rejects_invalid_status,

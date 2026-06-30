@@ -755,6 +755,140 @@ OUTPUT_DETAIL_ALLOWED_TRUST_LEVELS = frozenset((
     'high',
 ))
 
+LIBRARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'library_summary',
+    'collection_summary',
+    'search_summary',
+    'filter_summary',
+    'recent_items',
+    'memory_model_summary',
+    'metadata',
+))
+
+LIBRARY_REQUIRED_SECTIONS = frozenset((
+    'library_summary',
+    'collection_summary',
+    'search_summary',
+    'filter_summary',
+    'recent_items',
+    'memory_model_summary',
+))
+
+LIBRARY_SUMMARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'title',
+    'data_status',
+    'scope_label',
+    'total_items_label',
+    'note',
+    'is_placeholder',
+))
+
+LIBRARY_COLLECTION_SUMMARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'collections',
+    'note',
+    'is_placeholder',
+))
+
+LIBRARY_COLLECTION_REQUIRED_KEYS = frozenset((
+    'key',
+    'label',
+    'type',
+    'data_status',
+    'count_label',
+    'description',
+    'example_query',
+    'is_placeholder',
+))
+
+LIBRARY_SEARCH_SUMMARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'search_status',
+    'indexed_fields',
+    'unavailable_reason',
+    'note',
+    'is_placeholder',
+))
+
+LIBRARY_FILTER_SUMMARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'available_filters',
+    'disabled_filters',
+    'note',
+    'is_placeholder',
+))
+
+LIBRARY_RECENT_ITEMS_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'items',
+    'note',
+    'is_placeholder',
+))
+
+LIBRARY_RECENT_ITEM_REQUIRED_KEYS = frozenset((
+    'item_id',
+    'title',
+    'kind',
+    'data_status',
+    'date_label',
+    'phase',
+    'highlight_status',
+    'source_trust_status',
+    'output_status',
+    'note',
+    'is_placeholder',
+))
+
+LIBRARY_MEMORY_MODEL_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'status',
+    'explanation',
+    'future_favorites_status',
+    'future_tags_status',
+    'future_saved_searches_status',
+    'is_placeholder',
+))
+
+LIBRARY_ALLOWED_KINDS = frozenset((
+    'highlight',
+    'moment',
+    'output',
+    'sky_cycle',
+    'source',
+    'favorite',
+    'unknown',
+))
+
+LIBRARY_ALLOWED_COLLECTION_TYPES = frozenset((
+    'highlights',
+    'moments',
+    'outputs',
+    'sky_cycles',
+    'favorites',
+    'source_backed',
+    'phenomena',
+    'unknown',
+))
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -1162,6 +1296,29 @@ def build_output_detail_view():
     return payload
 
 
+def build_library_view():
+    """Return the first fake-safe Library product contract."""
+    payload = {
+        'id': 'library.placeholder',
+        'label': 'Library',
+        'status': 'Read-only product prototype',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'generated_at': 'Not evaluated yet',
+        'is_placeholder': True,
+        'safe_actions_available': [],
+        'library_summary': _build_library_summary(),
+        'collection_summary': _build_library_collection_summary(),
+        'search_summary': _build_library_search_summary(),
+        'filter_summary': _build_library_filter_summary(),
+        'recent_items': _build_library_recent_items(),
+        'memory_model_summary': _build_library_memory_model_summary(),
+        'metadata': _build_library_metadata(),
+    }
+
+    validate_library_payload(payload)
+    return payload
+
+
 def validate_now_view_payload(payload):
     """Validate a NowView payload before it reaches presentation templates."""
     if not isinstance(payload, dict):
@@ -1261,6 +1418,34 @@ def validate_output_detail_payload(payload):
     _validate_output_detail_related_moments(payload.get('related_moments'))
     _validate_output_detail_sky_cycle_context(payload.get('sky_cycle_context'))
     _validate_output_detail_share_readiness_summary(payload.get('share_readiness_summary'))
+    _validate_data_statuses(payload)
+    _validate_no_callables(payload)
+    _validate_no_sensitive_keys(payload)
+    _validate_no_absolute_paths(payload)
+    _validate_safe_actions(payload)
+    _validate_json_safe(payload)
+
+    return True
+
+
+def validate_library_payload(payload):
+    """Validate a Library payload before template rendering."""
+    if not isinstance(payload, dict):
+        raise ValueError('Library payload must be a dict')
+
+    missing_keys = sorted(LIBRARY_REQUIRED_KEYS.difference(payload.keys()))
+    if missing_keys:
+        raise ValueError('Library payload missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    for section_key in LIBRARY_REQUIRED_SECTIONS:
+        _validate_required_section(payload, section_key)
+
+    _validate_library_summary(payload.get('library_summary'))
+    _validate_library_collection_summary(payload.get('collection_summary'))
+    _validate_library_search_summary(payload.get('search_summary'))
+    _validate_library_filter_summary(payload.get('filter_summary'))
+    _validate_library_recent_items(payload.get('recent_items'))
+    _validate_library_memory_model_summary(payload.get('memory_model_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
     _validate_no_sensitive_keys(payload)
@@ -2140,6 +2325,210 @@ def _build_output_detail_metadata():
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
         'is_placeholder': True,
         'rp5_policy': 'No database, filesystem, media read, media generation, preview URL, rendering job, or external delivery.',
+    }
+
+
+def _build_library_summary():
+    return {
+        'id': 'library.summary.placeholder',
+        'label': 'Library Summary',
+        'title': 'Library',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'scope_label': 'Highlights, Moments, Outputs, Sky Cycles, and future Favorites',
+        'total_items_label': 'No indexed items evaluated yet',
+        'note': 'This view will help retrieve notable sky observations over time. Library indexing is not connected yet.',
+        'is_placeholder': True,
+    }
+
+
+def _build_library_collection_summary():
+    return {
+        'id': 'library.collections.placeholder',
+        'label': 'Collections',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'collections': [
+            {
+                'key': 'highlights',
+                'label': 'Highlights',
+                'type': 'highlights',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'count_label': 'No real Highlights indexed',
+                'description': 'Curated attention objects selected by Hybrid or the user.',
+                'example_query': 'meteor highlights from last winter',
+                'is_placeholder': True,
+            },
+            {
+                'key': 'moments',
+                'label': 'Moments',
+                'type': 'moments',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'count_label': 'No real Moments indexed',
+                'description': 'Cases worth analyzing, such as meteors, storms, clear windows, and anomalies.',
+                'example_query': 'clear windows during moonless nights',
+                'is_placeholder': True,
+            },
+            {
+                'key': 'outputs',
+                'label': 'Outputs',
+                'type': 'outputs',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'count_label': 'No generated Outputs indexed',
+                'description': 'Generated or derived results such as timelapse, keogram, startrail, and highlights.',
+                'example_query': 'startrails with high source trust',
+                'is_placeholder': True,
+            },
+            {
+                'key': 'sky_cycles',
+                'label': 'Sky Cycles',
+                'type': 'sky_cycles',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'count_label': 'No Sky Cycles indexed',
+                'description': 'Day-and-night observation cycles with phases, source confidence, and output context.',
+                'example_query': 'cycles with aurora candidates',
+                'is_placeholder': True,
+            },
+            {
+                'key': 'favorites',
+                'label': 'Favorites',
+                'type': 'favorites',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'count_label': 'Favorites not connected yet',
+                'description': 'Future user-curated items kept for review, export, or long-term memory.',
+                'example_query': 'my favorite aurora outputs',
+                'is_placeholder': True,
+            },
+            {
+                'key': 'phenomena',
+                'label': 'Phenomena',
+                'type': 'phenomena',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'count_label': 'Phenomena index not connected',
+                'description': 'Meteor, aurora, storm, cloud, Moon, sky-quality, and anomaly groupings.',
+                'example_query': 'lightning candidates in summer',
+                'is_placeholder': True,
+            },
+        ],
+        'note': 'Collections are static placeholders until bounded archive contracts exist.',
+        'is_placeholder': True,
+    }
+
+
+def _build_library_search_summary():
+    return {
+        'id': 'library.search.placeholder',
+        'label': 'Search Summary',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'search_status': 'Library search is not connected yet.',
+        'indexed_fields': [
+            'kind',
+            'date',
+            'phase',
+            'phenomenon',
+            'source trust',
+            'output status',
+        ],
+        'unavailable_reason': 'No database, filesystem, media, or index provider is connected.',
+        'note': 'Search should become bounded, paginated, and safe for Raspberry Pi 5 before any runtime integration.',
+        'is_placeholder': True,
+    }
+
+
+def _build_library_filter_summary():
+    return {
+        'id': 'library.filters.placeholder',
+        'label': 'Filter Summary',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'available_filters': [
+            'kind',
+            'phase',
+            'phenomenon',
+            'source trust',
+        ],
+        'disabled_filters': [
+            'date range',
+            'camera',
+            'Look',
+            'favorite status',
+            'saved search',
+        ],
+        'note': 'Filters are described as product requirements only; no filtering is performed in this prototype.',
+        'is_placeholder': True,
+    }
+
+
+def _build_library_recent_items():
+    return {
+        'id': 'library.recent_items.placeholder',
+        'label': 'Recent Items',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'items': [
+            {
+                'item_id': 'library.item.highlight.placeholder',
+                'title': 'Possible meteor candidate',
+                'kind': 'highlight',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'date_label': 'Date not evaluated yet',
+                'phase': 'night',
+                'highlight_status': 'Suggested placeholder',
+                'source_trust_status': 'Source trust not evaluated yet',
+                'output_status': 'Related output not evaluated yet',
+                'note': 'Example of a future Highlight retrieved from the archive.',
+                'is_placeholder': True,
+            },
+            {
+                'item_id': 'library.item.output.placeholder',
+                'title': 'Generated meteor highlight',
+                'kind': 'output',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'date_label': 'Date not evaluated yet',
+                'phase': 'night',
+                'highlight_status': 'Related Highlight not evaluated yet',
+                'source_trust_status': 'Source lineage pending source contract',
+                'output_status': 'Generated output status pending rendering contract',
+                'note': 'Example of a future Output retrieved by source trust or phenomenon.',
+                'is_placeholder': True,
+            },
+            {
+                'item_id': 'library.item.sky_cycle.placeholder',
+                'title': 'Sky Cycle with clear-window candidate',
+                'kind': 'sky_cycle',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'date_label': 'Date not evaluated yet',
+                'phase': 'unknown',
+                'highlight_status': 'Cycle highlights not evaluated yet',
+                'source_trust_status': 'Source coverage pending bounded backend contract',
+                'output_status': 'Cycle outputs not evaluated yet',
+                'note': 'Example of a future Sky Cycle entry retrieved by condition or event.',
+                'is_placeholder': True,
+            },
+        ],
+        'note': 'Recent items are static examples and do not read archive, media, or source data.',
+        'is_placeholder': True,
+    }
+
+
+def _build_library_memory_model_summary():
+    return {
+        'id': 'library.memory_model.placeholder',
+        'label': 'Memory Model',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'status': 'Long-term memory model not connected yet.',
+        'explanation': 'Library should help retrieve notable sky observations by meaning, not by raw implementation paths.',
+        'future_favorites_status': 'Favorites are future user-curation features.',
+        'future_tags_status': 'Tags are not connected yet.',
+        'future_saved_searches_status': 'Saved searches are future user-curation features.',
+        'is_placeholder': True,
+    }
+
+
+def _build_library_metadata():
+    return {
+        'contract': 'LibraryView',
+        'contract_version': 'v1.static',
+        'source': 'build_library_view',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'is_placeholder': True,
+        'rp5_policy': 'No database, query, filesystem, media read, indexing provider, preview URL, or archive scan.',
     }
 
 
@@ -3097,6 +3486,124 @@ def _validate_output_detail_share_readiness_summary(summary):
         raise ValueError('share_readiness_summary.safe_actions_available must be a list')
 
     _validate_safe_actions({'safe_actions_available': summary['safe_actions_available']})
+
+
+def _validate_library_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('library_summary must be a dict')
+
+    missing_keys = sorted(LIBRARY_SUMMARY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('library_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at library.library_summary: {0!r}'.format(summary['data_status']))
+
+
+def _validate_library_collection_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('collection_summary must be a dict')
+
+    missing_keys = sorted(LIBRARY_COLLECTION_SUMMARY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('collection_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at library.collection_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['collections'], list):
+        raise ValueError('collection_summary.collections must be a list')
+
+    for index, collection in enumerate(summary['collections']):
+        if not isinstance(collection, dict):
+            raise ValueError('collection_summary.collections[{0:d}] must be a dict'.format(index))
+
+        missing_collection_keys = sorted(LIBRARY_COLLECTION_REQUIRED_KEYS.difference(collection.keys()))
+        if missing_collection_keys:
+            raise ValueError('collection_summary.collections[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_collection_keys)))
+
+        if collection['type'] not in LIBRARY_ALLOWED_COLLECTION_TYPES:
+            raise ValueError('Invalid collection type at library.collection_summary.collections[{0:d}]: {1!r}'.format(index, collection['type']))
+
+        if collection['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+            raise ValueError('Invalid data_status at library.collection_summary.collections[{0:d}]: {1!r}'.format(index, collection['data_status']))
+
+
+def _validate_library_search_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('search_summary must be a dict')
+
+    missing_keys = sorted(LIBRARY_SEARCH_SUMMARY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('search_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at library.search_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['indexed_fields'], list):
+        raise ValueError('search_summary.indexed_fields must be a list')
+
+
+def _validate_library_filter_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('filter_summary must be a dict')
+
+    missing_keys = sorted(LIBRARY_FILTER_SUMMARY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('filter_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at library.filter_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['available_filters'], list):
+        raise ValueError('filter_summary.available_filters must be a list')
+
+    if not isinstance(summary['disabled_filters'], list):
+        raise ValueError('filter_summary.disabled_filters must be a list')
+
+
+def _validate_library_recent_items(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('recent_items must be a dict')
+
+    missing_keys = sorted(LIBRARY_RECENT_ITEMS_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('recent_items missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at library.recent_items: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['items'], list):
+        raise ValueError('recent_items.items must be a list')
+
+    for index, item in enumerate(summary['items']):
+        if not isinstance(item, dict):
+            raise ValueError('recent_items.items[{0:d}] must be a dict'.format(index))
+
+        missing_item_keys = sorted(LIBRARY_RECENT_ITEM_REQUIRED_KEYS.difference(item.keys()))
+        if missing_item_keys:
+            raise ValueError('recent_items.items[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_item_keys)))
+
+        if item['kind'] not in LIBRARY_ALLOWED_KINDS:
+            raise ValueError('Invalid Library item kind at library.recent_items.items[{0:d}]: {1!r}'.format(index, item['kind']))
+
+        if item['phase'] not in SKY_CYCLE_ALLOWED_PHASES:
+            raise ValueError('Invalid Library item phase at library.recent_items.items[{0:d}]: {1!r}'.format(index, item['phase']))
+
+        if item['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+            raise ValueError('Invalid data_status at library.recent_items.items[{0:d}]: {1!r}'.format(index, item['data_status']))
+
+
+def _validate_library_memory_model_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('memory_model_summary must be a dict')
+
+    missing_keys = sorted(LIBRARY_MEMORY_MODEL_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('memory_model_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at library.memory_model_summary: {0!r}'.format(summary['data_status']))
 
 
 def _validate_data_statuses(value, path='now'):

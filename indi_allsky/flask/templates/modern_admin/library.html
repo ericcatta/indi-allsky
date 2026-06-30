@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-library-product-v1') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="library-title">
+    <header class="modern-admin-table-panel" aria-label="Library product view">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Hybrid AllSky / Library</p>
+                <h1 id="library-title">{{ library_view.library_summary.title }}</h1>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ library_view.data_status | replace('_', ' ') | title }}</span>
+        </div>
+
+        <h2>{{ library_view.library_summary.scope_label }}</h2>
+        <p class="modern-admin-note">{{ library_view.library_summary.note }}</p>
+        <p class="modern-admin-note">Contract: <code>{{ library_view.metadata.contract }}</code> / <code>{{ library_view.metadata.contract_version }}</code>. Source: <code>{{ library_view.metadata.source }}</code>.</p>
+
+        <div class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_output_detail_view') }}">Output Detail</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle Report</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
+        </div>
+    </header>
+
+    <section class="modern-admin-table-panel" aria-labelledby="library-collections-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Archive structure</p>
+                <h2 id="library-collections-title">Collections</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ library_view.library_summary.total_items_label }}</span>
+        </div>
+        <p class="modern-admin-note">{{ library_view.collection_summary.note }}</p>
+
+        <section class="modern-admin-status-grid" aria-label="Library collections">
+            {% for collection in library_view.collection_summary.collections %}
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ collection.type | replace('_', ' ') | title }}</div>
+                <h3>{{ collection.label }}</h3>
+                <p>{{ collection.description }}</p>
+                <p><strong>Count:</strong> {{ collection.count_label }}</p>
+                <p><strong>Example:</strong> {{ collection.example_query }}</p>
+            </article>
+            {% endfor %}
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="library-find-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Retrieval</p>
+                <h2 id="library-find-title">Search and Filters</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ library_view.search_summary.data_status | replace('_', ' ') | title }}</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Library search and filters">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ library_view.search_summary.label }}</div>
+                <h3>{{ library_view.search_summary.search_status }}</h3>
+                <p>{{ library_view.search_summary.unavailable_reason }}</p>
+                <p>{{ library_view.search_summary.note }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Future indexed fields</div>
+                <h3>{{ library_view.search_summary.indexed_fields | join(', ') }}</h3>
+                <p>Index fields are product requirements only in this prototype.</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ library_view.filter_summary.label }}</div>
+                <h3>Available later: {{ library_view.filter_summary.available_filters | join(', ') }}</h3>
+                <p>Disabled: {{ library_view.filter_summary.disabled_filters | join(', ') }}</p>
+                <p>{{ library_view.filter_summary.note }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="library-recent-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Archive entries</p>
+                <h2 id="library-recent-title">Recent Items Prototype</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Static examples</span>
+        </div>
+        <p class="modern-admin-note">{{ library_view.recent_items.note }}</p>
+
+        <section class="modern-admin-status-grid" aria-label="Library recent items">
+            {% for item in library_view.recent_items.items %}
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ item.kind | replace('_', ' ') | title }} / {{ item.phase | replace('_', ' ') | title }}</div>
+                <h3>{{ item.title }}</h3>
+                <p><strong>Date:</strong> {{ item.date_label }}</p>
+                <p><strong>Highlight:</strong> {{ item.highlight_status }}</p>
+                <p><strong>Source trust:</strong> {{ item.source_trust_status }}</p>
+                <p><strong>Output:</strong> {{ item.output_status }}</p>
+                <p>{{ item.note }}</p>
+            </article>
+            {% endfor %}
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="library-memory-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Long-term memory</p>
+                <h2 id="library-memory-title">Memory Model</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ library_view.memory_model_summary.status }}</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Library memory model">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Retrieval model</div>
+                <h3>{{ library_view.memory_model_summary.explanation }}</h3>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">User curation</div>
+                <h3>{{ library_view.memory_model_summary.future_favorites_status }}</h3>
+                <p>{{ library_view.memory_model_summary.future_tags_status }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Saved retrieval</div>
+                <h3>{{ library_view.memory_model_summary.future_saved_searches_status }}</h3>
+                <p>No search or indexing runtime is connected.</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="library-boundary-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Boundary</p>
+                <h2 id="library-boundary-title">Static Product Contract</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">No runtime archive</span>
+        </div>
+        <p class="modern-admin-note">This page is a static Library contract. It does not query, scan storage, read source or media, build an index, display previews, or connect external delivery behavior.</p>
+    </section>
+</main>
+{% endblock %}
