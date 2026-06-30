@@ -10,17 +10,19 @@
     'indi_allsky.modern_admin_observatory_view'
 ) %}
 {% set is_hybrid_product_ui = request.endpoint in hybrid_product_endpoints %}
+{% set is_hybrid_shell_ui = request.endpoint and request.endpoint.startswith('indi_allsky.modern_admin') %}
   <head>
 <title>{% block title %}{% endblock %}</title>
 <link rel="icon" type="image/png" href="{{ url_for('indi_allsky.static', filename='images/favicon_32.png') }}" sizes="32x32">
 <link rel="icon" type="image/png" href="{{ url_for('indi_allsky.static', filename='images/favicon_128.png') }}" sizes="128x128">
 <link href="{{ url_for('indi_allsky.static', filename='bootstrap/bootstrap.min.css') }}" rel="stylesheet">
 <link href="{{ url_for('indi_allsky.static', filename='css/style.css') }}" rel="stylesheet">
-{% if not is_hybrid_product_ui %}
+{% if is_hybrid_shell_ui %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-shell-001') }}" rel="stylesheet">
+{% endif %}
 <script src="{{ url_for('indi_allsky.static', filename='js/jquery-3.7.1.min.js') }}"></script>
 <script src="{{ url_for('indi_allsky.static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ url_for('indi_allsky.static', filename='js/indi-allsky-tabs.js') }}"></script>
-{% endif %}
 <style>
 .container{
     max-width: 2000px;
@@ -55,7 +57,7 @@
 
     {% block head %}{% endblock %}
   </head>
-  <body class="{% if is_hybrid_product_ui %}hybrid-shell-body hybrid-theme-night{% else %}bg-dark bg-opacity-75{% endif %}">
+  <body class="{% if is_hybrid_shell_ui %}hybrid-shell-body hybrid-theme-night{% else %}bg-dark bg-opacity-75{% endif %}">
 {% macro admin_nav_url(classic_endpoint, modern_endpoint, modern_page=None) -%}
 {%- if session.get('admin_mode') == 'modern' -%}
     {%- if modern_page -%}
@@ -67,7 +69,7 @@
     {{- url_for(classic_endpoint) -}}
 {%- endif -%}
 {%- endmacro %}
-{% if is_hybrid_product_ui %}
+{% if is_hybrid_shell_ui %}
 <div class="hybrid-app-shell">
     <input class="hybrid-menu-checkbox" type="checkbox" id="hybrid-menu-toggle" aria-hidden="true">
     <header class="hybrid-app-topbar" aria-label="Hybrid product shell">
@@ -89,6 +91,7 @@
             <a class="{% if request.endpoint == 'indi_allsky.modern_admin_now_view' %}active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
             <a class="{% if request.endpoint == 'indi_allsky.modern_admin_highlights_view' %}active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
             <a class="{% if request.endpoint == 'indi_allsky.modern_admin_sky_cycle_view' %}active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle</a>
+            <a class="{% if request.endpoint == 'indi_allsky.modern_admin_library_view' %}active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
             <a class="{% if request.endpoint == 'indi_allsky.modern_admin_observatory_view' %}active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
         </nav>
         <div class="hybrid-app-actions">
@@ -113,20 +116,45 @@
         <div class="hybrid-drawer-section">
             <p>Operations</p>
             <a href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Cameras</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_gallery_view') }}">Gallery</a>
             <a href="{{ url_for('indi_allsky.modern_admin_media_images_view') }}">Images</a>
             <a href="{{ url_for('indi_allsky.modern_admin_loop_view') }}">Loop</a>
             <a href="{{ url_for('indi_allsky.modern_admin_media_timelapses_view') }}">Timelapses</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_mini_timelapses_view') }}">Mini Timelapses</a>
             <a href="{{ url_for('indi_allsky.modern_admin_media_keograms_view') }}">Keograms</a>
             <a href="{{ url_for('indi_allsky.modern_admin_media_startrails_view') }}">Startrails</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_startrail_videos_view') }}">Startrail Videos</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_panorama_view') }}">Panoramas</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_panorama_loop_view') }}">Panorama Loop</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_raw_images_view') }}">RAW Source</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_fits_view') }}">FITS Source</a>
+        </div>
+
+        <div class="hybrid-drawer-section">
+            <p>Observatory Tools</p>
+            <a href="{{ url_for('indi_allsky.modern_admin_sqm_view') }}">Sky Quality</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_charts_view') }}">Charts</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_sensor_panel_view') }}">Sensor Panel</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_astropanel_view') }}">Astropanel</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_virtualsky_view') }}">VirtualSky</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_focus_view') }}">Focus</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_camera_simulator_view') }}">Camera Simulator</a>
         </div>
 
         <div class="hybrid-drawer-section">
             <p>System</p>
-            <a href="{{ url_for('indi_allsky.modern_admin_sqm_view') }}">Sky Quality</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_charts_view') }}">Charts</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_sensor_panel_view') }}">Sensor Panel</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_storage_view') }}">Storage</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_uploads_view') }}">Uploads</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_youtube_view') }}">YouTube</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_drive_manager_view') }}">Drives</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_log_view') }}">Logs</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Tasks</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_users_view') }}">Users</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_notifications_view') }}">Notifications</a>
             <a href="{{ url_for('indi_allsky.modern_admin_system_info_view') }}">System Info</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_system_view') }}">System Index</a>
             <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Settings</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_updates_view') }}">Updates</a>
         </div>
     </aside>
 
