@@ -330,6 +330,20 @@ It deliberately excludes systemd checks, process probing, hardware probing,
 INDI/libcamera calls, filesystem reads, media reads, polling, POST/fetch/AJAX,
 and actions.
 
+## DATA004 Source Trust Update
+
+Now now includes a bounded Source Trust Summary.
+
+The integration checks latest RAW/FITS source metadata rows for the current
+camera and summarizes whether source preservation is known, unknown, or only
+partially supported by metadata. It is intentionally cautious: source trust is
+based on database metadata only, no filesystem verification is performed, and
+generated output lineage remains disconnected.
+
+It deliberately excludes filenames, paths, URLs, previews, filesystem checks,
+RAW/FITS reads, media reads, downloads, sharing, detector/AI ranking, polling,
+POST/fetch/AJAX, and actions.
+
 ## Current Phase Update
 
 NowView now includes `current_phase_summary`, sourced only from the existing

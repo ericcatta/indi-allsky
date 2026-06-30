@@ -71,6 +71,17 @@ A future Output Detail data step should first define how a specific output is
 selected, then connect metadata without preview URLs, filesystem access, media
 reads, downloads, sharing, or rendering jobs.
 
+## DATA004 Decision
+
+DATA004 Source Trust Summary is integrated into Now only.
+
+Output Detail remains disconnected because `/modern-admin/output` is not
+identifier-specific and cannot yet prove which source rows belong to this output.
+Connecting latest-camera RAW/FITS metadata here would overclaim source lineage.
+
+A future Output Detail data step should define identifier-specific output
+selection and source lineage before exposing source trust on this page.
+
 ## Product Score
 
 Initial score: 7.1/10.

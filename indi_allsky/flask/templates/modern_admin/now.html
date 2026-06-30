@@ -139,6 +139,7 @@
                 <h3>{{ source_confidence.confidence_label }}</h3>
                 <p>{{ source_confidence.note }}</p>
                 <p>{{ source_confidence.preservation_status }}. Coverage: {{ source_confidence.coverage_label }}.</p>
+                <p>Source types: {{ source_confidence.source_types | join(', ') }}.</p>
                 <p>Risk: {{ source_confidence.risk_level | title }}. Next contract: {{ source_confidence.next_backend_contract }}.</p>
                 {% for evidence_item in source_confidence.evidence %}
                     <p>{{ evidence_item }}</p>

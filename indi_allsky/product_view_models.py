@@ -243,6 +243,11 @@ NOW_SOURCE_CONFIDENCE_REQUIRED_KEYS = frozenset((
     'is_placeholder',
 ))
 
+NOW_SOURCE_TRUST_TYPES = frozenset((
+    'fits_source',
+    'raw_source',
+))
+
 SKY_CYCLE_REQUIRED_KEYS = frozenset((
     'id',
     'label',
@@ -1446,6 +1451,94 @@ class LatestGeneratedOutputRepository:
         return _latest_generated_output_row_metadata(descriptor, row)
 
 
+@dataclass(frozen=True)
+class SourceTrustDescriptor:
+    """Descriptor for one bounded source-file metadata source."""
+
+    source_type: str
+    query: object
+    order_by_expression: object = None
+    camera_id_field: object = None
+    source_label: str = 'Source metadata'
+    field_map: object = None
+
+
+class SourceTrustRepository:
+    """Descriptor-based adapter for bounded RAW/FITS source metadata."""
+
+    DEFAULT_FIELD_MAP = {
+        'id': 'id',
+        'camera_id': 'camera_id',
+        'day_date': 'dayDate',
+        'night': 'night',
+        'uploaded': 'uploaded',
+        'exposure': 'exposure',
+        'gain': 'gain',
+        'binmode': 'binmode',
+        'file_size': 'fileSize',
+        'width': 'width',
+        'height': 'height',
+    }
+
+    def __init__(self, descriptors=None, camera_id=None):
+        self.descriptors = tuple(descriptors or ())
+        self.camera_id = camera_id
+
+    def get_source_trust_metadata(self):
+        if self.camera_id in (None, ''):
+            return _build_source_trust_unavailable('Camera context unavailable.')
+
+        sources = []
+        failure_count = 0
+
+        for descriptor in self.descriptors:
+            try:
+                source = self._metadata_from_descriptor(descriptor)
+            except Exception:
+                failure_count += 1
+                continue
+
+            if source is not None:
+                sources.append(source)
+
+        if not sources:
+            if failure_count:
+                return _build_source_trust_unavailable('Source metadata unavailable.')
+
+            return _build_source_trust_empty()
+
+        return {
+            'status': 'source_metadata_available',
+            'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+            'sources': sources,
+            'partial_failures': failure_count,
+            'note': 'Source trust is based on bounded RAW/FITS metadata only.',
+        }
+
+    def _metadata_from_descriptor(self, descriptor):
+        query = getattr(descriptor, 'query', None)
+        if query is None:
+            raise ValueError('source trust descriptor missing query')
+
+        source_type = getattr(descriptor, 'source_type', NOW_PHASE_UNKNOWN)
+        if source_type not in NOW_SOURCE_TRUST_TYPES:
+            raise ValueError('source trust descriptor has unsupported source_type')
+
+        camera_id_field = getattr(descriptor, 'camera_id_field', None)
+        if camera_id_field is not None:
+            query = query.filter(camera_id_field == self.camera_id)
+
+        order_by_expression = getattr(descriptor, 'order_by_expression', None)
+        if order_by_expression is not None:
+            query = query.order_by(order_by_expression)
+
+        row = query.limit(1).first()
+        if not row:
+            return None
+
+        return _source_trust_row_metadata(descriptor, row)
+
+
 class LatestFrameImageTableRepository:
     """Repository adapter for one bounded latest image metadata row."""
 
@@ -1581,6 +1674,7 @@ def build_now_view(
     current_phase_night=None,
     latest_generated_output_repository=None,
     current_capture_repository=None,
+    source_trust_repository=None,
 ):
     """Return the first backend-owned NowView contract.
 
@@ -1613,7 +1707,10 @@ def build_now_view(
         'latest_generated_output_summary': _build_latest_generated_output_summary(
             latest_generated_output_repository=latest_generated_output_repository,
         ),
-        'source_confidence_summary': build_source_confidence_summary(),
+        'source_confidence_summary': build_source_confidence_summary(
+            source_trust_repository=source_trust_repository,
+            latest_frame_summary=latest_frame_summary,
+        ),
         'sky_cycle_briefing': _build_sky_cycle_briefing(),
         'primary_question_answers': _build_primary_question_answers(),
         'evidence_summary': _build_evidence_summary(),
@@ -2285,7 +2382,16 @@ def _latest_generated_output_summary_value(value):
     return value
 
 
-def build_source_confidence_summary():
+def build_source_confidence_summary(source_trust_repository=None, latest_frame_summary=None):
+    if source_trust_repository is not None:
+        try:
+            metadata = source_trust_repository.get_source_trust_metadata()
+        except Exception:
+            metadata = _build_source_trust_unavailable('Source trust repository failed; error details are not exposed.')
+
+        if isinstance(metadata, dict):
+            return _build_source_confidence_summary_from_metadata(metadata, latest_frame_summary=latest_frame_summary)
+
     return SourceConfidenceSummary(
         id='source_confidence.placeholder',
         label='Source Confidence',
@@ -2309,6 +2415,71 @@ def build_source_confidence_summary():
         ],
         next_backend_contract='bounded source coverage summary',
         is_placeholder=True,
+    ).to_dict()
+
+
+def _build_source_confidence_summary_from_metadata(metadata, latest_frame_summary=None):
+    sources = metadata.get('sources')
+    if not isinstance(sources, list):
+        sources = []
+
+    sanitized_sources = [
+        source for source in (_sanitize_source_trust_source(item) for item in sources)
+        if source is not None
+    ]
+    source_types = sorted(set(source['source_label'] for source in sanitized_sources))
+    has_latest_frame = isinstance(latest_frame_summary, dict) and bool(latest_frame_summary.get('frame_metadata'))
+    partial_failures = _latest_frame_json_value(metadata.get('partial_failures')) or 0
+
+    if sanitized_sources:
+        confidence_label = 'Source metadata available'
+        coverage_label = '{0:d} bounded source metadata row(s) found'.format(len(sanitized_sources))
+        preservation_status = 'RAW/FITS/source metadata found; file presence was not verified.'
+        risk_level = NOW_RISK_LEVEL_LOW if has_latest_frame and partial_failures == 0 else NOW_RISK_LEVEL_MEDIUM
+        status = 'Source preservation partially verified by metadata.'
+        gap_status = 'Filesystem coverage and per-output lineage are not verified.'
+        evidence = [
+            'Bounded RAW/FITS metadata rows found for current camera.',
+            'No filesystem verification was performed.',
+        ]
+        is_placeholder = False
+    else:
+        confidence_label = 'Source metadata not found'
+        coverage_label = 'No bounded RAW/FITS source metadata row found'
+        preservation_status = 'Source preservation cannot be confirmed from metadata.'
+        risk_level = NOW_RISK_LEVEL_MEDIUM if has_latest_frame else NOW_RISK_LEVEL_UNKNOWN
+        status = 'Source preservation not verified.'
+        gap_status = 'RAW/FITS/source metadata gap or source contract unavailable.'
+        evidence = [
+            'Latest frame metadata may exist without matching RAW/FITS metadata.',
+            'No filesystem verification was performed.',
+        ]
+        is_placeholder = True
+
+    if partial_failures:
+        risk_level = NOW_RISK_LEVEL_MEDIUM
+        evidence.append('One or more source metadata descriptors failed safely.')
+
+    if has_latest_frame:
+        evidence.append('Latest frame metadata is available as capture evidence.')
+
+    return SourceConfidenceSummary(
+        id='source_confidence.metadata',
+        label='Source Confidence',
+        status=status,
+        data_status=NOW_DATA_STATUS_NOT_EVALUATED,
+        confidence_label=confidence_label,
+        coverage_label=coverage_label,
+        source_types=source_types or ['source metadata not found'],
+        preservation_status=preservation_status,
+        retention_status='Source retention policy is not evaluated by this summary.',
+        lineage_status='Generated output lineage is not connected yet.',
+        gap_status=gap_status,
+        risk_level=risk_level,
+        note='Source trust is based on metadata only; no filesystem verification was performed.',
+        evidence=evidence,
+        next_backend_contract='bounded source lineage summary',
+        is_placeholder=is_placeholder,
     ).to_dict()
 
 
@@ -3480,6 +3651,26 @@ def _build_latest_generated_output_unavailable(note):
     }
 
 
+def _build_source_trust_empty():
+    return {
+        'status': 'no_source_metadata',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'sources': [],
+        'partial_failures': 0,
+        'note': 'No bounded RAW/FITS source metadata row is available from the injected descriptors.',
+    }
+
+
+def _build_source_trust_unavailable(note):
+    return {
+        'status': 'source_metadata_unavailable',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'sources': [],
+        'partial_failures': 0,
+        'note': _latest_frame_text(note, 'Source metadata unavailable.'),
+    }
+
+
 def _build_sky_cycle_briefing():
     return SkyCycleBriefingSection(
         id='sky_cycle.placeholder',
@@ -3853,6 +4044,67 @@ def _latest_generated_output_row_metadata(descriptor, row):
     }
 
 
+def _source_trust_row_metadata(descriptor, row):
+    created_at = getattr(row, 'createDate', None)
+    timestamp = _latest_frame_timestamp_label(created_at)
+    field_map = getattr(descriptor, 'field_map', None) or SourceTrustRepository.DEFAULT_FIELD_MAP
+
+    metadata = {
+        'source_type': _source_trust_text(getattr(descriptor, 'source_type', None), 'unknown'),
+        'source_label': _source_trust_text(getattr(descriptor, 'source_label', None), 'Source metadata'),
+        'timestamp': timestamp,
+    }
+
+    for output_key, row_key in field_map.items():
+        if output_key in metadata:
+            continue
+
+        metadata[output_key] = _latest_generated_output_json_value(getattr(row, row_key, None))
+
+    return _sanitize_source_trust_source(metadata)
+
+
+def _sanitize_source_trust_source(source):
+    if not isinstance(source, dict):
+        return None
+
+    source_type = source.get('source_type')
+    if source_type not in NOW_SOURCE_TRUST_TYPES:
+        return None
+
+    allowed_keys = frozenset((
+        'source_type',
+        'source_label',
+        'timestamp',
+        'id',
+        'camera_id',
+        'day_date',
+        'night',
+        'uploaded',
+        'exposure',
+        'gain',
+        'binmode',
+        'file_size',
+        'width',
+        'height',
+    ))
+
+    sanitized = {}
+    for key in sorted(allowed_keys):
+        if key not in source:
+            continue
+
+        value = _latest_generated_output_json_value(source.get(key))
+        if _latest_frame_metadata_value_is_json_safe(value) and not _latest_frame_value_is_unsafe(value):
+            sanitized[key] = value
+
+    sanitized['source_type'] = source_type
+    sanitized.setdefault('source_label', 'Source metadata')
+    sanitized.setdefault('timestamp', 'Not evaluated yet')
+
+    return sanitized
+
+
 def _latest_generated_output_json_value(value):
     if value in (None, ''):
         return None
@@ -3864,6 +4116,14 @@ def _latest_generated_output_json_value(value):
 
 
 def _latest_generated_output_text(value, fallback):
+    text = _latest_frame_text(value, fallback)
+    if _latest_frame_value_is_unsafe(text):
+        return fallback
+
+    return text
+
+
+def _source_trust_text(value, fallback):
     text = _latest_frame_text(value, fallback)
     if _latest_frame_value_is_unsafe(text):
         return fallback

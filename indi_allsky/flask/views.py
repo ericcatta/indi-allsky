@@ -44,6 +44,8 @@ from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import LatestFrameImageTableRepository
 from ..product_view_models import LatestGeneratedOutputRepository
 from ..product_view_models import LatestFrameSummaryProvider
+from ..product_view_models import SourceTrustDescriptor
+from ..product_view_models import SourceTrustRepository
 
 from cryptography.fernet import InvalidToken
 
@@ -7445,6 +7447,7 @@ class ModernAdminNowView(TemplateView):
             current_phase_night=context.get('night'),
             latest_generated_output_repository=self.get_latest_generated_output_repository(),
             current_capture_repository=self.get_current_capture_repository(),
+            source_trust_repository=self.get_source_trust_repository(),
         )
 
         return context
@@ -7541,6 +7544,35 @@ class ModernAdminNowView(TemplateView):
             return None
 
         return LatestGeneratedOutputRepository(descriptors=descriptors, camera_id=camera_id)
+
+    def get_source_trust_repository(self):
+        try:
+            camera = getattr(self, 'camera', None)
+            camera_id = getattr(camera, 'id', None)
+            if not camera_id:
+                return None
+
+            descriptors = (
+                SourceTrustDescriptor(
+                    source_type='fits_source',
+                    query=IndiAllSkyDbFitsImageTable.query,
+                    order_by_expression=IndiAllSkyDbFitsImageTable.createDate.desc(),
+                    camera_id_field=IndiAllSkyDbFitsImageTable.camera_id,
+                    source_label='FITS source metadata',
+                ),
+                SourceTrustDescriptor(
+                    source_type='raw_source',
+                    query=IndiAllSkyDbRawImageTable.query,
+                    order_by_expression=IndiAllSkyDbRawImageTable.createDate.desc(),
+                    camera_id_field=IndiAllSkyDbRawImageTable.camera_id,
+                    source_label='RAW source metadata',
+                ),
+            )
+        except Exception:
+            app.logger.error('Unable to build Now source trust repository')
+            return None
+
+        return SourceTrustRepository(descriptors=descriptors, camera_id=camera_id)
 
     def get_current_capture_repository(self):
         try:

@@ -27,6 +27,8 @@ from indi_allsky.product_view_models import GeneratedOutputDescriptor
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
 from indi_allsky.product_view_models import LatestGeneratedOutputRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
+from indi_allsky.product_view_models import SourceTrustDescriptor
+from indi_allsky.product_view_models import SourceTrustRepository
 from indi_allsky.product_view_models import validate_sky_cycle_report_payload
 from indi_allsky.product_view_models import validate_highlights_payload
 from indi_allsky.product_view_models import validate_moment_detail_payload
@@ -1750,6 +1752,143 @@ def test_build_source_confidence_summary_is_static_contract():
     assert_no_callables(source_confidence)
 
 
+def test_source_trust_repository_returns_allowlisted_source_metadata():
+    row = FakeImageRow(
+        id=23,
+        camera_id=7,
+        createDate=datetime(2026, 6, 30, 1, 2, 3),
+        dayDate=date(2026, 6, 30),
+        night=True,
+        uploaded=False,
+        exposure=15.5,
+        gain=120,
+        binmode=1,
+        fileSize=2048,
+        width=1920,
+        height=1080,
+        filename='/private/source.fit',
+        remote_url='https://example.invalid/source.fit',
+        s3_key='secret/key',
+        thumbnail_uuid='thumb',
+        data={'token': 'hidden'},
+    )
+    query = FakeImageQuery(row)
+    descriptor = SourceTrustDescriptor(
+        source_type='fits_source',
+        query=query,
+        order_by_expression='created-desc',
+        camera_id_field=FakeImageField('camera_id'),
+        source_label='FITS source metadata',
+    )
+
+    result = SourceTrustRepository([descriptor], camera_id=7).get_source_trust_metadata()
+    source = result['sources'][0]
+
+    assert result['status'] == 'source_metadata_available'
+    assert source['source_type'] == 'fits_source'
+    assert source['id'] == 23
+    assert source['camera_id'] == 7
+    assert source['timestamp'] == '2026-06-30 01:02:03'
+    assert source['day_date'] == '2026-06-30'
+    assert source['file_size'] == 2048
+    assert 'filename' not in source
+    assert 'remote_url' not in source
+    assert 's3_key' not in source
+    assert 'thumbnail_uuid' not in source
+    assert 'data' not in source
+    assert query.filter_calls == [(FakeImageField('camera_id') == 7)]
+    assert query.order_by_calls == ['created-desc']
+    assert query.limit_calls == [1]
+    assert query.first_calls == 1
+    json.dumps(result, sort_keys=True)
+    assert_no_absolute_paths(result)
+    assert_no_sensitive_text(result)
+    assert_no_callables(result)
+
+
+def test_source_trust_repository_handles_no_source_rows():
+    descriptor = SourceTrustDescriptor(
+        source_type='raw_source',
+        query=FakeImageQuery(None),
+        order_by_expression='created-desc',
+        camera_id_field=FakeImageField('camera_id'),
+        source_label='RAW source metadata',
+    )
+
+    result = SourceTrustRepository([descriptor], camera_id=7).get_source_trust_metadata()
+
+    assert result['status'] == 'no_source_metadata'
+    assert result['sources'] == []
+    assert result['partial_failures'] == 0
+    json.dumps(result, sort_keys=True)
+
+
+def test_source_trust_repository_partial_failure_keeps_good_source():
+    failing = SourceTrustDescriptor(
+        source_type='fits_source',
+        query=FakeImageQuery(raises=True),
+        order_by_expression='created-desc',
+        camera_id_field=FakeImageField('camera_id'),
+        source_label='FITS source metadata',
+    )
+    working = SourceTrustDescriptor(
+        source_type='raw_source',
+        query=FakeImageQuery(FakeImageRow(id=9, camera_id=7, createDate=datetime(2026, 6, 30, 2, 0, 0))),
+        order_by_expression='created-desc',
+        camera_id_field=FakeImageField('camera_id'),
+        source_label='RAW source metadata',
+    )
+
+    result = SourceTrustRepository([failing, working], camera_id=7).get_source_trust_metadata()
+
+    assert result['status'] == 'source_metadata_available'
+    assert result['partial_failures'] == 1
+    assert result['sources'][0]['source_type'] == 'raw_source'
+
+
+def test_source_confidence_summary_uses_source_trust_repository():
+    descriptor = SourceTrustDescriptor(
+        source_type='fits_source',
+        query=FakeImageQuery(FakeImageRow(id=23, camera_id=7, createDate=datetime(2026, 6, 30, 1, 2, 3))),
+        order_by_expression='created-desc',
+        camera_id_field=FakeImageField('camera_id'),
+        source_label='FITS source metadata',
+    )
+    repository = SourceTrustRepository([descriptor], camera_id=7)
+
+    now_view = build_now_view(source_trust_repository=repository)
+    source_confidence = now_view['source_confidence_summary']
+
+    assert source_confidence['confidence_label'] == 'Source metadata available'
+    assert source_confidence['coverage_label'] == '1 bounded source metadata row(s) found'
+    assert source_confidence['source_types'] == ['FITS source metadata']
+    assert source_confidence['risk_level'] == 'medium'
+    assert source_confidence['is_placeholder'] is False
+    assert 'No filesystem verification was performed.' in source_confidence['evidence']
+    json.dumps(source_confidence, sort_keys=True)
+    assert_no_absolute_paths(source_confidence)
+    assert_no_sensitive_text(source_confidence)
+    assert_no_callables(source_confidence)
+
+
+def test_source_confidence_summary_without_source_metadata_is_prudent():
+    descriptor = SourceTrustDescriptor(
+        source_type='fits_source',
+        query=FakeImageQuery(None),
+        order_by_expression='created-desc',
+        camera_id_field=FakeImageField('camera_id'),
+        source_label='FITS source metadata',
+    )
+    repository = SourceTrustRepository([descriptor], camera_id=7)
+
+    source_confidence = build_now_view(source_trust_repository=repository)['source_confidence_summary']
+
+    assert source_confidence['confidence_label'] == 'Source metadata not found'
+    assert source_confidence['risk_level'] == 'unknown'
+    assert source_confidence['is_placeholder'] is True
+    assert 'source metadata not found' in source_confidence['source_types']
+
+
 def test_latest_frame_summary_contract_is_fake_safe():
     now_view = build_now_view()
     latest_frame = now_view['latest_frame_summary']
@@ -2694,6 +2833,11 @@ def main():
         test_build_now_view_accepts_current_phase_context,
         test_source_confidence_summary_contract_is_fake_safe,
         test_build_source_confidence_summary_is_static_contract,
+        test_source_trust_repository_returns_allowlisted_source_metadata,
+        test_source_trust_repository_handles_no_source_rows,
+        test_source_trust_repository_partial_failure_keeps_good_source,
+        test_source_confidence_summary_uses_source_trust_repository,
+        test_source_confidence_summary_without_source_metadata_is_prudent,
         test_latest_frame_summary_contract_is_fake_safe,
         test_latest_frame_provider_with_frame_present,
         test_latest_frame_provider_with_no_frame,

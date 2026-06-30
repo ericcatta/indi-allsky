@@ -41,6 +41,17 @@ Moment Detail v1 does not perform database queries, detector calls, filesystem a
 
 Future real data should arrive only through bounded backend-owned providers and sanitized view models.
 
+## DATA004 Decision
+
+DATA004 Source Trust Summary is integrated into Now only.
+
+Moment Detail remains disconnected because the current route is not tied to a
+specific detected Moment or source lineage. Showing latest-camera RAW/FITS
+metadata here would imply evidence that the Moment contract does not yet prove.
+
+A future Moment data step should connect identifier-specific evidence first,
+then source trust, and only later media/preview context.
+
 ## Product Score
 
 Initial score: 7.0/10.

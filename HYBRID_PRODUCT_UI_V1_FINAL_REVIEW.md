@@ -189,6 +189,16 @@ Observatory remains disconnected by design. A future Observatory readiness step
 must define a broader readiness contract without live hardware, process, service,
 filesystem, or network probes in request paths.
 
+## DATA004 Integration Note
+
+Source Trust Summary is now integrated into Now as a bounded metadata summary.
+It checks latest RAW/FITS source metadata rows for the current camera and reports
+source trust cautiously: metadata can support partial confidence, but it does not
+prove file existence or output-to-source lineage.
+
+Moment Detail and Output Detail remain disconnected by design. They need
+identifier-specific lineage before source trust can be shown honestly.
+
 ## 8. Next Mission Proposal
 
 The next mission should be the first cautious real-data step after the static UX
