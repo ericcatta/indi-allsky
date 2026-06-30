@@ -37,6 +37,7 @@ from ..product_view_models import build_highlights_view
 from ..product_view_models import build_moment_detail_view
 from ..product_view_models import build_output_detail_view
 from ..product_view_models import build_library_view
+from ..product_view_models import build_observatory_view
 from ..product_view_models import build_sky_cycle_report_view
 from ..product_view_models import LatestFrameImageTableRepository
 from ..product_view_models import LatestFrameSummaryProvider
@@ -7844,28 +7845,15 @@ class ModernAdminYoutubeView(ModernAdminView):
         return 'modern-admin-status-muted'
 
 
-class ModernAdminObservatoryView(ModernAdminView):
-    page_title = 'Modern Admin Observatory'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+class ModernAdminObservatoryView(TemplateView):
+    page_title = 'Observatory'
+    decorators = [login_required]
 
     def get_context(self):
         context = super(ModernAdminObservatoryView, self).get_context()
-        image_data = self.get_image_data()
 
-        context['modern_admin_section_links'] = (
-            ('SQM', 'indi_allsky.modern_admin_sqm_view'),
-            ('Charts', 'indi_allsky.modern_admin_charts_view'),
-            ('Sensor Panel', 'indi_allsky.modern_admin_sensor_panel_view'),
-            ('Astropanel', 'indi_allsky.modern_admin_astropanel_view'),
-            ('VirtualSky', 'indi_allsky.modern_admin_virtualsky_view'),
-            ('Realtime Keogram', 'indi_allsky.modern_admin_realtime_keogram_view'),
-            ('Long Term Keogram', 'indi_allsky.modern_admin_longterm_keogram_view'),
-        )
-        context['modern_admin_observatory_metrics'] = (
-            {'label' : 'SQM', 'value' : image_data.get('sqm', 'Unknown')},
-            {'label' : 'Stars', 'value' : image_data.get('stars', 'Unknown')},
-            {'label' : 'Moon Phase', 'value' : '{0:0.1f}%'.format(float(image_data.get('moon_phase', 0.0)))},
-        )
+        session['admin_mode'] = 'modern'
+        context['observatory_view'] = build_observatory_view()
 
         return context
 

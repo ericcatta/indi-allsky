@@ -3,39 +3,130 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
-<script type="text/javascript">
-var camera_id = {{ camera_id }};
-</script>
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-observatory-product-v1') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<main class="modern-admin-shell" aria-labelledby="modern-admin-observatory-title">
-    {% set modern_admin_header_label = 'Observatory header' %}
-    {% set modern_admin_heading = 'Observatory' %}
-    {% set modern_admin_title_id = 'modern-admin-observatory-title' %}
-    {% include 'modern_admin/_shell_header.html' %}
+<main class="modern-admin-shell" aria-labelledby="observatory-title">
+    <header class="modern-admin-table-panel" aria-label="Observatory product view">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Hybrid AllSky / Observatory</p>
+                <h1 id="observatory-title">{{ observatory_view.observatory_summary.title }}</h1>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ observatory_view.observatory_summary.overall_status | replace('_', ' ') | title }}</span>
+        </div>
 
-    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory overview">
-        {% for metric in modern_admin_observatory_metrics %}
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">{{ metric.label }}</div>
-            <h3>{{ metric.value }}</h3>
-            <p>Latest value from existing indi-allsky image/status data.</p>
-        </article>
-        {% endfor %}
+        <h2>{{ observatory_view.observatory_summary.readiness_label }}</h2>
+        <p class="modern-admin-note">{{ observatory_view.observatory_summary.note }}</p>
+        <p class="modern-admin-note">Contract: <code>{{ observatory_view.metadata.contract }}</code> / <code>{{ observatory_view.metadata.contract_version }}</code>. Source: <code>{{ observatory_view.metadata.source }}</code>.</p>
+
+        <div class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Settings</a>
+        </div>
+    </header>
+
+    <section class="modern-admin-table-panel" aria-labelledby="observatory-core-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Readiness</p>
+                <h2 id="observatory-core-title">Capture and Source Health</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ observatory_view.data_status | replace('_', ' ') | title }}</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory capture health">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ observatory_view.camera_system_summary.label }}</div>
+                <h3>{{ observatory_view.camera_system_summary.status | replace('_', ' ') | title }}</h3>
+                <p><strong>Camera:</strong> {{ observatory_view.camera_system_summary.camera_label }}</p>
+                <p><strong>Profile:</strong> {{ observatory_view.camera_system_summary.profile_label }}</p>
+                <p>{{ observatory_view.camera_system_summary.backend_status }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ observatory_view.capture_pipeline_summary.label }}</div>
+                <h3>{{ observatory_view.capture_pipeline_summary.status | replace('_', ' ') | title }}</h3>
+                <p>{{ observatory_view.capture_pipeline_summary.latest_frame_status }}</p>
+                <p>{{ observatory_view.capture_pipeline_summary.cadence_status }}</p>
+                <p>{{ observatory_view.capture_pipeline_summary.day_night_status }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ observatory_view.source_preservation_summary.label }}</div>
+                <h3>{{ observatory_view.source_preservation_summary.preservation_label }}</h3>
+                <p>{{ observatory_view.source_preservation_summary.raw_status }}</p>
+                <p>{{ observatory_view.source_preservation_summary.fits_status }}</p>
+                <p>Trust: {{ observatory_view.source_preservation_summary.trust_level | title }}</p>
+            </article>
+        </section>
     </section>
 
-    <section class="modern-admin-table-panel" aria-labelledby="observatory-pages-title">
+    <section class="modern-admin-table-panel" aria-labelledby="observatory-operations-title">
         <div class="modern-admin-section-heading">
-            <p class="modern-admin-eyebrow">Observatory</p>
-            <h2 id="observatory-pages-title">Sky and sensor views</h2>
+            <div>
+                <p class="modern-admin-eyebrow">Operations</p>
+                <h2 id="observatory-operations-title">Storage, Generation, and Integrations</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Static contract</span>
         </div>
-        <div class="modern-admin-link-grid">
-            {% for label, endpoint in modern_admin_section_links %}
-            <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory operations">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ observatory_view.storage_summary.label }}</div>
+                <h3>{{ observatory_view.storage_summary.storage_label }}</h3>
+                <p>{{ observatory_view.storage_summary.retention_status }}</p>
+                <p>Risk: {{ observatory_view.storage_summary.risk_level | title }}</p>
+                <p>{{ observatory_view.storage_summary.note }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ observatory_view.generation_summary.label }}</div>
+                <h3>{{ observatory_view.generation_summary.outputs_status }}</h3>
+                <p>{{ observatory_view.generation_summary.queue_status }}</p>
+                <p>{{ observatory_view.generation_summary.rendering_status }}</p>
+                <p>{{ observatory_view.generation_summary.note }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ observatory_view.integration_summary.label }}</div>
+                <h3>{{ observatory_view.integration_summary.status | replace('_', ' ') | title }}</h3>
+                <p>{{ observatory_view.integration_summary.upload_status }}</p>
+                <p>{{ observatory_view.integration_summary.remote_status }}</p>
+                <p>{{ observatory_view.integration_summary.notification_status }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="observatory-attention-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Attention</p>
+                <h2 id="observatory-attention-title">System Readiness Items</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ observatory_view.attention_items.data_status | replace('_', ' ') | title }}</span>
+        </div>
+        <p class="modern-admin-note">{{ observatory_view.attention_items.note }}</p>
+
+        <section class="modern-admin-status-grid" aria-label="Observatory attention items">
+            {% for item in observatory_view.attention_items.items %}
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ item.status | replace('_', ' ') | title }} / Risk {{ item.risk_level | title }}</div>
+                <h3>{{ item.label }}</h3>
+                <p>{{ item.note }}</p>
+            </article>
             {% endfor %}
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="observatory-boundary-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Boundary</p>
+                <h2 id="observatory-boundary-title">Static Product Contract</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">No live checks</span>
         </div>
+        <p class="modern-admin-note">This page is a static Observatory contract. It does not inspect devices, connect to cameras, contact remote services, read media, show previews, or run a refresh loop.</p>
     </section>
 </main>
 {% endblock %}

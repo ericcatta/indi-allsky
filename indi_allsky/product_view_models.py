@@ -889,6 +889,151 @@ LIBRARY_ALLOWED_COLLECTION_TYPES = frozenset((
     'unknown',
 ))
 
+OBSERVATORY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'observatory_summary',
+    'camera_system_summary',
+    'capture_pipeline_summary',
+    'source_preservation_summary',
+    'storage_summary',
+    'generation_summary',
+    'integration_summary',
+    'attention_items',
+    'metadata',
+))
+
+OBSERVATORY_REQUIRED_SECTIONS = frozenset((
+    'observatory_summary',
+    'camera_system_summary',
+    'capture_pipeline_summary',
+    'source_preservation_summary',
+    'storage_summary',
+    'generation_summary',
+    'integration_summary',
+    'attention_items',
+))
+
+OBSERVATORY_SUMMARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'title',
+    'data_status',
+    'overall_status',
+    'readiness_label',
+    'note',
+    'is_placeholder',
+))
+
+OBSERVATORY_CAMERA_SYSTEM_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'camera_label',
+    'profile_label',
+    'capture_status',
+    'backend_status',
+    'note',
+    'is_placeholder',
+))
+
+OBSERVATORY_CAPTURE_PIPELINE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'latest_frame_status',
+    'cadence_status',
+    'day_night_status',
+    'note',
+    'is_placeholder',
+))
+
+OBSERVATORY_SOURCE_PRESERVATION_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'preservation_label',
+    'raw_status',
+    'fits_status',
+    'lineage_status',
+    'trust_level',
+    'note',
+    'is_placeholder',
+))
+
+OBSERVATORY_STORAGE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'storage_label',
+    'retention_status',
+    'risk_level',
+    'note',
+    'is_placeholder',
+))
+
+OBSERVATORY_GENERATION_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'outputs_status',
+    'queue_status',
+    'rendering_status',
+    'note',
+    'is_placeholder',
+))
+
+OBSERVATORY_INTEGRATION_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'upload_status',
+    'remote_status',
+    'notification_status',
+    'note',
+    'is_placeholder',
+))
+
+OBSERVATORY_ATTENTION_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'items',
+    'note',
+    'is_placeholder',
+))
+
+OBSERVATORY_ATTENTION_ITEM_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'risk_level',
+    'note',
+    'is_placeholder',
+))
+
+OBSERVATORY_ALLOWED_STATUSES = frozenset((
+    'ok',
+    'warning',
+    'blocked',
+    'not_evaluated',
+    'unknown',
+))
+
+OBSERVATORY_ALLOWED_RISK_LEVELS = NOW_ALLOWED_RISK_LEVELS
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -1319,6 +1464,31 @@ def build_library_view():
     return payload
 
 
+def build_observatory_view():
+    """Return the first fake-safe Observatory product contract."""
+    payload = {
+        'id': 'observatory.placeholder',
+        'label': 'Observatory',
+        'status': 'Read-only product prototype',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'generated_at': 'Not evaluated yet',
+        'is_placeholder': True,
+        'safe_actions_available': [],
+        'observatory_summary': _build_observatory_summary(),
+        'camera_system_summary': _build_observatory_camera_system_summary(),
+        'capture_pipeline_summary': _build_observatory_capture_pipeline_summary(),
+        'source_preservation_summary': _build_observatory_source_preservation_summary(),
+        'storage_summary': _build_observatory_storage_summary(),
+        'generation_summary': _build_observatory_generation_summary(),
+        'integration_summary': _build_observatory_integration_summary(),
+        'attention_items': _build_observatory_attention_items(),
+        'metadata': _build_observatory_metadata(),
+    }
+
+    validate_observatory_payload(payload)
+    return payload
+
+
 def validate_now_view_payload(payload):
     """Validate a NowView payload before it reaches presentation templates."""
     if not isinstance(payload, dict):
@@ -1446,6 +1616,36 @@ def validate_library_payload(payload):
     _validate_library_filter_summary(payload.get('filter_summary'))
     _validate_library_recent_items(payload.get('recent_items'))
     _validate_library_memory_model_summary(payload.get('memory_model_summary'))
+    _validate_data_statuses(payload)
+    _validate_no_callables(payload)
+    _validate_no_sensitive_keys(payload)
+    _validate_no_absolute_paths(payload)
+    _validate_safe_actions(payload)
+    _validate_json_safe(payload)
+
+    return True
+
+
+def validate_observatory_payload(payload):
+    """Validate an Observatory payload before template rendering."""
+    if not isinstance(payload, dict):
+        raise ValueError('Observatory payload must be a dict')
+
+    missing_keys = sorted(OBSERVATORY_REQUIRED_KEYS.difference(payload.keys()))
+    if missing_keys:
+        raise ValueError('Observatory payload missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    for section_key in OBSERVATORY_REQUIRED_SECTIONS:
+        _validate_required_section(payload, section_key)
+
+    _validate_observatory_summary(payload.get('observatory_summary'))
+    _validate_observatory_camera_system_summary(payload.get('camera_system_summary'))
+    _validate_observatory_capture_pipeline_summary(payload.get('capture_pipeline_summary'))
+    _validate_observatory_source_preservation_summary(payload.get('source_preservation_summary'))
+    _validate_observatory_storage_summary(payload.get('storage_summary'))
+    _validate_observatory_generation_summary(payload.get('generation_summary'))
+    _validate_observatory_integration_summary(payload.get('integration_summary'))
+    _validate_observatory_attention_items(payload.get('attention_items'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
     _validate_no_sensitive_keys(payload)
@@ -2532,6 +2732,147 @@ def _build_library_metadata():
     }
 
 
+def _build_observatory_summary():
+    return {
+        'id': 'observatory.summary.placeholder',
+        'label': 'Observatory Summary',
+        'title': 'Observatory',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'overall_status': 'not_evaluated',
+        'readiness_label': 'System readiness not evaluated yet',
+        'note': 'System readiness will summarize whether the observatory can capture reliably. No live service probes are performed in this prototype.',
+        'is_placeholder': True,
+    }
+
+
+def _build_observatory_camera_system_summary():
+    return {
+        'id': 'observatory.camera.placeholder',
+        'label': 'Camera System',
+        'status': 'not_evaluated',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'camera_label': 'Camera not evaluated yet',
+        'profile_label': 'Profile not evaluated yet',
+        'capture_status': 'Capture status pending bounded backend contract.',
+        'backend_status': 'Camera backend status not evaluated yet.',
+        'note': 'Camera readiness is represented as product health metadata only.',
+        'is_placeholder': True,
+    }
+
+
+def _build_observatory_capture_pipeline_summary():
+    return {
+        'id': 'observatory.capture_pipeline.placeholder',
+        'label': 'Capture Pipeline',
+        'status': 'not_evaluated',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'latest_frame_status': 'Latest frame continuity not evaluated yet.',
+        'cadence_status': 'Capture cadence not evaluated yet.',
+        'day_night_status': 'Day/night capture behavior not evaluated yet.',
+        'note': 'Capture pipeline summary is static until a bounded capture health provider exists.',
+        'is_placeholder': True,
+    }
+
+
+def _build_observatory_source_preservation_summary():
+    return {
+        'id': 'observatory.source_preservation.placeholder',
+        'label': 'Source Preservation',
+        'status': 'not_evaluated',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'preservation_label': 'Source preservation status pending bounded backend contract.',
+        'raw_status': 'RAW/source status not evaluated yet.',
+        'fits_status': 'FITS status not evaluated yet.',
+        'lineage_status': 'Source lineage not connected yet.',
+        'trust_level': NOW_RISK_LEVEL_UNKNOWN,
+        'note': 'Source preservation must be trustworthy before generated results can be fully trusted.',
+        'is_placeholder': True,
+    }
+
+
+def _build_observatory_storage_summary():
+    return {
+        'id': 'observatory.storage.placeholder',
+        'label': 'Storage',
+        'status': 'not_evaluated',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'storage_label': 'Storage status not evaluated yet.',
+        'retention_status': 'Retention policy not evaluated yet.',
+        'risk_level': NOW_RISK_LEVEL_UNKNOWN,
+        'note': 'Storage health is not connected to live capacity or retention checks in this prototype.',
+        'is_placeholder': True,
+    }
+
+
+def _build_observatory_generation_summary():
+    return {
+        'id': 'observatory.generation.placeholder',
+        'label': 'Generation',
+        'status': 'not_evaluated',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'outputs_status': 'Generated outputs status pending rendering contract.',
+        'queue_status': 'Generation queue status not evaluated yet.',
+        'rendering_status': 'Rendering readiness not evaluated yet.',
+        'note': 'No rendering, queue inspection, or media generation is connected.',
+        'is_placeholder': True,
+    }
+
+
+def _build_observatory_integration_summary():
+    return {
+        'id': 'observatory.integrations.placeholder',
+        'label': 'Integrations',
+        'status': 'not_evaluated',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'upload_status': 'Upload status not evaluated yet.',
+        'remote_status': 'Remote integration status not evaluated yet.',
+        'notification_status': 'Notification delivery status not evaluated yet.',
+        'note': 'No remote service lookup or integration status lookup is performed.',
+        'is_placeholder': True,
+    }
+
+
+def _build_observatory_attention_items():
+    return {
+        'id': 'observatory.attention.placeholder',
+        'label': 'Attention Items',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'items': [
+            {
+                'id': 'observatory.attention.source.placeholder',
+                'label': 'Source trust not evaluated',
+                'status': 'not_evaluated',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'risk_level': NOW_RISK_LEVEL_UNKNOWN,
+                'note': 'Source preservation and lineage require a future bounded health contract.',
+                'is_placeholder': True,
+            },
+            {
+                'id': 'observatory.attention.storage.placeholder',
+                'label': 'Storage risk not evaluated',
+                'status': 'not_evaluated',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'risk_level': NOW_RISK_LEVEL_UNKNOWN,
+                'note': 'Storage capacity and retention are not inspected by this prototype.',
+                'is_placeholder': True,
+            },
+        ],
+        'note': 'Attention items are static examples until Observatory Health has bounded data sources.',
+        'is_placeholder': True,
+    }
+
+
+def _build_observatory_metadata():
+    return {
+        'contract': 'ObservatoryView',
+        'contract_version': 'v1.static',
+        'source': 'build_observatory_view',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'is_placeholder': True,
+        'rp5_policy': 'No database, query, filesystem, device probe, camera connection probe, remote service access, media read, preview URL, or refresh loop.',
+    }
+
+
 def _build_latest_frame_no_row_summary():
     return LatestFrameSummary(
         id='latest_frame.no_row',
@@ -3604,6 +3945,133 @@ def _validate_library_memory_model_summary(summary):
 
     if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
         raise ValueError('Invalid data_status at library.memory_model_summary: {0!r}'.format(summary['data_status']))
+
+
+def _validate_observatory_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('observatory_summary must be a dict')
+
+    missing_keys = sorted(OBSERVATORY_SUMMARY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('observatory_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    _validate_observatory_status(summary['overall_status'], 'observatory.observatory_summary.overall_status')
+    _validate_observatory_data_status(summary, 'observatory.observatory_summary')
+
+
+def _validate_observatory_camera_system_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('camera_system_summary must be a dict')
+
+    missing_keys = sorted(OBSERVATORY_CAMERA_SYSTEM_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('camera_system_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    _validate_observatory_status(summary['status'], 'observatory.camera_system_summary.status')
+    _validate_observatory_data_status(summary, 'observatory.camera_system_summary')
+
+
+def _validate_observatory_capture_pipeline_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('capture_pipeline_summary must be a dict')
+
+    missing_keys = sorted(OBSERVATORY_CAPTURE_PIPELINE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('capture_pipeline_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    _validate_observatory_status(summary['status'], 'observatory.capture_pipeline_summary.status')
+    _validate_observatory_data_status(summary, 'observatory.capture_pipeline_summary')
+
+
+def _validate_observatory_source_preservation_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('source_preservation_summary must be a dict')
+
+    missing_keys = sorted(OBSERVATORY_SOURCE_PRESERVATION_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('source_preservation_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    _validate_observatory_status(summary['status'], 'observatory.source_preservation_summary.status')
+    _validate_observatory_data_status(summary, 'observatory.source_preservation_summary')
+    _validate_observatory_risk(summary['trust_level'], 'observatory.source_preservation_summary.trust_level')
+
+
+def _validate_observatory_storage_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('storage_summary must be a dict')
+
+    missing_keys = sorted(OBSERVATORY_STORAGE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('storage_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    _validate_observatory_status(summary['status'], 'observatory.storage_summary.status')
+    _validate_observatory_data_status(summary, 'observatory.storage_summary')
+    _validate_observatory_risk(summary['risk_level'], 'observatory.storage_summary.risk_level')
+
+
+def _validate_observatory_generation_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('generation_summary must be a dict')
+
+    missing_keys = sorted(OBSERVATORY_GENERATION_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('generation_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    _validate_observatory_status(summary['status'], 'observatory.generation_summary.status')
+    _validate_observatory_data_status(summary, 'observatory.generation_summary')
+
+
+def _validate_observatory_integration_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('integration_summary must be a dict')
+
+    missing_keys = sorted(OBSERVATORY_INTEGRATION_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('integration_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    _validate_observatory_status(summary['status'], 'observatory.integration_summary.status')
+    _validate_observatory_data_status(summary, 'observatory.integration_summary')
+
+
+def _validate_observatory_attention_items(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('attention_items must be a dict')
+
+    missing_keys = sorted(OBSERVATORY_ATTENTION_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('attention_items missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    _validate_observatory_data_status(summary, 'observatory.attention_items')
+
+    if not isinstance(summary['items'], list):
+        raise ValueError('attention_items.items must be a list')
+
+    for index, item in enumerate(summary['items']):
+        if not isinstance(item, dict):
+            raise ValueError('attention_items.items[{0:d}] must be a dict'.format(index))
+
+        missing_item_keys = sorted(OBSERVATORY_ATTENTION_ITEM_REQUIRED_KEYS.difference(item.keys()))
+        if missing_item_keys:
+            raise ValueError('attention_items.items[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_item_keys)))
+
+        _validate_observatory_status(item['status'], 'observatory.attention_items.items[{0:d}].status'.format(index))
+        _validate_observatory_data_status(item, 'observatory.attention_items.items[{0:d}]'.format(index))
+        _validate_observatory_risk(item['risk_level'], 'observatory.attention_items.items[{0:d}].risk_level'.format(index))
+
+
+def _validate_observatory_status(status, path):
+    if status not in OBSERVATORY_ALLOWED_STATUSES:
+        raise ValueError('Invalid Observatory status at {0:s}: {1!r}'.format(path, status))
+
+
+def _validate_observatory_risk(risk_level, path):
+    if risk_level not in OBSERVATORY_ALLOWED_RISK_LEVELS:
+        raise ValueError('Invalid risk_level at {0:s}: {1!r}'.format(path, risk_level))
+
+
+def _validate_observatory_data_status(summary, path):
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at {0:s}: {1!r}'.format(path, summary['data_status']))
 
 
 def _validate_data_statuses(value, path='now'):

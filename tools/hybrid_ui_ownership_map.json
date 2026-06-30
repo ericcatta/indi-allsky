@@ -188,6 +188,7 @@
                 "modern_admin_moment_detail_view",
                 "modern_admin_output_detail_view",
                 "modern_admin_library_view",
+                "modern_admin_observatory_view",
                 "modern_admin_sky_cycle_view",
         "modern_admin_uploads_view",
         "modern_admin_media_image_detail_view",
@@ -979,6 +980,43 @@
       "removal_risk": "critical",
       "notes": [
         "Sixth concrete surface for the domain-first Product UI.",
+        "Read-only, no controls, no runtime data evaluation.",
+        "Owner label is Modern Product UI; static route/template ownership remains classified as modern."
+      ]
+    },
+    "observatory_product_prototype": {
+      "label": "Observatory Product Prototype",
+      "status": "PRODUCT PROTOTYPE READ-ONLY",
+      "owner": "modern_product_ui",
+      "porting_priority": "product_prototype",
+      "routes": [
+        "/modern-admin/observatory"
+      ],
+      "templates": [
+        "modern_admin/observatory.html"
+      ],
+      "assets": [
+        "modern_admin/modern-admin.css"
+      ],
+      "apis": [
+        "modern_admin_observatory_view"
+      ],
+      "config_keys": [],
+      "protected": true,
+      "safety": "Read-only static Observatory view-model prototype. No database, query, filesystem, device probe, camera connection probe, remote request, RAW/FITS, media read, preview URL, live polling, or actions.",
+      "blockers": [
+        "Real Observatory backend contract",
+        "Bounded camera health provider",
+        "Bounded capture pipeline summary",
+        "Source preservation and lineage summary",
+        "Storage retention summary",
+        "Generation and integration health summaries",
+        "Safe actions for any future remediation behavior"
+      ],
+      "modern_gap": "Prototype uses static sanitized placeholders until product domain contracts provide real observatory health, source preservation, storage, generation, and integration data.",
+      "removal_risk": "critical",
+      "notes": [
+        "Seventh concrete surface for the domain-first Product UI.",
         "Read-only, no controls, no runtime data evaluation.",
         "Owner label is Modern Product UI; static route/template ownership remains classified as modern."
       ]

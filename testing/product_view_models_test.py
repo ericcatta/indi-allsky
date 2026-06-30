@@ -18,6 +18,7 @@ from indi_allsky.product_view_models import build_highlights_view
 from indi_allsky.product_view_models import build_moment_detail_view
 from indi_allsky.product_view_models import build_output_detail_view
 from indi_allsky.product_view_models import build_library_view
+from indi_allsky.product_view_models import build_observatory_view
 from indi_allsky.product_view_models import build_sky_cycle_report_view
 from indi_allsky.product_view_models import build_source_confidence_summary
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
@@ -28,6 +29,7 @@ from indi_allsky.product_view_models import validate_moment_detail_payload
 from indi_allsky.product_view_models import validate_now_view_payload
 from indi_allsky.product_view_models import validate_output_detail_payload
 from indi_allsky.product_view_models import validate_library_payload
+from indi_allsky.product_view_models import validate_observatory_payload
 
 
 REQUIRED_NOW_KEYS = {
@@ -75,6 +77,7 @@ HIGHLIGHTS_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/highlights.
 MOMENT_DETAIL_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/moment_detail.html')
 OUTPUT_DETAIL_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/output_detail.html')
 LIBRARY_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/library.html')
+OBSERVATORY_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/observatory.html')
 
 REQUIRED_SKY_CYCLE_KEYS = {
     'id',
@@ -143,6 +146,25 @@ REQUIRED_LIBRARY_KEYS = {
     'filter_summary',
     'recent_items',
     'memory_model_summary',
+    'metadata',
+}
+
+REQUIRED_OBSERVATORY_KEYS = {
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'observatory_summary',
+    'camera_system_summary',
+    'capture_pipeline_summary',
+    'source_preservation_summary',
+    'storage_summary',
+    'generation_summary',
+    'integration_summary',
+    'attention_items',
     'metadata',
 }
 
@@ -1148,6 +1170,157 @@ def test_library_template_has_no_mutative_controls():
     assert '/ajax/' not in template_text
 
 
+def test_build_observatory_view_returns_dict():
+    observatory = build_observatory_view()
+
+    assert isinstance(observatory, dict)
+    assert REQUIRED_OBSERVATORY_KEYS.issubset(observatory.keys())
+    assert observatory['id'] == 'observatory.placeholder'
+    assert observatory['metadata']['contract'] == 'ObservatoryView'
+
+
+def test_build_observatory_view_is_json_serializable():
+    observatory = build_observatory_view()
+
+    json.dumps(observatory, sort_keys=True)
+
+
+def test_build_observatory_view_has_required_sections():
+    observatory = build_observatory_view()
+
+    assert_section_status(observatory['observatory_summary'])
+    assert_section_status(observatory['camera_system_summary'])
+    assert_section_status(observatory['capture_pipeline_summary'])
+    assert_section_status(observatory['source_preservation_summary'])
+    assert_section_status(observatory['storage_summary'])
+    assert_section_status(observatory['generation_summary'])
+    assert_section_status(observatory['integration_summary'])
+    assert_section_status(observatory['attention_items'])
+
+    allowed_statuses = {'ok', 'warning', 'blocked', 'not_evaluated', 'unknown'}
+    assert observatory['observatory_summary']['overall_status'] in allowed_statuses
+    assert observatory['camera_system_summary']['status'] in allowed_statuses
+    assert observatory['capture_pipeline_summary']['status'] in allowed_statuses
+    assert observatory['source_preservation_summary']['status'] in allowed_statuses
+    assert observatory['storage_summary']['status'] in allowed_statuses
+    assert observatory['generation_summary']['status'] in allowed_statuses
+    assert observatory['integration_summary']['status'] in allowed_statuses
+    assert observatory['source_preservation_summary']['trust_level'] in {'unknown', 'low', 'medium', 'high'}
+    assert observatory['storage_summary']['risk_level'] in {'unknown', 'low', 'medium', 'high'}
+    assert isinstance(observatory['attention_items']['items'], list)
+
+
+def test_build_observatory_view_contains_no_sensitive_payload():
+    observatory = build_observatory_view()
+
+    assert_no_sensitive_text(observatory)
+    assert_no_absolute_paths(observatory)
+    assert_no_callables(observatory)
+
+
+def test_validate_observatory_payload_success():
+    assert validate_observatory_payload(build_observatory_view()) is True
+
+
+def test_validate_observatory_payload_requires_sections():
+    observatory = build_observatory_view()
+    del observatory['observatory_summary']
+
+    try:
+        validate_observatory_payload(observatory)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('missing observatory_summary should fail validation')
+
+
+def test_validate_observatory_payload_rejects_invalid_status():
+    observatory = build_observatory_view()
+    observatory['camera_system_summary']['status'] = 'online'
+
+    try:
+        validate_observatory_payload(observatory)
+    except ValueError as e:
+        assert 'Invalid Observatory status' in str(e)
+    else:
+        raise AssertionError('invalid Observatory status should fail validation')
+
+
+def test_validate_observatory_payload_rejects_invalid_trust_or_risk():
+    observatory = build_observatory_view()
+    observatory['source_preservation_summary']['trust_level'] = 'certain'
+
+    try:
+        validate_observatory_payload(observatory)
+    except ValueError as e:
+        assert 'Invalid risk_level' in str(e)
+    else:
+        raise AssertionError('invalid Observatory trust should fail validation')
+
+    observatory = build_observatory_view()
+    observatory['storage_summary']['risk_level'] = 'critical'
+
+    try:
+        validate_observatory_payload(observatory)
+    except ValueError as e:
+        assert 'Invalid risk_level' in str(e)
+    else:
+        raise AssertionError('invalid Observatory risk should fail validation')
+
+
+def test_validate_observatory_payload_rejects_attention_items_not_list():
+    observatory = build_observatory_view()
+    observatory['attention_items']['items'] = 'No attention items'
+
+    try:
+        validate_observatory_payload(observatory)
+    except ValueError as e:
+        assert 'items must be a list' in str(e)
+    else:
+        raise AssertionError('Observatory attention items string should fail validation')
+
+
+def test_validate_observatory_payload_rejects_path_secret_callable():
+    observatory = build_observatory_view()
+    observatory['storage_summary']['note'] = '/var/lib/indi-allsky/storage'
+
+    try:
+        validate_observatory_payload(observatory)
+    except ValueError as e:
+        assert 'Absolute paths' in str(e)
+    else:
+        raise AssertionError('Observatory path should fail validation')
+
+    observatory = build_observatory_view()
+    observatory['integration_summary']['note'] = {'token': 'value'}
+
+    try:
+        validate_observatory_payload(observatory)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('Observatory secret should fail validation')
+
+    observatory = build_observatory_view()
+    observatory['generation_summary']['note'] = lambda: None
+
+    try:
+        validate_observatory_payload(observatory)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('Observatory callable should fail validation')
+
+
+def test_observatory_template_has_no_mutative_controls():
+    template_text = OBSERVATORY_TEMPLATE.read_text(encoding='utf-8').lower()
+
+    assert '<form' not in template_text
+    assert 'post' not in template_text
+    assert 'fetch' not in template_text
+    assert '/ajax/' not in template_text
+
+
 def test_validate_sky_cycle_report_payload_success():
     assert validate_sky_cycle_report_payload(build_sky_cycle_report_view()) is True
 
@@ -1960,6 +2133,17 @@ def main():
         test_validate_library_payload_rejects_indexed_fields_not_list,
         test_validate_library_payload_rejects_path_secret_callable,
         test_library_template_has_no_mutative_controls,
+        test_build_observatory_view_returns_dict,
+        test_build_observatory_view_is_json_serializable,
+        test_build_observatory_view_has_required_sections,
+        test_build_observatory_view_contains_no_sensitive_payload,
+        test_validate_observatory_payload_success,
+        test_validate_observatory_payload_requires_sections,
+        test_validate_observatory_payload_rejects_invalid_status,
+        test_validate_observatory_payload_rejects_invalid_trust_or_risk,
+        test_validate_observatory_payload_rejects_attention_items_not_list,
+        test_validate_observatory_payload_rejects_path_secret_callable,
+        test_observatory_template_has_no_mutative_controls,
         test_validate_sky_cycle_report_payload_success,
         test_validate_sky_cycle_report_payload_requires_sections,
         test_validate_sky_cycle_report_payload_rejects_invalid_status,
