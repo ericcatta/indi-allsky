@@ -19,7 +19,7 @@
 
         <h2>{{ output_detail.output_summary.generation_status }}</h2>
         <p class="modern-admin-note">{{ output_detail.output_summary.note }}</p>
-        <p class="modern-admin-note"><strong>Generated result dossier:</strong> this page explains identity, recipe, source lineage, and review readiness without reading media or starting rendering.</p>
+        <p class="modern-admin-note"><strong>Generated result dossier:</strong> this page explains output identity, Look/recipe, source lineage, and review readiness without reading media or starting rendering.</p>
         <p class="modern-admin-note">Contract: <code>{{ output_detail.metadata.contract }}</code> / <code>{{ output_detail.metadata.contract_version }}</code>. Source: <code>{{ output_detail.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
@@ -46,6 +46,7 @@
                 <h3>{{ output_detail.output_summary.type | replace('_', ' ') | title }}</h3>
                 <p><strong>Phase:</strong> {{ output_detail.output_summary.phase | replace('_', ' ') | title }}</p>
                 <p><strong>Sky Cycle:</strong> {{ output_detail.output_summary.sky_cycle_label }}</p>
+                <p>{{ output_detail.output_summary.note }}</p>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ output_detail.preview_summary.label }}</div>
@@ -87,6 +88,7 @@
                 <div class="modern-admin-card-label">Non-destructive boundary</div>
                 <h3>{{ output_detail.recipe_summary.non_destructive_status }}</h3>
                 <p>{{ output_detail.recipe_summary.note }}</p>
+                <p>Source remains authoritative; Outputs are derived results.</p>
             </article>
         </section>
     </section>
@@ -167,7 +169,7 @@
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
         </div>
-        <p class="modern-admin-note">This page is a static generated-result dossier. It does not read media, show a live preview, start rendering, or connect external delivery behavior.</p>
+        <p class="modern-admin-note">This page is a static generated-result dossier. It does not read media, show a live preview, start rendering, edit Looks, regenerate outputs, or connect external delivery behavior.</p>
     </section>
 </main>
 {% endblock %}

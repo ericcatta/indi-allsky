@@ -65,7 +65,9 @@ Initial score: 7.1/10.
 
 Post-uplift score: 7.5/10.
 
-The contract is strong and clearly supports non-destructive rendering and source lineage. The uplift improves product identity and makes disabled preview/share states feel intentional rather than missing. The experience is still static and cannot yet deliver the emotional value of seeing a generated result in context.
+Post-polish score: 7.8/10.
+
+The contract is strong and clearly supports non-destructive rendering and source lineage. The uplift improves product identity and makes disabled preview/share states feel intentional rather than missing. Final polish makes the page read more clearly as a generated-result dossier with output identity, Look/recipe, source lineage, and non-destructive boundaries. The experience is still static and cannot yet deliver the emotional value of seeing a generated result in context.
 
 ## Risks
 

@@ -19,7 +19,7 @@
 
         <h2>{{ highlights_view.highlights_summary.attention_verdict }}</h2>
         <p class="modern-admin-note">{{ highlights_view.highlights_summary.note }}</p>
-        <p class="modern-admin-note"><strong>Start here:</strong> Highlights is the curated attention briefing. It tells the user what to inspect first, why it was selected, and whether the source can be trusted.</p>
+        <p class="modern-admin-note"><strong>Start here:</strong> Highlights is the curated attention briefing. It chooses a small set of review-worthy items, explains why each was selected, and separates source trust from user preference.</p>
         <p class="modern-admin-note">Contract: <code>{{ highlights_view.metadata.contract }}</code> / <code>{{ highlights_view.metadata.contract_version }}</code>. Source: <code>{{ highlights_view.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
@@ -40,7 +40,7 @@
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">{{ primary_highlight.review_status }}</span>
         </div>
-        <p class="modern-admin-note">This is the first item Hybrid would ask the user to inspect. The recommendation is static in v1, but the experience shape is product-first: one primary item, a reason, evidence, trust, and a next surface.</p>
+        <p class="modern-admin-note">This is the first item Hybrid would ask the user to inspect. The recommendation is static in v1, but the experience shape is product-first: one primary item, a reason, evidence, source trust, and a clear next surface.</p>
 
         <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Primary Highlight briefing">
             <article class="modern-admin-status-card">
@@ -61,7 +61,7 @@
                 <div class="modern-admin-card-label">Trust and user decision</div>
                 <h3>{{ primary_highlight.source_trust_status }}</h3>
                 <p>{{ primary_highlight.favorite_status }}</p>
-                <p>Highlight means curated attention. Favorite means a future user decision.</p>
+                <p>Highlight means curated attention. Favorite means a future user decision. They must never be treated as the same signal.</p>
             </article>
         </section>
     </section>

@@ -53,11 +53,14 @@ What works:
 - Placeholder states are honest.
 - Source preservation and non-destructive rendering are named repeatedly.
 - Real-data gaps are labeled as pending backend contracts.
+- Product-language polish now makes Observatory readiness, Library memory,
+  Highlight attention, Moment case analysis, and Output generated-result
+  lineage more consistent.
 
 What needs work:
 
-- Phrases like "pending backend contract" and "not evaluated yet" appear often
-  enough that the UI risks feeling like a developer specification.
+- Phrases like "pending backend contract" and "not evaluated yet" still appear
+  often enough that the UI can feel like a developer specification in places.
 - Basic product surfaces need more user-centered language once real data is
   introduced.
 - Placeholder copy should eventually be replaced with useful empty states, not
@@ -114,10 +117,12 @@ and health across a cycle.
 
 Library supports long-term retrieval.
 
-Observatory explains readiness and health.
+Observatory explains readiness and health without becoming Developer or
+Settings.
 
-Current distinction: good enough for v1. The main risk is that Sky Cycle and
-Library both become broad summaries unless Library stays retrieval-first.
+Current distinction: stronger after the final polish. The main remaining risk
+is that Sky Cycle and Library both become broad summaries unless Library stays
+retrieval-first.
 
 ## Flow Review
 
@@ -162,8 +167,8 @@ Product-specific dead ends have been reduced:
 
 ### Admin Panel Risk
 
-Medium. The architecture is product-first, but the placeholder language often
-exposes implementation concepts.
+Low to medium. Observatory now reads more like readiness than telemetry, but
+future real health data can still pull it toward admin-panel language.
 
 ### Generic Gallery Risk
 
@@ -172,8 +177,8 @@ work could weaken that boundary.
 
 ### Contract-Driven UI Risk
 
-High. The current skeleton is intentionally contract-first. The next design
-work must translate contracts into product experiences.
+Medium. The skeleton remains contract-first, but the final polish translates
+the lowest-scoring pages into clearer product experiences.
 
 ### RPi5-First Risk
 

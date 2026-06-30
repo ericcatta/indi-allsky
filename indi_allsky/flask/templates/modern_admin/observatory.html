@@ -19,6 +19,7 @@
 
         <h2>{{ observatory_view.observatory_summary.readiness_label }}</h2>
         <p class="modern-admin-note">{{ observatory_view.observatory_summary.note }}</p>
+        <p class="modern-admin-note"><strong>Can the observatory capture reliably?</strong> Observatory summarizes readiness for camera, capture, source preservation, storage, generation, and integrations. It is not Developer diagnostics or Settings editing.</p>
         <p class="modern-admin-note">Contract: <code>{{ observatory_view.metadata.contract }}</code> / <code>{{ observatory_view.metadata.contract_version }}</code>. Source: <code>{{ observatory_view.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
@@ -29,11 +30,40 @@
         </div>
     </header>
 
+    <section class="modern-admin-table-panel" aria-labelledby="observatory-readiness-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Readiness summary</p>
+                <h2 id="observatory-readiness-title">Can It Capture Reliably?</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ observatory_view.observatory_summary.overall_status | replace('_', ' ') | title }}</span>
+        </div>
+        <p class="modern-admin-note">Readiness is not evaluated yet. This prototype does not run live hardware, camera, storage, network, or service checks.</p>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory readiness summary">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Ready to observe?</div>
+                <h3>{{ observatory_view.observatory_summary.readiness_label }}</h3>
+                <p>Future backend contracts will summarize whether the system can capture and preserve source data reliably.</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">What looks OK?</div>
+                <h3>Nothing is claimed yet</h3>
+                <p>Static v1 does not mark hardware, storage, generation, or integrations as healthy.</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">What needs attention?</div>
+                <h3>{{ observatory_view.attention_items.data_status | replace('_', ' ') | title }}</h3>
+                <p>Future attention items should explain operational risk without exposing Developer internals.</p>
+            </article>
+        </section>
+    </section>
+
     <section class="modern-admin-table-panel" aria-labelledby="observatory-core-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Readiness</p>
-                <h2 id="observatory-core-title">Capture and Source Health</h2>
+                <p class="modern-admin-eyebrow">Capture readiness</p>
+                <h2 id="observatory-core-title">Camera, Capture, and Source Preservation</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-muted">{{ observatory_view.data_status | replace('_', ' ') | title }}</span>
         </div>
@@ -45,6 +75,7 @@
                 <p><strong>Camera:</strong> {{ observatory_view.camera_system_summary.camera_label }}</p>
                 <p><strong>Profile:</strong> {{ observatory_view.camera_system_summary.profile_label }}</p>
                 <p>{{ observatory_view.camera_system_summary.backend_status }}</p>
+                <p>Developer internals stay out of this readiness view.</p>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ observatory_view.capture_pipeline_summary.label }}</div>
@@ -58,6 +89,7 @@
                 <h3>{{ observatory_view.source_preservation_summary.preservation_label }}</h3>
                 <p>{{ observatory_view.source_preservation_summary.raw_status }}</p>
                 <p>{{ observatory_view.source_preservation_summary.fits_status }}</p>
+                <p>{{ observatory_view.source_preservation_summary.lineage_status }}</p>
                 <p>Trust: {{ observatory_view.source_preservation_summary.trust_level | title }}</p>
             </article>
         </section>
@@ -66,10 +98,10 @@
     <section class="modern-admin-table-panel" aria-labelledby="observatory-operations-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Operations</p>
+                <p class="modern-admin-eyebrow">Operational readiness</p>
                 <h2 id="observatory-operations-title">Storage, Generation, and Integrations</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Static contract</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only readiness</span>
         </div>
 
         <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory operations">
@@ -86,6 +118,7 @@
                 <p>{{ observatory_view.generation_summary.queue_status }}</p>
                 <p>{{ observatory_view.generation_summary.rendering_status }}</p>
                 <p>{{ observatory_view.generation_summary.note }}</p>
+                <p>Generation readiness is summarized here; rendering controls belong elsewhere.</p>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ observatory_view.integration_summary.label }}</div>
@@ -100,7 +133,7 @@
     <section class="modern-admin-table-panel" aria-labelledby="observatory-attention-title">
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Attention</p>
+                <p class="modern-admin-eyebrow">Operational attention</p>
                 <h2 id="observatory-attention-title">System Readiness Items</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-muted">{{ observatory_view.attention_items.data_status | replace('_', ' ') | title }}</span>
@@ -126,7 +159,7 @@
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">No live checks</span>
         </div>
-        <p class="modern-admin-note">This page is a static Observatory contract. It does not inspect devices, connect to cameras, contact remote services, read media, show previews, or run a refresh loop.</p>
+        <p class="modern-admin-note">This page is a static Observatory readiness surface. It does not inspect devices, connect to cameras, contact remote services, read media, show previews, edit settings, expose Developer internals, or run a refresh loop.</p>
     </section>
 </main>
 {% endblock %}

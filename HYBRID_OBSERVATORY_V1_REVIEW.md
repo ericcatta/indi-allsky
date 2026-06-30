@@ -25,6 +25,10 @@ panel.
 
 - The page is organized around product health rather than implementation
   metrics.
+- The UX polish reframes the page around the question "Can the observatory
+  capture reliably?" instead of a technical checklist.
+- Readiness, capture, source preservation, storage, generation, integrations,
+  and attention now read as operational product states.
 - Camera, capture, source preservation, storage, generation, integrations, and
   attention items are separate contract sections.
 - Source preservation is treated as a first-class trust requirement.
@@ -72,9 +76,12 @@ RPi5-first.
 
 Initial score: 7.2/10.
 
+Post-polish score: 7.7/10.
+
 The page has the right product shape: health as readiness and trust, not admin
-telemetry. The score remains limited because no real health evidence is
-connected yet.
+telemetry. The polish makes Observatory feel more reassuring and operational,
+and it better separates Observatory from Developer and Settings. The score
+remains limited because no real health evidence is connected yet.
 
 ## Risks
 
@@ -87,6 +94,6 @@ connected yet.
 
 Do not connect real checks yet.
 
-Recommended Mission 036: consolidate the v1 product surface set. Review Now,
-Highlights, Moment, Output, Sky Cycle, Library, and Observatory together before
-adding Settings/Developer or real data.
+Recommended next step: connect only cached or cheap health summaries after a
+bounded source review. Do not add live hardware checks, camera probes, network
+calls, or remediation controls in request paths.

@@ -19,7 +19,7 @@
 
         <h2>{{ library_view.library_summary.scope_label }}</h2>
         <p class="modern-admin-note">{{ library_view.library_summary.note }}</p>
-        <p class="modern-admin-note"><strong>Find notable sky observations over time:</strong> Library is product memory for Highlights, Moments, Outputs, Sky Cycles, and future Favorites. It is not a generic gallery or file browser.</p>
+        <p class="modern-admin-note"><strong>Find notable sky observations over time:</strong> Library is product memory for Highlights, Moments, Outputs, Sky Cycles, and future Favorites. It retrieves meaning; it is not a generic gallery, file browser, or attention ranking surface.</p>
         <p class="modern-admin-note">Contract: <code>{{ library_view.metadata.contract }}</code> / <code>{{ library_view.metadata.contract_version }}</code>. Source: <code>{{ library_view.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
@@ -49,6 +49,11 @@
                 <p>{{ collection.description }}</p>
                 <p><strong>Count:</strong> {{ collection.count_label }}</p>
                 <p><strong>Example:</strong> {{ collection.example_query }}</p>
+                {% if collection.key == 'highlights' %}
+                    <p>Highlights decide what deserves attention; Library helps find them later.</p>
+                {% elif collection.key == 'favorites' %}
+                    <p>Favorites are future user memory, not automatic ranking.</p>
+                {% endif %}
             </article>
             {% endfor %}
         </section>
@@ -69,6 +74,7 @@
                 <h3>{{ library_view.search_summary.search_status }}</h3>
                 <p>{{ library_view.search_summary.unavailable_reason }}</p>
                 <p>{{ library_view.search_summary.note }}</p>
+                <p>Search should retrieve bounded metadata, never scan media folders in the request path.</p>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">Future indexed fields</div>
@@ -144,7 +150,7 @@
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">No runtime archive</span>
         </div>
-        <p class="modern-admin-note">This page is a static Library contract. It does not query, scan storage, read source or media, build an index, display previews, or connect external delivery behavior.</p>
+        <p class="modern-admin-note">This page is a static Library memory contract. It does not query, scan storage, read source or media, build an index, display previews, rank attention, or connect external delivery behavior.</p>
     </section>
 </main>
 {% endblock %}

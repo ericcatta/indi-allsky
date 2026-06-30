@@ -19,7 +19,7 @@
 
         <h2>{{ moment_detail.moment_summary.selection_reason }}</h2>
         <p class="modern-admin-note">{{ moment_detail.moment_summary.note }}</p>
-        <p class="modern-admin-note"><strong>Case analysis:</strong> this page should help the user understand what happened, why Hybrid surfaced it, what evidence exists, whether the source is trustworthy, and which output explains it.</p>
+        <p class="modern-admin-note"><strong>Case analysis:</strong> this page should help the user understand what happened, why Hybrid surfaced it, what evidence exists, whether the source lineage is trustworthy, and which output explains it.</p>
         <p class="modern-admin-note">Contract: <code>{{ moment_detail.metadata.contract }}</code> / <code>{{ moment_detail.metadata.contract_version }}</code>. Source: <code>{{ moment_detail.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
@@ -59,6 +59,7 @@
                 <h3>{{ moment_detail.source_trust_summary.confidence }}</h3>
                 <p>{{ moment_detail.source_trust_summary.source_status }}</p>
                 <p>{{ moment_detail.source_trust_summary.lineage_status }}</p>
+                <p>{{ moment_detail.source_trust_summary.preservation_status }}</p>
             </article>
         </section>
     </section>
@@ -140,7 +141,7 @@
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
         </div>
-        <p class="modern-admin-note">This page is a static Moment case analysis. It does not evaluate detector, source, media, observatory, preview, external delivery, or confirmation behavior.</p>
+        <p class="modern-admin-note">This page is a static Moment case analysis. It does not evaluate detector evidence, source lineage, media, observatory health, preview, external delivery, or confirmation behavior.</p>
     </section>
 </main>
 {% endblock %}

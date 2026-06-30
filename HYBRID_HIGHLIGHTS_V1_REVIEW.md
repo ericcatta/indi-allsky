@@ -128,6 +128,8 @@ Initial Highlights v1 score: 7.0/10.
 
 Post-uplift Highlights v1 score: 7.5/10.
 
+Post-polish Highlights v1 score: 7.8/10.
+
 Why it scores above a mockup:
 
 - it formalizes the missing attention layer;
@@ -138,8 +140,10 @@ Why it scores above a mockup:
   items;
 - it separates primary recommendation, also-worth-reviewing items, trust, and
   user decision language.
+- final polish makes the Highlight/Favorite difference and source-trust
+  boundary clearer.
 
-Why it remains at 7.5:
+Why it remains at 7.8:
 
 - all examples are static;
 - there is no real selector;
@@ -147,8 +151,7 @@ Why it remains at 7.5:
 - source trust is not connected;
 - user decision state is not connected;
 - it does not yet prove the morning flow with real attention data.
-- it is still more explanatory prototype than emotionally convincing daily
-  briefing.
+- it is still a static attention briefing rather than real daily selection.
 
 ## Recommended Next Mission
 

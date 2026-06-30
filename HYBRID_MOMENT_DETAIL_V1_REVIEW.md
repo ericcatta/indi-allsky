@@ -47,7 +47,9 @@ Initial score: 7.0/10.
 
 Post-uplift score: 7.5/10.
 
-The domain shape is strong because the page explains why a Moment matters. The uplift improves hierarchy and makes the page feel more like a case analysis than a rendered schema. It remains limited because detector evidence, source lineage, related output metadata, and real Highlight target identity are still fake/static.
+Post-polish score: 7.7/10.
+
+The domain shape is strong because the page explains why a Moment matters. The uplift improves hierarchy and makes the page feel more like a case analysis than a rendered schema. Final polish clarifies the evidence -> source lineage -> related output path. It remains limited because detector evidence, source lineage, related output metadata, and real Highlight target identity are still fake/static.
 
 ## Risks
 
