@@ -24,6 +24,7 @@ from indi_allsky.product_view_models import build_sky_cycle_report_view
 from indi_allsky.product_view_models import build_source_confidence_summary
 from indi_allsky.product_view_models import CurrentCaptureStatusRepository
 from indi_allsky.product_view_models import GeneratedOutputDescriptor
+from indi_allsky.product_view_models import HighlightsMetadataRepository
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
 from indi_allsky.product_view_models import LatestGeneratedOutputRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
@@ -219,6 +220,7 @@ class FakeImageQuery:
         self.order_by_calls = list()
         self.limit_calls = list()
         self.first_calls = 0
+        self.all_calls = 0
 
     def filter(self, expression):
         self.filter_calls.append(expression)
@@ -237,6 +239,16 @@ class FakeImageQuery:
         if self.raises:
             raise RuntimeError('fake query failure')
         return self.row
+
+    def all(self):
+        self.all_calls += 1
+        if self.raises:
+            raise RuntimeError('fake query failure')
+        if isinstance(self.row, list):
+            return self.row
+        if self.row is None:
+            return []
+        return [self.row]
 
 
 def walk_payload(value):
@@ -548,6 +560,121 @@ def test_build_highlights_view_has_required_sections():
 def test_build_highlights_view_contains_no_sensitive_payload():
     highlights = build_highlights_view()
 
+    assert_no_sensitive_text(highlights)
+    assert_no_absolute_paths(highlights)
+    assert_no_callables(highlights)
+
+
+def test_highlights_metadata_repository_builds_explainable_candidates():
+    row = FakeImageRow(
+        id=42,
+        camera_id=7,
+        createDate=datetime(2026, 6, 30, 1, 2, 3),
+        dayDate=date(2026, 6, 30),
+        night=True,
+        detections=2,
+        stars=35,
+        sqm=19.2,
+        adu=84.0,
+        kpindex=2.0,
+        ovation_max=12,
+        smoke_rating=0,
+        moonmode=False,
+        stable=True,
+        exclude=False,
+        width=1920,
+        height=1080,
+        filename='/private/should-not-leak.jpg',
+        remote_url='https://example.invalid/image.jpg',
+        s3_key='secret/key',
+        thumbnail_uuid='thumbnail',
+        data={'token': 'hidden'},
+    )
+    query = FakeImageQuery(row)
+    repository = HighlightsMetadataRepository(
+        query=query,
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
+        order_by_expressions=('detections-desc', 'created-desc'),
+        max_items=4,
+    )
+
+    result = repository.get_highlight_metadata()
+    item = result['items'][0]
+
+    assert result['status'] == 'highlight_metadata_available'
+    assert item['type'] == 'meteor_candidate'
+    assert item['origin'] == 'rule'
+    assert item['phase'] == 'night'
+    assert item['is_placeholder'] is False
+    assert 'detections=2' in item['evidence']
+    assert 'image_metadata_id=42' in item['evidence']
+    assert query.filter_calls == [(FakeImageField('camera_id') == 7)]
+    assert query.order_by_calls == ['detections-desc', 'created-desc']
+    assert query.limit_calls == [4]
+    assert query.all_calls == 1
+    assert 'filename' not in json.dumps(item, sort_keys=True).lower()
+    assert 'remote_url' not in json.dumps(item, sort_keys=True).lower()
+    assert 's3_key' not in json.dumps(item, sort_keys=True).lower()
+    assert_no_sensitive_text(result)
+    assert_no_absolute_paths(result)
+    assert_no_callables(result)
+
+
+def test_highlights_metadata_repository_handles_no_candidates():
+    query = FakeImageQuery(FakeImageRow(id=43, camera_id=7, createDate=datetime(2026, 6, 30, 1, 2, 3)))
+    repository = HighlightsMetadataRepository(
+        query=query,
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
+        order_by_expressions=('created-desc',),
+        max_items=4,
+    )
+
+    result = repository.get_highlight_metadata()
+
+    assert result['status'] == 'no_highlight_metadata'
+    assert result['items'] == []
+    json.dumps(result, sort_keys=True)
+
+
+def test_highlights_metadata_repository_handles_query_error():
+    repository = HighlightsMetadataRepository(
+        query=FakeImageQuery(raises=True),
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
+        order_by_expressions=('created-desc',),
+        max_items=4,
+    )
+
+    result = repository.get_highlight_metadata()
+
+    assert result['status'] == 'highlight_metadata_unavailable'
+    assert result['items'] == []
+    assert_no_sensitive_text(result)
+
+
+def test_build_highlights_view_accepts_metadata_repository():
+    repository = HighlightsMetadataRepository(
+        query=FakeImageQuery([
+            FakeImageRow(id=50, camera_id=7, createDate=datetime(2026, 6, 30, 1, 2, 3), night=True, stars=45, sqm=19.5, exclude=False),
+            FakeImageRow(id=51, camera_id=7, createDate=datetime(2026, 6, 30, 2, 2, 3), night=True, kpindex=6.0, exclude=False),
+        ]),
+        camera_id=7,
+        camera_id_field=FakeImageField('camera_id'),
+        order_by_expressions=('detections-desc', 'created-desc'),
+        max_items=4,
+    )
+
+    highlights = build_highlights_view(highlights_repository=repository)
+
+    assert highlights['is_placeholder'] is False
+    assert highlights['highlights_summary']['is_placeholder'] is False
+    assert highlights['highlights_summary']['count_label'] == '2 metadata Highlight candidate(s)'
+    assert highlights['highlight_items'][0]['type'] == 'clear_window'
+    assert highlights['highlight_items'][1]['type'] == 'aurora_candidate'
+    assert validate_highlights_payload(highlights) is True
+    json.dumps(highlights, sort_keys=True)
     assert_no_sensitive_text(highlights)
     assert_no_absolute_paths(highlights)
     assert_no_callables(highlights)
@@ -2748,6 +2875,10 @@ def main():
         test_build_highlights_view_is_json_serializable,
         test_build_highlights_view_has_required_sections,
         test_build_highlights_view_contains_no_sensitive_payload,
+        test_highlights_metadata_repository_builds_explainable_candidates,
+        test_highlights_metadata_repository_handles_no_candidates,
+        test_highlights_metadata_repository_handles_query_error,
+        test_build_highlights_view_accepts_metadata_repository,
         test_validate_highlights_payload_success,
         test_validate_highlights_payload_requires_sections,
         test_validate_highlights_payload_rejects_invalid_type,

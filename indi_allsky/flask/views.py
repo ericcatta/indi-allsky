@@ -41,6 +41,7 @@ from ..product_view_models import build_observatory_view
 from ..product_view_models import build_sky_cycle_report_view
 from ..product_view_models import CurrentCaptureStatusRepository
 from ..product_view_models import GeneratedOutputDescriptor
+from ..product_view_models import HighlightsMetadataRepository
 from ..product_view_models import LatestFrameImageTableRepository
 from ..product_view_models import LatestGeneratedOutputRepository
 from ..product_view_models import LatestFrameSummaryProvider
@@ -7636,9 +7637,34 @@ class ModernAdminHighlightsView(TemplateView):
         context = super(ModernAdminHighlightsView, self).get_context()
 
         session['admin_mode'] = 'modern'
-        context['highlights_view'] = build_highlights_view()
+        context['highlights_view'] = build_highlights_view(
+            highlights_repository=self.get_highlights_repository(),
+        )
 
         return context
+
+    def get_highlights_repository(self):
+        try:
+            camera = getattr(self, 'camera', None)
+            camera_id = getattr(camera, 'id', None)
+            if not camera_id:
+                return None
+
+            return HighlightsMetadataRepository(
+                query=IndiAllSkyDbImageTable.query,
+                camera_id=camera_id,
+                camera_id_field=IndiAllSkyDbImageTable.camera_id,
+                order_by_expressions=(
+                    IndiAllSkyDbImageTable.detections.desc(),
+                    IndiAllSkyDbImageTable.stars.desc(),
+                    IndiAllSkyDbImageTable.sqm.desc(),
+                    IndiAllSkyDbImageTable.createDate.desc(),
+                ),
+                max_items=4,
+            )
+        except Exception:
+            app.logger.error('Unable to build Highlights metadata repository')
+            return None
 
 
 class ModernAdminMomentDetailView(TemplateView):

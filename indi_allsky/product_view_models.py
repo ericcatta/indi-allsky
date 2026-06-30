@@ -559,6 +559,26 @@ HIGHLIGHT_ALLOWED_ORIGINS = frozenset((
     'unknown',
 ))
 
+HIGHLIGHT_METADATA_ALLOWED_FIELDS = frozenset((
+    'id',
+    'camera_id',
+    'timestamp',
+    'day_date',
+    'night',
+    'detections',
+    'stars',
+    'sqm',
+    'adu',
+    'kpindex',
+    'ovation_max',
+    'smoke_rating',
+    'moonmode',
+    'stable',
+    'exclude',
+    'width',
+    'height',
+))
+
 MOMENT_DETAIL_REQUIRED_KEYS = frozenset((
     'id',
     'label',
@@ -1539,6 +1559,54 @@ class SourceTrustRepository:
         return _source_trust_row_metadata(descriptor, row)
 
 
+class HighlightsMetadataRepository:
+    """Bounded adapter for explainable Highlight candidates from image metadata."""
+
+    def __init__(self, query=None, camera_id=None, camera_id_field=None, order_by_expressions=None, max_items=4):
+        self.query = query
+        self.camera_id = camera_id
+        self.camera_id_field = camera_id_field
+        self.order_by_expressions = tuple(order_by_expressions or ())
+        self.max_items = max(1, min(int(max_items or 4), 8))
+
+    def get_highlight_metadata(self):
+        if self.query is None:
+            return _build_highlights_metadata_unavailable('Highlight metadata query unavailable.')
+
+        if self.camera_id in (None, ''):
+            return _build_highlights_metadata_unavailable('Camera context unavailable.')
+
+        try:
+            query = self.query
+
+            if self.camera_id_field is not None:
+                query = query.filter(self.camera_id_field == self.camera_id)
+
+            for order_by_expression in self.order_by_expressions:
+                query = query.order_by(order_by_expression)
+
+            query = query.limit(self.max_items)
+            rows = query.all()
+        except Exception:
+            return _build_highlights_metadata_unavailable('Highlight metadata query failed.')
+
+        items = []
+        for row in rows or []:
+            item = _highlight_item_from_image_metadata(_highlight_image_row_metadata(row))
+            if item is not None:
+                items.append(item)
+
+        if not items:
+            return _build_highlights_metadata_empty()
+
+        return {
+            'status': 'highlight_metadata_available',
+            'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+            'items': items[:self.max_items],
+            'note': 'Highlights are generated from bounded image metadata rules.',
+        }
+
+
 class LatestFrameImageTableRepository:
     """Repository adapter for one bounded latest image metadata row."""
 
@@ -1751,18 +1819,20 @@ def build_sky_cycle_report_view():
     return payload
 
 
-def build_highlights_view():
-    """Return the first fake-safe Highlights product contract."""
+def build_highlights_view(highlights_repository=None):
+    """Return the first Highlights product contract."""
+    highlight_items = _build_highlight_items(highlights_repository=highlights_repository)
+
     payload = {
         'id': 'highlights.placeholder',
         'label': 'Highlights',
         'status': 'Read-only product prototype',
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
         'generated_at': 'Not evaluated yet',
-        'is_placeholder': True,
+        'is_placeholder': all(item.get('is_placeholder', True) for item in highlight_items),
         'safe_actions_available': [],
-        'highlights_summary': _build_highlights_summary(),
-        'highlight_items': _build_highlight_items(),
+        'highlights_summary': _build_highlights_summary(highlight_items),
+        'highlight_items': highlight_items,
         'source_trust_summary': _build_highlights_source_trust_summary(),
         'review_queue_summary': _build_highlights_review_queue_summary(),
         'selection_policy_summary': _build_highlights_selection_policy_summary(),
@@ -2805,21 +2875,51 @@ def _build_sky_cycle_metadata():
     }
 
 
-def _build_highlights_summary():
+def _build_highlights_summary(highlight_items=None):
+    highlight_items = list(highlight_items or [])
+    real_items = [item for item in highlight_items if not item.get('is_placeholder', True)]
+    primary = real_items[0] if real_items else None
+
+    if primary:
+        count_label = '{0:d} metadata Highlight candidate(s)'.format(len(real_items))
+        primary_highlight = primary.get('title', 'Metadata Highlight candidate')
+        attention_verdict = 'Hybrid selected explainable metadata candidates for review.'
+        is_placeholder = False
+    else:
+        count_label = '4 placeholder Highlights'
+        primary_highlight = 'No primary Highlight selected from real data'
+        attention_verdict = 'Highlight selection is not connected to real detector data yet.'
+        is_placeholder = True
+
     return {
         'id': 'highlights.summary.placeholder',
         'label': 'Highlights Summary',
         'title': 'Highlights',
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
-        'count_label': '4 placeholder Highlights',
-        'primary_highlight': 'No primary Highlight selected from real data',
-        'attention_verdict': 'Highlight selection is not connected to real detector data yet.',
+        'count_label': count_label,
+        'primary_highlight': primary_highlight,
+        'attention_verdict': attention_verdict,
         'note': 'Highlights are curated attention objects. They explain what deserves review before the user explores reports or archives.',
-        'is_placeholder': True,
+        'is_placeholder': is_placeholder,
     }
 
 
-def _build_highlight_items():
+def _build_highlight_items(highlights_repository=None):
+    if highlights_repository is not None:
+        try:
+            metadata = highlights_repository.get_highlight_metadata()
+        except Exception:
+            metadata = _build_highlights_metadata_unavailable('Highlight metadata repository failed safely.')
+
+        if isinstance(metadata, dict):
+            items = metadata.get('items') or []
+            sanitized_items = [
+                item for item in (_sanitize_highlight_item(item) for item in items)
+                if item is not None
+            ]
+            if sanitized_items:
+                return sanitized_items
+
     return [
         {
             'highlight_id': 'highlight.placeholder.meteor',
@@ -3671,6 +3771,24 @@ def _build_source_trust_unavailable(note):
     }
 
 
+def _build_highlights_metadata_empty():
+    return {
+        'status': 'no_highlight_metadata',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'items': [],
+        'note': 'No bounded image metadata produced an explainable Highlight candidate.',
+    }
+
+
+def _build_highlights_metadata_unavailable(note):
+    return {
+        'status': 'highlight_metadata_unavailable',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'items': [],
+        'note': _latest_frame_text(note, 'Highlight metadata unavailable.'),
+    }
+
+
 def _build_sky_cycle_briefing():
     return SkyCycleBriefingSection(
         id='sky_cycle.placeholder',
@@ -4064,6 +4182,157 @@ def _source_trust_row_metadata(descriptor, row):
     return _sanitize_source_trust_source(metadata)
 
 
+def _highlight_image_row_metadata(row):
+    created_at = getattr(row, 'createDate', None)
+    metadata = {
+        'id': _latest_frame_json_value(getattr(row, 'id', None)),
+        'camera_id': _latest_frame_json_value(getattr(row, 'camera_id', None)),
+        'timestamp': _latest_frame_timestamp_label(created_at),
+        'day_date': _latest_generated_output_json_value(getattr(row, 'dayDate', None)),
+        'night': _latest_frame_json_value(getattr(row, 'night', None)),
+        'detections': _latest_frame_json_value(getattr(row, 'detections', None)),
+        'stars': _latest_frame_json_value(getattr(row, 'stars', None)),
+        'sqm': _latest_frame_json_value(getattr(row, 'sqm', None)),
+        'adu': _latest_frame_json_value(getattr(row, 'adu', None)),
+        'kpindex': _latest_frame_json_value(getattr(row, 'kpindex', None)),
+        'ovation_max': _latest_frame_json_value(getattr(row, 'ovation_max', None)),
+        'smoke_rating': _latest_frame_json_value(getattr(row, 'smoke_rating', None)),
+        'moonmode': _latest_frame_json_value(getattr(row, 'moonmode', None)),
+        'stable': _latest_frame_json_value(getattr(row, 'stable', None)),
+        'exclude': _latest_frame_json_value(getattr(row, 'exclude', None)),
+        'width': _latest_frame_json_value(getattr(row, 'width', None)),
+        'height': _latest_frame_json_value(getattr(row, 'height', None)),
+    }
+
+    return {
+        key: value
+        for key, value in metadata.items()
+        if key in HIGHLIGHT_METADATA_ALLOWED_FIELDS
+        and _latest_frame_metadata_value_is_json_safe(value)
+        and not _latest_frame_value_is_unsafe(value)
+    }
+
+
+def _highlight_item_from_image_metadata(metadata):
+    if not isinstance(metadata, dict) or metadata.get('exclude') is True:
+        return None
+
+    timestamp = _latest_frame_text(metadata.get('timestamp'), 'Time not evaluated yet')
+    phase = 'night' if metadata.get('night') is True else 'day' if metadata.get('night') is False else 'unknown'
+    evidence = []
+
+    detections = _safe_number(metadata.get('detections'))
+    stars = _safe_number(metadata.get('stars'))
+    sqm = _safe_number(metadata.get('sqm'))
+    kpindex = _safe_number(metadata.get('kpindex'))
+    ovation_max = _safe_number(metadata.get('ovation_max'))
+    smoke_rating = _safe_number(metadata.get('smoke_rating'))
+    stable = metadata.get('stable')
+
+    if detections and detections > 0:
+        highlight_type = 'meteor_candidate'
+        title = 'Detection metadata candidate'
+        selection_reason = 'Selected because: image metadata reports {0:g} detection(s).'.format(detections)
+        confidence_label = 'Detection metadata present; detector details not connected.'
+        evidence.append('detections={0:g}'.format(detections))
+    elif (ovation_max and ovation_max >= 50) or (kpindex and kpindex >= 5):
+        highlight_type = 'aurora_candidate'
+        title = 'Aurora conditions metadata candidate'
+        selection_reason = 'Selected because: aurora-related environment metadata is elevated.'
+        confidence_label = 'Aurora context metadata present; visual confirmation not connected.'
+        if ovation_max is not None:
+            evidence.append('ovation_max={0:g}'.format(ovation_max))
+        if kpindex is not None:
+            evidence.append('kpindex={0:g}'.format(kpindex))
+    elif smoke_rating and smoke_rating > 0:
+        highlight_type = 'sky_quality'
+        title = 'Sky quality attention item'
+        selection_reason = 'Selected because: smoke/sky-condition metadata indicates possible reduced transparency.'
+        confidence_label = 'Environmental metadata present; cloud classification not connected.'
+        evidence.append('smoke_rating={0:g}'.format(smoke_rating))
+    elif (stars and stars >= 20) or (sqm and sqm >= 18):
+        highlight_type = 'clear_window'
+        title = 'Clear window metadata candidate'
+        selection_reason = 'Selected because: star/SQM metadata suggests a potentially useful observing window.'
+        confidence_label = 'Sky quality metadata present; no image analysis performed.'
+        if stars is not None:
+            evidence.append('stars={0:g}'.format(stars))
+        if sqm is not None:
+            evidence.append('sqm={0:g}'.format(sqm))
+    elif stable is False:
+        highlight_type = 'observatory_issue'
+        title = 'Frame stability attention item'
+        selection_reason = 'Selected because: image metadata marks the frame as not stable.'
+        confidence_label = 'Operational metadata present; root cause not evaluated.'
+        evidence.append('stable=False')
+    else:
+        return None
+
+    evidence.append('timestamp={0:s}'.format(timestamp))
+    if metadata.get('id') is not None:
+        evidence.append('image_metadata_id={0}'.format(metadata.get('id')))
+
+    return {
+        'highlight_id': 'highlight.metadata.{0}'.format(_latest_frame_text(str(metadata.get('id')), 'unknown')),
+        'title': title,
+        'type': highlight_type,
+        'target_kind': 'moment',
+        'target_label': 'Moment Detail',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'origin': 'rule',
+        'selection_reason': selection_reason,
+        'confidence_label': confidence_label,
+        'evidence': evidence,
+        'phase': phase,
+        'sky_cycle_context': 'Sky Cycle context is not connected to this metadata candidate yet.',
+        'source_trust_status': 'Source trust summarized separately; per-highlight lineage is not connected yet.',
+        'related_output_status': 'Related output metadata is not connected to this Highlight yet.',
+        'favorite_status': 'Favorite remains a future user decision.',
+        'review_status': 'Suggested from metadata',
+        'safe_actions_available': [],
+        'is_placeholder': False,
+    }
+
+
+def _sanitize_highlight_item(item):
+    if not isinstance(item, dict):
+        return None
+
+    if item.get('type') not in HIGHLIGHT_ALLOWED_TYPES:
+        return None
+
+    if item.get('target_kind') not in HIGHLIGHT_ALLOWED_TARGET_KINDS:
+        return None
+
+    if item.get('origin') not in HIGHLIGHT_ALLOWED_ORIGINS:
+        return None
+
+    sanitized = {}
+    for key in HIGHLIGHT_ITEM_REQUIRED_KEYS:
+        value = item.get(key)
+        if key in ('evidence', 'safe_actions_available'):
+            if not isinstance(value, list):
+                return None
+            sanitized[key] = [
+                evidence_item
+                for evidence_item in value
+                if _latest_frame_metadata_value_is_json_safe(evidence_item)
+                and not _latest_frame_value_is_unsafe(evidence_item)
+            ]
+            continue
+
+        if key == 'is_placeholder':
+            sanitized[key] = bool(value)
+            continue
+
+        if not _latest_frame_metadata_value_is_json_safe(value) or _latest_frame_value_is_unsafe(value):
+            return None
+
+        sanitized[key] = value
+
+    return sanitized
+
+
 def _sanitize_source_trust_source(source):
     if not isinstance(source, dict):
         return None
@@ -4103,6 +4372,16 @@ def _sanitize_source_trust_source(source):
     sanitized.setdefault('timestamp', 'Not evaluated yet')
 
     return sanitized
+
+
+def _safe_number(value):
+    if isinstance(value, bool):
+        return None
+
+    if isinstance(value, (int, float)):
+        return value
+
+    return None
 
 
 def _latest_generated_output_json_value(value):

@@ -199,6 +199,16 @@ prove file existence or output-to-source lineage.
 Moment Detail and Output Detail remain disconnected by design. They need
 identifier-specific lineage before source trust can be shown honestly.
 
+## DATA005 Integration Note
+
+Highlights Metadata is now integrated into Highlights as bounded, metadata-only
+rule suggestions from image metadata. Candidates are explainable and include the
+specific metadata evidence that promoted them.
+
+The integration deliberately excludes detector runtime, AI ranking, media reads,
+preview URLs, filesystem access, target-specific Moment/Output wiring, and user
+decision mutations.
+
 ## 8. Next Mission Proposal
 
 The next mission should be the first cautious real-data step after the static UX

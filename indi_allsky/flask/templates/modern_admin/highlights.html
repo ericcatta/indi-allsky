@@ -40,7 +40,7 @@
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">{{ primary_highlight.review_status }}</span>
         </div>
-        <p class="modern-admin-note">This is the first item Hybrid would ask the user to inspect. The recommendation is static in v1, but the experience shape is product-first: one primary item, a reason, evidence, source trust, and a clear next surface.</p>
+        <p class="modern-admin-note">This is the first item Hybrid would ask the user to inspect. Each recommendation must stay explainable: one primary item, a reason, evidence, source trust, and a clear next surface.</p>
 
         <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Primary Highlight briefing">
             <article class="modern-admin-status-card">
@@ -72,7 +72,7 @@
                 <p class="modern-admin-eyebrow">Review queue</p>
                 <h2 id="highlights-summary-title">Primary Recommendation and Queue State</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Static prototype</span>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ highlights_view.highlights_summary.data_status | replace('_', ' ') | title }}</span>
         </div>
 
         <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Highlights summary">
@@ -104,9 +104,9 @@
                 <p class="modern-admin-eyebrow">Also worth reviewing</p>
                 <h2 id="highlight-items-title">Other Candidate Highlights</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">No real detector data</span>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Metadata rules only</span>
         </div>
-        <p class="modern-admin-note">These are secondary static examples. In the real product, this list should stay short, explainable, and safe to ignore.</p>
+        <p class="modern-admin-note">These are secondary candidates. The list must stay short, explainable, and safe to ignore.</p>
 
         <section class="modern-admin-status-grid" aria-label="Highlight items">
             {% for highlight in highlights_view.highlight_items %}
@@ -176,7 +176,7 @@
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">No interaction</span>
         </div>
-        <p class="modern-admin-note">No database, detector, filesystem, RAW/FITS, media read, media generation, preview URL, external delivery, or user decision behavior is connected to this prototype.</p>
+        <p class="modern-admin-note">Highlights may use bounded image metadata. No detector runtime, AI ranking, filesystem, RAW/FITS read, media read, media generation, preview URL, external delivery, or user decision behavior is connected here.</p>
     </section>
 </main>
 {% endblock %}
