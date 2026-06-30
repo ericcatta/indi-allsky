@@ -29,9 +29,9 @@ var camera_id = {{ camera_id }};
             <p>Notifications not acknowledged yet.</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Classic Fallback</div>
+            <div class="modern-admin-card-label">Legacy fallback</div>
             <h3>Available</h3>
-            <p><a href="{{ url_for('indi_allsky.notifications_view') }}">Open Classic Notifications</a></p>
+            <p><a href="{{ url_for('indi_allsky.notifications_view') }}">Open legacy Notifications</a></p>
         </article>
     </section>
 
@@ -121,7 +121,7 @@ var camera_id = {{ camera_id }};
 
     <section class="modern-admin-table-panel" aria-label="Notification fallbacks">
         <div class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.notifications_view') }}">Open Classic Notifications</a>
+            <a href="{{ url_for('indi_allsky.notifications_view') }}">Open legacy Notifications</a>
         </div>
     </section>
 </main>

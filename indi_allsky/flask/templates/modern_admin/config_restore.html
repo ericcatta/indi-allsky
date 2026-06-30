@@ -122,12 +122,12 @@ var camera_id = {{ camera_id }};
         </div>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.config_list_view') }}">Open Classic Config History</a>
-            <a href="{{ url_for('indi_allsky.config_restore_view') }}">Open Classic Config Restore</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_config_history_view') }}">Open Modern Config History</a>
+            <a href="{{ url_for('indi_allsky.config_list_view') }}">Open legacy Config History</a>
+            <a href="{{ url_for('indi_allsky.config_restore_view') }}">Open legacy Config Restore</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_config_history_view') }}">Open Config History</a>
         </section>
 
-        <p class="modern-admin-note">Raw config payload is intentionally hidden to avoid exposing secrets. Restore actions remain available only in Classic UI.</p>
+        <p class="modern-admin-note">Raw config payload is intentionally hidden to avoid exposing secrets. Restore actions remain available only in legacy UI.</p>
     </section>
 </main>
 <script>

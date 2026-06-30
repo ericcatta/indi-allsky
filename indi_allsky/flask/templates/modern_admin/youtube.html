@@ -28,9 +28,9 @@ var camera_id = {{ camera_id }};
             <p>Enabled upload categories.</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Classic fallback</div>
+            <div class="modern-admin-card-label">Legacy fallback</div>
             <h3>Available</h3>
-            <p>OAuth actions remain in Classic.</p>
+            <p>OAuth actions remain in the legacy configuration flow.</p>
         </article>
     </section>
 
@@ -87,8 +87,8 @@ var camera_id = {{ camera_id }};
         </div>
         <p class="modern-admin-note">This page is a read-only audit. It does not start authorization, change stored authorization, perform external service operations, create upload tasks, modify configuration, or show sensitive OAuth/configuration values.</p>
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_uploads_view') }}">Back to Modern Uploads</a>
-            <a href="{{ url_for('indi_allsky.config_view') }}#nav-youtube">Classic YouTube settings</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_uploads_view') }}">Back to Uploads</a>
+            <a href="{{ url_for('indi_allsky.config_view') }}#nav-youtube">Legacy YouTube settings</a>
         </section>
     </section>
 </main>

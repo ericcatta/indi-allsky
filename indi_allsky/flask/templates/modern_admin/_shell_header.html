@@ -1,3 +1,4 @@
+{% if not is_hybrid_shell_ui %}
 <header class="modern-admin-topbar" aria-label="{{ modern_admin_header_label }}">
     <h1 class="modern-admin-visually-hidden" id="{{ modern_admin_title_id }}">{{ modern_admin_heading }}</h1>
     {% set runtime_status = modern_admin_runtime_status|default({}, true) %}
@@ -34,7 +35,7 @@
         </div>
     </div>
 
-    <nav class="modern-admin-nav" aria-label="Modern admin sections">
+    <nav class="modern-admin-nav" aria-label="Hybrid sections">
         {% for item in modern_admin_nav %}
         {% if item.enabled %}
         <a class="modern-admin-nav-link{% if item.active %} modern-admin-nav-link-active{% endif %}" href="{{ url_for(item.endpoint) }}">{{ item.label }}</a>
@@ -201,3 +202,14 @@
     });
 })();
 </script>
+{% else %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="modern-admin-flash-list" aria-live="polite">
+    {% for category, message in messages %}
+    <div class="modern-admin-flash modern-admin-flash-{{ category|e }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+{% endif %}

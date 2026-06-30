@@ -112,7 +112,7 @@ var camera_id = {{ camera_id }};
                     </div>
                     <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
                 </div>
-                <p class="modern-admin-note">Classic preserves the current indi-allsky pipeline. Hybrid enables the per-camera controller path; AWB uses runtime gains from the previous frame while the other controllers remain placeholders.</p>
+                <p class="modern-admin-note">The legacy pipeline remains available for compatibility. Hybrid enables the per-camera controller path; AWB uses runtime gains from the previous frame while the other controllers remain placeholders.</p>
 
                 <div class="modern-admin-camera-profile-summary" aria-label="Hybrid controller status">
                     <div>
@@ -121,11 +121,11 @@ var camera_id = {{ camera_id }};
                     </div>
                     <div>
                         <span>Current status</span>
-                        <strong>{{ 'Hybrid foundation active' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic pipeline active' }}</strong>
+                        <strong>{{ 'Hybrid foundation active' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Legacy pipeline active' }}</strong>
                     </div>
                     <div>
                         <span>AWB status</span>
-                        <strong>{{ 'Measurement available · apply via ' ~ hybrid_capabilities.apply_backend if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic AWB path' }}</strong>
+                        <strong>{{ 'Measurement available · apply via ' ~ hybrid_capabilities.apply_backend if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Legacy AWB path' }}</strong>
                     </div>
                     <div>
                         <span>AWB apply mode</span>
@@ -211,7 +211,7 @@ var camera_id = {{ camera_id }};
                         <div>
                             <p class="modern-admin-eyebrow">Save</p>
                             <h2>Write profile mode only</h2>
-                            <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
+                            <p class="modern-admin-note">Saving creates a new config revision. Hybrid will not restart or reload indi-allsky automatically.</p>
                         </div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_hybrid_form.enabled %}
@@ -332,7 +332,7 @@ var camera_id = {{ camera_id }};
                         <div>
                             <p class="modern-admin-eyebrow">Save</p>
                             <h2>Write profile config only</h2>
-                            <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
+                            <p class="modern-admin-note">Saving creates a new config revision. Hybrid will not restart or reload indi-allsky automatically.</p>
                         </div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_driver_form.enabled %}
@@ -458,7 +458,7 @@ var camera_id = {{ camera_id }};
                         <div>
                             <p class="modern-admin-eyebrow">Save</p>
                             <h2>Write profile values only</h2>
-                            <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
+                            <p class="modern-admin-note">Saving creates a new config revision. Hybrid will not restart or reload indi-allsky automatically.</p>
                         </div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_capture_form.enabled %}
@@ -565,7 +565,7 @@ var camera_id = {{ camera_id }};
                         <div>
                             <p class="modern-admin-eyebrow">Save</p>
                             <h2>Write profile overrides only</h2>
-                            <p class="modern-admin-note">Saving creates a new config revision. Modern Admin will not restart or reload indi-allsky automatically.</p>
+                            <p class="modern-admin-note">Saving creates a new config revision. Hybrid will not restart or reload indi-allsky automatically.</p>
                         </div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_lens_form.enabled %}

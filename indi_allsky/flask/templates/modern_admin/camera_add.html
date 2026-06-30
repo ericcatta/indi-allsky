@@ -84,7 +84,7 @@ var camera_id = {{ camera_id }};
         </div>
         <p class="modern-admin-note">{{ modern_admin_usb_detection.message }}</p>
         {% if modern_admin_supported_camera_interfaces %}
-        <p class="modern-admin-note">indi-allsky camera interfaces remain available through the normal config system. This first Modern Admin flow starts only local INDI CCD drivers.</p>
+        <p class="modern-admin-note">indi-allsky camera interfaces remain available through the normal config system. This first Hybrid flow starts only local INDI CCD drivers.</p>
         {% endif %}
 
         <form class="modern-admin-form" method="post" action="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">

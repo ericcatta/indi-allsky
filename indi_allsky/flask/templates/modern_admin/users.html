@@ -29,9 +29,9 @@ var camera_id = {{ camera_id }};
             <p>Accounts currently marked active.</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Classic Fallback</div>
+            <div class="modern-admin-card-label">Legacy fallback</div>
             <h3>Available</h3>
-            <p><a href="{{ url_for('indi_allsky.users_view') }}">Open Classic Users</a></p>
+            <p><a href="{{ url_for('indi_allsky.users_view') }}">Open legacy Users</a></p>
         </article>
     </section>
 
@@ -115,8 +115,8 @@ var camera_id = {{ camera_id }};
 
     <section class="modern-admin-table-panel" aria-label="User management fallbacks">
         <div class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.users_view') }}">Open Classic Users</a>
-            <a href="{{ url_for('indi_allsky.user_view') }}">Open Classic User Profile</a>
+            <a href="{{ url_for('indi_allsky.users_view') }}">Open legacy Users</a>
+            <a href="{{ url_for('indi_allsky.user_view') }}">Open legacy User Profile</a>
         </div>
     </section>
 </main>
