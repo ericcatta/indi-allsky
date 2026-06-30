@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import copy
+from datetime import date
 from datetime import datetime
 from datetime import timedelta
 import inspect
@@ -21,7 +22,9 @@ from indi_allsky.product_view_models import build_library_view
 from indi_allsky.product_view_models import build_observatory_view
 from indi_allsky.product_view_models import build_sky_cycle_report_view
 from indi_allsky.product_view_models import build_source_confidence_summary
+from indi_allsky.product_view_models import GeneratedOutputDescriptor
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
+from indi_allsky.product_view_models import LatestGeneratedOutputRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
 from indi_allsky.product_view_models import validate_sky_cycle_report_payload
 from indi_allsky.product_view_models import validate_highlights_payload
@@ -2012,6 +2015,171 @@ def test_latest_frame_image_table_adapter_with_missing_attributes():
     json.dumps(latest_frame, sort_keys=True)
 
 
+def test_latest_generated_output_adapter_with_row_present():
+    created_at = datetime(2026, 6, 29, 4, 5, 6)
+    row = FakeImageRow(
+        id=101,
+        camera_id=7,
+        createDate=created_at,
+        dayDate=date(2026, 6, 29),
+        night=True,
+        uploaded=False,
+        success=True,
+        frames=240,
+        framerate=25,
+        fileSize=987654,
+        width=1920,
+        height=1080,
+    )
+    setattr(row, 'file' + 'name', '/private/output.mp4')
+    setattr(row, 'remote' + '_url', 'https://example.invalid/output.mp4')
+    setattr(row, 's3' + '_key', 'private/generated/output.mp4')
+    setattr(row, 'thumbnail' + '_uuid', 'private-thumb')
+    setattr(row, 'data', {'token': 'secret'})
+
+    query = FakeImageQuery(row)
+    descriptor = GeneratedOutputDescriptor(
+        output_type='timelapse',
+        query=query,
+        order_by_expression='created-desc',
+        camera_id_field=FakeImageField('camera_id'),
+        source_table_label='Timelapse outputs',
+    )
+    result = LatestGeneratedOutputRepository([descriptor], camera_id=7).get_latest_generated_output_metadata()
+
+    assert query.filter_calls == [('camera_id', '==', 7)]
+    assert query.order_by_calls == ['created-desc']
+    assert query.limit_calls == [1]
+    assert query.first_calls == 1
+    assert result['status'] == 'generated_output_available'
+    assert result['partial_failures'] == 0
+    assert result['output'] == {
+        'output_type': 'timelapse',
+        'timestamp': '2026-06-29 04:05:06',
+        'status_label': 'Generated output metadata available.',
+        'source_table_label': 'Timelapse outputs',
+        'id': 101,
+        'camera_id': 7,
+        'day_date': '2026-06-29',
+        'night': True,
+        'uploaded': False,
+        'success': True,
+        'frames': 240,
+        'framerate': 25,
+        'file_size': 987654,
+        'width': 1920,
+        'height': 1080,
+    }
+    serialized = json.dumps(result, sort_keys=True)
+    assert 'private' not in serialized
+    assert 'example.invalid' not in serialized
+    assert 'token' not in serialized
+    assert 'secret' not in serialized
+    assert_no_absolute_paths(result)
+
+
+def test_latest_generated_output_adapter_selects_latest_descriptor():
+    older = datetime(2026, 6, 28, 23, 0, 0)
+    newer = datetime(2026, 6, 29, 5, 0, 0)
+    older_query = FakeImageQuery(FakeImageRow(id=1, camera_id=7, createDate=older, frames=30))
+    newer_query = FakeImageQuery(FakeImageRow(id=2, camera_id=7, createDate=newer, frames=120))
+
+    result = LatestGeneratedOutputRepository([
+        GeneratedOutputDescriptor('keogram', older_query, 'created-desc', FakeImageField('camera_id'), 'Keogram outputs'),
+        GeneratedOutputDescriptor('startrail_video', newer_query, 'created-desc', FakeImageField('camera_id'), 'Startrail video outputs'),
+    ], camera_id=7).get_latest_generated_output_metadata()
+
+    assert older_query.limit_calls == [1]
+    assert newer_query.limit_calls == [1]
+    assert result['output']['output_type'] == 'startrail_video'
+    assert result['output']['id'] == 2
+    assert result['output']['timestamp'] == '2026-06-29 05:00:00'
+    json.dumps(result, sort_keys=True)
+
+
+def test_latest_generated_output_adapter_allows_partial_failure():
+    working_query = FakeImageQuery(FakeImageRow(
+        id=3,
+        camera_id=7,
+        createDate=datetime(2026, 6, 29, 6, 0, 0),
+        width=1280,
+        height=720,
+    ))
+    failing_query = FakeImageQuery(raises=True)
+
+    result = LatestGeneratedOutputRepository([
+        GeneratedOutputDescriptor('timelapse', failing_query, 'created-desc', FakeImageField('camera_id'), 'Timelapse outputs'),
+        GeneratedOutputDescriptor('keogram', working_query, 'created-desc', FakeImageField('camera_id'), 'Keogram outputs'),
+    ], camera_id=7).get_latest_generated_output_metadata()
+
+    assert failing_query.limit_calls == [1]
+    assert failing_query.first_calls == 1
+    assert working_query.limit_calls == [1]
+    assert result['status'] == 'generated_output_available'
+    assert result['partial_failures'] == 1
+    assert result['output']['output_type'] == 'keogram'
+    json.dumps(result, sort_keys=True)
+
+
+def test_latest_generated_output_adapter_with_no_rows():
+    query = FakeImageQuery(None)
+    descriptor = GeneratedOutputDescriptor('timelapse', query, 'created-desc', FakeImageField('camera_id'), 'Timelapse outputs')
+    result = LatestGeneratedOutputRepository([descriptor], camera_id=7).get_latest_generated_output_metadata()
+
+    assert query.filter_calls == [('camera_id', '==', 7)]
+    assert query.order_by_calls == ['created-desc']
+    assert query.limit_calls == [1]
+    assert query.first_calls == 1
+    assert result['status'] == 'no_generated_output_metadata'
+    assert result['output'] == {}
+    json.dumps(result, sort_keys=True)
+
+
+def test_latest_generated_output_adapter_with_all_query_errors():
+    query = FakeImageQuery(raises=True)
+    descriptor = GeneratedOutputDescriptor('timelapse', query, 'created-desc', FakeImageField('camera_id'), 'Timelapse outputs')
+    result = LatestGeneratedOutputRepository([descriptor], camera_id=7).get_latest_generated_output_metadata()
+
+    assert query.limit_calls == [1]
+    assert query.first_calls == 1
+    assert result['status'] == 'generated_output_metadata_unavailable'
+    assert result['output'] == {}
+    json.dumps(result, sort_keys=True)
+
+
+def test_latest_generated_output_adapter_with_missing_camera_context():
+    query = FakeImageQuery(FakeImageRow(id=1, camera_id=7, createDate=datetime(2026, 6, 29, 5, 0, 0)))
+    descriptor = GeneratedOutputDescriptor('timelapse', query, 'created-desc', FakeImageField('camera_id'), 'Timelapse outputs')
+    result = LatestGeneratedOutputRepository([descriptor], camera_id=None).get_latest_generated_output_metadata()
+
+    assert query.filter_calls == []
+    assert query.limit_calls == []
+    assert query.first_calls == 0
+    assert result['status'] == 'generated_output_metadata_unavailable'
+    assert result['output'] == {}
+
+
+def test_latest_generated_output_adapter_drops_non_primitive_and_unsafe_values():
+    row = FakeImageRow(
+        id=object(),
+        camera_id=7,
+        createDate=datetime(2026, 6, 29, 5, 0, 0),
+        dayDate=lambda: date(2026, 6, 29),
+        width=1920,
+        height='/private/generated/output.jpg',
+    )
+    query = FakeImageQuery(row)
+    descriptor = GeneratedOutputDescriptor('keogram', query, 'created-desc', FakeImageField('camera_id'), 'Keogram outputs')
+    result = LatestGeneratedOutputRepository([descriptor], camera_id=7).get_latest_generated_output_metadata()
+
+    assert result['output']['id'] is None
+    assert result['output']['day_date'] is None
+    assert result['output']['width'] == 1920
+    assert 'height' not in result['output']
+    assert_no_absolute_paths(result)
+    json.dumps(result, sort_keys=True)
+
+
 def test_safe_actions_are_metadata_only():
     now_view = build_now_view()
 
@@ -2344,6 +2512,13 @@ def main():
         test_latest_frame_image_table_adapter_with_no_row,
         test_latest_frame_image_table_adapter_with_query_error,
         test_latest_frame_image_table_adapter_with_missing_attributes,
+        test_latest_generated_output_adapter_with_row_present,
+        test_latest_generated_output_adapter_selects_latest_descriptor,
+        test_latest_generated_output_adapter_allows_partial_failure,
+        test_latest_generated_output_adapter_with_no_rows,
+        test_latest_generated_output_adapter_with_all_query_errors,
+        test_latest_generated_output_adapter_with_missing_camera_context,
+        test_latest_generated_output_adapter_drops_non_primitive_and_unsafe_values,
         test_safe_actions_are_metadata_only,
         test_validate_now_view_payload_success,
         test_validate_now_view_payload_requires_sections,

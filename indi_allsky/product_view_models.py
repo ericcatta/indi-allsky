@@ -1211,6 +1211,94 @@ class StaticLatestFrameRepository:
         return None
 
 
+@dataclass(frozen=True)
+class GeneratedOutputDescriptor:
+    """Descriptor for one bounded generated-output metadata source."""
+
+    output_type: str
+    query: object
+    order_by_expression: object = None
+    camera_id_field: object = None
+    source_table_label: str = 'Generated output source'
+    field_map: object = None
+    status_label: str = None
+
+
+class LatestGeneratedOutputRepository:
+    """Descriptor-based adapter for latest generated output metadata."""
+
+    DEFAULT_FIELD_MAP = {
+        'id': 'id',
+        'camera_id': 'camera_id',
+        'day_date': 'dayDate',
+        'night': 'night',
+        'uploaded': 'uploaded',
+        'success': 'success',
+        'frames': 'frames',
+        'framerate': 'framerate',
+        'file_size': 'fileSize',
+        'width': 'width',
+        'height': 'height',
+    }
+
+    def __init__(self, descriptors=None, camera_id=None):
+        self.descriptors = tuple(descriptors or ())
+        self.camera_id = camera_id
+
+    def get_latest_generated_output_metadata(self):
+        if self.camera_id in (None, ''):
+            return _build_latest_generated_output_unavailable('Camera context unavailable.')
+
+        candidates = []
+        failure_count = 0
+
+        for descriptor in self.descriptors:
+            try:
+                candidate = self._metadata_from_descriptor(descriptor)
+            except Exception:
+                failure_count += 1
+                continue
+
+            if candidate is not None:
+                candidates.append(candidate)
+
+        if not candidates:
+            if failure_count:
+                return _build_latest_generated_output_unavailable('Generated output metadata unavailable.')
+
+            return _build_latest_generated_output_empty()
+
+        latest = max(candidates, key=lambda item: item.get('_sort_key', ''))
+        latest.pop('_sort_key', None)
+
+        return {
+            'status': 'generated_output_available',
+            'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+            'output': latest,
+            'partial_failures': failure_count,
+            'note': 'Latest generated output metadata selected from bounded descriptors.',
+        }
+
+    def _metadata_from_descriptor(self, descriptor):
+        query = getattr(descriptor, 'query', None)
+        if query is None:
+            raise ValueError('generated output descriptor missing query')
+
+        camera_id_field = getattr(descriptor, 'camera_id_field', None)
+        if camera_id_field is not None:
+            query = query.filter(camera_id_field == self.camera_id)
+
+        order_by_expression = getattr(descriptor, 'order_by_expression', None)
+        if order_by_expression is not None:
+            query = query.order_by(order_by_expression)
+
+        row = query.limit(1).first()
+        if not row:
+            return None
+
+        return _latest_generated_output_row_metadata(descriptor, row)
+
+
 class LatestFrameImageTableRepository:
     """Repository adapter for one bounded latest image metadata row."""
 
@@ -2964,6 +3052,26 @@ def _build_latest_frame_rejected_summary():
     ).to_dict()
 
 
+def _build_latest_generated_output_empty():
+    return {
+        'status': 'no_generated_output_metadata',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'output': {},
+        'partial_failures': 0,
+        'note': 'No generated output metadata row is available from the injected descriptors.',
+    }
+
+
+def _build_latest_generated_output_unavailable(note):
+    return {
+        'status': 'generated_output_metadata_unavailable',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'output': {},
+        'partial_failures': 0,
+        'note': _latest_frame_text(note, 'Generated output metadata unavailable.'),
+    }
+
+
 def _build_sky_cycle_briefing():
     return SkyCycleBriefingSection(
         id='sky_cycle.placeholder',
@@ -3307,6 +3415,65 @@ def _latest_frame_row_metadata(row, created_at):
         for key, value in metadata.items()
         if _latest_frame_metadata_value_is_json_safe(value) and not _latest_frame_value_is_unsafe(value)
     }
+
+
+def _latest_generated_output_row_metadata(descriptor, row):
+    created_at = getattr(row, 'createDate', None)
+    timestamp = _latest_frame_timestamp_label(created_at)
+    field_map = getattr(descriptor, 'field_map', None) or LatestGeneratedOutputRepository.DEFAULT_FIELD_MAP
+
+    metadata = {
+        'output_type': _latest_generated_output_text(getattr(descriptor, 'output_type', None), 'unknown'),
+        'timestamp': timestamp,
+        'status_label': _latest_generated_output_text(getattr(descriptor, 'status_label', None), 'Generated output metadata available.'),
+        'source_table_label': _latest_generated_output_text(getattr(descriptor, 'source_table_label', None), 'Generated output source'),
+        '_sort_key': _latest_generated_output_sort_key(created_at, timestamp),
+    }
+
+    for output_key, row_key in field_map.items():
+        if output_key in metadata:
+            continue
+
+        metadata[output_key] = _latest_generated_output_json_value(getattr(row, row_key, None))
+
+    return {
+        key: value
+        for key, value in metadata.items()
+        if key == '_sort_key' or (
+            _latest_frame_metadata_value_is_json_safe(value) and not _latest_frame_value_is_unsafe(value)
+        )
+    }
+
+
+def _latest_generated_output_json_value(value):
+    if value in (None, ''):
+        return None
+
+    if hasattr(value, 'strftime'):
+        return value.strftime('%Y-%m-%d')
+
+    return _latest_frame_json_value(value)
+
+
+def _latest_generated_output_text(value, fallback):
+    text = _latest_frame_text(value, fallback)
+    if _latest_frame_value_is_unsafe(text):
+        return fallback
+
+    return text
+
+
+def _latest_generated_output_sort_key(value, timestamp):
+    if value in (None, ''):
+        return ''
+
+    if hasattr(value, 'strftime'):
+        return value.strftime('%Y-%m-%d %H:%M:%S')
+
+    if isinstance(timestamp, str) and timestamp != 'Not evaluated yet':
+        return timestamp
+
+    return ''
 
 
 def _latest_frame_json_value(value):
