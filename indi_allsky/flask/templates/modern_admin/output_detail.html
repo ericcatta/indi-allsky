@@ -4,7 +4,7 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-output-detail-product-v1') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-pass-001') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-emergency-001') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -121,7 +121,7 @@
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ output_detail.related_moments.label }}</div>
                 <h3>{{ output_detail.related_moments.relation_status }}</h3>
-                {% for moment in output_detail.related_moments.items %}
+                {% for moment in output_detail.related_moments['items'] %}
                     <p><strong>{{ moment.label }}:</strong> {{ moment.relation_label }} {{ moment.confidence_label }}</p>
                 {% endfor %}
                 <p>{{ output_detail.related_moments.note }}</p>

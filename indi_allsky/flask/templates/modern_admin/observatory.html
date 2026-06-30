@@ -4,7 +4,7 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-observatory-product-v1') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-pass-001') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-emergency-001') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -27,7 +27,6 @@
             <a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
             <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
             <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Settings</a>
         </div>
     </header>
 
@@ -142,7 +141,7 @@
         <p class="modern-admin-note">{{ observatory_view.attention_items.note }}</p>
 
         <section class="modern-admin-status-grid" aria-label="Observatory attention items">
-            {% for item in observatory_view.attention_items.items %}
+            {% for item in observatory_view.attention_items['items'] %}
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ item.status | replace('_', ' ') | title }} / Risk {{ item.risk_level | title }}</div>
                 <h3>{{ item.label }}</h3>

@@ -4,7 +4,7 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-sky-cycle-product-v1') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-pass-001') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-emergency-001') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -29,7 +29,6 @@
             <a href="{{ url_for('indi_allsky.modern_admin_output_detail_view') }}">Output Detail</a>
             <a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
             <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Settings index</a>
         </div>
     </header>
 
@@ -140,7 +139,7 @@
         </section>
 
         <section class="modern-admin-status-grid" aria-label="Moment candidates">
-            {% for moment in sky_cycle_report.moments_summary.items %}
+            {% for moment in sky_cycle_report.moments_summary['items'] %}
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ moment.type | replace('_', ' ') | title }} / {{ moment.phase | replace('_', ' ') | title }}</div>
                 <h3>{{ moment.label }}</h3>
@@ -199,7 +198,7 @@
         </section>
 
         <section class="modern-admin-status-grid" aria-label="Generated output candidates">
-            {% for output in sky_cycle_report.outputs_summary.items %}
+            {% for output in sky_cycle_report.outputs_summary['items'] %}
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ output.type | replace('_', ' ') | title }} / {{ output.phase | replace('_', ' ') | title }}</div>
                 <h3>{{ output.label }}</h3>

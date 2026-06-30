@@ -43,6 +43,7 @@ from ..product_view_models import CurrentCaptureStatusRepository
 from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import HighlightsMetadataRepository
 from ..product_view_models import LatestFrameImageTableRepository
+from ..product_view_models import LatestCameraFramesProvider
 from ..product_view_models import LatestGeneratedOutputRepository
 from ..product_view_models import LatestFrameSummaryProvider
 from ..product_view_models import SourceTrustDescriptor
@@ -5141,6 +5142,13 @@ class ModernAdminView(TemplateView):
     page_title = 'Modern Admin'
     decorators = [login_required]
 
+    def dispatch_request(self):
+        if self.__class__ is not ModernAdminView:
+            return super(ModernAdminView, self).dispatch_request()
+
+        session['admin_mode'] = 'modern'
+        return redirect(url_for('indi_allsky.modern_admin_now_view'))
+
     def get_context(self):
         context = super(ModernAdminView, self).get_context()
         session['admin_mode'] = 'modern'
@@ -7436,6 +7444,151 @@ class ModernAdminPlaceholderView(ModernAdminView):
         return context
 
 
+class ModernAdminLatestCameraFramesRepository:
+    """Bounded runtime source for the two latest Product UI camera images."""
+
+    def __init__(self, view):
+        self.view = view
+
+    def get_latest_camera_frames(self):
+        frames = []
+        for camera in self.get_camera_rows():
+            frames.append(self.get_frame_for_camera(camera))
+
+        return frames
+
+    def get_camera_rows(self):
+        try:
+            camera_rows = IndiAllSkyDbCameraTable.query\
+                .filter(IndiAllSkyDbCameraTable.hidden == sa_false())\
+                .order_by(IndiAllSkyDbCameraTable.id.asc())\
+                .limit(2)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading Now camera frame rows: %s', str(e))
+            camera_rows = list()
+
+        if camera_rows:
+            return camera_rows[:2]
+
+        camera = getattr(self.view, 'camera', None)
+        return [camera] if camera is not None else []
+
+    def get_frame_for_camera(self, camera):
+        camera_id = getattr(camera, 'id', None)
+        camera_label = str(
+            getattr(camera, 'friendlyName', None)
+            or getattr(camera, 'name', None)
+            or 'Camera {0}'.format(camera_id or 'unknown')
+        )
+
+        if not camera_id:
+            return self.empty_frame(camera_id, camera_label, 'Camera context unavailable.')
+
+        try:
+            image_entry = IndiAllSkyDbImageTable.query\
+                .filter(IndiAllSkyDbImageTable.camera_id == camera_id)\
+                .order_by(IndiAllSkyDbImageTable.createDate.desc())\
+                .limit(1)\
+                .first()
+        except Exception as e:
+            app.logger.error('Error loading Now latest image for camera %s: %s', camera_id, str(e))
+            return self.empty_frame(camera_id, camera_label, 'Latest image metadata unavailable.')
+
+        if not image_entry:
+            return self.empty_frame(camera_id, camera_label, 'No latest image metadata available.')
+
+        safe_image_url = self.safe_image_url(image_entry)
+        created_at = getattr(image_entry, 'createDate', None)
+
+        return {
+            'camera_id': camera_id,
+            'camera_label': camera_label,
+            'timestamp': self.timestamp_label(created_at),
+            'age_label': self.age_label(created_at),
+            'image_available': bool(safe_image_url),
+            'safe_image_url': safe_image_url,
+            'source_status': 'Existing image route available.' if safe_image_url else 'No safe image route available.',
+            'note': 'Latest frame shown from existing image URL metadata; no filesystem scan is performed by Now.',
+        }
+
+    def empty_frame(self, camera_id, camera_label, note):
+        return {
+            'camera_id': camera_id,
+            'camera_label': camera_label,
+            'timestamp': 'No latest frame available',
+            'age_label': 'Not evaluated yet',
+            'image_available': False,
+            'safe_image_url': None,
+            'source_status': note,
+            'note': note,
+        }
+
+    def safe_image_url(self, image_entry):
+        try:
+            image_url = image_entry.getUrl(s3_prefix=self.view.s3_prefix, local=True)
+        except Exception as e:
+            app.logger.error('Error determining Now camera image URL: %s', str(e))
+            return None
+
+        normalized_url = self.normalize_image_url(image_url)
+        if not normalized_url:
+            return None
+
+        normalized_url = str(normalized_url)
+        if not normalized_url.startswith('/images/'):
+            return None
+
+        if any(token in normalized_url.lower() for token in ('..', '\\', '://', 'file:', '\x00')):
+            return None
+
+        return normalized_url
+
+    def normalize_image_url(self, image_url):
+        if not image_url:
+            return None
+
+        image_url_str = str(image_url)
+        if image_url_str.startswith(('http://', 'https://')):
+            return None
+
+        if image_url_str.startswith('/'):
+            return image_url_str
+
+        image_url_p = Path(image_url_str)
+        if image_url_p.parts and image_url_p.parts[0] == 'images':
+            return url_for('indi_allsky.images_folder', path=str(Path(*image_url_p.parts[1:])))
+
+        return None
+
+    def timestamp_label(self, value):
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+
+        return 'No timestamp available'
+
+    def age_label(self, value):
+        if not hasattr(value, 'strftime'):
+            return 'Not evaluated yet'
+
+        try:
+            age_seconds = int((self.view.camera_now - value).total_seconds())
+        except Exception:
+            return 'Not evaluated yet'
+
+        if age_seconds < 0:
+            return 'Not evaluated yet'
+
+        if age_seconds < 60:
+            return '{0:d} seconds ago'.format(age_seconds)
+
+        age_minutes = int(age_seconds / 60)
+        if age_minutes < 60:
+            return '{0:d} minutes ago'.format(age_minutes)
+
+        return '{0:d} hours ago'.format(int(age_minutes / 60))
+
+
 class ModernAdminNowView(TemplateView):
     page_title = 'Hybrid Now'
     decorators = [login_required]
@@ -7446,6 +7599,7 @@ class ModernAdminNowView(TemplateView):
         session['admin_mode'] = 'modern'
         context['modern_admin_now'] = build_now_view(
             latest_frame_provider=self.get_latest_frame_provider(),
+            latest_camera_frames_provider=self.get_latest_camera_frames_provider(),
             current_phase_night=context.get('night'),
             latest_generated_output_repository=self.get_latest_generated_output_repository(),
             current_capture_repository=self.get_current_capture_repository(),
@@ -7482,6 +7636,13 @@ class ModernAdminNowView(TemplateView):
             return None
 
         return LatestFrameSummaryProvider(repository)
+
+    def get_latest_camera_frames_provider(self):
+        try:
+            return LatestCameraFramesProvider(ModernAdminLatestCameraFramesRepository(self))
+        except Exception:
+            app.logger.error('Unable to build Now latest camera frames provider')
+            return None
 
     def get_latest_generated_output_repository(self):
         try:

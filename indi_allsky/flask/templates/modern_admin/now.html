@@ -4,7 +4,7 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-now-product-experience-v1') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-pass-001') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-emergency-001') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -19,18 +19,50 @@
         </div>
 
         <h2>{{ modern_admin_now.current_verdict }}</h2>
-        <p class="modern-admin-note">Hybrid AllSky transforms continuous sky observation into trustworthy knowledge and beautiful results. This prototype combines bounded metadata with placeholder contracts for sky, source, media, and observatory data that are not connected yet.</p>
+        <p class="modern-admin-note">Hybrid turns continuous sky observation into a short operational briefing: what is happening, what deserves attention, what was generated, and whether the sources remain trustworthy.</p>
         <p class="modern-admin-note"><strong>Start with Highlights:</strong> review what Hybrid selected, then open the Moment or Output that explains the evidence.</p>
-        <p class="modern-admin-note">Contract: <code>{{ modern_admin_now.metadata.contract }}</code> / <code>{{ modern_admin_now.metadata.contract_version }}</code>. Source: <code>{{ modern_admin_now.metadata.source }}</code>.</p>
 
         <div class="modern-admin-link-grid">
             <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Start with Highlights</a>
             <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle Report</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_view') }}">Modern dashboard</a>
             <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Settings index</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
         </div>
     </header>
+
+    <section class="modern-admin-table-panel hybrid-now-camera-panel" aria-labelledby="now-camera-frames-title">
+        {% set camera_frames = modern_admin_now.latest_camera_frames %}
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Live context</p>
+                <h2 id="now-camera-frames-title">Latest Camera Frames</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ camera_frames.status }}</span>
+        </div>
+        <p class="modern-admin-note">{{ camera_frames.note }}</p>
+
+        <section class="hybrid-camera-frame-grid" aria-label="Latest frames by camera">
+            {% for frame in camera_frames['items'] %}
+            <article class="hybrid-camera-frame-card">
+                <div class="hybrid-camera-frame-media">
+                    {% if frame.image_available and frame.safe_image_url %}
+                    <img src="{{ frame.safe_image_url }}" alt="Latest frame from {{ frame.camera_label }}">
+                    {% else %}
+                    <div class="hybrid-camera-frame-fallback" aria-label="No image available">
+                        <span>No frame</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="hybrid-camera-frame-copy">
+                    <div class="modern-admin-card-label">{{ frame.source_status }}</div>
+                    <h3>{{ frame.camera_label }}</h3>
+                    <p>{{ frame.timestamp }}{% if frame.age_label %} / {{ frame.age_label }}{% endif %}</p>
+                    <p>{{ frame.note }}</p>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+    </section>
 
     <section class="modern-admin-table-panel" aria-labelledby="now-current-title">
         {% set latest_frame = modern_admin_now.latest_frame_summary %}

@@ -4,7 +4,7 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-library-product-v1') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-pass-001') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-emergency-001') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -102,7 +102,7 @@
         <p class="modern-admin-note">{{ library_view.recent_items.note }}</p>
 
         <section class="modern-admin-status-grid" aria-label="Library recent items">
-            {% for item in library_view.recent_items.items %}
+            {% for item in library_view.recent_items['items'] %}
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ item.kind | replace('_', ' ') | title }} / {{ item.phase | replace('_', ' ') | title }}</div>
                 <h3>{{ item.title }}</h3>

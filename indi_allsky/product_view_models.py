@@ -57,6 +57,7 @@ NOW_REQUIRED_KEYS = frozenset((
     'current_phase_summary',
     'current_capture_summary',
     'latest_frame_summary',
+    'latest_camera_frames',
     'latest_generated_output_summary',
     'source_confidence_summary',
     'sky_cycle_briefing',
@@ -76,6 +77,7 @@ NOW_REQUIRED_SECTIONS = frozenset((
     'current_phase_summary',
     'current_capture_summary',
     'latest_frame_summary',
+    'latest_camera_frames',
     'latest_generated_output_summary',
     'source_confidence_summary',
     'sky_cycle_briefing',
@@ -156,6 +158,31 @@ NOW_LATEST_FRAME_METADATA_KEYS = frozenset((
     'file_size',
     'width',
     'height',
+))
+
+NOW_LATEST_CAMERA_FRAMES_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'items',
+    'note',
+    'is_placeholder',
+))
+
+NOW_LATEST_CAMERA_FRAME_ITEM_KEYS = frozenset((
+    'camera_id',
+    'camera_label',
+    'timestamp',
+    'age_label',
+    'image_available',
+    'safe_image_url',
+    'source_status',
+    'note',
+))
+
+NOW_SAFE_WEB_ROUTE_KEYS = frozenset((
+    'safe_image_url',
 ))
 
 NOW_LATEST_GENERATED_OUTPUT_REQUIRED_KEYS = frozenset((
@@ -1794,6 +1821,55 @@ class LatestFrameSummaryProvider:
         ).to_dict()
 
 
+class StaticLatestCameraFramesRepository:
+    """Fallback camera-frame source used when runtime image URLs are unavailable."""
+
+    def get_latest_camera_frames(self):
+        return []
+
+
+class LatestCameraFramesProvider:
+    """Build sanitized latest camera frame cards from an injected repository."""
+
+    def __init__(self, repository=None):
+        self.repository = repository or StaticLatestCameraFramesRepository()
+
+    def build(self):
+        try:
+            frames = self.repository.get_latest_camera_frames()
+        except Exception:
+            frames = []
+
+        items = []
+        if isinstance(frames, list):
+            for index, frame in enumerate(frames[:2]):
+                if not isinstance(frame, dict):
+                    continue
+                items.append(_sanitize_latest_camera_frame_item(frame, index))
+
+        while len(items) < 2:
+            index = len(items)
+            items.append(_build_latest_camera_frame_placeholder(index))
+
+        image_count = len([item for item in items if item['image_available'] and item['safe_image_url']])
+        status = 'Latest camera images available.' if image_count else 'Latest camera images unavailable.'
+        note = (
+            'Latest camera frames use existing safe image routes; no filesystem scan or RAW/FITS read is performed by Now.'
+            if image_count
+            else 'Latest camera frame URLs are not available from the bounded runtime source.'
+        )
+
+        return {
+            'id': 'latest_camera_frames.summary',
+            'label': 'Latest Camera Frames',
+            'status': status,
+            'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+            'items': items,
+            'note': note,
+            'is_placeholder': image_count == 0,
+        }
+
+
 @dataclass(frozen=True)
 class NowMoment:
     id: str
@@ -1837,6 +1913,7 @@ class PrimaryQuestionAnswer:
 
 def build_now_view(
     latest_frame_provider=None,
+    latest_camera_frames_provider=None,
     current_phase_night=None,
     latest_generated_output_repository=None,
     current_capture_repository=None,
@@ -1850,18 +1927,26 @@ def build_now_view(
     """
     current_phase_summary = build_current_phase_summary(current_phase_night)
     latest_frame_summary = _build_latest_frame_summary(latest_frame_provider=latest_frame_provider)
+    latest_generated_output_summary = _build_latest_generated_output_summary(
+        latest_generated_output_repository=latest_generated_output_repository,
+    )
     current_capture_summary = _build_current_capture_summary(
         current_capture_repository=current_capture_repository,
         current_phase_summary=current_phase_summary,
         latest_frame_summary=latest_frame_summary,
     )
+    latest_camera_frames = _build_latest_camera_frames(latest_camera_frames_provider=latest_camera_frames_provider)
 
     payload = {
         'id': 'now.placeholder',
         'label': 'Now',
         'status': 'Read-only product prototype',
         'briefing_title': 'Current / Morning Briefing',
-        'current_verdict': 'Observation data not evaluated yet',
+        'current_verdict': _build_now_current_verdict(
+            latest_frame_summary=latest_frame_summary,
+            current_capture_summary=current_capture_summary,
+            latest_generated_output_summary=latest_generated_output_summary,
+        ),
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
         'generated_at': 'Not evaluated yet',
         'is_placeholder': True,
@@ -1870,9 +1955,8 @@ def build_now_view(
         'current_phase_summary': current_phase_summary,
         'current_capture_summary': current_capture_summary,
         'latest_frame_summary': latest_frame_summary,
-        'latest_generated_output_summary': _build_latest_generated_output_summary(
-            latest_generated_output_repository=latest_generated_output_repository,
-        ),
+        'latest_camera_frames': latest_camera_frames,
+        'latest_generated_output_summary': latest_generated_output_summary,
         'source_confidence_summary': build_source_confidence_summary(
             source_trust_repository=source_trust_repository,
             latest_frame_summary=latest_frame_summary,
@@ -2058,6 +2142,7 @@ def validate_now_view_payload(payload):
     _validate_current_phase_summary(payload.get('current_phase_summary'))
     _validate_current_capture_summary(payload.get('current_capture_summary'))
     _validate_latest_frame_summary(payload.get('latest_frame_summary'))
+    _validate_latest_camera_frames(payload.get('latest_camera_frames'))
     _validate_latest_generated_output_summary(payload.get('latest_generated_output_summary'))
     _validate_source_confidence_summary(payload.get('source_confidence_summary'))
     _validate_data_statuses(payload)
@@ -2312,6 +2397,86 @@ def _map_current_phase(night):
 def _build_latest_frame_summary(latest_frame_provider=None):
     provider = latest_frame_provider or LatestFrameSummaryProvider()
     return provider.build()
+
+
+def _build_latest_camera_frames(latest_camera_frames_provider=None):
+    provider = latest_camera_frames_provider or LatestCameraFramesProvider()
+    return provider.build()
+
+
+def _build_now_current_verdict(latest_frame_summary=None, current_capture_summary=None, latest_generated_output_summary=None):
+    latest_frame_available = isinstance(latest_frame_summary, dict) and latest_frame_summary.get('image_available')
+    capture_state = (
+        current_capture_summary.get('capture_state')
+        if isinstance(current_capture_summary, dict)
+        else None
+    )
+    latest_output_type = (
+        latest_generated_output_summary.get('output_type')
+        if isinstance(latest_generated_output_summary, dict)
+        else None
+    )
+
+    if latest_frame_available and capture_state in ('running', 'idle', 'paused', 'error'):
+        return 'Latest frame metadata available; capture state is {0:s}.'.format(capture_state)
+
+    if latest_frame_available:
+        return 'Latest frame metadata available.'
+
+    if latest_output_type and latest_output_type not in ('unknown', 'not evaluated'):
+        return 'Latest generated output metadata available.'
+
+    return 'Observation data not evaluated yet'
+
+
+def _build_latest_camera_frame_placeholder(index):
+    return {
+        'camera_id': None,
+        'camera_label': 'Camera {0:d}'.format(index + 1),
+        'timestamp': 'No latest frame available',
+        'age_label': 'Not evaluated yet',
+        'image_available': False,
+        'safe_image_url': None,
+        'source_status': 'No safe image URL available.',
+        'note': 'Camera frame fallback; no image route is connected for this slot.',
+    }
+
+
+def _sanitize_latest_camera_frame_item(frame, index):
+    safe_image_url = frame.get('safe_image_url')
+    if not _safe_product_image_url(safe_image_url):
+        safe_image_url = None
+
+    image_available = bool(frame.get('image_available')) and bool(safe_image_url)
+
+    return {
+        'camera_id': _latest_frame_json_value(frame.get('camera_id')),
+        'camera_label': _latest_frame_text(frame.get('camera_label'), 'Camera {0:d}'.format(index + 1)),
+        'timestamp': _latest_frame_text(frame.get('timestamp'), 'No latest frame available'),
+        'age_label': _latest_frame_text(frame.get('age_label'), 'Not evaluated yet'),
+        'image_available': image_available,
+        'safe_image_url': safe_image_url,
+        'source_status': _latest_frame_text(frame.get('source_status'), 'Source status not evaluated yet.'),
+        'note': _latest_frame_text(frame.get('note'), 'Latest frame route status not evaluated.'),
+    }
+
+
+def _safe_product_image_url(value):
+    if value in (None, ''):
+        return False
+
+    if not isinstance(value, str):
+        return False
+
+    value = value.strip()
+    if not value.startswith('/images/'):
+        return False
+
+    value_lower = value.lower()
+    if any(token in value_lower for token in ('..', '\\', '://', 'file:', '\x00')):
+        return False
+
+    return True
 
 
 def _build_current_capture_summary(current_capture_repository=None, current_phase_summary=None, latest_frame_summary=None):
@@ -4769,6 +4934,68 @@ def _validate_latest_frame_summary(summary):
     _validate_latest_frame_metadata(summary.get('frame_metadata'))
 
 
+def _validate_latest_camera_frames(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('latest_camera_frames must be a dict')
+
+    missing_keys = sorted(NOW_LATEST_CAMERA_FRAMES_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('latest_camera_frames missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at now.latest_camera_frames: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary.get('is_placeholder'), bool):
+        raise ValueError('latest_camera_frames.is_placeholder must be a boolean')
+
+    items = summary.get('items')
+    if not isinstance(items, list):
+        raise ValueError('latest_camera_frames.items must be a list')
+
+    if len(items) > 2:
+        raise ValueError('latest_camera_frames.items must contain at most two camera frame entries')
+
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            raise ValueError('latest_camera_frames.items[{0:d}] must be a dict'.format(index))
+
+        missing_item_keys = sorted(NOW_LATEST_CAMERA_FRAME_ITEM_KEYS.difference(item.keys()))
+        if missing_item_keys:
+            raise ValueError(
+                'latest_camera_frames.items[{0:d}] missing required keys: {1:s}'.format(
+                    index,
+                    ', '.join(missing_item_keys),
+                )
+            )
+
+        if not isinstance(item.get('image_available'), bool):
+            raise ValueError('latest_camera_frames.items[{0:d}].image_available must be boolean'.format(index))
+
+        safe_image_url = item.get('safe_image_url')
+        if safe_image_url is not None and not _safe_product_image_url(safe_image_url):
+            raise ValueError('latest_camera_frames.items[{0:d}].safe_image_url is not a safe image route'.format(index))
+
+        for key, value in item.items():
+            if key == 'safe_image_url':
+                continue
+
+            if not _latest_frame_metadata_value_is_json_safe(value):
+                raise ValueError(
+                    'latest_camera_frames.items[{0:d}] contains non-primitive value: {1:s}'.format(
+                        index,
+                        str(key),
+                    )
+                )
+
+            if _latest_frame_value_is_unsafe(value):
+                raise ValueError(
+                    'latest_camera_frames.items[{0:d}] contains unsafe value: {1:s}'.format(
+                        index,
+                        str(key),
+                    )
+                )
+
+
 def _validate_latest_frame_metadata(frame_metadata):
     if not isinstance(frame_metadata, dict):
         raise ValueError('latest_frame_summary.frame_metadata must be a dict')
@@ -5676,10 +5903,25 @@ def _validate_no_sensitive_keys(value, path='now'):
             _validate_no_sensitive_keys(item, '{0:s}[{1:d}]'.format(path, index))
 
 
-def _validate_no_absolute_paths(payload):
-    payload_text = json.dumps(payload, sort_keys=True)
-    if NOW_ABSOLUTE_PATH_RE.search(payload_text) or NOW_WINDOWS_PATH_RE.search(payload_text):
-        raise ValueError('Absolute paths are not allowed in NowView payload')
+def _validate_no_absolute_paths(payload, path='payload', key_name=None):
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            _validate_no_absolute_paths(value, '{0:s}.{1:s}'.format(path, str(key)), key_name=str(key))
+        return
+
+    if isinstance(payload, list):
+        for index, value in enumerate(payload):
+            _validate_no_absolute_paths(value, '{0:s}[{1:d}]'.format(path, index), key_name=key_name)
+        return
+
+    if key_name in NOW_SAFE_WEB_ROUTE_KEYS:
+        if payload is not None and not _safe_product_image_url(payload):
+            raise ValueError('Unsafe web image route at {0:s}'.format(path))
+        return
+
+    if isinstance(payload, str):
+        if NOW_ABSOLUTE_PATH_RE.search(payload) or NOW_WINDOWS_PATH_RE.search(payload):
+            raise ValueError('Absolute paths are not allowed in NowView payload')
 
 
 def _validate_safe_actions(payload):

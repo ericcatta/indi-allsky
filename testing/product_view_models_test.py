@@ -26,6 +26,7 @@ from indi_allsky.product_view_models import CurrentCaptureStatusRepository
 from indi_allsky.product_view_models import GeneratedOutputDescriptor
 from indi_allsky.product_view_models import HighlightsMetadataRepository
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
+from indi_allsky.product_view_models import LatestCameraFramesProvider
 from indi_allsky.product_view_models import LatestGeneratedOutputRepository
 from indi_allsky.product_view_models import LatestFrameSummaryProvider
 from indi_allsky.product_view_models import SourceTrustDescriptor
@@ -52,6 +53,7 @@ REQUIRED_NOW_KEYS = {
     'current_sky',
     'current_phase_summary',
     'latest_frame_summary',
+    'latest_camera_frames',
     'source_confidence_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
@@ -199,6 +201,17 @@ class FakeLatestGeneratedOutputRepository:
         return self.metadata
 
 
+class FakeLatestCameraFramesRepository:
+    def __init__(self, frames=None, raises=False):
+        self.frames = frames if frames is not None else []
+        self.raises = raises
+
+    def get_latest_camera_frames(self):
+        if self.raises:
+            raise RuntimeError('fake camera frames failure')
+        return self.frames
+
+
 class FakeImageRow:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -312,6 +325,7 @@ def test_build_now_view_has_explicit_placeholder_status():
     assert_section_status(now_view['current_sky'])
     assert_section_status(now_view['current_phase_summary'])
     assert_section_status(now_view['latest_frame_summary'])
+    assert_section_status(now_view['latest_camera_frames'])
     assert_section_status(now_view['source_confidence_summary'])
     assert_section_status(now_view['sky_cycle_briefing'])
     assert_section_status(now_view['evidence_summary'])
@@ -332,6 +346,80 @@ def test_build_now_view_has_explicit_placeholder_status():
 
     for attention_item in now_view['attention_items']:
         assert_section_status(attention_item)
+
+
+def test_latest_camera_frames_contract_is_fake_safe():
+    now_view = build_now_view()
+    camera_frames = now_view['latest_camera_frames']
+
+    assert camera_frames['status'] == 'Latest camera images unavailable.'
+    assert camera_frames['data_status'] == 'not_evaluated'
+    assert len(camera_frames['items']) == 2
+
+    for frame in camera_frames['items']:
+        assert frame['image_available'] is False
+        assert frame['safe_image_url'] is None
+        assert 'camera_label' in frame
+        assert 'source_status' in frame
+
+
+def test_latest_camera_frames_provider_accepts_safe_image_routes():
+    provider = LatestCameraFramesProvider(FakeLatestCameraFramesRepository([
+        {
+            'camera_id': 1,
+            'camera_label': 'North Sky',
+            'timestamp': '2026-06-30 07:18:00',
+            'age_label': '4 seconds ago',
+            'image_available': True,
+            'safe_image_url': '/images/ccd_1/latest.jpg',
+            'source_status': 'Existing image route available.',
+            'note': 'Latest frame shown from existing image URL metadata.',
+        },
+        {
+            'camera_id': 2,
+            'camera_label': 'South Sky',
+            'timestamp': '2026-06-30 07:17:55',
+            'age_label': '9 seconds ago',
+            'image_available': True,
+            'safe_image_url': '/images/ccd_2/latest.jpg',
+            'source_status': 'Existing image route available.',
+            'note': 'Latest frame shown from existing image URL metadata.',
+        },
+    ]))
+
+    now_view = build_now_view(latest_camera_frames_provider=provider)
+    camera_frames = now_view['latest_camera_frames']
+
+    assert camera_frames['status'] == 'Latest camera images available.'
+    assert camera_frames['is_placeholder'] is False
+    assert [item['camera_label'] for item in camera_frames['items']] == ['North Sky', 'South Sky']
+    assert camera_frames['items'][0]['safe_image_url'] == '/images/ccd_1/latest.jpg'
+    json.dumps(now_view, sort_keys=True)
+    assert_no_sensitive_text(now_view)
+    assert_no_callables(now_view)
+
+
+def test_latest_camera_frames_provider_rejects_unsafe_image_routes():
+    provider = LatestCameraFramesProvider(FakeLatestCameraFramesRepository([
+        {
+            'camera_id': 1,
+            'camera_label': 'North Sky',
+            'timestamp': '2026-06-30 07:18:00',
+            'age_label': '4 seconds ago',
+            'image_available': True,
+            'safe_image_url': 'https://example.invalid/latest.jpg',
+            'source_status': 'External URL should be rejected.',
+            'note': 'Unsafe route should become unavailable.',
+        },
+    ]))
+
+    now_view = build_now_view(latest_camera_frames_provider=provider)
+    frame = now_view['latest_camera_frames']['items'][0]
+
+    assert frame['image_available'] is False
+    assert frame['safe_image_url'] is None
+    assert_no_sensitive_text(now_view)
+    assert_no_callables(now_view)
 
 
 def test_build_now_view_contains_no_sensitive_payload():
@@ -3047,6 +3135,9 @@ def main():
         test_build_now_view_is_json_serializable,
         test_build_now_view_has_explicit_placeholder_status,
         test_build_now_view_contains_no_sensitive_payload,
+        test_latest_camera_frames_contract_is_fake_safe,
+        test_latest_camera_frames_provider_accepts_safe_image_routes,
+        test_latest_camera_frames_provider_rejects_unsafe_image_routes,
         test_build_sky_cycle_report_view_returns_dict,
         test_build_sky_cycle_report_view_is_json_serializable,
         test_build_sky_cycle_report_view_has_required_sections,
