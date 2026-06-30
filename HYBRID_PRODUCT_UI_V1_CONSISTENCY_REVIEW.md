@@ -128,30 +128,33 @@ What works:
 - Moment -> Output is present and natural for analysis.
 - Output -> Library is present and supports long-term retrieval.
 - Now -> Sky Cycle is present for users who want cycle context.
+- Sky Cycle now links to Highlights, Moment, Output, Library, Now, and
+  Observatory.
+- Library now links to Observatory.
 - Observatory is reachable from Now and several product surfaces.
 
-Gaps:
+Remaining watchouts:
 
-- Sky Cycle does not directly link to Highlights, Moment, Output, or Library.
-- Library does not directly link to Observatory.
-- Some pages link back to Now more clearly than they link forward through the
-  product flow.
+- Some pages still link back to Now more clearly than they explain the forward
+  product journey.
+- Link labels are consistent enough for v1, but not yet governed by a shared
+  product navigation map.
 
 Recommendation:
 
-Treat navigation as its own v1 pass. Do not add ad hoc links one page at a
-time. Build a deliberate product navigation map after this consolidation.
+Treat future navigation changes as a deliberate product navigation pass. The
+known v1 link gaps are closed; remaining work is refinement, labeling, and
+hierarchy.
 
 ## Dead Ends
 
 There are no total dead ends because the Modern shell remains available and
 most product surfaces link back to Now.
 
-However, product-specific dead ends still exist:
+Product-specific dead ends have been reduced:
 
-- Sky Cycle is context-rich but under-connected.
-- Library can find its way back to Now and Output, but not directly to
-  Observatory.
+- Sky Cycle is no longer under-connected to the main v1 surfaces.
+- Library can now move directly to Observatory.
 - Highlights needs a stronger sense of "this is the first thing to review"
   before it becomes the center of the product.
 

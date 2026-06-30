@@ -14,7 +14,6 @@ Now -> Highlights -> Moment -> Output -> Sky Cycle -> Library -> Observatory -> 
 
 ## Must Fix Before Real Data
 
-- Complete a deliberate product navigation pass across the frozen v1 flow.
 - Reduce contract-scaffolding language in Basic-facing surfaces.
 - Define common presentation rules for product status, data status, confidence,
   source trust, and safety boundaries.
@@ -28,15 +27,17 @@ Now -> Highlights -> Moment -> Output -> Sky Cycle -> Library -> Observatory -> 
 - Keep disabled or future actions visible only as metadata, never as controls.
 - Preserve the no-preview, no-filesystem, no-media-read boundary until each
   media path has a dedicated safety review.
-- Add a single source of truth for product navigation labels if link growth
-  continues.
 
 ## Nice Before Real Data
 
+- Refine product navigation hierarchy now that the known v1 link gaps are
+  closed.
 - Extract shared read-only product card/includes if duplication starts to slow
   iteration.
 - Add a product navigation map document for Now, Highlights, Moment, Output,
   Sky Cycle, Library, Observatory, Settings, and Developer.
+- Add a single source of truth for product navigation labels if link growth
+  continues.
 - Improve empty states so they are useful to users, not only honest to
   developers.
 - Normalize "back to" and "continue to" language across surfaces.
