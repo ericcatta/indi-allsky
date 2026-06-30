@@ -39,7 +39,9 @@ from ..product_view_models import build_output_detail_view
 from ..product_view_models import build_library_view
 from ..product_view_models import build_observatory_view
 from ..product_view_models import build_sky_cycle_report_view
+from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import LatestFrameImageTableRepository
+from ..product_view_models import LatestGeneratedOutputRepository
 from ..product_view_models import LatestFrameSummaryProvider
 
 from cryptography.fernet import InvalidToken
@@ -7440,6 +7442,7 @@ class ModernAdminNowView(TemplateView):
         context['modern_admin_now'] = build_now_view(
             latest_frame_provider=self.get_latest_frame_provider(),
             current_phase_night=context.get('night'),
+            latest_generated_output_repository=self.get_latest_generated_output_repository(),
         )
 
         return context
@@ -7472,6 +7475,70 @@ class ModernAdminNowView(TemplateView):
             return None
 
         return LatestFrameSummaryProvider(repository)
+
+    def get_latest_generated_output_repository(self):
+        try:
+            camera = getattr(self, 'camera', None)
+            camera_id = getattr(camera, 'id', None)
+            if not camera_id:
+                return None
+
+            descriptors = (
+                GeneratedOutputDescriptor(
+                    output_type='timelapse',
+                    query=IndiAllSkyDbVideoTable.query,
+                    order_by_expression=IndiAllSkyDbVideoTable.createDate.desc(),
+                    camera_id_field=IndiAllSkyDbVideoTable.camera_id,
+                    source_table_label='Timelapse outputs',
+                ),
+                GeneratedOutputDescriptor(
+                    output_type='mini_timelapse',
+                    query=IndiAllSkyDbMiniVideoTable.query,
+                    order_by_expression=IndiAllSkyDbMiniVideoTable.createDate.desc(),
+                    camera_id_field=IndiAllSkyDbMiniVideoTable.camera_id,
+                    source_table_label='Mini timelapse outputs',
+                ),
+                GeneratedOutputDescriptor(
+                    output_type='keogram',
+                    query=IndiAllSkyDbKeogramTable.query,
+                    order_by_expression=IndiAllSkyDbKeogramTable.createDate.desc(),
+                    camera_id_field=IndiAllSkyDbKeogramTable.camera_id,
+                    source_table_label='Keogram outputs',
+                ),
+                GeneratedOutputDescriptor(
+                    output_type='startrail',
+                    query=IndiAllSkyDbStarTrailsTable.query,
+                    order_by_expression=IndiAllSkyDbStarTrailsTable.createDate.desc(),
+                    camera_id_field=IndiAllSkyDbStarTrailsTable.camera_id,
+                    source_table_label='Startrail outputs',
+                ),
+                GeneratedOutputDescriptor(
+                    output_type='startrail_video',
+                    query=IndiAllSkyDbStarTrailsVideoTable.query,
+                    order_by_expression=IndiAllSkyDbStarTrailsVideoTable.createDate.desc(),
+                    camera_id_field=IndiAllSkyDbStarTrailsVideoTable.camera_id,
+                    source_table_label='Startrail video outputs',
+                ),
+                GeneratedOutputDescriptor(
+                    output_type='panorama_image',
+                    query=IndiAllSkyDbPanoramaImageTable.query,
+                    order_by_expression=IndiAllSkyDbPanoramaImageTable.createDate.desc(),
+                    camera_id_field=IndiAllSkyDbPanoramaImageTable.camera_id,
+                    source_table_label='Panorama image outputs',
+                ),
+                GeneratedOutputDescriptor(
+                    output_type='panorama_video',
+                    query=IndiAllSkyDbPanoramaVideoTable.query,
+                    order_by_expression=IndiAllSkyDbPanoramaVideoTable.createDate.desc(),
+                    camera_id_field=IndiAllSkyDbPanoramaVideoTable.camera_id,
+                    source_table_label='Panorama video outputs',
+                ),
+            )
+        except Exception:
+            app.logger.error('Unable to build Now latest generated output repository')
+            return None
+
+        return LatestGeneratedOutputRepository(descriptors=descriptors, camera_id=camera_id)
 
 
 class ModernAdminHighlightsView(TemplateView):

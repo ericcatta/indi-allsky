@@ -18,7 +18,7 @@
         </div>
 
         <h2>{{ modern_admin_now.current_verdict }}</h2>
-        <p class="modern-admin-note">Hybrid AllSky transforms continuous sky observation into trustworthy knowledge and beautiful results. This prototype shows the final product shape without evaluating live sky, source, media, or observatory data.</p>
+        <p class="modern-admin-note">Hybrid AllSky transforms continuous sky observation into trustworthy knowledge and beautiful results. This prototype combines bounded metadata with placeholder contracts for sky, source, media, and observatory data that are not connected yet.</p>
         <p class="modern-admin-note"><strong>Start with Highlights:</strong> review what Hybrid selected, then open the Moment or Output that explains the evidence.</p>
         <p class="modern-admin-note">Contract: <code>{{ modern_admin_now.metadata.contract }}</code> / <code>{{ modern_admin_now.metadata.contract_version }}</code>. Source: <code>{{ modern_admin_now.metadata.source }}</code>.</p>
 
@@ -33,6 +33,7 @@
 
     <section class="modern-admin-table-panel" aria-labelledby="now-current-title">
         {% set latest_frame = modern_admin_now.latest_frame_summary %}
+        {% set latest_output = modern_admin_now.latest_generated_output_summary %}
         {% set current_phase = modern_admin_now.current_phase_summary %}
         {% set source_confidence = modern_admin_now.source_confidence_summary %}
         <div class="modern-admin-section-heading">
@@ -86,6 +87,33 @@
                 <h3>{{ modern_admin_now.current_sky.source_recording }}</h3>
                 <p>{{ modern_admin_now.current_sky.capture_status }}</p>
                 <p>{{ latest_frame.evidence }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ latest_output.label }}</div>
+                <h3>{{ latest_output.output_type | replace('_', ' ') | title }}</h3>
+                <p>{{ latest_output.status }}</p>
+                <p>Generated: {{ latest_output.timestamp }}. Sky day: {{ latest_output.day_date }}.</p>
+                <p>Status: {{ latest_output.generation_status }}</p>
+                {% if latest_output.uploaded is not none or latest_output.success is not none %}
+                    <p>
+                    {% if latest_output.success is not none %}Generation success: {{ 'Yes' if latest_output.success else 'No' }}.{% endif %}
+                    {% if latest_output.uploaded is not none %} Uploaded: {{ 'Yes' if latest_output.uploaded else 'No' }}.{% endif %}
+                    </p>
+                {% endif %}
+                {% if latest_output.frames is not none or latest_output.framerate is not none %}
+                    <p>
+                    {% if latest_output.frames is not none %}Frames: {{ latest_output.frames }}.{% endif %}
+                    {% if latest_output.framerate is not none %} Framerate: {{ latest_output.framerate }}.{% endif %}
+                    </p>
+                {% endif %}
+                {% if latest_output.width is not none and latest_output.height is not none %}
+                    <p>Dimensions: {{ latest_output.width }} x {{ latest_output.height }}.</p>
+                {% endif %}
+                {% if latest_output.file_size is not none %}
+                    <p>Stored size metadata: {{ latest_output.file_size }} bytes.</p>
+                {% endif %}
+                <p>{{ latest_output.note }}</p>
+                <span class="modern-admin-status-pill modern-admin-status-muted">{{ latest_output.source_table_label }}</span>
             </article>
         </section>
     </section>

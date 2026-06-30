@@ -303,6 +303,20 @@ Now now has its first real, bounded, metadata-only product fact. The remaining
 risks are limited to missing full Flask/DB integration tests, timestamp semantics,
 and preserving the strict adapter allowlist in future edits.
 
+## DATA002 Latest Generated Output Update
+
+Now now includes bounded latest generated output metadata through a descriptor-based
+repository built in the Flask layer and rendered through the NowView contract.
+
+The integration is metadata-only and camera-scoped. It can summarize the latest
+timelapse, mini timelapse, keogram, startrail, startrail video, panorama image,
+or panorama video record when available. It still deliberately excludes preview
+URLs, filenames, paths, storage keys, raw rows, raw data, media reads, filesystem
+access, downloads, sharing, and generation behavior.
+
+Output Detail remains disconnected from DATA002 until it has an
+identifier-specific runtime contract.
+
 ## Current Phase Update
 
 NowView now includes `current_phase_summary`, sourced only from the existing

@@ -183,6 +183,17 @@ class FakeLatestFrameRepository:
         return self.metadata
 
 
+class FakeLatestGeneratedOutputRepository:
+    def __init__(self, metadata=None, raises=False):
+        self.metadata = metadata
+        self.raises = raises
+
+    def get_latest_generated_output_metadata(self):
+        if self.raises:
+            raise RuntimeError('fake generated output failure')
+        return self.metadata
+
+
 class FakeImageRow:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -2180,6 +2191,95 @@ def test_latest_generated_output_adapter_drops_non_primitive_and_unsafe_values()
     json.dumps(result, sort_keys=True)
 
 
+def test_build_now_view_includes_latest_generated_output_summary():
+    now_view = build_now_view()
+    latest_output = now_view['latest_generated_output_summary']
+
+    assert latest_output['label'] == 'Latest Generated Output'
+    assert latest_output['data_status'] == 'not_evaluated'
+    assert latest_output['output_type'] == 'not evaluated'
+    assert latest_output['timestamp'] == 'Not evaluated yet'
+    assert latest_output['source_table_label'] == 'Generated output source not evaluated yet'
+    json.dumps(now_view, sort_keys=True)
+
+
+def test_build_now_view_accepts_latest_generated_output_repository():
+    repository = FakeLatestGeneratedOutputRepository({
+        'status': 'generated_output_available',
+        'data_status': 'not_evaluated',
+        'output': {
+            'output_type': 'keogram',
+            'timestamp': '2026-06-29 05:00:00',
+            'day_date': '2026-06-29',
+            'status_label': 'Generated output metadata available.',
+            'uploaded': False,
+            'success': True,
+            'frames': 180,
+            'framerate': None,
+            'file_size': 123456,
+            'width': 1920,
+            'height': 480,
+            'source_table_label': 'Keogram outputs',
+        },
+        'partial_failures': 0,
+        'note': 'fake metadata',
+    })
+    now_view = build_now_view(latest_generated_output_repository=repository)
+    latest_output = now_view['latest_generated_output_summary']
+
+    assert latest_output['status'] == 'Latest generated output metadata available.'
+    assert latest_output['output_type'] == 'keogram'
+    assert latest_output['timestamp'] == '2026-06-29 05:00:00'
+    assert latest_output['day_date'] == '2026-06-29'
+    assert latest_output['generation_status'] == 'Generated output metadata available.'
+    assert latest_output['uploaded'] is False
+    assert latest_output['success'] is True
+    assert latest_output['frames'] == 180
+    assert latest_output['file_size'] == 123456
+    assert latest_output['width'] == 1920
+    assert latest_output['height'] == 480
+    assert latest_output['source_table_label'] == 'Keogram outputs'
+    assert_no_absolute_paths(latest_output)
+    json.dumps(now_view, sort_keys=True)
+
+
+def test_build_now_view_latest_generated_output_repository_no_output():
+    repository = FakeLatestGeneratedOutputRepository({
+        'status': 'no_generated_output_metadata',
+        'data_status': 'not_evaluated',
+        'output': {},
+        'partial_failures': 0,
+        'note': 'No generated output metadata row is available from the injected descriptors.',
+    })
+    latest_output = build_now_view(latest_generated_output_repository=repository)['latest_generated_output_summary']
+
+    assert latest_output['status'] == 'No generated output metadata available.'
+    assert latest_output['output_type'] == 'not evaluated'
+    assert latest_output['success'] is None
+    assert latest_output['source_table_label'] == 'Generated output source not evaluated yet'
+
+
+def test_build_now_view_latest_generated_output_repository_error():
+    repository = FakeLatestGeneratedOutputRepository(raises=True)
+    latest_output = build_now_view(latest_generated_output_repository=repository)['latest_generated_output_summary']
+
+    assert latest_output['status'] == 'Generated output metadata unavailable.'
+    assert latest_output['output_type'] == 'not evaluated'
+    assert latest_output['source_table_label'] == 'Generated output source not evaluated yet'
+
+
+def test_validate_now_view_payload_rejects_latest_generated_output_unsafe_value():
+    now_view = build_now_view()
+    now_view['latest_generated_output_summary']['source_table_label'] = '/private/generated'
+
+    try:
+        validate_now_view_payload(now_view)
+    except ValueError as e:
+        assert 'latest_generated_output_summary contains unsafe value' in str(e)
+    else:
+        raise AssertionError('unsafe generated output metadata should fail validation')
+
+
 def test_safe_actions_are_metadata_only():
     now_view = build_now_view()
 
@@ -2519,6 +2619,11 @@ def main():
         test_latest_generated_output_adapter_with_all_query_errors,
         test_latest_generated_output_adapter_with_missing_camera_context,
         test_latest_generated_output_adapter_drops_non_primitive_and_unsafe_values,
+        test_build_now_view_includes_latest_generated_output_summary,
+        test_build_now_view_accepts_latest_generated_output_repository,
+        test_build_now_view_latest_generated_output_repository_no_output,
+        test_build_now_view_latest_generated_output_repository_error,
+        test_validate_now_view_payload_rejects_latest_generated_output_unsafe_value,
         test_safe_actions_are_metadata_only,
         test_validate_now_view_payload_success,
         test_validate_now_view_payload_requires_sections,

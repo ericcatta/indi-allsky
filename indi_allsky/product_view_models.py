@@ -56,6 +56,7 @@ NOW_REQUIRED_KEYS = frozenset((
     'current_sky',
     'current_phase_summary',
     'latest_frame_summary',
+    'latest_generated_output_summary',
     'source_confidence_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
@@ -73,6 +74,7 @@ NOW_REQUIRED_SECTIONS = frozenset((
     'current_sky',
     'current_phase_summary',
     'latest_frame_summary',
+    'latest_generated_output_summary',
     'source_confidence_summary',
     'sky_cycle_briefing',
     'primary_question_answers',
@@ -152,6 +154,27 @@ NOW_LATEST_FRAME_METADATA_KEYS = frozenset((
     'file_size',
     'width',
     'height',
+))
+
+NOW_LATEST_GENERATED_OUTPUT_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'output_type',
+    'timestamp',
+    'day_date',
+    'generation_status',
+    'uploaded',
+    'success',
+    'frames',
+    'framerate',
+    'file_size',
+    'width',
+    'height',
+    'source_table_label',
+    'note',
+    'is_placeholder',
 ))
 
 NOW_CURRENT_PHASE_REQUIRED_KEYS = frozenset((
@@ -1429,12 +1452,12 @@ class PrimaryQuestionAnswer:
         return asdict(self)
 
 
-def build_now_view(latest_frame_provider=None, current_phase_night=None):
+def build_now_view(latest_frame_provider=None, current_phase_night=None, latest_generated_output_repository=None):
     """Return the first backend-owned NowView contract.
 
-    The payload is static and fake-safe by design. It gives the Product UI a
-    stable shape while real Now/SkyCycle/Moment/Output contracts are still being
-    designed.
+    The payload is built from sanitized view-model inputs. Most sections remain
+    fake-safe placeholders while bounded repositories can provide metadata-only
+    facts.
     """
     payload = {
         'id': 'now.placeholder',
@@ -1449,6 +1472,9 @@ def build_now_view(latest_frame_provider=None, current_phase_night=None):
         'current_sky': _build_current_sky(),
         'current_phase_summary': build_current_phase_summary(current_phase_night),
         'latest_frame_summary': _build_latest_frame_summary(latest_frame_provider=latest_frame_provider),
+        'latest_generated_output_summary': _build_latest_generated_output_summary(
+            latest_generated_output_repository=latest_generated_output_repository,
+        ),
         'source_confidence_summary': build_source_confidence_summary(),
         'sky_cycle_briefing': _build_sky_cycle_briefing(),
         'primary_question_answers': _build_primary_question_answers(),
@@ -1622,6 +1648,7 @@ def validate_now_view_payload(payload):
 
     _validate_current_phase_summary(payload.get('current_phase_summary'))
     _validate_latest_frame_summary(payload.get('latest_frame_summary'))
+    _validate_latest_generated_output_summary(payload.get('latest_generated_output_summary'))
     _validate_source_confidence_summary(payload.get('source_confidence_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
@@ -1875,6 +1902,111 @@ def _map_current_phase(night):
 def _build_latest_frame_summary(latest_frame_provider=None):
     provider = latest_frame_provider or LatestFrameSummaryProvider()
     return provider.build()
+
+
+def _build_latest_generated_output_summary(latest_generated_output_repository=None):
+    empty_output = {
+        'output_type': 'not evaluated',
+        'timestamp': 'Not evaluated yet',
+        'day_date': 'Not evaluated yet',
+        'generation_status': 'Generated output metadata not evaluated yet.',
+        'uploaded': None,
+        'success': None,
+        'frames': None,
+        'framerate': None,
+        'file_size': None,
+        'width': None,
+        'height': None,
+        'source_table_label': 'Generated output source not evaluated yet',
+    }
+
+    if latest_generated_output_repository is None:
+        return _latest_generated_output_summary_from_metadata(
+            status='Generated output metadata not connected yet.',
+            output_metadata=empty_output,
+            note='No generated-output repository is connected to Now.',
+        )
+
+    try:
+        repository_metadata = latest_generated_output_repository.get_latest_generated_output_metadata()
+    except Exception:
+        return _latest_generated_output_summary_from_metadata(
+            status='Generated output metadata unavailable.',
+            output_metadata=empty_output,
+            note='Generated-output repository failed; error details are not exposed.',
+        )
+
+    if not isinstance(repository_metadata, dict):
+        return _latest_generated_output_summary_from_metadata(
+            status='Generated output metadata unavailable.',
+            output_metadata=empty_output,
+            note='Generated-output repository returned unsupported metadata.',
+        )
+
+    output_metadata = repository_metadata.get('output') or {}
+    if not output_metadata:
+        return _latest_generated_output_summary_from_metadata(
+            status='No generated output metadata available.',
+            output_metadata=empty_output,
+            note=_latest_frame_text(repository_metadata.get('note'), 'No generated output metadata row is available.'),
+        )
+
+    generation_status = _latest_frame_text(
+        output_metadata.get('status_label'),
+        'Generated output metadata available.',
+    )
+
+    return _latest_generated_output_summary_from_metadata(
+        status='Latest generated output metadata available.',
+        output_metadata={
+            'output_type': _latest_frame_text(output_metadata.get('output_type'), 'unknown'),
+            'timestamp': _latest_frame_text(output_metadata.get('timestamp'), 'Not evaluated yet'),
+            'day_date': _latest_frame_text(output_metadata.get('day_date'), 'Not evaluated yet'),
+            'generation_status': generation_status,
+            'uploaded': output_metadata.get('uploaded'),
+            'success': output_metadata.get('success'),
+            'frames': output_metadata.get('frames'),
+            'framerate': output_metadata.get('framerate'),
+            'file_size': output_metadata.get('file_size'),
+            'width': output_metadata.get('width'),
+            'height': output_metadata.get('height'),
+            'source_table_label': _latest_frame_text(output_metadata.get('source_table_label'), 'Generated output source'),
+        },
+        note='Metadata selected from bounded generated-output descriptors. Preview and file access remain disabled.',
+    )
+
+
+def _latest_generated_output_summary_from_metadata(status, output_metadata, note):
+    return {
+        'id': 'latest_generated_output.summary',
+        'label': 'Latest Generated Output',
+        'status': status,
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'output_type': output_metadata['output_type'],
+        'timestamp': output_metadata['timestamp'],
+        'day_date': output_metadata['day_date'],
+        'generation_status': output_metadata['generation_status'],
+        'uploaded': _latest_generated_output_summary_value(output_metadata.get('uploaded')),
+        'success': _latest_generated_output_summary_value(output_metadata.get('success')),
+        'frames': _latest_generated_output_summary_value(output_metadata.get('frames')),
+        'framerate': _latest_generated_output_summary_value(output_metadata.get('framerate')),
+        'file_size': _latest_generated_output_summary_value(output_metadata.get('file_size')),
+        'width': _latest_generated_output_summary_value(output_metadata.get('width')),
+        'height': _latest_generated_output_summary_value(output_metadata.get('height')),
+        'source_table_label': output_metadata['source_table_label'],
+        'note': note,
+        'is_placeholder': True,
+    }
+
+
+def _latest_generated_output_summary_value(value):
+    if not _latest_frame_metadata_value_is_json_safe(value):
+        return None
+
+    if _latest_frame_value_is_unsafe(value):
+        return None
+
+    return value
 
 
 def build_source_confidence_summary():
@@ -3327,12 +3459,12 @@ def _build_attention_items():
 def _build_now_metadata():
     return {
         'contract': 'NowView',
-        'contract_version': 'v1-placeholder',
-        'source': 'static backend-owned builder',
+        'contract_version': 'v1-bounded-metadata',
+        'source': 'backend-owned builder with optional bounded metadata repositories',
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
         'notes': [
-            'No runtime state evaluated.',
-            'No database, filesystem, camera, source, or media generation access.',
+            'Only explicitly injected bounded metadata repositories are evaluated.',
+            'No filesystem, source file, media read, preview, generation, or mutative action is performed.',
         ],
     }
 
@@ -3602,6 +3734,35 @@ def _validate_latest_frame_metadata(frame_metadata):
 
         if _latest_frame_value_is_unsafe(value):
             raise ValueError('latest_frame_summary.frame_metadata contains unsafe value: {0:s}'.format(str(key)))
+
+
+def _validate_latest_generated_output_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('latest_generated_output_summary must be a dict')
+
+    missing_keys = sorted(NOW_LATEST_GENERATED_OUTPUT_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('latest_generated_output_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError(
+            'Invalid data_status at now.latest_generated_output_summary: {0!r}'.format(summary['data_status'])
+        )
+
+    for key, value in summary.items():
+        if key == 'is_placeholder':
+            if not isinstance(value, bool):
+                raise ValueError('latest_generated_output_summary.is_placeholder must be a boolean')
+            continue
+
+        if key == 'data_status':
+            continue
+
+        if not _latest_frame_metadata_value_is_json_safe(value):
+            raise ValueError('latest_generated_output_summary contains non-primitive value: {0:s}'.format(str(key)))
+
+        if _latest_frame_value_is_unsafe(value):
+            raise ValueError('latest_generated_output_summary contains unsafe value: {0:s}'.format(str(key)))
 
 
 def _validate_current_phase_summary(summary):

@@ -168,6 +168,17 @@ Reasoning:
   briefing;
 - real data is now needed to prove whether the product flow works.
 
+## DATA002 Integration Note
+
+The real-data phase has now connected latest generated output metadata into Now
+as a bounded, metadata-only summary. This advances item 3 in the readiness list
+without adding preview URLs, media reads, filesystem access, downloads, sharing,
+generation jobs, or mutative actions.
+
+Output Detail remains static/fake because the current route is not
+identifier-specific. A future Output Detail data step should define that runtime
+contract before connecting generated-output metadata there.
+
 ## 8. Next Mission Proposal
 
 The next mission should be the first cautious real-data step after the static UX
