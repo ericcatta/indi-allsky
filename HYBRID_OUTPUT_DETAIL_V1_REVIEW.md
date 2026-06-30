@@ -59,6 +59,18 @@ Output Detail v1 does not perform database queries, filesystem access, RAW/FITS 
 
 Future real data should arrive only through bounded backend-owned providers and sanitized view models.
 
+## DATA002 Decision
+
+DATA002 Latest Generated Output Metadata is integrated into Now only.
+
+Output Detail remains disconnected because `/modern-admin/output` is not
+identifier-specific. Connecting "latest generated output" here would blur the
+meaning of Output Detail as a page about one selected generated result.
+
+A future Output Detail data step should first define how a specific output is
+selected, then connect metadata without preview URLs, filesystem access, media
+reads, downloads, sharing, or rendering jobs.
+
 ## Product Score
 
 Initial score: 7.1/10.
