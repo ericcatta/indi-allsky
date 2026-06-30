@@ -609,6 +609,152 @@ MOMENT_DETAIL_ALLOWED_OUTPUT_TYPES = frozenset((
     'unknown',
 ))
 
+OUTPUT_DETAIL_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'output_summary',
+    'preview_summary',
+    'recipe_summary',
+    'source_lineage_summary',
+    'related_moments',
+    'sky_cycle_context',
+    'share_readiness_summary',
+    'metadata',
+))
+
+OUTPUT_DETAIL_REQUIRED_SECTIONS = frozenset((
+    'output_summary',
+    'preview_summary',
+    'recipe_summary',
+    'source_lineage_summary',
+    'related_moments',
+    'sky_cycle_context',
+    'share_readiness_summary',
+))
+
+OUTPUT_DETAIL_SUMMARY_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'title',
+    'type',
+    'data_status',
+    'generation_status',
+    'phase',
+    'sky_cycle_label',
+    'note',
+    'is_placeholder',
+))
+
+OUTPUT_DETAIL_PREVIEW_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'preview_status',
+    'data_status',
+    'preview_available',
+    'safe_preview_url',
+    'note',
+    'is_placeholder',
+))
+
+OUTPUT_DETAIL_RECIPE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'look_applied',
+    'recipe_status',
+    'rendering_intent',
+    'non_destructive_status',
+    'version_label',
+    'note',
+    'is_placeholder',
+))
+
+OUTPUT_DETAIL_SOURCE_LINEAGE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'source_status',
+    'lineage_status',
+    'source_types',
+    'source_coverage_label',
+    'preservation_status',
+    'trust_level',
+    'evidence',
+    'is_placeholder',
+))
+
+OUTPUT_DETAIL_RELATED_MOMENTS_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'relation_status',
+    'items',
+    'note',
+    'is_placeholder',
+))
+
+OUTPUT_DETAIL_RELATED_MOMENT_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'type',
+    'phase',
+    'data_status',
+    'relation_label',
+    'confidence_label',
+    'is_placeholder',
+))
+
+OUTPUT_DETAIL_SKY_CYCLE_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'data_status',
+    'cycle_label',
+    'phase',
+    'time_range_label',
+    'context_status',
+    'is_placeholder',
+))
+
+OUTPUT_DETAIL_SHARE_READINESS_REQUIRED_KEYS = frozenset((
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'export_status',
+    'share_status',
+    'limitations',
+    'safe_actions_available',
+    'is_placeholder',
+))
+
+OUTPUT_DETAIL_ALLOWED_TYPES = frozenset((
+    'best_image',
+    'latest_image',
+    'timelapse',
+    'day_timelapse',
+    'night_timelapse',
+    'keogram',
+    'startrail',
+    'startrail_video',
+    'storm_highlight',
+    'aurora_highlight',
+    'meteor_highlight',
+    'cycle_summary_video',
+    'unknown',
+))
+
+OUTPUT_DETAIL_ALLOWED_TRUST_LEVELS = frozenset((
+    'unknown',
+    'low',
+    'medium',
+    'high',
+))
+
 
 @dataclass(frozen=True)
 class NowSection:
@@ -992,6 +1138,30 @@ def build_moment_detail_view():
     return payload
 
 
+def build_output_detail_view():
+    """Return the first fake-safe Output Detail product contract."""
+    payload = {
+        'id': 'output_detail.placeholder',
+        'label': 'Output Detail',
+        'status': 'Read-only product prototype',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'generated_at': 'Not evaluated yet',
+        'is_placeholder': True,
+        'safe_actions_available': [],
+        'output_summary': _build_output_detail_summary(),
+        'preview_summary': _build_output_detail_preview_summary(),
+        'recipe_summary': _build_output_detail_recipe_summary(),
+        'source_lineage_summary': _build_output_detail_source_lineage_summary(),
+        'related_moments': _build_output_detail_related_moments(),
+        'sky_cycle_context': _build_output_detail_sky_cycle_context(),
+        'share_readiness_summary': _build_output_detail_share_readiness_summary(),
+        'metadata': _build_output_detail_metadata(),
+    }
+
+    validate_output_detail_payload(payload)
+    return payload
+
+
 def validate_now_view_payload(payload):
     """Validate a NowView payload before it reaches presentation templates."""
     if not isinstance(payload, dict):
@@ -1062,6 +1232,35 @@ def validate_moment_detail_payload(payload):
     _validate_moment_detail_related_outputs(payload.get('related_outputs'))
     _validate_moment_detail_sky_cycle_context(payload.get('sky_cycle_context'))
     _validate_moment_detail_observatory_context(payload.get('observatory_context'))
+    _validate_data_statuses(payload)
+    _validate_no_callables(payload)
+    _validate_no_sensitive_keys(payload)
+    _validate_no_absolute_paths(payload)
+    _validate_safe_actions(payload)
+    _validate_json_safe(payload)
+
+    return True
+
+
+def validate_output_detail_payload(payload):
+    """Validate an Output Detail payload before template rendering."""
+    if not isinstance(payload, dict):
+        raise ValueError('OutputDetail payload must be a dict')
+
+    missing_keys = sorted(OUTPUT_DETAIL_REQUIRED_KEYS.difference(payload.keys()))
+    if missing_keys:
+        raise ValueError('OutputDetail payload missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    for section_key in OUTPUT_DETAIL_REQUIRED_SECTIONS:
+        _validate_required_section(payload, section_key)
+
+    _validate_output_detail_summary(payload.get('output_summary'))
+    _validate_output_detail_preview_summary(payload.get('preview_summary'))
+    _validate_output_detail_recipe_summary(payload.get('recipe_summary'))
+    _validate_output_detail_source_lineage_summary(payload.get('source_lineage_summary'))
+    _validate_output_detail_related_moments(payload.get('related_moments'))
+    _validate_output_detail_sky_cycle_context(payload.get('sky_cycle_context'))
+    _validate_output_detail_share_readiness_summary(payload.get('share_readiness_summary'))
     _validate_data_statuses(payload)
     _validate_no_callables(payload)
     _validate_no_sensitive_keys(payload)
@@ -1811,6 +2010,136 @@ def _build_moment_detail_metadata():
         'data_status': NOW_DATA_STATUS_PLACEHOLDER,
         'is_placeholder': True,
         'rp5_policy': 'No database, detector, filesystem, media generation, preview URL, or runtime health check.',
+    }
+
+
+def _build_output_detail_summary():
+    return {
+        'id': 'output.summary.placeholder',
+        'label': 'Output Summary',
+        'title': 'Generated meteor highlight',
+        'type': 'meteor_highlight',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'generation_status': 'Generated output status pending rendering contract.',
+        'phase': 'night',
+        'sky_cycle_label': 'Sky Cycle not evaluated yet',
+        'note': 'This read-only prototype describes a generated result without reading media or starting rendering.',
+        'is_placeholder': True,
+    }
+
+
+def _build_output_detail_preview_summary():
+    return {
+        'id': 'output.preview.placeholder',
+        'label': 'Preview Summary',
+        'preview_status': 'Preview intentionally disabled in this prototype.',
+        'data_status': NOW_DATA_STATUS_NOT_EVALUATED,
+        'preview_available': False,
+        'safe_preview_url': None,
+        'note': 'Preview remains unavailable until a sanitized preview contract exists.',
+        'is_placeholder': True,
+    }
+
+
+def _build_output_detail_recipe_summary():
+    return {
+        'id': 'output.recipe.placeholder',
+        'label': 'Output Recipe',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'look_applied': 'Look not evaluated yet',
+        'recipe_status': 'Output recipe pending rendering contract.',
+        'rendering_intent': 'Astrophoto review output; intent not evaluated from real data.',
+        'non_destructive_status': 'Rendering is non-destructive; source data remains authoritative.',
+        'version_label': 'Recipe version not evaluated yet',
+        'note': 'Looks and recipes are metadata until bounded rendering contracts exist.',
+        'is_placeholder': True,
+    }
+
+
+def _build_output_detail_source_lineage_summary():
+    return {
+        'id': 'output.source_lineage.placeholder',
+        'label': 'Source Lineage',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'source_status': 'Source lineage is not connected yet.',
+        'lineage_status': 'Output-to-source relationship pending source contract.',
+        'source_types': [
+            'image metadata',
+            'source frames',
+        ],
+        'source_coverage_label': 'Source coverage not evaluated yet',
+        'preservation_status': 'Source preservation not evaluated in this prototype.',
+        'trust_level': NOW_RISK_LEVEL_UNKNOWN,
+        'evidence': [
+            'No source coverage calculation is connected yet.',
+            'No source frame or media read is performed by this prototype.',
+        ],
+        'is_placeholder': True,
+    }
+
+
+def _build_output_detail_related_moments():
+    return {
+        'id': 'output.related_moments.placeholder',
+        'label': 'Related Moments',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'relation_status': 'Moment relationship pending backend contract.',
+        'items': [
+            {
+                'id': 'output.related_moment.placeholder',
+                'label': 'Possible meteor candidate',
+                'type': 'meteor_candidate',
+                'phase': 'night',
+                'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+                'relation_label': 'Potential source Moment for this output.',
+                'confidence_label': 'Moment confidence not evaluated yet',
+                'is_placeholder': True,
+            },
+        ],
+        'note': 'Related Moments explain why an output exists, but no real detector relation is connected.',
+        'is_placeholder': True,
+    }
+
+
+def _build_output_detail_sky_cycle_context():
+    return {
+        'id': 'output.sky_cycle_context.placeholder',
+        'label': 'Sky Cycle Context',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'cycle_label': 'Sky Cycle not evaluated yet',
+        'phase': 'night',
+        'time_range_label': 'Time range not evaluated yet',
+        'context_status': 'Sky Cycle context pending backend contract.',
+        'is_placeholder': True,
+    }
+
+
+def _build_output_detail_share_readiness_summary():
+    return {
+        'id': 'output.share_readiness.placeholder',
+        'label': 'Review Readiness',
+        'status': 'Not ready for external delivery.',
+        'data_status': NOW_DATA_STATUS_FUTURE_CONTRACT,
+        'export_status': 'Export readiness not evaluated yet.',
+        'share_status': 'External sharing not connected.',
+        'limitations': [
+            'No preview contract connected.',
+            'No source lineage connected.',
+            'No rendering recipe connected.',
+        ],
+        'safe_actions_available': [],
+        'is_placeholder': True,
+    }
+
+
+def _build_output_detail_metadata():
+    return {
+        'contract': 'OutputDetailView',
+        'contract_version': 'v1.static',
+        'source': 'build_output_detail_view',
+        'data_status': NOW_DATA_STATUS_PLACEHOLDER,
+        'is_placeholder': True,
+        'rp5_policy': 'No database, filesystem, media read, media generation, preview URL, rendering job, or external delivery.',
     }
 
 
@@ -2621,6 +2950,153 @@ def _validate_moment_detail_observatory_context(summary):
 
     if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
         raise ValueError('Invalid data_status at moment_detail.observatory_context: {0!r}'.format(summary['data_status']))
+
+
+def _validate_output_detail_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('output_summary must be a dict')
+
+    missing_keys = sorted(OUTPUT_DETAIL_SUMMARY_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('output_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['type'] not in OUTPUT_DETAIL_ALLOWED_TYPES:
+        raise ValueError('Invalid output type at output_detail.output_summary: {0!r}'.format(summary['type']))
+
+    if summary['phase'] not in SKY_CYCLE_ALLOWED_PHASES:
+        raise ValueError('Invalid output phase at output_detail.output_summary: {0!r}'.format(summary['phase']))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at output_detail.output_summary: {0!r}'.format(summary['data_status']))
+
+
+def _validate_output_detail_preview_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('preview_summary must be a dict')
+
+    missing_keys = sorted(OUTPUT_DETAIL_PREVIEW_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('preview_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at output_detail.preview_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['preview_available'], bool):
+        raise ValueError('preview_summary.preview_available must be a boolean')
+
+    safe_preview_url = summary.get('safe_preview_url')
+    if safe_preview_url is None:
+        return
+
+    if not isinstance(safe_preview_url, str):
+        raise ValueError('preview_summary.safe_preview_url must be null or string metadata')
+
+    safe_preview_url_lower = safe_preview_url.lower()
+    if safe_preview_url.startswith('/') or safe_preview_url.startswith('~'):
+        raise ValueError('preview_summary.safe_preview_url cannot be an absolute path')
+
+    if any(token in safe_preview_url_lower for token in NOW_SUSPICIOUS_URL_TOKENS):
+        raise ValueError('preview_summary.safe_preview_url contains unsafe path metadata')
+
+
+def _validate_output_detail_recipe_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('recipe_summary must be a dict')
+
+    missing_keys = sorted(OUTPUT_DETAIL_RECIPE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('recipe_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at output_detail.recipe_summary: {0!r}'.format(summary['data_status']))
+
+
+def _validate_output_detail_source_lineage_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('source_lineage_summary must be a dict')
+
+    missing_keys = sorted(OUTPUT_DETAIL_SOURCE_LINEAGE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('source_lineage_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at output_detail.source_lineage_summary: {0!r}'.format(summary['data_status']))
+
+    if summary['trust_level'] not in OUTPUT_DETAIL_ALLOWED_TRUST_LEVELS:
+        raise ValueError('Invalid trust_level at output_detail.source_lineage_summary: {0!r}'.format(summary['trust_level']))
+
+    if not isinstance(summary['source_types'], list):
+        raise ValueError('source_lineage_summary.source_types must be a list')
+
+    if not isinstance(summary['evidence'], list):
+        raise ValueError('source_lineage_summary.evidence must be a list')
+
+
+def _validate_output_detail_related_moments(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('related_moments must be a dict')
+
+    missing_keys = sorted(OUTPUT_DETAIL_RELATED_MOMENTS_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('related_moments missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at output_detail.related_moments: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['items'], list):
+        raise ValueError('related_moments.items must be a list')
+
+    for index, item in enumerate(summary['items']):
+        if not isinstance(item, dict):
+            raise ValueError('related_moments.items[{0:d}] must be a dict'.format(index))
+
+        missing_item_keys = sorted(OUTPUT_DETAIL_RELATED_MOMENT_REQUIRED_KEYS.difference(item.keys()))
+        if missing_item_keys:
+            raise ValueError('related_moments.items[{0:d}] missing required keys: {1:s}'.format(index, ', '.join(missing_item_keys)))
+
+        if item['type'] not in MOMENT_DETAIL_ALLOWED_TYPES:
+            raise ValueError('Invalid related moment type at output_detail.related_moments.items[{0:d}]: {1!r}'.format(index, item['type']))
+
+        if item['phase'] not in SKY_CYCLE_ALLOWED_PHASES:
+            raise ValueError('Invalid related moment phase at output_detail.related_moments.items[{0:d}]: {1!r}'.format(index, item['phase']))
+
+        if item['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+            raise ValueError('Invalid data_status at output_detail.related_moments.items[{0:d}]: {1!r}'.format(index, item['data_status']))
+
+
+def _validate_output_detail_sky_cycle_context(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('sky_cycle_context must be a dict')
+
+    missing_keys = sorted(OUTPUT_DETAIL_SKY_CYCLE_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('sky_cycle_context missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['phase'] not in SKY_CYCLE_ALLOWED_PHASES:
+        raise ValueError('Invalid phase at output_detail.sky_cycle_context: {0!r}'.format(summary['phase']))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at output_detail.sky_cycle_context: {0!r}'.format(summary['data_status']))
+
+
+def _validate_output_detail_share_readiness_summary(summary):
+    if not isinstance(summary, dict):
+        raise ValueError('share_readiness_summary must be a dict')
+
+    missing_keys = sorted(OUTPUT_DETAIL_SHARE_READINESS_REQUIRED_KEYS.difference(summary.keys()))
+    if missing_keys:
+        raise ValueError('share_readiness_summary missing required keys: {0:s}'.format(', '.join(missing_keys)))
+
+    if summary['data_status'] not in NOW_ALLOWED_DATA_STATUSES:
+        raise ValueError('Invalid data_status at output_detail.share_readiness_summary: {0!r}'.format(summary['data_status']))
+
+    if not isinstance(summary['limitations'], list):
+        raise ValueError('share_readiness_summary.limitations must be a list')
+
+    if not isinstance(summary['safe_actions_available'], list):
+        raise ValueError('share_readiness_summary.safe_actions_available must be a list')
+
+    _validate_safe_actions({'safe_actions_available': summary['safe_actions_available']})
 
 
 def _validate_data_statuses(value, path='now'):

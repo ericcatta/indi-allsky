@@ -16,6 +16,7 @@ from indi_allsky.product_view_models import build_now_view
 from indi_allsky.product_view_models import build_current_phase_summary
 from indi_allsky.product_view_models import build_highlights_view
 from indi_allsky.product_view_models import build_moment_detail_view
+from indi_allsky.product_view_models import build_output_detail_view
 from indi_allsky.product_view_models import build_sky_cycle_report_view
 from indi_allsky.product_view_models import build_source_confidence_summary
 from indi_allsky.product_view_models import LatestFrameImageTableRepository
@@ -24,6 +25,7 @@ from indi_allsky.product_view_models import validate_sky_cycle_report_payload
 from indi_allsky.product_view_models import validate_highlights_payload
 from indi_allsky.product_view_models import validate_moment_detail_payload
 from indi_allsky.product_view_models import validate_now_view_payload
+from indi_allsky.product_view_models import validate_output_detail_payload
 
 
 REQUIRED_NOW_KEYS = {
@@ -69,6 +71,7 @@ SENSITIVE_PATTERNS = (
 SKY_CYCLE_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/sky_cycle.html')
 HIGHLIGHTS_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/highlights.html')
 MOMENT_DETAIL_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/moment_detail.html')
+OUTPUT_DETAIL_TEMPLATE = Path('indi_allsky/flask/templates/modern_admin/output_detail.html')
 
 REQUIRED_SKY_CYCLE_KEYS = {
     'id',
@@ -102,6 +105,24 @@ REQUIRED_MOMENT_DETAIL_KEYS = {
     'related_outputs',
     'sky_cycle_context',
     'observatory_context',
+    'metadata',
+}
+
+REQUIRED_OUTPUT_DETAIL_KEYS = {
+    'id',
+    'label',
+    'status',
+    'data_status',
+    'generated_at',
+    'is_placeholder',
+    'safe_actions_available',
+    'output_summary',
+    'preview_summary',
+    'recipe_summary',
+    'source_lineage_summary',
+    'related_moments',
+    'sky_cycle_context',
+    'share_readiness_summary',
     'metadata',
 }
 
@@ -761,6 +782,182 @@ def test_validate_moment_detail_payload_rejects_path_secret_callable():
 
 def test_moment_detail_template_has_no_mutative_controls():
     template_text = MOMENT_DETAIL_TEMPLATE.read_text(encoding='utf-8').lower()
+
+    assert '<form' not in template_text
+    assert 'post' not in template_text
+    assert 'fetch' not in template_text
+    assert '/ajax/' not in template_text
+
+
+def test_build_output_detail_view_returns_dict():
+    output = build_output_detail_view()
+
+    assert isinstance(output, dict)
+    assert REQUIRED_OUTPUT_DETAIL_KEYS.issubset(output.keys())
+    assert output['id'] == 'output_detail.placeholder'
+    assert output['metadata']['contract'] == 'OutputDetailView'
+
+
+def test_build_output_detail_view_is_json_serializable():
+    output = build_output_detail_view()
+
+    json.dumps(output, sort_keys=True)
+
+
+def test_build_output_detail_view_has_required_sections():
+    output = build_output_detail_view()
+
+    assert_section_status(output['output_summary'])
+    assert_section_status(output['preview_summary'])
+    assert_section_status(output['recipe_summary'])
+    assert_section_status(output['source_lineage_summary'])
+    assert_section_status(output['related_moments'])
+    assert_section_status(output['sky_cycle_context'])
+    assert_section_status(output['share_readiness_summary'])
+
+    assert output['output_summary']['type'] in {
+        'best_image',
+        'latest_image',
+        'timelapse',
+        'day_timelapse',
+        'night_timelapse',
+        'keogram',
+        'startrail',
+        'startrail_video',
+        'storm_highlight',
+        'aurora_highlight',
+        'meteor_highlight',
+        'cycle_summary_video',
+        'unknown',
+    }
+    assert output['output_summary']['phase'] in {
+        'day',
+        'sunset_twilight',
+        'night',
+        'sunrise_twilight',
+        'unknown',
+    }
+    assert output['preview_summary']['safe_preview_url'] is None
+    assert output['preview_summary']['preview_available'] is False
+    assert output['source_lineage_summary']['trust_level'] in {'unknown', 'low', 'medium', 'high'}
+    assert isinstance(output['source_lineage_summary']['source_types'], list)
+    assert isinstance(output['source_lineage_summary']['evidence'], list)
+    assert isinstance(output['related_moments']['items'], list)
+    assert isinstance(output['share_readiness_summary']['limitations'], list)
+    assert output['share_readiness_summary']['safe_actions_available'] == []
+
+
+def test_build_output_detail_view_contains_no_sensitive_payload():
+    output = build_output_detail_view()
+
+    assert_no_sensitive_text(output)
+    assert_no_absolute_paths(output)
+    assert_no_callables(output)
+
+
+def test_validate_output_detail_payload_success():
+    assert validate_output_detail_payload(build_output_detail_view()) is True
+
+
+def test_validate_output_detail_payload_requires_sections():
+    output = build_output_detail_view()
+    del output['output_summary']
+
+    try:
+        validate_output_detail_payload(output)
+    except ValueError as e:
+        assert 'missing required keys' in str(e)
+    else:
+        raise AssertionError('missing output_summary should fail validation')
+
+
+def test_validate_output_detail_payload_rejects_invalid_type():
+    output = build_output_detail_view()
+    output['output_summary']['type'] = 'gallery_card'
+
+    try:
+        validate_output_detail_payload(output)
+    except ValueError as e:
+        assert 'Invalid output type' in str(e)
+    else:
+        raise AssertionError('invalid output type should fail validation')
+
+
+def test_validate_output_detail_payload_rejects_invalid_trust_level():
+    output = build_output_detail_view()
+    output['source_lineage_summary']['trust_level'] = 'certain'
+
+    try:
+        validate_output_detail_payload(output)
+    except ValueError as e:
+        assert 'Invalid trust_level' in str(e)
+    else:
+        raise AssertionError('invalid trust level should fail validation')
+
+
+def test_validate_output_detail_payload_rejects_evidence_not_list():
+    output = build_output_detail_view()
+    output['source_lineage_summary']['evidence'] = 'Source lineage pending'
+
+    try:
+        validate_output_detail_payload(output)
+    except ValueError as e:
+        assert 'evidence must be a list' in str(e)
+    else:
+        raise AssertionError('Output evidence string should fail validation')
+
+
+def test_validate_output_detail_payload_rejects_direct_safe_action():
+    output = build_output_detail_view()
+    output['share_readiness_summary']['safe_actions_available'] = [
+        {
+            'label': 'Regenerate',
+            'url': '/modern-admin/output/action',
+        },
+    ]
+
+    try:
+        validate_output_detail_payload(output)
+    except ValueError as e:
+        assert 'direct action' in str(e)
+    else:
+        raise AssertionError('direct output action should fail validation')
+
+
+def test_validate_output_detail_payload_rejects_path_secret_callable():
+    output = build_output_detail_view()
+    output['preview_summary']['safe_preview_url'] = '/var/lib/indi-allsky/output.jpg'
+
+    try:
+        validate_output_detail_payload(output)
+    except ValueError as e:
+        assert 'absolute path' in str(e).lower() or 'Absolute paths' in str(e)
+    else:
+        raise AssertionError('Output preview path should fail validation')
+
+    output = build_output_detail_view()
+    output['source_lineage_summary']['evidence'].append({'token': 'value'})
+
+    try:
+        validate_output_detail_payload(output)
+    except ValueError as e:
+        assert 'Sensitive key' in str(e)
+    else:
+        raise AssertionError('Output secret should fail validation')
+
+    output = build_output_detail_view()
+    output['recipe_summary']['note'] = lambda: None
+
+    try:
+        validate_output_detail_payload(output)
+    except ValueError as e:
+        assert 'Callable' in str(e)
+    else:
+        raise AssertionError('Output callable should fail validation')
+
+
+def test_output_detail_template_has_no_mutative_controls():
+    template_text = OUTPUT_DETAIL_TEMPLATE.read_text(encoding='utf-8').lower()
 
     assert '<form' not in template_text
     assert 'post' not in template_text
@@ -1557,6 +1754,18 @@ def main():
         test_validate_moment_detail_payload_rejects_output_not_list,
         test_validate_moment_detail_payload_rejects_path_secret_callable,
         test_moment_detail_template_has_no_mutative_controls,
+        test_build_output_detail_view_returns_dict,
+        test_build_output_detail_view_is_json_serializable,
+        test_build_output_detail_view_has_required_sections,
+        test_build_output_detail_view_contains_no_sensitive_payload,
+        test_validate_output_detail_payload_success,
+        test_validate_output_detail_payload_requires_sections,
+        test_validate_output_detail_payload_rejects_invalid_type,
+        test_validate_output_detail_payload_rejects_invalid_trust_level,
+        test_validate_output_detail_payload_rejects_evidence_not_list,
+        test_validate_output_detail_payload_rejects_direct_safe_action,
+        test_validate_output_detail_payload_rejects_path_secret_callable,
+        test_output_detail_template_has_no_mutative_controls,
         test_validate_sky_cycle_report_payload_success,
         test_validate_sky_cycle_report_payload_requires_sections,
         test_validate_sky_cycle_report_payload_rejects_invalid_status,

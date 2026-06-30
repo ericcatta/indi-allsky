@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-output-detail-product-v1') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="output-title">
+    <header class="modern-admin-table-panel" aria-label="Output Detail product view">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Hybrid AllSky / Output</p>
+                <h1 id="output-title">{{ output_detail.output_summary.title }}</h1>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ output_detail.data_status | replace('_', ' ') | title }}</span>
+        </div>
+
+        <h2>{{ output_detail.output_summary.generation_status }}</h2>
+        <p class="modern-admin-note">{{ output_detail.output_summary.note }}</p>
+        <p class="modern-admin-note">Contract: <code>{{ output_detail.metadata.contract }}</code> / <code>{{ output_detail.metadata.contract_version }}</code>. Source: <code>{{ output_detail.metadata.source }}</code>.</p>
+
+        <div class="modern-admin-link-grid">
+            <a href="{{ url_for('indi_allsky.modern_admin_moment_detail_view') }}">Moment Detail</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle Report</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
+        </div>
+    </header>
+
+    <section class="modern-admin-table-panel" aria-labelledby="output-summary-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Generated result</p>
+                <h2 id="output-summary-title">What This Output Is</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ output_detail.output_summary.type | replace('_', ' ') | title }}</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Output summary">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Output type</div>
+                <h3>{{ output_detail.output_summary.type | replace('_', ' ') | title }}</h3>
+                <p><strong>Phase:</strong> {{ output_detail.output_summary.phase | replace('_', ' ') | title }}</p>
+                <p><strong>Sky Cycle:</strong> {{ output_detail.output_summary.sky_cycle_label }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ output_detail.preview_summary.label }}</div>
+                <h3>{{ output_detail.preview_summary.preview_status }}</h3>
+                <p>Preview available: {{ output_detail.preview_summary.preview_available }}</p>
+                <p>{{ output_detail.preview_summary.note }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ output_detail.share_readiness_summary.label }}</div>
+                <h3>{{ output_detail.share_readiness_summary.status }}</h3>
+                <p>{{ output_detail.share_readiness_summary.export_status }}</p>
+                <p>{{ output_detail.share_readiness_summary.share_status }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="output-recipe-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Rendering</p>
+                <h2 id="output-recipe-title">Look and Recipe</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ output_detail.recipe_summary.data_status | replace('_', ' ') | title }}</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Output recipe">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Look applied</div>
+                <h3>{{ output_detail.recipe_summary.look_applied }}</h3>
+                <p>{{ output_detail.recipe_summary.recipe_status }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Rendering intent</div>
+                <h3>{{ output_detail.recipe_summary.rendering_intent }}</h3>
+                <p>{{ output_detail.recipe_summary.version_label }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Non-destructive boundary</div>
+                <h3>{{ output_detail.recipe_summary.non_destructive_status }}</h3>
+                <p>{{ output_detail.recipe_summary.note }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="output-lineage-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Trust</p>
+                <h2 id="output-lineage-title">Source Lineage</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Trust: {{ output_detail.source_lineage_summary.trust_level | title }}</span>
+        </div>
+
+        <section class="modern-admin-status-grid" aria-label="Output source lineage">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ output_detail.source_lineage_summary.label }}</div>
+                <h3>{{ output_detail.source_lineage_summary.source_status }}</h3>
+                <p>{{ output_detail.source_lineage_summary.lineage_status }}</p>
+                <p>{{ output_detail.source_lineage_summary.source_coverage_label }}</p>
+                <p>{{ output_detail.source_lineage_summary.preservation_status }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Source types</div>
+                <h3>{{ output_detail.source_lineage_summary.source_types | join(', ') }}</h3>
+                {% for evidence_item in output_detail.source_lineage_summary.evidence %}
+                    <p>{{ evidence_item }}</p>
+                {% endfor %}
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ output_detail.related_moments.label }}</div>
+                <h3>{{ output_detail.related_moments.relation_status }}</h3>
+                {% for moment in output_detail.related_moments.items %}
+                    <p><strong>{{ moment.label }}:</strong> {{ moment.relation_label }} {{ moment.confidence_label }}</p>
+                {% endfor %}
+                <p>{{ output_detail.related_moments.note }}</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="output-context-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Context</p>
+                <h2 id="output-context-title">Sky Cycle and Review Readiness</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
+        </div>
+
+        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Output context">
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">{{ output_detail.sky_cycle_context.label }}</div>
+                <h3>{{ output_detail.sky_cycle_context.cycle_label }}</h3>
+                <p><strong>Phase:</strong> {{ output_detail.sky_cycle_context.phase | replace('_', ' ') | title }}</p>
+                <p>{{ output_detail.sky_cycle_context.time_range_label }}</p>
+                <p>{{ output_detail.sky_cycle_context.context_status }}</p>
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Limitations</div>
+                <h3>Not ready for final review</h3>
+                {% for limitation in output_detail.share_readiness_summary.limitations %}
+                    <p>{{ limitation }}</p>
+                {% endfor %}
+            </article>
+            <article class="modern-admin-status-card">
+                <div class="modern-admin-card-label">Future actions</div>
+                <h3>Safe action metadata only</h3>
+                <p>Available actions: {{ output_detail.share_readiness_summary.safe_actions_available | length }}</p>
+                <p>No interaction is connected to this prototype.</p>
+            </article>
+        </section>
+    </section>
+
+    <section class="modern-admin-table-panel" aria-labelledby="output-boundary-title">
+        <div class="modern-admin-section-heading">
+            <div>
+                <p class="modern-admin-eyebrow">Boundary</p>
+                <h2 id="output-boundary-title">Static Product Contract</h2>
+            </div>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">No actions</span>
+        </div>
+        <p class="modern-admin-note">This page is a static Output Detail contract. It does not read media, show a live preview, start rendering, or connect external delivery behavior.</p>
+    </section>
+</main>
+{% endblock %}
