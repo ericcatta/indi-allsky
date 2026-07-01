@@ -36,7 +36,8 @@ The source of truth for the current consolidation baseline is
   direct Classic-style ownership for developer/status pages; the boundary owns
   the read-only login guard for this family.
 - Notification read-only wrappers now share `ModernAdminNotificationStatusView`;
-  acknowledgement actions remain outside this boundary.
+  acknowledgement actions remain outside this boundary. The read-only list and
+  detail formatter now live in a small Hybrid-owned service.
 - Task/status wrappers now share `ModernAdminTaskStatusView`, reducing direct
   Classic-style ownership for read-only queue listing/detail pages; the
   boundary also owns the read-only login guard for this family.
@@ -108,7 +109,8 @@ runtime behavior.
 - Motivation: Hybrid now owns the easy wrapper boundaries, but many boundaries
   still inherit Classic backend implementation details.
 - Benefit: reduces actual Classic dependency rather than only moving wrapper
-  ownership.
+  ownership. The first slice was completed for notification read-only list/detail
+  formatting; continue with one similarly bounded family.
 - Risk: medium; choose one bounded read-only implementation and preserve all
   existing routes, templates, payloads, and context keys.
 - Impact: high if done behind a mature boundary such as task/status,
@@ -234,6 +236,8 @@ runtime behavior.
 - System read-only ownership boundary added via `ModernAdminSystemToolView`.
 - System read-only login guard ownership moved into `ModernAdminSystemToolView`.
 - Notification read-only ownership boundary added via `ModernAdminNotificationStatusView`.
+- Notification read-only list/detail formatting moved into
+  `ModernAdminNotificationReadService`.
 - Task/status ownership boundary added via `ModernAdminTaskStatusView`.
 - Task/status login guard ownership moved into `ModernAdminTaskStatusView`.
 - Media metadata listing ownership boundary added via `ModernAdminMediaMetadataView`.

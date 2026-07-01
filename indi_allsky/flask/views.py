@@ -31,6 +31,7 @@ from ..event_candidate import default_event_timeline_dir
 from ..frame_metadata import default_frame_metadata_dir
 from ..frame_metadata_analytics import FrameMetadataAnalytics
 from ..modern_safe_action import run_modern_safe_action_dry_run
+from ..modern_admin_notifications import ModernAdminNotificationReadService
 from ..processing import ImageProcessor
 from ..product_view_models import build_now_view
 from ..product_view_models import build_highlights_view
@@ -12321,12 +12322,12 @@ class ModernAdminNotificationStatusView(ModernAdminContextMixin):
     decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
-    def format_notification_datetime(self, value, default='Unknown'):
-        if not value:
-            return default
-        if hasattr(value, 'strftime'):
-            return value.strftime('%Y-%m-%d %H:%M:%S')
-        return str(value)
+    def get_notification_read_service(self):
+        return ModernAdminNotificationReadService(
+            query=IndiAllSkyDbNotificationTable.query,
+            order_by_expression=IndiAllSkyDbNotificationTable.createDate.desc(),
+            id_field=IndiAllSkyDbNotificationTable.id,
+        )
 
 
 class ModernAdminNotificationsView(ModernAdminNotificationStatusView, TemplateView):
@@ -12334,30 +12335,16 @@ class ModernAdminNotificationsView(ModernAdminNotificationStatusView, TemplateVi
 
     def get_context(self):
         context = super(ModernAdminNotificationsView, self).get_context()
+        service = self.get_notification_read_service()
 
         try:
-            notices = IndiAllSkyDbNotificationTable.query\
-                .order_by(IndiAllSkyDbNotificationTable.createDate.desc())\
-                .limit(100)\
-                .all()
+            notices = service.list_notifications(limit=100)
         except Exception as e:
             app.logger.error('Error loading modern admin notifications: %s', str(e))
             notices = list()
             context['modern_admin_notifications_error'] = 'Unable to load notifications.'
 
-        notification_rows = list()
-        for notice in notices:
-            is_ack = bool(notice.ack)
-            notification_rows.append({
-                'id'          : notice.id,
-                'category'    : notice.category.value if notice.category else 'Unknown',
-                'item'        : notice.item or 'Not set',
-                'created'     : self.format_notification_datetime(notice.createDate),
-                'expires'     : self.format_notification_datetime(notice.expireDate),
-                'ack'         : 'Yes' if is_ack else 'No',
-                'ack_tone'    : 'modern-admin-status-muted' if is_ack else 'modern-admin-status-warning',
-                'notification': notice.notification,
-            })
+        notification_rows = service.build_notification_rows(notices)
 
         context['modern_admin_notification_rows'] = notification_rows
         context['modern_admin_notification_count'] = len(notification_rows)
@@ -12379,25 +12366,15 @@ class ModernAdminNotificationDetailView(ModernAdminNotificationsView):
 
     def get_context(self):
         context = super(ModernAdminNotificationsView, self).get_context()
+        service = self.get_notification_read_service()
 
         try:
-            notice = IndiAllSkyDbNotificationTable.query\
-                .filter(IndiAllSkyDbNotificationTable.id == self.notification_id)\
-                .one()
+            notice = service.get_notification(self.notification_id)
         except NoResultFound:
             abort(404)
 
-        is_ack = bool(notice.ack)
-        context['modern_admin_notification_detail'] = {
-            'id'           : notice.id,
-            'category'     : notice.category.value if notice.category else 'Unknown',
-            'item'         : notice.item or 'Not set',
-            'created'      : self.format_notification_datetime(notice.createDate),
-            'expires'      : self.format_notification_datetime(notice.expireDate),
-            'ack'          : 'Yes' if is_ack else 'No',
-            'ack_tone'     : 'modern-admin-status-muted' if is_ack else 'modern-admin-status-warning',
-            'notification' : notice.notification,
-        }
+        notification_detail = service.build_notification_detail(notice)
+        context['modern_admin_notification_detail'] = notification_detail
 
         return context
 
