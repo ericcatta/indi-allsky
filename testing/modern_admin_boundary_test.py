@@ -17,6 +17,14 @@ OBSERVATORY_TOOL_WRAPPERS = (
     'ModernAdminVirtualSkyView',
 )
 
+CAMERA_TOOL_WRAPPERS = (
+    'ModernAdminCameraInfoView',
+    'ModernAdminImageLagView',
+    'ModernAdminAduHistoryView',
+    'ModernAdminDarkLibraryView',
+    'ModernAdminMaskView',
+)
+
 
 def assert_true(condition, message):
     if not condition:
@@ -39,8 +47,25 @@ def test_observatory_tools_use_hybrid_boundary():
         )
 
 
+def test_camera_tools_use_hybrid_boundary():
+    views_text = VIEWS_PATH.read_text(encoding='utf-8')
+
+    assert_true(
+        'class ModernAdminCameraToolView(ModernAdminContextMixin):' in views_text,
+        'Camera tools should have a dedicated Hybrid boundary',
+    )
+
+    for class_name in CAMERA_TOOL_WRAPPERS:
+        class_prefix = 'class {0:s}(ModernAdminCameraToolView,'.format(class_name)
+        assert_true(
+            class_prefix in views_text,
+            '{0:s} must inherit from ModernAdminCameraToolView'.format(class_name),
+        )
+
+
 def run_tests():
     test_observatory_tools_use_hybrid_boundary()
+    test_camera_tools_use_hybrid_boundary()
     print('Modern admin boundary checks passed')
 
 

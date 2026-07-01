@@ -30,6 +30,8 @@ The source of truth for the current consolidation baseline is
   ownership boundary that keeps Product payload wiring out of Classic wrappers.
 - Observatory tool wrappers now share `ModernAdminObservatoryToolView`, reducing
   direct Classic-style ownership for read-only observatory context pages.
+- Camera diagnostic wrappers now share `ModernAdminCameraToolView`, reducing
+  direct Classic-style ownership for read-only camera operational pages.
 
 ## P0
 
@@ -146,3 +148,4 @@ The source of truth for the current consolidation baseline is
 - P0 Product Spine Regression Checklist implemented as `testing/product_spine_regression_test.py`.
 - Product spine view ownership boundary added via `ModernAdminProductView`.
 - Observatory tool ownership boundary added via `ModernAdminObservatoryToolView`.
+- Camera diagnostic ownership boundary added via `ModernAdminCameraToolView`.

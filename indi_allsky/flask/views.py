@@ -13925,19 +13925,20 @@ class FileSpaceUsageView(TemplateView):
         return total_size, total_count
 
 
-class ModernAdminCameraInfoView(ModernAdminContextMixin, CameraLensView):
+class ModernAdminCameraToolView(ModernAdminContextMixin):
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
+
+
+class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraLensView):
     page_title = 'Modern Admin Camera Info'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
 
-class ModernAdminImageLagView(ModernAdminContextMixin, ImageLagView):
+class ModernAdminImageLagView(ModernAdminCameraToolView, ImageLagView):
     page_title = 'Modern Admin Image Lag'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
 
-class ModernAdminAduHistoryView(ModernAdminContextMixin, RollingAduView):
+class ModernAdminAduHistoryView(ModernAdminCameraToolView, RollingAduView):
     page_title = 'Modern Admin ADU History'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
 
 class ModernAdminFileSpaceUsageView(ModernAdminContextMixin, FileSpaceUsageView):
@@ -14057,9 +14058,8 @@ class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, TemplateVie
         return context
 
 
-class ModernAdminDarkLibraryView(ModernAdminContextMixin, TemplateView):
+class ModernAdminDarkLibraryView(ModernAdminCameraToolView, TemplateView):
     page_title = 'Modern Admin Dark Library'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
     def get_context(self):
         context = super(ModernAdminDarkLibraryView, self).get_context()
@@ -14278,9 +14278,8 @@ class ModernAdminLogDetailView(ModernAdminContextMixin, TemplateView):
         return '{0:.1f} {1:s}'.format(size, units[unit_index])
 
 
-class ModernAdminMaskView(ModernAdminContextMixin, MaskView):
+class ModernAdminMaskView(ModernAdminCameraToolView, MaskView):
     page_title = 'Modern Admin Mask Base'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
     def get_context(self):
         context = super(ModernAdminMaskView, self).get_context()
