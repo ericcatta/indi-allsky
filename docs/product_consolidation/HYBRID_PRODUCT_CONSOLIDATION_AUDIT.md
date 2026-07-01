@@ -315,7 +315,7 @@ Recommendation P1: Consolidate concepts in docs and contracts before code.
 | Media output metadata | Product output summary and media pages both read generated output tables. | P1: shared metadata-only adapter pattern for all output types. |
 | Environmental awareness | Observational context appears in analytics, observatory, sensor pages, processing metadata. | P1: create Environmental Summary contract before adding more UI. |
 | Event foundation vs Highlights | Highlights are attention objects; event foundations are evidence. | P0: do not let Highlights become detector UI. |
-| Safe actions vs Classic actions | Safe-action metadata exists, but Classic mutative routes remain. | P1: action registry/audit before replacing Classic actions. |
+| Safe actions vs Classic actions | Safe-action metadata exists, but Classic mutative routes remain. | P0 follow-up: `HYBRID_SAFE_ACTION_REGISTRY.md` now inventories actions; define a canonical action contract schema before replacing Classic actions. |
 | Modern shell naming | Some internals still use Modern naming, product uses Hybrid. | P2: code naming cleanup only after Alpha; visible language already converged. |
 
 ## Safe Cleanup Candidates
@@ -341,7 +341,7 @@ Do not start these without a dedicated mission.
 | Remove Classic routes/templates | Smaller codebase. | Break installed workflows, bookmarks, public endpoints, fallback actions. | Alpha telemetry/manual route audit. | P0 avoid. | Full Classic smoke test and rollback plan. |
 | Rename or remove settings keys | Cleaner product language. | Break runtime config, migrations, user configs. | Settings contract, migrations, compatibility plan. | P0 avoid. | Config migration tests and backup/restore. |
 | Merge media viewers and output detail | Better conceptual clarity. | Path/URL/preview leaks, route breakage, user workflow loss. | Output identifiers, media policy. | P1 later. | media route tests and manual browser checks. |
-| Replace Classic mutative tools with safe actions | Better safety and product consistency. | Hardware/system/data-loss regressions. | safe-action registry, audit, dry-run, rollback. | P1 later. | action-specific tests on Raspberry. |
+| Replace Classic mutative tools with safe actions | Better safety and product consistency. | Hardware/system/data-loss regressions. | action contract schema, safe-action registry, audit, dry-run, rollback. | P1 later. | action-specific tests on Raspberry. |
 | Consolidate shared AJAX endpoints | Cleaner API surface. | Dynamic consumers, Classic breakage. | JS consumer map and browser network audit. | P2 later. | request logs and route compatibility tests. |
 | Change background worker behavior | Performance/architecture clarity. | Capture/output regressions. | worker-specific tests. | P0 avoid. | Raspberry soak test. |
 | Add real detector/meteor algorithms | Product value. | False positives, performance, source trust issues. | detector discovery/design after consolidation. | P1 later. | offline FITS/source test corpus. |
@@ -428,7 +428,23 @@ Do not start these without a dedicated mission.
 - Impact: high future safety.
 - Dependencies: route role matrix and settings contract.
 - Priority: P1.
-- Verification: list each mutative route/action, owner, required dry-run/audit/rollback.
+- Status: completed in `docs/product_consolidation/HYBRID_SAFE_ACTION_REGISTRY.md`.
+- Verification: mutative route/action families are classified by owner, target,
+  destructive/reversible status, auth, risk, and future ownership.
+
+### Micro-step 5a: Safe Action Contract Schema
+
+- Motivation: the registry shows many action families but no canonical metadata
+  schema for future Product/Operations execution.
+- Benefits: avoids ad hoc action implementation and keeps Product UI
+  trustworthy.
+- Risks: low if documentation-only.
+- Impact: high future safety.
+- Dependencies: Safe Action Registry Discovery, Safe Actions policy, settings
+  contract, route role matrix.
+- Priority: P0.
+- Verification: every action in the registry can be represented by the schema
+  before any execute endpoint or UI button is added.
 
 ### Micro-step 6: Detector Discovery/Design
 

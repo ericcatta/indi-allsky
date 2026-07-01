@@ -21,7 +21,9 @@ The source of truth for the current consolidation baseline is
 - Settings groups are now classified in `HYBRID_SETTINGS_CONTRACT_REVIEW.md`.
 - Classic remains required as fallback/reference for many operational surfaces.
 - Settings remain high risk, but their product contract is now explicit.
-- Mutative/safe-action ownership is the next repeated blocker.
+- Mutative/safe-action ownership is now discovered in
+  `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
+  contract schema before any new execution path.
 
 ## P0
 
@@ -43,14 +45,14 @@ The source of truth for the current consolidation baseline is
 - Dependencies: Route Role Matrix.
 - Verification: update only evidence-backed ownership metadata; regenerate inventory; do not change routes/templates.
 
-### Safe Action Registry Discovery
+### Safe Action Contract Schema
 
-- Motivation: the settings contract repeatedly blocks media generation, restore, notification, focus, GPIO, network, config, download, and hardware workflows on missing action-policy ownership.
-- Benefit: prepares future Product/Operations controls without adding mutations now.
-- Risk: low if discovery-only.
+- Motivation: the action discovery found many live mutative surfaces but no canonical metadata schema for future Product/Operations actions.
+- Benefit: gives every future action a consistent review shape before endpoint, UI, audit, or permission work starts.
+- Risk: low if documentation-only.
 - Impact: high.
-- Dependencies: Route Role Matrix and Settings Contract Review.
-- Verification: list each mutative route/action, owner, risk, required dry-run/audit/rollback, and whether it must remain Classic fallback.
+- Dependencies: `HYBRID_SAFE_ACTION_REGISTRY.md`, Safe Actions policy, Route Role Matrix, and Settings Contract Review.
+- Verification: schema covers action id, endpoint, owner, target, role, destructive/reversible flags, confirmation, auth, CSRF, dry-run, audit, rollback/fallback, runtime risk, and stop conditions.
 
 ## P1
 
@@ -62,6 +64,24 @@ The source of truth for the current consolidation baseline is
 - Impact: medium-high.
 - Dependencies: Route Role Matrix and Settings Contract Review.
 - Verification: inventory mismatch count decreases only where ownership evidence exists.
+
+### Query-Style POST Semantics Audit
+
+- Motivation: the Safe Action Registry found several POST endpoints that are read/list compatibility APIs rather than mutations.
+- Benefit: separates true actions from legacy AJAX query endpoints before any route cleanup.
+- Risk: low if audit-only.
+- Impact: medium.
+- Dependencies: Safe Action Registry and browser/network evidence for dynamic callers.
+- Verification: each POST endpoint is classified as mutation, query-style read, mixed, or unknown; no route methods change.
+
+### External Action API Compatibility Review
+
+- Motivation: `/action/*` and `/sync/v1/*` contain real mutative external contracts that should not be conflated with Product UI actions.
+- Benefit: protects automation/sync consumers during consolidation.
+- Risk: low if review-only.
+- Impact: high.
+- Dependencies: Safe Action Registry and current API route definitions.
+- Verification: external endpoints remain unchanged and are classified by owner, auth, destructive behavior, and compatibility risk.
 
 ### Environmental Ownership Discovery
 
@@ -125,3 +145,4 @@ The source of truth for the current consolidation baseline is
 - Living consolidation backlog created in this file.
 - P0 Route Role Matrix completed in `HYBRID_ROUTE_ROLE_MATRIX.md`.
 - P0 Settings Contract Review completed in `HYBRID_SETTINGS_CONTRACT_REVIEW.md`.
+- P0 Safe Action Registry Discovery completed in `HYBRID_SAFE_ACTION_REGISTRY.md`.
