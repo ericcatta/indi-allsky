@@ -36,6 +36,9 @@ The source of truth for the current consolidation baseline is
   direct Classic-style ownership for developer/status pages.
 - Task/status wrappers now share `ModernAdminTaskStatusView`, reducing direct
   Classic-style ownership for read-only queue listing/detail pages.
+- Media metadata listing wrappers now share `ModernAdminMediaMetadataView`;
+  interactive gallery/download/preview surfaces remain intentionally outside
+  this boundary.
 
 ## P0
 
@@ -155,3 +158,4 @@ The source of truth for the current consolidation baseline is
 - Camera diagnostic ownership boundary added via `ModernAdminCameraToolView`.
 - System read-only ownership boundary added via `ModernAdminSystemToolView`.
 - Task/status ownership boundary added via `ModernAdminTaskStatusView`.
+- Media metadata listing ownership boundary added via `ModernAdminMediaMetadataView`.

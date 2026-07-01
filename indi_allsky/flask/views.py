@@ -14921,7 +14921,11 @@ class ModernAdminMediaTimelapsesView(ModernAdminMediaListView):
     modern_admin_media_kind = 'video'
 
 
-class ModernAdminMediaStartrailVideosView(ModernAdminContextMixin, TemplateView):
+class ModernAdminMediaMetadataView(ModernAdminContextMixin):
+    pass
+
+
+class ModernAdminMediaStartrailVideosView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin Startrail Videos'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_startrail_videos_view'
     startrail_video_display_limit = 100
@@ -15137,7 +15141,7 @@ class ModernAdminMediaVideoDetailView(ModernAdminMediaTimelapsesView):
         return 'Non-dict metadata payload'
 
 
-class ModernAdminMediaKeogramsView(ModernAdminContextMixin, TemplateView):
+class ModernAdminMediaKeogramsView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin Keograms'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_keograms_view'
     keogram_display_limit = 100
@@ -15251,7 +15255,7 @@ class ModernAdminMediaKeogramsView(ModernAdminContextMixin, TemplateView):
         return 'Non-dict metadata payload'
 
 
-class ModernAdminMediaStartrailsView(ModernAdminContextMixin, TemplateView):
+class ModernAdminMediaStartrailsView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin Startrails'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_startrails_view'
     startrail_display_limit = 100
@@ -15365,7 +15369,7 @@ class ModernAdminMediaStartrailsView(ModernAdminContextMixin, TemplateView):
         return 'Non-dict metadata payload'
 
 
-class ModernAdminMediaMiniTimelapsesView(ModernAdminContextMixin, TemplateView):
+class ModernAdminMediaMiniTimelapsesView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin Mini-Timelapses'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_mini_timelapses_view'
     mini_timelapse_display_limit = 100
@@ -15493,7 +15497,7 @@ class ModernAdminMediaMiniTimelapsesView(ModernAdminContextMixin, TemplateView):
         return 'Non-dict metadata payload'
 
 
-class ModernAdminMediaPanoramaView(ModernAdminContextMixin, TemplateView):
+class ModernAdminMediaPanoramaView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin Panorama'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_panorama_view'
     panorama_display_limit = 100
@@ -15627,7 +15631,7 @@ class ModernAdminMediaPanoramaLoopView(ModernAdminMediaListView):
     modern_admin_media_layout = 'loop'
 
 
-class ModernAdminMediaRawImagesView(ModernAdminContextMixin, TemplateView):
+class ModernAdminMediaRawImagesView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin Raw Images'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_raw_images_view'
     raw_image_display_limit = 100
@@ -15804,7 +15808,7 @@ class ModernAdminMediaFitsView(ModernAdminMediaListView):
         return url_for('indi_allsky.fits2jpeg_view', id=media_entry.id)
 
 
-class ModernAdminFitsView(ModernAdminContextMixin, TemplateView):
+class ModernAdminFitsView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin FITS Inspection'
     decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'

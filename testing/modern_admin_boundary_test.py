@@ -64,6 +64,19 @@ BOUNDARIES = (
             'ModernAdminTaskDetailView',
         ),
     },
+    {
+        'boundary': 'ModernAdminMediaMetadataView',
+        'parent': 'ModernAdminContextMixin',
+        'wrappers': (
+            'ModernAdminMediaStartrailVideosView',
+            'ModernAdminMediaKeogramsView',
+            'ModernAdminMediaStartrailsView',
+            'ModernAdminMediaMiniTimelapsesView',
+            'ModernAdminMediaPanoramaView',
+            'ModernAdminMediaRawImagesView',
+            'ModernAdminFitsView',
+        ),
+    },
 )
 
 
