@@ -24,17 +24,10 @@ The source of truth for the current consolidation baseline is
 - Mutative/safe-action ownership is now discovered in
   `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
   contract schema before any new execution path.
+- The Product spine is now protected by
+  `testing/product_spine_regression_test.py`.
 
 ## P0
-
-### Product Spine Regression Checklist
-
-- Motivation: protect the stable Product spine while consolidation work touches surrounding operational pages.
-- Benefit: makes Now, Highlights, Moment, Output, Sky Cycle, Library, and Observatory harder to regress.
-- Risk: low.
-- Impact: medium-high.
-- Dependencies: Product view model tests and ownership map.
-- Verification: checklist confirms routes, templates, builders, validation, read-only behavior, and no new POST/fetch/AJAX.
 
 ### Route Role Matrix Follow-up In Ownership Map
 
@@ -146,3 +139,4 @@ The source of truth for the current consolidation baseline is
 - P0 Route Role Matrix completed in `HYBRID_ROUTE_ROLE_MATRIX.md`.
 - P0 Settings Contract Review completed in `HYBRID_SETTINGS_CONTRACT_REVIEW.md`.
 - P0 Safe Action Registry Discovery completed in `HYBRID_SAFE_ACTION_REGISTRY.md`.
+- P0 Product Spine Regression Checklist implemented as `testing/product_spine_regression_test.py`.

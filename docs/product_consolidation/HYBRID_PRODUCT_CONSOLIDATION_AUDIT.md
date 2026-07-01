@@ -39,6 +39,9 @@ The safest next consolidation work is:
 - `PERFORMANCE_AUDIT_LEGACY_VS_PRODUCT.md` shows Product pages are faster because they avoid broad Classic context, filesystem/media access, and unbounded work.
 - `docs/product_consolidation/HYBRID_ROUTE_ROLE_MATRIX.md` is the current route-role reference for `/modern-admin/*` Product, Advanced, Developer, wrapper, and dynamic compatibility surfaces.
 - `docs/product_consolidation/HYBRID_SETTINGS_CONTRACT_REVIEW.md` is the current settings contract reference for Basic, Advanced, Developer, Classic fallback, and hidden/internal settings groups.
+- `testing/product_spine_regression_test.py` now protects the primary Product
+  spine by checking route registrations, builders, validators, templates, JSON
+  serializability, and read-only template constraints.
 
 ## Audit Rules Used
 
