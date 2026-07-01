@@ -45,8 +45,8 @@ The source of truth for the current consolidation baseline is
 - Media metadata listing wrappers now share `ModernAdminMediaMetadataView`;
   interactive gallery/download/preview surfaces remain intentionally outside
   this boundary. The boundary owns the read-only login guard for metadata
-  listing/detail pages. Startrail video and keogram metadata listings are the
-  first media-metadata slices moved into Hybrid-owned services.
+  listing/detail pages. Startrail video, keogram, and startrail metadata
+  listings are the first media-metadata slices moved into Hybrid-owned services.
 - Media browse wrappers now enter through `ModernAdminMediaBrowseView`, but
   preview, URL generation, lightbox and download behavior remain unchanged and
   require a separate safety review before deeper extraction.
@@ -111,7 +111,7 @@ runtime behavior.
 - Motivation: Hybrid now owns the easy wrapper boundaries, but many boundaries
   still inherit Classic backend implementation details.
 - Benefit: reduces actual Classic dependency rather than only moving wrapper
-  ownership. Notification, task/status, and two media metadata slices have been
+  ownership. Notification, task/status, and three media metadata slices have been
   moved into Hybrid-owned services; continue with one similarly bounded family.
 - Risk: medium; choose one bounded read-only implementation and preserve all
   existing routes, templates, payloads, and context keys.
@@ -249,6 +249,7 @@ runtime behavior.
 - Startrail video metadata listing moved into
   `ModernAdminStartrailVideoMetadataService`.
 - Keogram metadata listing moved into `ModernAdminKeogramMetadataService`.
+- Startrail metadata listing moved into `ModernAdminStartrailMetadataService`.
 - Media browse ownership boundary added via `ModernAdminMediaBrowseView`.
 - Remaining direct Modern Admin wrapper review completed; no further easy
   read-only boundary extraction is safe without a dedicated implementation

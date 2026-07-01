@@ -146,3 +146,7 @@ class ModernAdminKeogramMetadataService(ModernAdminStartrailVideoMetadataService
             'sync_id'    : entry.sync_id if entry.sync_id is not None else 'N/A',
             'metadata'   : self.format_data_summary(entry.data),
         }
+
+
+class ModernAdminStartrailMetadataService(ModernAdminKeogramMetadataService):
+    pass

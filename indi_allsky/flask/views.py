@@ -33,6 +33,7 @@ from ..frame_metadata_analytics import FrameMetadataAnalytics
 from ..modern_safe_action import run_modern_safe_action_dry_run
 from ..modern_admin_notifications import ModernAdminNotificationReadService
 from ..modern_admin_media_metadata import ModernAdminKeogramMetadataService
+from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..processing import ImageProcessor
@@ -14813,6 +14814,16 @@ class ModernAdminMediaMetadataView(ModernAdminContextMixin):
         )
 
 
+    def get_startrail_metadata_service(self):
+        return ModernAdminStartrailMetadataService(
+            query=IndiAllSkyDbStarTrailsTable.query,
+            camera_relation=IndiAllSkyDbStarTrailsTable.camera,
+            camera_id_field=IndiAllSkyDbCameraTable.id,
+            camera_id=self.camera.id,
+            order_by_expression=IndiAllSkyDbStarTrailsTable.createDate.desc(),
+        )
+
+
 class ModernAdminMediaStartrailVideosView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin Startrail Videos'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_startrail_videos_view'
@@ -14978,37 +14989,16 @@ class ModernAdminMediaStartrailsView(ModernAdminMediaMetadataView, TemplateView)
 
     def get_context(self):
         context = super(ModernAdminMediaStartrailsView, self).get_context()
+        service = self.get_startrail_metadata_service()
 
-        startrail_rows = list()
         try:
-            startrail_entries = IndiAllSkyDbStarTrailsTable.query\
-                .join(IndiAllSkyDbStarTrailsTable.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                .order_by(IndiAllSkyDbStarTrailsTable.createDate.desc())\
-                .limit(self.startrail_display_limit)\
-                .all()
+            startrail_entries = service.list_entries(limit=self.startrail_display_limit)
         except Exception as e:
             app.logger.error('Error loading modern admin startrail metadata rows: %s', str(e))
             startrail_entries = list()
             context['modern_admin_startrails_error'] = 'Unable to load startrail metadata.'
 
-        for entry in startrail_entries:
-            startrail_rows.append({
-                'id'         : entry.id,
-                'created'    : self.format_startrail_datetime(entry.createDate),
-                'day_date'   : entry.dayDate if entry.dayDate else 'Unknown',
-                'camera_id'  : entry.camera_id,
-                'filename'   : self.format_startrail_filename(entry.filename),
-                'dimensions' : self.format_startrail_dimensions(entry.width, entry.height),
-                'frames'     : entry.frames if entry.frames is not None else 'Unknown',
-                'file_size'  : self.format_media_size(entry.fileSize) if entry.fileSize else 'Unknown',
-                'timeofday'  : 'Night' if entry.night else 'Day',
-                'uploaded'   : self.format_startrail_bool(entry.uploaded),
-                'success'    : self.format_startrail_bool(entry.success),
-                'source'     : self.format_startrail_source(entry),
-                'sync_id'    : entry.sync_id if entry.sync_id is not None else 'N/A',
-                'metadata'   : self.format_startrail_data_summary(entry.data),
-            })
+        startrail_rows = service.build_rows(startrail_entries)
 
         context['modern_admin_startrail_rows'] = startrail_rows
         context['modern_admin_startrail_count'] = len(startrail_rows)
@@ -15022,66 +15012,6 @@ class ModernAdminMediaStartrailsView(ModernAdminMediaMetadataView, TemplateView)
         context['modern_admin_startrail_display_limit'] = self.startrail_display_limit
 
         return context
-
-
-    def format_startrail_datetime(self, value, default='Unknown'):
-        if not value:
-            return default
-        if hasattr(value, 'strftime'):
-            return value.strftime('%Y-%m-%d %H:%M:%S')
-        return str(value)
-
-
-    def format_startrail_filename(self, value):
-        if not value:
-            return 'Unknown'
-        return Path(str(value)).name
-
-
-    def format_startrail_dimensions(self, width, height):
-        if width and height:
-            return '{0:d} x {1:d}'.format(int(width), int(height))
-        return 'Unknown'
-
-
-    def format_media_size(self, value):
-        if value is None:
-            return 'Unknown'
-
-        try:
-            size = float(value)
-        except (TypeError, ValueError):
-            return str(value)
-
-        units = ('B', 'KB', 'MB', 'GB', 'TB')
-        unit_index = 0
-        while size >= 1024.0 and unit_index < len(units) - 1:
-            size /= 1024.0
-            unit_index += 1
-
-        if unit_index == 0:
-            return '{0:d} {1:s}'.format(int(size), units[unit_index])
-        return '{0:.1f} {1:s}'.format(size, units[unit_index])
-
-
-    def format_startrail_bool(self, value):
-        return 'Yes' if bool(value) else 'No'
-
-
-    def format_startrail_source(self, entry):
-        if entry.remote_url:
-            return 'Remote URL recorded'
-        if entry.s3_key:
-            return 'S3 key recorded'
-        return 'Local DB entry'
-
-
-    def format_startrail_data_summary(self, value):
-        if isinstance(value, dict):
-            return 'Keys: {0:d}'.format(len(value))
-        if value is None:
-            return 'No metadata payload'
-        return 'Non-dict metadata payload'
 
 
 class ModernAdminMediaMiniTimelapsesView(ModernAdminMediaMetadataView, TemplateView):

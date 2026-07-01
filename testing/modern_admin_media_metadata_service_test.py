@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_media_metadata import ModernAdminKeogramMetadataService
+from indi_allsky.modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from indi_allsky.modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 
 
@@ -48,6 +49,13 @@ class FakeKeogramEntry(FakeEntry):
     frames = 120
     fileSize = 2048
     data = {'keogram': True}
+
+
+class FakeStartrailEntry(FakeEntry):
+    filename = '/unsafe/path/startrail.jpg'
+    frames = 180
+    fileSize = 4096
+    data = {'startrail': True}
 
 
 class FakeQuery:
@@ -90,6 +98,16 @@ def build_service(query):
 
 def build_keogram_service(query):
     return ModernAdminKeogramMetadataService(
+        query=query,
+        camera_relation='camera-relation',
+        camera_id_field=FakeCameraIdField(),
+        camera_id=2,
+        order_by_expression='created-desc',
+    )
+
+
+def build_startrail_service(query):
+    return ModernAdminStartrailMetadataService(
         query=query,
         camera_relation='camera-relation',
         camera_id_field=FakeCameraIdField(),
@@ -191,6 +209,52 @@ def test_keogram_metadata_formats_remote_source_without_exposing_url():
     assert '/unsafe/path' not in str(row)
 
 
+def test_startrail_metadata_query_is_bounded_and_camera_filtered():
+    query = FakeQuery([FakeStartrailEntry()])
+    service = build_startrail_service(query)
+
+    entries = service.list_entries(limit=100)
+
+    assert entries == [query.entries[0]]
+    assert query.join_calls == ['camera-relation']
+    assert query.filter_calls == [('camera-id', 2)]
+    assert query.order_by_calls == ['created-desc']
+    assert query.limit_calls == [100]
+
+
+def test_startrail_metadata_rows_preserve_context_shape():
+    service = build_startrail_service(FakeQuery([]))
+
+    rows = service.build_rows([FakeStartrailEntry()])
+
+    assert rows == [{
+        'id'         : 17,
+        'created'    : '2026-01-02 03:04:05',
+        'day_date'   : '2026-01-02',
+        'camera_id'  : 2,
+        'filename'   : 'startrail.jpg',
+        'dimensions' : '1920 x 1080',
+        'frames'     : 180,
+        'file_size'  : '4.0 KB',
+        'timeofday'  : 'Night',
+        'uploaded'   : 'No',
+        'success'    : 'Yes',
+        'source'     : 'Local DB entry',
+        'sync_id'    : 'N/A',
+        'metadata'   : 'Keys: 1',
+    }]
+
+
+def test_startrail_metadata_formats_remote_source_without_exposing_url():
+    service = build_startrail_service(FakeQuery([]))
+
+    row = service.build_row(FakeRemoteEntry())
+
+    assert row['source'] == 'Remote URL recorded'
+    assert 'http' not in str(row)
+    assert '/unsafe/path' not in str(row)
+
+
 def test_startrail_video_metadata_service_has_no_flask_db_or_filesystem_access():
     import inspect
     import indi_allsky.modern_admin_media_metadata as module
@@ -211,6 +275,9 @@ def run_tests():
     test_keogram_metadata_query_is_bounded_and_camera_filtered()
     test_keogram_metadata_rows_preserve_context_shape()
     test_keogram_metadata_formats_remote_source_without_exposing_url()
+    test_startrail_metadata_query_is_bounded_and_camera_filtered()
+    test_startrail_metadata_rows_preserve_context_shape()
+    test_startrail_metadata_formats_remote_source_without_exposing_url()
     test_startrail_video_metadata_service_has_no_flask_db_or_filesystem_access()
     print('Modern admin media metadata service checks passed')
 
