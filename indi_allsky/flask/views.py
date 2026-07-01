@@ -13988,14 +13988,16 @@ class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, SensorPanelView
     page_title = 'Modern Admin Sensor Panel'
 
 
-class ModernAdminSystemInfoView(ModernAdminContextMixin, SystemInfoView):
+class ModernAdminSystemToolView(ModernAdminContextMixin):
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+
+class ModernAdminSystemInfoView(ModernAdminSystemToolView, SystemInfoView):
     page_title = 'Modern Admin System Info'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
-class ModernAdminSupportInfoView(ModernAdminContextMixin, SupportInfoView):
+class ModernAdminSupportInfoView(ModernAdminSystemToolView, SupportInfoView):
     page_title = 'Modern Admin Support Info'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
 class ModernAdminLoopView(ModernAdminContextMixin, ImageLoopImgView):
@@ -14132,15 +14134,13 @@ class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, VirtualSkyView):
     page_title = 'Modern Admin VirtualSky'
 
 
-class ModernAdminLogView(ModernAdminContextMixin, LogView):
+class ModernAdminLogView(ModernAdminSystemToolView, LogView):
     page_title = 'Modern Admin Log'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
-class ModernAdminLogDetailView(ModernAdminContextMixin, TemplateView):
+class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
     page_title = 'Modern Admin Log Detail'
     decorators = [login_required]
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
     max_detail_lines = 500
     default_detail_lines = 200
