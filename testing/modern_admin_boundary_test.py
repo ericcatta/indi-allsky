@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 from pathlib import Path
 
 
@@ -7,29 +8,54 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 VIEWS_PATH = REPO_ROOT / 'indi_allsky/flask/views.py'
 
 
-OBSERVATORY_TOOL_WRAPPERS = (
-    'ModernAdminSqmView',
-    'ModernAdminChartsView',
-    'ModernAdminSensorPanelView',
-    'ModernAdminRealtimeKeogramView',
-    'ModernAdminLongTermKeogramView',
-    'ModernAdminAstroPanelView',
-    'ModernAdminVirtualSkyView',
-)
-
-CAMERA_TOOL_WRAPPERS = (
-    'ModernAdminCameraInfoView',
-    'ModernAdminImageLagView',
-    'ModernAdminAduHistoryView',
-    'ModernAdminDarkLibraryView',
-    'ModernAdminMaskView',
-)
-
-SYSTEM_TOOL_WRAPPERS = (
-    'ModernAdminSystemInfoView',
-    'ModernAdminSupportInfoView',
-    'ModernAdminLogView',
-    'ModernAdminLogDetailView',
+BOUNDARIES = (
+    {
+        'boundary': 'ModernAdminProductView',
+        'parent': 'TemplateView',
+        'wrappers': (
+            'ModernAdminNowView',
+            'ModernAdminHighlightsView',
+            'ModernAdminMomentDetailView',
+            'ModernAdminOutputDetailView',
+            'ModernAdminLibraryView',
+            'ModernAdminSkyCycleView',
+            'ModernAdminObservatoryView',
+        ),
+    },
+    {
+        'boundary': 'ModernAdminObservatoryToolView',
+        'parent': 'ModernAdminContextMixin',
+        'wrappers': (
+            'ModernAdminSqmView',
+            'ModernAdminChartsView',
+            'ModernAdminSensorPanelView',
+            'ModernAdminRealtimeKeogramView',
+            'ModernAdminLongTermKeogramView',
+            'ModernAdminAstroPanelView',
+            'ModernAdminVirtualSkyView',
+        ),
+    },
+    {
+        'boundary': 'ModernAdminCameraToolView',
+        'parent': 'ModernAdminContextMixin',
+        'wrappers': (
+            'ModernAdminCameraInfoView',
+            'ModernAdminImageLagView',
+            'ModernAdminAduHistoryView',
+            'ModernAdminDarkLibraryView',
+            'ModernAdminMaskView',
+        ),
+    },
+    {
+        'boundary': 'ModernAdminSystemToolView',
+        'parent': 'ModernAdminContextMixin',
+        'wrappers': (
+            'ModernAdminSystemInfoView',
+            'ModernAdminSupportInfoView',
+            'ModernAdminLogView',
+            'ModernAdminLogDetailView',
+        ),
+    },
 )
 
 
@@ -38,58 +64,63 @@ def assert_true(condition, message):
         raise AssertionError(message)
 
 
-def test_observatory_tools_use_hybrid_boundary():
-    views_text = VIEWS_PATH.read_text(encoding='utf-8')
+def read_views():
+    return VIEWS_PATH.read_text(encoding='utf-8')
 
-    assert_true(
-        'class ModernAdminObservatoryToolView(ModernAdminContextMixin):' in views_text,
-        'Observatory tools should have a dedicated Hybrid boundary',
+
+def class_bases(views_text, class_name):
+    match = re.search(
+        r'^class\s+{0:s}\(([^)]*)\):'.format(re.escape(class_name)),
+        views_text,
+        flags=re.MULTILINE,
     )
+    if not match:
+        return None
 
-    for class_name in OBSERVATORY_TOOL_WRAPPERS:
-        class_prefix = 'class {0:s}(ModernAdminObservatoryToolView,'.format(class_name)
+    return tuple(base.strip() for base in match.group(1).split(',') if base.strip())
+
+
+def test_boundaries_exist_with_expected_parent():
+    views_text = read_views()
+
+    for spec in BOUNDARIES:
+        bases = class_bases(views_text, spec['boundary'])
         assert_true(
-            class_prefix in views_text,
-            '{0:s} must inherit from ModernAdminObservatoryToolView'.format(class_name),
+            bases == (spec['parent'],),
+            '{0:s} must inherit only from {1:s}'.format(spec['boundary'], spec['parent']),
         )
 
 
-def test_camera_tools_use_hybrid_boundary():
-    views_text = VIEWS_PATH.read_text(encoding='utf-8')
+def test_wrappers_use_expected_hybrid_boundary():
+    views_text = read_views()
 
-    assert_true(
-        'class ModernAdminCameraToolView(ModernAdminContextMixin):' in views_text,
-        'Camera tools should have a dedicated Hybrid boundary',
-    )
-
-    for class_name in CAMERA_TOOL_WRAPPERS:
-        class_prefix = 'class {0:s}(ModernAdminCameraToolView,'.format(class_name)
-        assert_true(
-            class_prefix in views_text,
-            '{0:s} must inherit from ModernAdminCameraToolView'.format(class_name),
-        )
+    for spec in BOUNDARIES:
+        boundary = spec['boundary']
+        for class_name in spec['wrappers']:
+            bases = class_bases(views_text, class_name)
+            assert_true(bases is not None, '{0:s} class is missing'.format(class_name))
+            assert_true(
+                bases[0] == boundary,
+                '{0:s} must use {1:s} as its first base'.format(class_name, boundary),
+            )
 
 
-def test_system_tools_use_hybrid_boundary():
-    views_text = VIEWS_PATH.read_text(encoding='utf-8')
+def test_isolated_wrappers_do_not_bypass_hybrid_boundaries():
+    views_text = read_views()
 
-    assert_true(
-        'class ModernAdminSystemToolView(ModernAdminContextMixin):' in views_text,
-        'System tools should have a dedicated Hybrid boundary',
-    )
-
-    for class_name in SYSTEM_TOOL_WRAPPERS:
-        class_prefix = 'class {0:s}(ModernAdminSystemToolView,'.format(class_name)
-        assert_true(
-            class_prefix in views_text,
-            '{0:s} must inherit from ModernAdminSystemToolView'.format(class_name),
-        )
+    for spec in BOUNDARIES:
+        for class_name in spec['wrappers']:
+            bases = class_bases(views_text, class_name)
+            assert_true(
+                bases is not None and 'ModernAdminContextMixin' not in bases,
+                '{0:s} must not inherit directly from ModernAdminContextMixin'.format(class_name),
+            )
 
 
 def run_tests():
-    test_observatory_tools_use_hybrid_boundary()
-    test_camera_tools_use_hybrid_boundary()
-    test_system_tools_use_hybrid_boundary()
+    test_boundaries_exist_with_expected_parent()
+    test_wrappers_use_expected_hybrid_boundary()
+    test_isolated_wrappers_do_not_bypass_hybrid_boundaries()
     print('Modern admin boundary checks passed')
 
 
