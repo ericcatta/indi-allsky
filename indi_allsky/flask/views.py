@@ -12317,10 +12317,20 @@ class NotificationsView(TemplateView):
         return context
 
 
-class ModernAdminNotificationsView(ModernAdminContextMixin, TemplateView):
-    page_title = 'Modern Admin Notifications'
+class ModernAdminNotificationStatusView(ModernAdminContextMixin):
     decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
+
+    def format_notification_datetime(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        return str(value)
+
+
+class ModernAdminNotificationsView(ModernAdminNotificationStatusView, TemplateView):
+    page_title = 'Modern Admin Notifications'
 
     def get_context(self):
         context = super(ModernAdminNotificationsView, self).get_context()
@@ -12358,18 +12368,8 @@ class ModernAdminNotificationsView(ModernAdminContextMixin, TemplateView):
         return context
 
 
-    def format_notification_datetime(self, value, default='Unknown'):
-        if not value:
-            return default
-        if hasattr(value, 'strftime'):
-            return value.strftime('%Y-%m-%d %H:%M:%S')
-        return str(value)
-
-
 class ModernAdminNotificationDetailView(ModernAdminNotificationsView):
     page_title = 'Modern Admin Notification Detail'
-    decorators = [login_required]
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
     def dispatch_request(self, notification_id):

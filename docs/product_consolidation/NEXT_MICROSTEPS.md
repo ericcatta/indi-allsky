@@ -35,6 +35,8 @@ The source of truth for the current consolidation baseline is
 - System read-only wrappers now share `ModernAdminSystemToolView`, reducing
   direct Classic-style ownership for developer/status pages; the boundary owns
   the read-only login guard for this family.
+- Notification read-only wrappers now share `ModernAdminNotificationStatusView`;
+  acknowledgement actions remain outside this boundary.
 - Task/status wrappers now share `ModernAdminTaskStatusView`, reducing direct
   Classic-style ownership for read-only queue listing/detail pages; the
   boundary also owns the read-only login guard for this family.
@@ -164,6 +166,7 @@ The source of truth for the current consolidation baseline is
 - Camera diagnostic ownership boundary added via `ModernAdminCameraToolView`.
 - System read-only ownership boundary added via `ModernAdminSystemToolView`.
 - System read-only login guard ownership moved into `ModernAdminSystemToolView`.
+- Notification read-only ownership boundary added via `ModernAdminNotificationStatusView`.
 - Task/status ownership boundary added via `ModernAdminTaskStatusView`.
 - Task/status login guard ownership moved into `ModernAdminTaskStatusView`.
 - Media metadata listing ownership boundary added via `ModernAdminMediaMetadataView`.

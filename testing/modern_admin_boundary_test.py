@@ -59,6 +59,18 @@ BOUNDARIES = (
         ),
     },
     {
+        'boundary': 'ModernAdminNotificationStatusView',
+        'parent': 'ModernAdminContextMixin',
+        'decorator': 'login_required',
+        'wrappers_defer_decorator': True,
+        'decorator_delegates': (
+            'ModernAdminNotificationDetailView',
+        ),
+        'wrappers': (
+            'ModernAdminNotificationsView',
+        ),
+    },
+    {
         'boundary': 'ModernAdminTaskStatusView',
         'parent': 'ModernAdminContextMixin',
         'decorator': 'login_required',
