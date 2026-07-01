@@ -9011,6 +9011,7 @@ class TaskQueueView(TemplateView):
 
 
 class ModernAdminTaskStatusView(ModernAdminContextMixin):
+    decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
     def get_task_data_value(self, task_data, key, default=''):
@@ -9123,7 +9124,6 @@ class ModernAdminTaskQueueView(ModernAdminTaskStatusView, TaskQueueView):
 
 class ModernAdminTaskDetailView(ModernAdminTaskStatusView, TemplateView):
     page_title = 'Modern Admin Task Detail'
-    decorators = [login_required]
 
     sensitive_payload_keys = (
         'password',

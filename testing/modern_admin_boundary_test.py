@@ -59,6 +59,8 @@ BOUNDARIES = (
     {
         'boundary': 'ModernAdminTaskStatusView',
         'parent': 'ModernAdminContextMixin',
+        'decorator': 'login_required',
+        'wrappers_defer_decorator': True,
         'wrappers': (
             'ModernAdminTaskQueueView',
             'ModernAdminTaskDetailView',
@@ -108,6 +110,23 @@ def class_bases(views_text, class_name):
     return tuple(base.strip() for base in match.group(1).split(',') if base.strip())
 
 
+def class_body(views_text, class_name):
+    match = re.search(
+        r'^class\s+{0:s}\([^)]*\):\n'.format(re.escape(class_name)),
+        views_text,
+        flags=re.MULTILINE,
+    )
+    if not match:
+        return None
+
+    start = match.end()
+    next_class = re.search(r'^class\s+\w+\(', views_text[start:], flags=re.MULTILINE)
+    if not next_class:
+        return views_text[start:]
+
+    return views_text[start:start + next_class.start()]
+
+
 def test_boundaries_exist_with_expected_parent():
     views_text = read_views()
 
@@ -117,6 +136,31 @@ def test_boundaries_exist_with_expected_parent():
             bases == (spec['parent'],),
             '{0:s} must inherit only from {1:s}'.format(spec['boundary'], spec['parent']),
         )
+
+
+def test_boundary_owned_decorators_stay_on_boundary():
+    views_text = read_views()
+
+    for spec in BOUNDARIES:
+        decorator = spec.get('decorator')
+        if not decorator:
+            continue
+
+        boundary_body = class_body(views_text, spec['boundary'])
+        assert_true(
+            boundary_body is not None and 'decorators = [{0:s}]'.format(decorator) in boundary_body,
+            '{0:s} must own decorators = [{1:s}]'.format(spec['boundary'], decorator),
+        )
+
+        if not spec.get('wrappers_defer_decorator'):
+            continue
+
+        for class_name in spec['wrappers']:
+            wrapper_body = class_body(views_text, class_name)
+            assert_true(
+                wrapper_body is not None and 'decorators =' not in wrapper_body,
+                '{0:s} must inherit decorators from {1:s}'.format(class_name, spec['boundary']),
+            )
 
 
 def test_wrappers_use_expected_hybrid_boundary():
@@ -147,6 +191,7 @@ def test_isolated_wrappers_do_not_bypass_hybrid_boundaries():
 
 def run_tests():
     test_boundaries_exist_with_expected_parent()
+    test_boundary_owned_decorators_stay_on_boundary()
     test_wrappers_use_expected_hybrid_boundary()
     test_isolated_wrappers_do_not_bypass_hybrid_boundaries()
     print('Modern admin boundary checks passed')
