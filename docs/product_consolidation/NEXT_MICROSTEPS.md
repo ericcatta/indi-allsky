@@ -18,20 +18,12 @@ The source of truth for the current consolidation baseline is
 - Product UI v1 exists and is visually converged.
 - DATA001-DATA006 are integrated with bounded metadata-only contracts.
 - Route roles for `/modern-admin/*` are now classified in `HYBRID_ROUTE_ROLE_MATRIX.md`.
+- Settings groups are now classified in `HYBRID_SETTINGS_CONTRACT_REVIEW.md`.
 - Classic remains required as fallback/reference for many operational surfaces.
-- Settings are the highest-risk consolidation area.
-- Settings ownership is the next ambiguity to reduce.
+- Settings remain high risk, but their product contract is now explicit.
+- Mutative/safe-action ownership is the next repeated blocker.
 
 ## P0
-
-### Settings Contract Review
-
-- Motivation: settings are the largest complexity and regression risk area.
-- Benefit: prepares Basic / Advanced / Developer organization without renaming keys or changing behavior.
-- Risk: low if documentation-only.
-- Impact: high.
-- Dependencies: `tools/hybrid_settings_ownership_map.json`, `HYBRID_SETTINGS_INVENTORY_REPORT.md`.
-- Verification: every settings group has owner, user level, risk, fallback, and migration stance.
 
 ### Product Spine Regression Checklist
 
@@ -51,6 +43,15 @@ The source of truth for the current consolidation baseline is
 - Dependencies: Route Role Matrix.
 - Verification: update only evidence-backed ownership metadata; regenerate inventory; do not change routes/templates.
 
+### Safe Action Registry Discovery
+
+- Motivation: the settings contract repeatedly blocks media generation, restore, notification, focus, GPIO, network, config, download, and hardware workflows on missing action-policy ownership.
+- Benefit: prepares future Product/Operations controls without adding mutations now.
+- Risk: low if discovery-only.
+- Impact: high.
+- Dependencies: Route Role Matrix and Settings Contract Review.
+- Verification: list each mutative route/action, owner, risk, required dry-run/audit/rollback, and whether it must remain Classic fallback.
+
 ## P1
 
 ### Ownership Map Correction Pass
@@ -59,17 +60,8 @@ The source of truth for the current consolidation baseline is
 - Benefit: lowers false positives in future audits.
 - Risk: medium if classifications are guessed.
 - Impact: medium-high.
-- Dependencies: Route Role Matrix.
-- Verification: inventory mismatch count decreases only where ownership evidence exists.
-
-### Safe Action Registry Discovery
-
-- Motivation: mutative Classic/operational actions need explicit ownership before any Product replacement.
-- Benefit: prepares future safe actions without adding mutations now.
-- Risk: low if discovery-only.
-- Impact: high.
 - Dependencies: Route Role Matrix and Settings Contract Review.
-- Verification: each mutative route/action has owner, risk, required audit trail, and rollback expectation.
+- Verification: inventory mismatch count decreases only where ownership evidence exists.
 
 ### Environmental Ownership Discovery
 
@@ -132,3 +124,4 @@ The source of truth for the current consolidation baseline is
 - Product Consolidation Audit baseline established in `HYBRID_PRODUCT_CONSOLIDATION_AUDIT.md`.
 - Living consolidation backlog created in this file.
 - P0 Route Role Matrix completed in `HYBRID_ROUTE_ROLE_MATRIX.md`.
+- P0 Settings Contract Review completed in `HYBRID_SETTINGS_CONTRACT_REVIEW.md`.

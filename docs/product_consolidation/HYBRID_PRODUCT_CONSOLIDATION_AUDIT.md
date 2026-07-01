@@ -38,6 +38,7 @@ The safest next consolidation work is:
 - `RELEASE_CANDIDATE_CLEANUP_AUDIT.md` found no route/template/Product builder safe to delete before Alpha.
 - `PERFORMANCE_AUDIT_LEGACY_VS_PRODUCT.md` shows Product pages are faster because they avoid broad Classic context, filesystem/media access, and unbounded work.
 - `docs/product_consolidation/HYBRID_ROUTE_ROLE_MATRIX.md` is the current route-role reference for `/modern-admin/*` Product, Advanced, Developer, wrapper, and dynamic compatibility surfaces.
+- `docs/product_consolidation/HYBRID_SETTINGS_CONTRACT_REVIEW.md` is the current settings contract reference for Basic, Advanced, Developer, Classic fallback, and hidden/internal settings groups.
 
 ## Audit Rules Used
 
@@ -251,6 +252,7 @@ Recommendation P1: Create a Settings Product Contract before touching active set
 - Risks: takes time before visible improvement.
 - Impact: high maintainability and safety.
 - Dependencies: `tools/hybrid_settings_ownership_map.json`, Classic config schema, Modern settings pages.
+- Status: completed in `docs/product_consolidation/HYBRID_SETTINGS_CONTRACT_REVIEW.md`.
 - Verification: generated settings inventory, manual review of all 39 groups, no runtime changes.
 
 ## Duplication Findings
@@ -395,6 +397,7 @@ Do not start these without a dedicated mission.
 - Impact: high.
 - Dependencies: `tools/hybrid_settings_ownership_map.json`, `HYBRID_SETTINGS_INVENTORY_REPORT.md`.
 - Priority: P0.
+- Status: completed in `docs/product_consolidation/HYBRID_SETTINGS_CONTRACT_REVIEW.md`.
 - Verification: every one of 39 settings groups has Basic/Advanced/Developer, owner, risk, and fallback classification.
 
 ### Micro-step 3: Ownership Map Correction Pass
