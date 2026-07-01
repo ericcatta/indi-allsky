@@ -39,6 +39,9 @@ The source of truth for the current consolidation baseline is
 - Media metadata listing wrappers now share `ModernAdminMediaMetadataView`;
   interactive gallery/download/preview surfaces remain intentionally outside
   this boundary.
+- Media browse wrappers now enter through `ModernAdminMediaBrowseView`, but
+  preview, URL generation, lightbox and download behavior remain unchanged and
+  require a separate safety review before deeper extraction.
 
 ## P0
 
@@ -159,3 +162,4 @@ The source of truth for the current consolidation baseline is
 - System read-only ownership boundary added via `ModernAdminSystemToolView`.
 - Task/status ownership boundary added via `ModernAdminTaskStatusView`.
 - Media metadata listing ownership boundary added via `ModernAdminMediaMetadataView`.
+- Media browse ownership boundary added via `ModernAdminMediaBrowseView`.

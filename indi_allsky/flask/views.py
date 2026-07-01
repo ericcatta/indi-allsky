@@ -14308,7 +14308,11 @@ class ModernAdminMaskView(ModernAdminCameraToolView, MaskView):
         return context
 
 
-class ModernAdminMediaListView(ModernAdminContextMixin, TemplateView):
+class ModernAdminMediaBrowseView(ModernAdminContextMixin):
+    pass
+
+
+class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
     page_title = 'Modern Admin Media'
     modern_admin_section = 'Media'
     modern_admin_description = 'Recent media captured by this camera.'

@@ -77,6 +77,13 @@ BOUNDARIES = (
             'ModernAdminFitsView',
         ),
     },
+    {
+        'boundary': 'ModernAdminMediaBrowseView',
+        'parent': 'ModernAdminContextMixin',
+        'wrappers': (
+            'ModernAdminMediaListView',
+        ),
+    },
 )
 
 
