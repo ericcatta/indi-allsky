@@ -47,8 +47,75 @@ The source of truth for the current consolidation baseline is
 - Media browse wrappers now enter through `ModernAdminMediaBrowseView`, but
   preview, URL generation, lightbox and download behavior remain unchanged and
   require a separate safety review before deeper extraction.
+- Remaining direct Modern Admin wrappers have been reviewed. No clearly safe
+  read-only family remains for simple boundary extraction; the easy extraction
+  phase is complete for now.
+
+## Remaining Direct Modern Admin Wrapper Review
+
+Decision: Option B. Do not force another boundary class. The next Classic
+extraction phase should replace one backend implementation behind an existing
+Hybrid boundary, preserving routes, templates, payloads, context keys, and
+runtime behavior.
+
+### Safe Next Extraction Candidate
+
+- None found with low enough risk. The obvious read-only families now have
+  Hybrid boundaries.
+
+### Intentionally Left Classic-Owned For Now
+
+- `ModernAdminPublicMediaEndpointsView`: read-only compatibility catalog, but
+  it describes public media endpoints and should stay near media compatibility
+  ownership until public/latest route contracts are reviewed.
+- Section landing pages based on `ModernAdminView`
+  (`ModernAdminCamerasView`, `ModernAdminStorageView`,
+  `ModernAdminUploadsView`, `ModernAdminYoutubeView`,
+  `ModernAdminSystemView`, `ModernAdminUpdatesView`): these are shell/section
+  pages rather than direct Classic wrapper families. Leave them until a
+  dedicated section ownership pass.
+- `ModernAdminPlaceholderView` and related mode/placeholder routing remain
+  compatibility glue. Changing them would risk navigation/session behavior.
+
+### Risky / Requires Dedicated Review
+
+- `ModernAdminUsersView` and `ModernAdminUserDetailView`: auth/user ownership
+  is sensitive and includes account metadata and adjacent mutating user flows.
+- `ModernAdminConfigHistoryView`, `ModernAdminConfigRestoreView`, and
+  `ModernAdminConfigRestoreDetailView`: config history/restore touches settings
+  payloads and restore semantics; keep out of safe boundary extraction.
+- `ModernAdminFileSpaceUsageView`: storage/filesystem reporting requires a
+  separate filesystem-safety review.
+- `ModernAdminLoopView`: loop/media behavior can involve preview, URL
+  generation, and client-side media assumptions.
+- `ModernAdminSettingsInventoryView` and settings preview descendants:
+  settings/config ownership is high risk until a settings implementation
+  migration is explicitly approved.
+
+### Mutating / Action-Related, Do Not Touch
+
+- Camera add/detect/server-start flows.
+- Safe controls, config save/restore surfaces, generation/focus/process
+  controls, network/drives/GPIO controls, notification acknowledgement, and
+  safe-action dry-run/capture endpoints.
+- Any POST/action endpoint, external API, restore/import/export, restart/stop,
+  purge/delete, upload/download, or media-generation path.
 
 ## P0
+
+### Replace One Backend Implementation Behind Existing Boundary
+
+- Motivation: Hybrid now owns the easy wrapper boundaries, but many boundaries
+  still inherit Classic backend implementation details.
+- Benefit: reduces actual Classic dependency rather than only moving wrapper
+  ownership.
+- Risk: medium; choose one bounded read-only implementation and preserve all
+  existing routes, templates, payloads, and context keys.
+- Impact: high if done behind a mature boundary such as task/status,
+  notifications, or media metadata.
+- Dependencies: completed boundary regression tests and current wrapper review.
+- Verification: add regression tests for unchanged context keys/output shape;
+  run relevant boundary tests and py_compile.
 
 ### Route Role Matrix Follow-up In Ownership Map
 
@@ -172,3 +239,6 @@ The source of truth for the current consolidation baseline is
 - Media metadata listing ownership boundary added via `ModernAdminMediaMetadataView`.
 - Media metadata login guard ownership moved into `ModernAdminMediaMetadataView`.
 - Media browse ownership boundary added via `ModernAdminMediaBrowseView`.
+- Remaining direct Modern Admin wrapper review completed; no further easy
+  read-only boundary extraction is safe without a dedicated implementation
+  replacement review.
