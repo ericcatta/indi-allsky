@@ -28,6 +28,8 @@ The source of truth for the current consolidation baseline is
   `testing/product_spine_regression_test.py`.
 - Product spine Flask views now share `ModernAdminProductView`, a small Hybrid
   ownership boundary that keeps Product payload wiring out of Classic wrappers.
+- Observatory tool wrappers now share `ModernAdminObservatoryToolView`, reducing
+  direct Classic-style ownership for read-only observatory context pages.
 
 ## P0
 
@@ -143,3 +145,4 @@ The source of truth for the current consolidation baseline is
 - P0 Safe Action Registry Discovery completed in `HYBRID_SAFE_ACTION_REGISTRY.md`.
 - P0 Product Spine Regression Checklist implemented as `testing/product_spine_regression_test.py`.
 - Product spine view ownership boundary added via `ModernAdminProductView`.
+- Observatory tool ownership boundary added via `ModernAdminObservatoryToolView`.

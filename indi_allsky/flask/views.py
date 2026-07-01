@@ -13945,9 +13945,12 @@ class ModernAdminFileSpaceUsageView(ModernAdminContextMixin, FileSpaceUsageView)
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
 
 
-class ModernAdminSqmView(ModernAdminContextMixin, SqmView):
-    page_title = 'Modern Admin SQM'
+class ModernAdminObservatoryToolView(ModernAdminContextMixin):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
+
+
+class ModernAdminSqmView(ModernAdminObservatoryToolView, SqmView):
+    page_title = 'Modern Admin SQM'
 
     def get_context(self):
         context = super(ModernAdminSqmView, self).get_context()
@@ -13976,14 +13979,12 @@ class ModernAdminSqmView(ModernAdminContextMixin, SqmView):
         return context
 
 
-class ModernAdminChartsView(ModernAdminContextMixin, ChartView):
+class ModernAdminChartsView(ModernAdminObservatoryToolView, ChartView):
     page_title = 'Modern Admin Charts'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
 
 
-class ModernAdminSensorPanelView(ModernAdminContextMixin, SensorPanelView):
+class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, SensorPanelView):
     page_title = 'Modern Admin Sensor Panel'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
 
 
 class ModernAdminSystemInfoView(ModernAdminContextMixin, SystemInfoView):
@@ -14001,9 +14002,8 @@ class ModernAdminLoopView(ModernAdminContextMixin, ImageLoopImgView):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_view'
 
 
-class ModernAdminRealtimeKeogramView(ModernAdminContextMixin, RealtimeKeogramView):
+class ModernAdminRealtimeKeogramView(ModernAdminObservatoryToolView, RealtimeKeogramView):
     page_title = 'Modern Admin Realtime Keogram'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
 
     def get_context(self):
         context = super(ModernAdminRealtimeKeogramView, self).get_context()
@@ -14014,9 +14014,8 @@ class ModernAdminRealtimeKeogramView(ModernAdminContextMixin, RealtimeKeogramVie
         return context
 
 
-class ModernAdminLongTermKeogramView(ModernAdminContextMixin, TemplateView):
+class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, TemplateView):
     page_title = 'Modern Admin Long Term Keogram'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
 
     def get_context(self):
         context = super(ModernAdminLongTermKeogramView, self).get_context()
@@ -14125,14 +14124,12 @@ class ModernAdminDarkLibraryView(ModernAdminContextMixin, TemplateView):
         return row_list
 
 
-class ModernAdminAstroPanelView(ModernAdminContextMixin, TemplateView):
+class ModernAdminAstroPanelView(ModernAdminObservatoryToolView, TemplateView):
     page_title = 'Modern Admin Astropanel'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
 
 
-class ModernAdminVirtualSkyView(ModernAdminContextMixin, VirtualSkyView):
+class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, VirtualSkyView):
     page_title = 'Modern Admin VirtualSky'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
 
 
 class ModernAdminLogView(ModernAdminContextMixin, LogView):
