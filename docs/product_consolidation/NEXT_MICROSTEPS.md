@@ -17,20 +17,12 @@ The source of truth for the current consolidation baseline is
 
 - Product UI v1 exists and is visually converged.
 - DATA001-DATA006 are integrated with bounded metadata-only contracts.
+- Route roles for `/modern-admin/*` are now classified in `HYBRID_ROUTE_ROLE_MATRIX.md`.
 - Classic remains required as fallback/reference for many operational surfaces.
 - Settings are the highest-risk consolidation area.
-- Route ownership is the next ambiguity to reduce.
+- Settings ownership is the next ambiguity to reduce.
 
 ## P0
-
-### Route Role Matrix
-
-- Motivation: clarify which `/modern-admin/*` routes are Product, Operations, Developer, Legacy fallback, public/shared, or external-facing before changing them.
-- Benefit: prevents accidental route churn and gives future cleanup a factual base.
-- Risk: low if documentation-only.
-- Impact: high.
-- Dependencies: `HYBRID_UI_INVENTORY_REPORT.md`, `tools/hybrid_ui_ownership_map.json`.
-- Verification: regenerate inventory and confirm every relevant `/modern-admin/*` route has a role.
 
 ### Settings Contract Review
 
@@ -49,6 +41,15 @@ The source of truth for the current consolidation baseline is
 - Impact: medium-high.
 - Dependencies: Product view model tests and ownership map.
 - Verification: checklist confirms routes, templates, builders, validation, read-only behavior, and no new POST/fetch/AJAX.
+
+### Route Role Matrix Follow-up In Ownership Map
+
+- Motivation: `HYBRID_ROUTE_ROLE_MATRIX.md` now classifies route families by product role, but `tools/hybrid_ui_ownership_map.json` still uses broader `modern` ownership for many routes.
+- Benefit: gives inventory reports more useful signal without changing runtime behavior.
+- Risk: medium if route classifications are over-applied to dynamic or wrapper routes.
+- Impact: medium-high.
+- Dependencies: Route Role Matrix.
+- Verification: update only evidence-backed ownership metadata; regenerate inventory; do not change routes/templates.
 
 ## P1
 
@@ -130,3 +131,4 @@ The source of truth for the current consolidation baseline is
 
 - Product Consolidation Audit baseline established in `HYBRID_PRODUCT_CONSOLIDATION_AUDIT.md`.
 - Living consolidation backlog created in this file.
+- P0 Route Role Matrix completed in `HYBRID_ROUTE_ROLE_MATRIX.md`.

@@ -37,6 +37,7 @@ The safest next consolidation work is:
 - `tools/hybrid_settings_ownership_map.json` has 39 settings groups, 33 high-risk groups, 30 `do_not_move_yet` groups, 13 dedicated preview groups, and 13 final read-only groups.
 - `RELEASE_CANDIDATE_CLEANUP_AUDIT.md` found no route/template/Product builder safe to delete before Alpha.
 - `PERFORMANCE_AUDIT_LEGACY_VS_PRODUCT.md` shows Product pages are faster because they avoid broad Classic context, filesystem/media access, and unbounded work.
+- `docs/product_consolidation/HYBRID_ROUTE_ROLE_MATRIX.md` is the current route-role reference for `/modern-admin/*` Product, Advanced, Developer, wrapper, and dynamic compatibility surfaces.
 
 ## Audit Rules Used
 
@@ -383,7 +384,8 @@ Do not start these without a dedicated mission.
 - Impact: high planning clarity.
 - Dependencies: `HYBRID_UI_INVENTORY_REPORT.md`, `tools/hybrid_ui_ownership_map.json`.
 - Priority: P0.
-- Verification: regenerate inventory; every `/modern-admin/*` route has a role.
+- Status: completed in `docs/product_consolidation/HYBRID_ROUTE_ROLE_MATRIX.md`.
+- Verification: route families from `HYBRID_UI_INVENTORY_REPORT.md` are classified by product role.
 
 ### Micro-step 2: Settings Contract Review
 
