@@ -14007,6 +14007,7 @@ class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, SensorPanelView
 
 
 class ModernAdminSystemToolView(ModernAdminContextMixin):
+    decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
@@ -14158,7 +14159,6 @@ class ModernAdminLogView(ModernAdminSystemToolView, LogView):
 
 class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
     page_title = 'Modern Admin Log Detail'
-    decorators = [login_required]
 
     max_detail_lines = 500
     default_detail_lines = 200

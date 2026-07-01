@@ -33,7 +33,8 @@ The source of truth for the current consolidation baseline is
 - Camera diagnostic wrappers now share `ModernAdminCameraToolView`, reducing
   direct Classic-style ownership for read-only camera operational pages.
 - System read-only wrappers now share `ModernAdminSystemToolView`, reducing
-  direct Classic-style ownership for developer/status pages.
+  direct Classic-style ownership for developer/status pages; the boundary owns
+  the read-only login guard for this family.
 - Task/status wrappers now share `ModernAdminTaskStatusView`, reducing direct
   Classic-style ownership for read-only queue listing/detail pages; the
   boundary also owns the read-only login guard for this family.
@@ -162,6 +163,7 @@ The source of truth for the current consolidation baseline is
 - Observatory tool ownership boundary added via `ModernAdminObservatoryToolView`.
 - Camera diagnostic ownership boundary added via `ModernAdminCameraToolView`.
 - System read-only ownership boundary added via `ModernAdminSystemToolView`.
+- System read-only login guard ownership moved into `ModernAdminSystemToolView`.
 - Task/status ownership boundary added via `ModernAdminTaskStatusView`.
 - Task/status login guard ownership moved into `ModernAdminTaskStatusView`.
 - Media metadata listing ownership boundary added via `ModernAdminMediaMetadataView`.

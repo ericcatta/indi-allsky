@@ -49,6 +49,8 @@ BOUNDARIES = (
     {
         'boundary': 'ModernAdminSystemToolView',
         'parent': 'ModernAdminContextMixin',
+        'decorator': 'login_required',
+        'wrappers_defer_decorator': True,
         'wrappers': (
             'ModernAdminSystemInfoView',
             'ModernAdminSupportInfoView',
