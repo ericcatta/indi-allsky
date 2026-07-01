@@ -7569,15 +7569,30 @@ class ModernAdminLatestCameraFramesRepository:
         return '{0:d} hours ago'.format(int(age_minutes / 60))
 
 
-class ModernAdminNowView(TemplateView):
-    page_title = 'Hybrid Now'
+class ModernAdminProductView(TemplateView):
     decorators = [login_required]
+    product_context_key = None
 
     def get_context(self):
-        context = super(ModernAdminNowView, self).get_context()
+        context = super(ModernAdminProductView, self).get_context()
 
         session['admin_mode'] = 'modern'
-        context['modern_admin_now'] = build_now_view(
+        if self.product_context_key:
+            context[self.product_context_key] = self.build_product_context(context)
+
+        return context
+
+
+    def build_product_context(self, context):
+        raise NotImplementedError('Product views must provide a backend-owned product payload.')
+
+
+class ModernAdminNowView(ModernAdminProductView):
+    page_title = 'Hybrid Now'
+    product_context_key = 'modern_admin_now'
+
+    def build_product_context(self, context):
+        return build_now_view(
             latest_frame_provider=self.get_latest_frame_provider(),
             latest_camera_frames_provider=self.get_latest_camera_frames_provider(),
             current_phase_night=context.get('night'),
@@ -7585,8 +7600,6 @@ class ModernAdminNowView(TemplateView):
             current_capture_repository=self.get_current_capture_repository(),
             source_trust_repository=self.get_source_trust_repository(),
         )
-
-        return context
 
 
     def get_latest_frame_provider(self):
@@ -7771,19 +7784,14 @@ class ModernAdminNowView(TemplateView):
             return None
 
 
-class ModernAdminHighlightsView(TemplateView):
+class ModernAdminHighlightsView(ModernAdminProductView):
     page_title = 'Highlights'
-    decorators = [login_required]
+    product_context_key = 'highlights_view'
 
-    def get_context(self):
-        context = super(ModernAdminHighlightsView, self).get_context()
-
-        session['admin_mode'] = 'modern'
-        context['highlights_view'] = build_highlights_view(
+    def build_product_context(self, context):
+        return build_highlights_view(
             highlights_repository=self.get_highlights_repository(),
         )
-
-        return context
 
     def get_highlights_repository(self):
         try:
@@ -7809,59 +7817,39 @@ class ModernAdminHighlightsView(TemplateView):
             return None
 
 
-class ModernAdminMomentDetailView(TemplateView):
+class ModernAdminMomentDetailView(ModernAdminProductView):
     page_title = 'Moment Detail'
-    decorators = [login_required]
+    product_context_key = 'moment_detail'
 
-    def get_context(self):
-        context = super(ModernAdminMomentDetailView, self).get_context()
-
-        session['admin_mode'] = 'modern'
-        context['moment_detail'] = build_moment_detail_view()
-
-        return context
+    def build_product_context(self, context):
+        return build_moment_detail_view()
 
 
-class ModernAdminOutputDetailView(TemplateView):
+class ModernAdminOutputDetailView(ModernAdminProductView):
     page_title = 'Output Detail'
-    decorators = [login_required]
+    product_context_key = 'output_detail'
 
-    def get_context(self):
-        context = super(ModernAdminOutputDetailView, self).get_context()
-
-        session['admin_mode'] = 'modern'
-        context['output_detail'] = build_output_detail_view()
-
-        return context
+    def build_product_context(self, context):
+        return build_output_detail_view()
 
 
-class ModernAdminLibraryView(TemplateView):
+class ModernAdminLibraryView(ModernAdminProductView):
     page_title = 'Library'
-    decorators = [login_required]
+    product_context_key = 'library_view'
 
-    def get_context(self):
-        context = super(ModernAdminLibraryView, self).get_context()
-
-        session['admin_mode'] = 'modern'
-        context['library_view'] = build_library_view()
-
-        return context
+    def build_product_context(self, context):
+        return build_library_view()
 
 
-class ModernAdminSkyCycleView(TemplateView):
+class ModernAdminSkyCycleView(ModernAdminProductView):
     page_title = 'Sky Cycle Report'
-    decorators = [login_required]
+    product_context_key = 'sky_cycle_report'
 
-    def get_context(self):
-        context = super(ModernAdminSkyCycleView, self).get_context()
-
-        session['admin_mode'] = 'modern'
-        context['sky_cycle_report'] = build_sky_cycle_report_view(
+    def build_product_context(self, context):
+        return build_sky_cycle_report_view(
             sky_cycle_repository=self.get_sky_cycle_repository(),
             current_phase_night=context.get('night'),
         )
-
-        return context
 
     def get_sky_cycle_repository(self):
         try:
@@ -8191,17 +8179,12 @@ class ModernAdminYoutubeView(ModernAdminView):
         return 'modern-admin-status-muted'
 
 
-class ModernAdminObservatoryView(TemplateView):
+class ModernAdminObservatoryView(ModernAdminProductView):
     page_title = 'Observatory'
-    decorators = [login_required]
+    product_context_key = 'observatory_view'
 
-    def get_context(self):
-        context = super(ModernAdminObservatoryView, self).get_context()
-
-        session['admin_mode'] = 'modern'
-        context['observatory_view'] = build_observatory_view()
-
-        return context
+    def build_product_context(self, context):
+        return build_observatory_view()
 
 
 class ModernAdminSystemView(ModernAdminView):

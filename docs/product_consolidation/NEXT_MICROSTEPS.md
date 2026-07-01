@@ -26,6 +26,8 @@ The source of truth for the current consolidation baseline is
   contract schema before any new execution path.
 - The Product spine is now protected by
   `testing/product_spine_regression_test.py`.
+- Product spine Flask views now share `ModernAdminProductView`, a small Hybrid
+  ownership boundary that keeps Product payload wiring out of Classic wrappers.
 
 ## P0
 
@@ -140,3 +142,4 @@ The source of truth for the current consolidation baseline is
 - P0 Settings Contract Review completed in `HYBRID_SETTINGS_CONTRACT_REVIEW.md`.
 - P0 Safe Action Registry Discovery completed in `HYBRID_SAFE_ACTION_REGISTRY.md`.
 - P0 Product Spine Regression Checklist implemented as `testing/product_spine_regression_test.py`.
+- Product spine view ownership boundary added via `ModernAdminProductView`.

@@ -104,6 +104,11 @@ def read_text(path):
 def test_product_routes_are_registered():
     views_text = read_text(VIEWS_PATH)
 
+    assert_true(
+        'class ModernAdminProductView(TemplateView):' in views_text,
+        'Product views should have a dedicated Hybrid Product view boundary',
+    )
+
     redirect_snippet = "return redirect(url_for('indi_allsky.modern_admin_now_view'))"
     assert_true(
         redirect_snippet in views_text,
@@ -111,6 +116,12 @@ def test_product_routes_are_registered():
     )
 
     for surface in PRODUCT_SPINE:
+        class_pattern = 'class {0:s}(ModernAdminProductView):'.format(surface['view'])
+        assert_true(
+            class_pattern in views_text,
+            '{0:s} must inherit from ModernAdminProductView'.format(surface['name']),
+        )
+
         route = re.escape(surface['route'])
         view = re.escape(surface['view'])
         endpoint = re.escape(surface['endpoint'])
