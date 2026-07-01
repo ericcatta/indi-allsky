@@ -39,7 +39,8 @@ The source of truth for the current consolidation baseline is
   boundary also owns the read-only login guard for this family.
 - Media metadata listing wrappers now share `ModernAdminMediaMetadataView`;
   interactive gallery/download/preview surfaces remain intentionally outside
-  this boundary.
+  this boundary. The boundary owns the read-only login guard for metadata
+  listing/detail pages.
 - Media browse wrappers now enter through `ModernAdminMediaBrowseView`, but
   preview, URL generation, lightbox and download behavior remain unchanged and
   require a separate safety review before deeper extraction.
@@ -164,4 +165,5 @@ The source of truth for the current consolidation baseline is
 - Task/status ownership boundary added via `ModernAdminTaskStatusView`.
 - Task/status login guard ownership moved into `ModernAdminTaskStatusView`.
 - Media metadata listing ownership boundary added via `ModernAdminMediaMetadataView`.
+- Media metadata login guard ownership moved into `ModernAdminMediaMetadataView`.
 - Media browse ownership boundary added via `ModernAdminMediaBrowseView`.

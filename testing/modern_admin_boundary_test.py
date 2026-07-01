@@ -69,6 +69,11 @@ BOUNDARIES = (
     {
         'boundary': 'ModernAdminMediaMetadataView',
         'parent': 'ModernAdminContextMixin',
+        'decorator': 'login_required',
+        'wrappers_defer_decorator': True,
+        'decorator_delegates': (
+            'ModernAdminFitsDetailView',
+        ),
         'wrappers': (
             'ModernAdminMediaStartrailVideosView',
             'ModernAdminMediaKeogramsView',
@@ -155,7 +160,8 @@ def test_boundary_owned_decorators_stay_on_boundary():
         if not spec.get('wrappers_defer_decorator'):
             continue
 
-        for class_name in spec['wrappers']:
+        decorator_delegates = spec['wrappers'] + spec.get('decorator_delegates', ())
+        for class_name in decorator_delegates:
             wrapper_body = class_body(views_text, class_name)
             assert_true(
                 wrapper_body is not None and 'decorators =' not in wrapper_body,

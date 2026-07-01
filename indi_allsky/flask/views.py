@@ -14926,7 +14926,7 @@ class ModernAdminMediaTimelapsesView(ModernAdminMediaListView):
 
 
 class ModernAdminMediaMetadataView(ModernAdminContextMixin):
-    pass
+    decorators = [login_required]
 
 
 class ModernAdminMediaStartrailVideosView(ModernAdminMediaMetadataView, TemplateView):
@@ -15814,7 +15814,6 @@ class ModernAdminMediaFitsView(ModernAdminMediaListView):
 
 class ModernAdminFitsView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin FITS Inspection'
-    decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
 
     fits_display_limit = 100
@@ -15944,7 +15943,6 @@ class ModernAdminFitsView(ModernAdminMediaMetadataView, TemplateView):
 
 class ModernAdminFitsDetailView(ModernAdminFitsView):
     page_title = 'Modern Admin FITS Detail'
-    decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
 
 
