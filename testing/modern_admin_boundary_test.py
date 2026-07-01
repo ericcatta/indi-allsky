@@ -75,6 +75,9 @@ BOUNDARIES = (
         'parent': 'ModernAdminContextMixin',
         'decorator': 'login_required',
         'wrappers_defer_decorator': True,
+        'forbidden_bases': (
+            'TaskQueueView',
+        ),
         'wrappers': (
             'ModernAdminTaskQueueView',
             'ModernAdminTaskDetailView',
@@ -207,6 +210,12 @@ def test_isolated_wrappers_do_not_bypass_hybrid_boundaries():
                 bases is not None and 'ModernAdminContextMixin' not in bases,
                 '{0:s} must not inherit directly from ModernAdminContextMixin'.format(class_name),
             )
+
+            for forbidden_base in spec.get('forbidden_bases', ()):
+                assert_true(
+                    forbidden_base not in bases,
+                    '{0:s} must not inherit directly from {1:s}'.format(class_name, forbidden_base),
+                )
 
 
 def run_tests():

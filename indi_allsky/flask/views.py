@@ -32,6 +32,7 @@ from ..frame_metadata import default_frame_metadata_dir
 from ..frame_metadata_analytics import FrameMetadataAnalytics
 from ..modern_safe_action import run_modern_safe_action_dry_run
 from ..modern_admin_notifications import ModernAdminNotificationReadService
+from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..processing import ImageProcessor
 from ..product_view_models import build_now_view
 from ..product_view_models import build_highlights_view
@@ -9015,129 +9016,66 @@ class ModernAdminTaskStatusView(ModernAdminContextMixin):
     decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
-    def get_task_data_value(self, task_data, key, default=''):
-        if not isinstance(task_data, dict):
-            return default
+    def get_task_read_service(self):
+        state_list = (
+            TaskQueueState.MANUAL,
+            TaskQueueState.QUEUED,
+            TaskQueueState.RUNNING,
+            TaskQueueState.SUCCESS,
+            TaskQueueState.FAILED,
+        )
 
-        value = task_data.get(key)
-        if value not in (None, ''):
-            return value
+        exclude_queues = (
+            TaskQueueQueue.IMAGE,
+            TaskQueueQueue.UPLOAD,
+        )
 
-        task_kwargs = task_data.get('kwargs')
-        if isinstance(task_kwargs, dict):
-            value = task_kwargs.get(key)
-            if value not in (None, ''):
-                return value
+        camera_now_minus_3d = self.camera_now - timedelta(days=3)
+        filter_expression = and_(
+            IndiAllSkyDbTaskQueueTable.createDate > camera_now_minus_3d,
+            IndiAllSkyDbTaskQueueTable.state.in_(state_list),
+            ~IndiAllSkyDbTaskQueueTable.queue.in_(exclude_queues),
+        )
 
-        return default
-
-
-    def format_task_datetime(self, value, default='Unknown'):
-        if not value:
-            return default
-        if hasattr(value, 'strftime'):
-            return value.strftime('%Y-%m-%d %H:%M:%S')
-        return str(value)
-
-
-    def format_task_age(self, value):
-        if not value:
-            return 'Unknown age'
-
-        try:
-            age_s = max(0, int((self.camera_now - value).total_seconds()))
-        except TypeError:
-            return 'Unknown age'
-
-        if age_s < 60:
-            return '{0:d}s ago'.format(age_s)
-        if age_s < 3600:
-            return '{0:d}m ago'.format(int(age_s / 60))
-        if age_s < 86400:
-            return '{0:d}h ago'.format(int(age_s / 3600))
-        return '{0:d}d ago'.format(int(age_s / 86400))
+        return ModernAdminTaskReadService(
+            query=IndiAllSkyDbTaskQueueTable.query,
+            now=self.camera_now,
+            filter_expression=filter_expression,
+            order_by_expression=IndiAllSkyDbTaskQueueTable.createDate.desc(),
+            id_field=IndiAllSkyDbTaskQueueTable.id,
+        )
 
 
-    def get_task_state_tone(self, state):
-        state_name = str(state or '').upper()
-        if state_name == 'SUCCESS':
-            return 'modern-admin-status-good'
-        if state_name == 'FAILED':
-            return 'modern-admin-status-warning'
-        if state_name in ('QUEUED', 'RUNNING'):
-            return 'modern-admin-status-neutral'
-        return 'modern-admin-status-muted'
-
-
-    def get_task_filter_values(self, task_rows, key):
-        values = {str(row.get(key) or 'Unknown') for row in task_rows}
-        return sorted(values)
-
-
-    def get_recent_task_count(self, task_list):
-        recent_cutoff = self.camera_now - timedelta(hours=1)
-        recent_count = 0
-        for task in task_list:
-            create_date = task.get('createDate')
-            if create_date and create_date >= recent_cutoff:
-                recent_count += 1
-        return recent_count
-
-
-class ModernAdminTaskQueueView(ModernAdminTaskStatusView, TaskQueueView):
+class ModernAdminTaskQueueView(ModernAdminTaskStatusView, TemplateView):
     page_title = 'Modern Admin Task Queue'
     modern_admin_task_display_limit = 200
 
     def get_context(self):
         context = super(ModernAdminTaskQueueView, self).get_context()
+        service = self.get_task_read_service()
 
-        task_rows = list()
-        task_list = context.get('task_list', [])
-        for task in task_list[:self.modern_admin_task_display_limit]:
-            created_date = task.get('createDate')
-            message = task.get('message') or task.get('result') or ''
-            task_rows.append({
-                'id'         : task.get('id'),
-                'details_url': url_for('indi_allsky.modern_admin_task_detail_view', task_id=task.get('id')),
-                'created'    : self.format_task_datetime(created_date),
-                'age'        : self.format_task_age(created_date),
-                'updated'    : self.format_task_datetime(task.get('updateDate'), default='Not tracked'),
-                'queue'      : task.get('queue') or 'Unknown',
-                'action'     : task.get('action') or 'Unknown',
-                'state'      : task.get('state') or 'Unknown',
-                'state_tone' : self.get_task_state_tone(task.get('state')),
-                'camera_id'  : task.get('camera_id') or 'Any',
-                'profile_id' : task.get('profile_id') or 'Any',
-                'message'    : message or 'No message',
-            })
+        task_list = service.list_tasks()
+        task_rows = service.build_queue_rows(
+            task_list,
+            details_url_builder=lambda task_id: url_for('indi_allsky.modern_admin_task_detail_view', task_id=task_id),
+            display_limit=self.modern_admin_task_display_limit,
+        )
 
+        context['task_list'] = task_list
         context['modern_admin_task_rows'] = task_rows
         context['modern_admin_task_count'] = len(task_list)
         context['modern_admin_task_display_count'] = len(task_rows)
         context['modern_admin_task_display_limit'] = self.modern_admin_task_display_limit
-        context['modern_admin_task_states'] = self.get_task_filter_values(task_rows, 'state')
-        context['modern_admin_task_queues'] = self.get_task_filter_values(task_rows, 'queue')
-        context['modern_admin_task_actions'] = self.get_task_filter_values(task_rows, 'action')
-        context['modern_admin_task_recent_count'] = self.get_recent_task_count(task_list)
+        context['modern_admin_task_states'] = service.get_task_filter_values(task_rows, 'state')
+        context['modern_admin_task_queues'] = service.get_task_filter_values(task_rows, 'queue')
+        context['modern_admin_task_actions'] = service.get_task_filter_values(task_rows, 'action')
+        context['modern_admin_task_recent_count'] = service.get_recent_task_count(task_list)
 
         return context
 
 
 class ModernAdminTaskDetailView(ModernAdminTaskStatusView, TemplateView):
     page_title = 'Modern Admin Task Detail'
-
-    sensitive_payload_keys = (
-        'password',
-        'passwd',
-        'token',
-        'secret',
-        'credential',
-        'authorization',
-        'auth_header',
-        'api_key',
-        'access_key',
-        'private_key',
-    )
 
     def dispatch_request(self, task_id):
         self.task_id = task_id
@@ -9146,69 +9084,16 @@ class ModernAdminTaskDetailView(ModernAdminTaskStatusView, TemplateView):
 
     def get_context(self):
         context = super(ModernAdminTaskDetailView, self).get_context()
+        service = self.get_task_read_service()
 
         try:
-            task = IndiAllSkyDbTaskQueueTable.query\
-                .filter(IndiAllSkyDbTaskQueueTable.id == self.task_id)\
-                .one()
+            task = service.get_task(self.task_id)
         except NoResultFound:
             abort(404)
 
-        task_data = task.data if isinstance(task.data, dict) else {}
-        sanitized_payload = self.redact_task_payload(task.data)
-        payload_text = self.format_task_payload(sanitized_payload)
-
-        context['modern_admin_task_detail'] = {
-            'id'           : task.id,
-            'queue'        : task.queue.name if task.queue else 'Unknown',
-            'queue_value'  : task.queue.value if task.queue else 'Unknown',
-            'state'        : task.state.name if task.state else 'Unknown',
-            'state_value'  : task.state.value if task.state else 'Unknown',
-            'state_tone'   : self.get_task_state_tone(task.state.name if task.state else None),
-            'action'       : self.get_task_data_value(task_data, 'action', 'MISSING'),
-            'created'      : self.format_task_datetime(task.createDate),
-            'updated'      : self.format_task_datetime(getattr(task, 'updateDate', None), default='Not tracked'),
-            'priority'     : task.priority if task.priority is not None else 'Not set',
-            'camera_id'    : self.get_task_data_value(task_data, 'camera_id') or 'Any',
-            'profile_id'   : self.get_task_data_value(task_data, 'profile_id') or 'Any',
-            'message'      : self.get_task_data_value(task_data, 'message') or self.get_task_data_value(task_data, 'error') or 'No message',
-            'result'       : task.result or 'No result',
-            'payload_text' : payload_text,
-            'has_payload'  : payload_text != '',
-        }
+        context['modern_admin_task_detail'] = service.build_task_detail(task)
 
         return context
-
-
-    def redact_task_payload(self, value):
-        if isinstance(value, dict):
-            redacted = {}
-            for key, item in value.items():
-                if self.is_sensitive_payload_key(key):
-                    redacted[key] = '<redacted>'
-                else:
-                    redacted[key] = self.redact_task_payload(item)
-            return redacted
-
-        if isinstance(value, list):
-            return [self.redact_task_payload(item) for item in value]
-
-        return value
-
-
-    def is_sensitive_payload_key(self, key):
-        key_str = str(key).lower()
-        return any(sensitive_key in key_str for sensitive_key in self.sensitive_payload_keys)
-
-
-    def format_task_payload(self, value):
-        if value in (None, ''):
-            return ''
-
-        try:
-            return json.dumps(value, indent=2, sort_keys=True, default=str)
-        except TypeError:
-            return str(value)
 
 
 class AjaxSystemInfoView(BaseView):

@@ -40,7 +40,8 @@ The source of truth for the current consolidation baseline is
   detail formatter now live in a small Hybrid-owned service.
 - Task/status wrappers now share `ModernAdminTaskStatusView`, reducing direct
   Classic-style ownership for read-only queue listing/detail pages; the
-  boundary also owns the read-only login guard for this family.
+  boundary also owns the read-only login guard for this family. Task list/detail
+  read-only query and formatting now live in a Hybrid-owned service.
 - Media metadata listing wrappers now share `ModernAdminMediaMetadataView`;
   interactive gallery/download/preview surfaces remain intentionally outside
   this boundary. The boundary owns the read-only login guard for metadata
@@ -109,8 +110,8 @@ runtime behavior.
 - Motivation: Hybrid now owns the easy wrapper boundaries, but many boundaries
   still inherit Classic backend implementation details.
 - Benefit: reduces actual Classic dependency rather than only moving wrapper
-  ownership. The first slice was completed for notification read-only list/detail
-  formatting; continue with one similarly bounded family.
+  ownership. Notification and task/status read-only formatting have been moved
+  into Hybrid-owned services; continue with one similarly bounded family.
 - Risk: medium; choose one bounded read-only implementation and preserve all
   existing routes, templates, payloads, and context keys.
 - Impact: high if done behind a mature boundary such as task/status,
@@ -240,6 +241,8 @@ runtime behavior.
   `ModernAdminNotificationReadService`.
 - Task/status ownership boundary added via `ModernAdminTaskStatusView`.
 - Task/status login guard ownership moved into `ModernAdminTaskStatusView`.
+- Task/status list/detail query and formatting moved into
+  `ModernAdminTaskReadService`.
 - Media metadata listing ownership boundary added via `ModernAdminMediaMetadataView`.
 - Media metadata login guard ownership moved into `ModernAdminMediaMetadataView`.
 - Media browse ownership boundary added via `ModernAdminMediaBrowseView`.
