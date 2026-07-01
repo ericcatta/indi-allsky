@@ -126,3 +126,23 @@ class ModernAdminStartrailVideoMetadataService:
         if value is None:
             return 'No metadata payload'
         return 'Non-dict metadata payload'
+
+
+class ModernAdminKeogramMetadataService(ModernAdminStartrailVideoMetadataService):
+    def build_row(self, entry):
+        return {
+            'id'         : entry.id,
+            'created'    : self.format_datetime(entry.createDate),
+            'day_date'   : entry.dayDate if entry.dayDate else 'Unknown',
+            'camera_id'  : entry.camera_id,
+            'filename'   : self.format_filename(entry.filename),
+            'dimensions' : self.format_dimensions(entry.width, entry.height),
+            'frames'     : entry.frames if entry.frames is not None else 'Unknown',
+            'file_size'  : self.format_media_size(entry.fileSize) if entry.fileSize else 'Unknown',
+            'timeofday'  : 'Night' if entry.night else 'Day',
+            'uploaded'   : self.format_bool(entry.uploaded),
+            'success'    : self.format_bool(entry.success),
+            'source'     : self.format_source(entry),
+            'sync_id'    : entry.sync_id if entry.sync_id is not None else 'N/A',
+            'metadata'   : self.format_data_summary(entry.data),
+        }
