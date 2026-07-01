@@ -9010,44 +9010,24 @@ class TaskQueueView(TemplateView):
         return context
 
 
-class ModernAdminTaskQueueView(ModernAdminContextMixin, TaskQueueView):
-    page_title = 'Modern Admin Task Queue'
+class ModernAdminTaskStatusView(ModernAdminContextMixin):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
-    modern_admin_task_display_limit = 200
 
-    def get_context(self):
-        context = super(ModernAdminTaskQueueView, self).get_context()
+    def get_task_data_value(self, task_data, key, default=''):
+        if not isinstance(task_data, dict):
+            return default
 
-        task_rows = list()
-        task_list = context.get('task_list', [])
-        for task in task_list[:self.modern_admin_task_display_limit]:
-            created_date = task.get('createDate')
-            message = task.get('message') or task.get('result') or ''
-            task_rows.append({
-                'id'         : task.get('id'),
-                'details_url': url_for('indi_allsky.modern_admin_task_detail_view', task_id=task.get('id')),
-                'created'    : self.format_task_datetime(created_date),
-                'age'        : self.format_task_age(created_date),
-                'updated'    : self.format_task_datetime(task.get('updateDate'), default='Not tracked'),
-                'queue'      : task.get('queue') or 'Unknown',
-                'action'     : task.get('action') or 'Unknown',
-                'state'      : task.get('state') or 'Unknown',
-                'state_tone' : self.get_task_state_tone(task.get('state')),
-                'camera_id'  : task.get('camera_id') or 'Any',
-                'profile_id' : task.get('profile_id') or 'Any',
-                'message'    : message or 'No message',
-            })
+        value = task_data.get(key)
+        if value not in (None, ''):
+            return value
 
-        context['modern_admin_task_rows'] = task_rows
-        context['modern_admin_task_count'] = len(task_list)
-        context['modern_admin_task_display_count'] = len(task_rows)
-        context['modern_admin_task_display_limit'] = self.modern_admin_task_display_limit
-        context['modern_admin_task_states'] = self.get_task_filter_values(task_rows, 'state')
-        context['modern_admin_task_queues'] = self.get_task_filter_values(task_rows, 'queue')
-        context['modern_admin_task_actions'] = self.get_task_filter_values(task_rows, 'action')
-        context['modern_admin_task_recent_count'] = self.get_recent_task_count(task_list)
+        task_kwargs = task_data.get('kwargs')
+        if isinstance(task_kwargs, dict):
+            value = task_kwargs.get(key)
+            if value not in (None, ''):
+                return value
 
-        return context
+        return default
 
 
     def format_task_datetime(self, value, default='Unknown'):
@@ -9102,10 +9082,48 @@ class ModernAdminTaskQueueView(ModernAdminContextMixin, TaskQueueView):
         return recent_count
 
 
-class ModernAdminTaskDetailView(ModernAdminContextMixin, TemplateView):
+class ModernAdminTaskQueueView(ModernAdminTaskStatusView, TaskQueueView):
+    page_title = 'Modern Admin Task Queue'
+    modern_admin_task_display_limit = 200
+
+    def get_context(self):
+        context = super(ModernAdminTaskQueueView, self).get_context()
+
+        task_rows = list()
+        task_list = context.get('task_list', [])
+        for task in task_list[:self.modern_admin_task_display_limit]:
+            created_date = task.get('createDate')
+            message = task.get('message') or task.get('result') or ''
+            task_rows.append({
+                'id'         : task.get('id'),
+                'details_url': url_for('indi_allsky.modern_admin_task_detail_view', task_id=task.get('id')),
+                'created'    : self.format_task_datetime(created_date),
+                'age'        : self.format_task_age(created_date),
+                'updated'    : self.format_task_datetime(task.get('updateDate'), default='Not tracked'),
+                'queue'      : task.get('queue') or 'Unknown',
+                'action'     : task.get('action') or 'Unknown',
+                'state'      : task.get('state') or 'Unknown',
+                'state_tone' : self.get_task_state_tone(task.get('state')),
+                'camera_id'  : task.get('camera_id') or 'Any',
+                'profile_id' : task.get('profile_id') or 'Any',
+                'message'    : message or 'No message',
+            })
+
+        context['modern_admin_task_rows'] = task_rows
+        context['modern_admin_task_count'] = len(task_list)
+        context['modern_admin_task_display_count'] = len(task_rows)
+        context['modern_admin_task_display_limit'] = self.modern_admin_task_display_limit
+        context['modern_admin_task_states'] = self.get_task_filter_values(task_rows, 'state')
+        context['modern_admin_task_queues'] = self.get_task_filter_values(task_rows, 'queue')
+        context['modern_admin_task_actions'] = self.get_task_filter_values(task_rows, 'action')
+        context['modern_admin_task_recent_count'] = self.get_recent_task_count(task_list)
+
+        return context
+
+
+class ModernAdminTaskDetailView(ModernAdminTaskStatusView, TemplateView):
     page_title = 'Modern Admin Task Detail'
     decorators = [login_required]
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
     sensitive_payload_keys = (
         'password',
@@ -9145,14 +9163,14 @@ class ModernAdminTaskDetailView(ModernAdminContextMixin, TemplateView):
             'queue_value'  : task.queue.value if task.queue else 'Unknown',
             'state'        : task.state.name if task.state else 'Unknown',
             'state_value'  : task.state.value if task.state else 'Unknown',
-            'state_tone'   : ModernAdminTaskQueueView.get_task_state_tone(self, task.state.name if task.state else None),
-            'action'       : TaskQueueView.get_task_data_value(self, task_data, 'action', 'MISSING'),
-            'created'      : ModernAdminTaskQueueView.format_task_datetime(self, task.createDate),
-            'updated'      : ModernAdminTaskQueueView.format_task_datetime(self, getattr(task, 'updateDate', None), default='Not tracked'),
+            'state_tone'   : self.get_task_state_tone(task.state.name if task.state else None),
+            'action'       : self.get_task_data_value(task_data, 'action', 'MISSING'),
+            'created'      : self.format_task_datetime(task.createDate),
+            'updated'      : self.format_task_datetime(getattr(task, 'updateDate', None), default='Not tracked'),
             'priority'     : task.priority if task.priority is not None else 'Not set',
-            'camera_id'    : TaskQueueView.get_task_data_value(self, task_data, 'camera_id') or 'Any',
-            'profile_id'   : TaskQueueView.get_task_data_value(self, task_data, 'profile_id') or 'Any',
-            'message'      : TaskQueueView.get_task_data_value(self, task_data, 'message') or TaskQueueView.get_task_data_value(self, task_data, 'error') or 'No message',
+            'camera_id'    : self.get_task_data_value(task_data, 'camera_id') or 'Any',
+            'profile_id'   : self.get_task_data_value(task_data, 'profile_id') or 'Any',
+            'message'      : self.get_task_data_value(task_data, 'message') or self.get_task_data_value(task_data, 'error') or 'No message',
             'result'       : task.result or 'No result',
             'payload_text' : payload_text,
             'has_payload'  : payload_text != '',

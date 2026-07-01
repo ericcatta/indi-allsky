@@ -56,6 +56,14 @@ BOUNDARIES = (
             'ModernAdminLogDetailView',
         ),
     },
+    {
+        'boundary': 'ModernAdminTaskStatusView',
+        'parent': 'ModernAdminContextMixin',
+        'wrappers': (
+            'ModernAdminTaskQueueView',
+            'ModernAdminTaskDetailView',
+        ),
+    },
 )
 
 
