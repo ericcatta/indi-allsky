@@ -17,6 +17,7 @@ from indi_allsky.modern_admin_settings_contracts import ModernAdminExposureGainS
 from indi_allsky.modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
+from indi_allsky.modern_admin_settings_contracts import ModernAdminSettingsContractBase
 from indi_allsky.modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 
 
@@ -813,6 +814,31 @@ def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
         )
 
 
+def test_single_group_settings_contracts_share_group_lookup_helper():
+    import indi_allsky.modern_admin_settings_contracts as module
+
+    source = inspect.getsource(module)
+    single_group_contracts = (
+        ModernAdminStorageSettingsContract,
+        ModernAdminCameraProfileSettingsContract,
+        ModernAdminCameraConnectionSettingsContract,
+        ModernAdminHybridAwbSettingsContract,
+        ModernAdminFitsSourceSettingsContract,
+        ModernAdminNotificationsSettingsContract,
+    )
+
+    assert_true(
+        source.count('def find_settings_group') == 1,
+        'settings group lookup helper should have one shared implementation',
+    )
+
+    for contract_class in single_group_contracts:
+        assert_true(
+            issubclass(contract_class, ModernAdminSettingsContractBase),
+            '{0:s} must inherit the shared settings contract base'.format(contract_class.__name__),
+        )
+
+
 def run_tests():
     test_notifications_settings_contract_preserves_context_shape()
     test_notifications_settings_contract_handles_missing_group()
@@ -842,6 +868,7 @@ def run_tests():
     test_fits_source_settings_contract_handles_missing_group()
     test_fits_source_settings_view_uses_hybrid_contract()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
+    test_single_group_settings_contracts_share_group_lookup_helper()
 
 
 if __name__ == '__main__':

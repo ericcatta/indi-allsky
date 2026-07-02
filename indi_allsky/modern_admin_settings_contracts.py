@@ -1,4 +1,13 @@
-class ModernAdminStorageSettingsContract:
+class ModernAdminSettingsContractBase:
+    def find_settings_group(self, settings_groups, group_id):
+        for group in settings_groups or tuple():
+            if group.get('group_id') == group_id:
+                return group
+
+        return None
+
+
+class ModernAdminStorageSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
             'label'       : 'Storage health',
@@ -158,14 +167,6 @@ class ModernAdminStorageSettingsContract:
         }
 
 
-    def find_settings_group(self, settings_groups, group_id):
-        for group in settings_groups or tuple():
-            if group.get('group_id') == group_id:
-                return group
-
-        return None
-
-
     def get_overview_cards(self):
         return tuple(
             {
@@ -219,7 +220,7 @@ class ModernAdminStorageSettingsContract:
         return str(value)
 
 
-class ModernAdminCameraProfileSettingsContract:
+class ModernAdminCameraProfileSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
             'label'       : 'Profile identity',
@@ -385,14 +386,6 @@ class ModernAdminCameraProfileSettingsContract:
         }
 
 
-    def find_settings_group(self, settings_groups, group_id):
-        for group in settings_groups or tuple():
-            if group.get('group_id') == group_id:
-                return group
-
-        return None
-
-
     def get_overview_cards(self):
         return tuple(
             {
@@ -446,7 +439,7 @@ class ModernAdminCameraProfileSettingsContract:
         return str(value)
 
 
-class ModernAdminCameraConnectionSettingsContract:
+class ModernAdminCameraConnectionSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
             'label'       : 'Camera driver / backend',
@@ -631,14 +624,6 @@ class ModernAdminCameraConnectionSettingsContract:
             'modern_admin_camera_connection_config_sections' : self.get_config_sections(),
             'modern_admin_camera_connection_proposed_layout' : self.get_proposed_layout(),
         }
-
-
-    def find_settings_group(self, settings_groups, group_id):
-        for group in settings_groups or tuple():
-            if group.get('group_id') == group_id:
-                return group
-
-        return None
 
 
     def get_overview_cards(self):
@@ -1266,7 +1251,7 @@ class ModernAdminAutoExposureGainSettingsContract:
         return str(value)
 
 
-class ModernAdminHybridAwbSettingsContract:
+class ModernAdminHybridAwbSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
             'label'       : 'Hybrid AWB mode / strategy',
@@ -1481,14 +1466,6 @@ class ModernAdminHybridAwbSettingsContract:
             'modern_admin_hybrid_awb_config_sections' : self.get_config_sections(),
             'modern_admin_hybrid_awb_proposed_layout' : self.get_proposed_layout(),
         }
-
-
-    def find_settings_group(self, settings_groups, group_id):
-        for group in settings_groups or tuple():
-            if group.get('group_id') == group_id:
-                return group
-
-        return None
 
 
     def get_overview_cards(self):
@@ -1836,7 +1813,7 @@ class ModernAdminAcquisitionSaveSettingsContract:
         return str(value)
 
 
-class ModernAdminFitsSourceSettingsContract:
+class ModernAdminFitsSourceSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
             'label'       : 'FITS persistence',
@@ -2044,14 +2021,6 @@ class ModernAdminFitsSourceSettingsContract:
         }
 
 
-    def find_settings_group(self, settings_groups, group_id):
-        for group in settings_groups or tuple():
-            if group.get('group_id') == group_id:
-                return group
-
-        return None
-
-
     def get_overview_cards(self):
         return tuple(
             {
@@ -2105,7 +2074,7 @@ class ModernAdminFitsSourceSettingsContract:
         return str(value)
 
 
-class ModernAdminNotificationsSettingsContract:
+class ModernAdminNotificationsSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
             'label'       : 'Notification categories',
@@ -2248,14 +2217,6 @@ class ModernAdminNotificationsSettingsContract:
             'modern_admin_notifications_config_sections' : self.get_config_sections(),
             'modern_admin_notifications_proposed_layout' : self.get_proposed_layout(),
         }
-
-
-    def find_settings_group(self, settings_groups, group_id):
-        for group in settings_groups or tuple():
-            if group.get('group_id') == group_id:
-                return group
-
-        return None
 
 
     def get_overview_cards(self):
