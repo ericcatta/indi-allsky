@@ -35,10 +35,11 @@ The source of truth for the current consolidation baseline is
 - System read-only wrappers now share `ModernAdminSystemToolView`, reducing
   direct Classic-style ownership for developer/status pages; the boundary owns
   the read-only login guard for this family.
-- Notification read-only wrappers now share `ModernAdminNotificationStatusView`;
-  acknowledgement actions remain outside this boundary. The read-only list and
-  detail formatter and context summaries now live in a small Hybrid-owned
-  service.
+- Notification read-only wrappers now share `ModernAdminNotificationStatusView`.
+  The read-only list/detail formatter, context summaries, acknowledge lookup,
+  acknowledge result/audit types, and acknowledge action policy now live in the
+  Hybrid-owned Notifications service layer. `modern_safe_action.py` remains the
+  safe-action wrapper/orchestrator for permission and execution contracts.
 - Task/status wrappers now share `ModernAdminTaskStatusView`, reducing direct
   Classic-style ownership for read-only queue listing/detail pages; the
   boundary also owns the read-only login guard for this family. Task list/detail
@@ -101,8 +102,8 @@ runtime behavior.
 
 - Camera add/detect/server-start flows.
 - Safe controls, config save/restore surfaces, generation/focus/process
-  controls, network/drives/GPIO controls, notification acknowledgement, and
-  safe-action dry-run/capture endpoints.
+  controls, network/drives/GPIO controls, and safe-action dry-run/capture
+  endpoints.
 - Any POST/action endpoint, external API, restore/import/export, restart/stop,
   purge/delete, upload/download, or media-generation path.
 

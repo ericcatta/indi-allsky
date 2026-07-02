@@ -9,6 +9,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_notifications import ModernAdminNotificationReadService
+from indi_allsky.modern_admin_notifications import NOTIFICATION_ACKNOWLEDGE_ACTION_ID
+from indi_allsky.modern_admin_notifications import NOTIFICATION_ACKNOWLEDGE_FEATURE
+from indi_allsky.modern_admin_notifications import NOTIFICATION_ACKNOWLEDGE_LABEL
+from indi_allsky.modern_admin_notifications import NOTIFICATION_ACKNOWLEDGE_RISK_LEVEL
 from indi_allsky.modern_admin_notifications import NotificationAcknowledgeService
 
 
@@ -188,6 +192,21 @@ def test_notification_acknowledge_service_is_domain_owned():
     assert safe_action_module.NotificationAcknowledgeService is notification_module.NotificationAcknowledgeService
 
 
+def test_notification_acknowledge_action_policy_is_domain_owned():
+    import indi_allsky.modern_safe_action as safe_action_module
+
+    action = safe_action_module.NotificationAcknowledgeSafeAction(permission_check=lambda actor: True)
+    service = NotificationAcknowledgeService(lambda notification_id: None)
+
+    assert action.action_id == NOTIFICATION_ACKNOWLEDGE_ACTION_ID
+    assert action.label == NOTIFICATION_ACKNOWLEDGE_LABEL
+    assert action.feature == NOTIFICATION_ACKNOWLEDGE_FEATURE
+    assert action.risk_level == NOTIFICATION_ACKNOWLEDGE_RISK_LEVEL
+    assert service.action_id == NOTIFICATION_ACKNOWLEDGE_ACTION_ID
+    assert service.feature == NOTIFICATION_ACKNOWLEDGE_FEATURE
+    assert service.risk_level == NOTIFICATION_ACKNOWLEDGE_RISK_LEVEL
+
+
 def test_notification_acknowledge_service_preserves_acknowledge_behavior():
     notice = FakeAcknowledgeNotice(7)
     repo = FakeAcknowledgeRepository({7: notice})
@@ -230,6 +249,7 @@ def run_tests():
     test_notification_detail_context_preserves_context_key()
     test_notification_read_service_has_no_flask_or_db_dependency()
     test_notification_acknowledge_service_is_domain_owned()
+    test_notification_acknowledge_action_policy_is_domain_owned()
     test_notification_acknowledge_service_preserves_acknowledge_behavior()
     test_notification_acknowledge_service_preserves_audit_redaction()
     print('Modern admin notification read service checks passed')

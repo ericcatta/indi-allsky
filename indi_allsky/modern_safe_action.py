@@ -7,6 +7,10 @@ from pathlib import Path
 from typing import Any
 from typing import Callable
 
+from .modern_admin_notifications import NOTIFICATION_ACKNOWLEDGE_ACTION_ID
+from .modern_admin_notifications import NOTIFICATION_ACKNOWLEDGE_FEATURE
+from .modern_admin_notifications import NOTIFICATION_ACKNOWLEDGE_LABEL
+from .modern_admin_notifications import NOTIFICATION_ACKNOWLEDGE_RISK_LEVEL
 from .modern_admin_notifications import NotificationAcknowledgeDbAdapter
 from .modern_admin_notifications import NotificationAcknowledgeRepositoryError
 from .modern_admin_notifications import NotificationAcknowledgeService
@@ -327,10 +331,10 @@ class ModernAdminSafeActionPlaceholder(ModernAdminSafeAction):
 
 
 class NotificationAcknowledgeSafeAction(ModernAdminSafeAction):
-    action_id = 'notification.acknowledge'
-    label = 'Acknowledge Notification'
-    feature = 'Notifications'
-    risk_level = 'medium'
+    action_id = NOTIFICATION_ACKNOWLEDGE_ACTION_ID
+    label = NOTIFICATION_ACKNOWLEDGE_LABEL
+    feature = NOTIFICATION_ACKNOWLEDGE_FEATURE
+    risk_level = NOTIFICATION_ACKNOWLEDGE_RISK_LEVEL
 
     def __init__(self, permission_check=None, notification_lookup=None, acknowledge_callback=None, acknowledge_service=None):
         super().__init__(permission_check=permission_check)

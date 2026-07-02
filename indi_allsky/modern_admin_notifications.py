@@ -15,6 +15,11 @@ SECRET_TOKENS = (
     'token',
 )
 
+NOTIFICATION_ACKNOWLEDGE_ACTION_ID = 'notification.acknowledge'
+NOTIFICATION_ACKNOWLEDGE_LABEL = 'Acknowledge Notification'
+NOTIFICATION_ACKNOWLEDGE_FEATURE = 'Notifications'
+NOTIFICATION_ACKNOWLEDGE_RISK_LEVEL = 'medium'
+
 
 @dataclass(frozen=True)
 class NotificationAcknowledgeResult:
@@ -189,9 +194,9 @@ class NotificationAcknowledgeDbAdapter:
 class NotificationAcknowledgeService:
     """Hybrid-owned service boundary for notification acknowledge operations."""
 
-    action_id = 'notification.acknowledge'
-    feature = 'Notifications'
-    risk_level = 'medium'
+    action_id = NOTIFICATION_ACKNOWLEDGE_ACTION_ID
+    feature = NOTIFICATION_ACKNOWLEDGE_FEATURE
+    risk_level = NOTIFICATION_ACKNOWLEDGE_RISK_LEVEL
 
     def __init__(self, notification_lookup):
         self.notification_lookup = notification_lookup
