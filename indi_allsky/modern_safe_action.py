@@ -7,6 +7,10 @@ from pathlib import Path
 from typing import Any
 from typing import Callable
 
+from .modern_admin_notifications import NotificationAcknowledgeDbAdapter
+from .modern_admin_notifications import NotificationAcknowledgeRepositoryError
+from .modern_admin_notifications import NotificationAcknowledgeService
+
 
 SECRET_TOKENS = (
     'apikey',
@@ -322,272 +326,6 @@ class ModernAdminSafeActionPlaceholder(ModernAdminSafeAction):
         self.risk_level = risk_level
 
 
-class NotificationAcknowledgeRepositoryError(RuntimeError):
-    """Sanitized repository error for notification acknowledge lookup."""
-
-
-class NotificationAcknowledgeDbAdapter:
-    """DB adapter between notification models and the acknowledge service.
-
-    The adapter performs lookup only. It does not call setAck(), commit, mutate
-    database state, depend on Flask request context, or expose raw repository
-    exception messages.
-    """
-
-    def __init__(self, notification_model=None, query=None, no_result_exceptions=None):
-        self.notification_model = notification_model
-        self.query = query
-        self.no_result_exceptions = tuple(no_result_exceptions or ())
-
-
-    def lookup(self, notification_id):
-        try:
-            query = self.query_for_lookup()
-
-            if hasattr(query, 'filter_by'):
-                return query.filter_by(id=notification_id).one()
-
-            if self.notification_model is None:
-                raise NotificationAcknowledgeRepositoryError('notification_model is required')
-
-            return query.filter(self.notification_model.id == notification_id).one()
-        except Exception as e:
-            if self.is_no_result(e):
-                return None
-
-            raise NotificationAcknowledgeRepositoryError(type(e).__name__) from e
-
-
-    def query_for_lookup(self):
-        if self.query is not None:
-            return self.query
-
-        if self.notification_model is None:
-            raise NotificationAcknowledgeRepositoryError('notification_model is required')
-
-        return self.notification_model.query
-
-
-    def is_no_result(self, error):
-        if self.no_result_exceptions and isinstance(error, self.no_result_exceptions):
-            return True
-
-        return type(error).__name__ == 'NoResultFound'
-
-
-class NotificationAcknowledgeService:
-    """Service boundary for notification acknowledge operations.
-
-    The service has no Flask request dependency and is not exposed to the UI. It
-    can call a notification object's setAck() only through acknowledge(), which
-    must be invoked explicitly by a future tested wrapper.
-    """
-
-    action_id = 'notification.acknowledge'
-    feature = 'Notifications'
-    risk_level = 'medium'
-
-    def __init__(self, notification_lookup):
-        self.notification_lookup = notification_lookup
-
-
-    def validate_notification_id(self, notification_id):
-        if notification_id is None or isinstance(notification_id, bool):
-            return None, 'notification_id is required'
-
-        try:
-            notification_id_i = int(notification_id)
-        except (TypeError, ValueError):
-            return None, 'notification_id must be a positive integer'
-
-        if notification_id_i < 1:
-            return None, 'notification_id must be a positive integer'
-
-        return notification_id_i, None
-
-
-    def lookup_notification(self, notification_id):
-        notification_id_i, error = self.validate_notification_id(notification_id)
-        if error:
-            return None
-
-        return self.notification_lookup(notification_id_i)
-
-
-    def acknowledge(self, notification_id, notification=None, actor=None, payload=None):
-        payload = payload or {}
-        notification_id_i, error = self.validate_notification_id(notification_id)
-        if error:
-            return self.result(
-                status='invalid_id',
-                message=error,
-                dry_run=False,
-                allowed=False,
-                details={'notification_id': notification_id},
-            )
-
-        try:
-            if notification is None:
-                notification = self.notification_lookup(notification_id_i)
-        except Exception as e:
-            return self.result(
-                status='repository_error',
-                message='Notification lookup failed',
-                dry_run=False,
-                allowed=False,
-                details={
-                    'notification_id': notification_id_i,
-                    'error_type': type(e).__name__,
-                },
-            )
-
-        if notification is None:
-            return self.result(
-                status='not_found',
-                message='Notification does not exist',
-                dry_run=False,
-                allowed=False,
-                details={'notification_id': notification_id_i},
-            )
-
-        if bool(getattr(notification, 'ack', False)):
-            return self.result(
-                status='already_acked',
-                message='Notification is already acknowledged',
-                dry_run=False,
-                allowed=True,
-                details={
-                    'notification_id': notification_id_i,
-                    'idempotent': True,
-                },
-            )
-
-        try:
-            notification.setAck()
-        except Exception as e:
-            return self.result(
-                status='acknowledge_failed',
-                message='Notification acknowledge failed',
-                dry_run=False,
-                allowed=False,
-                details={
-                    'notification_id': notification_id_i,
-                    'error_type': type(e).__name__,
-                },
-            )
-
-        return self.result(
-            status='acknowledged',
-            message='Notification acknowledged',
-            dry_run=False,
-            allowed=True,
-            details={'notification_id': notification_id_i},
-        )
-
-
-    def acknowledge_with_audit(self, notification_id, actor=None, payload=None, audit_log=None, dry_run=False):
-        payload = dict(payload or {})
-        payload.setdefault('notification_id', notification_id)
-
-        if dry_run:
-            result = self.dry_run(notification_id)
-        else:
-            result = self.acknowledge(
-                notification_id=notification_id,
-                actor=actor,
-                payload=payload,
-            )
-
-        audit_record = ModernAdminSafeActionAuditRecord.from_result(
-            result,
-            actor=actor,
-            payload=payload,
-        )
-        audit_write = None
-        if audit_log is not None:
-            audit_write = audit_log.append(audit_record)
-
-        return result, audit_record, audit_write
-
-
-    def dry_run(self, notification_id):
-        notification_id_i, error = self.validate_notification_id(notification_id)
-        if error:
-            return self.result(
-                status='invalid_id',
-                message=error,
-                dry_run=True,
-                allowed=False,
-                details={'notification_id': notification_id},
-            )
-
-        try:
-            notification = self.notification_lookup(notification_id_i)
-        except Exception as e:
-            return self.result(
-                status='repository_error',
-                message='Notification lookup failed',
-                dry_run=True,
-                allowed=False,
-                details={
-                    'notification_id': notification_id_i,
-                    'error_type': type(e).__name__,
-                },
-            )
-
-        if notification is None:
-            return self.result(
-                status='not_found',
-                message='Notification does not exist',
-                dry_run=True,
-                allowed=False,
-                details={'notification_id': notification_id_i},
-            )
-
-        if bool(getattr(notification, 'ack', False)):
-            return self.result(
-                status='already_acked',
-                message='Notification is already acknowledged',
-                dry_run=True,
-                allowed=True,
-                details={
-                    'notification_id': notification_id_i,
-                    'idempotent': True,
-                },
-            )
-
-        return self.result(
-            status='dry_run',
-            message='Dry run only; no action executed',
-            dry_run=True,
-            allowed=True,
-            details={'notification_id': notification_id_i},
-        )
-
-
-    def acknowledge_callback(self, notification_id, notification=None, actor=None, payload=None):
-        return self.acknowledge(
-            notification_id=notification_id,
-            notification=notification,
-            actor=actor,
-            payload=payload or {},
-        )
-
-
-    def result(self, status, message, dry_run=False, allowed=False, details=None):
-        return ModernAdminSafeActionResult(
-            action_id=self.action_id,
-            feature=self.feature,
-            risk_level=self.risk_level,
-            status=status,
-            message=message,
-            dry_run=dry_run,
-            allowed=allowed,
-            audit_message='service action={0:s} status={1:s}'.format(self.action_id, status),
-            details=details or {},
-        )
-
-
 class NotificationAcknowledgeSafeAction(ModernAdminSafeAction):
     action_id = 'notification.acknowledge'
     label = 'Acknowledge Notification'
@@ -654,7 +392,7 @@ class NotificationAcknowledgeSafeAction(ModernAdminSafeAction):
             payload=payload,
         )
 
-        if isinstance(callback_result, ModernAdminSafeActionResult):
+        if self.is_action_result(callback_result):
             return callback_result
 
         callback_details = {}
@@ -679,6 +417,22 @@ class NotificationAcknowledgeSafeAction(ModernAdminSafeAction):
             return None
 
         return self.notification_lookup(notification_id)
+
+
+    def is_action_result(self, value):
+        return all(
+            hasattr(value, attr)
+            for attr in (
+                'action_id',
+                'feature',
+                'risk_level',
+                'status',
+                'message',
+                'dry_run',
+                'allowed',
+                'details',
+            )
+        )
 
 
     def notification_id_from_payload(self, payload):

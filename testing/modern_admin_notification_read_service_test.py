@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_notifications import ModernAdminNotificationReadService
+from indi_allsky.modern_admin_notifications import NotificationAcknowledgeService
 
 
 class FakeCategory:
@@ -29,6 +30,30 @@ class FakeNotice:
         self.expireDate = datetime(2026, 1, 3, 4, 5, 6)
         self.ack = ack
         self.notification = 'Test notification'
+
+
+class FakeAcknowledgeNotice:
+    def __init__(self, notice_id=1, ack=False):
+        self.id = notice_id
+        self.ack = ack
+        self.set_ack_calls = 0
+
+    def setAck(self):
+        self.set_ack_calls += 1
+        self.ack = True
+
+
+class FakeAcknowledgeRepository:
+    def __init__(self, notices=None, error=None):
+        self.notices = notices or {}
+        self.error = error
+        self.lookup_calls = []
+
+    def lookup(self, notification_id):
+        self.lookup_calls.append(notification_id)
+        if self.error is not None:
+            raise self.error
+        return self.notices.get(notification_id)
 
 
 class FakeQuery:
@@ -147,12 +172,66 @@ def test_notification_read_service_has_no_flask_or_db_dependency():
     assert 'open(' not in source
 
 
+def test_notification_acknowledge_service_is_domain_owned():
+    import inspect
+    import indi_allsky.modern_admin_notifications as notification_module
+    import indi_allsky.modern_safe_action as safe_action_module
+
+    notification_source = inspect.getsource(notification_module)
+    safe_action_source = inspect.getsource(safe_action_module)
+
+    assert 'class NotificationAcknowledgeService' in notification_source
+    assert 'class NotificationAcknowledgeDbAdapter' in notification_source
+    assert 'class NotificationAcknowledgeRepositoryError' in notification_source
+    assert 'class NotificationAcknowledgeSafeAction' in safe_action_source
+    assert 'class NotificationAcknowledgeService' not in safe_action_source
+    assert safe_action_module.NotificationAcknowledgeService is notification_module.NotificationAcknowledgeService
+
+
+def test_notification_acknowledge_service_preserves_acknowledge_behavior():
+    notice = FakeAcknowledgeNotice(7)
+    repo = FakeAcknowledgeRepository({7: notice})
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    result = service.acknowledge(notification_id=7)
+
+    assert result.status == 'acknowledged'
+    assert result.allowed is True
+    assert result.details == {'notification_id': 7}
+    assert notice.ack is True
+    assert notice.set_ack_calls == 1
+    assert repo.lookup_calls == [7]
+
+
+def test_notification_acknowledge_service_preserves_audit_redaction():
+    notice = FakeAcknowledgeNotice(8)
+    repo = FakeAcknowledgeRepository({8: notice})
+    service = NotificationAcknowledgeService(repo.lookup)
+
+    _result, audit_record, _audit_write = service.acknowledge_with_audit(
+        notification_id=8,
+        payload={
+            'notification_id': 8,
+            'api_token': 'do-not-leak',
+        },
+        dry_run=False,
+    )
+    data = audit_record.to_dict()
+
+    assert data['status'] == 'acknowledged'
+    assert data['payload_summary']['api_token'] == '[REDACTED]'
+    assert 'do-not-leak' not in str(data)
+
+
 def run_tests():
     test_notification_rows_preserve_context_shape()
     test_notification_detail_preserves_filter_behavior()
     test_notification_list_context_preserves_context_keys()
     test_notification_detail_context_preserves_context_key()
     test_notification_read_service_has_no_flask_or_db_dependency()
+    test_notification_acknowledge_service_is_domain_owned()
+    test_notification_acknowledge_service_preserves_acknowledge_behavior()
+    test_notification_acknowledge_service_preserves_audit_redaction()
     print('Modern admin notification read service checks passed')
 
 
