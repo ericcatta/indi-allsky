@@ -14,6 +14,7 @@ from indi_allsky.modern_admin_settings_contracts import ModernAdminAutoExposureG
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraConnectionSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminExposureGainSettingsContract
+from indi_allsky.modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminStorageSettingsContract
@@ -711,6 +712,86 @@ def test_acquisition_save_settings_view_uses_hybrid_contract():
     )
 
 
+def test_fits_source_settings_contract_preserves_context_shape():
+    contract = ModernAdminFitsSourceSettingsContract()
+    fits_source_group = {
+        'group_id': 'fits_source_files',
+        'label': 'FITS / Source Files',
+    }
+
+    context = contract.build_context((
+        {'group_id': 'other'},
+        fits_source_group,
+    ))
+
+    assert_true(
+        context['modern_admin_fits_source_settings_group'] is fits_source_group,
+        'FITS/source group must be selected from settings inventory groups',
+    )
+    assert_true(
+        len(context['modern_admin_fits_source_overview_cards']) == 6,
+        'FITS/source overview cards shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_fits_source_config_sections']) == 5,
+        'FITS/source config sections shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_fits_source_proposed_layout']) == 6,
+        'FITS/source proposed layout shape changed',
+    )
+    assert_true(
+        context['modern_admin_fits_source_overview_cards'][0]['current_status'] == 'not evaluated here',
+        'FITS/source overview current status changed',
+    )
+    assert_true(
+        context['modern_admin_fits_source_config_sections'][0]['key_count'] == 4,
+        'FITS persistence config key count changed',
+    )
+    assert_true(
+        context['modern_admin_fits_source_config_sections'][4]['key_count'] == 3,
+        'viewer/file safety config key count changed',
+    )
+    assert_true(
+        context['modern_admin_fits_source_proposed_layout'][0]['note'] == 'read-only proposal',
+        'FITS/source layout note changed',
+    )
+
+
+def test_fits_source_settings_contract_handles_missing_group():
+    contract = ModernAdminFitsSourceSettingsContract()
+    context = contract.build_context(())
+
+    assert_true(
+        context['modern_admin_fits_source_settings_group'] is None,
+        'missing FITS/source group must remain a safe None fallback',
+    )
+
+
+def test_fits_source_settings_view_uses_hybrid_contract():
+    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
+    start = views_text.index('class ModernAdminFitsSourceSettingsView')
+    end = views_text.index('class ModernAdminFullSettingsView', start)
+    fits_source_view = views_text[start:end]
+
+    assert_true(
+        'ModernAdminFitsSourceSettingsContract' in fits_source_view,
+        'FITS/source settings view must use the Hybrid settings contract',
+    )
+    assert_true(
+        'settings_contract' in fits_source_view,
+        'FITS/source settings view must expose the contract dependency explicitly',
+    )
+    assert_true(
+        'FITS_SOURCE_CONFIG_SECTIONS' not in fits_source_view,
+        'FITS/source static config sections must not remain inline on the view',
+    )
+    assert_true(
+        'get_fits_source_overview_cards' not in fits_source_view,
+        'FITS/source overview formatting must not remain inline on the view',
+    )
+
+
 def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
     import indi_allsky.modern_admin_settings_contracts as module
 
@@ -757,6 +838,9 @@ def run_tests():
     test_acquisition_save_settings_contract_preserves_context_shape()
     test_acquisition_save_settings_contract_handles_missing_groups()
     test_acquisition_save_settings_view_uses_hybrid_contract()
+    test_fits_source_settings_contract_preserves_context_shape()
+    test_fits_source_settings_contract_handles_missing_group()
+    test_fits_source_settings_view_uses_hybrid_contract()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
 
 

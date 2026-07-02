@@ -51,6 +51,11 @@ The source of truth for the current consolidation baseline is
   save formats, FITS/RAW/source persistence, retention impact, and hook
   boundaries only; no capture cadence, save/FITS/RAW/source behavior, hook
   execution, or config writes were changed.
+- FITS / Source settings are now a Hybrid-owned read-only contract slice. It
+  documents FITS persistence, RAW/source preservation, FITS headers, retention,
+  upload/export flags, and viewer/file-access safety boundaries only; no
+  FITS/RAW/source behavior, path handling, filesystem access, conversion,
+  download/viewer behavior, or config writes were changed.
 - Mutative/safe-action ownership is now discovered in
   `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
   contract schema before any new execution path.
@@ -153,9 +158,9 @@ runtime behavior.
 - Benefit: continues moving from settings documentation to native Hybrid
   settings ownership without renaming keys, changing defaults, or removing
   Classic fallback. Notifications, Storage, Camera Profile Identity, Camera
-  Connection, Exposure/Gain, Auto Exposure/Gain, Hybrid AWB, and Acquisition /
-  Save are complete as the first read-only contract slices; choose the next
-  low-risk group rather than broad settings migration.
+  Connection, Exposure/Gain, Auto Exposure/Gain, Hybrid AWB, Acquisition /
+  Save, and FITS / Source are complete as the first read-only contract slices;
+  choose the next low-risk group rather than broad settings migration.
 - Risk: high if the first slice edits runtime config; keep the first step
   bounded to one low-risk read-only/edit-preview group.
 - Impact: high for Classic exit.

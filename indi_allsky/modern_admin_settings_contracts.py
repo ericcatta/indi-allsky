@@ -1836,6 +1836,275 @@ class ModernAdminAcquisitionSaveSettingsContract:
         return str(value)
 
 
+class ModernAdminFitsSourceSettingsContract:
+    CONFIG_SECTIONS = (
+        {
+            'label'       : 'FITS persistence',
+            'description' : 'FITS source persistence settings discovered from Classic config and Modern FITS metadata surfaces.',
+            'keys'        : (
+                {
+                    'key'     : 'IMAGE_SAVE_FITS',
+                    'source'  : 'Classic config form / Modern FITS metadata pages',
+                    'notes'   : 'Primary FITS persistence gate; this preview does not create FITS files.',
+                },
+                {
+                    'key'     : 'IMAGE_SAVE_FITS_COMPRESSED',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Compression metadata for persisted FITS records.',
+                },
+                {
+                    'key'     : 'IMAGE_SAVE_FITS_PERIOD',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Periodic FITS save interval metadata.',
+                },
+                {
+                    'key'     : 'IMAGE_SAVE_FITS_PRE_DARK',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Pre-dark FITS source behavior metadata.',
+                },
+            ),
+        },
+        {
+            'label'       : 'RAW / source persistence',
+            'description' : 'RAW/source export settings that must remain separate from display-image output settings.',
+            'keys'        : (
+                {
+                    'key'     : 'IMAGE_EXPORT_RAW',
+                    'source'  : 'Classic config form / Modern RAW metadata pages',
+                    'notes'   : 'RAW/source export behavior; no filesystem access is performed here.',
+                },
+                {
+                    'key'     : 'FILETRANSFER__UPLOAD_RAW',
+                    'source'  : 'Classic upload config form',
+                    'notes'   : 'Remote upload flag for RAW/source products; no remote action is triggered here.',
+                },
+                {
+                    'key'     : 'FILETRANSFER__UPLOAD_FITS / S3UPLOAD__UPLOAD_FITS',
+                    'source'  : 'Classic upload config form',
+                    'notes'   : 'Remote upload flags for FITS products; shown as static evidence only.',
+                },
+            ),
+        },
+        {
+            'label'       : 'FITS headers / metadata',
+            'description' : 'Static FITS header and image metadata fields that connect source files to scientific context.',
+            'keys'        : (
+                {
+                    'key'     : 'FITSHEADERS__*_KEY / FITSHEADERS__*_VAL',
+                    'source'  : 'Classic config form',
+                    'notes'   : 'Optional FITS header metadata rows.',
+                },
+                {
+                    'key'     : 'CCD_BIT_DEPTH',
+                    'source'  : 'Classic config form / Modern camera settings',
+                    'notes'   : 'Source bit-depth metadata used by FITS processing contexts.',
+                },
+                {
+                    'key'     : 'IndiAllSkyDbFitsImageTable metadata',
+                    'source'  : 'Modern FITS inspection/detail pages',
+                    'notes'   : 'Existing DB metadata surfaced read-only by Modern FITS pages.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Retention and storage impact',
+            'description' : 'Retention and storage placement settings that affect source-data footprint on Raspberry Pi storage.',
+            'keys'        : (
+                {
+                    'key'     : 'IMAGE_FITS_EXPIRE_DAYS',
+                    'source'  : 'Classic config form / Storage settings preview',
+                    'notes'   : 'FITS retention period metadata.',
+                },
+                {
+                    'key'     : 'IMAGE_RAW_EXPIRE_DAYS',
+                    'source'  : 'Classic config form / Storage settings preview',
+                    'notes'   : 'RAW/source retention period metadata.',
+                },
+                {
+                    'key'     : 'IMAGE_FOLDER / IMAGE_EXPORT_FOLDER',
+                    'source'  : 'Classic config form / Storage settings preview',
+                    'notes'   : 'Storage roots shown as key names only; no path is read or scanned here.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Viewer / file access safety notes',
+            'description' : 'Boundaries for future source-file viewers and file access actions.',
+            'keys'        : (
+                {
+                    'key'     : 'Classic conversion route',
+                    'source'  : 'Classic FITS viewer',
+                    'notes'   : 'Classic conversion route exists; this settings preview never calls it.',
+                },
+                {
+                    'key'     : 'Modern FITS inspection/detail',
+                    'source'  : 'Modern read-only metadata pages',
+                    'notes'   : 'Safe metadata inspection already exists separately from source-file actions.',
+                },
+                {
+                    'key'     : 'path allowlist / basename-only UI',
+                    'source'  : 'Safe Actions and file policy',
+                    'notes'   : 'Future file actions require explicit policy before exposure.',
+                },
+            ),
+        },
+    )
+
+    PROPOSED_LAYOUT = (
+        {
+            'label'          : 'FITS persistence',
+            'purpose'        : 'Make FITS save mode, compression, period, and pre-dark semantics explicit without creating files.',
+            'source_keys'    : ('IMAGE_SAVE_FITS', 'IMAGE_SAVE_FITS_COMPRESSED', 'IMAGE_SAVE_FITS_PERIOD', 'IMAGE_SAVE_FITS_PRE_DARK'),
+            'proposed_level' : 'Future Advanced / Scientific Source',
+        },
+        {
+            'label'          : 'RAW/source persistence',
+            'purpose'        : 'Keep RAW/source export behavior separate from display-image save formats and remote upload actions.',
+            'source_keys'    : ('IMAGE_EXPORT_RAW', 'FILETRANSFER__UPLOAD_RAW', 'FILETRANSFER__UPLOAD_FITS'),
+            'proposed_level' : 'Future Advanced / Scientific Source',
+        },
+        {
+            'label'          : 'FITS headers / metadata',
+            'purpose'        : 'Group source metadata and FITS headers as scientific context instead of generic config rows.',
+            'source_keys'    : ('FITSHEADERS__*', 'CCD_BIT_DEPTH', 'IndiAllSkyDbFitsImageTable'),
+            'proposed_level' : 'Future Advanced / Metadata',
+        },
+        {
+            'label'          : 'Retention and storage impact',
+            'purpose'        : 'Show source-data storage cost and retention constraints with RPi5-first limits.',
+            'source_keys'    : ('IMAGE_FITS_EXPIRE_DAYS', 'IMAGE_RAW_EXPIRE_DAYS', 'IMAGE_FOLDER', 'IMAGE_EXPORT_FOLDER'),
+            'proposed_level' : 'Future Advanced / Storage',
+        },
+        {
+            'label'          : 'Scientific Source Layer relationship',
+            'purpose'        : 'Preserve source-first semantics so final UI does not reduce explainability or scientific traceability.',
+            'source_keys'    : ('ScientificFrame', 'ScientificFrameProvider', 'FITS metadata'),
+            'proposed_level' : 'Future Advanced / Scientific Source',
+        },
+        {
+            'label'          : 'Viewer / file access safety notes',
+            'purpose'        : 'Keep conversion, preview, and file-access actions outside this read-only settings preview.',
+            'source_keys'    : ('Classic FITS viewer', 'Modern FITS metadata inspection', 'Safe file policy'),
+            'proposed_level' : 'Future Developer / Safety',
+        },
+    )
+
+    OVERVIEW_CARDS = (
+        {
+            'label'           : 'FITS persistence',
+            'purpose'         : 'Summarize FITS save policy as scientific source persistence, not ordinary display output.',
+            'related_fields'  : ('IMAGE_SAVE_FITS', 'IMAGE_SAVE_FITS_COMPRESSED', 'IMAGE_SAVE_FITS_PERIOD', 'IMAGE_SAVE_FITS_PRE_DARK'),
+            'future_editable' : 'blocked until Scientific Source policy is preserved',
+            'safety_note'     : 'This page does not create, inspect, convert, or download FITS files.',
+        },
+        {
+            'label'           : 'RAW/source persistence',
+            'purpose'         : 'Keep RAW/source export behavior separate from display-image save formats.',
+            'related_fields'  : ('IMAGE_EXPORT_RAW', 'FILETRANSFER__UPLOAD_RAW', 'FILETRANSFER__UPLOAD_FITS / S3UPLOAD__UPLOAD_FITS'),
+            'future_editable' : 'blocked until source export policy exists',
+            'safety_note'     : 'This page does not read source files or trigger remote upload/export behavior.',
+        },
+        {
+            'label'           : 'FITS headers',
+            'purpose'         : 'Show FITS header metadata as scientific context rather than generic raw config rows.',
+            'related_fields'  : ('FITSHEADERS__*_KEY / FITSHEADERS__*_VAL', 'CCD_BIT_DEPTH', 'IndiAllSkyDbFitsImageTable metadata'),
+            'future_editable' : 'yes after metadata validation policy',
+            'safety_note'     : 'Header edits must preserve metadata quality and avoid leaking sensitive values.',
+        },
+        {
+            'label'           : 'Upload/export source files',
+            'purpose'         : 'Document source-file upload/export flags without running network or filesystem actions.',
+            'related_fields'  : ('FILETRANSFER__UPLOAD_RAW', 'FILETRANSFER__UPLOAD_FITS', 'S3UPLOAD__UPLOAD_FITS', 'IMAGE_EXPORT_RAW'),
+            'future_editable' : 'blocked until upload/source action policy exists',
+            'safety_note'     : 'Remote operations, credential use, and source export actions remain out of scope here.',
+        },
+        {
+            'label'           : 'Retention and storage impact',
+            'purpose'         : 'Make source-data footprint visible with Raspberry Pi storage constraints in mind.',
+            'related_fields'  : ('IMAGE_FITS_EXPIRE_DAYS', 'IMAGE_RAW_EXPIRE_DAYS', 'IMAGE_FOLDER / IMAGE_EXPORT_FOLDER'),
+            'future_editable' : 'yes after retention/storage policy',
+            'safety_note'     : 'This page does not scan folders, estimate disk usage, or delete expired files.',
+        },
+        {
+            'label'           : 'Viewer/download safety boundary',
+            'purpose'         : 'Keep preview, conversion, and download actions separated from this read-only settings product page.',
+            'related_fields'  : ('Classic conversion route', 'Modern FITS inspection/detail', 'path allowlist / basename-only UI'),
+            'future_editable' : 'no from this page',
+            'safety_note'     : 'No fits2jpeg, file streaming, arbitrary path access, or download link is exposed here.',
+        },
+    )
+
+
+    def build_context(self, settings_groups):
+        return {
+            'modern_admin_fits_source_settings_group'  : self.find_settings_group(settings_groups, 'fits_source_files'),
+            'modern_admin_fits_source_overview_cards'  : self.get_overview_cards(),
+            'modern_admin_fits_source_config_sections' : self.get_config_sections(),
+            'modern_admin_fits_source_proposed_layout' : self.get_proposed_layout(),
+        }
+
+
+    def find_settings_group(self, settings_groups, group_id):
+        for group in settings_groups or tuple():
+            if group.get('group_id') == group_id:
+                return group
+
+        return None
+
+
+    def get_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_text(row.get('label')),
+                'purpose'         : self.safe_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_text(row.get('future_editable')),
+                'safety_note'     : self.safe_text(row.get('safety_note')),
+            }
+            for row in self.OVERVIEW_CARDS
+        )
+
+
+    def get_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_text(section.get('label')),
+                'description' : self.safe_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_text(row.get('key')),
+                        'source' : self.safe_text(row.get('source')),
+                        'notes'  : self.safe_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.CONFIG_SECTIONS
+        )
+
+
+    def get_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_text(row.get('label')),
+                'purpose'        : self.safe_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.PROPOSED_LAYOUT
+        )
+
+
+    def safe_text(self, value):
+        if value is None:
+            return ''
+
+        return str(value)
+
+
 class ModernAdminNotificationsSettingsContract:
     CONFIG_SECTIONS = (
         {
