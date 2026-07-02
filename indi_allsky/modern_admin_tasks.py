@@ -2,6 +2,60 @@ import json
 from datetime import timedelta
 
 
+TASK_STATUS_VISIBLE_STATES = (
+    'MANUAL',
+    'QUEUED',
+    'RUNNING',
+    'SUCCESS',
+    'FAILED',
+)
+
+TASK_STATUS_EXCLUDED_QUEUES = (
+    'IMAGE',
+    'UPLOAD',
+)
+
+TASK_STATUS_LOOKBACK_DAYS = 3
+
+
+class ModernAdminTaskReadPolicy:
+    def __init__(
+        self,
+        visible_state_names=TASK_STATUS_VISIBLE_STATES,
+        excluded_queue_names=TASK_STATUS_EXCLUDED_QUEUES,
+        lookback_days=TASK_STATUS_LOOKBACK_DAYS,
+    ):
+        self.visible_state_names = tuple(visible_state_names)
+        self.excluded_queue_names = tuple(excluded_queue_names)
+        self.lookback_days = lookback_days
+
+
+    def visible_states(self, state_enum):
+        return tuple(
+            getattr(state_enum, state_name)
+            for state_name in self.visible_state_names
+        )
+
+
+    def excluded_queues(self, queue_enum):
+        return tuple(
+            getattr(queue_enum, queue_name)
+            for queue_name in self.excluded_queue_names
+        )
+
+
+    def cutoff_datetime(self, now):
+        return now - timedelta(days=self.lookback_days)
+
+
+    def build_filter_expression(self, and_operator, task_model, state_enum, queue_enum, now):
+        return and_operator(
+            task_model.createDate > self.cutoff_datetime(now),
+            task_model.state.in_(self.visible_states(state_enum)),
+            ~task_model.queue.in_(self.excluded_queues(queue_enum)),
+        )
+
+
 class ModernAdminTaskReadService:
     sensitive_payload_keys = (
         'password',

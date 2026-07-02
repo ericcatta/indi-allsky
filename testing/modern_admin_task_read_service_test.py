@@ -10,6 +10,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_tasks import ModernAdminTaskReadService
+from indi_allsky.modern_admin_tasks import ModernAdminTaskReadPolicy
+from indi_allsky.modern_admin_tasks import TASK_STATUS_EXCLUDED_QUEUES
+from indi_allsky.modern_admin_tasks import TASK_STATUS_LOOKBACK_DAYS
+from indi_allsky.modern_admin_tasks import TASK_STATUS_VISIBLE_STATES
 
 
 class FakeEnum:
@@ -21,6 +25,53 @@ class FakeEnum:
 class FakeField:
     def __eq__(self, value):
         return ('eq', value)
+
+
+class FakeComparableField:
+    def __init__(self, name):
+        self.name = name
+
+    def __gt__(self, value):
+        return ('gt', self.name, value)
+
+    def in_(self, values):
+        return FakeInExpression(self.name, values)
+
+
+class FakeInExpression:
+    def __init__(self, name, values):
+        self.name = name
+        self.values = values
+
+    def __invert__(self):
+        return ('not_in', self.name, self.values)
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, FakeInExpression)
+            and self.name == other.name
+            and self.values == other.values
+        )
+
+
+class FakeTaskModel:
+    createDate = FakeComparableField('createDate')
+    state = FakeComparableField('state')
+    queue = FakeComparableField('queue')
+
+
+class FakeStateEnum:
+    MANUAL = 'manual'
+    QUEUED = 'queued'
+    RUNNING = 'running'
+    SUCCESS = 'success'
+    FAILED = 'failed'
+
+
+class FakeQueueEnum:
+    IMAGE = 'image'
+    UPLOAD = 'upload'
+    VIDEO = 'video'
 
 
 class FakeTask:
@@ -160,6 +211,42 @@ def test_recent_task_count_matches_previous_boundary_behavior():
     assert count == 1
 
 
+def test_task_read_policy_owns_status_filter_contract():
+    now = datetime(2026, 1, 5, 5, 4, 5)
+    policy = ModernAdminTaskReadPolicy()
+
+    expression = policy.build_filter_expression(
+        and_operator=lambda *items: ('and', items),
+        task_model=FakeTaskModel,
+        state_enum=FakeStateEnum,
+        queue_enum=FakeQueueEnum,
+        now=now,
+    )
+
+    assert TASK_STATUS_VISIBLE_STATES == ('MANUAL', 'QUEUED', 'RUNNING', 'SUCCESS', 'FAILED')
+    assert TASK_STATUS_EXCLUDED_QUEUES == ('IMAGE', 'UPLOAD')
+    assert TASK_STATUS_LOOKBACK_DAYS == 3
+    assert expression == (
+        'and',
+        (
+            ('gt', 'createDate', datetime(2026, 1, 2, 5, 4, 5)),
+            FakeInExpression('state', ('manual', 'queued', 'running', 'success', 'failed')),
+            ('not_in', 'queue', ('image', 'upload')),
+        ),
+    )
+
+
+def test_task_status_view_uses_domain_read_policy():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    start = source.index('class ModernAdminTaskStatusView')
+    end = source.index('class ModernAdminTaskQueueView', start)
+    source = source[start:end]
+
+    assert 'ModernAdminTaskReadPolicy' in source
+    assert 'TaskQueueState.MANUAL' not in source
+    assert 'TaskQueueQueue.IMAGE' not in source
+
+
 def test_task_read_service_has_no_flask_or_db_dependency():
     import inspect
     import indi_allsky.modern_admin_tasks as module
@@ -178,6 +265,8 @@ def run_tests():
     test_task_detail_redacts_sensitive_payload()
     test_task_detail_query_uses_id_filter()
     test_recent_task_count_matches_previous_boundary_behavior()
+    test_task_read_policy_owns_status_filter_contract()
+    test_task_status_view_uses_domain_read_policy()
     test_task_read_service_has_no_flask_or_db_dependency()
     print('Modern admin task read service checks passed')
 

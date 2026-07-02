@@ -43,7 +43,8 @@ The source of truth for the current consolidation baseline is
 - Task/status wrappers now share `ModernAdminTaskStatusView`, reducing direct
   Classic-style ownership for read-only queue listing/detail pages; the
   boundary also owns the read-only login guard for this family. Task list/detail
-  read-only query and formatting now live in a Hybrid-owned service.
+  read-only query, visibility policy, and formatting now live in a Hybrid-owned
+  service layer.
 - Media metadata listing wrappers now share `ModernAdminMediaMetadataView`;
   interactive gallery/download/preview surfaces remain intentionally outside
   this boundary. The boundary owns the read-only login guard for metadata

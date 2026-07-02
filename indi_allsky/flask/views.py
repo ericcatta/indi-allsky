@@ -37,6 +37,7 @@ from ..modern_admin_media_metadata import ModernAdminMiniTimelapseMetadataServic
 from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_tasks import ModernAdminTaskReadService
+from ..modern_admin_tasks import ModernAdminTaskReadPolicy
 from ..processing import ImageProcessor
 from ..product_view_models import build_now_view
 from ..product_view_models import build_highlights_view
@@ -9031,24 +9032,13 @@ class ModernAdminTaskStatusView(ModernAdminContextMixin):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
     def get_task_read_service(self):
-        state_list = (
-            TaskQueueState.MANUAL,
-            TaskQueueState.QUEUED,
-            TaskQueueState.RUNNING,
-            TaskQueueState.SUCCESS,
-            TaskQueueState.FAILED,
-        )
-
-        exclude_queues = (
-            TaskQueueQueue.IMAGE,
-            TaskQueueQueue.UPLOAD,
-        )
-
-        camera_now_minus_3d = self.camera_now - timedelta(days=3)
-        filter_expression = and_(
-            IndiAllSkyDbTaskQueueTable.createDate > camera_now_minus_3d,
-            IndiAllSkyDbTaskQueueTable.state.in_(state_list),
-            ~IndiAllSkyDbTaskQueueTable.queue.in_(exclude_queues),
+        read_policy = ModernAdminTaskReadPolicy()
+        filter_expression = read_policy.build_filter_expression(
+            and_operator=and_,
+            task_model=IndiAllSkyDbTaskQueueTable,
+            state_enum=TaskQueueState,
+            queue_enum=TaskQueueQueue,
+            now=self.camera_now,
         )
 
         return ModernAdminTaskReadService(
