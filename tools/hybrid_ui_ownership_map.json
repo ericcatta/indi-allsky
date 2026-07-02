@@ -116,6 +116,7 @@
         "/modern-admin/users"
       ],
       "templates": [
+        "modern_admin/_media_camera_filter.html",
         "modern_admin/_shell_header.html",
         "modern_admin/adu_history.html",
         "modern_admin/astropanel.html",

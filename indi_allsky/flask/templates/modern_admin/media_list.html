@@ -40,20 +40,8 @@ var camera_id = {{ camera_id }};
                 <p>Older images load in read-only batches.</p>
             </article>
         </section>
-        <div class="modern-admin-gallery-filter-bar" role="group" aria-label="Camera filter">
-            {% for camera_filter in modern_admin_gallery_camera_filters %}
-            {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view') %}
-            {% if camera_filter.profile_id %}
-            {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view', profile_id=camera_filter.profile_id) %}
-            {% elif camera_filter.camera_id %}
-            {% set filter_url = url_for('indi_allsky.modern_admin_media_gallery_view', camera_id=camera_filter.camera_id) %}
-            {% endif %}
-            <a class="modern-admin-media-button modern-admin-gallery-filter{% if camera_filter.active %} modern-admin-gallery-filter-active{% endif %}" href="{{ filter_url }}" role="button" aria-pressed="{{ 'true' if camera_filter.active else 'false' }}" data-gallery-filter-profile="{{ camera_filter.profile_id }}" data-gallery-filter-camera="{{ camera_filter.camera_id or '' }}">
-                <span>{{ camera_filter.label }}</span>
-            </a>
-            {% endfor %}
-        </div>
         {% endif %}
+        {% include 'modern_admin/_media_camera_filter.html' %}
         {% if modern_admin_media_kind in ('image', 'fits') %}
         <div class="modern-admin-media-toolbar" aria-label="Media selection actions">
             <button class="modern-admin-media-button" id="modern-admin-download-selected" type="button" disabled>Download selected</button>

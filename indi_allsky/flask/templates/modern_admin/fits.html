@@ -20,7 +20,7 @@ var camera_id = {{ camera_id }};
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Recent FITS Rows</div>
             <h3>{{ modern_admin_fits_count }} / {{ modern_admin_fits_display_limit }}</h3>
-            <p>Latest database entries for the active camera.</p>
+            <p>Latest database entries for the selected camera filter.</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
         <article class="modern-admin-status-card">
@@ -48,8 +48,8 @@ var camera_id = {{ camera_id }};
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Camera Scope</div>
-            <h3>{{ camera_id }}</h3>
-            <p>Latest database entries for the active camera.</p>
+            <h3>{{ modern_admin_media_selected_label }}</h3>
+            <p>Current read-only camera filter.</p>
         </article>
     </section>
 
@@ -62,6 +62,8 @@ var camera_id = {{ camera_id }};
         {% if modern_admin_fits_error %}
         <p class="modern-admin-note">{{ modern_admin_fits_error }}</p>
         {% endif %}
+
+        {% include 'modern_admin/_media_camera_filter.html' %}
 
         <div class="modern-admin-filter-row" aria-label="FITS metadata filters">
             <label>

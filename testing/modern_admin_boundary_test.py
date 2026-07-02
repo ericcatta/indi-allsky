@@ -85,7 +85,7 @@ BOUNDARIES = (
     },
     {
         'boundary': 'ModernAdminMediaMetadataView',
-        'parent': 'ModernAdminContextMixin',
+        'parent': 'ModernAdminMediaBrowseView',
         'decorator': 'login_required',
         'wrappers_defer_decorator': True,
         'decorator_delegates': (

@@ -1,0 +1,15 @@
+{% if modern_admin_media_camera_filters and modern_admin_media_camera_filters|length > 1 %}
+<div class="modern-admin-gallery-filter-bar" role="group" aria-label="Camera filter">
+    {% for camera_filter in modern_admin_media_camera_filters %}
+    {% set filter_url = url_for(modern_admin_media_camera_filter_endpoint) %}
+    {% if camera_filter.profile_id %}
+    {% set filter_url = url_for(modern_admin_media_camera_filter_endpoint, profile_id=camera_filter.profile_id) %}
+    {% elif camera_filter.camera_id %}
+    {% set filter_url = url_for(modern_admin_media_camera_filter_endpoint, camera_id=camera_filter.camera_id) %}
+    {% endif %}
+    <a class="modern-admin-media-button modern-admin-gallery-filter{% if camera_filter.active %} modern-admin-gallery-filter-active{% endif %}" href="{{ filter_url }}" role="button" aria-pressed="{{ 'true' if camera_filter.active else 'false' }}" data-gallery-filter-profile="{{ camera_filter.profile_id }}" data-gallery-filter-camera="{{ camera_filter.camera_id or '' }}">
+        <span>{{ camera_filter.label }}</span>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}

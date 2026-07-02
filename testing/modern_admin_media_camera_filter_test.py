@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+
+import re
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+VIEWS_PATH = REPO_ROOT / 'indi_allsky/flask/views.py'
+TEMPLATE_ROOT = REPO_ROOT / 'indi_allsky/flask/templates/modern_admin'
+
+
+CAMERA_FILTER_TEMPLATES = (
+    'media_list.html',
+    'startrail_videos.html',
+    'keograms.html',
+    'startrails.html',
+    'mini_timelapses.html',
+    'panoramas.html',
+    'raw_images.html',
+    'fits.html',
+)
+
+
+def assert_true(condition, message):
+    if not condition:
+        raise AssertionError(message)
+
+
+def read_views():
+    return VIEWS_PATH.read_text(encoding='utf-8')
+
+
+def class_body(views_text, class_name):
+    match = re.search(
+        r'^class\s+{0:s}\([^)]*\):\n'.format(re.escape(class_name)),
+        views_text,
+        flags=re.MULTILINE,
+    )
+    if not match:
+        return ''
+
+    start = match.end()
+    next_class = re.search(r'^class\s+\w+\(', views_text[start:], flags=re.MULTILINE)
+    if not next_class:
+        return views_text[start:]
+
+    return views_text[start:start + next_class.start()]
+
+
+def test_media_browse_boundary_owns_gallery_camera_filter_policy():
+    body = class_body(read_views(), 'ModernAdminMediaBrowseView')
+
+    assert_true('def get_media_camera_filters(self):' in body, 'media browse boundary must own shared camera filters')
+    assert_true("'All Cameras'" in body, 'shared camera filters must preserve Gallery default')
+    assert_true("request.args.get('profile_id'" in body, 'shared camera filters must support profile_id')
+    assert_true("request.args.get('camera_id', type=int)" in body, 'shared camera filters must support camera_id')
+
+
+def test_media_list_uses_selected_camera_filter_instead_of_active_camera_only():
+    body = class_body(read_views(), 'ModernAdminMediaListView')
+
+    assert_true('self.add_media_camera_filter_context(context)' in body, 'media list pages must expose camera filter context')
+    assert_true('self.apply_media_camera_filter(query)' in body, 'media list queries must use selected camera filter')
+    assert_true('.filter(IndiAllSkyDbCameraTable.id == self.camera.id)' not in body, 'media list must not force active camera only')
+
+
+def test_media_metadata_services_use_selected_camera_filter():
+    body = class_body(read_views(), 'ModernAdminMediaMetadataView')
+
+    assert_true('self.add_media_camera_filter_context(context)' in body, 'metadata pages must expose camera filter context')
+    assert_true(body.count('camera_id=self.get_selected_media_camera_id()') == 4, 'metadata services must use selected camera filter')
+    assert_true('camera_id=self.camera.id' not in body, 'metadata services must not force active camera only')
+
+
+def test_inline_metadata_queries_use_shared_camera_filter():
+    views_text = read_views()
+
+    for class_name in ('ModernAdminMediaPanoramaView', 'ModernAdminMediaRawImagesView', 'ModernAdminFitsView'):
+        body = class_body(views_text, class_name)
+        assert_true('self.apply_media_camera_filter(' in body, '{0:s} must use shared camera filter'.format(class_name))
+        assert_true('.filter(IndiAllSkyDbCameraTable.id == self.camera.id)' not in body, '{0:s} must not force active camera only'.format(class_name))
+
+
+def test_media_detail_views_do_not_restrict_to_active_camera():
+    views_text = read_views()
+
+    for class_name in ('ModernAdminMediaImageDetailView', 'ModernAdminMediaVideoDetailView', 'ModernAdminFitsDetailView'):
+        body = class_body(views_text, class_name)
+        assert_true('.filter(IndiAllSkyDbCameraTable.id == self.camera.id)' not in body, '{0:s} must open rows selected from all-camera listings'.format(class_name))
+
+
+def test_camera_filter_partial_is_available_on_camera_owned_media_pages():
+    include = "{% include 'modern_admin/_media_camera_filter.html' %}"
+
+    for template_name in CAMERA_FILTER_TEMPLATES:
+        text = (TEMPLATE_ROOT / template_name).read_text(encoding='utf-8')
+        assert_true(include in text, '{0:s} must render the shared camera filter'.format(template_name))
+
+
+def run_tests():
+    test_media_browse_boundary_owns_gallery_camera_filter_policy()
+    test_media_list_uses_selected_camera_filter_instead_of_active_camera_only()
+    test_media_metadata_services_use_selected_camera_filter()
+    test_inline_metadata_queries_use_shared_camera_filter()
+    test_media_detail_views_do_not_restrict_to_active_camera()
+    test_camera_filter_partial_is_available_on_camera_owned_media_pages()
+
+
+if __name__ == '__main__':
+    run_tests()
+    print('modern admin media camera filter tests passed')

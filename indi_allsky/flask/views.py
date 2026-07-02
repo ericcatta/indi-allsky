@@ -14170,13 +14170,224 @@ class ModernAdminMaskView(ModernAdminCameraToolView, MaskView):
 
 
 class ModernAdminMediaBrowseView(ModernAdminContextMixin):
-    pass
+    def add_media_camera_filter_context(self, context):
+        camera_filters = self.get_media_camera_filters()
+        selected_filter = self.get_selected_media_camera_filter(camera_filters)
+
+        context['modern_admin_media_camera_filters'] = camera_filters
+        context['modern_admin_media_selected_filter'] = selected_filter
+        context['modern_admin_media_selected_label'] = selected_filter.get('label') or 'All Cameras'
+        context['modern_admin_media_camera_filter_endpoint'] = request.endpoint
+
+
+    def get_selected_media_camera_id(self):
+        return self.get_selected_media_camera_filter().get('camera_id')
+
+
+    def apply_media_camera_filter(self, query):
+        selected_camera_id = self.get_selected_media_camera_id()
+        if selected_camera_id is not None:
+            query = query.filter(IndiAllSkyDbCameraTable.id == selected_camera_id)
+
+        return query
+
+
+    def get_media_camera_filters(self):
+        cached_filters = getattr(self, '_modern_admin_media_camera_filters', None)
+        if cached_filters is not None:
+            return cached_filters
+
+        filters = [{
+            'label'      : 'All Cameras',
+            'profile_id' : '',
+            'camera_id'  : None,
+            'active'     : False,
+        }]
+
+        camera_rows = self.get_media_filter_camera_rows()
+        profile_configs = self.get_media_filter_profiles()
+        used_camera_ids = set()
+
+        for profile_index, profile_config in enumerate(profile_configs):
+            camera_id = self.get_media_profile_camera_id(profile_config, camera_rows, profile_index)
+            if camera_id is None or camera_id in used_camera_ids:
+                continue
+
+            profile_id = str(profile_config.get('profile_id') or profile_config.get('id') or 'profile-{0:d}'.format(profile_index + 1))
+            filters.append({
+                'label'      : self.get_media_profile_label(profile_config, camera_id),
+                'profile_id' : profile_id,
+                'camera_id'  : camera_id,
+                'active'     : False,
+            })
+            used_camera_ids.add(camera_id)
+
+        if len(filters) == 1:
+            for camera in camera_rows:
+                filters.append({
+                    'label'      : str(camera.friendlyName or camera.name or 'Camera {0:d}'.format(camera.id)),
+                    'profile_id' : '',
+                    'camera_id'  : camera.id,
+                    'active'     : False,
+                })
+
+        self._modern_admin_media_camera_filters = filters
+        return filters
+
+
+    def get_selected_media_camera_filter(self, camera_filters=None):
+        if camera_filters is None:
+            camera_filters = self.get_media_camera_filters()
+
+        selected_profile_id = str(request.args.get('profile_id', '') or '')
+        selected_camera_id = request.args.get('camera_id', type=int)
+
+        selected_filter = camera_filters[0]
+        if selected_profile_id:
+            for camera_filter in camera_filters:
+                if camera_filter.get('profile_id') == selected_profile_id:
+                    selected_filter = camera_filter
+                    break
+        elif selected_camera_id:
+            for camera_filter in camera_filters:
+                if camera_filter.get('camera_id') == selected_camera_id:
+                    selected_filter = camera_filter
+                    break
+            else:
+                selected_filter = {
+                    'label'      : 'Camera {0:d}'.format(selected_camera_id),
+                    'profile_id' : '',
+                    'camera_id'  : selected_camera_id,
+                    'active'     : False,
+                }
+                camera_filters.append(selected_filter)
+
+        for camera_filter in camera_filters:
+            camera_filter['active'] = camera_filter is selected_filter
+
+        return selected_filter
+
+
+    def get_media_filter_profiles(self):
+        multi_camera_config = self.indi_allsky_config.get('MULTI_CAMERA') or {}
+        profile_configs = multi_camera_config.get('profiles') or []
+        if not isinstance(profile_configs, list):
+            return list()
+
+        return [
+            profile_config
+            for profile_config in profile_configs
+            if isinstance(profile_config, dict)
+        ]
+
+
+    def get_media_filter_camera_rows(self):
+        try:
+            return IndiAllSkyDbCameraTable.query\
+                .filter(IndiAllSkyDbCameraTable.hidden == False)\
+                .order_by(IndiAllSkyDbCameraTable.id.asc())\
+                .all()
+        except Exception as e:
+            app.logger.error('Error reading modern admin media camera filters: %s', str(e))
+            return list()
+
+
+    def get_media_profile_camera_id(self, profile_config, camera_rows, profile_index):
+        for key in ('db_camera_id', 'camera_db_id', 'camera_id'):
+            if key not in profile_config:
+                continue
+
+            try:
+                return int(profile_config[key])
+            except (TypeError, ValueError):
+                continue
+
+        matched_camera = self.get_media_profile_camera_match(profile_config, camera_rows)
+        if matched_camera:
+            return matched_camera.id
+
+        if profile_index < len(camera_rows):
+            return camera_rows[profile_index].id
+
+        return None
+
+
+    def get_media_profile_camera_match(self, profile_config, camera_rows):
+        profile_terms = set()
+        for key in ('profile_id', 'id', 'label', 'camera_name', 'camera_interface', 'indi_camera_name'):
+            value = profile_config.get(key)
+            if value:
+                profile_terms.add(str(value).strip().lower())
+
+        nested_indi = profile_config.get('indi') or {}
+        if isinstance(nested_indi, dict):
+            value = nested_indi.get('camera_name')
+            if value:
+                profile_terms.add(str(value).strip().lower())
+
+        if not profile_terms:
+            return None
+
+        for camera in camera_rows:
+            camera_terms = (
+                camera.friendlyName,
+                camera.name,
+                camera.name_alt1,
+                camera.name_alt2,
+                camera.driver,
+            )
+            normalized_camera_terms = [
+                str(term).strip().lower()
+                for term in camera_terms
+                if term
+            ]
+
+            for profile_term in profile_terms:
+                for camera_term in normalized_camera_terms:
+                    if profile_term == camera_term or profile_term in camera_term or camera_term in profile_term:
+                        return camera
+
+        return None
+
+
+    def get_media_profile_label(self, profile_config, camera_id):
+        label = profile_config.get('label') or profile_config.get('camera_name')
+        if label:
+            return str(label)
+
+        label = profile_config.get('profile_id') \
+            or profile_config.get('id') \
+            or profile_config.get('camera_interface') \
+            or 'Camera {0:d}'.format(camera_id)
+
+        return self.format_media_filter_label(label)
+
+
+    def format_media_filter_label(self, label):
+        label_str = str(label)
+        parts = [
+            part
+            for part in re.split(r'[-_\s]+', label_str)
+            if part
+        ]
+        if not parts:
+            return label_str
+
+        formatted_parts = list()
+        for part in parts:
+            part_lower = part.lower()
+            if part_lower.startswith(('imx', 'asi')) and any(character.isdigit() for character in part_lower):
+                formatted_parts.append(part.upper())
+            else:
+                formatted_parts.append(part.capitalize())
+
+        return ' '.join(formatted_parts)
 
 
 class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
     page_title = 'Modern Admin Media'
     modern_admin_section = 'Media'
-    modern_admin_description = 'Recent media captured by this camera.'
+    modern_admin_description = 'Recent media captured by available cameras.'
     modern_admin_media_kind = 'image'
     modern_admin_media_layout = 'grid'
     modern_admin_media_model = None
@@ -14184,6 +14395,7 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
 
     def get_context(self):
         context = super(ModernAdminMediaListView, self).get_context()
+        self.add_media_camera_filter_context(context)
 
         media_entries = self.get_media_entries()
         media_items = list()
@@ -14213,10 +14425,13 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
 
         # Read-only media inventory; reuses the existing DB models behind classic viewers.
         try:
-            return self.modern_admin_media_model.query\
+            query = self.modern_admin_media_model.query\
                 .join(self.modern_admin_media_model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                .order_by(self.modern_admin_media_model.createDate.desc())\
+                .order_by(self.modern_admin_media_model.createDate.desc())
+
+            query = self.apply_media_camera_filter(query)
+
+            return query\
                 .limit(self.modern_admin_media_limit)\
                 .all()
         except Exception as e:
@@ -14395,195 +14610,35 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
 
 
     def get_gallery_camera_filters(self):
-        cached_filters = getattr(self, '_modern_admin_gallery_camera_filters', None)
-        if cached_filters is not None:
-            return cached_filters
-
-        filters = [{
-            'label'      : 'All Cameras',
-            'profile_id' : '',
-            'camera_id'  : None,
-            'active'     : False,
-        }]
-
-        camera_rows = self.get_gallery_filter_camera_rows()
-        profile_configs = self.get_gallery_filter_profiles()
-        used_camera_ids = set()
-
-        for profile_index, profile_config in enumerate(profile_configs):
-            camera_id = self.get_gallery_profile_camera_id(profile_config, camera_rows, profile_index)
-            if camera_id is None or camera_id in used_camera_ids:
-                continue
-
-            profile_id = str(profile_config.get('profile_id') or profile_config.get('id') or 'profile-{0:d}'.format(profile_index + 1))
-            filters.append({
-                'label'      : self.get_gallery_profile_label(profile_config, camera_id),
-                'profile_id' : profile_id,
-                'camera_id'  : camera_id,
-                'active'     : False,
-            })
-            used_camera_ids.add(camera_id)
-
-        if len(filters) == 1:
-            for camera in camera_rows:
-                filters.append({
-                    'label'      : str(camera.friendlyName or camera.name or 'Camera {0:d}'.format(camera.id)),
-                    'profile_id' : '',
-                    'camera_id'  : camera.id,
-                    'active'     : False,
-                })
-
-        self._modern_admin_gallery_camera_filters = filters
-        return filters
+        return self.get_media_camera_filters()
 
 
     def get_selected_gallery_camera_filter(self, camera_filters=None):
-        if camera_filters is None:
-            camera_filters = self.get_gallery_camera_filters()
-
-        selected_profile_id = str(request.args.get('profile_id', '') or '')
-        selected_camera_id = request.args.get('camera_id', type=int)
-
-        selected_filter = camera_filters[0]
-        if selected_profile_id:
-            for camera_filter in camera_filters:
-                if camera_filter.get('profile_id') == selected_profile_id:
-                    selected_filter = camera_filter
-                    break
-        elif selected_camera_id:
-            for camera_filter in camera_filters:
-                if camera_filter.get('camera_id') == selected_camera_id:
-                    selected_filter = camera_filter
-                    break
-            else:
-                selected_filter = {
-                    'label'      : 'Camera {0:d}'.format(selected_camera_id),
-                    'profile_id' : '',
-                    'camera_id'  : selected_camera_id,
-                    'active'     : False,
-                }
-                camera_filters.append(selected_filter)
-
-        for camera_filter in camera_filters:
-            camera_filter['active'] = camera_filter is selected_filter
-
-        return selected_filter
+        return self.get_selected_media_camera_filter(camera_filters)
 
 
     def get_gallery_filter_profiles(self):
-        multi_camera_config = self.indi_allsky_config.get('MULTI_CAMERA') or {}
-        profile_configs = multi_camera_config.get('profiles') or []
-        if not isinstance(profile_configs, list):
-            return list()
-
-        return [
-            profile_config
-            for profile_config in profile_configs
-            if isinstance(profile_config, dict)
-        ]
+        return self.get_media_filter_profiles()
 
 
     def get_gallery_filter_camera_rows(self):
-        try:
-            return IndiAllSkyDbCameraTable.query\
-                .filter(IndiAllSkyDbCameraTable.hidden == False)\
-                .order_by(IndiAllSkyDbCameraTable.id.asc())\
-                .all()
-        except Exception as e:
-            app.logger.error('Error reading modern admin gallery camera filters: %s', str(e))
-            return list()
+        return self.get_media_filter_camera_rows()
 
 
     def get_gallery_profile_camera_id(self, profile_config, camera_rows, profile_index):
-        for key in ('db_camera_id', 'camera_db_id', 'camera_id'):
-            if key not in profile_config:
-                continue
-
-            try:
-                return int(profile_config[key])
-            except (TypeError, ValueError):
-                continue
-
-        matched_camera = self.get_gallery_profile_camera_match(profile_config, camera_rows)
-        if matched_camera:
-            return matched_camera.id
-
-        if profile_index < len(camera_rows):
-            return camera_rows[profile_index].id
-
-        return None
+        return self.get_media_profile_camera_id(profile_config, camera_rows, profile_index)
 
 
     def get_gallery_profile_camera_match(self, profile_config, camera_rows):
-        profile_terms = set()
-        for key in ('profile_id', 'id', 'label', 'camera_name', 'camera_interface', 'indi_camera_name'):
-            value = profile_config.get(key)
-            if value:
-                profile_terms.add(str(value).strip().lower())
-
-        nested_indi = profile_config.get('indi') or {}
-        if isinstance(nested_indi, dict):
-            value = nested_indi.get('camera_name')
-            if value:
-                profile_terms.add(str(value).strip().lower())
-
-        if not profile_terms:
-            return None
-
-        for camera in camera_rows:
-            camera_terms = (
-                camera.friendlyName,
-                camera.name,
-                camera.name_alt1,
-                camera.name_alt2,
-                camera.driver,
-            )
-            normalized_camera_terms = [
-                str(term).strip().lower()
-                for term in camera_terms
-                if term
-            ]
-
-            for profile_term in profile_terms:
-                for camera_term in normalized_camera_terms:
-                    if profile_term == camera_term or profile_term in camera_term or camera_term in profile_term:
-                        return camera
-
-        return None
+        return self.get_media_profile_camera_match(profile_config, camera_rows)
 
 
     def get_gallery_profile_label(self, profile_config, camera_id):
-        label = profile_config.get('label') or profile_config.get('camera_name')
-        if label:
-            return str(label)
-
-        label = profile_config.get('profile_id') \
-            or profile_config.get('id') \
-            or profile_config.get('camera_interface') \
-            or 'Camera {0:d}'.format(camera_id)
-
-        return self.format_gallery_filter_label(label)
+        return self.get_media_profile_label(profile_config, camera_id)
 
 
     def format_gallery_filter_label(self, label):
-        label_str = str(label)
-        parts = [
-            part
-            for part in re.split(r'[-_\s]+', label_str)
-            if part
-        ]
-        if not parts:
-            return label_str
-
-        formatted_parts = list()
-        for part in parts:
-            part_lower = part.lower()
-            if part_lower.startswith(('imx', 'asi')) and any(character.isdigit() for character in part_lower):
-                formatted_parts.append(part.upper())
-            else:
-                formatted_parts.append(part.capitalize())
-
-        return ' '.join(formatted_parts)
+        return self.format_media_filter_label(label)
 
 
     def get_media_preview_url(self, media_entry, media_url=None):
@@ -14690,7 +14745,6 @@ class ModernAdminMediaImageDetailView(ModernAdminMediaImagesView):
             entry = IndiAllSkyDbImageTable.query\
                 .join(IndiAllSkyDbImageTable.camera)\
                 .filter(IndiAllSkyDbImageTable.id == self.image_id)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
                 .one()
         except NoResultFound:
             abort(404)
@@ -14786,8 +14840,14 @@ class ModernAdminMediaTimelapsesView(ModernAdminMediaListView):
     modern_admin_media_kind = 'video'
 
 
-class ModernAdminMediaMetadataView(ModernAdminContextMixin):
+class ModernAdminMediaMetadataView(ModernAdminMediaBrowseView):
     decorators = [login_required]
+
+
+    def get_context(self):
+        context = super(ModernAdminMediaMetadataView, self).get_context()
+        self.add_media_camera_filter_context(context)
+        return context
 
 
     def get_startrail_video_metadata_service(self):
@@ -14795,7 +14855,7 @@ class ModernAdminMediaMetadataView(ModernAdminContextMixin):
             query=IndiAllSkyDbStarTrailsVideoTable.query,
             camera_relation=IndiAllSkyDbStarTrailsVideoTable.camera,
             camera_id_field=IndiAllSkyDbCameraTable.id,
-            camera_id=self.camera.id,
+            camera_id=self.get_selected_media_camera_id(),
             order_by_expression=IndiAllSkyDbStarTrailsVideoTable.createDate.desc(),
         )
 
@@ -14805,7 +14865,7 @@ class ModernAdminMediaMetadataView(ModernAdminContextMixin):
             query=IndiAllSkyDbKeogramTable.query,
             camera_relation=IndiAllSkyDbKeogramTable.camera,
             camera_id_field=IndiAllSkyDbCameraTable.id,
-            camera_id=self.camera.id,
+            camera_id=self.get_selected_media_camera_id(),
             order_by_expression=IndiAllSkyDbKeogramTable.createDate.desc(),
         )
 
@@ -14815,7 +14875,7 @@ class ModernAdminMediaMetadataView(ModernAdminContextMixin):
             query=IndiAllSkyDbStarTrailsTable.query,
             camera_relation=IndiAllSkyDbStarTrailsTable.camera,
             camera_id_field=IndiAllSkyDbCameraTable.id,
-            camera_id=self.camera.id,
+            camera_id=self.get_selected_media_camera_id(),
             order_by_expression=IndiAllSkyDbStarTrailsTable.createDate.desc(),
         )
 
@@ -14825,7 +14885,7 @@ class ModernAdminMediaMetadataView(ModernAdminContextMixin):
             query=IndiAllSkyDbMiniVideoTable.query,
             camera_relation=IndiAllSkyDbMiniVideoTable.camera,
             camera_id_field=IndiAllSkyDbCameraTable.id,
-            camera_id=self.camera.id,
+            camera_id=self.get_selected_media_camera_id(),
             order_by_expression=IndiAllSkyDbMiniVideoTable.createDate.desc(),
         )
 
@@ -14878,7 +14938,6 @@ class ModernAdminMediaVideoDetailView(ModernAdminMediaTimelapsesView):
             entry = IndiAllSkyDbVideoTable.query\
                 .join(IndiAllSkyDbVideoTable.camera)\
                 .filter(IndiAllSkyDbVideoTable.id == self.video_id)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
                 .one()
         except NoResultFound:
             abort(404)
@@ -15063,10 +15122,11 @@ class ModernAdminMediaPanoramaView(ModernAdminMediaMetadataView, TemplateView):
 
         panorama_rows = list()
         try:
-            panorama_entries = IndiAllSkyDbPanoramaImageTable.query\
+            panorama_query = IndiAllSkyDbPanoramaImageTable.query\
                 .join(IndiAllSkyDbPanoramaImageTable.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                .order_by(IndiAllSkyDbPanoramaImageTable.createDate.desc())\
+                .order_by(IndiAllSkyDbPanoramaImageTable.createDate.desc())
+
+            panorama_entries = self.apply_media_camera_filter(panorama_query)\
                 .limit(self.panorama_display_limit)\
                 .all()
         except Exception as e:
@@ -15197,10 +15257,11 @@ class ModernAdminMediaRawImagesView(ModernAdminMediaMetadataView, TemplateView):
 
         raw_image_rows = list()
         try:
-            raw_image_entries = IndiAllSkyDbRawImageTable.query\
+            raw_image_query = IndiAllSkyDbRawImageTable.query\
                 .join(IndiAllSkyDbRawImageTable.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                .order_by(IndiAllSkyDbRawImageTable.createDate.desc())\
+                .order_by(IndiAllSkyDbRawImageTable.createDate.desc())
+
+            raw_image_entries = self.apply_media_camera_filter(raw_image_query)\
                 .limit(self.raw_image_display_limit)\
                 .all()
         except Exception as e:
@@ -15374,10 +15435,11 @@ class ModernAdminFitsView(ModernAdminMediaMetadataView, TemplateView):
 
         fits_rows = list()
         try:
-            fits_entries = IndiAllSkyDbFitsImageTable.query\
+            fits_query = IndiAllSkyDbFitsImageTable.query\
                 .join(IndiAllSkyDbFitsImageTable.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                .order_by(IndiAllSkyDbFitsImageTable.createDate.desc())\
+                .order_by(IndiAllSkyDbFitsImageTable.createDate.desc())
+
+            fits_entries = self.apply_media_camera_filter(fits_query)\
                 .limit(self.fits_display_limit)\
                 .all()
         except Exception as e:
@@ -15509,7 +15571,6 @@ class ModernAdminFitsDetailView(ModernAdminFitsView):
             entry = IndiAllSkyDbFitsImageTable.query\
                 .join(IndiAllSkyDbFitsImageTable.camera)\
                 .filter(IndiAllSkyDbFitsImageTable.id == self.fits_id)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
                 .one()
         except NoResultFound:
             abort(404)
