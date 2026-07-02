@@ -13,6 +13,7 @@ from indi_allsky.modern_admin_settings_contracts import ModernAdminAutoExposureG
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraConnectionSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminExposureGainSettingsContract
+from indi_allsky.modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 
@@ -528,6 +529,86 @@ def test_auto_exposure_gain_settings_view_uses_hybrid_contract():
     )
 
 
+def test_hybrid_awb_settings_contract_preserves_context_shape():
+    contract = ModernAdminHybridAwbSettingsContract()
+    hybrid_awb_group = {
+        'group_id': 'hybrid_awb',
+        'label': 'Hybrid AWB',
+    }
+
+    context = contract.build_context((
+        {'group_id': 'other'},
+        hybrid_awb_group,
+    ))
+
+    assert_true(
+        context['modern_admin_hybrid_awb_settings_group'] is hybrid_awb_group,
+        'hybrid AWB group must be selected from settings inventory groups',
+    )
+    assert_true(
+        len(context['modern_admin_hybrid_awb_overview_cards']) == 6,
+        'hybrid AWB overview cards shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_hybrid_awb_config_sections']) == 5,
+        'hybrid AWB config sections shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_hybrid_awb_proposed_layout']) == 5,
+        'hybrid AWB proposed layout shape changed',
+    )
+    assert_true(
+        context['modern_admin_hybrid_awb_overview_cards'][0]['current_status'] == 'not evaluated here',
+        'hybrid AWB overview current status changed',
+    )
+    assert_true(
+        context['modern_admin_hybrid_awb_config_sections'][1]['key_count'] == 7,
+        'libcamera AWB config key count changed',
+    )
+    assert_true(
+        context['modern_admin_hybrid_awb_config_sections'][2]['key_count'] == 5,
+        'post-process RGB config key count changed',
+    )
+    assert_true(
+        context['modern_admin_hybrid_awb_proposed_layout'][0]['note'] == 'read-only proposal',
+        'hybrid AWB layout note changed',
+    )
+
+
+def test_hybrid_awb_settings_contract_handles_missing_group():
+    contract = ModernAdminHybridAwbSettingsContract()
+    context = contract.build_context(())
+
+    assert_true(
+        context['modern_admin_hybrid_awb_settings_group'] is None,
+        'missing hybrid AWB group must remain a safe None fallback',
+    )
+
+
+def test_hybrid_awb_settings_view_uses_hybrid_contract():
+    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
+    start = views_text.index('class ModernAdminHybridAwbSettingsView')
+    end = views_text.index('class ModernAdminAcquisitionSaveSettingsView', start)
+    hybrid_awb_view = views_text[start:end]
+
+    assert_true(
+        'ModernAdminHybridAwbSettingsContract' in hybrid_awb_view,
+        'hybrid AWB settings view must use the Hybrid settings contract',
+    )
+    assert_true(
+        'settings_contract' in hybrid_awb_view,
+        'hybrid AWB settings view must expose the contract dependency explicitly',
+    )
+    assert_true(
+        'HYBRID_AWB_CONFIG_SECTIONS' not in hybrid_awb_view,
+        'hybrid AWB static config sections must not remain inline on the view',
+    )
+    assert_true(
+        'get_hybrid_awb_overview_cards' not in hybrid_awb_view,
+        'hybrid AWB overview formatting must not remain inline on the view',
+    )
+
+
 def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
     import indi_allsky.modern_admin_settings_contracts as module
 
@@ -568,6 +649,9 @@ def run_tests():
     test_auto_exposure_gain_settings_contract_preserves_context_shape()
     test_auto_exposure_gain_settings_contract_handles_missing_groups()
     test_auto_exposure_gain_settings_view_uses_hybrid_contract()
+    test_hybrid_awb_settings_contract_preserves_context_shape()
+    test_hybrid_awb_settings_contract_handles_missing_group()
+    test_hybrid_awb_settings_view_uses_hybrid_contract()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
 
 

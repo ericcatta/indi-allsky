@@ -42,6 +42,10 @@ The source of truth for the current consolidation baseline is
   It documents target ADU, automation gates, gain caps, and manual-control
   relationships only; no auto-exposure controller behavior, exposure/gain
   algorithms, profile binding, or config writes were changed.
+- Hybrid AWB settings are now a Hybrid-owned read-only contract slice. It
+  documents AWB strategy, libcamera AWB metadata, post-process RGB factors, and
+  profile-specific color ownership only; no AWB algorithm, image-processing,
+  capture behavior, profile binding, or config writes were changed.
 - Mutative/safe-action ownership is now discovered in
   `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
   contract schema before any new execution path.
@@ -144,9 +148,9 @@ runtime behavior.
 - Benefit: continues moving from settings documentation to native Hybrid
   settings ownership without renaming keys, changing defaults, or removing
   Classic fallback. Notifications, Storage, Camera Profile Identity, Camera
-  Connection, Exposure/Gain, and Auto Exposure/Gain are complete as the first
-  read-only contract slices; choose the next low-risk group rather than broad
-  settings migration.
+  Connection, Exposure/Gain, Auto Exposure/Gain, and Hybrid AWB are complete as
+  the first read-only contract slices; choose the next low-risk group rather
+  than broad settings migration.
 - Risk: high if the first slice edits runtime config; keep the first step
   bounded to one low-risk read-only/edit-preview group.
 - Impact: high for Classic exit.
