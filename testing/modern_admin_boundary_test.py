@@ -106,6 +106,7 @@ BOUNDARIES = (
         'parent': 'ModernAdminContextMixin',
         'wrappers': (
             'ModernAdminMediaListView',
+            'ModernAdminLoopView',
         ),
     },
 )

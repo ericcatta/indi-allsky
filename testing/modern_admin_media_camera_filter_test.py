@@ -11,6 +11,7 @@ TEMPLATE_ROOT = REPO_ROOT / 'indi_allsky/flask/templates/modern_admin'
 
 CAMERA_FILTER_TEMPLATES = (
     'media_list.html',
+    'loop.html',
     'startrail_videos.html',
     'keograms.html',
     'startrails.html',
@@ -51,6 +52,7 @@ def test_media_browse_boundary_owns_gallery_camera_filter_policy():
     body = class_body(read_views(), 'ModernAdminMediaBrowseView')
 
     assert_true('def get_media_camera_filters(self):' in body, 'media browse boundary must own shared camera filters')
+    assert_true('def apply_media_camera_id_filter(self, query, camera_id_field):' in body, 'media browse boundary must support direct camera_id filters')
     assert_true("'All Cameras'" in body, 'shared camera filters must preserve Gallery default')
     assert_true("request.args.get('profile_id'" in body, 'shared camera filters must support profile_id')
     assert_true("request.args.get('camera_id', type=int)" in body, 'shared camera filters must support camera_id')
@@ -64,11 +66,32 @@ def test_media_list_uses_selected_camera_filter_instead_of_active_camera_only():
     assert_true('.filter(IndiAllSkyDbCameraTable.id == self.camera.id)' not in body, 'media list must not force active camera only')
 
 
+def test_modern_loop_uses_media_camera_filter_context():
+    body = class_body(read_views(), 'ModernAdminLoopView')
+    template = (TEMPLATE_ROOT / 'loop.html').read_text(encoding='utf-8')
+
+    assert_true('self.add_media_camera_filter_context(context)' in body, 'Modern Loop must expose camera filter context')
+    assert_true("context['modern_admin_loop_camera_id']" in body, 'Modern Loop must expose selected camera id')
+    assert_true("var camera_id = {{ modern_admin_loop_camera_id | tojson }};" in template, 'Loop JS must use selected camera id')
+    assert_true("params.set('camera_id', camera_id);" in template, 'Loop JS must send camera_id only when selected')
+
+
+def test_json_loop_all_cameras_does_not_require_camera_id():
+    body = class_body(read_views(), 'JsonImageLoopView')
+
+    assert_true("camera_id = request.args.get('camera_id', type=int)" in body, 'JSON loop must accept missing camera_id for All Cameras')
+    assert_true('if camera_id:' in body, 'JSON loop must keep camera-specific behavior when camera_id is selected')
+    assert_true("camera_id = int(request.args['camera_id'])" not in body, 'JSON loop must not require camera_id')
+
+
 def test_media_metadata_services_use_selected_camera_filter():
     body = class_body(read_views(), 'ModernAdminMediaMetadataView')
 
     assert_true('self.add_media_camera_filter_context(context)' in body, 'metadata pages must expose camera filter context')
     assert_true(body.count('camera_id=self.get_selected_media_camera_id()') == 4, 'metadata services must use selected camera filter')
+    assert_true('camera_relation=' not in body, 'generated-output metadata services must not require Camera joins')
+    assert_true('IndiAllSkyDbKeogramTable.camera_id' in body, 'Keogram metadata must filter by direct camera_id')
+    assert_true('IndiAllSkyDbStarTrailsTable.camera_id' in body, 'Startrail metadata must filter by direct camera_id')
     assert_true('camera_id=self.camera.id' not in body, 'metadata services must not force active camera only')
 
 
@@ -77,7 +100,7 @@ def test_inline_metadata_queries_use_shared_camera_filter():
 
     for class_name in ('ModernAdminMediaPanoramaView', 'ModernAdminMediaRawImagesView', 'ModernAdminFitsView'):
         body = class_body(views_text, class_name)
-        assert_true('self.apply_media_camera_filter(' in body, '{0:s} must use shared camera filter'.format(class_name))
+        assert_true('self.apply_media_camera_id_filter(' in body, '{0:s} must use shared direct camera_id filter'.format(class_name))
         assert_true('.filter(IndiAllSkyDbCameraTable.id == self.camera.id)' not in body, '{0:s} must not force active camera only'.format(class_name))
 
 
@@ -100,6 +123,8 @@ def test_camera_filter_partial_is_available_on_camera_owned_media_pages():
 def run_tests():
     test_media_browse_boundary_owns_gallery_camera_filter_policy()
     test_media_list_uses_selected_camera_filter_instead_of_active_camera_only()
+    test_modern_loop_uses_media_camera_filter_context()
+    test_json_loop_all_cameras_does_not_require_camera_id()
     test_media_metadata_services_use_selected_camera_filter()
     test_inline_metadata_queries_use_shared_camera_filter()
     test_media_detail_views_do_not_restrict_to_active_camera()

@@ -1130,9 +1130,10 @@ class JsonImageLoopView(JsonView):
         history_seconds = int(request.args.get('limit_s', self.history_seconds))
         self.limit = int(request.args.get('limit', self._limit))
         timestamp = int(request.args.get('timestamp', 0))
-        camera_id = int(request.args['camera_id'])
+        camera_id = request.args.get('camera_id', type=int)
 
-        self.cameraSetup(camera_id=camera_id)
+        if camera_id:
+            self.cameraSetup(camera_id=camera_id)
 
 
         if not timestamp:
@@ -1145,13 +1146,21 @@ class JsonImageLoopView(JsonView):
             history_seconds = 14400
 
 
-        jsqm_data, camera_sqm_mag_data, camera_sqm_adu_data, device_sqm_mag_data = self.getSqmData(camera_id, ts_dt)
+        if camera_id:
+            jsqm_data, camera_sqm_mag_data, camera_sqm_adu_data, device_sqm_mag_data = self.getSqmData(camera_id, ts_dt)
+            stars_data = self.getStarsData(camera_id, ts_dt)
+        else:
+            jsqm_data = list()
+            camera_sqm_mag_data = list()
+            camera_sqm_adu_data = list()
+            device_sqm_mag_data = list()
+            stars_data = list()
 
         data = {
             'message'    : '',
             'image_list' : self.getLoopImages(camera_id, ts_dt, history_seconds),
             'jsqm_data'  : jsqm_data,
-            'stars_data' : self.getStarsData(camera_id, ts_dt),
+            'stars_data' : stars_data,
             'camera_sqm_mag_data' : camera_sqm_mag_data,
             'camera_sqm_adu_data' : camera_sqm_adu_data,
             'device_sqm_mag_data' : device_sqm_mag_data,
@@ -1166,16 +1175,17 @@ class JsonImageLoopView(JsonView):
     def getLoopImages(self, camera_id, loop_dt, history_seconds):
         ts_minus_seconds = loop_dt - timedelta(seconds=history_seconds)
 
+        loop_filters = [
+            self.model.exclude == sa_false(),
+            self.model.createDate > ts_minus_seconds,
+            self.model.createDate < loop_dt,
+        ]
+        if camera_id:
+            loop_filters.insert(0, IndiAllSkyDbCameraTable.id == camera_id)
+
         latest_images_q = self.model.query\
             .join(self.model.camera)\
-            .filter(
-                and_(
-                    IndiAllSkyDbCameraTable.id == camera_id,
-                    self.model.exclude == sa_false(),
-                    self.model.createDate > ts_minus_seconds,
-                    self.model.createDate < loop_dt,
-                )
-            )
+            .filter(and_(*loop_filters))
 
 
         local = True  # default to local assets
@@ -13880,11 +13890,6 @@ class ModernAdminSupportInfoView(ModernAdminSystemToolView, SupportInfoView):
     page_title = 'Modern Admin Support Info'
 
 
-class ModernAdminLoopView(ModernAdminContextMixin, ImageLoopImgView):
-    page_title = 'Modern Admin Loop'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_view'
-
-
 class ModernAdminRealtimeKeogramView(ModernAdminObservatoryToolView, RealtimeKeogramView):
     page_title = 'Modern Admin Realtime Keogram'
 
@@ -14192,6 +14197,14 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
         return query
 
 
+    def apply_media_camera_id_filter(self, query, camera_id_field):
+        selected_camera_id = self.get_selected_media_camera_id()
+        if selected_camera_id is not None:
+            query = query.filter(camera_id_field == selected_camera_id)
+
+        return query
+
+
     def get_media_camera_filters(self):
         cached_filters = getattr(self, '_modern_admin_media_camera_filters', None)
         if cached_filters is not None:
@@ -14382,6 +14395,22 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
                 formatted_parts.append(part.capitalize())
 
         return ' '.join(formatted_parts)
+
+
+class ModernAdminLoopView(ModernAdminMediaBrowseView, ImageLoopImgView):
+    page_title = 'Modern Admin Loop'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_view'
+
+
+    def get_context(self):
+        context = super(ModernAdminLoopView, self).get_context()
+        self.add_media_camera_filter_context(context)
+
+        selected_filter = context.get('modern_admin_media_selected_filter') or {}
+        context['modern_admin_loop_camera_id'] = selected_filter.get('camera_id')
+        context['modern_admin_loop_selected_label'] = selected_filter.get('label') or 'All Cameras'
+
+        return context
 
 
 class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
@@ -14853,8 +14882,7 @@ class ModernAdminMediaMetadataView(ModernAdminMediaBrowseView):
     def get_startrail_video_metadata_service(self):
         return ModernAdminStartrailVideoMetadataService(
             query=IndiAllSkyDbStarTrailsVideoTable.query,
-            camera_relation=IndiAllSkyDbStarTrailsVideoTable.camera,
-            camera_id_field=IndiAllSkyDbCameraTable.id,
+            camera_id_field=IndiAllSkyDbStarTrailsVideoTable.camera_id,
             camera_id=self.get_selected_media_camera_id(),
             order_by_expression=IndiAllSkyDbStarTrailsVideoTable.createDate.desc(),
         )
@@ -14863,8 +14891,7 @@ class ModernAdminMediaMetadataView(ModernAdminMediaBrowseView):
     def get_keogram_metadata_service(self):
         return ModernAdminKeogramMetadataService(
             query=IndiAllSkyDbKeogramTable.query,
-            camera_relation=IndiAllSkyDbKeogramTable.camera,
-            camera_id_field=IndiAllSkyDbCameraTable.id,
+            camera_id_field=IndiAllSkyDbKeogramTable.camera_id,
             camera_id=self.get_selected_media_camera_id(),
             order_by_expression=IndiAllSkyDbKeogramTable.createDate.desc(),
         )
@@ -14873,8 +14900,7 @@ class ModernAdminMediaMetadataView(ModernAdminMediaBrowseView):
     def get_startrail_metadata_service(self):
         return ModernAdminStartrailMetadataService(
             query=IndiAllSkyDbStarTrailsTable.query,
-            camera_relation=IndiAllSkyDbStarTrailsTable.camera,
-            camera_id_field=IndiAllSkyDbCameraTable.id,
+            camera_id_field=IndiAllSkyDbStarTrailsTable.camera_id,
             camera_id=self.get_selected_media_camera_id(),
             order_by_expression=IndiAllSkyDbStarTrailsTable.createDate.desc(),
         )
@@ -14883,8 +14909,7 @@ class ModernAdminMediaMetadataView(ModernAdminMediaBrowseView):
     def get_mini_timelapse_metadata_service(self):
         return ModernAdminMiniTimelapseMetadataService(
             query=IndiAllSkyDbMiniVideoTable.query,
-            camera_relation=IndiAllSkyDbMiniVideoTable.camera,
-            camera_id_field=IndiAllSkyDbCameraTable.id,
+            camera_id_field=IndiAllSkyDbMiniVideoTable.camera_id,
             camera_id=self.get_selected_media_camera_id(),
             order_by_expression=IndiAllSkyDbMiniVideoTable.createDate.desc(),
         )
@@ -15123,10 +15148,9 @@ class ModernAdminMediaPanoramaView(ModernAdminMediaMetadataView, TemplateView):
         panorama_rows = list()
         try:
             panorama_query = IndiAllSkyDbPanoramaImageTable.query\
-                .join(IndiAllSkyDbPanoramaImageTable.camera)\
                 .order_by(IndiAllSkyDbPanoramaImageTable.createDate.desc())
 
-            panorama_entries = self.apply_media_camera_filter(panorama_query)\
+            panorama_entries = self.apply_media_camera_id_filter(panorama_query, IndiAllSkyDbPanoramaImageTable.camera_id)\
                 .limit(self.panorama_display_limit)\
                 .all()
         except Exception as e:
@@ -15258,10 +15282,9 @@ class ModernAdminMediaRawImagesView(ModernAdminMediaMetadataView, TemplateView):
         raw_image_rows = list()
         try:
             raw_image_query = IndiAllSkyDbRawImageTable.query\
-                .join(IndiAllSkyDbRawImageTable.camera)\
                 .order_by(IndiAllSkyDbRawImageTable.createDate.desc())
 
-            raw_image_entries = self.apply_media_camera_filter(raw_image_query)\
+            raw_image_entries = self.apply_media_camera_id_filter(raw_image_query, IndiAllSkyDbRawImageTable.camera_id)\
                 .limit(self.raw_image_display_limit)\
                 .all()
         except Exception as e:
@@ -15436,10 +15459,9 @@ class ModernAdminFitsView(ModernAdminMediaMetadataView, TemplateView):
         fits_rows = list()
         try:
             fits_query = IndiAllSkyDbFitsImageTable.query\
-                .join(IndiAllSkyDbFitsImageTable.camera)\
                 .order_by(IndiAllSkyDbFitsImageTable.createDate.desc())
 
-            fits_entries = self.apply_media_camera_filter(fits_query)\
+            fits_entries = self.apply_media_camera_id_filter(fits_query, IndiAllSkyDbFitsImageTable.camera_id)\
                 .limit(self.fits_display_limit)\
                 .all()
         except Exception as e:

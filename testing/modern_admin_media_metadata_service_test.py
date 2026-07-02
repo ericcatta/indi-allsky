@@ -177,6 +177,25 @@ def test_startrail_video_metadata_query_all_cameras_skips_camera_filter():
     assert query.limit_calls == [100]
 
 
+def test_startrail_video_metadata_query_supports_direct_camera_id_filter_without_join():
+    query = FakeQuery([FakeEntry()])
+    service = ModernAdminStartrailVideoMetadataService(
+        query=query,
+        camera_relation=None,
+        camera_id_field=FakeCameraIdField(),
+        camera_id=2,
+        order_by_expression='created-desc',
+    )
+
+    entries = service.list_entries(limit=100)
+
+    assert entries == [query.entries[0]]
+    assert query.join_calls == []
+    assert query.filter_calls == [('camera-id', 2)]
+    assert query.order_by_calls == ['created-desc']
+    assert query.limit_calls == [100]
+
+
 def test_startrail_video_metadata_rows_preserve_context_shape():
     service = build_service(FakeQuery([]))
 
@@ -370,6 +389,7 @@ def test_startrail_video_metadata_service_has_no_flask_db_or_filesystem_access()
 def run_tests():
     test_startrail_video_metadata_query_is_bounded_and_camera_filtered()
     test_startrail_video_metadata_query_all_cameras_skips_camera_filter()
+    test_startrail_video_metadata_query_supports_direct_camera_id_filter_without_join()
     test_startrail_video_metadata_rows_preserve_context_shape()
     test_startrail_video_metadata_formats_remote_source_without_exposing_url()
     test_keogram_metadata_query_is_bounded_and_camera_filtered()
