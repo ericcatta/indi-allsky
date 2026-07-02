@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-loop-preview-layout-v3') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-loop-preview-layout-v4') }}" rel="stylesheet">
 <script type="text/javascript">
 const modernAdminLoopCameras = {{ modern_admin_loop_camera_views | tojson }};
 var refreshInterval = {{ refreshInterval | int }};

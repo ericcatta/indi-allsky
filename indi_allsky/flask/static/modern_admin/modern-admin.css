@@ -821,15 +821,15 @@
 }
 
 .modern-admin-loop-preview-card .modern-admin-live-frame {
-  min-height: clamp(320px, 42vw, 620px);
-  max-height: min(68vh, 720px);
-  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-width: 100%;
+  height: clamp(320px, 42vw, 620px);
+  min-height: 0;
   margin-top: 14px;
 }
 
 .modern-admin-loop-preview-grid-multi .modern-admin-live-frame {
-  min-height: clamp(260px, 24vw, 460px);
-  max-height: min(56vh, 520px);
+  height: clamp(260px, 24vw, 460px);
 }
 
 .modern-admin-loop-preview-card .modern-admin-live-frame img {
@@ -859,7 +859,7 @@
   }
 
   .modern-admin-loop-preview-card .modern-admin-live-frame {
-    min-height: 280px;
+    height: 280px;
   }
 }
 
