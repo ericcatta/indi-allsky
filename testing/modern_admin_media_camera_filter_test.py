@@ -7,6 +7,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 VIEWS_PATH = REPO_ROOT / 'indi_allsky/flask/views.py'
 TEMPLATE_ROOT = REPO_ROOT / 'indi_allsky/flask/templates/modern_admin'
+MODERN_ADMIN_CSS_PATH = REPO_ROOT / 'indi_allsky/flask/static/modern_admin/modern-admin.css'
 
 
 CAMERA_FILTER_TEMPLATES = (
@@ -92,6 +93,18 @@ def test_json_loop_all_cameras_does_not_require_camera_id():
     assert_true("camera_id = int(request.args['camera_id'])" not in body, 'JSON loop must not require camera_id')
 
 
+def test_modern_loop_preview_layout_contains_media_without_forced_stretch():
+    css = MODERN_ADMIN_CSS_PATH.read_text(encoding='utf-8')
+
+    assert_true('grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));' in css, 'Loop all-camera grid must allow two contained desktop columns')
+    assert_true('overflow: hidden;' in css, 'Loop preview cards must contain media overflow')
+    assert_true('.modern-admin-loop-preview-card .modern-admin-live-frame img' in css, 'Loop preview image rule must be explicit')
+    assert_true('max-width: 100%;' in css, 'Loop preview image must be width-constrained')
+    assert_true('max-height: 100%;' in css, 'Loop preview image must be height-constrained')
+    assert_true('width: auto;' in css, 'Loop preview image must keep natural aspect ratio width')
+    assert_true('height: auto;' in css, 'Loop preview image must keep natural aspect ratio height')
+
+
 def test_generated_output_metadata_pages_expose_openable_media_products():
     views_text = read_views()
     expected_contexts = (
@@ -154,6 +167,7 @@ def run_tests():
     test_media_list_uses_selected_camera_filter_instead_of_active_camera_only()
     test_modern_loop_uses_media_camera_filter_context()
     test_json_loop_all_cameras_does_not_require_camera_id()
+    test_modern_loop_preview_layout_contains_media_without_forced_stretch()
     test_generated_output_metadata_pages_expose_openable_media_products()
     test_media_metadata_services_use_selected_camera_filter()
     test_inline_metadata_queries_use_shared_camera_filter()

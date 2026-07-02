@@ -799,18 +799,19 @@
 .modern-admin-loop-preview-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 22px;
+  gap: 18px;
   width: 100%;
   margin-top: 22px;
 }
 
 .modern-admin-loop-preview-grid-multi {
-  grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));
 }
 
 .modern-admin-loop-preview-card {
   min-width: 0;
-  padding: 24px;
+  padding: 20px;
+  overflow: hidden;
   border: 1px solid var(--modern-admin-line);
   border-radius: 18px;
   background:
@@ -820,18 +821,22 @@
 }
 
 .modern-admin-loop-preview-card .modern-admin-live-frame {
-  min-height: clamp(460px, 54vw, 820px);
+  min-height: clamp(320px, 42vw, 620px);
+  max-height: min(68vh, 720px);
   aspect-ratio: 16 / 9;
   margin-top: 14px;
 }
 
 .modern-admin-loop-preview-grid-multi .modern-admin-live-frame {
-  min-height: clamp(360px, 28vw, 640px);
+  min-height: clamp(260px, 24vw, 460px);
+  max-height: min(56vh, 520px);
 }
 
 .modern-admin-loop-preview-card .modern-admin-live-frame img {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
 }
 
