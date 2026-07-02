@@ -796,37 +796,65 @@
   object-fit: contain;
 }
 
-.modern-admin-loop-grid {
+.modern-admin-loop-preview-grid {
+  display: grid;
   grid-template-columns: 1fr;
-  gap: 18px;
+  gap: 22px;
+  width: 100%;
+  margin-top: 22px;
 }
 
-.modern-admin-loop-grid.modern-admin-loop-grid-multi {
-  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+.modern-admin-loop-preview-grid-multi {
+  grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
 }
 
-.modern-admin-loop-camera-card {
+.modern-admin-loop-preview-card {
   min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--modern-admin-line);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
+    var(--modern-admin-panel);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.22);
 }
 
-.modern-admin-loop-camera-card .modern-admin-live-frame {
-  min-height: clamp(320px, 48vw, 720px);
+.modern-admin-loop-preview-card .modern-admin-live-frame {
+  min-height: clamp(460px, 54vw, 820px);
   aspect-ratio: 16 / 9;
+  margin-top: 14px;
 }
 
-.modern-admin-loop-grid-multi .modern-admin-live-frame {
-  min-height: clamp(280px, 32vw, 560px);
+.modern-admin-loop-preview-grid-multi .modern-admin-live-frame {
+  min-height: clamp(360px, 28vw, 640px);
 }
 
-.modern-admin-loop-camera-card .modern-admin-live-frame img {
+.modern-admin-loop-preview-card .modern-admin-live-frame img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-@media (max-width: 620px) {
-  .modern-admin-loop-grid.modern-admin-loop-grid-multi {
+.hybrid-theme-day .hybrid-app-content .modern-admin-loop-preview-card {
+  border-color: rgba(33, 43, 38, 0.14);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.54)),
+    rgba(255, 255, 255, 0.92);
+  color: #20251f;
+  box-shadow: 0 18px 46px rgba(31, 42, 36, 0.12);
+}
+
+@media (max-width: 720px) {
+  .modern-admin-loop-preview-grid-multi {
     grid-template-columns: 1fr;
+  }
+
+  .modern-admin-loop-preview-card {
+    padding: 16px;
+  }
+
+  .modern-admin-loop-preview-card .modern-admin-live-frame {
+    min-height: 280px;
   }
 }
 
