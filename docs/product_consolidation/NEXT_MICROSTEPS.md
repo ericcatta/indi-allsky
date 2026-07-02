@@ -34,6 +34,10 @@ The source of truth for the current consolidation baseline is
 - Camera Connection settings are now a Hybrid-owned read-only contract slice.
   It documents backend/driver/INDI/libcamera metadata only; no driver behavior,
   hardware probing, active binding, or config writes were added.
+- Exposure/Gain settings are now a Hybrid-owned read-only contract slice. It
+  documents manual exposure/gain keys and profile/automation relationships only;
+  no capture cadence, exposure/gain logic, profile binding, or config writes
+  were changed.
 - Mutative/safe-action ownership is now discovered in
   `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
   contract schema before any new execution path.
@@ -135,9 +139,9 @@ runtime behavior.
   removable.
 - Benefit: continues moving from settings documentation to native Hybrid
   settings ownership without renaming keys, changing defaults, or removing
-  Classic fallback. Notifications, Storage, Camera Profile Identity, and Camera
-  Connection are complete as the first read-only contract slices; choose the
-  next low-risk group rather than broad settings migration.
+  Classic fallback. Notifications, Storage, Camera Profile Identity, Camera
+  Connection, and Exposure/Gain are complete as the first read-only contract
+  slices; choose the next low-risk group rather than broad settings migration.
 - Risk: high if the first slice edits runtime config; keep the first step
   bounded to one low-risk read-only/edit-preview group.
 - Impact: high for Classic exit.

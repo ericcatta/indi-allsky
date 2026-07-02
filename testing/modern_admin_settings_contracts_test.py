@@ -11,6 +11,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraConnectionSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
+from indi_allsky.modern_admin_settings_contracts import ModernAdminExposureGainSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 
@@ -324,6 +325,107 @@ def test_camera_connection_settings_view_uses_hybrid_contract():
     )
 
 
+def test_exposure_gain_settings_contract_preserves_context_shape():
+    contract = ModernAdminExposureGainSettingsContract()
+    exposure_group = {
+        'group_id': 'exposure',
+        'label': 'Exposure',
+    }
+    gain_group = {
+        'group_id': 'gain',
+        'label': 'Gain',
+    }
+
+    context = contract.build_context((
+        {'group_id': 'other'},
+        exposure_group,
+        gain_group,
+    ))
+
+    assert_true(
+        context['modern_admin_exposure_settings_group'] is exposure_group,
+        'exposure group must be selected from settings inventory groups',
+    )
+    assert_true(
+        context['modern_admin_gain_settings_group'] is gain_group,
+        'gain group must be selected from settings inventory groups',
+    )
+    assert_true(
+        context['modern_admin_exposure_gain_settings_groups'] == (exposure_group, gain_group),
+        'exposure/gain grouped context shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_exposure_gain_overview_cards']) == 6,
+        'exposure/gain overview cards shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_exposure_gain_config_sections']) == 4,
+        'exposure/gain config sections shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_exposure_gain_proposed_layout']) == 5,
+        'exposure/gain proposed layout shape changed',
+    )
+    assert_true(
+        context['modern_admin_exposure_gain_overview_cards'][0]['current_status'] == 'not evaluated here',
+        'exposure/gain overview current status changed',
+    )
+    assert_true(
+        context['modern_admin_exposure_gain_config_sections'][0]['key_count'] == 7,
+        'manual exposure config key count changed',
+    )
+    assert_true(
+        context['modern_admin_exposure_gain_config_sections'][1]['key_count'] == 6,
+        'manual gain config key count changed',
+    )
+    assert_true(
+        context['modern_admin_exposure_gain_proposed_layout'][0]['note'] == 'read-only proposal',
+        'exposure/gain layout note changed',
+    )
+
+
+def test_exposure_gain_settings_contract_handles_missing_groups():
+    contract = ModernAdminExposureGainSettingsContract()
+    context = contract.build_context(())
+
+    assert_true(
+        context['modern_admin_exposure_settings_group'] is None,
+        'missing exposure group must remain a safe None fallback',
+    )
+    assert_true(
+        context['modern_admin_gain_settings_group'] is None,
+        'missing gain group must remain a safe None fallback',
+    )
+    assert_true(
+        context['modern_admin_exposure_gain_settings_groups'] == (),
+        'missing exposure/gain groups must produce an empty group tuple',
+    )
+
+
+def test_exposure_gain_settings_view_uses_hybrid_contract():
+    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
+    start = views_text.index('class ModernAdminExposureGainSettingsView')
+    end = views_text.index('class ModernAdminAutoExposureGainSettingsView', start)
+    exposure_gain_view = views_text[start:end]
+
+    assert_true(
+        'ModernAdminExposureGainSettingsContract' in exposure_gain_view,
+        'exposure/gain settings view must use the Hybrid settings contract',
+    )
+    assert_true(
+        'settings_contract' in exposure_gain_view,
+        'exposure/gain settings view must expose the contract dependency explicitly',
+    )
+    assert_true(
+        'EXPOSURE_GAIN_CONFIG_SECTIONS' not in exposure_gain_view,
+        'exposure/gain static config sections must not remain inline on the view',
+    )
+    assert_true(
+        'get_exposure_gain_overview_cards' not in exposure_gain_view,
+        'exposure/gain overview formatting must not remain inline on the view',
+    )
+
+
 def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
     import indi_allsky.modern_admin_settings_contracts as module
 
@@ -358,6 +460,9 @@ def run_tests():
     test_camera_connection_settings_contract_preserves_context_shape()
     test_camera_connection_settings_contract_handles_missing_group()
     test_camera_connection_settings_view_uses_hybrid_contract()
+    test_exposure_gain_settings_contract_preserves_context_shape()
+    test_exposure_gain_settings_contract_handles_missing_groups()
+    test_exposure_gain_settings_view_uses_hybrid_contract()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
 
 
