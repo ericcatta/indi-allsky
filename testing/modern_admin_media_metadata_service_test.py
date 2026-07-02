@@ -220,6 +220,48 @@ def test_startrail_video_metadata_rows_preserve_context_shape():
     }]
 
 
+def test_media_metadata_summary_counts_uploaded_success_and_sources():
+    service = build_service(FakeQuery([]))
+    rows = [
+        {
+            'uploaded': 'Yes',
+            'success': 'No',
+            'source': 'Local DB entry',
+        },
+        {
+            'uploaded': 'No',
+            'success': 'Yes',
+            'source': 'Remote URL recorded',
+        },
+        {
+            'uploaded': 'Yes',
+            'success': 'Yes',
+            'source': 'Local DB entry',
+        },
+    ]
+
+    summary = service.build_summary(rows, include_sources=True)
+
+    assert summary == {
+        'count'         : 3,
+        'uploaded_count': 2,
+        'success_count' : 2,
+        'sources'       : ['Local DB entry', 'Remote URL recorded'],
+    }
+
+
+def test_media_metadata_views_use_service_summary():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    start = source.index('class ModernAdminMediaStartrailVideosView')
+    end = source.index('class ModernAdminMediaPanoramaView', start)
+    source = source[start:end]
+
+    assert '.build_summary(' in source
+    assert "row['uploaded'] == 'Yes'" not in source
+    assert "row['success'] == 'Yes'" not in source
+    assert "row['source'] for row" not in source
+
+
 def test_startrail_video_metadata_formats_remote_source_without_exposing_url():
     service = build_service(FakeQuery([]))
 
@@ -391,6 +433,8 @@ def run_tests():
     test_startrail_video_metadata_query_all_cameras_skips_camera_filter()
     test_startrail_video_metadata_query_supports_direct_camera_id_filter_without_join()
     test_startrail_video_metadata_rows_preserve_context_shape()
+    test_media_metadata_summary_counts_uploaded_success_and_sources()
+    test_media_metadata_views_use_service_summary()
     test_startrail_video_metadata_formats_remote_source_without_exposing_url()
     test_keogram_metadata_query_is_bounded_and_camera_filtered()
     test_keogram_metadata_rows_preserve_context_shape()

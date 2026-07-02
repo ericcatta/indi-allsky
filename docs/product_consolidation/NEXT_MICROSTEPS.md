@@ -49,8 +49,8 @@ The source of truth for the current consolidation baseline is
   interactive gallery/download/preview surfaces remain intentionally outside
   this boundary. The boundary owns the read-only login guard for metadata
   listing/detail pages. Startrail video, keogram, startrail, and mini-timelapse
-  metadata listings are the first media-metadata slices moved into Hybrid-owned
-  services.
+  metadata listings and their read-only summary counts are the first
+  media-metadata slices moved into Hybrid-owned services.
 - Media browse wrappers now enter through `ModernAdminMediaBrowseView`, but
   preview, URL generation, lightbox and download behavior remain unchanged and
   require a separate safety review before deeper extraction.
@@ -258,6 +258,8 @@ runtime behavior.
 - Startrail metadata listing moved into `ModernAdminStartrailMetadataService`.
 - Mini-timelapse metadata listing moved into
   `ModernAdminMiniTimelapseMetadataService`.
+- Media metadata uploaded/success/source summary ownership moved into the
+  Hybrid-owned metadata services for the extracted slices.
 - Media browse ownership boundary added via `ModernAdminMediaBrowseView`.
 - Remaining direct Modern Admin wrapper review completed; no further easy
   read-only boundary extraction is safe without a dedicated implementation

@@ -38,6 +38,26 @@ class ModernAdminStartrailVideoMetadataService:
         ]
 
 
+    def build_summary(self, rows, include_sources=False):
+        summary = {
+            'count'         : len(rows),
+            'uploaded_count': self.count_rows_with_value(rows, 'uploaded', 'Yes'),
+            'success_count' : self.count_rows_with_value(rows, 'success', 'Yes'),
+        }
+
+        if include_sources:
+            summary['sources'] = sorted({row['source'] for row in rows})
+
+        return summary
+
+
+    def count_rows_with_value(self, rows, key, value):
+        return len([
+            row for row in rows
+            if row.get(key) == value
+        ])
+
+
     def build_row(self, entry):
         return {
             'id'         : entry.id,

@@ -15038,17 +15038,14 @@ class ModernAdminMediaStartrailVideosView(ModernAdminMediaMetadataView, Template
             context['modern_admin_startrail_videos_error'] = 'Unable to load startrail video metadata.'
 
         startrail_video_rows = service.build_rows(startrail_video_entries)
+        startrail_video_summary = service.build_summary(startrail_video_rows)
 
         context['modern_admin_generated_media_items'] = self.build_generated_media_items(startrail_video_entries, media_kind='video')
         context['modern_admin_generated_media_label'] = 'Startrail video products'
         context['modern_admin_startrail_video_rows'] = startrail_video_rows
-        context['modern_admin_startrail_video_count'] = len(startrail_video_rows)
-        context['modern_admin_startrail_video_uploaded_count'] = len([
-            row for row in startrail_video_rows if row['uploaded'] == 'Yes'
-        ])
-        context['modern_admin_startrail_video_success_count'] = len([
-            row for row in startrail_video_rows if row['success'] == 'Yes'
-        ])
+        context['modern_admin_startrail_video_count'] = startrail_video_summary['count']
+        context['modern_admin_startrail_video_uploaded_count'] = startrail_video_summary['uploaded_count']
+        context['modern_admin_startrail_video_success_count'] = startrail_video_summary['success_count']
         context['modern_admin_startrail_video_display_limit'] = self.startrail_video_display_limit
 
         return context
@@ -15163,18 +15160,15 @@ class ModernAdminMediaKeogramsView(ModernAdminMediaMetadataView, TemplateView):
             context['modern_admin_keograms_error'] = 'Unable to load keogram metadata.'
 
         keogram_rows = service.build_rows(keogram_entries)
+        keogram_summary = service.build_summary(keogram_rows, include_sources=True)
 
         context['modern_admin_generated_media_items'] = self.build_generated_media_items(keogram_entries, media_kind='image')
         context['modern_admin_generated_media_label'] = 'Keogram products'
         context['modern_admin_keogram_rows'] = keogram_rows
-        context['modern_admin_keogram_count'] = len(keogram_rows)
-        context['modern_admin_keogram_uploaded_count'] = len([
-            row for row in keogram_rows if row['uploaded'] == 'Yes'
-        ])
-        context['modern_admin_keogram_success_count'] = len([
-            row for row in keogram_rows if row['success'] == 'Yes'
-        ])
-        context['modern_admin_keogram_sources'] = sorted({row['source'] for row in keogram_rows})
+        context['modern_admin_keogram_count'] = keogram_summary['count']
+        context['modern_admin_keogram_uploaded_count'] = keogram_summary['uploaded_count']
+        context['modern_admin_keogram_success_count'] = keogram_summary['success_count']
+        context['modern_admin_keogram_sources'] = keogram_summary['sources']
         context['modern_admin_keogram_display_limit'] = self.keogram_display_limit
 
         return context
@@ -15198,18 +15192,15 @@ class ModernAdminMediaStartrailsView(ModernAdminMediaMetadataView, TemplateView)
             context['modern_admin_startrails_error'] = 'Unable to load startrail metadata.'
 
         startrail_rows = service.build_rows(startrail_entries)
+        startrail_summary = service.build_summary(startrail_rows, include_sources=True)
 
         context['modern_admin_generated_media_items'] = self.build_generated_media_items(startrail_entries, media_kind='image')
         context['modern_admin_generated_media_label'] = 'Startrail products'
         context['modern_admin_startrail_rows'] = startrail_rows
-        context['modern_admin_startrail_count'] = len(startrail_rows)
-        context['modern_admin_startrail_uploaded_count'] = len([
-            row for row in startrail_rows if row['uploaded'] == 'Yes'
-        ])
-        context['modern_admin_startrail_success_count'] = len([
-            row for row in startrail_rows if row['success'] == 'Yes'
-        ])
-        context['modern_admin_startrail_sources'] = sorted({row['source'] for row in startrail_rows})
+        context['modern_admin_startrail_count'] = startrail_summary['count']
+        context['modern_admin_startrail_uploaded_count'] = startrail_summary['uploaded_count']
+        context['modern_admin_startrail_success_count'] = startrail_summary['success_count']
+        context['modern_admin_startrail_sources'] = startrail_summary['sources']
         context['modern_admin_startrail_display_limit'] = self.startrail_display_limit
 
         return context
@@ -15233,17 +15224,14 @@ class ModernAdminMediaMiniTimelapsesView(ModernAdminMediaMetadataView, TemplateV
             context['modern_admin_mini_timelapses_error'] = 'Unable to load mini-timelapse metadata.'
 
         mini_timelapse_rows = service.build_rows(mini_timelapse_entries)
+        mini_timelapse_summary = service.build_summary(mini_timelapse_rows)
 
         context['modern_admin_generated_media_items'] = self.build_generated_media_items(mini_timelapse_entries, media_kind='video')
         context['modern_admin_generated_media_label'] = 'Mini timelapse products'
         context['modern_admin_mini_timelapse_rows'] = mini_timelapse_rows
-        context['modern_admin_mini_timelapse_count'] = len(mini_timelapse_rows)
-        context['modern_admin_mini_timelapse_uploaded_count'] = len([
-            row for row in mini_timelapse_rows if row['uploaded'] == 'Yes'
-        ])
-        context['modern_admin_mini_timelapse_success_count'] = len([
-            row for row in mini_timelapse_rows if row['success'] == 'Yes'
-        ])
+        context['modern_admin_mini_timelapse_count'] = mini_timelapse_summary['count']
+        context['modern_admin_mini_timelapse_uploaded_count'] = mini_timelapse_summary['uploaded_count']
+        context['modern_admin_mini_timelapse_success_count'] = mini_timelapse_summary['success_count']
         context['modern_admin_mini_timelapse_display_limit'] = self.mini_timelapse_display_limit
 
         return context
