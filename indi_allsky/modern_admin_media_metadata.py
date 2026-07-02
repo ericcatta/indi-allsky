@@ -150,3 +150,28 @@ class ModernAdminKeogramMetadataService(ModernAdminStartrailVideoMetadataService
 
 class ModernAdminStartrailMetadataService(ModernAdminKeogramMetadataService):
     pass
+
+
+class ModernAdminMiniTimelapseMetadataService(ModernAdminStartrailVideoMetadataService):
+    def build_row(self, entry):
+        return {
+            'id'          : entry.id,
+            'created'     : self.format_datetime(entry.createDate),
+            'target_date' : self.format_datetime(entry.targetDate),
+            'start_date'  : self.format_datetime(entry.startDate),
+            'end_date'    : self.format_datetime(entry.endDate),
+            'day_date'    : entry.dayDate if entry.dayDate else 'Unknown',
+            'camera_id'   : entry.camera_id,
+            'filename'    : self.format_filename(entry.filename),
+            'dimensions'  : self.format_dimensions(entry.width, entry.height),
+            'frames'      : entry.frames if entry.frames is not None else 'Unknown',
+            'framerate'   : self.format_number(entry.framerate, suffix=' fps'),
+            'file_size'   : self.format_media_size(entry.fileSize) if entry.fileSize else 'Unknown',
+            'timeofday'   : 'Night' if entry.night else 'Day',
+            'uploaded'    : self.format_bool(entry.uploaded),
+            'success'     : self.format_bool(entry.success),
+            'source'      : self.format_source(entry),
+            'sync_id'     : entry.sync_id if entry.sync_id is not None else 'N/A',
+            'note'        : entry.note if entry.note else 'None',
+            'metadata'    : self.format_data_summary(entry.data),
+        }
