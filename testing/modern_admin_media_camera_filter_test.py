@@ -75,6 +75,7 @@ def test_modern_loop_uses_media_camera_filter_context():
     assert_true("context['modern_admin_loop_camera_views']" in body, 'Modern Loop must expose per-camera loop views')
     assert_true('def get_loop_camera_views(self, selected_filter):' in body, 'Modern Loop must build all-camera loop views')
     assert_true('const modernAdminLoopCameras = {{ modern_admin_loop_camera_views | tojson }};' in template, 'Loop JS must receive per-camera loop views')
+    assert_true("v='modern-loop-layout-v2'" in template, 'Loop template must cache-bust the responsive layout CSS')
     assert_true('modern-admin-loop-grid' in template, 'Loop template must use the responsive loop preview grid')
     assert_true('modern-admin-loop-grid-multi' in template, 'Loop template must distinguish all-camera preview layout')
     assert_true('data-loop-camera="{{ loop_camera.loop_id }}"' in template, 'Loop template must render one card per loop camera')
