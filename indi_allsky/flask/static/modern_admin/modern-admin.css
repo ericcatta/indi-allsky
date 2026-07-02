@@ -796,6 +796,34 @@
   object-fit: contain;
 }
 
+.modern-admin-loop-grid {
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.modern-admin-loop-grid.modern-admin-loop-grid-multi {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+}
+
+.modern-admin-loop-camera-card {
+  min-width: 0;
+}
+
+.modern-admin-loop-camera-card .modern-admin-live-frame {
+  min-height: clamp(320px, 48vw, 720px);
+  aspect-ratio: 16 / 9;
+}
+
+.modern-admin-loop-grid-multi .modern-admin-live-frame {
+  min-height: clamp(280px, 32vw, 560px);
+}
+
+.modern-admin-loop-camera-card .modern-admin-live-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .modern-admin-chart-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

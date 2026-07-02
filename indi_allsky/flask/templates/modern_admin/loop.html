@@ -29,7 +29,7 @@ var timestamp = {{ timestamp | int }};
             <label>Frame Delay {{ form_history.FRAMEDELAY_SELECT() }}</label>
             <label>Rock {{ form_history.ROCK_CHECKBOX() }}</label>
         </div>
-        <section class="modern-admin-status-grid{% if modern_admin_loop_camera_views|length > 1 %} modern-admin-status-grid-three{% endif %}" aria-label="Camera loops">
+        <section class="modern-admin-status-grid modern-admin-loop-grid{% if modern_admin_loop_camera_views|length > 1 %} modern-admin-loop-grid-multi{% endif %}" aria-label="Camera loops">
             {% for loop_camera in modern_admin_loop_camera_views %}
             <article class="modern-admin-status-card modern-admin-loop-camera-card" data-loop-camera="{{ loop_camera.loop_id }}">
                 <div class="modern-admin-card-label">Camera loop</div>
