@@ -244,6 +244,8 @@ runtime behavior.
   `ModernAdminSqmSummaryService`.
 - Long-term Keogram generated-age display formatting moved into
   `ModernAdminLongTermKeogramDisplayService`.
+- VirtualSky overlay form-data defaults moved into
+  `ModernAdminVirtualSkyContextService`.
 - Camera diagnostic ownership boundary added via `ModernAdminCameraToolView`.
 - Camera Info lens/sensor summary formatting moved into
   `ModernAdminCameraInfoService`.

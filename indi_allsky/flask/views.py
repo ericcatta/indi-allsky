@@ -40,6 +40,7 @@ from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
 from ..modern_admin_observatory_tools import ModernAdminSqmSummaryService
+from ..modern_admin_observatory_tools import ModernAdminVirtualSkyContextService
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
 from ..modern_admin_tasks import ModernAdminTaskReadService
@@ -441,6 +442,7 @@ class IndexImgView(TemplateView):
 class VirtualSkyView(TemplateView):
     page_title = 'VirtualSky'
     image_loop_view = 'indi_allsky.js_image_loop_view'
+    context_service = ModernAdminVirtualSkyContextService()
 
 
     def get_context(self):
@@ -453,25 +455,9 @@ class VirtualSkyView(TemplateView):
         context['timestamp'] = timestamp
 
 
-        data = {
-            'AZIMUTH_ANGLE'         : self.camera.az,
-            'IMAGE_CIRCLE_DIAMETER' : self.camera.data.get('vs_image_circle_diameter', 3500),
-            'LATITUDE_OFFSET'       : self.camera.data.get('vs_latitude_offset', 0.0),
-            'LONGITUDE_OFFSET'      : self.camera.data.get('vs_longitude_offset', 0.0),
-            'OFFSET_X'              : self.camera.data.get('vs_offset_x', 0.0),
-            'OFFSET_Y'              : self.camera.data.get('vs_offset_y', 0.0),
-            'MAGNITUDE'             : self.camera.data.get('vs_magnitude', 6.0),
-            'CONSTELLATIONS'        : self.camera.data.get('vs_constellations', True),
-            'CONSTELLATIONLABELS'   : self.camera.data.get('vs_constellationlabels', False),
-            'SHOWSTARS'             : self.camera.data.get('vs_showstars', True),
-            'SHOWSTARLABELS'        : self.camera.data.get('vs_showstarlabels', True),
-            'SHOWPLANETS'           : self.camera.data.get('vs_showplanets', True),
-            'SHOWPLANETLABELS'      : self.camera.data.get('vs_showplanetlabels', True),
-            #'FLIP_NS'               : self.camera.data.get('vs_flip_ns', False),
-            #'FLIP_EW'               : self.camera.data.get('vs_flip_ew', False),
-        }
-
-        context['form_virtualsky'] = IndiAllskyVirtualSkyHelperForm(data=data)
+        context['form_virtualsky'] = IndiAllskyVirtualSkyHelperForm(
+            data=self.context_service.build_form_data(self.camera),
+        )
 
 
         refreshInterval_ms = math.ceil(self.indi_allsky_config.get('CCD_EXPOSURE_MAX', 15.0)) * 1000

@@ -10,6 +10,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
 from indi_allsky.modern_admin_observatory_tools import ModernAdminSqmSummaryService
+from indi_allsky.modern_admin_observatory_tools import ModernAdminVirtualSkyContextService
 
 
 class FakeSqmSummary:
@@ -19,6 +20,23 @@ class FakeSqmSummary:
     stars_min = 10
     stars_avg = 20
     stars_max = 30
+
+
+class FakeCamera:
+    az = 123.4
+    data = {
+        'vs_image_circle_diameter': 2800,
+        'vs_latitude_offset'      : 1.25,
+        'vs_offset_x'             : -2.5,
+        'vs_magnitude'            : 5.5,
+        'vs_constellations'       : False,
+        'vs_showplanets'          : False,
+    }
+
+
+class FakeCameraWithoutData:
+    az = 42.0
+    data = None
 
 
 def test_sqm_summary_service_preserves_context_shape():
@@ -63,6 +81,40 @@ def test_longterm_keogram_display_service_preserves_age_format():
     assert service.format_generated_age(90061) == 'Generated 1 days, 1 hours, 1 minutes ago'
 
 
+def test_virtualsky_context_service_preserves_form_data_shape():
+    service = ModernAdminVirtualSkyContextService()
+
+    data = service.build_form_data(FakeCamera())
+
+    assert data == {
+        'AZIMUTH_ANGLE'         : 123.4,
+        'IMAGE_CIRCLE_DIAMETER' : 2800,
+        'LATITUDE_OFFSET'       : 1.25,
+        'LONGITUDE_OFFSET'      : 0.0,
+        'OFFSET_X'              : -2.5,
+        'OFFSET_Y'              : 0.0,
+        'MAGNITUDE'             : 5.5,
+        'CONSTELLATIONS'        : False,
+        'CONSTELLATIONLABELS'   : False,
+        'SHOWSTARS'             : True,
+        'SHOWSTARLABELS'        : True,
+        'SHOWPLANETS'           : False,
+        'SHOWPLANETLABELS'      : True,
+    }
+
+
+def test_virtualsky_context_service_preserves_defaults_without_camera_data():
+    service = ModernAdminVirtualSkyContextService()
+
+    data = service.build_form_data(FakeCameraWithoutData())
+
+    assert data['AZIMUTH_ANGLE'] == 42.0
+    assert data['IMAGE_CIRCLE_DIAMETER'] == 3500
+    assert data['MAGNITUDE'] == 6.0
+    assert data['CONSTELLATIONS'] is True
+    assert data['CONSTELLATIONLABELS'] is False
+
+
 def test_modern_sqm_view_uses_observatory_service():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
     start = source.index('class ModernAdminSqmView')
@@ -86,6 +138,18 @@ def test_modern_longterm_keogram_view_uses_display_service():
     assert "'Generated {0:d} days" not in source
 
 
+def test_virtualsky_view_uses_context_service():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    start = source.index('class VirtualSkyView')
+    end = source.index('class RealtimeKeogramView', start)
+    source = source[start:end]
+
+    assert 'ModernAdminVirtualSkyContextService' in source
+    assert 'build_form_data' in source
+    assert "'IMAGE_CIRCLE_DIAMETER' : self.camera.data.get" not in source
+    assert "'SHOWPLANETLABELS'      : self.camera.data.get" not in source
+
+
 def test_observatory_tools_module_has_no_flask_db_or_filesystem_dependency():
     import indi_allsky.modern_admin_observatory_tools as module
 
@@ -102,8 +166,11 @@ def run_tests():
     test_sqm_summary_service_preserves_context_shape()
     test_sqm_summary_service_preserves_safe_defaults()
     test_longterm_keogram_display_service_preserves_age_format()
+    test_virtualsky_context_service_preserves_form_data_shape()
+    test_virtualsky_context_service_preserves_defaults_without_camera_data()
     test_modern_sqm_view_uses_observatory_service()
     test_modern_longterm_keogram_view_uses_display_service()
+    test_virtualsky_view_uses_context_service()
     test_observatory_tools_module_has_no_flask_db_or_filesystem_dependency()
     print('Modern admin observatory tools checks passed')
 
