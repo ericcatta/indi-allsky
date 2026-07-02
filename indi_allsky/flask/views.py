@@ -38,6 +38,7 @@ from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
+from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..modern_admin_tasks import ModernAdminTaskReadPolicy
 from ..processing import ImageProcessor
@@ -14079,40 +14080,15 @@ class ModernAdminLogView(ModernAdminSystemToolView, LogView):
 class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
     page_title = 'Modern Admin Log Detail'
 
-    max_detail_lines = 500
-    default_detail_lines = 200
-    line_size = 180
-    log_sources = {
-        'capture' : {
-            'label'       : 'Capture Log',
-            'path'        : Path('/var/log/indi-allsky/indi-allsky.log'),
-            'classic_url' : 'indi_allsky.log_view',
-        },
-        'webapp' : {
-            'label'       : 'Webapp Log',
-            'path'        : Path('/var/log/indi-allsky/webapp-indi-allsky.log'),
-            'classic_url' : 'indi_allsky.log_view',
-        },
-        'syslog' : {
-            'label'       : 'OS System Log',
-            'path'        : Path('/var/log/syslog'),
-            'classic_url' : 'indi_allsky.log_view',
-        },
-        'kernel' : {
-            'label'       : 'Kernel Log',
-            'path'        : Path('/var/log/kern.log'),
-            'classic_url' : 'indi_allsky.log_view',
-        },
-    }
-    sensitive_line_regexes = (
-        re.compile(r'(?i)(password\s*[:=]\s*)(\S+)'),
-        re.compile(r'(?i)(token\s*[:=]\s*)(\S+)'),
-        re.compile(r'(?i)(api[_-]?key\s*[:=]\s*)(\S+)'),
-        re.compile(r'(?i)(secret\s*[:=]\s*)(\S+)'),
-    )
+    log_policy = ModernAdminLogDisplayPolicy()
+    max_detail_lines = log_policy.max_detail_lines
+    default_detail_lines = log_policy.default_detail_lines
+    line_size = log_policy.line_size
+    log_sources = log_policy.log_sources
+    sensitive_line_regexes = log_policy.sensitive_line_regexes
 
     def dispatch_request(self, log_name, *args, **kwargs):
-        if log_name not in self.log_sources:
+        if not self.log_policy.is_known_log(log_name):
             abort(404)
 
         context = self.get_context(log_name=log_name)
@@ -14122,7 +14098,7 @@ class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
     def get_context(self, log_name=None):
         context = super(ModernAdminLogDetailView, self).get_context()
 
-        log_source = self.log_sources[log_name]
+        log_source = self.log_policy.get_log_source(log_name)
         line_limit = self.get_requested_line_limit()
         log_lines, log_status, log_file_size = self.read_log_tail(log_source['path'], line_limit)
 
@@ -14132,23 +14108,14 @@ class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
         context['modern_admin_log_status'] = log_status
         context['modern_admin_log_line_limit'] = line_limit
         context['modern_admin_log_file_size'] = self.format_file_size(log_file_size)
-        context['modern_admin_log_sources'] = [
-            {
-                'name'   : source_name,
-                'label'  : source['label'],
-                'active' : source_name == log_name,
-            }
-            for source_name, source in self.log_sources.items()
-        ]
+        context['modern_admin_log_sources'] = self.log_policy.build_source_rows(log_name)
 
         return context
 
 
     def get_requested_line_limit(self):
         line_limit = request.args.get('lines', self.default_detail_lines, type=int)
-        if line_limit <= 0:
-            return self.default_detail_lines
-        return min(line_limit, self.max_detail_lines)
+        return self.log_policy.normalize_line_limit(line_limit)
 
 
     def read_log_tail(self, log_file_p, line_limit):
@@ -14163,7 +14130,7 @@ class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
         if log_file_size == 0:
             return ['Log file is empty.'], 'Empty', log_file_size
 
-        read_bytes = line_limit * self.line_size
+        read_bytes = self.log_policy.read_bytes_for_limit(line_limit)
         log_file_seek = max(log_file_size - read_bytes, 0)
 
         try:
@@ -14188,31 +14155,11 @@ class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
 
 
     def redact_log_line(self, line):
-        redacted_line = line
-        for sensitive_regex in self.sensitive_line_regexes:
-            redacted_line = sensitive_regex.sub(r'\1[REDACTED]', redacted_line)
-
-        return redacted_line
+        return self.log_policy.redact_log_line(line)
 
 
     def format_file_size(self, value):
-        if value is None:
-            return 'Unknown'
-
-        try:
-            size = float(value)
-        except (TypeError, ValueError):
-            return str(value)
-
-        units = ('B', 'KB', 'MB', 'GB', 'TB')
-        unit_index = 0
-        while size >= 1024.0 and unit_index < len(units) - 1:
-            size /= 1024.0
-            unit_index += 1
-
-        if unit_index == 0:
-            return '{0:d} {1:s}'.format(int(size), units[unit_index])
-        return '{0:.1f} {1:s}'.format(size, units[unit_index])
+        return self.log_policy.format_file_size(value)
 
 
 class ModernAdminMaskView(ModernAdminCameraToolView, MaskView):

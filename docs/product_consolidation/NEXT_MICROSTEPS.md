@@ -247,6 +247,8 @@ runtime behavior.
   `ModernAdminImageLagPolicy`.
 - System read-only ownership boundary added via `ModernAdminSystemToolView`.
 - System read-only login guard ownership moved into `ModernAdminSystemToolView`.
+- Log Detail display policy, source rows, redaction, and file-size formatting moved
+  into `ModernAdminLogDisplayPolicy`.
 - Notification read-only ownership boundary added via `ModernAdminNotificationStatusView`.
 - Notification read-only list/detail formatting moved into
   `ModernAdminNotificationReadService`.
