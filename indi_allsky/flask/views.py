@@ -38,6 +38,7 @@ from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
+from ..modern_admin_observatory_tools import ModernAdminSqmSummaryService
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
 from ..modern_admin_tasks import ModernAdminTaskReadService
@@ -13897,6 +13898,8 @@ class ModernAdminObservatoryToolView(ModernAdminContextMixin):
 class ModernAdminSqmView(ModernAdminObservatoryToolView, SqmView):
     page_title = 'Modern Admin SQM'
 
+    sqm_summary_service = ModernAdminSqmSummaryService()
+
     def get_context(self):
         context = super(ModernAdminSqmView, self).get_context()
         image_data = self.get_image_data()
@@ -13916,10 +13919,7 @@ class ModernAdminSqmView(ModernAdminObservatoryToolView, SqmView):
             .filter(IndiAllSkyDbImageTable.createDate > camera_now_minus_30m)\
             .first()
 
-        context['modern_admin_sqm'] = image_data.get('sqm', 0.0)
-        context['modern_admin_stars'] = image_data.get('stars', 0)
-        context['modern_admin_moon_phase'] = image_data.get('moon_phase', 0.0)
-        context['modern_admin_sqm_summary'] = sqm_summary
+        context.update(self.sqm_summary_service.build_context(image_data, sqm_summary))
 
         return context
 

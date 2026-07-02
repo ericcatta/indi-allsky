@@ -240,6 +240,8 @@ runtime behavior.
 - P0 Product Spine Regression Checklist implemented as `testing/product_spine_regression_test.py`.
 - Product spine view ownership boundary added via `ModernAdminProductView`.
 - Observatory tool ownership boundary added via `ModernAdminObservatoryToolView`.
+- Observatory SQM context summary ownership moved into
+  `ModernAdminSqmSummaryService`.
 - Camera diagnostic ownership boundary added via `ModernAdminCameraToolView`.
 - Camera Info lens/sensor summary formatting moved into
   `ModernAdminCameraInfoService`.
