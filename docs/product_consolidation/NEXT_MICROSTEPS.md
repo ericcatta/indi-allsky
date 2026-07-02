@@ -21,6 +21,9 @@ The source of truth for the current consolidation baseline is
 - Settings groups are now classified in `HYBRID_SETTINGS_CONTRACT_REVIEW.md`.
 - Classic remains required as fallback/reference for many operational surfaces.
 - Settings remain high risk, but their product contract is now explicit.
+- Notifications settings are the first read-only settings contract slice moved
+  into a Hybrid-owned contract helper; existing keys, defaults, config behavior,
+  and Classic fallback remain unchanged.
 - Mutative/safe-action ownership is now discovered in
   `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
   contract schema before any new execution path.
@@ -120,9 +123,10 @@ runtime behavior.
 - Motivation: `HYBRID_CLASSIC_EXIT_ASSESSMENT.md` identifies Settings as the
   lowest Hybrid ownership domain and the largest real blocker to making Classic
   removable.
-- Benefit: begins moving from settings documentation to native Hybrid settings
-  ownership without renaming keys, changing defaults, or removing Classic
-  fallback.
+- Benefit: continues moving from settings documentation to native Hybrid
+  settings ownership without renaming keys, changing defaults, or removing
+  Classic fallback. Notifications is complete as the first read-only contract
+  slice; choose the next low-risk group rather than broad settings migration.
 - Risk: high if the first slice edits runtime config; keep the first step
   bounded to one low-risk read-only/edit-preview group.
 - Impact: high for Classic exit.
