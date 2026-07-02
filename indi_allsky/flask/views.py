@@ -12234,12 +12234,7 @@ class ModernAdminNotificationsView(ModernAdminNotificationStatusView, TemplateVi
             context['modern_admin_notifications_error'] = 'Unable to load notifications.'
 
         notification_rows = service.build_notification_rows(notices)
-
-        context['modern_admin_notification_rows'] = notification_rows
-        context['modern_admin_notification_count'] = len(notification_rows)
-        context['modern_admin_notification_unacked_count'] = len([row for row in notification_rows if row['ack'] == 'No'])
-        context['modern_admin_notification_categories'] = sorted({row['category'] for row in notification_rows})
-        context['modern_admin_notification_items'] = sorted({row['item'] for row in notification_rows})
+        context.update(service.build_notification_list_context(notification_rows))
 
         return context
 
@@ -12263,7 +12258,7 @@ class ModernAdminNotificationDetailView(ModernAdminNotificationsView):
             abort(404)
 
         notification_detail = service.build_notification_detail(notice)
-        context['modern_admin_notification_detail'] = notification_detail
+        context.update(service.build_notification_detail_context(notification_detail))
 
         return context
 

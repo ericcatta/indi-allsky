@@ -37,7 +37,8 @@ The source of truth for the current consolidation baseline is
   the read-only login guard for this family.
 - Notification read-only wrappers now share `ModernAdminNotificationStatusView`;
   acknowledgement actions remain outside this boundary. The read-only list and
-  detail formatter now live in a small Hybrid-owned service.
+  detail formatter and context summaries now live in a small Hybrid-owned
+  service.
 - Task/status wrappers now share `ModernAdminTaskStatusView`, reducing direct
   Classic-style ownership for read-only queue listing/detail pages; the
   boundary also owns the read-only login guard for this family. Task list/detail
@@ -240,6 +241,8 @@ runtime behavior.
 - System read-only login guard ownership moved into `ModernAdminSystemToolView`.
 - Notification read-only ownership boundary added via `ModernAdminNotificationStatusView`.
 - Notification read-only list/detail formatting moved into
+  `ModernAdminNotificationReadService`.
+- Notification read-only context summary ownership moved into
   `ModernAdminNotificationReadService`.
 - Task/status ownership boundary added via `ModernAdminTaskStatusView`.
 - Task/status login guard ownership moved into `ModernAdminTaskStatusView`.

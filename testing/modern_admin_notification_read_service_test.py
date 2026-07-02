@@ -96,6 +96,45 @@ def test_notification_detail_preserves_filter_behavior():
     assert row['category'] == 'Unknown'
 
 
+def test_notification_list_context_preserves_context_keys():
+    service = ModernAdminNotificationReadService(query=FakeQuery([]))
+    rows = [
+        {
+            'id'      : 1,
+            'category': 'System',
+            'item'    : 'Camera',
+            'ack'     : 'No',
+        },
+        {
+            'id'      : 2,
+            'category': 'System',
+            'item'    : 'Storage',
+            'ack'     : 'Yes',
+        },
+    ]
+
+    context = service.build_notification_list_context(rows)
+
+    assert context == {
+        'modern_admin_notification_rows'          : rows,
+        'modern_admin_notification_count'         : 2,
+        'modern_admin_notification_unacked_count' : 1,
+        'modern_admin_notification_categories'    : ['System'],
+        'modern_admin_notification_items'         : ['Camera', 'Storage'],
+    }
+
+
+def test_notification_detail_context_preserves_context_key():
+    service = ModernAdminNotificationReadService(query=FakeQuery([]))
+    detail = {'id': 42}
+
+    context = service.build_notification_detail_context(detail)
+
+    assert context == {
+        'modern_admin_notification_detail': detail,
+    }
+
+
 def test_notification_read_service_has_no_flask_or_db_dependency():
     import inspect
     import indi_allsky.modern_admin_notifications as module
@@ -111,6 +150,8 @@ def test_notification_read_service_has_no_flask_or_db_dependency():
 def run_tests():
     test_notification_rows_preserve_context_shape()
     test_notification_detail_preserves_filter_behavior()
+    test_notification_list_context_preserves_context_keys()
+    test_notification_detail_context_preserves_context_key()
     test_notification_read_service_has_no_flask_or_db_dependency()
     print('Modern admin notification read service checks passed')
 

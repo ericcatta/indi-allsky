@@ -34,6 +34,24 @@ class ModernAdminNotificationReadService:
         return self.build_notification_row(notice)
 
 
+    def build_notification_list_context(self, notification_rows):
+        return {
+            'modern_admin_notification_rows'          : notification_rows,
+            'modern_admin_notification_count'         : len(notification_rows),
+            'modern_admin_notification_unacked_count' : len([
+                row for row in notification_rows if row['ack'] == 'No'
+            ]),
+            'modern_admin_notification_categories'    : sorted({row['category'] for row in notification_rows}),
+            'modern_admin_notification_items'         : sorted({row['item'] for row in notification_rows}),
+        }
+
+
+    def build_notification_detail_context(self, notification_detail):
+        return {
+            'modern_admin_notification_detail': notification_detail,
+        }
+
+
     def build_notification_row(self, notice):
         is_ack = bool(getattr(notice, 'ack', False))
 
