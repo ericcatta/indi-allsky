@@ -2,13 +2,17 @@
 
 import math
 import sys
+from datetime import datetime
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
+from indi_allsky.modern_admin_camera_diagnostics import IMAGE_LAG_LOOKBACK_HOURS
+from indi_allsky.modern_admin_camera_diagnostics import IMAGE_LAG_ROW_LIMIT
 from indi_allsky.modern_admin_camera_diagnostics import ModernAdminCameraInfoService
+from indi_allsky.modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 
 
 class FakeCamera:
@@ -66,6 +70,28 @@ def test_modern_camera_info_view_uses_camera_info_service():
     assert 'camera_width_mm = camera.width * camera.pixelSize' not in source
 
 
+def test_image_lag_policy_preserves_window_and_limit():
+    policy = ModernAdminImageLagPolicy()
+    timestamp_datetime = datetime(2026, 1, 2, 12, 0, 0)
+
+    assert IMAGE_LAG_LOOKBACK_HOURS == 3
+    assert IMAGE_LAG_ROW_LIMIT == 50
+    assert policy.row_limit == 50
+    assert policy.window_start(timestamp_datetime) == datetime(2026, 1, 2, 9, 0, 0)
+
+
+def test_modern_image_lag_view_uses_domain_policy():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    start = source.index('class ModernAdminImageLagView')
+    end = source.index('class ModernAdminAduHistoryView', start)
+    source = source[start:end]
+
+    assert 'ModernAdminImageLagPolicy' in source
+    assert 'super(ModernAdminImageLagView' not in source
+    assert 'timedelta(hours=3)' not in source
+    assert '.limit(50)' not in source
+
+
 def test_camera_info_service_has_no_flask_db_or_filesystem_dependency():
     import inspect
     import indi_allsky.modern_admin_camera_diagnostics as module
@@ -83,6 +109,8 @@ def run_tests():
     test_camera_info_service_preserves_camera_lens_context_shape()
     test_camera_info_service_preserves_privacy_owner()
     test_modern_camera_info_view_uses_camera_info_service()
+    test_image_lag_policy_preserves_window_and_limit()
+    test_modern_image_lag_view_uses_domain_policy()
     test_camera_info_service_has_no_flask_db_or_filesystem_dependency()
     print('Modern admin camera diagnostics service checks passed')
 

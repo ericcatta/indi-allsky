@@ -37,6 +37,7 @@ from ..modern_admin_media_metadata import ModernAdminMiniTimelapseMetadataServic
 from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
+from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..modern_admin_tasks import ModernAdminTaskReadPolicy
 from ..processing import ImageProcessor
@@ -13833,6 +13834,49 @@ class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraLensView):
 
 class ModernAdminImageLagView(ModernAdminCameraToolView, ImageLagView):
     page_title = 'Modern Admin Image Lag'
+
+    def get_context(self):
+        context = TemplateView.get_context(self)
+        session['admin_mode'] = 'modern'
+        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
+        context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
+        image_lag_policy = ModernAdminImageLagPolicy()
+
+        timestamp = int(request.args.get('timestamp', 0))
+        if not timestamp:
+            timestamp = int(datetime.timestamp(self.camera_now))
+
+        ts_dt = datetime.fromtimestamp(timestamp) + timedelta(seconds=self.camera_time_offset)
+
+        if db.engine.dialect.name == 'mysql':
+            createDate_s = func.date_format('%s', IndiAllSkyDbImageTable.createDate)  # mysql
+        elif db.engine.dialect.name == 'postgresql':
+            createDate_s = func.to_char(IndiAllSkyDbImageTable.createDate, '%s')  # postgres
+        else:
+            createDate_s = func.strftime('%s', IndiAllSkyDbImageTable.createDate)  # sqlite
+
+        context['image_lag_q'] = IndiAllSkyDbImageTable.query\
+            .add_columns(
+                IndiAllSkyDbImageTable.id,
+                IndiAllSkyDbImageTable.createDate,
+                IndiAllSkyDbImageTable.exposure,
+                IndiAllSkyDbImageTable.exp_elapsed,
+                (IndiAllSkyDbImageTable.exp_elapsed - IndiAllSkyDbImageTable.exposure).label('delta'),
+                IndiAllSkyDbImageTable.process_elapsed,
+                (cast(createDate_s, Integer) - func.lag(createDate_s).over(order_by=IndiAllSkyDbImageTable.createDate)).label('lag_diff'),
+            )\
+            .join(IndiAllSkyDbImageTable.camera)\
+            .filter(
+                and_(
+                    IndiAllSkyDbCameraTable.id == self.camera.id,
+                    IndiAllSkyDbImageTable.createDate < ts_dt,
+                    IndiAllSkyDbImageTable.createDate > image_lag_policy.window_start(ts_dt),
+                )
+            )\
+            .order_by(IndiAllSkyDbImageTable.createDate.desc())\
+            .limit(image_lag_policy.row_limit)
+
+        return context
 
 
 class ModernAdminAduHistoryView(ModernAdminCameraToolView, RollingAduView):

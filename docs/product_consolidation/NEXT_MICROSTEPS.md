@@ -32,8 +32,8 @@ The source of truth for the current consolidation baseline is
   direct Classic-style ownership for read-only observatory context pages.
 - Camera diagnostic wrappers now share `ModernAdminCameraToolView`, reducing
   direct Classic-style ownership for read-only camera operational pages. Camera
-  Info lens/sensor summary formatting now lives in a Hybrid-owned diagnostics
-  service.
+  Info lens/sensor summary formatting and Image Lag read-only window/limit
+  policy now live in a Hybrid-owned diagnostics service.
 - System read-only wrappers now share `ModernAdminSystemToolView`, reducing
   direct Classic-style ownership for developer/status pages; the boundary owns
   the read-only login guard for this family.
@@ -243,6 +243,8 @@ runtime behavior.
 - Camera diagnostic ownership boundary added via `ModernAdminCameraToolView`.
 - Camera Info lens/sensor summary formatting moved into
   `ModernAdminCameraInfoService`.
+- Image Lag read-only window/limit policy moved into
+  `ModernAdminImageLagPolicy`.
 - System read-only ownership boundary added via `ModernAdminSystemToolView`.
 - System read-only login guard ownership moved into `ModernAdminSystemToolView`.
 - Notification read-only ownership boundary added via `ModernAdminNotificationStatusView`.

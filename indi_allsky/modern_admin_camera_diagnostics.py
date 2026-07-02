@@ -1,4 +1,9 @@
 import math
+from datetime import timedelta
+
+
+IMAGE_LAG_LOOKBACK_HOURS = 3
+IMAGE_LAG_ROW_LIMIT = 50
 
 
 class ModernAdminCameraInfoService:
@@ -62,3 +67,13 @@ class ModernAdminCameraInfoService:
         degrees, minutes = divmod(minutes, 60)
         degrees = degrees if is_positive else -degrees
         return degrees, minutes, seconds
+
+
+class ModernAdminImageLagPolicy:
+    def __init__(self, lookback_hours=IMAGE_LAG_LOOKBACK_HOURS, row_limit=IMAGE_LAG_ROW_LIMIT):
+        self.lookback_hours = lookback_hours
+        self.row_limit = row_limit
+
+
+    def window_start(self, timestamp_datetime):
+        return timestamp_datetime - timedelta(hours=self.lookback_hours)
