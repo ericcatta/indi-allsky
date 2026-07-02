@@ -5,7 +5,7 @@
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
 <script type="text/javascript">
-var camera_id = {{ modern_admin_loop_camera_id | tojson }};
+const modernAdminLoopCameras = {{ modern_admin_loop_camera_views | tojson }};
 var refreshInterval = {{ refreshInterval | int }};
 var timestamp = {{ timestamp | int }};
 </script>
@@ -29,16 +29,23 @@ var timestamp = {{ timestamp | int }};
             <label>Frame Delay {{ form_history.FRAMEDELAY_SELECT() }}</label>
             <label>Rock {{ form_history.ROCK_CHECKBOX() }}</label>
         </div>
-        <figure class="modern-admin-live-frame">
-            <img id="modern-admin-loop-image" alt="Latest loop frame">
-        </figure>
-        <p class="modern-admin-note" id="modern-admin-loop-message">Loading loop frames...</p>
+        <section class="modern-admin-status-grid{% if modern_admin_loop_camera_views|length > 1 %} modern-admin-status-grid-three{% endif %}" aria-label="Camera loops">
+            {% for loop_camera in modern_admin_loop_camera_views %}
+            <article class="modern-admin-status-card modern-admin-loop-camera-card" data-loop-camera="{{ loop_camera.loop_id }}">
+                <div class="modern-admin-card-label">Camera loop</div>
+                <h3>{{ loop_camera.label }}</h3>
+                <figure class="modern-admin-live-frame">
+                    <img data-loop-image="{{ loop_camera.loop_id }}" alt="Latest loop frame for {{ loop_camera.label }}">
+                </figure>
+                <p class="modern-admin-note" data-loop-message="{{ loop_camera.loop_id }}">Loading loop frames...</p>
+            </article>
+            {% endfor %}
+        </section>
     </section>
 </main>
 
 <script>
-let modernAdminLoopData = { image_list: [], message: '' };
-let modernAdminLoopIndex = 0;
+let modernAdminLoopState = {};
 const modernAdminImagesBaseUrl = '{{ url_for('indi_allsky.images_folder', path='__modern_admin_path__') }}'.replace('__modern_admin_path__', '');
 
 function modernAdminResolveImageUrl(url) {
@@ -66,8 +73,8 @@ function modernAdminLoopRock() {
     return checkbox ? checkbox.checked : false;
 }
 
-function modernAdminLoopSequence() {
-    const imageList = modernAdminLoopData.image_list || [];
+function modernAdminLoopSequence(loopState) {
+    const imageList = loopState.data.image_list || [];
     if (modernAdminLoopRock()) {
         return imageList.concat([...imageList].reverse());
     }
@@ -75,50 +82,75 @@ function modernAdminLoopSequence() {
     return [...imageList].reverse();
 }
 
-function modernAdminLoadLoop() {
+function modernAdminGetLoopState(loopCamera) {
+    if (!modernAdminLoopState[loopCamera.loop_id]) {
+        modernAdminLoopState[loopCamera.loop_id] = {
+            data: { image_list: [], message: '' },
+            index: 0,
+        };
+    }
+
+    return modernAdminLoopState[loopCamera.loop_id];
+}
+
+function modernAdminLoadLoop(loopCamera) {
     const params = new URLSearchParams({
         limit_s: modernAdminLoopHistory(),
         timestamp: timestamp
     });
-    if (camera_id !== null && camera_id !== undefined && camera_id !== '') {
-        params.set('camera_id', camera_id);
+    if (loopCamera.camera_id !== null && loopCamera.camera_id !== undefined && loopCamera.camera_id !== '') {
+        params.set('camera_id', loopCamera.camera_id);
     }
 
     fetch('{{ url_for(image_loop_view) }}?' + params.toString())
         .then((response) => response.json())
         .then((data) => {
-            modernAdminLoopData = data;
-            document.getElementById('modern-admin-loop-message').textContent = data.message || '';
+            const loopState = modernAdminGetLoopState(loopCamera);
+            loopState.data = data;
+            const message = document.querySelector('[data-loop-message="' + loopCamera.loop_id + '"]');
+            if (message) {
+                message.textContent = data.message || '';
+            }
         })
         .catch(() => {
-            document.getElementById('modern-admin-loop-message').textContent = 'Error loading loop frames.';
+            const message = document.querySelector('[data-loop-message="' + loopCamera.loop_id + '"]');
+            if (message) {
+                message.textContent = 'Error loading loop frames.';
+            }
         });
 }
 
-function modernAdminShowLoopFrame() {
-    if (!modernAdminLoopData.image_list.length) {
-        window.setTimeout(modernAdminShowLoopFrame, 500);
+function modernAdminShowLoopFrame(loopCamera) {
+    const loopState = modernAdminGetLoopState(loopCamera);
+    if (!loopState.data.image_list.length) {
+        window.setTimeout(() => modernAdminShowLoopFrame(loopCamera), 500);
         return;
     }
 
-    const imageList = modernAdminLoopSequence();
-    const image = document.getElementById('modern-admin-loop-image');
+    const imageList = modernAdminLoopSequence(loopState);
+    const image = document.querySelector('[data-loop-image="' + loopCamera.loop_id + '"]');
+    if (!image) {
+        return;
+    }
+
     const preloadImage = new Image();
     preloadImage.onload = function() {
         image.src = this.src;
     };
-    preloadImage.src = modernAdminResolveImageUrl(imageList[modernAdminLoopIndex % imageList.length].url);
+    preloadImage.src = modernAdminResolveImageUrl(imageList[loopState.index % imageList.length].url);
 
-    modernAdminLoopIndex += 1;
-    if (modernAdminLoopIndex >= imageList.length) {
-        modernAdminLoopIndex = 0;
+    loopState.index += 1;
+    if (loopState.index >= imageList.length) {
+        loopState.index = 0;
     }
 
-    window.setTimeout(modernAdminShowLoopFrame, modernAdminLoopDelay());
+    window.setTimeout(() => modernAdminShowLoopFrame(loopCamera), modernAdminLoopDelay());
 }
 
-modernAdminLoadLoop();
-window.setInterval(modernAdminLoadLoop, refreshInterval);
-modernAdminShowLoopFrame();
+modernAdminLoopCameras.forEach((loopCamera) => {
+    modernAdminLoadLoop(loopCamera);
+    window.setInterval(() => modernAdminLoadLoop(loopCamera), refreshInterval);
+    modernAdminShowLoopFrame(loopCamera);
+});
 </script>
 {% endblock %}

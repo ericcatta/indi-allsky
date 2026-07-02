@@ -14409,8 +14409,42 @@ class ModernAdminLoopView(ModernAdminMediaBrowseView, ImageLoopImgView):
         selected_filter = context.get('modern_admin_media_selected_filter') or {}
         context['modern_admin_loop_camera_id'] = selected_filter.get('camera_id')
         context['modern_admin_loop_selected_label'] = selected_filter.get('label') or 'All Cameras'
+        context['modern_admin_loop_camera_views'] = self.get_loop_camera_views(selected_filter)
 
         return context
+
+
+    def get_loop_camera_views(self, selected_filter):
+        selected_camera_id = selected_filter.get('camera_id')
+        if selected_camera_id:
+            return [{
+                'loop_id'   : 'camera-{0:d}'.format(selected_camera_id),
+                'camera_id' : selected_camera_id,
+                'label'     : selected_filter.get('label') or 'Camera {0:d}'.format(selected_camera_id),
+            }]
+
+        camera_views = list()
+        used_camera_ids = set()
+        for camera_filter in self.get_media_camera_filters():
+            camera_id = camera_filter.get('camera_id')
+            if not camera_id or camera_id in used_camera_ids:
+                continue
+
+            camera_views.append({
+                'loop_id'   : 'camera-{0:d}'.format(camera_id),
+                'camera_id' : camera_id,
+                'label'     : camera_filter.get('label') or 'Camera {0:d}'.format(camera_id),
+            })
+            used_camera_ids.add(camera_id)
+
+        if not camera_views and getattr(self, 'camera', None):
+            camera_views.append({
+                'loop_id'   : 'camera-{0:d}'.format(self.camera.id),
+                'camera_id' : self.camera.id,
+                'label'     : str(self.camera.friendlyName or self.camera.name or 'Camera {0:d}'.format(self.camera.id)),
+            })
+
+        return camera_views
 
 
 class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
@@ -14915,6 +14949,87 @@ class ModernAdminMediaMetadataView(ModernAdminMediaBrowseView):
         )
 
 
+    def build_generated_media_items(self, entries, media_kind='image', limit=12):
+        media_items = list()
+        for entry in list(entries)[:limit]:
+            try:
+                media_items.append(self.build_generated_media_item(entry, media_kind=media_kind))
+            except Exception as e:
+                app.logger.error('Error serializing modern admin generated media entry %s: %s', getattr(entry, 'id', 'unknown'), str(e))
+
+        return media_items
+
+
+    def build_generated_media_item(self, entry, media_kind='image'):
+        media_url = self.get_generated_media_url(entry)
+        preview_url = media_url if media_kind == 'image' else None
+        create_date = getattr(entry, 'createDate', None)
+        day_date = getattr(entry, 'dayDate', None)
+        file_size = getattr(entry, 'fileSize', None)
+        width = getattr(entry, 'width', None)
+        height = getattr(entry, 'height', None)
+        frames = getattr(entry, 'frames', None)
+
+        return {
+            'id'          : getattr(entry, 'id', None),
+            'camera_id'   : getattr(entry, 'camera_id', None),
+            'title'       : self.format_generated_media_title(entry),
+            'media_kind'  : media_kind,
+            'url'         : media_url,
+            'preview_url' : preview_url,
+            'filename'    : self.format_generated_media_filename(getattr(entry, 'filename', None)),
+            'created'     : create_date.strftime('%Y-%m-%d %H:%M:%S') if create_date else 'Unknown date',
+            'day_date'    : day_date.strftime('%Y-%m-%d') if hasattr(day_date, 'strftime') else (day_date if day_date else 'Unknown day'),
+            'timeofday'   : 'Night' if getattr(entry, 'night', False) else 'Day',
+            'size'        : self.format_generated_media_size(file_size) if file_size else 'Unknown size',
+            'dimensions'  : '{0:d} x {1:d}'.format(width, height) if width and height else 'Unknown dimensions',
+            'frames'      : '{0:d} frames'.format(frames) if frames else None,
+        }
+
+
+    def get_generated_media_url(self, entry):
+        local = True
+        if self.web_nonlocal_images:
+            if self.web_local_images_admin and self.verify_admin_network():
+                pass
+            else:
+                local = False
+                if not getattr(entry, 'remote_url', None) and not getattr(entry, 's3_key', None):
+                    return None
+
+        try:
+            media_url = entry.getUrl(s3_prefix=self.s3_prefix, local=local)
+        except Exception as e:
+            app.logger.error('Error determining modern admin generated media URL: %s', str(e))
+            return None
+
+        return ModernAdminMediaListView.normalize_media_url(self, media_url)
+
+
+    def format_generated_media_title(self, entry):
+        create_date = getattr(entry, 'createDate', None)
+        if create_date:
+            return create_date.strftime('%b %d, %H:%M')
+
+        day_date = getattr(entry, 'dayDate', None)
+        if hasattr(day_date, 'strftime'):
+            return day_date.strftime('%Y-%m-%d')
+        if day_date:
+            return str(day_date)
+
+        return self.format_generated_media_filename(getattr(entry, 'filename', None))
+
+
+    def format_generated_media_filename(self, value):
+        if not value:
+            return 'Unknown'
+        return Path(str(value)).name
+
+
+    def format_generated_media_size(self, value):
+        return ModernAdminMediaListView.format_media_size(self, value)
+
+
 class ModernAdminMediaStartrailVideosView(ModernAdminMediaMetadataView, TemplateView):
     page_title = 'Modern Admin Startrail Videos'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_startrail_videos_view'
@@ -14934,6 +15049,8 @@ class ModernAdminMediaStartrailVideosView(ModernAdminMediaMetadataView, Template
 
         startrail_video_rows = service.build_rows(startrail_video_entries)
 
+        context['modern_admin_generated_media_items'] = self.build_generated_media_items(startrail_video_entries, media_kind='video')
+        context['modern_admin_generated_media_label'] = 'Startrail video products'
         context['modern_admin_startrail_video_rows'] = startrail_video_rows
         context['modern_admin_startrail_video_count'] = len(startrail_video_rows)
         context['modern_admin_startrail_video_uploaded_count'] = len([
@@ -15057,6 +15174,8 @@ class ModernAdminMediaKeogramsView(ModernAdminMediaMetadataView, TemplateView):
 
         keogram_rows = service.build_rows(keogram_entries)
 
+        context['modern_admin_generated_media_items'] = self.build_generated_media_items(keogram_entries, media_kind='image')
+        context['modern_admin_generated_media_label'] = 'Keogram products'
         context['modern_admin_keogram_rows'] = keogram_rows
         context['modern_admin_keogram_count'] = len(keogram_rows)
         context['modern_admin_keogram_uploaded_count'] = len([
@@ -15090,6 +15209,8 @@ class ModernAdminMediaStartrailsView(ModernAdminMediaMetadataView, TemplateView)
 
         startrail_rows = service.build_rows(startrail_entries)
 
+        context['modern_admin_generated_media_items'] = self.build_generated_media_items(startrail_entries, media_kind='image')
+        context['modern_admin_generated_media_label'] = 'Startrail products'
         context['modern_admin_startrail_rows'] = startrail_rows
         context['modern_admin_startrail_count'] = len(startrail_rows)
         context['modern_admin_startrail_uploaded_count'] = len([
@@ -15123,6 +15244,8 @@ class ModernAdminMediaMiniTimelapsesView(ModernAdminMediaMetadataView, TemplateV
 
         mini_timelapse_rows = service.build_rows(mini_timelapse_entries)
 
+        context['modern_admin_generated_media_items'] = self.build_generated_media_items(mini_timelapse_entries, media_kind='video')
+        context['modern_admin_generated_media_label'] = 'Mini timelapse products'
         context['modern_admin_mini_timelapse_rows'] = mini_timelapse_rows
         context['modern_admin_mini_timelapse_count'] = len(mini_timelapse_rows)
         context['modern_admin_mini_timelapse_uploaded_count'] = len([
@@ -15178,6 +15301,8 @@ class ModernAdminMediaPanoramaView(ModernAdminMediaMetadataView, TemplateView):
                 'metadata'   : self.format_panorama_data_summary(entry.data),
             })
 
+        context['modern_admin_generated_media_items'] = self.build_generated_media_items(panorama_entries, media_kind='image')
+        context['modern_admin_generated_media_label'] = 'Panorama products'
         context['modern_admin_panorama_rows'] = panorama_rows
         context['modern_admin_panorama_count'] = len(panorama_rows)
         context['modern_admin_panorama_uploaded_count'] = len([

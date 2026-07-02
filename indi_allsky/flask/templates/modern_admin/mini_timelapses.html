@@ -48,6 +48,8 @@ var camera_id = {{ camera_id }};
 
         {% include 'modern_admin/_media_camera_filter.html' %}
 
+        {% include 'modern_admin/_generated_media_strip.html' %}
+
         <div class="modern-admin-filter-bar" aria-label="Mini timelapse filters">
             <label>
                 Search
@@ -122,7 +124,7 @@ var camera_id = {{ camera_id }};
             </table>
         </div>
 
-        <p class="modern-admin-note">This page shows database metadata only. It does not play, generate, convert, download, delete, open paths or inspect file contents.</p>
+        <p class="modern-admin-note">This page shows database-backed mini timelapse products and metadata. It does not generate, convert, download, delete, open paths or inspect file contents.</p>
 
         <section class="modern-admin-link-grid">
             <a href="{{ url_for('indi_allsky.mini_videoviewer_view') }}">Open legacy Mini Video Viewer</a>

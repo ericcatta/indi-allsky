@@ -1,0 +1,53 @@
+{% if modern_admin_generated_media_items %}
+<section class="modern-admin-media-grid" aria-label="{{ modern_admin_generated_media_label or 'Generated media products' }}">
+    {% for item in modern_admin_generated_media_items %}
+    <article class="modern-admin-media-card" data-media-id="{{ item.id }}">
+        <div class="modern-admin-media-preview">
+            {% if item.preview_url and item.media_kind == 'image' %}
+            <img src="{{ item.preview_url }}" alt="{{ item.title }}" loading="lazy" data-original-url="{{ item.url or item.preview_url }}">
+            {% elif item.url and item.media_kind == 'video' %}
+            <video src="{{ item.url }}" controls preload="metadata"></video>
+            {% else %}
+            <div class="modern-admin-media-file">{{ item.media_kind|upper }}</div>
+            {% endif %}
+        </div>
+        <div class="modern-admin-media-body">
+            <div>
+                <p class="modern-admin-card-label">Camera {{ item.camera_id }} · {{ item.timeofday }}</p>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.filename }}</p>
+            </div>
+            <dl class="modern-admin-media-meta">
+                <div>
+                    <dt>Created</dt>
+                    <dd>{{ item.created }}</dd>
+                </div>
+                <div>
+                    <dt>Day</dt>
+                    <dd>{{ item.day_date }}</dd>
+                </div>
+                <div>
+                    <dt>Size</dt>
+                    <dd>{{ item.size }}</dd>
+                </div>
+                <div>
+                    <dt>Dimensions</dt>
+                    <dd>{{ item.dimensions }}</dd>
+                </div>
+                {% if item.frames %}
+                <div>
+                    <dt>Frames</dt>
+                    <dd>{{ item.frames }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+            {% if item.url %}
+            <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ item.url }}" target="_blank" rel="noopener">Open read-only</a>
+            {% else %}
+            <span class="modern-admin-status-pill modern-admin-status-muted">No safe media URL</span>
+            {% endif %}
+        </div>
+    </article>
+    {% endfor %}
+</section>
+{% endif %}
