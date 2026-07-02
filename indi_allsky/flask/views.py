@@ -36,6 +36,7 @@ from ..modern_admin_media_metadata import ModernAdminKeogramMetadataService
 from ..modern_admin_media_metadata import ModernAdminMiniTimelapseMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
+from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..modern_admin_tasks import ModernAdminTaskReadPolicy
 from ..processing import ImageProcessor
@@ -13810,6 +13811,24 @@ class ModernAdminCameraToolView(ModernAdminContextMixin):
 
 class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraLensView):
     page_title = 'Modern Admin Camera Info'
+
+    def get_context(self):
+        context = TemplateView.get_context(self)
+        session['admin_mode'] = 'modern'
+        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
+        context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
+
+        camera = IndiAllSkyDbCameraTable.query\
+            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+            .one()
+        service = ModernAdminCameraInfoService(cfa_map=constants.CFA_MAP_STR)
+
+        context.update(service.build_context(
+            camera=camera,
+            privacy_mode=self.indi_allsky_config.get('PRIVACY_MODE'),
+        ))
+
+        return context
 
 
 class ModernAdminImageLagView(ModernAdminCameraToolView, ImageLagView):

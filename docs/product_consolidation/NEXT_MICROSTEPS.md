@@ -31,7 +31,9 @@ The source of truth for the current consolidation baseline is
 - Observatory tool wrappers now share `ModernAdminObservatoryToolView`, reducing
   direct Classic-style ownership for read-only observatory context pages.
 - Camera diagnostic wrappers now share `ModernAdminCameraToolView`, reducing
-  direct Classic-style ownership for read-only camera operational pages.
+  direct Classic-style ownership for read-only camera operational pages. Camera
+  Info lens/sensor summary formatting now lives in a Hybrid-owned diagnostics
+  service.
 - System read-only wrappers now share `ModernAdminSystemToolView`, reducing
   direct Classic-style ownership for developer/status pages; the boundary owns
   the read-only login guard for this family.
@@ -239,6 +241,8 @@ runtime behavior.
 - Product spine view ownership boundary added via `ModernAdminProductView`.
 - Observatory tool ownership boundary added via `ModernAdminObservatoryToolView`.
 - Camera diagnostic ownership boundary added via `ModernAdminCameraToolView`.
+- Camera Info lens/sensor summary formatting moved into
+  `ModernAdminCameraInfoService`.
 - System read-only ownership boundary added via `ModernAdminSystemToolView`.
 - System read-only login guard ownership moved into `ModernAdminSystemToolView`.
 - Notification read-only ownership boundary added via `ModernAdminNotificationStatusView`.
