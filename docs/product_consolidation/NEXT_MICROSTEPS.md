@@ -59,6 +59,9 @@ The source of truth for the current consolidation baseline is
 - Remaining direct Modern Admin wrappers have been reviewed. No clearly safe
   read-only family remains for simple boundary extraction; the easy extraction
   phase is complete for now.
+- Classic Exit Assessment now identifies the real removal blockers: settings
+  ownership, media/public filesystem behavior, operational/developer actions,
+  system/auth/support surfaces, and external compatibility APIs.
 
 ## Remaining Direct Modern Admin Wrapper Review
 
@@ -111,6 +114,22 @@ runtime behavior.
   purge/delete, upload/download, or media-generation path.
 
 ## P0
+
+### Settings Contract Implementation Slice
+
+- Motivation: `HYBRID_CLASSIC_EXIT_ASSESSMENT.md` identifies Settings as the
+  lowest Hybrid ownership domain and the largest real blocker to making Classic
+  removable.
+- Benefit: begins moving from settings documentation to native Hybrid settings
+  ownership without renaming keys, changing defaults, or removing Classic
+  fallback.
+- Risk: high if the first slice edits runtime config; keep the first step
+  bounded to one low-risk read-only/edit-preview group.
+- Impact: high for Classic exit.
+- Dependencies: `HYBRID_SETTINGS_CONTRACT_REVIEW.md`, existing settings
+  inventory, current Modern settings preview pages, and Classic fallback.
+- Verification: preserve settings keys/defaults; add shape/regression tests;
+  run settings inventory and route inventory; keep Classic full config working.
 
 ### Replace One Backend Implementation Behind Existing Boundary
 
