@@ -8,6 +8,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
+from indi_allsky.modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
 from indi_allsky.modern_admin_observatory_tools import ModernAdminSqmSummaryService
 
 
@@ -54,6 +55,14 @@ def test_sqm_summary_service_preserves_safe_defaults():
     }
 
 
+def test_longterm_keogram_display_service_preserves_age_format():
+    service = ModernAdminLongTermKeogramDisplayService()
+
+    assert service.format_generated_age(0) == 'Generated 0 days, 0 hours, 0 minutes ago'
+    assert service.format_generated_age(60) == 'Generated 0 days, 0 hours, 1 minutes ago'
+    assert service.format_generated_age(90061) == 'Generated 1 days, 1 hours, 1 minutes ago'
+
+
 def test_modern_sqm_view_uses_observatory_service():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
     start = source.index('class ModernAdminSqmView')
@@ -63,6 +72,18 @@ def test_modern_sqm_view_uses_observatory_service():
     assert 'ModernAdminSqmSummaryService' in source
     assert "context['modern_admin_sqm'] = image_data.get" not in source
     assert 'context.update(self.sqm_summary_service.build_context' in source
+
+
+def test_modern_longterm_keogram_view_uses_display_service():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    start = source.index('class ModernAdminLongTermKeogramView')
+    end = source.index('class ModernAdminDarkLibraryView', start)
+    source = source[start:end]
+
+    assert 'ModernAdminLongTermKeogramDisplayService' in source
+    assert 'format_generated_age' in source
+    assert 'image_age_days = int(image_age_s / 86400)' not in source
+    assert "'Generated {0:d} days" not in source
 
 
 def test_observatory_tools_module_has_no_flask_db_or_filesystem_dependency():
@@ -80,7 +101,9 @@ def test_observatory_tools_module_has_no_flask_db_or_filesystem_dependency():
 def run_tests():
     test_sqm_summary_service_preserves_context_shape()
     test_sqm_summary_service_preserves_safe_defaults()
+    test_longterm_keogram_display_service_preserves_age_format()
     test_modern_sqm_view_uses_observatory_service()
+    test_modern_longterm_keogram_view_uses_display_service()
     test_observatory_tools_module_has_no_flask_db_or_filesystem_dependency()
     print('Modern admin observatory tools checks passed')
 

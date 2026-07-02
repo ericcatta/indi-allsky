@@ -38,6 +38,7 @@ from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
+from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
 from ..modern_admin_observatory_tools import ModernAdminSqmSummaryService
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
@@ -13967,6 +13968,8 @@ class ModernAdminRealtimeKeogramView(ModernAdminObservatoryToolView, RealtimeKeo
 class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, TemplateView):
     page_title = 'Modern Admin Long Term Keogram'
 
+    display_service = ModernAdminLongTermKeogramDisplayService()
+
     def get_context(self):
         context = super(ModernAdminLongTermKeogramView, self).get_context()
         context['keogram_age'] = ''
@@ -13978,15 +13981,7 @@ class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, TemplateVie
         )
         if longterm_keogram_image_p.is_file():
             image_age_s = time.time() - longterm_keogram_image_p.stat().st_mtime
-            image_age_days = int(image_age_s / 86400)
-            image_age_hours = int((image_age_s % 86400) / 3600)
-            image_age_minutes = int(((image_age_s % 86400) % 3600) / 60)
-
-            context['keogram_age'] = 'Generated {0:d} days, {1:d} hours, {2:d} minutes ago'.format(
-                image_age_days,
-                image_age_hours,
-                image_age_minutes,
-            )
+            context['keogram_age'] = self.display_service.format_generated_age(image_age_s)
             context['keogram_uri'] = str(Path('images').joinpath('ccd_{0:s}'.format(self.camera.uuid), 'longterm_keogram.jpg'))
 
         keogram_uri = context.get('keogram_uri')

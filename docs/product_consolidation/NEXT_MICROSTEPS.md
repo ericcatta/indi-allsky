@@ -242,6 +242,8 @@ runtime behavior.
 - Observatory tool ownership boundary added via `ModernAdminObservatoryToolView`.
 - Observatory SQM context summary ownership moved into
   `ModernAdminSqmSummaryService`.
+- Long-term Keogram generated-age display formatting moved into
+  `ModernAdminLongTermKeogramDisplayService`.
 - Camera diagnostic ownership boundary added via `ModernAdminCameraToolView`.
 - Camera Info lens/sensor summary formatting moved into
   `ModernAdminCameraInfoService`.
