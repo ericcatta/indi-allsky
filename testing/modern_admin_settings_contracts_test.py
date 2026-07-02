@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 
+from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraConnectionSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminStorageSettingsContract
@@ -247,6 +248,82 @@ def test_camera_profile_settings_view_uses_hybrid_contract():
     )
 
 
+def test_camera_connection_settings_contract_preserves_context_shape():
+    contract = ModernAdminCameraConnectionSettingsContract()
+    camera_connection_group = {
+        'group_id': 'camera_connection',
+        'label': 'Camera Connection',
+    }
+
+    context = contract.build_context((
+        {'group_id': 'other'},
+        camera_connection_group,
+    ))
+
+    assert_true(
+        context['modern_admin_camera_connection_settings_group'] is camera_connection_group,
+        'camera connection group must be selected from settings inventory groups',
+    )
+    assert_true(
+        len(context['modern_admin_camera_connection_overview_cards']) == 6,
+        'camera connection overview cards shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_camera_connection_config_sections']) == 5,
+        'camera connection config sections shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_camera_connection_proposed_layout']) == 5,
+        'camera connection proposed layout shape changed',
+    )
+    assert_true(
+        context['modern_admin_camera_connection_overview_cards'][0]['current_status'] == 'not evaluated here',
+        'camera connection overview current status changed',
+    )
+    assert_true(
+        context['modern_admin_camera_connection_config_sections'][1]['key_count'] == 3,
+        'camera connection INDI config key count changed',
+    )
+    assert_true(
+        context['modern_admin_camera_connection_proposed_layout'][0]['note'] == 'read-only proposal',
+        'camera connection layout note changed',
+    )
+
+
+def test_camera_connection_settings_contract_handles_missing_group():
+    contract = ModernAdminCameraConnectionSettingsContract()
+    context = contract.build_context(())
+
+    assert_true(
+        context['modern_admin_camera_connection_settings_group'] is None,
+        'missing camera connection group must remain a safe None fallback',
+    )
+
+
+def test_camera_connection_settings_view_uses_hybrid_contract():
+    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
+    start = views_text.index('class ModernAdminCameraConnectionSettingsView')
+    end = views_text.index('class ModernAdminExposureGainSettingsView', start)
+    camera_connection_view = views_text[start:end]
+
+    assert_true(
+        'ModernAdminCameraConnectionSettingsContract' in camera_connection_view,
+        'camera connection settings view must use the Hybrid settings contract',
+    )
+    assert_true(
+        'settings_contract' in camera_connection_view,
+        'camera connection settings view must expose the contract dependency explicitly',
+    )
+    assert_true(
+        'CAMERA_CONNECTION_CONFIG_SECTIONS' not in camera_connection_view,
+        'camera connection static config sections must not remain inline on the view',
+    )
+    assert_true(
+        'get_camera_connection_overview_cards' not in camera_connection_view,
+        'camera connection overview formatting must not remain inline on the view',
+    )
+
+
 def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
     import indi_allsky.modern_admin_settings_contracts as module
 
@@ -278,6 +355,9 @@ def run_tests():
     test_camera_profile_settings_contract_preserves_context_shape()
     test_camera_profile_settings_contract_handles_missing_group()
     test_camera_profile_settings_view_uses_hybrid_contract()
+    test_camera_connection_settings_contract_preserves_context_shape()
+    test_camera_connection_settings_contract_handles_missing_group()
+    test_camera_connection_settings_view_uses_hybrid_contract()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
 
 

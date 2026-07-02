@@ -446,6 +446,254 @@ class ModernAdminCameraProfileSettingsContract:
         return str(value)
 
 
+class ModernAdminCameraConnectionSettingsContract:
+    CONFIG_SECTIONS = (
+        {
+            'label'       : 'Camera driver / backend',
+            'description' : 'Driver/backend selectors that determine how indi-allsky talks to a camera.',
+            'keys'        : (
+                {
+                    'key'     : 'CAMERA_INTERFACE',
+                    'source'  : 'Classic config form / Modern camera settings',
+                    'notes'   : 'High-impact backend selector for INDI, libcamera, and supported camera interfaces.',
+                },
+                {
+                    'key'     : 'camera_interface',
+                    'source'  : 'Modern camera profile fields',
+                    'notes'   : 'Profile-scoped connection backend used by Modern Camera Settings.',
+                },
+            ),
+        },
+        {
+            'label'       : 'INDI connection',
+            'description' : 'Connection fields for INDI-based cameras. This page does not contact INDI or test connectivity.',
+            'keys'        : (
+                {
+                    'key'     : 'INDI_SERVER / indi_server',
+                    'source'  : 'Classic config form / Modern camera settings',
+                    'notes'   : 'INDI host metadata; future UI must keep it profile-aware where profiles are active.',
+                },
+                {
+                    'key'     : 'INDI_PORT / indi_port',
+                    'source'  : 'Classic config form / Modern camera settings',
+                    'notes'   : 'INDI port metadata with validation in existing Modern camera settings.',
+                },
+                {
+                    'key'     : 'INDI_CAMERA_NAME / indi_camera_name',
+                    'source'  : 'Classic config form / Modern camera settings',
+                    'notes'   : 'INDI device name binding for the selected camera/profile.',
+                },
+            ),
+        },
+        {
+            'label'       : 'libcamera identity',
+            'description' : 'libcamera identity fields that bind a profile to a local camera interface.',
+            'keys'        : (
+                {
+                    'key'     : 'LIBCAMERA.CAMERA_ID / libcamera_camera_id',
+                    'source'  : 'Classic config form / Modern camera settings',
+                    'notes'   : 'libcamera device id. This preview does not enumerate cameras or run hardware detection.',
+                },
+                {
+                    'key'     : 'LIBCAMERA.IMAGE_FILE_TYPE / libcamera_image_file_type',
+                    'source'  : 'Modern camera settings',
+                    'notes'   : 'Optional libcamera image type metadata tied to camera connection behavior.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Camera row association',
+            'description' : 'Read-only database camera metadata that clarifies which camera row a profile maps to.',
+            'keys'        : (
+                {
+                    'key'     : 'db_camera_id',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Database camera identifier surfaced for relationship clarity.',
+                },
+                {
+                    'key'     : 'db_camera_name',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Database camera name surfaced by Modern camera settings.',
+                },
+                {
+                    'key'     : 'db_camera_driver',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Driver metadata for the associated camera row.',
+                },
+                {
+                    'key'     : 'db_camera_status',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Status metadata shown read-only by Modern camera settings.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Failure / fallback metadata',
+            'description' : 'Existing fallback concepts that must remain explicit until final Modern connection UX is designed.',
+            'keys'        : (
+                {
+                    'key'     : 'current config fallback',
+                    'source'  : 'Modern camera settings / Classic config',
+                    'notes'   : 'Single-camera fallback config remains compatibility infrastructure and is not edited here.',
+                },
+                {
+                    'key'     : 'profile read-only state',
+                    'source'  : 'Modern camera settings profile resolver',
+                    'notes'   : 'Prevents unsafe profile edits; this preview only documents the concept.',
+                },
+            ),
+        },
+    )
+
+    PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Camera driver / backend',
+            'purpose'        : 'Make the selected backend clear without hiding whether it is global fallback or profile-owned.',
+            'source_keys'    : ('CAMERA_INTERFACE', 'camera_interface'),
+            'proposed_level' : 'Future Basic / Camera Connection',
+        },
+        {
+            'label'          : 'Connection status',
+            'purpose'        : 'Show status context from existing Modern camera surfaces without doing hardware checks here.',
+            'source_keys'    : ('db_camera_status', 'profile read-only state'),
+            'proposed_level' : 'Future Basic / Camera Connection',
+        },
+        {
+            'label'          : 'Device identity',
+            'purpose'        : 'Group INDI and libcamera identity fields by backend so hardware binding is understandable.',
+            'source_keys'    : ('INDI_CAMERA_NAME', 'LIBCAMERA.CAMERA_ID', 'db_camera_name'),
+            'proposed_level' : 'Future Advanced / Camera Connection',
+        },
+        {
+            'label'          : 'Multicamera selection',
+            'purpose'        : 'Keep camera connection settings aligned with the selected profile and never flatten multicamera ownership.',
+            'source_keys'    : ('camera_interface', 'db_camera_id', 'MULTI_CAMERA.profiles'),
+            'proposed_level' : 'Future Advanced / Multicamera',
+        },
+        {
+            'label'          : 'Failure / fallback notes',
+            'purpose'        : 'Explain what remains compatibility fallback before any final editor or safe action exists.',
+            'source_keys'    : ('current config fallback', 'profile read-only state'),
+            'proposed_level' : 'Future Developer / Guardrails',
+        },
+    )
+
+    OVERVIEW_CARDS = (
+        {
+            'label'           : 'Camera backend',
+            'purpose'         : 'Summarize which camera interface family a future final UI should present first.',
+            'related_fields'  : ('CAMERA_INTERFACE', 'camera_interface'),
+            'future_editable' : 'yes after profile-safe validation',
+            'safety_note'     : 'Changing backend can affect capture startup and must remain profile-aware.',
+        },
+        {
+            'label'           : 'INDI connection',
+            'purpose'         : 'Group INDI host, port, and device identity without opening sockets or testing hardware here.',
+            'related_fields'  : ('INDI_SERVER / indi_server', 'INDI_PORT / indi_port', 'INDI_CAMERA_NAME / indi_camera_name'),
+            'future_editable' : 'blocked until connection test policy exists',
+            'safety_note'     : 'This card does not contact INDI or validate a live connection.',
+        },
+        {
+            'label'           : 'libcamera identity',
+            'purpose'         : 'Describe local libcamera identity fields without enumerating attached cameras.',
+            'related_fields'  : ('LIBCAMERA.CAMERA_ID / libcamera_camera_id', 'LIBCAMERA.IMAGE_FILE_TYPE / libcamera_image_file_type'),
+            'future_editable' : 'blocked until hardware discovery policy exists',
+            'safety_note'     : 'No hardware scan or camera detection is performed by this page.',
+        },
+        {
+            'label'           : 'Database camera identity',
+            'purpose'         : 'Keep database camera row identity visible as product context without querying live rows here.',
+            'related_fields'  : ('db_camera_id', 'db_camera_name', 'db_camera_driver', 'db_camera_status'),
+            'future_editable' : 'no from this page',
+            'safety_note'     : 'Database camera identity is shown as static design evidence only.',
+        },
+        {
+            'label'           : 'Multicamera selection',
+            'purpose'         : 'Preserve the relationship between connection settings, selected camera, and active profile.',
+            'related_fields'  : ('camera_interface', 'db_camera_id', 'MULTI_CAMERA.profiles'),
+            'future_editable' : 'blocked until multicamera selection policy exists',
+            'safety_note'     : 'Future controls must not flatten multicamera/profile ownership into a single global setting.',
+        },
+        {
+            'label'           : 'Failure / fallback behavior',
+            'purpose'         : 'Document how final UI should explain fallback state before exposing connection edits.',
+            'related_fields'  : ('current config fallback', 'profile read-only state', 'db_camera_status'),
+            'future_editable' : 'blocked until fallback contract exists',
+            'safety_note'     : 'Fallback behavior touches runtime capture safety and remains descriptive here.',
+        },
+    )
+
+
+    def build_context(self, settings_groups):
+        return {
+            'modern_admin_camera_connection_settings_group'  : self.find_settings_group(settings_groups, 'camera_connection'),
+            'modern_admin_camera_connection_overview_cards'  : self.get_overview_cards(),
+            'modern_admin_camera_connection_config_sections' : self.get_config_sections(),
+            'modern_admin_camera_connection_proposed_layout' : self.get_proposed_layout(),
+        }
+
+
+    def find_settings_group(self, settings_groups, group_id):
+        for group in settings_groups or tuple():
+            if group.get('group_id') == group_id:
+                return group
+
+        return None
+
+
+    def get_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_text(row.get('label')),
+                'purpose'         : self.safe_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_text(row.get('future_editable')),
+                'safety_note'     : self.safe_text(row.get('safety_note')),
+            }
+            for row in self.OVERVIEW_CARDS
+        )
+
+
+    def get_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_text(section.get('label')),
+                'description' : self.safe_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_text(row.get('key')),
+                        'source' : self.safe_text(row.get('source')),
+                        'notes'  : self.safe_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.CONFIG_SECTIONS
+        )
+
+
+    def get_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_text(row.get('label')),
+                'purpose'        : self.safe_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.PROPOSED_LAYOUT
+        )
+
+
+    def safe_text(self, value):
+        if value is None:
+            return ''
+
+        return str(value)
+
+
 class ModernAdminNotificationsSettingsContract:
     CONFIG_SECTIONS = (
         {
