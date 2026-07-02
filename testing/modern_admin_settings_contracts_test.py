@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 
+from indi_allsky.modern_admin_settings_contracts import ModernAdminAcquisitionSaveSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminAutoExposureGainSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraConnectionSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
@@ -609,6 +610,107 @@ def test_hybrid_awb_settings_view_uses_hybrid_contract():
     )
 
 
+def test_acquisition_save_settings_contract_preserves_context_shape():
+    contract = ModernAdminAcquisitionSaveSettingsContract()
+    image_acquisition_group = {
+        'group_id': 'image_acquisition',
+        'label': 'Image Acquisition',
+    }
+    image_save_formats_group = {
+        'group_id': 'image_save_formats',
+        'label': 'Image Save Formats',
+    }
+
+    context = contract.build_context((
+        {'group_id': 'other'},
+        image_acquisition_group,
+        image_save_formats_group,
+    ))
+
+    assert_true(
+        context['modern_admin_image_acquisition_settings_group'] is image_acquisition_group,
+        'image acquisition group must be selected from settings inventory groups',
+    )
+    assert_true(
+        context['modern_admin_image_save_formats_settings_group'] is image_save_formats_group,
+        'image save formats group must be selected from settings inventory groups',
+    )
+    assert_true(
+        context['modern_admin_acquisition_save_settings_groups'] == (image_acquisition_group, image_save_formats_group),
+        'acquisition/save grouped context shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_acquisition_save_overview_cards']) == 6,
+        'acquisition/save overview cards shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_acquisition_save_config_sections']) == 5,
+        'acquisition/save config sections shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_acquisition_save_proposed_layout']) == 6,
+        'acquisition/save proposed layout shape changed',
+    )
+    assert_true(
+        context['modern_admin_acquisition_save_overview_cards'][0]['current_status'] == 'not evaluated here',
+        'acquisition/save overview current status changed',
+    )
+    assert_true(
+        context['modern_admin_acquisition_save_config_sections'][3]['key_count'] == 5,
+        'RAW/FITS/source behavior config key count changed',
+    )
+    assert_true(
+        context['modern_admin_acquisition_save_config_sections'][4]['key_count'] == 4,
+        'retention/storage impact config key count changed',
+    )
+    assert_true(
+        context['modern_admin_acquisition_save_proposed_layout'][0]['note'] == 'read-only proposal',
+        'acquisition/save layout note changed',
+    )
+
+
+def test_acquisition_save_settings_contract_handles_missing_groups():
+    contract = ModernAdminAcquisitionSaveSettingsContract()
+    context = contract.build_context(())
+
+    assert_true(
+        context['modern_admin_image_acquisition_settings_group'] is None,
+        'missing image acquisition group must remain a safe None fallback',
+    )
+    assert_true(
+        context['modern_admin_image_save_formats_settings_group'] is None,
+        'missing image save formats group must remain a safe None fallback',
+    )
+    assert_true(
+        context['modern_admin_acquisition_save_settings_groups'] == (),
+        'missing acquisition/save groups must produce an empty group tuple',
+    )
+
+
+def test_acquisition_save_settings_view_uses_hybrid_contract():
+    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
+    start = views_text.index('class ModernAdminAcquisitionSaveSettingsView')
+    end = views_text.index('class ModernAdminFitsSourceSettingsView', start)
+    acquisition_save_view = views_text[start:end]
+
+    assert_true(
+        'ModernAdminAcquisitionSaveSettingsContract' in acquisition_save_view,
+        'acquisition/save settings view must use the Hybrid settings contract',
+    )
+    assert_true(
+        'settings_contract' in acquisition_save_view,
+        'acquisition/save settings view must expose the contract dependency explicitly',
+    )
+    assert_true(
+        'ACQUISITION_SAVE_CONFIG_SECTIONS' not in acquisition_save_view,
+        'acquisition/save static config sections must not remain inline on the view',
+    )
+    assert_true(
+        'get_acquisition_save_overview_cards' not in acquisition_save_view,
+        'acquisition/save overview formatting must not remain inline on the view',
+    )
+
+
 def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
     import indi_allsky.modern_admin_settings_contracts as module
 
@@ -652,6 +754,9 @@ def run_tests():
     test_hybrid_awb_settings_contract_preserves_context_shape()
     test_hybrid_awb_settings_contract_handles_missing_group()
     test_hybrid_awb_settings_view_uses_hybrid_contract()
+    test_acquisition_save_settings_contract_preserves_context_shape()
+    test_acquisition_save_settings_contract_handles_missing_groups()
+    test_acquisition_save_settings_view_uses_hybrid_contract()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
 
 
