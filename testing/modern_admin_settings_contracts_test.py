@@ -26,6 +26,401 @@ def assert_true(condition, message):
         raise AssertionError(message)
 
 
+def contract_guardrail_cases():
+    return (
+        {
+            'name': 'notifications',
+            'contract': ModernAdminNotificationsSettingsContract(),
+            'future_key': 'future_editable_actionable',
+            'groups': (
+                {
+                    'group_id': 'notifications',
+                    'label': 'Notifications',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_notifications_settings_group', 'notifications'),
+            ),
+            'group_tuple_key': None,
+            'expected_context_keys': (
+                'modern_admin_notifications_settings_group',
+                'modern_admin_notifications_overview_cards',
+                'modern_admin_notifications_config_sections',
+                'modern_admin_notifications_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_notifications_overview_cards',
+            'config_key': 'modern_admin_notifications_config_sections',
+            'layout_key': 'modern_admin_notifications_proposed_layout',
+        },
+        {
+            'name': 'storage',
+            'contract': ModernAdminStorageSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'storage_drives',
+                    'label': 'Storage / Drives',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_storage_settings_group', 'storage_drives'),
+            ),
+            'group_tuple_key': None,
+            'expected_context_keys': (
+                'modern_admin_storage_settings_group',
+                'modern_admin_storage_overview_cards',
+                'modern_admin_storage_config_sections',
+                'modern_admin_storage_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_storage_overview_cards',
+            'config_key': 'modern_admin_storage_config_sections',
+            'layout_key': 'modern_admin_storage_proposed_layout',
+        },
+        {
+            'name': 'camera profile',
+            'contract': ModernAdminCameraProfileSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'camera_profile_identity',
+                    'label': 'Camera Profile Identity',
+                    'visibility': 'Basic',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_camera_profile_settings_group', 'camera_profile_identity'),
+            ),
+            'group_tuple_key': None,
+            'expected_context_keys': (
+                'modern_admin_camera_profile_settings_group',
+                'modern_admin_camera_profile_overview_cards',
+                'modern_admin_camera_profile_config_sections',
+                'modern_admin_camera_profile_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_camera_profile_overview_cards',
+            'config_key': 'modern_admin_camera_profile_config_sections',
+            'layout_key': 'modern_admin_camera_profile_proposed_layout',
+        },
+        {
+            'name': 'camera connection',
+            'contract': ModernAdminCameraConnectionSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'camera_connection',
+                    'label': 'Camera Connection',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_camera_connection_settings_group', 'camera_connection'),
+            ),
+            'group_tuple_key': None,
+            'expected_context_keys': (
+                'modern_admin_camera_connection_settings_group',
+                'modern_admin_camera_connection_overview_cards',
+                'modern_admin_camera_connection_config_sections',
+                'modern_admin_camera_connection_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_camera_connection_overview_cards',
+            'config_key': 'modern_admin_camera_connection_config_sections',
+            'layout_key': 'modern_admin_camera_connection_proposed_layout',
+        },
+        {
+            'name': 'exposure gain',
+            'contract': ModernAdminExposureGainSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'exposure',
+                    'label': 'Exposure',
+                    'visibility': 'Advanced',
+                },
+                {
+                    'group_id': 'gain',
+                    'label': 'Gain',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_exposure_settings_group', 'exposure'),
+                ('modern_admin_gain_settings_group', 'gain'),
+            ),
+            'group_tuple_key': 'modern_admin_exposure_gain_settings_groups',
+            'expected_context_keys': (
+                'modern_admin_exposure_settings_group',
+                'modern_admin_gain_settings_group',
+                'modern_admin_exposure_gain_settings_groups',
+                'modern_admin_exposure_gain_overview_cards',
+                'modern_admin_exposure_gain_config_sections',
+                'modern_admin_exposure_gain_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_exposure_gain_overview_cards',
+            'config_key': 'modern_admin_exposure_gain_config_sections',
+            'layout_key': 'modern_admin_exposure_gain_proposed_layout',
+        },
+        {
+            'name': 'auto exposure gain',
+            'contract': ModernAdminAutoExposureGainSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'auto_exposure',
+                    'label': 'Auto Exposure',
+                    'visibility': 'Advanced',
+                },
+                {
+                    'group_id': 'auto_gain',
+                    'label': 'Auto Gain',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_auto_exposure_settings_group', 'auto_exposure'),
+                ('modern_admin_auto_gain_settings_group', 'auto_gain'),
+            ),
+            'group_tuple_key': 'modern_admin_auto_exposure_gain_settings_groups',
+            'expected_context_keys': (
+                'modern_admin_auto_exposure_settings_group',
+                'modern_admin_auto_gain_settings_group',
+                'modern_admin_auto_exposure_gain_settings_groups',
+                'modern_admin_auto_exposure_gain_overview_cards',
+                'modern_admin_auto_exposure_gain_config_sections',
+                'modern_admin_auto_exposure_gain_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_auto_exposure_gain_overview_cards',
+            'config_key': 'modern_admin_auto_exposure_gain_config_sections',
+            'layout_key': 'modern_admin_auto_exposure_gain_proposed_layout',
+        },
+        {
+            'name': 'hybrid AWB',
+            'contract': ModernAdminHybridAwbSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'hybrid_awb',
+                    'label': 'Hybrid AWB',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_hybrid_awb_settings_group', 'hybrid_awb'),
+            ),
+            'group_tuple_key': None,
+            'expected_context_keys': (
+                'modern_admin_hybrid_awb_settings_group',
+                'modern_admin_hybrid_awb_overview_cards',
+                'modern_admin_hybrid_awb_config_sections',
+                'modern_admin_hybrid_awb_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_hybrid_awb_overview_cards',
+            'config_key': 'modern_admin_hybrid_awb_config_sections',
+            'layout_key': 'modern_admin_hybrid_awb_proposed_layout',
+        },
+        {
+            'name': 'acquisition save',
+            'contract': ModernAdminAcquisitionSaveSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'image_acquisition',
+                    'label': 'Image Acquisition',
+                    'visibility': 'Advanced',
+                },
+                {
+                    'group_id': 'image_save_formats',
+                    'label': 'Image Save Formats',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_image_acquisition_settings_group', 'image_acquisition'),
+                ('modern_admin_image_save_formats_settings_group', 'image_save_formats'),
+            ),
+            'group_tuple_key': 'modern_admin_acquisition_save_settings_groups',
+            'expected_context_keys': (
+                'modern_admin_image_acquisition_settings_group',
+                'modern_admin_image_save_formats_settings_group',
+                'modern_admin_acquisition_save_settings_groups',
+                'modern_admin_acquisition_save_overview_cards',
+                'modern_admin_acquisition_save_config_sections',
+                'modern_admin_acquisition_save_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_acquisition_save_overview_cards',
+            'config_key': 'modern_admin_acquisition_save_config_sections',
+            'layout_key': 'modern_admin_acquisition_save_proposed_layout',
+        },
+        {
+            'name': 'FITS source',
+            'contract': ModernAdminFitsSourceSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'fits_source_files',
+                    'label': 'FITS / Source Files',
+                    'visibility': 'Developer',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_fits_source_settings_group', 'fits_source_files'),
+            ),
+            'group_tuple_key': None,
+            'expected_context_keys': (
+                'modern_admin_fits_source_settings_group',
+                'modern_admin_fits_source_overview_cards',
+                'modern_admin_fits_source_config_sections',
+                'modern_admin_fits_source_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_fits_source_overview_cards',
+            'config_key': 'modern_admin_fits_source_config_sections',
+            'layout_key': 'modern_admin_fits_source_proposed_layout',
+        },
+    )
+
+
+def get_group_by_id(groups, group_id):
+    for group in groups:
+        if group.get('group_id') == group_id:
+            return group
+
+    raise AssertionError('test group fixture missing {0:s}'.format(group_id))
+
+
+def assert_overview_cards_shape(case, overview_cards):
+    assert_true(overview_cards, '{0:s} overview cards must not be empty'.format(case['name']))
+
+    for card in overview_cards:
+        relation_keys = [
+            key
+            for key in ('related_fields', 'related_keys')
+            if key in card
+        ]
+        assert_true(
+            tuple(card.keys()) == (
+                'label',
+                'purpose',
+                relation_keys[0],
+                'current_status',
+                case['future_key'],
+                'safety_note',
+            ),
+            '{0:s} overview card key order/shape changed'.format(case['name']),
+        )
+        assert_true(
+            len(relation_keys) == 1,
+            '{0:s} overview cards must expose exactly one relation tuple'.format(case['name']),
+        )
+        assert_true(
+            isinstance(card[relation_keys[0]], tuple),
+            '{0:s} overview relation metadata must remain a tuple'.format(case['name']),
+        )
+        assert_true(
+            card['current_status'] == 'not evaluated here',
+            '{0:s} overview current status changed'.format(case['name']),
+        )
+
+
+def assert_config_sections_shape(case, config_sections):
+    assert_true(config_sections, '{0:s} config sections must not be empty'.format(case['name']))
+
+    for section in config_sections:
+        assert_true(
+            tuple(section.keys()) == (
+                'label',
+                'description',
+                'key_count',
+                'keys',
+            ),
+            '{0:s} config section key order/shape changed'.format(case['name']),
+        )
+        assert_true(
+            section['key_count'] == len(section['keys']),
+            '{0:s} config key_count must match keys length'.format(case['name']),
+        )
+        for row in section['keys']:
+            assert_true(
+                tuple(row.keys()) == ('key', 'source', 'notes'),
+                '{0:s} config row key order/shape changed'.format(case['name']),
+            )
+
+
+def assert_proposed_layout_shape(case, proposed_layout):
+    assert_true(proposed_layout, '{0:s} proposed layout must not be empty'.format(case['name']))
+
+    for row in proposed_layout:
+        assert_true(
+            tuple(row.keys()) == (
+                'label',
+                'purpose',
+                'source_keys',
+                'proposed_level',
+                'note',
+            ),
+            '{0:s} proposed layout key order/shape changed'.format(case['name']),
+        )
+        assert_true(
+            isinstance(row['source_keys'], tuple),
+            '{0:s} proposed source_keys must remain a tuple'.format(case['name']),
+        )
+        assert_true(
+            row['note'] == 'read-only proposal',
+            '{0:s} proposed layout note changed'.format(case['name']),
+        )
+        assert_true(
+            row['proposed_level'].startswith('Future '),
+            '{0:s} proposed level must keep Future visibility metadata'.format(case['name']),
+        )
+        assert_true(
+            any(level in row['proposed_level'] for level in ('Basic', 'Advanced', 'Developer')),
+            '{0:s} proposed level must include Basic/Advanced/Developer visibility'.format(case['name']),
+        )
+
+
+def test_migrated_settings_contracts_preserve_top_level_context_contracts():
+    for case in contract_guardrail_cases():
+        context = case['contract'].build_context((
+            {'group_id': 'unrelated', 'label': 'Unrelated', 'visibility': 'Hidden'},
+        ) + case['groups'])
+
+        assert_true(
+            tuple(context.keys()) == case['expected_context_keys'],
+            '{0:s} top-level context keys changed'.format(case['name']),
+        )
+
+        for context_key, group_id in case['selected_group_keys']:
+            selected_group = context[context_key]
+            expected_group = get_group_by_id(case['groups'], group_id)
+
+            assert_true(
+                selected_group is expected_group,
+                '{0:s} selected settings group object changed'.format(case['name']),
+            )
+            assert_true(
+                selected_group.get('label'),
+                '{0:s} selected settings group label was dropped'.format(case['name']),
+            )
+            assert_true(
+                selected_group.get('visibility') in ('Basic', 'Advanced', 'Developer'),
+                '{0:s} selected settings group visibility metadata was dropped'.format(case['name']),
+            )
+
+        if case['group_tuple_key']:
+            expected_groups = tuple(
+                get_group_by_id(case['groups'], group_id)
+                for _, group_id in case['selected_group_keys']
+            )
+            assert_true(
+                context[case['group_tuple_key']] == expected_groups,
+                '{0:s} grouped settings tuple changed'.format(case['name']),
+            )
+
+        assert_overview_cards_shape(case, context[case['overview_key']])
+        assert_config_sections_shape(case, context[case['config_key']])
+        assert_proposed_layout_shape(case, context[case['layout_key']])
+
+
 def test_notifications_settings_contract_preserves_context_shape():
     contract = ModernAdminNotificationsSettingsContract()
     notifications_group = {
@@ -840,6 +1235,7 @@ def test_single_group_settings_contracts_share_group_lookup_helper():
 
 
 def run_tests():
+    test_migrated_settings_contracts_preserve_top_level_context_contracts()
     test_notifications_settings_contract_preserves_context_shape()
     test_notifications_settings_contract_handles_missing_group()
     test_notifications_settings_view_uses_hybrid_contract()
