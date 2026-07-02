@@ -219,6 +219,233 @@ class ModernAdminStorageSettingsContract:
         return str(value)
 
 
+class ModernAdminCameraProfileSettingsContract:
+    CONFIG_SECTIONS = (
+        {
+            'label'       : 'Profile identity',
+            'description' : 'Stable profile identifiers and labels that keep settings scoped to the intended camera profile.',
+            'keys'        : (
+                {
+                    'key'     : 'profile_id',
+                    'source'  : 'Modern camera settings profile fields',
+                    'notes'   : 'Protected identity field used by Modern camera settings, galleries, tasks, and metadata filters.',
+                },
+                {
+                    'key'     : 'profile_label',
+                    'source'  : 'Modern camera settings profile fields',
+                    'notes'   : 'Operator-facing profile label/purpose metadata.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Profile state',
+            'description' : 'Read-only state concepts that decide whether a profile participates in capture/runtime selection.',
+            'keys'        : (
+                {
+                    'key'     : 'profile_enabled',
+                    'source'  : 'Modern camera settings profile fields',
+                    'notes'   : 'Enabled flag used to decide whether a profile can participate in multicamera capture.',
+                },
+                {
+                    'key'     : 'profile_primary',
+                    'source'  : 'Modern camera settings profile fields',
+                    'notes'   : 'Primary profile marker used by profile-first runtime selection.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Camera relationship',
+            'description' : 'Database camera metadata that links a profile to a physical/logical camera without editing it here.',
+            'keys'        : (
+                {
+                    'key'     : 'db_camera_id',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Database camera row identifier shown for relationship clarity.',
+                },
+                {
+                    'key'     : 'db_camera_name',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Database camera name associated with the selected profile.',
+                },
+                {
+                    'key'     : 'db_camera_driver',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Driver/interface metadata for the associated camera.',
+                },
+                {
+                    'key'     : 'db_camera_status',
+                    'source'  : 'Modern camera settings DB fields',
+                    'notes'   : 'Read-only camera status metadata surfaced by Modern camera settings.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Multicamera binding',
+            'description' : 'Configuration concepts that preserve camera/profile separation for future settings redesign.',
+            'keys'        : (
+                {
+                    'key'     : 'MULTI_CAMERA.profiles',
+                    'source'  : 'Config ownership map / Modern profile resolver',
+                    'notes'   : 'Profile collection that must stay profile-first and must not be flattened into global config.',
+                },
+                {
+                    'key'     : 'camera_id / profile_id filters',
+                    'source'  : 'Modern media/tasks/metadata views',
+                    'notes'   : 'Read-only relationship metadata used across Modern pages to avoid single-camera assumptions.',
+                },
+            ),
+        },
+    )
+
+    PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Active camera',
+            'purpose'        : 'Show the camera relationship for the active profile without editing camera binding here.',
+            'source_keys'    : ('db_camera_id', 'db_camera_name', 'db_camera_driver', 'db_camera_status'),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Active profile',
+            'purpose'        : 'Make profile identity and enabled/primary state visible before exposing any edits.',
+            'source_keys'    : ('profile_id', 'profile_enabled', 'profile_primary'),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Profile label / purpose',
+            'purpose'        : 'Separate operator-facing label/purpose from stable profile identifiers.',
+            'source_keys'    : ('profile_label',),
+            'proposed_level' : 'Future Basic / Camera Profile',
+        },
+        {
+            'label'          : 'Profile-camera relationship',
+            'purpose'        : 'Keep the camera/profile binding explicit so settings stay profile-first and multicamera-safe.',
+            'source_keys'    : ('MULTI_CAMERA.profiles', 'camera_id / profile_id filters'),
+            'proposed_level' : 'Future Advanced / Multicamera',
+        },
+        {
+            'label'          : 'Multicamera notes',
+            'purpose'        : 'Document constraints that prevent flattening profile-owned fields into global settings.',
+            'source_keys'    : ('profile_id', 'MULTI_CAMERA.profiles'),
+            'proposed_level' : 'Future Developer / Guardrails',
+        },
+    )
+
+    OVERVIEW_CARDS = (
+        {
+            'label'           : 'Active profile',
+            'purpose'         : 'Summarize which profile concept will anchor the final Basic camera settings experience.',
+            'related_fields'  : ('profile_id', 'profile_enabled', 'profile_primary'),
+            'future_editable' : 'blocked until profile edit contract exists',
+            'safety_note'     : 'This card does not load or change the active runtime profile.',
+        },
+        {
+            'label'           : 'Profile identity',
+            'purpose'         : 'Keep stable profile identifiers separate from operator-facing labels and purpose text.',
+            'related_fields'  : ('profile_id', 'profile_label'),
+            'future_editable' : 'yes after profile validation policy',
+            'safety_note'     : 'Identity changes must preserve existing camera/profile references and metadata filters.',
+        },
+        {
+            'label'           : 'Profile-camera binding',
+            'purpose'         : 'Make the camera relationship visible without rebinding profiles from this read-only page.',
+            'related_fields'  : ('db_camera_id', 'db_camera_name', 'db_camera_driver', 'MULTI_CAMERA.profiles'),
+            'future_editable' : 'blocked until multicamera binding policy exists',
+            'safety_note'     : 'Binding edits can affect capture, media routing, tasks, and profile-first configuration.',
+        },
+        {
+            'label'           : 'Multicamera role',
+            'purpose'         : 'Show that profiles may participate in multicamera operation without flattening them into global settings.',
+            'related_fields'  : ('profile_primary', 'profile_enabled', 'camera_id / profile_id filters'),
+            'future_editable' : 'blocked until multicamera role policy exists',
+            'safety_note'     : 'Future edits must stay profile-first and must not assume a single camera.',
+        },
+        {
+            'label'           : 'Profile fallback behavior',
+            'purpose'         : 'Document future fallback expectations when a profile or camera relationship is unavailable.',
+            'related_fields'  : ('profile_enabled', 'db_camera_status', 'MULTI_CAMERA.profiles'),
+            'future_editable' : 'no until runtime fallback contract exists',
+            'safety_note'     : 'Fallback behavior touches runtime selection and should remain descriptive here.',
+        },
+        {
+            'label'           : 'Future profile editor',
+            'purpose'         : 'Reserve space for a later safe editor once validation, audit, rollback, and multicamera rules exist.',
+            'related_fields'  : ('profile_id', 'profile_label', 'db_camera_id', 'MULTI_CAMERA.profiles'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'No profile editor is exposed from this page.',
+        },
+    )
+
+
+    def build_context(self, settings_groups):
+        return {
+            'modern_admin_camera_profile_settings_group'  : self.find_settings_group(settings_groups, 'camera_profile_identity'),
+            'modern_admin_camera_profile_overview_cards'  : self.get_overview_cards(),
+            'modern_admin_camera_profile_config_sections' : self.get_config_sections(),
+            'modern_admin_camera_profile_proposed_layout' : self.get_proposed_layout(),
+        }
+
+
+    def find_settings_group(self, settings_groups, group_id):
+        for group in settings_groups or tuple():
+            if group.get('group_id') == group_id:
+                return group
+
+        return None
+
+
+    def get_overview_cards(self):
+        return tuple(
+            {
+                'label'           : self.safe_text(row.get('label')),
+                'purpose'         : self.safe_text(row.get('purpose')),
+                'related_fields'  : tuple(self.safe_text(field) for field in row.get('related_fields', tuple())),
+                'current_status'  : 'not evaluated here',
+                'future_editable' : self.safe_text(row.get('future_editable')),
+                'safety_note'     : self.safe_text(row.get('safety_note')),
+            }
+            for row in self.OVERVIEW_CARDS
+        )
+
+
+    def get_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_text(section.get('label')),
+                'description' : self.safe_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_text(row.get('key')),
+                        'source' : self.safe_text(row.get('source')),
+                        'notes'  : self.safe_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.CONFIG_SECTIONS
+        )
+
+
+    def get_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_text(row.get('label')),
+                'purpose'        : self.safe_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.PROPOSED_LAYOUT
+        )
+
+
+    def safe_text(self, value):
+        if value is None:
+            return ''
+
+        return str(value)
+
+
 class ModernAdminNotificationsSettingsContract:
     CONFIG_SECTIONS = (
         {

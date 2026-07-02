@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 
+from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 
@@ -170,6 +171,82 @@ def test_storage_settings_view_uses_hybrid_contract():
     )
 
 
+def test_camera_profile_settings_contract_preserves_context_shape():
+    contract = ModernAdminCameraProfileSettingsContract()
+    camera_profile_group = {
+        'group_id': 'camera_profile_identity',
+        'label': 'Camera Profile Identity',
+    }
+
+    context = contract.build_context((
+        {'group_id': 'other'},
+        camera_profile_group,
+    ))
+
+    assert_true(
+        context['modern_admin_camera_profile_settings_group'] is camera_profile_group,
+        'camera profile group must be selected from settings inventory groups',
+    )
+    assert_true(
+        len(context['modern_admin_camera_profile_overview_cards']) == 6,
+        'camera profile overview cards shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_camera_profile_config_sections']) == 4,
+        'camera profile config sections shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_camera_profile_proposed_layout']) == 5,
+        'camera profile proposed layout shape changed',
+    )
+    assert_true(
+        context['modern_admin_camera_profile_overview_cards'][0]['current_status'] == 'not evaluated here',
+        'camera profile overview current status changed',
+    )
+    assert_true(
+        context['modern_admin_camera_profile_config_sections'][2]['key_count'] == 4,
+        'camera relationship config key count changed',
+    )
+    assert_true(
+        context['modern_admin_camera_profile_proposed_layout'][0]['note'] == 'read-only proposal',
+        'camera profile layout note changed',
+    )
+
+
+def test_camera_profile_settings_contract_handles_missing_group():
+    contract = ModernAdminCameraProfileSettingsContract()
+    context = contract.build_context(())
+
+    assert_true(
+        context['modern_admin_camera_profile_settings_group'] is None,
+        'missing camera profile group must remain a safe None fallback',
+    )
+
+
+def test_camera_profile_settings_view_uses_hybrid_contract():
+    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
+    start = views_text.index('class ModernAdminCameraProfileSettingsView')
+    end = views_text.index('class ModernAdminCameraConnectionSettingsView', start)
+    camera_profile_view = views_text[start:end]
+
+    assert_true(
+        'ModernAdminCameraProfileSettingsContract' in camera_profile_view,
+        'camera profile settings view must use the Hybrid settings contract',
+    )
+    assert_true(
+        'settings_contract' in camera_profile_view,
+        'camera profile settings view must expose the contract dependency explicitly',
+    )
+    assert_true(
+        'CAMERA_PROFILE_CONFIG_SECTIONS' not in camera_profile_view,
+        'camera profile static config sections must not remain inline on the view',
+    )
+    assert_true(
+        'get_camera_profile_overview_cards' not in camera_profile_view,
+        'camera profile overview formatting must not remain inline on the view',
+    )
+
+
 def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
     import indi_allsky.modern_admin_settings_contracts as module
 
@@ -198,6 +275,9 @@ def run_tests():
     test_storage_settings_contract_preserves_context_shape()
     test_storage_settings_contract_handles_missing_group()
     test_storage_settings_view_uses_hybrid_contract()
+    test_camera_profile_settings_contract_preserves_context_shape()
+    test_camera_profile_settings_contract_handles_missing_group()
+    test_camera_profile_settings_view_uses_hybrid_contract()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
 
 
