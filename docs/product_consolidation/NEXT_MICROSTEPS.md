@@ -249,6 +249,8 @@ runtime behavior.
 - System read-only login guard ownership moved into `ModernAdminSystemToolView`.
 - Log Detail display policy, source rows, redaction, and file-size formatting moved
   into `ModernAdminLogDisplayPolicy`.
+- System Info overview card composition moved into
+  `ModernAdminSystemInfoSummaryService`.
 - Notification read-only ownership boundary added via `ModernAdminNotificationStatusView`.
 - Notification read-only list/detail formatting moved into
   `ModernAdminNotificationReadService`.

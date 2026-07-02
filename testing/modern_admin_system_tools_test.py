@@ -12,6 +12,56 @@ from indi_allsky.modern_admin_system_tools import LOG_DETAIL_DEFAULT_LINES
 from indi_allsky.modern_admin_system_tools import LOG_DETAIL_LINE_SIZE
 from indi_allsky.modern_admin_system_tools import LOG_DETAIL_MAX_LINES
 from indi_allsky.modern_admin_system_tools import ModernAdminLogDisplayPolicy
+from indi_allsky.modern_admin_system_tools import ModernAdminSystemInfoSummaryService
+
+
+def test_system_info_summary_service_preserves_card_shape():
+    service = ModernAdminSystemInfoSummaryService()
+
+    cards = service.build_summary_cards({
+        'release'        : '1.2.3',
+        'system_type'    : 'Raspberry Pi 5',
+        'python_version' : '3.11.0',
+        'python_platform': 'aarch64',
+        'cpu_count'      : 4,
+        'cpu_usage'      : {'user': 4.2},
+        'cpu_load5'      : 0.1,
+        'cpu_load10'     : 0.2,
+        'cpu_load15'     : 0.3,
+        'mem_usage'      : {'user_percent': 25.0},
+        'uptime_str'     : '1 days, 2:3',
+        'swap_usage'     : 4.5,
+    })
+
+    assert cards == [
+        {
+            'label'      : 'Release',
+            'value'      : '1.2.3',
+            'description': 'Raspberry Pi 5. Python 3.11.0 on aarch64.',
+            'status'     : 'Read-only',
+        },
+        {
+            'label'      : 'CPU',
+            'value'      : '0.0%',
+            'description': '4 cores. Load: 0.10, 0.20, 0.30.',
+            'status'     : 'Read-only',
+        },
+        {
+            'label'      : 'Memory',
+            'value'      : '0.0%',
+            'description': 'Uptime: 1 days, 2:3. Swap usage: 4.5%.',
+            'status'     : 'Read-only',
+        },
+    ]
+
+
+def test_system_info_summary_service_formats_numeric_values():
+    service = ModernAdminSystemInfoSummaryService()
+
+    assert service.format_percent(12) == '12.0%'
+    assert service.format_percent('12.25') == '12.2%'
+    assert service.format_percent('not-a-number') == '0.0%'
+    assert service.format_number('3.14159') == '3.14'
 
 
 def test_log_display_policy_preserves_line_limits():
@@ -82,6 +132,24 @@ def test_modern_log_detail_view_uses_system_tool_policy():
     assert 'line_limit * self.line_size' not in source
 
 
+def test_modern_system_info_view_uses_summary_service():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    start = source.index('class ModernAdminSystemInfoView')
+    end = source.index('class ModernAdminSupportInfoView', start)
+    source = source[start:end]
+
+    assert 'ModernAdminSystemInfoSummaryService' in source
+    assert 'modern_admin_system_summary_cards' in source
+
+
+def test_modern_system_info_template_uses_summary_cards():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'templates' / 'modern_admin' / 'system_info.html').read_text()
+
+    assert 'modern_admin_system_summary_cards' in source
+    assert 'summary_card.label' in source
+    assert '"%0.1f"|format(cpu_usage | float)' not in source
+
+
 def test_system_tools_module_has_no_flask_db_or_file_read_dependency():
     import indi_allsky.modern_admin_system_tools as module
 
@@ -94,11 +162,15 @@ def test_system_tools_module_has_no_flask_db_or_file_read_dependency():
 
 
 def run_tests():
+    test_system_info_summary_service_preserves_card_shape()
+    test_system_info_summary_service_formats_numeric_values()
     test_log_display_policy_preserves_line_limits()
     test_log_display_policy_preserves_source_rows()
     test_log_display_policy_redacts_sensitive_lines()
     test_log_display_policy_formats_file_size()
     test_modern_log_detail_view_uses_system_tool_policy()
+    test_modern_system_info_view_uses_summary_service()
+    test_modern_system_info_template_uses_summary_cards()
     test_system_tools_module_has_no_flask_db_or_file_read_dependency()
     print('Modern admin system tools checks passed')
 

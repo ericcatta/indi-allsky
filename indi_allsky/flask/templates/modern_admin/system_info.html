@@ -17,24 +17,14 @@ var camera_id = {{ camera_id }};
     {% include 'modern_admin/_shell_header.html' %}
 
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="System overview">
+        {% for summary_card in modern_admin_system_summary_cards %}
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Release</div>
-            <h3>{{ release }}</h3>
-            <p>{{ system_type }}. Python {{ python_version }} on {{ python_platform }}.</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+            <div class="modern-admin-card-label">{{ summary_card.label }}</div>
+            <h3>{{ summary_card.value }}</h3>
+            <p>{{ summary_card.description }}</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">{{ summary_card.status }}</span>
         </article>
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">CPU</div>
-            <h3>{{ "%0.1f"|format(cpu_usage | float) }}%</h3>
-            <p>{{ cpu_count }} cores. Load: {{ "%0.2f"|format(cpu_load5 | float) }}, {{ "%0.2f"|format(cpu_load10 | float) }}, {{ "%0.2f"|format(cpu_load15 | float) }}.</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
-        </article>
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Memory</div>
-            <h3>{{ "%0.1f"|format(mem_usage | float) }}%</h3>
-            <p>Uptime: {{ uptime_str }}. Swap usage: {{ "%0.1f"|format(swap_usage | float) }}%.</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
-        </article>
+        {% endfor %}
     </section>
 
     <section class="modern-admin-table-panel" aria-labelledby="services-title">

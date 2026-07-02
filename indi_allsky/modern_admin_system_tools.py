@@ -37,6 +37,57 @@ LOG_DETAIL_SENSITIVE_PATTERNS = (
 )
 
 
+class ModernAdminSystemInfoSummaryService:
+    def build_summary_cards(self, context):
+        return [
+            {
+                'label'      : 'Release',
+                'value'      : str(context.get('release', '')),
+                'description': '{0:s}. Python {1:s} on {2:s}.'.format(
+                    str(context.get('system_type', '')),
+                    str(context.get('python_version', '')),
+                    str(context.get('python_platform', '')),
+                ),
+                'status'     : 'Read-only',
+            },
+            {
+                'label'      : 'CPU',
+                'value'      : self.format_percent(context.get('cpu_usage')),
+                'description': '{0:s} cores. Load: {1:s}, {2:s}, {3:s}.'.format(
+                    str(context.get('cpu_count', '')),
+                    self.format_number(context.get('cpu_load5')),
+                    self.format_number(context.get('cpu_load10')),
+                    self.format_number(context.get('cpu_load15')),
+                ),
+                'status'     : 'Read-only',
+            },
+            {
+                'label'      : 'Memory',
+                'value'      : self.format_percent(context.get('mem_usage')),
+                'description': 'Uptime: {0:s}. Swap usage: {1:s}.'.format(
+                    str(context.get('uptime_str', '')),
+                    self.format_percent(context.get('swap_usage')),
+                ),
+                'status'     : 'Read-only',
+            },
+        ]
+
+
+    def format_percent(self, value):
+        return '{0:.1f}%'.format(self.safe_float(value))
+
+
+    def format_number(self, value):
+        return '{0:.2f}'.format(self.safe_float(value))
+
+
+    def safe_float(self, value):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
+
+
 class ModernAdminLogDisplayPolicy:
     def __init__(
         self,

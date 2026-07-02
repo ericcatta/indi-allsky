@@ -39,6 +39,7 @@ from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataServi
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
+from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
 from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..modern_admin_tasks import ModernAdminTaskReadPolicy
 from ..processing import ImageProcessor
@@ -13938,6 +13939,13 @@ class ModernAdminSystemToolView(ModernAdminContextMixin):
 
 class ModernAdminSystemInfoView(ModernAdminSystemToolView, SystemInfoView):
     page_title = 'Modern Admin System Info'
+
+    summary_service = ModernAdminSystemInfoSummaryService()
+
+    def get_context(self):
+        context = super(ModernAdminSystemInfoView, self).get_context()
+        context['modern_admin_system_summary_cards'] = self.summary_service.build_summary_cards(context)
+        return context
 
 
 class ModernAdminSupportInfoView(ModernAdminSystemToolView, SupportInfoView):
