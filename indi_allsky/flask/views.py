@@ -10417,15 +10417,26 @@ class AjaxTimelapseGeneratorView(BaseView):
             return jsonify(message)
 
         elif action == 'generate_panorama_video':
-            if not self.indi_allsky_config.get('FISH2PANO', {}).get('ENABLE'):
+            plan = ModernAdminGeneratedOutputActionPlanner().plan(
+                action=action,
+                camera_id=camera.id,
+                day_date=day_date,
+                night=night,
+                config=self.indi_allsky_config,
+            )
+            if plan.status == 'unavailable':
                 message = {
-                    'success-message' : 'Panoramas disabled',
+                    'success-message' : plan.message,
                 }
 
                 return jsonify(message)
 
+            if plan.status != 'planned':
+                return jsonify({
+                    'form_global': [plan.message],
+                }), 400
 
-            timespec = day_date.strftime('%Y%m%d')
+            timespec = plan.details['timespec']
 
             if night:
                 timeofday_str = 'night'
@@ -10435,19 +10446,12 @@ class AjaxTimelapseGeneratorView(BaseView):
 
             app.logger.warning('Generating %s time panorama timelapse for %s camera %d', timeofday_str, timespec, camera.id)
 
-            jobdata = {
-                'action' : 'generatePanoramaVideo',
-                'kwargs' : {
-                    'timespec'    : timespec,
-                    'night'       : night,
-                    'camera_id'   : camera.id,
-                },
-            }
+            jobdata = plan.details['jobdata']
 
             task = IndiAllSkyDbTaskQueueTable(
                 queue=TaskQueueQueue.VIDEO,
                 state=TaskQueueState.MANUAL,
-                priority=100,
+                priority=plan.details['priority'],
                 data=jobdata,
             )
             db.session.add(task)

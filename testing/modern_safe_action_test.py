@@ -1608,6 +1608,56 @@ def test_generated_output_action_planner_creates_generate_k_st_plan():
     }
 
 
+def test_generated_output_action_planner_creates_generate_panorama_plan_when_enabled():
+    planner = ModernAdminGeneratedOutputActionPlanner()
+
+    result = planner.plan(
+        action='generate_panorama_video',
+        camera_id=11,
+        day_date='2026-07-02',
+        night=True,
+        config={'FISH2PANO': {'ENABLE': True}},
+    )
+
+    assert result.status == 'planned'
+    assert result.allowed is True
+    assert result.details['action'] == 'generate_panorama_video'
+    assert result.details['camera_id'] == 11
+    assert result.details['timespec'] == '20260702'
+    assert result.details['night'] is True
+    assert result.details['priority'] == 100
+    assert result.details['jobdata'] == {
+        'action': 'generatePanoramaVideo',
+        'kwargs': {
+            'timespec': '20260702',
+            'night': True,
+            'camera_id': 11,
+        },
+    }
+
+
+def test_generated_output_action_planner_rejects_generate_panorama_when_disabled():
+    planner = ModernAdminGeneratedOutputActionPlanner()
+
+    result = planner.plan(
+        action='generate_panorama_video',
+        camera_id=11,
+        day_date='2026-07-02',
+        night=False,
+        config={'FISH2PANO': {'ENABLE': False}},
+    )
+
+    assert result.status == 'unavailable'
+    assert result.allowed is False
+    assert result.message == 'Panoramas disabled'
+    assert result.details == {
+        'action': 'generate_panorama_video',
+        'camera_id': 11,
+        'day_date': '2026-07-02',
+        'night': False,
+    }
+
+
 def test_generated_output_action_planner_rejects_unsupported_action():
     planner = ModernAdminGeneratedOutputActionPlanner()
 
@@ -1835,6 +1885,20 @@ def test_ajax_generate_k_st_uses_hybrid_planner_static():
     branch = view_source[branch_start:branch_end]
 
     assert 'ModernAdminGeneratedOutputActionPlanner().plan' in branch
+    assert "jobdata = plan.details['jobdata']" in branch
+    assert "priority=plan.details['priority']" in branch
+
+
+def test_ajax_generate_panorama_video_uses_hybrid_planner_static():
+    view_source, _full_source = get_ajax_timelapse_generator_view_source()
+    branch_start = view_source.index("elif action == 'generate_panorama_video':")
+    branch_end = view_source.index("elif action == 'generate_k_st':")
+    branch = view_source[branch_start:branch_end]
+
+    assert 'ModernAdminGeneratedOutputActionPlanner().plan' in branch
+    assert 'config=self.indi_allsky_config' in branch
+    assert "if plan.status == 'unavailable':" in branch
+    assert "'success-message' : plan.message" in branch
     assert "jobdata = plan.details['jobdata']" in branch
     assert "priority=plan.details['priority']" in branch
 
@@ -2255,6 +2319,8 @@ if __name__ == '__main__':
     test_capture_service_command_boundary_requires_effect_adapter()
     test_generated_output_action_planner_creates_generate_video_plan()
     test_generated_output_action_planner_creates_generate_k_st_plan()
+    test_generated_output_action_planner_creates_generate_panorama_plan_when_enabled()
+    test_generated_output_action_planner_rejects_generate_panorama_when_disabled()
     test_generated_output_action_planner_rejects_unsupported_action()
     test_generated_output_action_planner_rejects_invalid_target()
     test_generated_output_action_planner_has_no_effect_adapter()
@@ -2273,6 +2339,7 @@ if __name__ == '__main__':
     test_capture_service_action_view_uses_hybrid_boundary_static()
     test_ajax_generate_video_uses_hybrid_planner_static()
     test_ajax_generate_k_st_uses_hybrid_planner_static()
+    test_ajax_generate_panorama_video_uses_hybrid_planner_static()
     test_safe_action_dry_run_helper_response_shape()
     test_safe_action_dry_run_helper_missing_action_id_response_shape()
     test_safe_action_dry_run_helper_unknown_action_response_shape()

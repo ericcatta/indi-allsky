@@ -68,10 +68,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     adapter operativo esistente nel layer Flask; capture controls piu' ampi,
     retry/regenerate/maintenance/system actions restano Classic-owned o da
     isolare.
-  - il planning dei comandi generazione `generate_video` e `generate_k_st`
-    e' ora Hybrid-owned tramite `ModernAdminGeneratedOutputActionPlanner`;
-    l'enqueue DB/task queue resta adapter Classic/Flask esistente, e
-    delete/upload/combo/panorama restano fuori scope.
+  - il planning dei comandi generazione `generate_video`, `generate_k_st` e
+    `generate_panorama_video` e' ora Hybrid-owned tramite
+    `ModernAdminGeneratedOutputActionPlanner`; il gate disponibilita'
+    `FISH2PANO.ENABLE` per panorama vive nel planner, mentre l'enqueue DB/task
+    queue resta adapter Classic/Flask esistente; delete/upload/combo restano
+    fuori scope.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.

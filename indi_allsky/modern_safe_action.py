@@ -1312,6 +1312,14 @@ class ModernAdminGeneratedOutputActionPlanner:
             'state'     : 'MANUAL',
             'priority'  : 100,
         },
+        'generate_panorama_video': {
+            'job_action'         : 'generatePanoramaVideo',
+            'queue'              : 'VIDEO',
+            'state'              : 'MANUAL',
+            'priority'           : 100,
+            'requires_fish2pano' : True,
+            'disabled_message'   : 'Panoramas disabled',
+        },
     }
 
     def __init__(self, supported_actions=None):
@@ -1373,7 +1381,18 @@ class ModernAdminGeneratedOutputActionPlanner:
         return None
 
 
-    def plan(self, action=None, camera_id=None, day_date=None, night=None, payload=None):
+    def fish2pano_enabled(self, config):
+        if config is None:
+            return False
+
+        fish2pano_config = config.get('FISH2PANO', {}) if hasattr(config, 'get') else {}
+        if not hasattr(fish2pano_config, 'get'):
+            return False
+
+        return bool(fish2pano_config.get('ENABLE'))
+
+
+    def plan(self, action=None, camera_id=None, day_date=None, night=None, payload=None, config=None):
         payload = payload or {}
         action_name = self.normalize_action(action if action is not None else payload.get('action', payload.get('ACTION_SELECT')))
         camera_id = self.normalize_camera_id(camera_id if camera_id is not None else payload.get('camera_id', payload.get('CAMERA_ID')))
@@ -1423,6 +1442,19 @@ class ModernAdminGeneratedOutputActionPlanner:
             )
 
         action_config = self.supported_actions[action_name]
+        if action_config.get('requires_fish2pano') and not self.fish2pano_enabled(config):
+            return self.result(
+                status='unavailable',
+                message=action_config.get('disabled_message', 'Generated output action unavailable.'),
+                allowed=False,
+                details={
+                    'action'    : action_name,
+                    'camera_id' : camera_id,
+                    'day_date'  : day_date.isoformat(),
+                    'night'     : night,
+                },
+            )
+
         timespec = day_date.strftime('%Y%m%d')
         jobdata = {
             'action' : action_config['job_action'],
