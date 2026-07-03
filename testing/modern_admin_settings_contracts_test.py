@@ -10,6 +10,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 
 from indi_allsky.modern_admin_settings_contracts import ModernAdminAcquisitionSaveSettingsContract
+from indi_allsky.modern_admin_settings_contracts import ModernAdminAnalyticsSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminAutoExposureGainSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraConnectionSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
@@ -251,6 +252,31 @@ def contract_guardrail_cases():
             'overview_key': 'modern_admin_acquisition_save_overview_cards',
             'config_key': 'modern_admin_acquisition_save_config_sections',
             'layout_key': 'modern_admin_acquisition_save_proposed_layout',
+        },
+        {
+            'name': 'analytics',
+            'contract': ModernAdminAnalyticsSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'analytics',
+                    'label': 'Analytics',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_analytics_settings_group', 'analytics'),
+            ),
+            'group_tuple_key': None,
+            'expected_context_keys': (
+                'modern_admin_analytics_settings_group',
+                'modern_admin_analytics_overview_cards',
+                'modern_admin_analytics_config_sections',
+                'modern_admin_analytics_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_analytics_overview_cards',
+            'config_key': 'modern_admin_analytics_config_sections',
+            'layout_key': 'modern_admin_analytics_proposed_layout',
         },
         {
             'name': 'FITS source',
@@ -1188,6 +1214,82 @@ def test_fits_source_settings_view_uses_hybrid_contract():
     )
 
 
+def test_analytics_settings_contract_preserves_context_shape():
+    contract = ModernAdminAnalyticsSettingsContract()
+    analytics_group = {
+        'group_id': 'analytics',
+        'label': 'Analytics',
+    }
+
+    context = contract.build_context((
+        {'group_id': 'other'},
+        analytics_group,
+    ))
+
+    assert_true(
+        context['modern_admin_analytics_settings_group'] is analytics_group,
+        'analytics group must be selected from settings inventory groups',
+    )
+    assert_true(
+        len(context['modern_admin_analytics_overview_cards']) == 6,
+        'analytics overview cards shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_analytics_config_sections']) == 3,
+        'analytics config sections shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_analytics_proposed_layout']) == 3,
+        'analytics proposed layout shape changed',
+    )
+    assert_true(
+        context['modern_admin_analytics_overview_cards'][0]['current_status'] == 'not evaluated here',
+        'analytics overview current status changed',
+    )
+    assert_true(
+        context['modern_admin_analytics_config_sections'][2]['key_count'] == 3,
+        'analytics SQM config key count changed',
+    )
+    assert_true(
+        context['modern_admin_analytics_proposed_layout'][0]['note'] == 'read-only proposal',
+        'analytics layout note changed',
+    )
+
+
+def test_analytics_settings_contract_handles_missing_group():
+    contract = ModernAdminAnalyticsSettingsContract()
+    context = contract.build_context(())
+
+    assert_true(
+        context['modern_admin_analytics_settings_group'] is None,
+        'missing analytics group must remain a safe None fallback',
+    )
+
+
+def test_analytics_settings_view_uses_hybrid_contract():
+    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
+    start = views_text.index('class ModernAdminAnalyticsSettingsView')
+    end = views_text.index('class ModernAdminStorageSettingsView', start)
+    analytics_view = views_text[start:end]
+
+    assert_true(
+        'ModernAdminAnalyticsSettingsContract' in analytics_view,
+        'analytics settings view must use the Hybrid settings contract',
+    )
+    assert_true(
+        'settings_contract' in analytics_view,
+        'analytics settings view must expose the contract dependency explicitly',
+    )
+    assert_true(
+        'ANALYTICS_CONFIG_SECTIONS' not in analytics_view,
+        'analytics static config sections must not remain inline on the view',
+    )
+    assert_true(
+        'get_analytics_overview_cards' not in analytics_view,
+        'analytics overview formatting must not remain inline on the view',
+    )
+
+
 def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
     import indi_allsky.modern_admin_settings_contracts as module
 
@@ -1217,6 +1319,7 @@ def test_single_group_settings_contracts_share_group_lookup_helper():
         ModernAdminStorageSettingsContract,
         ModernAdminCameraProfileSettingsContract,
         ModernAdminCameraConnectionSettingsContract,
+        ModernAdminAnalyticsSettingsContract,
         ModernAdminHybridAwbSettingsContract,
         ModernAdminFitsSourceSettingsContract,
         ModernAdminNotificationsSettingsContract,
@@ -1244,6 +1347,7 @@ def test_settings_contracts_share_proposed_layout_formatter():
         ModernAdminCameraConnectionSettingsContract,
         ModernAdminExposureGainSettingsContract,
         ModernAdminAutoExposureGainSettingsContract,
+        ModernAdminAnalyticsSettingsContract,
         ModernAdminHybridAwbSettingsContract,
         ModernAdminAcquisitionSaveSettingsContract,
         ModernAdminFitsSourceSettingsContract,
@@ -1272,6 +1376,7 @@ def test_settings_contracts_share_config_sections_formatter():
         ModernAdminCameraConnectionSettingsContract,
         ModernAdminExposureGainSettingsContract,
         ModernAdminAutoExposureGainSettingsContract,
+        ModernAdminAnalyticsSettingsContract,
         ModernAdminHybridAwbSettingsContract,
         ModernAdminAcquisitionSaveSettingsContract,
         ModernAdminFitsSourceSettingsContract,
@@ -1300,6 +1405,7 @@ def test_settings_contracts_share_safe_text_behavior():
         ModernAdminCameraConnectionSettingsContract(),
         ModernAdminExposureGainSettingsContract(),
         ModernAdminAutoExposureGainSettingsContract(),
+        ModernAdminAnalyticsSettingsContract(),
         ModernAdminHybridAwbSettingsContract(),
         ModernAdminAcquisitionSaveSettingsContract(),
         ModernAdminFitsSourceSettingsContract(),
@@ -1370,6 +1476,9 @@ def run_tests():
     test_fits_source_settings_contract_preserves_context_shape()
     test_fits_source_settings_contract_handles_missing_group()
     test_fits_source_settings_view_uses_hybrid_contract()
+    test_analytics_settings_contract_preserves_context_shape()
+    test_analytics_settings_contract_handles_missing_group()
+    test_analytics_settings_view_uses_hybrid_contract()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
     test_single_group_settings_contracts_share_group_lookup_helper()
     test_settings_contracts_share_proposed_layout_formatter()

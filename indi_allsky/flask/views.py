@@ -42,6 +42,7 @@ from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplaySe
 from ..modern_admin_observatory_tools import ModernAdminSqmSummaryService
 from ..modern_admin_observatory_tools import ModernAdminVirtualSkyContextService
 from ..modern_admin_settings_contracts import ModernAdminAcquisitionSaveSettingsContract
+from ..modern_admin_settings_contracts import ModernAdminAnalyticsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminAutoExposureGainSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminCameraConnectionSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
@@ -18486,187 +18487,12 @@ class ModernAdminReadySettingsPreviewView(ModernAdminBasicSettingsPreviewView):
 class ModernAdminAnalyticsSettingsView(ModernAdminSettingsInventoryView):
     page_title = 'Modern Admin Analytics Settings'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-
-    ANALYTICS_CONFIG_SECTIONS = (
-        {
-            'label'       : 'Charts / Custom Slots',
-            'description' : 'Controls which metrics are selected for Classic chart custom slots and their optional display floors.',
-            'keys'        : (
-                {
-                    'key'     : 'CHARTS__CUSTOM_SLOT_*',
-                    'source'  : 'Classic config form',
-                    'notes'   : 'Custom chart slot metric selectors shown by the Classic config surface.',
-                },
-                {
-                    'key'     : 'CHARTS__CUSTOM_SLOT_*_MIN',
-                    'source'  : 'Classic config form',
-                    'notes'   : 'Optional minimum bounds for custom chart slots.',
-                },
-            ),
-        },
-        {
-            'label'       : 'ADU Analytics',
-            'description' : 'Defines the brightness sampling area used by operational ADU summaries and related status views.',
-            'keys'        : (
-                {
-                    'key'     : 'ADU_ROI_*',
-                    'source'  : 'Classic config form',
-                    'notes'   : 'ADU region metadata used by operational brightness analytics.',
-                },
-                {
-                    'key'     : 'ADU_FOV_DIV',
-                    'source'  : 'Classic config form',
-                    'notes'   : 'Fallback ADU field-of-view division when no ROI is configured.',
-                },
-            ),
-        },
-        {
-            'label'       : 'SQM Analytics',
-            'description' : 'Groups sky quality sampling metadata and camera-SQM sensor settings used by analytics/status surfaces.',
-            'keys'        : (
-                {
-                    'key'     : 'SQM_ROI_*',
-                    'source'  : 'Classic config form',
-                    'notes'   : 'SQM/star region metadata used by brightness and sky quality summaries.',
-                },
-                {
-                    'key'     : 'SQM_FOV_DIV',
-                    'source'  : 'Classic config form',
-                    'notes'   : 'Fallback SQM/star field-of-view division when no ROI is configured.',
-                },
-                {
-                    'key'     : 'CAMERA_SQM__*',
-                    'source'  : 'Classic config form',
-                    'notes'   : 'Camera SQM sensor settings that feed analytics/status surfaces.',
-                },
-            ),
-        },
-    )
-
-    ANALYTICS_PROPOSED_LAYOUT = (
-        {
-            'label'          : 'Sky brightness / SQM',
-            'purpose'        : 'Group sky-quality sampling controls and camera-SQM sensor context in one analytics-oriented area.',
-            'source_keys'    : ('SQM_ROI_*', 'SQM_FOV_DIV', 'CAMERA_SQM__*'),
-            'proposed_level' : 'Future Advanced / Analytics',
-        },
-        {
-            'label'          : 'Image signal / ADU',
-            'purpose'        : 'Keep image brightness sampling controls close to analytics and signal-health reporting.',
-            'source_keys'    : ('ADU_ROI_*', 'ADU_FOV_DIV'),
-            'proposed_level' : 'Future Advanced / Analytics',
-        },
-        {
-            'label'          : 'Charts / Custom slots',
-            'purpose'        : 'Treat custom chart slots as chart composition controls, separate from daily operational settings.',
-            'source_keys'    : ('CHARTS__CUSTOM_SLOT_*', 'CHARTS__CUSTOM_SLOT_*_MIN'),
-            'proposed_level' : 'Future Developer / Advanced depending on use',
-        },
-    )
-    ANALYTICS_OVERVIEW_CARDS = (
-        {
-            'label'           : 'Sky brightness / SQM',
-            'purpose'         : 'Describe sky-brightness sampling and sky quality context without computing live SQM values.',
-            'related_keys'    : ('SQM_ROI_*', 'SQM_FOV_DIV'),
-            'future_editable' : 'yes',
-            'safety_note'     : 'Future editing needs validation and clear ROI preview; this page does not run analytics.',
-        },
-        {
-            'label'           : 'Image signal / ADU',
-            'purpose'         : 'Describe image-signal sampling used by ADU summaries and quality context.',
-            'related_keys'    : ('ADU_ROI_*', 'ADU_FOV_DIV'),
-            'future_editable' : 'yes',
-            'safety_note'     : 'ROI changes affect analytics interpretation and should stay explainable.',
-        },
-        {
-            'label'           : 'Chart slots',
-            'purpose'         : 'Group custom chart slot choices separately from operational measurement definitions.',
-            'related_keys'    : ('CHARTS__CUSTOM_SLOT_*', 'CHARTS__CUSTOM_SLOT_*_MIN'),
-            'future_editable' : 'yes',
-            'safety_note'     : 'Chart composition can become editable after value validation; no chart data is queried here.',
-        },
-        {
-            'label'           : 'ROI / FOV definitions',
-            'purpose'         : 'Keep region-of-interest and field-of-view concepts visible as shared analytics geometry.',
-            'related_keys'    : ('ADU_ROI_*', 'SQM_ROI_*', 'ADU_FOV_DIV', 'SQM_FOV_DIV'),
-            'future_editable' : 'blocked',
-            'safety_note'     : 'Final editing needs a visual geometry workflow and camera/profile ownership review.',
-        },
-        {
-            'label'           : 'Camera SQM integration',
-            'purpose'         : 'Describe camera-SQM settings as an analytics input without polling sensors or reading config.',
-            'related_keys'    : ('CAMERA_SQM__*',),
-            'future_editable' : 'blocked',
-            'safety_note'     : 'Sensor/provider ownership must be verified before active editing.',
-        },
-        {
-            'label'           : 'Future analytics dashboard',
-            'purpose'         : 'Show where analytics configuration should connect to future dashboard/report surfaces.',
-            'related_keys'    : ('CHARTS__CUSTOM_SLOT_*', 'ADU_*', 'SQM_*', 'CAMERA_SQM__*'),
-            'future_editable' : 'no',
-            'safety_note'     : 'Dashboards consume analytics outputs; this settings page does not query or calculate them.',
-        },
-    )
+    settings_contract = ModernAdminAnalyticsSettingsContract()
 
     def get_context(self):
         context = super(ModernAdminAnalyticsSettingsView, self).get_context()
-        analytics_group = None
-        for group in context.get('modern_admin_settings_groups', []):
-            if group.get('group_id') == 'analytics':
-                analytics_group = group
-                break
-
-        context['modern_admin_analytics_settings_group'] = analytics_group
-        context['modern_admin_analytics_overview_cards'] = self.get_analytics_overview_cards()
-        context['modern_admin_analytics_config_sections'] = self.get_analytics_config_sections()
-        context['modern_admin_analytics_proposed_layout'] = self.get_analytics_proposed_layout()
+        context.update(self.settings_contract.build_context(context.get('modern_admin_settings_groups', [])))
         return context
-
-
-    def get_analytics_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_settings_text(section.get('label')),
-                'description' : self.safe_settings_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_settings_text(row.get('key')),
-                        'source' : self.safe_settings_text(row.get('source')),
-                        'notes'  : self.safe_settings_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.ANALYTICS_CONFIG_SECTIONS
-        )
-
-
-    def get_analytics_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_settings_text(row.get('label')),
-                'purpose'        : self.safe_settings_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_settings_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_settings_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.ANALYTICS_PROPOSED_LAYOUT
-        )
-
-
-    def get_analytics_overview_cards(self):
-        return tuple(
-            {
-                'label'          : self.safe_settings_text(row.get('label')),
-                'purpose'        : self.safe_settings_text(row.get('purpose')),
-                'related_keys'   : tuple(self.safe_settings_text(key) for key in row.get('related_keys', tuple())),
-                'current_status' : 'not evaluated here',
-                'future_editable': self.safe_settings_text(row.get('future_editable')),
-                'safety_note'    : self.safe_settings_text(row.get('safety_note')),
-            }
-            for row in self.ANALYTICS_OVERVIEW_CARDS
-        )
 
 
 class ModernAdminStorageSettingsView(ModernAdminSettingsInventoryView):

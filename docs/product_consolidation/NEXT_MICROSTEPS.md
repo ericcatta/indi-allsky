@@ -56,6 +56,10 @@ The source of truth for the current consolidation baseline is
   upload/export flags, and viewer/file-access safety boundaries only; no
   FITS/RAW/source behavior, path handling, filesystem access, conversion,
   download/viewer behavior, or config writes were changed.
+- Analytics settings are now a Hybrid-owned read-only contract slice. It
+  documents chart slots, ADU/SQM sampling metadata, ROI/FOV concepts, and
+  camera-SQM integration only; no analytics queries, sensor polling, chart
+  computation, ROI validation, or config writes were added.
 - Mutative/safe-action ownership is now discovered in
   `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
   contract schema before any new execution path.
