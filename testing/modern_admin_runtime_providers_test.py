@@ -9,12 +9,20 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 import indi_allsky.modern_admin_runtime_providers as runtime_providers
+from indi_allsky.modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 
 
 def assert_true(condition, message):
     if not condition:
         raise AssertionError(message)
+
+
+class FakeCamera:
+    def __init__(self, friendly_name=None, name=None, driver=None):
+        self.friendlyName = friendly_name
+        self.name = name
+        self.driver = driver
 
 
 def test_service_status_provider_reports_active_service():
@@ -121,6 +129,120 @@ def test_modern_capture_service_status_uses_hybrid_provider_static():
     )
 
 
+def test_camera_runtime_provider_reports_multi_camera_active():
+    provider = ModernAdminCameraRuntimeMetadataProvider()
+    status = provider.get_runtime_status(
+        multi_camera_enabled=True,
+        profile_configs=[
+            {'enabled': True, 'label': 'IMX708 Wide'},
+            {'enabled': True, 'label': 'ASI678MC'},
+        ],
+        recent_camera_ids=[1, 2],
+        recent_camera_labels=['IMX708 Wide', 'ASI678MC'],
+    )
+
+    assert_true(status == {
+        'label' : 'Runtime: Multi-camera active · IMX708 Wide + ASI678MC',
+        'tone'  : 'good',
+    }, 'multi-camera active payload must match existing shell contract')
+
+
+def test_camera_runtime_provider_reports_restart_required_for_one_recent_camera():
+    provider = ModernAdminCameraRuntimeMetadataProvider()
+    status = provider.get_runtime_status(
+        multi_camera_enabled=True,
+        profile_configs=[
+            {'enabled': True, 'label': 'IMX708 Wide'},
+            {'enabled': True, 'label': 'ASI678MC'},
+        ],
+        recent_camera_ids=[1],
+        recent_camera_labels=['IMX708 Wide'],
+    )
+
+    assert_true(status == {
+        'label' : 'Runtime: Restart required or only one camera active · IMX708 Wide',
+        'tone'  : 'warn',
+    }, 'one recent camera should preserve existing restart-required message')
+
+
+def test_camera_runtime_provider_reports_config_enabled_without_recent_cameras():
+    provider = ModernAdminCameraRuntimeMetadataProvider()
+    status = provider.get_runtime_status(
+        multi_camera_enabled=True,
+        profile_configs=[
+            {'enabled': True, 'label': 'IMX708 Wide'},
+            {'enabled': False, 'label': 'Disabled Camera'},
+            {'enabled': True, 'camera_name': 'ASI678MC'},
+        ],
+        recent_camera_ids=[],
+        recent_camera_labels=[],
+    )
+
+    assert_true(status == {
+        'label' : 'Config: Multi-camera enabled · Restart may be required · IMX708 Wide + ASI678MC',
+        'tone'  : 'warn',
+    }, 'config-only multi-camera status should use enabled profile labels')
+
+
+def test_camera_runtime_provider_reports_single_camera_with_current_camera_fallback():
+    provider = ModernAdminCameraRuntimeMetadataProvider()
+    status = provider.get_runtime_status(
+        multi_camera_enabled=False,
+        recent_camera_ids=[],
+        recent_camera_labels=[],
+        current_camera=FakeCamera(friendly_name='', name='ASI678MC', driver='ZWO'),
+    )
+
+    assert_true(status == {
+        'label' : 'Capture: Single camera · ASI678MC',
+        'tone'  : 'muted',
+    }, 'single-camera fallback should use current camera identity')
+
+
+def test_camera_runtime_provider_handles_missing_camera_safely():
+    provider = ModernAdminCameraRuntimeMetadataProvider()
+    status = provider.get_runtime_status(
+        multi_camera_enabled=False,
+        recent_camera_ids=[],
+        recent_camera_labels=[],
+        current_camera=None,
+    )
+
+    assert_true(status == {
+        'label' : 'Capture: Single camera',
+        'tone'  : 'muted',
+    }, 'missing current camera should produce safe single-camera fallback')
+
+
+def test_camera_runtime_provider_formats_long_camera_list():
+    provider = ModernAdminCameraRuntimeMetadataProvider()
+
+    assert_true(
+        provider.format_camera_list(['A', 'B', 'C']) == 'A + B + 1 more',
+        'long camera list should preserve existing compact shell format',
+    )
+
+
+def test_modern_runtime_status_uses_hybrid_camera_provider_static():
+    views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    function_start = views_source.index('def get_modern_admin_runtime_status')
+    function_end = views_source.index('def get_recent_image_camera_ids')
+    function_source = views_source[function_start:function_end]
+
+    assert_true(
+        'ModernAdminCameraRuntimeMetadataProvider' in function_source,
+        'Modern runtime status must enter through the Hybrid camera provider',
+    )
+    assert_true(
+        'multi_camera_enabled=multi_camera_enabled' in function_source,
+        'Flask layer should pass normalized config intent into the provider',
+    )
+    assert_true(
+        "Runtime: Multi-camera active" not in function_source,
+        'camera runtime status copy/policy should not remain inline in views.py',
+    )
+
+
 def run_tests():
     tests = [
         test_service_status_provider_reports_active_service,
@@ -130,6 +252,13 @@ def run_tests():
         test_service_status_provider_handles_adapter_error_safely,
         test_service_status_provider_is_framework_free,
         test_modern_capture_service_status_uses_hybrid_provider_static,
+        test_camera_runtime_provider_reports_multi_camera_active,
+        test_camera_runtime_provider_reports_restart_required_for_one_recent_camera,
+        test_camera_runtime_provider_reports_config_enabled_without_recent_cameras,
+        test_camera_runtime_provider_reports_single_camera_with_current_camera_fallback,
+        test_camera_runtime_provider_handles_missing_camera_safely,
+        test_camera_runtime_provider_formats_long_camera_list,
+        test_modern_runtime_status_uses_hybrid_camera_provider_static,
     ]
 
     for test in tests:
