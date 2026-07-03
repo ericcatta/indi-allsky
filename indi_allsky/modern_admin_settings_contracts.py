@@ -7,6 +7,19 @@ class ModernAdminSettingsContractBase:
         return None
 
 
+    def get_proposed_layout(self):
+        return tuple(
+            {
+                'label'          : self.safe_text(row.get('label')),
+                'purpose'        : self.safe_text(row.get('purpose')),
+                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
+                'proposed_level' : self.safe_text(row.get('proposed_level')),
+                'note'           : 'read-only proposal',
+            }
+            for row in self.PROPOSED_LAYOUT
+        )
+
+
 class ModernAdminStorageSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
@@ -197,19 +210,6 @@ class ModernAdminStorageSettingsContract(ModernAdminSettingsContractBase):
                 ),
             }
             for section in self.CONFIG_SECTIONS
-        )
-
-
-    def get_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_text(row.get('label')),
-                'purpose'        : self.safe_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.PROPOSED_LAYOUT
         )
 
 
@@ -416,19 +416,6 @@ class ModernAdminCameraProfileSettingsContract(ModernAdminSettingsContractBase):
                 ),
             }
             for section in self.CONFIG_SECTIONS
-        )
-
-
-    def get_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_text(row.get('label')),
-                'purpose'        : self.safe_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.PROPOSED_LAYOUT
         )
 
 
@@ -659,19 +646,6 @@ class ModernAdminCameraConnectionSettingsContract(ModernAdminSettingsContractBas
         )
 
 
-    def get_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_text(row.get('label')),
-                'purpose'        : self.safe_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.PROPOSED_LAYOUT
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -679,7 +653,7 @@ class ModernAdminCameraConnectionSettingsContract(ModernAdminSettingsContractBas
         return str(value)
 
 
-class ModernAdminExposureGainSettingsContract:
+class ModernAdminExposureGainSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
             'label'       : 'Manual exposure',
@@ -939,19 +913,6 @@ class ModernAdminExposureGainSettingsContract:
         )
 
 
-    def get_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_text(row.get('label')),
-                'purpose'        : self.safe_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.PROPOSED_LAYOUT
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -959,7 +920,7 @@ class ModernAdminExposureGainSettingsContract:
         return str(value)
 
 
-class ModernAdminAutoExposureGainSettingsContract:
+class ModernAdminAutoExposureGainSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
             'label'       : 'Target ADU',
@@ -1231,19 +1192,6 @@ class ModernAdminAutoExposureGainSettingsContract:
         )
 
 
-    def get_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_text(row.get('label')),
-                'purpose'        : self.safe_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.PROPOSED_LAYOUT
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -1501,19 +1449,6 @@ class ModernAdminHybridAwbSettingsContract(ModernAdminSettingsContractBase):
         )
 
 
-    def get_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_text(row.get('label')),
-                'purpose'        : self.safe_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.PROPOSED_LAYOUT
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -1521,7 +1456,7 @@ class ModernAdminHybridAwbSettingsContract(ModernAdminSettingsContractBase):
         return str(value)
 
 
-class ModernAdminAcquisitionSaveSettingsContract:
+class ModernAdminAcquisitionSaveSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
             'label'       : 'Capture cadence',
@@ -1793,19 +1728,6 @@ class ModernAdminAcquisitionSaveSettingsContract:
         )
 
 
-    def get_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_text(row.get('label')),
-                'purpose'        : self.safe_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.PROPOSED_LAYOUT
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -2054,19 +1976,6 @@ class ModernAdminFitsSourceSettingsContract(ModernAdminSettingsContractBase):
         )
 
 
-    def get_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_text(row.get('label')),
-                'purpose'        : self.safe_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.PROPOSED_LAYOUT
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -2249,19 +2158,6 @@ class ModernAdminNotificationsSettingsContract(ModernAdminSettingsContractBase):
                 ),
             }
             for section in self.CONFIG_SECTIONS
-        )
-
-
-    def get_proposed_layout(self):
-        return tuple(
-            {
-                'label'          : self.safe_text(row.get('label')),
-                'purpose'        : self.safe_text(row.get('purpose')),
-                'source_keys'    : tuple(self.safe_text(key) for key in row.get('source_keys', tuple())),
-                'proposed_level' : self.safe_text(row.get('proposed_level')),
-                'note'           : 'read-only proposal',
-            }
-            for row in self.PROPOSED_LAYOUT
         )
 
 

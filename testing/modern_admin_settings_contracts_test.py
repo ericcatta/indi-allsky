@@ -1234,6 +1234,34 @@ def test_single_group_settings_contracts_share_group_lookup_helper():
         )
 
 
+def test_settings_contracts_share_proposed_layout_formatter():
+    import indi_allsky.modern_admin_settings_contracts as module
+
+    source = inspect.getsource(module)
+    migrated_contracts = (
+        ModernAdminStorageSettingsContract,
+        ModernAdminCameraProfileSettingsContract,
+        ModernAdminCameraConnectionSettingsContract,
+        ModernAdminExposureGainSettingsContract,
+        ModernAdminAutoExposureGainSettingsContract,
+        ModernAdminHybridAwbSettingsContract,
+        ModernAdminAcquisitionSaveSettingsContract,
+        ModernAdminFitsSourceSettingsContract,
+        ModernAdminNotificationsSettingsContract,
+    )
+
+    assert_true(
+        source.count('def get_proposed_layout') == 1,
+        'proposed layout formatter should have one shared implementation',
+    )
+
+    for contract_class in migrated_contracts:
+        assert_true(
+            issubclass(contract_class, ModernAdminSettingsContractBase),
+            '{0:s} must inherit the shared proposed layout formatter'.format(contract_class.__name__),
+        )
+
+
 def run_tests():
     test_migrated_settings_contracts_preserve_top_level_context_contracts()
     test_notifications_settings_contract_preserves_context_shape()
@@ -1265,6 +1293,7 @@ def run_tests():
     test_fits_source_settings_view_uses_hybrid_contract()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
     test_single_group_settings_contracts_share_group_lookup_helper()
+    test_settings_contracts_share_proposed_layout_formatter()
 
 
 if __name__ == '__main__':
