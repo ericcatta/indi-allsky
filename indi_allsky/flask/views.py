@@ -33,6 +33,7 @@ from ..frame_metadata_analytics import FrameMetadataAnalytics
 from ..modern_safe_action import ModernAdminCaptureServiceCommandBoundary
 from ..modern_safe_action import ModernAdminGeneratedOutputActionPlanner
 from ..modern_safe_action import ModernAdminMaintenanceActionPlanner
+from ..modern_safe_action import ModernAdminSystemPowerCommandBoundary
 from ..modern_safe_action import run_modern_safe_action_dry_run
 from ..modern_admin_notifications import ModernAdminNotificationReadService
 from ..modern_admin_media_metadata import ModernAdminKeogramMetadataService
@@ -9052,12 +9053,22 @@ class AjaxSystemInfoView(BaseView):
             if command == 'reboot':
                 # allowing rebooting from non-admin networks for now
                 try:
-                    r = self.rebootSystemd()
+                    action_result = ModernAdminSystemPowerCommandBoundary(
+                        effect_adapter=self.run_system_power_command,
+                    ).run(payload={'command': command}, actor=current_user)
                 except dbus.exceptions.DBusException as e:
                     json_data = {
                         'form_global' : [str(e)],
                     }
                     return jsonify(json_data), 400
+
+                if action_result.status == 'validation_failed':
+                    errors_data = {
+                        'COMMAND_HIDDEN' : [action_result.message],
+                    }
+                    return jsonify(errors_data), 400
+
+                r = action_result.details['service_result']
             elif command == 'poweroff':
                 if not self.verify_admin_network():
                     json_data = {
@@ -9210,6 +9221,13 @@ class AjaxSystemInfoView(BaseView):
         r = manager.Reboot(False)
 
         return r
+
+
+    def run_system_power_command(self, command):
+        if command == 'reboot':
+            return self.rebootSystemd()
+
+        raise ValueError('Unhandled system power command')
 
 
     def poweroffSystemd(self):

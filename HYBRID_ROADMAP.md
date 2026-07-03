@@ -76,8 +76,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     fuori scope.
   - il planning della maintenance action non distruttiva `backup_db` e' ora
     Hybrid-owned tramite `ModernAdminMaintenanceActionPlanner`; l'enqueue DB/task
-    queue resta adapter Classic/Flask esistente, mentre expire/flush/reboot/
-    poweroff/service controls restano fuori scope.
+    queue resta adapter Classic/Flask esistente;
+  - il boundary esplicito "Hybrid recovery -> reboot Pi -> delegate effect" e'
+    ora Hybrid-owned tramite `ModernAdminSystemPowerCommandBoundary`; l'effetto
+    DBus `rebootSystemd()` resta adapter Classic/Flask esistente, mentre
+    poweroff/expire/flush e recovery hardware piu' profonde restano fuori scope.
 - Book 2 / Runtime Providers:
   - il boundary read-only "capture service -> service status payload" e' ora
     Hybrid-owned tramite `ModernAdminServiceStatusProvider`; il comando

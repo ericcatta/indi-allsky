@@ -95,6 +95,16 @@
             <a class="{% if request.endpoint == 'indi_allsky.modern_admin_observatory_view' %}active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
         </nav>
         <div class="hybrid-app-actions">
+            {% set capture_action_url = modern_admin_capture_action_url|default(none, true) %}
+            {% set quick_action_url = modern_admin_quick_action_url|default(none, true) %}
+            {% set capture_service_status = modern_admin_capture_service_status|default({}, true) %}
+            <div class="hybrid-runtime-actions" aria-label="Runtime recovery controls">
+                <span class="hybrid-runtime-status" data-hybrid-capture-service-status data-tone="{{ capture_service_status.tone|default('muted', true) }}">{{ capture_service_status.label|default('Capture: Unknown', true) }}</span>
+                <button class="hybrid-runtime-button hybrid-runtime-button-good" type="button" data-hybrid-capture-command="start"{% if not capture_action_url %} disabled{% endif %}>Start</button>
+                <button class="hybrid-runtime-button hybrid-runtime-button-warn" type="button" data-hybrid-capture-command="stop"{% if not capture_action_url %} disabled{% endif %}>Stop</button>
+                <button class="hybrid-runtime-button hybrid-runtime-button-warn" type="button" data-hybrid-capture-command="restart"{% if not capture_action_url %} disabled{% endif %}>Restart Capture</button>
+                <button class="hybrid-runtime-button hybrid-runtime-button-danger" type="button" data-hybrid-system-command="reboot"{% if not quick_action_url %} disabled{% endif %}>Reboot Pi</button>
+            </div>
             <a class="hybrid-home-button" href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Home</a>
             <button class="hybrid-theme-toggle" id="hybrid-theme-toggle" type="button" aria-label="Toggle day or night theme">Day</button>
         </div>
@@ -168,6 +178,32 @@
     var body = document.body;
     var themeButton = document.getElementById('hybrid-theme-toggle');
     var menuToggle = document.getElementById('hybrid-menu-toggle');
+    var captureActionUrl = {{ modern_admin_capture_action_url|default(none, true)|tojson }};
+    var quickActionUrl = {{ modern_admin_quick_action_url|default(none, true)|tojson }};
+    var cameraId = {{ modern_admin_quick_action_camera|default(0, true)|tojson }};
+    var csrfToken = {{ csrf_token()|tojson }};
+    var captureMessages = {
+        start: 'Start capture service?',
+        stop: 'Stop capture service?',
+        restart: 'Restart capture service?'
+    };
+    var systemMessages = {
+        reboot: 'Reboot this Raspberry Pi? Capture will stop while the system restarts.'
+    };
+
+    function setHybridCaptureButtonsBusy(isBusy) {
+        document.querySelectorAll('[data-hybrid-capture-command]').forEach(function (button) {
+            button.disabled = isBusy || !captureActionUrl;
+        });
+    }
+
+    function updateHybridCaptureStatus(status) {
+        var badge = document.querySelector('[data-hybrid-capture-service-status]');
+        if (badge && status) {
+            badge.textContent = status.label || 'Capture: Unknown';
+            badge.setAttribute('data-tone', status.tone || 'muted');
+        }
+    }
 
     try {
         var storedTheme = localStorage.getItem('hybrid-theme');
@@ -197,6 +233,82 @@
             try { localStorage.setItem('hybrid-menu-open', menuToggle.checked ? 'true' : 'false'); } catch (e) {}
         });
     }
+
+    document.querySelectorAll('[data-hybrid-capture-command]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var command = button.getAttribute('data-hybrid-capture-command');
+            if (!captureActionUrl || !command || !window.confirm(captureMessages[command] || 'Run capture action?')) {
+                return;
+            }
+
+            setHybridCaptureButtonsBusy(true);
+
+            fetch(captureActionUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    command: command,
+                    next: window.location.href
+                })
+            }).then(function (response) {
+                if (!response.ok) {
+                    return response.json().then(function (data) {
+                        throw new Error(data['failure-message'] || Object.values(data).flat().join(' ') || 'Capture action failed.');
+                    });
+                }
+
+                return response.json();
+            }).then(function (data) {
+                updateHybridCaptureStatus(data['service-status']);
+            }).catch(function (error) {
+                window.alert(error.message || 'Capture action failed.');
+            }).finally(function () {
+                setHybridCaptureButtonsBusy(false);
+            });
+        });
+    });
+
+    document.querySelectorAll('[data-hybrid-system-command]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var command = button.getAttribute('data-hybrid-system-command');
+            if (!quickActionUrl || !command || !window.confirm(systemMessages[command] || 'Run system action?')) {
+                return;
+            }
+
+            button.disabled = true;
+
+            fetch(quickActionUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    CAMERA_ID: cameraId,
+                    SERVICE_HIDDEN: 'system',
+                    COMMAND_HIDDEN: command
+                })
+            }).then(function (response) {
+                if (!response.ok) {
+                    return response.json().then(function (data) {
+                        throw new Error(Object.values(data).flat().join(' ') || 'System action failed.');
+                    });
+                }
+
+                return response.json();
+            }).then(function (data) {
+                window.alert(data['success-message'] || 'System action submitted.');
+            }).catch(function (error) {
+                window.alert(error.message || 'System action failed.');
+                button.disabled = false;
+            });
+        });
+    });
 })();
 </script>
 {% else %}

@@ -26,6 +26,7 @@ from indi_allsky.modern_safe_action import LogDownloadService
 from indi_allsky.modern_safe_action import ModernAdminCaptureServiceCommandBoundary
 from indi_allsky.modern_safe_action import ModernAdminGeneratedOutputActionPlanner
 from indi_allsky.modern_safe_action import ModernAdminMaintenanceActionPlanner
+from indi_allsky.modern_safe_action import ModernAdminSystemPowerCommandBoundary
 from indi_allsky.modern_safe_action import NotificationAcknowledgeDbAdapter
 from indi_allsky.modern_safe_action import NotificationAcknowledgeRepositoryError
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
@@ -1554,6 +1555,54 @@ def test_capture_service_command_boundary_requires_effect_adapter():
     assert result.details['command'] == 'start'
 
 
+def test_system_power_command_boundary_normalizes_reboot_intent():
+    boundary = ModernAdminSystemPowerCommandBoundary(effect_adapter=lambda command: 'ok')
+
+    assert boundary.normalize_command({'COMMAND_HIDDEN': ' Reboot '}) == 'reboot'
+    assert boundary.normalize_command({'command': 'REBOOT'}) == 'reboot'
+    assert boundary.normalize_command({'command': None}) == ''
+    assert boundary.normalize_command({'command': False}) == ''
+
+
+def test_system_power_command_boundary_rejects_unsupported_command_without_adapter_call():
+    calls = []
+    boundary = ModernAdminSystemPowerCommandBoundary(effect_adapter=lambda command: calls.append(command))
+
+    result = boundary.run(payload={'COMMAND_HIDDEN': 'poweroff'})
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert result.details['command'] == 'poweroff'
+    assert calls == []
+
+
+def test_system_power_command_boundary_delegates_reboot_only():
+    calls = []
+
+    def fake_effect(command):
+        calls.append(command)
+        return 'reboot-submitted'
+
+    boundary = ModernAdminSystemPowerCommandBoundary(effect_adapter=fake_effect)
+    result = boundary.run(payload={'COMMAND_HIDDEN': ' reboot '})
+
+    assert result.status == 'executed'
+    assert result.allowed is True
+    assert result.details['command'] == 'reboot'
+    assert result.details['past_tense'] == 'restarted'
+    assert result.details['service_result'] == 'reboot-submitted'
+    assert calls == ['reboot']
+
+
+def test_system_power_command_boundary_requires_effect_adapter():
+    boundary = ModernAdminSystemPowerCommandBoundary()
+    result = boundary.run(payload={'COMMAND_HIDDEN': 'reboot'})
+
+    assert result.status == 'not_implemented'
+    assert result.allowed is False
+    assert result.details['command'] == 'reboot'
+
+
 def test_generated_output_action_planner_creates_generate_video_plan():
     planner = ModernAdminGeneratedOutputActionPlanner()
 
@@ -1850,6 +1899,10 @@ def get_ajax_system_view_source():
     return source[class_start:class_end], source
 
 
+def get_base_template_source():
+    return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'templates' / 'base.html').read_text()
+
+
 def get_flask_init_source():
     return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / '__init__.py').read_text()
 
@@ -1960,6 +2013,29 @@ def test_ajax_system_backup_db_uses_hybrid_maintenance_planner_static():
     assert "data=plan.details['jobdata']" in branch
     assert "priority=plan.details['priority']" in branch
     assert "message_list = [plan.details['success_message']]" in branch
+
+
+def test_ajax_system_reboot_uses_hybrid_power_boundary_static():
+    view_source, _full_source = get_ajax_system_view_source()
+    branch_start = view_source.index("if command == 'reboot':")
+    branch_end = view_source.index("elif command == 'poweroff':")
+    branch = view_source[branch_start:branch_end]
+
+    assert 'ModernAdminSystemPowerCommandBoundary' in branch
+    assert 'effect_adapter=self.run_system_power_command' in branch
+    assert "r = action_result.details['service_result']" in branch
+
+
+def test_hybrid_shell_exposes_recovery_controls_static():
+    source = get_base_template_source()
+
+    assert 'data-hybrid-capture-command="start"' in source
+    assert 'data-hybrid-capture-command="stop"' in source
+    assert 'data-hybrid-capture-command="restart"' in source
+    assert 'data-hybrid-system-command="reboot"' in source
+    assert 'data-hybrid-system-command="poweroff"' not in source
+    assert 'fetch(captureActionUrl' in source
+    assert 'fetch(quickActionUrl' in source
 
 
 def test_safe_action_dry_run_helper_response_shape():

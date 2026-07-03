@@ -174,6 +174,103 @@
   gap: 8px;
 }
 
+.hybrid-runtime-actions {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px;
+  border: 1px solid rgba(143, 216, 208, 0.18);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.hybrid-theme-day .hybrid-runtime-actions {
+  border-color: rgba(48, 118, 134, 0.18);
+  background: rgba(48, 118, 134, 0.055);
+}
+
+.hybrid-runtime-status,
+.hybrid-runtime-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  white-space: nowrap;
+}
+
+.hybrid-runtime-status {
+  padding: 0 10px;
+  color: #a9b3ac;
+}
+
+.hybrid-runtime-status[data-tone="good"] {
+  color: #a8d99b;
+}
+
+.hybrid-runtime-status[data-tone="warn"] {
+  color: #e7c879;
+}
+
+.hybrid-runtime-status[data-tone="danger"] {
+  color: #e99c92;
+}
+
+.hybrid-runtime-button {
+  border: 1px solid rgba(143, 216, 208, 0.22);
+  padding: 0 10px;
+  color: #def8f3;
+  background: rgba(143, 216, 208, 0.08);
+  cursor: pointer;
+}
+
+.hybrid-runtime-button:hover:not(:disabled) {
+  background: rgba(143, 216, 208, 0.15);
+}
+
+.hybrid-runtime-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.hybrid-runtime-button-good {
+  border-color: rgba(168, 217, 155, 0.28);
+  color: #dff5d7;
+}
+
+.hybrid-runtime-button-warn {
+  border-color: rgba(231, 200, 121, 0.3);
+  color: #f3df9d;
+}
+
+.hybrid-runtime-button-danger {
+  border-color: rgba(233, 156, 146, 0.34);
+  color: #ffd1ca;
+}
+
+.hybrid-theme-day .hybrid-runtime-status {
+  color: #526157;
+}
+
+.hybrid-theme-day .hybrid-runtime-status[data-tone="good"] {
+  color: #426f3f;
+}
+
+.hybrid-theme-day .hybrid-runtime-status[data-tone="warn"] {
+  color: #8c6b24;
+}
+
+.hybrid-theme-day .hybrid-runtime-status[data-tone="danger"] {
+  color: #93443d;
+}
+
+.hybrid-theme-day .hybrid-runtime-button {
+  border-color: rgba(48, 118, 134, 0.18);
+  color: #1d4d55;
+  background: rgba(48, 118, 134, 0.07);
+}
+
 .hybrid-home-button,
 .hybrid-theme-toggle {
   padding: 0 13px;
@@ -1580,6 +1677,15 @@
     padding-inline: 10px;
   }
 
+  .hybrid-app-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .hybrid-runtime-actions {
+    order: 3;
+  }
+
   .hybrid-product-shell {
     width: min(100% - 22px, 1320px);
   }
@@ -1599,5 +1705,13 @@
   .hybrid-product-shell > .modern-admin-table-panel:first-child,
   .hybrid-product-shell .modern-admin-table-panel {
     padding: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hybrid-runtime-actions {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
   }
 }

@@ -1287,6 +1287,86 @@ class ModernAdminCaptureServiceCommandBoundary:
         )
 
 
+class ModernAdminSystemPowerCommandBoundary:
+    """Hybrid-owned command boundary for explicit system power recovery.
+
+    The boundary owns command normalization and allowlisting only. The injected
+    effect adapter remains responsible for the existing reboot/power behavior.
+    """
+
+    action_id = 'system.power_control'
+    feature = 'System Power'
+    risk_level = 'critical'
+
+    DEFAULT_COMMANDS = {
+        'reboot': 'restarted',
+    }
+
+    def __init__(self, effect_adapter=None, valid_commands=None):
+        self.effect_adapter = effect_adapter
+        self.valid_commands = dict(valid_commands or self.DEFAULT_COMMANDS)
+
+
+    def normalize_command(self, value):
+        if isinstance(value, dict) or hasattr(value, 'get'):
+            value = value.get('command', value.get('COMMAND_HIDDEN'))
+
+        if value is None or isinstance(value, bool):
+            return ''
+
+        return str(value).strip().lower()
+
+
+    def run(self, command=None, actor=None, payload=None):
+        payload = payload or {}
+        command = self.normalize_command(command if command is not None else payload)
+
+        if command not in self.valid_commands:
+            return ModernAdminSafeActionResult(
+                action_id=self.action_id,
+                feature=self.feature,
+                risk_level=self.risk_level,
+                status='validation_failed',
+                message='Invalid system power command.',
+                dry_run=False,
+                allowed=False,
+                details={
+                    'command': command,
+                },
+            )
+
+        if self.effect_adapter is None:
+            return ModernAdminSafeActionResult(
+                action_id=self.action_id,
+                feature=self.feature,
+                risk_level=self.risk_level,
+                status='not_implemented',
+                message='System power command adapter is not configured.',
+                dry_run=False,
+                allowed=False,
+                details={
+                    'command': command,
+                },
+            )
+
+        effect_result = self.effect_adapter(command)
+
+        return ModernAdminSafeActionResult(
+            action_id=self.action_id,
+            feature=self.feature,
+            risk_level=self.risk_level,
+            status='executed',
+            message='System power command executed.',
+            dry_run=False,
+            allowed=True,
+            details={
+                'command'       : command,
+                'past_tense'    : self.valid_commands[command],
+                'service_result': effect_result,
+            },
+        )
+
+
 class ModernAdminGeneratedOutputActionPlanner:
     """Hybrid-owned planning boundary for generated-output actions.
 
