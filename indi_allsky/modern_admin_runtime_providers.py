@@ -572,3 +572,79 @@ class ModernAdminCaptureHealthSummaryProvider:
                 return None
             value = value.get(key)
         return value
+
+
+class ModernAdminLocationMetadataProvider:
+    """Hybrid-owned read boundary for observatory/GPS location metadata."""
+
+    def get_location_metadata(self, camera=None, config=None):
+        config = config if isinstance(config, dict) else {}
+        camera_latitude = self.number_or_none(getattr(camera, 'latitude', None))
+        camera_longitude = self.number_or_none(getattr(camera, 'longitude', None))
+        camera_elevation = self.number_or_none(getattr(camera, 'elevation', None))
+        camera_has_location = camera_latitude is not None and camera_longitude is not None
+
+        latitude = self.first_number(
+            camera_latitude,
+            config.get('LOCATION_LATITUDE'),
+        )
+        longitude = self.first_number(
+            camera_longitude,
+            config.get('LOCATION_LONGITUDE'),
+        )
+        elevation = self.first_number(
+            camera_elevation,
+            config.get('LOCATION_ELEVATION'),
+        )
+        gps_enabled = bool(config.get('GPS_ENABLE', False))
+
+        status = 'available' if latitude is not None and longitude is not None else 'unknown'
+
+        return {
+            'status'          : status,
+            'tone'            : 'good' if status == 'available' else 'muted',
+            'source'          : 'camera_metadata' if camera_has_location else 'config',
+            'location_name'   : self.safe_text(config.get('LOCATION_NAME')),
+            'latitude'        : latitude,
+            'longitude'       : longitude,
+            'elevation'       : elevation,
+            'gps_enabled'     : gps_enabled,
+            'gps_status_label': 'GPS enabled' if gps_enabled else 'GPS disabled',
+            'status_label'    : self.status_label(status, gps_enabled),
+        }
+
+
+    def status_label(self, status, gps_enabled):
+        if status == 'available':
+            if gps_enabled:
+                return 'Location metadata available; GPS may update it.'
+            return 'Location metadata available from saved configuration.'
+
+        if gps_enabled:
+            return 'GPS enabled, but location metadata is unavailable.'
+
+        return 'Location metadata unavailable.'
+
+
+    def first_number(self, *values):
+        for value in values:
+            number = self.number_or_none(value)
+            if number is not None:
+                return number
+        return None
+
+
+    def number_or_none(self, value):
+        if value is None:
+            return None
+
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+
+    def safe_text(self, value):
+        if value is None:
+            return ''
+        return str(value)

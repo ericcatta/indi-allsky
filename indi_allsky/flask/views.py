@@ -49,6 +49,7 @@ from ..modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 from ..modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
 from ..modern_admin_runtime_providers import ModernAdminCaptureHealthSummaryProvider
 from ..modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
+from ..modern_admin_runtime_providers import ModernAdminLocationMetadataProvider
 from ..modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 from ..modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
@@ -13960,6 +13961,21 @@ class ModernAdminAstroPanelView(ModernAdminObservatoryToolView, TemplateView):
 
 class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, VirtualSkyView):
     page_title = 'Modern Admin VirtualSky'
+
+    location_metadata_provider = ModernAdminLocationMetadataProvider()
+
+    def get_context(self):
+        context = super(ModernAdminVirtualSkyView, self).get_context()
+        location_metadata = self.location_metadata_provider.get_location_metadata(
+            camera=getattr(self, 'camera', None),
+            config=self.indi_allsky_config,
+        )
+
+        context['modern_admin_location_metadata'] = location_metadata
+        context['camera_latitude'] = location_metadata['latitude']
+        context['camera_longitude'] = location_metadata['longitude']
+
+        return context
 
 
 class ModernAdminLogView(ModernAdminSystemToolView, LogView):

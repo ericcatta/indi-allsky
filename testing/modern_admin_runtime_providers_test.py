@@ -14,6 +14,7 @@ import indi_allsky.modern_admin_runtime_providers as runtime_providers
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCaptureHealthSummaryProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
+from indi_allsky.modern_admin_runtime_providers import ModernAdminLocationMetadataProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 
@@ -28,6 +29,13 @@ class FakeCamera:
         self.friendlyName = friendly_name
         self.name = name
         self.driver = driver
+
+
+class FakeLocationCamera:
+    def __init__(self, latitude=None, longitude=None, elevation=None):
+        self.latitude = latitude
+        self.longitude = longitude
+        self.elevation = elevation
 
 
 def test_service_status_provider_reports_active_service():
@@ -465,6 +473,91 @@ def test_modern_capture_health_summary_uses_hybrid_provider_static():
     )
 
 
+def test_location_metadata_provider_reports_camera_location():
+    provider = ModernAdminLocationMetadataProvider()
+    metadata = provider.get_location_metadata(
+        camera=FakeLocationCamera(latitude=45.1, longitude=9.2, elevation=240),
+        config={
+            'GPS_ENABLE': False,
+            'LOCATION_NAME': 'Backyard',
+            'LOCATION_LATITUDE': 1.0,
+            'LOCATION_LONGITUDE': 2.0,
+            'LOCATION_ELEVATION': 3,
+        },
+    )
+
+    assert_true(metadata == {
+        'status'          : 'available',
+        'tone'            : 'good',
+        'source'          : 'camera_metadata',
+        'location_name'   : 'Backyard',
+        'latitude'        : 45.1,
+        'longitude'       : 9.2,
+        'elevation'       : 240.0,
+        'gps_enabled'     : False,
+        'gps_status_label': 'GPS disabled',
+        'status_label'    : 'Location metadata available from saved configuration.',
+    }, 'camera location metadata should be normalized without live GPS polling')
+
+
+def test_location_metadata_provider_uses_config_fallback():
+    provider = ModernAdminLocationMetadataProvider()
+    metadata = provider.get_location_metadata(
+        camera=FakeLocationCamera(latitude=None, longitude=None, elevation=None),
+        config={
+            'GPS_ENABLE': True,
+            'LOCATION_LATITUDE': '45.5',
+            'LOCATION_LONGITUDE': '9.5',
+            'LOCATION_ELEVATION': '200',
+        },
+    )
+
+    assert_true(metadata['status'] == 'available', 'config fallback location should be available')
+    assert_true(metadata['source'] == 'config', 'camera without location should report config source')
+    assert_true(metadata['latitude'] == 45.5, 'latitude should be converted to float')
+    assert_true(metadata['longitude'] == 9.5, 'longitude should be converted to float')
+    assert_true(metadata['elevation'] == 200.0, 'elevation should be converted to float')
+    assert_true(metadata['gps_status_label'] == 'GPS enabled', 'GPS enabled label should be explicit')
+
+
+def test_location_metadata_provider_handles_missing_location_safely():
+    provider = ModernAdminLocationMetadataProvider()
+    metadata = provider.get_location_metadata(
+        camera=FakeLocationCamera(latitude='bad', longitude=None, elevation=None),
+        config={
+            'GPS_ENABLE': True,
+            'LOCATION_LATITUDE': 'bad',
+            'LOCATION_LONGITUDE': None,
+        },
+    )
+
+    assert_true(metadata['status'] == 'unknown', 'invalid/missing location should be unknown')
+    assert_true(metadata['tone'] == 'muted', 'unknown location tone should be muted')
+    assert_true(metadata['latitude'] is None, 'invalid latitude should be None')
+    assert_true(metadata['longitude'] is None, 'missing longitude should be None')
+    assert_true(metadata['status_label'] == 'GPS enabled, but location metadata is unavailable.', 'missing GPS location label should be safe')
+
+
+def test_modern_virtualsky_uses_hybrid_location_provider_static():
+    views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    class_start = views_source.index('class ModernAdminVirtualSkyView')
+    class_end = views_source.index('class ModernAdminLogView', class_start)
+    class_source = views_source[class_start:class_end]
+
+    assert_true(
+        'ModernAdminLocationMetadataProvider' in class_source,
+        'Modern VirtualSky must use the Hybrid location metadata provider',
+    )
+    assert_true(
+        "context['modern_admin_location_metadata'] = location_metadata" in class_source,
+        'Modern VirtualSky should expose provider payload without reshaping in template',
+    )
+    assert_true(
+        'self.location_metadata_provider.get_location_metadata' in class_source,
+        'Location metadata must enter through the provider boundary',
+    )
+
+
 def test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static():
     views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
     function_start = views_source.index('def get_current_capture_repository')
@@ -511,6 +604,10 @@ def run_tests():
         test_capture_health_provider_reports_missing_frame,
         test_capture_health_provider_reports_multi_camera_mixed_state,
         test_modern_capture_health_summary_uses_hybrid_provider_static,
+        test_location_metadata_provider_reports_camera_location,
+        test_location_metadata_provider_uses_config_fallback,
+        test_location_metadata_provider_handles_missing_location_safely,
+        test_modern_virtualsky_uses_hybrid_location_provider_static,
         test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static,
     ]
 

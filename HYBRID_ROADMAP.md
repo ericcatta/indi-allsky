@@ -101,6 +101,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     per-camera capture health summary" e' ora Hybrid-owned tramite
     `ModernAdminCaptureHealthSummaryProvider`; query latest frame e config lookup
     restano adapter Flask/DB;
+  - il boundary read-only "camera/config location metadata -> observatory/GPS
+    location summary" e' ora Hybrid-owned tramite
+    `ModernAdminLocationMetadataProvider`; GPS live polling/provider behavior
+    resta fuori scope;
   - service control effects, sensori/meteo/GPS e watchdog behavior/polling
     restano fuori scope e Classic/Flask-owned per ora.
 - Emergency runtime recovery:
