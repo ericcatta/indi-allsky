@@ -25,6 +25,7 @@ from indi_allsky.modern_safe_action import LogDownloadSafeAction
 from indi_allsky.modern_safe_action import LogDownloadService
 from indi_allsky.modern_safe_action import ModernAdminCaptureServiceCommandBoundary
 from indi_allsky.modern_safe_action import ModernAdminGeneratedOutputActionPlanner
+from indi_allsky.modern_safe_action import ModernAdminMaintenanceActionPlanner
 from indi_allsky.modern_safe_action import NotificationAcknowledgeDbAdapter
 from indi_allsky.modern_safe_action import NotificationAcknowledgeRepositoryError
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
@@ -1694,6 +1695,45 @@ def test_generated_output_action_planner_has_no_effect_adapter():
     assert not hasattr(planner, 'effect_adapter')
 
 
+def test_maintenance_action_planner_creates_backup_db_plan():
+    planner = ModernAdminMaintenanceActionPlanner()
+
+    result = planner.plan(action=' backup_db ')
+
+    assert result.status == 'planned'
+    assert result.allowed is True
+    assert result.dry_run is True
+    assert result.details == {
+        'action': 'backup_db',
+        'jobdata': {
+            'action': 'backupDatabase',
+            'kwargs': {},
+        },
+        'queue': 'VIDEO',
+        'state': 'MANUAL',
+        'priority': 100,
+        'success_message': 'Submitted backup task',
+    }
+
+
+def test_maintenance_action_planner_rejects_unsupported_action():
+    planner = ModernAdminMaintenanceActionPlanner()
+
+    result = planner.plan(action='flush_images')
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert result.details == {
+        'action': 'flush_images',
+    }
+
+
+def test_maintenance_action_planner_has_no_effect_adapter():
+    planner = ModernAdminMaintenanceActionPlanner()
+
+    assert not hasattr(planner, 'effect_adapter')
+
+
 def test_notification_acknowledge_dry_run_registry_has_no_execute_callback():
     registry = build_notification_acknowledge_dry_run_registry(
         permission_check=lambda actor: True,
@@ -1803,6 +1843,13 @@ def get_ajax_timelapse_generator_view_source():
     return source[class_start:class_end], source
 
 
+def get_ajax_system_view_source():
+    source = (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    class_start = source.index('class AjaxSystemInfoView')
+    class_end = source.index('class ConfigDownloadView')
+    return source[class_start:class_end], source
+
+
 def get_flask_init_source():
     return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / '__init__.py').read_text()
 
@@ -1901,6 +1948,18 @@ def test_ajax_generate_panorama_video_uses_hybrid_planner_static():
     assert "'success-message' : plan.message" in branch
     assert "jobdata = plan.details['jobdata']" in branch
     assert "priority=plan.details['priority']" in branch
+
+
+def test_ajax_system_backup_db_uses_hybrid_maintenance_planner_static():
+    view_source, _full_source = get_ajax_system_view_source()
+    branch_start = view_source.index("elif command == 'backup_db':")
+    branch_end = view_source.index("elif command == 'expire_data':")
+    branch = view_source[branch_start:branch_end]
+
+    assert 'ModernAdminMaintenanceActionPlanner().plan' in branch
+    assert "data=plan.details['jobdata']" in branch
+    assert "priority=plan.details['priority']" in branch
+    assert "message_list = [plan.details['success_message']]" in branch
 
 
 def test_safe_action_dry_run_helper_response_shape():
@@ -2324,6 +2383,9 @@ if __name__ == '__main__':
     test_generated_output_action_planner_rejects_unsupported_action()
     test_generated_output_action_planner_rejects_invalid_target()
     test_generated_output_action_planner_has_no_effect_adapter()
+    test_maintenance_action_planner_creates_backup_db_plan()
+    test_maintenance_action_planner_rejects_unsupported_action()
+    test_maintenance_action_planner_has_no_effect_adapter()
     test_notification_acknowledge_dry_run_registry_has_no_execute_callback()
     test_dry_run_helper_missing_action_id()
     test_dry_run_helper_unknown_action_id()
@@ -2340,6 +2402,7 @@ if __name__ == '__main__':
     test_ajax_generate_video_uses_hybrid_planner_static()
     test_ajax_generate_k_st_uses_hybrid_planner_static()
     test_ajax_generate_panorama_video_uses_hybrid_planner_static()
+    test_ajax_system_backup_db_uses_hybrid_maintenance_planner_static()
     test_safe_action_dry_run_helper_response_shape()
     test_safe_action_dry_run_helper_missing_action_id_response_shape()
     test_safe_action_dry_run_helper_unknown_action_response_shape()

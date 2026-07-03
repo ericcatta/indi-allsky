@@ -32,6 +32,7 @@ from ..frame_metadata import default_frame_metadata_dir
 from ..frame_metadata_analytics import FrameMetadataAnalytics
 from ..modern_safe_action import ModernAdminCaptureServiceCommandBoundary
 from ..modern_safe_action import ModernAdminGeneratedOutputActionPlanner
+from ..modern_safe_action import ModernAdminMaintenanceActionPlanner
 from ..modern_safe_action import run_modern_safe_action_dry_run
 from ..modern_admin_notifications import ModernAdminNotificationReadService
 from ..modern_admin_media_metadata import ModernAdminKeogramMetadataService
@@ -9170,21 +9171,24 @@ class AjaxSystemInfoView(BaseView):
                 }
                 return jsonify(json_data)
             elif command == 'backup_db':
+                plan = ModernAdminMaintenanceActionPlanner().plan(action=command)
+                if plan.status != 'planned':
+                    return jsonify({
+                        'COMMAND_HIDDEN': [plan.message],
+                    }), 400
+
                 task_backup_db = IndiAllSkyDbTaskQueueTable(
                     queue=TaskQueueQueue.VIDEO,
                     state=TaskQueueState.MANUAL,
-                    priority=100,
-                    data={
-                        'action' : 'backupDatabase',
-                        'kwargs' : {},
-                    },
+                    priority=plan.details['priority'],
+                    data=plan.details['jobdata'],
                 )
 
                 db.session.add(task_backup_db)
                 db.session.commit()
 
 
-                message_list = ['Submitted backup task']
+                message_list = [plan.details['success_message']]
 
                 json_data = {
                     'success-message' : ''.join(message_list),

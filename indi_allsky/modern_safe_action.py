@@ -1496,6 +1496,86 @@ class ModernAdminGeneratedOutputActionPlanner:
         )
 
 
+class ModernAdminMaintenanceActionPlanner:
+    """Hybrid-owned planning boundary for low-risk maintenance actions.
+
+    The planner creates command metadata only. It does not enqueue tasks,
+    execute maintenance work, read files, or mutate database/media state.
+    """
+
+    action_id = 'maintenance.plan'
+    feature = 'Maintenance'
+    risk_level = 'medium'
+
+    DEFAULT_ACTIONS = {
+        'backup_db': {
+            'job_action'      : 'backupDatabase',
+            'queue'           : 'VIDEO',
+            'state'           : 'MANUAL',
+            'priority'        : 100,
+            'success_message' : 'Submitted backup task',
+        },
+    }
+
+    def __init__(self, supported_actions=None):
+        self.supported_actions = dict(supported_actions or self.DEFAULT_ACTIONS)
+
+
+    def normalize_action(self, value):
+        if value is None or isinstance(value, bool):
+            return ''
+
+        return str(value).strip().lower()
+
+
+    def plan(self, action=None, payload=None):
+        payload = payload or {}
+        action_name = self.normalize_action(action if action is not None else payload.get('command', payload.get('COMMAND_HIDDEN')))
+
+        if action_name not in self.supported_actions:
+            return self.result(
+                status='validation_failed',
+                message='Unsupported maintenance action.',
+                allowed=False,
+                details={
+                    'action': action_name,
+                },
+            )
+
+        action_config = self.supported_actions[action_name]
+        jobdata = {
+            'action' : action_config['job_action'],
+            'kwargs' : {},
+        }
+
+        return self.result(
+            status='planned',
+            message='Maintenance action planned.',
+            allowed=True,
+            details={
+                'action'          : action_name,
+                'jobdata'         : jobdata,
+                'queue'           : action_config['queue'],
+                'state'           : action_config['state'],
+                'priority'        : action_config['priority'],
+                'success_message' : action_config['success_message'],
+            },
+        )
+
+
+    def result(self, status, message, allowed=False, details=None):
+        return ModernAdminSafeActionResult(
+            action_id=self.action_id,
+            feature=self.feature,
+            risk_level=self.risk_level,
+            status=status,
+            message=message,
+            dry_run=True,
+            allowed=allowed,
+            details=details or {},
+        )
+
+
 class ModernAdminSafeActionRegistry:
     def __init__(self):
         self._actions = {}

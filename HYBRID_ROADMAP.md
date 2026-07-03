@@ -74,6 +74,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     `FISH2PANO.ENABLE` per panorama vive nel planner, mentre l'enqueue DB/task
     queue resta adapter Classic/Flask esistente; delete/upload/combo restano
     fuori scope.
+  - il planning della maintenance action non distruttiva `backup_db` e' ora
+    Hybrid-owned tramite `ModernAdminMaintenanceActionPlanner`; l'enqueue DB/task
+    queue resta adapter Classic/Flask esistente, mentre expire/flush/reboot/
+    poweroff/service controls restano fuori scope.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
