@@ -152,6 +152,37 @@ def test_product_shell_receives_runtime_action_context():
     )
 
 
+def test_runtime_action_context_is_safe_for_product_view():
+    views_text = read_text(VIEWS_PATH)
+    method_start = views_text.index('    def get_modern_admin_topbar_context(self):')
+    method_end = views_text.index('    def get_modern_admin_abort_exposure_action_url(self):', method_start)
+    topbar_method = views_text[method_start:method_end]
+    runtime_start = views_text.index('    def get_modern_admin_runtime_status(self):')
+    runtime_end = views_text.index('    def get_recent_image_camera_ids(self):', runtime_start)
+    runtime_method = views_text[runtime_start:runtime_end]
+
+    assert_true(
+        'ModernAdminView.get_modern_admin_runtime_status(self)' in topbar_method,
+        'Shared runtime context must not require ProductView to inherit runtime status helpers',
+    )
+    assert_true(
+        'ModernAdminView.get_modern_admin_abort_exposure_action_url(self)' in topbar_method,
+        'Shared runtime context must not require ProductView to inherit abort URL helpers',
+    )
+    assert_true(
+        'ModernAdminView.get_modern_admin_recovery_targets(self)' in topbar_method,
+        'Shared runtime context must not require ProductView to inherit recovery target helpers',
+    )
+    assert_true(
+        'ModernAdminView.get_recent_image_camera_ids(self)' in runtime_method,
+        'Runtime status helper must not require ProductView to inherit recent image helpers',
+    )
+    assert_true(
+        'ModernAdminView.get_recent_camera_labels(self, recent_camera_ids)' in runtime_method,
+        'Runtime status helper must not require ProductView to inherit camera label helpers',
+    )
+
+
 def test_product_builders_return_valid_json_safe_payloads():
     for surface in PRODUCT_SPINE:
         builder = getattr(product_view_models, surface['builder'])
@@ -185,6 +216,7 @@ def run_tests():
     tests = (
         test_product_routes_are_registered,
         test_product_shell_receives_runtime_action_context,
+        test_runtime_action_context_is_safe_for_product_view,
         test_product_builders_return_valid_json_safe_payloads,
         test_product_templates_are_server_rendered_and_read_only,
     )

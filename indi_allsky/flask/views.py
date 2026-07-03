@@ -5904,7 +5904,7 @@ class ModernAdminView(TemplateView):
             app.logger.error('Error determining modern admin capture action URL: %s', str(e))
 
         try:
-            runtime_status = self.get_modern_admin_runtime_status()
+            runtime_status = ModernAdminView.get_modern_admin_runtime_status(self)
         except Exception as e:
             app.logger.error('Error determining modern admin runtime status: %s', str(e))
 
@@ -5912,8 +5912,8 @@ class ModernAdminView(TemplateView):
             'modern_admin_quick_action_url'     : quick_action_url,
             'modern_admin_quick_action_camera'  : camera_id,
             'modern_admin_capture_action_url'   : capture_action_url,
-            'modern_admin_abort_exposure_action_url': self.get_modern_admin_abort_exposure_action_url(),
-            'modern_admin_recovery_targets'     : self.get_modern_admin_recovery_targets(),
+            'modern_admin_abort_exposure_action_url': ModernAdminView.get_modern_admin_abort_exposure_action_url(self),
+            'modern_admin_recovery_targets'     : ModernAdminView.get_modern_admin_recovery_targets(self),
             'modern_admin_runtime_status'       : runtime_status,
             'modern_admin_capture_service_status': get_modern_admin_capture_service_status(),
         }
@@ -5976,8 +5976,8 @@ class ModernAdminView(TemplateView):
             multi_camera_config = self.indi_allsky_config.get('MULTI_CAMERA') or {}
             profile_configs = multi_camera_config.get('profiles') or []
 
-            recent_camera_ids = self.get_recent_image_camera_ids()
-            recent_camera_labels = self.get_recent_camera_labels(recent_camera_ids)
+            recent_camera_ids = ModernAdminView.get_recent_image_camera_ids(self)
+            recent_camera_labels = ModernAdminView.get_recent_camera_labels(self, recent_camera_ids)
 
             return ModernAdminCameraRuntimeMetadataProvider().get_runtime_status(
                 multi_camera_enabled=multi_camera_enabled,
