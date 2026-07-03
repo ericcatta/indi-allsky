@@ -140,6 +140,18 @@ def test_product_routes_are_registered():
         )
 
 
+def test_product_shell_receives_runtime_action_context():
+    views_text = read_text(VIEWS_PATH)
+    class_start = views_text.index('class ModernAdminProductView(TemplateView):')
+    class_end = views_text.index('class ModernAdminNowView(ModernAdminProductView):', class_start)
+    product_view = views_text[class_start:class_end]
+
+    assert_true(
+        'ModernAdminView.get_modern_admin_topbar_context(self)' in product_view,
+        'Product shell must receive runtime action URLs for Hybrid recovery controls',
+    )
+
+
 def test_product_builders_return_valid_json_safe_payloads():
     for surface in PRODUCT_SPINE:
         builder = getattr(product_view_models, surface['builder'])
@@ -172,6 +184,7 @@ def test_product_templates_are_server_rendered_and_read_only():
 def run_tests():
     tests = (
         test_product_routes_are_registered,
+        test_product_shell_receives_runtime_action_context,
         test_product_builders_return_valid_json_safe_payloads,
         test_product_templates_are_server_rendered_and_read_only,
     )

@@ -7444,6 +7444,7 @@ class ModernAdminProductView(TemplateView):
         context = super(ModernAdminProductView, self).get_context()
 
         session['admin_mode'] = 'modern'
+        context.update(ModernAdminView.get_modern_admin_topbar_context(self))
         if self.product_context_key:
             context[self.product_context_key] = self.build_product_context(context)
 
