@@ -1306,6 +1306,12 @@ class ModernAdminGeneratedOutputActionPlanner:
             'state'     : 'MANUAL',
             'priority'  : 100,
         },
+        'generate_k_st': {
+            'job_action': 'generateKeogramStarTrails',
+            'queue'     : 'VIDEO',
+            'state'     : 'MANUAL',
+            'priority'  : 100,
+        },
     }
 
     def __init__(self, supported_actions=None):

@@ -10460,7 +10460,18 @@ class AjaxTimelapseGeneratorView(BaseView):
             return jsonify(message)
 
         elif action == 'generate_k_st':
-            timespec = day_date.strftime('%Y%m%d')
+            plan = ModernAdminGeneratedOutputActionPlanner().plan(
+                action=action,
+                camera_id=camera.id,
+                day_date=day_date,
+                night=night,
+            )
+            if plan.status != 'planned':
+                return jsonify({
+                    'form_global': [plan.message],
+                }), 400
+
+            timespec = plan.details['timespec']
 
             if night:
                 timeofday_str = 'night'
@@ -10470,19 +10481,12 @@ class AjaxTimelapseGeneratorView(BaseView):
 
             app.logger.warning('Generating %s time timelapse for %s camera %d', timeofday_str, timespec, camera.id)
 
-            jobdata = {
-                'action' : 'generateKeogramStarTrails',
-                'kwargs' : {
-                    'timespec'    : timespec,
-                    'night'       : night,
-                    'camera_id'   : camera.id,
-                },
-            }
+            jobdata = plan.details['jobdata']
 
             task = IndiAllSkyDbTaskQueueTable(
                 queue=TaskQueueQueue.VIDEO,
                 state=TaskQueueState.MANUAL,
-                priority=100,
+                priority=plan.details['priority'],
                 data=jobdata,
             )
             db.session.add(task)
