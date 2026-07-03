@@ -16,6 +16,11 @@ class ModernAdminSettingsRuntimeService:
         return config_adapter.save(username, note)
 
 
+    def save_full_config(self, config, username, note, config_adapter):
+        config_adapter.config = config
+        return config_adapter.save(username, note)
+
+
     def default_config_adapter_factory(self):
         from .config import IndiAllSkyConfig
 

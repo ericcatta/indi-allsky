@@ -3220,6 +3220,10 @@ class AjaxConfigView(BaseView):
     methods = ['POST']
     decorators = [login_required]
 
+    def settings_runtime_service(self):
+        return ModernAdminSettingsRuntimeService()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -4171,7 +4175,12 @@ class AjaxConfigView(BaseView):
 
 
         try:
-            self._indi_allsky_config_obj.save(username, config_note)
+            self.settings_runtime_service().save_full_config(
+                config=self.indi_allsky_config,
+                username=username,
+                note=config_note,
+                config_adapter=self._indi_allsky_config_obj,
+            )
             app.logger.info('Saved new config')
         except ConfigSaveException as e:
             error_data = {

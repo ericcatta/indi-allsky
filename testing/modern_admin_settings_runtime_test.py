@@ -141,6 +141,27 @@ def test_settings_runtime_service_propagates_adapter_exception():
         raise AssertionError('Adapter exception was not propagated')
 
 
+def test_settings_runtime_service_saves_full_config_through_adapter():
+    adapter = FakeConfigAdapter()
+    service = ModernAdminSettingsRuntimeService()
+    config = {'CAMERA_INTERFACE': 'indi', 'OWNER': 'Hybrid'}
+
+    result = service.save_full_config(
+        config=config,
+        username='admin',
+        note='Full config save',
+        config_adapter=adapter,
+    )
+
+    assert result == 'saved-config-row'
+    assert adapter.config is config
+    assert adapter.save_calls == [{
+        'username': 'admin',
+        'note': 'Full config save',
+        'config': config,
+    }]
+
+
 def test_settings_runtime_service_has_no_flask_or_db_dependency():
     import indi_allsky.modern_admin_settings_runtime as module
 
@@ -429,9 +450,22 @@ def test_ajax_config_view_uses_reload_command_boundary():
     assert "'Saved new config,  Reloading indi-allsky service.'" not in ajax_config_source
 
 
+def test_ajax_config_view_uses_full_config_save_boundary():
+    views_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py'
+    source = views_path.read_text()
+    start = source.index('class AjaxConfigView')
+    end = source.index('class AjaxSetTimeView')
+    ajax_config_source = source[start:end]
+
+    assert 'ModernAdminSettingsRuntimeService' in ajax_config_source
+    assert 'settings_runtime_service().save_full_config(' in ajax_config_source
+    assert 'self._indi_allsky_config_obj.save(' not in ajax_config_source
+
+
 if __name__ == '__main__':
     test_settings_runtime_service_saves_config_revision_through_adapter()
     test_settings_runtime_service_propagates_adapter_exception()
+    test_settings_runtime_service_saves_full_config_through_adapter()
     test_settings_runtime_service_has_no_flask_or_db_dependency()
     test_settings_restore_service_validates_and_delegates_to_adapter()
     test_settings_restore_service_rejects_invalid_target_before_save()
@@ -447,4 +481,5 @@ if __name__ == '__main__':
     test_modern_config_history_views_use_revision_metadata_service()
     test_ajax_config_restore_view_uses_restore_service_boundary()
     test_ajax_config_view_uses_reload_command_boundary()
+    test_ajax_config_view_uses_full_config_save_boundary()
     print('Modern admin settings runtime tests passed')
