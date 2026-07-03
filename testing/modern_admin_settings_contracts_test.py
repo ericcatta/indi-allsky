@@ -1290,6 +1290,49 @@ def test_settings_contracts_share_config_sections_formatter():
         )
 
 
+def test_settings_contract_safe_text_behavior_before_consolidation():
+    contracts = (
+        ModernAdminStorageSettingsContract(),
+        ModernAdminCameraProfileSettingsContract(),
+        ModernAdminCameraConnectionSettingsContract(),
+        ModernAdminExposureGainSettingsContract(),
+        ModernAdminAutoExposureGainSettingsContract(),
+        ModernAdminHybridAwbSettingsContract(),
+        ModernAdminAcquisitionSaveSettingsContract(),
+        ModernAdminFitsSourceSettingsContract(),
+        ModernAdminNotificationsSettingsContract(),
+    )
+
+    cases = (
+        (None, ''),
+        ('', ''),
+        ('already safe text', 'already safe text'),
+        ('  preserves surrounding spaces  ', '  preserves surrounding spaces  '),
+        (0, '0'),
+        (42, '42'),
+        (False, 'False'),
+        (True, 'True'),
+    )
+
+    for contract in contracts:
+        for value, expected in cases:
+            result = contract.safe_text(value)
+            assert_true(
+                result == expected,
+                '{0:s}.safe_text changed value handling for {1!r}'.format(
+                    contract.__class__.__name__,
+                    value,
+                ),
+            )
+            assert_true(
+                type(result) is type(expected),
+                '{0:s}.safe_text changed type handling for {1!r}'.format(
+                    contract.__class__.__name__,
+                    value,
+                ),
+            )
+
+
 def run_tests():
     test_migrated_settings_contracts_preserve_top_level_context_contracts()
     test_notifications_settings_contract_preserves_context_shape()
@@ -1323,6 +1366,7 @@ def run_tests():
     test_single_group_settings_contracts_share_group_lookup_helper()
     test_settings_contracts_share_proposed_layout_formatter()
     test_settings_contracts_share_config_sections_formatter()
+    test_settings_contract_safe_text_behavior_before_consolidation()
 
 
 if __name__ == '__main__':
