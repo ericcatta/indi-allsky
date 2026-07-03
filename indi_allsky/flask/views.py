@@ -45,7 +45,9 @@ from ..modern_admin_media_runtime import ModernAdminMediaListQueryPlanner
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from ..modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 from ..modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
+from ..modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
 from ..modern_admin_runtime_providers import ModernAdminServiceStatusProvider
+from ..modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
@@ -78,7 +80,6 @@ from ..product_view_models import build_output_detail_view
 from ..product_view_models import build_library_view
 from ..product_view_models import build_observatory_view
 from ..product_view_models import build_sky_cycle_report_view
-from ..product_view_models import CurrentCaptureStatusRepository
 from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import HighlightsMetadataRepository
 from ..product_view_models import LatestFrameImageTableRepository
@@ -7591,7 +7592,7 @@ class ModernAdminNowView(ModernAdminProductView):
                 or 'Unknown camera'
             )
 
-            return CurrentCaptureStatusRepository(
+            metadata = ModernAdminWatchdogStatusSummaryProvider().get_current_capture_metadata(
                 status_code=status_code,
                 status_map=status_map,
                 watchdog_age_seconds=watchdog_age_seconds,
@@ -7602,6 +7603,7 @@ class ModernAdminNowView(ModernAdminProductView):
                 daytime_capture_save=bool(getattr(camera, 'daytime_capture_save', True)),
                 camera_label=camera_label,
             )
+            return ModernAdminCurrentCaptureMetadataRepository(metadata)
         except Exception:
             app.logger.error('Unable to build Now current capture repository')
             return None

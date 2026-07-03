@@ -180,3 +180,122 @@ class ModernAdminCameraRuntimeMetadataProvider:
             return ' + '.join(camera_labels)
 
         return '{0:s} + {1:d} more'.format(' + '.join(camera_labels[:2]), len(camera_labels) - 2)
+
+
+class ModernAdminWatchdogStatusSummaryProvider:
+    """Hybrid-owned capture/watchdog summary shaping for Modern/Admin runtime."""
+
+    STATE_RUNNING = 'running'
+    STATE_IDLE = 'idle'
+    STATE_PAUSED = 'paused'
+    STATE_ERROR = 'error'
+    STATE_UNKNOWN = 'unknown'
+
+    ALLOWED_STATES = frozenset((
+        STATE_RUNNING,
+        STATE_IDLE,
+        STATE_PAUSED,
+        STATE_ERROR,
+        STATE_UNKNOWN,
+    ))
+
+    def get_current_capture_metadata(
+        self,
+        status_code=None,
+        status_map=None,
+        watchdog_age_seconds=None,
+        local_camera=True,
+        focus_mode=False,
+        capture_pause=False,
+        daytime_capture=True,
+        daytime_capture_save=True,
+        camera_label='Camera not evaluated yet',
+    ):
+        raw_state = dict(status_map or {}).get(status_code, self.STATE_UNKNOWN)
+        capture_state = self.resolve_capture_state(
+            raw_state=raw_state,
+            capture_pause=capture_pause,
+            local_camera=local_camera,
+            focus_mode=focus_mode,
+        )
+
+        return {
+            'capture_state': capture_state,
+            'is_acquiring': capture_state == self.STATE_RUNNING,
+            'camera_label': str(camera_label or 'Camera not evaluated yet'),
+            'policy_label': self.policy_label(
+                capture_pause=capture_pause,
+                local_camera=local_camera,
+                focus_mode=focus_mode,
+                daytime_capture=daytime_capture,
+                daytime_capture_save=daytime_capture_save,
+            ),
+            'source_status': self.source_status(watchdog_age_seconds),
+            'watchdog_age_seconds': watchdog_age_seconds,
+        }
+
+
+    def resolve_capture_state(self, raw_state, capture_pause=False, local_camera=True, focus_mode=False):
+        if capture_pause:
+            return self.STATE_PAUSED
+
+        if not local_camera:
+            return self.STATE_UNKNOWN
+
+        if focus_mode:
+            return self.STATE_IDLE
+
+        if raw_state in self.ALLOWED_STATES:
+            return raw_state
+
+        return self.STATE_UNKNOWN
+
+
+    def policy_label(
+        self,
+        capture_pause=False,
+        local_camera=True,
+        focus_mode=False,
+        daytime_capture=True,
+        daytime_capture_save=True,
+    ):
+        if capture_pause:
+            return 'Capture intentionally paused.'
+
+        if not local_camera:
+            return 'Remote camera mode; local capture state is not authoritative.'
+
+        if focus_mode:
+            return 'Focus mode active; normal capture status is not evaluated.'
+
+        if not daytime_capture:
+            return 'Daytime capture disabled by camera policy.'
+
+        if daytime_capture and not daytime_capture_save:
+            return 'Daytime capture enabled, but daytime frame saving is disabled.'
+
+        return 'Capture policy allows normal acquisition.'
+
+
+    def source_status(self, watchdog_age_seconds):
+        if watchdog_age_seconds is None:
+            return 'Persisted capture status read; watchdog age not evaluated.'
+
+        if not isinstance(watchdog_age_seconds, (int, float)):
+            return 'Persisted capture status read; watchdog age unavailable.'
+
+        if watchdog_age_seconds > 600:
+            return 'Persisted capture watchdog is stale.'
+
+        return 'Persisted capture status and watchdog are available.'
+
+
+class ModernAdminCurrentCaptureMetadataRepository:
+    """Adapter exposing provider metadata through the Product repository contract."""
+
+    def __init__(self, metadata=None):
+        self.metadata = dict(metadata or {})
+
+
+    def get_current_capture_metadata(self):
+        return dict(self.metadata)

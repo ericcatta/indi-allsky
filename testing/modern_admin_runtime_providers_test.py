@@ -10,7 +10,9 @@ sys.path.insert(0, str(REPO_ROOT))
 
 import indi_allsky.modern_admin_runtime_providers as runtime_providers
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
+from indi_allsky.modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
 from indi_allsky.modern_admin_runtime_providers import ModernAdminServiceStatusProvider
+from indi_allsky.modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 
 
 def assert_true(condition, message):
@@ -243,6 +245,114 @@ def test_modern_runtime_status_uses_hybrid_camera_provider_static():
     )
 
 
+def test_watchdog_status_provider_reports_healthy_running_capture():
+    provider = ModernAdminWatchdogStatusSummaryProvider()
+    metadata = provider.get_current_capture_metadata(
+        status_code=1,
+        status_map={1: 'running'},
+        watchdog_age_seconds=12,
+        camera_label='ASI678MC',
+    )
+
+    assert_true(metadata == {
+        'capture_state': 'running',
+        'is_acquiring': True,
+        'camera_label': 'ASI678MC',
+        'policy_label': 'Capture policy allows normal acquisition.',
+        'source_status': 'Persisted capture status and watchdog are available.',
+        'watchdog_age_seconds': 12,
+    }, 'healthy watchdog metadata must preserve current capture summary contract')
+
+
+def test_watchdog_status_provider_reports_stale_error_capture():
+    provider = ModernAdminWatchdogStatusSummaryProvider()
+    metadata = provider.get_current_capture_metadata(
+        status_code=9,
+        status_map={9: 'error'},
+        watchdog_age_seconds=700,
+        camera_label='ASI678MC',
+    )
+
+    assert_true(metadata['capture_state'] == 'error', 'error status code should map to error state')
+    assert_true(metadata['is_acquiring'] is False, 'error state must not be acquiring')
+    assert_true(
+        metadata['source_status'] == 'Persisted capture watchdog is stale.',
+        'stale watchdog should preserve existing source status wording',
+    )
+
+
+def test_watchdog_status_provider_handles_missing_watchdog_safely():
+    provider = ModernAdminWatchdogStatusSummaryProvider()
+    metadata = provider.get_current_capture_metadata(
+        status_code=None,
+        status_map={},
+        watchdog_age_seconds=None,
+        camera_label='Camera not evaluated yet',
+    )
+
+    assert_true(metadata['capture_state'] == 'unknown', 'missing status should map to unknown')
+    assert_true(metadata['is_acquiring'] is False, 'unknown state must not be acquiring')
+    assert_true(
+        metadata['source_status'] == 'Persisted capture status read; watchdog age not evaluated.',
+        'missing watchdog age should preserve safe fallback wording',
+    )
+
+
+def test_watchdog_status_provider_prioritizes_pause_and_policy():
+    provider = ModernAdminWatchdogStatusSummaryProvider()
+    metadata = provider.get_current_capture_metadata(
+        status_code=1,
+        status_map={1: 'running'},
+        watchdog_age_seconds='unknown',
+        capture_pause=True,
+        daytime_capture=True,
+        daytime_capture_save=False,
+    )
+
+    assert_true(metadata['capture_state'] == 'paused', 'capture pause should override raw running state')
+    assert_true(metadata['is_acquiring'] is False, 'paused state must not be acquiring')
+    assert_true(metadata['policy_label'] == 'Capture intentionally paused.', 'pause policy label must be preserved')
+    assert_true(
+        metadata['source_status'] == 'Persisted capture status read; watchdog age unavailable.',
+        'non-numeric watchdog age should preserve unavailable wording',
+    )
+
+
+def test_current_capture_metadata_repository_returns_copy():
+    repository = ModernAdminCurrentCaptureMetadataRepository({
+        'capture_state': 'running',
+        'watchdog_age_seconds': 5,
+    })
+
+    metadata = repository.get_current_capture_metadata()
+    metadata['capture_state'] = 'mutated'
+
+    assert_true(
+        repository.get_current_capture_metadata()['capture_state'] == 'running',
+        'repository adapter should not expose mutable internal metadata',
+    )
+
+
+def test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static():
+    views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    function_start = views_source.index('def get_current_capture_repository')
+    function_end = views_source.index('class ModernAdminHighlightsView')
+    function_source = views_source[function_start:function_end]
+
+    assert_true(
+        'ModernAdminWatchdogStatusSummaryProvider' in function_source,
+        'Now current capture repository must enter through the Hybrid watchdog provider',
+    )
+    assert_true(
+        'ModernAdminCurrentCaptureMetadataRepository' in function_source,
+        'Now should expose provider metadata through the Product repository contract',
+    )
+    assert_true(
+        'CurrentCaptureStatusRepository' not in function_source,
+        'Modern path should not use the Product repository as runtime ownership boundary',
+    )
+
+
 def run_tests():
     tests = [
         test_service_status_provider_reports_active_service,
@@ -259,6 +369,12 @@ def run_tests():
         test_camera_runtime_provider_handles_missing_camera_safely,
         test_camera_runtime_provider_formats_long_camera_list,
         test_modern_runtime_status_uses_hybrid_camera_provider_static,
+        test_watchdog_status_provider_reports_healthy_running_capture,
+        test_watchdog_status_provider_reports_stale_error_capture,
+        test_watchdog_status_provider_handles_missing_watchdog_safely,
+        test_watchdog_status_provider_prioritizes_pause_and_policy,
+        test_current_capture_metadata_repository_returns_copy,
+        test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static,
     ]
 
     for test in tests:
