@@ -14,6 +14,7 @@ from indi_allsky.modern_admin_settings_contracts import ModernAdminAnalyticsSett
 from indi_allsky.modern_admin_settings_contracts import ModernAdminAutoExposureGainSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraConnectionSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
+from indi_allsky.modern_admin_settings_contracts import ModernAdminEnvironmentalAwarenessSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminExposureGainSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
@@ -277,6 +278,31 @@ def contract_guardrail_cases():
             'overview_key': 'modern_admin_analytics_overview_cards',
             'config_key': 'modern_admin_analytics_config_sections',
             'layout_key': 'modern_admin_analytics_proposed_layout',
+        },
+        {
+            'name': 'environmental awareness',
+            'contract': ModernAdminEnvironmentalAwarenessSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'environmental_awareness',
+                    'label': 'Environmental Awareness',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_environmental_awareness_settings_group', 'environmental_awareness'),
+            ),
+            'group_tuple_key': None,
+            'expected_context_keys': (
+                'modern_admin_environmental_awareness_settings_group',
+                'modern_admin_environmental_awareness_overview_cards',
+                'modern_admin_environmental_awareness_config_sections',
+                'modern_admin_environmental_awareness_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_environmental_awareness_overview_cards',
+            'config_key': 'modern_admin_environmental_awareness_config_sections',
+            'layout_key': 'modern_admin_environmental_awareness_proposed_layout',
         },
         {
             'name': 'FITS source',
@@ -1290,6 +1316,58 @@ def test_analytics_settings_view_uses_hybrid_contract():
     )
 
 
+def test_environmental_awareness_settings_contract_preserves_context_shape():
+    contract = ModernAdminEnvironmentalAwarenessSettingsContract()
+    environmental_group = {
+        'group_id': 'environmental_awareness',
+        'label': 'Environmental Awareness',
+    }
+
+    context = contract.build_context((
+        {'group_id': 'other'},
+        environmental_group,
+    ))
+
+    assert_true(
+        context['modern_admin_environmental_awareness_settings_group'] is environmental_group,
+        'environmental awareness group must be selected from settings inventory groups',
+    )
+    assert_true(
+        len(context['modern_admin_environmental_awareness_overview_cards']) == 5,
+        'environmental awareness overview cards shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_environmental_awareness_config_sections']) == 3,
+        'environmental awareness config sections shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_environmental_awareness_proposed_layout']) == 3,
+        'environmental awareness proposed layout shape changed',
+    )
+    assert_true(
+        context['modern_admin_environmental_awareness_overview_cards'][0]['current_status'] == 'not evaluated here',
+        'environmental awareness overview current status changed',
+    )
+    assert_true(
+        context['modern_admin_environmental_awareness_config_sections'][1]['key_count'] == 3,
+        'environmental awareness provider config key count changed',
+    )
+    assert_true(
+        context['modern_admin_environmental_awareness_proposed_layout'][0]['note'] == 'read-only proposal',
+        'environmental awareness layout note changed',
+    )
+
+
+def test_environmental_awareness_settings_contract_handles_missing_group():
+    contract = ModernAdminEnvironmentalAwarenessSettingsContract()
+    context = contract.build_context(())
+
+    assert_true(
+        context['modern_admin_environmental_awareness_settings_group'] is None,
+        'missing environmental awareness group must remain a safe None fallback',
+    )
+
+
 def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
     import indi_allsky.modern_admin_settings_contracts as module
 
@@ -1320,6 +1398,7 @@ def test_single_group_settings_contracts_share_group_lookup_helper():
         ModernAdminCameraProfileSettingsContract,
         ModernAdminCameraConnectionSettingsContract,
         ModernAdminAnalyticsSettingsContract,
+        ModernAdminEnvironmentalAwarenessSettingsContract,
         ModernAdminHybridAwbSettingsContract,
         ModernAdminFitsSourceSettingsContract,
         ModernAdminNotificationsSettingsContract,
@@ -1348,6 +1427,7 @@ def test_settings_contracts_share_proposed_layout_formatter():
         ModernAdminExposureGainSettingsContract,
         ModernAdminAutoExposureGainSettingsContract,
         ModernAdminAnalyticsSettingsContract,
+        ModernAdminEnvironmentalAwarenessSettingsContract,
         ModernAdminHybridAwbSettingsContract,
         ModernAdminAcquisitionSaveSettingsContract,
         ModernAdminFitsSourceSettingsContract,
@@ -1377,6 +1457,7 @@ def test_settings_contracts_share_config_sections_formatter():
         ModernAdminExposureGainSettingsContract,
         ModernAdminAutoExposureGainSettingsContract,
         ModernAdminAnalyticsSettingsContract,
+        ModernAdminEnvironmentalAwarenessSettingsContract,
         ModernAdminHybridAwbSettingsContract,
         ModernAdminAcquisitionSaveSettingsContract,
         ModernAdminFitsSourceSettingsContract,
@@ -1406,6 +1487,7 @@ def test_settings_contracts_share_safe_text_behavior():
         ModernAdminExposureGainSettingsContract(),
         ModernAdminAutoExposureGainSettingsContract(),
         ModernAdminAnalyticsSettingsContract(),
+        ModernAdminEnvironmentalAwarenessSettingsContract(),
         ModernAdminHybridAwbSettingsContract(),
         ModernAdminAcquisitionSaveSettingsContract(),
         ModernAdminFitsSourceSettingsContract(),
@@ -1479,6 +1561,8 @@ def run_tests():
     test_analytics_settings_contract_preserves_context_shape()
     test_analytics_settings_contract_handles_missing_group()
     test_analytics_settings_view_uses_hybrid_contract()
+    test_environmental_awareness_settings_contract_preserves_context_shape()
+    test_environmental_awareness_settings_contract_handles_missing_group()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
     test_single_group_settings_contracts_share_group_lookup_helper()
     test_settings_contracts_share_proposed_layout_formatter()

@@ -1947,6 +1947,151 @@ class ModernAdminAnalyticsSettingsContract(ModernAdminSettingsContractBase):
         )
 
 
+class ModernAdminEnvironmentalAwarenessSettingsContract(ModernAdminSettingsContractBase):
+    CONFIG_SECTIONS = (
+        {
+            'label'       : 'Environmental status display',
+            'description' : 'Controls where environmental context appears in operator status text and image labels without evaluating live conditions here.',
+            'keys'        : (
+                {
+                    'key'     : 'WEB_STATUS_TEMPLATE',
+                    'source'  : 'Classic config defaults / config form',
+                    'notes'   : 'Status template can display smoke, aurora, Kp-index, sun, and moon context.',
+                },
+                {
+                    'key'     : 'IMAGE_LABEL_TEMPLATE',
+                    'source'  : 'Classic config defaults / config form',
+                    'notes'   : 'Image label template can display environmental and sky-context metadata on rendered output.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Weather / sensor providers',
+            'description' : 'Groups external weather provider and station configuration metadata without connecting to network services.',
+            'keys'        : (
+                {
+                    'key'     : 'TEMP_SENSOR__OPENWEATHERMAP_*',
+                    'source'  : 'Classic config form / config storage',
+                    'notes'   : 'OpenWeatherMap provider metadata; credentials must remain hidden from normal product views.',
+                },
+                {
+                    'key'     : 'TEMP_SENSOR__AMBIENTWEATHER_*',
+                    'source'  : 'Classic config form / config storage',
+                    'notes'   : 'Ambient Weather provider metadata, including credential and station identity fields.',
+                },
+                {
+                    'key'     : 'TEMP_SENSOR__WEATHERUNDERGROUND_*',
+                    'source'  : 'Classic config form / config storage',
+                    'notes'   : 'Weather Underground provider metadata when present in Classic configuration.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Space weather / atmospheric context',
+            'description' : 'Documents environmental concepts used by status surfaces without calculating aurora, smoke, or cloud state here.',
+            'keys'        : (
+                {
+                    'key'     : 'smoke_rating / smoke_rating_status',
+                    'source'  : 'status data / label templates',
+                    'notes'   : 'Smoke context displayed by status and image label templates.',
+                },
+                {
+                    'key'     : 'aurora_* / kpindex_*',
+                    'source'  : 'status data / label templates',
+                    'notes'   : 'Aurora and space-weather context displayed by status and image label templates.',
+                },
+                {
+                    'key'     : 'sky_condition / cloud_condition / sky_trend',
+                    'source'  : 'Modern analytics/status summaries',
+                    'notes'   : 'Cloud and sky condition summaries consumed by dashboard/status surfaces.',
+                },
+            ),
+        },
+    )
+
+    PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Status display',
+            'purpose'        : 'Keep environmental display templates separate from provider credentials and runtime sensor behavior.',
+            'source_keys'    : ('WEB_STATUS_TEMPLATE', 'IMAGE_LABEL_TEMPLATE'),
+            'proposed_level' : 'Future Advanced / Environmental Awareness',
+        },
+        {
+            'label'          : 'Weather providers',
+            'purpose'        : 'Describe provider configuration ownership without exposing or validating credentials.',
+            'source_keys'    : ('TEMP_SENSOR__OPENWEATHERMAP_*', 'TEMP_SENSOR__AMBIENTWEATHER_*', 'TEMP_SENSOR__WEATHERUNDERGROUND_*'),
+            'proposed_level' : 'Future Advanced / Environmental Awareness',
+        },
+        {
+            'label'          : 'Environmental evidence',
+            'purpose'        : 'Separate environmental facts consumed by Product UI from the providers that generate them.',
+            'source_keys'    : ('smoke_rating', 'aurora_*', 'kpindex_*', 'sky_condition', 'cloud_condition'),
+            'proposed_level' : 'Future Advanced / Observatory Context',
+        },
+    )
+
+    OVERVIEW_CARDS = (
+        {
+            'label'           : 'Display templates',
+            'purpose'         : 'Show that environmental context can appear in status text and rendered labels.',
+            'related_keys'    : ('WEB_STATUS_TEMPLATE', 'IMAGE_LABEL_TEMPLATE'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'Template editing can affect rendered output and should remain outside this contract-only slice.',
+        },
+        {
+            'label'           : 'Weather provider metadata',
+            'purpose'         : 'Clarify provider ownership without reading network state or exposing credentials.',
+            'related_keys'    : ('TEMP_SENSOR__OPENWEATHERMAP_*', 'TEMP_SENSOR__AMBIENTWEATHER_*', 'TEMP_SENSOR__WEATHERUNDERGROUND_*'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'Credentials and provider validation remain Classic fallback until a redaction/write policy exists.',
+        },
+        {
+            'label'           : 'Atmospheric context',
+            'purpose'         : 'Keep smoke, cloud, and sky-condition concepts visible as product context.',
+            'related_keys'    : ('smoke_rating', 'cloud_condition', 'sky_condition', 'sky_trend'),
+            'future_editable' : 'no',
+            'safety_note'     : 'This contract does not calculate or refresh environmental observations.',
+        },
+        {
+            'label'           : 'Space-weather context',
+            'purpose'         : 'Separate aurora/Kp concepts from future detector or ranking features.',
+            'related_keys'    : ('aurora_*', 'kpindex_*'),
+            'future_editable' : 'no',
+            'safety_note'     : 'This contract does not call external space-weather providers.',
+        },
+        {
+            'label'           : 'Future Observatory connection',
+            'purpose'         : 'Prepare environmental awareness for future Observatory context without making it a live health check.',
+            'related_keys'    : ('Observatory context', 'status summaries', 'environmental metadata'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'Live polling, provider checks, and sensor ownership need dedicated review before UI exposure.',
+        },
+    )
+
+
+    def build_context(self, settings_groups):
+        return {
+            'modern_admin_environmental_awareness_settings_group'  : self.find_settings_group(settings_groups, 'environmental_awareness'),
+            'modern_admin_environmental_awareness_overview_cards'  : self.get_overview_cards(),
+            'modern_admin_environmental_awareness_config_sections' : self.get_config_sections(),
+            'modern_admin_environmental_awareness_proposed_layout' : self.get_proposed_layout(),
+        }
+
+
+    def get_overview_cards(self):
+        return tuple(
+            {
+                'label'          : self.safe_text(row.get('label')),
+                'purpose'        : self.safe_text(row.get('purpose')),
+                'related_keys'   : tuple(self.safe_text(key) for key in row.get('related_keys', tuple())),
+                'current_status' : 'not evaluated here',
+                'future_editable': self.safe_text(row.get('future_editable')),
+                'safety_note'    : self.safe_text(row.get('safety_note')),
+            }
+            for row in self.OVERVIEW_CARDS
+        )
+
+
 class ModernAdminNotificationsSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {

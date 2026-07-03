@@ -60,6 +60,11 @@ The source of truth for the current consolidation baseline is
   documents chart slots, ADU/SQM sampling metadata, ROI/FOV concepts, and
   camera-SQM integration only; no analytics queries, sensor polling, chart
   computation, ROI validation, or config writes were added.
+- Environmental Awareness settings now have a Hybrid-owned read-only
+  contract-only slice. It documents status templates, weather/sensor provider
+  metadata, smoke/cloud/aurora context, and future Observatory relationships
+  only; it is intentionally not wired to a Settings UI route because provider,
+  credential, polling, and sensor ownership still require dedicated review.
 - Mutative/safe-action ownership is now discovered in
   `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
   contract schema before any new execution path.
