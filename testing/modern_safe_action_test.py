@@ -11,6 +11,7 @@ from indi_allsky.modern_safe_action import ModernAdminSafeAction
 from indi_allsky.modern_safe_action import ModernAdminSafeActionAuditLog
 from indi_allsky.modern_safe_action import ModernAdminSafeActionPlaceholder
 from indi_allsky.modern_safe_action import ModernAdminSafeActionAuditRecord
+from indi_allsky.modern_safe_action import ModernAdminSafeActionContract
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRegistry
 from indi_allsky.modern_safe_action import ModernAdminSafeActionResult
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRunner
@@ -200,6 +201,84 @@ def test_result_is_structured():
     assert data['dry_run'] is True
 
 
+def test_safe_action_contract_shape_is_stable():
+    contract = ModernAdminSafeActionContract(
+        action_id='test.contract',
+        label='Test Contract',
+        feature='Testing',
+        risk_level='medium',
+        required_permission='admin',
+    )
+
+    assert contract.to_dict() == {
+        'action_id'           : 'test.contract',
+        'label'               : 'Test Contract',
+        'feature'             : 'Testing',
+        'risk_level'          : 'medium',
+        'required_permission' : 'admin',
+    }
+
+
+def test_safe_action_contract_uses_class_metadata():
+    contract = ExampleAction.action_contract()
+
+    assert contract.to_dict() == {
+        'action_id'           : 'test.example_action',
+        'label'               : 'Example Action',
+        'feature'             : 'Testing',
+        'risk_level'          : 'low',
+        'required_permission' : 'admin',
+    }
+
+
+def test_placeholder_contract_uses_instance_metadata():
+    action = ModernAdminSafeActionPlaceholder(
+        action_id='placeholder.contract',
+        label='Placeholder Contract',
+        feature='Placeholder',
+        risk_level='high',
+        permission_check=lambda actor: True,
+    )
+
+    assert action.contract.to_dict() == {
+        'action_id'           : 'placeholder.contract',
+        'label'               : 'Placeholder Contract',
+        'feature'             : 'Placeholder',
+        'risk_level'          : 'high',
+        'required_permission' : 'admin',
+    }
+
+
+def test_notification_acknowledge_contract_uses_domain_metadata():
+    action = NotificationAcknowledgeSafeAction(permission_check=lambda actor: True)
+
+    assert action.contract.to_dict() == {
+        'action_id'           : 'notification.acknowledge',
+        'label'               : 'Acknowledge Notification',
+        'feature'             : 'Notifications',
+        'risk_level'          : 'medium',
+        'required_permission' : 'admin',
+    }
+
+
+def test_safe_action_contract_does_not_change_result_shape():
+    action = ExampleAction(permission_check=lambda actor: True)
+    result = action.run(actor=Actor(), payload={}, dry_run=True).to_dict()
+
+    assert list(result.keys()) == [
+        'action_id',
+        'feature',
+        'risk_level',
+        'status',
+        'message',
+        'dry_run',
+        'allowed',
+        'audit_message',
+        'details',
+        'created_at',
+    ]
+
+
 def test_audit_message_redacts_secret_payload():
     action = ExampleAction(permission_check=lambda actor: True)
     result = action.run(
@@ -236,6 +315,20 @@ def test_registry_register_and_lookup():
 
     assert registry.get('test.example_action') is action
     assert registry.find('test.example_action') is action
+
+
+def test_registry_output_shape_remains_backward_compatible():
+    registry = ModernAdminSafeActionRegistry()
+    registry.register(ExampleAction(permission_check=lambda actor: True))
+
+    assert registry.to_dict() == [
+        {
+            'action_id'  : 'test.example_action',
+            'label'      : 'Example Action',
+            'feature'    : 'Testing',
+            'risk_level' : 'low',
+        },
+    ]
 
 
 def test_registry_duplicate_action_id_fails():
@@ -1882,9 +1975,15 @@ if __name__ == '__main__':
     test_dry_run_does_not_mutate()
     test_action_without_permission_fails()
     test_result_is_structured()
+    test_safe_action_contract_shape_is_stable()
+    test_safe_action_contract_uses_class_metadata()
+    test_placeholder_contract_uses_instance_metadata()
+    test_notification_acknowledge_contract_uses_domain_metadata()
+    test_safe_action_contract_does_not_change_result_shape()
     test_audit_message_redacts_secret_payload()
     test_registry_empty()
     test_registry_register_and_lookup()
+    test_registry_output_shape_remains_backward_compatible()
     test_registry_duplicate_action_id_fails()
     test_registry_missing_action_returns_structured_error()
     test_registry_filters_by_feature_and_risk()

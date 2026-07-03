@@ -80,8 +80,10 @@ The source of truth for the current consolidation baseline is
   Settings milestone should be a Sensors boundary separation or an Action
   Contract, not another isolated contract-only slice.
 - Mutative/safe-action ownership is now discovered in
-  `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
-  contract schema before any new execution path.
+  `HYBRID_SAFE_ACTION_REGISTRY.md`; `ModernAdminSafeActionContract` is the
+  first minimal metadata-only action contract foundation. Existing safe actions
+  still execute through the same wrapper/orchestrator and preserve response
+  shape.
 - The Product spine is now protected by
   `testing/product_spine_regression_test.py`.
 - Product spine Flask views now share `ModernAdminProductView`, a small Hybrid
@@ -216,14 +218,14 @@ runtime behavior.
 - Dependencies: Route Role Matrix.
 - Verification: update only evidence-backed ownership metadata; regenerate inventory; do not change routes/templates.
 
-### Safe Action Contract Schema
+### Safe Action Contract Adoption Guardrails
 
-- Motivation: the action discovery found many live mutative surfaces but no canonical metadata schema for future Product/Operations actions.
-- Benefit: gives every future action a consistent review shape before endpoint, UI, audit, or permission work starts.
-- Risk: low if documentation-only.
+- Motivation: `ModernAdminSafeActionContract` now gives safe actions a stable metadata shape, but the registry and domain actions still need gradual contract-level validation before more mutating domains move into Hybrid ownership.
+- Benefit: catches missing action metadata early while keeping the current safe-action runner, permissions, response shape, and endpoints unchanged.
+- Risk: low if limited to tests/metadata validation.
 - Impact: high.
-- Dependencies: `HYBRID_SAFE_ACTION_REGISTRY.md`, Safe Actions policy, Route Role Matrix, and Settings Contract Review.
-- Verification: schema covers action id, endpoint, owner, target, role, destructive/reversible flags, confirmation, auth, CSRF, dry-run, audit, rollback/fallback, runtime risk, and stop conditions.
+- Dependencies: `HYBRID_SAFE_ACTION_REGISTRY.md`, Safe Actions policy, Route Role Matrix, and current safe-action tests.
+- Verification: every registered action exposes a contract with action id, label, feature, risk level, and required permission; registry output remains backward-compatible.
 
 ## P1
 

@@ -29,6 +29,24 @@ SECRET_TOKENS = (
 
 
 @dataclass(frozen=True)
+class ModernAdminSafeActionContract:
+    action_id: str
+    label: str
+    feature: str
+    risk_level: str
+    required_permission: str = 'admin'
+
+    def to_dict(self):
+        return {
+            'action_id'           : self.action_id,
+            'label'               : self.label,
+            'feature'             : self.feature,
+            'risk_level'          : self.risk_level,
+            'required_permission' : self.required_permission,
+        }
+
+
+@dataclass(frozen=True)
 class ModernAdminSafeActionResult:
     action_id: str
     feature: str
@@ -196,6 +214,28 @@ class ModernAdminSafeAction:
 
     def __init__(self, permission_check: Callable[[Any], bool] | None = None):
         self.permission_check = permission_check
+
+
+    @classmethod
+    def action_contract(cls):
+        return ModernAdminSafeActionContract(
+            action_id=cls.action_id,
+            label=cls.label,
+            feature=cls.feature,
+            risk_level=cls.risk_level,
+            required_permission=cls.required_permission,
+        )
+
+
+    @property
+    def contract(self):
+        return ModernAdminSafeActionContract(
+            action_id=self.action_id,
+            label=self.label,
+            feature=self.feature,
+            risk_level=self.risk_level,
+            required_permission=self.required_permission,
+        )
 
 
     def run(self, actor=None, payload=None, dry_run=True):
