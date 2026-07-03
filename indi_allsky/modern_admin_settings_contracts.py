@@ -7,6 +7,25 @@ class ModernAdminSettingsContractBase:
         return None
 
 
+    def get_config_sections(self):
+        return tuple(
+            {
+                'label'       : self.safe_text(section.get('label')),
+                'description' : self.safe_text(section.get('description')),
+                'key_count'   : len(section.get('keys') or tuple()),
+                'keys'        : tuple(
+                    {
+                        'key'    : self.safe_text(row.get('key')),
+                        'source' : self.safe_text(row.get('source')),
+                        'notes'  : self.safe_text(row.get('notes')),
+                    }
+                    for row in section.get('keys', tuple())
+                ),
+            }
+            for section in self.CONFIG_SECTIONS
+        )
+
+
     def get_proposed_layout(self):
         return tuple(
             {
@@ -194,25 +213,6 @@ class ModernAdminStorageSettingsContract(ModernAdminSettingsContractBase):
         )
 
 
-    def get_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_text(section.get('label')),
-                'description' : self.safe_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_text(row.get('key')),
-                        'source' : self.safe_text(row.get('source')),
-                        'notes'  : self.safe_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.CONFIG_SECTIONS
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -397,25 +397,6 @@ class ModernAdminCameraProfileSettingsContract(ModernAdminSettingsContractBase):
                 'safety_note'     : self.safe_text(row.get('safety_note')),
             }
             for row in self.OVERVIEW_CARDS
-        )
-
-
-    def get_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_text(section.get('label')),
-                'description' : self.safe_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_text(row.get('key')),
-                        'source' : self.safe_text(row.get('source')),
-                        'notes'  : self.safe_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.CONFIG_SECTIONS
         )
 
 
@@ -624,25 +605,6 @@ class ModernAdminCameraConnectionSettingsContract(ModernAdminSettingsContractBas
                 'safety_note'     : self.safe_text(row.get('safety_note')),
             }
             for row in self.OVERVIEW_CARDS
-        )
-
-
-    def get_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_text(section.get('label')),
-                'description' : self.safe_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_text(row.get('key')),
-                        'source' : self.safe_text(row.get('source')),
-                        'notes'  : self.safe_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.CONFIG_SECTIONS
         )
 
 
@@ -891,25 +853,6 @@ class ModernAdminExposureGainSettingsContract(ModernAdminSettingsContractBase):
                 'safety_note'     : self.safe_text(row.get('safety_note')),
             }
             for row in self.OVERVIEW_CARDS
-        )
-
-
-    def get_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_text(section.get('label')),
-                'description' : self.safe_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_text(row.get('key')),
-                        'source' : self.safe_text(row.get('source')),
-                        'notes'  : self.safe_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.CONFIG_SECTIONS
         )
 
 
@@ -1173,25 +1116,6 @@ class ModernAdminAutoExposureGainSettingsContract(ModernAdminSettingsContractBas
         )
 
 
-    def get_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_text(section.get('label')),
-                'description' : self.safe_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_text(row.get('key')),
-                        'source' : self.safe_text(row.get('source')),
-                        'notes'  : self.safe_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.CONFIG_SECTIONS
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -1427,25 +1351,6 @@ class ModernAdminHybridAwbSettingsContract(ModernAdminSettingsContractBase):
                 'safety_note'     : self.safe_text(row.get('safety_note')),
             }
             for row in self.OVERVIEW_CARDS
-        )
-
-
-    def get_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_text(section.get('label')),
-                'description' : self.safe_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_text(row.get('key')),
-                        'source' : self.safe_text(row.get('source')),
-                        'notes'  : self.safe_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.CONFIG_SECTIONS
         )
 
 
@@ -1709,25 +1614,6 @@ class ModernAdminAcquisitionSaveSettingsContract(ModernAdminSettingsContractBase
         )
 
 
-    def get_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_text(section.get('label')),
-                'description' : self.safe_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_text(row.get('key')),
-                        'source' : self.safe_text(row.get('source')),
-                        'notes'  : self.safe_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.CONFIG_SECTIONS
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -1957,25 +1843,6 @@ class ModernAdminFitsSourceSettingsContract(ModernAdminSettingsContractBase):
         )
 
 
-    def get_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_text(section.get('label')),
-                'description' : self.safe_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_text(row.get('key')),
-                        'source' : self.safe_text(row.get('source')),
-                        'notes'  : self.safe_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.CONFIG_SECTIONS
-        )
-
-
     def safe_text(self, value):
         if value is None:
             return ''
@@ -2139,25 +2006,6 @@ class ModernAdminNotificationsSettingsContract(ModernAdminSettingsContractBase):
                 'safety_note'                : self.safe_text(row.get('safety_note')),
             }
             for row in self.OVERVIEW_CARDS
-        )
-
-
-    def get_config_sections(self):
-        return tuple(
-            {
-                'label'       : self.safe_text(section.get('label')),
-                'description' : self.safe_text(section.get('description')),
-                'key_count'   : len(section.get('keys') or tuple()),
-                'keys'        : tuple(
-                    {
-                        'key'    : self.safe_text(row.get('key')),
-                        'source' : self.safe_text(row.get('source')),
-                        'notes'  : self.safe_text(row.get('notes')),
-                    }
-                    for row in section.get('keys', tuple())
-                ),
-            }
-            for section in self.CONFIG_SECTIONS
         )
 
 
