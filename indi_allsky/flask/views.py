@@ -38,6 +38,7 @@ from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
+from ..modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
@@ -14463,15 +14464,7 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
 
 
     def get_media_preview_url(self, media_entry, media_url=None):
-        if not media_entry.thumbnail_uuid:
-            return media_url if media_url is not None else self.get_media_url(media_entry)
-
-        try:
-            thumbnail_entry = IndiAllSkyDbThumbnailTable.query\
-                .filter(IndiAllSkyDbThumbnailTable.uuid == media_entry.thumbnail_uuid)\
-                .one()
-        except NoResultFound:
-            return media_url if media_url is not None else self.get_media_url(media_entry)
+        fallback_url = media_url if media_url is not None else self.get_media_url(media_entry)
 
         local = True
         if self.web_nonlocal_images:
@@ -14479,16 +14472,22 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
                 pass
             else:
                 local = False
-                if not thumbnail_entry.remote_url and not thumbnail_entry.s3_key:
-                    return media_url if media_url is not None else self.get_media_url(media_entry)
 
-        try:
-            return self.get_modern_admin_media_url_normalizer().normalize_media_url(
-                thumbnail_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
-            )
-        except Exception as e:
-            app.logger.error('Error determining modern admin thumbnail URL: %s', str(e))
-            return media_url if media_url is not None else self.get_media_url(media_entry)
+        return self.get_preview_metadata_lookup_service().get_preview_url(
+            media_entry,
+            media_url=fallback_url,
+            local=local,
+        )
+
+
+    def get_preview_metadata_lookup_service(self):
+        return ModernAdminPreviewMetadataLookupService(
+            thumbnail_query=IndiAllSkyDbThumbnailTable.query,
+            thumbnail_uuid_field=IndiAllSkyDbThumbnailTable.uuid,
+            url_normalizer=self.get_modern_admin_media_url_normalizer(),
+            s3_prefix=self.s3_prefix,
+            logger=app.logger,
+        )
 
 
 class ModernAdminMediaGalleryPageView(ModernAdminMediaGalleryView):

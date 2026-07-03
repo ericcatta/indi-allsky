@@ -55,6 +55,73 @@ class ModernAdminMediaUrlNormalizer:
         return True
 
 
+class ModernAdminPreviewMetadataLookupService:
+    """Metadata-only thumbnail/preview lookup for Modern/Admin media surfaces."""
+
+    def __init__(
+        self,
+        thumbnail_query,
+        thumbnail_uuid_field,
+        url_normalizer,
+        s3_prefix='',
+        logger=None,
+    ):
+        self.thumbnail_query = thumbnail_query
+        self.thumbnail_uuid_field = thumbnail_uuid_field
+        self.url_normalizer = url_normalizer
+        self.s3_prefix = s3_prefix
+        self.logger = logger
+
+
+    def get_preview_url(self, media_entry, media_url=None, local=True):
+        fallback_url = media_url
+        thumbnail_uuid = getattr(media_entry, 'thumbnail_uuid', None)
+        if not thumbnail_uuid:
+            return fallback_url
+
+        thumbnail_entry = self.get_thumbnail_entry(thumbnail_uuid)
+        if thumbnail_entry is None:
+            return fallback_url
+
+        if not local and not self.has_remote_media(thumbnail_entry):
+            return fallback_url
+
+        try:
+            thumbnail_url = thumbnail_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
+        except Exception as e:
+            self.log_error('Error determining modern admin thumbnail URL: {0:s}', e)
+            return fallback_url
+
+        normalized_url = self.url_normalizer.normalize_media_url(thumbnail_url)
+        return normalized_url if normalized_url is not None else fallback_url
+
+
+    def get_thumbnail_entry(self, thumbnail_uuid):
+        try:
+            return self.thumbnail_query\
+                .filter(self.thumbnail_uuid_field == thumbnail_uuid)\
+                .one()
+        except Exception:
+            return None
+
+
+    def has_remote_media(self, thumbnail_entry):
+        return bool(
+            getattr(thumbnail_entry, 'remote_url', None)
+            or getattr(thumbnail_entry, 's3_key', None)
+        )
+
+
+    def log_error(self, message, *args):
+        if self.logger is None:
+            return
+
+        try:
+            self.logger.error(message, *args)
+        except Exception:
+            pass
+
+
 class ModernAdminLatestCameraFramesRepository:
     """Bounded runtime source for the two latest Product UI camera images."""
 

@@ -12,6 +12,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
+from indi_allsky.modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 
 
 class FakeField:
@@ -31,6 +32,26 @@ class FakeImage:
         self.camera_id = camera_id
         self.url = url
         self.createDate = created or datetime(2026, 7, 3, 12, 0, 0)
+        self.get_url_calls = list()
+
+    def getUrl(self, s3_prefix='', local=True):
+        self.get_url_calls.append({
+            's3_prefix': s3_prefix,
+            'local': local,
+        })
+        return self.url
+
+
+class FakeMediaEntry:
+    def __init__(self, thumbnail_uuid='thumb-1'):
+        self.thumbnail_uuid = thumbnail_uuid
+
+
+class FakeThumbnail:
+    def __init__(self, url='images/thumbs/thumb.jpg', remote_url='', s3_key=''):
+        self.url = url
+        self.remote_url = remote_url
+        self.s3_key = s3_key
         self.get_url_calls = list()
 
     def getUrl(self, s3_prefix='', local=True):
@@ -72,6 +93,11 @@ class FakeQuery:
             raise RuntimeError('query failed')
         return self.first_row
 
+    def one(self):
+        if self.fail or self.first_row is None:
+            raise RuntimeError('query failed')
+        return self.first_row
+
 
 def build_repository(camera_query=None, image_query=None, clock=None):
     return ModernAdminLatestCameraFramesRepository(
@@ -85,6 +111,17 @@ def build_repository(camera_query=None, image_query=None, clock=None):
         clock=clock or (lambda: datetime(2026, 7, 3, 12, 5, 0)),
         s3_prefix='https://cdn.invalid',
         images_folder_url_builder=lambda path: '/images/{0:s}'.format(path),
+    )
+
+
+def build_preview_lookup(thumbnail_query=None):
+    return ModernAdminPreviewMetadataLookupService(
+        thumbnail_query=thumbnail_query or FakeQuery(first_row=FakeThumbnail()),
+        thumbnail_uuid_field=FakeField(),
+        url_normalizer=ModernAdminMediaUrlNormalizer(
+            images_folder_url_builder=lambda path: '/images/{0:s}'.format(path),
+        ),
+        s3_prefix='https://cdn.invalid',
     )
 
 
@@ -206,6 +243,90 @@ def test_modern_views_delegate_media_url_normalization_to_runtime_service():
     assert_true('.normalize_media_url(' in source, 'views should delegate final URL shaping to Hybrid runtime normalizer')
 
 
+def test_preview_metadata_lookup_shapes_thumbnail_url():
+    thumbnail = FakeThumbnail(url='images/thumbs/thumb.jpg')
+    query = FakeQuery(first_row=thumbnail)
+    service = build_preview_lookup(query)
+
+    preview_url = service.get_preview_url(
+        FakeMediaEntry(thumbnail_uuid='thumb-1'),
+        media_url='/images/full/full.jpg',
+        local=True,
+    )
+
+    assert_true(preview_url == '/images/thumbs/thumb.jpg', 'thumbnail URL should be normalized through Hybrid normalizer')
+    assert_true(query.filter_calls == [('eq', 'thumb-1')], 'thumbnail lookup must filter by thumbnail uuid')
+    assert_true(thumbnail.get_url_calls == [{'s3_prefix': 'https://cdn.invalid', 'local': True}], 'thumbnail getUrl adapter call must preserve arguments')
+
+
+def test_preview_metadata_lookup_falls_back_when_thumbnail_missing():
+    service = build_preview_lookup(FakeQuery(first_row=None))
+
+    preview_url = service.get_preview_url(
+        FakeMediaEntry(thumbnail_uuid='missing-thumb'),
+        media_url='/images/full/full.jpg',
+        local=True,
+    )
+
+    assert_true(preview_url == '/images/full/full.jpg', 'missing thumbnail row should fall back to media URL')
+
+
+def test_preview_metadata_lookup_falls_back_without_thumbnail_uuid():
+    query = FakeQuery(first_row=FakeThumbnail())
+    service = build_preview_lookup(query)
+
+    preview_url = service.get_preview_url(
+        FakeMediaEntry(thumbnail_uuid=None),
+        media_url='/images/full/full.jpg',
+        local=True,
+    )
+
+    assert_true(preview_url == '/images/full/full.jpg', 'missing thumbnail uuid should fall back to media URL')
+    assert_true(query.filter_calls == [], 'missing thumbnail uuid must not query thumbnails')
+
+
+def test_preview_metadata_lookup_preserves_nonlocal_remote_policy():
+    local_only_thumbnail = FakeThumbnail(url='images/thumbs/local-only.jpg')
+    service = build_preview_lookup(FakeQuery(first_row=local_only_thumbnail))
+
+    preview_url = service.get_preview_url(
+        FakeMediaEntry(thumbnail_uuid='thumb-1'),
+        media_url='/images/full/full.jpg',
+        local=False,
+    )
+
+    assert_true(preview_url == '/images/full/full.jpg', 'nonlocal mode without remote thumbnail metadata should fall back')
+    assert_true(local_only_thumbnail.get_url_calls == [], 'nonlocal missing remote thumbnail must not call getUrl')
+
+    remote_thumbnail = FakeThumbnail(
+        url='https://example.invalid/thumb.jpg',
+        remote_url='https://example.invalid/thumb.jpg',
+    )
+    remote_service = build_preview_lookup(FakeQuery(first_row=remote_thumbnail))
+
+    preview_url = remote_service.get_preview_url(
+        FakeMediaEntry(thumbnail_uuid='thumb-2'),
+        media_url='/images/full/full.jpg',
+        local=False,
+    )
+
+    assert_true(preview_url == 'https://example.invalid/thumb.jpg', 'remote thumbnail URL should be preserved')
+    assert_true(remote_thumbnail.get_url_calls == [{'s3_prefix': 'https://cdn.invalid', 'local': False}], 'remote thumbnail getUrl adapter call must preserve nonlocal intent')
+
+
+def test_gallery_preview_lookup_delegates_to_runtime_service():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ModernAdminMediaGalleryView')
+    end = source.index('class ModernAdminMediaGalleryPageView', start)
+    body = source[start:end]
+
+    assert_true('ModernAdminPreviewMetadataLookupService' in source, 'views must import Hybrid preview metadata lookup service')
+    assert_true('get_preview_metadata_lookup_service' in body, 'Gallery must construct preview lookup service')
+    assert_true('IndiAllSkyDbThumbnailTable.query\\' not in body, 'Gallery must not own inline thumbnail query')
+    assert_true('.filter(IndiAllSkyDbThumbnailTable.uuid == media_entry.thumbnail_uuid)' not in body, 'Gallery must not own inline thumbnail uuid filtering')
+    assert_true('.get_preview_url(' in body, 'Gallery preview URL should be delegated to Hybrid service')
+
+
 def test_media_runtime_service_has_no_flask_db_or_filesystem_access():
     import indi_allsky.modern_admin_media_runtime as module
 
@@ -227,6 +348,11 @@ def run_tests():
     test_media_url_normalizer_preserves_existing_url_shapes()
     test_media_url_normalizer_supports_safe_local_image_profile()
     test_modern_views_delegate_media_url_normalization_to_runtime_service()
+    test_preview_metadata_lookup_shapes_thumbnail_url()
+    test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
+    test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()
+    test_preview_metadata_lookup_preserves_nonlocal_remote_policy()
+    test_gallery_preview_lookup_delegates_to_runtime_service()
     test_media_runtime_service_has_no_flask_db_or_filesystem_access()
     print('Modern admin media runtime checks passed')
 

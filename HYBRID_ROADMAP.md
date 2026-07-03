@@ -47,6 +47,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - la normalizzazione URL media Modern/Hybrid e' ora Hybrid-owned tramite
     `ModernAdminMediaUrlNormalizer`; le view delegano la forma finale degli URL
     mantenendo `getUrl()` come adapter low-level esistente;
+  - il lookup metadata-only dei thumbnail/preview Gallery e' ora Hybrid-owned
+    tramite `ModernAdminPreviewMetadataLookupService`; cache, generazione preview,
+    download e filesystem restano fuori scope;
   - le query camera/image e la normalizzazione URL locale sono iniettate dal
     layer Flask, mentre `getUrl()` resta adapter/fallback media esistente;
   - preview/download/cache/filesystem/FITS/RAW e media browse internals restano
