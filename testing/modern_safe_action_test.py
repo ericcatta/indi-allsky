@@ -24,6 +24,7 @@ from indi_allsky.modern_safe_action import LogDownloadPolicy
 from indi_allsky.modern_safe_action import LogDownloadSafeAction
 from indi_allsky.modern_safe_action import LogDownloadService
 from indi_allsky.modern_safe_action import ModernAdminCaptureServiceCommandBoundary
+from indi_allsky.modern_safe_action import ModernAdminGeneratedOutputActionPlanner
 from indi_allsky.modern_safe_action import NotificationAcknowledgeDbAdapter
 from indi_allsky.modern_safe_action import NotificationAcknowledgeRepositoryError
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
@@ -1552,6 +1553,70 @@ def test_capture_service_command_boundary_requires_effect_adapter():
     assert result.details['command'] == 'start'
 
 
+def test_generated_output_action_planner_creates_generate_video_plan():
+    planner = ModernAdminGeneratedOutputActionPlanner()
+
+    result = planner.plan(
+        action=' generate_video ',
+        camera_id='7',
+        day_date='2026-07-02',
+        night='night',
+    )
+
+    assert result.status == 'planned'
+    assert result.allowed is True
+    assert result.dry_run is True
+    assert result.details['action'] == 'generate_video'
+    assert result.details['camera_id'] == 7
+    assert result.details['timespec'] == '20260702'
+    assert result.details['night'] is True
+    assert result.details['priority'] == 100
+    assert result.details['jobdata'] == {
+        'action': 'generateVideo',
+        'kwargs': {
+            'timespec': '20260702',
+            'night': True,
+            'camera_id': 7,
+        },
+    }
+
+
+def test_generated_output_action_planner_rejects_unsupported_action():
+    planner = ModernAdminGeneratedOutputActionPlanner()
+
+    result = planner.plan(
+        action='delete_video',
+        camera_id=7,
+        day_date='2026-07-02',
+        night=False,
+    )
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert result.details['action'] == 'delete_video'
+
+
+def test_generated_output_action_planner_rejects_invalid_target():
+    planner = ModernAdminGeneratedOutputActionPlanner()
+
+    result = planner.plan(
+        action='generate_video',
+        camera_id='not-a-camera',
+        day_date='2026-07-02',
+        night=False,
+    )
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert result.message == 'camera_id is required.'
+
+
+def test_generated_output_action_planner_has_no_effect_adapter():
+    planner = ModernAdminGeneratedOutputActionPlanner()
+
+    assert not hasattr(planner, 'effect_adapter')
+
+
 def test_notification_acknowledge_dry_run_registry_has_no_execute_callback():
     registry = build_notification_acknowledge_dry_run_registry(
         permission_check=lambda actor: True,
@@ -1654,6 +1719,13 @@ def get_capture_service_action_view_source():
     return source[class_start:class_end], source
 
 
+def get_ajax_timelapse_generator_view_source():
+    source = (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    class_start = source.index('class AjaxTimelapseGeneratorView')
+    class_end = source.index('class MiniTimelapseGeneratorView')
+    return source[class_start:class_end], source
+
+
 def get_flask_init_source():
     return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / '__init__.py').read_text()
 
@@ -1716,6 +1788,17 @@ def test_capture_service_action_view_uses_hybrid_boundary_static():
     assert 'get_capture_service_command_boundary' in view_source
     assert 'effect_adapter=self.run_capture_service_command' in view_source
     assert 'command not in self.valid_commands' not in view_source
+
+
+def test_ajax_generate_video_uses_hybrid_planner_static():
+    view_source, _full_source = get_ajax_timelapse_generator_view_source()
+    branch_start = view_source.index("elif action == 'generate_video':")
+    branch_end = view_source.index("elif action == 'generate_panorama_video':")
+    branch = view_source[branch_start:branch_end]
+
+    assert 'ModernAdminGeneratedOutputActionPlanner().plan' in branch
+    assert "jobdata = plan.details['jobdata']" in branch
+    assert "priority=plan.details['priority']" in branch
 
 
 def test_safe_action_dry_run_helper_response_shape():
@@ -2132,6 +2215,10 @@ if __name__ == '__main__':
     test_capture_service_command_boundary_rejects_invalid_without_adapter_call()
     test_capture_service_command_boundary_delegates_valid_command_only()
     test_capture_service_command_boundary_requires_effect_adapter()
+    test_generated_output_action_planner_creates_generate_video_plan()
+    test_generated_output_action_planner_rejects_unsupported_action()
+    test_generated_output_action_planner_rejects_invalid_target()
+    test_generated_output_action_planner_has_no_effect_adapter()
     test_notification_acknowledge_dry_run_registry_has_no_execute_callback()
     test_dry_run_helper_missing_action_id()
     test_dry_run_helper_unknown_action_id()
@@ -2145,6 +2232,7 @@ if __name__ == '__main__':
     test_safe_action_dry_run_view_status_mapping_static()
     test_safe_action_dry_run_view_has_no_legacy_ack_path_static()
     test_capture_service_action_view_uses_hybrid_boundary_static()
+    test_ajax_generate_video_uses_hybrid_planner_static()
     test_safe_action_dry_run_helper_response_shape()
     test_safe_action_dry_run_helper_missing_action_id_response_shape()
     test_safe_action_dry_run_helper_unknown_action_response_shape()

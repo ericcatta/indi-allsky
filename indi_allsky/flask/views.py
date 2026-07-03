@@ -31,6 +31,7 @@ from ..event_candidate import default_event_timeline_dir
 from ..frame_metadata import default_frame_metadata_dir
 from ..frame_metadata_analytics import FrameMetadataAnalytics
 from ..modern_safe_action import ModernAdminCaptureServiceCommandBoundary
+from ..modern_safe_action import ModernAdminGeneratedOutputActionPlanner
 from ..modern_safe_action import run_modern_safe_action_dry_run
 from ..modern_admin_notifications import ModernAdminNotificationReadService
 from ..modern_admin_media_metadata import ModernAdminKeogramMetadataService
@@ -10377,7 +10378,18 @@ class AjaxTimelapseGeneratorView(BaseView):
 
 
         elif action == 'generate_video':
-            timespec = day_date.strftime('%Y%m%d')
+            plan = ModernAdminGeneratedOutputActionPlanner().plan(
+                action=action,
+                camera_id=camera.id,
+                day_date=day_date,
+                night=night,
+            )
+            if plan.status != 'planned':
+                return jsonify({
+                    'form_global': [plan.message],
+                }), 400
+
+            timespec = plan.details['timespec']
 
             if night:
                 timeofday_str = 'night'
@@ -10387,19 +10399,12 @@ class AjaxTimelapseGeneratorView(BaseView):
 
             app.logger.warning('Generating %s time timelapse for %s camera %d', timeofday_str, timespec, camera.id)
 
-            jobdata = {
-                'action' : 'generateVideo',
-                'kwargs' : {
-                    'timespec'    : timespec,
-                    'night'       : night,
-                    'camera_id'   : camera.id,
-                },
-            }
+            jobdata = plan.details['jobdata']
 
             task = IndiAllSkyDbTaskQueueTable(
                 queue=TaskQueueQueue.VIDEO,
                 state=TaskQueueState.MANUAL,
-                priority=100,
+                priority=plan.details['priority'],
                 data=jobdata,
             )
             db.session.add(task)

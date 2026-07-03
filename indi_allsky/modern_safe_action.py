@@ -2,6 +2,7 @@ import json
 import re
 from dataclasses import dataclass
 from dataclasses import field
+from datetime import date
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -1283,6 +1284,177 @@ class ModernAdminCaptureServiceCommandBoundary:
                 'past_tense'    : self.valid_commands[command],
                 'service_result': effect_result,
             },
+        )
+
+
+class ModernAdminGeneratedOutputActionPlanner:
+    """Hybrid-owned planning boundary for generated-output actions.
+
+    The planner does not enqueue tasks, write to the database, generate media,
+    or touch the filesystem. It only normalizes a supported action intent into
+    the same job payload shape used by the existing effect adapter.
+    """
+
+    action_id = 'generated_output.plan'
+    feature = 'Generated Output'
+    risk_level = 'high'
+
+    DEFAULT_ACTIONS = {
+        'generate_video': {
+            'job_action': 'generateVideo',
+            'queue'     : 'VIDEO',
+            'state'     : 'MANUAL',
+            'priority'  : 100,
+        },
+    }
+
+    def __init__(self, supported_actions=None):
+        self.supported_actions = dict(supported_actions or self.DEFAULT_ACTIONS)
+
+
+    def normalize_action(self, value):
+        if value is None or isinstance(value, bool):
+            return ''
+
+        return str(value).strip().lower()
+
+
+    def normalize_camera_id(self, value):
+        if value is None or isinstance(value, bool):
+            return None
+
+        try:
+            camera_id = int(value)
+        except (TypeError, ValueError):
+            return None
+
+        if camera_id < 1:
+            return None
+
+        return camera_id
+
+
+    def normalize_day_date(self, value):
+        if isinstance(value, datetime):
+            return value.date()
+
+        if isinstance(value, date):
+            return value
+
+        if value is None or isinstance(value, bool):
+            return None
+
+        try:
+            return datetime.strptime(str(value).strip(), '%Y-%m-%d').date()
+        except (TypeError, ValueError):
+            return None
+
+
+    def normalize_night(self, value):
+        if isinstance(value, bool):
+            return value
+
+        if value is None:
+            return None
+
+        value_s = str(value).strip().lower()
+        if value_s in ('night', 'true', '1', 'yes'):
+            return True
+
+        if value_s in ('day', 'false', '0', 'no'):
+            return False
+
+        return None
+
+
+    def plan(self, action=None, camera_id=None, day_date=None, night=None, payload=None):
+        payload = payload or {}
+        action_name = self.normalize_action(action if action is not None else payload.get('action', payload.get('ACTION_SELECT')))
+        camera_id = self.normalize_camera_id(camera_id if camera_id is not None else payload.get('camera_id', payload.get('CAMERA_ID')))
+        day_date = self.normalize_day_date(day_date if day_date is not None else payload.get('day_date', payload.get('DAY_DATE')))
+        night = self.normalize_night(night if night is not None else payload.get('night', payload.get('NIGHT')))
+
+        if action_name not in self.supported_actions:
+            return self.result(
+                status='validation_failed',
+                message='Unsupported generated output action.',
+                allowed=False,
+                details={
+                    'action': action_name,
+                },
+            )
+
+        if camera_id is None:
+            return self.result(
+                status='validation_failed',
+                message='camera_id is required.',
+                allowed=False,
+                details={
+                    'action': action_name,
+                },
+            )
+
+        if day_date is None:
+            return self.result(
+                status='validation_failed',
+                message='day_date is required.',
+                allowed=False,
+                details={
+                    'action'   : action_name,
+                    'camera_id': camera_id,
+                },
+            )
+
+        if night is None:
+            return self.result(
+                status='validation_failed',
+                message='night is required.',
+                allowed=False,
+                details={
+                    'action'   : action_name,
+                    'camera_id': camera_id,
+                },
+            )
+
+        action_config = self.supported_actions[action_name]
+        timespec = day_date.strftime('%Y%m%d')
+        jobdata = {
+            'action' : action_config['job_action'],
+            'kwargs' : {
+                'timespec'  : timespec,
+                'night'     : night,
+                'camera_id' : camera_id,
+            },
+        }
+
+        return self.result(
+            status='planned',
+            message='Generated output action planned.',
+            allowed=True,
+            details={
+                'action'    : action_name,
+                'camera_id' : camera_id,
+                'day_date'  : day_date.isoformat(),
+                'timespec'  : timespec,
+                'night'     : night,
+                'jobdata'   : jobdata,
+                'queue'     : action_config['queue'],
+                'state'     : action_config['state'],
+                'priority'  : action_config['priority'],
+            },
+        )
+
+
+    def result(self, status, message, allowed=False, details=None):
+        return ModernAdminSafeActionResult(
+            action_id=self.action_id,
+            feature=self.feature,
+            risk_level=self.risk_level,
+            status=status,
+            message=message,
+            dry_run=True,
+            allowed=allowed,
+            details=details or {},
         )
 
 
