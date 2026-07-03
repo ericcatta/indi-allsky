@@ -40,6 +40,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     ora Hybrid-owned tramite `ModernAdminSettingsRuntimeService`; il parser
     full-config legacy resta Classic-owned;
   - rollback e salvataggi ConfigView legacy restano Classic-owned.
+- Book 2 / Media Runtime Independence:
+  - la responsabilita' "Now -> latest camera frames -> bounded latest image
+    metadata + safe local image route" e' ora Hybrid-owned tramite
+    `ModernAdminLatestCameraFramesRepository`;
+  - le query camera/image e la normalizzazione URL locale sono iniettate dal
+    layer Flask, mentre `getUrl()` resta adapter/fallback media esistente;
+  - preview/download/cache/filesystem/FITS/RAW e media browse internals restano
+    fuori scope e Classic-owned per ora.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
