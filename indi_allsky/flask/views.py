@@ -47,6 +47,7 @@ from ..modern_admin_media_runtime import ModernAdminMediaListQueryPlanner
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from ..modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 from ..modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
+from ..modern_admin_runtime_providers import ModernAdminCaptureHealthSummaryProvider
 from ..modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
 from ..modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 from ..modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
@@ -5916,6 +5917,7 @@ class ModernAdminView(TemplateView):
             'modern_admin_recovery_targets'     : ModernAdminView.get_modern_admin_recovery_targets(self),
             'modern_admin_runtime_status'       : runtime_status,
             'modern_admin_capture_service_status': get_modern_admin_capture_service_status(),
+            'modern_admin_capture_health_summary': ModernAdminView.get_modern_admin_capture_health_summary(self),
         }
 
 
@@ -5992,6 +5994,67 @@ class ModernAdminView(TemplateView):
                 'label' : 'Runtime: Unknown',
                 'tone'  : 'muted',
             }
+
+
+    def get_modern_admin_capture_health_summary(self):
+        try:
+            profile_configs = (self.indi_allsky_config.get('MULTI_CAMERA') or {}).get('profiles') or []
+            latest_frames = ModernAdminView.get_latest_capture_health_frames(self, profile_configs)
+
+            return ModernAdminCaptureHealthSummaryProvider().get_capture_health_summary(
+                profile_configs=profile_configs,
+                latest_frames=latest_frames,
+                current_camera=getattr(self, 'camera', None),
+                now=getattr(self, 'camera_now', None),
+                default_expected_interval_seconds=self.indi_allsky_config.get('CCD_EXPOSURE_PERIOD', 45),
+                default_exposure_timeout_seconds=self.indi_allsky_config.get('CCD_EXPOSURE_TIMEOUT', 330),
+            )
+        except Exception as e:
+            app.logger.error('Error building modern admin capture health summary: %s', str(e))
+            return {
+                'status'        : 'unknown',
+                'tone'          : 'muted',
+                'camera_health' : [],
+                'source_status' : 'Capture health metadata unavailable.',
+            }
+
+
+    def get_latest_capture_health_frames(self, profile_configs):
+        camera_ids = list()
+        for profile_config in profile_configs or []:
+            if not profile_config.get('enabled', False):
+                continue
+
+            camera_id = profile_config.get('camera_id') \
+                or profile_config.get('camera_db_id') \
+                or profile_config.get('db_camera_id')
+            if camera_id and camera_id not in camera_ids:
+                camera_ids.append(camera_id)
+
+        current_camera_id = getattr(getattr(self, 'camera', None), 'id', None)
+        if not camera_ids and current_camera_id:
+            camera_ids.append(current_camera_id)
+
+        latest_frames = list()
+        for camera_id in camera_ids:
+            try:
+                image = IndiAllSkyDbImageTable.query\
+                    .filter(IndiAllSkyDbImageTable.camera_id == camera_id)\
+                    .order_by(IndiAllSkyDbImageTable.createDate.desc())\
+                    .first()
+            except Exception as e:
+                app.logger.error('Error reading latest capture health frame for camera %s: %s', str(camera_id), str(e))
+                continue
+
+            if image is None:
+                continue
+
+            latest_frames.append({
+                'camera_id'  : camera_id,
+                'timestamp'  : getattr(image, 'createDate', None),
+            })
+
+        return latest_frames
 
 
     def get_recent_image_camera_ids(self):

@@ -1,3 +1,7 @@
+from datetime import datetime
+from datetime import timezone
+
+
 class ModernAdminServiceStatusProvider:
     """Hybrid-owned read boundary for Modern/Admin service status."""
 
@@ -299,3 +303,272 @@ class ModernAdminCurrentCaptureMetadataRepository:
 
     def get_current_capture_metadata(self):
         return dict(self.metadata)
+
+
+class ModernAdminCaptureHealthSummaryProvider:
+    """Hybrid-owned per-camera/profile capture health summary shaping."""
+
+    DEFAULT_EXPECTED_INTERVAL_SECONDS = 45
+    DEFAULT_EXPOSURE_TIMEOUT_SECONDS = 330
+    MIN_STALE_AFTER_SECONDS = 60
+
+    def get_capture_health_summary(
+        self,
+        profile_configs=None,
+        latest_frames=None,
+        current_camera=None,
+        now=None,
+        default_expected_interval_seconds=DEFAULT_EXPECTED_INTERVAL_SECONDS,
+        default_exposure_timeout_seconds=DEFAULT_EXPOSURE_TIMEOUT_SECONDS,
+    ):
+        now = self.normalize_now(now)
+        latest_frame_map = self.latest_frame_map(latest_frames)
+        targets = self.capture_targets(
+            profile_configs=profile_configs,
+            current_camera=current_camera,
+            default_expected_interval_seconds=default_expected_interval_seconds,
+            default_exposure_timeout_seconds=default_exposure_timeout_seconds,
+        )
+
+        camera_health = [
+            self.target_health(target, latest_frame_map.get(target['camera_id']), now)
+            for target in targets
+        ]
+
+        return {
+            'status'        : self.summary_status(camera_health),
+            'tone'          : self.summary_tone(camera_health),
+            'camera_health' : camera_health,
+            'source_status' : self.source_status(camera_health),
+        }
+
+
+    def capture_targets(
+        self,
+        profile_configs=None,
+        current_camera=None,
+        default_expected_interval_seconds=DEFAULT_EXPECTED_INTERVAL_SECONDS,
+        default_exposure_timeout_seconds=DEFAULT_EXPOSURE_TIMEOUT_SECONDS,
+    ):
+        targets = list()
+        for profile_config in profile_configs or []:
+            if not profile_config.get('enabled', False):
+                continue
+
+            camera_id = self.normalize_camera_id(
+                profile_config.get('camera_id')
+                or profile_config.get('camera_db_id')
+                or profile_config.get('db_camera_id')
+            )
+            profile_id = self.safe_text(profile_config.get('profile_id') or profile_config.get('id'))
+            label = self.safe_text(
+                profile_config.get('label')
+                or profile_config.get('camera_name')
+                or profile_config.get('name')
+                or profile_id
+                or camera_id
+                or 'Camera not evaluated yet'
+            )
+            expected_interval = self.positive_float(
+                profile_config.get('expected_interval_seconds')
+                or profile_config.get('capture_interval')
+                or profile_config.get('exposure_period')
+                or self.nested_value(profile_config, ('exposure', 'period')),
+                default_expected_interval_seconds,
+            )
+            exposure_timeout = self.positive_float(
+                profile_config.get('exposure_timeout')
+                or self.nested_value(profile_config, ('exposure', 'timeout')),
+                default_exposure_timeout_seconds,
+            )
+            stale_after = self.positive_float(
+                profile_config.get('stale_after_seconds'),
+                max(expected_interval * 3, self.MIN_STALE_AFTER_SECONDS),
+            )
+
+            targets.append({
+                'profile_id'                : profile_id,
+                'camera_id'                 : camera_id,
+                'label'                     : label,
+                'expected_interval_seconds' : expected_interval,
+                'exposure_timeout_seconds'  : exposure_timeout,
+                'stale_after_seconds'       : stale_after,
+            })
+
+        if targets:
+            return targets
+
+        camera_id = self.normalize_camera_id(getattr(current_camera, 'id', None))
+        if current_camera is None and not camera_id:
+            return []
+
+        return [{
+            'profile_id'                : '',
+            'camera_id'                 : camera_id,
+            'label'                     : ModernAdminCameraRuntimeMetadataProvider().camera_label(current_camera),
+            'expected_interval_seconds' : self.positive_float(None, default_expected_interval_seconds),
+            'exposure_timeout_seconds'  : self.positive_float(None, default_exposure_timeout_seconds),
+            'stale_after_seconds'       : max(self.positive_float(None, default_expected_interval_seconds) * 3, self.MIN_STALE_AFTER_SECONDS),
+        }]
+
+
+    def target_health(self, target, latest_frame, now):
+        timestamp = self.frame_timestamp(latest_frame)
+        age_seconds = self.age_seconds(timestamp, now)
+        status = self.health_status(age_seconds, target['stale_after_seconds'], latest_frame)
+
+        return {
+            'profile_id'                : target['profile_id'],
+            'camera_id'                 : target['camera_id'],
+            'label'                     : target['label'],
+            'status'                    : status,
+            'tone'                      : self.health_tone(status),
+            'status_label'              : self.health_label(status, age_seconds),
+            'latest_frame_timestamp'    : self.format_timestamp(timestamp),
+            'latest_frame_age_seconds'  : age_seconds,
+            'expected_interval_seconds' : target['expected_interval_seconds'],
+            'stale_after_seconds'       : target['stale_after_seconds'],
+            'exposure_timeout_seconds'  : target['exposure_timeout_seconds'],
+        }
+
+
+    def health_status(self, age_seconds, stale_after_seconds, latest_frame):
+        if latest_frame and bool(latest_frame.get('busy', False)):
+            return 'busy'
+
+        if age_seconds is None:
+            return 'missing'
+
+        if age_seconds > stale_after_seconds:
+            return 'stale'
+
+        return 'ok'
+
+
+    def health_tone(self, status):
+        return {
+            'ok'      : 'good',
+            'busy'    : 'warn',
+            'stale'   : 'warn',
+            'missing' : 'muted',
+        }.get(status, 'muted')
+
+
+    def health_label(self, status, age_seconds):
+        if status == 'ok':
+            return 'Latest frame is fresh.'
+        if status == 'busy':
+            return 'Capture is busy.'
+        if status == 'stale':
+            return 'Latest frame is stale.'
+        if status == 'missing':
+            return 'No latest frame metadata.'
+        return 'Capture health not evaluated.'
+
+
+    def summary_status(self, camera_health):
+        statuses = [item['status'] for item in camera_health]
+        if not statuses:
+            return 'unknown'
+        if len(set(statuses)) == 1:
+            return statuses[0]
+        if all(status == 'ok' for status in statuses):
+            return 'ok'
+        if any(status in ('stale', 'busy') for status in statuses):
+            return 'mixed'
+        return 'mixed'
+
+
+    def summary_tone(self, camera_health):
+        status = self.summary_status(camera_health)
+        return {
+            'ok'      : 'good',
+            'stale'   : 'warn',
+            'busy'    : 'warn',
+            'mixed'   : 'warn',
+            'missing' : 'muted',
+            'unknown' : 'muted',
+        }.get(status, 'muted')
+
+
+    def source_status(self, camera_health):
+        if not camera_health:
+            return 'No camera/profile metadata available.'
+        return 'Capture health is based on latest frame metadata only.'
+
+
+    def latest_frame_map(self, latest_frames):
+        frame_map = dict()
+        for frame in latest_frames or []:
+            camera_id = self.normalize_camera_id(frame.get('camera_id'))
+            if camera_id:
+                frame_map[camera_id] = dict(frame)
+        return frame_map
+
+
+    def frame_timestamp(self, latest_frame):
+        if not latest_frame:
+            return None
+
+        timestamp = latest_frame.get('timestamp') or latest_frame.get('createDate')
+        if isinstance(timestamp, datetime):
+            return timestamp
+
+        return None
+
+
+    def age_seconds(self, timestamp, now):
+        if timestamp is None:
+            return None
+
+        if timestamp.tzinfo is not None and now.tzinfo is None:
+            timestamp = timestamp.astimezone(timezone.utc).replace(tzinfo=None)
+        if timestamp.tzinfo is None and now.tzinfo is not None:
+            now = now.astimezone(timezone.utc).replace(tzinfo=None)
+
+        return max(0, int((now - timestamp).total_seconds()))
+
+
+    def format_timestamp(self, timestamp):
+        if timestamp is None:
+            return None
+        return timestamp.isoformat()
+
+
+    def normalize_now(self, now):
+        if isinstance(now, datetime):
+            return now
+        return datetime.now()
+
+
+    def normalize_camera_id(self, camera_id):
+        if camera_id is None:
+            return ''
+        return str(camera_id).strip()
+
+
+    def safe_text(self, value):
+        if value is None:
+            return ''
+        return str(value)
+
+
+    def positive_float(self, value, default):
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            value = float(default)
+
+        if value <= 0:
+            return float(default)
+
+        return value
+
+
+    def nested_value(self, mapping, keys):
+        value = mapping
+        for key in keys:
+            if not isinstance(value, dict):
+                return None
+            value = value.get(key)
+        return value

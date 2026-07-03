@@ -2,6 +2,8 @@
 
 import inspect
 import sys
+from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 
 
@@ -10,6 +12,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 import indi_allsky.modern_admin_runtime_providers as runtime_providers
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
+from indi_allsky.modern_admin_runtime_providers import ModernAdminCaptureHealthSummaryProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
 from indi_allsky.modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
@@ -333,6 +336,135 @@ def test_current_capture_metadata_repository_returns_copy():
     )
 
 
+def test_capture_health_provider_reports_fresh_frame():
+    now = datetime(2026, 7, 4, 10, 0, 0)
+    provider = ModernAdminCaptureHealthSummaryProvider()
+    summary = provider.get_capture_health_summary(
+        profile_configs=[{
+            'enabled': True,
+            'profile_id': 'wide',
+            'camera_id': 1,
+            'label': 'IMX708 Wide',
+            'exposure_period': 45,
+            'exposure_timeout': 90,
+        }],
+        latest_frames=[{
+            'camera_id': 1,
+            'timestamp': now - timedelta(seconds=30),
+        }],
+        now=now,
+    )
+
+    assert_true(summary['status'] == 'ok', 'fresh frame summary should be ok')
+    assert_true(summary['tone'] == 'good', 'fresh frame summary tone should be good')
+    assert_true(summary['camera_health'][0]['status'] == 'ok', 'fresh camera health should be ok')
+    assert_true(summary['camera_health'][0]['latest_frame_age_seconds'] == 30, 'fresh age should be computed')
+    assert_true(summary['camera_health'][0]['stale_after_seconds'] == 135.0, 'stale threshold should derive from interval')
+
+
+def test_capture_health_provider_reports_stale_frame():
+    now = datetime(2026, 7, 4, 10, 0, 0)
+    provider = ModernAdminCaptureHealthSummaryProvider()
+    summary = provider.get_capture_health_summary(
+        profile_configs=[{
+            'enabled': True,
+            'profile_id': 'zwo',
+            'camera_id': 2,
+            'label': 'ASI678MC',
+            'expected_interval_seconds': 45,
+        }],
+        latest_frames=[{
+            'camera_id': 2,
+            'timestamp': now - timedelta(seconds=180),
+        }],
+        now=now,
+    )
+
+    assert_true(summary['status'] == 'stale', 'single stale frame summary should be stale')
+    assert_true(summary['tone'] == 'warn', 'stale frame summary tone should warn')
+    assert_true(summary['camera_health'][0]['status'] == 'stale', 'stale camera health should be stale')
+    assert_true(summary['camera_health'][0]['status_label'] == 'Latest frame is stale.', 'stale label should be product-safe')
+
+
+def test_capture_health_provider_reports_missing_frame():
+    provider = ModernAdminCaptureHealthSummaryProvider()
+    summary = provider.get_capture_health_summary(
+        profile_configs=[{
+            'enabled': True,
+            'profile_id': 'zwo',
+            'camera_id': 2,
+            'label': 'ASI678MC',
+        }],
+        latest_frames=[],
+        now=datetime(2026, 7, 4, 10, 0, 0),
+    )
+
+    assert_true(summary['status'] == 'missing', 'missing frame summary should be missing')
+    assert_true(summary['tone'] == 'muted', 'missing frame summary tone should be muted')
+    assert_true(summary['camera_health'][0]['status'] == 'missing', 'missing camera health should be missing')
+    assert_true(summary['camera_health'][0]['latest_frame_timestamp'] is None, 'missing frame timestamp should stay None')
+
+
+def test_capture_health_provider_reports_multi_camera_mixed_state():
+    now = datetime(2026, 7, 4, 10, 0, 0)
+    provider = ModernAdminCaptureHealthSummaryProvider()
+    summary = provider.get_capture_health_summary(
+        profile_configs=[
+            {
+                'enabled': True,
+                'profile_id': 'wide',
+                'camera_id': 1,
+                'label': 'IMX708 Wide',
+                'exposure_period': 45,
+            },
+            {
+                'enabled': True,
+                'profile_id': 'zwo',
+                'camera_id': 2,
+                'label': 'ASI678MC',
+                'exposure_period': 45,
+            },
+        ],
+        latest_frames=[
+            {
+                'camera_id': 1,
+                'timestamp': now - timedelta(seconds=20),
+            },
+            {
+                'camera_id': 2,
+                'timestamp': now - timedelta(seconds=200),
+            },
+        ],
+        now=now,
+    )
+
+    statuses = [item['status'] for item in summary['camera_health']]
+
+    assert_true(summary['status'] == 'mixed', 'mixed multi-camera state should be explicit')
+    assert_true(summary['tone'] == 'warn', 'mixed multi-camera state should warn')
+    assert_true(statuses == ['ok', 'stale'], 'per-camera statuses should be preserved')
+
+
+def test_modern_capture_health_summary_uses_hybrid_provider_static():
+    views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    function_start = views_source.index('def get_modern_admin_capture_health_summary')
+    function_end = views_source.index('def get_latest_capture_health_frames', function_start)
+    function_source = views_source[function_start:function_end]
+
+    assert_true(
+        'ModernAdminCaptureHealthSummaryProvider' in function_source,
+        'Modern capture health summary must enter through the Hybrid provider',
+    )
+    assert_true(
+        'latest_frames=latest_frames' in function_source,
+        'Flask layer should pass latest frame metadata as adapter data',
+    )
+    assert_true(
+        'IndiAllSkyDbImageTable.query' not in function_source,
+        'DB query execution should stay outside the Hybrid summary provider call',
+    )
+
+
 def test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static():
     views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
     function_start = views_source.index('def get_current_capture_repository')
@@ -374,6 +506,11 @@ def run_tests():
         test_watchdog_status_provider_handles_missing_watchdog_safely,
         test_watchdog_status_provider_prioritizes_pause_and_policy,
         test_current_capture_metadata_repository_returns_copy,
+        test_capture_health_provider_reports_fresh_frame,
+        test_capture_health_provider_reports_stale_frame,
+        test_capture_health_provider_reports_missing_frame,
+        test_capture_health_provider_reports_multi_camera_mixed_state,
+        test_modern_capture_health_summary_uses_hybrid_provider_static,
         test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static,
     ]
 

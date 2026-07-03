@@ -97,6 +97,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     current capture/watchdog summary metadata" e' ora Hybrid-owned tramite
     `ModernAdminWatchdogStatusSummaryProvider`; `_miscDb` reads e status code
     constants restano adapter Flask/Classic;
+  - il boundary read-only "profile/camera config + latest frame metadata ->
+    per-camera capture health summary" e' ora Hybrid-owned tramite
+    `ModernAdminCaptureHealthSummaryProvider`; query latest frame e config lookup
+    restano adapter Flask/DB;
   - service control effects, sensori/meteo/GPS e watchdog behavior/polling
     restano fuori scope e Classic/Flask-owned per ora.
 - Emergency runtime recovery:
