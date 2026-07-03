@@ -22,6 +22,46 @@ class ModernAdminSettingsRuntimeService:
         return IndiAllSkyConfig()
 
 
+class ModernAdminSettingsRestoreValidationError(ValueError):
+    pass
+
+
+class ModernAdminSettingsRestoreService:
+    """Hybrid-owned boundary for settings restore execution intent.
+
+    The service validates the restore target and delegates persistence to the
+    existing config adapter so restore behavior and storage semantics remain
+    unchanged.
+    """
+
+    REQUIRED_CONFIG_KEYS = (
+        'INDI_SERVER',
+        'CCD_CONFIG',
+        'INDI_CONFIG_DEFAULTS',
+    )
+
+    DEFAULT_RESTORE_NOTE = 'Manual config restore from upload'
+
+    def restore_config(self, config, username, config_adapter, note=None):
+        self.validate_restore_target(config)
+        config_adapter.config = config
+        return config_adapter.save(username, note or self.DEFAULT_RESTORE_NOTE)
+
+
+    def validate_restore_target(self, config):
+        if not isinstance(config, dict):
+            raise ModernAdminSettingsRestoreValidationError('Not a valid indi-allsky config')
+
+        if (
+            not isinstance(config.get('INDI_SERVER'), str)
+            or not isinstance(config.get('CCD_CONFIG'), dict)
+            or not isinstance(config.get('INDI_CONFIG_DEFAULTS'), dict)
+        ):
+            raise ModernAdminSettingsRestoreValidationError('Not a valid indi-allsky config')
+
+        return True
+
+
 class ModernAdminSettingsRevisionMetadataService:
     """Hybrid-owned read model for config revision metadata.
 

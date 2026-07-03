@@ -52,6 +52,8 @@ from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContra
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
+from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreService
+from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreValidationError
 from ..modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
@@ -12759,6 +12761,10 @@ class AjaxConfigRestoreView(BaseView):
     methods = ['POST']
 
 
+    def settings_restore_service(self):
+        return ModernAdminSettingsRestoreService()
+
+
     def dispatch_request(self):
         if not current_user.is_admin:
             return jsonify({}), 400
@@ -12814,8 +12820,9 @@ class AjaxConfigRestoreView(BaseView):
             tmp_config_p.unlink()  # cleanup
 
 
-        # basic config validation
-        if not isinstance(config_dict.get('INDI_SERVER'), str) or not isinstance(config_dict.get('CCD_CONFIG'), dict) or not isinstance(config_dict.get('INDI_CONFIG_DEFAULTS'), dict):
+        try:
+            self.settings_restore_service().validate_restore_target(config_dict)
+        except ModernAdminSettingsRestoreValidationError:
             error_data = {
                 'form_global' : ['Please fix the errors above'],
                 'CONFIG_UPLOAD' : ['Not a valid indi-allsky config'],
@@ -12831,9 +12838,11 @@ class AjaxConfigRestoreView(BaseView):
 
 
         try:
-            # replace config
-            self._indi_allsky_config_obj.config = config_dict
-            self._indi_allsky_config_obj.save(username, 'Manual config restore from upload')
+            self.settings_restore_service().restore_config(
+                config=config_dict,
+                username=username,
+                config_adapter=self._indi_allsky_config_obj,
+            )
         except ConfigSaveException as e:
             error_data = {
                 'form_global' : ['Please fix the errors above'],

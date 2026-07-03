@@ -8,6 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
+from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRestoreService
+from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRestoreValidationError
 
 
 class FakeConfigAdapter:
@@ -130,6 +132,53 @@ def test_settings_runtime_service_has_no_flask_or_db_dependency():
     assert 'db.session' not in source
 
 
+def valid_restore_config():
+    return {
+        'INDI_SERVER': 'localhost',
+        'CCD_CONFIG': {},
+        'INDI_CONFIG_DEFAULTS': {},
+    }
+
+
+def test_settings_restore_service_validates_and_delegates_to_adapter():
+    adapter = FakeConfigAdapter()
+    config = valid_restore_config()
+    service = ModernAdminSettingsRestoreService()
+
+    result = service.restore_config(
+        config=config,
+        username='admin',
+        config_adapter=adapter,
+    )
+
+    assert result == 'saved-config-row'
+    assert adapter.config is config
+    assert adapter.save_calls == [{
+        'username': 'admin',
+        'note': 'Manual config restore from upload',
+        'config': config,
+    }]
+
+
+def test_settings_restore_service_rejects_invalid_target_before_save():
+    adapter = FakeConfigAdapter()
+    service = ModernAdminSettingsRestoreService()
+
+    try:
+        service.restore_config(
+            config={'INDI_SERVER': 'localhost'},
+            username='admin',
+            config_adapter=adapter,
+        )
+    except ModernAdminSettingsRestoreValidationError as e:
+        assert str(e) == 'Not a valid indi-allsky config'
+    else:
+        raise AssertionError('Invalid restore target was not rejected')
+
+    assert adapter.config is None
+    assert adapter.save_calls == []
+
+
 def test_settings_revision_history_context_formats_metadata_rows():
     revision = FakeConfigRevision(
         revision_id=7,
@@ -234,13 +283,29 @@ def test_modern_config_history_views_use_revision_metadata_service():
     assert 'format_config_datetime' not in modern_history_source
 
 
+def test_ajax_config_restore_view_uses_restore_service_boundary():
+    views_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py'
+    source = views_path.read_text()
+    start = source.index('class AjaxConfigRestoreView')
+    end = source.index('class AjaxSelectCameraView')
+    ajax_restore_source = source[start:end]
+
+    assert 'ModernAdminSettingsRestoreService' in ajax_restore_source
+    assert 'settings_restore_service().restore_config(' in ajax_restore_source
+    assert 'self._indi_allsky_config_obj.save(' not in ajax_restore_source
+    assert 'self._indi_allsky_config_obj.config = config_dict' not in ajax_restore_source
+
+
 if __name__ == '__main__':
     test_settings_runtime_service_saves_config_revision_through_adapter()
     test_settings_runtime_service_propagates_adapter_exception()
     test_settings_runtime_service_has_no_flask_or_db_dependency()
+    test_settings_restore_service_validates_and_delegates_to_adapter()
+    test_settings_restore_service_rejects_invalid_target_before_save()
     test_settings_revision_history_context_formats_metadata_rows()
     test_settings_revision_restore_context_adds_restore_metadata_only()
     test_settings_revision_restore_detail_uses_injected_lookup()
     test_modern_settings_views_use_runtime_service_for_config_revision_save()
     test_modern_config_history_views_use_revision_metadata_service()
+    test_ajax_config_restore_view_uses_restore_service_boundary()
     print('Modern admin settings runtime tests passed')
