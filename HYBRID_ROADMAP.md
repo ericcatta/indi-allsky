@@ -53,6 +53,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - la serializzazione item di `ModernAdminMediaListView` e' ora Hybrid-owned
     tramite `ModernAdminMediaItemSerializer`; query, filtri, paginazione,
     lightbox/download e media internals restano invariati;
+  - il planning read-only delle query `ModernAdminMediaListView` e' ora
+    Hybrid-owned tramite `ModernAdminMediaListQueryPlanner`; SQLAlchemy query
+    execution, Gallery pagination e media internals restano adapter/view-owned;
   - le query camera/image e la normalizzazione URL locale sono iniettate dal
     layer Flask, mentre `getUrl()` resta adapter/fallback media esistente;
   - preview/download/cache/filesystem/FITS/RAW e media browse internals restano

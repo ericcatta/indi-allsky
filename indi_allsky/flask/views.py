@@ -38,6 +38,7 @@ from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
 from ..modern_admin_media_runtime import ModernAdminMediaItemSerializer
+from ..modern_admin_media_runtime import ModernAdminMediaListQueryPlanner
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from ..modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
@@ -14259,20 +14260,37 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
         if not getattr(self, 'camera', None):
             return list()
 
+        query_plan = self.get_media_list_query_plan()
+
         # Read-only media inventory; reuses the existing DB models behind classic viewers.
         try:
-            query = self.modern_admin_media_model.query\
-                .join(self.modern_admin_media_model.camera)\
-                .order_by(self.modern_admin_media_model.createDate.desc())
+            query = self.modern_admin_media_model.query
+            query = self.apply_media_list_query_plan(query, query_plan)
 
-            query = self.apply_media_camera_filter(query)
-
-            return query\
-                .limit(self.modern_admin_media_limit)\
-                .all()
+            return query.all()
         except Exception as e:
             app.logger.error('Error querying modern admin media entries: %s', str(e))
             return list()
+
+
+    def get_media_list_query_plan(self):
+        return ModernAdminMediaListQueryPlanner().build_plan(
+            selected_camera_id=self.get_selected_media_camera_id(),
+            limit=self.modern_admin_media_limit,
+        )
+
+
+    def apply_media_list_query_plan(self, query, query_plan):
+        if query_plan.join_camera:
+            query = query.join(self.modern_admin_media_model.camera)
+
+        if query_plan.order_latest:
+            query = query.order_by(self.modern_admin_media_model.createDate.desc())
+
+        if query_plan.selected_camera_id is not None:
+            query = query.filter(IndiAllSkyDbCameraTable.id == query_plan.selected_camera_id)
+
+        return query.limit(query_plan.limit)
 
 
     def serialize_media_entry(self, media_entry):

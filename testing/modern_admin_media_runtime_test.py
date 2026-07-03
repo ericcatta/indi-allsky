@@ -12,6 +12,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaItemSerializer
+from indi_allsky.modern_admin_media_runtime import ModernAdminMediaListQueryPlanner
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from indi_allsky.modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 
@@ -443,6 +444,47 @@ def test_media_list_view_delegates_item_serialization_to_runtime_service():
     assert_true("'dimensions'  :" not in body, 'media list view must not own dimensions item shape')
 
 
+def test_media_list_query_planner_builds_default_plan():
+    plan = ModernAdminMediaListQueryPlanner().build_plan()
+
+    assert_true(plan.to_dict() == {
+        'selected_camera_id': None,
+        'limit'             : 24,
+        'join_camera'       : True,
+        'order_latest'      : True,
+    }, 'default media list query plan must preserve existing list behavior')
+
+
+def test_media_list_query_planner_normalizes_camera_and_limit_intent():
+    planner = ModernAdminMediaListQueryPlanner()
+
+    plan = planner.build_plan(selected_camera_id='7', limit='48')
+    assert_true(plan.selected_camera_id == 7, 'camera id should normalize to int')
+    assert_true(plan.limit == 48, 'limit should normalize to int')
+
+    plan = planner.build_plan(selected_camera_id='invalid', limit='invalid')
+    assert_true(plan.selected_camera_id is None, 'invalid camera id should fall back to all cameras')
+    assert_true(plan.limit == 24, 'invalid limit should fall back to existing default')
+
+    plan = planner.build_plan(selected_camera_id=0, limit=None)
+    assert_true(plan.selected_camera_id is None, 'non-positive camera id should fall back to all cameras')
+    assert_true(plan.limit == 24, 'missing limit should fall back to existing default')
+
+
+def test_media_list_view_delegates_query_planning_to_runtime_service():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ModernAdminMediaListView')
+    end = source.index('class ModernAdminMediaGalleryView', start)
+    body = source[start:end]
+
+    assert_true('ModernAdminMediaListQueryPlanner' in source, 'views must import Hybrid media list query planner')
+    assert_true('def get_media_list_query_plan(self):' in body, 'media list view must construct query plan')
+    assert_true('def apply_media_list_query_plan(self, query, query_plan):' in body, 'media list view must apply query plan explicitly')
+    assert_true('self.apply_media_camera_filter(query)' not in body, 'media list view should not own selected camera intent inline')
+    assert_true('.filter(IndiAllSkyDbCameraTable.id == self.camera.id)' not in body, 'media list view must not force active camera only')
+    assert_true('return query.limit(query_plan.limit)' in body, 'media list query plan must own limit intent')
+
+
 def test_media_runtime_service_has_no_flask_db_or_filesystem_access():
     import indi_allsky.modern_admin_media_runtime as module
 
@@ -472,6 +514,9 @@ def run_tests():
     test_media_item_serializer_preserves_existing_item_shape()
     test_media_item_serializer_handles_missing_optional_metadata_safely()
     test_media_list_view_delegates_item_serialization_to_runtime_service()
+    test_media_list_query_planner_builds_default_plan()
+    test_media_list_query_planner_normalizes_camera_and_limit_intent()
+    test_media_list_view_delegates_query_planning_to_runtime_service()
     test_media_runtime_service_has_no_flask_db_or_filesystem_access()
     print('Modern admin media runtime checks passed')
 

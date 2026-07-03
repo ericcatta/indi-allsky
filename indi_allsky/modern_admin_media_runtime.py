@@ -1,6 +1,68 @@
 from pathlib import Path
 
 
+class ModernAdminMediaListQueryPlan:
+    """Read-only query intent for Modern/Admin media list pages."""
+
+    def __init__(
+        self,
+        selected_camera_id=None,
+        limit=24,
+        join_camera=True,
+        order_latest=True,
+    ):
+        self.selected_camera_id = selected_camera_id
+        self.limit = limit
+        self.join_camera = bool(join_camera)
+        self.order_latest = bool(order_latest)
+
+
+    def to_dict(self):
+        return {
+            'selected_camera_id': self.selected_camera_id,
+            'limit'             : self.limit,
+            'join_camera'       : self.join_camera,
+            'order_latest'      : self.order_latest,
+        }
+
+
+class ModernAdminMediaListQueryPlanner:
+    """Hybrid-owned planning boundary; the caller still executes the query."""
+
+    def build_plan(self, selected_camera_id=None, limit=24):
+        return ModernAdminMediaListQueryPlan(
+            selected_camera_id=self.normalize_camera_id(selected_camera_id),
+            limit=self.normalize_limit(limit),
+            join_camera=True,
+            order_latest=True,
+        )
+
+
+    def normalize_camera_id(self, value):
+        if value in (None, ''):
+            return None
+
+        try:
+            camera_id = int(value)
+        except (TypeError, ValueError):
+            return None
+
+        if camera_id <= 0:
+            return None
+
+        return camera_id
+
+
+    def normalize_limit(self, value):
+        if value is None:
+            return 24
+
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 24
+
+
 class ModernAdminMediaUrlNormalizer:
     """Hybrid-owned URL shaping for Modern/Admin media surfaces."""
 

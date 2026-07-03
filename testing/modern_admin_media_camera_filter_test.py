@@ -63,7 +63,8 @@ def test_media_list_uses_selected_camera_filter_instead_of_active_camera_only():
     body = class_body(read_views(), 'ModernAdminMediaListView')
 
     assert_true('self.add_media_camera_filter_context(context)' in body, 'media list pages must expose camera filter context')
-    assert_true('self.apply_media_camera_filter(query)' in body, 'media list queries must use selected camera filter')
+    assert_true('self.get_media_list_query_plan()' in body, 'media list queries must use Hybrid query planning')
+    assert_true('query_plan.selected_camera_id' in body, 'media list query plan must carry selected camera filter')
     assert_true('.filter(IndiAllSkyDbCameraTable.id == self.camera.id)' not in body, 'media list must not force active camera only')
 
 
