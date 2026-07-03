@@ -1203,6 +1203,89 @@ class LogDownloadSafeAction(ModernAdminSafeAction):
         return self.log_service.policy.normalize_log_name(value)
 
 
+class ModernAdminCaptureServiceCommandBoundary:
+    """Hybrid-owned command boundary for capture service controls.
+
+    The boundary owns request intent normalization and command allowlisting.
+    The injected effect adapter remains responsible for the actual service
+    command, preserving existing runtime behavior.
+    """
+
+    action_id = 'capture.service_control'
+    feature = 'Capture Service'
+    risk_level = 'critical'
+
+    DEFAULT_COMMANDS = {
+        'start'   : 'started',
+        'stop'    : 'stopped',
+        'restart' : 'restarted',
+    }
+
+    def __init__(self, effect_adapter=None, valid_commands=None):
+        self.effect_adapter = effect_adapter
+        self.valid_commands = dict(valid_commands or self.DEFAULT_COMMANDS)
+
+
+    def normalize_command(self, value):
+        if isinstance(value, dict) or hasattr(value, 'get'):
+            value = value.get('command')
+
+        if value is None or isinstance(value, bool):
+            return ''
+
+        return str(value).strip().lower()
+
+
+    def run(self, command=None, actor=None, payload=None):
+        payload = payload or {}
+        command = self.normalize_command(command if command is not None else payload)
+
+        if command not in self.valid_commands:
+            return ModernAdminSafeActionResult(
+                action_id=self.action_id,
+                feature=self.feature,
+                risk_level=self.risk_level,
+                status='validation_failed',
+                message='Invalid capture command.',
+                dry_run=False,
+                allowed=False,
+                details={
+                    'command': command,
+                },
+            )
+
+        if self.effect_adapter is None:
+            return ModernAdminSafeActionResult(
+                action_id=self.action_id,
+                feature=self.feature,
+                risk_level=self.risk_level,
+                status='not_implemented',
+                message='Capture service command adapter is not configured.',
+                dry_run=False,
+                allowed=False,
+                details={
+                    'command': command,
+                },
+            )
+
+        effect_result = self.effect_adapter(command)
+
+        return ModernAdminSafeActionResult(
+            action_id=self.action_id,
+            feature=self.feature,
+            risk_level=self.risk_level,
+            status='executed',
+            message='Capture service command executed.',
+            dry_run=False,
+            allowed=True,
+            details={
+                'command'       : command,
+                'past_tense'    : self.valid_commands[command],
+                'service_result': effect_result,
+            },
+        )
+
+
 class ModernAdminSafeActionRegistry:
     def __init__(self):
         self._actions = {}

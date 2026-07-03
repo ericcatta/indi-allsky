@@ -23,6 +23,7 @@ from indi_allsky.modern_safe_action import ImageUnexcludeSafeAction
 from indi_allsky.modern_safe_action import LogDownloadPolicy
 from indi_allsky.modern_safe_action import LogDownloadSafeAction
 from indi_allsky.modern_safe_action import LogDownloadService
+from indi_allsky.modern_safe_action import ModernAdminCaptureServiceCommandBoundary
 from indi_allsky.modern_safe_action import NotificationAcknowledgeDbAdapter
 from indi_allsky.modern_safe_action import NotificationAcknowledgeRepositoryError
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
@@ -1500,6 +1501,57 @@ def test_runner_has_no_flask_request_dependency():
     assert result.allowed is True
 
 
+def test_capture_service_command_boundary_normalizes_command_intent():
+    boundary = ModernAdminCaptureServiceCommandBoundary(effect_adapter=lambda command: {'returncode': 0, 'output': ''})
+
+    assert boundary.normalize_command({'command': ' Restart '}) == 'restart'
+    assert boundary.normalize_command({'command': 'STOP'}) == 'stop'
+    assert boundary.normalize_command({'command': None}) == ''
+    assert boundary.normalize_command({'command': True}) == ''
+
+
+def test_capture_service_command_boundary_rejects_invalid_without_adapter_call():
+    calls = []
+    boundary = ModernAdminCaptureServiceCommandBoundary(effect_adapter=lambda command: calls.append(command))
+
+    result = boundary.run(payload={'command': 'rm -rf'})
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert result.details['command'] == 'rm -rf'
+    assert calls == []
+
+
+def test_capture_service_command_boundary_delegates_valid_command_only():
+    calls = []
+
+    def fake_effect(command):
+        calls.append(command)
+        return {
+            'returncode': 0,
+            'output': '',
+        }
+
+    boundary = ModernAdminCaptureServiceCommandBoundary(effect_adapter=fake_effect)
+    result = boundary.run(payload={'command': ' restart '})
+
+    assert result.status == 'executed'
+    assert result.allowed is True
+    assert result.details['command'] == 'restart'
+    assert result.details['past_tense'] == 'restarted'
+    assert result.details['service_result'] == {'returncode': 0, 'output': ''}
+    assert calls == ['restart']
+
+
+def test_capture_service_command_boundary_requires_effect_adapter():
+    boundary = ModernAdminCaptureServiceCommandBoundary()
+    result = boundary.run(payload={'command': 'start'})
+
+    assert result.status == 'not_implemented'
+    assert result.allowed is False
+    assert result.details['command'] == 'start'
+
+
 def test_notification_acknowledge_dry_run_registry_has_no_execute_callback():
     registry = build_notification_acknowledge_dry_run_registry(
         permission_check=lambda actor: True,
@@ -1595,6 +1647,13 @@ def get_safe_action_dry_run_view_source():
     return source[class_start:class_end], source
 
 
+def get_capture_service_action_view_source():
+    source = (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    class_start = source.index('class ModernAdminCaptureServiceActionView')
+    class_end = source.index('class SystemInfoView')
+    return source[class_start:class_end], source
+
+
 def get_flask_init_source():
     return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / '__init__.py').read_text()
 
@@ -1648,6 +1707,15 @@ def test_safe_action_dry_run_view_has_no_legacy_ack_path_static():
     assert 'setAck(' not in view_source
     assert 'db.session' not in view_source
     assert 'commit(' not in view_source
+
+
+def test_capture_service_action_view_uses_hybrid_boundary_static():
+    view_source, _full_source = get_capture_service_action_view_source()
+
+    assert 'ModernAdminCaptureServiceCommandBoundary' in view_source
+    assert 'get_capture_service_command_boundary' in view_source
+    assert 'effect_adapter=self.run_capture_service_command' in view_source
+    assert 'command not in self.valid_commands' not in view_source
 
 
 def test_safe_action_dry_run_helper_response_shape():
@@ -2060,6 +2128,10 @@ if __name__ == '__main__':
     test_runner_execute_failure_structured()
     test_runner_audit_redaction()
     test_runner_has_no_flask_request_dependency()
+    test_capture_service_command_boundary_normalizes_command_intent()
+    test_capture_service_command_boundary_rejects_invalid_without_adapter_call()
+    test_capture_service_command_boundary_delegates_valid_command_only()
+    test_capture_service_command_boundary_requires_effect_adapter()
     test_notification_acknowledge_dry_run_registry_has_no_execute_callback()
     test_dry_run_helper_missing_action_id()
     test_dry_run_helper_unknown_action_id()
@@ -2072,6 +2144,7 @@ if __name__ == '__main__':
     test_safe_action_dry_run_view_permission_policy_static()
     test_safe_action_dry_run_view_status_mapping_static()
     test_safe_action_dry_run_view_has_no_legacy_ack_path_static()
+    test_capture_service_action_view_uses_hybrid_boundary_static()
     test_safe_action_dry_run_helper_response_shape()
     test_safe_action_dry_run_helper_missing_action_id_response_shape()
     test_safe_action_dry_run_helper_unknown_action_response_shape()

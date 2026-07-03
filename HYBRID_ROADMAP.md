@@ -60,6 +60,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     layer Flask, mentre `getUrl()` resta adapter/fallback media esistente;
   - preview/download/cache/filesystem/FITS/RAW e media browse internals restano
     fuori scope e Classic-owned per ora.
+- Book 2 / Safe Actions Runtime:
+  - il boundary "capture service request -> normalize/allowlist command ->
+    delegate effect" e' ora Hybrid-owned tramite
+    `ModernAdminCaptureServiceCommandBoundary`;
+  - l'effetto `systemctl --user start/stop/restart indi-allsky.service` resta
+    adapter operativo esistente nel layer Flask; capture controls piu' ampi,
+    retry/regenerate/maintenance/system actions restano Classic-owned o da
+    isolare.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.

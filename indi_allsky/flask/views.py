@@ -30,6 +30,7 @@ from ..event_candidate import default_event_candidate_runtime_path
 from ..event_candidate import default_event_timeline_dir
 from ..frame_metadata import default_frame_metadata_dir
 from ..frame_metadata_analytics import FrameMetadataAnalytics
+from ..modern_safe_action import ModernAdminCaptureServiceCommandBoundary
 from ..modern_safe_action import run_modern_safe_action_dry_run
 from ..modern_admin_notifications import ModernAdminNotificationReadService
 from ..modern_admin_media_metadata import ModernAdminKeogramMetadataService
@@ -8278,12 +8279,6 @@ class ModernAdminCaptureServiceActionView(BaseView):
     decorators = [login_required]
 
     service_name = 'indi-allsky.service'
-    valid_commands = {
-        'start'   : 'started',
-        'stop'    : 'stopped',
-        'restart' : 'restarted',
-    }
-
     def dispatch_request(self):
         if request.method == 'GET':
             return jsonify({
@@ -8297,16 +8292,11 @@ class ModernAdminCaptureServiceActionView(BaseView):
                 status_code=403,
             )
 
-        command = self.get_requested_command()
-        if command not in self.valid_commands:
-            return self.get_response(
-                False,
-                'Invalid capture command.',
-                status_code=400,
-            )
+        payload = self.get_request_payload()
+        boundary = self.get_capture_service_command_boundary()
 
         try:
-            result = self.run_capture_service_command(command)
+            action_result = boundary.run(payload=payload, actor=current_user)
         except TimeoutError:
             return self.get_response(
                 False,
@@ -8321,6 +8311,22 @@ class ModernAdminCaptureServiceActionView(BaseView):
                 status_code=500,
             )
 
+        if action_result.status == 'validation_failed':
+            return self.get_response(
+                False,
+                'Invalid capture command.',
+                status_code=400,
+            )
+
+        if action_result.status != 'executed':
+            return self.get_response(
+                False,
+                action_result.message,
+                status_code=500,
+            )
+
+        command = action_result.details['command']
+        result = action_result.details['service_result']
         if result['returncode'] != 0:
             app.logger.error('Capture service %s failed: %s', command, result['output'])
             message = 'Capture service {0:s} failed.'.format(command)
@@ -8329,16 +8335,22 @@ class ModernAdminCaptureServiceActionView(BaseView):
 
             return self.get_response(False, message, status_code=500)
 
-        message = 'Capture service {0:s}.'.format(self.valid_commands[command])
+        message = 'Capture service {0:s}.'.format(action_result.details['past_tense'])
         return self.get_response(True, message)
 
 
-    def get_requested_command(self):
+    def get_request_payload(self):
         payload = request.get_json(silent=True) or {}
         if not payload:
             payload = request.form
 
-        return str(payload.get('command', '')).strip().lower()
+        return payload
+
+
+    def get_capture_service_command_boundary(self):
+        return ModernAdminCaptureServiceCommandBoundary(
+            effect_adapter=self.run_capture_service_command,
+        )
 
 
     def run_capture_service_command(self, command):
