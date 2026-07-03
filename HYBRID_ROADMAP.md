@@ -33,8 +33,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - la decisione post-restore flush/reset e' ora Hybrid-owned tramite
     `ModernAdminSettingsRestoreService`; gli effetti DB/file restano adapter
     Classic/fallback;
-  - rollback, full config save, reload/restart dopo save e salvataggi
-    ConfigView legacy restano Classic-owned.
+  - il boundary "settings save -> reload requested? -> queue reload command" e'
+    ora Hybrid-owned tramite `ModernAdminSettingsReloadCommandService`; status
+    DB/task queue restano adapter Classic/fallback;
+  - rollback, full config save e salvataggi ConfigView legacy restano
+    Classic-owned.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.

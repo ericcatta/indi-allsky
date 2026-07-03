@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
+from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRestoreService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRestoreValidationError
@@ -34,6 +35,15 @@ class CallRecorder:
 
     def __call__(self):
         self.calls += 1
+
+
+class ActionRecorder:
+    def __init__(self):
+        self.actions = []
+
+
+    def __call__(self, action):
+        self.actions.append(action)
 
 
 class FakeUser:
@@ -246,6 +256,45 @@ def test_settings_restore_service_allows_partial_post_restore_cleanup():
     assert reset_adapter.calls == 0
 
 
+def test_settings_reload_command_service_defaults_to_noop_plan():
+    status_adapter = CallRecorder()
+    task_adapter = ActionRecorder()
+    service = ModernAdminSettingsReloadCommandService()
+
+    plan = service.execute_after_save(
+        status_adapter=status_adapter,
+        task_adapter=task_adapter,
+    )
+
+    assert plan == {
+        'reload_requested': False,
+        'task_action': None,
+        'success_message': 'Saved new config',
+    }
+    assert status_adapter.calls == 0
+    assert task_adapter.actions == []
+
+
+def test_settings_reload_command_service_delegates_explicit_reload_request():
+    status_adapter = CallRecorder()
+    task_adapter = ActionRecorder()
+    service = ModernAdminSettingsReloadCommandService()
+
+    plan = service.execute_after_save(
+        reload_requested='y',
+        status_adapter=status_adapter,
+        task_adapter=task_adapter,
+    )
+
+    assert plan == {
+        'reload_requested': True,
+        'task_action': 'reload',
+        'success_message': 'Saved new config,  Reloading indi-allsky service.',
+    }
+    assert status_adapter.calls == 1
+    assert task_adapter.actions == ['reload']
+
+
 def test_settings_revision_history_context_formats_metadata_rows():
     revision = FakeConfigRevision(
         revision_id=7,
@@ -366,6 +415,20 @@ def test_ajax_config_restore_view_uses_restore_service_boundary():
     assert 'if reset_keys:' not in ajax_restore_source
 
 
+def test_ajax_config_view_uses_reload_command_boundary():
+    views_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py'
+    source = views_path.read_text()
+    start = source.index('class AjaxConfigView')
+    end = source.index('class AjaxSetTimeView')
+    ajax_config_source = source[start:end]
+
+    assert 'ModernAdminSettingsReloadCommandService' in ajax_config_source
+    assert 'settings_reload_command_service().execute_after_save(' in ajax_config_source
+    assert "data={'action' : 'reload'}" not in ajax_config_source
+    assert "if reload_on_save:" not in ajax_config_source
+    assert "'Saved new config,  Reloading indi-allsky service.'" not in ajax_config_source
+
+
 if __name__ == '__main__':
     test_settings_runtime_service_saves_config_revision_through_adapter()
     test_settings_runtime_service_propagates_adapter_exception()
@@ -375,10 +438,13 @@ if __name__ == '__main__':
     test_settings_restore_service_skips_post_restore_cleanup_by_default()
     test_settings_restore_service_delegates_requested_post_restore_cleanup()
     test_settings_restore_service_allows_partial_post_restore_cleanup()
+    test_settings_reload_command_service_defaults_to_noop_plan()
+    test_settings_reload_command_service_delegates_explicit_reload_request()
     test_settings_revision_history_context_formats_metadata_rows()
     test_settings_revision_restore_context_adds_restore_metadata_only()
     test_settings_revision_restore_detail_uses_injected_lookup()
     test_modern_settings_views_use_runtime_service_for_config_revision_save()
     test_modern_config_history_views_use_revision_metadata_service()
     test_ajax_config_restore_view_uses_restore_service_boundary()
+    test_ajax_config_view_uses_reload_command_boundary()
     print('Modern admin settings runtime tests passed')

@@ -84,6 +84,39 @@ class ModernAdminSettingsRestoreService:
         return True
 
 
+class ModernAdminSettingsReloadCommandService:
+    """Hybrid-owned reload/restart intent boundary for settings saves."""
+
+    RELOAD_ACTION = 'reload'
+    SAVE_MESSAGE = 'Saved new config'
+    RELOAD_MESSAGE = 'Saved new config,  Reloading indi-allsky service.'
+
+    def execute_after_save(self, reload_requested=None, status_adapter=None, task_adapter=None):
+        plan = self.build_after_save_plan(reload_requested=reload_requested)
+
+        if plan['reload_requested']:
+            if status_adapter is not None:
+                status_adapter()
+
+            if task_adapter is not None:
+                task_adapter(plan['task_action'])
+
+        return plan
+
+
+    def build_after_save_plan(self, reload_requested=None):
+        reload_enabled = self.normalize_reload_intent(reload_requested)
+        return {
+            'reload_requested': reload_enabled,
+            'task_action': self.RELOAD_ACTION if reload_enabled else None,
+            'success_message': self.RELOAD_MESSAGE if reload_enabled else self.SAVE_MESSAGE,
+        }
+
+
+    def normalize_reload_intent(self, reload_requested=None):
+        return bool(reload_requested)
+
+
 class ModernAdminSettingsRevisionMetadataService:
     """Hybrid-owned read model for config revision metadata.
 

@@ -51,6 +51,7 @@ from ..modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContr
 from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
+from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreValidationError
@@ -3219,6 +3220,26 @@ class AjaxConfigView(BaseView):
     methods = ['POST']
     decorators = [login_required]
 
+    def settings_reload_command_service(self):
+        return ModernAdminSettingsReloadCommandService()
+
+
+    def mark_settings_reload_status(self):
+        self._miscDb.setState('STATUS', constants.STATUS_RELOADING)
+
+
+    def enqueue_settings_reload_task(self, task_action):
+        task_reload = IndiAllSkyDbTaskQueueTable(
+            queue=TaskQueueQueue.MAIN,
+            state=TaskQueueState.MANUAL,
+            priority=100,
+            data={'action' : task_action},
+        )
+
+        db.session.add(task_reload)
+        db.session.commit()
+
+
     def log_config_validation_errors(self, form_config):
         for field_name, errors in form_config.errors.items():
             field = getattr(form_config, field_name, None)
@@ -4159,26 +4180,15 @@ class AjaxConfigView(BaseView):
             return jsonify(error_data), 400
 
 
-        if reload_on_save:
-            self._miscDb.setState('STATUS', constants.STATUS_RELOADING)
+        reload_plan = self.settings_reload_command_service().execute_after_save(
+            reload_requested=reload_on_save,
+            status_adapter=self.mark_settings_reload_status,
+            task_adapter=self.enqueue_settings_reload_task,
+        )
 
-            task_reload = IndiAllSkyDbTaskQueueTable(
-                queue=TaskQueueQueue.MAIN,
-                state=TaskQueueState.MANUAL,
-                priority=100,
-                data={'action' : 'reload'},
-            )
-
-            db.session.add(task_reload)
-            db.session.commit()
-
-            message = {
-                'success-message' : 'Saved new config,  Reloading indi-allsky service.',
-            }
-        else:
-            message = {
-                'success-message' : 'Saved new config',
-            }
+        message = {
+            'success-message' : reload_plan['success_message'],
+        }
 
 
         return jsonify(message)
