@@ -37,6 +37,7 @@ from ..modern_admin_media_metadata import ModernAdminMiniTimelapseMetadataServic
 from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
+from ..modern_admin_media_runtime import ModernAdminMediaItemSerializer
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from ..modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
@@ -14275,31 +14276,15 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
 
 
     def serialize_media_entry(self, media_entry):
-        create_date = getattr(media_entry, 'createDate', None)
-        day_date = getattr(media_entry, 'dayDate', None)
-        file_size = getattr(media_entry, 'fileSize', None)
-        width = getattr(media_entry, 'width', None)
-        height = getattr(media_entry, 'height', None)
-        frames = getattr(media_entry, 'frames', None)
-        media_url = self.get_media_url(media_entry)
-        preview_url = self.get_media_preview_url(media_entry, media_url=media_url)
+        return self.get_media_item_serializer().serialize(media_entry)
 
-        return {
-            'id'          : media_entry.id,
-            'camera_id'   : getattr(media_entry, 'camera_id', None),
-            'title'       : self.format_media_title(media_entry),
-            'url'         : media_url,
-            'preview_url' : preview_url,
-            'filename'    : Path(media_entry.filename).name,
-            'created'     : create_date.strftime('%Y-%m-%d %H:%M:%S') if create_date else 'Unknown date',
-            'day_date'    : day_date.strftime('%Y-%m-%d') if day_date else 'Unknown day',
-            'age'         : self.format_media_age(create_date) if create_date else 'Unknown age',
-            'timeofday'   : self.format_media_timeofday(media_entry),
-            'size'        : self.format_media_size(file_size) if file_size else 'Unknown size',
-            'dimensions'  : '{0:d} x {1:d}'.format(width, height) if width and height else 'Unknown dimensions',
-            'frames'      : '{0:d} frames'.format(frames) if frames else None,
-            'success'     : getattr(media_entry, 'success', None),
-        }
+
+    def get_media_item_serializer(self):
+        return ModernAdminMediaItemSerializer(
+            media_url_provider=self.get_media_url,
+            preview_url_provider=self.get_media_preview_url,
+            clock=lambda: self.camera_now,
+        )
 
 
     def get_media_url(self, media_entry):
@@ -14323,39 +14308,6 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
 
     def get_media_preview_url(self, media_entry, media_url=None):
         return media_url if media_url is not None else self.get_media_url(media_entry)
-
-
-    def format_media_title(self, media_entry):
-        create_date = getattr(media_entry, 'createDate', None)
-        if create_date:
-            return create_date.strftime('%b %d, %H:%M')
-
-        day_date = getattr(media_entry, 'dayDate', None)
-        if day_date:
-            return day_date.strftime('%Y-%m-%d')
-
-        return Path(media_entry.filename).name
-
-
-    def format_media_timeofday(self, media_entry):
-        if not hasattr(media_entry, 'night'):
-            return 'Captured'
-
-        if media_entry.night:
-            return 'Night'
-
-        return 'Day'
-
-
-    def format_media_age(self, create_date):
-        age_s = max(0, int((self.camera_now - create_date).total_seconds()))
-
-        if age_s < 60:
-            return '{0:d}s ago'.format(age_s)
-        elif age_s < 3600:
-            return '{0:d}m ago'.format(int(age_s / 60))
-
-        return '{0:d}h ago'.format(int(age_s / 3600))
 
 
     def format_media_size(self, size_b):

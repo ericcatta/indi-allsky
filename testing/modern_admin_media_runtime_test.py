@@ -11,8 +11,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
+from indi_allsky.modern_admin_media_runtime import ModernAdminMediaItemSerializer
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from indi_allsky.modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
+
+
+DEFAULT = object()
 
 
 class FakeField:
@@ -43,7 +47,32 @@ class FakeImage:
 
 
 class FakeMediaEntry:
-    def __init__(self, thumbnail_uuid='thumb-1'):
+    def __init__(
+        self,
+        entry_id=44,
+        camera_id=2,
+        filename='/unsafe/path/frame.jpg',
+        create_date=DEFAULT,
+        day_date=DEFAULT,
+        file_size=2048,
+        width=1920,
+        height=1080,
+        frames=30,
+        night=True,
+        success=True,
+        thumbnail_uuid='thumb-1',
+    ):
+        self.id = entry_id
+        self.camera_id = camera_id
+        self.filename = filename
+        self.createDate = datetime(2026, 7, 3, 12, 0, 0) if create_date is DEFAULT else create_date
+        self.dayDate = datetime(2026, 7, 3) if day_date is DEFAULT else day_date
+        self.fileSize = file_size
+        self.width = width
+        self.height = height
+        self.frames = frames
+        self.night = night
+        self.success = success
         self.thumbnail_uuid = thumbnail_uuid
 
 
@@ -122,6 +151,24 @@ def build_preview_lookup(thumbnail_query=None):
             images_folder_url_builder=lambda path: '/images/{0:s}'.format(path),
         ),
         s3_prefix='https://cdn.invalid',
+    )
+
+
+def build_media_item_serializer(media_url='/images/full/frame.jpg', preview_url='/images/thumbs/frame.jpg', clock=None, calls=None):
+    call_log = calls if calls is not None else list()
+
+    def media_url_provider(entry):
+        call_log.append(('media_url', entry.id))
+        return media_url
+
+    def preview_url_provider(entry, media_url=None):
+        call_log.append(('preview_url', entry.id, media_url))
+        return preview_url
+
+    return ModernAdminMediaItemSerializer(
+        media_url_provider=media_url_provider,
+        preview_url_provider=preview_url_provider,
+        clock=clock or (lambda: datetime(2026, 7, 3, 12, 5, 0)),
     )
 
 
@@ -327,6 +374,75 @@ def test_gallery_preview_lookup_delegates_to_runtime_service():
     assert_true('.get_preview_url(' in body, 'Gallery preview URL should be delegated to Hybrid service')
 
 
+def test_media_item_serializer_preserves_existing_item_shape():
+    calls = list()
+    serializer = build_media_item_serializer(calls=calls)
+
+    item = serializer.serialize(FakeMediaEntry())
+
+    assert_true(item == {
+        'id'          : 44,
+        'camera_id'   : 2,
+        'title'       : 'Jul 03, 12:00',
+        'url'         : '/images/full/frame.jpg',
+        'preview_url' : '/images/thumbs/frame.jpg',
+        'filename'    : 'frame.jpg',
+        'created'     : '2026-07-03 12:00:00',
+        'day_date'    : '2026-07-03',
+        'age'         : '5m ago',
+        'timeofday'   : 'Night',
+        'size'        : '2.0 KB',
+        'dimensions'  : '1920 x 1080',
+        'frames'      : '30 frames',
+        'success'     : True,
+    }, 'media item serializer must preserve existing ModernAdminMediaListView shape')
+    assert_true(calls == [
+        ('media_url', 44),
+        ('preview_url', 44, '/images/full/frame.jpg'),
+    ], 'media item serializer must use injected URL and preview providers')
+
+
+def test_media_item_serializer_handles_missing_optional_metadata_safely():
+    serializer = build_media_item_serializer(media_url=None, preview_url=None)
+    entry = FakeMediaEntry(
+        filename=None,
+        create_date=None,
+        day_date=None,
+        file_size=None,
+        width=None,
+        height=None,
+        frames=None,
+        success=None,
+        thumbnail_uuid=None,
+    )
+
+    item = serializer.serialize(entry)
+
+    assert_true(item['title'] == 'Unknown', 'missing title metadata should fall back safely')
+    assert_true(item['filename'] == 'Unknown', 'missing filename should fall back safely')
+    assert_true(item['created'] == 'Unknown date', 'missing createDate should fall back safely')
+    assert_true(item['day_date'] == 'Unknown day', 'missing dayDate should fall back safely')
+    assert_true(item['age'] == 'Unknown age', 'missing createDate age should fall back safely')
+    assert_true(item['size'] == 'Unknown size', 'missing file size should fall back safely')
+    assert_true(item['dimensions'] == 'Unknown dimensions', 'missing dimensions should fall back safely')
+    assert_true(item['frames'] is None, 'missing frames should stay None')
+    assert_true(item['url'] is None, 'missing URL should stay None')
+    assert_true(item['preview_url'] is None, 'missing preview URL should stay None')
+
+
+def test_media_list_view_delegates_item_serialization_to_runtime_service():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ModernAdminMediaListView')
+    end = source.index('class ModernAdminMediaGalleryView', start)
+    body = source[start:end]
+
+    assert_true('ModernAdminMediaItemSerializer' in source, 'views must import Hybrid media item serializer')
+    assert_true('def get_media_item_serializer(self):' in body, 'media list view must construct item serializer')
+    assert_true('return self.get_media_item_serializer().serialize(media_entry)' in body, 'media list view must delegate item serialization')
+    assert_true("'preview_url' :" not in body, 'media list view must not own preview item shape')
+    assert_true("'dimensions'  :" not in body, 'media list view must not own dimensions item shape')
+
+
 def test_media_runtime_service_has_no_flask_db_or_filesystem_access():
     import indi_allsky.modern_admin_media_runtime as module
 
@@ -353,6 +469,9 @@ def run_tests():
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()
     test_preview_metadata_lookup_preserves_nonlocal_remote_policy()
     test_gallery_preview_lookup_delegates_to_runtime_service()
+    test_media_item_serializer_preserves_existing_item_shape()
+    test_media_item_serializer_handles_missing_optional_metadata_safely()
+    test_media_list_view_delegates_item_serialization_to_runtime_service()
     test_media_runtime_service_has_no_flask_db_or_filesystem_access()
     print('Modern admin media runtime checks passed')
 

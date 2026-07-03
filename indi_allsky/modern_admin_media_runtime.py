@@ -122,6 +122,119 @@ class ModernAdminPreviewMetadataLookupService:
             pass
 
 
+class ModernAdminMediaItemSerializer:
+    """Serialize one media DB row into the existing Modern/Admin view item shape."""
+
+    def __init__(
+        self,
+        media_url_provider,
+        preview_url_provider,
+        clock,
+    ):
+        self.media_url_provider = media_url_provider
+        self.preview_url_provider = preview_url_provider
+        self.clock = clock
+
+
+    def serialize(self, media_entry):
+        create_date = getattr(media_entry, 'createDate', None)
+        day_date = getattr(media_entry, 'dayDate', None)
+        file_size = getattr(media_entry, 'fileSize', None)
+        width = getattr(media_entry, 'width', None)
+        height = getattr(media_entry, 'height', None)
+        frames = getattr(media_entry, 'frames', None)
+        media_url = self.media_url_provider(media_entry)
+        preview_url = self.preview_url_provider(media_entry, media_url=media_url)
+
+        return {
+            'id'          : getattr(media_entry, 'id', None),
+            'camera_id'   : getattr(media_entry, 'camera_id', None),
+            'title'       : self.format_media_title(media_entry),
+            'url'         : media_url,
+            'preview_url' : preview_url,
+            'filename'    : self.format_filename(getattr(media_entry, 'filename', None)),
+            'created'     : self.format_datetime(create_date, default='Unknown date'),
+            'day_date'    : self.format_date(day_date, default='Unknown day'),
+            'age'         : self.format_media_age(create_date) if create_date else 'Unknown age',
+            'timeofday'   : self.format_media_timeofday(media_entry),
+            'size'        : self.format_media_size(file_size) if file_size else 'Unknown size',
+            'dimensions'  : self.format_dimensions(width, height),
+            'frames'      : '{0:d} frames'.format(frames) if frames else None,
+            'success'     : getattr(media_entry, 'success', None),
+        }
+
+
+    def format_media_title(self, media_entry):
+        create_date = getattr(media_entry, 'createDate', None)
+        if create_date:
+            return self.format_datetime(create_date, format_text='%b %d, %H:%M')
+
+        day_date = getattr(media_entry, 'dayDate', None)
+        if day_date:
+            return self.format_date(day_date)
+
+        return self.format_filename(getattr(media_entry, 'filename', None))
+
+
+    def format_media_timeofday(self, media_entry):
+        if not hasattr(media_entry, 'night'):
+            return 'Captured'
+
+        if media_entry.night:
+            return 'Night'
+
+        return 'Day'
+
+
+    def format_media_age(self, create_date):
+        age_s = max(0, int((self.clock() - create_date).total_seconds()))
+
+        if age_s < 60:
+            return '{0:d}s ago'.format(age_s)
+        elif age_s < 3600:
+            return '{0:d}m ago'.format(int(age_s / 60))
+
+        return '{0:d}h ago'.format(int(age_s / 3600))
+
+
+    def format_media_size(self, size_b):
+        size = float(size_b)
+        for unit in ('B', 'KB', 'MB', 'GB'):
+            if size < 1024.0:
+                return '{0:0.1f} {1:s}'.format(size, unit)
+            size /= 1024.0
+
+        return '{0:0.1f} TB'.format(size)
+
+
+    def format_datetime(self, value, default='Unknown', format_text='%Y-%m-%d %H:%M:%S'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime(format_text)
+        return str(value)
+
+
+    def format_date(self, value, default='Unknown'):
+        if not value:
+            return default
+        if hasattr(value, 'strftime'):
+            return value.strftime('%Y-%m-%d')
+        return str(value)
+
+
+    def format_filename(self, value):
+        if not value:
+            return 'Unknown'
+        return Path(str(value)).name
+
+
+    def format_dimensions(self, width, height):
+        if width and height:
+            return '{0:d} x {1:d}'.format(int(width), int(height))
+        return 'Unknown dimensions'
+
+
 class ModernAdminLatestCameraFramesRepository:
     """Bounded runtime source for the two latest Product UI camera images."""
 
