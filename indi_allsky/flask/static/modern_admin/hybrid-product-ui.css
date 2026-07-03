@@ -229,6 +229,7 @@
 }
 
 .hybrid-runtime-button {
+  -webkit-appearance: none;
   appearance: none;
   flex: 0 0 auto;
   border: 1px solid rgba(143, 216, 208, 0.22);
@@ -238,6 +239,16 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition: border-color 160ms ease, background 160ms ease, color 160ms ease, opacity 160ms ease;
+}
+
+.hybrid-app-topbar .hybrid-runtime-actions .hybrid-runtime-button,
+.hybrid-app-topbar .hybrid-runtime-actions .hybrid-runtime-button:disabled {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 999px;
+  font: inherit;
+  margin: 0;
+  text-decoration: none;
 }
 
 .hybrid-runtime-button:hover:not(:disabled) {

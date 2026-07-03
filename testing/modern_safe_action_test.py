@@ -2037,6 +2037,16 @@ def get_hybrid_product_css_source():
     return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'static' / 'modern_admin' / 'hybrid-product-ui.css').read_text()
 
 
+def get_hybrid_product_template_sources():
+    template_root = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'templates'
+    sources = []
+    for path in sorted(template_root.rglob('*.html')):
+        source = path.read_text()
+        if 'hybrid-product-ui.css' in source:
+            sources.append(source)
+    return '\n'.join(sources)
+
+
 def get_allsky_source():
     return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'allsky.py').read_text()
 
@@ -2207,11 +2217,20 @@ def test_hybrid_runtime_buttons_reset_native_browser_appearance_static():
     shared_block = source[shared_block_start:shared_block_end]
 
     assert 'appearance: none;' in button_block
+    assert '-webkit-appearance: none;' in button_block
     assert 'font: inherit;' in shared_block
     assert 'border-radius: 999px;' in shared_block
     assert 'box-sizing: border-box;' in shared_block
     assert '.hybrid-runtime-button:disabled' in source
+    assert '.hybrid-app-topbar .hybrid-runtime-actions .hybrid-runtime-button:disabled' in source
     assert 'opacity: 1;' in source
+
+
+def test_hybrid_product_css_cache_key_is_bumped_static():
+    source = get_hybrid_product_template_sources()
+
+    assert 'hybrid-product-ui-shell-004' in source
+    assert 'hybrid-product-ui-shell-001' not in source
 
 
 def test_abort_exposure_main_task_routes_to_capture_worker_queue_static():
@@ -2690,6 +2709,7 @@ if __name__ == '__main__':
     test_ajax_system_reboot_uses_hybrid_power_boundary_static()
     test_hybrid_shell_exposes_recovery_controls_static()
     test_hybrid_runtime_buttons_reset_native_browser_appearance_static()
+    test_hybrid_product_css_cache_key_is_bumped_static()
     test_abort_exposure_main_task_routes_to_capture_worker_queue_static()
     test_capture_worker_abort_exposure_queue_command_uses_camera_adapter_static()
     test_safe_action_dry_run_helper_response_shape()
