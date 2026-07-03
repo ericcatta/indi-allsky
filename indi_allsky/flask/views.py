@@ -44,6 +44,7 @@ from ..modern_admin_media_runtime import ModernAdminMediaItemSerializer
 from ..modern_admin_media_runtime import ModernAdminMediaListQueryPlanner
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from ..modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
+from ..modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
@@ -5138,7 +5139,7 @@ class AjaxMiniVideoViewerView(BaseView):
 def get_modern_admin_capture_service_status(service_name='indi-allsky.service'):
     import subprocess
 
-    try:
+    def systemctl_status_adapter(service_name):
         result = subprocess.run(
             ['systemctl', '--user', 'is-active', service_name],
             stdout=subprocess.PIPE,
@@ -5147,44 +5148,13 @@ def get_modern_admin_capture_service_status(service_name='indi-allsky.service'):
             timeout=5,
             check=False,
         )
-    except (OSError, subprocess.TimeoutExpired) as e:
         return {
-            'state'          : 'unknown',
-            'running'        : False,
-            'label'          : '? Unknown',
-            'tone'           : 'muted',
-            'toggle_command' : 'start',
-            'toggle_label'   : 'Start Capture',
-            'output'         : str(e),
+            'output': (result.stdout or '').strip(),
         }
 
-    state = (result.stdout or '').strip().split('\n')[0].strip().lower() or 'unknown'
-    running = state == 'active'
-    if running:
-        label = '● Running'
-        tone = 'good'
-        toggle_command = 'stop'
-        toggle_label = 'Stop Capture'
-    elif state == 'failed':
-        label = '● Failed'
-        tone = 'danger'
-        toggle_command = 'start'
-        toggle_label = 'Start Capture'
-    else:
-        label = '○ Stopped'
-        tone = 'muted'
-        toggle_command = 'start'
-        toggle_label = 'Start Capture'
-
-    return {
-        'state'          : state,
-        'running'        : running,
-        'label'          : label,
-        'tone'           : tone,
-        'toggle_command' : toggle_command,
-        'toggle_label'   : toggle_label,
-        'output'         : (result.stdout or '').strip(),
-    }
+    return ModernAdminServiceStatusProvider(
+        status_adapter=systemctl_status_adapter,
+    ).get_service_status(service_name)
 
 
 class ModernAdminView(TemplateView):

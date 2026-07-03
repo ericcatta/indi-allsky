@@ -78,6 +78,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     Hybrid-owned tramite `ModernAdminMaintenanceActionPlanner`; l'enqueue DB/task
     queue resta adapter Classic/Flask esistente, mentre expire/flush/reboot/
     poweroff/service controls restano fuori scope.
+- Book 2 / Runtime Providers:
+  - il boundary read-only "capture service -> service status payload" e' ora
+    Hybrid-owned tramite `ModernAdminServiceStatusProvider`; il comando
+    `systemctl --user is-active` resta adapter operativo nel layer Flask;
+  - service control effects, camera runtime provider, sensori/meteo/GPS e
+    watchdog restano fuori scope e Classic/Flask-owned per ora.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
