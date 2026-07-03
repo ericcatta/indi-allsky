@@ -51,6 +51,7 @@ from ..modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContr
 from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
+from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
@@ -12531,7 +12532,16 @@ class ModernAdminUserDetailView(ModernAdminUsersView):
         return context
 
 
-class ModernAdminConfigHistoryView(ModernAdminContextMixin, TemplateView):
+class ModernAdminConfigRevisionMetadataMixin:
+    def settings_revision_metadata_service(self):
+        return ModernAdminSettingsRevisionMetadataService(
+            query=IndiAllSkyDbConfigTable.query,
+            id_field=IndiAllSkyDbConfigTable.id,
+            created_field=IndiAllSkyDbConfigTable.createDate,
+        )
+
+
+class ModernAdminConfigHistoryView(ModernAdminConfigRevisionMetadataMixin, ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Config History'
     decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
@@ -12540,66 +12550,14 @@ class ModernAdminConfigHistoryView(ModernAdminContextMixin, TemplateView):
 
     def get_context(self):
         context = super(ModernAdminConfigHistoryView, self).get_context()
-
-        config_rows = list()
-        config_list = IndiAllSkyDbConfigTable.query\
-            .order_by(IndiAllSkyDbConfigTable.createDate.desc())\
-            .limit(self.config_display_limit)
-
-        for entry in config_list:
-            user_row = getattr(entry, 'user', None)
-            entry_data = entry.data if isinstance(entry.data, dict) else {}
-            summary, data_size = self.summarize_config_data(entry_data)
-
-            config_rows.append({
-                'id'         : entry.id,
-                'created'    : self.format_config_datetime(entry.createDate),
-                'user'       : user_row.username if user_row else 'Deleted user',
-                'user_id'    : user_row.id if user_row else 'N/A',
-                'level'      : entry.level or 'Unknown',
-                'encrypted'  : 'Yes' if bool(entry.encrypted) else 'No',
-                'note'       : entry.note or 'No note',
-                'summary'    : summary,
-                'data_size'  : data_size,
-            })
-
-        context['modern_admin_config_history_rows'] = config_rows
-        context['modern_admin_config_history_count'] = len(config_rows)
-        context['modern_admin_config_history_display_limit'] = self.config_display_limit
-        context['modern_admin_config_history_encrypted_count'] = len([
-            row for row in config_rows if row['encrypted'] == 'Yes'
-        ])
-        context['modern_admin_config_history_levels'] = sorted({row['level'] for row in config_rows})
-        context['modern_admin_config_history_encrypted_states'] = sorted({row['encrypted'] for row in config_rows})
+        context.update(self.settings_revision_metadata_service().history_context(
+            limit=self.config_display_limit,
+        ))
 
         return context
 
 
-    def format_config_datetime(self, value, default='Unknown'):
-        if not value:
-            return default
-        if hasattr(value, 'strftime'):
-            return value.strftime('%Y-%m-%d %H:%M:%S')
-        return str(value)
-
-
-    def summarize_config_data(self, data):
-        if not isinstance(data, dict):
-            if data is None:
-                return 'No config snapshot', 'N/A'
-            return 'Non-dict payload', 'N/A'
-
-        try:
-            size_bytes = len(json.dumps(data, default=str).encode('utf-8'))
-            size_display = '{:.1f} KB'.format(size_bytes / 1024.0)
-        except (TypeError, ValueError):
-            size_display = 'Unavailable'
-
-        summary = 'Keys: {0:d}'.format(len(data))
-        return summary, size_display
-
-
-class ModernAdminConfigRestoreView(ModernAdminContextMixin, TemplateView):
+class ModernAdminConfigRestoreView(ModernAdminConfigRevisionMetadataMixin, ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Config Restore'
     decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
@@ -12608,75 +12566,11 @@ class ModernAdminConfigRestoreView(ModernAdminContextMixin, TemplateView):
 
     def get_context(self):
         context = super(ModernAdminConfigRestoreView, self).get_context()
-
-        restore_rows = list()
-        config_list = IndiAllSkyDbConfigTable.query\
-            .order_by(IndiAllSkyDbConfigTable.createDate.desc())\
-            .limit(self.config_display_limit)
-
-        for entry in config_list:
-            user_row = getattr(entry, 'user', None)
-            entry_data = entry.data if isinstance(entry.data, dict) else {}
-            summary, data_size = self.summarize_config_data(entry_data)
-            has_payload = bool(entry_data)
-            restore_state = 'Unavailable'
-
-            if has_payload and summary != 'Non-dict payload':
-                restore_state = 'Likely restore candidate'
-
-            restore_rows.append({
-                'id'            : entry.id,
-                'created'       : self.format_config_datetime(entry.createDate),
-                'user'          : user_row.username if user_row else 'Deleted user',
-                'user_id'       : user_row.id if user_row else 'N/A',
-                'level'         : entry.level or 'Unknown',
-                'encrypted'     : 'Yes' if bool(entry.encrypted) else 'No',
-                'note'          : entry.note or 'No note',
-                'summary'       : summary,
-                'data_size'     : data_size,
-                'restore_state' : restore_state,
-            })
-
-        context['modern_admin_config_restore_rows'] = restore_rows
-        context['modern_admin_config_restore_count'] = len(restore_rows)
-        context['modern_admin_config_restore_display_limit'] = self.config_display_limit
-        context['modern_admin_config_restore_likely_count'] = len([
-            row for row in restore_rows if row['restore_state'] == 'Likely restore candidate'
-        ])
-        context['modern_admin_config_restore_encrypted_count'] = len([
-            row for row in restore_rows if row['encrypted'] == 'Yes'
-        ])
-        context['modern_admin_config_restore_levels'] = sorted({row['level'] for row in restore_rows})
-        context['modern_admin_config_restore_states'] = sorted({row['restore_state'] for row in restore_rows})
-        context['modern_admin_config_restore_warning'] = (
-            'Read-only inspection only. Actual restore flow remains in Classic UI.'
-        )
+        context.update(self.settings_revision_metadata_service().restore_context(
+            limit=self.config_display_limit,
+        ))
 
         return context
-
-
-    def format_config_datetime(self, value, default='Unknown'):
-        if not value:
-            return default
-        if hasattr(value, 'strftime'):
-            return value.strftime('%Y-%m-%d %H:%M:%S')
-        return str(value)
-
-
-    def summarize_config_data(self, data):
-        if not isinstance(data, dict):
-            if data is None:
-                return 'No config snapshot', 'N/A'
-            return 'Non-dict payload', 'N/A'
-
-        try:
-            size_bytes = len(json.dumps(data, default=str).encode('utf-8'))
-            size_display = '{:.1f} KB'.format(size_bytes / 1024.0)
-        except (TypeError, ValueError):
-            size_display = 'Unavailable'
-
-        summary = 'Keys: {0:d}'.format(len(data))
-        return summary, size_display
 
 
 class ModernAdminConfigRestoreDetailView(ModernAdminConfigRestoreView):
@@ -12694,36 +12588,9 @@ class ModernAdminConfigRestoreDetailView(ModernAdminConfigRestoreView):
         context = super(ModernAdminConfigRestoreView, self).get_context()
 
         try:
-            entry = IndiAllSkyDbConfigTable.query\
-                .filter(IndiAllSkyDbConfigTable.id == self.config_id)\
-                .one()
+            context.update(self.settings_revision_metadata_service().restore_detail_context(self.config_id))
         except NoResultFound:
             abort(404)
-
-        user_row = getattr(entry, 'user', None)
-        entry_data = entry.data if isinstance(entry.data, dict) else {}
-        summary, data_size = self.summarize_config_data(entry_data)
-        has_payload = bool(entry_data)
-        restore_state = 'Unavailable'
-
-        if has_payload and summary != 'Non-dict payload':
-            restore_state = 'Likely restore candidate'
-
-        context['modern_admin_config_restore_detail'] = {
-            'id'            : entry.id,
-            'created'       : self.format_config_datetime(entry.createDate),
-            'user'          : user_row.username if user_row else 'Deleted user',
-            'user_id'       : user_row.id if user_row else 'N/A',
-            'level'         : entry.level or 'Unknown',
-            'encrypted'     : 'Yes' if bool(entry.encrypted) else 'No',
-            'note'          : entry.note or 'No note',
-            'summary'       : summary,
-            'data_size'     : data_size,
-            'restore_state' : restore_state,
-        }
-        context['modern_admin_config_restore_warning'] = (
-            'Read-only metadata inspection only. Raw config payload and restore actions are intentionally hidden.'
-        )
 
         return context
 

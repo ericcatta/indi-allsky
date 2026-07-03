@@ -26,7 +26,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - la responsabilita' "Modern settings save -> nuova revisione config" e' ora
     Hybrid-owned tramite `ModernAdminSettingsRuntimeService`;
   - `IndiAllSkyConfig.save()` resta adapter/fallback di persistenza Classic;
-  - restore, history, rollback, full config save, reload/restart dopo save e
+  - history/list/detail metadata delle revisioni config Modern e' ora
+    Hybrid-owned tramite `ModernAdminSettingsRevisionMetadataService`;
+  - restore execution, rollback, full config save, reload/restart dopo save e
     salvataggi ConfigView legacy restano Classic-owned.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
