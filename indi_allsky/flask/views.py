@@ -51,6 +51,7 @@ from ..modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContr
 from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
+from ..modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
 from ..modern_admin_tasks import ModernAdminTaskReadService
@@ -17737,6 +17738,14 @@ class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):
         return context
 
 
+    def settings_runtime_service(self):
+        return ModernAdminSettingsRuntimeService()
+
+
+    def save_settings_config_revision(self, config, username, note):
+        return self.settings_runtime_service().save_config_revision(config, username, note)
+
+
     def get_settings_ownership_context(self):
         try:
             ownership_map = json.loads(self.SETTINGS_OWNERSHIP_MAP_PATH.read_text(encoding='utf-8'))
@@ -20234,11 +20243,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             else:
                 username = 'system'
 
-            from ..config import IndiAllSkyConfig
-
-            config_obj = IndiAllSkyConfig()
-            config_obj.config = new_config
-            config_obj.save(username, save_note)
+            self.save_settings_config_revision(new_config, username, save_note)
             self.indi_allsky_config = new_config
             if save_sync_requested:
                 app.logger.info('%s section=hybrid copied_fields=%s', save_note, ','.join(copied_fields))
@@ -20588,11 +20593,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             else:
                 username = 'system'
 
-            from ..config import IndiAllSkyConfig
-
-            config_obj = IndiAllSkyConfig()
-            config_obj.config = new_config
-            config_obj.save(username, save_note)
+            self.save_settings_config_revision(new_config, username, save_note)
             self.indi_allsky_config = new_config
             if save_sync_requested:
                 app.logger.info('%s section=driver_connection copied_fields=%s', save_note, ','.join(copied_fields))
@@ -21032,11 +21033,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             else:
                 username = 'system'
 
-            from ..config import IndiAllSkyConfig
-
-            config_obj = IndiAllSkyConfig()
-            config_obj.config = new_config
-            config_obj.save(username, save_note)
+            self.save_settings_config_revision(new_config, username, save_note)
             self.indi_allsky_config = new_config
             if save_sync_requested:
                 app.logger.info('%s section=acquisition copied_fields=%s', save_note, ','.join(copied_fields))
@@ -21105,11 +21102,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
             save_note = 'Modern Admin Camera {0:s} sync from {1:s} to {2:s}'.format(section_label, source_profile_id, target_profile_id)
 
-            from ..config import IndiAllSkyConfig
-
-            config_obj = IndiAllSkyConfig()
-            config_obj.config = new_config
-            config_obj.save(username, save_note)
+            self.save_settings_config_revision(new_config, username, save_note)
             self.indi_allsky_config = new_config
             app.logger.info('%s section=%s copied_fields=%s', save_note, section_key, ','.join(copied_fields))
             result['modern_admin_camera_settings_success'] = 'Synced {0:s} settings from {1:s} to {2:s}. Restart indi-allsky for the running capture service to use the copied values.'.format(section_label, source_profile_id, target_profile_id)
@@ -21762,11 +21755,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             else:
                 username = 'system'
 
-            from ..config import IndiAllSkyConfig
-
-            config_obj = IndiAllSkyConfig()
-            config_obj.config = new_config
-            config_obj.save(username, save_note)
+            self.save_settings_config_revision(new_config, username, save_note)
             self.indi_allsky_config = new_config
             if save_sync_requested:
                 app.logger.info('%s section=lens_optics copied_fields=%s', save_note, ','.join(copied_fields))
@@ -22368,11 +22357,7 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
             else:
                 username = 'system'
 
-            from ..config import IndiAllSkyConfig
-
-            config_obj = IndiAllSkyConfig()
-            config_obj.config = new_config
-            config_obj.save(username, 'Modern Admin Global Capture Defaults update')
+            self.save_settings_config_revision(new_config, username, 'Modern Admin Global Capture Defaults update')
             app.logger.info('Saved Modern Admin Global Capture Defaults config update')
             result['modern_admin_capture_settings_success'] = 'Global Capture Defaults saved. Restart or reload indi-allsky for the running capture service to use the new fallback values.'
         except ConfigSaveException as e:

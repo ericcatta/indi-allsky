@@ -22,6 +22,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Le modifiche runtime devono restare conservative: niente refactor ampi senza motivo.
 - Le impostazioni operative multicamera devono vivere nei Camera Profiles.
 - I global settings restano fallback legacy/single-camera/advanced, non UI operativa primaria.
+- Book 2 / Settings Runtime Independence:
+  - la responsabilita' "Modern settings save -> nuova revisione config" e' ora
+    Hybrid-owned tramite `ModernAdminSettingsRuntimeService`;
+  - `IndiAllSkyConfig.save()` resta adapter/fallback di persistenza Classic;
+  - restore, history, rollback, full config save, reload/restart dopo save e
+    salvataggi ConfigView legacy restano Classic-owned.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
