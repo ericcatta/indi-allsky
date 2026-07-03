@@ -120,8 +120,12 @@ The source of truth for the current consolidation baseline is
   read-only family remains for simple boundary extraction; the easy extraction
   phase is complete for now.
 - Classic Exit Assessment now identifies the real removal blockers: settings
-  ownership, media/public filesystem behavior, operational/developer actions,
-  system/auth/support surfaces, and external compatibility APIs.
+  write/restore/config execution, media/public/latest/filesystem behavior,
+  action execution ownership, external compatibility APIs, and
+  hardware/provider/system/auth surfaces.
+- Updated Classic Exit Assessment recommends Action Contract hardening as the
+  next phase. Settings contract-only slices should remain paused until a real
+  write/preview/rollback milestone is approved.
 
 ## Remaining Direct Modern Admin Wrapper Review
 
@@ -175,24 +179,14 @@ runtime behavior.
 
 ## P0
 
-### Settings Contract Implementation Slice
+### Safe Action Contract Adoption Guardrails
 
-- Motivation: `HYBRID_CLASSIC_EXIT_ASSESSMENT.md` identifies Settings as the
-  lowest Hybrid ownership domain and the largest real blocker to making Classic
-  removable.
-- Benefit: continues moving from settings documentation to native Hybrid
-  settings ownership without renaming keys, changing defaults, or removing
-  Classic fallback. Notifications, Storage, Camera Profile Identity, Camera
-  Connection, Exposure/Gain, Auto Exposure/Gain, Hybrid AWB, Acquisition /
-  Save, and FITS / Source are complete as the first read-only contract slices;
-  choose the next low-risk group rather than broad settings migration.
-- Risk: high if the first slice edits runtime config; keep the first step
-  bounded to one low-risk read-only/edit-preview group.
-- Impact: high for Classic exit.
-- Dependencies: `HYBRID_SETTINGS_CONTRACT_REVIEW.md`, existing settings
-  inventory, current Modern settings preview pages, and Classic fallback.
-- Verification: preserve settings keys/defaults; add shape/regression tests;
-  run settings inventory and route inventory; keep Classic full config working.
+- Motivation: `ModernAdminSafeActionContract` now gives safe actions a stable metadata shape, but the registry and domain actions still need gradual contract-level validation before more mutating domains move into Hybrid ownership.
+- Benefit: catches missing action metadata early while keeping the current safe-action runner, permissions, response shape, and endpoints unchanged.
+- Risk: low if limited to tests/metadata validation.
+- Impact: high.
+- Dependencies: `HYBRID_SAFE_ACTION_REGISTRY.md`, Safe Actions policy, Route Role Matrix, and current safe-action tests.
+- Verification: every registered action exposes a contract with action id, label, feature, risk level, and required permission; registry output remains backward-compatible.
 
 ### Replace One Backend Implementation Behind Existing Boundary
 
@@ -218,14 +212,14 @@ runtime behavior.
 - Dependencies: Route Role Matrix.
 - Verification: update only evidence-backed ownership metadata; regenerate inventory; do not change routes/templates.
 
-### Safe Action Contract Adoption Guardrails
+### Settings Write Contract Pilot
 
-- Motivation: `ModernAdminSafeActionContract` now gives safe actions a stable metadata shape, but the registry and domain actions still need gradual contract-level validation before more mutating domains move into Hybrid ownership.
-- Benefit: catches missing action metadata early while keeping the current safe-action runner, permissions, response shape, and endpoints unchanged.
-- Risk: low if limited to tests/metadata validation.
-- Impact: high.
-- Dependencies: `HYBRID_SAFE_ACTION_REGISTRY.md`, Safe Actions policy, Route Role Matrix, and current safe-action tests.
-- Verification: every registered action exposes a contract with action id, label, feature, risk level, and required permission; registry output remains backward-compatible.
+- Motivation: `HYBRID_CLASSIC_EXIT_ASSESSMENT.md` still identifies Settings write/restore/config execution as the largest Classic-removal blocker, but contract-only slices have reached diminishing returns.
+- Benefit: moves from read-only Settings ownership toward real Hybrid configuration ownership without renaming keys, changing defaults, or removing Classic fallback.
+- Risk: high if runtime config is changed without preview/diff/rollback semantics.
+- Impact: high for Classic exit.
+- Dependencies: existing read-only Settings contracts, `HYBRID_SETTINGS_CONTRACT_REVIEW.md`, current Modern settings preview pages, and Classic fallback.
+- Verification: start with preview/diff only for one already-owned low-risk group; preserve settings keys/defaults; add shape/regression tests; keep Classic full config working.
 
 ## P1
 

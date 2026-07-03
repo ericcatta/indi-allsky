@@ -1,267 +1,372 @@
 # Hybrid Classic Exit Assessment
 
-This assessment estimates what still prevents complete Classic removal.
+This assessment estimates what still prevents complete Classic removal after
+the latest Product Consolidation work.
 
 It is not a generic audit. It measures the current state of the major product
 domains and lists only real blockers observed in the repository today.
 
 ## Executive Summary
 
-Classic is no longer the owner of the Product spine. It is still the owner or
-compatibility provider for several operational, media, settings, system, and
-external API behaviors.
+Classic is no longer the owner of the Product spine, and it is no longer the
+only owner of several operational read-only domains. Since the previous
+assessment, Hybrid gained:
 
-The shortest path to making Classic removable is not to delete Classic pages
-first. The shortest path is:
+- domain-owned read services for Notifications and Task Status;
+- ownership boundaries for Product, Observatory tools, Camera diagnostics,
+  System tools, Task status, Notifications, Media metadata, and Media browse;
+- several media metadata services;
+- Camera diagnostics, Observatory, and System read-only helper ownership;
+- many read-only Settings contracts;
+- consolidated Settings contract helpers and guardrail tests;
+- a minimal `ModernAdminSafeActionContract` foundation.
 
-1. complete Hybrid-owned read services for remaining low-risk operational
-   domains;
-2. define a canonical action contract for mutative operations;
-3. replace settings/config ownership behind a Basic / Advanced / Developer
-   model;
-4. isolate media browsing, preview, download, and public/latest compatibility;
-5. keep Classic as fallback until each domain has a native Hybrid owner and
-   regression tests.
+The center of gravity has moved. The main problem is no longer "too many
+Modern pages inherit Classic wrappers." The main problem is now deeper:
+Classic still owns or defines sensitive behavior for configuration writes,
+media/file/public URL semantics, mutative operations, external compatibility
+APIs, and several hardware/provider-backed operational surfaces.
 
-Current estimate: Classic is removable only after **three blocker classes** are
+Current estimate: Classic is removable only after **five blocker classes** are
 addressed:
 
-- settings/config mutation and restore;
-- media/public/latest/file behavior;
-- operational/system/hardware actions.
+1. settings write/restore/config execution;
+2. media/public/latest/filesystem behavior;
+3. action execution ownership for mutating operations;
+4. external compatibility APIs and public contracts;
+5. hardware/provider/system/auth surfaces that need dedicated security or
+   runtime reviews.
 
 ## Domain Ownership Estimate
 
-| Domain | Hybrid ownership | Remaining Classic dependencies | Blockers | Difficulty | Next milestone |
+| Domain | Hybrid ownership | Remaining Classic ownership | Remaining blockers | Technical risk | Architectural maturity |
 | --- | ---: | --- | --- | --- | --- |
-| Product UI | 95% | Product pages still coexist with Classic/public routes and some Product data uses existing DB models. | No blocker for Product spine; blocker is surrounding compatibility shell. | Low | Keep Product spine protected; do not merge it with operational pages. |
-| Notifications | 90% | Legacy `/ajax/notification` and Classic notification pages still exist as compatibility surfaces. | External/Classic callers still use old endpoint semantics. | Low-medium | Decide whether legacy acknowledge endpoint remains compatibility-only or is wrapped by the Hybrid action model. |
-| Task Status | 85% | Worker/task execution and mutation remain outside read-only Task Status ownership. | Queue mutation, retry, purge, execution, and worker behavior are not Hybrid-owned. | Medium | Keep read-only Task Status owned; design task action contract separately. |
-| Media Metadata | 55% | Gallery, timelapse, loop, FITS, preview, download, URL helpers, public/latest routes, and filesystem/media helpers. | Media behavior mixes metadata, previews, downloads, public URLs, lightbox/client behavior, and file helpers. | High | Finish metadata-only slices only where trivial; then do a dedicated Media Contract replacement plan. |
-| Camera Diagnostics | 65% | ADU History, Dark Library, Mask, calibration URLs/filesystem, camera controls, detect/start INDI. | Dark/calibration and mask touch filesystem/media; camera detection/service actions are operational. | Medium-high | Extract one more pure read-only summary only if obvious; otherwise move to Camera Operations action design. |
-| Observatory | 60% | Charts, Sensor Panel, Realtime Keogram, AstroPanel live JS/AJAX, Long-term Keogram file/cache, VirtualSky live image loop. | Environmental/live data, JS polling, media URL normalization, and generated keogram file state. | Medium-high | Stop tiny extraction when only live/media behavior remains; define Observatory data/service contracts. |
-| System Tools | 60% | Support script execution, log download/export, system time/timezone, network/drive/GPIO wrappers, file-space usage. | Developer actions and sensitive reads are not Hybrid-owned; support info runs external script. | High | Separate read-only diagnostics from Developer actions; design System Action contract before mutations. |
-| Settings | 25% | Classic full config, config history/restore, `ConfigView`, raw settings keys, many preview pages inherited from Classic config ownership. | Settings keys, defaults, restore semantics, full config compatibility, and migration risk. | Critical | First real Classic-exit blocker: implement Basic / Advanced / Developer settings ownership without renaming keys. |
+| Product UI | 96% | Classic/public compatibility routes coexist around the Product spine; some data still comes from existing DB models. | No Product spine blocker. Remaining risk is compatibility shell and surrounding operational routes. | Low | High. Product view models, Product routes, visual system, and DATA001-DATA006 are stable. |
+| Notifications | 95% | Legacy AJAX/Classic notification compatibility endpoints still exist. | Compatibility endpoint semantics and future notification write/action ownership beyond acknowledge. | Low | High. Read, acknowledge, result/audit policy, and settings contract are Hybrid-owned. |
+| Task Status | 90% | Worker execution, retry, purge, clear, and queue mutation remain outside read-only Task Status ownership. | Mutating queue/workflow actions require Action Contract ownership. | Medium | High for read-only status; medium for full task domain. |
+| Media Metadata | 68% | Gallery, timelapse, loop, FITS, preview/download/lightbox, URL helpers, public/latest routes, and filesystem helpers. | Metadata services exist for several slices, but media product behavior still mixes DB metadata, media serving, previews, downloads, client behavior, and file helpers. | High | Medium. Metadata-only ownership is maturing; media behavior ownership is not. |
+| Camera Diagnostics | 74% | ADU History, Dark Library, Mask, calibration/file behavior, camera controls, camera detection/start flows. | Remaining safe read-only slices are limited; camera control/action behavior is separate and risky. | Medium-high | Medium-high for read-only diagnostics; low for camera operations. |
+| Observatory Tools | 70% | Charts, Sensor Panel, Realtime Keogram, AstroPanel live behavior, Long-term Keogram file/cache/generation boundaries, sensor/provider data. | Live/provider/environmental behavior and generated/media-backed observatory surfaces need explicit service contracts. | Medium-high | Medium. Several display policies are owned, but live data ownership is still unclear. |
+| System Tools | 70% | Support script execution, log download/export, time/timezone, network/drive/GPIO, service controls, users/auth. | Developer/system actions and security-sensitive auth/support behavior remain Classic-owned or compatibility-owned. | High | Medium. Safe read-only summaries are owned; sensitive actions are not. |
+| Settings | 48% | Full config edit/save/restore/history, raw config compatibility, many high-risk groups, Classic fallback, config mutation semantics. | Read-only contracts cover many important groups, but no Hybrid write/save/restore contract exists. | Critical | Medium for read-only contract layer; low for write ownership. |
+| Safe Actions | 35% | Most live mutative operations still live in Classic AJAX, action APIs, system wrappers, external APIs, and domain-specific handlers. | Action metadata foundation exists, but action registry validation, domain action ownership, compatibility wrappers, and permission/audit semantics are incomplete. | Critical | Early. Useful foundation, not yet an execution ownership model. |
 
-## Real Classic Removal Blockers
+## Updated Top 5 Classic Removal Blockers
 
-These are the modules or route families that actually block Classic removal
-today. This list excludes theoretical references and harmless coexistence.
+### 1. Settings Write / Restore / Config Execution
 
-### 1. Settings And Config Ownership
+Current status:
 
-Real blockers:
-
-- `ConfigView` and Modern settings previews still inherit from Classic-style
-  config ownership.
-- `/config`, `/ajax/config`, `/config/restore`, `/modern-admin/system/config`,
-  `/modern-admin/settings/full`, config history, and config restore remain
-  compatibility and mutation surfaces.
-- `tools/hybrid_settings_ownership_map.json` marks most groups as high-risk or
-  do-not-move-yet.
-
-Why this blocks removal:
-
-Classic owns the complete fallback for editing, restoring, and understanding
-raw config. Hybrid has a contract review, but not native settings execution.
-
-Milestone:
-
-- Create Hybrid Settings read/write contract without renaming settings keys.
-- Keep Classic as fallback until save/restore/diff/rollback are tested.
-
-### 2. Media/Public/Filesystem Behavior
+- Many read-only Settings contracts are Hybrid-owned.
+- Shared contract helpers and guardrail tests exist.
+- Opportunistic contract-only slices have intentionally paused.
 
 Real blockers:
 
-- `ModernAdminMediaListView`, gallery/images/timelapses/loop/FITS detail, and
-  public/latest routes still rely on existing media URL/file behavior.
-- `/images/<path>`, `/latest*`, FITS viewers, video viewers, thumbnail/public
-  routes, preview/lightbox/download helpers, and generated media viewers remain
-  compatibility-critical.
-- Sync API media routes remain external contracts.
+- full config editing and save behavior;
+- config history and restore;
+- raw config compatibility;
+- default/key compatibility;
+- rollback/diff semantics;
+- remaining provider/hardware-backed groups such as sensors/GPS.
 
-Why this blocks removal:
+Why this is now blocker #1:
 
-Classic-era media behavior is not just UI. It defines external URLs, media
-serving, previews, downloads, and public integrations.
+Settings is no longer undocumented, but Classic still owns the dangerous part:
+changing configuration. Classic cannot be removed while config write/restore is
+the only complete path.
 
-Milestone:
+Next milestone:
 
-- Define a Hybrid Media Contract that separates metadata, preview, download,
-  public/latest, and filesystem helpers.
-- Replace metadata first; replace preview/download only with runtime evidence.
+- Build a Hybrid Settings write contract for one already-owned low-risk group.
+- Preserve existing keys/defaults and Classic fallback.
+- Add preview/diff/rollback semantics before any real write expansion.
 
-### 3. Operational And Developer Actions
+### 2. Media / Public / Latest / Filesystem Contract
 
-Real blockers:
+Current status:
 
-- Safe Action exists, but most real mutations still live in Classic AJAX,
-  action APIs, system wrappers, and direct operational routes.
-- Capture service, INDI detect/start, network, drives, GPIO, focus, generate,
-  config restore, log download, and external Action/Sync APIs remain outside a
-  complete Hybrid execution model.
-
-Why this blocks removal:
-
-Classic is still the compatibility owner for many things that affect hardware,
-system state, generated media, credentials, or external automation.
-
-Milestone:
-
-- Define canonical Action Contract schema.
-- Move actions family-by-family into Hybrid-owned safe actions while preserving
-  legacy endpoints as wrappers.
-
-### 4. System/Auth/User/Support Surfaces
+- Media metadata boundaries and services exist.
+- Some multi-camera UX and Loop layout issues were fixed.
+- Metadata-only slices are safer than before.
 
 Real blockers:
 
-- User/auth Modern pages are sensitive and still not extracted.
-- Support info runs a script via JSON endpoint.
-- Log download/export is a sensitive read/export action.
-- System time/timezone and service controls remain Developer actions.
+- preview/lightbox/download behavior;
+- public/latest routes;
+- media URL generation;
+- FITS/raw/source viewer behavior;
+- filesystem paths and helper semantics;
+- external consumers of media URLs.
 
-Why this blocks removal:
+Why this is now blocker #2:
 
-These are security-sensitive and cannot be replaced by simple wrapper moves.
+Media is not just a page family. It is an external contract and a filesystem
+contract. Classic removal requires stable Hybrid ownership of metadata, URL,
+preview, download, and public/latest semantics.
 
-Milestone:
+Next milestone:
 
-- Keep auth/users Classic-owned until a dedicated security review.
-- Treat support/log/system actions as Developer domain, not Product UI.
+- Define and implement a narrow Hybrid Media Contract starting with URL/preview
+  classification, not behavior change.
+- Keep filesystem/media helpers unchanged until tests prove compatibility.
 
-### 5. External Compatibility APIs
+### 3. Safe Actions / Mutating Operation Ownership
+
+Current status:
+
+- Safe actions are discovered.
+- Notifications acknowledge is domain-owned.
+- `ModernAdminSafeActionContract` now gives a minimal metadata foundation.
+- `modern_safe_action.py` remains an orchestrator.
 
 Real blockers:
 
-- `/action/*`
-- `/sync/v1/*`
-- OAuth/YouTube routes
-- public/latest media routes
+- capture controls;
+- task retry/cancel/clear/purge;
+- config restore/save;
+- log download/export;
+- media delete/generation/regeneration/upload;
+- network/drive/GPIO/system controls;
+- external `/action/*` and `/sync/v1/*` mutations.
 
-Why this blocks removal:
+Why this is now blocker #3:
 
-They may have external consumers not visible through static analysis.
+Read-only ownership is mostly no longer the hard part. Classic remains
+essential because it owns many operations that change system, camera, media, or
+config state.
 
-Milestone:
+Next milestone:
 
-- Freeze external API compatibility separately from Classic UI removal.
-- Replace implementation behind stable contracts only after endpoint tests.
+- Add registry-level guardrails for `ModernAdminSafeActionContract`.
+- Then migrate one low-risk existing action family behind a domain-owned action
+  service while preserving current endpoint/response behavior.
 
-## What No Longer Blocks Classic Removal
+### 4. External Compatibility APIs
 
-These areas are not complete applications by themselves, but they no longer
-represent the main Classic-exit blocker:
+Current status:
 
-- Product UI spine: owned by Product view models and `ModernAdminProductView`.
-- Notifications read + acknowledge: effectively Hybrid-owned.
-- Task Status read-only status: effectively Hybrid-owned.
-- Several media metadata slices: Hybrid-owned metadata services exist.
-- Camera Info and Image Lag: read-only logic moved into diagnostics service.
-- SQM, Long-term Keogram age formatting, VirtualSky form defaults: small
-  Observatory ownership slices moved into services.
-- System Info overview and Log Detail display policy: moved into System Tools.
+- Route roles and safe action discovery identify the danger.
+- No full replacement contract exists yet.
 
-## Shortest Path To "Classic Becomes Removable"
+Real blockers:
 
-### Phase 1: Complete Non-Mutating Domain Ownership
+- `/action/*`;
+- `/sync/v1/*`;
+- public/latest media endpoints;
+- OAuth/YouTube integrations;
+- legacy AJAX endpoints that external scripts may call.
 
-Goal: no Product/Advanced read-only page should depend on Classic for simple
-query/formatting/display policy.
+Why this is now blocker #4:
 
-Recommended next work:
+These APIs may have consumers outside the UI. Static analysis cannot prove they
+are unused, so Classic cannot be removed until their compatibility ownership is
+explicit.
 
-- finish clearly metadata-only media slices if still safe;
-- avoid preview/download/URL/file helpers until the Media Contract exists;
-- stop extracting tiny slices when only live JS, filesystem, or action behavior
-  remains.
+Next milestone:
+
+- Create endpoint-level compatibility tests for the highest-risk public/action
+  routes before changing implementation ownership.
+
+### 5. Hardware / Provider / System / Auth Surfaces
+
+Current status:
+
+- Camera diagnostics, Observatory tools, and System tools have better
+  read-only boundaries.
+- Sensitive behavior remains intentionally untouched.
+
+Real blockers:
+
+- users/auth;
+- support script execution;
+- log export/download;
+- network/drive/GPIO controls;
+- service start/stop/restart;
+- sensors/GPS/provider polling;
+- camera detect/start/control.
+
+Why this is now blocker #5:
+
+These are not cleanup tasks. They are security/runtime ownership milestones.
+Treating them as ordinary wrapper extraction would be unsafe.
+
+Next milestone:
+
+- Separate read-only diagnostics from Developer actions.
+- Review one hardware/provider family at a time before implementation.
+
+## Blockers That Disappeared Since The Previous Assessment
+
+These no longer deserve blocker status:
+
+- Product spine ownership: Product routes and payloads are protected by
+  `ModernAdminProductView` and regression tests.
+- Easy read-only wrapper extraction: completed for the obvious families.
+- Notifications read/acknowledge ownership: effectively Hybrid-owned, with
+  Classic endpoints remaining as compatibility surfaces.
+- Task Status read-only ownership: effectively Hybrid-owned for list/detail
+  status.
+- "No settings product contract": no longer true. Many read-only contracts
+  exist, and helper duplication has been reduced.
+- "No action schema at all": no longer true. A minimal safe-action metadata
+  contract exists.
+- Several small operational display policies: Camera Info, Image Lag, System
+  Info, Log Detail, SQM, Long-term Keogram age display, and VirtualSky context
+  defaults now have Hybrid-owned service/helper ownership.
+
+## Remaining Blockers That Are Architectural Milestones
+
+These should not be treated as incremental cleanup:
+
+1. Settings write/save/restore ownership.
+   This needs contracts, diff/preview, rollback, compatibility, and tests.
+
+2. Media/public/latest/filesystem ownership.
+   This needs a media contract that separates metadata, URL generation,
+   preview, download, public routes, and filesystem helpers.
+
+3. Action execution ownership.
+   This needs action contracts, permissions, audit, dry-run semantics,
+   compatibility wrappers, and domain services.
+
+4. External API compatibility.
+   This needs endpoint-level compatibility tests before implementation moves.
+
+5. Auth/users/system operations.
+   This needs security review, not simple view extraction.
+
+## Future Work That Should Stop Or Pause
+
+Low-value work to stop for now:
+
+- Adding more opportunistic Settings contract-only slices for groups marked
+  `do_not_move_yet`.
+- Extracting more tiny read-only wrapper classes just to reduce inheritance
+  counts.
+- Continuing media metadata slice extraction mechanically when the remaining
+  value is in preview/URL/filesystem contracts.
+- Polishing settings formatter internals beyond meaningful duplication removal.
+- Redesigning Product UI or shell. The visual system is frozen except for bugs,
+  accessibility, responsive fixes, and consistency.
+- Broad documentation audits that restate existing inventories without changing
+  ownership or decisions.
+
+Work that may continue only with evidence:
+
+- route ownership-map corrections backed by current route matrix evidence;
+- safe-action guardrail tests;
+- endpoint compatibility tests;
+- one-domain service extraction where behavior and context shape are proven
+  unchanged.
+
+## Shortest Realistic Path To "Classic Removable"
+
+### Phase 1: Freeze Compatibility Baselines
+
+Goal: know which behaviors must remain stable before replacing implementations.
+
+Recommended work:
+
+- add Safe Action Contract adoption guardrails;
+- add endpoint compatibility tests for public/latest and external action APIs;
+- update ownership metadata only where evidence is strong.
 
 Exit criterion:
 
-- read-only Modern wrappers are orchestration shells around Hybrid-owned
-  services.
+- every sensitive route family has a stable contract or an explicit
+  compatibility owner.
 
-### Phase 2: Settings Contract Implementation
+### Phase 2: Settings Write Contract Pilot
 
-Goal: Hybrid owns settings organization and safe edit flow while preserving
-existing keys.
+Goal: prove Hybrid can own configuration changes without renaming keys or
+removing Classic fallback.
 
-Recommended next work:
+Recommended work:
 
-- implement Basic / Advanced / Developer settings ownership behind existing
-  keys;
-- add diff/preview/rollback semantics before any restore or raw config save;
-- keep Classic full config as fallback until coverage is strong.
-
-Exit criterion:
-
-- Classic `ConfigView` is no longer required for normal settings work.
-
-### Phase 3: Action Contract Implementation
-
-Goal: Classic no longer owns mutative semantics.
-
-Recommended next work:
-
-- define action schema;
-- migrate one action family at a time behind existing endpoints;
-- keep external/public routes stable as wrappers.
+- choose one already-owned, low-risk settings group;
+- implement preview/diff semantics first;
+- then implement save through existing keys only if rollback/fallback is clear.
 
 Exit criterion:
 
-- capture, generation, config, network/drive/GPIO, notification, log download,
-  and task mutations have Hybrid-owned action services or explicit external API
-  owners.
+- one settings group can be read, previewed, changed, and rolled back through a
+  Hybrid-owned contract while Classic remains compatible.
 
-### Phase 4: Media Contract Implementation
+### Phase 3: Action Contract Pilot
 
-Goal: media browsing and public/latest behavior become Hybrid-owned without
-breaking external consumers.
+Goal: move one mutating operation family into a domain-owned Hybrid service.
 
-Recommended next work:
+Recommended work:
 
-- separate metadata from URL generation;
-- separate preview from download;
-- separate internal file paths from web URLs;
-- add endpoint tests for public/latest compatibility.
+- validate all registered safe actions expose `ModernAdminSafeActionContract`;
+- preserve registry output shape;
+- choose one low-risk existing action family;
+- keep legacy route/API as wrapper.
 
 Exit criterion:
 
-- Classic media viewers/routes are compatibility wrappers, not implementation
-  owners.
+- one non-trivial mutation is Hybrid-owned end-to-end with permission, audit,
+  dry-run/execute semantics, tests, and unchanged external response shape.
 
-### Phase 5: Classic UI Retirement
+### Phase 4: Media Contract Pilot
 
-Goal: Classic can be disabled or removed without losing Product, Operations,
-Developer, media, settings, or external API behavior.
+Goal: separate media metadata from URL/preview/download/filesystem behavior.
+
+Recommended work:
+
+- classify media endpoints by metadata, preview, download, public/latest, or
+  filesystem behavior;
+- add compatibility tests;
+- replace one tiny URL/preview helper behind an unchanged route only after
+  tests exist.
 
 Exit criterion:
 
-- route inventory classifies all remaining Classic routes as either removed,
-  external compatibility, or wrapper-only.
-- no primary workflow requires a Classic template.
+- one media product path is Hybrid-owned without changing URLs, previews,
+  downloads, cache, or filesystem behavior.
 
-## Recommended Next Milestone
+### Phase 5: Developer/System/Auth Separation
 
-The highest-value next milestone is **Settings Contract Implementation Plan
-for one safe read-only/edit-preview group**, not another generic extraction.
+Goal: keep Product/Operations independent from Developer/security-sensitive
+actions.
+
+Recommended work:
+
+- keep users/auth Classic-owned until security review;
+- move only read-only diagnostics with no filesystem mutation or process
+  control;
+- treat support/log/system controls as Developer actions.
+
+Exit criterion:
+
+- Classic no longer owns normal Product/Operations flows; remaining Classic
+  routes are either external compatibility wrappers or deliberately retained
+  Developer/security surfaces.
+
+## Updated Recommendation For The Next Project Phase
+
+The next phase should be **Action Contract hardening**, not more Settings
+slices and not more visual/Product UI work.
 
 Why:
 
-- Settings is the lowest Hybrid ownership domain and the biggest real blocker.
-- It is central to Classic removal.
-- It can start without renaming keys or changing defaults.
-- A small group can prove the model before touching critical settings.
+- Settings contract-only work has reached diminishing returns.
+- The largest remaining blockers involve mutation, compatibility, and runtime
+  safety.
+- `ModernAdminSafeActionContract` is intentionally small and needs adoption
+  guardrails before action migration starts.
+- A stronger action foundation will also help future Settings write, Task
+  mutation, media generation, system controls, and hardware/provider work.
 
-Recommended first slice:
+Recommended next mission:
 
-- read-only/edit-preview ownership for a low-risk settings group, preserving
-  keys and current fallback.
+- Add registry-level Safe Action Contract guardrails:
+  - every registered safe action exposes contract metadata;
+  - required fields are non-empty;
+  - risk levels are allowlisted;
+  - registry public output remains backward-compatible;
+  - no route/API/permission/response behavior changes.
 
-Stop conditions:
-
-- any settings key rename;
-- config default changes;
-- restore/save behavior changes without rollback;
-- Classic fallback removal.
+This is the shortest safe step toward Classic removable because it prepares
+the mutation model without touching dangerous mutations yet.
