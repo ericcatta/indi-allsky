@@ -874,6 +874,16 @@ class CaptureWorker(Process):
                     self._shutdown = True
                 elif c_dict.get('settime'):
                     self.update_time_offset = int(c_dict['settime'])
+                elif c_dict.get('abort_exposure'):
+                    logger.warning(
+                        '[%s][camera_id=%s] Manual abort exposure requested',
+                        self.profile_id,
+                        self.camera_id if self.camera_id is not None else 'unknown',
+                    )
+                    self.indiclient.abortCcdExposure()
+                    exposure_aborted = True
+                    waiting_for_frame = False
+                    waiting_for_sqm_frame = False
                 else:
                     logger.error('Unknown action: %s', str(c_dict))
 

@@ -96,13 +96,18 @@
         </nav>
         <div class="hybrid-app-actions">
             {% set capture_action_url = modern_admin_capture_action_url|default(none, true) %}
+            {% set abort_exposure_action_url = modern_admin_abort_exposure_action_url|default(none, true) %}
             {% set quick_action_url = modern_admin_quick_action_url|default(none, true) %}
             {% set capture_service_status = modern_admin_capture_service_status|default({}, true) %}
+            {% set recovery_targets = modern_admin_recovery_targets|default([], true) %}
             <div class="hybrid-runtime-actions" aria-label="Runtime recovery controls">
                 <span class="hybrid-runtime-status" data-hybrid-capture-service-status data-tone="{{ capture_service_status.tone|default('muted', true) }}">{{ capture_service_status.label|default('Capture: Unknown', true) }}</span>
                 <button class="hybrid-runtime-button hybrid-runtime-button-good" type="button" data-hybrid-capture-command="start"{% if not capture_action_url %} disabled{% endif %}>Start</button>
                 <button class="hybrid-runtime-button hybrid-runtime-button-warn" type="button" data-hybrid-capture-command="stop"{% if not capture_action_url %} disabled{% endif %}>Stop</button>
                 <button class="hybrid-runtime-button hybrid-runtime-button-warn" type="button" data-hybrid-capture-command="restart"{% if not capture_action_url %} disabled{% endif %}>Restart Capture</button>
+                {% for target in recovery_targets %}
+                <button class="hybrid-runtime-button hybrid-runtime-button-danger" type="button" data-hybrid-abort-exposure data-hybrid-abort-profile="{{ target.profile_id }}" data-hybrid-abort-camera="{{ target.camera_id|default('', true) }}"{% if not abort_exposure_action_url %} disabled{% endif %}>Abort {{ target.label }}</button>
+                {% endfor %}
                 <button class="hybrid-runtime-button hybrid-runtime-button-danger" type="button" data-hybrid-system-command="reboot"{% if not quick_action_url %} disabled{% endif %}>Reboot Pi</button>
             </div>
             <a class="hybrid-home-button" href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Home</a>
@@ -179,6 +184,7 @@
     var themeButton = document.getElementById('hybrid-theme-toggle');
     var menuToggle = document.getElementById('hybrid-menu-toggle');
     var captureActionUrl = {{ modern_admin_capture_action_url|default(none, true)|tojson }};
+    var abortExposureActionUrl = {{ modern_admin_abort_exposure_action_url|default(none, true)|tojson }};
     var quickActionUrl = {{ modern_admin_quick_action_url|default(none, true)|tojson }};
     var cameraId = {{ modern_admin_quick_action_camera|default(0, true)|tojson }};
     var csrfToken = {{ csrf_token()|tojson }};
@@ -305,6 +311,46 @@
                 window.alert(data['success-message'] || 'System action submitted.');
             }).catch(function (error) {
                 window.alert(error.message || 'System action failed.');
+                button.disabled = false;
+            });
+        });
+    });
+
+    document.querySelectorAll('[data-hybrid-abort-exposure]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var profileId = button.getAttribute('data-hybrid-abort-profile') || '';
+            var cameraId = button.getAttribute('data-hybrid-abort-camera') || '';
+            var label = button.textContent || 'selected camera';
+            if (!abortExposureActionUrl || !window.confirm(label + '? This only aborts the current exposure for that camera/profile.')) {
+                return;
+            }
+
+            button.disabled = true;
+
+            fetch(abortExposureActionUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    profile_id: profileId,
+                    camera_id: cameraId
+                })
+            }).then(function (response) {
+                if (!response.ok) {
+                    return response.json().then(function (data) {
+                        throw new Error(data['failure-message'] || Object.values(data).flat().join(' ') || 'Abort exposure failed.');
+                    });
+                }
+
+                return response.json();
+            }).then(function (data) {
+                window.alert(data['success-message'] || 'Abort exposure queued.');
+            }).catch(function (error) {
+                window.alert(error.message || 'Abort exposure failed.');
+            }).finally(function () {
                 button.disabled = false;
             });
         });

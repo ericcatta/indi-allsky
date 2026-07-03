@@ -1681,6 +1681,31 @@ class IndiAllSky(object):
 
                     task.setSuccess('Set time queued')
 
+                elif action == 'abortExposure':
+                    profile_id = task.data.get('profile_id')
+
+                    if self.multi_camera_capture_enable:
+                        if not profile_id:
+                            logger.error('abortExposure missing profile_id while multi-camera capture is enabled')
+                            task.setFailed('Missing profile_id')
+                            continue
+
+                        handle = self.capture_worker_map.get(str(profile_id))
+                        if not handle:
+                            logger.error('abortExposure requested for unknown profile_id=%s', profile_id)
+                            task.setFailed('Unknown profile_id')
+                            continue
+
+                        handle['capture_q'].put({
+                            'abort_exposure': True,
+                        })
+                        task.setSuccess('Abort exposure queued for {0:s}'.format(str(profile_id)))
+                    else:
+                        self.capture_q.put({
+                            'abort_exposure': True,
+                        })
+                        task.setSuccess('Abort exposure queued')
+
                 elif action == 'setlocation':
                     logger.info('Set location initiated')
 

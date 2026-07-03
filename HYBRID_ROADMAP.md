@@ -68,6 +68,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     adapter operativo esistente nel layer Flask; capture controls piu' ampi,
     retry/regenerate/maintenance/system actions restano Classic-owned o da
     isolare.
+  - il boundary esplicito "Hybrid recovery -> abort exposure per profilo/camera
+    -> MAIN task -> CaptureWorker queue" e' ora Hybrid-owned tramite
+    `ModernAdminAbortExposureActionPlanner`; `allsky.py`, `CaptureWorker` e le
+    classi camera INDI/libcamera restano effect adapter esistenti.
   - il planning dei comandi generazione `generate_video`, `generate_k_st` e
     `generate_panorama_video` e' ora Hybrid-owned tramite
     `ModernAdminGeneratedOutputActionPlanner`; il gate disponibilita'

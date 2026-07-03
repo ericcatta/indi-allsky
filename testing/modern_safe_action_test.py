@@ -23,6 +23,7 @@ from indi_allsky.modern_safe_action import ImageUnexcludeSafeAction
 from indi_allsky.modern_safe_action import LogDownloadPolicy
 from indi_allsky.modern_safe_action import LogDownloadSafeAction
 from indi_allsky.modern_safe_action import LogDownloadService
+from indi_allsky.modern_safe_action import ModernAdminAbortExposureActionPlanner
 from indi_allsky.modern_safe_action import ModernAdminCaptureServiceCommandBoundary
 from indi_allsky.modern_safe_action import ModernAdminGeneratedOutputActionPlanner
 from indi_allsky.modern_safe_action import ModernAdminMaintenanceActionPlanner
@@ -1555,6 +1556,135 @@ def test_capture_service_command_boundary_requires_effect_adapter():
     assert result.details['command'] == 'start'
 
 
+def test_abort_exposure_action_planner_creates_profile_plan():
+    planner = ModernAdminAbortExposureActionPlanner(
+        profile_configs=[
+            {
+                'profile_id': 'asi678mc',
+                'enabled': True,
+                'camera_id': 2,
+                'camera_interface': 'indi',
+                'label': 'ASI678MC',
+            },
+            {
+                'profile_id': 'disabled',
+                'enabled': False,
+                'camera_id': 3,
+                'camera_interface': 'indi',
+            },
+        ],
+    )
+
+    result = planner.plan(payload={'profile_id': 'asi678mc', 'camera_id': '2'})
+
+    assert result.status == 'planned'
+    assert result.allowed is True
+    assert result.details['profile_id'] == 'asi678mc'
+    assert result.details['camera_id'] == 2
+    assert result.details['camera_interface'] == 'indi'
+    assert result.details['priority'] == 10
+    assert result.details['jobdata'] == {
+        'action': 'abortExposure',
+        'profile_id': 'asi678mc',
+        'camera_id': 2,
+    }
+
+
+def test_abort_exposure_action_planner_rejects_invalid_profile():
+    planner = ModernAdminAbortExposureActionPlanner(
+        profile_configs=[
+            {
+                'profile_id': 'imx708-wide',
+                'enabled': True,
+                'camera_id': 1,
+                'camera_interface': 'libcamera',
+            },
+        ],
+    )
+
+    result = planner.plan(payload={'profile_id': 'missing'})
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert result.message == 'Unsupported capture profile.'
+    assert result.details == {'profile_id': 'missing'}
+
+
+def test_abort_exposure_action_planner_rejects_unsupported_camera_interface():
+    planner = ModernAdminAbortExposureActionPlanner(
+        profile_configs=[
+            {
+                'profile_id': 'network-camera',
+                'enabled': True,
+                'camera_id': 4,
+                'camera_interface': 'pycurl',
+            },
+        ],
+    )
+
+    result = planner.plan(payload={'profile_id': 'network-camera'})
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert result.message == 'Unsupported capture profile.'
+
+
+def test_abort_exposure_action_planner_accepts_libcamera_backend_family():
+    planner = ModernAdminAbortExposureActionPlanner(
+        profile_configs=[
+            {
+                'profile_id': 'imx708-wide',
+                'enabled': True,
+                'camera_id': 1,
+                'camera_interface': 'libcamera_imx708',
+            },
+        ],
+    )
+
+    result = planner.plan(payload={'profile_id': 'imx708-wide'})
+
+    assert result.status == 'planned'
+    assert result.allowed is True
+    assert result.details['profile_id'] == 'imx708-wide'
+    assert result.details['camera_id'] == 1
+    assert result.details['camera_interface'] == 'libcamera_imx708'
+
+
+def test_abort_exposure_action_planner_rejects_camera_profile_mismatch():
+    planner = ModernAdminAbortExposureActionPlanner(
+        profile_configs=[
+            {
+                'profile_id': 'asi678mc',
+                'enabled': True,
+                'camera_id': 2,
+                'camera_interface': 'indi',
+            },
+        ],
+    )
+
+    result = planner.plan(payload={'profile_id': 'asi678mc', 'camera_id': 9})
+
+    assert result.status == 'validation_failed'
+    assert result.allowed is False
+    assert result.message == 'camera_id does not match capture profile.'
+
+
+def test_abort_exposure_action_planner_supports_single_camera_fallback():
+    planner = ModernAdminAbortExposureActionPlanner(current_camera_id=8)
+
+    result = planner.plan(payload={})
+
+    assert result.status == 'planned'
+    assert result.allowed is True
+    assert result.details['profile_id'] == ''
+    assert result.details['camera_id'] == 8
+    assert result.details['jobdata'] == {
+        'action': 'abortExposure',
+        'profile_id': '',
+        'camera_id': 8,
+    }
+
+
 def test_system_power_command_boundary_normalizes_reboot_intent():
     boundary = ModernAdminSystemPowerCommandBoundary(effect_adapter=lambda command: 'ok')
 
@@ -1903,6 +2033,14 @@ def get_base_template_source():
     return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'templates' / 'base.html').read_text()
 
 
+def get_allsky_source():
+    return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'allsky.py').read_text()
+
+
+def get_capture_worker_source():
+    return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'capture.py').read_text()
+
+
 def get_flask_init_source():
     return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / '__init__.py').read_text()
 
@@ -1965,6 +2103,20 @@ def test_capture_service_action_view_uses_hybrid_boundary_static():
     assert 'get_capture_service_command_boundary' in view_source
     assert 'effect_adapter=self.run_capture_service_command' in view_source
     assert 'command not in self.valid_commands' not in view_source
+
+
+def test_abort_exposure_action_view_uses_hybrid_planner_static():
+    view_source, full_source = get_capture_service_action_view_source()
+    class_start = view_source.index('class ModernAdminAbortExposureActionView')
+    class_source = view_source[class_start:]
+
+    assert 'ModernAdminAbortExposureActionPlanner' in class_source
+    assert 'queue=TaskQueueQueue.MAIN' in class_source
+    assert 'state=TaskQueueState.MANUAL' in class_source
+    assert "priority=plan.details['priority']" in class_source
+    assert "data=plan.details['jobdata']" in class_source
+    assert 'abortCcdExposure(' not in class_source
+    assert "bp_allsky.add_url_rule('/modern-admin/capture/abort-exposure'" in full_source
 
 
 def test_ajax_generate_video_uses_hybrid_planner_static():
@@ -2032,10 +2184,38 @@ def test_hybrid_shell_exposes_recovery_controls_static():
     assert 'data-hybrid-capture-command="start"' in source
     assert 'data-hybrid-capture-command="stop"' in source
     assert 'data-hybrid-capture-command="restart"' in source
+    assert 'data-hybrid-abort-exposure' in source
+    assert 'data-hybrid-abort-profile="{{ target.profile_id }}"' in source
+    assert 'fetch(abortExposureActionUrl' in source
     assert 'data-hybrid-system-command="reboot"' in source
     assert 'data-hybrid-system-command="poweroff"' not in source
     assert 'fetch(captureActionUrl' in source
     assert 'fetch(quickActionUrl' in source
+
+
+def test_abort_exposure_main_task_routes_to_capture_worker_queue_static():
+    source = get_allsky_source()
+    branch_start = source.index("elif action == 'abortExposure':")
+    branch_end = source.index("elif action == 'setlocation':", branch_start)
+    branch = source[branch_start:branch_end]
+
+    assert "task.data.get('profile_id')" in branch
+    assert 'self.capture_worker_map.get(str(profile_id))' in branch
+    assert "'abort_exposure': True" in branch
+    assert "task.setFailed('Missing profile_id')" in branch
+    assert "task.setFailed('Unknown profile_id')" in branch
+    assert "task.setSuccess('Abort exposure queued" in branch
+
+
+def test_capture_worker_abort_exposure_queue_command_uses_camera_adapter_static():
+    source = get_capture_worker_source()
+    branch_start = source.index("elif c_dict.get('abort_exposure'):")
+    branch_end = source.index('else:', branch_start)
+    branch = source[branch_start:branch_end]
+
+    assert 'self.indiclient.abortCcdExposure()' in branch
+    assert 'waiting_for_frame = False' in branch
+    assert 'waiting_for_sqm_frame = False' in branch
 
 
 def test_safe_action_dry_run_helper_response_shape():
@@ -2452,6 +2632,12 @@ if __name__ == '__main__':
     test_capture_service_command_boundary_rejects_invalid_without_adapter_call()
     test_capture_service_command_boundary_delegates_valid_command_only()
     test_capture_service_command_boundary_requires_effect_adapter()
+    test_abort_exposure_action_planner_creates_profile_plan()
+    test_abort_exposure_action_planner_rejects_invalid_profile()
+    test_abort_exposure_action_planner_rejects_unsupported_camera_interface()
+    test_abort_exposure_action_planner_accepts_libcamera_backend_family()
+    test_abort_exposure_action_planner_rejects_camera_profile_mismatch()
+    test_abort_exposure_action_planner_supports_single_camera_fallback()
     test_generated_output_action_planner_creates_generate_video_plan()
     test_generated_output_action_planner_creates_generate_k_st_plan()
     test_generated_output_action_planner_creates_generate_panorama_plan_when_enabled()
@@ -2475,10 +2661,15 @@ if __name__ == '__main__':
     test_safe_action_dry_run_view_status_mapping_static()
     test_safe_action_dry_run_view_has_no_legacy_ack_path_static()
     test_capture_service_action_view_uses_hybrid_boundary_static()
+    test_abort_exposure_action_view_uses_hybrid_planner_static()
     test_ajax_generate_video_uses_hybrid_planner_static()
     test_ajax_generate_k_st_uses_hybrid_planner_static()
     test_ajax_generate_panorama_video_uses_hybrid_planner_static()
     test_ajax_system_backup_db_uses_hybrid_maintenance_planner_static()
+    test_ajax_system_reboot_uses_hybrid_power_boundary_static()
+    test_hybrid_shell_exposes_recovery_controls_static()
+    test_abort_exposure_main_task_routes_to_capture_worker_queue_static()
+    test_capture_worker_abort_exposure_queue_command_uses_camera_adapter_static()
     test_safe_action_dry_run_helper_response_shape()
     test_safe_action_dry_run_helper_missing_action_id_response_shape()
     test_safe_action_dry_run_helper_unknown_action_response_shape()

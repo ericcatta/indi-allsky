@@ -1287,6 +1287,178 @@ class ModernAdminCaptureServiceCommandBoundary:
         )
 
 
+class ModernAdminAbortExposureActionPlanner:
+    """Hybrid-owned planning boundary for manual per-profile exposure abort.
+
+    The planner validates an explicit operator intent and builds the existing
+    MAIN task payload. It does not talk to camera hardware, INDI, libcamera, or
+    worker queues directly.
+    """
+
+    action_id = 'capture.abort_exposure'
+    feature = 'Capture Recovery'
+    risk_level = 'critical'
+
+    def __init__(self, profile_configs=None, current_camera_id=None):
+        self.profile_configs = list(profile_configs or [])
+        self.current_camera_id = current_camera_id
+
+
+    def normalize_profile_id(self, value):
+        if value is None or isinstance(value, bool):
+            return ''
+
+        return str(value).strip()
+
+
+    def normalize_camera_id(self, value):
+        if value in (None, '') or isinstance(value, bool):
+            return None
+
+        try:
+            camera_id = int(value)
+        except (TypeError, ValueError):
+            return None
+
+        if camera_id <= 0:
+            return None
+
+        return camera_id
+
+
+    def is_supported_camera_interface(self, camera_interface):
+        camera_interface = str(camera_interface or '').strip().lower()
+        return (
+            camera_interface == 'indi'
+            or camera_interface.startswith('indi_')
+            or camera_interface.startswith('libcamera')
+        )
+
+
+    def supported_profile_targets(self):
+        targets = list()
+
+        for profile in self.profile_configs:
+            if not profile.get('enabled', False):
+                continue
+
+            profile_id = self.normalize_profile_id(profile.get('profile_id') or profile.get('id'))
+            if not profile_id:
+                continue
+
+            camera_id = self.normalize_camera_id(
+                profile.get('camera_id')
+                or profile.get('camera_db_id')
+                or profile.get('db_camera_id')
+            )
+            camera_interface = str(profile.get('camera_interface') or '').strip().lower()
+            if not self.is_supported_camera_interface(camera_interface):
+                continue
+
+            targets.append({
+                'profile_id'       : profile_id,
+                'camera_id'        : camera_id,
+                'camera_interface' : camera_interface,
+                'label'            : str(profile.get('label') or profile.get('camera_name') or profile_id),
+            })
+
+        return targets
+
+
+    def target_for_profile(self, profile_id):
+        for target in self.supported_profile_targets():
+            if target['profile_id'] == profile_id:
+                return target
+
+        return None
+
+
+    def plan(self, payload=None, profile_id=None, camera_id=None):
+        payload = payload or {}
+        profile_id = self.normalize_profile_id(profile_id if profile_id is not None else payload.get('profile_id'))
+        camera_id = self.normalize_camera_id(camera_id if camera_id is not None else payload.get('camera_id'))
+
+        if profile_id:
+            target = self.target_for_profile(profile_id)
+            if not target:
+                return self.result(
+                    status='validation_failed',
+                    message='Unsupported capture profile.',
+                    allowed=False,
+                    details={
+                        'profile_id': profile_id,
+                    },
+                )
+
+            if camera_id is not None and target.get('camera_id') not in (None, camera_id):
+                return self.result(
+                    status='validation_failed',
+                    message='camera_id does not match capture profile.',
+                    allowed=False,
+                    details={
+                        'profile_id': profile_id,
+                        'camera_id' : camera_id,
+                    },
+                )
+
+            camera_id = target.get('camera_id') if camera_id is None else camera_id
+            camera_interface = target.get('camera_interface')
+        else:
+            if self.profile_configs:
+                return self.result(
+                    status='validation_failed',
+                    message='profile_id is required for multi-camera capture recovery.',
+                    allowed=False,
+                    details={},
+                )
+
+            camera_id = camera_id or self.normalize_camera_id(self.current_camera_id)
+            if camera_id is None:
+                return self.result(
+                    status='validation_failed',
+                    message='camera_id is required.',
+                    allowed=False,
+                    details={},
+                )
+
+            camera_interface = 'legacy'
+
+        jobdata = {
+            'action'     : 'abortExposure',
+            'profile_id' : profile_id,
+            'camera_id'  : camera_id,
+        }
+
+        return self.result(
+            status='planned',
+            message='Abort exposure action planned.',
+            allowed=True,
+            details={
+                'profile_id'        : profile_id,
+                'camera_id'         : camera_id,
+                'camera_interface'  : camera_interface,
+                'queue'             : 'MAIN',
+                'state'             : 'MANUAL',
+                'priority'          : 10,
+                'jobdata'           : jobdata,
+                'success_message'   : 'Abort exposure queued',
+            },
+        )
+
+
+    def result(self, status, message, allowed=False, details=None):
+        return ModernAdminSafeActionResult(
+            action_id=self.action_id,
+            feature=self.feature,
+            risk_level=self.risk_level,
+            status=status,
+            message=message,
+            dry_run=True,
+            allowed=allowed,
+            details=details or {},
+        )
+
+
 class ModernAdminSystemPowerCommandBoundary:
     """Hybrid-owned command boundary for explicit system power recovery.
 

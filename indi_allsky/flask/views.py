@@ -30,6 +30,7 @@ from ..event_candidate import default_event_candidate_runtime_path
 from ..event_candidate import default_event_timeline_dir
 from ..frame_metadata import default_frame_metadata_dir
 from ..frame_metadata_analytics import FrameMetadataAnalytics
+from ..modern_safe_action import ModernAdminAbortExposureActionPlanner
 from ..modern_safe_action import ModernAdminCaptureServiceCommandBoundary
 from ..modern_safe_action import ModernAdminGeneratedOutputActionPlanner
 from ..modern_safe_action import ModernAdminMaintenanceActionPlanner
@@ -5183,6 +5184,7 @@ class ModernAdminView(TemplateView):
         context['modern_admin_nav'] = self.get_modern_admin_nav()
         context['modern_admin_camera_name'] = str(camera_name)
         context['modern_admin_camera_model'] = str(camera_model)
+        context.update(self.get_modern_admin_topbar_context())
 
         return context
 
@@ -5910,9 +5912,62 @@ class ModernAdminView(TemplateView):
             'modern_admin_quick_action_url'     : quick_action_url,
             'modern_admin_quick_action_camera'  : camera_id,
             'modern_admin_capture_action_url'   : capture_action_url,
+            'modern_admin_abort_exposure_action_url': self.get_modern_admin_abort_exposure_action_url(),
+            'modern_admin_recovery_targets'     : self.get_modern_admin_recovery_targets(),
             'modern_admin_runtime_status'       : runtime_status,
             'modern_admin_capture_service_status': get_modern_admin_capture_service_status(),
         }
+
+
+    def get_modern_admin_abort_exposure_action_url(self):
+        try:
+            return url_for('indi_allsky.modern_admin_abort_exposure_action_view')
+        except Exception as e:
+            app.logger.error('Error determining modern admin abort exposure action URL: %s', str(e))
+            return None
+
+
+    def get_modern_admin_recovery_targets(self):
+        multi_camera_config = self.indi_allsky_config.get('MULTI_CAMERA') or {}
+        profile_configs = multi_camera_config.get('profiles') or []
+        enabled_profiles = [p for p in profile_configs if p.get('enabled', False)]
+
+        targets = list()
+        if enabled_profiles:
+            for profile in enabled_profiles:
+                profile_id = str(profile.get('profile_id') or profile.get('id') or '').strip()
+                if not profile_id:
+                    continue
+
+                camera_interface = str(profile.get('camera_interface') or '').strip().lower()
+                if not (
+                    camera_interface == 'indi'
+                    or camera_interface.startswith('indi_')
+                    or camera_interface.startswith('libcamera')
+                ):
+                    continue
+
+                camera_id = profile.get('camera_id') or profile.get('camera_db_id') or profile.get('db_camera_id')
+                label = str(profile.get('label') or profile.get('camera_name') or profile_id)
+                targets.append({
+                    'label'            : label,
+                    'profile_id'       : profile_id,
+                    'camera_id'        : camera_id,
+                    'camera_interface' : camera_interface,
+                })
+
+            return targets
+
+        camera_id = getattr(getattr(self, 'camera', None), 'id', None)
+        if camera_id:
+            targets.append({
+                'label'            : str(getattr(self.camera, 'friendlyName', '') or getattr(self.camera, 'name', '') or 'Current camera'),
+                'profile_id'       : '',
+                'camera_id'        : camera_id,
+                'camera_interface' : str(getattr(self.camera, 'driver', '') or 'legacy'),
+            })
+
+        return targets
 
 
     def get_modern_admin_runtime_status(self):
@@ -8314,6 +8369,46 @@ class ModernAdminCaptureServiceActionView(BaseView):
             }), status_code
 
         return redirect(self.get_redirect_url())
+
+
+class ModernAdminAbortExposureActionView(BaseView):
+    methods = ['POST']
+    decorators = [login_required]
+
+    def dispatch_request(self):
+        if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
+            return jsonify({
+                'failure-message': 'You do not have permission to abort exposure.',
+            }), 403
+
+        payload = request.get_json(silent=True) or {}
+        planner = ModernAdminAbortExposureActionPlanner(
+            profile_configs=(self.indi_allsky_config.get('MULTI_CAMERA') or {}).get('profiles') or [],
+            current_camera_id=payload.get('camera_id') or getattr(getattr(self, 'camera', None), 'id', None),
+        )
+        plan = planner.plan(payload=payload)
+
+        if plan.status != 'planned':
+            return jsonify({
+                'failure-message': plan.message,
+                'details'        : plan.details,
+            }), 400
+
+        task_abort = IndiAllSkyDbTaskQueueTable(
+            queue=TaskQueueQueue.MAIN,
+            state=TaskQueueState.MANUAL,
+            priority=plan.details['priority'],
+            data=plan.details['jobdata'],
+        )
+
+        db.session.add(task_abort)
+        db.session.commit()
+
+        return jsonify({
+            'success-message': plan.details['success_message'],
+            'task-id'        : task_abort.id,
+            'details'        : plan.details,
+        })
 
 
 class SystemInfoView(TemplateView):
@@ -22760,6 +22855,7 @@ bp_allsky.add_url_rule('/modern-admin/library', view_func=ModernAdminLibraryView
 bp_allsky.add_url_rule('/modern-admin/sky-cycle', view_func=ModernAdminSkyCycleView.as_view('modern_admin_sky_cycle_view', template_name='modern_admin/sky_cycle.html'))
 bp_allsky.add_url_rule('/modern-admin/safe-action/dry-run', view_func=ModernAdminSafeActionDryRunView.as_view('modern_admin_safe_action_dry_run_view'), methods=['POST'])
 bp_allsky.add_url_rule('/modern-admin/capture/service', view_func=ModernAdminCaptureServiceActionView.as_view('modern_admin_capture_service_action_view'))
+bp_allsky.add_url_rule('/modern-admin/capture/abort-exposure', view_func=ModernAdminAbortExposureActionView.as_view('modern_admin_abort_exposure_action_view'))
 bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/add', view_func=ModernAdminCameraAddView.as_view('modern_admin_camera_add_view', template_name='modern_admin/camera_add.html'))
 bp_allsky.add_url_rule('/modern-admin/cameras/detect-indi', view_func=ModernAdminIndiCameraDetectView.as_view('modern_admin_camera_detect_indi_view'))
