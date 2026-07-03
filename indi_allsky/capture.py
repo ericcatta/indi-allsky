@@ -361,6 +361,59 @@ class CaptureWorker(Process):
         self._last_libcamera_frame_ts = 0.0
 
 
+    def _positive_float(self, value, default):
+        try:
+            float_value = float(value)
+        except (TypeError, ValueError):
+            return float(default)
+
+        if float_value <= 0:
+            return float(default)
+
+        return float_value
+
+
+    def _exposure_timeout_plan(self, exposure=None):
+        configured_timeout = self._positive_float(self.config.get('CCD_EXPOSURE_TIMEOUT', 330), 330)
+        requested_exposure = self._positive_float(exposure, 0.0)
+        exposure_floor = requested_exposure + 30.0 if requested_exposure > 0 else 0.0
+        effective_timeout = max(configured_timeout, exposure_floor)
+
+        return {
+            'configured'      : configured_timeout,
+            'requested'       : requested_exposure,
+            'exposure_floor'  : exposure_floor,
+            'effective'       : effective_timeout,
+            'floor_applied'   : effective_timeout > configured_timeout,
+        }
+
+
+    def _next_exposure_timeout_check(self, now_time, camera_ready_time, timeout_plan, waiting_for_frame):
+        if not waiting_for_frame:
+            return now_time + timeout_plan['effective']
+
+        camera_last_ready_s = max(0.0, now_time - camera_ready_time)
+        remaining_s = timeout_plan['effective'] - camera_last_ready_s
+        if remaining_s <= 0:
+            return now_time
+
+        return now_time + min(max(remaining_s, 1.0), 30.0)
+
+
+    def _log_exposure_timeout_plan(self, timeout_plan, context):
+        logger.info(
+            '[EXPOSURE_TIMEOUT_RUNTIME][%s][camera_id=%s] context=%s configured_timeout=%0.1fs requested_exposure_s=%0.8fs exposure_floor=%0.1fs effective_timeout=%0.1fs floor_applied=%s',
+            self.profile_id,
+            self.camera_id if self.camera_id is not None else 'unknown',
+            context,
+            timeout_plan['configured'],
+            timeout_plan['requested'],
+            timeout_plan['exposure_floor'],
+            timeout_plan['effective'],
+            timeout_plan['floor_applied'],
+        )
+
+
     def _set_global_state(self, key, value):
         # MULTI_CAMERA_PREP: in experimental multi-camera mode, only the
         # primary profile owns legacy global status keys used by the UI.
@@ -714,9 +767,7 @@ class CaptureWorker(Process):
 
 
     def _libcamera_busy_timeout(self):
-        exposure = float(self.camera_runtime_state.current_exposure or 0.0)
-        configured_timeout = float(self.config.get('CCD_EXPOSURE_TIMEOUT', 330))
-        return max(configured_timeout, exposure + 30.0)
+        return self._exposure_timeout_plan(self.camera_runtime_state.current_exposure)['effective']
 
 
     def _recover_libcamera_busy_timeout(self, now_time, exposure_state):
@@ -826,7 +877,9 @@ class CaptureWorker(Process):
         last_camera_ready = False
         exposure_state = 'unset'
         camera_driver_returncode = None
-        next_check_exposure_state = time.time() + self.exposure_timeout
+        exposure_timeout_plan = self._exposure_timeout_plan()
+        next_check_exposure_state = time.time() + exposure_timeout_plan['effective']
+        self._log_exposure_timeout_plan(exposure_timeout_plan, 'startup')
 
         self.reconfigure_camera = True  # reconfigure on first run
 
@@ -1046,21 +1099,30 @@ class CaptureWorker(Process):
                     continue
 
 
-                # check exposure state every 5 minutes
+                # check exposure state using the per-profile timeout resolved
+                # into this CaptureWorker config.
                 if next_check_exposure_state < loop_start_time:
-                    next_check_exposure_state = time.time() + self.exposure_timeout
+                    exposure_timeout_plan = self._exposure_timeout_plan(self.exposure_av[constants.EXPOSURE_CURRENT])
+                    camera_last_ready_s = loop_start_time - camera_ready_time
+                    next_check_exposure_state = self._next_exposure_timeout_check(
+                        loop_start_time,
+                        camera_ready_time,
+                        exposure_timeout_plan,
+                        waiting_for_frame,
+                    )
 
-                    camera_last_ready_s = int(loop_start_time - camera_ready_time)
-                    if camera_last_ready_s > self.exposure_timeout:
+                    if waiting_for_frame and camera_last_ready_s >= exposure_timeout_plan['effective']:
                         self._miscDb.addNotification(
                             NotificationCategory.CAMERA,
                             'last_ready',
-                            'Camera last ready {0:d}s ago. Camera might be hung. Aborting exposure.'.format(camera_last_ready_s),
+                            'Camera last ready {0:d}s ago. Camera might be hung. Aborting exposure.'.format(int(camera_last_ready_s)),
                             expire=timedelta(minutes=60),
                         )
 
+                        self._log_exposure_timeout_plan(exposure_timeout_plan, 'abort')
                         self.indiclient.abortCcdExposure()
                         exposure_aborted = True
+                        next_check_exposure_state = loop_start_time + exposure_timeout_plan['effective']
 
 
                 # Loop to run for 11 seconds (prime number)
@@ -1238,6 +1300,8 @@ class CaptureWorker(Process):
                         frame_start_time = now_time
                         exposure_period_info = self._effective_exposure_period(self.exposure_av[constants.EXPOSURE_NEXT])
                         self._log_effective_exposure_period(exposure_period_info)
+                        exposure_timeout_plan = self._exposure_timeout_plan(self.exposure_av[constants.EXPOSURE_NEXT])
+                        self._log_exposure_timeout_plan(exposure_timeout_plan, 'start')
 
                         if self._is_images_only_libcamera_profile() and self.config.get('MULTI_CAMERA_TIMING_DIAG', False):
                             camera_id = self.camera_id if self.camera_id is not None else 'unknown'
@@ -1322,6 +1386,7 @@ class CaptureWorker(Process):
                         camera_ready = False
                         waiting_for_frame = True
                         self._busy_started = now_time
+                        next_check_exposure_state = frame_start_time + exposure_timeout_plan['effective']
 
                         if self._is_images_only_libcamera_profile():
                             camera_id = self.camera_id if self.camera_id is not None else 'unknown'

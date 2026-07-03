@@ -99,6 +99,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     constants restano adapter Flask/Classic;
   - service control effects, sensori/meteo/GPS e watchdog behavior/polling
     restano fuori scope e Classic/Flask-owned per ora.
+- Emergency runtime recovery:
+  - il timeout esposizione del `CaptureWorker` e' ora riallineato all'avvio
+    della singola esposizione e usa il `CCD_EXPOSURE_TIMEOUT` gia' risolto per
+    profilo, con floor conservativo `exposure + 30s`;
+  - root cause del drift osservato: il vecchio check timeout poteva cadere fuori
+    fase e attendere quasi un altro timeout completo, mentre il backlog
+    condiviso `image_q` puo' aggiungere delay tra esposizioni;
+  - nessun rewrite scheduler, nessun cambio driver, nessun nuovo watchdog
+    automatico.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
