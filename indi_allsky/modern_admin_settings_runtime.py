@@ -42,6 +42,28 @@ class ModernAdminSettingsRestoreService:
 
     DEFAULT_RESTORE_NOTE = 'Manual config restore from upload'
 
+    def post_restore_cleanup(self, flush_configs=None, reset_keys=None, flush_adapter=None, reset_adapter=None):
+        cleanup_flags = self.normalize_post_restore_flags(
+            flush_configs=flush_configs,
+            reset_keys=reset_keys,
+        )
+
+        if cleanup_flags['flush_configs'] and flush_adapter is not None:
+            flush_adapter()
+
+        if cleanup_flags['reset_keys'] and reset_adapter is not None:
+            reset_adapter()
+
+        return cleanup_flags
+
+
+    def normalize_post_restore_flags(self, flush_configs=None, reset_keys=None):
+        return {
+            'flush_configs': bool(flush_configs),
+            'reset_keys': bool(reset_keys),
+        }
+
+
     def restore_config(self, config, username, config_adapter, note=None):
         self.validate_restore_target(config)
         config_adapter.config = config

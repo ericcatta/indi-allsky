@@ -12765,6 +12765,56 @@ class AjaxConfigRestoreView(BaseView):
         return ModernAdminSettingsRestoreService()
 
 
+    def flush_config_entries_after_restore(self):
+        flush_entries = IndiAllSkyDbConfigTable.query\
+            .filter(IndiAllSkyDbConfigTable.id != self._indi_allsky_config_obj.config_id)
+
+        flush_entries.delete()
+        db.session.commit()
+
+        app.logger.warning('Config entries flushed')
+
+
+    def reset_security_keys_after_restore(self):
+        import shutil
+        import secrets
+        from cryptography.fernet import Fernet
+
+
+        flask_config_p = Path('/etc/indi-allsky/flask.json')
+
+
+        with io.open(str(flask_config_p), 'rb') as flask_config_f:
+            flask_config = json.load(flask_config_f, object_pairs_hook=OrderedDict)
+
+
+        new_flask_secret_key = secrets.token_hex()
+        new_flask_password_key = Fernet.generate_key().decode()
+
+
+        flask_config['SECRET_KEY'] = new_flask_secret_key
+        flask_config['PASSWORD_KEY'] = new_flask_password_key
+
+
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json', encoding='utf-8') as f_tmp_config:
+            json.dump(
+                flask_config,
+                f_tmp_config,
+                indent=2,  # matches jq output
+                ensure_ascii=False,
+            )
+
+            tmp_config_p = Path(f_tmp_config.name)
+
+
+        shutil.copy2(str(tmp_config_p), str(flask_config_p))
+        tmp_config_p.unlink()
+
+        flask_config_p.chmod(0o660)
+
+        app.logger.warning('Reset security keys')
+
+
     def dispatch_request(self):
         if not current_user.is_admin:
             return jsonify({}), 400
@@ -12854,54 +12904,12 @@ class AjaxConfigRestoreView(BaseView):
         app.logger.info('Restored config from upload')
 
 
-        if flush_configs:
-            flush_entries = IndiAllSkyDbConfigTable.query\
-                .filter(IndiAllSkyDbConfigTable.id != self._indi_allsky_config_obj.config_id)
-
-            flush_entries.delete()
-            db.session.commit()
-
-            app.logger.warning('Config entries flushed')
-
-
-        if reset_keys:
-            import shutil
-            import secrets
-            from cryptography.fernet import Fernet
-
-
-            flask_config_p = Path('/etc/indi-allsky/flask.json')
-
-
-            with io.open(str(flask_config_p), 'rb') as flask_config_f:
-                flask_config = json.load(flask_config_f, object_pairs_hook=OrderedDict)
-
-
-            new_flask_secret_key = secrets.token_hex()
-            new_flask_password_key = Fernet.generate_key().decode()
-
-
-            flask_config['SECRET_KEY'] = new_flask_secret_key
-            flask_config['PASSWORD_KEY'] = new_flask_password_key
-
-
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json', encoding='utf-8') as f_tmp_config:
-                json.dump(
-                    flask_config,
-                    f_tmp_config,
-                    indent=2,  # matches jq output
-                    ensure_ascii=False,
-                )
-
-                tmp_config_p = Path(f_tmp_config.name)
-
-
-            shutil.copy2(str(tmp_config_p), str(flask_config_p))
-            tmp_config_p.unlink()
-
-            flask_config_p.chmod(0o660)
-
-            app.logger.warning('Reset security keys')
+        self.settings_restore_service().post_restore_cleanup(
+            flush_configs=flush_configs,
+            reset_keys=reset_keys,
+            flush_adapter=self.flush_config_entries_after_restore,
+            reset_adapter=self.reset_security_keys_after_restore,
+        )
 
 
         message = {

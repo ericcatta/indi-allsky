@@ -27,6 +27,15 @@ class FakeConfigAdapter:
         return 'saved-config-row'
 
 
+class CallRecorder:
+    def __init__(self):
+        self.calls = 0
+
+
+    def __call__(self):
+        self.calls += 1
+
+
 class FakeUser:
     def __init__(self, user_id=1, username='admin'):
         self.id = user_id
@@ -179,6 +188,64 @@ def test_settings_restore_service_rejects_invalid_target_before_save():
     assert adapter.save_calls == []
 
 
+def test_settings_restore_service_skips_post_restore_cleanup_by_default():
+    flush_adapter = CallRecorder()
+    reset_adapter = CallRecorder()
+    service = ModernAdminSettingsRestoreService()
+
+    result = service.post_restore_cleanup(
+        flush_adapter=flush_adapter,
+        reset_adapter=reset_adapter,
+    )
+
+    assert result == {
+        'flush_configs': False,
+        'reset_keys': False,
+    }
+    assert flush_adapter.calls == 0
+    assert reset_adapter.calls == 0
+
+
+def test_settings_restore_service_delegates_requested_post_restore_cleanup():
+    flush_adapter = CallRecorder()
+    reset_adapter = CallRecorder()
+    service = ModernAdminSettingsRestoreService()
+
+    result = service.post_restore_cleanup(
+        flush_configs='y',
+        reset_keys='y',
+        flush_adapter=flush_adapter,
+        reset_adapter=reset_adapter,
+    )
+
+    assert result == {
+        'flush_configs': True,
+        'reset_keys': True,
+    }
+    assert flush_adapter.calls == 1
+    assert reset_adapter.calls == 1
+
+
+def test_settings_restore_service_allows_partial_post_restore_cleanup():
+    flush_adapter = CallRecorder()
+    reset_adapter = CallRecorder()
+    service = ModernAdminSettingsRestoreService()
+
+    result = service.post_restore_cleanup(
+        flush_configs='y',
+        reset_keys=None,
+        flush_adapter=flush_adapter,
+        reset_adapter=reset_adapter,
+    )
+
+    assert result == {
+        'flush_configs': True,
+        'reset_keys': False,
+    }
+    assert flush_adapter.calls == 1
+    assert reset_adapter.calls == 0
+
+
 def test_settings_revision_history_context_formats_metadata_rows():
     revision = FakeConfigRevision(
         revision_id=7,
@@ -292,8 +359,11 @@ def test_ajax_config_restore_view_uses_restore_service_boundary():
 
     assert 'ModernAdminSettingsRestoreService' in ajax_restore_source
     assert 'settings_restore_service().restore_config(' in ajax_restore_source
+    assert 'settings_restore_service().post_restore_cleanup(' in ajax_restore_source
     assert 'self._indi_allsky_config_obj.save(' not in ajax_restore_source
     assert 'self._indi_allsky_config_obj.config = config_dict' not in ajax_restore_source
+    assert 'if flush_configs:' not in ajax_restore_source
+    assert 'if reset_keys:' not in ajax_restore_source
 
 
 if __name__ == '__main__':
@@ -302,6 +372,9 @@ if __name__ == '__main__':
     test_settings_runtime_service_has_no_flask_or_db_dependency()
     test_settings_restore_service_validates_and_delegates_to_adapter()
     test_settings_restore_service_rejects_invalid_target_before_save()
+    test_settings_restore_service_skips_post_restore_cleanup_by_default()
+    test_settings_restore_service_delegates_requested_post_restore_cleanup()
+    test_settings_restore_service_allows_partial_post_restore_cleanup()
     test_settings_revision_history_context_formats_metadata_rows()
     test_settings_revision_restore_context_adds_restore_metadata_only()
     test_settings_revision_restore_detail_uses_injected_lookup()
