@@ -37,6 +37,7 @@ from ..modern_admin_media_metadata import ModernAdminMiniTimelapseMetadataServic
 from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
+from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
@@ -6140,6 +6141,18 @@ class ModernAdminView(TemplateView):
 class ModernAdminContextMixin(object):
     decorators = [login_required]
     modern_admin_active_endpoint = None
+
+    def get_modern_admin_media_url_normalizer(self):
+        cached_normalizer = getattr(self, '_modern_admin_media_url_normalizer', None)
+        if cached_normalizer is not None:
+            return cached_normalizer
+
+        cached_normalizer = ModernAdminMediaUrlNormalizer(
+            images_folder_url_builder=lambda path: url_for('indi_allsky.images_folder', path=path),
+        )
+        self._modern_admin_media_url_normalizer = cached_normalizer
+        return cached_normalizer
+
 
     def get_context(self):
         context = super(ModernAdminContextMixin, self).get_context()
@@ -13715,7 +13728,7 @@ class ModernAdminRealtimeKeogramView(ModernAdminObservatoryToolView, RealtimeKeo
         context = super(ModernAdminRealtimeKeogramView, self).get_context()
         keogram_uri = context.get('keogram_uri')
         if keogram_uri:
-            context['keogram_uri'] = ModernAdminMediaListView.normalize_media_url(self, keogram_uri)
+            context['keogram_uri'] = self.get_modern_admin_media_url_normalizer().normalize_media_url(keogram_uri)
 
         return context
 
@@ -13741,7 +13754,7 @@ class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, TemplateVie
 
         keogram_uri = context.get('keogram_uri')
         if keogram_uri:
-            context['keogram_uri'] = ModernAdminMediaListView.normalize_media_url(self, keogram_uri)
+            context['keogram_uri'] = self.get_modern_admin_media_url_normalizer().normalize_media_url(keogram_uri)
 
         try:
             context['modern_admin_longterm_rows'] = IndiAllSkyDbLongTermKeogramTable.query\
@@ -13798,7 +13811,7 @@ class ModernAdminDarkLibraryView(ModernAdminCameraToolView, TemplateView):
                 file_size = 0
 
             try:
-                row_url = ModernAdminMediaListView.normalize_media_url(self, row.getUrl())
+                row_url = self.get_modern_admin_media_url_normalizer().normalize_media_url(row.getUrl())
             except Exception as e:
                 app.logger.error('Error determining modern admin calibration URL: %s', str(e))
                 row_url = None
@@ -13927,7 +13940,7 @@ class ModernAdminMaskView(ModernAdminCameraToolView, MaskView):
         context = super(ModernAdminMaskView, self).get_context()
         mask_image_uri = context.get('mask_image_uri')
         if mask_image_uri:
-            context['mask_image_uri'] = ModernAdminMediaListView.normalize_media_url(self, mask_image_uri)
+            context['mask_image_uri'] = self.get_modern_admin_media_url_normalizer().normalize_media_url(mask_image_uri)
 
         return context
 
@@ -14299,7 +14312,9 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
                     return None
 
         try:
-            return self.normalize_media_url(media_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
+            return self.get_modern_admin_media_url_normalizer().normalize_media_url(
+                media_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
+            )
         except Exception as e:
             app.logger.error('Error determining modern admin media URL: %s', str(e))
             return None
@@ -14307,21 +14322,6 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
 
     def get_media_preview_url(self, media_entry, media_url=None):
         return media_url if media_url is not None else self.get_media_url(media_entry)
-
-
-    def normalize_media_url(self, media_url):
-        if not media_url:
-            return None
-
-        media_url_str = str(media_url)
-        if media_url_str.startswith(('http://', 'https://', '/')):
-            return media_url_str
-
-        media_url_p = Path(media_url_str)
-        if media_url_p.parts and media_url_p.parts[0] == 'images':
-            return url_for('indi_allsky.images_folder', path=str(Path(*media_url_p.parts[1:])))
-
-        return media_url_str
 
 
     def format_media_title(self, media_entry):
@@ -14483,7 +14483,9 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
                     return media_url if media_url is not None else self.get_media_url(media_entry)
 
         try:
-            return self.normalize_media_url(thumbnail_entry.getUrl(s3_prefix=self.s3_prefix, local=local))
+            return self.get_modern_admin_media_url_normalizer().normalize_media_url(
+                thumbnail_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
+            )
         except Exception as e:
             app.logger.error('Error determining modern admin thumbnail URL: %s', str(e))
             return media_url if media_url is not None else self.get_media_url(media_entry)
@@ -14761,7 +14763,7 @@ class ModernAdminMediaMetadataView(ModernAdminMediaBrowseView):
             app.logger.error('Error determining modern admin generated media URL: %s', str(e))
             return None
 
-        return ModernAdminMediaListView.normalize_media_url(self, media_url)
+        return self.get_modern_admin_media_url_normalizer().normalize_media_url(media_url)
 
 
     def format_generated_media_title(self, entry):
@@ -17280,7 +17282,7 @@ class ModernAdminImageCircleHelperView(ModernAdminSafeControlsMixin, ImageCircle
         form = context['form_imagecircle']
         latest_image_url = context.get('latest_image_url')
         if latest_image_url:
-            context['latest_image_url'] = ModernAdminMediaListView.normalize_media_url(self, latest_image_url)
+            context['latest_image_url'] = self.get_modern_admin_media_url_normalizer().normalize_media_url(latest_image_url)
 
         context['modern_admin_safe_title'] = 'Image Circle Helper'
         context['modern_admin_safe_note'] = 'Latest image and circle parameters come from the classic helper. Modern Admin keeps this as a read-only reference view.'

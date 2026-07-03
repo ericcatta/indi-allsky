@@ -11,6 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
+from indi_allsky.modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 
 
 class FakeField:
@@ -169,6 +170,42 @@ def test_latest_camera_frame_age_labels_are_stable():
     assert_true(repository.age_label(None) == 'Not evaluated yet', 'missing timestamps should be safe')
 
 
+def test_media_url_normalizer_preserves_existing_url_shapes():
+    normalizer = ModernAdminMediaUrlNormalizer(
+        images_folder_url_builder=lambda path: '/images/{0:s}'.format(path),
+    )
+
+    assert_true(normalizer.normalize_media_url(None) is None, 'None URLs should stay unavailable')
+    assert_true(normalizer.normalize_media_url('') is None, 'empty URLs should stay unavailable')
+    assert_true(normalizer.normalize_media_url('/images/camera/latest.jpg') == '/images/camera/latest.jpg', 'absolute app URLs should be preserved')
+    assert_true(normalizer.normalize_media_url('https://example.invalid/media.jpg') == 'https://example.invalid/media.jpg', 'remote URLs should be preserved for media pages')
+    assert_true(normalizer.normalize_media_url('http://example.invalid/media.jpg') == 'http://example.invalid/media.jpg', 'HTTP URLs should be preserved for media pages')
+    assert_true(normalizer.normalize_media_url('images/camera/latest.jpg') == '/images/camera/latest.jpg', 'relative image URLs should use injected images route builder')
+    assert_true(normalizer.normalize_media_url('custom/media.jpg') == 'custom/media.jpg', 'non-image relative URLs should preserve legacy shape')
+
+
+def test_media_url_normalizer_supports_safe_local_image_profile():
+    normalizer = ModernAdminMediaUrlNormalizer(
+        images_folder_url_builder=lambda path: '/images/{0:s}'.format(path),
+    )
+
+    assert_true(normalizer.normalize_safe_local_image_url('images/camera/latest.jpg') == '/images/camera/latest.jpg', 'safe local image URL should be normalized')
+    assert_true(normalizer.normalize_safe_local_image_url('/images/camera/latest.jpg') == '/images/camera/latest.jpg', 'safe absolute image URL should be preserved')
+    assert_true(normalizer.normalize_safe_local_image_url('https://example.invalid/latest.jpg') is None, 'safe local profile must reject remote URLs')
+    assert_true(normalizer.normalize_safe_local_image_url('/other/latest.jpg') is None, 'safe local profile must reject non-image routes')
+    assert_true(normalizer.normalize_safe_local_image_url('/images/../secret.jpg') is None, 'safe local profile must reject traversal')
+
+
+def test_modern_views_delegate_media_url_normalization_to_runtime_service():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+
+    assert_true('from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer' in source, 'views must import Hybrid media URL normalizer')
+    assert_true('def normalize_media_url(' not in source, 'views must not own inline media URL normalization')
+    assert_true('ModernAdminMediaListView.normalize_media_url' not in source, 'views must not call legacy class-level URL normalization')
+    assert_true('.getUrl(s3_prefix=self.s3_prefix, local=local)' in source, 'Classic getUrl adapter call should remain explicit and preserved')
+    assert_true('.normalize_media_url(' in source, 'views should delegate final URL shaping to Hybrid runtime normalizer')
+
+
 def test_media_runtime_service_has_no_flask_db_or_filesystem_access():
     import indi_allsky.modern_admin_media_runtime as module
 
@@ -187,6 +224,9 @@ def run_tests():
     test_latest_camera_frames_rejects_remote_and_unsafe_routes()
     test_latest_camera_frames_handles_missing_rows_and_query_errors_safely()
     test_latest_camera_frame_age_labels_are_stable()
+    test_media_url_normalizer_preserves_existing_url_shapes()
+    test_media_url_normalizer_supports_safe_local_image_profile()
+    test_modern_views_delegate_media_url_normalization_to_runtime_service()
     test_media_runtime_service_has_no_flask_db_or_filesystem_access()
     print('Modern admin media runtime checks passed')
 

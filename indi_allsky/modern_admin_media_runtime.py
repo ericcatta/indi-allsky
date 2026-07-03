@@ -1,6 +1,60 @@
 from pathlib import Path
 
 
+class ModernAdminMediaUrlNormalizer:
+    """Hybrid-owned URL shaping for Modern/Admin media surfaces."""
+
+    def __init__(self, images_folder_url_builder=None):
+        self.images_folder_url_builder = images_folder_url_builder
+
+
+    def normalize_media_url(self, media_url):
+        if not media_url:
+            return None
+
+        media_url_str = str(media_url)
+        if media_url_str.startswith(('http://', 'https://', '/')):
+            return media_url_str
+
+        media_url_p = Path(media_url_str)
+        if media_url_p.parts and media_url_p.parts[0] == 'images':
+            if not self.images_folder_url_builder:
+                return media_url_str
+            return self.images_folder_url_builder(str(Path(*media_url_p.parts[1:])))
+
+        return media_url_str
+
+
+    def normalize_safe_local_image_url(self, media_url):
+        normalized_url = self.normalize_media_url(media_url)
+        if not normalized_url:
+            return None
+
+        normalized_url = str(normalized_url)
+        if not self.is_safe_local_image_route(normalized_url):
+            return None
+
+        return normalized_url
+
+
+    def is_safe_local_image_route(self, value):
+        if not value:
+            return False
+
+        value = str(value)
+        value_lower = value.lower()
+        if not value.startswith('/'):
+            return False
+
+        if '/images/' not in value:
+            return False
+
+        if any(token in value_lower for token in ('..', '\\', '://', 'file:', '\x00')):
+            return False
+
+        return True
+
+
 class ModernAdminLatestCameraFramesRepository:
     """Bounded runtime source for the two latest Product UI camera images."""
 
@@ -27,7 +81,9 @@ class ModernAdminLatestCameraFramesRepository:
         self.fallback_camera = fallback_camera
         self.clock = clock
         self.s3_prefix = s3_prefix
-        self.images_folder_url_builder = images_folder_url_builder
+        self.url_normalizer = ModernAdminMediaUrlNormalizer(
+            images_folder_url_builder=images_folder_url_builder,
+        )
         self.logger = logger
 
 
@@ -116,53 +172,7 @@ class ModernAdminLatestCameraFramesRepository:
             self.log_error('Error determining Now camera image URL: {0:s}', e)
             return None
 
-        normalized_url = self.normalize_image_url(image_url)
-        if not normalized_url:
-            return None
-
-        normalized_url = str(normalized_url)
-        if not self.is_safe_local_image_route(normalized_url):
-            return None
-
-        return normalized_url
-
-
-    def is_safe_local_image_route(self, value):
-        if not value:
-            return False
-
-        value = str(value)
-        value_lower = value.lower()
-        if not value.startswith('/'):
-            return False
-
-        if '/images/' not in value:
-            return False
-
-        if any(token in value_lower for token in ('..', '\\', '://', 'file:', '\x00')):
-            return False
-
-        return True
-
-
-    def normalize_image_url(self, image_url):
-        if not image_url:
-            return None
-
-        image_url_str = str(image_url)
-        if image_url_str.startswith(('http://', 'https://')):
-            return None
-
-        if image_url_str.startswith('/'):
-            return image_url_str
-
-        image_url_p = Path(image_url_str)
-        if image_url_p.parts and image_url_p.parts[0] == 'images':
-            if not self.images_folder_url_builder:
-                return None
-            return self.images_folder_url_builder(str(Path(*image_url_p.parts[1:])))
-
-        return None
+        return self.url_normalizer.normalize_safe_local_image_url(image_url)
 
 
     def timestamp_label(self, value):
