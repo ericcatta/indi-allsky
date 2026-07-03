@@ -70,6 +70,15 @@ The source of truth for the current consolidation baseline is
   upload/remote naming flags, and the existing Hybrid media metadata service
   only; no generation, task queue mutation, upload, watch/download route,
   filesystem behavior, or config writes were changed.
+- Settings next-slice decision: stop adding opportunistic contract-only slices
+  for now. The remaining medium-risk groups are not cleanly descriptive:
+  `sensors` mixes hardware sensors, external providers, runtime status, and
+  potential polling; `gps` needs provider/runtime evidence; `image_save_formats`
+  is already represented inside Acquisition / Save but remains `do_not_move_yet`;
+  media-product groups such as timelapse/keogram/startrail are tied to
+  generation, upload, public media, or download behavior. The next real
+  Settings milestone should be a Sensors boundary separation or an Action
+  Contract, not another isolated contract-only slice.
 - Mutative/safe-action ownership is now discovered in
   `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
   contract schema before any new execution path.
