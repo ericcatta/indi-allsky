@@ -2092,6 +2092,193 @@ class ModernAdminEnvironmentalAwarenessSettingsContract(ModernAdminSettingsContr
         )
 
 
+class ModernAdminMiniTimelapseSettingsContract(ModernAdminSettingsContractBase):
+    CONFIG_SECTIONS = (
+        {
+            'label'       : 'Manual mini-timelapse job',
+            'description' : 'Describes the operator-selected window and playback metadata used when a mini timelapse job is prepared manually.',
+            'keys'        : (
+                {
+                    'key'     : 'CAMERA_ID',
+                    'source'  : 'Mini timelapse generator form',
+                    'notes'   : 'Camera scope for the generated mini-timelapse job.',
+                },
+                {
+                    'key'     : 'IMAGE_ID',
+                    'source'  : 'Mini timelapse generator form',
+                    'notes'   : 'Anchor frame used to build the pre/post window.',
+                },
+                {
+                    'key'     : 'PRE_SECONDS_SELECT / POST_SECONDS_SELECT',
+                    'source'  : 'Mini timelapse generator form',
+                    'notes'   : 'Operator-selected time window around the anchor frame.',
+                },
+                {
+                    'key'     : 'FRAMERATE_SELECT',
+                    'source'  : 'Mini timelapse generator form',
+                    'notes'   : 'Playback speed selected for the generated clip.',
+                },
+                {
+                    'key'     : 'NOTE',
+                    'source'  : 'Mini timelapse generator form',
+                    'notes'   : 'Operator description stored with the generation job.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Generation task boundary',
+            'description' : 'Documents the task/action metadata boundary without creating, retrying, or mutating generation jobs.',
+            'keys'        : (
+                {
+                    'key'     : 'generateMiniVideo',
+                    'source'  : 'Task queue job action',
+                    'notes'   : 'Task action used by the existing generator endpoint; this contract does not execute it.',
+                },
+                {
+                    'key'     : 'TaskQueueQueue.VIDEO / TaskQueueState.MANUAL',
+                    'source'  : 'Task queue metadata',
+                    'notes'   : 'Queue/state metadata for generated mini-timelapse jobs.',
+                },
+                {
+                    'key'     : 'pre_seconds / post_seconds / framerate / note',
+                    'source'  : 'Task queue job payload',
+                    'notes'   : 'Payload fields forwarded to generation; no validation or execution is performed here.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Upload / remote naming',
+            'description' : 'Groups upload and remote destination metadata for generated mini timelapse outputs without transferring media.',
+            'keys'        : (
+                {
+                    'key'     : 'FILETRANSFER__REMOTE_MINI_VIDEO_NAME',
+                    'source'  : 'Classic config form / config defaults',
+                    'notes'   : 'Remote filename template for mini-timelapse uploads.',
+                },
+                {
+                    'key'     : 'FILETRANSFER__REMOTE_MINI_VIDEO_FOLDER',
+                    'source'  : 'Classic config form / config defaults',
+                    'notes'   : 'Remote folder template for mini-timelapse uploads.',
+                },
+                {
+                    'key'     : 'FILETRANSFER__UPLOAD_MINI_VIDEO',
+                    'source'  : 'Classic config form / config defaults',
+                    'notes'   : 'File-transfer enablement flag for mini-timelapse outputs.',
+                },
+                {
+                    'key'     : 'YOUTUBE__UPLOAD_MINI_VIDEO',
+                    'source'  : 'Classic config form / config defaults',
+                    'notes'   : 'YouTube upload enablement flag for mini-timelapse outputs.',
+                },
+            ),
+        },
+        {
+            'label'       : 'Read-only media metadata',
+            'description' : 'Connects settings ownership to existing Hybrid mini-timelapse metadata views without browsing or opening media files.',
+            'keys'        : (
+                {
+                    'key'     : 'ModernAdminMiniTimelapseMetadataService',
+                    'source'  : 'Hybrid media metadata service',
+                    'notes'   : 'Read-only metadata listing already owned by Hybrid; media preview/download behavior is outside this contract.',
+                },
+                {
+                    'key'     : 'IndiAllSkyDbMiniVideoTable',
+                    'source'  : 'Generated media metadata table',
+                    'notes'   : 'DB metadata source for mini-timelapse rows; this contract does not query it.',
+                },
+            ),
+        },
+    )
+
+    PROPOSED_LAYOUT = (
+        {
+            'label'          : 'Mini-timelapse job',
+            'purpose'        : 'Keep the selected camera, anchor image, time window, speed, and note visible as product concepts.',
+            'source_keys'    : ('CAMERA_ID', 'IMAGE_ID', 'PRE_SECONDS_SELECT', 'POST_SECONDS_SELECT', 'FRAMERATE_SELECT', 'NOTE'),
+            'proposed_level' : 'Future Advanced / Mini Timelapse',
+        },
+        {
+            'label'          : 'Generation boundary',
+            'purpose'        : 'Separate generation job metadata from task execution, retry, and queue mutation.',
+            'source_keys'    : ('generateMiniVideo', 'TaskQueueQueue.VIDEO', 'TaskQueueState.MANUAL'),
+            'proposed_level' : 'Future Developer / Safe Actions',
+        },
+        {
+            'label'          : 'Delivery settings',
+            'purpose'        : 'Keep mini-timelapse upload flags and remote naming separate from generation and metadata listing.',
+            'source_keys'    : ('FILETRANSFER__REMOTE_MINI_VIDEO_*', 'FILETRANSFER__UPLOAD_MINI_VIDEO', 'YOUTUBE__UPLOAD_MINI_VIDEO'),
+            'proposed_level' : 'Future Advanced / Uploads',
+        },
+        {
+            'label'          : 'Metadata listing',
+            'purpose'        : 'Use Hybrid-owned metadata services for read-only status while keeping media open/download behavior separate.',
+            'source_keys'    : ('ModernAdminMiniTimelapseMetadataService', 'IndiAllSkyDbMiniVideoTable'),
+            'proposed_level' : 'Future Advanced / Media Metadata',
+        },
+    )
+
+    OVERVIEW_CARDS = (
+        {
+            'label'           : 'Manual job metadata',
+            'purpose'         : 'Describe the operator-selected scope for a mini-timelapse without submitting a job.',
+            'related_keys'    : ('CAMERA_ID', 'IMAGE_ID', 'PRE_SECONDS_SELECT', 'POST_SECONDS_SELECT', 'FRAMERATE_SELECT', 'NOTE'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'Generation remains a mutating task action and is not exposed by this contract.',
+        },
+        {
+            'label'           : 'Generation task',
+            'purpose'         : 'Make the task boundary explicit before any future Safe Action ownership work.',
+            'related_keys'    : ('generateMiniVideo', 'TaskQueueQueue.VIDEO', 'TaskQueueState.MANUAL'),
+            'future_editable' : 'no from settings',
+            'safety_note'     : 'No queue insert, retry, purge, or generation behavior is changed.',
+        },
+        {
+            'label'           : 'Upload flags',
+            'purpose'         : 'Document file-transfer and YouTube flags that affect mini-timelapse delivery.',
+            'related_keys'    : ('FILETRANSFER__UPLOAD_MINI_VIDEO', 'YOUTUBE__UPLOAD_MINI_VIDEO'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'Upload credentials, remote paths, and external delivery remain outside this slice.',
+        },
+        {
+            'label'           : 'Remote naming',
+            'purpose'         : 'Keep remote filename/folder templates visible as delivery metadata, not filesystem behavior.',
+            'related_keys'    : ('FILETRANSFER__REMOTE_MINI_VIDEO_NAME', 'FILETRANSFER__REMOTE_MINI_VIDEO_FOLDER'),
+            'future_editable' : 'blocked',
+            'safety_note'     : 'No remote path validation, upload, or filesystem access is performed here.',
+        },
+        {
+            'label'           : 'Hybrid metadata ownership',
+            'purpose'         : 'Connect settings ownership to the existing read-only Hybrid mini-timelapse metadata service.',
+            'related_keys'    : ('ModernAdminMiniTimelapseMetadataService', 'IndiAllSkyDbMiniVideoTable'),
+            'future_editable' : 'no',
+            'safety_note'     : 'Preview, download, watch routes, and media browsing behavior remain unchanged.',
+        },
+    )
+
+
+    def build_context(self, settings_groups):
+        return {
+            'modern_admin_mini_timelapse_settings_group'  : self.find_settings_group(settings_groups, 'mini_timelapse'),
+            'modern_admin_mini_timelapse_overview_cards'  : self.get_overview_cards(),
+            'modern_admin_mini_timelapse_config_sections' : self.get_config_sections(),
+            'modern_admin_mini_timelapse_proposed_layout' : self.get_proposed_layout(),
+        }
+
+
+    def get_overview_cards(self):
+        return tuple(
+            {
+                'label'          : self.safe_text(row.get('label')),
+                'purpose'        : self.safe_text(row.get('purpose')),
+                'related_keys'   : tuple(self.safe_text(key) for key in row.get('related_keys', tuple())),
+                'current_status' : 'not evaluated here',
+                'future_editable': self.safe_text(row.get('future_editable')),
+                'safety_note'    : self.safe_text(row.get('safety_note')),
+            }
+            for row in self.OVERVIEW_CARDS
+        )
+
+
 class ModernAdminNotificationsSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {

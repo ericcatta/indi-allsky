@@ -65,6 +65,11 @@ The source of truth for the current consolidation baseline is
   metadata, smoke/cloud/aurora context, and future Observatory relationships
   only; it is intentionally not wired to a Settings UI route because provider,
   credential, polling, and sensor ownership still require dedicated review.
+- Mini Timelapse settings now have a Hybrid-owned read-only contract-only
+  slice. It documents manual request metadata, task-generation boundaries,
+  upload/remote naming flags, and the existing Hybrid media metadata service
+  only; no generation, task queue mutation, upload, watch/download route,
+  filesystem behavior, or config writes were changed.
 - Mutative/safe-action ownership is now discovered in
   `HYBRID_SAFE_ACTION_REGISTRY.md`; the next blocker is a canonical action
   contract schema before any new execution path.

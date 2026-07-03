@@ -18,6 +18,7 @@ from indi_allsky.modern_admin_settings_contracts import ModernAdminEnvironmental
 from indi_allsky.modern_admin_settings_contracts import ModernAdminExposureGainSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
+from indi_allsky.modern_admin_settings_contracts import ModernAdminMiniTimelapseSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from indi_allsky.modern_admin_settings_contracts import ModernAdminSettingsContractBase
 from indi_allsky.modern_admin_settings_contracts import ModernAdminStorageSettingsContract
@@ -303,6 +304,31 @@ def contract_guardrail_cases():
             'overview_key': 'modern_admin_environmental_awareness_overview_cards',
             'config_key': 'modern_admin_environmental_awareness_config_sections',
             'layout_key': 'modern_admin_environmental_awareness_proposed_layout',
+        },
+        {
+            'name': 'mini timelapse',
+            'contract': ModernAdminMiniTimelapseSettingsContract(),
+            'future_key': 'future_editable',
+            'groups': (
+                {
+                    'group_id': 'mini_timelapse',
+                    'label': 'Mini Timelapse',
+                    'visibility': 'Advanced',
+                },
+            ),
+            'selected_group_keys': (
+                ('modern_admin_mini_timelapse_settings_group', 'mini_timelapse'),
+            ),
+            'group_tuple_key': None,
+            'expected_context_keys': (
+                'modern_admin_mini_timelapse_settings_group',
+                'modern_admin_mini_timelapse_overview_cards',
+                'modern_admin_mini_timelapse_config_sections',
+                'modern_admin_mini_timelapse_proposed_layout',
+            ),
+            'overview_key': 'modern_admin_mini_timelapse_overview_cards',
+            'config_key': 'modern_admin_mini_timelapse_config_sections',
+            'layout_key': 'modern_admin_mini_timelapse_proposed_layout',
         },
         {
             'name': 'FITS source',
@@ -1368,6 +1394,62 @@ def test_environmental_awareness_settings_contract_handles_missing_group():
     )
 
 
+def test_mini_timelapse_settings_contract_preserves_context_shape():
+    contract = ModernAdminMiniTimelapseSettingsContract()
+    mini_timelapse_group = {
+        'group_id': 'mini_timelapse',
+        'label': 'Mini Timelapse',
+    }
+
+    context = contract.build_context((
+        {'group_id': 'other'},
+        mini_timelapse_group,
+    ))
+
+    assert_true(
+        context['modern_admin_mini_timelapse_settings_group'] is mini_timelapse_group,
+        'mini timelapse group must be selected from settings inventory groups',
+    )
+    assert_true(
+        len(context['modern_admin_mini_timelapse_overview_cards']) == 5,
+        'mini timelapse overview cards shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_mini_timelapse_config_sections']) == 4,
+        'mini timelapse config sections shape changed',
+    )
+    assert_true(
+        len(context['modern_admin_mini_timelapse_proposed_layout']) == 4,
+        'mini timelapse proposed layout shape changed',
+    )
+    assert_true(
+        context['modern_admin_mini_timelapse_overview_cards'][0]['current_status'] == 'not evaluated here',
+        'mini timelapse overview current status changed',
+    )
+    assert_true(
+        context['modern_admin_mini_timelapse_config_sections'][0]['key_count'] == 5,
+        'mini timelapse request metadata config key count changed',
+    )
+    assert_true(
+        context['modern_admin_mini_timelapse_config_sections'][2]['key_count'] == 4,
+        'mini timelapse delivery metadata config key count changed',
+    )
+    assert_true(
+        context['modern_admin_mini_timelapse_proposed_layout'][0]['note'] == 'read-only proposal',
+        'mini timelapse layout note changed',
+    )
+
+
+def test_mini_timelapse_settings_contract_handles_missing_group():
+    contract = ModernAdminMiniTimelapseSettingsContract()
+    context = contract.build_context(())
+
+    assert_true(
+        context['modern_admin_mini_timelapse_settings_group'] is None,
+        'missing mini timelapse group must remain a safe None fallback',
+    )
+
+
 def test_settings_contract_module_has_no_flask_or_runtime_config_dependency():
     import indi_allsky.modern_admin_settings_contracts as module
 
@@ -1399,6 +1481,7 @@ def test_single_group_settings_contracts_share_group_lookup_helper():
         ModernAdminCameraConnectionSettingsContract,
         ModernAdminAnalyticsSettingsContract,
         ModernAdminEnvironmentalAwarenessSettingsContract,
+        ModernAdminMiniTimelapseSettingsContract,
         ModernAdminHybridAwbSettingsContract,
         ModernAdminFitsSourceSettingsContract,
         ModernAdminNotificationsSettingsContract,
@@ -1428,6 +1511,7 @@ def test_settings_contracts_share_proposed_layout_formatter():
         ModernAdminAutoExposureGainSettingsContract,
         ModernAdminAnalyticsSettingsContract,
         ModernAdminEnvironmentalAwarenessSettingsContract,
+        ModernAdminMiniTimelapseSettingsContract,
         ModernAdminHybridAwbSettingsContract,
         ModernAdminAcquisitionSaveSettingsContract,
         ModernAdminFitsSourceSettingsContract,
@@ -1458,6 +1542,7 @@ def test_settings_contracts_share_config_sections_formatter():
         ModernAdminAutoExposureGainSettingsContract,
         ModernAdminAnalyticsSettingsContract,
         ModernAdminEnvironmentalAwarenessSettingsContract,
+        ModernAdminMiniTimelapseSettingsContract,
         ModernAdminHybridAwbSettingsContract,
         ModernAdminAcquisitionSaveSettingsContract,
         ModernAdminFitsSourceSettingsContract,
@@ -1488,6 +1573,7 @@ def test_settings_contracts_share_safe_text_behavior():
         ModernAdminAutoExposureGainSettingsContract(),
         ModernAdminAnalyticsSettingsContract(),
         ModernAdminEnvironmentalAwarenessSettingsContract(),
+        ModernAdminMiniTimelapseSettingsContract(),
         ModernAdminHybridAwbSettingsContract(),
         ModernAdminAcquisitionSaveSettingsContract(),
         ModernAdminFitsSourceSettingsContract(),
@@ -1563,6 +1649,8 @@ def run_tests():
     test_analytics_settings_view_uses_hybrid_contract()
     test_environmental_awareness_settings_contract_preserves_context_shape()
     test_environmental_awareness_settings_contract_handles_missing_group()
+    test_mini_timelapse_settings_contract_preserves_context_shape()
+    test_mini_timelapse_settings_contract_handles_missing_group()
     test_settings_contract_module_has_no_flask_or_runtime_config_dependency()
     test_single_group_settings_contracts_share_group_lookup_helper()
     test_settings_contracts_share_proposed_layout_formatter()
