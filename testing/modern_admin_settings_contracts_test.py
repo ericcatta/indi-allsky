@@ -1290,7 +1290,10 @@ def test_settings_contracts_share_config_sections_formatter():
         )
 
 
-def test_settings_contract_safe_text_behavior_before_consolidation():
+def test_settings_contracts_share_safe_text_behavior():
+    import indi_allsky.modern_admin_settings_contracts as module
+
+    source = inspect.getsource(module)
     contracts = (
         ModernAdminStorageSettingsContract(),
         ModernAdminCameraProfileSettingsContract(),
@@ -1301,6 +1304,11 @@ def test_settings_contract_safe_text_behavior_before_consolidation():
         ModernAdminAcquisitionSaveSettingsContract(),
         ModernAdminFitsSourceSettingsContract(),
         ModernAdminNotificationsSettingsContract(),
+    )
+
+    assert_true(
+        source.count('def safe_text') == 1,
+        'safe_text formatter should have one shared implementation',
     )
 
     cases = (
@@ -1366,7 +1374,7 @@ def run_tests():
     test_single_group_settings_contracts_share_group_lookup_helper()
     test_settings_contracts_share_proposed_layout_formatter()
     test_settings_contracts_share_config_sections_formatter()
-    test_settings_contract_safe_text_behavior_before_consolidation()
+    test_settings_contracts_share_safe_text_behavior()
 
 
 if __name__ == '__main__':

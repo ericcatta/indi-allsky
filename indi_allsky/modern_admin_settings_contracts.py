@@ -39,6 +39,13 @@ class ModernAdminSettingsContractBase:
         )
 
 
+    def safe_text(self, value):
+        if value is None:
+            return ''
+
+        return str(value)
+
+
 class ModernAdminStorageSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
@@ -211,14 +218,6 @@ class ModernAdminStorageSettingsContract(ModernAdminSettingsContractBase):
             }
             for row in self.OVERVIEW_CARDS
         )
-
-
-    def safe_text(self, value):
-        if value is None:
-            return ''
-
-        return str(value)
-
 
 class ModernAdminCameraProfileSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
@@ -398,13 +397,6 @@ class ModernAdminCameraProfileSettingsContract(ModernAdminSettingsContractBase):
             }
             for row in self.OVERVIEW_CARDS
         )
-
-
-    def safe_text(self, value):
-        if value is None:
-            return ''
-
-        return str(value)
 
 
 class ModernAdminCameraConnectionSettingsContract(ModernAdminSettingsContractBase):
@@ -606,13 +598,6 @@ class ModernAdminCameraConnectionSettingsContract(ModernAdminSettingsContractBas
             }
             for row in self.OVERVIEW_CARDS
         )
-
-
-    def safe_text(self, value):
-        if value is None:
-            return ''
-
-        return str(value)
 
 
 class ModernAdminExposureGainSettingsContract(ModernAdminSettingsContractBase):
@@ -854,13 +839,6 @@ class ModernAdminExposureGainSettingsContract(ModernAdminSettingsContractBase):
             }
             for row in self.OVERVIEW_CARDS
         )
-
-
-    def safe_text(self, value):
-        if value is None:
-            return ''
-
-        return str(value)
 
 
 class ModernAdminAutoExposureGainSettingsContract(ModernAdminSettingsContractBase):
@@ -1116,13 +1094,6 @@ class ModernAdminAutoExposureGainSettingsContract(ModernAdminSettingsContractBas
         )
 
 
-    def safe_text(self, value):
-        if value is None:
-            return ''
-
-        return str(value)
-
-
 class ModernAdminHybridAwbSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
@@ -1352,13 +1323,6 @@ class ModernAdminHybridAwbSettingsContract(ModernAdminSettingsContractBase):
             }
             for row in self.OVERVIEW_CARDS
         )
-
-
-    def safe_text(self, value):
-        if value is None:
-            return ''
-
-        return str(value)
 
 
 class ModernAdminAcquisitionSaveSettingsContract(ModernAdminSettingsContractBase):
@@ -1614,13 +1578,6 @@ class ModernAdminAcquisitionSaveSettingsContract(ModernAdminSettingsContractBase
         )
 
 
-    def safe_text(self, value):
-        if value is None:
-            return ''
-
-        return str(value)
-
-
 class ModernAdminFitsSourceSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
@@ -1843,13 +1800,6 @@ class ModernAdminFitsSourceSettingsContract(ModernAdminSettingsContractBase):
         )
 
 
-    def safe_text(self, value):
-        if value is None:
-            return ''
-
-        return str(value)
-
-
 class ModernAdminNotificationsSettingsContract(ModernAdminSettingsContractBase):
     CONFIG_SECTIONS = (
         {
@@ -2007,10 +1957,3 @@ class ModernAdminNotificationsSettingsContract(ModernAdminSettingsContractBase):
             }
             for row in self.OVERVIEW_CARDS
         )
-
-
-    def safe_text(self, value):
-        if value is None:
-            return ''
-
-        return str(value)
