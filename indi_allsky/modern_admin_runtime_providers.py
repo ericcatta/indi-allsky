@@ -1023,3 +1023,94 @@ class ModernAdminConfiguredSensorWeatherProvider:
         if value is None:
             return ''
         return str(value)
+
+
+class ModernAdminTaskBacklogSummaryProvider:
+    """Hybrid-owned read-only summary shaping for persisted task backlog counts."""
+
+    STATE_LABELS = (
+        'Manual',
+        'Queued',
+        'Running',
+        'Success',
+        'Failed',
+        'Expired',
+    )
+
+    ACTIVE_STATES = frozenset((
+        'Manual',
+        'Queued',
+        'Running',
+    ))
+
+    ATTENTION_STATES = frozenset((
+        'Failed',
+    ))
+
+
+    def get_task_backlog_summary(self, state_counts=None):
+        state_counts = state_counts if isinstance(state_counts, dict) else {}
+        rows = [
+            {
+                'label' : state_label,
+                'count' : self.count_for_state(state_counts, state_label),
+            }
+            for state_label in self.STATE_LABELS
+        ]
+        total_count = sum(row['count'] for row in rows)
+        active_count = sum(row['count'] for row in rows if row['label'] in self.ACTIVE_STATES)
+        attention_count = sum(row['count'] for row in rows if row['label'] in self.ATTENTION_STATES)
+        status = self.status(total_count, active_count, attention_count)
+
+        return {
+            'status'          : status,
+            'tone'            : self.tone(status),
+            'status_label'    : self.status_label(status),
+            'rows'            : rows,
+            'total_count'     : total_count,
+            'active_count'    : active_count,
+            'attention_count' : attention_count,
+            'metadata_source' : 'taskqueue_state_counts',
+        }
+
+
+    def count_for_state(self, state_counts, state_label):
+        value = state_counts.get(state_label, state_counts.get(str(state_label).upper(), 0))
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            value = 0
+
+        if value < 0:
+            return 0
+
+        return value
+
+
+    def status(self, total_count, active_count, attention_count):
+        if attention_count:
+            return 'attention'
+        if active_count:
+            return 'active'
+        if total_count:
+            return 'history'
+        return 'empty'
+
+
+    def tone(self, status):
+        return {
+            'attention' : 'warn',
+            'active'    : 'warn',
+            'history'   : 'muted',
+            'empty'     : 'muted',
+        }.get(status, 'muted')
+
+
+    def status_label(self, status):
+        if status == 'attention':
+            return 'Task backlog has failed work.'
+        if status == 'active':
+            return 'Task backlog has active work.'
+        if status == 'history':
+            return 'Task backlog has completed history only.'
+        return 'No persisted task backlog entries.'

@@ -18,6 +18,7 @@ from indi_allsky.modern_admin_runtime_providers import ModernAdminConfiguredSens
 from indi_allsky.modern_admin_runtime_providers import ModernAdminLocationMetadataProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminSensorWeatherMetadataProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminServiceStatusProvider
+from indi_allsky.modern_admin_runtime_providers import ModernAdminTaskBacklogSummaryProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 
 
@@ -744,6 +745,88 @@ def test_modern_sensor_panel_uses_hybrid_configured_sensor_weather_provider_stat
     )
 
 
+def test_task_backlog_summary_provider_reports_empty_backlog():
+    provider = ModernAdminTaskBacklogSummaryProvider()
+    summary = provider.get_task_backlog_summary({})
+
+    assert_true(summary['status'] == 'empty', 'empty task backlog should be explicit')
+    assert_true(summary['tone'] == 'muted', 'empty task backlog tone should be muted')
+    assert_true(summary['total_count'] == 0, 'empty task backlog total should be zero')
+    assert_true(summary['active_count'] == 0, 'empty task backlog active count should be zero')
+    assert_true(summary['attention_count'] == 0, 'empty task backlog attention count should be zero')
+    assert_true(
+        [row['label'] for row in summary['rows']] == ['Manual', 'Queued', 'Running', 'Success', 'Failed', 'Expired'],
+        'task backlog rows must preserve existing task state labels',
+    )
+
+
+def test_task_backlog_summary_provider_reports_active_backlog():
+    provider = ModernAdminTaskBacklogSummaryProvider()
+    summary = provider.get_task_backlog_summary({
+        'Manual': 1,
+        'Queued': '2',
+        'Running': 1,
+        'Success': 4,
+    })
+
+    assert_true(summary['status'] == 'active', 'manual/queued/running tasks should be active')
+    assert_true(summary['tone'] == 'warn', 'active task backlog should warn')
+    assert_true(summary['total_count'] == 8, 'task backlog total should include active and history states')
+    assert_true(summary['active_count'] == 4, 'active count should include manual/queued/running states')
+    assert_true(summary['attention_count'] == 0, 'active backlog without failures should not require attention')
+
+
+def test_task_backlog_summary_provider_reports_failed_attention():
+    provider = ModernAdminTaskBacklogSummaryProvider()
+    summary = provider.get_task_backlog_summary({
+        'Failed': 2,
+        'Queued': 1,
+    })
+
+    assert_true(summary['status'] == 'attention', 'failed tasks should take attention priority')
+    assert_true(summary['tone'] == 'warn', 'failed task backlog should warn')
+    assert_true(summary['total_count'] == 3, 'task backlog total should include failed tasks')
+    assert_true(summary['attention_count'] == 2, 'failed task count should be attention count')
+    assert_true(summary['status_label'] == 'Task backlog has failed work.', 'failed task label should be product-safe')
+
+
+def test_task_backlog_summary_provider_sanitizes_invalid_counts():
+    provider = ModernAdminTaskBacklogSummaryProvider()
+    summary = provider.get_task_backlog_summary({
+        'Manual': -1,
+        'Queued': 'bad',
+        'RUNNING': 3,
+    })
+
+    assert_true(summary['status'] == 'active', 'uppercase fallback state key should be accepted')
+    assert_true(summary['total_count'] == 3, 'invalid and negative counts should be clamped to zero')
+    assert_true(summary['active_count'] == 3, 'valid uppercase fallback count should be included')
+
+
+def test_modern_uploads_uses_hybrid_task_backlog_provider_static():
+    views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    class_start = views_source.index('class ModernAdminUploadsView')
+    class_end = views_source.index('class ModernAdminUploadDetailView', class_start)
+    class_source = views_source[class_start:class_end]
+
+    assert_true(
+        'ModernAdminTaskBacklogSummaryProvider' in class_source,
+        'Modern Uploads must use the Hybrid task backlog summary provider',
+    )
+    assert_true(
+        "context['modern_admin_task_backlog_summary']" in class_source,
+        'Modern Uploads should expose provider task backlog summary metadata',
+    )
+    assert_true(
+        "context['modern_admin_upload_tasks'] = task_backlog_summary['rows']" in class_source,
+        'existing upload task rows should come from provider summary rows',
+    )
+    assert_true(
+        "summary.append({'label' : state.value, 'count' : count})" not in class_source,
+        'task backlog row shaping should not remain inline in views.py',
+    )
+
+
 def test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static():
     views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
     function_start = views_source.index('def get_current_capture_repository')
@@ -803,6 +886,11 @@ def run_tests():
         test_configured_sensor_weather_provider_handles_missing_config,
         test_configured_sensor_weather_provider_reports_unknown_provider,
         test_modern_sensor_panel_uses_hybrid_configured_sensor_weather_provider_static,
+        test_task_backlog_summary_provider_reports_empty_backlog,
+        test_task_backlog_summary_provider_reports_active_backlog,
+        test_task_backlog_summary_provider_reports_failed_attention,
+        test_task_backlog_summary_provider_sanitizes_invalid_counts,
+        test_modern_uploads_uses_hybrid_task_backlog_provider_static,
         test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static,
     ]
 

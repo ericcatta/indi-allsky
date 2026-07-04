@@ -53,6 +53,7 @@ from ..modern_admin_runtime_providers import ModernAdminConfiguredSensorWeatherP
 from ..modern_admin_runtime_providers import ModernAdminLocationMetadataProvider
 from ..modern_admin_runtime_providers import ModernAdminSensorWeatherMetadataProvider
 from ..modern_admin_runtime_providers import ModernAdminServiceStatusProvider
+from ..modern_admin_runtime_providers import ModernAdminTaskBacklogSummaryProvider
 from ..modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
@@ -7871,6 +7872,7 @@ class ModernAdminStorageView(ModernAdminView):
 class ModernAdminUploadsView(ModernAdminView):
     page_title = 'Modern Admin Uploads'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_uploads_view'
+    task_backlog_summary_provider = ModernAdminTaskBacklogSummaryProvider()
 
     def get_context(self):
         context = super(ModernAdminUploadsView, self).get_context()
@@ -7901,7 +7903,9 @@ class ModernAdminUploadsView(ModernAdminView):
                 'tone'   : 'modern-admin-status-good' if youtube_config.get('UPLOAD_VIDEO') else 'modern-admin-status-muted',
             },
         )
-        context['modern_admin_upload_tasks'] = self.get_task_queue_summary()
+        task_backlog_summary = self.get_task_queue_summary()
+        context['modern_admin_task_backlog_summary'] = task_backlog_summary
+        context['modern_admin_upload_tasks'] = task_backlog_summary['rows']
         context['modern_admin_upload_notifications'] = self.get_upload_notifications()
         context['modern_admin_upload_target_count'] = len(context['modern_admin_upload_targets'])
         context['modern_admin_upload_enabled_count'] = len([
@@ -7914,7 +7918,7 @@ class ModernAdminUploadsView(ModernAdminView):
 
 
     def get_task_queue_summary(self):
-        summary = list()
+        state_counts = dict()
         for state in TaskQueueState:
             try:
                 count = IndiAllSkyDbTaskQueueTable.query\
@@ -7924,9 +7928,9 @@ class ModernAdminUploadsView(ModernAdminView):
                 app.logger.error('Error counting modern admin upload task queue rows: %s', str(e))
                 count = 0
 
-            summary.append({'label' : state.value, 'count' : count})
+            state_counts[state.value] = count
 
-        return summary
+        return self.task_backlog_summary_provider.get_task_backlog_summary(state_counts=state_counts)
 
 
     def get_upload_notifications(self):

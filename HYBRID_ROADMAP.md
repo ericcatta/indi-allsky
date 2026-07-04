@@ -113,6 +113,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     provider metadata" e' ora Hybrid-owned tramite
     `ModernAdminConfiguredSensorWeatherProvider`; credential values, provider
     validation, polling e driver restano fuori scope;
+  - il boundary read-only "taskqueue state counts -> task backlog summary" e'
+    ora Hybrid-owned tramite `ModernAdminTaskBacklogSummaryProvider`; query DB,
+    worker execution e mutazioni task restano adapter/runtime esistenti;
   - service control effects, sensori/meteo/GPS e watchdog behavior/polling
     restano fuori scope e Classic/Flask-owned per ora.
 - Emergency runtime recovery:
