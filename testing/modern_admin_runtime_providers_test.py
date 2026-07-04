@@ -15,6 +15,7 @@ from indi_allsky.modern_admin_runtime_providers import ModernAdminCameraRuntimeM
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCaptureHealthSummaryProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
 from indi_allsky.modern_admin_runtime_providers import ModernAdminLocationMetadataProvider
+from indi_allsky.modern_admin_runtime_providers import ModernAdminSensorWeatherMetadataProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 
@@ -558,6 +559,93 @@ def test_modern_virtualsky_uses_hybrid_location_provider_static():
     )
 
 
+def test_sensor_weather_metadata_provider_reports_available_latest_metadata():
+    now = datetime(2026, 7, 4, 10, 0, 0)
+    provider = ModernAdminSensorWeatherMetadataProvider()
+    metadata = provider.get_sensor_weather_metadata(
+        latest_image_data={
+            'sensor_user_0': 0.0,
+            'sensor_user_10': '21.5',
+            'sensor_temp_0': -5.2,
+            'sensor_temp_1': 'not numeric',
+        },
+        latest_image_timestamp=now - timedelta(seconds=120),
+        now=now,
+    )
+
+    assert_true(metadata['status'] == 'available', 'fresh persisted sensor metadata should be available')
+    assert_true(metadata['tone'] == 'good', 'available sensor metadata tone should be good')
+    assert_true(metadata['latest_timestamp'] == '2026-07-04T09:58:00', 'timestamp should be JSON-safe text')
+    assert_true(metadata['age_seconds'] == 120, 'age should be computed from latest frame timestamp')
+    assert_true(metadata['sensor_user_count'] == 2, 'numeric user slots should be counted, including zero')
+    assert_true(metadata['sensor_temp_count'] == 1, 'non-numeric temp slots should be ignored')
+    assert_true(metadata['sensor_field_count'] == 3, 'field count should summarize all persisted sensor slots')
+    assert_true(
+        metadata['source_status'] == 'Persisted sensor/weather metadata available from latest frame.',
+        'available metadata source wording should be product-safe',
+    )
+
+
+def test_sensor_weather_metadata_provider_reports_stale_metadata():
+    now = datetime(2026, 7, 4, 10, 0, 0)
+    provider = ModernAdminSensorWeatherMetadataProvider()
+    metadata = provider.get_sensor_weather_metadata(
+        latest_image_data={
+            'sensor_user_10': 21.5,
+        },
+        latest_image_timestamp=now - timedelta(seconds=1200),
+        now=now,
+        stale_after_seconds=900,
+    )
+
+    assert_true(metadata['status'] == 'stale', 'old persisted sensor metadata should be stale')
+    assert_true(metadata['tone'] == 'warn', 'stale sensor metadata should warn')
+    assert_true(metadata['age_seconds'] == 1200, 'stale age should be preserved')
+    assert_true(
+        metadata['source_status'] == 'Persisted sensor/weather metadata is stale.',
+        'stale metadata source wording should be product-safe',
+    )
+
+
+def test_sensor_weather_metadata_provider_handles_missing_metadata_safely():
+    provider = ModernAdminSensorWeatherMetadataProvider()
+    metadata = provider.get_sensor_weather_metadata(
+        latest_image_data=None,
+        latest_image_timestamp=None,
+        now=datetime(2026, 7, 4, 10, 0, 0),
+    )
+
+    assert_true(metadata['status'] == 'missing', 'missing sensor metadata should be explicit')
+    assert_true(metadata['tone'] == 'muted', 'missing sensor metadata tone should be muted')
+    assert_true(metadata['latest_timestamp'] is None, 'missing timestamp should stay None')
+    assert_true(metadata['age_seconds'] is None, 'missing age should stay None')
+    assert_true(metadata['sensor_field_count'] == 0, 'missing metadata should expose zero fields')
+    assert_true(
+        metadata['source_status'] == 'No persisted sensor/weather metadata found.',
+        'missing metadata source wording should be safe',
+    )
+
+
+def test_modern_sensor_panel_uses_hybrid_sensor_weather_provider_static():
+    views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    class_start = views_source.index('class ModernAdminSensorPanelView')
+    class_end = views_source.index('class ModernAdminSystemToolView', class_start)
+    class_source = views_source[class_start:class_end]
+
+    assert_true(
+        'ModernAdminSensorWeatherMetadataProvider' in class_source,
+        'Modern Sensor Panel must use the Hybrid sensor/weather metadata provider',
+    )
+    assert_true(
+        "context['modern_admin_sensor_weather_metadata']" in class_source,
+        'Modern Sensor Panel should expose sensor/weather provider payload as a context key',
+    )
+    assert_true(
+        'sensor_user_count' not in class_source,
+        'sensor/weather metadata summary policy should not remain inline in views.py',
+    )
+
+
 def test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static():
     views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
     function_start = views_source.index('def get_current_capture_repository')
@@ -608,6 +696,10 @@ def run_tests():
         test_location_metadata_provider_uses_config_fallback,
         test_location_metadata_provider_handles_missing_location_safely,
         test_modern_virtualsky_uses_hybrid_location_provider_static,
+        test_sensor_weather_metadata_provider_reports_available_latest_metadata,
+        test_sensor_weather_metadata_provider_reports_stale_metadata,
+        test_sensor_weather_metadata_provider_handles_missing_metadata_safely,
+        test_modern_sensor_panel_uses_hybrid_sensor_weather_provider_static,
         test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static,
     ]
 

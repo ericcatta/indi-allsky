@@ -648,3 +648,133 @@ class ModernAdminLocationMetadataProvider:
         if value is None:
             return ''
         return str(value)
+
+
+class ModernAdminSensorWeatherMetadataProvider:
+    """Hybrid-owned metadata-only summary for persisted sensor/weather readings."""
+
+    SENSOR_SLOT_PREFIXES = (
+        'sensor_user_',
+        'sensor_temp_',
+    )
+
+
+    def get_sensor_weather_metadata(
+        self,
+        latest_image_data=None,
+        latest_image_timestamp=None,
+        now=None,
+        stale_after_seconds=900,
+    ):
+        latest_image_data = latest_image_data if isinstance(latest_image_data, dict) else {}
+        now = self.normalize_now(now)
+        age_seconds = self.age_seconds(latest_image_timestamp, now)
+        sensor_user_count = self.count_numeric_slots(latest_image_data, 'sensor_user_', 60)
+        sensor_temp_count = self.count_numeric_slots(latest_image_data, 'sensor_temp_', 60)
+        sensor_field_count = sensor_user_count + sensor_temp_count
+        status = self.status(sensor_field_count, age_seconds, stale_after_seconds)
+
+        return {
+            'status'                 : status,
+            'tone'                   : self.tone(status),
+            'latest_timestamp'       : self.format_timestamp(latest_image_timestamp),
+            'age_seconds'            : age_seconds,
+            'stale_after_seconds'    : self.positive_int(stale_after_seconds, 900),
+            'sensor_user_count'      : sensor_user_count,
+            'sensor_temp_count'      : sensor_temp_count,
+            'sensor_field_count'     : sensor_field_count,
+            'source_status'          : self.source_status(status, sensor_field_count, age_seconds),
+            'metadata_source'        : 'latest_image_metadata',
+        }
+
+
+    def status(self, sensor_field_count, age_seconds, stale_after_seconds):
+        if sensor_field_count <= 0:
+            return 'missing'
+
+        if age_seconds is None:
+            return 'available'
+
+        if age_seconds > self.positive_int(stale_after_seconds, 900):
+            return 'stale'
+
+        return 'available'
+
+
+    def tone(self, status):
+        return {
+            'available' : 'good',
+            'stale'    : 'warn',
+            'missing'  : 'muted',
+        }.get(status, 'muted')
+
+
+    def source_status(self, status, sensor_field_count, age_seconds):
+        if status == 'missing':
+            return 'No persisted sensor/weather metadata found.'
+
+        if status == 'stale':
+            return 'Persisted sensor/weather metadata is stale.'
+
+        if age_seconds is None:
+            return 'Persisted sensor/weather metadata available; timestamp unavailable.'
+
+        return 'Persisted sensor/weather metadata available from latest frame.'
+
+
+    def count_numeric_slots(self, data, prefix, slot_count):
+        count = 0
+        for slot_index in range(slot_count):
+            key = '{0:s}{1:d}'.format(prefix, slot_index)
+            if key not in data:
+                continue
+            if self.number_or_none(data.get(key)) is None:
+                continue
+            count += 1
+        return count
+
+
+    def number_or_none(self, value):
+        if value is None:
+            return None
+
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+
+    def age_seconds(self, timestamp, now):
+        if not isinstance(timestamp, datetime):
+            return None
+
+        if timestamp.tzinfo is not None and now.tzinfo is None:
+            timestamp = timestamp.astimezone(timezone.utc).replace(tzinfo=None)
+        if timestamp.tzinfo is None and now.tzinfo is not None:
+            now = now.astimezone(timezone.utc).replace(tzinfo=None)
+
+        return max(0, int((now - timestamp).total_seconds()))
+
+
+    def format_timestamp(self, timestamp):
+        if not isinstance(timestamp, datetime):
+            return None
+        return timestamp.isoformat()
+
+
+    def normalize_now(self, now):
+        if isinstance(now, datetime):
+            return now
+        return datetime.now()
+
+
+    def positive_int(self, value, default):
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            value = int(default)
+
+        if value <= 0:
+            return int(default)
+
+        return value

@@ -50,6 +50,7 @@ from ..modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataPro
 from ..modern_admin_runtime_providers import ModernAdminCaptureHealthSummaryProvider
 from ..modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
 from ..modern_admin_runtime_providers import ModernAdminLocationMetadataProvider
+from ..modern_admin_runtime_providers import ModernAdminSensorWeatherMetadataProvider
 from ..modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 from ..modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
@@ -13818,6 +13819,21 @@ class ModernAdminChartsView(ModernAdminObservatoryToolView, ChartView):
 
 class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, SensorPanelView):
     page_title = 'Modern Admin Sensor Panel'
+    sensor_weather_metadata_provider = ModernAdminSensorWeatherMetadataProvider()
+
+    def get_context(self):
+        context = super(ModernAdminSensorPanelView, self).get_context()
+        latest_image_entry = getattr(self, 'latest_image_entry', None)
+        latest_image_data = getattr(latest_image_entry, 'data', None)
+        latest_image_timestamp = getattr(latest_image_entry, 'createDate', None)
+
+        context['modern_admin_sensor_weather_metadata'] = self.sensor_weather_metadata_provider.get_sensor_weather_metadata(
+            latest_image_data=latest_image_data,
+            latest_image_timestamp=latest_image_timestamp,
+            now=getattr(self, 'camera_now', None),
+        )
+
+        return context
 
 
 class ModernAdminSystemToolView(ModernAdminContextMixin):

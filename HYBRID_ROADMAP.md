@@ -105,6 +105,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     location summary" e' ora Hybrid-owned tramite
     `ModernAdminLocationMetadataProvider`; GPS live polling/provider behavior
     resta fuori scope;
+  - il boundary read-only "latest image sensor/weather metadata -> persisted
+    sensor/weather summary" e' ora Hybrid-owned tramite
+    `ModernAdminSensorWeatherMetadataProvider`; live sensor polling, provider API
+    calls e driver hardware restano fuori scope;
   - service control effects, sensori/meteo/GPS e watchdog behavior/polling
     restano fuori scope e Classic/Flask-owned per ora.
 - Emergency runtime recovery:
