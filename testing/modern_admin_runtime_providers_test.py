@@ -14,6 +14,7 @@ import indi_allsky.modern_admin_runtime_providers as runtime_providers
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCaptureHealthSummaryProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
+from indi_allsky.modern_admin_runtime_providers import ModernAdminConfiguredSensorWeatherProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminLocationMetadataProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminSensorWeatherMetadataProvider
 from indi_allsky.modern_admin_runtime_providers import ModernAdminServiceStatusProvider
@@ -646,6 +647,103 @@ def test_modern_sensor_panel_uses_hybrid_sensor_weather_provider_static():
     )
 
 
+def test_configured_sensor_weather_provider_reports_available_config():
+    provider = ModernAdminConfiguredSensorWeatherProvider()
+    metadata = provider.get_configured_provider_metadata({
+        'TEMP_SENSOR': {
+            'A_CLASSNAME': 'temp_api_openweathermap',
+            'A_LABEL': 'Outdoor Weather',
+            'A_USER_VAR_SLOT': 'sensor_user_10',
+            'B_CLASSNAME': '',
+            'OPENWEATHERMAP_APIKEY_E': 'encrypted-secret',
+        },
+    })
+
+    assert_true(metadata['status'] == 'available', 'configured weather provider should be available')
+    assert_true(metadata['tone'] == 'good', 'available provider config should use good tone')
+    assert_true(metadata['enabled_count'] == 1, 'one configured sensor slot should be counted')
+    assert_true(metadata['disabled_count'] == 5, 'disabled sensor slots should be counted')
+    assert_true(metadata['weather_provider_count'] == 1, 'API provider should count as weather provider')
+    assert_true(metadata['hardware_sensor_count'] == 0, 'API provider should not count as hardware sensor')
+    assert_true(metadata['provider_slots'][0]['provider_label'] == 'OpenWeather API', 'provider label should be product-safe')
+    assert_true(metadata['provider_slots'][0]['provider_type'] == 'weather_api', 'provider type should be normalized')
+    assert_true(metadata['credential_metadata'][0] == {
+        'provider_id' : 'temp_api_openweathermap',
+        'label'       : 'OpenWeather API credentials',
+        'configured'  : True,
+    }, 'credential metadata must expose only configured flag')
+    assert_true(
+        'encrypted-secret' not in str(metadata),
+        'configured provider metadata must not expose credential values',
+    )
+
+
+def test_configured_sensor_weather_provider_reports_disabled_config():
+    provider = ModernAdminConfiguredSensorWeatherProvider()
+    metadata = provider.get_configured_provider_metadata({
+        'TEMP_SENSOR': {
+            'A_CLASSNAME': '',
+            'B_CLASSNAME': '',
+            'C_CLASSNAME': '',
+            'D_CLASSNAME': '',
+            'E_CLASSNAME': '',
+            'F_CLASSNAME': '',
+        },
+    })
+
+    assert_true(metadata['status'] == 'disabled', 'empty sensor slots should be disabled')
+    assert_true(metadata['tone'] == 'muted', 'disabled provider config should use muted tone')
+    assert_true(metadata['enabled_count'] == 0, 'disabled config should not report enabled providers')
+    assert_true(metadata['disabled_count'] == 6, 'all six slots should be disabled')
+    assert_true(metadata['status_label'] == 'No sensor/weather providers configured.', 'disabled status label should be safe')
+
+
+def test_configured_sensor_weather_provider_handles_missing_config():
+    provider = ModernAdminConfiguredSensorWeatherProvider()
+    metadata = provider.get_configured_provider_metadata({})
+
+    assert_true(metadata['status'] == 'missing', 'missing TEMP_SENSOR config should be explicit')
+    assert_true(metadata['tone'] == 'muted', 'missing provider config should use muted tone')
+    assert_true(metadata['provider_slots'] == [], 'missing config should not invent provider slots')
+    assert_true(metadata['credential_metadata'] == [], 'missing config should not invent credential metadata')
+
+
+def test_configured_sensor_weather_provider_reports_unknown_provider():
+    provider = ModernAdminConfiguredSensorWeatherProvider()
+    metadata = provider.get_configured_provider_metadata({
+        'TEMP_SENSOR': {
+            'A_CLASSNAME': 'custom_sensor_driver',
+            'A_LABEL': 'Experimental Sensor',
+        },
+    })
+
+    assert_true(metadata['status'] == 'unknown', 'unknown provider IDs should be explicit')
+    assert_true(metadata['tone'] == 'warn', 'unknown provider config should warn')
+    assert_true(metadata['enabled_count'] == 1, 'unknown configured slot is still enabled')
+    assert_true(metadata['unknown_count'] == 1, 'unknown configured slot should be counted')
+    assert_true(metadata['provider_slots'][0]['provider_type'] == 'unknown', 'unknown provider type should be preserved')
+
+
+def test_modern_sensor_panel_uses_hybrid_configured_sensor_weather_provider_static():
+    views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
+    class_start = views_source.index('class ModernAdminSensorPanelView')
+    class_end = views_source.index('class ModernAdminSystemToolView', class_start)
+    class_source = views_source[class_start:class_end]
+
+    assert_true(
+        'ModernAdminConfiguredSensorWeatherProvider' in class_source,
+        'Modern Sensor Panel must use the Hybrid configured sensor/weather provider',
+    )
+    assert_true(
+        "context['modern_admin_configured_sensor_weather_metadata']" in class_source,
+        'Modern Sensor Panel should expose configured sensor/weather metadata as a context key',
+    )
+    assert_true(
+        'OPENWEATHERMAP_APIKEY' not in class_source,
+        'configured provider credential policy should not be inline in views.py',
+    )
+
+
 def test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static():
     views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
     function_start = views_source.index('def get_current_capture_repository')
@@ -700,6 +798,11 @@ def run_tests():
         test_sensor_weather_metadata_provider_reports_stale_metadata,
         test_sensor_weather_metadata_provider_handles_missing_metadata_safely,
         test_modern_sensor_panel_uses_hybrid_sensor_weather_provider_static,
+        test_configured_sensor_weather_provider_reports_available_config,
+        test_configured_sensor_weather_provider_reports_disabled_config,
+        test_configured_sensor_weather_provider_handles_missing_config,
+        test_configured_sensor_weather_provider_reports_unknown_provider,
+        test_modern_sensor_panel_uses_hybrid_configured_sensor_weather_provider_static,
         test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static,
     ]
 

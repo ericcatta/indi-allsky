@@ -109,6 +109,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     sensor/weather summary" e' ora Hybrid-owned tramite
     `ModernAdminSensorWeatherMetadataProvider`; live sensor polling, provider API
     calls e driver hardware restano fuori scope;
+  - il boundary read-only "TEMP_SENSOR config -> configured sensor/weather
+    provider metadata" e' ora Hybrid-owned tramite
+    `ModernAdminConfiguredSensorWeatherProvider`; credential values, provider
+    validation, polling e driver restano fuori scope;
   - service control effects, sensori/meteo/GPS e watchdog behavior/polling
     restano fuori scope e Classic/Flask-owned per ora.
 - Emergency runtime recovery:

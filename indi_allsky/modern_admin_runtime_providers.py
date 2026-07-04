@@ -778,3 +778,248 @@ class ModernAdminSensorWeatherMetadataProvider:
             return int(default)
 
         return value
+
+
+class ModernAdminConfiguredSensorWeatherProvider:
+    """Hybrid-owned read boundary for configured sensor/weather provider metadata."""
+
+    SENSOR_SLOTS = ('A', 'B', 'C', 'D', 'E', 'F')
+
+    PROVIDER_LABELS = {
+        'temp_api_openweathermap'        : 'OpenWeather API',
+        'temp_api_weatherunderground'   : 'Weather Underground API',
+        'temp_api_astrospheric'         : 'Astrospheric API',
+        'temp_api_ambientweather'       : 'Ambient Weather API',
+        'temp_api_ecowitt'              : 'Ecowitt API',
+        'kernel_temp_sensor_ds18x20_w1' : 'DS18x20 temperature sensor',
+        'blinka_temp_sensor_dht22'      : 'DHT22 temperature sensor',
+        'blinka_temp_sensor_dht21'      : 'DHT21 temperature sensor',
+        'blinka_temp_sensor_dht11'      : 'DHT11 temperature sensor',
+        'blinka_temp_sensor_bmp180_i2c' : 'BMP180 i2c sensor',
+        'blinka_temp_sensor_bmp280_i2c' : 'BMP280 i2c sensor',
+        'blinka_temp_sensor_bmp280_spi' : 'BMP280 SPI sensor',
+        'blinka_temp_sensor_bme280_i2c' : 'BME280 i2c sensor',
+        'blinka_temp_sensor_bme280_spi' : 'BME280 SPI sensor',
+        'blinka_temp_sensor_bme680_i2c' : 'BME680 i2c sensor',
+        'blinka_temp_sensor_bme680_spi' : 'BME680 SPI sensor',
+        'blinka_temp_sensor_bmp3xx_i2c' : 'BMP3xx i2c sensor',
+        'blinka_temp_sensor_bmp3xx_spi' : 'BMP3xx SPI sensor',
+        'blinka_temp_sensor_si7021_i2c' : 'Si7021 i2c sensor',
+        'blinka_temp_sensor_sht3x_i2c'  : 'SHT3x i2c sensor',
+        'blinka_temp_sensor_sht4x_i2c'  : 'SHT40/41/45 i2c sensor',
+        'blinka_temp_sensor_htu21d_i2c' : 'HTU21D i2c sensor',
+        'blinka_temp_sensor_htu31d_i2c' : 'HTU31D i2c sensor',
+        'blinka_temp_sensor_ahtx0_i2c'  : 'AHT10/20 i2c sensor',
+        'blinka_temp_sensor_scd30_i2c'  : 'SCD-30 i2c sensor',
+        'blinka_temp_sensor_scd4x_i2c'  : 'SCD-4x i2c sensor',
+        'blinka_temp_sensor_hdc302x_i2c': 'HDC302x i2c sensor',
+        'cpads_temp_sensor_tmp36_ads1015_i2c': 'TMP36 ADS1015 i2c sensor',
+        'cpads_temp_sensor_tmp36_ads1115_i2c': 'TMP36 ADS1115 i2c sensor',
+        'cpads_temp_sensor_lm35_ads1015_i2c' : 'LM35 ADS1015 i2c sensor',
+        'cpads_temp_sensor_lm35_ads1115_i2c' : 'LM35 ADS1115 i2c sensor',
+        'blinka_temp_sensor_mlx90614_i2c'    : 'MLX90614 i2c sensor',
+        'blinka_temp_sensor_mlx90615_i2c'    : 'MLX90615 i2c sensor',
+        'blinka_temp_sensor_mlx90640_i2c'    : 'MLX90640 i2c sensor',
+        'blinka_light_sensor_tsl2561_i2c'    : 'TSL2561 i2c light sensor',
+        'blinka_light_sensor_tsl2591_i2c'    : 'TSL2591 i2c light sensor',
+        'blinka_light_sensor_veml7700_i2c'   : 'VEML7700 i2c light sensor',
+        'blinka_light_sensor_bh1750_i2c'     : 'BH1750 i2c light sensor',
+        'blinka_light_sensor_si1145_i2c'     : 'SI1145 i2c light sensor',
+        'blinka_light_sensor_ltr390_i2c'     : 'LTR390 i2c light sensor',
+        'qwiic_mag_sensor_mmc5983ma_i2c'     : 'MMC5983MA i2c magnetometer',
+        'blinka_imu_sensor_icm20x_i2c'       : 'ICM20X i2c IMU',
+        'blinka_imu_sensor_mpu6050_i2c'      : 'MPU6050 i2c IMU',
+        'blinka_voc_sensor_sgp40_i2c'        : 'SGP40 i2c air quality sensor',
+        'blinka_ups_hat_waveshare_e_mcu_i2c' : 'Waveshare UPS HAT sensor',
+        'blinka_current_sensor_ina219_i2c'   : 'INA219 i2c current sensor',
+        'blinka_current_sensor_ina228_i2c'   : 'INA228 i2c current sensor',
+        'blinka_current_sensor_ina260_i2c'   : 'INA260 i2c current sensor',
+        'blinka_current_sensor_ina23x_i2c'   : 'INA23x i2c current sensor',
+        'blinka_current_sensor_ina3221_i2c'  : 'INA3221 i2c current sensor',
+        'blinka_sparkfun_lightning_sensor_as3935_spi': 'AS3935 SPI lightning sensor',
+        'blinka_sparkfun_lightning_sensor_as3935_i2c': 'AS3935 i2c lightning sensor',
+        'blinka_rain_sensor_fc37'            : 'FC-37 rain sensor',
+        'mqtt_broker_sensor'                 : 'MQTT broker sensor',
+        'sensor_data_generator'              : 'Test data generator',
+    }
+
+    CREDENTIAL_GROUPS = (
+        {
+            'provider_id' : 'temp_api_openweathermap',
+            'label'       : 'OpenWeather API credentials',
+            'keys'        : ('OPENWEATHERMAP_APIKEY', 'OPENWEATHERMAP_APIKEY_E'),
+        },
+        {
+            'provider_id' : 'temp_api_weatherunderground',
+            'label'       : 'Weather Underground credentials',
+            'keys'        : ('WUNDERGROUND_APIKEY', 'WUNDERGROUND_APIKEY_E'),
+        },
+        {
+            'provider_id' : 'temp_api_astrospheric',
+            'label'       : 'Astrospheric credentials',
+            'keys'        : ('ASTROSPHERIC_APIKEY', 'ASTROSPHERIC_APIKEY_E'),
+        },
+        {
+            'provider_id' : 'temp_api_ambientweather',
+            'label'       : 'Ambient Weather credentials',
+            'keys'        : (
+                'AMBIENTWEATHER_APIKEY',
+                'AMBIENTWEATHER_APIKEY_E',
+                'AMBIENTWEATHER_APPLICATIONKEY',
+                'AMBIENTWEATHER_APPLICATIONKEY_E',
+                'AMBIENTWEATHER_MACADDRESS',
+                'AMBIENTWEATHER_MACADDRESS_E',
+            ),
+        },
+        {
+            'provider_id' : 'temp_api_ecowitt',
+            'label'       : 'Ecowitt credentials',
+            'keys'        : (
+                'ECOWITT_APIKEY',
+                'ECOWITT_APIKEY_E',
+                'ECOWITT_APPLICATIONKEY',
+                'ECOWITT_APPLICATIONKEY_E',
+                'ECOWITT_MACADDRESS',
+                'ECOWITT_MACADDRESS_E',
+            ),
+        },
+    )
+
+
+    def get_configured_provider_metadata(self, config=None):
+        if not isinstance(config, dict):
+            return self.missing_metadata()
+
+        temp_sensor_config = config.get('TEMP_SENSOR')
+        if not isinstance(temp_sensor_config, dict):
+            return self.missing_metadata()
+
+        providers = self.configured_slots(temp_sensor_config)
+        enabled_providers = [provider for provider in providers if provider['enabled']]
+        unknown_providers = [provider for provider in providers if provider['status'] == 'unknown']
+        weather_provider_count = len([provider for provider in enabled_providers if provider['provider_type'] == 'weather_api'])
+        hardware_sensor_count = len([provider for provider in enabled_providers if provider['provider_type'] == 'local_sensor'])
+        status = self.status(enabled_providers, unknown_providers)
+
+        return {
+            'status'                 : status,
+            'tone'                   : self.tone(status),
+            'status_label'           : self.status_label(status),
+            'provider_slots'         : providers,
+            'enabled_count'          : len(enabled_providers),
+            'disabled_count'         : len(providers) - len(enabled_providers),
+            'unknown_count'          : len(unknown_providers),
+            'weather_provider_count' : weather_provider_count,
+            'hardware_sensor_count'  : hardware_sensor_count,
+            'credential_metadata'    : self.credential_metadata(temp_sensor_config),
+            'metadata_source'        : 'config_TEMP_SENSOR',
+        }
+
+
+    def missing_metadata(self):
+        return {
+            'status'                 : 'missing',
+            'tone'                   : 'muted',
+            'status_label'           : 'Sensor/weather provider configuration is unavailable.',
+            'provider_slots'         : [],
+            'enabled_count'          : 0,
+            'disabled_count'         : 0,
+            'unknown_count'          : 0,
+            'weather_provider_count' : 0,
+            'hardware_sensor_count'  : 0,
+            'credential_metadata'    : [],
+            'metadata_source'        : 'config_TEMP_SENSOR',
+        }
+
+
+    def configured_slots(self, temp_sensor_config):
+        providers = list()
+        for slot_name in self.SENSOR_SLOTS:
+            class_name = self.safe_text(temp_sensor_config.get('{0:s}_CLASSNAME'.format(slot_name))).strip()
+            label = self.safe_text(temp_sensor_config.get('{0:s}_LABEL'.format(slot_name))).strip() or 'Sensor {0:s}'.format(slot_name)
+            user_var_slot = self.safe_text(temp_sensor_config.get('{0:s}_USER_VAR_SLOT'.format(slot_name))).strip()
+            enabled = bool(class_name)
+            known = not enabled or class_name in self.PROVIDER_LABELS
+            status = self.slot_status(enabled, known)
+
+            providers.append({
+                'slot'            : slot_name,
+                'enabled'         : enabled,
+                'status'          : status,
+                'class_name'      : class_name,
+                'label'           : label,
+                'provider_label'  : self.provider_label(class_name),
+                'provider_type'   : self.provider_type(class_name),
+                'user_var_slot'   : user_var_slot,
+            })
+
+        return providers
+
+
+    def credential_metadata(self, temp_sensor_config):
+        metadata = list()
+        for credential_group in self.CREDENTIAL_GROUPS:
+            configured = any(bool(self.safe_text(temp_sensor_config.get(key)).strip()) for key in credential_group['keys'])
+            metadata.append({
+                'provider_id' : credential_group['provider_id'],
+                'label'       : credential_group['label'],
+                'configured'  : configured,
+            })
+        return metadata
+
+
+    def status(self, enabled_providers, unknown_providers):
+        if unknown_providers:
+            return 'unknown'
+        if enabled_providers:
+            return 'available'
+        return 'disabled'
+
+
+    def slot_status(self, enabled, known):
+        if not enabled:
+            return 'disabled'
+        if not known:
+            return 'unknown'
+        return 'available'
+
+
+    def tone(self, status):
+        return {
+            'available' : 'good',
+            'disabled'  : 'muted',
+            'missing'   : 'muted',
+            'unknown'   : 'warn',
+        }.get(status, 'muted')
+
+
+    def status_label(self, status):
+        if status == 'available':
+            return 'Configured sensor/weather provider metadata available.'
+        if status == 'disabled':
+            return 'No sensor/weather providers configured.'
+        if status == 'unknown':
+            return 'Sensor/weather provider configuration contains unknown provider IDs.'
+        return 'Sensor/weather provider configuration is unavailable.'
+
+
+    def provider_label(self, class_name):
+        if not class_name:
+            return 'None'
+        return self.PROVIDER_LABELS.get(class_name, class_name)
+
+
+    def provider_type(self, class_name):
+        if not class_name:
+            return 'disabled'
+        if class_name.startswith('temp_api_'):
+            return 'weather_api'
+        if class_name in self.PROVIDER_LABELS:
+            return 'local_sensor'
+        return 'unknown'
+
+
+    def safe_text(self, value):
+        if value is None:
+            return ''
+        return str(value)

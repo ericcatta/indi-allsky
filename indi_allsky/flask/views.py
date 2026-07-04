@@ -49,6 +49,7 @@ from ..modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 from ..modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
 from ..modern_admin_runtime_providers import ModernAdminCaptureHealthSummaryProvider
 from ..modern_admin_runtime_providers import ModernAdminCurrentCaptureMetadataRepository
+from ..modern_admin_runtime_providers import ModernAdminConfiguredSensorWeatherProvider
 from ..modern_admin_runtime_providers import ModernAdminLocationMetadataProvider
 from ..modern_admin_runtime_providers import ModernAdminSensorWeatherMetadataProvider
 from ..modern_admin_runtime_providers import ModernAdminServiceStatusProvider
@@ -13819,6 +13820,7 @@ class ModernAdminChartsView(ModernAdminObservatoryToolView, ChartView):
 
 class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, SensorPanelView):
     page_title = 'Modern Admin Sensor Panel'
+    configured_sensor_weather_provider = ModernAdminConfiguredSensorWeatherProvider()
     sensor_weather_metadata_provider = ModernAdminSensorWeatherMetadataProvider()
 
     def get_context(self):
@@ -13831,6 +13833,9 @@ class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, SensorPanelView
             latest_image_data=latest_image_data,
             latest_image_timestamp=latest_image_timestamp,
             now=getattr(self, 'camera_now', None),
+        )
+        context['modern_admin_configured_sensor_weather_metadata'] = self.configured_sensor_weather_provider.get_configured_provider_metadata(
+            config=getattr(self, 'indi_allsky_config', None),
         )
 
         return context
