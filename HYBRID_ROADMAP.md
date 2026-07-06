@@ -152,6 +152,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - `IndiAllSkyDbTaskQueueTable`, `db.session`, `TaskQueueQueue` e
     `TaskQueueState` restano adapter low-level Flask/Classic, ma la boundary
     `plan -> enqueue effect` e' Hybrid-owned.
+  - l'effetto `systemctl --user start/stop/restart indi-allsky.service` per
+    capture service passa ora attraverso
+    `ModernAdminServiceControlEffectAdapter`; subprocess/systemctl resta adapter
+    operativo low-level.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.

@@ -56,6 +56,7 @@ from ..modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 from ..modern_admin_runtime_providers import ModernAdminTaskBacklogSummaryProvider
 from ..modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 from ..modern_admin_runtime_effects import ModernAdminTaskEnqueueEffectAdapter
+from ..modern_admin_runtime_effects import ModernAdminServiceControlEffectAdapter
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
@@ -8393,24 +8394,9 @@ class ModernAdminCaptureServiceActionView(BaseView):
 
 
     def run_capture_service_command(self, command):
-        import subprocess
-
-        try:
-            result = subprocess.run(
-                ['systemctl', '--user', command, self.service_name],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                timeout=20,
-                check=False,
-            )
-        except subprocess.TimeoutExpired:
-            raise TimeoutError()
-
-        return {
-            'returncode' : result.returncode,
-            'output'     : (result.stdout or '').strip(),
-        }
+        return ModernAdminServiceControlEffectAdapter(
+            service_name=self.service_name,
+        ).execute(command)
 
 
     def get_redirect_url(self):

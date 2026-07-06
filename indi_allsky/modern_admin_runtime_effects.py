@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import subprocess
 from typing import Any
 
 
@@ -65,3 +66,31 @@ class ModernAdminTaskEnqueueEffectAdapter:
             return enum_cls[value]
 
         return value
+
+
+class ModernAdminServiceControlEffectAdapter:
+    """Hybrid compatibility adapter for existing user service controls."""
+
+    def __init__(self, service_name, subprocess_run=None, timeout=20):
+        self.service_name = service_name
+        self.subprocess_run = subprocess_run or subprocess.run
+        self.timeout = timeout
+
+
+    def execute(self, command):
+        try:
+            result = self.subprocess_run(
+                ['systemctl', '--user', command, self.service_name],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=self.timeout,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            raise TimeoutError()
+
+        return {
+            'returncode' : result.returncode,
+            'output'     : (result.stdout or '').strip(),
+        }

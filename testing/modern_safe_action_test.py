@@ -2,6 +2,7 @@
 
 import json
 import sys
+import subprocess
 from tempfile import TemporaryDirectory
 from pathlib import Path
 
@@ -35,6 +36,7 @@ from indi_allsky.modern_safe_action import NotificationAcknowledgeService
 from indi_allsky.modern_safe_action import build_default_modern_safe_action_registry
 from indi_allsky.modern_safe_action import build_notification_acknowledge_dry_run_registry
 from indi_allsky.modern_safe_action import run_modern_safe_action_dry_run
+from indi_allsky.modern_admin_runtime_effects import ModernAdminServiceControlEffectAdapter
 from indi_allsky.modern_admin_runtime_effects import ModernAdminTaskEnqueueEffectAdapter
 
 
@@ -1557,6 +1559,58 @@ def test_capture_service_command_boundary_requires_effect_adapter():
     assert result.details['command'] == 'start'
 
 
+def test_service_control_effect_adapter_preserves_systemctl_command_shape():
+    calls = []
+
+    class FakeResult:
+        returncode = 0
+        stdout = ' done \n'
+
+    def fake_run(*args, **kwargs):
+        calls.append((args, kwargs))
+        return FakeResult()
+
+    adapter = ModernAdminServiceControlEffectAdapter(
+        service_name='indi-allsky.service',
+        subprocess_run=fake_run,
+        timeout=20,
+    )
+
+    result = adapter.execute('restart')
+
+    assert result == {
+        'returncode': 0,
+        'output': 'done',
+    }
+    assert calls == [(
+        (['systemctl', '--user', 'restart', 'indi-allsky.service'],),
+        {
+            'stdout': subprocess.PIPE,
+            'stderr': subprocess.STDOUT,
+            'text': True,
+            'timeout': 20,
+            'check': False,
+        },
+    )]
+
+
+def test_service_control_effect_adapter_maps_timeout_to_timeout_error():
+    def fake_run(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd=args[0], timeout=kwargs['timeout'])
+
+    adapter = ModernAdminServiceControlEffectAdapter(
+        service_name='indi-allsky.service',
+        subprocess_run=fake_run,
+    )
+
+    try:
+        adapter.execute('restart')
+    except TimeoutError:
+        pass
+    else:
+        raise AssertionError('Expected TimeoutError')
+
+
 def test_abort_exposure_action_planner_creates_profile_plan():
     planner = ModernAdminAbortExposureActionPlanner(
         profile_configs=[
@@ -2171,8 +2225,10 @@ def test_capture_service_action_view_uses_hybrid_boundary_static():
     view_source, _full_source = get_capture_service_action_view_source()
 
     assert 'ModernAdminCaptureServiceCommandBoundary' in view_source
+    assert 'ModernAdminServiceControlEffectAdapter' in view_source
     assert 'get_capture_service_command_boundary' in view_source
     assert 'effect_adapter=self.run_capture_service_command' in view_source
+    assert ".execute(command)" in view_source
     assert 'command not in self.valid_commands' not in view_source
 
 
@@ -2728,6 +2784,8 @@ if __name__ == '__main__':
     test_capture_service_command_boundary_rejects_invalid_without_adapter_call()
     test_capture_service_command_boundary_delegates_valid_command_only()
     test_capture_service_command_boundary_requires_effect_adapter()
+    test_service_control_effect_adapter_preserves_systemctl_command_shape()
+    test_service_control_effect_adapter_maps_timeout_to_timeout_error()
     test_abort_exposure_action_planner_creates_profile_plan()
     test_abort_exposure_action_planner_rejects_invalid_profile()
     test_abort_exposure_action_planner_rejects_unsupported_camera_interface()
