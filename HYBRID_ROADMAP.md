@@ -127,6 +127,18 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     condiviso `image_q` puo' aggiungere delay tra esposizioni;
   - nessun rewrite scheduler, nessun cambio driver, nessun nuovo watchdog
     automatico.
+- Book 2 runtime dependency checkpoint:
+  - Settings, Media, Safe Actions e Runtime Providers hanno sufficiente
+    ownership Hybrid per payload, planning e request intent dei percorsi
+    Modern/Product principali;
+  - i blocker reali rimasti non sono ulteriori wrapper o formatter, ma adapter
+    di compatibilita' runtime: persistenza config, media access, task queue,
+    service/system effects, worker/capture/generation effects e route/API
+    legacy ancora consumate;
+  - la prossima priorita' e' una Hybrid Runtime Compatibility Layer minimale,
+    iniziando da un adapter effetti condiviso o da un media access adapter;
+  - nuove micro-estrazioni vanno fatte solo se rimuovono direttamente uno di
+    questi blocker.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
