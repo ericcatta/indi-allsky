@@ -35,6 +35,7 @@ from indi_allsky.modern_safe_action import NotificationAcknowledgeService
 from indi_allsky.modern_safe_action import build_default_modern_safe_action_registry
 from indi_allsky.modern_safe_action import build_notification_acknowledge_dry_run_registry
 from indi_allsky.modern_safe_action import run_modern_safe_action_dry_run
+from indi_allsky.modern_admin_runtime_effects import ModernAdminTaskEnqueueEffectAdapter
 
 
 SAFE_ACTION_DRY_RUN_ROUTE = '/modern-admin/safe-action/dry-run'
@@ -1874,6 +1875,62 @@ def test_generated_output_action_planner_has_no_effect_adapter():
     assert not hasattr(planner, 'effect_adapter')
 
 
+def test_task_enqueue_effect_adapter_materializes_plan_without_changing_payload():
+    class FakeTask:
+        next_id = 40
+
+        def __init__(self, queue=None, state=None, priority=None, data=None):
+            FakeTask.next_id += 1
+            self.id = FakeTask.next_id
+            self.queue = queue
+            self.state = state
+            self.priority = priority
+            self.data = data
+
+    class FakeSession:
+        def __init__(self):
+            self.added = []
+            self.commits = 0
+
+        def add(self, task):
+            self.added.append(task)
+
+        def commit(self):
+            self.commits += 1
+
+    session = FakeSession()
+    jobdata = {
+        'action': 'generateVideo',
+        'kwargs': {
+            'timespec': '20260702',
+            'night': True,
+            'camera_id': 7,
+        },
+    }
+    adapter = ModernAdminTaskEnqueueEffectAdapter(
+        task_model=FakeTask,
+        db_session=session,
+        queue_enum={'VIDEO': 'video-enum'},
+        state_enum={'MANUAL': 'manual-enum'},
+    )
+
+    result = adapter.enqueue_from_plan({
+        'queue': 'VIDEO',
+        'state': 'MANUAL',
+        'priority': 100,
+        'jobdata': jobdata,
+    })
+
+    assert session.commits == 1
+    assert session.added == [result.task]
+    assert result.task_id == 41
+    assert result.queue == 'video-enum'
+    assert result.state == 'manual-enum'
+    assert result.priority == 100
+    assert result.jobdata is jobdata
+    assert result.task.data is jobdata
+
+
 def test_maintenance_action_planner_creates_backup_db_plan():
     planner = ModernAdminMaintenanceActionPlanner()
 
@@ -2140,8 +2197,8 @@ def test_ajax_generate_video_uses_hybrid_planner_static():
     branch = view_source[branch_start:branch_end]
 
     assert 'ModernAdminGeneratedOutputActionPlanner().plan' in branch
-    assert "jobdata = plan.details['jobdata']" in branch
-    assert "priority=plan.details['priority']" in branch
+    assert 'ModernAdminTaskEnqueueEffectAdapter' in branch
+    assert '.enqueue_from_plan(plan.details)' in branch
 
 
 def test_ajax_generate_k_st_uses_hybrid_planner_static():
@@ -2151,8 +2208,8 @@ def test_ajax_generate_k_st_uses_hybrid_planner_static():
     branch = view_source[branch_start:branch_end]
 
     assert 'ModernAdminGeneratedOutputActionPlanner().plan' in branch
-    assert "jobdata = plan.details['jobdata']" in branch
-    assert "priority=plan.details['priority']" in branch
+    assert 'ModernAdminTaskEnqueueEffectAdapter' in branch
+    assert '.enqueue_from_plan(plan.details)' in branch
 
 
 def test_ajax_generate_panorama_video_uses_hybrid_planner_static():
@@ -2165,8 +2222,8 @@ def test_ajax_generate_panorama_video_uses_hybrid_planner_static():
     assert 'config=self.indi_allsky_config' in branch
     assert "if plan.status == 'unavailable':" in branch
     assert "'success-message' : plan.message" in branch
-    assert "jobdata = plan.details['jobdata']" in branch
-    assert "priority=plan.details['priority']" in branch
+    assert 'ModernAdminTaskEnqueueEffectAdapter' in branch
+    assert '.enqueue_from_plan(plan.details)' in branch
 
 
 def test_ajax_system_backup_db_uses_hybrid_maintenance_planner_static():
@@ -2685,6 +2742,7 @@ if __name__ == '__main__':
     test_generated_output_action_planner_rejects_unsupported_action()
     test_generated_output_action_planner_rejects_invalid_target()
     test_generated_output_action_planner_has_no_effect_adapter()
+    test_task_enqueue_effect_adapter_materializes_plan_without_changing_payload()
     test_maintenance_action_planner_creates_backup_db_plan()
     test_maintenance_action_planner_rejects_unsupported_action()
     test_maintenance_action_planner_has_no_effect_adapter()

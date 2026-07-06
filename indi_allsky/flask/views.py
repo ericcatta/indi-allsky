@@ -55,6 +55,7 @@ from ..modern_admin_runtime_providers import ModernAdminSensorWeatherMetadataPro
 from ..modern_admin_runtime_providers import ModernAdminServiceStatusProvider
 from ..modern_admin_runtime_providers import ModernAdminTaskBacklogSummaryProvider
 from ..modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
+from ..modern_admin_runtime_effects import ModernAdminTaskEnqueueEffectAdapter
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
@@ -10496,16 +10497,12 @@ class AjaxTimelapseGeneratorView(BaseView):
 
             app.logger.warning('Generating %s time timelapse for %s camera %d', timeofday_str, timespec, camera.id)
 
-            jobdata = plan.details['jobdata']
-
-            task = IndiAllSkyDbTaskQueueTable(
-                queue=TaskQueueQueue.VIDEO,
-                state=TaskQueueState.MANUAL,
-                priority=plan.details['priority'],
-                data=jobdata,
-            )
-            db.session.add(task)
-            db.session.commit()
+            ModernAdminTaskEnqueueEffectAdapter(
+                task_model=IndiAllSkyDbTaskQueueTable,
+                db_session=db.session,
+                queue_enum=TaskQueueQueue,
+                state_enum=TaskQueueState,
+            ).enqueue_from_plan(plan.details)
 
             message = {
                 'success-message' : 'Job submitted',
@@ -10543,16 +10540,12 @@ class AjaxTimelapseGeneratorView(BaseView):
 
             app.logger.warning('Generating %s time panorama timelapse for %s camera %d', timeofday_str, timespec, camera.id)
 
-            jobdata = plan.details['jobdata']
-
-            task = IndiAllSkyDbTaskQueueTable(
-                queue=TaskQueueQueue.VIDEO,
-                state=TaskQueueState.MANUAL,
-                priority=plan.details['priority'],
-                data=jobdata,
-            )
-            db.session.add(task)
-            db.session.commit()
+            ModernAdminTaskEnqueueEffectAdapter(
+                task_model=IndiAllSkyDbTaskQueueTable,
+                db_session=db.session,
+                queue_enum=TaskQueueQueue,
+                state_enum=TaskQueueState,
+            ).enqueue_from_plan(plan.details)
 
             message = {
                 'success-message' : 'Job submitted',
@@ -10582,16 +10575,12 @@ class AjaxTimelapseGeneratorView(BaseView):
 
             app.logger.warning('Generating %s time timelapse for %s camera %d', timeofday_str, timespec, camera.id)
 
-            jobdata = plan.details['jobdata']
-
-            task = IndiAllSkyDbTaskQueueTable(
-                queue=TaskQueueQueue.VIDEO,
-                state=TaskQueueState.MANUAL,
-                priority=plan.details['priority'],
-                data=jobdata,
-            )
-            db.session.add(task)
-            db.session.commit()
+            ModernAdminTaskEnqueueEffectAdapter(
+                task_model=IndiAllSkyDbTaskQueueTable,
+                db_session=db.session,
+                queue_enum=TaskQueueQueue,
+                state_enum=TaskQueueState,
+            ).enqueue_from_plan(plan.details)
 
             message = {
                 'success-message' : 'Job submitted',

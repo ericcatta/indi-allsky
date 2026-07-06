@@ -139,6 +139,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     iniziando da un adapter effetti condiviso o da un media access adapter;
   - nuove micro-estrazioni vanno fatte solo se rimuovono direttamente uno di
     questi blocker.
+- Book 2 / Hybrid Runtime Compatibility Layer:
+  - il primo adapter effetti condiviso e' ora
+    `ModernAdminTaskEnqueueEffectAdapter`;
+  - l'effetto "generated output plan -> task queue row" per
+    `generate_video`, `generate_k_st` e `generate_panorama_video` passa ora
+    attraverso questo adapter;
+  - `IndiAllSkyDbTaskQueueTable`, `db.session`, `TaskQueueQueue` e
+    `TaskQueueState` restano adapter low-level Flask/Classic, ma la boundary
+    `plan -> enqueue effect` e' Hybrid-owned.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
