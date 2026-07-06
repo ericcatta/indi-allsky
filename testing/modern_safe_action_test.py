@@ -2233,8 +2233,8 @@ def test_ajax_system_backup_db_uses_hybrid_maintenance_planner_static():
     branch = view_source[branch_start:branch_end]
 
     assert 'ModernAdminMaintenanceActionPlanner().plan' in branch
-    assert "data=plan.details['jobdata']" in branch
-    assert "priority=plan.details['priority']" in branch
+    assert 'ModernAdminTaskEnqueueEffectAdapter' in branch
+    assert '.enqueue_from_plan(plan.details)' in branch
     assert "message_list = [plan.details['success_message']]" in branch
 
 

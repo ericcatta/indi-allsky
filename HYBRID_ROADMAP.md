@@ -145,6 +145,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - l'effetto "generated output plan -> task queue row" per
     `generate_video`, `generate_k_st` e `generate_panorama_video` passa ora
     attraverso questo adapter;
+  - l'effetto "maintenance plan -> task queue row" per `backup_db` passa ora
+    attraverso lo stesso adapter;
   - `IndiAllSkyDbTaskQueueTable`, `db.session`, `TaskQueueQueue` e
     `TaskQueueState` restano adapter low-level Flask/Classic, ma la boundary
     `plan -> enqueue effect` e' Hybrid-owned.

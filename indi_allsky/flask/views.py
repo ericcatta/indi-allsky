@@ -9264,16 +9264,12 @@ class AjaxSystemInfoView(BaseView):
                         'COMMAND_HIDDEN': [plan.message],
                     }), 400
 
-                task_backup_db = IndiAllSkyDbTaskQueueTable(
-                    queue=TaskQueueQueue.VIDEO,
-                    state=TaskQueueState.MANUAL,
-                    priority=plan.details['priority'],
-                    data=plan.details['jobdata'],
-                )
-
-                db.session.add(task_backup_db)
-                db.session.commit()
-
+                ModernAdminTaskEnqueueEffectAdapter(
+                    task_model=IndiAllSkyDbTaskQueueTable,
+                    db_session=db.session,
+                    queue_enum=TaskQueueQueue,
+                    state_enum=TaskQueueState,
+                ).enqueue_from_plan(plan.details)
 
                 message_list = [plan.details['success_message']]
 
