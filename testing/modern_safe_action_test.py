@@ -2182,10 +2182,9 @@ def test_abort_exposure_action_view_uses_hybrid_planner_static():
     class_source = view_source[class_start:]
 
     assert 'ModernAdminAbortExposureActionPlanner' in class_source
-    assert 'queue=TaskQueueQueue.MAIN' in class_source
-    assert 'state=TaskQueueState.MANUAL' in class_source
-    assert "priority=plan.details['priority']" in class_source
-    assert "data=plan.details['jobdata']" in class_source
+    assert 'ModernAdminTaskEnqueueEffectAdapter' in class_source
+    assert '.enqueue_from_plan(plan.details)' in class_source
+    assert "'task-id'        : enqueue_result.task_id" in class_source
     assert 'abortCcdExposure(' not in class_source
     assert "bp_allsky.add_url_rule('/modern-admin/capture/abort-exposure'" in full_source
 

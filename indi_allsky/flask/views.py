@@ -8466,19 +8466,16 @@ class ModernAdminAbortExposureActionView(BaseView):
                 'details'        : plan.details,
             }), 400
 
-        task_abort = IndiAllSkyDbTaskQueueTable(
-            queue=TaskQueueQueue.MAIN,
-            state=TaskQueueState.MANUAL,
-            priority=plan.details['priority'],
-            data=plan.details['jobdata'],
-        )
-
-        db.session.add(task_abort)
-        db.session.commit()
+        enqueue_result = ModernAdminTaskEnqueueEffectAdapter(
+            task_model=IndiAllSkyDbTaskQueueTable,
+            db_session=db.session,
+            queue_enum=TaskQueueQueue,
+            state_enum=TaskQueueState,
+        ).enqueue_from_plan(plan.details)
 
         return jsonify({
             'success-message': plan.details['success_message'],
-            'task-id'        : task_abort.id,
+            'task-id'        : enqueue_result.task_id,
             'details'        : plan.details,
         })
 
