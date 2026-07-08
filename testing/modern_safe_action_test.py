@@ -37,6 +37,7 @@ from indi_allsky.modern_safe_action import build_default_modern_safe_action_regi
 from indi_allsky.modern_safe_action import build_notification_acknowledge_dry_run_registry
 from indi_allsky.modern_safe_action import run_modern_safe_action_dry_run
 from indi_allsky.modern_admin_runtime_effects import ModernAdminServiceControlEffectAdapter
+from indi_allsky.modern_admin_runtime_effects import ModernAdminSystemPowerEffectAdapter
 from indi_allsky.modern_admin_runtime_effects import ModernAdminTaskEnqueueEffectAdapter
 
 
@@ -1788,6 +1789,30 @@ def test_system_power_command_boundary_requires_effect_adapter():
     assert result.details['command'] == 'reboot'
 
 
+def test_system_power_effect_adapter_delegates_reboot_only():
+    calls = []
+
+    def fake_reboot():
+        calls.append('reboot')
+        return 'dbus-reboot-result'
+
+    adapter = ModernAdminSystemPowerEffectAdapter(reboot_effect=fake_reboot)
+
+    assert adapter.execute('reboot') == 'dbus-reboot-result'
+    assert calls == ['reboot']
+
+
+def test_system_power_effect_adapter_rejects_unsupported_command():
+    adapter = ModernAdminSystemPowerEffectAdapter(reboot_effect=lambda: 'unexpected')
+
+    try:
+        adapter.execute('poweroff')
+    except ValueError as e:
+        assert str(e) == 'Unhandled system power command'
+    else:
+        raise AssertionError('Expected ValueError')
+
+
 def test_generated_output_action_planner_creates_generate_video_plan():
     planner = ModernAdminGeneratedOutputActionPlanner()
 
@@ -2301,6 +2326,7 @@ def test_ajax_system_reboot_uses_hybrid_power_boundary_static():
 
     assert 'ModernAdminSystemPowerCommandBoundary' in branch
     assert 'effect_adapter=self.run_system_power_command' in branch
+    assert 'ModernAdminSystemPowerEffectAdapter' in view_source
     assert "r = action_result.details['service_result']" in branch
 
 
@@ -2786,6 +2812,8 @@ if __name__ == '__main__':
     test_capture_service_command_boundary_requires_effect_adapter()
     test_service_control_effect_adapter_preserves_systemctl_command_shape()
     test_service_control_effect_adapter_maps_timeout_to_timeout_error()
+    test_system_power_effect_adapter_delegates_reboot_only()
+    test_system_power_effect_adapter_rejects_unsupported_command()
     test_abort_exposure_action_planner_creates_profile_plan()
     test_abort_exposure_action_planner_rejects_invalid_profile()
     test_abort_exposure_action_planner_rejects_unsupported_camera_interface()

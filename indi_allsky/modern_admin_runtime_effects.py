@@ -94,3 +94,17 @@ class ModernAdminServiceControlEffectAdapter:
             'returncode' : result.returncode,
             'output'     : (result.stdout or '').strip(),
         }
+
+
+class ModernAdminSystemPowerEffectAdapter:
+    """Hybrid compatibility adapter for existing system power effects."""
+
+    def __init__(self, reboot_effect):
+        self.reboot_effect = reboot_effect
+
+
+    def execute(self, command):
+        if command == 'reboot':
+            return self.reboot_effect()
+
+        raise ValueError('Unhandled system power command')

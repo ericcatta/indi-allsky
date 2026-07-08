@@ -57,6 +57,7 @@ from ..modern_admin_runtime_providers import ModernAdminTaskBacklogSummaryProvid
 from ..modern_admin_runtime_providers import ModernAdminWatchdogStatusSummaryProvider
 from ..modern_admin_runtime_effects import ModernAdminTaskEnqueueEffectAdapter
 from ..modern_admin_runtime_effects import ModernAdminServiceControlEffectAdapter
+from ..modern_admin_runtime_effects import ModernAdminSystemPowerEffectAdapter
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
@@ -9370,10 +9371,9 @@ class AjaxSystemInfoView(BaseView):
 
 
     def run_system_power_command(self, command):
-        if command == 'reboot':
-            return self.rebootSystemd()
-
-        raise ValueError('Unhandled system power command')
+        return ModernAdminSystemPowerEffectAdapter(
+            reboot_effect=self.rebootSystemd,
+        ).execute(command)
 
 
     def poweroffSystemd(self):

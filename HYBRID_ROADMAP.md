@@ -156,6 +156,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     capture service passa ora attraverso
     `ModernAdminServiceControlEffectAdapter`; subprocess/systemctl resta adapter
     operativo low-level.
+  - l'effetto reboot Pi passa ora attraverso
+    `ModernAdminSystemPowerEffectAdapter`; DBus `rebootSystemd()` resta adapter
+    operativo low-level.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
