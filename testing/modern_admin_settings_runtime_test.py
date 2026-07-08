@@ -445,7 +445,8 @@ def test_ajax_config_view_uses_reload_command_boundary():
 
     assert 'ModernAdminSettingsReloadCommandService' in ajax_config_source
     assert 'settings_reload_command_service().execute_after_save(' in ajax_config_source
-    assert "data={'action' : 'reload'}" not in ajax_config_source
+    assert 'ModernAdminTaskEnqueueEffectAdapter' in ajax_config_source
+    assert '.enqueue(' in ajax_config_source
     assert "if reload_on_save:" not in ajax_config_source
     assert "'Saved new config,  Reloading indi-allsky service.'" not in ajax_config_source
 

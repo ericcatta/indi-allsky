@@ -3254,15 +3254,17 @@ class AjaxConfigView(BaseView):
 
 
     def enqueue_settings_reload_task(self, task_action):
-        task_reload = IndiAllSkyDbTaskQueueTable(
-            queue=TaskQueueQueue.MAIN,
-            state=TaskQueueState.MANUAL,
+        ModernAdminTaskEnqueueEffectAdapter(
+            task_model=IndiAllSkyDbTaskQueueTable,
+            db_session=db.session,
+            queue_enum=TaskQueueQueue,
+            state_enum=TaskQueueState,
+        ).enqueue(
+            queue='MAIN',
+            state='MANUAL',
             priority=100,
-            data={'action' : task_action},
+            jobdata={'action' : task_action},
         )
-
-        db.session.add(task_reload)
-        db.session.commit()
 
 
     def log_config_validation_errors(self, form_config):

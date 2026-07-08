@@ -149,6 +149,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     attraverso lo stesso adapter;
   - l'effetto "abort exposure plan -> MAIN task queue row" passa ora
     attraverso lo stesso adapter;
+  - l'effetto "settings reload request -> MAIN task queue row" passa ora
+    attraverso lo stesso adapter;
   - `IndiAllSkyDbTaskQueueTable`, `db.session`, `TaskQueueQueue` e
     `TaskQueueState` restano adapter low-level Flask/Classic, ma la boundary
     `plan -> enqueue effect` e' Hybrid-owned.
