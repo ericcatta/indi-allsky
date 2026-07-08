@@ -42,6 +42,7 @@ from ..modern_admin_media_metadata import ModernAdminMiniTimelapseMetadataServic
 from ..modern_admin_media_metadata import ModernAdminStartrailMetadataService
 from ..modern_admin_media_metadata import ModernAdminStartrailVideoMetadataService
 from ..modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
+from ..modern_admin_media_runtime import ModernAdminMediaAccessAdapter
 from ..modern_admin_media_runtime import ModernAdminMediaItemSerializer
 from ..modern_admin_media_runtime import ModernAdminMediaListQueryPlanner
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
@@ -14441,13 +14442,15 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
                 if not media_entry.remote_url and not media_entry.s3_key:
                     return None
 
-        try:
-            return self.get_modern_admin_media_url_normalizer().normalize_media_url(
-                media_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
-            )
-        except Exception as e:
-            app.logger.error('Error determining modern admin media URL: %s', str(e))
-            return None
+        return self.get_media_access_adapter().resolve_media_url(media_entry, local=local)
+
+
+    def get_media_access_adapter(self):
+        return ModernAdminMediaAccessAdapter(
+            url_normalizer=self.get_modern_admin_media_url_normalizer(),
+            s3_prefix=self.s3_prefix,
+            logger=app.logger,
+        )
 
 
     def get_media_preview_url(self, media_entry, media_url=None):

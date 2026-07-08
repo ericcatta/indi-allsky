@@ -117,6 +117,35 @@ class ModernAdminMediaUrlNormalizer:
         return True
 
 
+class ModernAdminMediaAccessAdapter:
+    """Hybrid compatibility adapter for existing media URL resolution."""
+
+    def __init__(self, url_normalizer, s3_prefix='', logger=None):
+        self.url_normalizer = url_normalizer
+        self.s3_prefix = s3_prefix
+        self.logger = logger
+
+
+    def resolve_media_url(self, media_entry, local=True):
+        try:
+            media_url = media_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
+        except Exception as e:
+            self.log_error('Error determining modern admin media URL: {0:s}', e)
+            return None
+
+        return self.url_normalizer.normalize_media_url(media_url)
+
+
+    def log_error(self, message, *args):
+        if self.logger is None:
+            return
+
+        try:
+            self.logger.error(message, *args)
+        except Exception:
+            pass
+
+
 class ModernAdminPreviewMetadataLookupService:
     """Metadata-only thumbnail/preview lookup for Modern/Admin media surfaces."""
 

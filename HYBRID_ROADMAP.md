@@ -161,6 +161,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - l'effetto reboot Pi passa ora attraverso
     `ModernAdminSystemPowerEffectAdapter`; DBus `rebootSystemd()` resta adapter
     operativo low-level.
+- Book 2 / Media Access Compatibility Layer:
+  - il primo adapter read-only e' ora `ModernAdminMediaAccessAdapter`;
+  - `ModernAdminMediaListView` risolve gli URL media tramite questo adapter,
+    preservando l'attuale chiamata low-level `getUrl(s3_prefix=..., local=...)`
+    e la normalizzazione URL Hybrid;
+  - serve/download, preview/cache generation, filesystem paths, FITS/RAW e
+    lightbox/deep browse internals restano Classic/filesystem-owned.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.

@@ -11,6 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from indi_allsky.modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
+from indi_allsky.modern_admin_media_runtime import ModernAdminMediaAccessAdapter
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaItemSerializer
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaListQueryPlanner
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
@@ -62,6 +63,8 @@ class FakeMediaEntry:
         night=True,
         success=True,
         thumbnail_uuid='thumb-1',
+        url='images/media/frame.jpg',
+        raise_get_url=False,
     ):
         self.id = entry_id
         self.camera_id = camera_id
@@ -75,6 +78,19 @@ class FakeMediaEntry:
         self.night = night
         self.success = success
         self.thumbnail_uuid = thumbnail_uuid
+        self.url = url
+        self.raise_get_url = raise_get_url
+        self.get_url_calls = list()
+
+
+    def getUrl(self, s3_prefix='', local=True):
+        self.get_url_calls.append({
+            's3_prefix': s3_prefix,
+            'local': local,
+        })
+        if self.raise_get_url:
+            raise RuntimeError('getUrl failed')
+        return self.url
 
 
 class FakeThumbnail:
@@ -281,13 +297,46 @@ def test_media_url_normalizer_supports_safe_local_image_profile():
     assert_true(normalizer.normalize_safe_local_image_url('/images/../secret.jpg') is None, 'safe local profile must reject traversal')
 
 
+def test_media_access_adapter_preserves_get_url_arguments_and_normalizes_result():
+    normalizer = ModernAdminMediaUrlNormalizer(
+        images_folder_url_builder=lambda path: '/images/{0:s}'.format(path),
+    )
+    media_entry = FakeMediaEntry(url='images/generated/movie.mp4')
+    adapter = ModernAdminMediaAccessAdapter(
+        url_normalizer=normalizer,
+        s3_prefix='https://cdn.invalid',
+    )
+
+    media_url = adapter.resolve_media_url(media_entry, local=False)
+
+    assert_true(media_url == '/images/generated/movie.mp4', 'media access adapter should preserve existing URL normalization')
+    assert_true(media_entry.get_url_calls == [{
+        's3_prefix': 'https://cdn.invalid',
+        'local': False,
+    }], 'media access adapter must preserve getUrl arguments')
+
+
+def test_media_access_adapter_returns_none_when_get_url_fails():
+    normalizer = ModernAdminMediaUrlNormalizer()
+    media_entry = FakeMediaEntry(raise_get_url=True)
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=normalizer)
+
+    assert_true(adapter.resolve_media_url(media_entry, local=True) is None, 'getUrl failure should keep URL unavailable')
+
+
 def test_modern_views_delegate_media_url_normalization_to_runtime_service():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ModernAdminMediaListView')
+    end = source.index('class ModernAdminMediaGalleryView', start)
+    body = source[start:end]
 
     assert_true('from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer' in source, 'views must import Hybrid media URL normalizer')
+    assert_true('from ..modern_admin_media_runtime import ModernAdminMediaAccessAdapter' in source, 'views must import Hybrid media access adapter')
     assert_true('def normalize_media_url(' not in source, 'views must not own inline media URL normalization')
     assert_true('ModernAdminMediaListView.normalize_media_url' not in source, 'views must not call legacy class-level URL normalization')
-    assert_true('.getUrl(s3_prefix=self.s3_prefix, local=local)' in source, 'Classic getUrl adapter call should remain explicit and preserved')
+    assert_true('def get_media_access_adapter(self):' in body, 'media list view must construct media access adapter')
+    assert_true('.resolve_media_url(media_entry, local=local)' in body, 'media list URL resolution should go through Hybrid media access adapter')
+    assert_true('.getUrl(s3_prefix=self.s3_prefix, local=local)' not in body, 'media list view must not own direct getUrl call')
     assert_true('.normalize_media_url(' in source, 'views should delegate final URL shaping to Hybrid runtime normalizer')
 
 
@@ -505,6 +554,8 @@ def run_tests():
     test_latest_camera_frame_age_labels_are_stable()
     test_media_url_normalizer_preserves_existing_url_shapes()
     test_media_url_normalizer_supports_safe_local_image_profile()
+    test_media_access_adapter_preserves_get_url_arguments_and_normalizes_result()
+    test_media_access_adapter_returns_none_when_get_url_fails()
     test_modern_views_delegate_media_url_normalization_to_runtime_service()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
