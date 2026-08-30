@@ -78,6 +78,7 @@ from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminFullConfigAcquisitionModeParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigAutoGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
@@ -3294,6 +3295,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigAutoGainParser()
 
 
+    def full_config_camera_sqm_parser(self):
+        return ModernAdminFullConfigCameraSqmParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3383,13 +3388,7 @@ class AjaxConfigView(BaseView):
         exposure_gain_parser.apply_exposure_limits(self.indi_allsky_config, request.json)
         acquisition_mode_parser.apply_bit_depth(self.indi_allsky_config, request.json)
         exposure_gain_parser.apply_exposure_periods(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CAMERA_SQM']['ENABLE']                 = bool(request.json['CAMERA_SQM__ENABLE'])
-        self.indi_allsky_config['CAMERA_SQM']['ENABLE_DAY']             = bool(request.json['CAMERA_SQM__ENABLE_DAY'])
-        self.indi_allsky_config['CAMERA_SQM']['EXPOSURE']               = float(round(float(request.json['CAMERA_SQM__EXPOSURE']), 6))
-        self.indi_allsky_config['CAMERA_SQM']['GAIN']                   = float(round(float(request.json['CAMERA_SQM__GAIN']), 2))  # limit to 2 decimals
-        self.indi_allsky_config['CAMERA_SQM']['BINNING']                = int(request.json['CAMERA_SQM__BINNING'])
-        self.indi_allsky_config['CAMERA_SQM']['EXPOSURE_PERIOD']        = int(request.json['CAMERA_SQM__EXPOSURE_PERIOD'])
-        self.indi_allsky_config['CAMERA_SQM']['MAGNITUDE_OFFSET']       = float(request.json['CAMERA_SQM__MAGNITUDE_OFFSET'])
+        self.full_config_camera_sqm_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['FOCUS_MODE']                           = bool(request.json['FOCUS_MODE'])
         self.indi_allsky_config['FOCUS_DELAY']                          = float(request.json['FOCUS_DELAY'])
         self.indi_allsky_config['CFA_PATTERN']                          = str(request.json['CFA_PATTERN'])

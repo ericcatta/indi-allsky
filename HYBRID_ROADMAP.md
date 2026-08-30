@@ -95,7 +95,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     validazione legacy senza interrogare capability hardware;
   - il gate e il numero livelli Auto Gain legacy sono ora Hybrid-owned tramite
     `ModernAdminFullConfigAutoGainParser`, mantenendo la semantica `bool()` e
-    il cast intero esistenti; le varianti profile-first restano invariate.
+    il cast intero esistenti; le varianti profile-first restano invariate;
+  - il blocco Camera SQM del parser full-config e' ora Hybrid-owned tramite
+    `ModernAdminFullConfigCameraSqmParser`; enablement, precisione numerica,
+    cadence e offset mantengono la semantica legacy, senza modificare raccolta
+    o calcolo SQM runtime.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

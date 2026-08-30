@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigAcquisitionModeParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigAutoGainParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
@@ -73,6 +74,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigExposureGainParser,
         ModernAdminFullConfigAcquisitionModeParser,
         ModernAdminFullConfigAutoGainParser,
+        ModernAdminFullConfigCameraSqmParser,
     )
 
     def __init__(self, source_path=VIEWS_PATH):
@@ -189,6 +191,9 @@ class LegacyFullConfigParserHarness:
                 full_config_auto_gain_parser=(
                     lambda: ModernAdminFullConfigAutoGainParser()
                 ),
+                full_config_camera_sqm_parser=(
+                    lambda: ModernAdminFullConfigCameraSqmParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -262,7 +267,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 689
+    assert len(harness.direct_payload_keys) == 682
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -495,6 +500,42 @@ def test_auto_gain_parser_preserves_legacy_boolean_and_integer_casting():
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
+def test_camera_sqm_parser_preserves_legacy_casting_and_rounding():
+    parser = ModernAdminFullConfigCameraSqmParser()
+    config = {'CAMERA_SQM': {'LEGACY_VALUE': 'preserve'}}
+    payload = {
+        'CAMERA_SQM__ENABLE': '',
+        'CAMERA_SQM__ENABLE_DAY': 'false',
+        'CAMERA_SQM__EXPOSURE': '10.1234567',
+        'CAMERA_SQM__GAIN': 12.3456,
+        'CAMERA_SQM__BINNING': '2',
+        'CAMERA_SQM__EXPOSURE_PERIOD': 900,
+        'CAMERA_SQM__MAGNITUDE_OFFSET': '-0.25',
+    }
+
+    assert parser.apply(config, payload) is config
+    assert config['CAMERA_SQM'] == {
+        'LEGACY_VALUE': 'preserve',
+        'ENABLE': False,
+        'ENABLE_DAY': True,
+        'EXPOSURE': 10.123457,
+        'GAIN': 12.35,
+        'BINNING': 2,
+        'EXPOSURE_PERIOD': 900,
+        'MAGNITUDE_OFFSET': -0.25,
+    }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        incomplete_payload = dict(payload)
+        incomplete_payload.pop(missing_field)
+        try:
+            parser.apply({'CAMERA_SQM': {}}, incomplete_payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -575,6 +616,15 @@ def test_ajax_config_view_delegates_auto_gain_parsing():
 
     assert 'full_config_auto_gain_parser().apply' in parser_source
     for field_name in ModernAdminFullConfigAutoGainParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
+
+
+def test_ajax_config_view_delegates_camera_sqm_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_camera_sqm_parser().apply' in parser_source
+    for field_name in ModernAdminFullConfigCameraSqmParser.REQUIRED_FIELDS:
         assert field_name not in harness.direct_payload_keys
 
 
@@ -741,6 +791,7 @@ if __name__ == '__main__':
     test_exposure_gain_parser_preserves_legacy_casting_and_rounding()
     test_acquisition_mode_parser_preserves_legacy_integer_casting()
     test_auto_gain_parser_preserves_legacy_boolean_and_integer_casting()
+    test_camera_sqm_parser_preserves_legacy_casting_and_rounding()
     test_ajax_config_view_delegates_camera_connection_parsing()
     test_ajax_config_view_delegates_station_identity_parsing()
     test_ajax_config_view_delegates_lens_metadata_parsing()
@@ -748,6 +799,7 @@ if __name__ == '__main__':
     test_ajax_config_view_delegates_exposure_gain_parsing_in_legacy_order()
     test_ajax_config_view_delegates_acquisition_mode_in_legacy_order()
     test_ajax_config_view_delegates_auto_gain_parsing()
+    test_ajax_config_view_delegates_camera_sqm_parsing()
     test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()

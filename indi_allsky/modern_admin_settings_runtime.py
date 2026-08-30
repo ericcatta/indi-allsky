@@ -233,6 +233,30 @@ class ModernAdminFullConfigAutoGainParser:
         return config
 
 
+class ModernAdminFullConfigCameraSqmParser:
+    """Hybrid-owned parser for full-config camera SQM fields."""
+
+    REQUIRED_FIELDS = (
+        'CAMERA_SQM__ENABLE',
+        'CAMERA_SQM__ENABLE_DAY',
+        'CAMERA_SQM__EXPOSURE',
+        'CAMERA_SQM__GAIN',
+        'CAMERA_SQM__BINNING',
+        'CAMERA_SQM__EXPOSURE_PERIOD',
+        'CAMERA_SQM__MAGNITUDE_OFFSET',
+    )
+
+    def apply(self, config, payload):
+        config['CAMERA_SQM']['ENABLE'] = bool(payload['CAMERA_SQM__ENABLE'])
+        config['CAMERA_SQM']['ENABLE_DAY'] = bool(payload['CAMERA_SQM__ENABLE_DAY'])
+        config['CAMERA_SQM']['EXPOSURE'] = float(round(float(payload['CAMERA_SQM__EXPOSURE']), 6))
+        config['CAMERA_SQM']['GAIN'] = float(round(float(payload['CAMERA_SQM__GAIN']), 2))
+        config['CAMERA_SQM']['BINNING'] = int(payload['CAMERA_SQM__BINNING'])
+        config['CAMERA_SQM']['EXPOSURE_PERIOD'] = int(payload['CAMERA_SQM__EXPOSURE_PERIOD'])
+        config['CAMERA_SQM']['MAGNITUDE_OFFSET'] = float(payload['CAMERA_SQM__MAGNITUDE_OFFSET'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 
