@@ -535,6 +535,22 @@ class ModernAdminFullConfigContrastEnhancementParser:
         return config
 
 
+class ModernAdminFullConfigSkyModeThresholdParser:
+    """Hybrid-owned parser for full-config night and moon mode thresholds."""
+
+    REQUIRED_FIELDS = (
+        'NIGHT_SUN_ALT_DEG',
+        'NIGHT_MOONMODE_ALT_DEG',
+        'NIGHT_MOONMODE_PHASE',
+    )
+
+    def apply(self, config, payload):
+        config['NIGHT_SUN_ALT_DEG'] = float(payload['NIGHT_SUN_ALT_DEG'])
+        config['NIGHT_MOONMODE_ALT_DEG'] = float(payload['NIGHT_MOONMODE_ALT_DEG'])
+        config['NIGHT_MOONMODE_PHASE'] = float(payload['NIGHT_MOONMODE_PHASE'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

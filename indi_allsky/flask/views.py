@@ -93,6 +93,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryPar
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPhotometryParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigSkyModeThresholdParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigTimelapseParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigWhiteBalanceParser
@@ -3347,6 +3348,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigPhotometryParser()
 
 
+    def full_config_sky_mode_threshold_parser(self):
+        return ModernAdminFullConfigSkyModeThresholdParser()
+
+
     def full_config_timelapse_parser(self):
         return ModernAdminFullConfigTimelapseParser()
 
@@ -3476,9 +3481,7 @@ class AjaxConfigView(BaseView):
         self.full_config_timelapse_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_capture_policy_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_contrast_enhancement_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['NIGHT_SUN_ALT_DEG']                    = float(request.json['NIGHT_SUN_ALT_DEG'])
-        self.indi_allsky_config['NIGHT_MOONMODE_ALT_DEG']               = float(request.json['NIGHT_MOONMODE_ALT_DEG'])
-        self.indi_allsky_config['NIGHT_MOONMODE_PHASE']                 = float(request.json['NIGHT_MOONMODE_PHASE'])
+        self.full_config_sky_mode_threshold_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['WEB_STATUS_TEMPLATE']                  = str(request.json['WEB_STATUS_TEMPLATE'])
         self.indi_allsky_config['WEB_EXTRA_TEXT']                       = str(request.json['WEB_EXTRA_TEXT'])
         self.indi_allsky_config['WEB_NONLOCAL_IMAGES']                  = bool(request.json['WEB_NONLOCAL_IMAGES'])
