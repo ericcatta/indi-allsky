@@ -96,14 +96,28 @@ class ModernAdminFullConfigCameraConnectionParser:
 class ModernAdminFullConfigStationIdentityParser:
     """Hybrid-owned parser for the full-config station identity fields."""
 
-    REQUIRED_FIELDS = (
+    IDENTITY_FIELDS = (
         'WEBSITE__TITLE',
         'OWNER',
     )
+    LOCATION_FIELDS = (
+        'LOCATION_NAME',
+        'LOCATION_LATITUDE',
+        'LOCATION_LONGITUDE',
+        'LOCATION_ELEVATION',
+    )
+    REQUIRED_FIELDS = IDENTITY_FIELDS + LOCATION_FIELDS
 
     def apply(self, config, payload):
         config['WEBSITE']['TITLE'] = str(payload['WEBSITE__TITLE'])
         config['OWNER'] = str(payload['OWNER'])
+        return config
+
+    def apply_location(self, config, payload):
+        config['LOCATION_NAME'] = str(payload['LOCATION_NAME'])
+        config['LOCATION_LATITUDE'] = float(round(float(payload['LOCATION_LATITUDE']), 3))
+        config['LOCATION_LONGITUDE'] = float(round(float(payload['LOCATION_LONGITUDE']), 3))
+        config['LOCATION_ELEVATION'] = int(payload['LOCATION_ELEVATION'])
         return config
 
 

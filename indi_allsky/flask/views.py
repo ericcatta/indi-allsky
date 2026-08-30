@@ -3418,7 +3418,8 @@ class AjaxConfigView(BaseView):
 
         # update data
         self.full_config_camera_connection_parser().apply(self.indi_allsky_config, request.json)
-        self.full_config_station_identity_parser().apply(self.indi_allsky_config, request.json)
+        station_identity_parser = self.full_config_station_identity_parser()
+        station_identity_parser.apply(self.indi_allsky_config, request.json)
         self.full_config_lens_metadata_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_lens_geometry_parser().apply(self.indi_allsky_config, request.json)
         exposure_gain_parser = self.full_config_exposure_gain_parser()
@@ -3456,10 +3457,7 @@ class AjaxConfigView(BaseView):
         self.indi_allsky_config['LOGO_OVERLAY']                         = str(request.json['LOGO_OVERLAY'])
         self.indi_allsky_config['HEALTHCHECK']['DISK_USAGE']            = float(request.json['HEALTHCHECK__DISK_USAGE'])
         self.indi_allsky_config['HEALTHCHECK']['SWAP_USAGE']            = float(request.json['HEALTHCHECK__SWAP_USAGE'])
-        self.indi_allsky_config['LOCATION_NAME']                        = str(request.json['LOCATION_NAME'])
-        self.indi_allsky_config['LOCATION_LATITUDE']                    = float(round(float(request.json['LOCATION_LATITUDE']), 3))
-        self.indi_allsky_config['LOCATION_LONGITUDE']                   = float(round(float(request.json['LOCATION_LONGITUDE']), 3))
-        self.indi_allsky_config['LOCATION_ELEVATION']                   = int(request.json['LOCATION_ELEVATION'])
+        station_identity_parser.apply_location(self.indi_allsky_config, request.json)
         self.indi_allsky_config['TIMELAPSE_ENABLE']                     = bool(request.json['TIMELAPSE_ENABLE'])
         self.indi_allsky_config['TIMELAPSE_SKIP_FRAMES']                = int(request.json['TIMELAPSE_SKIP_FRAMES'])
         self.indi_allsky_config['TIMELAPSE']['PRE_PROCESSOR']           = str(request.json['TIMELAPSE__PRE_PROCESSOR'])

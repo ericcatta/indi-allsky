@@ -312,7 +312,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 631
+    assert len(harness.direct_payload_keys) == 627
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -358,22 +358,35 @@ def test_station_identity_parser_preserves_legacy_casting_and_required_fields():
     payload = {
         'WEBSITE__TITLE': 42,
         'OWNER': True,
+        'LOCATION_NAME': 123,
+        'LOCATION_LATITUDE': '45.1236',
+        'LOCATION_LONGITUDE': 9.8764,
+        'LOCATION_ELEVATION': '245',
     }
 
     assert parser.apply(config, payload) is config
+    assert parser.apply_location(config, payload) is config
     assert config == {
         'WEBSITE': {
             'LEGACY_VALUE': 'preserve',
             'TITLE': '42',
         },
         'OWNER': 'True',
+        'LOCATION_NAME': '123',
+        'LOCATION_LATITUDE': 45.124,
+        'LOCATION_LONGITUDE': 9.876,
+        'LOCATION_ELEVATION': 245,
     }
 
-    for missing_field in parser.REQUIRED_FIELDS:
+    parser_methods = {
+        **{field_name: parser.apply for field_name in parser.IDENTITY_FIELDS},
+        **{field_name: parser.apply_location for field_name in parser.LOCATION_FIELDS},
+    }
+    for missing_field, parser_method in parser_methods.items():
         incomplete_payload = dict(payload)
         incomplete_payload.pop(missing_field)
         try:
-            parser.apply({'WEBSITE': {}}, incomplete_payload)
+            parser_method({'WEBSITE': {}}, incomplete_payload)
         except KeyError as error:
             assert error.args == (missing_field,)
         else:
@@ -885,9 +898,16 @@ def test_ajax_config_view_delegates_station_identity_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
-    assert 'full_config_station_identity_parser().apply' in parser_source
-    assert "indi_allsky_config['WEBSITE']['TITLE'] =" not in parser_source
-    assert "indi_allsky_config['OWNER'] =" not in parser_source
+    expected_order = (
+        'station_identity_parser.apply(',
+        "indi_allsky_config['DETECT_STARS']",
+        "indi_allsky_config['HEALTHCHECK']['SWAP_USAGE']",
+        'station_identity_parser.apply_location',
+    )
+    call_positions = [parser_source.index(fragment) for fragment in expected_order]
+    assert call_positions == sorted(call_positions)
+    for field_name in ModernAdminFullConfigStationIdentityParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
 
 
 def test_ajax_config_view_delegates_lens_metadata_parsing():

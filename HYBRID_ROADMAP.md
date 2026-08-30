@@ -76,10 +76,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     (`CAMERA_INTERFACE`, `INDI_SERVER`, `INDI_PORT`, `INDI_CAMERA_NAME`), e'
     ora Hybrid-owned tramite `ModernAdminFullConfigCameraConnectionParser` e
     protetto dai fingerprint golden dell'intero payload;
-  - il gruppo full-config Station Identity (`WEBSITE.TITLE`, `OWNER`) e' ora
-    Hybrid-owned tramite `ModernAdminFullConfigStationIdentityParser`, senza
-    cambiare cast, campi richiesti o conservazione delle chiavi Website
-    esistenti;
+  - il gruppo full-config Station Identity (titolo, proprietario, nome e
+    coordinate/elevazione della stazione) e' ora Hybrid-owned tramite
+    `ModernAdminFullConfigStationIdentityParser`, senza cambiare cast,
+    arrotondamenti, campi richiesti o chiavi Website esistenti;
   - i metadati descrittivi della lente (`LENS_NAME`, `LENS_FOCAL_LENGTH`,
     `LENS_FOCAL_RATIO`) sono ora Hybrid-owned tramite
     `ModernAdminFullConfigLensMetadataParser`;
