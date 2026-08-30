@@ -83,6 +83,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigColorProcessingParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigDenoiseParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigDisplayUnitsParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigEnvironmentParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
@@ -3326,6 +3327,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigDisplayUnitsParser()
 
 
+    def full_config_environment_parser(self):
+        return ModernAdminFullConfigEnvironmentParser()
+
+
     def full_config_white_balance_parser(self):
         return ModernAdminFullConfigWhiteBalanceParser()
 
@@ -3429,14 +3434,11 @@ class AjaxConfigView(BaseView):
         self.full_config_denoise_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_white_balance_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_image_enhancement_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CCD_COOLING']                          = bool(request.json['CCD_COOLING'])
-        self.indi_allsky_config['CCD_COOLING_DAY']                      = bool(request.json['CCD_COOLING_DAY'])
-        self.indi_allsky_config['CCD_TEMP']                             = float(request.json['CCD_TEMP'])
-        self.indi_allsky_config['CCD_TEMP_DAY']                         = float(request.json['CCD_TEMP_DAY'])
+        environment_parser = self.full_config_environment_parser()
+        environment_parser.apply_camera_temperature(self.indi_allsky_config, request.json)
         self.full_config_auto_white_balance_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_display_units_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['GPS_ENABLE']                           = bool(request.json['GPS_ENABLE'])
-        self.indi_allsky_config['CCD_TEMP_SCRIPT']                      = str(request.json['CCD_TEMP_SCRIPT'])
+        environment_parser.apply_runtime_sources(self.indi_allsky_config, request.json)
         self.indi_allsky_config['TARGET_ADU']                           = int(request.json['TARGET_ADU'])
         self.indi_allsky_config['TARGET_ADU_DAY']                       = int(request.json['TARGET_ADU_DAY'])
         self.indi_allsky_config['TARGET_ADU_DEV']                       = int(request.json['TARGET_ADU_DEV'])

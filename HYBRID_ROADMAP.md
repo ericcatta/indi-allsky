@@ -121,6 +121,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - le preferenze di visualizzazione per temperatura, pressione e velocita'
     del vento sono ora parsate da `ModernAdminFullConfigDisplayUnitsParser`;
     conversioni, sensori e provider runtime restano invariati.
+  - cooling e target temperatura giorno/notte, enablement GPS e nome dello
+    script temperatura sono ora parsati in ordine legacy da
+    `ModernAdminFullConfigEnvironmentParser`; hardware, script e provider
+    runtime restano Classic-owned e invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

@@ -405,6 +405,34 @@ class ModernAdminFullConfigDisplayUnitsParser:
         return config
 
 
+class ModernAdminFullConfigEnvironmentParser:
+    """Hybrid-owned parser for full-config camera environment fields."""
+
+    CAMERA_TEMPERATURE_FIELDS = (
+        'CCD_COOLING',
+        'CCD_COOLING_DAY',
+        'CCD_TEMP',
+        'CCD_TEMP_DAY',
+    )
+    RUNTIME_SOURCE_FIELDS = (
+        'GPS_ENABLE',
+        'CCD_TEMP_SCRIPT',
+    )
+    REQUIRED_FIELDS = CAMERA_TEMPERATURE_FIELDS + RUNTIME_SOURCE_FIELDS
+
+    def apply_camera_temperature(self, config, payload):
+        config['CCD_COOLING'] = bool(payload['CCD_COOLING'])
+        config['CCD_COOLING_DAY'] = bool(payload['CCD_COOLING_DAY'])
+        config['CCD_TEMP'] = float(payload['CCD_TEMP'])
+        config['CCD_TEMP_DAY'] = float(payload['CCD_TEMP_DAY'])
+        return config
+
+    def apply_runtime_sources(self, config, payload):
+        config['GPS_ENABLE'] = bool(payload['GPS_ENABLE'])
+        config['CCD_TEMP_SCRIPT'] = str(payload['CCD_TEMP_SCRIPT'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 
