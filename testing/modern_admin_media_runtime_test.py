@@ -340,6 +340,18 @@ def test_modern_views_delegate_media_url_normalization_to_runtime_service():
     assert_true('.normalize_media_url(' in source, 'views should delegate final URL shaping to Hybrid runtime normalizer')
 
 
+def test_generated_media_metadata_delegates_media_access_to_runtime_adapter():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ModernAdminMediaMetadataView')
+    end = source.index('class ModernAdminMediaStartrailVideosView', start)
+    body = source[start:end]
+
+    assert_true('def get_generated_media_access_adapter(self):' in body, 'generated media metadata view must construct media access adapter')
+    assert_true('.resolve_media_url(entry, local=local)' in body, 'generated media URL resolution should go through Hybrid media access adapter')
+    assert_true('.getUrl(s3_prefix=self.s3_prefix, local=local)' not in body, 'generated media metadata view must not own direct getUrl call')
+    assert_true('.normalize_media_url(media_url)' not in body, 'generated media metadata view must not own final URL normalization')
+
+
 def test_preview_metadata_lookup_shapes_thumbnail_url():
     thumbnail = FakeThumbnail(url='images/thumbs/thumb.jpg')
     query = FakeQuery(first_row=thumbnail)
@@ -557,6 +569,7 @@ def run_tests():
     test_media_access_adapter_preserves_get_url_arguments_and_normalizes_result()
     test_media_access_adapter_returns_none_when_get_url_fails()
     test_modern_views_delegate_media_url_normalization_to_runtime_service()
+    test_generated_media_metadata_delegates_media_access_to_runtime_adapter()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()

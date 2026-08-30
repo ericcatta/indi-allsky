@@ -166,6 +166,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - `ModernAdminMediaListView` risolve gli URL media tramite questo adapter,
     preservando l'attuale chiamata low-level `getUrl(s3_prefix=..., local=...)`
     e la normalizzazione URL Hybrid;
+  - le preview metadata-only di generated media (`keograms`, `startrails`,
+    `startrail videos`, `mini timelapses`, `panoramas`) risolvono ora gli URL
+    media tramite lo stesso adapter, lasciando query, template, download,
+    filesystem e cache invariati;
   - serve/download, preview/cache generation, filesystem paths, FITS/RAW e
     lightbox/deep browse internals restano Classic/filesystem-owned.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.

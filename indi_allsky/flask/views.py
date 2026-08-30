@@ -14855,13 +14855,16 @@ class ModernAdminMediaMetadataView(ModernAdminMediaBrowseView):
                 if not getattr(entry, 'remote_url', None) and not getattr(entry, 's3_key', None):
                     return None
 
-        try:
-            media_url = entry.getUrl(s3_prefix=self.s3_prefix, local=local)
-        except Exception as e:
-            app.logger.error('Error determining modern admin generated media URL: %s', str(e))
-            return None
+        return self.get_generated_media_access_adapter().resolve_media_url(entry, local=local)
 
-        return self.get_modern_admin_media_url_normalizer().normalize_media_url(media_url)
+
+    def get_generated_media_access_adapter(self):
+        return ModernAdminMediaAccessAdapter(
+            url_normalizer=self.get_modern_admin_media_url_normalizer(),
+            s3_prefix=self.s3_prefix,
+            logger=app.logger,
+            error_message='Error determining modern admin generated media URL: %s',
+        )
 
 
     def format_generated_media_title(self, entry):

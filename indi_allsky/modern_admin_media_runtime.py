@@ -120,17 +120,24 @@ class ModernAdminMediaUrlNormalizer:
 class ModernAdminMediaAccessAdapter:
     """Hybrid compatibility adapter for existing media URL resolution."""
 
-    def __init__(self, url_normalizer, s3_prefix='', logger=None):
+    def __init__(
+        self,
+        url_normalizer,
+        s3_prefix='',
+        logger=None,
+        error_message='Error determining modern admin media URL: {0:s}',
+    ):
         self.url_normalizer = url_normalizer
         self.s3_prefix = s3_prefix
         self.logger = logger
+        self.error_message = error_message
 
 
     def resolve_media_url(self, media_entry, local=True):
         try:
             media_url = media_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
         except Exception as e:
-            self.log_error('Error determining modern admin media URL: {0:s}', e)
+            self.log_error(self.error_message, e)
             return None
 
         return self.url_normalizer.normalize_media_url(media_url)
