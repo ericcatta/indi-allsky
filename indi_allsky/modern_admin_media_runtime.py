@@ -143,6 +143,10 @@ class ModernAdminMediaAccessAdapter:
         return self.url_normalizer.normalize_media_url(media_url)
 
 
+    def resolve_existing_media_url(self, media_url):
+        return self.url_normalizer.normalize_media_url(media_url)
+
+
     def log_error(self, message, *args):
         if self.logger is None:
             return

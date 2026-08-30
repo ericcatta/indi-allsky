@@ -316,6 +316,22 @@ def test_media_access_adapter_preserves_get_url_arguments_and_normalizes_result(
     }], 'media access adapter must preserve getUrl arguments')
 
 
+def test_media_access_adapter_normalizes_existing_media_urls():
+    normalizer = ModernAdminMediaUrlNormalizer(
+        images_folder_url_builder=lambda path: '/images/{0:s}'.format(path),
+    )
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=normalizer)
+
+    assert_true(
+        adapter.resolve_existing_media_url('images/ccd_camera/realtime_keogram.jpg') == '/images/ccd_camera/realtime_keogram.jpg',
+        'existing media URLs should normalize through the media access adapter',
+    )
+    assert_true(
+        adapter.resolve_existing_media_url(None) is None,
+        'missing existing media URLs should stay unavailable',
+    )
+
+
 def test_media_access_adapter_returns_none_when_get_url_fails():
     normalizer = ModernAdminMediaUrlNormalizer()
     media_entry = FakeMediaEntry(raise_get_url=True)
@@ -350,6 +366,17 @@ def test_generated_media_metadata_delegates_media_access_to_runtime_adapter():
     assert_true('.resolve_media_url(entry, local=local)' in body, 'generated media URL resolution should go through Hybrid media access adapter')
     assert_true('.getUrl(s3_prefix=self.s3_prefix, local=local)' not in body, 'generated media metadata view must not own direct getUrl call')
     assert_true('.normalize_media_url(media_url)' not in body, 'generated media metadata view must not own final URL normalization')
+
+
+def test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ModernAdminObservatoryToolView')
+    end = source.index('class ModernAdminDarkLibraryView', start)
+    body = source[start:end]
+
+    assert_true('def get_observatory_media_access_adapter(self):' in body, 'observatory tools must construct media access adapter')
+    assert_true('.resolve_existing_media_url(keogram_uri)' in body, 'observatory keogram URLs should go through Hybrid media access adapter')
+    assert_true('.normalize_media_url(keogram_uri)' not in body, 'observatory keogram views must not own direct URL normalization')
 
 
 def test_preview_metadata_lookup_shapes_thumbnail_url():
@@ -567,9 +594,11 @@ def run_tests():
     test_media_url_normalizer_preserves_existing_url_shapes()
     test_media_url_normalizer_supports_safe_local_image_profile()
     test_media_access_adapter_preserves_get_url_arguments_and_normalizes_result()
+    test_media_access_adapter_normalizes_existing_media_urls()
     test_media_access_adapter_returns_none_when_get_url_fails()
     test_modern_views_delegate_media_url_normalization_to_runtime_service()
     test_generated_media_metadata_delegates_media_access_to_runtime_adapter()
+    test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()

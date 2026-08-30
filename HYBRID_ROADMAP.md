@@ -170,6 +170,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     `startrail videos`, `mini timelapses`, `panoramas`) risolvono ora gli URL
     media tramite lo stesso adapter, lasciando query, template, download,
     filesystem e cache invariati;
+  - gli URL display gia' prodotti per Realtime/Long-term Keogram passano ora
+    dallo stesso adapter, senza cambiare discovery file/cache o generazione;
   - serve/download, preview/cache generation, filesystem paths, FITS/RAW e
     lightbox/deep browse internals restano Classic/filesystem-owned.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.

@@ -13759,6 +13759,14 @@ class ModernAdminFileSpaceUsageView(ModernAdminContextMixin, FileSpaceUsageView)
 class ModernAdminObservatoryToolView(ModernAdminContextMixin):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_observatory_view'
 
+    def get_observatory_media_access_adapter(self):
+        return ModernAdminMediaAccessAdapter(
+            url_normalizer=self.get_modern_admin_media_url_normalizer(),
+            s3_prefix=self.s3_prefix,
+            logger=app.logger,
+            error_message='Error determining modern admin observatory media URL: %s',
+        )
+
 
 class ModernAdminSqmView(ModernAdminObservatoryToolView, SqmView):
     page_title = 'Modern Admin SQM'
@@ -13843,7 +13851,7 @@ class ModernAdminRealtimeKeogramView(ModernAdminObservatoryToolView, RealtimeKeo
         context = super(ModernAdminRealtimeKeogramView, self).get_context()
         keogram_uri = context.get('keogram_uri')
         if keogram_uri:
-            context['keogram_uri'] = self.get_modern_admin_media_url_normalizer().normalize_media_url(keogram_uri)
+            context['keogram_uri'] = self.get_observatory_media_access_adapter().resolve_existing_media_url(keogram_uri)
 
         return context
 
@@ -13869,7 +13877,7 @@ class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, TemplateVie
 
         keogram_uri = context.get('keogram_uri')
         if keogram_uri:
-            context['keogram_uri'] = self.get_modern_admin_media_url_normalizer().normalize_media_url(keogram_uri)
+            context['keogram_uri'] = self.get_observatory_media_access_adapter().resolve_existing_media_url(keogram_uri)
 
         try:
             context['modern_admin_longterm_rows'] = IndiAllSkyDbLongTermKeogramTable.query\
