@@ -151,6 +151,13 @@ class ModernAdminMediaAccessAdapter:
         return media_entry.getFilesystemPath()
 
 
+    def resolve_media_file_size(self, media_entry, default=0):
+        try:
+            return self.resolve_filesystem_path(media_entry).stat().st_size
+        except Exception:
+            return default
+
+
     def read_fits_preview_metadata(self, filename_p, fits_opener):
         hdulist = fits_opener(filename_p)
         header = hdulist[0].header

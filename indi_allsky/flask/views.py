@@ -13685,6 +13685,13 @@ class FileSpaceUsageView(TemplateView):
 class ModernAdminCameraToolView(ModernAdminContextMixin):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
+    def get_camera_media_access_adapter(self):
+        return ModernAdminMediaAccessAdapter(
+            url_normalizer=self.get_modern_admin_media_url_normalizer(),
+            logger=app.logger,
+            error_message='Error determining modern admin calibration URL: %s',
+        )
+
 
 class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraLensView):
     page_title = 'Modern Admin Camera Info'
@@ -13934,18 +13941,11 @@ class ModernAdminDarkLibraryView(ModernAdminCameraToolView, TemplateView):
             app.logger.error('Error loading modern admin calibration rows: %s', str(e))
             return list()
 
+        media_access_adapter = self.get_camera_media_access_adapter()
         row_list = list()
         for row in rows:
-            try:
-                file_size = row.getFilesystemPath().stat().st_size
-            except Exception:
-                file_size = 0
-
-            try:
-                row_url = self.get_modern_admin_media_url_normalizer().normalize_media_url(row.getUrl())
-            except Exception as e:
-                app.logger.error('Error determining modern admin calibration URL: %s', str(e))
-                row_url = None
+            file_size = media_access_adapter.resolve_media_file_size(row, default=0)
+            row_url = media_access_adapter.resolve_media_url(row, local=True)
 
             row_list.append({
                 'id'         : row.id,

@@ -100,6 +100,21 @@ class FakeMediaEntry:
         return self.filename
 
 
+class FakeFilesystemPath:
+    def __init__(self, file_size=None, error=None):
+        self.file_size = file_size
+        self.error = error
+        self.stat_calls = 0
+
+
+    def stat(self):
+        self.stat_calls += 1
+        if self.error:
+            raise self.error
+
+        return type('FileStat', (), {'st_size': self.file_size})()
+
+
 class FakeThumbnail:
     def __init__(self, url='images/thumbs/thumb.jpg', remote_url='', s3_key=''):
         self.url = url
@@ -371,6 +386,25 @@ def test_media_access_adapter_preserves_filesystem_path_resolution():
     assert_true(media_entry.get_filesystem_path_calls == 1, 'filesystem path adapter should delegate exactly once')
 
 
+def test_media_access_adapter_resolves_file_size_with_existing_fallback():
+    filesystem_path = FakeFilesystemPath(file_size=3145728)
+    media_entry = FakeMediaEntry(filename=filesystem_path)
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
+
+    file_size = adapter.resolve_media_file_size(media_entry, default=0)
+
+    assert_true(file_size == 3145728, 'media file size adapter should preserve filesystem stat size')
+    assert_true(media_entry.get_filesystem_path_calls == 1, 'media file size adapter should resolve the filesystem path once')
+    assert_true(filesystem_path.stat_calls == 1, 'media file size adapter should stat the resolved path once')
+
+    unavailable_path = FakeFilesystemPath(error=OSError('unavailable'))
+    unavailable_entry = FakeMediaEntry(filename=unavailable_path)
+    assert_true(
+        adapter.resolve_media_file_size(unavailable_entry, default=0) == 0,
+        'media file size adapter should preserve the existing zero fallback',
+    )
+
+
 def test_media_access_adapter_reads_fits_preview_metadata_and_closes_file():
     hdu_list = FakeFitsHduList({
         'EXPTIME'  : '12.5',
@@ -511,6 +545,18 @@ def test_fits_preview_route_delegates_header_metadata_to_media_access_adapter():
     assert_true('.read_fits_preview_metadata(filename_p, fits.open)' in body, 'FITS preview metadata should go through Hybrid media access adapter')
     assert_true('fits.open(filename_p)' not in body, 'FITS preview route must not own direct FITS open')
     assert_true('hdulist[0].header' not in body, 'FITS preview route must not own direct FITS header parsing')
+
+
+def test_dark_library_delegates_read_only_media_access_to_adapter():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ModernAdminDarkLibraryView')
+    end = source.index('class ModernAdminAstroPanelView', start)
+    body = source[start:end]
+
+    assert_true('.resolve_media_file_size(row, default=0)' in body, 'dark library file size lookup should go through Hybrid media access adapter')
+    assert_true('.resolve_media_url(row, local=True)' in body, 'dark library URL lookup should go through Hybrid media access adapter')
+    assert_true('row.getFilesystemPath()' not in body, 'dark library must not own direct filesystem path resolution')
+    assert_true('row.getUrl()' not in body, 'dark library must not own direct media URL resolution')
 
 
 def test_preview_metadata_lookup_shapes_thumbnail_url():
@@ -734,6 +780,7 @@ def run_tests():
     test_media_access_adapter_normalizes_existing_media_urls()
     test_media_access_adapter_returns_none_when_get_url_fails()
     test_media_access_adapter_preserves_filesystem_path_resolution()
+    test_media_access_adapter_resolves_file_size_with_existing_fallback()
     test_media_access_adapter_reads_fits_preview_metadata_and_closes_file()
     test_media_access_adapter_reads_fits_preview_metadata_defaults()
     test_media_serve_adapter_preserves_sender_arguments()
@@ -744,6 +791,7 @@ def run_tests():
     test_images_folder_route_delegates_serving_to_media_serve_adapter()
     test_fits_preview_route_delegates_path_resolution_to_media_access_adapter()
     test_fits_preview_route_delegates_header_metadata_to_media_access_adapter()
+    test_dark_library_delegates_read_only_media_access_to_adapter()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()
