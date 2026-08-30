@@ -112,6 +112,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - fattori RGB manuali e midtones White Balance giorno/notte sono ora parsati
     da `ModernAdminFullConfigWhiteBalanceParser`; Auto WB, algoritmi e pipeline
     colore restano invariati.
+  - saturazione, gamma e sharpening giorno/notte sono ora parsati da
+    `ModernAdminFullConfigImageEnhancementParser`; algoritmi, validazione e
+    pipeline immagini restano invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

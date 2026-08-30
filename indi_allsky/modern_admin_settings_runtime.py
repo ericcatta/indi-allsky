@@ -353,6 +353,28 @@ class ModernAdminFullConfigWhiteBalanceParser:
         return config
 
 
+class ModernAdminFullConfigImageEnhancementParser:
+    """Hybrid-owned parser for full-config image enhancement fields."""
+
+    REQUIRED_FIELDS = (
+        'SATURATION_FACTOR',
+        'SATURATION_FACTOR_DAY',
+        'GAMMA_CORRECTION',
+        'GAMMA_CORRECTION_DAY',
+        'SHARPEN_AMOUNT',
+        'SHARPEN_AMOUNT_DAY',
+    )
+
+    def apply(self, config, payload):
+        config['SATURATION_FACTOR'] = float(payload['SATURATION_FACTOR'])
+        config['SATURATION_FACTOR_DAY'] = float(payload['SATURATION_FACTOR_DAY'])
+        config['GAMMA_CORRECTION'] = float(payload['GAMMA_CORRECTION'])
+        config['GAMMA_CORRECTION_DAY'] = float(payload['GAMMA_CORRECTION_DAY'])
+        config['SHARPEN_AMOUNT'] = float(payload['SHARPEN_AMOUNT'])
+        config['SHARPEN_AMOUNT_DAY'] = float(payload['SHARPEN_AMOUNT_DAY'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

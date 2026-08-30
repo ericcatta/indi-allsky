@@ -83,6 +83,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigColorProcessing
 from ..modern_admin_settings_runtime import ModernAdminFullConfigDenoiseParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -3319,6 +3320,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigWhiteBalanceParser()
 
 
+    def full_config_image_enhancement_parser(self):
+        return ModernAdminFullConfigImageEnhancementParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3413,12 +3418,7 @@ class AjaxConfigView(BaseView):
         self.full_config_color_processing_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_denoise_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_white_balance_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['SATURATION_FACTOR']                    = float(request.json['SATURATION_FACTOR'])
-        self.indi_allsky_config['SATURATION_FACTOR_DAY']                = float(request.json['SATURATION_FACTOR_DAY'])
-        self.indi_allsky_config['GAMMA_CORRECTION']                     = float(request.json['GAMMA_CORRECTION'])
-        self.indi_allsky_config['GAMMA_CORRECTION_DAY']                 = float(request.json['GAMMA_CORRECTION_DAY'])
-        self.indi_allsky_config['SHARPEN_AMOUNT']                       = float(request.json['SHARPEN_AMOUNT'])
-        self.indi_allsky_config['SHARPEN_AMOUNT_DAY']                   = float(request.json['SHARPEN_AMOUNT_DAY'])
+        self.full_config_image_enhancement_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CCD_COOLING']                          = bool(request.json['CCD_COOLING'])
         self.indi_allsky_config['CCD_COOLING_DAY']                      = bool(request.json['CCD_COOLING_DAY'])
         self.indi_allsky_config['CCD_TEMP']                             = float(request.json['CCD_TEMP'])

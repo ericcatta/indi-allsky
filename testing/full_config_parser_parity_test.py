@@ -21,6 +21,7 @@ from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigColor
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigDenoiseParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -83,6 +84,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigColorProcessingParser,
         ModernAdminFullConfigDenoiseParser,
         ModernAdminFullConfigWhiteBalanceParser,
+        ModernAdminFullConfigImageEnhancementParser,
     )
 
     def __init__(self, source_path=VIEWS_PATH):
@@ -214,6 +216,9 @@ class LegacyFullConfigParserHarness:
                 full_config_white_balance_parser=(
                     lambda: ModernAdminFullConfigWhiteBalanceParser()
                 ),
+                full_config_image_enhancement_parser=(
+                    lambda: ModernAdminFullConfigImageEnhancementParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -287,7 +292,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 654
+    assert len(harness.direct_payload_keys) == 648
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -685,6 +690,39 @@ def test_white_balance_parser_preserves_legacy_float_casting():
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
+def test_image_enhancement_parser_preserves_legacy_float_casting():
+    parser = ModernAdminFullConfigImageEnhancementParser()
+    config = {}
+    payload = {
+        'SATURATION_FACTOR': '1.25',
+        'SATURATION_FACTOR_DAY': 0.75,
+        'GAMMA_CORRECTION': '1.1',
+        'GAMMA_CORRECTION_DAY': 0.9,
+        'SHARPEN_AMOUNT': '2.5',
+        'SHARPEN_AMOUNT_DAY': 1,
+    }
+
+    assert parser.apply(config, payload) is config
+    assert config == {
+        'SATURATION_FACTOR': 1.25,
+        'SATURATION_FACTOR_DAY': 0.75,
+        'GAMMA_CORRECTION': 1.1,
+        'GAMMA_CORRECTION_DAY': 0.9,
+        'SHARPEN_AMOUNT': 2.5,
+        'SHARPEN_AMOUNT_DAY': 1.0,
+    }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        incomplete_payload = dict(payload)
+        incomplete_payload.pop(missing_field)
+        try:
+            parser.apply({}, incomplete_payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -810,6 +848,15 @@ def test_ajax_config_view_delegates_white_balance_parsing():
 
     assert 'full_config_white_balance_parser().apply' in parser_source
     for field_name in ModernAdminFullConfigWhiteBalanceParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
+
+
+def test_ajax_config_view_delegates_image_enhancement_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_image_enhancement_parser().apply' in parser_source
+    for field_name in ModernAdminFullConfigImageEnhancementParser.REQUIRED_FIELDS:
         assert field_name not in harness.direct_payload_keys
 
 
@@ -981,6 +1028,7 @@ if __name__ == '__main__':
     test_color_processing_parser_preserves_legacy_casting()
     test_denoise_parser_preserves_legacy_string_and_integer_casting()
     test_white_balance_parser_preserves_legacy_float_casting()
+    test_image_enhancement_parser_preserves_legacy_float_casting()
     test_ajax_config_view_delegates_camera_connection_parsing()
     test_ajax_config_view_delegates_station_identity_parsing()
     test_ajax_config_view_delegates_lens_metadata_parsing()
@@ -993,6 +1041,7 @@ if __name__ == '__main__':
     test_ajax_config_view_delegates_color_processing_parsing()
     test_ajax_config_view_delegates_denoise_parsing()
     test_ajax_config_view_delegates_white_balance_parsing()
+    test_ajax_config_view_delegates_image_enhancement_parsing()
     test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()
