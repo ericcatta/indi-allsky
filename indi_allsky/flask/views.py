@@ -858,8 +858,8 @@ class MaskView(TemplateView):
         image_dir = Path(self.indi_allsky_config['IMAGE_FOLDER']).absolute()
         mask_image_p = image_dir.joinpath(mask_image_uri.name)
 
-        if mask_image_p.exists():
-            mask_mtime = mask_image_p.stat().st_mtime
+        mask_mtime = self.resolve_mask_mtime(mask_image_p)
+        if mask_mtime is not None:
             mask_mtime_dt = datetime.fromtimestamp(mask_mtime)
             context['mask_date'] = mask_mtime_dt.strftime('%Y-%m-%d %H:%M:%S')
         else:
@@ -867,6 +867,13 @@ class MaskView(TemplateView):
 
 
         return context
+
+
+    def resolve_mask_mtime(self, mask_image_p):
+        if not mask_image_p.exists():
+            return None
+
+        return mask_image_p.stat().st_mtime
 
 
 class CamerasView(TemplateView):
@@ -14084,6 +14091,10 @@ class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
 
 class ModernAdminMaskView(ModernAdminCameraToolView, MaskView):
     page_title = 'Modern Admin Mask Base'
+
+    def resolve_mask_mtime(self, mask_image_p):
+        return self.get_camera_media_access_adapter().resolve_existing_path_mtime(mask_image_p)
+
 
     def get_context(self):
         context = super(ModernAdminMaskView, self).get_context()

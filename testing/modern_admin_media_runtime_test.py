@@ -104,15 +104,21 @@ class FakeFilesystemPath:
     def __init__(self, file_size=None, modified=None, exists=True, error=None):
         self.file_size = file_size
         self.modified = modified
-        self.exists = exists
+        self.path_exists = exists
         self.error = error
+        self.exists_calls = 0
         self.is_file_calls = 0
         self.stat_calls = 0
 
 
+    def exists(self):
+        self.exists_calls += 1
+        return self.path_exists
+
+
     def is_file(self):
         self.is_file_calls += 1
-        return self.exists
+        return self.path_exists
 
 
     def stat(self):
@@ -434,6 +440,25 @@ def test_media_access_adapter_resolves_existing_file_mtime():
     assert_true(missing_path.stat_calls == 0, 'missing generated media should not be statted')
 
 
+def test_media_access_adapter_resolves_existing_path_mtime():
+    existing_path = FakeFilesystemPath(modified=1783076400.0)
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
+
+    modified = adapter.resolve_existing_path_mtime(existing_path)
+
+    assert_true(modified == 1783076400.0, 'existing media path should preserve filesystem modification time')
+    assert_true(existing_path.exists_calls == 1, 'existing path lookup should check path availability once')
+    assert_true(existing_path.is_file_calls == 0, 'existing path lookup should preserve the legacy exists check')
+    assert_true(existing_path.stat_calls == 1, 'existing media path should be statted once')
+
+    missing_path = FakeFilesystemPath(exists=False)
+    assert_true(
+        adapter.resolve_existing_path_mtime(missing_path) is None,
+        'missing media path should preserve unavailable fallback',
+    )
+    assert_true(missing_path.stat_calls == 0, 'missing media path should not be statted')
+
+
 def test_media_access_adapter_resolves_file_mtime_without_changing_errors():
     filesystem_path = FakeFilesystemPath(modified=1783076400.0)
     adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
@@ -636,6 +661,29 @@ def test_dark_library_delegates_read_only_media_access_to_adapter():
     assert_true('.resolve_media_url(row, local=True)' in body, 'dark library URL lookup should go through Hybrid media access adapter')
     assert_true('row.getFilesystemPath()' not in body, 'dark library must not own direct filesystem path resolution')
     assert_true('row.getUrl()' not in body, 'dark library must not own direct media URL resolution')
+
+
+def test_modern_mask_delegates_file_metadata_to_media_access_adapter():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ModernAdminMaskView')
+    end = source.index('class ModernAdminMediaBrowseView', start)
+    body = source[start:end]
+
+    assert_true('def resolve_mask_mtime(self, mask_image_p):' in body, 'Modern Mask must own its filesystem metadata boundary')
+    assert_true('.resolve_existing_path_mtime(mask_image_p)' in body, 'Modern Mask mtime lookup should go through Hybrid media access adapter')
+    assert_true('mask_image_p.exists()' not in body, 'Modern Mask must not own direct path availability checks')
+    assert_true('mask_image_p.stat()' not in body, 'Modern Mask must not own direct file metadata reads')
+
+
+def test_classic_mask_preserves_default_file_metadata_hook():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class MaskView')
+    end = source.index('class CamerasView', start)
+    body = source[start:end]
+
+    assert_true('self.resolve_mask_mtime(mask_image_p)' in body, 'Mask base view should call the overridable filesystem metadata boundary')
+    assert_true('if not mask_image_p.exists():' in body, 'Classic Mask should preserve its existing path availability check')
+    assert_true('return mask_image_p.stat().st_mtime' in body, 'Classic Mask should preserve its existing mtime read')
 
 
 def test_preview_metadata_lookup_shapes_thumbnail_url():
@@ -861,6 +909,7 @@ def run_tests():
     test_media_access_adapter_preserves_filesystem_path_resolution()
     test_media_access_adapter_resolves_file_size_with_existing_fallback()
     test_media_access_adapter_resolves_existing_file_mtime()
+    test_media_access_adapter_resolves_existing_path_mtime()
     test_media_access_adapter_resolves_file_mtime_without_changing_errors()
     test_media_access_adapter_reads_fits_preview_metadata_and_closes_file()
     test_media_access_adapter_reads_fits_preview_metadata_defaults()
@@ -875,6 +924,8 @@ def run_tests():
     test_fits_preview_route_delegates_header_metadata_to_media_access_adapter()
     test_fits_preview_route_delegates_file_mtime_to_media_access_adapter()
     test_dark_library_delegates_read_only_media_access_to_adapter()
+    test_modern_mask_delegates_file_metadata_to_media_access_adapter()
+    test_classic_mask_preserves_default_file_metadata_hook()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()

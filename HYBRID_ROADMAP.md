@@ -185,6 +185,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     mentre conversione immagine e response restano invariati;
   - Dark Library risolve URL e dimensione file read-only di dark frame/BPM
     tramite lo stesso adapter, preservando righe, fallback e filesystem;
+  - la pagina Mask Modern risolve presenza e `mtime` di `mask_base.png` tramite
+    l'adapter; il base Classic conserva il precedente accesso come fallback;
   - download, preview/cache generation, filesystem paths, FITS/RAW e
     lightbox/deep browse internals restano Classic/filesystem-owned.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
