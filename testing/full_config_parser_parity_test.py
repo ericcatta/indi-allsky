@@ -28,6 +28,7 @@ from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigExpos
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageStretchParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigKeogramParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -104,6 +105,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigWhiteBalanceParser,
         ModernAdminFullConfigImageEnhancementParser,
         ModernAdminFullConfigImageStretchParser,
+        ModernAdminFullConfigKeogramParser,
         ModernAdminFullConfigAutoWhiteBalanceParser,
     )
 
@@ -269,6 +271,9 @@ class LegacyFullConfigParserHarness:
                 full_config_image_stretch_parser=(
                     lambda: ModernAdminFullConfigImageStretchParser()
                 ),
+                full_config_keogram_parser=(
+                    lambda: ModernAdminFullConfigKeogramParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -342,7 +347,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 589
+    assert len(harness.direct_payload_keys) == 583
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -1123,6 +1128,39 @@ def test_image_stretch_parser_preserves_legacy_casting_and_nested_values():
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
+def test_keogram_parser_preserves_legacy_casting():
+    parser = ModernAdminFullConfigKeogramParser()
+    config = {}
+    payload = {
+        'KEOGRAM_ANGLE': '15.5',
+        'KEOGRAM_H_SCALE': '75',
+        'KEOGRAM_V_SCALE': 50,
+        'KEOGRAM_CROP_TOP': '-2',
+        'KEOGRAM_CROP_BOTTOM': 3,
+        'KEOGRAM_LABEL': 'false',
+    }
+
+    assert parser.apply(config, payload) is config
+    assert config == {
+        'KEOGRAM_ANGLE': 15.5,
+        'KEOGRAM_H_SCALE': 75,
+        'KEOGRAM_V_SCALE': 50,
+        'KEOGRAM_CROP_TOP': -2,
+        'KEOGRAM_CROP_BOTTOM': 3,
+        'KEOGRAM_LABEL': True,
+    }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        incomplete_payload = dict(payload)
+        incomplete_payload.pop(missing_field)
+        try:
+            parser.apply({}, incomplete_payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -1365,6 +1403,15 @@ def test_ajax_config_view_delegates_image_stretch_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
+def test_ajax_config_view_delegates_keogram_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_keogram_parser().apply' in parser_source
+    for field_name in ModernAdminFullConfigKeogramParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
+
+
 def test_exposure_gain_parser_preserves_partial_mutation_order_on_errors():
     harness = LegacyFullConfigParserHarness()
     invalid_binning = harness.capture(
@@ -1544,6 +1591,7 @@ if __name__ == '__main__':
     test_sky_mode_threshold_parser_preserves_legacy_float_casting()
     test_web_status_parser_preserves_legacy_casting()
     test_image_stretch_parser_preserves_legacy_casting_and_nested_values()
+    test_keogram_parser_preserves_legacy_casting()
     test_ajax_config_view_delegates_camera_connection_parsing()
     test_ajax_config_view_delegates_station_identity_parsing()
     test_ajax_config_view_delegates_lens_metadata_parsing()
@@ -1567,6 +1615,7 @@ if __name__ == '__main__':
     test_ajax_config_view_delegates_sky_mode_threshold_parsing()
     test_ajax_config_view_delegates_web_status_parsing()
     test_ajax_config_view_delegates_image_stretch_parsing()
+    test_ajax_config_view_delegates_keogram_parsing()
     test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()

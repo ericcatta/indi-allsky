@@ -606,6 +606,28 @@ class ModernAdminFullConfigImageStretchParser:
         return config
 
 
+class ModernAdminFullConfigKeogramParser:
+    """Hybrid-owned parser for full-config keogram fields."""
+
+    REQUIRED_FIELDS = (
+        'KEOGRAM_ANGLE',
+        'KEOGRAM_H_SCALE',
+        'KEOGRAM_V_SCALE',
+        'KEOGRAM_CROP_TOP',
+        'KEOGRAM_CROP_BOTTOM',
+        'KEOGRAM_LABEL',
+    )
+
+    def apply(self, config, payload):
+        config['KEOGRAM_ANGLE'] = float(payload['KEOGRAM_ANGLE'])
+        config['KEOGRAM_H_SCALE'] = int(payload['KEOGRAM_H_SCALE'])
+        config['KEOGRAM_V_SCALE'] = int(payload['KEOGRAM_V_SCALE'])
+        config['KEOGRAM_CROP_TOP'] = int(payload['KEOGRAM_CROP_TOP'])
+        config['KEOGRAM_CROP_BOTTOM'] = int(payload['KEOGRAM_CROP_BOTTOM'])
+        config['KEOGRAM_LABEL'] = bool(payload['KEOGRAM_LABEL'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

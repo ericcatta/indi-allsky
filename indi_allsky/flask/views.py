@@ -90,6 +90,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainPar
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageStretchParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigKeogramParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -3374,6 +3375,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigImageStretchParser()
 
 
+    def full_config_keogram_parser(self):
+        return ModernAdminFullConfigKeogramParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3494,12 +3499,7 @@ class AjaxConfigView(BaseView):
         self.full_config_sky_mode_threshold_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_web_status_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_image_stretch_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['KEOGRAM_ANGLE']                        = float(request.json['KEOGRAM_ANGLE'])
-        self.indi_allsky_config['KEOGRAM_H_SCALE']                      = int(request.json['KEOGRAM_H_SCALE'])
-        self.indi_allsky_config['KEOGRAM_V_SCALE']                      = int(request.json['KEOGRAM_V_SCALE'])
-        self.indi_allsky_config['KEOGRAM_CROP_TOP']                     = int(request.json['KEOGRAM_CROP_TOP'])
-        self.indi_allsky_config['KEOGRAM_CROP_BOTTOM']                  = int(request.json['KEOGRAM_CROP_BOTTOM'])
-        self.indi_allsky_config['KEOGRAM_LABEL']                        = bool(request.json['KEOGRAM_LABEL'])
+        self.full_config_keogram_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['LONGTERM_KEOGRAM']['ENABLE']           = bool(request.json['LONGTERM_KEOGRAM__ENABLE'])
         self.indi_allsky_config['LONGTERM_KEOGRAM']['OFFSET_X']         = int(request.json['LONGTERM_KEOGRAM__OFFSET_X'])
         self.indi_allsky_config['LONGTERM_KEOGRAM']['OFFSET_Y']         = int(request.json['LONGTERM_KEOGRAM__OFFSET_Y'])
