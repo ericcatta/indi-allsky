@@ -433,6 +433,28 @@ class ModernAdminFullConfigEnvironmentParser:
         return config
 
 
+class ModernAdminFullConfigPhotometryParser:
+    """Hybrid-owned parser for full-config ADU and SQM measurement fields."""
+
+    REQUIRED_FIELDS = (
+        'TARGET_ADU',
+        'TARGET_ADU_DAY',
+        'TARGET_ADU_DEV',
+        'TARGET_ADU_DEV_DAY',
+        'ADU_FOV_DIV',
+        'SQM_FOV_DIV',
+    )
+
+    def apply(self, config, payload):
+        config['TARGET_ADU'] = int(payload['TARGET_ADU'])
+        config['TARGET_ADU_DAY'] = int(payload['TARGET_ADU_DAY'])
+        config['TARGET_ADU_DEV'] = int(payload['TARGET_ADU_DEV'])
+        config['TARGET_ADU_DEV_DAY'] = int(payload['TARGET_ADU_DEV_DAY'])
+        config['ADU_FOV_DIV'] = int(payload['ADU_FOV_DIV'])
+        config['SQM_FOV_DIV'] = int(payload['SQM_FOV_DIV'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

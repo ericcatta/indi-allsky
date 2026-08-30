@@ -90,6 +90,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancemen
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
+from ..modern_admin_settings_runtime import ModernAdminFullConfigPhotometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigWhiteBalanceParser
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
@@ -3331,6 +3332,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigEnvironmentParser()
 
 
+    def full_config_photometry_parser(self):
+        return ModernAdminFullConfigPhotometryParser()
+
+
     def full_config_white_balance_parser(self):
         return ModernAdminFullConfigWhiteBalanceParser()
 
@@ -3439,12 +3444,7 @@ class AjaxConfigView(BaseView):
         self.full_config_auto_white_balance_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_display_units_parser().apply(self.indi_allsky_config, request.json)
         environment_parser.apply_runtime_sources(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['TARGET_ADU']                           = int(request.json['TARGET_ADU'])
-        self.indi_allsky_config['TARGET_ADU_DAY']                       = int(request.json['TARGET_ADU_DAY'])
-        self.indi_allsky_config['TARGET_ADU_DEV']                       = int(request.json['TARGET_ADU_DEV'])
-        self.indi_allsky_config['TARGET_ADU_DEV_DAY']                   = int(request.json['TARGET_ADU_DEV_DAY'])
-        self.indi_allsky_config['ADU_FOV_DIV']                          = int(request.json['ADU_FOV_DIV'])
-        self.indi_allsky_config['SQM_FOV_DIV']                          = int(request.json['SQM_FOV_DIV'])
+        self.full_config_photometry_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['DETECT_STARS']                         = bool(request.json['DETECT_STARS'])
         self.indi_allsky_config['DETECT_STARS_THOLD']                   = float(request.json['DETECT_STARS_THOLD'])
         self.indi_allsky_config['DETECT_METEORS']                       = bool(request.json['DETECT_METEORS'])
