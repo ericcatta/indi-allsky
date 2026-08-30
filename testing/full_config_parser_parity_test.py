@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
 
 
 VIEWS_PATH = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py'
@@ -53,11 +54,16 @@ class LegacyFullConfigParserHarness:
     )
 
     GOLDEN_FINGERPRINTS = {
-        'standard': '30016acf66378db3baf722cd6ed6188394a7149207901c28c577d7137af0b3bc',
-        'roi_disabled': '06cb8c1cddc68798f01128affa284caae554d76c0eff6a87778d8d4c9c16fe39',
+        'standard': '5447b4ca1db321a02ad5fb24689d3621120f1ccc97a58cce410d96fd6d30fdaa',
+        'roi_disabled': '99488173572f652ea383680a082bb19721d3dfb7d3df844e434b0445427bf9e6',
         'invalid_color': 'e73182498be70a84834d303141ffac48c607f99bbce8cf293b9f89660b069fa2',
-        'compat': '03ff6675142ef9f2580bf8edaf85ea988ba4915c08e9dfb5e8abb79d220bb801',
+        'compat': 'b158691cfbb3e7ca3bf79c97d044c99da12e58f5fee14eec6bf70a8849085291',
     }
+
+    HYBRID_PARSERS = (
+        ModernAdminFullConfigCameraConnectionParser,
+        ModernAdminFullConfigStationIdentityParser,
+    )
 
     def __init__(self, source_path=VIEWS_PATH):
         self.source_path = Path(source_path)
@@ -70,7 +76,11 @@ class LegacyFullConfigParserHarness:
         self.direct_payload_keys, self.optional_payload_keys = self.extract_payload_keys()
         self.required_payload_keys = tuple(sorted(
             set(self.direct_payload_keys)
-            | set(ModernAdminFullConfigCameraConnectionParser.REQUIRED_FIELDS)
+            | {
+                field_name
+                for parser_class in self.HYBRID_PARSERS
+                for field_name in parser_class.REQUIRED_FIELDS
+            }
         ))
 
 
@@ -151,6 +161,9 @@ class LegacyFullConfigParserHarness:
                 full_config_camera_connection_parser=(
                     lambda: ModernAdminFullConfigCameraConnectionParser()
                 ),
+                full_config_station_identity_parser=(
+                    lambda: ModernAdminFullConfigStationIdentityParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -175,18 +188,24 @@ class LegacyFullConfigParserHarness:
             return ('error', error.__class__, str(error), config)
 
 
-    def canonicalize(self, value):
+    def canonicalize(self, value, path=()):
         if is_dataclass(value):
-            return self.canonicalize(asdict(value))
+            return self.canonicalize(asdict(value), path)
         if isinstance(value, type):
             return '{0:s}.{1:s}'.format(value.__module__, value.__qualname__)
         if isinstance(value, dict):
             return {
-                key: self.canonicalize(item)
+                key: self.canonicalize(item, path + (key,))
                 for key, item in value.items()
             }
         if isinstance(value, (list, tuple)):
-            return [self.canonicalize(item) for item in value]
+            canonical_items = [
+                self.canonicalize(item, path + (index,))
+                for index, item in enumerate(value)
+            ]
+            if path[-2:] == ('YOUTUBE', 'TAGS'):
+                return sorted(canonical_items)
+            return canonical_items
         return value
 
 
@@ -218,11 +237,10 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 715
+    assert len(harness.direct_payload_keys) == 713
     assert len(harness.required_payload_keys) == 719
-    assert set(ModernAdminFullConfigCameraConnectionParser.REQUIRED_FIELDS).issubset(
-        harness.required_payload_keys
-    )
+    for parser_class in harness.HYBRID_PARSERS:
+        assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
     assert set(harness.JSON_FIELDS).issubset(harness.required_payload_keys)
     assert set(harness.COLOR_FIELDS).issubset(harness.required_payload_keys)
     assert 'YOUTUBE__TAGS_STR' in harness.required_payload_keys
@@ -259,6 +277,34 @@ def test_camera_connection_parser_preserves_legacy_casting_and_required_fields()
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
+def test_station_identity_parser_preserves_legacy_casting_and_required_fields():
+    parser = ModernAdminFullConfigStationIdentityParser()
+    config = {'WEBSITE': {'LEGACY_VALUE': 'preserve'}}
+    payload = {
+        'WEBSITE__TITLE': 42,
+        'OWNER': True,
+    }
+
+    assert parser.apply(config, payload) is config
+    assert config == {
+        'WEBSITE': {
+            'LEGACY_VALUE': 'preserve',
+            'TITLE': '42',
+        },
+        'OWNER': 'True',
+    }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        incomplete_payload = dict(payload)
+        incomplete_payload.pop(missing_field)
+        try:
+            parser.apply({'WEBSITE': {}}, incomplete_payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -266,6 +312,15 @@ def test_ajax_config_view_delegates_camera_connection_parsing():
     assert 'full_config_camera_connection_parser().apply' in parser_source
     for field_name in ModernAdminFullConfigCameraConnectionParser.REQUIRED_FIELDS:
         assert "indi_allsky_config['{0:s}'] =".format(field_name) not in parser_source
+
+
+def test_ajax_config_view_delegates_station_identity_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_station_identity_parser().apply' in parser_source
+    assert "indi_allsky_config['WEBSITE']['TITLE'] =" not in parser_source
+    assert "indi_allsky_config['OWNER'] =" not in parser_source
 
 
 def test_full_config_parser_matches_pre_migration_golden_fingerprints():
@@ -320,6 +375,14 @@ def test_full_config_parser_matches_pre_migration_golden_fingerprints():
         name: harness.fingerprint(result)
         for name, result in cases.items()
     } == harness.GOLDEN_FINGERPRINTS
+
+
+def test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags():
+    harness = LegacyFullConfigParserHarness()
+    first = {'config': {'YOUTUBE': {'TAGS': ['alpha', 'beta']}}}
+    second = {'config': {'YOUTUBE': {'TAGS': ['beta', 'alpha']}}}
+
+    assert harness.fingerprint(first) == harness.fingerprint(second)
 
 
 def test_legacy_parser_corpus_executes_success_and_edge_paths():
@@ -389,8 +452,11 @@ def test_parity_harness_detects_candidate_drift():
 if __name__ == '__main__':
     test_parity_corpus_covers_current_legacy_parser_contract()
     test_camera_connection_parser_preserves_legacy_casting_and_required_fields()
+    test_station_identity_parser_preserves_legacy_casting_and_required_fields()
     test_ajax_config_view_delegates_camera_connection_parsing()
+    test_ajax_config_view_delegates_station_identity_parsing()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
+    test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()
     test_legacy_parser_corpus_executes_success_and_edge_paths()
     test_parity_harness_accepts_equivalent_candidate_and_exceptions()
     test_parity_harness_detects_candidate_drift()

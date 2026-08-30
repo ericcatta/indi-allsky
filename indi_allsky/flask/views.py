@@ -77,6 +77,7 @@ from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsCo
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
+from ..modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreService
@@ -3264,6 +3265,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigCameraConnectionParser()
 
 
+    def full_config_station_identity_parser(self):
+        return ModernAdminFullConfigStationIdentityParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3338,8 +3343,7 @@ class AjaxConfigView(BaseView):
 
         # update data
         self.full_config_camera_connection_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['WEBSITE']['TITLE']                     = str(request.json['WEBSITE__TITLE'])
-        self.indi_allsky_config['OWNER']                                = str(request.json['OWNER'])
+        self.full_config_station_identity_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['LENS_NAME']                            = str(request.json['LENS_NAME'])
         self.indi_allsky_config['LENS_FOCAL_LENGTH']                    = float(request.json['LENS_FOCAL_LENGTH'])
         self.indi_allsky_config['LENS_FOCAL_RATIO']                     = float(request.json['LENS_FOCAL_RATIO'])

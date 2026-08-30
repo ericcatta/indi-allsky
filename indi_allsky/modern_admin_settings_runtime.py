@@ -93,6 +93,20 @@ class ModernAdminFullConfigCameraConnectionParser:
         return config
 
 
+class ModernAdminFullConfigStationIdentityParser:
+    """Hybrid-owned parser for the full-config station identity fields."""
+
+    REQUIRED_FIELDS = (
+        'WEBSITE__TITLE',
+        'OWNER',
+    )
+
+    def apply(self, config, payload):
+        config['WEBSITE']['TITLE'] = str(payload['WEBSITE__TITLE'])
+        config['OWNER'] = str(payload['OWNER'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 
