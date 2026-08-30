@@ -77,6 +77,7 @@ from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsCo
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminFullConfigAcquisitionModeParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigAutoGainParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigAutoWhiteBalanceParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigColorProcessingParser
@@ -3300,6 +3301,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigAutoGainParser()
 
 
+    def full_config_auto_white_balance_parser(self):
+        return ModernAdminFullConfigAutoWhiteBalanceParser()
+
+
     def full_config_camera_sqm_parser(self):
         return ModernAdminFullConfigCameraSqmParser()
 
@@ -3423,8 +3428,7 @@ class AjaxConfigView(BaseView):
         self.indi_allsky_config['CCD_COOLING_DAY']                      = bool(request.json['CCD_COOLING_DAY'])
         self.indi_allsky_config['CCD_TEMP']                             = float(request.json['CCD_TEMP'])
         self.indi_allsky_config['CCD_TEMP_DAY']                         = float(request.json['CCD_TEMP_DAY'])
-        self.indi_allsky_config['AUTO_WB']                              = bool(request.json['AUTO_WB'])
-        self.indi_allsky_config['AUTO_WB_DAY']                          = bool(request.json['AUTO_WB_DAY'])
+        self.full_config_auto_white_balance_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['TEMP_DISPLAY']                         = str(request.json['TEMP_DISPLAY'])
         self.indi_allsky_config['PRESSURE_DISPLAY']                     = str(request.json['PRESSURE_DISPLAY'])
         self.indi_allsky_config['WINDSPEED_DISPLAY']                    = str(request.json['WINDSPEED_DISPLAY'])

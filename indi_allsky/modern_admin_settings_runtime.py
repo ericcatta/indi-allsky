@@ -375,6 +375,20 @@ class ModernAdminFullConfigImageEnhancementParser:
         return config
 
 
+class ModernAdminFullConfigAutoWhiteBalanceParser:
+    """Hybrid-owned parser for full-config automatic white balance flags."""
+
+    REQUIRED_FIELDS = (
+        'AUTO_WB',
+        'AUTO_WB_DAY',
+    )
+
+    def apply(self, config, payload):
+        config['AUTO_WB'] = bool(payload['AUTO_WB'])
+        config['AUTO_WB_DAY'] = bool(payload['AUTO_WB_DAY'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

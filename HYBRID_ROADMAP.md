@@ -115,6 +115,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - saturazione, gamma e sharpening giorno/notte sono ora parsati da
     `ModernAdminFullConfigImageEnhancementParser`; algoritmi, validazione e
     pipeline immagini restano invariati.
+  - i flag Auto White Balance giorno/notte sono ora parsati da
+    `ModernAdminFullConfigAutoWhiteBalanceParser`; algoritmi AWB, pipeline
+    colore e controllo camera restano invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
