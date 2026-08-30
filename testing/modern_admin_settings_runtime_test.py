@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_admin_settings_runtime import ModernAdminConfigRevisionPersistenceAdapter
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsConfigValidationService
+from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsCredentialEncryptionService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
@@ -65,6 +66,17 @@ class FakeLogger:
 
     def warning(self, message, *args):
         self.warnings.append((message, args))
+
+
+class FakeCipher:
+    def __init__(self, key):
+        self.key = key
+        self.encrypt_calls = []
+
+
+    def encrypt(self, value):
+        self.encrypt_calls.append(value)
+        return b'encrypted:' + value
 
 
 class CallRecorder:
@@ -200,6 +212,102 @@ def test_classic_config_delegates_validation_to_hybrid_service():
     assert 'return ModernAdminSettingsConfigValidationService' not in validation_source
     assert 'valid_types = ' not in validation_source
     assert 'Config key has wrong type:' not in validation_source
+
+
+def test_settings_credential_encryption_service_encrypts_all_fields():
+    cipher_instances = []
+
+    def cipher_factory(key):
+        cipher = FakeCipher(key)
+        cipher_instances.append(cipher)
+        return cipher
+
+    service = ModernAdminSettingsCredentialEncryptionService(
+        password_key_adapter=lambda: 'test-password-key',
+        cipher_factory=cipher_factory,
+    )
+    config = {
+        'ENCRYPT_PASSWORDS': True,
+        'FILETRANSFER': {'PASSWORD': 'filetransfer'},
+        'S3UPLOAD': {'SECRET_KEY': 's3'},
+        'MQTTPUBLISH': {'PASSWORD': 'mqtt-publish'},
+        'SYNCAPI': {'APIKEY': 'sync'},
+        'PYCURL_CAMERA': {'PASSWORD': 'pycurl'},
+        'TEMP_SENSOR': {
+            'OPENWEATHERMAP_APIKEY': 'openweather',
+            'WUNDERGROUND_APIKEY': 'wunderground',
+            'ASTROSPHERIC_APIKEY': 'astrospheric',
+            'MQTT_PASSWORD': 'sensor-mqtt',
+        },
+        'DEVICE': {'MQTT_PASSWORD': 'device-mqtt'},
+        'LIBCAMERA': {'MQTT_PASSWORD': 'libcamera-mqtt'},
+        'ADSB': {'PASSWORD': 'adsb'},
+        'IMAGE_OVERLAY': {'A_PASSWORD': 'overlay'},
+    }
+    expected_values = (
+        ('FILETRANSFER', 'PASSWORD', 'PASSWORD_E', 'filetransfer'),
+        ('S3UPLOAD', 'SECRET_KEY', 'SECRET_KEY_E', 's3'),
+        ('MQTTPUBLISH', 'PASSWORD', 'PASSWORD_E', 'mqtt-publish'),
+        ('SYNCAPI', 'APIKEY', 'APIKEY_E', 'sync'),
+        ('PYCURL_CAMERA', 'PASSWORD', 'PASSWORD_E', 'pycurl'),
+        ('TEMP_SENSOR', 'OPENWEATHERMAP_APIKEY', 'OPENWEATHERMAP_APIKEY_E', 'openweather'),
+        ('TEMP_SENSOR', 'WUNDERGROUND_APIKEY', 'WUNDERGROUND_APIKEY_E', 'wunderground'),
+        ('TEMP_SENSOR', 'ASTROSPHERIC_APIKEY', 'ASTROSPHERIC_APIKEY_E', 'astrospheric'),
+        ('TEMP_SENSOR', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E', 'sensor-mqtt'),
+        ('DEVICE', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E', 'device-mqtt'),
+        ('LIBCAMERA', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E', 'libcamera-mqtt'),
+        ('ADSB', 'PASSWORD', 'PASSWORD_E', 'adsb'),
+        ('IMAGE_OVERLAY', 'A_PASSWORD', 'A_PASSWORD_E', 'overlay'),
+    )
+
+    result, encrypted = service.encrypt_config(config)
+
+    assert encrypted is True
+    assert cipher_instances[0].key == b'test-password-key'
+    assert cipher_instances[0].encrypt_calls == [
+        value.encode() for _section, _plain_key, _encrypted_key, value in expected_values
+    ]
+    for section, plain_key, encrypted_key, value in expected_values:
+        assert result[section][plain_key] == ''
+        assert result[section][encrypted_key] == 'encrypted:' + value
+
+    assert config['FILETRANSFER']['PASSWORD'] == ''
+
+
+def test_settings_credential_encryption_service_preserves_disabled_fallbacks():
+    password_key_calls = []
+    service = ModernAdminSettingsCredentialEncryptionService(
+        password_key_adapter=lambda: password_key_calls.append(True),
+        cipher_factory=lambda _key: (_ for _ in ()).throw(AssertionError('cipher should not be created')),
+    )
+    config = {
+        'ENCRYPT_PASSWORDS': False,
+        'FILETRANSFER': {'PASSWORD': 123, 'PASSWORD_E': 'old-ciphertext'},
+    }
+
+    result, encrypted = service.encrypt_config(config)
+
+    assert encrypted is False
+    assert password_key_calls == []
+    assert result['FILETRANSFER']['PASSWORD'] == '123'
+    assert result['FILETRANSFER']['PASSWORD_E'] == ''
+    assert result['TEMP_SENSOR']['OPENWEATHERMAP_APIKEY'] == ''
+    assert result['TEMP_SENSOR']['OPENWEATHERMAP_APIKEY_E'] == ''
+    assert result['IMAGE_OVERLAY']['A_PASSWORD'] == ''
+    assert result['IMAGE_OVERLAY']['A_PASSWORD_E'] == ''
+
+
+def test_classic_config_delegates_credential_encryption_to_hybrid_service():
+    config_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'config.py'
+    source = config_path.read_text()
+    start = source.index('    def _encryptPasswords(self):')
+    end = source.index('    def _encryptPasswordsClassic(self):', start)
+    encryption_source = source[start:end]
+
+    assert 'ModernAdminSettingsCredentialEncryptionService' in encryption_source
+    assert ').encrypt_config(self.config)' in encryption_source
+    assert 'Fernet(' not in encryption_source
+    assert "config['FILETRANSFER']['PASSWORD']" not in encryption_source
 
 
 def test_config_revision_persistence_adapter_uses_naive_utc_timestamp():
@@ -698,6 +806,9 @@ if __name__ == '__main__':
     test_settings_config_validation_service_preserves_skip_and_unknown_policy()
     test_settings_config_validation_service_rejects_wrong_nested_type()
     test_classic_config_delegates_validation_to_hybrid_service()
+    test_settings_credential_encryption_service_encrypts_all_fields()
+    test_settings_credential_encryption_service_preserves_disabled_fallbacks()
+    test_classic_config_delegates_credential_encryption_to_hybrid_service()
     test_config_revision_persistence_adapter_uses_naive_utc_timestamp()
     test_settings_revision_rollback_service_preserves_revert_effect()
     test_classic_config_revert_delegates_application_to_hybrid_service()

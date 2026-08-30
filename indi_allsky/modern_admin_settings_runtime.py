@@ -1,6 +1,8 @@
 from datetime import datetime
 from datetime import timezone
 
+from cryptography.fernet import Fernet
+
 from .exceptions import ConfigSaveException
 
 
@@ -101,6 +103,65 @@ class ModernAdminSettingsConfigValidationService:
     def log_warning(self, message, *args):
         if self.logger is not None:
             self.logger.warning(message, *args)
+
+
+class ModernAdminSettingsCredentialEncryptionService:
+    """Hybrid-owned credential encryption for config revision persistence."""
+
+    CREDENTIAL_FIELDS = (
+        ('FILETRANSFER', 'PASSWORD', 'PASSWORD_E'),
+        ('S3UPLOAD', 'SECRET_KEY', 'SECRET_KEY_E'),
+        ('MQTTPUBLISH', 'PASSWORD', 'PASSWORD_E'),
+        ('SYNCAPI', 'APIKEY', 'APIKEY_E'),
+        ('PYCURL_CAMERA', 'PASSWORD', 'PASSWORD_E'),
+        ('TEMP_SENSOR', 'OPENWEATHERMAP_APIKEY', 'OPENWEATHERMAP_APIKEY_E'),
+        ('TEMP_SENSOR', 'WUNDERGROUND_APIKEY', 'WUNDERGROUND_APIKEY_E'),
+        ('TEMP_SENSOR', 'ASTROSPHERIC_APIKEY', 'ASTROSPHERIC_APIKEY_E'),
+        ('TEMP_SENSOR', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E'),
+        ('DEVICE', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E'),
+        ('LIBCAMERA', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E'),
+        ('ADSB', 'PASSWORD', 'PASSWORD_E'),
+        ('IMAGE_OVERLAY', 'A_PASSWORD', 'A_PASSWORD_E'),
+    )
+
+    def __init__(self, password_key_adapter, cipher_factory=None):
+        self.password_key_adapter = password_key_adapter
+        self.cipher_factory = cipher_factory or Fernet
+
+
+    def encrypt_config(self, config):
+        encrypted = bool(config['ENCRYPT_PASSWORDS'])
+        cipher = None
+        if encrypted:
+            cipher = self.cipher_factory(self.password_key_adapter().encode())
+
+        encrypted_values = []
+        for section, plain_key, encrypted_key in self.CREDENTIAL_FIELDS:
+            plain_value = str(config.get(section, {}).get(plain_key, ''))
+            if encrypted and plain_value:
+                encrypted_value = cipher.encrypt(plain_value.encode()).decode()
+                plain_value = ''
+            else:
+                encrypted_value = ''
+
+            encrypted_values.append((
+                section,
+                plain_key,
+                encrypted_key,
+                plain_value,
+                encrypted_value,
+            ))
+
+        encrypted_config = config.copy()
+        for section, _plain_key, _encrypted_key in self.CREDENTIAL_FIELDS:
+            if not isinstance(encrypted_config.get(section), dict):
+                encrypted_config[section] = {}
+
+        for section, plain_key, encrypted_key, plain_value, encrypted_value in encrypted_values:
+            encrypted_config[section][plain_key] = plain_value
+            encrypted_config[section][encrypted_key] = encrypted_value
+
+        return encrypted_config, encrypted
 
 
 class ModernAdminConfigRevisionPersistenceAdapter:

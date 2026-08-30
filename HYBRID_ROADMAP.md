@@ -50,7 +50,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - la validazione tipi del config prima della persistenza e' ora Hybrid-owned
     tramite `ModernAdminSettingsConfigValidationService`; skip legacy, warning
     per chiavi sconosciute e compatibilita' numerica `int/float` restano
-    invariati, mentre cifratura credenziali e parser restano Classic-owned.
+    invariati;
+  - la cifratura credenziali prima della persistenza e' ora Hybrid-owned tramite
+    `ModernAdminSettingsCredentialEncryptionService`; algoritmo Fernet, campi,
+    fallback plaintext e mutazione shallow-copy restano invariati, mentre
+    `_encryptPasswordsClassic()` resta temporaneamente come fallback di
+    compatibilita' e il parser full-config resta Classic-owned.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

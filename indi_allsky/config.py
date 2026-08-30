@@ -1177,6 +1177,14 @@ class IndiAllSkyConfig(IndiAllSkyConfigBase):
 
 
     def _encryptPasswords(self):
+        from .modern_admin_settings_runtime import ModernAdminSettingsCredentialEncryptionService
+
+        return ModernAdminSettingsCredentialEncryptionService(
+            password_key_adapter=lambda: app.config['PASSWORD_KEY'],
+        ).encrypt_config(self.config)
+
+
+    def _encryptPasswordsClassic(self):
         config = self.config.copy()
 
         if config['ENCRYPT_PASSWORDS']:
