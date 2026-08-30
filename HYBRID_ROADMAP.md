@@ -187,8 +187,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     tramite lo stesso adapter, preservando righe, fallback e filesystem;
   - la pagina Mask Modern risolve presenza e `mtime` di `mask_base.png` tramite
     l'adapter; il base Classic conserva il precedente accesso come fallback;
-  - download, preview/cache generation, filesystem paths, FITS/RAW e
-    lightbox/deep browse internals restano Classic/filesystem-owned.
+  - checkpoint Media Access read-only completato: i link Open/Download Modern
+    consumano gli URL gia' adapterizzati (`/images/<path>`, remoto o
+    `/fits2jpeg`) e non esiste un secondo effetto download Modern da migrare;
+  - conversione FITS, preview/cache generation, RAW/source readers e viewer
+    legacy sono blocchi runtime profondi, non ulteriori micro-slice sicure;
+  - fermare le estrazioni Media Access descrittive: il prossimo milestone deve
+    sostituire una responsabilita' low-level reale (config persistence oppure
+    worker/effect execution) dietro una boundary gia' esistente.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
 - Ogni camera/profilo deve avere stato runtime separato per exposure, gain, ADU, metering, Hybrid AWB e Auto Exposure.
 - UX, chiarezza configurazione, dashboard/reporting, onboarding e usability sono tracciati nella roadmap dedicata `HYBRID_UX_ROADMAP.md`.
