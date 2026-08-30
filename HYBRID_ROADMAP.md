@@ -108,7 +108,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     validazione e pipeline scientifica restano invariati;
   - selezione e intensita' denoise e parametri bilateral giorno/notte sono ora
     parsati da `ModernAdminFullConfigDenoiseParser`; filtri, algoritmi e
-    pipeline immagini restano Classic-owned e invariati.
+    pipeline immagini restano Classic-owned e invariati;
+  - fattori RGB manuali e midtones White Balance giorno/notte sono ora parsati
+    da `ModernAdminFullConfigWhiteBalanceParser`; Auto WB, algoritmi e pipeline
+    colore restano invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

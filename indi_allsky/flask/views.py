@@ -87,6 +87,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryPar
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigWhiteBalanceParser
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreService
@@ -3314,6 +3315,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigDenoiseParser()
 
 
+    def full_config_white_balance_parser(self):
+        return ModernAdminFullConfigWhiteBalanceParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3407,18 +3412,7 @@ class AjaxConfigView(BaseView):
         self.full_config_focus_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_color_processing_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_denoise_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['WBR_FACTOR']                           = float(request.json['WBR_FACTOR'])
-        self.indi_allsky_config['WBG_FACTOR']                           = float(request.json['WBG_FACTOR'])
-        self.indi_allsky_config['WBB_FACTOR']                           = float(request.json['WBB_FACTOR'])
-        self.indi_allsky_config['WBR_FACTOR_DAY']                       = float(request.json['WBR_FACTOR_DAY'])
-        self.indi_allsky_config['WBG_FACTOR_DAY']                       = float(request.json['WBG_FACTOR_DAY'])
-        self.indi_allsky_config['WBB_FACTOR_DAY']                       = float(request.json['WBB_FACTOR_DAY'])
-        self.indi_allsky_config['WBR_MTF_MIDTONES']                     = float(request.json['WBR_MTF_MIDTONES'])
-        self.indi_allsky_config['WBG_MTF_MIDTONES']                     = float(request.json['WBG_MTF_MIDTONES'])
-        self.indi_allsky_config['WBB_MTF_MIDTONES']                     = float(request.json['WBB_MTF_MIDTONES'])
-        self.indi_allsky_config['WBR_MTF_MIDTONES_DAY']                 = float(request.json['WBR_MTF_MIDTONES_DAY'])
-        self.indi_allsky_config['WBG_MTF_MIDTONES_DAY']                 = float(request.json['WBG_MTF_MIDTONES_DAY'])
-        self.indi_allsky_config['WBB_MTF_MIDTONES_DAY']                 = float(request.json['WBB_MTF_MIDTONES_DAY'])
+        self.full_config_white_balance_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['SATURATION_FACTOR']                    = float(request.json['SATURATION_FACTOR'])
         self.indi_allsky_config['SATURATION_FACTOR_DAY']                = float(request.json['SATURATION_FACTOR_DAY'])
         self.indi_allsky_config['GAMMA_CORRECTION']                     = float(request.json['GAMMA_CORRECTION'])

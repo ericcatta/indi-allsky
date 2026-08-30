@@ -319,6 +319,40 @@ class ModernAdminFullConfigDenoiseParser:
         return config
 
 
+class ModernAdminFullConfigWhiteBalanceParser:
+    """Hybrid-owned parser for manual full-config white balance fields."""
+
+    REQUIRED_FIELDS = (
+        'WBR_FACTOR',
+        'WBG_FACTOR',
+        'WBB_FACTOR',
+        'WBR_FACTOR_DAY',
+        'WBG_FACTOR_DAY',
+        'WBB_FACTOR_DAY',
+        'WBR_MTF_MIDTONES',
+        'WBG_MTF_MIDTONES',
+        'WBB_MTF_MIDTONES',
+        'WBR_MTF_MIDTONES_DAY',
+        'WBG_MTF_MIDTONES_DAY',
+        'WBB_MTF_MIDTONES_DAY',
+    )
+
+    def apply(self, config, payload):
+        config['WBR_FACTOR'] = float(payload['WBR_FACTOR'])
+        config['WBG_FACTOR'] = float(payload['WBG_FACTOR'])
+        config['WBB_FACTOR'] = float(payload['WBB_FACTOR'])
+        config['WBR_FACTOR_DAY'] = float(payload['WBR_FACTOR_DAY'])
+        config['WBG_FACTOR_DAY'] = float(payload['WBG_FACTOR_DAY'])
+        config['WBB_FACTOR_DAY'] = float(payload['WBB_FACTOR_DAY'])
+        config['WBR_MTF_MIDTONES'] = float(payload['WBR_MTF_MIDTONES'])
+        config['WBG_MTF_MIDTONES'] = float(payload['WBG_MTF_MIDTONES'])
+        config['WBB_MTF_MIDTONES'] = float(payload['WBB_MTF_MIDTONES'])
+        config['WBR_MTF_MIDTONES_DAY'] = float(payload['WBR_MTF_MIDTONES_DAY'])
+        config['WBG_MTF_MIDTONES_DAY'] = float(payload['WBG_MTF_MIDTONES_DAY'])
+        config['WBB_MTF_MIDTONES_DAY'] = float(payload['WBB_MTF_MIDTONES_DAY'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 
