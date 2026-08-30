@@ -497,6 +497,24 @@ class ModernAdminFullConfigTimelapseParser:
         return config
 
 
+class ModernAdminFullConfigCapturePolicyParser:
+    """Hybrid-owned parser for full-config capture policy flags."""
+
+    REQUIRED_FIELDS = (
+        'CAPTURE_PAUSE',
+        'DAYTIME_CAPTURE',
+        'DAYTIME_CAPTURE_SAVE',
+        'DAYTIME_TIMELAPSE',
+    )
+
+    def apply(self, config, payload):
+        config['CAPTURE_PAUSE'] = bool(payload['CAPTURE_PAUSE'])
+        config['DAYTIME_CAPTURE'] = bool(payload['DAYTIME_CAPTURE'])
+        config['DAYTIME_CAPTURE_SAVE'] = bool(payload['DAYTIME_CAPTURE_SAVE'])
+        config['DAYTIME_TIMELAPSE'] = bool(payload['DAYTIME_TIMELAPSE'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

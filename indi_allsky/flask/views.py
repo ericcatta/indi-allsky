@@ -80,6 +80,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigAutoGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigAutoWhiteBalanceParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigCapturePolicyParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigColorProcessingParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigDenoiseParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigDisplayUnitsParser
@@ -3313,6 +3314,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigCameraSqmParser()
 
 
+    def full_config_capture_policy_parser(self):
+        return ModernAdminFullConfigCapturePolicyParser()
+
+
     def full_config_focus_parser(self):
         return ModernAdminFullConfigFocusParser()
 
@@ -3464,10 +3469,7 @@ class AjaxConfigView(BaseView):
         self.indi_allsky_config['HEALTHCHECK']['SWAP_USAGE']            = float(request.json['HEALTHCHECK__SWAP_USAGE'])
         station_identity_parser.apply_location(self.indi_allsky_config, request.json)
         self.full_config_timelapse_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CAPTURE_PAUSE']                        = bool(request.json['CAPTURE_PAUSE'])
-        self.indi_allsky_config['DAYTIME_CAPTURE']                      = bool(request.json['DAYTIME_CAPTURE'])
-        self.indi_allsky_config['DAYTIME_CAPTURE_SAVE']                 = bool(request.json['DAYTIME_CAPTURE_SAVE'])
-        self.indi_allsky_config['DAYTIME_TIMELAPSE']                    = bool(request.json['DAYTIME_TIMELAPSE'])
+        self.full_config_capture_policy_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['DAYTIME_CONTRAST_ENHANCE']             = bool(request.json['DAYTIME_CONTRAST_ENHANCE'])
         self.indi_allsky_config['NIGHT_CONTRAST_ENHANCE']               = bool(request.json['NIGHT_CONTRAST_ENHANCE'])
         self.indi_allsky_config['CONTRAST_ENHANCE_16BIT']               = bool(request.json['CONTRAST_ENHANCE_16BIT'])

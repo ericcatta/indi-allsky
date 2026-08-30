@@ -18,6 +18,7 @@ from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigAutoG
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigAutoWhiteBalanceParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCapturePolicyParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigColorProcessingParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigDenoiseParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigDisplayUnitsParser
@@ -85,6 +86,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigAcquisitionModeParser,
         ModernAdminFullConfigAutoGainParser,
         ModernAdminFullConfigCameraSqmParser,
+        ModernAdminFullConfigCapturePolicyParser,
         ModernAdminFullConfigFocusParser,
         ModernAdminFullConfigColorProcessingParser,
         ModernAdminFullConfigDenoiseParser,
@@ -217,6 +219,9 @@ class LegacyFullConfigParserHarness:
                 full_config_camera_sqm_parser=(
                     lambda: ModernAdminFullConfigCameraSqmParser()
                 ),
+                full_config_capture_policy_parser=(
+                    lambda: ModernAdminFullConfigCapturePolicyParser()
+                ),
                 full_config_focus_parser=(
                     lambda: ModernAdminFullConfigFocusParser()
                 ),
@@ -317,7 +322,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 618
+    assert len(harness.direct_payload_keys) == 614
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -932,6 +937,35 @@ def test_timelapse_parser_preserves_legacy_casting_and_nested_values():
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
+def test_capture_policy_parser_preserves_legacy_boolean_casting():
+    parser = ModernAdminFullConfigCapturePolicyParser()
+    config = {}
+    payload = {
+        'CAPTURE_PAUSE': '',
+        'DAYTIME_CAPTURE': 'false',
+        'DAYTIME_CAPTURE_SAVE': 0,
+        'DAYTIME_TIMELAPSE': 1,
+    }
+
+    assert parser.apply(config, payload) is config
+    assert config == {
+        'CAPTURE_PAUSE': False,
+        'DAYTIME_CAPTURE': True,
+        'DAYTIME_CAPTURE_SAVE': False,
+        'DAYTIME_TIMELAPSE': True,
+    }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        incomplete_payload = dict(payload)
+        incomplete_payload.pop(missing_field)
+        try:
+            parser.apply({}, incomplete_payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -1129,6 +1163,15 @@ def test_ajax_config_view_delegates_timelapse_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
+def test_ajax_config_view_delegates_capture_policy_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_capture_policy_parser().apply' in parser_source
+    for field_name in ModernAdminFullConfigCapturePolicyParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
+
+
 def test_exposure_gain_parser_preserves_partial_mutation_order_on_errors():
     harness = LegacyFullConfigParserHarness()
     invalid_binning = harness.capture(
@@ -1303,6 +1346,7 @@ if __name__ == '__main__':
     test_environment_parser_preserves_legacy_casting_and_required_fields()
     test_photometry_parser_preserves_legacy_integer_casting()
     test_timelapse_parser_preserves_legacy_casting_and_nested_values()
+    test_capture_policy_parser_preserves_legacy_boolean_casting()
     test_ajax_config_view_delegates_camera_connection_parsing()
     test_ajax_config_view_delegates_station_identity_parsing()
     test_ajax_config_view_delegates_lens_metadata_parsing()
@@ -1321,6 +1365,7 @@ if __name__ == '__main__':
     test_ajax_config_view_delegates_environment_parsing_in_legacy_order()
     test_ajax_config_view_delegates_photometry_parsing()
     test_ajax_config_view_delegates_timelapse_parsing()
+    test_ajax_config_view_delegates_capture_policy_parsing()
     test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()

@@ -131,6 +131,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - enablement e opzioni full-config Timelapse sono ora parsati da
     `ModernAdminFullConfigTimelapseParser`; generazione, enqueue, ffmpeg,
     filesystem e output media restano Classic-owned e invariati.
+  - pausa capture e policy di acquisizione/salvataggio/timelapse diurni sono
+    ora parsati da `ModernAdminFullConfigCapturePolicyParser`; scheduler,
+    worker e comportamento camera restano Classic-owned e invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
