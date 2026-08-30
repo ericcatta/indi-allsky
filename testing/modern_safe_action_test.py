@@ -2367,7 +2367,7 @@ def test_hybrid_runtime_buttons_reset_native_browser_appearance_static():
 def test_hybrid_product_css_cache_key_is_bumped_static():
     source = get_hybrid_product_template_sources()
 
-    assert 'hybrid-product-ui-shell-004' in source
+    assert 'hybrid-product-ui-shell-005' in source
     assert 'hybrid-product-ui-shell-001' not in source
 
 
