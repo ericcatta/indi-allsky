@@ -17167,10 +17167,14 @@ class ImageCircleHelperView(TemplateView):
 
 
         if latest_image:
-            context['latest_image_url'] = latest_image.getUrl(s3_prefix=self.s3_prefix, local=local)
+            context['latest_image_url'] = self.resolve_latest_image_url(latest_image, local=local)
 
 
         return context
+
+
+    def resolve_latest_image_url(self, latest_image, local=True):
+        return latest_image.getUrl(s3_prefix=self.s3_prefix, local=local)
 
 
 class ModernAdminSafeControlsMixin(ModernAdminContextMixin):
@@ -17405,12 +17409,13 @@ class ModernAdminImageCircleHelperView(ModernAdminSafeControlsMixin, ImageCircle
     page_title = 'Modern Admin Image Circle Helper'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
+    def resolve_latest_image_url(self, latest_image, local=True):
+        return self.get_safe_controls_media_access_adapter().resolve_media_url(latest_image, local=local)
+
+
     def get_context(self):
         context = super(ModernAdminImageCircleHelperView, self).get_context()
         form = context['form_imagecircle']
-        latest_image_url = context.get('latest_image_url')
-        if latest_image_url:
-            context['latest_image_url'] = self.get_safe_controls_media_access_adapter().resolve_existing_media_url(latest_image_url)
 
         context['modern_admin_safe_title'] = 'Image Circle Helper'
         context['modern_admin_safe_note'] = 'Latest image and circle parameters come from the classic helper. Modern Admin keeps this as a read-only reference view.'

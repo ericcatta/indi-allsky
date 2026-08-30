@@ -173,8 +173,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - gli URL display gia' prodotti per Realtime/Long-term Keogram passano ora
     dallo stesso adapter; anche presenza e `mtime` del file Long-term Keogram
     sono letti tramite l'adapter, senza cambiare cache o generazione;
-  - la preview read-only di Image Circle Helper mantiene la sorgente Classic,
-    ma normalizza l'URL display tramite `ModernAdminMediaAccessAdapter`;
+  - la preview read-only di Image Circle Helper mantiene query e sorgente
+    Classic, ma risolve l'URL tramite `ModernAdminMediaAccessAdapter`; il base
+    Classic conserva il precedente `getUrl()` come adapter/fallback;
   - la route fallback `/images/<path>` entra ora attraverso
     `ModernAdminMediaServeAdapter`, preservando l'attuale `send_from_directory`;
   - `/fits2jpeg` risolve il path del FITS tramite `ModernAdminMediaAccessAdapter`,

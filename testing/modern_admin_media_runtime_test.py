@@ -540,13 +540,28 @@ def test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter
 
 def test_safe_control_image_circle_preview_delegates_display_url_to_media_access_adapter():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
-    start = source.index('class ModernAdminSafeControlsMixin')
-    end = source.index('class ModernAdminConfigView', start)
+    mixin_start = source.index('class ModernAdminSafeControlsMixin')
+    mixin_end = source.index('class ModernAdminFocusView', mixin_start)
+    mixin_body = source[mixin_start:mixin_end]
+    view_start = source.index('class ModernAdminImageCircleHelperView')
+    view_end = source.index('class ModernAdminConfigView', view_start)
+    view_body = source[view_start:view_end]
+
+    assert_true('def get_safe_controls_media_access_adapter(self):' in mixin_body, 'safe controls must construct media access adapter')
+    assert_true('def resolve_latest_image_url(self, latest_image, local=True):' in view_body, 'Modern Image Circle helper must own its URL resolution hook')
+    assert_true('.resolve_media_url(latest_image, local=local)' in view_body, 'Image Circle preview URL should go through Hybrid media access adapter')
+    assert_true('latest_image.getUrl(' not in view_body, 'Modern Image Circle helper must not call Classic getUrl directly')
+    assert_true('.normalize_media_url(' not in view_body, 'Image Circle helper must not own direct URL normalization')
+
+
+def test_classic_image_circle_preview_preserves_default_url_hook():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ImageCircleHelperView')
+    end = source.index('class ModernAdminSafeControlsMixin', start)
     body = source[start:end]
 
-    assert_true('def get_safe_controls_media_access_adapter(self):' in body, 'safe controls must construct media access adapter')
-    assert_true('.resolve_existing_media_url(latest_image_url)' in body, 'Image Circle preview URL should go through Hybrid media access adapter')
-    assert_true('.normalize_media_url(latest_image_url)' not in body, 'Image Circle helper must not own direct URL normalization')
+    assert_true('self.resolve_latest_image_url(latest_image, local=local)' in body, 'Image Circle base view should call the overridable URL boundary')
+    assert_true('return latest_image.getUrl(s3_prefix=self.s3_prefix, local=local)' in body, 'Classic Image Circle behavior should preserve the existing getUrl call')
 
 
 def test_images_folder_route_delegates_serving_to_media_serve_adapter():
@@ -824,6 +839,7 @@ def run_tests():
     test_generated_media_metadata_delegates_media_access_to_runtime_adapter()
     test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter()
     test_safe_control_image_circle_preview_delegates_display_url_to_media_access_adapter()
+    test_classic_image_circle_preview_preserves_default_url_hook()
     test_images_folder_route_delegates_serving_to_media_serve_adapter()
     test_fits_preview_route_delegates_path_resolution_to_media_access_adapter()
     test_fits_preview_route_delegates_header_metadata_to_media_access_adapter()
