@@ -82,6 +82,7 @@ class FakeMediaEntry:
         self.url = url
         self.raise_get_url = raise_get_url
         self.get_url_calls = list()
+        self.get_filesystem_path_calls = 0
 
 
     def getUrl(self, s3_prefix='', local=True):
@@ -92,6 +93,11 @@ class FakeMediaEntry:
         if self.raise_get_url:
             raise RuntimeError('getUrl failed')
         return self.url
+
+
+    def getFilesystemPath(self):
+        self.get_filesystem_path_calls += 1
+        return self.filename
 
 
 class FakeThumbnail:
@@ -341,6 +347,16 @@ def test_media_access_adapter_returns_none_when_get_url_fails():
     assert_true(adapter.resolve_media_url(media_entry, local=True) is None, 'getUrl failure should keep URL unavailable')
 
 
+def test_media_access_adapter_preserves_filesystem_path_resolution():
+    media_entry = FakeMediaEntry(filename='/srv/allsky/images/ccd/fits.fit')
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
+
+    media_path = adapter.resolve_filesystem_path(media_entry)
+
+    assert_true(media_path == '/srv/allsky/images/ccd/fits.fit', 'filesystem path adapter should preserve existing getFilesystemPath result')
+    assert_true(media_entry.get_filesystem_path_calls == 1, 'filesystem path adapter should delegate exactly once')
+
+
 def test_media_serve_adapter_preserves_sender_arguments():
     calls = list()
 
@@ -418,6 +434,17 @@ def test_images_folder_route_delegates_serving_to_media_serve_adapter():
     assert_true('ModernAdminMediaServeAdapter' in source, 'views must import Hybrid media serve adapter')
     assert_true('.serve_image_folder_path(path)' in body, 'images folder route should delegate serving through Hybrid adapter')
     assert_true("send_from_directory(app.config['INDI_ALLSKY_IMAGE_FOLDER'], path)" not in body, 'images folder route must not own direct send_from_directory call')
+
+
+def test_fits_preview_route_delegates_path_resolution_to_media_access_adapter():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class Fits2JpegView')
+    end = source.index('class GalleryViewerView', start)
+    body = source[start:end]
+
+    assert_true('def get_media_access_adapter(self):' in body, 'FITS preview route must construct media access adapter')
+    assert_true('.resolve_filesystem_path(fits_entry)' in body, 'FITS preview path resolution should go through Hybrid media access adapter')
+    assert_true('fits_entry.getFilesystemPath()' not in body, 'FITS preview route must not own direct getFilesystemPath call')
 
 
 def test_preview_metadata_lookup_shapes_thumbnail_url():
@@ -618,12 +645,15 @@ def test_media_runtime_service_has_no_flask_db_or_filesystem_access():
     import indi_allsky.modern_admin_media_runtime as module
 
     source = inspect.getsource(module)
+    adapter_start = source.index('class ModernAdminMediaAccessAdapter')
+    adapter_end = source.index('class ModernAdminMediaServeAdapter', adapter_start)
+    non_adapter_source = source[:adapter_start] + source[adapter_end:]
 
     assert_true('flask' not in source.lower(), 'media runtime service must not import Flask')
     assert_true('db.session' not in source, 'media runtime service must not use db.session')
     assert_true('request' not in source, 'media runtime service must not read request state')
     assert_true('open(' not in source, 'media runtime service must not open files')
-    assert_true('getFilesystemPath' not in source, 'media runtime service must not use filesystem path helpers')
+    assert_true('getFilesystemPath' not in non_adapter_source, 'only the media access adapter may delegate filesystem path helpers')
 
 
 def run_tests():
@@ -637,12 +667,14 @@ def run_tests():
     test_media_access_adapter_preserves_get_url_arguments_and_normalizes_result()
     test_media_access_adapter_normalizes_existing_media_urls()
     test_media_access_adapter_returns_none_when_get_url_fails()
+    test_media_access_adapter_preserves_filesystem_path_resolution()
     test_media_serve_adapter_preserves_sender_arguments()
     test_modern_views_delegate_media_url_normalization_to_runtime_service()
     test_generated_media_metadata_delegates_media_access_to_runtime_adapter()
     test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter()
     test_safe_control_image_circle_preview_delegates_display_url_to_media_access_adapter()
     test_images_folder_route_delegates_serving_to_media_serve_adapter()
+    test_fits_preview_route_delegates_path_resolution_to_media_access_adapter()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()

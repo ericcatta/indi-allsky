@@ -147,6 +147,10 @@ class ModernAdminMediaAccessAdapter:
         return self.url_normalizer.normalize_media_url(media_url)
 
 
+    def resolve_filesystem_path(self, media_entry):
+        return media_entry.getFilesystemPath()
+
+
     def log_error(self, message, *args):
         if self.logger is None:
             return

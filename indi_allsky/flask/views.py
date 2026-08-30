@@ -4703,7 +4703,7 @@ class Fits2JpegView(BaseView):
         self.cameraSetup(camera_id=fits_entry.camera_id)
 
 
-        filename_p = Path(fits_entry.getFilesystemPath())
+        filename_p = Path(self.get_media_access_adapter().resolve_filesystem_path(fits_entry))
 
 
         p_config = self.indi_allsky_config.copy()
@@ -4795,6 +4795,15 @@ class Fits2JpegView(BaseView):
 
 
         return Response(image_buffer.getvalue(), mimetype='image/jpeg')
+
+
+    def get_media_access_adapter(self):
+        return ModernAdminMediaAccessAdapter(
+            url_normalizer=ModernAdminMediaUrlNormalizer(),
+            s3_prefix=self.s3_prefix,
+            logger=app.logger,
+            error_message='Error resolving FITS preview media path: %s',
+        )
 
 
 class GalleryViewerView(FormView):
