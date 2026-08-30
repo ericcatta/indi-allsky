@@ -17169,6 +17169,15 @@ class ModernAdminSafeControlsMixin(ModernAdminContextMixin):
 
     secret_field_tokens = ('PASSWORD', 'PSK', 'SECRET', 'TOKEN', 'KEY')
 
+    def get_safe_controls_media_access_adapter(self):
+        return ModernAdminMediaAccessAdapter(
+            url_normalizer=self.get_modern_admin_media_url_normalizer(),
+            s3_prefix=self.s3_prefix,
+            logger=app.logger,
+            error_message='Error determining modern admin safe controls media URL: %s',
+        )
+
+
     def get_context(self):
         context = super(ModernAdminSafeControlsMixin, self).get_context()
         context.setdefault('modern_admin_safe_title', self.page_title.replace('Modern Admin ', ''))
@@ -17391,7 +17400,7 @@ class ModernAdminImageCircleHelperView(ModernAdminSafeControlsMixin, ImageCircle
         form = context['form_imagecircle']
         latest_image_url = context.get('latest_image_url')
         if latest_image_url:
-            context['latest_image_url'] = self.get_modern_admin_media_url_normalizer().normalize_media_url(latest_image_url)
+            context['latest_image_url'] = self.get_safe_controls_media_access_adapter().resolve_existing_media_url(latest_image_url)
 
         context['modern_admin_safe_title'] = 'Image Circle Helper'
         context['modern_admin_safe_note'] = 'Latest image and circle parameters come from the classic helper. Modern Admin keeps this as a read-only reference view.'

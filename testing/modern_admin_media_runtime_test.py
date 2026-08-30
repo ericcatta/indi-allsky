@@ -379,6 +379,17 @@ def test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter
     assert_true('.normalize_media_url(keogram_uri)' not in body, 'observatory keogram views must not own direct URL normalization')
 
 
+def test_safe_control_image_circle_preview_delegates_display_url_to_media_access_adapter():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class ModernAdminSafeControlsMixin')
+    end = source.index('class ModernAdminConfigView', start)
+    body = source[start:end]
+
+    assert_true('def get_safe_controls_media_access_adapter(self):' in body, 'safe controls must construct media access adapter')
+    assert_true('.resolve_existing_media_url(latest_image_url)' in body, 'Image Circle preview URL should go through Hybrid media access adapter')
+    assert_true('.normalize_media_url(latest_image_url)' not in body, 'Image Circle helper must not own direct URL normalization')
+
+
 def test_preview_metadata_lookup_shapes_thumbnail_url():
     thumbnail = FakeThumbnail(url='images/thumbs/thumb.jpg')
     query = FakeQuery(first_row=thumbnail)
@@ -599,6 +610,7 @@ def run_tests():
     test_modern_views_delegate_media_url_normalization_to_runtime_service()
     test_generated_media_metadata_delegates_media_access_to_runtime_adapter()
     test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter()
+    test_safe_control_image_circle_preview_delegates_display_url_to_media_access_adapter()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()
