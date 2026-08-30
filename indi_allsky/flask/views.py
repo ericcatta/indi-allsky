@@ -82,6 +82,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectio
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCapturePolicyParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigColorProcessingParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigContrastEnhancementParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigDenoiseParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigDisplayUnitsParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigEnvironmentParser
@@ -3326,6 +3327,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigColorProcessingParser()
 
 
+    def full_config_contrast_enhancement_parser(self):
+        return ModernAdminFullConfigContrastEnhancementParser()
+
+
     def full_config_denoise_parser(self):
         return ModernAdminFullConfigDenoiseParser()
 
@@ -3470,11 +3475,7 @@ class AjaxConfigView(BaseView):
         station_identity_parser.apply_location(self.indi_allsky_config, request.json)
         self.full_config_timelapse_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_capture_policy_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['DAYTIME_CONTRAST_ENHANCE']             = bool(request.json['DAYTIME_CONTRAST_ENHANCE'])
-        self.indi_allsky_config['NIGHT_CONTRAST_ENHANCE']               = bool(request.json['NIGHT_CONTRAST_ENHANCE'])
-        self.indi_allsky_config['CONTRAST_ENHANCE_16BIT']               = bool(request.json['CONTRAST_ENHANCE_16BIT'])
-        self.indi_allsky_config['CLAHE_CLIPLIMIT']                      = float(request.json['CLAHE_CLIPLIMIT'])
-        self.indi_allsky_config['CLAHE_GRIDSIZE']                       = int(request.json['CLAHE_GRIDSIZE'])
+        self.full_config_contrast_enhancement_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['NIGHT_SUN_ALT_DEG']                    = float(request.json['NIGHT_SUN_ALT_DEG'])
         self.indi_allsky_config['NIGHT_MOONMODE_ALT_DEG']               = float(request.json['NIGHT_MOONMODE_ALT_DEG'])
         self.indi_allsky_config['NIGHT_MOONMODE_PHASE']                 = float(request.json['NIGHT_MOONMODE_PHASE'])

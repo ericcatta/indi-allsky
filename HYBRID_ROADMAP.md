@@ -134,6 +134,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - pausa capture e policy di acquisizione/salvataggio/timelapse diurni sono
     ora parsati da `ModernAdminFullConfigCapturePolicyParser`; scheduler,
     worker e comportamento camera restano Classic-owned e invariati.
+  - flag contrast enhancement giorno/notte/16-bit e parametri CLAHE sono ora
+    parsati da `ModernAdminFullConfigContrastEnhancementParser`; OpenCV,
+    algoritmi e pipeline immagini restano Classic-owned e invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

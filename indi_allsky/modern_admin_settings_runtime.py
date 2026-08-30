@@ -515,6 +515,26 @@ class ModernAdminFullConfigCapturePolicyParser:
         return config
 
 
+class ModernAdminFullConfigContrastEnhancementParser:
+    """Hybrid-owned parser for full-config contrast enhancement fields."""
+
+    REQUIRED_FIELDS = (
+        'DAYTIME_CONTRAST_ENHANCE',
+        'NIGHT_CONTRAST_ENHANCE',
+        'CONTRAST_ENHANCE_16BIT',
+        'CLAHE_CLIPLIMIT',
+        'CLAHE_GRIDSIZE',
+    )
+
+    def apply(self, config, payload):
+        config['DAYTIME_CONTRAST_ENHANCE'] = bool(payload['DAYTIME_CONTRAST_ENHANCE'])
+        config['NIGHT_CONTRAST_ENHANCE'] = bool(payload['NIGHT_CONTRAST_ENHANCE'])
+        config['CONTRAST_ENHANCE_16BIT'] = bool(payload['CONTRAST_ENHANCE_16BIT'])
+        config['CLAHE_CLIPLIMIT'] = float(payload['CLAHE_CLIPLIMIT'])
+        config['CLAHE_GRIDSIZE'] = int(payload['CLAHE_GRIDSIZE'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 
