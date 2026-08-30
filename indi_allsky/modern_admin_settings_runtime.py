@@ -6,6 +6,75 @@ from cryptography.fernet import Fernet
 from .exceptions import ConfigSaveException
 
 
+class ModernAdminFullConfigPayloadPreparationService:
+    """Hybrid-owned structural preparation for the legacy full-config parser."""
+
+    DICT_SECTIONS = (
+        'WEBSITE',
+        'CCD_CONFIG',
+        'CAMERA_SQM',
+        'IMAGE_FILE_COMPRESSION',
+        'IMAGE_CIRCLE_MASK',
+        'FISH2PANO',
+        'TEXT_PROPERTIES',
+        'CARDINAL_DIRS',
+        'IMAGE_STRETCH',
+        'ORB_PROPERTIES',
+        'IMAGE_BORDER',
+        'FILETRANSFER',
+        'S3UPLOAD',
+        'MQTTPUBLISH',
+        'SYNCAPI',
+        'YOUTUBE',
+        'LIBCAMERA',
+        'PYCURL_CAMERA',
+        'ACCUM_CAMERA',
+        'TEST_CAMERA',
+        'VIRTUALSKY',
+        'CIRCULAR_DISPLAY',
+        'FOCUSER',
+        'DEW_HEATER',
+        'FAN',
+        'GENERIC_GPIO',
+        'MANUAL_GPIO',
+        'DEVICE',
+        'TEMP_SENSOR',
+        'THUMBNAILS',
+        'HEALTHCHECK',
+        'CHARTS',
+        'TIMELAPSE',
+        'MOON_OVERLAY',
+        'LIGHTGRAPH_OVERLAY',
+        'IMAGE_OVERLAY',
+        'ADSB',
+        'SATELLITE_TRACK',
+        'LONGTERM_KEOGRAM',
+        'REALTIME_KEOGRAM',
+        'STARTRAILS',
+        'EVENT_CANDIDATE_TRIGGERS',
+    )
+
+    CCD_MODES = (
+        'NIGHT',
+        'MOONMODE',
+        'DAY',
+    )
+
+    def prepare(self, config):
+        for section in self.DICT_SECTIONS:
+            if not isinstance(config.get(section), dict):
+                config[section] = {}
+
+        for mode in self.CCD_MODES:
+            if not config['CCD_CONFIG'].get(mode):
+                config['CCD_CONFIG'][mode] = {}
+
+        if not config.get('FITSHEADERS'):
+            config['FITSHEADERS'] = [['', ''], ['', ''], ['', ''], ['', ''], ['', '']]
+
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

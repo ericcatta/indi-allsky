@@ -61,6 +61,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     propagazione errori Fernet, clearing dei campi cifrati e fallback legacy
     (incluso `IMAGE_OVERLAY.APASSWORD`) restano invariati, mentre
     `_decrypt_passwordsClassic()` resta fallback e il parser full-config resta
+    Classic-owned;
+  - audit parser full-config: `AjaxConfigView.dispatch_request()` resta un
+    milestone Classic di circa 934 righe, 720 accessi diretti al payload e 719
+    campi distinti; non procedere con migrazioni field-by-field senza un parity
+    harness completo;
+  - la preparazione strutturale prima del parsing full-config e' ora
+    Hybrid-owned tramite `ModernAdminFullConfigPayloadPreparationService`:
+    sezioni dict, rami CCD e fallback FITS headers mantengono la semantica
+    esistente, mentre cast/assegnazioni e trasformazioni speciali restano
     Classic-owned.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image

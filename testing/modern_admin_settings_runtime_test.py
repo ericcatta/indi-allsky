@@ -9,6 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_admin_settings_runtime import ModernAdminConfigRevisionPersistenceAdapter
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsConfigValidationService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsCredentialDecryptionService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsCredentialEncryptionService
@@ -111,6 +112,58 @@ class FakeUser:
     def __init__(self, user_id=1, username='admin'):
         self.id = user_id
         self.username = username
+
+
+def test_full_config_payload_preparation_preserves_structure_policy():
+    service = ModernAdminFullConfigPayloadPreparationService()
+    website = {'TITLE': 'Hybrid'}
+    night = {'GAIN': 100}
+    config = {
+        'WEBSITE': website,
+        'CCD_CONFIG': {
+            'NIGHT': night,
+            'MOONMODE': None,
+            'DAY': '',
+        },
+        'FILETRANSFER': 'invalid-section',
+    }
+
+    result = service.prepare(config)
+
+    assert result is config
+    assert result['WEBSITE'] is website
+    assert result['CCD_CONFIG']['NIGHT'] is night
+    assert result['CCD_CONFIG']['MOONMODE'] == {}
+    assert result['CCD_CONFIG']['DAY'] == {}
+    assert result['FILETRANSFER'] == {}
+    assert all(isinstance(result[section], dict) for section in service.DICT_SECTIONS)
+    assert result['FITSHEADERS'] == [['', ''], ['', ''], ['', ''], ['', ''], ['', '']]
+
+
+def test_full_config_payload_preparation_preserves_existing_fits_headers():
+    service = ModernAdminFullConfigPayloadPreparationService()
+    fits_headers = [['OBSERVER', 'Hybrid']]
+    config = {
+        'CCD_CONFIG': {},
+        'FITSHEADERS': fits_headers,
+    }
+
+    result = service.prepare(config)
+
+    assert result['FITSHEADERS'] is fits_headers
+
+
+def test_ajax_full_config_parser_uses_hybrid_preparation_boundary():
+    views_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py'
+    source = views_path.read_text()
+    start = source.index('class AjaxConfigView')
+    end = source.index('class AjaxSetTimeView')
+    ajax_config_source = source[start:end]
+
+    assert 'ModernAdminFullConfigPayloadPreparationService' in ajax_config_source
+    assert 'full_config_payload_preparation_service().prepare(self.indi_allsky_config)' in ajax_config_source
+    assert 'leaf_list = (' not in ajax_config_source
+    assert "self.indi_allsky_config['FITSHEADERS'] = [['', '']" not in ajax_config_source
 
 
 def test_config_revision_persistence_adapter_preserves_database_effect():
@@ -937,6 +990,9 @@ def test_ajax_config_view_uses_full_config_save_boundary():
 
 
 if __name__ == '__main__':
+    test_full_config_payload_preparation_preserves_structure_policy()
+    test_full_config_payload_preparation_preserves_existing_fits_headers()
+    test_ajax_full_config_parser_uses_hybrid_preparation_boundary()
     test_config_revision_persistence_adapter_preserves_database_effect()
     test_settings_config_validation_service_preserves_type_policy()
     test_settings_config_validation_service_preserves_skip_and_unknown_policy()

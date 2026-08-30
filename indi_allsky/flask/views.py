@@ -75,6 +75,7 @@ from ..modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContr
 from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
+from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreService
@@ -3254,6 +3255,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminSettingsRuntimeService()
 
 
+    def full_config_payload_preparation_service(self):
+        return ModernAdminFullConfigPayloadPreparationService()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3323,69 +3328,7 @@ class AjaxConfigView(BaseView):
             return jsonify({}), 400
 
 
-        # sanity check
-        leaf_list = (
-            'WEBSITE',
-            'CCD_CONFIG',
-            'CAMERA_SQM',
-            'IMAGE_FILE_COMPRESSION',
-            'IMAGE_CIRCLE_MASK',
-            'FISH2PANO',
-            'TEXT_PROPERTIES',
-            'CARDINAL_DIRS',
-            'IMAGE_STRETCH',
-            'ORB_PROPERTIES',
-            'IMAGE_BORDER',
-            'FILETRANSFER',
-            'S3UPLOAD',
-            'MQTTPUBLISH',
-            'SYNCAPI',
-            'YOUTUBE',
-            'LIBCAMERA',
-            'PYCURL_CAMERA',
-            'ACCUM_CAMERA',
-            'TEST_CAMERA',
-            'VIRTUALSKY',
-            'CIRCULAR_DISPLAY',
-            'FOCUSER',
-            'DEW_HEATER',
-            'FAN',
-            'GENERIC_GPIO',
-            'MANUAL_GPIO',
-            'DEVICE',
-            'TEMP_SENSOR',
-            'THUMBNAILS',
-            'HEALTHCHECK',
-            'CHARTS',
-            'TIMELAPSE',
-            'MOON_OVERLAY',
-            'LIGHTGRAPH_OVERLAY',
-            'IMAGE_OVERLAY',
-            'ADSB',
-            'SATELLITE_TRACK',
-            'LONGTERM_KEOGRAM',
-            'REALTIME_KEOGRAM',
-            'STARTRAILS',
-            'EVENT_CANDIDATE_TRIGGERS',
-        )
-
-        for leaf in leaf_list:
-            if not isinstance(self.indi_allsky_config.get(leaf), dict):
-                self.indi_allsky_config[leaf] = dict()
-
-
-        if not self.indi_allsky_config['CCD_CONFIG'].get('NIGHT'):
-            self.indi_allsky_config['CCD_CONFIG']['NIGHT'] = {}
-
-        if not self.indi_allsky_config['CCD_CONFIG'].get('MOONMODE'):
-            self.indi_allsky_config['CCD_CONFIG']['MOONMODE'] = {}
-
-        if not self.indi_allsky_config['CCD_CONFIG'].get('DAY'):
-            self.indi_allsky_config['CCD_CONFIG']['DAY'] = {}
-
-
-        if not self.indi_allsky_config.get('FITSHEADERS'):
-            self.indi_allsky_config['FITSHEADERS'] = [['', ''], ['', ''], ['', ''], ['', ''], ['', '']]
+        self.full_config_payload_preparation_service().prepare(self.indi_allsky_config)
 
 
         # update data
