@@ -128,6 +128,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - target ADU giorno/notte, deviazioni e divisori di campo ADU/SQM sono ora
     parsati da `ModernAdminFullConfigPhotometryParser`; misurazione, algoritmi
     fotometrici e detector restano Classic-owned e invariati.
+  - enablement e opzioni full-config Timelapse sono ora parsati da
+    `ModernAdminFullConfigTimelapseParser`; generazione, enqueue, ffmpeg,
+    filesystem e output media restano Classic-owned e invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

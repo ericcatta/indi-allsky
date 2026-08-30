@@ -469,6 +469,34 @@ class ModernAdminFullConfigPhotometryParser:
         return config
 
 
+class ModernAdminFullConfigTimelapseParser:
+    """Hybrid-owned parser for full-config timelapse fields."""
+
+    REQUIRED_FIELDS = (
+        'TIMELAPSE_ENABLE',
+        'TIMELAPSE_SKIP_FRAMES',
+        'TIMELAPSE__PRE_PROCESSOR',
+        'TIMELAPSE__PRE_PROCESSOR_DAY',
+        'TIMELAPSE__IMAGE_CIRCLE',
+        'TIMELAPSE__KEOGRAM_RATIO',
+        'TIMELAPSE__PRE_SCALE',
+        'TIMELAPSE__FFMPEG_REPORT',
+        'TIMELAPSE__USE_NIGHT_CONFIG',
+    )
+
+    def apply(self, config, payload):
+        config['TIMELAPSE_ENABLE'] = bool(payload['TIMELAPSE_ENABLE'])
+        config['TIMELAPSE_SKIP_FRAMES'] = int(payload['TIMELAPSE_SKIP_FRAMES'])
+        config['TIMELAPSE']['PRE_PROCESSOR'] = str(payload['TIMELAPSE__PRE_PROCESSOR'])
+        config['TIMELAPSE']['PRE_PROCESSOR_DAY'] = str(payload['TIMELAPSE__PRE_PROCESSOR_DAY'])
+        config['TIMELAPSE']['IMAGE_CIRCLE'] = int(payload['TIMELAPSE__IMAGE_CIRCLE'])
+        config['TIMELAPSE']['KEOGRAM_RATIO'] = float(payload['TIMELAPSE__KEOGRAM_RATIO'])
+        config['TIMELAPSE']['PRE_SCALE'] = int(payload['TIMELAPSE__PRE_SCALE'])
+        config['TIMELAPSE']['FFMPEG_REPORT'] = bool(payload['TIMELAPSE__FFMPEG_REPORT'])
+        config['TIMELAPSE']['USE_NIGHT_CONFIG'] = bool(payload['TIMELAPSE__USE_NIGHT_CONFIG'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

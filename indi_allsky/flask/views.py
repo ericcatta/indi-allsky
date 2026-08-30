@@ -92,6 +92,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataPar
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPhotometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigTimelapseParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigWhiteBalanceParser
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
@@ -3336,6 +3337,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigPhotometryParser()
 
 
+    def full_config_timelapse_parser(self):
+        return ModernAdminFullConfigTimelapseParser()
+
+
     def full_config_white_balance_parser(self):
         return ModernAdminFullConfigWhiteBalanceParser()
 
@@ -3458,15 +3463,7 @@ class AjaxConfigView(BaseView):
         self.indi_allsky_config['HEALTHCHECK']['DISK_USAGE']            = float(request.json['HEALTHCHECK__DISK_USAGE'])
         self.indi_allsky_config['HEALTHCHECK']['SWAP_USAGE']            = float(request.json['HEALTHCHECK__SWAP_USAGE'])
         station_identity_parser.apply_location(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['TIMELAPSE_ENABLE']                     = bool(request.json['TIMELAPSE_ENABLE'])
-        self.indi_allsky_config['TIMELAPSE_SKIP_FRAMES']                = int(request.json['TIMELAPSE_SKIP_FRAMES'])
-        self.indi_allsky_config['TIMELAPSE']['PRE_PROCESSOR']           = str(request.json['TIMELAPSE__PRE_PROCESSOR'])
-        self.indi_allsky_config['TIMELAPSE']['PRE_PROCESSOR_DAY']       = str(request.json['TIMELAPSE__PRE_PROCESSOR_DAY'])
-        self.indi_allsky_config['TIMELAPSE']['IMAGE_CIRCLE']            = int(request.json['TIMELAPSE__IMAGE_CIRCLE'])
-        self.indi_allsky_config['TIMELAPSE']['KEOGRAM_RATIO']           = float(request.json['TIMELAPSE__KEOGRAM_RATIO'])
-        self.indi_allsky_config['TIMELAPSE']['PRE_SCALE']               = int(request.json['TIMELAPSE__PRE_SCALE'])
-        self.indi_allsky_config['TIMELAPSE']['FFMPEG_REPORT']           = bool(request.json['TIMELAPSE__FFMPEG_REPORT'])
-        self.indi_allsky_config['TIMELAPSE']['USE_NIGHT_CONFIG']        = bool(request.json['TIMELAPSE__USE_NIGHT_CONFIG'])
+        self.full_config_timelapse_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CAPTURE_PAUSE']                        = bool(request.json['CAPTURE_PAUSE'])
         self.indi_allsky_config['DAYTIME_CAPTURE']                      = bool(request.json['DAYTIME_CAPTURE'])
         self.indi_allsky_config['DAYTIME_CAPTURE_SAVE']                 = bool(request.json['DAYTIME_CAPTURE_SAVE'])
