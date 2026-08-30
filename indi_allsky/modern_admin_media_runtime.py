@@ -162,6 +162,10 @@ class ModernAdminMediaAccessAdapter:
         if not filename_p.is_file():
             return None
 
+        return self.resolve_file_mtime(filename_p)
+
+
+    def resolve_file_mtime(self, filename_p):
         return filename_p.stat().st_mtime
 
 

@@ -4703,13 +4703,14 @@ class Fits2JpegView(BaseView):
         self.cameraSetup(camera_id=fits_entry.camera_id)
 
 
-        filename_p = Path(self.get_media_access_adapter().resolve_filesystem_path(fits_entry))
+        media_access_adapter = self.get_media_access_adapter()
+        filename_p = Path(media_access_adapter.resolve_filesystem_path(fits_entry))
 
 
         p_config = self.indi_allsky_config.copy()
 
 
-        fits_metadata = self.get_media_access_adapter().read_fits_preview_metadata(filename_p, fits.open)
+        fits_metadata = media_access_adapter.read_fits_preview_metadata(filename_p, fits.open)
 
         exposure = fits_metadata['exposure']
         gain = fits_metadata['gain']
@@ -4738,7 +4739,7 @@ class Fits2JpegView(BaseView):
 
 
         # use mtime for date
-        image_date = datetime.fromtimestamp(filename_p.stat().st_mtime)
+        image_date = datetime.fromtimestamp(media_access_adapter.resolve_file_mtime(filename_p))
 
 
         image_processor.update_astrometric_data(image_date)

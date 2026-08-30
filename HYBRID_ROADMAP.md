@@ -181,7 +181,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - `/fits2jpeg` risolve il path del FITS tramite `ModernAdminMediaAccessAdapter`,
     lasciando conversione JPEG e risposta HTTP invariati;
   - la lettura metadata/header per la preview `/fits2jpeg` e' ora dentro
-    l'adapter, mentre conversione immagine e response restano invariati;
+    l'adapter; anche il `mtime` usato come data del frame passa dall'adapter,
+    mentre conversione immagine e response restano invariati;
   - Dark Library risolve URL e dimensione file read-only di dark frame/BPM
     tramite lo stesso adapter, preservando righe, fallback e filesystem;
   - download, preview/cache generation, filesystem paths, FITS/RAW e

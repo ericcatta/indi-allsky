@@ -434,6 +434,25 @@ def test_media_access_adapter_resolves_existing_file_mtime():
     assert_true(missing_path.stat_calls == 0, 'missing generated media should not be statted')
 
 
+def test_media_access_adapter_resolves_file_mtime_without_changing_errors():
+    filesystem_path = FakeFilesystemPath(modified=1783076400.0)
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
+
+    modified = adapter.resolve_file_mtime(filesystem_path)
+
+    assert_true(modified == 1783076400.0, 'direct file mtime adapter should preserve filesystem modification time')
+    assert_true(filesystem_path.is_file_calls == 0, 'direct file mtime adapter should preserve the existing no-precheck behavior')
+    assert_true(filesystem_path.stat_calls == 1, 'direct file mtime adapter should stat the path once')
+
+    unavailable_path = FakeFilesystemPath(error=OSError('unavailable'))
+    try:
+        adapter.resolve_file_mtime(unavailable_path)
+    except OSError as e:
+        assert_true(str(e) == 'unavailable', 'direct file mtime adapter should preserve filesystem errors')
+    else:
+        raise AssertionError('direct file mtime adapter must not hide filesystem errors')
+
+
 def test_media_access_adapter_reads_fits_preview_metadata_and_closes_file():
     hdu_list = FakeFitsHduList({
         'EXPTIME'  : '12.5',
@@ -595,6 +614,16 @@ def test_fits_preview_route_delegates_header_metadata_to_media_access_adapter():
     assert_true('.read_fits_preview_metadata(filename_p, fits.open)' in body, 'FITS preview metadata should go through Hybrid media access adapter')
     assert_true('fits.open(filename_p)' not in body, 'FITS preview route must not own direct FITS open')
     assert_true('hdulist[0].header' not in body, 'FITS preview route must not own direct FITS header parsing')
+
+
+def test_fits_preview_route_delegates_file_mtime_to_media_access_adapter():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class Fits2JpegView')
+    end = source.index('class GalleryViewerView', start)
+    body = source[start:end]
+
+    assert_true('.resolve_file_mtime(filename_p)' in body, 'FITS preview file mtime should go through Hybrid media access adapter')
+    assert_true('filename_p.stat().st_mtime' not in body, 'FITS preview route must not own direct file metadata reads')
 
 
 def test_dark_library_delegates_read_only_media_access_to_adapter():
@@ -832,6 +861,7 @@ def run_tests():
     test_media_access_adapter_preserves_filesystem_path_resolution()
     test_media_access_adapter_resolves_file_size_with_existing_fallback()
     test_media_access_adapter_resolves_existing_file_mtime()
+    test_media_access_adapter_resolves_file_mtime_without_changing_errors()
     test_media_access_adapter_reads_fits_preview_metadata_and_closes_file()
     test_media_access_adapter_reads_fits_preview_metadata_defaults()
     test_media_serve_adapter_preserves_sender_arguments()
@@ -843,6 +873,7 @@ def run_tests():
     test_images_folder_route_delegates_serving_to_media_serve_adapter()
     test_fits_preview_route_delegates_path_resolution_to_media_access_adapter()
     test_fits_preview_route_delegates_header_metadata_to_media_access_adapter()
+    test_fits_preview_route_delegates_file_mtime_to_media_access_adapter()
     test_dark_library_delegates_read_only_media_access_to_adapter()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
