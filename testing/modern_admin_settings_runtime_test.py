@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_admin_settings_runtime import ModernAdminConfigRevisionPersistenceAdapter
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsConfigValidationService
+from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsCredentialDecryptionService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsCredentialEncryptionService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
@@ -71,7 +72,16 @@ class FakeLogger:
 class FakeCipher:
     def __init__(self, key):
         self.key = key
+        self.decrypt_calls = []
         self.encrypt_calls = []
+
+
+    def decrypt(self, value):
+        self.decrypt_calls.append(value)
+        prefix = b'encrypted:'
+        if not value.startswith(prefix):
+            raise ValueError('invalid ciphertext')
+        return value[len(prefix):]
 
 
     def encrypt(self, value):
@@ -308,6 +318,132 @@ def test_classic_config_delegates_credential_encryption_to_hybrid_service():
     assert ').encrypt_config(self.config)' in encryption_source
     assert 'Fernet(' not in encryption_source
     assert "config['FILETRANSFER']['PASSWORD']" not in encryption_source
+
+
+def test_settings_credential_decryption_service_decrypts_all_fields():
+    cipher_instances = []
+
+    def cipher_factory(key):
+        cipher = FakeCipher(key)
+        cipher_instances.append(cipher)
+        return cipher
+
+    service = ModernAdminSettingsCredentialDecryptionService(
+        password_key_adapter=lambda: 'test-password-key',
+        cipher_factory=cipher_factory,
+    )
+    expected_values = (
+        ('FILETRANSFER', 'PASSWORD', 'PASSWORD_E', 'filetransfer'),
+        ('S3UPLOAD', 'SECRET_KEY', 'SECRET_KEY_E', 's3'),
+        ('MQTTPUBLISH', 'PASSWORD', 'PASSWORD_E', 'mqtt-publish'),
+        ('SYNCAPI', 'APIKEY', 'APIKEY_E', 'sync'),
+        ('PYCURL_CAMERA', 'PASSWORD', 'PASSWORD_E', 'pycurl'),
+        ('TEMP_SENSOR', 'OPENWEATHERMAP_APIKEY', 'OPENWEATHERMAP_APIKEY_E', 'openweather'),
+        ('TEMP_SENSOR', 'WUNDERGROUND_APIKEY', 'WUNDERGROUND_APIKEY_E', 'wunderground'),
+        ('TEMP_SENSOR', 'ASTROSPHERIC_APIKEY', 'ASTROSPHERIC_APIKEY_E', 'astrospheric'),
+        ('TEMP_SENSOR', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E', 'sensor-mqtt'),
+        ('DEVICE', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E', 'device-mqtt'),
+        ('LIBCAMERA', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E', 'libcamera-mqtt'),
+        ('ADSB', 'PASSWORD', 'PASSWORD_E', 'adsb'),
+        ('IMAGE_OVERLAY', 'A_PASSWORD', 'A_PASSWORD_E', 'overlay'),
+    )
+    config = {'ENCRYPT_PASSWORDS': True}
+    for section, plain_key, encrypted_key, value in expected_values:
+        config.setdefault(section, {})[plain_key] = 'old-plaintext'
+        config[section][encrypted_key] = 'encrypted:' + value
+
+    result = service.decrypt_config(config)
+
+    assert cipher_instances[0].key == b'test-password-key'
+    assert cipher_instances[0].decrypt_calls == [
+        ('encrypted:' + value).encode()
+        for _section, _plain_key, _encrypted_key, value in expected_values
+    ]
+    for section, plain_key, encrypted_key, value in expected_values:
+        assert result[section][plain_key] == value
+        assert result[section][encrypted_key] == ''
+
+    assert config['FILETRANSFER']['PASSWORD'] == 'filetransfer'
+
+
+def test_settings_credential_decryption_service_preserves_encrypted_fallbacks():
+    cipher_instances = []
+
+    def cipher_factory(key):
+        cipher = FakeCipher(key)
+        cipher_instances.append(cipher)
+        return cipher
+
+    service = ModernAdminSettingsCredentialDecryptionService(
+        password_key_adapter=lambda: 'test-password-key',
+        cipher_factory=cipher_factory,
+    )
+    config = {
+        'ENCRYPT_PASSWORDS': True,
+        'FILETRANSFER': {'PASSWORD': 'plain-fallback', 'PASSWORD_E': ''},
+        'IMAGE_OVERLAY': {
+            'A_PASSWORD': 'current-key-value',
+            'APASSWORD': 'legacy-fallback',
+            'A_PASSWORD_E': '',
+        },
+    }
+
+    result = service.decrypt_config(config)
+
+    assert cipher_instances[0].decrypt_calls == []
+    assert result['FILETRANSFER']['PASSWORD'] == 'plain-fallback'
+    assert result['IMAGE_OVERLAY']['A_PASSWORD'] == 'legacy-fallback'
+    assert result['IMAGE_OVERLAY']['A_PASSWORD_E'] == ''
+
+
+def test_settings_credential_decryption_service_preserves_disabled_values():
+    password_key_calls = []
+    service = ModernAdminSettingsCredentialDecryptionService(
+        password_key_adapter=lambda: password_key_calls.append(True),
+        cipher_factory=lambda _key: (_ for _ in ()).throw(AssertionError('cipher should not be created')),
+    )
+    config = {
+        'ENCRYPT_PASSWORDS': False,
+        'FILETRANSFER': {'PASSWORD': 123, 'PASSWORD_E': 'ignored-ciphertext'},
+    }
+
+    result = service.decrypt_config(config)
+
+    assert password_key_calls == []
+    assert result['FILETRANSFER']['PASSWORD'] == 123
+    assert result['FILETRANSFER']['PASSWORD_E'] == ''
+    assert result['TEMP_SENSOR']['OPENWEATHERMAP_APIKEY'] == ''
+    assert result['IMAGE_OVERLAY']['A_PASSWORD'] == ''
+
+
+def test_settings_credential_decryption_service_propagates_cipher_error():
+    service = ModernAdminSettingsCredentialDecryptionService(
+        password_key_adapter=lambda: 'test-password-key',
+        cipher_factory=FakeCipher,
+    )
+
+    try:
+        service.decrypt_config({
+            'ENCRYPT_PASSWORDS': True,
+            'FILETRANSFER': {'PASSWORD_E': 'invalid-ciphertext'},
+        })
+    except ValueError as error:
+        assert str(error) == 'invalid ciphertext'
+    else:
+        raise AssertionError('Expected cipher error to propagate')
+
+
+def test_classic_config_delegates_credential_decryption_to_hybrid_service():
+    config_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'config.py'
+    source = config_path.read_text()
+    start = source.index('    def _decrypt_passwords(self):')
+    end = source.index('    def _decrypt_passwordsClassic(self):', start)
+    decryption_source = source[start:end]
+
+    assert 'ModernAdminSettingsCredentialDecryptionService' in decryption_source
+    assert ').decrypt_config(self.config)' in decryption_source
+    assert 'Fernet(' not in decryption_source
+    assert "config['FILETRANSFER']['PASSWORD']" not in decryption_source
 
 
 def test_config_revision_persistence_adapter_uses_naive_utc_timestamp():
@@ -809,6 +945,11 @@ if __name__ == '__main__':
     test_settings_credential_encryption_service_encrypts_all_fields()
     test_settings_credential_encryption_service_preserves_disabled_fallbacks()
     test_classic_config_delegates_credential_encryption_to_hybrid_service()
+    test_settings_credential_decryption_service_decrypts_all_fields()
+    test_settings_credential_decryption_service_preserves_encrypted_fallbacks()
+    test_settings_credential_decryption_service_preserves_disabled_values()
+    test_settings_credential_decryption_service_propagates_cipher_error()
+    test_classic_config_delegates_credential_decryption_to_hybrid_service()
     test_config_revision_persistence_adapter_uses_naive_utc_timestamp()
     test_settings_revision_rollback_service_preserves_revert_effect()
     test_classic_config_revert_delegates_application_to_hybrid_service()

@@ -164,6 +164,61 @@ class ModernAdminSettingsCredentialEncryptionService:
         return encrypted_config, encrypted
 
 
+class ModernAdminSettingsCredentialDecryptionService:
+    """Hybrid-owned credential decryption for config revision reads."""
+
+    CREDENTIAL_FIELDS = (
+        ('FILETRANSFER', 'PASSWORD', 'PASSWORD_E', 'PASSWORD'),
+        ('S3UPLOAD', 'SECRET_KEY', 'SECRET_KEY_E', 'SECRET_KEY'),
+        ('MQTTPUBLISH', 'PASSWORD', 'PASSWORD_E', 'PASSWORD'),
+        ('SYNCAPI', 'APIKEY', 'APIKEY_E', 'APIKEY'),
+        ('PYCURL_CAMERA', 'PASSWORD', 'PASSWORD_E', 'PASSWORD'),
+        ('TEMP_SENSOR', 'OPENWEATHERMAP_APIKEY', 'OPENWEATHERMAP_APIKEY_E', 'OPENWEATHERMAP_APIKEY'),
+        ('TEMP_SENSOR', 'WUNDERGROUND_APIKEY', 'WUNDERGROUND_APIKEY_E', 'WUNDERGROUND_APIKEY'),
+        ('TEMP_SENSOR', 'ASTROSPHERIC_APIKEY', 'ASTROSPHERIC_APIKEY_E', 'ASTROSPHERIC_APIKEY'),
+        ('TEMP_SENSOR', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E', 'MQTT_PASSWORD'),
+        ('DEVICE', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E', 'MQTT_PASSWORD'),
+        ('LIBCAMERA', 'MQTT_PASSWORD', 'MQTT_PASSWORD_E', 'MQTT_PASSWORD'),
+        ('ADSB', 'PASSWORD', 'PASSWORD_E', 'PASSWORD'),
+        ('IMAGE_OVERLAY', 'A_PASSWORD', 'A_PASSWORD_E', 'APASSWORD'),
+    )
+
+    def __init__(self, password_key_adapter, cipher_factory=None):
+        self.password_key_adapter = password_key_adapter
+        self.cipher_factory = cipher_factory or Fernet
+
+
+    def decrypt_config(self, config):
+        encrypted = bool(config['ENCRYPT_PASSWORDS'])
+        cipher = None
+        if encrypted:
+            cipher = self.cipher_factory(self.password_key_adapter().encode())
+
+        decrypted_values = []
+        for section, plain_key, encrypted_key, encrypted_fallback_key in self.CREDENTIAL_FIELDS:
+            if encrypted:
+                encrypted_value = config.get(section, {}).get(encrypted_key, '')
+                if encrypted_value:
+                    plain_value = cipher.decrypt(encrypted_value.encode()).decode()
+                else:
+                    plain_value = config.get(section, {}).get(encrypted_fallback_key, '')
+            else:
+                plain_value = config.get(section, {}).get(plain_key, '')
+
+            decrypted_values.append((section, plain_key, encrypted_key, plain_value))
+
+        decrypted_config = config.copy()
+        for section, _plain_key, _encrypted_key, _fallback_key in self.CREDENTIAL_FIELDS:
+            if not isinstance(decrypted_config.get(section), dict):
+                decrypted_config[section] = {}
+
+        for section, plain_key, encrypted_key, plain_value in decrypted_values:
+            decrypted_config[section][plain_key] = plain_value
+            decrypted_config[section][encrypted_key] = ''
+
+        return decrypted_config
+
+
 class ModernAdminConfigRevisionPersistenceAdapter:
     """Hybrid-owned persistence for an already validated config revision."""
 

@@ -55,7 +55,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     `ModernAdminSettingsCredentialEncryptionService`; algoritmo Fernet, campi,
     fallback plaintext e mutazione shallow-copy restano invariati, mentre
     `_encryptPasswordsClassic()` resta temporaneamente come fallback di
-    compatibilita' e il parser full-config resta Classic-owned.
+    compatibilita';
+  - la decrittazione credenziali al caricamento delle revisioni e' ora
+    Hybrid-owned tramite `ModernAdminSettingsCredentialDecryptionService`;
+    propagazione errori Fernet, clearing dei campi cifrati e fallback legacy
+    (incluso `IMAGE_OVERLAY.APASSWORD`) restano invariati, mentre
+    `_decrypt_passwordsClassic()` resta fallback e il parser full-config resta
+    Classic-owned.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
