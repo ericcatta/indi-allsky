@@ -79,6 +79,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigAcquisitionMode
 from ..modern_admin_settings_runtime import ModernAdminFullConfigAutoGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigColorProcessingParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
@@ -3304,6 +3305,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigFocusParser()
 
 
+    def full_config_color_processing_parser(self):
+        return ModernAdminFullConfigColorProcessingParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3395,12 +3400,7 @@ class AjaxConfigView(BaseView):
         exposure_gain_parser.apply_exposure_periods(self.indi_allsky_config, request.json)
         self.full_config_camera_sqm_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_focus_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CFA_PATTERN']                          = str(request.json['CFA_PATTERN'])
-        self.indi_allsky_config['USE_NIGHT_COLOR']                      = bool(request.json['USE_NIGHT_COLOR'])
-        self.indi_allsky_config['SCNR_ALGORITHM']                       = str(request.json['SCNR_ALGORITHM'])
-        self.indi_allsky_config['SCNR_ALGORITHM_DAY']                   = str(request.json['SCNR_ALGORITHM_DAY'])
-        self.indi_allsky_config['SCNR_MTF_MIDTONES']                    = float(request.json['SCNR_MTF_MIDTONES'])
-        self.indi_allsky_config['SCNR_MTF_MIDTONES_DAY']                = float(request.json['SCNR_MTF_MIDTONES_DAY'])
+        self.full_config_color_processing_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['IMAGE_DENOISE']                        = str(request.json['IMAGE_DENOISE'])
         self.indi_allsky_config['IMAGE_DENOISE_DAY']                    = str(request.json['IMAGE_DENOISE_DAY'])
         self.indi_allsky_config['IMAGE_DENOISE_STRENGTH']               = int(request.json['IMAGE_DENOISE_STRENGTH'])

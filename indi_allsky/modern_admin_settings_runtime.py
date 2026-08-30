@@ -271,6 +271,28 @@ class ModernAdminFullConfigFocusParser:
         return config
 
 
+class ModernAdminFullConfigColorProcessingParser:
+    """Hybrid-owned parser for full-config CFA and SCNR fields."""
+
+    REQUIRED_FIELDS = (
+        'CFA_PATTERN',
+        'USE_NIGHT_COLOR',
+        'SCNR_ALGORITHM',
+        'SCNR_ALGORITHM_DAY',
+        'SCNR_MTF_MIDTONES',
+        'SCNR_MTF_MIDTONES_DAY',
+    )
+
+    def apply(self, config, payload):
+        config['CFA_PATTERN'] = str(payload['CFA_PATTERN'])
+        config['USE_NIGHT_COLOR'] = bool(payload['USE_NIGHT_COLOR'])
+        config['SCNR_ALGORITHM'] = str(payload['SCNR_ALGORITHM'])
+        config['SCNR_ALGORITHM_DAY'] = str(payload['SCNR_ALGORITHM_DAY'])
+        config['SCNR_MTF_MIDTONES'] = float(payload['SCNR_MTF_MIDTONES'])
+        config['SCNR_MTF_MIDTONES_DAY'] = float(payload['SCNR_MTF_MIDTONES_DAY'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

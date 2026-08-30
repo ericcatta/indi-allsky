@@ -102,7 +102,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     o calcolo SQM runtime;
   - `FOCUS_MODE` e `FOCUS_DELAY` sono ora parsati da
     `ModernAdminFullConfigFocusParser`, mantenendo cast e validazione legacy;
-    controller, movimento hardware e azioni focus restano Classic-owned.
+    controller, movimento hardware e azioni focus restano Classic-owned;
+  - CFA pattern, selezione colore notturno e parametri SCNR giorno/notte sono
+    ora parsati da `ModernAdminFullConfigColorProcessingParser`; algoritmi,
+    validazione e pipeline scientifica restano invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
