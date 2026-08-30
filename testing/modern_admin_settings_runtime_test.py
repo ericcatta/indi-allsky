@@ -2,10 +2,13 @@
 
 import inspect
 import sys
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from indi_allsky.modern_admin_settings_runtime import ModernAdminConfigRevisionPersistenceAdapter
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
@@ -26,6 +29,25 @@ class FakeConfigAdapter:
             'config': self.config,
         })
         return 'saved-config-row'
+
+
+class FakeConfigModel:
+    def __init__(self, **kwargs):
+        self.values = kwargs
+
+
+class FakeDbSession:
+    def __init__(self):
+        self.add_calls = []
+        self.commit_calls = 0
+
+
+    def add(self, entry):
+        self.add_calls.append(entry)
+
+
+    def commit(self):
+        self.commit_calls += 1
 
 
 class CallRecorder:
@@ -50,6 +72,51 @@ class FakeUser:
     def __init__(self, user_id=1, username='admin'):
         self.id = user_id
         self.username = username
+
+
+def test_config_revision_persistence_adapter_preserves_database_effect():
+    db_session = FakeDbSession()
+    created = datetime(2026, 8, 30, 12, 0, 0)
+    config = {'CAMERA_INTERFACE': 'indi'}
+    user = FakeUser(user_id=7, username='admin')
+    adapter = ModernAdminConfigRevisionPersistenceAdapter(
+        config_model=FakeConfigModel,
+        db_session=db_session,
+        config_level=4,
+        clock=lambda: created,
+    )
+
+    result = adapter.save_revision(
+        config=config,
+        user_entry=user,
+        note=123,
+        encrypted=True,
+    )
+
+    assert result.values == {
+        'data'      : config,
+        'createDate': created,
+        'level'     : '4',
+        'user_id'   : 7,
+        'note'      : '123',
+        'encrypted' : True,
+    }
+    assert db_session.add_calls == [result]
+    assert db_session.commit_calls == 1
+
+
+def test_config_revision_persistence_adapter_uses_naive_utc_timestamp():
+    adapter = ModernAdminConfigRevisionPersistenceAdapter(
+        config_model=FakeConfigModel,
+        db_session=FakeDbSession(),
+        config_level='system',
+    )
+
+    created = adapter.utcnow()
+
+    assert created.tzinfo is None
+    utcnow = datetime.now(tz=timezone.utc).replace(tzinfo=None)
+    assert abs((utcnow - created).total_seconds()) < 2
 
 
 class FakeConfigRevision:
@@ -170,6 +237,20 @@ def test_settings_runtime_service_has_no_flask_or_db_dependency():
     assert 'from flask' not in source
     assert 'import flask' not in source
     assert 'db.session' not in source
+
+
+def test_classic_config_delegates_revision_persistence_to_hybrid_adapter():
+    config_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'config.py'
+    source = config_path.read_text()
+    start = source.index('    def _setConfigEntry(')
+    end = source.index('    def _decrypt_passwords(', start)
+    body = source[start:end]
+
+    assert 'ModernAdminConfigRevisionPersistenceAdapter' in body
+    assert '.save_revision(config, user_entry, note, encrypted)' in body
+    assert 'IndiAllSkyDbConfigTable(' not in body
+    assert 'db.session.add(' not in body
+    assert 'db.session.commit()' not in body
 
 
 def valid_restore_config():
@@ -464,10 +545,13 @@ def test_ajax_config_view_uses_full_config_save_boundary():
 
 
 if __name__ == '__main__':
+    test_config_revision_persistence_adapter_preserves_database_effect()
+    test_config_revision_persistence_adapter_uses_naive_utc_timestamp()
     test_settings_runtime_service_saves_config_revision_through_adapter()
     test_settings_runtime_service_propagates_adapter_exception()
     test_settings_runtime_service_saves_full_config_through_adapter()
     test_settings_runtime_service_has_no_flask_or_db_dependency()
+    test_classic_config_delegates_revision_persistence_to_hybrid_adapter()
     test_settings_restore_service_validates_and_delegates_to_adapter()
     test_settings_restore_service_rejects_invalid_target_before_save()
     test_settings_restore_service_skips_post_restore_cleanup_by_default()

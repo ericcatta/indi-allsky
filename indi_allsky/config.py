@@ -964,22 +964,13 @@ class IndiAllSkyConfig(IndiAllSkyConfigBase):
 
 
     def _setConfigEntry(self, config, user_entry, note, encrypted):
-        ### Always store configs with UTC
-        utcnow = datetime.now(tz=timezone.utc).replace(tzinfo=None)
+        from .modern_admin_settings_runtime import ModernAdminConfigRevisionPersistenceAdapter
 
-        config_entry = IndiAllSkyDbConfigTable(
-            data=config,
-            createDate=utcnow,
-            level=str(__config_level__),
-            user_id=user_entry.id,
-            note=str(note),
-            encrypted=encrypted,
-        )
-
-        db.session.add(config_entry)
-        db.session.commit()
-
-        return config_entry
+        return ModernAdminConfigRevisionPersistenceAdapter(
+            config_model=IndiAllSkyDbConfigTable,
+            db_session=db.session,
+            config_level=__config_level__,
+        ).save_revision(config, user_entry, note, encrypted)
 
 
     def _decrypt_passwords(self):

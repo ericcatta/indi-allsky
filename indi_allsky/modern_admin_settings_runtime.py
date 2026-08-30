@@ -1,3 +1,36 @@
+from datetime import datetime
+from datetime import timezone
+
+
+class ModernAdminConfigRevisionPersistenceAdapter:
+    """Hybrid-owned persistence for an already validated config revision."""
+
+    def __init__(self, config_model, db_session, config_level, clock=None):
+        self.config_model = config_model
+        self.db_session = db_session
+        self.config_level = config_level
+        self.clock = clock or self.utcnow
+
+
+    def save_revision(self, config, user_entry, note, encrypted):
+        config_entry = self.config_model(
+            data=config,
+            createDate=self.clock(),
+            level=str(self.config_level),
+            user_id=user_entry.id,
+            note=str(note),
+            encrypted=encrypted,
+        )
+
+        self.db_session.add(config_entry)
+        self.db_session.commit()
+        return config_entry
+
+
+    def utcnow(self):
+        return datetime.now(tz=timezone.utc).replace(tzinfo=None)
+
+
 class ModernAdminSettingsRuntimeService:
     """Hybrid-owned boundary for Modern settings runtime persistence.
 

@@ -39,6 +39,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - il boundary "full config payload costruito/validato -> persistence save" e'
     ora Hybrid-owned tramite `ModernAdminSettingsRuntimeService`; il parser
     full-config legacy resta Classic-owned;
+  - la persistenza low-level "config validata -> nuova revisione DB -> commit"
+    e' ora Hybrid-owned tramite `ModernAdminConfigRevisionPersistenceAdapter`;
+    modello DB, sessione e config level sono adapter iniettati, mentre lookup
+    utente, validazione completa e cifratura restano Classic-owned;
   - rollback e salvataggi ConfigView legacy restano Classic-owned.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
