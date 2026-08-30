@@ -1168,59 +1168,12 @@ class IndiAllSkyConfig(IndiAllSkyConfigBase):
 
 
     def _validateConfig(self):
-        skip_keys = [
-            'INDI_CONFIG_DEFAULTS',
-            'INDI_CONFIG_DAY',
-        ]
+        from .modern_admin_settings_runtime import ModernAdminSettingsConfigValidationService
 
-        skip_keys_l2 = [
-            ['FILETRANSFER', 'LIBCURL_OPTIONS'],
-        ]
-
-
-        for key in self.config.keys():
-            if key in skip_keys:
-                #app.logger.info('Skipping key [%s]', str(key))
-                continue
-
-
-            if isinstance(self.config[key], dict):
-                # check 2nd level dict entries
-                for key_l2 in self.config[key].keys():
-
-                    if key in [x[0] for x in skip_keys_l2] and key_l2 in [x[1] for x in skip_keys_l2]:
-                        #app.logger.info('Skipping key [%s][%s]', str(key), str(key_l2))
-                        continue
-
-
-                    try:
-                        if isinstance(self.config[key][key_l2], int):
-                            # jq will convert floats that end in .0 to ints
-                            valid_types = (int, float)
-                        else:
-                            valid_types = type(self.base_config[key][key_l2])
-
-
-                        if not isinstance(self.config[key][key_l2], valid_types):
-                            app.logger.error('Config key has wrong type: [%s][%s] (%s vs %s)', str(key), str(key_l2), str(type(self.base_config[key][key_l2])), str(type(self.config[key][key_l2])))
-                            raise ConfigSaveException('Config key has wrong type: [{0:s}][{1:s}]'.format(str(key), str(key_l2)))
-                    except KeyError:
-                        app.logger.warning('Config key not found in base config: [%s][%s]', str(key), str(key_l2))
-
-            else:
-                try:
-                    if isinstance(self.config[key], int):
-                        # jq will convert floats that end in .0 to ints
-                        valid_types = (int, float)
-                    else:
-                        valid_types = type(self.base_config[key])
-
-
-                    if not isinstance(self.config[key], valid_types):
-                        app.logger.error('Config key has wrong type: [%s] (%s vs %s)', str(key), str(type(self.base_config[key])), str(type(self.config[key])))
-                        raise ConfigSaveException('Config key has wrong type: [{0:s}]'.format(str(key)))
-                except KeyError:
-                    app.logger.warning('Config key not found in base config: [%s]', str(key))
+        ModernAdminSettingsConfigValidationService(
+            base_config=self.base_config,
+            logger=app.logger,
+        ).validate(self.config)
 
 
     def _encryptPasswords(self):

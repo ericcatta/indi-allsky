@@ -9,12 +9,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_admin_settings_runtime import ModernAdminConfigRevisionPersistenceAdapter
+from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsConfigValidationService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRevisionRollbackService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRestoreService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRestoreValidationError
+from indi_allsky.exceptions import ConfigSaveException
 
 
 class FakeConfigAdapter:
@@ -49,6 +51,20 @@ class FakeDbSession:
 
     def commit(self):
         self.commit_calls += 1
+
+
+class FakeLogger:
+    def __init__(self):
+        self.errors = []
+        self.warnings = []
+
+
+    def error(self, message, *args):
+        self.errors.append((message, args))
+
+
+    def warning(self, message, *args):
+        self.warnings.append((message, args))
 
 
 class CallRecorder:
@@ -104,6 +120,86 @@ def test_config_revision_persistence_adapter_preserves_database_effect():
     }
     assert db_session.add_calls == [result]
     assert db_session.commit_calls == 1
+
+
+def test_settings_config_validation_service_preserves_type_policy():
+    service = ModernAdminSettingsConfigValidationService(
+        base_config={
+            'EXPOSURE': 1.5,
+            'NAME': 'camera',
+            'CAMERA': {'GAIN': 10, 'LABEL': 'primary'},
+        },
+    )
+
+    assert service.validate({
+        'EXPOSURE': 1,
+        'NAME': 'updated',
+        'CAMERA': {'GAIN': 12, 'LABEL': 'secondary'},
+    }) is True
+
+    try:
+        service.validate({'CAMERA': {'GAIN': 12.5}})
+    except ConfigSaveException as error:
+        assert str(error) == 'Config key has wrong type: [CAMERA][GAIN]'
+    else:
+        raise AssertionError('Expected asymmetric legacy numeric validation')
+
+
+def test_settings_config_validation_service_preserves_skip_and_unknown_policy():
+    logger = FakeLogger()
+    service = ModernAdminSettingsConfigValidationService(
+        base_config={
+            'INDI_CONFIG_DAY': {},
+            'FILETRANSFER': {'LIBCURL_OPTIONS': {}},
+        },
+        logger=logger,
+    )
+
+    assert service.validate({
+        'INDI_CONFIG_DAY': 'legacy-unvalidated-value',
+        'FILETRANSFER': {'LIBCURL_OPTIONS': 'legacy-unvalidated-value'},
+        'UNKNOWN': 'preserved',
+        'UNKNOWN_GROUP': {'UNKNOWN_VALUE': 7},
+    }) is True
+    assert logger.errors == []
+    assert logger.warnings == [
+        ('Config key not found in base config: [%s]', ('UNKNOWN',)),
+        ('Config key not found in base config: [%s][%s]', ('UNKNOWN_GROUP', 'UNKNOWN_VALUE')),
+    ]
+
+
+def test_settings_config_validation_service_rejects_wrong_nested_type():
+    logger = FakeLogger()
+    service = ModernAdminSettingsConfigValidationService(
+        base_config={'CAMERA': {'LABEL': 'primary'}},
+        logger=logger,
+    )
+
+    try:
+        service.validate({'CAMERA': {'LABEL': []}})
+    except ConfigSaveException as error:
+        assert str(error) == 'Config key has wrong type: [CAMERA][LABEL]'
+    else:
+        raise AssertionError('Expected ConfigSaveException')
+
+    assert logger.errors == [(
+        'Config key has wrong type: [%s][%s] (%s vs %s)',
+        ('CAMERA', 'LABEL', "<class 'str'>", "<class 'list'>"),
+    )]
+
+
+def test_classic_config_delegates_validation_to_hybrid_service():
+    config_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'config.py'
+    source = config_path.read_text()
+    start = source.index('    def _validateConfig(self):')
+    end = source.index('    def _encryptPasswords(self):', start)
+    validation_source = source[start:end]
+
+    assert 'ModernAdminSettingsConfigValidationService' in validation_source
+    assert ').validate(self.config)' in validation_source
+    assert 'return ModernAdminSettingsConfigValidationService' not in validation_source
+    assert 'valid_types = ' not in validation_source
+    assert 'Config key has wrong type:' not in validation_source
 
 
 def test_config_revision_persistence_adapter_uses_naive_utc_timestamp():
@@ -598,6 +694,10 @@ def test_ajax_config_view_uses_full_config_save_boundary():
 
 if __name__ == '__main__':
     test_config_revision_persistence_adapter_preserves_database_effect()
+    test_settings_config_validation_service_preserves_type_policy()
+    test_settings_config_validation_service_preserves_skip_and_unknown_policy()
+    test_settings_config_validation_service_rejects_wrong_nested_type()
+    test_classic_config_delegates_validation_to_hybrid_service()
     test_config_revision_persistence_adapter_uses_naive_utc_timestamp()
     test_settings_revision_rollback_service_preserves_revert_effect()
     test_classic_config_revert_delegates_application_to_hybrid_service()

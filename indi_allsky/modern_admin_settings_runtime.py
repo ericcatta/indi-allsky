@@ -1,6 +1,107 @@
 from datetime import datetime
 from datetime import timezone
 
+from .exceptions import ConfigSaveException
+
+
+class ModernAdminSettingsConfigValidationService:
+    """Hybrid-owned type validation for config payloads before persistence."""
+
+    SKIP_KEYS = (
+        'INDI_CONFIG_DEFAULTS',
+        'INDI_CONFIG_DAY',
+    )
+
+    SKIP_NESTED_KEYS = (
+        ('FILETRANSFER', 'LIBCURL_OPTIONS'),
+    )
+
+    def __init__(self, base_config, logger=None):
+        self.base_config = base_config
+        self.logger = logger
+
+
+    def validate(self, config):
+        for key in config.keys():
+            if key in self.SKIP_KEYS:
+                continue
+
+            if isinstance(config[key], dict):
+                self.validate_nested_config(config, key)
+            else:
+                self.validate_value(config, key)
+
+        return True
+
+
+    def validate_nested_config(self, config, key):
+        for nested_key in config[key].keys():
+            if (key, nested_key) in self.SKIP_NESTED_KEYS:
+                continue
+
+            try:
+                expected_value = self.base_config[key][nested_key]
+            except KeyError:
+                self.log_warning(
+                    'Config key not found in base config: [%s][%s]',
+                    str(key),
+                    str(nested_key),
+                )
+                continue
+
+            value = config[key][nested_key]
+            if not isinstance(value, self.valid_types(value, expected_value)):
+                self.log_error(
+                    'Config key has wrong type: [%s][%s] (%s vs %s)',
+                    str(key),
+                    str(nested_key),
+                    str(type(expected_value)),
+                    str(type(value)),
+                )
+                raise ConfigSaveException(
+                    'Config key has wrong type: [{0:s}][{1:s}]'.format(
+                        str(key),
+                        str(nested_key),
+                    ),
+                )
+
+
+    def validate_value(self, config, key):
+        try:
+            expected_value = self.base_config[key]
+        except KeyError:
+            self.log_warning('Config key not found in base config: [%s]', str(key))
+            return
+
+        value = config[key]
+        if not isinstance(value, self.valid_types(value, expected_value)):
+            self.log_error(
+                'Config key has wrong type: [%s] (%s vs %s)',
+                str(key),
+                str(type(expected_value)),
+                str(type(value)),
+            )
+            raise ConfigSaveException(
+                'Config key has wrong type: [{0:s}]'.format(str(key)),
+            )
+
+
+    def valid_types(self, value, expected_value):
+        if isinstance(value, int):
+            return (int, float)
+
+        return type(expected_value)
+
+
+    def log_error(self, message, *args):
+        if self.logger is not None:
+            self.logger.error(message, *args)
+
+
+    def log_warning(self, message, *args):
+        if self.logger is not None:
+            self.logger.warning(message, *args)
+
 
 class ModernAdminConfigRevisionPersistenceAdapter:
     """Hybrid-owned persistence for an already validated config revision."""

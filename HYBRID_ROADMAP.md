@@ -46,7 +46,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - l'applicazione di una revisione rollback gia' selezionata e confermata e'
     ora Hybrid-owned tramite `ModernAdminSettingsRevisionRollbackService`, con
     identica semantica merge e nota di revisione; lookup DB e conferma CLI,
-    validazione, cifratura e salvataggi ConfigView legacy restano Classic-owned.
+    cifratura e salvataggi ConfigView legacy restano Classic-owned;
+  - la validazione tipi del config prima della persistenza e' ora Hybrid-owned
+    tramite `ModernAdminSettingsConfigValidationService`; skip legacy, warning
+    per chiavi sconosciute e compatibilita' numerica `int/float` restano
+    invariati, mentre cifratura credenziali e parser restano Classic-owned.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
