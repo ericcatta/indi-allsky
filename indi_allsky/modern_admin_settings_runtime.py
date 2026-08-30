@@ -732,6 +732,38 @@ class ModernAdminFullConfigImageCalibrationParser:
         return config
 
 
+class ModernAdminFullConfigImageOutputParser:
+    """Hybrid-owned parser for full-config image output fields."""
+
+    REQUIRED_FIELDS = (
+        'PRIVACY_MODE',
+        'IMAGE_EXIF_PRIVACY',
+        'IMAGE_FILE_TYPE',
+        'IMAGE_FILE_COMPRESSION__JPG',
+        'IMAGE_FILE_COMPRESSION__PNG',
+        'IMAGE_FOLDER',
+        'VARLIB_FOLDER',
+        'IMAGE_LABEL_TEMPLATE',
+        'IMAGE_EXTRA_TEXT',
+    )
+
+    def apply(self, config, payload):
+        config['PRIVACY_MODE'] = bool(payload['PRIVACY_MODE'])
+        config['IMAGE_EXIF_PRIVACY'] = bool(payload['IMAGE_EXIF_PRIVACY'])
+        config['IMAGE_FILE_TYPE'] = str(payload['IMAGE_FILE_TYPE'])
+
+        compression = config['IMAGE_FILE_COMPRESSION']
+        compression['jpg'] = int(payload['IMAGE_FILE_COMPRESSION__JPG'])
+        compression['jpeg'] = int(payload['IMAGE_FILE_COMPRESSION__JPG'])
+        compression['png'] = int(payload['IMAGE_FILE_COMPRESSION__PNG'])
+
+        config['IMAGE_FOLDER'] = str(payload['IMAGE_FOLDER'])
+        config['VARLIB_FOLDER'] = str(payload['VARLIB_FOLDER'])
+        config['IMAGE_LABEL_TEMPLATE'] = str(payload['IMAGE_LABEL_TEMPLATE'])
+        config['IMAGE_EXTRA_TEXT'] = str(payload['IMAGE_EXTRA_TEXT'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

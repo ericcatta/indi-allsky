@@ -161,6 +161,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     parsati da `ModernAdminFullConfigImageCalibrationParser`; calibrazione,
     dark library, FITS, pipeline immagini e filesystem restano Classic-owned e
     invariati.
+  - privacy, formato/compressione, directory e testi di output immagine sono ora
+    parsati da `ModernAdminFullConfigImageOutputParser`; encoder, EXIF runtime,
+    template rendering, creazione directory e scrittura filesystem restano
+    Classic-owned e invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

@@ -28,6 +28,7 @@ from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigExpos
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageCalibrationParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageOutputParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageStretchParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigKeogramParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
@@ -114,6 +115,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigRealtimeKeogramParser,
         ModernAdminFullConfigStartrailsParser,
         ModernAdminFullConfigImageCalibrationParser,
+        ModernAdminFullConfigImageOutputParser,
         ModernAdminFullConfigAutoWhiteBalanceParser,
     )
 
@@ -294,6 +296,9 @@ class LegacyFullConfigParserHarness:
                 full_config_image_calibration_parser=(
                     lambda: ModernAdminFullConfigImageCalibrationParser()
                 ),
+                full_config_image_output_parser=(
+                    lambda: ModernAdminFullConfigImageOutputParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -367,7 +372,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 553
+    assert len(harness.direct_payload_keys) == 544
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -1335,6 +1340,53 @@ def test_image_calibration_parser_preserves_legacy_casting():
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
+def test_image_output_parser_preserves_legacy_casting_and_nested_values():
+    parser = ModernAdminFullConfigImageOutputParser()
+    config = {
+        'LEGACY_VALUE': 'preserve',
+        'IMAGE_FILE_COMPRESSION': {'legacy': 1},
+    }
+    payload = {
+        'PRIVACY_MODE': 'false',
+        'IMAGE_EXIF_PRIVACY': 0,
+        'IMAGE_FILE_TYPE': 42,
+        'IMAGE_FILE_COMPRESSION__JPG': '90',
+        'IMAGE_FILE_COMPRESSION__PNG': 3,
+        'IMAGE_FOLDER': 100,
+        'VARLIB_FOLDER': '/var/lib/indi-allsky',
+        'IMAGE_LABEL_TEMPLATE': '{timestamp}',
+        'IMAGE_EXTRA_TEXT': None,
+    }
+
+    assert parser.apply(config, payload) is config
+    assert config == {
+        'LEGACY_VALUE': 'preserve',
+        'PRIVACY_MODE': True,
+        'IMAGE_EXIF_PRIVACY': False,
+        'IMAGE_FILE_TYPE': '42',
+        'IMAGE_FILE_COMPRESSION': {
+            'legacy': 1,
+            'jpg': 90,
+            'jpeg': 90,
+            'png': 3,
+        },
+        'IMAGE_FOLDER': '100',
+        'VARLIB_FOLDER': '/var/lib/indi-allsky',
+        'IMAGE_LABEL_TEMPLATE': '{timestamp}',
+        'IMAGE_EXTRA_TEXT': 'None',
+    }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        incomplete_payload = dict(payload)
+        incomplete_payload.pop(missing_field)
+        try:
+            parser.apply({'IMAGE_FILE_COMPRESSION': {}}, incomplete_payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -1622,6 +1674,15 @@ def test_ajax_config_view_delegates_image_calibration_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
+def test_ajax_config_view_delegates_image_output_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_image_output_parser().apply' in parser_source
+    for field_name in ModernAdminFullConfigImageOutputParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
+
+
 def test_exposure_gain_parser_preserves_partial_mutation_order_on_errors():
     harness = LegacyFullConfigParserHarness()
     invalid_binning = harness.capture(
@@ -1806,6 +1867,7 @@ if __name__ == '__main__':
     test_realtime_keogram_parser_preserves_legacy_casting_and_nested_values()
     test_startrails_parser_preserves_legacy_casting_and_nested_values()
     test_image_calibration_parser_preserves_legacy_casting()
+    test_image_output_parser_preserves_legacy_casting_and_nested_values()
     test_ajax_config_view_delegates_camera_connection_parsing()
     test_ajax_config_view_delegates_station_identity_parsing()
     test_ajax_config_view_delegates_lens_metadata_parsing()
@@ -1834,6 +1896,7 @@ if __name__ == '__main__':
     test_ajax_config_view_delegates_realtime_keogram_parsing()
     test_ajax_config_view_delegates_startrails_parsing()
     test_ajax_config_view_delegates_image_calibration_parsing()
+    test_ajax_config_view_delegates_image_output_parsing()
     test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()

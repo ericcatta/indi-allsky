@@ -90,6 +90,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainPar
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageCalibrationParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigImageOutputParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageStretchParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigKeogramParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
@@ -3399,6 +3400,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigImageCalibrationParser()
 
 
+    def full_config_image_output_parser(self):
+        return ModernAdminFullConfigImageOutputParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3524,18 +3529,7 @@ class AjaxConfigView(BaseView):
         self.full_config_realtime_keogram_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_startrails_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_image_calibration_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['PRIVACY_MODE']                         = bool(request.json['PRIVACY_MODE'])
-        self.indi_allsky_config['IMAGE_EXIF_PRIVACY']                   = bool(request.json['IMAGE_EXIF_PRIVACY'])
-        self.indi_allsky_config['IMAGE_FILE_TYPE']                      = str(request.json['IMAGE_FILE_TYPE'])
-        self.indi_allsky_config['IMAGE_FILE_COMPRESSION']['jpg']        = int(request.json['IMAGE_FILE_COMPRESSION__JPG'])
-        self.indi_allsky_config['IMAGE_FILE_COMPRESSION']['jpeg']       = int(request.json['IMAGE_FILE_COMPRESSION__JPG'])  # duplicate
-        self.indi_allsky_config['IMAGE_FILE_COMPRESSION']['png']        = int(request.json['IMAGE_FILE_COMPRESSION__PNG'])
-        #self.indi_allsky_config['IMAGE_FILE_COMPRESSION']['tif']        = int(request.json['IMAGE_FILE_COMPRESSION__TIF'])  # not used anymore
-        #self.indi_allsky_config['IMAGE_FILE_COMPRESSION']['tiff']       = int(request.json['IMAGE_FILE_COMPRESSION__TIF'])  # duplicate
-        self.indi_allsky_config['IMAGE_FOLDER']                         = str(request.json['IMAGE_FOLDER'])
-        self.indi_allsky_config['VARLIB_FOLDER']                        = str(request.json['VARLIB_FOLDER'])
-        self.indi_allsky_config['IMAGE_LABEL_TEMPLATE']                 = str(request.json['IMAGE_LABEL_TEMPLATE'])
-        self.indi_allsky_config['IMAGE_EXTRA_TEXT']                     = str(request.json['IMAGE_EXTRA_TEXT'])
+        self.full_config_image_output_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['IMAGE_ROTATE']                         = str(request.json['IMAGE_ROTATE'])
         self.indi_allsky_config['IMAGE_ROTATE_ANGLE']                   = int(request.json['IMAGE_ROTATE_ANGLE'])
         self.indi_allsky_config['IMAGE_ROTATE_KEEP_SIZE']               = bool(request.json['IMAGE_ROTATE_KEEP_SIZE'])
