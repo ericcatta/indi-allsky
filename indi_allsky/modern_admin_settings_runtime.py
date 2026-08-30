@@ -75,6 +75,24 @@ class ModernAdminFullConfigPayloadPreparationService:
         return config
 
 
+class ModernAdminFullConfigCameraConnectionParser:
+    """Hybrid-owned parser for the full-config camera connection fields."""
+
+    REQUIRED_FIELDS = (
+        'CAMERA_INTERFACE',
+        'INDI_SERVER',
+        'INDI_PORT',
+        'INDI_CAMERA_NAME',
+    )
+
+    def apply(self, config, payload):
+        config['CAMERA_INTERFACE'] = str(payload['CAMERA_INTERFACE'])
+        config['INDI_SERVER'] = str(payload['INDI_SERVER'])
+        config['INDI_PORT'] = int(payload['INDI_PORT'])
+        config['INDI_CAMERA_NAME'] = str(payload['INDI_CAMERA_NAME'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

@@ -71,7 +71,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     Hybrid-owned tramite `ModernAdminFullConfigPayloadPreparationService`:
     sezioni dict, rami CCD e fallback FITS headers mantengono la semantica
     esistente, mentre cast/assegnazioni e trasformazioni speciali restano
-    Classic-owned.
+    Classic-owned;
+  - il primo gruppo del parser full-config, Camera Connection
+    (`CAMERA_INTERFACE`, `INDI_SERVER`, `INDI_PORT`, `INDI_CAMERA_NAME`), e'
+    ora Hybrid-owned tramite `ModernAdminFullConfigCameraConnectionParser` e
+    protetto dai fingerprint golden dell'intero payload; gli altri gruppi
+    restano Classic-owned.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

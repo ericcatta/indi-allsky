@@ -75,6 +75,7 @@ from ..modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContr
 from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
+from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
@@ -3259,6 +3260,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigPayloadPreparationService()
 
 
+    def full_config_camera_connection_parser(self):
+        return ModernAdminFullConfigCameraConnectionParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3332,10 +3337,7 @@ class AjaxConfigView(BaseView):
 
 
         # update data
-        self.indi_allsky_config['CAMERA_INTERFACE']                     = str(request.json['CAMERA_INTERFACE'])
-        self.indi_allsky_config['INDI_SERVER']                          = str(request.json['INDI_SERVER'])
-        self.indi_allsky_config['INDI_PORT']                            = int(request.json['INDI_PORT'])
-        self.indi_allsky_config['INDI_CAMERA_NAME']                     = str(request.json['INDI_CAMERA_NAME'])
+        self.full_config_camera_connection_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['WEBSITE']['TITLE']                     = str(request.json['WEBSITE__TITLE'])
         self.indi_allsky_config['OWNER']                                = str(request.json['OWNER'])
         self.indi_allsky_config['LENS_NAME']                            = str(request.json['LENS_NAME'])

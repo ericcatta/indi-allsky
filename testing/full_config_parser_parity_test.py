@@ -2,14 +2,18 @@
 
 import ast
 import copy
+import hashlib
 import json
 import sys
+from dataclasses import asdict
 from dataclasses import dataclass
+from dataclasses import is_dataclass
 from pathlib import Path
 from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 
 
@@ -48,6 +52,13 @@ class LegacyFullConfigParserHarness:
         'LIGHTGRAPH_OVERLAY__FONT_COLOR',
     )
 
+    GOLDEN_FINGERPRINTS = {
+        'standard': '30016acf66378db3baf722cd6ed6188394a7149207901c28c577d7137af0b3bc',
+        'roi_disabled': '06cb8c1cddc68798f01128affa284caae554d76c0eff6a87778d8d4c9c16fe39',
+        'invalid_color': 'e73182498be70a84834d303141ffac48c607f99bbce8cf293b9f89660b069fa2',
+        'compat': '03ff6675142ef9f2580bf8edaf85ea988ba4915c08e9dfb5e8abb79d220bb801',
+    }
+
     def __init__(self, source_path=VIEWS_PATH):
         self.source_path = Path(source_path)
         self.parser_statements = self.extract_parser_statements()
@@ -57,6 +68,10 @@ class LegacyFullConfigParserHarness:
             'exec',
         )
         self.direct_payload_keys, self.optional_payload_keys = self.extract_payload_keys()
+        self.required_payload_keys = tuple(sorted(
+            set(self.direct_payload_keys)
+            | set(ModernAdminFullConfigCameraConnectionParser.REQUIRED_FIELDS)
+        ))
 
 
     def extract_parser_statements(self):
@@ -108,7 +123,7 @@ class LegacyFullConfigParserHarness:
     def build_payload(self, overrides=None):
         payload = {
             key: 1
-            for key in set(self.direct_payload_keys) | set(self.optional_payload_keys)
+            for key in set(self.required_payload_keys) | set(self.optional_payload_keys)
         }
         for key in self.JSON_FIELDS:
             payload[key] = '{}'
@@ -131,7 +146,12 @@ class LegacyFullConfigParserHarness:
         namespace = {
             'json': json,
             'request': SimpleNamespace(json=payload),
-            'self': SimpleNamespace(indi_allsky_config=config),
+            'self': SimpleNamespace(
+                indi_allsky_config=config,
+                full_config_camera_connection_parser=(
+                    lambda: ModernAdminFullConfigCameraConnectionParser()
+                ),
+            ),
         }
         exec(self.code, namespace)
         return FullConfigParserResult(
@@ -155,6 +175,31 @@ class LegacyFullConfigParserHarness:
             return ('error', error.__class__, str(error), config)
 
 
+    def canonicalize(self, value):
+        if is_dataclass(value):
+            return self.canonicalize(asdict(value))
+        if isinstance(value, type):
+            return '{0:s}.{1:s}'.format(value.__module__, value.__qualname__)
+        if isinstance(value, dict):
+            return {
+                key: self.canonicalize(item)
+                for key, item in value.items()
+            }
+        if isinstance(value, (list, tuple)):
+            return [self.canonicalize(item) for item in value]
+        return value
+
+
+    def fingerprint(self, value):
+        canonical_json = json.dumps(
+            self.canonicalize(value),
+            sort_keys=True,
+            separators=(',', ':'),
+            default=str,
+        )
+        return hashlib.sha256(canonical_json.encode()).hexdigest()
+
+
     def assert_parity(self, candidate_parser, initial_config=None, payload=None):
         payload = self.build_payload() if payload is None else payload
         expected = self.capture(
@@ -173,12 +218,108 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 719
-    assert set(harness.JSON_FIELDS).issubset(harness.direct_payload_keys)
-    assert set(harness.COLOR_FIELDS).issubset(harness.direct_payload_keys)
-    assert 'YOUTUBE__TAGS_STR' in harness.direct_payload_keys
-    assert 'RELOAD_ON_SAVE' in harness.direct_payload_keys
-    assert 'CONFIG_NOTE' in harness.direct_payload_keys
+    assert len(harness.direct_payload_keys) == 715
+    assert len(harness.required_payload_keys) == 719
+    assert set(ModernAdminFullConfigCameraConnectionParser.REQUIRED_FIELDS).issubset(
+        harness.required_payload_keys
+    )
+    assert set(harness.JSON_FIELDS).issubset(harness.required_payload_keys)
+    assert set(harness.COLOR_FIELDS).issubset(harness.required_payload_keys)
+    assert 'YOUTUBE__TAGS_STR' in harness.required_payload_keys
+    assert 'RELOAD_ON_SAVE' in harness.required_payload_keys
+    assert 'CONFIG_NOTE' in harness.required_payload_keys
+
+
+def test_camera_connection_parser_preserves_legacy_casting_and_required_fields():
+    parser = ModernAdminFullConfigCameraConnectionParser()
+    config = {}
+    payload = {
+        'CAMERA_INTERFACE': 42,
+        'INDI_SERVER': 'localhost',
+        'INDI_PORT': '7624',
+        'INDI_CAMERA_NAME': True,
+    }
+
+    assert parser.apply(config, payload) is config
+    assert config == {
+        'CAMERA_INTERFACE': '42',
+        'INDI_SERVER': 'localhost',
+        'INDI_PORT': 7624,
+        'INDI_CAMERA_NAME': 'True',
+    }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        incomplete_payload = dict(payload)
+        incomplete_payload.pop(missing_field)
+        try:
+            parser.apply({}, incomplete_payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
+def test_ajax_config_view_delegates_camera_connection_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_camera_connection_parser().apply' in parser_source
+    for field_name in ModernAdminFullConfigCameraConnectionParser.REQUIRED_FIELDS:
+        assert "indi_allsky_config['{0:s}'] =".format(field_name) not in parser_source
+
+
+def test_full_config_parser_matches_pre_migration_golden_fingerprints():
+    harness = LegacyFullConfigParserHarness()
+    roi_disabled_payload = harness.build_payload({
+        'ADU_ROI_X2': 0,
+        'ADU_ROI_Y2': 0,
+        'SQM_ROI_X2': 0,
+        'SQM_ROI_Y2': 0,
+        'IMAGE_CROP_ROI_X2': 0,
+        'IMAGE_CROP_ROI_Y2': 0,
+        'RELOAD_ON_SAVE': False,
+    })
+    invalid_color_payload = harness.build_payload({
+        'TEXT_PROPERTIES__FONT_COLOR': 'invalid-color',
+    })
+    compatibility_config = {
+        'CUSTOM_COMPATIBILITY_KEY': {'preserve': True},
+        'WEBSITE': {'LEGACY_VALUE': 'preserve'},
+        'FITSHEADERS': [
+            ['OBSERVER', 'Hybrid'],
+            ['', ''],
+            ['', ''],
+            ['', ''],
+            ['', ''],
+        ],
+    }
+    cases = {
+        'standard': harness.capture(
+            harness.execute_legacy,
+            harness.prepare_config(),
+            harness.build_payload(),
+        ),
+        'roi_disabled': harness.capture(
+            harness.execute_legacy,
+            harness.prepare_config(),
+            roi_disabled_payload,
+        ),
+        'invalid_color': harness.capture(
+            harness.execute_legacy,
+            harness.prepare_config(),
+            invalid_color_payload,
+        ),
+        'compat': harness.capture(
+            harness.execute_legacy,
+            harness.prepare_config(compatibility_config),
+            harness.build_payload(),
+        ),
+    }
+
+    assert {
+        name: harness.fingerprint(result)
+        for name, result in cases.items()
+    } == harness.GOLDEN_FINGERPRINTS
 
 
 def test_legacy_parser_corpus_executes_success_and_edge_paths():
@@ -247,6 +388,9 @@ def test_parity_harness_detects_candidate_drift():
 
 if __name__ == '__main__':
     test_parity_corpus_covers_current_legacy_parser_contract()
+    test_camera_connection_parser_preserves_legacy_casting_and_required_fields()
+    test_ajax_config_view_delegates_camera_connection_parsing()
+    test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_legacy_parser_corpus_executes_success_and_edge_paths()
     test_parity_harness_accepts_equivalent_candidate_and_exceptions()
     test_parity_harness_detects_candidate_drift()
