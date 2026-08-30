@@ -14,6 +14,7 @@ from types import SimpleNamespace
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -67,6 +68,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigStationIdentityParser,
         ModernAdminFullConfigLensMetadataParser,
         ModernAdminFullConfigLensGeometryParser,
+        ModernAdminFullConfigExposureGainParser,
     )
 
     def __init__(self, source_path=VIEWS_PATH):
@@ -174,6 +176,9 @@ class LegacyFullConfigParserHarness:
                 full_config_lens_geometry_parser=(
                     lambda: ModernAdminFullConfigLensGeometryParser()
                 ),
+                full_config_exposure_gain_parser=(
+                    lambda: ModernAdminFullConfigExposureGainParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -247,7 +252,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 705
+    assert len(harness.direct_payload_keys) == 695
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -373,6 +378,49 @@ def test_lens_geometry_parser_preserves_legacy_casting_and_required_fields():
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
+def test_exposure_gain_parser_preserves_legacy_casting_and_rounding():
+    parser = ModernAdminFullConfigExposureGainParser()
+    config = {
+        'CCD_CONFIG': {
+            'NIGHT': {},
+            'MOONMODE': {},
+            'DAY': {},
+        },
+    }
+    payload = {
+        'CCD_CONFIG__NIGHT__GAIN': '12.3456',
+        'CCD_CONFIG__MOONMODE__GAIN': 23.4567,
+        'CCD_CONFIG__DAY__GAIN': '34.5678',
+        'CCD_EXPOSURE_MAX': '1.1234567',
+        'CCD_EXPOSURE_DEF': 2.2345678,
+        'CCD_EXPOSURE_MIN': '0.0000014',
+        'CCD_EXPOSURE_MIN_DAY': 0.0000026,
+        'CCD_EXPOSURE_TIMEOUT': '330',
+        'EXPOSURE_PERIOD': '45.5',
+        'EXPOSURE_PERIOD_DAY': 15,
+    }
+
+    assert parser.apply_night_gain(config, payload) is config
+    assert parser.apply_moonmode_gain(config, payload) is config
+    assert parser.apply_day_gain(config, payload) is config
+    assert parser.apply_exposure_limits(config, payload) is config
+    assert parser.apply_exposure_periods(config, payload) is config
+    assert config == {
+        'CCD_CONFIG': {
+            'NIGHT': {'GAIN': 12.35},
+            'MOONMODE': {'GAIN': 23.46},
+            'DAY': {'GAIN': 34.57},
+        },
+        'CCD_EXPOSURE_MAX': 1.123457,
+        'CCD_EXPOSURE_DEF': 2.234568,
+        'CCD_EXPOSURE_MIN': 0.000001,
+        'CCD_EXPOSURE_MIN_DAY': 0.000003,
+        'CCD_EXPOSURE_TIMEOUT': 330,
+        'EXPOSURE_PERIOD': 45.5,
+        'EXPOSURE_PERIOD_DAY': 15.0,
+    }
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -407,6 +455,51 @@ def test_ajax_config_view_delegates_lens_geometry_parsing():
     assert 'full_config_lens_geometry_parser().apply' in parser_source
     for field_name in ModernAdminFullConfigLensGeometryParser.REQUIRED_FIELDS:
         assert "indi_allsky_config['{0:s}'] =".format(field_name) not in parser_source
+
+
+def test_ajax_config_view_delegates_exposure_gain_parsing_in_legacy_order():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    expected_calls = (
+        'apply_night_gain',
+        'apply_moonmode_gain',
+        'apply_day_gain',
+        'apply_exposure_limits',
+        'apply_exposure_periods',
+    )
+    call_positions = [parser_source.index(call_name) for call_name in expected_calls]
+    assert call_positions == sorted(call_positions)
+    for field_name in ModernAdminFullConfigExposureGainParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
+
+
+def test_exposure_gain_parser_preserves_partial_mutation_order_on_errors():
+    harness = LegacyFullConfigParserHarness()
+    invalid_binning = harness.capture(
+        harness.execute_legacy,
+        harness.prepare_config(),
+        harness.build_payload({'CCD_CONFIG__NIGHT__BINNING': 'invalid'}),
+    )
+    assert invalid_binning[0:3] == (
+        'error',
+        ValueError,
+        "invalid literal for int() with base 10: 'invalid'",
+    )
+    invalid_binning_config = invalid_binning[3]
+    assert invalid_binning_config['CCD_CONFIG']['NIGHT']['GAIN'] == 1.0
+    assert 'GAIN' not in invalid_binning_config['CCD_CONFIG']['MOONMODE']
+    assert 'CCD_EXPOSURE_MAX' not in invalid_binning_config
+
+    invalid_bit_depth = harness.capture(
+        harness.execute_legacy,
+        harness.prepare_config(),
+        harness.build_payload({'CCD_BIT_DEPTH': 'invalid'}),
+    )
+    assert invalid_bit_depth[0:2] == ('error', ValueError)
+    invalid_bit_depth_config = invalid_bit_depth[3]
+    assert invalid_bit_depth_config['CCD_EXPOSURE_TIMEOUT'] == 1
+    assert 'EXPOSURE_PERIOD' not in invalid_bit_depth_config
 
 
 def test_full_config_parser_matches_pre_migration_golden_fingerprints():
@@ -541,10 +634,13 @@ if __name__ == '__main__':
     test_station_identity_parser_preserves_legacy_casting_and_required_fields()
     test_lens_metadata_parser_preserves_legacy_casting_and_required_fields()
     test_lens_geometry_parser_preserves_legacy_casting_and_required_fields()
+    test_exposure_gain_parser_preserves_legacy_casting_and_rounding()
     test_ajax_config_view_delegates_camera_connection_parsing()
     test_ajax_config_view_delegates_station_identity_parsing()
     test_ajax_config_view_delegates_lens_metadata_parsing()
     test_ajax_config_view_delegates_lens_geometry_parsing()
+    test_ajax_config_view_delegates_exposure_gain_parsing_in_legacy_order()
+    test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()
     test_legacy_parser_corpus_executes_success_and_edge_paths()

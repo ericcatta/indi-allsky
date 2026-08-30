@@ -143,6 +143,52 @@ class ModernAdminFullConfigLensGeometryParser:
         return config
 
 
+class ModernAdminFullConfigExposureGainParser:
+    """Hybrid-owned parser for manual full-config exposure and gain fields."""
+
+    REQUIRED_FIELDS = (
+        'CCD_CONFIG__NIGHT__GAIN',
+        'CCD_CONFIG__MOONMODE__GAIN',
+        'CCD_CONFIG__DAY__GAIN',
+        'CCD_EXPOSURE_MAX',
+        'CCD_EXPOSURE_DEF',
+        'CCD_EXPOSURE_MIN',
+        'CCD_EXPOSURE_MIN_DAY',
+        'CCD_EXPOSURE_TIMEOUT',
+        'EXPOSURE_PERIOD',
+        'EXPOSURE_PERIOD_DAY',
+    )
+
+    def apply_night_gain(self, config, payload):
+        config['CCD_CONFIG']['NIGHT']['GAIN'] = float(round(float(payload['CCD_CONFIG__NIGHT__GAIN']), 2))
+        return config
+
+
+    def apply_moonmode_gain(self, config, payload):
+        config['CCD_CONFIG']['MOONMODE']['GAIN'] = float(round(float(payload['CCD_CONFIG__MOONMODE__GAIN']), 2))
+        return config
+
+
+    def apply_day_gain(self, config, payload):
+        config['CCD_CONFIG']['DAY']['GAIN'] = float(round(float(payload['CCD_CONFIG__DAY__GAIN']), 2))
+        return config
+
+
+    def apply_exposure_limits(self, config, payload):
+        config['CCD_EXPOSURE_MAX'] = float(round(float(payload['CCD_EXPOSURE_MAX']), 6))
+        config['CCD_EXPOSURE_DEF'] = float(round(float(payload['CCD_EXPOSURE_DEF']), 6))
+        config['CCD_EXPOSURE_MIN'] = float(round(float(payload['CCD_EXPOSURE_MIN']), 6))
+        config['CCD_EXPOSURE_MIN_DAY'] = float(round(float(payload['CCD_EXPOSURE_MIN_DAY']), 6))
+        config['CCD_EXPOSURE_TIMEOUT'] = int(payload['CCD_EXPOSURE_TIMEOUT'])
+        return config
+
+
+    def apply_exposure_periods(self, config, payload):
+        config['EXPOSURE_PERIOD'] = float(payload['EXPOSURE_PERIOD'])
+        config['EXPOSURE_PERIOD_DAY'] = float(payload['EXPOSURE_PERIOD_DAY'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

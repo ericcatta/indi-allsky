@@ -85,7 +85,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     `ModernAdminFullConfigLensMetadataParser`;
   - la geometria lente (`LENS_IMAGE_CIRCLE`, offset X/Y, altitudine e azimut)
     e' ora Hybrid-owned tramite `ModernAdminFullConfigLensGeometryParser`;
-    validazione e uso runtime restano invariati.
+    validazione e uso runtime restano invariati;
+  - manual gain giorno/notte/moonmode e limiti, timeout e cadence di esposizione
+    sono ora Hybrid-owned tramite `ModernAdminFullConfigExposureGainParser`;
+    ordine delle mutazioni, arrotondamenti e cast legacy restano invariati,
+    mentre binning, Auto Gain e bit depth restano Classic-owned.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

@@ -76,6 +76,7 @@ from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContra
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -3279,6 +3280,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigLensGeometryParser()
 
 
+    def full_config_exposure_gain_parser(self):
+        return ModernAdminFullConfigExposureGainParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3356,22 +3361,18 @@ class AjaxConfigView(BaseView):
         self.full_config_station_identity_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_lens_metadata_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_lens_geometry_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CCD_CONFIG']['NIGHT']['GAIN']          = float(round(float(request.json['CCD_CONFIG__NIGHT__GAIN']), 2))  # limit to 2 decimals
+        exposure_gain_parser = self.full_config_exposure_gain_parser()
+        exposure_gain_parser.apply_night_gain(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CCD_CONFIG']['NIGHT']['BINNING']       = int(request.json['CCD_CONFIG__NIGHT__BINNING'])
-        self.indi_allsky_config['CCD_CONFIG']['MOONMODE']['GAIN']       = float(round(float(request.json['CCD_CONFIG__MOONMODE__GAIN']), 2))  # limit to 2 decimals
+        exposure_gain_parser.apply_moonmode_gain(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CCD_CONFIG']['MOONMODE']['BINNING']    = int(request.json['CCD_CONFIG__MOONMODE__BINNING'])
-        self.indi_allsky_config['CCD_CONFIG']['DAY']['GAIN']            = float(round(float(request.json['CCD_CONFIG__DAY__GAIN']), 2))  # limit to 2 decimals
+        exposure_gain_parser.apply_day_gain(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CCD_CONFIG']['DAY']['BINNING']         = int(request.json['CCD_CONFIG__DAY__BINNING'])
         self.indi_allsky_config['CCD_CONFIG']['AUTO_GAIN_ENABLE']       = bool(request.json['CCD_CONFIG__AUTO_GAIN_ENABLE'])
         self.indi_allsky_config['CCD_CONFIG']['AUTO_GAIN_LEVELS']       = int(request.json['CCD_CONFIG__AUTO_GAIN_LEVELS'])
-        self.indi_allsky_config['CCD_EXPOSURE_MAX']                     = float(round(float(request.json['CCD_EXPOSURE_MAX']), 6))
-        self.indi_allsky_config['CCD_EXPOSURE_DEF']                     = float(round(float(request.json['CCD_EXPOSURE_DEF']), 6))
-        self.indi_allsky_config['CCD_EXPOSURE_MIN']                     = float(round(float(request.json['CCD_EXPOSURE_MIN']), 6))
-        self.indi_allsky_config['CCD_EXPOSURE_MIN_DAY']                 = float(round(float(request.json['CCD_EXPOSURE_MIN_DAY']), 6))
-        self.indi_allsky_config['CCD_EXPOSURE_TIMEOUT']                 = int(request.json['CCD_EXPOSURE_TIMEOUT'])
+        exposure_gain_parser.apply_exposure_limits(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CCD_BIT_DEPTH']                        = int(request.json['CCD_BIT_DEPTH'])
-        self.indi_allsky_config['EXPOSURE_PERIOD']                      = float(request.json['EXPOSURE_PERIOD'])
-        self.indi_allsky_config['EXPOSURE_PERIOD_DAY']                  = float(request.json['EXPOSURE_PERIOD_DAY'])
+        exposure_gain_parser.apply_exposure_periods(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CAMERA_SQM']['ENABLE']                 = bool(request.json['CAMERA_SQM__ENABLE'])
         self.indi_allsky_config['CAMERA_SQM']['ENABLE_DAY']             = bool(request.json['CAMERA_SQM__ENABLE_DAY'])
         self.indi_allsky_config['CAMERA_SQM']['EXPOSURE']               = float(round(float(request.json['CAMERA_SQM__EXPOSURE']), 6))
