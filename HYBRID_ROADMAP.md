@@ -153,6 +153,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     label Realtime Keogram sono ora parsati da
     `ModernAdminFullConfigRealtimeKeogramParser`; generazione,
     filesystem/cache e comportamento live restano Classic-owned e invariati.
+  - soglie, policy timelapse/data source e metadati Image Circle Mask di
+    Startrails sono ora parsati da `ModernAdminFullConfigStartrailsParser`;
+    algoritmi scientifici, generazione, maschere runtime, filesystem e output
+    media restano Classic-owned e invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

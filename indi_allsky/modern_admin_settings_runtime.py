@@ -668,6 +668,48 @@ class ModernAdminFullConfigRealtimeKeogramParser:
         return config
 
 
+class ModernAdminFullConfigStartrailsParser:
+    """Hybrid-owned parser for full-config startrails fields."""
+
+    REQUIRED_FIELDS = (
+        'STARTRAILS_SUN_ALT_THOLD',
+        'STARTRAILS_MOONMODE_THOLD',
+        'STARTRAILS_MOON_ALT_THOLD',
+        'STARTRAILS_MOON_PHASE_THOLD',
+        'STARTRAILS_MAX_ADU',
+        'STARTRAILS_MASK_THOLD',
+        'STARTRAILS_PIXEL_THOLD',
+        'STARTRAILS_MIN_STARS',
+        'STARTRAILS_TIMELAPSE',
+        'STARTRAILS_TIMELAPSE_MINFRAMES',
+        'STARTRAILS_USE_DB_DATA',
+        'STARTRAILS__IMAGE_CIRCLE_MASK_ENABLE',
+        'STARTRAILS__IMAGE_CIRCLE_MASK_DIAMETER',
+        'STARTRAILS__IMAGE_CIRCLE_MASK_BLUR',
+        'STARTRAILS__IMAGE_CIRCLE_MASK_OPACITY',
+    )
+
+    def apply(self, config, payload):
+        config['STARTRAILS_SUN_ALT_THOLD'] = float(payload['STARTRAILS_SUN_ALT_THOLD'])
+        config['STARTRAILS_MOONMODE_THOLD'] = bool(payload['STARTRAILS_MOONMODE_THOLD'])
+        config['STARTRAILS_MOON_ALT_THOLD'] = float(payload['STARTRAILS_MOON_ALT_THOLD'])
+        config['STARTRAILS_MOON_PHASE_THOLD'] = float(payload['STARTRAILS_MOON_PHASE_THOLD'])
+        config['STARTRAILS_MAX_ADU'] = int(payload['STARTRAILS_MAX_ADU'])
+        config['STARTRAILS_MASK_THOLD'] = int(payload['STARTRAILS_MASK_THOLD'])
+        config['STARTRAILS_PIXEL_THOLD'] = float(payload['STARTRAILS_PIXEL_THOLD'])
+        config['STARTRAILS_MIN_STARS'] = int(payload['STARTRAILS_MIN_STARS'])
+        config['STARTRAILS_TIMELAPSE'] = bool(payload['STARTRAILS_TIMELAPSE'])
+        config['STARTRAILS_TIMELAPSE_MINFRAMES'] = int(payload['STARTRAILS_TIMELAPSE_MINFRAMES'])
+        config['STARTRAILS_USE_DB_DATA'] = bool(payload['STARTRAILS_USE_DB_DATA'])
+
+        startrails = config['STARTRAILS']
+        startrails['IMAGE_CIRCLE_MASK_ENABLE'] = bool(payload['STARTRAILS__IMAGE_CIRCLE_MASK_ENABLE'])
+        startrails['IMAGE_CIRCLE_MASK_DIAMETER'] = int(payload['STARTRAILS__IMAGE_CIRCLE_MASK_DIAMETER'])
+        startrails['IMAGE_CIRCLE_MASK_BLUR'] = int(payload['STARTRAILS__IMAGE_CIRCLE_MASK_BLUR'])
+        startrails['IMAGE_CIRCLE_MASK_OPACITY'] = int(payload['STARTRAILS__IMAGE_CIRCLE_MASK_OPACITY'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

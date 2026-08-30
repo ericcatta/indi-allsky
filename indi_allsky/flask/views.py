@@ -98,6 +98,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparat
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPhotometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigRealtimeKeogramParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigSkyModeThresholdParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigStartrailsParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigTimelapseParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigWebStatusParser
@@ -3389,6 +3390,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigRealtimeKeogramParser()
 
 
+    def full_config_startrails_parser(self):
+        return ModernAdminFullConfigStartrailsParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3512,21 +3517,7 @@ class AjaxConfigView(BaseView):
         self.full_config_keogram_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_longterm_keogram_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_realtime_keogram_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['STARTRAILS_SUN_ALT_THOLD']             = float(request.json['STARTRAILS_SUN_ALT_THOLD'])
-        self.indi_allsky_config['STARTRAILS_MOONMODE_THOLD']            = bool(request.json['STARTRAILS_MOONMODE_THOLD'])
-        self.indi_allsky_config['STARTRAILS_MOON_ALT_THOLD']            = float(request.json['STARTRAILS_MOON_ALT_THOLD'])
-        self.indi_allsky_config['STARTRAILS_MOON_PHASE_THOLD']          = float(request.json['STARTRAILS_MOON_PHASE_THOLD'])
-        self.indi_allsky_config['STARTRAILS_MAX_ADU']                   = int(request.json['STARTRAILS_MAX_ADU'])
-        self.indi_allsky_config['STARTRAILS_MASK_THOLD']                = int(request.json['STARTRAILS_MASK_THOLD'])
-        self.indi_allsky_config['STARTRAILS_PIXEL_THOLD']               = float(request.json['STARTRAILS_PIXEL_THOLD'])
-        self.indi_allsky_config['STARTRAILS_MIN_STARS']                 = int(request.json['STARTRAILS_MIN_STARS'])
-        self.indi_allsky_config['STARTRAILS_TIMELAPSE']                 = bool(request.json['STARTRAILS_TIMELAPSE'])
-        self.indi_allsky_config['STARTRAILS_TIMELAPSE_MINFRAMES']       = int(request.json['STARTRAILS_TIMELAPSE_MINFRAMES'])
-        self.indi_allsky_config['STARTRAILS_USE_DB_DATA']               = bool(request.json['STARTRAILS_USE_DB_DATA'])
-        self.indi_allsky_config['STARTRAILS']['IMAGE_CIRCLE_MASK_ENABLE']   = bool(request.json['STARTRAILS__IMAGE_CIRCLE_MASK_ENABLE'])
-        self.indi_allsky_config['STARTRAILS']['IMAGE_CIRCLE_MASK_DIAMETER'] = int(request.json['STARTRAILS__IMAGE_CIRCLE_MASK_DIAMETER'])
-        self.indi_allsky_config['STARTRAILS']['IMAGE_CIRCLE_MASK_BLUR']     = int(request.json['STARTRAILS__IMAGE_CIRCLE_MASK_BLUR'])
-        self.indi_allsky_config['STARTRAILS']['IMAGE_CIRCLE_MASK_OPACITY']  = int(request.json['STARTRAILS__IMAGE_CIRCLE_MASK_OPACITY'])
+        self.full_config_startrails_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['IMAGE_CALIBRATE_DARK']                 = bool(request.json['IMAGE_CALIBRATE_DARK'])
         self.indi_allsky_config['IMAGE_CALIBRATE_BPM']                  = bool(request.json['IMAGE_CALIBRATE_BPM'])
         self.indi_allsky_config['IMAGE_CALIBRATE_FIX_HOLES']            = bool(request.json['IMAGE_CALIBRATE_FIX_HOLES'])
