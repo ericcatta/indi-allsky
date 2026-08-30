@@ -13885,14 +13885,16 @@ class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, TemplateVie
             'ccd_{0:s}'.format(self.camera.uuid),
             'longterm_keogram.jpg',
         )
-        if longterm_keogram_image_p.is_file():
-            image_age_s = time.time() - longterm_keogram_image_p.stat().st_mtime
+        media_access_adapter = self.get_observatory_media_access_adapter()
+        longterm_keogram_mtime = media_access_adapter.resolve_existing_file_mtime(longterm_keogram_image_p)
+        if longterm_keogram_mtime is not None:
+            image_age_s = time.time() - longterm_keogram_mtime
             context['keogram_age'] = self.display_service.format_generated_age(image_age_s)
             context['keogram_uri'] = str(Path('images').joinpath('ccd_{0:s}'.format(self.camera.uuid), 'longterm_keogram.jpg'))
 
         keogram_uri = context.get('keogram_uri')
         if keogram_uri:
-            context['keogram_uri'] = self.get_observatory_media_access_adapter().resolve_existing_media_url(keogram_uri)
+            context['keogram_uri'] = media_access_adapter.resolve_existing_media_url(keogram_uri)
 
         try:
             context['modern_admin_longterm_rows'] = IndiAllSkyDbLongTermKeogramTable.query\

@@ -101,10 +101,18 @@ class FakeMediaEntry:
 
 
 class FakeFilesystemPath:
-    def __init__(self, file_size=None, error=None):
+    def __init__(self, file_size=None, modified=None, exists=True, error=None):
         self.file_size = file_size
+        self.modified = modified
+        self.exists = exists
         self.error = error
+        self.is_file_calls = 0
         self.stat_calls = 0
+
+
+    def is_file(self):
+        self.is_file_calls += 1
+        return self.exists
 
 
     def stat(self):
@@ -112,7 +120,10 @@ class FakeFilesystemPath:
         if self.error:
             raise self.error
 
-        return type('FileStat', (), {'st_size': self.file_size})()
+        return type('FileStat', (), {
+            'st_size' : self.file_size,
+            'st_mtime': self.modified,
+        })()
 
 
 class FakeThumbnail:
@@ -405,6 +416,24 @@ def test_media_access_adapter_resolves_file_size_with_existing_fallback():
     )
 
 
+def test_media_access_adapter_resolves_existing_file_mtime():
+    existing_path = FakeFilesystemPath(modified=1783076400.0)
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
+
+    modified = adapter.resolve_existing_file_mtime(existing_path)
+
+    assert_true(modified == 1783076400.0, 'existing generated media should preserve filesystem modification time')
+    assert_true(existing_path.is_file_calls == 1, 'generated media lookup should check file availability once')
+    assert_true(existing_path.stat_calls == 1, 'existing generated media should be statted once')
+
+    missing_path = FakeFilesystemPath(exists=False)
+    assert_true(
+        adapter.resolve_existing_file_mtime(missing_path) is None,
+        'missing generated media should preserve unavailable fallback',
+    )
+    assert_true(missing_path.stat_calls == 0, 'missing generated media should not be statted')
+
+
 def test_media_access_adapter_reads_fits_preview_metadata_and_closes_file():
     hdu_list = FakeFitsHduList({
         'EXPTIME'  : '12.5',
@@ -500,7 +529,13 @@ def test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter
 
     assert_true('def get_observatory_media_access_adapter(self):' in body, 'observatory tools must construct media access adapter')
     assert_true('.resolve_existing_media_url(keogram_uri)' in body, 'observatory keogram URLs should go through Hybrid media access adapter')
+    assert_true('.resolve_existing_file_mtime(longterm_keogram_image_p)' in body, 'long-term keogram filesystem metadata should go through Hybrid media access adapter')
     assert_true('.normalize_media_url(keogram_uri)' not in body, 'observatory keogram views must not own direct URL normalization')
+
+    longterm_start = body.index('class ModernAdminLongTermKeogramView')
+    longterm_body = body[longterm_start:]
+    assert_true('longterm_keogram_image_p.is_file()' not in longterm_body, 'long-term keogram view must not own direct file availability checks')
+    assert_true('longterm_keogram_image_p.stat()' not in longterm_body, 'long-term keogram view must not own direct file metadata reads')
 
 
 def test_safe_control_image_circle_preview_delegates_display_url_to_media_access_adapter():
@@ -781,6 +816,7 @@ def run_tests():
     test_media_access_adapter_returns_none_when_get_url_fails()
     test_media_access_adapter_preserves_filesystem_path_resolution()
     test_media_access_adapter_resolves_file_size_with_existing_fallback()
+    test_media_access_adapter_resolves_existing_file_mtime()
     test_media_access_adapter_reads_fits_preview_metadata_and_closes_file()
     test_media_access_adapter_reads_fits_preview_metadata_defaults()
     test_media_serve_adapter_preserves_sender_arguments()

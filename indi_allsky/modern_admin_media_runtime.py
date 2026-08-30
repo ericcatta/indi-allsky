@@ -158,6 +158,13 @@ class ModernAdminMediaAccessAdapter:
             return default
 
 
+    def resolve_existing_file_mtime(self, filename_p):
+        if not filename_p.is_file():
+            return None
+
+        return filename_p.stat().st_mtime
+
+
     def read_fits_preview_metadata(self, filename_p, fits_opener):
         hdulist = fits_opener(filename_p)
         header = hdulist[0].header
