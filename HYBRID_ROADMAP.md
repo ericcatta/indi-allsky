@@ -140,6 +140,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - soglie di altitudine solare/lunare e fase per le modalita' night/moon sono
     ora parsate da `ModernAdminFullConfigSkyModeThresholdParser`; calcoli
     astronomici, transizioni e scheduler restano Classic-owned e invariati.
+  - template/testo status web e policy immagini locali/non locali sono ora
+    parsati da `ModernAdminFullConfigWebStatusParser`; route, autorizzazioni,
+    template e comportamento media restano invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

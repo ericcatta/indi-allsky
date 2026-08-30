@@ -551,6 +551,24 @@ class ModernAdminFullConfigSkyModeThresholdParser:
         return config
 
 
+class ModernAdminFullConfigWebStatusParser:
+    """Hybrid-owned parser for full-config web status fields."""
+
+    REQUIRED_FIELDS = (
+        'WEB_STATUS_TEMPLATE',
+        'WEB_EXTRA_TEXT',
+        'WEB_NONLOCAL_IMAGES',
+        'WEB_LOCAL_IMAGES_ADMIN',
+    )
+
+    def apply(self, config, payload):
+        config['WEB_STATUS_TEMPLATE'] = str(payload['WEB_STATUS_TEMPLATE'])
+        config['WEB_EXTRA_TEXT'] = str(payload['WEB_EXTRA_TEXT'])
+        config['WEB_NONLOCAL_IMAGES'] = bool(payload['WEB_NONLOCAL_IMAGES'])
+        config['WEB_LOCAL_IMAGES_ADMIN'] = bool(payload['WEB_LOCAL_IMAGES_ADMIN'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

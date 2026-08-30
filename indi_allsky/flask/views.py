@@ -96,6 +96,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigPhotometryParse
 from ..modern_admin_settings_runtime import ModernAdminFullConfigSkyModeThresholdParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigTimelapseParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigWebStatusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigWhiteBalanceParser
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
@@ -3356,6 +3357,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigTimelapseParser()
 
 
+    def full_config_web_status_parser(self):
+        return ModernAdminFullConfigWebStatusParser()
+
+
     def full_config_white_balance_parser(self):
         return ModernAdminFullConfigWhiteBalanceParser()
 
@@ -3482,10 +3487,7 @@ class AjaxConfigView(BaseView):
         self.full_config_capture_policy_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_contrast_enhancement_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_sky_mode_threshold_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['WEB_STATUS_TEMPLATE']                  = str(request.json['WEB_STATUS_TEMPLATE'])
-        self.indi_allsky_config['WEB_EXTRA_TEXT']                       = str(request.json['WEB_EXTRA_TEXT'])
-        self.indi_allsky_config['WEB_NONLOCAL_IMAGES']                  = bool(request.json['WEB_NONLOCAL_IMAGES'])
-        self.indi_allsky_config['WEB_LOCAL_IMAGES_ADMIN']               = bool(request.json['WEB_LOCAL_IMAGES_ADMIN'])
+        self.full_config_web_status_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['IMAGE_STRETCH']['CLASSNAME']           = str(request.json['IMAGE_STRETCH__CLASSNAME'])
         self.indi_allsky_config['IMAGE_STRETCH']['MODE1_GAMMA']         = float(request.json['IMAGE_STRETCH__MODE1_GAMMA'])
         self.indi_allsky_config['IMAGE_STRETCH']['MODE1_STDDEVS']       = float(request.json['IMAGE_STRETCH__MODE1_STDDEVS'])
