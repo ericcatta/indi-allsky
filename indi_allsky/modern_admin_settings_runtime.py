@@ -710,6 +710,28 @@ class ModernAdminFullConfigStartrailsParser:
         return config
 
 
+class ModernAdminFullConfigImageCalibrationParser:
+    """Hybrid-owned parser for full-config image calibration fields."""
+
+    REQUIRED_FIELDS = (
+        'IMAGE_CALIBRATE_DARK',
+        'IMAGE_CALIBRATE_BPM',
+        'IMAGE_CALIBRATE_FIX_HOLES',
+        'IMAGE_CALIBRATE_HOLE_THOLD',
+        'IMAGE_CALIBRATE_MANUAL_OFFSET',
+        'IMAGE_SAVE_FITS_PRE_DARK',
+    )
+
+    def apply(self, config, payload):
+        config['IMAGE_CALIBRATE_DARK'] = bool(payload['IMAGE_CALIBRATE_DARK'])
+        config['IMAGE_CALIBRATE_BPM'] = bool(payload['IMAGE_CALIBRATE_BPM'])
+        config['IMAGE_CALIBRATE_FIX_HOLES'] = bool(payload['IMAGE_CALIBRATE_FIX_HOLES'])
+        config['IMAGE_CALIBRATE_HOLE_THOLD'] = int(payload['IMAGE_CALIBRATE_HOLE_THOLD'])
+        config['IMAGE_CALIBRATE_MANUAL_OFFSET'] = int(payload['IMAGE_CALIBRATE_MANUAL_OFFSET'])
+        config['IMAGE_SAVE_FITS_PRE_DARK'] = bool(payload['IMAGE_SAVE_FITS_PRE_DARK'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

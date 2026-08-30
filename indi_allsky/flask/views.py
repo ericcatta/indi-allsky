@@ -88,6 +88,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigDisplayUnitsPar
 from ..modern_admin_settings_runtime import ModernAdminFullConfigEnvironmentParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigImageCalibrationParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageStretchParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigKeogramParser
@@ -3394,6 +3395,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigStartrailsParser()
 
 
+    def full_config_image_calibration_parser(self):
+        return ModernAdminFullConfigImageCalibrationParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3518,12 +3523,7 @@ class AjaxConfigView(BaseView):
         self.full_config_longterm_keogram_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_realtime_keogram_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_startrails_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['IMAGE_CALIBRATE_DARK']                 = bool(request.json['IMAGE_CALIBRATE_DARK'])
-        self.indi_allsky_config['IMAGE_CALIBRATE_BPM']                  = bool(request.json['IMAGE_CALIBRATE_BPM'])
-        self.indi_allsky_config['IMAGE_CALIBRATE_FIX_HOLES']            = bool(request.json['IMAGE_CALIBRATE_FIX_HOLES'])
-        self.indi_allsky_config['IMAGE_CALIBRATE_HOLE_THOLD']           = int(request.json['IMAGE_CALIBRATE_HOLE_THOLD'])
-        self.indi_allsky_config['IMAGE_CALIBRATE_MANUAL_OFFSET']        = int(request.json['IMAGE_CALIBRATE_MANUAL_OFFSET'])
-        self.indi_allsky_config['IMAGE_SAVE_FITS_PRE_DARK']             = bool(request.json['IMAGE_SAVE_FITS_PRE_DARK'])
+        self.full_config_image_calibration_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['PRIVACY_MODE']                         = bool(request.json['PRIVACY_MODE'])
         self.indi_allsky_config['IMAGE_EXIF_PRIVACY']                   = bool(request.json['IMAGE_EXIF_PRIVACY'])
         self.indi_allsky_config['IMAGE_FILE_TYPE']                      = str(request.json['IMAGE_FILE_TYPE'])

@@ -157,6 +157,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     Startrails sono ora parsati da `ModernAdminFullConfigStartrailsParser`;
     algoritmi scientifici, generazione, maschere runtime, filesystem e output
     media restano Classic-owned e invariati.
+  - flag Dark/BPM/Fix Holes, soglia/offset e salvataggio FITS pre-dark sono ora
+    parsati da `ModernAdminFullConfigImageCalibrationParser`; calibrazione,
+    dark library, FITS, pipeline immagini e filesystem restano Classic-owned e
+    invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
