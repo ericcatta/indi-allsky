@@ -96,6 +96,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataPar
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLongTermKeogramParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPhotometryParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigRealtimeKeogramParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigSkyModeThresholdParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigTimelapseParser
@@ -3384,6 +3385,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigLongTermKeogramParser()
 
 
+    def full_config_realtime_keogram_parser(self):
+        return ModernAdminFullConfigRealtimeKeogramParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3506,9 +3511,7 @@ class AjaxConfigView(BaseView):
         self.full_config_image_stretch_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_keogram_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_longterm_keogram_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['REALTIME_KEOGRAM']['MAX_ENTRIES']      = int(request.json['REALTIME_KEOGRAM__MAX_ENTRIES'])
-        self.indi_allsky_config['REALTIME_KEOGRAM']['SAVE_INTERVAL']    = int(request.json['REALTIME_KEOGRAM__SAVE_INTERVAL'])
-        self.indi_allsky_config['REALTIME_KEOGRAM']['LABEL']            = bool(request.json['REALTIME_KEOGRAM__LABEL'])
+        self.full_config_realtime_keogram_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['STARTRAILS_SUN_ALT_THOLD']             = float(request.json['STARTRAILS_SUN_ALT_THOLD'])
         self.indi_allsky_config['STARTRAILS_MOONMODE_THOLD']            = bool(request.json['STARTRAILS_MOONMODE_THOLD'])
         self.indi_allsky_config['STARTRAILS_MOON_ALT_THOLD']            = float(request.json['STARTRAILS_MOON_ALT_THOLD'])

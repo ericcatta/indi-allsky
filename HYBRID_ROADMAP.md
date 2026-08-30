@@ -149,8 +149,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - angolo, scale, crop e label Keogram base sono ora parsati da
     `ModernAdminFullConfigKeogramParser`; enablement, offset e metadati font del
     Long-term Keogram sono ora parsati da
-    `ModernAdminFullConfigLongTermKeogramParser`; generazione, filesystem/cache
-    e configurazione Realtime restano Classic-owned e invariati.
+    `ModernAdminFullConfigLongTermKeogramParser`; limite righe, intervallo save e
+    label Realtime Keogram sono ora parsati da
+    `ModernAdminFullConfigRealtimeKeogramParser`; generazione,
+    filesystem/cache e comportamento live restano Classic-owned e invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

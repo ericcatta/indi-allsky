@@ -34,6 +34,7 @@ from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensM
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLongTermKeogramParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigPhotometryParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigRealtimeKeogramParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigSkyModeThresholdParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigTimelapseParser
@@ -108,6 +109,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigImageStretchParser,
         ModernAdminFullConfigKeogramParser,
         ModernAdminFullConfigLongTermKeogramParser,
+        ModernAdminFullConfigRealtimeKeogramParser,
         ModernAdminFullConfigAutoWhiteBalanceParser,
     )
 
@@ -279,6 +281,9 @@ class LegacyFullConfigParserHarness:
                 full_config_longterm_keogram_parser=(
                     lambda: ModernAdminFullConfigLongTermKeogramParser()
                 ),
+                full_config_realtime_keogram_parser=(
+                    lambda: ModernAdminFullConfigRealtimeKeogramParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -352,7 +357,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 577
+    assert len(harness.direct_payload_keys) == 574
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -1202,6 +1207,36 @@ def test_longterm_keogram_parser_preserves_legacy_casting_and_nested_values():
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
+def test_realtime_keogram_parser_preserves_legacy_casting_and_nested_values():
+    parser = ModernAdminFullConfigRealtimeKeogramParser()
+    config = {'REALTIME_KEOGRAM': {'LEGACY_VALUE': 'preserve'}}
+    payload = {
+        'REALTIME_KEOGRAM__MAX_ENTRIES': '1000',
+        'REALTIME_KEOGRAM__SAVE_INTERVAL': 25,
+        'REALTIME_KEOGRAM__LABEL': 'false',
+    }
+
+    assert parser.apply(config, payload) is config
+    assert config == {
+        'REALTIME_KEOGRAM': {
+            'LEGACY_VALUE': 'preserve',
+            'MAX_ENTRIES': 1000,
+            'SAVE_INTERVAL': 25,
+            'LABEL': True,
+        },
+    }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        incomplete_payload = dict(payload)
+        incomplete_payload.pop(missing_field)
+        try:
+            parser.apply({'REALTIME_KEOGRAM': {}}, incomplete_payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -1462,6 +1497,15 @@ def test_ajax_config_view_delegates_longterm_keogram_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
+def test_ajax_config_view_delegates_realtime_keogram_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_realtime_keogram_parser().apply' in parser_source
+    for field_name in ModernAdminFullConfigRealtimeKeogramParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
+
+
 def test_exposure_gain_parser_preserves_partial_mutation_order_on_errors():
     harness = LegacyFullConfigParserHarness()
     invalid_binning = harness.capture(
@@ -1643,6 +1687,7 @@ if __name__ == '__main__':
     test_image_stretch_parser_preserves_legacy_casting_and_nested_values()
     test_keogram_parser_preserves_legacy_casting()
     test_longterm_keogram_parser_preserves_legacy_casting_and_nested_values()
+    test_realtime_keogram_parser_preserves_legacy_casting_and_nested_values()
     test_ajax_config_view_delegates_camera_connection_parsing()
     test_ajax_config_view_delegates_station_identity_parsing()
     test_ajax_config_view_delegates_lens_metadata_parsing()
@@ -1668,6 +1713,7 @@ if __name__ == '__main__':
     test_ajax_config_view_delegates_image_stretch_parsing()
     test_ajax_config_view_delegates_keogram_parsing()
     test_ajax_config_view_delegates_longterm_keogram_parsing()
+    test_ajax_config_view_delegates_realtime_keogram_parsing()
     test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()

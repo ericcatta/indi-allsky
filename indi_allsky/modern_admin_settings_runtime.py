@@ -651,6 +651,23 @@ class ModernAdminFullConfigLongTermKeogramParser:
         return config
 
 
+class ModernAdminFullConfigRealtimeKeogramParser:
+    """Hybrid-owned parser for full-config realtime keogram fields."""
+
+    REQUIRED_FIELDS = (
+        'REALTIME_KEOGRAM__MAX_ENTRIES',
+        'REALTIME_KEOGRAM__SAVE_INTERVAL',
+        'REALTIME_KEOGRAM__LABEL',
+    )
+
+    def apply(self, config, payload):
+        realtime_keogram = config['REALTIME_KEOGRAM']
+        realtime_keogram['MAX_ENTRIES'] = int(payload['REALTIME_KEOGRAM__MAX_ENTRIES'])
+        realtime_keogram['SAVE_INTERVAL'] = int(payload['REALTIME_KEOGRAM__SAVE_INTERVAL'])
+        realtime_keogram['LABEL'] = bool(payload['REALTIME_KEOGRAM__LABEL'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 
