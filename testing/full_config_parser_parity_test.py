@@ -14,6 +14,7 @@ from types import SimpleNamespace
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigAcquisitionModeParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigAutoGainParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
@@ -71,6 +72,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigLensGeometryParser,
         ModernAdminFullConfigExposureGainParser,
         ModernAdminFullConfigAcquisitionModeParser,
+        ModernAdminFullConfigAutoGainParser,
     )
 
     def __init__(self, source_path=VIEWS_PATH):
@@ -184,6 +186,9 @@ class LegacyFullConfigParserHarness:
                 full_config_acquisition_mode_parser=(
                     lambda: ModernAdminFullConfigAcquisitionModeParser()
                 ),
+                full_config_auto_gain_parser=(
+                    lambda: ModernAdminFullConfigAutoGainParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -257,7 +262,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 691
+    assert len(harness.direct_payload_keys) == 689
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -456,6 +461,40 @@ def test_acquisition_mode_parser_preserves_legacy_integer_casting():
     }
 
 
+def test_auto_gain_parser_preserves_legacy_boolean_and_integer_casting():
+    parser = ModernAdminFullConfigAutoGainParser()
+
+    for raw_enable, expected_enable in (
+        (False, False),
+        (True, True),
+        ('', False),
+        ('false', True),
+    ):
+        config = {'CCD_CONFIG': {}}
+        payload = {
+            'CCD_CONFIG__AUTO_GAIN_ENABLE': raw_enable,
+            'CCD_CONFIG__AUTO_GAIN_LEVELS': '8',
+        }
+        assert parser.apply(config, payload) is config
+        assert config['CCD_CONFIG'] == {
+            'AUTO_GAIN_ENABLE': expected_enable,
+            'AUTO_GAIN_LEVELS': 8,
+        }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        payload = {
+            'CCD_CONFIG__AUTO_GAIN_ENABLE': False,
+            'CCD_CONFIG__AUTO_GAIN_LEVELS': '8',
+        }
+        payload.pop(missing_field)
+        try:
+            parser.apply({'CCD_CONFIG': {}}, payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -527,6 +566,15 @@ def test_ajax_config_view_delegates_acquisition_mode_in_legacy_order():
     call_positions = [parser_source.index(call_name) for call_name in expected_calls]
     assert call_positions == sorted(call_positions)
     for field_name in ModernAdminFullConfigAcquisitionModeParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
+
+
+def test_ajax_config_view_delegates_auto_gain_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_auto_gain_parser().apply' in parser_source
+    for field_name in ModernAdminFullConfigAutoGainParser.REQUIRED_FIELDS:
         assert field_name not in harness.direct_payload_keys
 
 
@@ -692,12 +740,14 @@ if __name__ == '__main__':
     test_lens_geometry_parser_preserves_legacy_casting_and_required_fields()
     test_exposure_gain_parser_preserves_legacy_casting_and_rounding()
     test_acquisition_mode_parser_preserves_legacy_integer_casting()
+    test_auto_gain_parser_preserves_legacy_boolean_and_integer_casting()
     test_ajax_config_view_delegates_camera_connection_parsing()
     test_ajax_config_view_delegates_station_identity_parsing()
     test_ajax_config_view_delegates_lens_metadata_parsing()
     test_ajax_config_view_delegates_lens_geometry_parsing()
     test_ajax_config_view_delegates_exposure_gain_parsing_in_legacy_order()
     test_ajax_config_view_delegates_acquisition_mode_in_legacy_order()
+    test_ajax_config_view_delegates_auto_gain_parsing()
     test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()

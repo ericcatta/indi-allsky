@@ -76,6 +76,7 @@ from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContra
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminFullConfigAcquisitionModeParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigAutoGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
@@ -3289,6 +3290,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigAcquisitionModeParser()
 
 
+    def full_config_auto_gain_parser(self):
+        return ModernAdminFullConfigAutoGainParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3374,8 +3379,7 @@ class AjaxConfigView(BaseView):
         acquisition_mode_parser.apply_moonmode_binning(self.indi_allsky_config, request.json)
         exposure_gain_parser.apply_day_gain(self.indi_allsky_config, request.json)
         acquisition_mode_parser.apply_day_binning(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CCD_CONFIG']['AUTO_GAIN_ENABLE']       = bool(request.json['CCD_CONFIG__AUTO_GAIN_ENABLE'])
-        self.indi_allsky_config['CCD_CONFIG']['AUTO_GAIN_LEVELS']       = int(request.json['CCD_CONFIG__AUTO_GAIN_LEVELS'])
+        self.full_config_auto_gain_parser().apply(self.indi_allsky_config, request.json)
         exposure_gain_parser.apply_exposure_limits(self.indi_allsky_config, request.json)
         acquisition_mode_parser.apply_bit_depth(self.indi_allsky_config, request.json)
         exposure_gain_parser.apply_exposure_periods(self.indi_allsky_config, request.json)

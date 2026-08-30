@@ -219,6 +219,20 @@ class ModernAdminFullConfigAcquisitionModeParser:
         return config
 
 
+class ModernAdminFullConfigAutoGainParser:
+    """Hybrid-owned parser for legacy full-config Auto Gain fields."""
+
+    REQUIRED_FIELDS = (
+        'CCD_CONFIG__AUTO_GAIN_ENABLE',
+        'CCD_CONFIG__AUTO_GAIN_LEVELS',
+    )
+
+    def apply(self, config, payload):
+        config['CCD_CONFIG']['AUTO_GAIN_ENABLE'] = bool(payload['CCD_CONFIG__AUTO_GAIN_ENABLE'])
+        config['CCD_CONFIG']['AUTO_GAIN_LEVELS'] = int(payload['CCD_CONFIG__AUTO_GAIN_LEVELS'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

@@ -92,7 +92,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     mentre Auto Gain resta Classic-owned;
   - binning giorno/notte/moonmode e bit depth sono ora Hybrid-owned tramite
     `ModernAdminFullConfigAcquisitionModeParser`, mantenendo cast, ordine e
-    validazione legacy senza interrogare capability hardware.
+    validazione legacy senza interrogare capability hardware;
+  - il gate e il numero livelli Auto Gain legacy sono ora Hybrid-owned tramite
+    `ModernAdminFullConfigAutoGainParser`, mantenendo la semantica `bool()` e
+    il cast intero esistenti; le varianti profile-first restano invariate.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
