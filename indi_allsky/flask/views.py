@@ -80,6 +80,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigAutoGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigColorProcessingParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigDenoiseParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
@@ -3309,6 +3310,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigColorProcessingParser()
 
 
+    def full_config_denoise_parser(self):
+        return ModernAdminFullConfigDenoiseParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3401,14 +3406,7 @@ class AjaxConfigView(BaseView):
         self.full_config_camera_sqm_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_focus_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_color_processing_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['IMAGE_DENOISE']                        = str(request.json['IMAGE_DENOISE'])
-        self.indi_allsky_config['IMAGE_DENOISE_DAY']                    = str(request.json['IMAGE_DENOISE_DAY'])
-        self.indi_allsky_config['IMAGE_DENOISE_STRENGTH']               = int(request.json['IMAGE_DENOISE_STRENGTH'])
-        self.indi_allsky_config['IMAGE_DENOISE_STRENGTH_DAY']           = int(request.json['IMAGE_DENOISE_STRENGTH_DAY'])
-        self.indi_allsky_config['BILATERAL_SIGMA_COLOR']                = int(request.json['BILATERAL_SIGMA_COLOR'])
-        self.indi_allsky_config['BILATERAL_SIGMA_COLOR_DAY']            = int(request.json['BILATERAL_SIGMA_COLOR_DAY'])
-        self.indi_allsky_config['BILATERAL_SIGMA_SPACE']                = int(request.json['BILATERAL_SIGMA_SPACE'])
-        self.indi_allsky_config['BILATERAL_SIGMA_SPACE_DAY']            = int(request.json['BILATERAL_SIGMA_SPACE_DAY'])
+        self.full_config_denoise_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['WBR_FACTOR']                           = float(request.json['WBR_FACTOR'])
         self.indi_allsky_config['WBG_FACTOR']                           = float(request.json['WBG_FACTOR'])
         self.indi_allsky_config['WBB_FACTOR']                           = float(request.json['WBB_FACTOR'])

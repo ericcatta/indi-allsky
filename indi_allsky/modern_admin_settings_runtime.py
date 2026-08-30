@@ -293,6 +293,32 @@ class ModernAdminFullConfigColorProcessingParser:
         return config
 
 
+class ModernAdminFullConfigDenoiseParser:
+    """Hybrid-owned parser for full-config denoise and bilateral fields."""
+
+    REQUIRED_FIELDS = (
+        'IMAGE_DENOISE',
+        'IMAGE_DENOISE_DAY',
+        'IMAGE_DENOISE_STRENGTH',
+        'IMAGE_DENOISE_STRENGTH_DAY',
+        'BILATERAL_SIGMA_COLOR',
+        'BILATERAL_SIGMA_COLOR_DAY',
+        'BILATERAL_SIGMA_SPACE',
+        'BILATERAL_SIGMA_SPACE_DAY',
+    )
+
+    def apply(self, config, payload):
+        config['IMAGE_DENOISE'] = str(payload['IMAGE_DENOISE'])
+        config['IMAGE_DENOISE_DAY'] = str(payload['IMAGE_DENOISE_DAY'])
+        config['IMAGE_DENOISE_STRENGTH'] = int(payload['IMAGE_DENOISE_STRENGTH'])
+        config['IMAGE_DENOISE_STRENGTH_DAY'] = int(payload['IMAGE_DENOISE_STRENGTH_DAY'])
+        config['BILATERAL_SIGMA_COLOR'] = int(payload['BILATERAL_SIGMA_COLOR'])
+        config['BILATERAL_SIGMA_COLOR_DAY'] = int(payload['BILATERAL_SIGMA_COLOR_DAY'])
+        config['BILATERAL_SIGMA_SPACE'] = int(payload['BILATERAL_SIGMA_SPACE'])
+        config['BILATERAL_SIGMA_SPACE_DAY'] = int(payload['BILATERAL_SIGMA_SPACE_DAY'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

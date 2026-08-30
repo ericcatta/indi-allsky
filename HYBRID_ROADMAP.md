@@ -105,7 +105,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     controller, movimento hardware e azioni focus restano Classic-owned;
   - CFA pattern, selezione colore notturno e parametri SCNR giorno/notte sono
     ora parsati da `ModernAdminFullConfigColorProcessingParser`; algoritmi,
-    validazione e pipeline scientifica restano invariati.
+    validazione e pipeline scientifica restano invariati;
+  - selezione e intensita' denoise e parametri bilateral giorno/notte sono ora
+    parsati da `ModernAdminFullConfigDenoiseParser`; filtri, algoritmi e
+    pipeline immagini restano Classic-owned e invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
