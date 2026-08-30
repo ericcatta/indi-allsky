@@ -4709,20 +4709,18 @@ class Fits2JpegView(BaseView):
         p_config = self.indi_allsky_config.copy()
 
 
-        hdulist = fits.open(filename_p)
+        fits_metadata = self.get_media_access_adapter().read_fits_preview_metadata(filename_p, fits.open)
 
-        exposure = float(hdulist[0].header.get('EXPTIME', 0))
-        gain = float(hdulist[0].header.get('GAIN', 0))
+        exposure = fits_metadata['exposure']
+        gain = fits_metadata['gain']
         gain_av = Array('f', [gain])
         position_av = Array('f', [self.camera.latitude, self.camera.longitude, self.camera.elevation])
-        binning = int(hdulist[0].header.get('XBINNING', 1))
+        binning = fits_metadata['binning']
         binning_av = Array('i', [binning])
-        sensors_temp_av = Array('f', [float(hdulist[0].header.get('CCD-TEMP', 0))])
-        sensors_user_av = Array('f', [float(hdulist[0].header.get('CCD-TEMP', 0)), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        sensors_temp_av = Array('f', [fits_metadata['sensor_temp']])
+        sensors_user_av = Array('f', [fits_metadata['sensor_temp'], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         night_av = Array('i', [1, 0])  # using night values for processing
         astro_av = Array('f', [0.0, 0.0, 0.0])
-
-        hdulist.close()
 
         image_processor = ImageProcessor(
             p_config,

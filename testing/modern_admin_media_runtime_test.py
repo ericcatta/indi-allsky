@@ -115,6 +115,20 @@ class FakeThumbnail:
         return self.url
 
 
+class FakeFitsHduList:
+    def __init__(self, header=None):
+        self.closed = False
+        self.header = header or {}
+
+    def __getitem__(self, index):
+        if index != 0:
+            raise IndexError(index)
+        return self
+
+    def close(self):
+        self.closed = True
+
+
 class FakeQuery:
     def __init__(self, rows=None, first_row=None, fail=False):
         self.rows = rows or list()
@@ -357,6 +371,47 @@ def test_media_access_adapter_preserves_filesystem_path_resolution():
     assert_true(media_entry.get_filesystem_path_calls == 1, 'filesystem path adapter should delegate exactly once')
 
 
+def test_media_access_adapter_reads_fits_preview_metadata_and_closes_file():
+    hdu_list = FakeFitsHduList({
+        'EXPTIME'  : '12.5',
+        'GAIN'     : '220',
+        'XBINNING' : '2',
+        'CCD-TEMP' : '-4.5',
+    })
+    calls = list()
+
+    def fake_fits_opener(filename_p):
+        calls.append(filename_p)
+        return hdu_list
+
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
+
+    metadata = adapter.read_fits_preview_metadata('/srv/allsky/images/ccd/fits.fit', fake_fits_opener)
+
+    assert_true(calls == ['/srv/allsky/images/ccd/fits.fit'], 'FITS metadata reader must preserve opener path argument')
+    assert_true(metadata == {
+        'exposure'    : 12.5,
+        'gain'        : 220.0,
+        'binning'     : 2,
+        'sensor_temp' : -4.5,
+    }, 'FITS metadata reader must preserve existing header conversions')
+    assert_true(hdu_list.closed is True, 'FITS metadata reader must close the opened FITS handle')
+
+
+def test_media_access_adapter_reads_fits_preview_metadata_defaults():
+    hdu_list = FakeFitsHduList()
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
+
+    metadata = adapter.read_fits_preview_metadata('/srv/allsky/images/ccd/fits.fit', lambda filename_p: hdu_list)
+
+    assert_true(metadata == {
+        'exposure'    : 0.0,
+        'gain'        : 0.0,
+        'binning'     : 1,
+        'sensor_temp' : 0.0,
+    }, 'missing FITS header values must preserve existing defaults')
+
+
 def test_media_serve_adapter_preserves_sender_arguments():
     calls = list()
 
@@ -445,6 +500,17 @@ def test_fits_preview_route_delegates_path_resolution_to_media_access_adapter():
     assert_true('def get_media_access_adapter(self):' in body, 'FITS preview route must construct media access adapter')
     assert_true('.resolve_filesystem_path(fits_entry)' in body, 'FITS preview path resolution should go through Hybrid media access adapter')
     assert_true('fits_entry.getFilesystemPath()' not in body, 'FITS preview route must not own direct getFilesystemPath call')
+
+
+def test_fits_preview_route_delegates_header_metadata_to_media_access_adapter():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('class Fits2JpegView')
+    end = source.index('class GalleryViewerView', start)
+    body = source[start:end]
+
+    assert_true('.read_fits_preview_metadata(filename_p, fits.open)' in body, 'FITS preview metadata should go through Hybrid media access adapter')
+    assert_true('fits.open(filename_p)' not in body, 'FITS preview route must not own direct FITS open')
+    assert_true('hdulist[0].header' not in body, 'FITS preview route must not own direct FITS header parsing')
 
 
 def test_preview_metadata_lookup_shapes_thumbnail_url():
@@ -668,6 +734,8 @@ def run_tests():
     test_media_access_adapter_normalizes_existing_media_urls()
     test_media_access_adapter_returns_none_when_get_url_fails()
     test_media_access_adapter_preserves_filesystem_path_resolution()
+    test_media_access_adapter_reads_fits_preview_metadata_and_closes_file()
+    test_media_access_adapter_reads_fits_preview_metadata_defaults()
     test_media_serve_adapter_preserves_sender_arguments()
     test_modern_views_delegate_media_url_normalization_to_runtime_service()
     test_generated_media_metadata_delegates_media_access_to_runtime_adapter()
@@ -675,6 +743,7 @@ def run_tests():
     test_safe_control_image_circle_preview_delegates_display_url_to_media_access_adapter()
     test_images_folder_route_delegates_serving_to_media_serve_adapter()
     test_fits_preview_route_delegates_path_resolution_to_media_access_adapter()
+    test_fits_preview_route_delegates_header_metadata_to_media_access_adapter()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()

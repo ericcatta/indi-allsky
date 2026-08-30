@@ -177,7 +177,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - la route fallback `/images/<path>` entra ora attraverso
     `ModernAdminMediaServeAdapter`, preservando l'attuale `send_from_directory`;
   - `/fits2jpeg` risolve il path del FITS tramite `ModernAdminMediaAccessAdapter`,
-    lasciando apertura FITS, conversione JPEG e risposta HTTP invariati;
+    lasciando conversione JPEG e risposta HTTP invariati;
+  - la lettura metadata/header per la preview `/fits2jpeg` e' ora dentro
+    l'adapter, mentre conversione immagine e response restano invariati;
   - download, preview/cache generation, filesystem paths, FITS/RAW e
     lightbox/deep browse internals restano Classic/filesystem-owned.
 - Nuove funzioni attive solo dietro toggle esplicito o in modalita' diagnostica/shadow.
