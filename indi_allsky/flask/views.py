@@ -76,6 +76,7 @@ from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContra
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminFullConfigStationIdentityParser
@@ -3274,6 +3275,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigLensMetadataParser()
 
 
+    def full_config_lens_geometry_parser(self):
+        return ModernAdminFullConfigLensGeometryParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3350,11 +3355,7 @@ class AjaxConfigView(BaseView):
         self.full_config_camera_connection_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_station_identity_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_lens_metadata_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['LENS_IMAGE_CIRCLE']                    = int(request.json['LENS_IMAGE_CIRCLE'])
-        self.indi_allsky_config['LENS_OFFSET_X']                        = int(request.json['LENS_OFFSET_X'])
-        self.indi_allsky_config['LENS_OFFSET_Y']                        = int(request.json['LENS_OFFSET_Y'])
-        self.indi_allsky_config['LENS_ALTITUDE']                        = float(request.json['LENS_ALTITUDE'])
-        self.indi_allsky_config['LENS_AZIMUTH']                         = float(request.json['LENS_AZIMUTH'])
+        self.full_config_lens_geometry_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CCD_CONFIG']['NIGHT']['GAIN']          = float(round(float(request.json['CCD_CONFIG__NIGHT__GAIN']), 2))  # limit to 2 decimals
         self.indi_allsky_config['CCD_CONFIG']['NIGHT']['BINNING']       = int(request.json['CCD_CONFIG__NIGHT__BINNING'])
         self.indi_allsky_config['CCD_CONFIG']['MOONMODE']['GAIN']       = float(round(float(request.json['CCD_CONFIG__MOONMODE__GAIN']), 2))  # limit to 2 decimals

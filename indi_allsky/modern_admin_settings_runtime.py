@@ -123,6 +123,26 @@ class ModernAdminFullConfigLensMetadataParser:
         return config
 
 
+class ModernAdminFullConfigLensGeometryParser:
+    """Hybrid-owned parser for full-config lens geometry fields."""
+
+    REQUIRED_FIELDS = (
+        'LENS_IMAGE_CIRCLE',
+        'LENS_OFFSET_X',
+        'LENS_OFFSET_Y',
+        'LENS_ALTITUDE',
+        'LENS_AZIMUTH',
+    )
+
+    def apply(self, config, payload):
+        config['LENS_IMAGE_CIRCLE'] = int(payload['LENS_IMAGE_CIRCLE'])
+        config['LENS_OFFSET_X'] = int(payload['LENS_OFFSET_X'])
+        config['LENS_OFFSET_Y'] = int(payload['LENS_OFFSET_Y'])
+        config['LENS_ALTITUDE'] = float(payload['LENS_ALTITUDE'])
+        config['LENS_AZIMUTH'] = float(payload['LENS_AZIMUTH'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

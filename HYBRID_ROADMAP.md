@@ -82,8 +82,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     esistenti;
   - i metadati descrittivi della lente (`LENS_NAME`, `LENS_FOCAL_LENGTH`,
     `LENS_FOCAL_RATIO`) sono ora Hybrid-owned tramite
-    `ModernAdminFullConfigLensMetadataParser`; image circle, offset e
-    orientamento restano Classic-owned in attesa di una revisione geometrica.
+    `ModernAdminFullConfigLensMetadataParser`;
+  - la geometria lente (`LENS_IMAGE_CIRCLE`, offset X/Y, altitudine e azimut)
+    e' ora Hybrid-owned tramite `ModernAdminFullConfigLensGeometryParser`;
+    validazione e uso runtime restano invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
