@@ -89,6 +89,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigEnvironmentPars
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigImageStretchParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -3369,6 +3370,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigImageEnhancementParser()
 
 
+    def full_config_image_stretch_parser(self):
+        return ModernAdminFullConfigImageStretchParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3488,19 +3493,7 @@ class AjaxConfigView(BaseView):
         self.full_config_contrast_enhancement_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_sky_mode_threshold_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_web_status_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['IMAGE_STRETCH']['CLASSNAME']           = str(request.json['IMAGE_STRETCH__CLASSNAME'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MODE1_GAMMA']         = float(request.json['IMAGE_STRETCH__MODE1_GAMMA'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MODE1_STDDEVS']       = float(request.json['IMAGE_STRETCH__MODE1_STDDEVS'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MODE2_SHADOWS']       = float(request.json['IMAGE_STRETCH__MODE2_SHADOWS'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MODE2_MIDTONES']      = float(request.json['IMAGE_STRETCH__MODE2_MIDTONES'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MODE2_HIGHLIGHTS']    = float(request.json['IMAGE_STRETCH__MODE2_HIGHLIGHTS'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MODE3_BLACK_CLIP']    = float(request.json['IMAGE_STRETCH__MODE3_BLACK_CLIP'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MODE3_SHADOWS']       = float(request.json['IMAGE_STRETCH__MODE3_SHADOWS'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MODE3_MIDTONES']      = float(request.json['IMAGE_STRETCH__MODE3_MIDTONES'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MODE3_HIGHLIGHTS']    = float(request.json['IMAGE_STRETCH__MODE3_HIGHLIGHTS'])
-        self.indi_allsky_config['IMAGE_STRETCH']['SPLIT']               = bool(request.json['IMAGE_STRETCH__SPLIT'])
-        self.indi_allsky_config['IMAGE_STRETCH']['MOONMODE']            = bool(request.json['IMAGE_STRETCH__MOONMODE'])
-        self.indi_allsky_config['IMAGE_STRETCH']['DAYTIME']             = bool(request.json['IMAGE_STRETCH__DAYTIME'])
+        self.full_config_image_stretch_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['KEOGRAM_ANGLE']                        = float(request.json['KEOGRAM_ANGLE'])
         self.indi_allsky_config['KEOGRAM_H_SCALE']                      = int(request.json['KEOGRAM_H_SCALE'])
         self.indi_allsky_config['KEOGRAM_V_SCALE']                      = int(request.json['KEOGRAM_V_SCALE'])

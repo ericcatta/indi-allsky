@@ -569,6 +569,43 @@ class ModernAdminFullConfigWebStatusParser:
         return config
 
 
+class ModernAdminFullConfigImageStretchParser:
+    """Hybrid-owned parser for full-config image stretch fields."""
+
+    REQUIRED_FIELDS = (
+        'IMAGE_STRETCH__CLASSNAME',
+        'IMAGE_STRETCH__MODE1_GAMMA',
+        'IMAGE_STRETCH__MODE1_STDDEVS',
+        'IMAGE_STRETCH__MODE2_SHADOWS',
+        'IMAGE_STRETCH__MODE2_MIDTONES',
+        'IMAGE_STRETCH__MODE2_HIGHLIGHTS',
+        'IMAGE_STRETCH__MODE3_BLACK_CLIP',
+        'IMAGE_STRETCH__MODE3_SHADOWS',
+        'IMAGE_STRETCH__MODE3_MIDTONES',
+        'IMAGE_STRETCH__MODE3_HIGHLIGHTS',
+        'IMAGE_STRETCH__SPLIT',
+        'IMAGE_STRETCH__MOONMODE',
+        'IMAGE_STRETCH__DAYTIME',
+    )
+
+    def apply(self, config, payload):
+        image_stretch = config['IMAGE_STRETCH']
+        image_stretch['CLASSNAME'] = str(payload['IMAGE_STRETCH__CLASSNAME'])
+        image_stretch['MODE1_GAMMA'] = float(payload['IMAGE_STRETCH__MODE1_GAMMA'])
+        image_stretch['MODE1_STDDEVS'] = float(payload['IMAGE_STRETCH__MODE1_STDDEVS'])
+        image_stretch['MODE2_SHADOWS'] = float(payload['IMAGE_STRETCH__MODE2_SHADOWS'])
+        image_stretch['MODE2_MIDTONES'] = float(payload['IMAGE_STRETCH__MODE2_MIDTONES'])
+        image_stretch['MODE2_HIGHLIGHTS'] = float(payload['IMAGE_STRETCH__MODE2_HIGHLIGHTS'])
+        image_stretch['MODE3_BLACK_CLIP'] = float(payload['IMAGE_STRETCH__MODE3_BLACK_CLIP'])
+        image_stretch['MODE3_SHADOWS'] = float(payload['IMAGE_STRETCH__MODE3_SHADOWS'])
+        image_stretch['MODE3_MIDTONES'] = float(payload['IMAGE_STRETCH__MODE3_MIDTONES'])
+        image_stretch['MODE3_HIGHLIGHTS'] = float(payload['IMAGE_STRETCH__MODE3_HIGHLIGHTS'])
+        image_stretch['SPLIT'] = bool(payload['IMAGE_STRETCH__SPLIT'])
+        image_stretch['MOONMODE'] = bool(payload['IMAGE_STRETCH__MOONMODE'])
+        image_stretch['DAYTIME'] = bool(payload['IMAGE_STRETCH__DAYTIME'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

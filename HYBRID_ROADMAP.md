@@ -143,6 +143,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - template/testo status web e policy immagini locali/non locali sono ora
     parsati da `ModernAdminFullConfigWebStatusParser`; route, autorizzazioni,
     template e comportamento media restano invariati.
+  - classe, parametri delle modalita' e flag Image Stretch sono ora parsati da
+    `ModernAdminFullConfigImageStretchParser`; algoritmi, OpenCV e pipeline
+    immagini restano Classic-owned e invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
