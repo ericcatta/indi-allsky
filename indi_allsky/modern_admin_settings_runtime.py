@@ -107,6 +107,22 @@ class ModernAdminFullConfigStationIdentityParser:
         return config
 
 
+class ModernAdminFullConfigLensMetadataParser:
+    """Hybrid-owned parser for descriptive full-config lens metadata."""
+
+    REQUIRED_FIELDS = (
+        'LENS_NAME',
+        'LENS_FOCAL_LENGTH',
+        'LENS_FOCAL_RATIO',
+    )
+
+    def apply(self, config, payload):
+        config['LENS_NAME'] = str(payload['LENS_NAME'])
+        config['LENS_FOCAL_LENGTH'] = float(payload['LENS_FOCAL_LENGTH'])
+        config['LENS_FOCAL_RATIO'] = float(payload['LENS_FOCAL_RATIO'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

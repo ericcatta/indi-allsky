@@ -79,7 +79,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - il gruppo full-config Station Identity (`WEBSITE.TITLE`, `OWNER`) e' ora
     Hybrid-owned tramite `ModernAdminFullConfigStationIdentityParser`, senza
     cambiare cast, campi richiesti o conservazione delle chiavi Website
-    esistenti; gli altri gruppi restano Classic-owned.
+    esistenti;
+  - i metadati descrittivi della lente (`LENS_NAME`, `LENS_FOCAL_LENGTH`,
+    `LENS_FOCAL_RATIO`) sono ora Hybrid-owned tramite
+    `ModernAdminFullConfigLensMetadataParser`; image circle, offset e
+    orientamento restano Classic-owned in attesa di una revisione geometrica.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
