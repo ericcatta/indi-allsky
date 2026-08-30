@@ -93,6 +93,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigImageStretchPar
 from ..modern_admin_settings_runtime import ModernAdminFullConfigKeogramParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigLongTermKeogramParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPhotometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigSkyModeThresholdParser
@@ -3379,6 +3380,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigKeogramParser()
 
 
+    def full_config_longterm_keogram_parser(self):
+        return ModernAdminFullConfigLongTermKeogramParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3500,12 +3505,7 @@ class AjaxConfigView(BaseView):
         self.full_config_web_status_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_image_stretch_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_keogram_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['LONGTERM_KEOGRAM']['ENABLE']           = bool(request.json['LONGTERM_KEOGRAM__ENABLE'])
-        self.indi_allsky_config['LONGTERM_KEOGRAM']['OFFSET_X']         = int(request.json['LONGTERM_KEOGRAM__OFFSET_X'])
-        self.indi_allsky_config['LONGTERM_KEOGRAM']['OFFSET_Y']         = int(request.json['LONGTERM_KEOGRAM__OFFSET_Y'])
-        self.indi_allsky_config['LONGTERM_KEOGRAM']['OPENCV_FONT_SCALE']    = float(request.json['LONGTERM_KEOGRAM__OPENCV_FONT_SCALE'])
-        self.indi_allsky_config['LONGTERM_KEOGRAM']['PIL_FONT_SIZE']        = int(request.json['LONGTERM_KEOGRAM__PIL_FONT_SIZE'])
-        self.indi_allsky_config['LONGTERM_KEOGRAM']['MONTH_LABEL_TEMPLATE'] = str(request.json['LONGTERM_KEOGRAM__MONTH_LABEL_TEMPLATE'])
+        self.full_config_longterm_keogram_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['REALTIME_KEOGRAM']['MAX_ENTRIES']      = int(request.json['REALTIME_KEOGRAM__MAX_ENTRIES'])
         self.indi_allsky_config['REALTIME_KEOGRAM']['SAVE_INTERVAL']    = int(request.json['REALTIME_KEOGRAM__SAVE_INTERVAL'])
         self.indi_allsky_config['REALTIME_KEOGRAM']['LABEL']            = bool(request.json['REALTIME_KEOGRAM__LABEL'])

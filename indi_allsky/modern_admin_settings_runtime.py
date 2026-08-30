@@ -628,6 +628,29 @@ class ModernAdminFullConfigKeogramParser:
         return config
 
 
+class ModernAdminFullConfigLongTermKeogramParser:
+    """Hybrid-owned parser for full-config long-term keogram fields."""
+
+    REQUIRED_FIELDS = (
+        'LONGTERM_KEOGRAM__ENABLE',
+        'LONGTERM_KEOGRAM__OFFSET_X',
+        'LONGTERM_KEOGRAM__OFFSET_Y',
+        'LONGTERM_KEOGRAM__OPENCV_FONT_SCALE',
+        'LONGTERM_KEOGRAM__PIL_FONT_SIZE',
+        'LONGTERM_KEOGRAM__MONTH_LABEL_TEMPLATE',
+    )
+
+    def apply(self, config, payload):
+        longterm_keogram = config['LONGTERM_KEOGRAM']
+        longterm_keogram['ENABLE'] = bool(payload['LONGTERM_KEOGRAM__ENABLE'])
+        longterm_keogram['OFFSET_X'] = int(payload['LONGTERM_KEOGRAM__OFFSET_X'])
+        longterm_keogram['OFFSET_Y'] = int(payload['LONGTERM_KEOGRAM__OFFSET_Y'])
+        longterm_keogram['OPENCV_FONT_SCALE'] = float(payload['LONGTERM_KEOGRAM__OPENCV_FONT_SCALE'])
+        longterm_keogram['PIL_FONT_SIZE'] = int(payload['LONGTERM_KEOGRAM__PIL_FONT_SIZE'])
+        longterm_keogram['MONTH_LABEL_TEMPLATE'] = str(payload['LONGTERM_KEOGRAM__MONTH_LABEL_TEMPLATE'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 
