@@ -14,6 +14,7 @@ from indi_allsky.modern_admin_media_runtime import ModernAdminLatestCameraFrames
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaAccessAdapter
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaItemSerializer
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaListQueryPlanner
+from indi_allsky.modern_admin_media_runtime import ModernAdminMediaServeAdapter
 from indi_allsky.modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from indi_allsky.modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 
@@ -340,6 +341,24 @@ def test_media_access_adapter_returns_none_when_get_url_fails():
     assert_true(adapter.resolve_media_url(media_entry, local=True) is None, 'getUrl failure should keep URL unavailable')
 
 
+def test_media_serve_adapter_preserves_sender_arguments():
+    calls = list()
+
+    def fake_sender(image_folder, path):
+        calls.append((image_folder, path))
+        return 'served-response'
+
+    adapter = ModernAdminMediaServeAdapter(
+        image_folder='/srv/allsky/images',
+        sender=fake_sender,
+    )
+
+    response = adapter.serve_image_folder_path('ccd_camera/latest.jpg')
+
+    assert_true(response == 'served-response', 'media serve adapter should return existing sender response')
+    assert_true(calls == [('/srv/allsky/images', 'ccd_camera/latest.jpg')], 'media serve adapter must preserve sender arguments exactly')
+
+
 def test_modern_views_delegate_media_url_normalization_to_runtime_service():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
     start = source.index('class ModernAdminMediaListView')
@@ -388,6 +407,17 @@ def test_safe_control_image_circle_preview_delegates_display_url_to_media_access
     assert_true('def get_safe_controls_media_access_adapter(self):' in body, 'safe controls must construct media access adapter')
     assert_true('.resolve_existing_media_url(latest_image_url)' in body, 'Image Circle preview URL should go through Hybrid media access adapter')
     assert_true('.normalize_media_url(latest_image_url)' not in body, 'Image Circle helper must not own direct URL normalization')
+
+
+def test_images_folder_route_delegates_serving_to_media_serve_adapter():
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    start = source.index('def images_folder(path):')
+    end = source.index('bp_allsky.add_url_rule', start)
+    body = source[start:end]
+
+    assert_true('ModernAdminMediaServeAdapter' in source, 'views must import Hybrid media serve adapter')
+    assert_true('.serve_image_folder_path(path)' in body, 'images folder route should delegate serving through Hybrid adapter')
+    assert_true("send_from_directory(app.config['INDI_ALLSKY_IMAGE_FOLDER'], path)" not in body, 'images folder route must not own direct send_from_directory call')
 
 
 def test_preview_metadata_lookup_shapes_thumbnail_url():
@@ -607,10 +637,12 @@ def run_tests():
     test_media_access_adapter_preserves_get_url_arguments_and_normalizes_result()
     test_media_access_adapter_normalizes_existing_media_urls()
     test_media_access_adapter_returns_none_when_get_url_fails()
+    test_media_serve_adapter_preserves_sender_arguments()
     test_modern_views_delegate_media_url_normalization_to_runtime_service()
     test_generated_media_metadata_delegates_media_access_to_runtime_adapter()
     test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter()
     test_safe_control_image_circle_preview_delegates_display_url_to_media_access_adapter()
+    test_images_folder_route_delegates_serving_to_media_serve_adapter()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()

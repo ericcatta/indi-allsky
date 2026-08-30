@@ -45,6 +45,7 @@ from ..modern_admin_media_runtime import ModernAdminLatestCameraFramesRepository
 from ..modern_admin_media_runtime import ModernAdminMediaAccessAdapter
 from ..modern_admin_media_runtime import ModernAdminMediaItemSerializer
 from ..modern_admin_media_runtime import ModernAdminMediaListQueryPlanner
+from ..modern_admin_media_runtime import ModernAdminMediaServeAdapter
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 from ..modern_admin_media_runtime import ModernAdminPreviewMetadataLookupService
 from ..modern_admin_runtime_providers import ModernAdminCameraRuntimeMetadataProvider
@@ -22845,7 +22846,10 @@ class AjaxAstroPanelView(BaseView):
 @bp_allsky.route('/images/<path:path>')  # noqa: E302
 def images_folder(path):
     app.logger.warning('Serving image file: %s', path)
-    return send_from_directory(app.config['INDI_ALLSKY_IMAGE_FOLDER'], path)
+    return ModernAdminMediaServeAdapter(
+        image_folder=app.config['INDI_ALLSKY_IMAGE_FOLDER'],
+        sender=send_from_directory,
+    ).serve_image_folder_path(path)
 
 
 bp_allsky.add_url_rule('/ajax/status_update', view_func=AjaxStatusUpdateView.as_view('ajax_status_update_view'))

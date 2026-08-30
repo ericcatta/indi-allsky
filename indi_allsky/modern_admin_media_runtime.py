@@ -157,6 +157,18 @@ class ModernAdminMediaAccessAdapter:
             pass
 
 
+class ModernAdminMediaServeAdapter:
+    """Hybrid compatibility adapter for existing media file serving."""
+
+    def __init__(self, image_folder, sender):
+        self.image_folder = image_folder
+        self.sender = sender
+
+
+    def serve_image_folder_path(self, path):
+        return self.sender(self.image_folder, path)
+
+
 class ModernAdminPreviewMetadataLookupService:
     """Metadata-only thumbnail/preview lookup for Modern/Admin media surfaces."""
 
