@@ -118,6 +118,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - i flag Auto White Balance giorno/notte sono ora parsati da
     `ModernAdminFullConfigAutoWhiteBalanceParser`; algoritmi AWB, pipeline
     colore e controllo camera restano invariati.
+  - le preferenze di visualizzazione per temperatura, pressione e velocita'
+    del vento sono ora parsate da `ModernAdminFullConfigDisplayUnitsParser`;
+    conversioni, sensori e provider runtime restano invariati.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

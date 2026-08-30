@@ -82,6 +82,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectio
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigColorProcessingParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigDenoiseParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigDisplayUnitsParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
@@ -3321,6 +3322,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigDenoiseParser()
 
 
+    def full_config_display_units_parser(self):
+        return ModernAdminFullConfigDisplayUnitsParser()
+
+
     def full_config_white_balance_parser(self):
         return ModernAdminFullConfigWhiteBalanceParser()
 
@@ -3429,9 +3434,7 @@ class AjaxConfigView(BaseView):
         self.indi_allsky_config['CCD_TEMP']                             = float(request.json['CCD_TEMP'])
         self.indi_allsky_config['CCD_TEMP_DAY']                         = float(request.json['CCD_TEMP_DAY'])
         self.full_config_auto_white_balance_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['TEMP_DISPLAY']                         = str(request.json['TEMP_DISPLAY'])
-        self.indi_allsky_config['PRESSURE_DISPLAY']                     = str(request.json['PRESSURE_DISPLAY'])
-        self.indi_allsky_config['WINDSPEED_DISPLAY']                    = str(request.json['WINDSPEED_DISPLAY'])
+        self.full_config_display_units_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['GPS_ENABLE']                           = bool(request.json['GPS_ENABLE'])
         self.indi_allsky_config['CCD_TEMP_SCRIPT']                      = str(request.json['CCD_TEMP_SCRIPT'])
         self.indi_allsky_config['TARGET_ADU']                           = int(request.json['TARGET_ADU'])

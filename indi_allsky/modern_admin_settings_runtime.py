@@ -389,6 +389,22 @@ class ModernAdminFullConfigAutoWhiteBalanceParser:
         return config
 
 
+class ModernAdminFullConfigDisplayUnitsParser:
+    """Hybrid-owned parser for full-config display unit preferences."""
+
+    REQUIRED_FIELDS = (
+        'TEMP_DISPLAY',
+        'PRESSURE_DISPLAY',
+        'WINDSPEED_DISPLAY',
+    )
+
+    def apply(self, config, payload):
+        config['TEMP_DISPLAY'] = str(payload['TEMP_DISPLAY'])
+        config['PRESSURE_DISPLAY'] = str(payload['PRESSURE_DISPLAY'])
+        config['WINDSPEED_DISPLAY'] = str(payload['WINDSPEED_DISPLAY'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 
