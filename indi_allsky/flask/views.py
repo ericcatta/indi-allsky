@@ -80,6 +80,7 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigAutoGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -3299,6 +3300,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigCameraSqmParser()
 
 
+    def full_config_focus_parser(self):
+        return ModernAdminFullConfigFocusParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3389,8 +3394,7 @@ class AjaxConfigView(BaseView):
         acquisition_mode_parser.apply_bit_depth(self.indi_allsky_config, request.json)
         exposure_gain_parser.apply_exposure_periods(self.indi_allsky_config, request.json)
         self.full_config_camera_sqm_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['FOCUS_MODE']                           = bool(request.json['FOCUS_MODE'])
-        self.indi_allsky_config['FOCUS_DELAY']                          = float(request.json['FOCUS_DELAY'])
+        self.full_config_focus_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CFA_PATTERN']                          = str(request.json['CFA_PATTERN'])
         self.indi_allsky_config['USE_NIGHT_COLOR']                      = bool(request.json['USE_NIGHT_COLOR'])
         self.indi_allsky_config['SCNR_ALGORITHM']                       = str(request.json['SCNR_ALGORITHM'])

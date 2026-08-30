@@ -99,7 +99,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - il blocco Camera SQM del parser full-config e' ora Hybrid-owned tramite
     `ModernAdminFullConfigCameraSqmParser`; enablement, precisione numerica,
     cadence e offset mantengono la semantica legacy, senza modificare raccolta
-    o calcolo SQM runtime.
+    o calcolo SQM runtime;
+  - `FOCUS_MODE` e `FOCUS_DELAY` sono ora parsati da
+    `ModernAdminFullConfigFocusParser`, mantenendo cast e validazione legacy;
+    controller, movimento hardware e azioni focus restano Classic-owned.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite

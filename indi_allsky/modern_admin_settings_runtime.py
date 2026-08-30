@@ -257,6 +257,20 @@ class ModernAdminFullConfigCameraSqmParser:
         return config
 
 
+class ModernAdminFullConfigFocusParser:
+    """Hybrid-owned parser for legacy full-config focus timing fields."""
+
+    REQUIRED_FIELDS = (
+        'FOCUS_MODE',
+        'FOCUS_DELAY',
+    )
+
+    def apply(self, config, payload):
+        config['FOCUS_MODE'] = bool(payload['FOCUS_MODE'])
+        config['FOCUS_DELAY'] = float(payload['FOCUS_DELAY'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

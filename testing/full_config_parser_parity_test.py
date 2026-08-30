@@ -18,6 +18,7 @@ from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigAutoG
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigCameraSqmParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -75,6 +76,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigAcquisitionModeParser,
         ModernAdminFullConfigAutoGainParser,
         ModernAdminFullConfigCameraSqmParser,
+        ModernAdminFullConfigFocusParser,
     )
 
     def __init__(self, source_path=VIEWS_PATH):
@@ -194,6 +196,9 @@ class LegacyFullConfigParserHarness:
                 full_config_camera_sqm_parser=(
                     lambda: ModernAdminFullConfigCameraSqmParser()
                 ),
+                full_config_focus_parser=(
+                    lambda: ModernAdminFullConfigFocusParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -267,7 +272,7 @@ class LegacyFullConfigParserHarness:
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 682
+    assert len(harness.direct_payload_keys) == 680
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -536,6 +541,40 @@ def test_camera_sqm_parser_preserves_legacy_casting_and_rounding():
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
+def test_focus_parser_preserves_legacy_boolean_and_float_casting():
+    parser = ModernAdminFullConfigFocusParser()
+
+    for raw_mode, expected_mode in (
+        (False, False),
+        (True, True),
+        ('', False),
+        ('false', True),
+    ):
+        config = {}
+        payload = {
+            'FOCUS_MODE': raw_mode,
+            'FOCUS_DELAY': '4.25',
+        }
+        assert parser.apply(config, payload) is config
+        assert config == {
+            'FOCUS_MODE': expected_mode,
+            'FOCUS_DELAY': 4.25,
+        }
+
+    for missing_field in parser.REQUIRED_FIELDS:
+        payload = {
+            'FOCUS_MODE': False,
+            'FOCUS_DELAY': '4.25',
+        }
+        payload.pop(missing_field)
+        try:
+            parser.apply({}, payload)
+        except KeyError as error:
+            assert error.args == (missing_field,)
+        else:
+            raise AssertionError('{0:s} should remain required'.format(missing_field))
+
+
 def test_ajax_config_view_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -625,6 +664,15 @@ def test_ajax_config_view_delegates_camera_sqm_parsing():
 
     assert 'full_config_camera_sqm_parser().apply' in parser_source
     for field_name in ModernAdminFullConfigCameraSqmParser.REQUIRED_FIELDS:
+        assert field_name not in harness.direct_payload_keys
+
+
+def test_ajax_config_view_delegates_focus_parsing():
+    harness = LegacyFullConfigParserHarness()
+    parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
+
+    assert 'full_config_focus_parser().apply' in parser_source
+    for field_name in ModernAdminFullConfigFocusParser.REQUIRED_FIELDS:
         assert field_name not in harness.direct_payload_keys
 
 
@@ -792,6 +840,7 @@ if __name__ == '__main__':
     test_acquisition_mode_parser_preserves_legacy_integer_casting()
     test_auto_gain_parser_preserves_legacy_boolean_and_integer_casting()
     test_camera_sqm_parser_preserves_legacy_casting_and_rounding()
+    test_focus_parser_preserves_legacy_boolean_and_float_casting()
     test_ajax_config_view_delegates_camera_connection_parsing()
     test_ajax_config_view_delegates_station_identity_parsing()
     test_ajax_config_view_delegates_lens_metadata_parsing()
@@ -800,6 +849,7 @@ if __name__ == '__main__':
     test_ajax_config_view_delegates_acquisition_mode_in_legacy_order()
     test_ajax_config_view_delegates_auto_gain_parsing()
     test_ajax_config_view_delegates_camera_sqm_parsing()
+    test_ajax_config_view_delegates_focus_parsing()
     test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()
