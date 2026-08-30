@@ -1618,10 +1618,14 @@ class IndiAllSkyConfigUtil(IndiAllSkyConfig):
             sys.exit(1)
 
 
-        self._config.update(revert_entry.data)
-
         logger.info('Reverting configuration')
-        self.save('system', 'Revert to config: {0:d}'.format(revert_entry.id))
+        from .modern_admin_settings_runtime import ModernAdminSettingsRevisionRollbackService
+
+        ModernAdminSettingsRevisionRollbackService().apply_revision(
+            revision=revert_entry,
+            current_config=self._config,
+            save_adapter=self.save,
+        )
 
 
     def dump(self, **kwargs):

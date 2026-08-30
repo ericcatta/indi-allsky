@@ -12,6 +12,7 @@ from indi_allsky.modern_admin_settings_runtime import ModernAdminConfigRevisionP
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
+from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRevisionRollbackService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRestoreService
 from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsRestoreValidationError
 
@@ -117,6 +118,57 @@ def test_config_revision_persistence_adapter_uses_naive_utc_timestamp():
     assert created.tzinfo is None
     utcnow = datetime.now(tz=timezone.utc).replace(tzinfo=None)
     assert abs((utcnow - created).total_seconds()) < 2
+
+
+def test_settings_revision_rollback_service_preserves_revert_effect():
+    service = ModernAdminSettingsRevisionRollbackService()
+    revision = type('Revision', (), {
+        'id': 42,
+        'data': {
+            'CAMERA_INTERFACE': 'libcamera',
+            'CCD_CONFIG': {'NIGHT': {'GAIN': 12}},
+        },
+    })()
+    current_config = {
+        'CAMERA_INTERFACE': 'indi',
+        'UNCHANGED_FALLBACK': True,
+    }
+    save_calls = []
+
+    def save_adapter(username, note):
+        save_calls.append((username, note, dict(current_config)))
+        return 'saved-rollback-row'
+
+    result = service.apply_revision(
+        revision=revision,
+        current_config=current_config,
+        save_adapter=save_adapter,
+    )
+
+    assert result == 'saved-rollback-row'
+    assert current_config == {
+        'CAMERA_INTERFACE': 'libcamera',
+        'CCD_CONFIG': {'NIGHT': {'GAIN': 12}},
+        'UNCHANGED_FALLBACK': True,
+    }
+    assert save_calls == [(
+        'system',
+        'Revert to config: 42',
+        current_config,
+    )]
+
+
+def test_classic_config_revert_delegates_application_to_hybrid_service():
+    config_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'config.py'
+    source = config_path.read_text()
+    start = source.index('    def _revert(self, **kwargs):')
+    end = source.index('    def dump(self, **kwargs):', start)
+    revert_source = source[start:end]
+
+    assert 'ModernAdminSettingsRevisionRollbackService' in revert_source
+    assert '.apply_revision(' in revert_source
+    assert 'self._config.update(revert_entry.data)' not in revert_source
+    assert "self.save('system', 'Revert to config:" not in revert_source
 
 
 class FakeConfigRevision:
@@ -547,6 +599,8 @@ def test_ajax_config_view_uses_full_config_save_boundary():
 if __name__ == '__main__':
     test_config_revision_persistence_adapter_preserves_database_effect()
     test_config_revision_persistence_adapter_uses_naive_utc_timestamp()
+    test_settings_revision_rollback_service_preserves_revert_effect()
+    test_classic_config_revert_delegates_application_to_hybrid_service()
     test_settings_runtime_service_saves_config_revision_through_adapter()
     test_settings_runtime_service_propagates_adapter_exception()
     test_settings_runtime_service_saves_full_config_through_adapter()

@@ -31,6 +31,19 @@ class ModernAdminConfigRevisionPersistenceAdapter:
         return datetime.now(tz=timezone.utc).replace(tzinfo=None)
 
 
+class ModernAdminSettingsRevisionRollbackService:
+    """Hybrid-owned application of a confirmed config revision rollback."""
+
+    ROLLBACK_NOTE = 'Revert to config: {revision_id:d}'
+
+    def apply_revision(self, revision, current_config, save_adapter, username='system'):
+        current_config.update(revision.data)
+        return save_adapter(
+            username,
+            self.ROLLBACK_NOTE.format(revision_id=revision.id),
+        )
+
+
 class ModernAdminSettingsRuntimeService:
     """Hybrid-owned boundary for Modern settings runtime persistence.
 
