@@ -64,8 +64,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     Classic-owned;
   - audit parser full-config: `AjaxConfigView.dispatch_request()` resta un
     milestone Classic di circa 934 righe, 720 accessi diretti al payload e 719
-    campi distinti; non procedere con migrazioni field-by-field senza un parity
-    harness completo;
+    campi distinti; `testing/full_config_parser_parity_test.py` fornisce ora il
+    parity harness obbligatorio per confrontare config finale, reload/note ed
+    eccezioni tra parser legacy e un futuro candidato Hybrid;
   - la preparazione strutturale prima del parsing full-config e' ora
     Hybrid-owned tramite `ModernAdminFullConfigPayloadPreparationService`:
     sezioni dict, rami CCD e fallback FITS headers mantengono la semantica
