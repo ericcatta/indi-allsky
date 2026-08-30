@@ -75,6 +75,7 @@ from ..modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContr
 from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
+from ..modern_admin_settings_runtime import ModernAdminFullConfigAcquisitionModeParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigCameraConnectionParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
@@ -3284,6 +3285,10 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigExposureGainParser()
 
 
+    def full_config_acquisition_mode_parser(self):
+        return ModernAdminFullConfigAcquisitionModeParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3362,16 +3367,17 @@ class AjaxConfigView(BaseView):
         self.full_config_lens_metadata_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_lens_geometry_parser().apply(self.indi_allsky_config, request.json)
         exposure_gain_parser = self.full_config_exposure_gain_parser()
+        acquisition_mode_parser = self.full_config_acquisition_mode_parser()
         exposure_gain_parser.apply_night_gain(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CCD_CONFIG']['NIGHT']['BINNING']       = int(request.json['CCD_CONFIG__NIGHT__BINNING'])
+        acquisition_mode_parser.apply_night_binning(self.indi_allsky_config, request.json)
         exposure_gain_parser.apply_moonmode_gain(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CCD_CONFIG']['MOONMODE']['BINNING']    = int(request.json['CCD_CONFIG__MOONMODE__BINNING'])
+        acquisition_mode_parser.apply_moonmode_binning(self.indi_allsky_config, request.json)
         exposure_gain_parser.apply_day_gain(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CCD_CONFIG']['DAY']['BINNING']         = int(request.json['CCD_CONFIG__DAY__BINNING'])
+        acquisition_mode_parser.apply_day_binning(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CCD_CONFIG']['AUTO_GAIN_ENABLE']       = bool(request.json['CCD_CONFIG__AUTO_GAIN_ENABLE'])
         self.indi_allsky_config['CCD_CONFIG']['AUTO_GAIN_LEVELS']       = int(request.json['CCD_CONFIG__AUTO_GAIN_LEVELS'])
         exposure_gain_parser.apply_exposure_limits(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['CCD_BIT_DEPTH']                        = int(request.json['CCD_BIT_DEPTH'])
+        acquisition_mode_parser.apply_bit_depth(self.indi_allsky_config, request.json)
         exposure_gain_parser.apply_exposure_periods(self.indi_allsky_config, request.json)
         self.indi_allsky_config['CAMERA_SQM']['ENABLE']                 = bool(request.json['CAMERA_SQM__ENABLE'])
         self.indi_allsky_config['CAMERA_SQM']['ENABLE_DAY']             = bool(request.json['CAMERA_SQM__ENABLE_DAY'])

@@ -189,6 +189,36 @@ class ModernAdminFullConfigExposureGainParser:
         return config
 
 
+class ModernAdminFullConfigAcquisitionModeParser:
+    """Hybrid-owned parser for full-config binning and bit depth fields."""
+
+    REQUIRED_FIELDS = (
+        'CCD_CONFIG__NIGHT__BINNING',
+        'CCD_CONFIG__MOONMODE__BINNING',
+        'CCD_CONFIG__DAY__BINNING',
+        'CCD_BIT_DEPTH',
+    )
+
+    def apply_night_binning(self, config, payload):
+        config['CCD_CONFIG']['NIGHT']['BINNING'] = int(payload['CCD_CONFIG__NIGHT__BINNING'])
+        return config
+
+
+    def apply_moonmode_binning(self, config, payload):
+        config['CCD_CONFIG']['MOONMODE']['BINNING'] = int(payload['CCD_CONFIG__MOONMODE__BINNING'])
+        return config
+
+
+    def apply_day_binning(self, config, payload):
+        config['CCD_CONFIG']['DAY']['BINNING'] = int(payload['CCD_CONFIG__DAY__BINNING'])
+        return config
+
+
+    def apply_bit_depth(self, config, payload):
+        config['CCD_BIT_DEPTH'] = int(payload['CCD_BIT_DEPTH'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

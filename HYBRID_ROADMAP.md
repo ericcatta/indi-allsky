@@ -89,7 +89,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - manual gain giorno/notte/moonmode e limiti, timeout e cadence di esposizione
     sono ora Hybrid-owned tramite `ModernAdminFullConfigExposureGainParser`;
     ordine delle mutazioni, arrotondamenti e cast legacy restano invariati,
-    mentre binning, Auto Gain e bit depth restano Classic-owned.
+    mentre Auto Gain resta Classic-owned;
+  - binning giorno/notte/moonmode e bit depth sono ora Hybrid-owned tramite
+    `ModernAdminFullConfigAcquisitionModeParser`, mantenendo cast, ordine e
+    validazione legacy senza interrogare capability hardware.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
