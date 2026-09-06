@@ -16,6 +16,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Focus: decodifica, ritaglio e misurazione ora nel modulo condiviso
+  `indi_allsky/focus_preview.py`; parita' JPEG/score/stelle verificata.
+  Selezione multicamera e pagina nativa restano da completare.
+
 - Recovery IMX708 2026-09-06: la cache della maschera Mode 1 stretch distingue
   binning e dimensioni del frame; processor separati anche per profili con
   FITS/output completi, non solo images-only. Corretto il crash notturno senza

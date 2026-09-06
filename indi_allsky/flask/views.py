@@ -9255,135 +9255,19 @@ class JsonFocusView(JsonView):
 
 
     def dispatch_request(self):
-        import cv2
-        from ..stars import IndiAllSkyStars
-
-        zoom = int(request.args.get('zoom', 2))
-        x_offset = int(request.args.get('x_offset', 0))
-        y_offset = int(request.args.get('y_offset', 0))
-
-
-        sqm_mask = {
-            1 : None,  # assume bin 1
-        }
-
-        stars_detect_o = IndiAllSkyStars(self.indi_allsky_config, mask=sqm_mask)
-
-
-        json_data = dict()
-        json_data['focus_mode'] = self.indi_allsky_config.get('FOCUS_MODE', False)
-
-        image_dir = Path(self.indi_allsky_config['IMAGE_FOLDER']).absolute()
-        latest_image_p = image_dir.joinpath('latest.{0:s}'.format(self.indi_allsky_config['IMAGE_FILE_TYPE']))
-        #latest_image_p = image_dir.joinpath('focus.fit')
-        #latest_image_p = image_dir.joinpath('focus.png')
-
-
-        if not latest_image_p.exists():
-            app.logger.error('Latest image does not exist')
-            return jsonify({}), 400
-
-
-        #focus_start = time.time()
-
-        if latest_image_p.suffix in ('.jpg', '.jpeg'):
-            import simplejpeg
-
-            try:
-                with io.open(str(latest_image_p), 'rb') as f_img:
-                    image_data = simplejpeg.decode_jpeg(f_img.read(), colorspace='BGR')
-            except ValueError:
-                app.logger.error('Unable to read %s', latest_image_p)
-                return jsonify({}), 400
-
-        elif latest_image_p.suffix in ('.png',):
-            # opencv is faster than Pillow with PNG
-            # PNG encoding is very slow on Raspberry Pi
-            image_data = cv2.imread(str(latest_image_p), cv2.IMREAD_COLOR)
-
-            if isinstance(image_data, type(None)):
-                app.logger.error('Unable to read %s', latest_image_p)
-                return jsonify({}), 400
-        elif latest_image_p.suffix in ('.fit', '.fits'):
-            import numpy
-            from astropy.io import fits
-
-            try:
-                hdulist = fits.open(latest_image_p)
-            except OSError:
-                app.logger.error('Unable to read %s', latest_image_p)
-                return jsonify({}), 400
-
-            # data should be RGB
-            image_data = numpy.swapaxes(hdulist[0].data, 0, 2)
-            image_data = numpy.swapaxes(image_data, 0, 1)
-            image_data = cv2.cvtColor(image_data, cv2.COLOR_RGB2BGR)
-
-        else:
-            # Pillow supports remaining image types
-            import numpy
-            import PIL
-            from PIL import Image
-
-            try:
-                with Image.open(str(latest_image_p)) as img_pil:
-                    image_data = cv2.cvtColor(numpy.array(img_pil), cv2.COLOR_RGB2BGR)
-            except PIL.UnidentifiedImageError:
-                app.logger.error('Unable to read %s', latest_image_p)
-                return jsonify({}), 400
-
-
-        stars = stars_detect_o.detectObjects(image_data, 1)  # assume bin 1
-
-
-        image_height, image_width = image_data.shape[:2]
-
-        ### get ROI based on zoom
-        x1 = int((image_width / 2) - (image_width / zoom) + x_offset)
-        y1 = int((image_height / 2) - (image_height / zoom) - y_offset)
-        x2 = int((image_width / 2) + (image_width / zoom) + x_offset)
-        y2 = int((image_height / 2) + (image_height / zoom) - y_offset)
-
-        image_roi = image_data[
-            y1:y2,
-            x1:x2,
-        ]
-
-
-        ### OpenCV
-        _, json_image = cv2.imencode('.jpg', image_roi, [cv2.IMWRITE_JPEG_QUALITY, 90])
-        #_, json_image = cv2.imencode('.png', image_roi, [cv2.IMWRITE_PNG_COMPRESSION, 5])
-        json_image_buffer = io.BytesIO(json_image.tobytes())
-
-
-        ### pillow
-        #from PIL import Image
-        #json_image_buffer = io.BytesIO()
-        #img = Image.fromarray(cv2.cvtColor(image_roi, cv2.COLOR_BGR2RGB))
-        #img.save(json_image_buffer, format='JPEG', quality=90)
-        #img.save(json_image_buffer, format='PNG', compress_level=5)
-
-
-        json_image_b64 = base64.b64encode(json_image_buffer.getvalue())
-
-        json_data['image_b64'] = json_image_b64.decode('utf-8')
-
-
-        ### Blur detection
-        #vl_start = time.time()
-
-        ### determine variance of laplacian
-        blur_score = cv2.Laplacian(image_roi, cv2.CV_32F).var()
-        json_data['blur_score'] = float(blur_score)
-        json_data['star_count'] = len(stars)
-
-        #vl_elapsed_s = time.time() - vl_start
-        #app.logger.info('Variance of laplacien in %0.4f s', vl_elapsed_s)
-
-        #focus_elapsed_s = time.time() - focus_start
-        #app.logger.info('Focus processing in %0.4f s', focus_elapsed_s)
-
-        return jsonify(json_data)
+        from ..focus_preview import load_focus_image, focus_preview
+        try:
+            zoom = int(request.args.get('zoom', 2))
+            x_offset = int(request.args.get('x_offset', 0))
+            y_offset = int(request.args.get('y_offset', 0))
+            image_dir = Path(self.indi_allsky_config['IMAGE_FOLDER']).absolute()
+            latest_image_p = image_dir.joinpath('latest.{0:s}'.format(self.indi_allsky_config['IMAGE_FILE_TYPE']))
+            image_data = load_focus_image(latest_image_p)
+            return jsonify(focus_preview(image_data, self.indi_allsky_config,
+                                         zoom=zoom, x_offset=x_offset, y_offset=y_offset))
+        except (ValueError, OSError) as error:
+            app.logger.warning('Focus preview unavailable: %s', error)
+            return jsonify({'error': 'Focus preview unavailable. Check the image and zoom/offset selection.'}), 400
 
 
 class AjaxFocusControllerView(BaseView):

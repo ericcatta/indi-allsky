@@ -619,3 +619,26 @@ combined failures. The complete 17-entrypoint Book 2/shell regression passes.
 No physical focuser was moved. This is a prerequisite correction: native Focus
 controls, multicamera preview isolation and real hardware acceptance remain open;
 the existing disabled Hybrid movement controls have not been declared complete.
+
+## Verified prerequisite: independent Focus measurement engine
+
+Focus decoding, ROI selection, star counting, JPEG encoding and Laplacian score
+now live outside Flask views in `indi_allsky/focus_preview.py`. The compatibility
+endpoint delegates to that shared implementation. Valid crops retain the same
+formulas, full-frame star detection and JPEG quality. Invalid zoom/offsets return
+an explicit error instead of wrapping negative NumPy indices or passing an empty
+crop to OpenCV. FITS reads close their HDU list and copy data before returning.
+
+The captured pre-extraction class and its AST fingerprint are stored in
+`testing/fixtures/focus_preview_legacy.json`. On the Raspberry,
+`hybrid_focus_preview_parity_test.py` executes the captured legacy method and
+compares the complete result to the new engine for 22 valid zoom/offset cases:
+JPEG bytes, blur score, star count and focus mode all match. Invalid regions and
+RGB FITS decoding/resource closure are checked separately.
+`hybrid_focus_endpoint_flow_test.py` verifies actual Flask responses for both
+roles, malformed inputs, missing files and anonymous redirect with Classic imports
+forbidden. The full 17-entrypoint Book 2/shell regression passes unchanged.
+
+The endpoint still uses the legacy latest file selection. Native Focus UI and
+camera-specific live preview are explicitly unfinished; this extraction does not
+claim those flows or hardware acceptance are complete. Production is unchanged.
