@@ -546,3 +546,30 @@ The data-URL download event was not confirmed by the browser tool, so device-sid
 receipt remains blocked rather than passed. Production FITS UI deployment and
 full-resolution live acceptance are still open. The urgent runtime recovery
 record is separate: `HYBRID_IMX708_STRETCH_RECOVERY.md`.
+
+## Verified correction: runtime controls on native tool and media pages
+
+The shared Hybrid context now supplies the existing runtime providers and Safe
+Action URLs to native media, task, notification, account and tool pages. These
+pages previously rendered a missing-context Unknown badge and disabled controls,
+although the same controls worked on Product pages. No effect implementation or
+permission policy changed. The shell now reflects admin-only recovery permission
+with disabled controls and an accessible explanation for ordinary users, and
+ignores clicks on disabled/pending controls.
+
+`testing/hybrid_runtime_shell_flow_test.py` passes on the Raspberry with temporary
+DB and Classic imports forbidden: eight pages, admin/ordinary users, exactly one
+service-status read per page, both camera/profile abort targets, running/unknown
+provider states and anonymous redirect. The 17 Book 2/shell entrypoints and the
+archive, operations and FITS Flask suites pass. Only the intentionally changed
+Hybrid shell DOM fingerprints were updated; Classic and Full Config fingerprints
+are unchanged.
+
+Browser acceptance on localhost sandbox 2026-09-06: archive admin shows all six
+recovery buttons enabled; ordinary user shows all six disabled with permission
+explanation on Now and archive. Start opens its correct confirmation. The browser
+interrupted that modal interaction and no submitted effect was verified: this
+is not evidence of service start or failed-effect recovery. The sandbox blocks
+subprocess effects, so its Unknown status is legitimate. Running status is
+covered by the injected-provider Flask test, not a live service observation.
+Production deployment and real recovery-effects acceptance remain open.

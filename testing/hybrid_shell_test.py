@@ -56,6 +56,7 @@ def shell_contract(shell, modern, authenticated, original_source=None):
         request=SimpleNamespace(endpoint='indi_allsky.modern_admin_now_view' if modern else 'indi_allsky.index_view'),
         current_user=SimpleNamespace(is_authenticated=authenticated, is_admin=authenticated),
         session={'admin_mode': 'modern' if modern else 'classic'},
+        config={'LOGIN_DISABLED': False},
         form_camera_select=SimpleNamespace(CAMERA_SELECT=lambda **kwargs: '<select></select>'),
         camera_id=2, camera_count=2,
     )
@@ -81,14 +82,14 @@ def shell_contract(shell, modern, authenticated, original_source=None):
 
 def test_shell_dom_parity():
     # Classic retains the pre-split 17c5a322 baselines. Hybrid's baseline
-    # intentionally includes the accessible keyboard navigation controller;
+    # intentionally includes accessible navigation and role-aware recovery controls;
     # account links are checked separately below. Full Config fingerprints
     # are independent and unchanged.
     expected = {
         (False, False): 'da24764ffdc54509edae10c1475666dc2ebe6808599afddbbe9fa65426a46010',
         (False, True): '5231472cc413795e3f2b4c2a380db4bc0f7a8205a9e092569f76999d806383fc',
-        (True, False): 'c80b34e4ab4fdf3d6e73f3e98401e915c05ec9e48175b59cc49a0344cf3b81d8',
-        (True, True): 'c80b34e4ab4fdf3d6e73f3e98401e915c05ec9e48175b59cc49a0344cf3b81d8',
+        (True, False): 'bf087aa4d926a19e29b0f976093a73f7691bc42d1231f1360c24a290bb8fe2dc',
+        (True, True): '12f93629460d77ce9aceb4ae771e005d160f8800d099c04f5df7132584dfc5bd',
     }
     for (modern, authenticated), fingerprint in expected.items():
         shell = 'modern_admin/base.html' if modern else 'base.html'

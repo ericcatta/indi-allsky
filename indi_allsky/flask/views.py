@@ -4828,6 +4828,7 @@ class ModernAdminContextMixin(object):
 
         context['modern_admin_mode'] = session.get('admin_mode', 'modern')
         context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
+        context.update(ModernAdminView.get_modern_admin_topbar_context(self))
 
         return context
 
