@@ -16,6 +16,24 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-config-restore-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    <section class="modern-admin-table-panel" aria-labelledby="restore-upload-title">
+        <h2 id="restore-upload-title">Restore configuration</h2>
+        <p>This replaces the complete configuration, including camera profiles. Download a snapshot from Config History before restoring.</p>
+        <form id="hybrid-config-restore" action="{{ url_for('indi_allsky.ajax_config_restore_view') }}" method="post" enctype="multipart/form-data">
+            {{ form_config_restore.csrf_token }}
+            <p>{{ form_config_restore.CONFIG_UPLOAD.label }} {{ form_config_restore.CONFIG_UPLOAD(required=true, accept='.json,application/json') }}</p>
+            <p>{{ form_config_restore.FLUSH_CONFIGS() }} {{ form_config_restore.FLUSH_CONFIGS.label }} — Permanently remove previous configuration revisions.</p>
+            <p>{{ form_config_restore.RESET_KEYS() }} {{ form_config_restore.RESET_KEYS.label }} — Replace security keys and invalidate sessions. Unavailable when password encryption is enabled.</p>
+            <button type="submit" class="btn btn-primary">Restore configuration</button>
+            <p role="status" aria-live="polite" data-restore-status></p>
+        </form>
+    </section>
+    <script src="{{ url_for('indi_allsky.static', filename='modern_admin/config-restore.js') }}" defer></script>
+    {% else %}
+    <p class="modern-admin-note">An administrator account is required to restore configurations.</p>
+    {% endif %}
+
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Config restore summary">
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Recent entries</div>
@@ -122,12 +140,10 @@ var camera_id = {{ camera_id }};
         </div>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.config_list_view') }}">Open legacy Config History</a>
-            <a href="{{ url_for('indi_allsky.config_restore_view') }}">Open legacy Config Restore</a>
             <a href="{{ url_for('indi_allsky.modern_admin_config_history_view') }}">Open Config History</a>
         </section>
 
-        <p class="modern-admin-note">Raw config payload is intentionally hidden to avoid exposing secrets. Restore actions remain available only in legacy UI.</p>
+        <p class="modern-admin-note">Snapshot values are hidden here because they may contain secrets.</p>
     </section>
 </main>
 <script>

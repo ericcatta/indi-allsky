@@ -44,6 +44,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     Passano 18 entrypoint locali e il rendering della shell in Flask sul Pi
     con Classic escluso, sempre in staging e senza accesso al DB operativo.
 - Book 2 / Settings Runtime Independence:
+  - il flusso upload/restore e download delle revisioni e' disponibile nelle
+    pagine Hybrid, senza link alle pagine Classic: form, CSRF, gate admin,
+    opzioni flush/reset e gestione del risultato usano il contratto esistente.
+    Controller browser verificato per errori, sessione scaduta, flag e doppio
+    invio; template e form reali verificati in Flask sul Pi con Classic
+    escluso. Nessun restore operativo effettuato: persistenza ed effetti
+    reali restano da collaudare nella manutenzione del prodotto completo.
   - completata l'ownership dell'intero parser Full Config:
     `ModernAdminFullConfigParser.parse(config, payload)` interpreta tutti i
     719 campi, riusa i 31 parser di dominio e restituisce config, intent reload

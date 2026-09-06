@@ -29,9 +29,9 @@ var camera_id = {{ camera_id }};
             <p>Rows that were saved with encrypted values.</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Legacy fallback</div>
-            <h3>Available</h3>
-            <p><a href="{{ url_for('indi_allsky.config_list_view') }}">Open legacy Config History</a></p>
+            <div class="modern-admin-card-label">Configuration</div>
+            <h3>Full Settings</h3>
+            <p><a href="{{ url_for('indi_allsky.modern_admin_full_settings_view') }}">Open Full Settings</a></p>
         </article>
     </section>
 
@@ -111,8 +111,8 @@ var camera_id = {{ camera_id }};
 
         <p class="modern-admin-note">Raw config payload is not shown here. Sensitive values are not displayed.</p>
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.config_list_view') }}">Open legacy Config History</a>
-            <a href="{{ url_for('indi_allsky.config_restore_view') }}">Open legacy Config Restore</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_full_settings_view') }}">Open Full Settings</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_config_restore_view') }}">Open Config Restore</a>
         </section>
     </section>
 </main>

@@ -60,6 +60,38 @@ def check_startup(config_path, classic_enabled):
             shell = render_template('modern_admin/base.html')
             assert 'hybrid-app-shell' in shell
             assert 'admin-mode-switch-classic' not in shell
+        from flask_login import UserMixin, login_user, logout_user
+        from indi_allsky.flask.forms import IndiAllskyConfigRestoreForm
+        from types import SimpleNamespace
+        class RestoreUser(UserMixin):
+            id = 'test-admin'
+            is_admin = True
+        with app.test_request_context('/indi-allsky/modern-admin/config/restore'):
+            form = IndiAllskyConfigRestoreForm(indi_allsky_config={})
+            context = {'form_config_restore': form, 'camera_id': -1,
+                       'modern_admin_config_restore_detail': SimpleNamespace(id=1)}
+            login_user(RestoreUser())
+            restored = render_template('modern_admin/config_restore.html', **context)
+            assert 'id="hybrid-config-restore"' in restored
+            assert 'name="csrf_token"' in restored
+            assert 'name="CONFIG_UPLOAD"' in restored
+            assert '/ajax/config/restore' in restored
+            detail = render_template('modern_admin/config_restore_detail.html', **context)
+            assert '/config/download?id=1' in detail
+            render_template('modern_admin/config_history.html', **context)
+            # The real form preserves the existing encryption gate.
+            encrypted = IndiAllskyConfigRestoreForm(indi_allsky_config={'ENCRYPT_PASSWORDS': True})
+            assert 'disabled' in str(encrypted.RESET_KEYS())
+            ordinary_user = RestoreUser()
+            ordinary_user.is_admin = False
+            login_user(ordinary_user)
+            assert 'id="hybrid-config-restore"' not in render_template('modern_admin/config_restore.html', **context)
+            assert '/config/download?id=1' not in render_template('modern_admin/config_restore_detail.html', **context)
+            logout_user()
+            readonly = render_template('modern_admin/config_restore.html', **context)
+            assert 'id="hybrid-config-restore"' not in readonly
+            readonly = render_template('modern_admin/config_restore_detail.html', **context)
+            assert '/config/download?id=1' not in readonly
         client = app.test_client()
         response = client.get('/indi-allsky/static/images/favicon_32.png')
         assert response.status_code == 200

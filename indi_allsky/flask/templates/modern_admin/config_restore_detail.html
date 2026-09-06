@@ -56,12 +56,13 @@ var camera_id = {{ camera_id }};
             <div><dt>Note</dt><dd>{{ modern_admin_config_restore_detail.note }}</dd></div>
         </dl>
 
-        <p class="modern-admin-note">Restore, download and raw config inspection remain intentionally unavailable here.</p>
+        {% if current_user.is_authenticated and current_user.is_admin %}
+        <p><a href="{{ url_for('indi_allsky.config_download_view', id=modern_admin_config_restore_detail.id) }}">Download this snapshot</a> to restore it through Config Restore. The downloaded file may contain secrets; keep it private.</p>
+        {% endif %}
 
         <section class="modern-admin-link-grid">
             <a href="{{ url_for('indi_allsky.modern_admin_config_restore_view') }}">Back to Config Restore</a>
             <a href="{{ url_for('indi_allsky.modern_admin_config_history_view') }}">Open Config History</a>
-            <a href="{{ url_for('indi_allsky.config_restore_view') }}">Open legacy Config Restore</a>
         </section>
     </section>
 </main>

@@ -6964,7 +6964,7 @@ class ModernAdminSystemView(ModernAdminView):
             ('Camera Settings', 'indi_allsky.modern_admin_camera_settings_view'),
             ('Config', 'indi_allsky.modern_admin_config_view'),
             ('Config History', 'indi_allsky.modern_admin_config_history_view'),
-            ('Config Restore (read-only)', 'indi_allsky.modern_admin_config_restore_view'),
+            ('Config Restore', 'indi_allsky.modern_admin_config_restore_view'),
             ('Network', 'indi_allsky.modern_admin_network_view'),
             ('GPIO Control', 'indi_allsky.modern_admin_manual_gpio_view'),
             ('Updates', 'indi_allsky.modern_admin_updates_view'),
@@ -11222,6 +11222,10 @@ class ModernAdminConfigRestoreView(ModernAdminConfigRevisionMetadataMixin, Moder
         context.update(self.settings_revision_metadata_service().restore_context(
             limit=self.config_display_limit,
         ))
+
+        context['form_config_restore'] = IndiAllskyConfigRestoreForm(
+            indi_allsky_config=self.indi_allsky_config,
+        )
 
         return context
 
