@@ -1210,3 +1210,39 @@ old timestamps appeared stale and the blocked service adapter appeared Unknown.
 This is partial admin browser acceptance, not a hardware or full-control pass.
 The new Observatory page is not deployed to production; the existing capture
 soak remains on faf53d86 without interruption from this mission.
+
+
+## Upgrade prerequisite defect and Hybrid command ownership
+
+Review of Updates found an actual supported Classic operation: the System page
+starts the installed `upgrade-indi-allsky.service`, which runs
+`misc/unattended_upgrade.sh`. This must be migrated, not labelled a future
+feature. Its preflight in AjaxSystemInfoView incorrectly used `disk_usage.total`
+instead of `free`, so a large full disk passed. Permission errors were skipped,
+and `/var` was checked only if reported as a separate partition.
+
+`ModernAdminUpgradeCommandBoundary` now owns command/authorization validation,
+free-space checks on both `/` and `/var`, and delegation to the injected effect.
+Both paths require at least 1000 MiB free, preserving the intended threshold;
+unknown/malformed or unreadable observations block submission. Native route auth,
+CSRF, request fields, configured unit and successful `Job submitted` payload
+remain. Read/effect failures return sanitized 503 responses; service exceptions
+are logged. The service script itself is unchanged. The check is a prerequisite,
+not a reservation of space or proof of a successful upgrade.
+
+`upgrade_command_test.py` covers a large nearly full disk, exact threshold,
+root/var failures, malformed observations, rejected permissions/commands, and a
+single effect. `hybrid_upgrade_flow_test.py` passes on the isolated Pi copy with
+Classic forbidden: real admin/ordinary/anonymous requests, CSRF, low free space,
+read failure, exact configured service call and failed effect. The service is
+mocked; no upgrade, network package operation or capture restart was performed.
+All 19 Book 2/modern_admin/Safe Actions/parity/Product/shell/composition/upgrade
+entrypoints pass and git diff --check is clean. Remote test log:
+`/tmp/hybrid-upgrade-flow.log` (contains the deliberately injected service error).
+
+Updates UI, explicit confirmation, pending/duplicate handling and observable
+upgrade-service completion remain open. In particular the installed oneshot unit
+uses RemainAfterExit: repeated Start after completion needs deliberate lifecycle
+handling before the UI can claim a new upgrade started. The script's capture
+stop also needs timer-aware maintenance review. These are not declared passed
+by the preflight correction. The fix is committed but not deployed to production.

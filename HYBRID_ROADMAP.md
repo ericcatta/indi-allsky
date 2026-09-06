@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Upgrade: il prerequisito spazio e la delega del comando sono ora nel boundary
+  Hybrid `ModernAdminUpgradeCommandBoundary`. Corretto il confronto errato con
+  capacita' totale: servono almeno 1000 MiB liberi sia su / sia su /var; letture
+  non verificabili bloccano l'avvio. API/permessi/CSRF e servizio installato
+  conservati. UI Updates, osservabilita' del servizio e prova upgrade reale
+  restano da completare; nessun upgrade reale eseguito durante il soak.
+
 - Observatory: riepilogo operativo Hybrid da record per camera, freschezza frame,
   fonti FITS/RAW, conteggi task e capacita' del filesystem media. Errori di lettura
   distinti da dati assenti; indicatori integrazioni descrivono configurazione,

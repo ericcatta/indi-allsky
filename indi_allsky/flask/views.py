@@ -7645,32 +7645,15 @@ class AjaxSystemInfoView(BaseView):
                 return jsonify(errors_data), 400
 
         elif service == app.config['UPGRADE_ALLSKY_SERVICE_NAME']:
-            if command == 'start':
-                fs_list = psutil.disk_partitions(all=True)
-                for fs in fs_list:
-                    if fs.mountpoint not in ('/', '/var'):
-                        continue
-
-                    try:
-                        disk_usage = psutil.disk_usage(fs.mountpoint)
-                    except PermissionError as e:
-                        app.logger.error('PermissionError: %s', str(e))
-                        continue
-
-
-                    fs_free_mb = disk_usage.total / 1024.0 / 1024.0
-                    if fs_free_mb < 1000:
-                        errors_data = {
-                            'COMMAND_HIDDEN' : ['Not enough available space on {0:s} filesystem'.format(fs.mountpoint)],
-                        }
-                        return jsonify(errors_data), 400
-
-                r = self.startSystemdUnit(app.config['UPGRADE_ALLSKY_SERVICE_NAME'])
-            else:
-                errors_data = {
-                    'COMMAND_HIDDEN' : ['Unhandled command'],
-                }
-                return jsonify(errors_data), 400
+            from ..modern_safe_action import ModernAdminUpgradeCommandBoundary
+            result = ModernAdminUpgradeCommandBoundary(
+                disk_usage=psutil.disk_usage,
+                effect_adapter=lambda: self.startSystemdUnit(app.config['UPGRADE_ALLSKY_SERVICE_NAME']),
+            ).run(command, authorized=bool(app.config['LOGIN_DISABLED'] or current_user.is_admin))
+            if not result.allowed:
+                status = 503 if result.status in ('provider_unavailable', 'effect_failed') else 400
+                return jsonify({'COMMAND_HIDDEN': [result.message]}), status
+            r = result.details['service_result']
         elif service == 'system':
             if command == 'reboot':
                 # allowing rebooting from non-admin networks for now

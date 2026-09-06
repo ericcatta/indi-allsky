@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from dataclasses import dataclass
 from dataclasses import field
@@ -1457,6 +1458,52 @@ class ModernAdminAbortExposureActionPlanner:
             allowed=allowed,
             details=details or {},
         )
+
+
+class ModernAdminUpgradeCommandBoundary:
+    """Validate upgrade preconditions before delegating to the installed service.
+
+    Permission is supplied by the authenticated route. Disk reads and service
+    effects are injected; this boundary never invokes shell/package operations.
+    """
+    MIN_FREE_BYTES = 1000 * 1024 * 1024
+
+    def __init__(self, disk_usage, effect_adapter):
+        self.disk_usage = disk_usage
+        self.effect_adapter = effect_adapter
+
+    def run(self, command, *, authorized=False):
+        def result(status, message, allowed=False, details=None):
+            return ModernAdminSafeActionResult(
+                action_id='system.upgrade', feature='Updates', risk_level='critical',
+                status=status, message=message, allowed=allowed, dry_run=False,
+                details=details or {})
+
+        if authorized is not True:
+            return result('permission_denied', 'Administrator access is required for upgrades.')
+        if command != 'start':
+            return result('validation_failed', 'Unhandled command')
+        free_space = {}
+        for mount in ('/', '/var'):
+            try:
+                free = self.disk_usage(mount).free
+            except (OSError, AttributeError, TypeError):
+                return result('provider_unavailable', 'Cannot verify available space on {0} filesystem'.format(mount))
+            # psutil exposes integer bytes. Reject malformed observations rather
+            # than interpreting an unknown capacity as sufficient free space.
+            if isinstance(free, bool) or not isinstance(free, int) or free < 0:
+                return result('provider_unavailable', 'Cannot verify available space on {0} filesystem'.format(mount))
+            free_space[mount] = free
+            if free < self.MIN_FREE_BYTES:
+                return result('validation_failed', 'Not enough available space on {0} filesystem'.format(mount),
+                              details={'free_bytes': free_space, 'minimum_free_bytes': self.MIN_FREE_BYTES})
+        try:
+            service_result = self.effect_adapter()
+        except Exception:
+            logging.getLogger(__name__).exception('Upgrade service start failed')
+            return result('effect_failed', 'The upgrade service could not be started. Inspect system logs before retrying.')
+        return result('submitted', 'Job submitted', allowed=True,
+                      details={'free_bytes': free_space, 'service_result': service_result})
 
 
 class ModernAdminSystemPowerCommandBoundary:
