@@ -201,6 +201,7 @@ from .forms import IndiAllskyIndiServerChangeForm
 
 from .notification_views import ModernAdminNotificationAcknowledgeView
 from .table_export_views import ModernAdminTableExportView
+from .mini_generation import ModernAdminMiniPreviewView, queue_mini_generation
 from .source_media_views import ModernAdminSourceDownloadView, local_source_allowed, source_file_path
 from .base_views import BaseView
 from .base_views import TemplateView
@@ -12058,57 +12059,7 @@ class AjaxMiniTimelapseGeneratorView(BaseView):
 
 
     def dispatch_request(self):
-        if not current_user.is_admin:
-            json_data = {
-                'failure-message' : 'User does not have permission to generate content',
-            }
-            return jsonify(json_data), 400
-
-
-        image_id = int(request.json['IMAGE_ID'])
-        camera_id = int(request.json['CAMERA_ID'])
-        pre_seconds = int(request.json['PRE_SECONDS'])
-        post_seconds = int(request.json['POST_SECONDS'])
-        framerate = float(request.json['FRAMERATE'])
-        note = str(request.json['NOTE'])
-
-
-        # sanity check
-        IndiAllSkyDbImageTable.query\
-            .join(IndiAllSkyDbImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbImageTable.id == image_id)\
-            .one()
-
-
-        jobdata = {
-            'action' : 'generateMiniVideo',
-            'kwargs' : {
-                'image_id'      : image_id,
-                'camera_id'     : camera_id,
-                'pre_seconds'   : pre_seconds,
-                'post_seconds'  : post_seconds,
-                'framerate'     : framerate,
-                'note'          : note,
-            },
-        }
-
-
-        task_mini_video = IndiAllSkyDbTaskQueueTable(
-            queue=TaskQueueQueue.VIDEO,
-            state=TaskQueueState.MANUAL,
-            priority=100,
-            data=jobdata,
-        )
-
-        db.session.add(task_mini_video)
-        db.session.commit()
-
-        message = {
-            'success-message' : 'Job Submitted - Check the Mini Timelapses view in a few minutes',
-        }
-
-        return jsonify(message)
+        return queue_mini_generation()
 
 
 class FileSpaceUsageView(TemplateView):
@@ -13504,22 +13455,16 @@ class ModernAdminMediaMetadataView(ModernAdminMediaBrowseView):
 
 
     def get_generated_media_url(self, entry):
-        local = True
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
-                if not getattr(entry, 'remote_url', None) and not getattr(entry, 's3_key', None):
-                    return None
-
-        return self.get_generated_media_access_adapter().resolve_media_url(entry, local=local)
+        local = local_source_allowed(entry.camera, self.verify_admin_network)
+        if not local and not entry.remote_url and not entry.s3_key:
+            return None
+        return self.get_generated_media_access_adapter(entry).resolve_media_url(entry, local=local)
 
 
-    def get_generated_media_access_adapter(self):
+    def get_generated_media_access_adapter(self, entry):
         return ModernAdminMediaAccessAdapter(
             url_normalizer=self.get_modern_admin_media_url_normalizer(),
-            s3_prefix=self.s3_prefix,
+            s3_prefix=entry.camera.s3_prefix,
             logger=app.logger,
             error_message='Error determining modern admin generated media URL: %s',
         )
@@ -15916,6 +15861,40 @@ class ModernAdminGenerateView(ModernAdminMediaBrowseView, TemplateView):
             rows.append({'id':task.id, 'created':task.createDate, 'action':data.get('action', 'Unknown'),
                          'state':task.state.name, 'result':task.result or ''})
         context['generation_tasks'] = rows
+        return context
+
+
+class ModernAdminMiniGenerateView(ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Create mini timelapse'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_mini_timelapses_view'
+
+    def get_context(self):
+        context = super().get_context()
+        filters = self.get_media_camera_filters()
+        selected = self.get_selected_media_camera_filter(filters)
+        if request.args.get('profile_id') and not selected.get('profile_id'):
+            abort(400, description='Choose an available camera profile.')
+        target_id = selected.get('camera_id') or self.camera.id
+        if request.args.get('camera_id') and request.args.get('camera_id', type=int) != target_id:
+            abort(400, description='Camera and profile do not match.')
+        target = IndiAllSkyDbCameraTable.query.filter_by(id=target_id).first_or_404()
+        query = IndiAllSkyDbImageTable.query.filter_by(camera_id=target.id)
+        if request.args.get('image_id'):
+            image_id = request.args.get('image_id', type=int)
+            if not image_id or image_id <= 0:
+                abort(400, description='Choose a valid image ID.')
+            image = query.filter_by(id=image_id).first_or_404()
+        else:
+            image = query.order_by(IndiAllSkyDbImageTable.createDate.desc(), IndiAllSkyDbImageTable.id.desc()).first()
+        context.update(mini_camera=target, mini_image=image,
+            mini_filters=[item for item in filters if item.get('camera_id')],
+            mini_can_submit=bool(current_user.is_authenticated and current_user.is_admin),
+            form_mini=IndiAllskyMiniTimelapseForm(data={'CAMERA_ID':target.id,
+                'IMAGE_ID':image.id if image else '', 'PRE_SECONDS_SELECT':'240',
+                'POST_SECONDS_SELECT':'120', 'FRAMERATE_SELECT':'10'}))
+        for field in (context['form_mini'].PRE_SECONDS_SELECT, context['form_mini'].POST_SECONDS_SELECT):
+            field.choices = list(dict(field.choices).items())
         return context
 
 
@@ -21461,6 +21440,8 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
     bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
     bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>/acknowledge', view_func=ModernAdminNotificationAcknowledgeView.as_view('modern_admin_notification_acknowledge_view'), methods=['POST'])
+    bp_allsky.add_url_rule('/modern-admin/tools/mini-generate', view_func=ModernAdminMiniGenerateView.as_view('modern_admin_mini_generate_view', template_name='modern_admin/mini_generate.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/mini-preview', view_func=ModernAdminMiniPreviewView.as_view('modern_admin_mini_preview_view'))
     bp_allsky.add_url_rule('/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download', view_func=ModernAdminSourceDownloadView.as_view('modern_admin_source_download_view'))
     bp_allsky.add_url_rule('/modern-admin/operations/export', view_func=ModernAdminTableExportView.as_view('modern_admin_table_export_view'), methods=['POST'])
     bp_allsky.add_url_rule('/modern-admin/notifications', view_func=ModernAdminNotificationsView.as_view('modern_admin_notifications_view', template_name='modern_admin/notifications.html'))

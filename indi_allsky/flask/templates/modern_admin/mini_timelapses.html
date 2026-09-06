@@ -97,7 +97,7 @@ var camera_id = {{ camera_id }};
                 <tbody>
                     {% for video in modern_admin_mini_timelapse_rows %}
                     <tr data-search="{{ (video.id ~ ' ' ~ video.filename ~ ' ' ~ video.note)|lower }}" data-timeofday="{{ video.timeofday|lower }}" data-uploaded="{{ video.uploaded|lower }}">
-                        <td>{{ video.id }}</td>
+                        <td>{{ video.id }} <a class="modern-admin-file-action" href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='mini-video', camera_id=video.camera_id, media_id=video.id) }}">Download</a></td>
                         <td>{{ video.created }}</td>
                         <td>{{ video.target_date }}</td>
                         <td>{{ video.camera_id }}</td>
@@ -124,11 +124,10 @@ var camera_id = {{ camera_id }};
             </table>
         </div>
 
-        <p class="modern-admin-note">This page shows database-backed mini timelapse products and metadata. It does not generate, convert, download, delete, open paths or inspect file contents.</p>
+        <p class="modern-admin-note">Preview recent outputs above or download an original file from its row. Filters apply to the displayed records.</p>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.mini_videoviewer_view') }}">Open legacy Mini Video Viewer</a>
-            <a href="{{ url_for('indi_allsky.mini_generate_view') }}">Open legacy Mini Timelapse Generate</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_mini_generate_view', camera_id=modern_admin_media_selected_filter.camera_id, profile_id=request.args.get('profile_id', '')) }}">Create mini timelapse</a>
         </section>
     </section>
 </main>

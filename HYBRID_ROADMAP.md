@@ -31,6 +31,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     conservati. Test su task reali in DB temporaneo e cancellazioni di fixture;
   - browser desktop/mobile verificato; encoding/upload dei worker e produzione
     restano da collaudare. Evidenze in `HYBRID_ACCEPTANCE_STATUS.md`.
+- Media generati: download Hybrid per record/camera estesi ai prodotti immagini,
+  timelapse, mini-video, startrail e panorama; preview con policy della camera
+  proprietaria. Cinque pagine non richiedono piu' route UI Classic.
+- Mini timelapse: selezione immagine, preview intervallo, validazione e comando
+  coda posseduti da Hybrid; POST compatibile delegato e worker invariato. Prove
+  Flask/browser isolate passate; archivio completo ed esecuzione live aperti.
 - Collaudo sorgenti FITS/RAW: download originali Hybrid per record/camera,
   policy locale/remota e cartella export separata; preview JPEG senza Classic,
   gestione file/header mancanti o invalidi e chiusura handle su errore.

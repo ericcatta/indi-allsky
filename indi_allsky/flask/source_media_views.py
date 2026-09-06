@@ -1,10 +1,21 @@
-"""Hybrid original FITS/RAW downloads, independent of UI compatibility routes."""
+"""Hybrid original media downloads, independent of UI compatibility routes."""
 from pathlib import Path
 from urllib.parse import urlsplit
 from flask import abort, current_app as app, redirect, send_file
 from flask_login import login_required
 from .base_views import BaseView
-from .models import IndiAllSkyDbFitsImageTable, IndiAllSkyDbRawImageTable
+from .models import (IndiAllSkyDbFitsImageTable, IndiAllSkyDbRawImageTable,
+    IndiAllSkyDbImageTable, IndiAllSkyDbVideoTable, IndiAllSkyDbMiniVideoTable,
+    IndiAllSkyDbKeogramTable, IndiAllSkyDbStarTrailsTable, IndiAllSkyDbStarTrailsVideoTable,
+    IndiAllSkyDbPanoramaImageTable, IndiAllSkyDbPanoramaVideoTable)
+
+MEDIA_DOWNLOAD_MODELS = {
+    'fits': IndiAllSkyDbFitsImageTable, 'raw': IndiAllSkyDbRawImageTable,
+    'image': IndiAllSkyDbImageTable, 'video': IndiAllSkyDbVideoTable,
+    'mini-video': IndiAllSkyDbMiniVideoTable, 'keogram': IndiAllSkyDbKeogramTable,
+    'startrail': IndiAllSkyDbStarTrailsTable, 'startrail-video': IndiAllSkyDbStarTrailsVideoTable,
+    'panorama': IndiAllSkyDbPanoramaImageTable, 'panorama-video': IndiAllSkyDbPanoramaVideoTable,
+}
 
 
 def local_source_allowed(camera, verify_admin_network):
@@ -29,7 +40,7 @@ class ModernAdminSourceDownloadView(BaseView):
     decorators = [login_required]
 
     def dispatch_request(self, kind, camera_id, media_id):
-        model = {'fits': IndiAllSkyDbFitsImageTable, 'raw': IndiAllSkyDbRawImageTable}.get(kind)
+        model = MEDIA_DOWNLOAD_MODELS.get(kind)
         if model is None:
             abort(404)
         entry = model.query.filter_by(id=media_id, camera_id=camera_id).first_or_404()
@@ -45,8 +56,8 @@ class ModernAdminSourceDownloadView(BaseView):
             if parts.scheme not in ('https', 'http') or not parts.netloc:
                 abort(404, description='The remote original URL is unavailable.')
             return redirect(target)
-        path = source_file_path(entry, self.indi_allsky_config)
         try:
+            path = source_file_path(entry, self.indi_allsky_config)
             response = send_file(path, mimetype='application/octet-stream', as_attachment=True,
                                  download_name=path.name, conditional=True, max_age=0)
             response.cache_control.private = True

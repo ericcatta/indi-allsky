@@ -307,3 +307,49 @@ escaping. The authenticated flow test confirms the notice appears before login
 and is absent after successful authentication. A browser logout/login/task-detail
 sequence reproduced and verified the correction. This changes no credentials,
 permissions, sessions or redirects. The full Book 2/shell/route regression passes.
+
+
+## Verified mission: generated media and native mini timelapses
+
+Five generated-media pages now render with Classic disabled: keograms,
+startrails, startrail videos, mini timelapses and panorama images. Their original
+files are downloadable by database record and camera, including records outside
+the 12 preview cards. The Hybrid download handler also supports ordinary images,
+full timelapses and panorama videos. Existing root confinement, remote-URL
+validation, authentication, range responses and private caching apply to every
+kind. Generated previews now use the owning camera's access policy and S3 prefix,
+fixing cross-camera policy selection in an all-camera listing. Image detail now
+links to its original and to a native mini generator centred on that image.
+
+The mini generator owns source selection, full-interval preview, validation and
+queue submission through `mini_generation.py`; the compatibility POST delegates
+to it. Existing worker payload keys, priority and queue/state are unchanged.
+Invalid or missing image/camera data return controlled errors; failed commits
+roll back. The supported interval is 0–12 hours on either side; frame rate is
+validated against the existing UI's 0.25–25 FPS range, and notes are bounded by
+the database's 255-character capacity. The old default-image ID zero bug and
+four-hour preview truncation are corrected. Preview uses the worker's inclusive
+bounds and excluded-record rule, reports the full count and an explicit 1,000-
+record preview cap. Missing files can still reduce the encoded output, which is
+stated next to the estimate. No acquisition or scientific algorithm changed.
+
+Browser evidence in `testing/evidence/hybrid-generated-media-2026-09-06.json`
+covers both camera selections, exact task payloads, optional description,
+confirmation, ordinary-user restrictions, preview playback/fullscreen, mobile
+width, all five pages' filters, and original downloads. Synthetic MP4 files are
+real decodable clips; they do not establish live capture-worker correctness.
+Individual footer/Open clicks not exercised are explicitly marked blocked.
+
+Nine real Flask suites pass with isolated data, including new generated-media
+and mini-generation coverage. Full Book 2, existing route fingerprints and all
+JavaScript controller suites pass. Discovery now covers 90 template routes and
+320 parameter-free role/camera contexts: 219 render successfully, 3 fail (the
+YouTube page still references Classic config), and 98 are blocked. It enumerates
+15,758 control occurrences; rendering alone does not pass these interactions.
+Dynamic detail routes still require their dedicated fixtures.
+
+Still open: browsing older records beyond the existing 100-row limits, complete
+player/context controls across every media type, YouTube/integrations, remaining
+operational tools, product placeholders, physical Classic removal, production
+deploy/rollback verification, and the minimum 24-hour day/night acceptance run.
+No performance improvement or complete product acceptance is claimed.

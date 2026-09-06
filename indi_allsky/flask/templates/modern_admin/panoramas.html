@@ -97,7 +97,7 @@ var camera_id = {{ camera_id }};
                 <tbody>
                     {% for panorama in modern_admin_panorama_rows %}
                     <tr data-search="{{ (panorama.id ~ ' ' ~ panorama.filename)|lower }}" data-timeofday="{{ panorama.timeofday|lower }}" data-uploaded="{{ panorama.uploaded|lower }}">
-                        <td>{{ panorama.id }}</td>
+                        <td>{{ panorama.id }} <a class="modern-admin-file-action" href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='panorama', camera_id=panorama.camera_id, media_id=panorama.id) }}">Download</a></td>
                         <td>{{ panorama.created }}</td>
                         <td>{{ panorama.day_date }}</td>
                         <td>{{ panorama.camera_id }}</td>
@@ -124,11 +124,11 @@ var camera_id = {{ camera_id }};
             </table>
         </div>
 
-        <p class="modern-admin-note">This page shows database-backed panorama products and metadata. It does not generate, convert, download, delete, exclude, open paths or inspect file contents.</p>
+        <p class="modern-admin-note">Preview recent outputs above or download an original file from its row. Filters apply to the displayed records.</p>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.latest_panorama_view') }}">Open legacy Panorama Latest</a>
-            <a href="{{ url_for('indi_allsky.panorama_image_view') }}">Open legacy Panorama Viewer</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_generate_view', camera_id=modern_admin_media_selected_filter.camera_id, profile_id=request.args.get('profile_id', '')) }}">Generate media</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_panorama_loop_view', camera_id=modern_admin_media_selected_filter.camera_id, profile_id=request.args.get('profile_id', '')) }}">Open panorama loop</a>
             <a href="{{ url_for('indi_allsky.modern_admin_media_panorama_loop_view') }}">Open Panorama Loop</a>
         </section>
     </section>

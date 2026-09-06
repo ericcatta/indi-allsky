@@ -576,7 +576,7 @@ def test_generated_media_metadata_delegates_media_access_to_runtime_adapter():
     end = source.index('class ModernAdminMediaStartrailVideosView', start)
     body = source[start:end]
 
-    assert_true('def get_generated_media_access_adapter(self):' in body, 'generated media metadata view must construct media access adapter')
+    assert_true('def get_generated_media_access_adapter(self, entry):' in body, 'generated media metadata view must construct media access adapter')
     assert_true('.resolve_media_url(entry, local=local)' in body, 'generated media URL resolution should go through Hybrid media access adapter')
     assert_true('.getUrl(s3_prefix=self.s3_prefix, local=local)' not in body, 'generated media metadata view must not own direct getUrl call')
     assert_true('.normalize_media_url(media_url)' not in body, 'generated media metadata view must not own final URL normalization')

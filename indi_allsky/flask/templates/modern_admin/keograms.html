@@ -95,7 +95,7 @@ var camera_id = {{ camera_id }};
                 <tbody>
                     {% for keogram in modern_admin_keogram_rows %}
                     <tr data-search="{{ (keogram.id ~ ' ' ~ keogram.filename)|lower }}" data-timeofday="{{ keogram.timeofday|lower }}" data-uploaded="{{ keogram.uploaded|lower }}">
-                        <td>{{ keogram.id }}</td>
+                        <td>{{ keogram.id }} <a class="modern-admin-file-action" href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='keogram', camera_id=keogram.camera_id, media_id=keogram.id) }}">Download</a></td>
                         <td>{{ keogram.created }}</td>
                         <td>{{ keogram.day_date }}</td>
                         <td>{{ keogram.camera_id }}</td>
@@ -120,10 +120,10 @@ var camera_id = {{ camera_id }};
             </table>
         </div>
 
-        <p class="modern-admin-note">This page shows database-backed keogram products and metadata. It does not generate, convert, download, delete, open paths or inspect file contents.</p>
+        <p class="modern-admin-note">Preview recent outputs above or download an original file from its row. Filters apply to the displayed records.</p>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.videoviewer_view') }}">Open legacy Video Viewer</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_generate_view', camera_id=modern_admin_media_selected_filter.camera_id, profile_id=request.args.get('profile_id', '')) }}">Generate media</a>
             <a href="{{ url_for('indi_allsky.modern_admin_realtime_keogram_view') }}">Open Realtime Keogram</a>
             <a href="{{ url_for('indi_allsky.modern_admin_longterm_keogram_view') }}">Open Long Term Keogram</a>
         </section>

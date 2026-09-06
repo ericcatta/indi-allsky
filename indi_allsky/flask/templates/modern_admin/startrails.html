@@ -95,7 +95,7 @@ var camera_id = {{ camera_id }};
                 <tbody>
                     {% for startrail in modern_admin_startrail_rows %}
                     <tr data-search="{{ (startrail.id ~ ' ' ~ startrail.filename)|lower }}" data-timeofday="{{ startrail.timeofday|lower }}" data-uploaded="{{ startrail.uploaded|lower }}">
-                        <td>{{ startrail.id }}</td>
+                        <td>{{ startrail.id }} <a class="modern-admin-file-action" href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='startrail', camera_id=startrail.camera_id, media_id=startrail.id) }}">Download</a></td>
                         <td>{{ startrail.created }}</td>
                         <td>{{ startrail.day_date }}</td>
                         <td>{{ startrail.camera_id }}</td>
@@ -120,11 +120,10 @@ var camera_id = {{ camera_id }};
             </table>
         </div>
 
-        <p class="modern-admin-note">This page shows database-backed startrail products and metadata. It does not generate, convert, download, delete, open paths or inspect file contents.</p>
+        <p class="modern-admin-note">Preview recent outputs above or download an original file from its row. Filters apply to the displayed records.</p>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.videoviewer_view') }}">Open legacy Video Viewer</a>
-            <a href="{{ url_for('indi_allsky.startrail_image_view') }}">Open legacy Startrail Viewer</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_generate_view', camera_id=modern_admin_media_selected_filter.camera_id, profile_id=request.args.get('profile_id', '')) }}">Generate media</a>
         </section>
     </section>
 </main>

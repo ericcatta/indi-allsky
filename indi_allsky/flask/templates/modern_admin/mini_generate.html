@@ -1,0 +1,62 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}{{ website_title }}: Create mini timelapse{% endblock %}
+{% block head %}{{ super() }}
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='mini-generation-v2') }}">
+{% endblock %}
+{% block content %}
+<main class="modern-admin-shell">
+<section class="modern-admin-table-panel">
+  <h1>Create mini timelapse</h1>
+  <p>Select an image as the centre of the clip, then choose the time before and after it. Generation uses saved, non-excluded images for this camera.</p>
+  <nav class="modern-admin-link-grid" aria-label="Mini timelapse camera">
+  {% for choice in mini_filters %}<a href="{{ url_for('indi_allsky.modern_admin_mini_generate_view', camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == mini_camera.id %}aria-current="page"{% endif %}>{{ choice.label }}</a>{% endfor %}
+  </nav>
+  <h2>{{ mini_camera.friendlyName or mini_camera.name }}</h2>
+  <form method="get" class="modern-admin-filter-bar">
+    <input type="hidden" name="camera_id" value="{{ mini_camera.id }}">
+    <input type="hidden" name="profile_id" value="{{ request.args.get('profile_id', '') }}">
+    <label>Image ID <input type="number" min="1" name="image_id" value="{{ mini_image.id if mini_image else '' }}" required></label>
+    <button type="submit">Load image</button>
+    <a href="{{ url_for('indi_allsky.modern_admin_mini_generate_view', camera_id=mini_camera.id, profile_id=request.args.get('profile_id', '')) }}">Use latest image</a>
+  </form>
+  {% if mini_image %}
+  <p id="mini-target">Image {{ mini_image.id }} · {{ mini_image.createDate }}{% if mini_image.exclude %} · Excluded from generated output{% endif %}</p>
+  {% else %}<p role="status">No saved images are available for this camera.</p>{% endif %}
+  {% if not mini_can_submit %}<p role="status">You can preview the interval. Administrator access is required to queue generation.</p>{% endif %}
+  <form id="hybrid-mini-form" action="{{ url_for('indi_allsky.ajax_mini_generate_view') }}" data-preview-url="{{ url_for('indi_allsky.modern_admin_mini_preview_view') }}" method="post">
+    {{ form_mini.csrf_token }}{{ form_mini.CAMERA_ID }}{{ form_mini.IMAGE_ID }}
+    <fieldset {% if not mini_image %}disabled{% endif %}>
+      <div class="modern-admin-filter-bar">
+        <label for="PRE_SECONDS_SELECT">Time before image</label>{{ form_mini.PRE_SECONDS_SELECT() }}
+        <label for="POST_SECONDS_SELECT">Time after image</label>{{ form_mini.POST_SECONDS_SELECT() }}
+        <label for="FRAMERATE_SELECT">Frame rate</label>{{ form_mini.FRAMERATE_SELECT() }}
+      </div>
+      <button id="mini-refresh" type="button">Refresh preview</button>
+      <p id="mini-preview-status" role="status" aria-live="polite"></p>
+      <div class="modern-admin-media-preview" id="mini-preview-container">
+        <button type="button" id="mini-exit-fullscreen">Exit fullscreen</button>
+        <img id="mini-preview-image" alt="Mini timelapse preview" hidden>
+      </div>
+      <div class="modern-admin-filter-bar">
+        <button type="button" id="mini-play" disabled>Play preview</button>
+        <button type="button" id="mini-fullscreen" disabled>Fullscreen preview</button>
+      </div>
+      <p id="mini-frame-status" role="status"></p>
+      <label for="NOTE">Description (optional)</label>{{ form_mini.NOTE(maxlength=255, required=false) }}
+      <fieldset {% if not mini_can_submit %}disabled{% endif %}>
+        <label><input type="checkbox" id="mini-confirm" name="CONFIRM"> Confirm generation for this image, camera and interval.</label>
+        <button type="submit">Queue mini timelapse</button>
+      </fieldset>
+    </fieldset>
+    <p id="mini-result" role="status" aria-live="polite"></p>
+    <a id="mini-task" hidden>Inspect submitted task</a>
+  </form>
+  <section class="modern-admin-link-grid">
+    <a href="{{ url_for('indi_allsky.modern_admin_media_mini_timelapses_view', camera_id=mini_camera.id, profile_id=request.args.get('profile_id', '')) }}">View mini timelapses</a>
+    <a href="{{ url_for('indi_allsky.modern_admin_media_images_view', camera_id=mini_camera.id, profile_id=request.args.get('profile_id', '')) }}">Browse source images</a>
+    <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view', camera_id=mini_camera.id, profile_id=request.args.get('profile_id', '')) }}">Open task queue</a>
+  </section>
+</section>
+</main>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/mini-generation.js', v='mini-generation-v2') }}"></script>
+{% endblock %}

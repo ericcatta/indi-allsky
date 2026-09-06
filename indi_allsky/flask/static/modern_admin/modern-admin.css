@@ -3205,3 +3205,14 @@ body.modern-admin-lightbox-open {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+#hybrid-mini-form fieldset { min-width: 0; }
+#hybrid-mini-form select, #hybrid-mini-form input[type="text"] { max-width: 100%; }
+#hybrid-mini-form .modern-admin-filter-bar { flex-wrap: wrap; }
+#mini-preview-container { min-height: 0; background: #101820; }
+#mini-preview-image { max-height: 60vh; object-fit: contain; }
+#mini-preview-container:fullscreen { display: grid; place-items: center; }
+#mini-preview-container:fullscreen img { max-height: 100vh; }
+
+#mini-exit-fullscreen { display: none; }
+#mini-preview-container:fullscreen #mini-exit-fullscreen { display: block; position: absolute; top: 1rem; right: 1rem; z-index: 1; }

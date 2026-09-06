@@ -10,7 +10,8 @@ from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app
 from hybrid_operations_fixture import seed_operations
 from hybrid_source_media_fixture import seed_source_media
-from hybrid_generation_fixture import seed_generation
+from hybrid_generation_fixture import seed_generation, seed_preview_frames
+from hybrid_generated_media_fixture import seed_generated_media
 
 class SandboxEffectBlocked(RuntimeError):
     pass
@@ -22,6 +23,8 @@ def run(runtime_config, port):
         seed_operations(app)
         seed_source_media(app)
         seed_generation(app)
+        seed_preview_frames(app)
+        seed_generated_media(app)
         from flask import request, jsonify
         from indi_allsky.flask.views import AjaxConfigRestoreView
         @app.before_request
@@ -30,6 +33,8 @@ def run(runtime_config, port):
                 return None
             # Only generation queues into the in-memory DB; no worker consumes it.
             payload = request.get_json(silent=True)
+            if request.path == '/indi-allsky/ajax/minigenerate':
+                return None
             if request.path == '/indi-allsky/ajax/generate' and isinstance(payload, dict) and payload.get('ACTION_SELECT') in ('generate_video', 'generate_k_st', 'generate_video_k_st', 'generate_panorama_video'):
                 return None
             notification_ack = re.fullmatch(r'/indi-allsky/modern-admin/notifications/[1-3]/acknowledge', request.path)
