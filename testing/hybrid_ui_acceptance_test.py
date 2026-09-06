@@ -14,48 +14,100 @@ from pathlib import Path
 import time
 from unittest.mock import patch
 
-from hybrid_runtime_fixture import isolated_app, login_client
 
 class ProviderUnavailable(RuntimeError):
     pass
 
 class Controls(HTMLParser):
+    """Discover static HTML controls, without claiming computed CSS/JS state."""
+    VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+            'link', 'meta', 'param', 'source', 'track', 'wbr'}
+    ROLES = {'button', 'link', 'switch', 'checkbox', 'radio', 'tab', 'menuitem',
+             'menuitemcheckbox', 'menuitemradio', 'slider', 'spinbutton', 'combobox'}
+    DISABLABLE = {'button', 'input', 'select', 'textarea'}
+
     def __init__(self):
         super().__init__()
         self.controls = []
-        self.active = []
-        self.form = None
+        self.stack = []
         self.text = []
+
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
-        if tag == 'form':
-            self.form = {'id': a.get('id', ''), 'action': a.get('action', ''), 'method': a.get('method', 'get')}
-        interactive = tag in ('a', 'button', 'select', 'textarea') or (tag == 'input' and a.get('type', 'text') != 'hidden') or a.get('role') in ('button', 'link', 'switch')
-        if not interactive:
-            return
-        self.controls.append({'tag': tag, 'dom_id': a.get('id', ''), 'name': a.get('name', ''),
-            'type': a.get('type', ''), 'href': a.get('href', ''), 'label': a.get('aria-label', ''),
-            'disabled': 'disabled' in a or a.get('aria-disabled') == 'true',
-            'form': self.form, 'data': {k:v for k,v in a.items() if k.startswith('data-')},
-            'status': 'bloccato', 'reason': 'Interaction and effect not yet verified', 'evidence': []})
-        if tag != 'input':
-            self.active.append((tag, self.controls[-1]))
+        parent = self.stack[-1] if self.stack else None
+        node = {'tag': tag, 'attrs': a, 'control': None, 'first_legend': None}
+        if tag == 'legend' and parent and parent['tag'] == 'fieldset' and parent['first_legend'] is None:
+            parent['first_legend'] = node
+        ancestors = self.stack + [node]
+        form = next((n for n in reversed(self.stack) if n['tag'] == 'form'), None)
+        interactive = (tag in ('a', 'button', 'select', 'textarea', 'summary')
+                       or (tag == 'input' and a.get('type', 'text').lower() != 'hidden')
+                       or a.get('role') in self.ROLES
+                       or ('tabindex' in a and a['tabindex'] != '-1'))
+        if interactive:
+            disabled_by = []
+            if tag in self.DISABLABLE:
+                if 'disabled' in a:
+                    disabled_by.append('self')
+                for ancestor in self.stack:
+                    if ancestor['tag'] == 'fieldset' and 'disabled' in ancestor['attrs']:
+                        # HTML exempts only descendants of the first direct legend.
+                        legend = ancestor['first_legend']
+                        if legend is None or not any(n is legend for n in self.stack):
+                            disabled_by.append('fieldset:' + ancestor['attrs'].get('id', ''))
+            collapsed = []
+            for index, ancestor in enumerate(self.stack):
+                if ancestor['tag'] == 'details' and 'open' not in ancestor['attrs']:
+                    child = ancestors[index + 1]
+                    if child['tag'] != 'summary':
+                        collapsed.append(ancestor['attrs'].get('id', ''))
+            fa = form['attrs'] if form else {}
+            item = {'tag': tag, 'dom_id': a.get('id', ''), 'name': a.get('name', ''),
+                    'type': a.get('type', ''), 'href': a.get('href', ''),
+                    'label': a.get('aria-label', ''),
+                    'disabled': bool(disabled_by), 'disabled_by': disabled_by,
+                    'aria_disabled': any(n['attrs'].get('aria-disabled') == 'true' for n in ancestors),
+                    'hidden_attribute': any('hidden' in n['attrs'] for n in ancestors),
+                    'inert': any('inert' in n['attrs'] for n in ancestors),
+                    'collapsed_details': collapsed,
+                    'described_by': list(dict.fromkeys(ref for n in ancestors for ref in n['attrs'].get('aria-describedby', '').split())),
+                    'form': ({'id': fa.get('id', ''), 'action': fa.get('action', ''), 'method': fa.get('method', 'get')} if form else None),
+                    'data': {k:v for k,v in a.items() if k.startswith('data-')},
+                    'status': 'bloccato', 'reason': 'Interaction and effect not yet verified', 'evidence': []}
+            self.controls.append(item)
+            node['control'] = item
+        if tag not in self.VOID:
+            self.stack.append(node)
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        if tag not in self.VOID:
+            self.handle_endtag(tag)
+
     def handle_endtag(self, tag):
-        if tag == 'form':
-            self.form = None
-        if self.active and self.active[-1][0] == tag:
-            self.active.pop()
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index]['tag'] == tag:
+                del self.stack[index:]
+                break
+
     def handle_data(self, value):
+        # Form values and executable/style text are not labels or audit signals.
+        if any(n['tag'] in ('textarea', 'script', 'style') for n in self.stack):
+            return
         value = value.strip()
         if value:
             self.text.append(value)
-            if self.active:
-                item = self.active[-1][1]
-                item['label'] = (item['label'] + ' ' + value).strip()
+            for node in reversed(self.stack):
+                if node['control'] is not None:
+                    if not node['attrs'].get('aria-label'):
+                        item = node['control']
+                        item['label'] = (item['label'] + ' ' + value).strip()
+                    break
+
     def identified(self, route):
         seen = {}
         for item in self.controls:
-            # Do not record field values (including configuration secrets).
+            # Keep previous stable keys; do not include visibility or field values.
             key = item['dom_id'] or hashlib.sha256(json.dumps({k:item[k] for k in ('tag','name','type','href','form','data')},sort_keys=True).encode()).hexdigest()[:16]
             seen[key] = seen.get(key, 0) + 1
             item['id'] = route + '::' + key + '::' + str(seen[key])
@@ -63,10 +115,11 @@ class Controls(HTMLParser):
         return self.controls
 
 def collect(runtime_config):
-    report = {'schema_version': 1, 'environment': 'isolated Flask, memory database, synthetic users/cameras',
+    from hybrid_runtime_fixture import isolated_app, login_client
+    report = {'schema_version': 2, 'environment': 'isolated Flask, memory database, synthetic users/cameras',
               'classic_enabled': False, 'live_hardware_effects': False,
-              'coverage_note': 'HTTP rendering and control discovery only; no control is marked passed by discovery.', 'pages': []}
-    with isolated_app(runtime_config) as app:
+              'coverage_note': 'Static HTML discovery only; computed CSS, JavaScript-created controls, external form ownership and browser effects require DOM acceptance. No control is marked passed by discovery.', 'pages': []}
+    with isolated_app(runtime_config, multi_camera=True) as app:
         from indi_allsky.flask.base_views import TemplateView
         from indi_allsky.flask import views
         source = ast.parse(Path(views.__file__).read_text())
@@ -90,14 +143,15 @@ def collect(runtime_config):
                 if rule.arguments:
                     page.update(status='bloccato', reason='Detail route requires dedicated fixture parameters')
                     continue
-                for role, uid, camera in [('admin',1,1), ('admin',1,2), ('user',2,1), ('anonymous',None,1)]:
+                for role, uid, camera in [('admin',1,1), ('admin',1,2), ('user',2,1), ('user',2,2), ('anonymous',None,1)]:
                     client = clients[role]
                     with client.session_transaction() as session:
                         session['camera_id'] = camera
-                    case = {'role':role, 'camera_id':camera, 'controls':[]}
+                    scope = {'camera_id': camera, 'profile_id': 'test-profile-' + str(camera)}
+                    case = {'role':role, **scope, 'controls':[]}
                     started = time.monotonic()
                     try:
-                        response = client.get(rule.rule)
+                        response = client.get(rule.rule, query_string=scope)
                         case['http_status'] = response.status_code
                         case['redirect'] = response.location
                         if response.status_code == 200:

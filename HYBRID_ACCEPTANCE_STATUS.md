@@ -1133,3 +1133,41 @@ observed, but future maintenance must explicitly stop and restore that timer.
 The rollback path was prepared in the deployment script; a live rollback was not
 executed and is not claimed as a passed recovery drill. Production's four
 pre-existing untracked entries were preserved; tracked files are clean.
+
+
+## Acceptance inventory: inherited state and camera/profile coverage
+
+The static HTML collector previously treated controls inside disabled fieldsets as
+enabled and omitted Settings disclosure summaries. It also included textarea
+values and script/style text as labels/audit text. It now records native disabled
+state (including the first-legend exception), inherited ARIA disabled state,
+hidden/inert ancestors, collapsed details and description references separately.
+Disclosure, ARIA widgets and focusable custom elements enter the inventory.
+Textarea values and script/style bodies are excluded, and explicit aria-labels
+remain intact. Existing control identity inputs are preserved.
+
+Schema 2 uses explicit camera/profile requests and synthetic multicamera config,
+including both cameras for admin and ordinary user, plus anonymous access. The
+full discovery ran against the isolated exact faf53d86 release with Classic
+imports, subprocesses and DBus prohibited: 91 routes, 81 with five contexts
+(405 contexts), 296 successful renderings and 109 blocked/redirected contexts,
+zero rendering defects. Ten parameterized detail routes remain blocked pending
+dedicated fixture selection. There are 22,800 control occurrences across contexts,
+including 3,156 native-disabled controls and 140 disclosure summaries. These are
+not unique product controls and none is marked passed by discovery.
+
+Report: `/home/eric/hybrid-release-evidence-faf53d86/ui-discovery-v2-scoped.json`.
+SHA256: `3db8857c5c44574ce1f657a198e062ce24fc2e79d6949eb89789b77ee2682183`.
+It is intentionally kept outside the repository rather than committing thousands
+of duplicated synthetic controls. Observatory still emits “future backend
+contract” and Updates “not implemented”; these signals require functional review.
+Absence of those phrases elsewhere is not evidence of functional completeness.
+Computed CSS, JS-generated controls, external form ownership, browser interactions
+and effects remain separate acceptance work; hidden controls stay in the matrix.
+
+`hybrid_ui_inventory_parser_test.py` passes regressions for fieldset/legend scope,
+form boundaries, disclosure states, native versus ARIA disabling, hidden/inert
+ancestors, secret-value exclusion and stable IDs across value/state changes. All
+18 modern_admin/Book 2/Safe Actions/parity/Product/shell/composition entrypoints
+pass, along with compilation and diff checks. No runtime code or capture settings
+changed; production soak is unaffected by this test-only mission.
