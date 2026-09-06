@@ -169,9 +169,36 @@ contents. The full Book 2 regression, shell/route checks and existing runtime
 login/Settings/startup tests pass after the changes.
 
 Actual browser results are in `testing/evidence/hybrid-operations-2026-09-06.json`.
-A later attempt to repeat acknowledgement as the ordinary user hit CDP navigation
-and focus-command timeouts; that browser-only case remains blocked, although
-the real Flask ordinary-user case passes. The new inventory still finds nine
+The first ordinary-user browser attempt hit navigation/focus timeouts after
+the SSH tunnel failed. Restarting the isolated server with its own log and
+restoring the tunnel resolved it: ordinary-user acknowledgement and persistence
+after reload subsequently passed in the browser as well. Production services
+were checked and remained active. The new inventory still finds nine
 parameter-free pages with Classic URL BuildErrors (media, generation, YouTube).
 Parameterized routes and all other control states remain subject to the full
 acceptance matrix. Classic removal and live validation remain open.
+
+
+## Verified mission: interactive camera simulator
+
+The disabled Hybrid simulator has been replaced with its real lens/sensor
+selectors, pixel offsets, image-circle canvas and shareable link. It has its
+own Hybrid view/template; it no longer inherits the old simulator view or uses
+the generic disabled-controls template. All 25 lenses and 60 sensors retain
+their original constants. The drawing parity test compares 3,000 lens/sensor/
+offset cases against a frozen pre-migration drawing routine. Full Config and
+other existing parity fingerprints remain unchanged; the simulator template
+registration change is explicitly checked before normalizing the old route hash.
+
+The form rejects invalid lens/sensor query values and non-integer offsets with
+400 rather than an unhandled conversion. Browser input errors have visible
+feedback. The current link retains camera/profile and simulator parameters;
+reloading it recreates the result. Native fields, a real Copy button, an external
+text summary and stacked narrow controls replace the disabled wrapper. On
+narrow screens metadata labels are shown below the canvas to avoid collisions;
+image-circle geometry is unchanged. The simulator writes no settings or tasks.
+
+`hybrid_camera_simulator_flow_test.py` verifies controls, catalog coverage,
+both user roles, IMX708/IMX678 and invalid requests in Flask with Classic absent.
+`hybrid_camera_simulator_parity_test.js` verifies catalog and drawing parity.
+Browser results are in `testing/evidence/hybrid-simulator-2026-09-06.json`.

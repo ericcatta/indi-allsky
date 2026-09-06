@@ -15817,25 +15817,25 @@ class ModernAdminSafeControlsMixin(ModernAdminContextMixin):
         }
 
 
-class ModernAdminCameraSimulatorView(ModernAdminSafeControlsMixin, CameraSimulatorView):
-    page_title = 'Modern Admin Camera Simulator'
+class ModernAdminCameraSimulatorView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Camera Simulator'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
     def get_context(self):
-        context = super(ModernAdminCameraSimulatorView, self).get_context()
-        form = context['form_camera_simulator']
-
-        context['modern_admin_safe_title'] = 'Camera Simulator'
-        context['modern_admin_safe_note'] = 'Camera and lens inputs mirror the classic simulator. The modern page keeps the simulator read-only until the interactive canvas is ported safely.'
-        context['modern_admin_safe_sections'] = (
-            {
-                'title' : 'Simulator inputs',
-                'rows'  : self.field_rows(form, ('LENS_SELECT', 'SENSOR_SELECT', 'OFFSET_X', 'OFFSET_Y')),
-            },
-        )
-        context['modern_admin_safe_actions'] = (
-            self.disabled_action('Run simulator', 'The classic simulator is client-side and interactive; Modern Admin shows the selected inputs without applying calculations yet.'),
-        )
+        context = super().get_context()
+        try:
+            form_data = {
+                'LENS_SELECT': request.args.get('lens', 'zwo_f1.2_2.5mm_1-2'),
+                'SENSOR_SELECT': request.args.get('sensor', 'imx477'),
+                'OFFSET_X': int(request.args.get('offset_x', 0)),
+                'OFFSET_Y': int(request.args.get('offset_y', 0)),
+            }
+        except ValueError:
+            abort(400, description='Simulator offsets must be whole pixels.')
+        form = IndiAllskyCameraSimulatorForm(data=form_data, meta={'csrf': False})
+        if not form.validate():
+            abort(400, description='Choose a supported simulator lens and sensor.')
+        context['form_camera_simulator'] = form
         return context
 
 
@@ -21466,7 +21466,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>', view_func=ModernAdminNotificationDetailView.as_view('modern_admin_notification_detail_view', template_name='modern_admin/notification_detail.html'))
     bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
     bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
-    bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/camera_simulator.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/generate', view_func=ModernAdminGenerateView.as_view('modern_admin_generate_view', template_name='modern_admin/safe_controls.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusView.as_view('modern_admin_focus_view', template_name='modern_admin/safe_controls.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))

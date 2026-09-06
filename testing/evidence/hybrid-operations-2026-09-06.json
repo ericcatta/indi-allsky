@@ -208,10 +208,10 @@
       "role": "ordinary user",
       "camera_profile": "synthetic cameras 1/2; notices system-wide",
       "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
-      "request": "attempted login/navigation",
+      "request": "POST /notifications/1/acknowledge",
       "expected_effect": "Confirm notice as ordinary user",
-      "proof": "CDP navigation/focus timeouts prevented confirmation of reached state; Flask ordinary-user effect/persistence test passes separately.",
-      "status": "bloccato"
+      "proof": "Initial CDP timeout followed SSH tunnel loss. After reconnecting and restarting isolated server, synthetic ordinary-user login, acknowledgement message and already-acknowledged state after reload passed in actual browser.",
+      "status": "superato"
     }
   ]
 }

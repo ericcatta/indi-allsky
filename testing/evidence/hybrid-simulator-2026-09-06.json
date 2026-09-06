@@ -1,0 +1,84 @@
+{
+  "date": "2026-09-06",
+  "baseline": "e481b884 plus interactive simulator mission",
+  "scope": "Browser sandbox; no hardware or configuration effects",
+  "controls": [
+    {
+      "page": "/indi-allsky/modern-admin/tools/camera-simulator",
+      "control_id": "SENSOR_SELECT",
+      "role": "ordinary user",
+      "camera_profile": "camera_id=2, profile_id=test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; supported lens/sensor catalog",
+      "request": "Client-side only; GET on reload",
+      "expected_effect": "Update sensor geometry",
+      "proof": "Opened with IMX708: 4608x2592, 4786px circle. Selected IMX678 via native picker: 3840x2160, 3350px circle; canvas and text updated.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tools/camera-simulator",
+      "control_id": "OFFSET_X + OFFSET_Y + Update simulation",
+      "role": "ordinary user",
+      "camera_profile": "camera_id=2, profile_id=test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; supported lens/sensor catalog",
+      "request": "Client-side only; GET on reload",
+      "expected_effect": "Update offsets without writing settings",
+      "proof": "125/-250 yielded 0.25x-0.50 mm on IMX678. Update button redrew canvas; corresponding query values visible in permalink.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tools/camera-simulator",
+      "control_id": "LENS_SELECT",
+      "role": "ordinary user",
+      "camera_profile": "camera_id=2, profile_id=test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; supported lens/sensor catalog",
+      "request": "Client-side only; GET on reload",
+      "expected_effect": "Update lens image circle",
+      "proof": "Selected M12 0.76mm via native picker; text changed from 3350px to 1385px circle.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tools/camera-simulator",
+      "control_id": "copy-simulator-link",
+      "role": "ordinary user",
+      "camera_profile": "camera_id=2, profile_id=test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; supported lens/sensor catalog",
+      "request": "Client-side only; GET on reload",
+      "expected_effect": "Copy reproducible link",
+      "proof": "Clicked Copy simulation link; Simulator link copied status; link retained camera/profile, lens, sensor and offsets.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tools/camera-simulator",
+      "control_id": "simulator-permalink/reload",
+      "role": "ordinary user",
+      "camera_profile": "camera_id=2, profile_id=test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; supported lens/sensor catalog",
+      "request": "Client-side only; GET on reload",
+      "expected_effect": "Recreate selected simulation",
+      "proof": "Reload preserved IMX678, selected lens and offsets; same numeric summary visible.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tools/camera-simulator",
+      "control_id": "OFFSET_X/invalid",
+      "role": "ordinary user",
+      "camera_profile": "camera_id=2, profile_id=test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; supported lens/sensor catalog",
+      "request": "Client-side only; GET on reload",
+      "expected_effect": "Explain invalid input and recover",
+      "proof": "1.5 showed whole-pixel error; replacing with 25 restored valid summary showing 0.05x-0.50 mm offset.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tools/camera-simulator",
+      "control_id": "mobile canvas + controls",
+      "role": "ordinary user",
+      "camera_profile": "camera_id=2, profile_id=test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; supported lens/sensor catalog",
+      "request": "Client-side only; GET on reload",
+      "expected_effect": "Keep controls and metadata readable at 390x844",
+      "proof": "Screenshot after correction showed stacked fields, complete textual summary, copy button and canvas without overlapping metadata labels; angle circles remain approximate.",
+      "status": "superato"
+    }
+  ]
+}

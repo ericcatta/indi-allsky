@@ -23,6 +23,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Le modifiche runtime devono restare conservative: niente refactor ampi senza motivo.
 - Le impostazioni operative multicamera devono vivere nei Camera Profiles.
 - I global settings restano fallback legacy/single-camera/advanced, non UI operativa primaria.
+- Camera Simulator Hybrid:
+  - sostituito wrapper disabilitato con selettori, offset, canvas e permalink
+    interattivi. View/template propri, nessuna eredita' dal frontend simulatore
+    precedente; catalogo e geometria verificati su 3.000 casi di parita';
+  - test browser con IMX708/IMX678, cambio lente/offset, copia link e reload;
+    nessuna scrittura di configurazione o azione hardware.
 - Task e notifiche Hybrid:
   - liste e dettagli si aprono con Classic escluso; riconoscimento notifiche
     disponibile nel dettaglio con handler Hybrid autenticato, CSRF, servizio

@@ -1,0 +1,39 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}{{ website_title }}: Camera Simulator{% endblock %}
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">
+<style>
+.hybrid-simulator-controls {display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;}
+.hybrid-simulator-controls label {display:block;margin-bottom:6px;}
+#image-circle-canvas {display:block;width:100%;height:auto;background:#000;}
+#simulator-permalink {width:100%;margin:12px 0;}
+</style>
+<script src="{{ url_for('indi_allsky.static', filename='js/clipboard.min.js') }}"></script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/camera-simulator-data.js') }}" defer></script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/camera-simulator.js') }}" defer></script>
+{% endblock %}
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="simulator-title">
+    <section class="modern-admin-table-panel">
+        <h1 id="simulator-title">Camera Simulator</h1>
+        <p>Compare the lens image circle with a sensor and adjust its position. Changes here do not change camera settings.</p>
+        <form id="hybrid-camera-simulator">
+            <div class="hybrid-simulator-controls">
+            {% for field in (form_camera_simulator.LENS_SELECT, form_camera_simulator.SENSOR_SELECT, form_camera_simulator.OFFSET_X, form_camera_simulator.OFFSET_Y) %}
+                <div>{{ field.label }}{% if field.type == 'IntegerField' %}{{ field(class='form-control', required=true, step=1) }}{% else %}{{ field(class='form-control', required=true) }}{% endif %}</div>
+            {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Update simulation</button>
+        </form>
+        <p id="simulator-status" role="status" aria-live="polite"></p>
+    </section>
+    <section class="modern-admin-table-panel" aria-label="Image circle simulation">
+        <p>Field-of-view circles are approximate and depend on the lens.</p>
+        <canvas id="image-circle-canvas" aria-label="Sensor area and approximate lens image circle"></canvas>
+        <p id="simulation-summary" aria-live="polite"></p>
+        <label for="simulator-permalink">Link to this simulation</label>
+        <input id="simulator-permalink" readonly type="text" class="form-control">
+        <button id="copy-simulator-link" type="button" class="btn btn-secondary" data-clipboard-target="#simulator-permalink">Copy simulation link</button>
+    </section>
+</main>
+{% endblock %}
