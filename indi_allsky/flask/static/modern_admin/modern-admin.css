@@ -3188,3 +3188,20 @@ body.modern-admin-lightbox-open {
   padding: 4px 8px;
   white-space: nowrap;
 }
+
+#hybrid-generation-form .modern-admin-filter-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+#hybrid-generation-form select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  #hybrid-generation-form .modern-admin-filter-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

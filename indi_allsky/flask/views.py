@@ -161,6 +161,7 @@ from sqlalchemy import or_
 #from sqlalchemy.types import DateTime
 from sqlalchemy.types import Integer
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.expression import true as sa_true
 from sqlalchemy.sql.expression import false as sa_false
 from sqlalchemy.sql.expression import null as sa_null
@@ -7055,7 +7056,7 @@ class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
         'virtualsky'            : ('Observatory', 'Modern VirtualSky viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
         'camera-simulator'      : ('Cameras', 'Modern camera simulator safe view is available.', 'indi_allsky.modern_admin_camera_simulator_view'),
         'astropanel'            : ('Observatory', 'Modern AstroPanel viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
-        'generate'              : ('Storage', 'Modern generate safe view is available.', 'indi_allsky.modern_admin_generate_view'),
+        'generate'              : ('Storage', 'Generate outputs from saved images and inspect task results.', 'indi_allsky.modern_admin_generate_view'),
         'focus'                 : ('Cameras', 'Modern focus safe view is available.', 'indi_allsky.modern_admin_focus_view'),
         'process-fits'          : ('Storage', 'Modern FITS processing safe view is available.', 'indi_allsky.modern_admin_image_processing_view'),
         'image-circle-helper'   : ('Cameras', 'Modern image circle helper safe view is available.', 'indi_allsky.modern_admin_image_circle_helper_view'),
@@ -8884,6 +8885,15 @@ class AjaxTimelapseGeneratorView(BaseView):
 
 
     def dispatch_request(self):
+        try:
+            return self.execute_request()
+        except (SQLAlchemyError, OSError):
+            db.session.rollback()
+            app.logger.exception('Media action failed; inspect task and asset state before retrying')
+            return jsonify({'form_global': ['The action failed and may have partially completed. Check tasks and media before retrying.']}), 500
+
+
+    def execute_request(self):
         if not current_user.is_admin:
             json_data = {
                 'form_global' : ['User does not have permission to generate content'],
@@ -8891,7 +8901,15 @@ class AjaxTimelapseGeneratorView(BaseView):
             return jsonify(json_data), 400
 
 
-        camera_id = int(request.json['CAMERA_ID'])
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({'form_global': ['A generation request object is required.']}), 400
+        try:
+            camera_id = int(payload['CAMERA_ID'])
+        except (KeyError, TypeError, ValueError):
+            return jsonify({'CAMERA_ID': ['Choose a valid camera.']}), 400
+        if not IndiAllSkyDbCameraTable.query.filter_by(id=camera_id).first():
+            return jsonify({'CAMERA_ID': ['Camera not found.']}), 404
 
         form_timelapsegen = IndiAllskyTimelapseGeneratorForm(data=request.json, camera_id=camera_id)
 
@@ -15862,84 +15880,43 @@ class ModernAdminCameraSimulatorView(ModernAdminContextMixin, TemplateView):
         return context
 
 
-class ModernAdminGenerateView(ModernAdminSafeControlsMixin, TimelapseGeneratorView):
-    page_title = 'Modern Admin Generate'
+class ModernAdminGenerateView(ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Generate media'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+    decorators = [login_required]
 
     def get_context(self):
-        context = super(ModernAdminGenerateView, self).get_context()
-        form = context['form_timelapsegen']
-        task_list = context.get('task_list', tuple())
-        task_state_counts = self.get_task_state_counts(task_list)
-
-        context['modern_admin_safe_title'] = 'Generate'
-        context['modern_admin_safe_note'] = 'Recent generation tasks are real. Creating new media tasks is disabled in Modern Admin safe mode.'
-        context['modern_admin_safe_summary_cards'] = (
-            {
-                'label' : 'Recent VIDEO tasks',
-                'value' : len(task_list),
-                'detail' : 'Last 12 hours.',
-            },
-            {
-                'label' : 'Queued or running',
-                'value' : task_state_counts.get('QUEUED', 0) + task_state_counts.get('RUNNING', 0),
-                'detail' : 'Read-only queue status.',
-            },
-            {
-                'label' : 'Failed',
-                'value' : task_state_counts.get('FAILED', 0),
-                'detail' : 'Generation action remains disabled.',
-            },
-        )
-        context['modern_admin_safe_sections'] = (
-            {
-                'title' : 'Timelapse configuration',
-                'rows'  : (
-                    {'label' : 'Timelapse', 'value' : 'Enabled' if self.indi_allsky_config.get('TIMELAPSE_ENABLE', True) else 'Disabled'},
-                    {'label' : 'Daytime timelapse', 'value' : 'Enabled' if self.indi_allsky_config.get('DAYTIME_TIMELAPSE', False) else 'Disabled'},
-                    {'label' : 'Camera ID', 'value' : self.camera.id},
-                ),
-            },
-            {
-                'title' : 'Generation request',
-                'rows'  : self.field_rows(form, ('ACTION_SELECT', 'DAY_SELECT')),
-            },
-        )
-        context['modern_admin_safe_actions'] = (
-            self.disabled_action('Generate', 'This queues processing jobs and remains disabled in Modern Admin.'),
-        )
-        context['modern_admin_safe_tables'] = (
-            {
-                'title'   : 'Recent tasks',
-                'headers' : ('ID', 'Date', 'Queue', 'Action', 'State', 'Result'),
-                'rows'    : [
-                    (
-                        task['id'],
-                        task['createDate'].strftime('%Y-%m-%d %H:%M:%S'),
-                        task['queue'],
-                        task['action'],
-                        task['state'],
-                        task['result'] or '',
-                    )
-                    for task in context.get('task_list', tuple())
-                ],
-            },
-        )
-        context['modern_admin_safe_links'] = (
-            {'label' : 'Open Classic Generate', 'endpoint' : 'indi_allsky.generate_view'},
-            {'label' : 'Open Modern Timelapses', 'endpoint' : 'indi_allsky.modern_admin_media_timelapses_view'},
-            {'label' : 'Open Modern Task Queue', 'endpoint' : 'indi_allsky.modern_admin_taskqueue_view'},
-        )
+        context = super().get_context()
+        filters = self.get_media_camera_filters()
+        selected = self.get_selected_media_camera_filter(filters)
+        if request.args.get('profile_id') and not selected.get('profile_id'):
+            abort(400, description='Choose an available camera profile.')
+        target_id = selected.get('camera_id') or self.camera.id
+        if request.args.get('camera_id') and request.args.get('camera_id', type=int) != target_id:
+            abort(400, description='Camera and profile do not match.')
+        target = IndiAllSkyDbCameraTable.query.filter_by(id=target_id).first_or_404()
+        form = IndiAllskyTimelapseGeneratorForm(data={'CAMERA_ID': target.id}, camera_id=target.id)
+        context['form_timelapsegen'] = form
+        context['generation_camera'] = target
+        context['generation_filters'] = [item for item in filters if item.get('camera_id')]
+        context['generation_can_submit'] = bool(current_user.is_authenticated and current_user.is_admin)
+        context['generation_has_days'] = bool(form.DAY_SELECT.choices)
+        tasks = IndiAllSkyDbTaskQueueTable.query.filter(
+            IndiAllSkyDbTaskQueueTable.createDate > datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=12),
+            IndiAllSkyDbTaskQueueTable.queue == TaskQueueQueue.VIDEO,
+            IndiAllSkyDbTaskQueueTable.state.in_((TaskQueueState.MANUAL, TaskQueueState.QUEUED,
+                TaskQueueState.RUNNING, TaskQueueState.SUCCESS, TaskQueueState.FAILED)),
+        ).order_by(IndiAllSkyDbTaskQueueTable.createDate.desc())
+        rows = []
+        for task in tasks:
+            data = task.data if isinstance(task.data, dict) else {}
+            kwargs = data.get('kwargs') if isinstance(data.get('kwargs'), dict) else {}
+            if str(kwargs.get('camera_id', data.get('camera_id', ''))) != str(target.id):
+                continue
+            rows.append({'id':task.id, 'created':task.createDate, 'action':data.get('action', 'Unknown'),
+                         'state':task.state.name, 'result':task.result or ''})
+        context['generation_tasks'] = rows
         return context
-
-
-    def get_task_state_counts(self, task_list):
-        counts = dict()
-        for task in task_list:
-            state = task.get('state', 'UNKNOWN')
-            counts[state] = counts.get(state, 0) + 1
-
-        return counts
 
 
 class ModernAdminFocusView(ModernAdminSafeControlsMixin, FocusView):
@@ -21491,7 +21468,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
     bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/camera_simulator.html'))
-    bp_allsky.add_url_rule('/modern-admin/tools/generate', view_func=ModernAdminGenerateView.as_view('modern_admin_generate_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/generate', view_func=ModernAdminGenerateView.as_view('modern_admin_generate_view', template_name='modern_admin/generate.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusView.as_view('modern_admin_focus_view', template_name='modern_admin/safe_controls.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))

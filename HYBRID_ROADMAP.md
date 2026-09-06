@@ -23,6 +23,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Le modifiche runtime devono restare conservative: niente refactor ampi senza motivo.
 - Le impostazioni operative multicamera devono vivere nei Camera Profiles.
 - I global settings restano fallback legacy/single-camera/advanced, non UI operativa primaria.
+- Generazione media Hybrid:
+  - form nativo con camera/periodo, tutte le azioni esistenti e conferma esplicita;
+    nessuna eredita' dalla vecchia pagina Generate o dal wrapper disabilitato;
+  - task recenti limitati alla camera scelta, link al dettaglio e gestione di
+    errori/richieste duplicate lato UI; permessi, rete admin e gate panorama
+    conservati. Test su task reali in DB temporaneo e cancellazioni di fixture;
+  - browser desktop/mobile verificato; encoding/upload dei worker e produzione
+    restano da collaudare. Evidenze in `HYBRID_ACCEPTANCE_STATUS.md`.
 - Collaudo sorgenti FITS/RAW: download originali Hybrid per record/camera,
   policy locale/remota e cartella export separata; preview JPEG senza Classic,
   gestione file/header mancanti o invalidi e chiusura handle su errore.

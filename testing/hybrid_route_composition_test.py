@@ -21,10 +21,10 @@ def test_route_contract_is_unchanged():
                 and node.func.attr == 'add_url_rule'
                 and node.args[0].value not in ('/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
             ):
-                if node.args[0].value == '/modern-admin/tools/camera-simulator':
+                if node.args[0].value in ('/modern-admin/tools/camera-simulator', '/modern-admin/tools/generate'):
                     template = next(k for k in node.keywords if k.arg == 'view_func').value
                     setting = next(k for k in template.keywords if k.arg == 'template_name')
-                    assert setting.value.value == 'modern_admin/camera_simulator.html'
+                    assert setting.value.value == ('modern_admin/camera_simulator.html' if node.args[0].value.endswith('camera-simulator') else 'modern_admin/generate.html')
                     setting.value.value = 'modern_admin/safe_controls.html'
                 calls.append(ast.dump(node, include_attributes=False))
     assert len(calls) == 224

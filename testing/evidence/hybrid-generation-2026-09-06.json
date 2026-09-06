@@ -1,0 +1,128 @@
+{
+  "date": "2026-09-06",
+  "baseline": "dbd5893f plus native generation mission",
+  "scope": "Synthetic Raspberry staging only; no production deployment or worker execution",
+  "controls": [
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Action, period, confirmation, submit (role gate)",
+      "role": "ordinary user",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Explain unavailable mutations while preserving task consultation",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Form controls disabled; administrator requirement visible; 102 camera-2 synthetic task records displayed.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Action + Submit without confirmation",
+      "role": "administrator",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Reject accidental request locally",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Selected Generate Timelapse Only; submission without checkbox displayed confirmation requirement. No task was sent.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Generate Timelapse Only",
+      "role": "administrator",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Create one scoped video job",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Confirmed and submitted; refreshed tasks, searched MANUAL, found task 206. Detail showed generateVideo, camera_id 2, night true, timespec 20260906, priority 100, queue VIDEO.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Day and period change",
+      "role": "administrator",
+      "camera_profile": "camera 1 / test-profile-1",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Invalidate confirmation after changing scope",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Confirmed, changed Night to Day, then submitted: confirmation requirement returned. Reset Night and reconfirmed.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Generate Keogram/Star Trails",
+      "role": "administrator",
+      "camera_profile": "camera 1 / test-profile-1",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Create one scoped processing job",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Success message observed; refresh and MANUAL search showed task 207, generateKeogramStarTrails; camera-2 task 206 absent from camera-1 listing.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Generate All",
+      "role": "administrator",
+      "camera_profile": "camera 2 / test-profile-2, 390x844",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Queue all enabled output jobs",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Success message observed. Refreshed list contained tasks 208 KeogramStarTrails, 209 Video, 210 PanoramaVideo, all in MANUAL. The sandbox config enabled FISH2PANO.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Refresh dates/tasks + Search tasks + Details",
+      "role": "administrator",
+      "camera_profile": "both cameras",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Expose requested task and its actual parameters",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Task 206 detail verified payload and camera. Camera-1 listing showed 207; camera-2 listing showed 206/208/209/210 after MANUAL filter.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Mobile form",
+      "role": "administrator",
+      "camera_profile": "camera 1 / test-profile-1, 390x844",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Fit controls within screen width",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Initial selectors made document 424px wide. After scoped grid/min-width fix, document width was 390px and selectors 284px. Screenshot showed readable fields, confirmation and action buttons.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Delete and Upload selections",
+      "role": "administrator",
+      "camera_profile": "camera 1 / test-profile-1",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Explain consequences before confirmation",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Selecting Delete Images showed irreversible-delete warning; selecting Upload explained current end-of-night data and that historical date is ignored. Neither browser effect was submitted.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Delete submission and external upload",
+      "role": "administrator",
+      "camera_profile": "dedicated test data/destinations",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Verify real end effects in browser",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Server-side deletion effects passed only on dedicated synthetic files via Flask tests. Browser submission and live upload destinations remain unverified.",
+      "status": "bloccato"
+    },
+    {
+      "page": "/modern-admin/tools/generate",
+      "control_id": "Worker execution",
+      "role": "administrator",
+      "camera_profile": "real cameras",
+      "prerequisites": "Isolated sandbox with Classic disabled; real synthetic source images; memory task DB without worker consumers",
+      "expected_effect": "Produce actual generated media and observe completion",
+      "request": "GET page or POST /indi-allsky/ajax/generate",
+      "proof": "Sandbox task DB is intentionally not consumed by production workers. Task creation is not a completed encoding or upload. Live worker validation remains open.",
+      "status": "bloccato"
+    }
+  ]
+}

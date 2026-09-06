@@ -10,6 +10,7 @@ from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app
 from hybrid_operations_fixture import seed_operations
 from hybrid_source_media_fixture import seed_source_media
+from hybrid_generation_fixture import seed_generation
 
 class SandboxEffectBlocked(RuntimeError):
     pass
@@ -17,13 +18,19 @@ class SandboxEffectBlocked(RuntimeError):
 def run(runtime_config, port):
     with isolated_app(runtime_config, multi_camera=True) as app:
         app.jinja_env.auto_reload = True
+        app.config['ADMIN_NETWORKS'] = ['127.0.0.0/8', '::1/128']
         seed_operations(app)
         seed_source_media(app)
+        seed_generation(app)
         from flask import request, jsonify
         from indi_allsky.flask.views import AjaxConfigRestoreView
         @app.before_request
         def restrict_sandbox_effects():
             if request.method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
+                return None
+            # Only generation queues into the in-memory DB; no worker consumes it.
+            payload = request.get_json(silent=True)
+            if request.path == '/indi-allsky/ajax/generate' and isinstance(payload, dict) and payload.get('ACTION_SELECT') in ('generate_video', 'generate_k_st', 'generate_video_k_st', 'generate_panorama_video'):
                 return None
             notification_ack = re.fullmatch(r'/indi-allsky/modern-admin/notifications/[1-3]/acknowledge', request.path)
             if not notification_ack and request.path not in ('/indi-allsky/login', '/indi-allsky/ajax/config',

@@ -255,3 +255,44 @@ page families, and 97 redirects/blocked contexts. The 14,378 discovered control
 occurrences are not click passes. Remaining render failures are generated media
 (keograms, mini timelapses, panoramas, startrail images/videos), generation and
 YouTube; parameterized routes need their separate fixtures and evidence.
+
+
+## Verified mission: native Hybrid generation workflow
+
+Baseline `dbd5893f`. Generate no longer inherits the old page class or renders
+the generic disabled-controls wrapper. It has a native Hybrid form and reads
+real available dates and recent camera-scoped tasks. All ten existing action
+choices are retained, including individual/combined generation, individual/
+combined output deletion, source-image deletion and end-of-night upload.
+Existing action names, valid payloads, queue policy and FISH2PANO gate are kept.
+Task links expose the actual queued record; the page does not claim an encoded
+file merely because a task was submitted. Its 12-hour read window uses UTC
+consistent with task timestamps.
+
+The controller requires an explicit action and confirmation, invalidates the
+confirmation on scope changes, prevents concurrent submits, explains destructive
+and upload semantics, and retains uncertain/failed outcomes for inspection.
+Non-admin forms are disabled with a reason; the existing server role and admin-
+network restrictions remain enforced. Invalid JSON/camera requests return
+controlled 400/404 responses. Database/filesystem failures roll back pending DB
+state and report a potentially partial operation without leaking backend details.
+The route's legacy valid action behavior is not rewritten.
+
+`hybrid_generation_flow_test.py` passes in Flask without Classic: both roles/
+cameras, missing CSRF, invalid payload/camera/date/action, anonymous access,
+network gate, exact generation task payloads/order/priority/state, panorama gate,
+end-of-night queue intent, failed commit rollback, and every individual/combined
+deletion using only dedicated fixture markers and synthetic JPEG sources.
+Camera-1 records/files survive camera-2 deletions. These deletion tests are real
+filesystem/DB effects in a temporary directory; they are not browser or live
+production-media deletion tests. Encoding and actual remote upload remain open.
+
+Browser evidence is in `testing/evidence/hybrid-generation-2026-09-06.json`.
+It records ordinary-user restrictions, admin submissions, confirmation reset,
+actual task IDs/payloads, camera filtering and Generate All on a 390x844 viewport.
+The mobile form initially overflowed to 424px; bounded native select widths and
+a responsive grid reduced document width to the 390px viewport. Task tables
+reuse the already-tested operations controller for sorting, paging and exports.
+All Book 2/JS regressions and seven isolated Flask suites pass. No execution-
+throughput improvement is claimed. A stale login-required flash seen after
+sign-in remains an identified shared-auth UI defect for the subsequent pass.
