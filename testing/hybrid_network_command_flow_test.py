@@ -12,6 +12,22 @@ def run(runtime_config):
         import dbus
         endpoint='/indi-allsky/ajax/network'
         admin=login_client(app,1);ordinary=login_client(app,2)
+        page='/indi-allsky/modern-admin/system/network'
+        from indi_allsky.flask.forms import IndiAllskyNetworkManagerForm
+        with patch.object(IndiAllskyNetworkManagerForm,'getConnections',lambda self: {'Wi-Fi':[('test-uuid','Test connection')]}), patch.object(IndiAllskyNetworkManagerForm,'getWifiDevices',lambda self: [('wlan-test','Test wireless')]):
+            for client,disabled in ((admin,False),(ordinary,True)):
+                response=client.get(page)
+                assert response.status_code==200 and 'Test connection' in response.text
+                assert response.text.count('data-network-command=')==12
+                assert (response.text.count('<fieldset disabled>')==3)==disabled
+                assert 'type="password"' in response.text and 'Connection changes remain disabled' not in response.text
+        def unavailable(self):
+            raise dbus.exceptions.DBusException('private details')
+        with patch.object(IndiAllskyNetworkManagerForm,'getConnections',unavailable):
+            response=admin.get(page)
+            assert response.status_code==200 and 'connections could not be read' in response.text and 'private details' not in response.text
+            assert 'data-network-command=' not in response.text
+        assert app.test_client().get(page).status_code==302
         token=re.search(r'name="csrf_token"[^>]*value="([^"]+)"',admin.get('/indi-allsky/modern-admin/account').text)[1]
         headers={'X-CSRFToken':token}
         effects=Mock()
@@ -29,6 +45,10 @@ def run(runtime_config):
             payload={'COMMAND':'createhotspot','INTERFACE':'wlan0','SSID':'Test','BAND':'bg','PSK':'test-only-password','NOSECURITY':False}
             assert admin.post(endpoint,json=payload,headers=headers).status_code==200
             effects.createHotspot.assert_called_once_with('wlan0','Test','bg','test-only-password',nosecurity=False)
+            assert admin.post(endpoint,json={'COMMAND':'scanap','INTERFACE':'wlan-test'},headers=headers).status_code==200
+            effects.scanAPs.assert_called_once_with('wlan-test')
+            assert admin.post(endpoint,json={'COMMAND':'connectap','INTERFACE':'wlan-test','AP_PATH':'/org/freedesktop/NetworkManager/AccessPoint/1','PSK':'test-only-password','PRIORITY':'0','RETRIES':'4'},headers=headers).status_code==200
+            effects.connectAP.assert_called_once_with('wlan-test','/org/freedesktop/NetworkManager/AccessPoint/1','test-only-password',0,4)
             factory.reset_mock()
             assert admin.post(endpoint,json=payload).status_code==400
             user_token=re.search(r'name="csrf_token"[^>]*value="([^"]+)"',ordinary.get('/indi-allsky/modern-admin/account').text)[1]

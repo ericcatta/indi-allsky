@@ -18531,35 +18531,26 @@ class ModernAdminCaptureSettingsView(ModernAdminSettingsInventoryView):
         config['TARGET_ADU_DEV_DAY'] = int(form_config.TARGET_ADU_DEV_DAY.data)
 
 
-class ModernAdminNetworkView(ModernAdminSafeControlsMixin, NetworkManagerView):
-    page_title = 'Modern Admin Network'
+class ModernAdminNetworkView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Network'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
     def get_context(self):
-        context = super(ModernAdminNetworkView, self).get_context()
-        form = context['form_connections']
-
-        context['modern_admin_safe_title'] = 'Network'
-        context['modern_admin_safe_note'] = 'Network Manager status and available selectors are real. Connection changes remain disabled in Modern Admin.'
-        context['modern_admin_safe_sections'] = (
-            {
-                'title' : 'Host',
-                'rows'  : (
-                    {'label' : 'Hostname', 'value' : context.get('hostname')},
-                    {'label' : 'Network Manager', 'value' : 'Available' if context.get('nm_installed') else 'Unavailable'},
-                ),
-            },
-            {
-                'title' : 'Connections',
-                'rows'  : self.field_rows(form, ('CONNECTIONS_SELECT', 'WIFI_DEVICES_SELECT', 'SSID_SELECT', 'HOTSPOT_DEVICES_SELECT', 'HOTSPOT_SSID')),
-            },
-        )
-        context['modern_admin_safe_actions'] = (
-            self.disabled_action('Activate connection', 'May interrupt remote access; disabled in Modern Admin.'),
-            self.disabled_action('Deactivate connection', 'May disconnect the web session; disabled in Modern Admin.'),
-            self.disabled_action('Delete connection', 'Destructive network action; disabled in Modern Admin.'),
-            self.disabled_action('Create hotspot', 'Changes network state; disabled in Modern Admin.'),
-        )
+        context = super().get_context()
+        form, error = None, ''
+        try:
+            form = IndiAllskyNetworkManagerForm()
+            choices = form.CONNECTIONS_SELECT.choices
+            wifi = form.WIFI_DEVICES_SELECT.choices
+            if not isinstance(choices, dict) or any(item[0] in ('error', 'D-Bus Unavailable') for item in wifi):
+                raise ValueError('Network inventory unavailable')
+        except (dbus.exceptions.DBusException, ValueError, KeyError):
+            app.logger.exception('Network inventory unavailable')
+            form = None
+            error = 'NetworkManager is unavailable or its connections could not be read.'
+        context.update(network_form=form, network_error=error,
+                       network_can_control=bool(current_user.is_admin),
+                       network_hostname=socket.gethostname())
         return context
 
 
@@ -19101,7 +19092,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))
     bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))
-    bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/network.html'))
     bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/drives.html'))
     bp_allsky.add_url_rule('/modern-admin/system/gpio-control', view_func=ModernAdminManualGpioView.as_view('modern_admin_manual_gpio_view', template_name='modern_admin/manual_gpio.html'))
     bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))

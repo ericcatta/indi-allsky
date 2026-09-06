@@ -18,7 +18,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 - Network: parsing dei dodici comandi in `network_commands.py`, adapter
   NetworkManager separato dalle view con fingerprint dei metodi conservati.
-  NOSECURITY richiede un booleano esplicito. Pagina nativa e collaudo live aperti.
+  NOSECURITY richiede un booleano esplicito. Pagina Hybrid nativa indipendente da
+  NetworkManagerView: connessioni, scansione/join Wi-Fi e hotspot con conferma,
+  blocco doppio invio e refresh obbligatorio dopo modifiche o errori. Polling
+  attivazione resiliente agli errori di lettura D-Bus. Test Flask senza Classic e
+  controller passano; browser reale, deploy e collaudo rete/recovery ancora aperti.
 
 - Drives Hybrid: inventario e validazione comandi nel servizio `drive_manager.py`,
   pagina nativa con metadata/mount/unmount/poweroff. Snapshot UDisks unico,

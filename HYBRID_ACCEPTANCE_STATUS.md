@@ -800,3 +800,34 @@ effect fingerprints remain unchanged, with only this explicit recovery addition
 accounted for by the guard. The correction is not deployed to production. Live network
 changes, reconnect/recovery, browser acceptance and production deployment remain
 open. No saved connections, Wi-Fi settings or credentials were changed on the Pi.
+
+## Native Hybrid Network controls
+
+Hybrid Network now inherits only the Hybrid context and shared TemplateView,
+without NetworkManagerView. The shared form supplies read-only connection/device
+choices; failed inventory is shown separately from an empty Wi-Fi device list.
+The native template/controller expose all nine saved-connection commands, scan,
+join access point and create hotspot. Password inputs are concealed and cleared
+after requests. Open hotspot selection sends an explicit JSON boolean.
+
+Commands require administrator permission and target-specific confirmation.
+Scanning explicitly warns that it enables the radio. Scan choices belong to the
+selected interface and are cleared when it changes. Requests disable controls
+while pending; mutations and failures require refreshed inventory before another
+command. Reconnect/session feedback does not claim success after a lost response.
+SSID descriptions use text-only option construction, never HTML insertion.
+
+`hybrid_network_command_flow_test.py` runs real Flask with Classic imports
+forbidden: native page and twelve controls for admin, disabled fieldsets for
+ordinary users, anonymous redirect, provider-error rendering, all twelve effect
+dispatches, explicit hotspot security, CSRF and failed effects. Inventory and
+effects are simulated. `hybrid_network_browser_test.js` executes the controller
+with a synthetic DOM: all command payloads, cancel, pending/refresh guards, scan
+results and empty state, interface binding, concealed credential clearing,
+hotspot boolean, session expiry and provider failure. All nineteen Book 2/shell/
+route/network entrypoints and git diff --check pass.
+
+Actual browser rendering/keyboard/mobile acceptance, real scans and connection
+changes, reconnect/recovery and production deployment remain open. No live
+network settings were changed. These automated results do not complete the
+network hardware acceptance or the overall product plan.

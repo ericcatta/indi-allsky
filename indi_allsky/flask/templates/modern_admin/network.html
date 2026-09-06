@@ -1,0 +1,46 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}Network — Hybrid{% endblock %}
+{% block content %}
+<section id="network-tool" style="max-width:1000px;margin:auto;padding:1rem" data-url="{{ url_for('indi_allsky.ajax_network_manager_view') }}" data-csrf="{{ csrf_token() }}">
+<h1>Network</h1><p>Host: {{ network_hostname }}</p>
+<p>Connection changes can interrupt remote access. Keep local access available before changing the connection used by this session.</p>
+<a href="{{ url_for('indi_allsky.modern_admin_network_view') }}">Refresh connections</a>
+{% if network_error %}<p role="alert">{{ network_error }}</p>{% endif %}
+{% if not network_can_control %}<p>Administrator access is required to change connections or scan Wi-Fi.</p>{% endif %}
+{% if network_form %}{% set f = network_form %}
+<form id="network-form" onsubmit="return false">
+<fieldset {% if not network_can_control %}disabled{% endif %}>
+<legend>Saved connections</legend>
+{{ f.CONNECTIONS_SELECT.label }} {{ f.CONNECTIONS_SELECT() }}
+<p>An asterisk marks automatic connection. Refresh to observe updated addresses and state.</p>
+{% for command, label in [('activate','Activate'),('deactivate','Deactivate'),('delete','Delete saved connection'),('autostart','Enable automatic connection'),('noautostart','Disable automatic connection'),('incpriority','Increase priority'),('decpriority','Decrease priority'),('powersaveenable','Enable Wi-Fi power saving'),('powersavedisable','Disable Wi-Fi power saving')] %}
+<button type="button" data-network-command="{{ command }}">{{ label }}</button>
+{% endfor %}
+</fieldset>
+<fieldset {% if not network_can_control %}disabled{% endif %}>
+<legend>Join Wi-Fi</legend>
+{{ f.WIFI_DEVICES_SELECT.label }} {{ f.WIFI_DEVICES_SELECT() }}
+<button type="button" data-network-command="scanap">Scan access points</button>
+<p>Scanning enables the Wi-Fi radio if it is off and can take about 20 seconds.</p>
+<label for="SSID_SELECT">Access point</label><select id="SSID_SELECT"><option value="">Scan to choose an access point</option></select>
+<label for="SSID_PSK">Wi-Fi password</label><input id="SSID_PSK" type="password" autocomplete="new-password">
+{{ f.SSID_PRIORITY.label }} {{ f.SSID_PRIORITY(step=1, min=-2147483648, max=2147483647) }}
+{{ f.SSID_RETRIES.label }} {{ f.SSID_RETRIES(min=-1, max=2147483647) }}
+<button type="button" data-network-command="connectap">Connect to access point</button>
+</fieldset>
+<fieldset {% if not network_can_control %}disabled{% endif %}>
+<legend>Create hotspot</legend>
+{{ f.HOTSPOT_DEVICES_SELECT.label }} {{ f.HOTSPOT_DEVICES_SELECT() }}
+{{ f.HOTSPOT_SSID.label }} {{ f.HOTSPOT_SSID() }}
+{{ f.HOTSPOT_BAND.label }} {{ f.HOTSPOT_BAND() }}
+<label for="HOTSPOT_PSK">Hotspot password (at least 8 characters)</label><input id="HOTSPOT_PSK" type="password" autocomplete="new-password">
+<label for="HOTSPOT_NOSECURITY"><input id="HOTSPOT_NOSECURITY" type="checkbox">Create an open hotspot without a password</label>
+<p>Creates a saved hotspot with automatic connection enabled. Refresh connections to inspect or activate it.</p>
+<button type="button" data-network-command="createhotspot">Create hotspot</button>
+</fieldset></form>
+{% endif %}
+<p id="network-result" role="status" aria-live="polite"></p>
+</section>
+<style>#network-tool fieldset{margin:1rem 0;padding:1rem;border:1px solid #64748b;border-radius:.5rem}#network-tool label{display:block;margin-top:.75rem}#network-tool select,#network-tool input:not([type=checkbox]){max-width:100%;width:100%}#network-tool button{margin:.4rem .4rem .4rem 0}</style>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/network.js') }}"></script>
+{% endblock %}
