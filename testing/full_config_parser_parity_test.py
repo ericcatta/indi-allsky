@@ -45,9 +45,12 @@ from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigStati
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigTimelapseParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigWebStatusParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigWhiteBalanceParser
+from indi_allsky.modern_admin_full_config import ModernAdminFullConfigParser
 
 
 VIEWS_PATH = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py'
+PARSER_PATH = VIEWS_PATH.parents[1] / 'modern_admin_full_config.py'
+LEGACY_FIXTURE_PATH = Path(__file__).parent / 'fixtures/full_config_before_hybrid_parser.py'
 
 
 @dataclass(frozen=True)
@@ -58,7 +61,7 @@ class FullConfigParserResult:
 
 
 class LegacyFullConfigParserHarness:
-    """Execute the pure mutation block of AjaxConfigView for parity checks."""
+    """Execute current or frozen mutation statements for parity checks."""
 
     JSON_FIELDS = (
         'FILETRANSFER__LIBCURL_OPTIONS',
@@ -123,7 +126,7 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigAutoWhiteBalanceParser,
     )
 
-    def __init__(self, source_path=VIEWS_PATH):
+    def __init__(self, source_path=PARSER_PATH):
         self.source_path = Path(source_path)
         self.parser_statements = self.extract_parser_statements()
         self.code = compile(
@@ -144,6 +147,21 @@ class LegacyFullConfigParserHarness:
 
     def extract_parser_statements(self):
         tree = ast.parse(self.source_path.read_text())
+        if self.source_path == PARSER_PATH:
+            parser = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'ModernAdminFullConfigParser')
+            method = next(node for node in parser.body if isinstance(node, ast.FunctionDef) and node.name == 'parse')
+
+            class HarnessNames(ast.NodeTransformer):
+                def visit_Name(self, node):
+                    # Keep the existing AST guardrails and harness namespace
+                    # while the actual parser has a Flask-independent API.
+                    if node.id == 'config':
+                        return ast.copy_location(ast.parse('self.indi_allsky_config', mode='eval').body, node)
+                    if node.id == 'payload':
+                        return ast.copy_location(ast.parse('request.json', mode='eval').body, node)
+                    return node
+
+            return [HarnessNames().visit(node) for node in method.body if not isinstance(node, ast.Return)]
         ajax_class = next(
             node for node in tree.body
             if isinstance(node, ast.ClassDef) and node.name == 'AjaxConfigView'
@@ -417,6 +435,7 @@ config['FISH2PANO']['PIL_FONT_SIZE'] = int(payload['FISH2PANO__PIL_FONT_SIZE'])
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
+    # These 517 accesses now live in the Hybrid orchestrator, not the view.
     assert len(harness.direct_payload_keys) == 517
     assert len(harness.HYBRID_PARSERS) == 31
     assert len({field for parser in harness.HYBRID_PARSERS for field in parser.REQUIRED_FIELDS}) == 202
@@ -428,6 +447,79 @@ def test_parity_corpus_covers_current_legacy_parser_contract():
     assert 'YOUTUBE__TAGS_STR' in harness.required_payload_keys
     assert 'RELOAD_ON_SAVE' in harness.required_payload_keys
     assert 'CONFIG_NOTE' in harness.required_payload_keys
+
+
+def test_complete_hybrid_parser_matches_frozen_legacy():
+    assert hashlib.sha256(LEGACY_FIXTURE_PATH.read_bytes()).hexdigest() == (
+        'cf43920ddbb0b293aa9945805fcd4ec4dc17f8fdd722caf43877691c63df4ba9'
+    )
+    legacy = LegacyFullConfigParserHarness(LEGACY_FIXTURE_PATH)
+    current = LegacyFullConfigParserHarness()
+    parser = ModernAdminFullConfigParser()
+    assert current.required_payload_keys == legacy.required_payload_keys
+    assert current.optional_payload_keys == legacy.optional_payload_keys
+    payload = legacy.build_payload()
+    initial = legacy.prepare_config({'UNRELATED': {'preserve': True}})
+
+    def compare(config, candidate_payload):
+        original_payload = copy.deepcopy(candidate_payload)
+
+        def capture(parse):
+            working = copy.deepcopy(config)
+            try:
+                result = parse(working, candidate_payload)
+                assert result.config is working
+                return ('ok', asdict(result))
+            except Exception as error:
+                return (type(error), error.args, working)
+
+        assert capture(legacy.execute_legacy) == capture(parser.parse)
+        assert candidate_payload == original_payload
+
+    compare(initial, payload)
+    for field in legacy.required_payload_keys:
+        incomplete = dict(payload)
+        del incomplete[field]
+        compare(initial, incomplete)
+        for value in (None, '', 'invalid', [], {}, 'false', '1.75', -1):
+            compare(initial, dict(payload, **{field: value}))
+    for field in legacy.optional_payload_keys:
+        incomplete = dict(payload)
+        del incomplete[field]
+        compare(initial, incomplete)
+    for section in initial:
+        if not isinstance(initial[section], (dict, list)):
+            continue
+        incomplete = copy.deepcopy(initial)
+        del incomplete[section]
+        compare(incomplete, payload)
+        for value in (None, [], 'invalid'):
+            compare(dict(initial, **{section: value}), payload)
+
+
+def test_ajax_config_has_no_inline_full_config_interpretation():
+    tree = ast.parse(VIEWS_PATH.read_text())
+    view = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'AjaxConfigView')
+    dispatch = next(node for node in view.body if isinstance(node, ast.FunctionDef) and node.name == 'dispatch_request')
+    assert not any(
+        isinstance(node, ast.Subscript) and ast.unparse(node.value) == 'request.json'
+        for node in ast.walk(dispatch)
+    )
+    assert not any(
+        isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        and ast.unparse(node.func.value) == 'request.json'
+        for node in ast.walk(dispatch)
+    )
+    source = ast.unparse(dispatch)
+    assert 'parsed = self.full_config_parser().parse(self.indi_allsky_config, request.json)' in source
+    assert source.index('full_config_payload_preparation_service().prepare') < source.index('full_config_parser().parse')
+    assert 'reload_on_save = parsed.reload_on_save' in source
+    assert 'config_note = parsed.config_note' in source
+    factory = next(node for node in view.body if isinstance(node, ast.FunctionDef) and node.name == 'full_config_parser')
+    assert ast.unparse(factory.body[0]) == 'return ModernAdminFullConfigParser()'
+    parser_tree = ast.parse(PARSER_PATH.read_text())
+    imports = [node for node in ast.walk(parser_tree) if isinstance(node, (ast.Import, ast.ImportFrom))]
+    assert all('flask' not in ast.unparse(node) for node in imports)
 
 
 def test_camera_connection_parser_preserves_legacy_casting_and_required_fields():
@@ -1434,7 +1526,7 @@ def test_image_output_parser_preserves_legacy_casting_and_nested_values():
             raise AssertionError('{0:s} should remain required'.format(missing_field))
 
 
-def test_ajax_config_view_delegates_camera_connection_parsing():
+def test_hybrid_full_config_delegates_camera_connection_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1443,7 +1535,7 @@ def test_ajax_config_view_delegates_camera_connection_parsing():
         assert "indi_allsky_config['{0:s}'] =".format(field_name) not in parser_source
 
 
-def test_ajax_config_view_delegates_station_identity_parsing():
+def test_hybrid_full_config_delegates_station_identity_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1459,7 +1551,7 @@ def test_ajax_config_view_delegates_station_identity_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_lens_metadata_parsing():
+def test_hybrid_full_config_delegates_lens_metadata_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1468,7 +1560,7 @@ def test_ajax_config_view_delegates_lens_metadata_parsing():
         assert "indi_allsky_config['{0:s}'] =".format(field_name) not in parser_source
 
 
-def test_ajax_config_view_delegates_lens_geometry_parsing():
+def test_hybrid_full_config_delegates_lens_geometry_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1477,7 +1569,7 @@ def test_ajax_config_view_delegates_lens_geometry_parsing():
         assert "indi_allsky_config['{0:s}'] =".format(field_name) not in parser_source
 
 
-def test_ajax_config_view_delegates_exposure_gain_parsing_in_legacy_order():
+def test_hybrid_full_config_delegates_exposure_gain_parsing_in_legacy_order():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1494,7 +1586,7 @@ def test_ajax_config_view_delegates_exposure_gain_parsing_in_legacy_order():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_acquisition_mode_in_legacy_order():
+def test_hybrid_full_config_delegates_acquisition_mode_in_legacy_order():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1515,7 +1607,7 @@ def test_ajax_config_view_delegates_acquisition_mode_in_legacy_order():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_auto_gain_parsing():
+def test_hybrid_full_config_delegates_auto_gain_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1524,7 +1616,7 @@ def test_ajax_config_view_delegates_auto_gain_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_camera_sqm_parsing():
+def test_hybrid_full_config_delegates_camera_sqm_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1533,7 +1625,7 @@ def test_ajax_config_view_delegates_camera_sqm_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_focus_parsing():
+def test_hybrid_full_config_delegates_focus_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1542,7 +1634,7 @@ def test_ajax_config_view_delegates_focus_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_color_processing_parsing():
+def test_hybrid_full_config_delegates_color_processing_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1551,7 +1643,7 @@ def test_ajax_config_view_delegates_color_processing_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_denoise_parsing():
+def test_hybrid_full_config_delegates_denoise_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1560,7 +1652,7 @@ def test_ajax_config_view_delegates_denoise_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_white_balance_parsing():
+def test_hybrid_full_config_delegates_white_balance_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1569,7 +1661,7 @@ def test_ajax_config_view_delegates_white_balance_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_image_enhancement_parsing():
+def test_hybrid_full_config_delegates_image_enhancement_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1578,7 +1670,7 @@ def test_ajax_config_view_delegates_image_enhancement_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_auto_white_balance_parsing():
+def test_hybrid_full_config_delegates_auto_white_balance_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1587,7 +1679,7 @@ def test_ajax_config_view_delegates_auto_white_balance_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_display_units_parsing():
+def test_hybrid_full_config_delegates_display_units_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1596,7 +1688,7 @@ def test_ajax_config_view_delegates_display_units_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_environment_parsing_in_legacy_order():
+def test_hybrid_full_config_delegates_environment_parsing_in_legacy_order():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1613,7 +1705,7 @@ def test_ajax_config_view_delegates_environment_parsing_in_legacy_order():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_photometry_parsing():
+def test_hybrid_full_config_delegates_photometry_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1622,7 +1714,7 @@ def test_ajax_config_view_delegates_photometry_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_timelapse_parsing():
+def test_hybrid_full_config_delegates_timelapse_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1631,7 +1723,7 @@ def test_ajax_config_view_delegates_timelapse_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_capture_policy_parsing():
+def test_hybrid_full_config_delegates_capture_policy_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1640,7 +1732,7 @@ def test_ajax_config_view_delegates_capture_policy_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_contrast_enhancement_parsing():
+def test_hybrid_full_config_delegates_contrast_enhancement_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1649,7 +1741,7 @@ def test_ajax_config_view_delegates_contrast_enhancement_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_sky_mode_threshold_parsing():
+def test_hybrid_full_config_delegates_sky_mode_threshold_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1658,7 +1750,7 @@ def test_ajax_config_view_delegates_sky_mode_threshold_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_web_status_parsing():
+def test_hybrid_full_config_delegates_web_status_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1667,7 +1759,7 @@ def test_ajax_config_view_delegates_web_status_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_image_stretch_parsing():
+def test_hybrid_full_config_delegates_image_stretch_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1676,7 +1768,7 @@ def test_ajax_config_view_delegates_image_stretch_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_keogram_parsing():
+def test_hybrid_full_config_delegates_keogram_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1685,7 +1777,7 @@ def test_ajax_config_view_delegates_keogram_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_longterm_keogram_parsing():
+def test_hybrid_full_config_delegates_longterm_keogram_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1694,7 +1786,7 @@ def test_ajax_config_view_delegates_longterm_keogram_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_realtime_keogram_parsing():
+def test_hybrid_full_config_delegates_realtime_keogram_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1703,7 +1795,7 @@ def test_ajax_config_view_delegates_realtime_keogram_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_startrails_parsing():
+def test_hybrid_full_config_delegates_startrails_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1712,7 +1804,7 @@ def test_ajax_config_view_delegates_startrails_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
-def test_ajax_config_view_delegates_image_calibration_parsing():
+def test_hybrid_full_config_delegates_image_calibration_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1774,7 +1866,7 @@ def test_image_transform_and_panorama_parsers_match_frozen_legacy():
             compare(dict(initial, **{section: container}), incomplete)
 
 
-def test_ajax_config_view_delegates_image_transform_and_panorama_in_order():
+def test_hybrid_full_config_delegates_image_transform_and_panorama_in_order():
     harness = LegacyFullConfigParserHarness()
     statements = [ast.unparse(statement) for statement in harness.parser_statements]
     calls = [
@@ -1789,7 +1881,7 @@ def test_ajax_config_view_delegates_image_transform_and_panorama_in_order():
     assert 'IMAGE_ROTATE_WITH_OFFSET' not in harness.required_payload_keys
 
 
-def test_ajax_config_view_delegates_image_output_parsing():
+def test_hybrid_full_config_delegates_image_output_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
 
@@ -1953,8 +2045,10 @@ def test_parity_harness_detects_candidate_drift():
 
 
 if __name__ == '__main__':
+    test_complete_hybrid_parser_matches_frozen_legacy()
+    test_ajax_config_has_no_inline_full_config_interpretation()
     test_image_transform_and_panorama_parsers_match_frozen_legacy()
-    test_ajax_config_view_delegates_image_transform_and_panorama_in_order()
+    test_hybrid_full_config_delegates_image_transform_and_panorama_in_order()
     test_parity_corpus_covers_current_legacy_parser_contract()
     test_camera_connection_parser_preserves_legacy_casting_and_required_fields()
     test_station_identity_parser_preserves_legacy_casting_and_required_fields()
@@ -1985,35 +2079,35 @@ if __name__ == '__main__':
     test_startrails_parser_preserves_legacy_casting_and_nested_values()
     test_image_calibration_parser_preserves_legacy_casting()
     test_image_output_parser_preserves_legacy_casting_and_nested_values()
-    test_ajax_config_view_delegates_camera_connection_parsing()
-    test_ajax_config_view_delegates_station_identity_parsing()
-    test_ajax_config_view_delegates_lens_metadata_parsing()
-    test_ajax_config_view_delegates_lens_geometry_parsing()
-    test_ajax_config_view_delegates_exposure_gain_parsing_in_legacy_order()
-    test_ajax_config_view_delegates_acquisition_mode_in_legacy_order()
-    test_ajax_config_view_delegates_auto_gain_parsing()
-    test_ajax_config_view_delegates_camera_sqm_parsing()
-    test_ajax_config_view_delegates_focus_parsing()
-    test_ajax_config_view_delegates_color_processing_parsing()
-    test_ajax_config_view_delegates_denoise_parsing()
-    test_ajax_config_view_delegates_white_balance_parsing()
-    test_ajax_config_view_delegates_image_enhancement_parsing()
-    test_ajax_config_view_delegates_auto_white_balance_parsing()
-    test_ajax_config_view_delegates_display_units_parsing()
-    test_ajax_config_view_delegates_environment_parsing_in_legacy_order()
-    test_ajax_config_view_delegates_photometry_parsing()
-    test_ajax_config_view_delegates_timelapse_parsing()
-    test_ajax_config_view_delegates_capture_policy_parsing()
-    test_ajax_config_view_delegates_contrast_enhancement_parsing()
-    test_ajax_config_view_delegates_sky_mode_threshold_parsing()
-    test_ajax_config_view_delegates_web_status_parsing()
-    test_ajax_config_view_delegates_image_stretch_parsing()
-    test_ajax_config_view_delegates_keogram_parsing()
-    test_ajax_config_view_delegates_longterm_keogram_parsing()
-    test_ajax_config_view_delegates_realtime_keogram_parsing()
-    test_ajax_config_view_delegates_startrails_parsing()
-    test_ajax_config_view_delegates_image_calibration_parsing()
-    test_ajax_config_view_delegates_image_output_parsing()
+    test_hybrid_full_config_delegates_camera_connection_parsing()
+    test_hybrid_full_config_delegates_station_identity_parsing()
+    test_hybrid_full_config_delegates_lens_metadata_parsing()
+    test_hybrid_full_config_delegates_lens_geometry_parsing()
+    test_hybrid_full_config_delegates_exposure_gain_parsing_in_legacy_order()
+    test_hybrid_full_config_delegates_acquisition_mode_in_legacy_order()
+    test_hybrid_full_config_delegates_auto_gain_parsing()
+    test_hybrid_full_config_delegates_camera_sqm_parsing()
+    test_hybrid_full_config_delegates_focus_parsing()
+    test_hybrid_full_config_delegates_color_processing_parsing()
+    test_hybrid_full_config_delegates_denoise_parsing()
+    test_hybrid_full_config_delegates_white_balance_parsing()
+    test_hybrid_full_config_delegates_image_enhancement_parsing()
+    test_hybrid_full_config_delegates_auto_white_balance_parsing()
+    test_hybrid_full_config_delegates_display_units_parsing()
+    test_hybrid_full_config_delegates_environment_parsing_in_legacy_order()
+    test_hybrid_full_config_delegates_photometry_parsing()
+    test_hybrid_full_config_delegates_timelapse_parsing()
+    test_hybrid_full_config_delegates_capture_policy_parsing()
+    test_hybrid_full_config_delegates_contrast_enhancement_parsing()
+    test_hybrid_full_config_delegates_sky_mode_threshold_parsing()
+    test_hybrid_full_config_delegates_web_status_parsing()
+    test_hybrid_full_config_delegates_image_stretch_parsing()
+    test_hybrid_full_config_delegates_keogram_parsing()
+    test_hybrid_full_config_delegates_longterm_keogram_parsing()
+    test_hybrid_full_config_delegates_realtime_keogram_parsing()
+    test_hybrid_full_config_delegates_startrails_parsing()
+    test_hybrid_full_config_delegates_image_calibration_parsing()
+    test_hybrid_full_config_delegates_image_output_parsing()
     test_exposure_gain_parser_preserves_partial_mutation_order_on_errors()
     test_full_config_parser_matches_pre_migration_golden_fingerprints()
     test_golden_fingerprint_normalizes_legacy_unordered_youtube_tags()

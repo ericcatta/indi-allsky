@@ -44,6 +44,17 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     Passano 18 entrypoint locali e il rendering della shell in Flask sul Pi
     con Classic escluso, sempre in staging e senza accesso al DB operativo.
 - Book 2 / Settings Runtime Independence:
+  - completata l'ownership dell'intero parser Full Config:
+    `ModernAdminFullConfigParser.parse(config, payload)` interpreta tutti i
+    719 campi, riusa i 31 parser di dominio e restituisce config, intent reload
+    e nota revisione. Nessun campo Full Config resta interpretato inline nella
+    view; form validation, persistenza ed effetti restano boundary separati;
+  - il blocco precedente e' congelato come fixture di parita'. Il confronto
+    include ogni campo obbligatorio mancante, conversioni valide/non valide,
+    contenitori mancanti/incompatibili, payload invariato, identita' config,
+    eccezioni e mutazioni parziali; i fingerprint storici restano invariati.
+    Passano la regressione locale (18 entrypoint) e la parita' completa con
+    l'interprete del Pi, in uno staging minimo rimosso automaticamente.
   - la responsabilita' "Modern settings save -> nuova revisione config" e' ora
     Hybrid-owned tramite `ModernAdminSettingsRuntimeService`;
   - `IndiAllSkyConfig.save()` resta adapter/fallback di persistenza Classic;
