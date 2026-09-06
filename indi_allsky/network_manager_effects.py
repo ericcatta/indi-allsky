@@ -258,7 +258,7 @@ class NetworkManagerEffects:
             ap_strength = ap_props.Get('org.freedesktop.NetworkManager.AccessPoint', 'Strength')
             ap_frequency = ap_props.Get('org.freedesktop.NetworkManager.AccessPoint', 'Frequency')
             ap_hwaddress = ap_props.Get('org.freedesktop.NetworkManager.AccessPoint', 'HwAddress')
-            str_ap_ssid = ''.join((chr(i) for i in ap_ssid))
+            str_ap_ssid = bytes(ap_ssid).decode('utf-8', errors='replace')
             logger.info('Found SSID: %s', str_ap_ssid)
             ap_frequency_int = int(ap_frequency)
             if ap_frequency_int > 5999:

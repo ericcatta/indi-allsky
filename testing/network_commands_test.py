@@ -19,6 +19,11 @@ def run():
     handler=next(n for n in poll.body if isinstance(n,ast.Try)).handlers[0]
     assert len(handler.body)==2 and isinstance(handler.body[-1],ast.Continue)
     handler.body.pop()
+    # SSIDs are byte sequences: decode for display without changing AP identity.
+    scan=next(n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name=='scanAPs')
+    ssid=next(n for n in ast.walk(scan) if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='str_ap_ssid' for t in n.targets))
+    assert ast.dump(ssid.value)==ast.dump(ast.parse("bytes(ap_ssid).decode('utf-8', errors='replace')",mode='eval').body)
+    ssid.value=ast.parse("''.join((chr(i) for i in ap_ssid))",mode='eval').body
     actual={n.name:hashlib.sha256(ast.dump(n,include_attributes=False).encode()).hexdigest() for n in cls.body if isinstance(n,ast.FunctionDef)}
     assert actual==expected
     for command,(method,kwargs) in CONNECTION_COMMANDS.items():

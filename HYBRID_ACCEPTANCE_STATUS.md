@@ -831,3 +831,19 @@ Actual browser rendering/keyboard/mobile acceptance, real scans and connection
 changes, reconnect/recovery and production deployment remain open. No live
 network settings were changed. These automated results do not complete the
 network hardware acceptance or the overall product plan.
+
+### Scan display correctness
+
+The real adapter now decodes SSID bytes as UTF-8 for display, fixing mojibake
+such as `Cafè` becoming `CafÃ¨`. Invalid byte sequences use replacement characters;
+empty SSIDs remain empty. The D-Bus AP object path, not the display name, remains
+the connection target. No connection credentials or NetworkManager settings are
+rewritten. Existing signal conversion was checked with actual dbus.Byte values
+0, 50 and 100 and was already correct; it is unchanged.
+
+`network_scan_effects_test.py` runs the real scan method with actual D-Bus value
+types and a fake bus: UTF-8/invalid/empty names, exact target paths, signal values,
+ordering, empty scans, rejected scans and radio enabling only when initially off.
+It passes on the Pi Python environment alongside activation and Flask network
+tests. The historical fingerprint remains unchanged with only the exact display
+decoding replacement accounted for. No live Wi-Fi scan was performed.
