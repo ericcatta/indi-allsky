@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Highlights: selezione reale di massimo otto immagini per scope camera/profilo,
+  ordinata per detections/stars/SQM/data, con valori mostrati e senza fallback di
+  candidati simulati. Moment porta al dettaglio dell'immagine selezionata; senza
+  ID apre Library. Policy media condivise; eventi classificati, revisione e AI
+  non sono dichiarati implementati. Test Flask passano; browser/deploy aperti.
+
 - Output Detail: dettaglio reale per sette tipi generati, collegato da Library e
   archivio. Riusa policy URL e download per-record; valida tipo, ID e scope
   camera/profilo. Senza selezione propone le raccolte reali. Metadata e risultato

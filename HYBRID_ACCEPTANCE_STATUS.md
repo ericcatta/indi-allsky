@@ -954,3 +954,33 @@ updated explicit Hybrid media boundary. git diff --check passes.
 Direct browser playback, production deployment, source lineage and processing
 recipe reconstruction remain open. The change completes real generated-record
 inspection through this Product entry, not the complete product acceptance.
+
+## Highlights and Moment inspect actual images
+
+The operational Highlights page no longer calls the prototype builder, whose
+empty-data fallback generated sample meteor/output/clear-window candidates.
+It now queries at most eight actual image records in the selected camera/profile
+scope, ordered by detections, stars, SQM, timestamp and ID. The page explains this
+all-history ordering and prints the saved values without identifying meteors or
+claiming AI classifications. Empty selection and provider failure are distinct.
+Previews/download URLs reuse the owner-aware archive policy. Excluded records
+remain explicitly labelled, preserving the existing ranking's input scope.
+
+Each Inspect image link supplies the actual ID/camera/profile to Moment. That
+entry validates the scope and redirects to the implemented image detail; without
+an ID it opens the image Library preserving scope. It no longer renders a fake
+case dossier. Historical prototype payload functions/templates remain available
+for the later cleanup audit, but these two operational views do not invoke them.
+
+`hybrid_highlights_flow_test.py` passes with Classic imports forbidden, real Flask,
+temporary images and a database containing more than a page: controlled ranking,
+eight-row bound, both cameras/roles, exact Moment-to-image redirects and rendered
+details, missing/invalid IDs, mismatched profiles, empty selection, sanitized
+provider failure, remote-only preview policy and zero simulated candidates when
+all image records are removed. All nineteen Book 2/shell/route/network regression
+entrypoints pass, as does git diff --check.
+
+Direct browser preview/interaction, production deployment, persisted event
+review/classification and source lineage remain open. Moment currently provides
+image inspection, not the completed detector-event workflow; the larger plan
+must still account for that distinction.

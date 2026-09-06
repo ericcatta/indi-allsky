@@ -88,11 +88,8 @@ from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..modern_admin_tasks import ModernAdminTaskReadPolicy
 from ..processing import ImageProcessor
 from ..product_view_models import build_now_view
-from ..product_view_models import build_highlights_view
-from ..product_view_models import build_moment_detail_view
 from ..product_view_models import build_observatory_view
 from ..product_view_models import GeneratedOutputDescriptor
-from ..product_view_models import HighlightsMetadataRepository
 from ..product_view_models import LatestFrameImageTableRepository
 from ..product_view_models import LatestCameraFramesProvider
 from ..product_view_models import LatestGeneratedOutputRepository
@@ -6361,47 +6358,6 @@ class ModernAdminNowView(ModernAdminProductView):
             return None
 
 
-class ModernAdminHighlightsView(ModernAdminProductView):
-    page_title = 'Highlights'
-    product_context_key = 'highlights_view'
-
-    def build_product_context(self, context):
-        return build_highlights_view(
-            highlights_repository=self.get_highlights_repository(),
-        )
-
-    def get_highlights_repository(self):
-        try:
-            camera = getattr(self, 'camera', None)
-            camera_id = getattr(camera, 'id', None)
-            if not camera_id:
-                return None
-
-            return HighlightsMetadataRepository(
-                query=IndiAllSkyDbImageTable.query,
-                camera_id=camera_id,
-                camera_id_field=IndiAllSkyDbImageTable.camera_id,
-                order_by_expressions=(
-                    IndiAllSkyDbImageTable.detections.desc(),
-                    IndiAllSkyDbImageTable.stars.desc(),
-                    IndiAllSkyDbImageTable.sqm.desc(),
-                    IndiAllSkyDbImageTable.createDate.desc(),
-                ),
-                max_items=4,
-            )
-        except Exception:
-            app.logger.error('Unable to build Highlights metadata repository')
-            return None
-
-
-class ModernAdminMomentDetailView(ModernAdminProductView):
-    page_title = 'Moment Detail'
-    product_context_key = 'moment_detail'
-
-    def build_product_context(self, context):
-        return build_moment_detail_view()
-
-
 class ModernAdminSkyCycleView(ModernAdminProductView):
     page_title = 'Sky Cycle Report'
 
@@ -11801,6 +11757,59 @@ class ModernAdminOutputDetailView(ModernAdminMediaBrowseView, TemplateView):
             app.logger.exception('Output detail unavailable')
             context['output_error'] = 'The output record could not be loaded. Refresh the page to retry.'
         return context
+
+
+class ModernAdminHighlightsView(ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Highlights'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_highlights_view'
+
+    def get_context(self):
+        context = super().get_context()
+        self.add_media_camera_filter_context(context)
+        selected = context['modern_admin_media_selected_filter']
+        items, error = [], ''
+        try:
+            query = IndiAllSkyDbImageTable.query
+            if selected.get('camera_id') is not None:
+                query = query.filter(IndiAllSkyDbImageTable.camera_id == selected['camera_id'])
+            entries = query.order_by(IndiAllSkyDbImageTable.detections.desc(),
+                IndiAllSkyDbImageTable.stars.desc(), IndiAllSkyDbImageTable.sqm.desc(),
+                IndiAllSkyDbImageTable.createDate.desc(), IndiAllSkyDbImageTable.id.desc()).limit(8).all()
+            archive = ModernAdminMediaArchive('image', selected.get('camera_id'), self.verify_admin_network)
+            for entry in entries:
+                item = archive.item(entry)
+                item.update(detections=entry.detections, stars=entry.stars, sqm=entry.sqm)
+                items.append(item)
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception('Highlights unavailable')
+            items, error = [], 'Image metadata could not be loaded. Refresh to retry.'
+        context.update(highlight_records=items, highlight_error=error)
+        return context
+
+
+class ModernAdminMomentDetailView(ModernAdminMediaBrowseView, TemplateView):
+    decorators = [login_required]
+
+    def dispatch_request(self):
+        selected = self.get_selected_media_camera_filter()
+        scope = {'camera_id': selected.get('camera_id'), 'profile_id': selected.get('profile_id', '')}
+        identifier = request.args.get('id')
+        if identifier is None:
+            return redirect(url_for('indi_allsky.modern_admin_library_view', kind='image', **scope))
+        try:
+            identifier = int(identifier)
+            if not 0 < identifier <= 2**63 - 1:
+                raise ValueError()
+        except ValueError:
+            abort(400, description='Choose a valid image identifier.')
+        query = IndiAllSkyDbImageTable.query.filter(IndiAllSkyDbImageTable.id == identifier)
+        if selected.get('camera_id') is not None:
+            query = query.filter(IndiAllSkyDbImageTable.camera_id == selected['camera_id'])
+        entry = query.first_or_404()
+        scope['camera_id'] = entry.camera_id
+        return redirect(url_for('indi_allsky.modern_admin_media_image_detail_view', image_id=entry.id, **scope))
 
 
 class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
