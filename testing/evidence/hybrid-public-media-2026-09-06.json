@@ -1,0 +1,183 @@
+{
+  "date": "2026-09-06",
+  "baseline": "eef51c18 plus public media mission",
+  "scope": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+  "controls": [
+    {
+      "page": "/latestimageview",
+      "control_id": "redirect and image preview",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Resolve correct record into an independent Hybrid viewer",
+      "proof": "Redirected to /view_image?id=2&camera_id=2; camera2 caption and image URL, decoded width64. No Classic shell loaded.",
+      "status": "superato"
+    },
+    {
+      "page": "/view_image",
+      "control_id": "Copy link",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2/image2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Copy stable record/camera permalink",
+      "proof": "Button displayed Link copied. Controller tests additionally verify copied value and permission/API-unavailable fallback.",
+      "status": "superato"
+    },
+    {
+      "page": "/view_image",
+      "control_id": "Download original",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2/image2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Download without a session when public-media access is enabled",
+      "proof": "Browser download event observed from /media/image/2/2/original?download=1. Real Flask tests cover optional-auth restrictions, content, range and camera mismatch.",
+      "status": "superato"
+    },
+    {
+      "page": "/view_image",
+      "control_id": "Fullscreen / Exit fullscreen",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2/image2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Enter and leave fullscreen through visible controls",
+      "proof": "Native accessibility tree showed Media preview, Exit fullscreen and image. Clicked Exit fullscreen and returned to the public viewer.",
+      "status": "superato"
+    },
+    {
+      "page": "/latesttimelapsewatch",
+      "control_id": "video playback",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera1/video1,390x844",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Keep play controls usable and play actual media",
+      "proof": "Initial64px fixture video hid playback controls. Responsive player became358px wide in390px viewport. Clicked native Play; currentTime=2,duration=2,ended=true.",
+      "status": "superato"
+    },
+    {
+      "page": "/watch_timelapse",
+      "control_id": "Download original",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera1/video1",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Download video anonymously under optional-media policy",
+      "proof": "Browser download event observed for /media/video/1/1/original?download=1.",
+      "status": "superato"
+    },
+    {
+      "page": "/latestkeogramview",
+      "control_id": "redirect / viewer",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Resolve the appropriate media type and camera",
+      "proof": "Navigated to /view_keogram?id=2&camera_id=2. Heading, filename, source URL and camera2 caption matched the fixture; RAW correctly showed Day and other fixtures Night.",
+      "status": "superato"
+    },
+    {
+      "page": "/lateststartrailview",
+      "control_id": "redirect / viewer",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Resolve the appropriate media type and camera",
+      "proof": "Navigated to /view_startrail?id=2&camera_id=2. Heading, filename, source URL and camera2 caption matched the fixture; RAW correctly showed Day and other fixtures Night.",
+      "status": "superato"
+    },
+    {
+      "page": "/latestpanoramaview",
+      "control_id": "redirect / viewer",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Resolve the appropriate media type and camera",
+      "proof": "Navigated to /view_panorama?id=2&camera_id=2. Heading, filename, source URL and camera2 caption matched the fixture; RAW correctly showed Day and other fixtures Night.",
+      "status": "superato"
+    },
+    {
+      "page": "/latestrawview",
+      "control_id": "redirect / viewer",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Resolve the appropriate media type and camera",
+      "proof": "Navigated to /view_raw?id=2&camera_id=2. Heading, filename, source URL and camera2 caption matched the fixture; RAW correctly showed Day and other fixtures Night.",
+      "status": "superato"
+    },
+    {
+      "page": "/lateststartrailvideowatch",
+      "control_id": "redirect / viewer",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Resolve the appropriate media type and camera",
+      "proof": "Navigated to /watch_startrail?id=2&camera_id=2. Heading, filename, source URL and camera2 caption matched the fixture; RAW correctly showed Day and other fixtures Night.",
+      "status": "superato"
+    },
+    {
+      "page": "/latestpanoramavideowatch",
+      "control_id": "redirect / viewer",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera2",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Resolve the appropriate media type and camera",
+      "proof": "Navigated to /watch_panorama?id=2&camera_id=2. Heading, filename, source URL and camera2 caption matched the fixture; RAW correctly showed Day and other fixtures Night.",
+      "status": "superato"
+    },
+    {
+      "page": "/latestthumbnail",
+      "control_id": "thumbnail redirect",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera1/night",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Return latest linked thumbnail without a signature error",
+      "proof": "Redirected to /images/thumbnail-camera-1.jpg; image decoded at64px width.",
+      "status": "superato"
+    },
+    {
+      "page": "/latestpanorama",
+      "control_id": "night selection without data",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "camera1/day",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Return explicit missing-data state",
+      "proof": "Displayed Not Found: No media match this camera and day/night selection.",
+      "status": "superato"
+    },
+    {
+      "page": "/latestimage",
+      "control_id": "invalid camera parameter",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "invalid",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Reject invalid input without500",
+      "proof": "Displayed Bad Request: Invalid media camera_id.",
+      "status": "superato"
+    },
+    {
+      "page": "/public media",
+      "control_id": "remote integrations and live dataset",
+      "role": "anonymous browser; anonymous/ordinary/admin covered by Flask tests",
+      "camera_profile": "production",
+      "prerequisites": "Raspberry isolated sandbox, Classic imports prohibited, synthetic media, anonymous browser with optional media access enabled.",
+      "request": "GET existing public media URL / native viewer interaction",
+      "expected_effect": "Validate production URL consumers and media access",
+      "proof": "Transport and remote-URL policy verified by isolated Flask tests; production consumers/data and post-deployment checks remain open.",
+      "status": "bloccato"
+    }
+  ]
+}

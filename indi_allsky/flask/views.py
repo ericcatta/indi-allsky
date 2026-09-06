@@ -201,6 +201,7 @@ from .forms import IndiAllskyIndiServerChangeForm
 
 from .notification_views import ModernAdminNotificationAcknowledgeView
 from .table_export_views import ModernAdminTableExportView
+from .public_media import PublicLatestMediaView, PublicMediaViewerView, PublicMediaOriginalView
 from .media_archive import ModernAdminMediaArchive, archive_parameters, KINDS as ARCHIVE_KINDS
 from .mini_generation import ModernAdminMiniPreviewView, queue_mini_generation
 from .source_media_views import ModernAdminSourceDownloadView, local_source_allowed, source_file_path
@@ -504,56 +505,8 @@ class RealtimeKeogramView(TemplateView):
         return context
 
 
-class LatestImageRedirect(BaseView):
+class LatestImageRedirect(PublicLatestMediaView):
     model = IndiAllSkyDbImageTable
-
-
-    def dispatch_request(self):
-        camera_id = int(request.args.get('camera_id', 0))
-        night = request.args.get('night')  # can be None
-
-        if not camera_id:
-            camera = self.getLatestCamera()
-            camera_id = camera.id
-
-
-        self.cameraSetup(camera_id=camera_id)
-
-
-        local = True
-        if self.web_nonlocal_images:
-            local = False
-
-
-        image_entry = self.getLatestImage(camera_id, night=night)
-
-
-        image_url = image_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
-
-
-        return redirect(image_url, code=302)
-
-
-    def getLatestImage(self, camera_id, night=None):
-        if isinstance(night, type(None)):
-            latest_image_entry = self.model.query\
-                .join(self.model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-                .order_by(self.model.createDate.desc())\
-                .first()
-        else:
-            # filter based on night
-            night_bool = bool(int(night))
-
-            latest_image_entry = self.model.query\
-                .join(self.model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-                .filter(self.model.night == night_bool)\
-                .order_by(self.model.createDate.desc())\
-                .first()
-
-
-        return latest_image_entry
 
 
 class LatestKeogramRedirect(LatestImageRedirect):
@@ -573,72 +526,12 @@ class LatestRawImageRedirect(LatestImageRedirect):
 
 
 class LatestThumbnailRedirect(LatestImageRedirect):
-
-    def getLatestImage(self, camera_id):
-        latest_image_thumbnail_entry = db.session.query(
-            IndiAllSkyDbImageTable,
-            IndiAllSkyDbThumbnailTable,
-        )\
-            .join(IndiAllSkyDbImageTable.camera)\
-            .join(IndiAllSkyDbThumbnailTable, IndiAllSkyDbImageTable.thumbnail_uuid == IndiAllSkyDbThumbnailTable.uuid)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbImageTable.createDate.desc())\
-            .first()
-
-        _, latest_thumbnail_entry = latest_image_thumbnail_entry
-
-        return latest_thumbnail_entry
+    thumbnail = True
 
 
-class LatestTimelapseVideoRedirect(BaseView):
+class LatestTimelapseVideoRedirect(PublicLatestMediaView):
     model = IndiAllSkyDbVideoTable
-
-    def dispatch_request(self):
-        camera_id = int(request.args.get('camera_id', 0))
-        night = request.args.get('night')  # can be None
-
-
-        if not camera_id:
-            camera = self.getLatestCamera()
-            camera_id = camera.id
-
-
-        self.cameraSetup(camera_id=camera_id)
-
-
-        local = True
-        if self.web_nonlocal_images:
-            local = False
-
-
-        video_entry = self.getLatestVideo(camera_id, night=night)
-
-
-        video_url = video_entry.getUrl(s3_prefix=self.s3_prefix, local=local)
-
-
-        return redirect(video_url, code=302)
-
-
-    def getLatestVideo(self, camera_id, night=None):
-        if isinstance(night, type(None)):
-            latest_video_entry = self.model.query\
-                .join(self.model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-                .order_by(self.model.dayDate.desc())\
-                .first()
-        else:
-            # filter based on night
-            night_bool = bool(int(night))
-
-            latest_video_entry = self.model.query\
-                .join(self.model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-                .filter(self.model.night == night_bool)\
-                .order_by(self.model.dayDate.desc())\
-                .first()
-
-        return latest_video_entry
+    sort_by_day = True
 
 
 class LatestStartrailVideoRedirect(LatestTimelapseVideoRedirect):
@@ -649,53 +542,9 @@ class LatestPanoramaVideoRedirect(LatestTimelapseVideoRedirect):
     model = IndiAllSkyDbPanoramaVideoTable
 
 
-class LatestImageViewRedirect(BaseView):
-    model = IndiAllSkyDbImageTable
+class LatestImageViewRedirect(LatestImageRedirect):
+    show_viewer = True
     view_view = 'indi_allsky.timelapse_image_view'
-
-
-    def dispatch_request(self):
-        camera_id = int(request.args.get('camera_id', 0))
-        night = request.args.get('night')  # can be None
-
-
-        if not camera_id:
-            camera = self.getLatestCamera()
-            camera_id = camera.id
-
-
-        self.cameraSetup(camera_id=camera_id)
-
-
-        image_entry = self.getLatestImage(camera_id, night=night)
-
-
-        view_url = url_for(self.view_view, id=image_entry.id)
-
-
-        return redirect(view_url, code=302)
-
-
-    def getLatestImage(self, camera_id, night=None):
-        if isinstance(night, type(None)):
-            latest_image_entry = self.model.query\
-                .join(self.model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-                .order_by(self.model.createDate.desc())\
-                .first()
-        else:
-            # filter based on night
-            night_bool = bool(int(night))
-
-            latest_image_entry = self.model.query\
-                .join(self.model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-                .filter(self.model.night == night_bool)\
-                .order_by(self.model.createDate.desc())\
-                .first()
-
-
-        return latest_image_entry
 
 
 class LatestKeogramViewRedirect(LatestImageViewRedirect):
@@ -718,53 +567,9 @@ class LatestRawImageViewRedirect(LatestImageViewRedirect):
     view_view = 'indi_allsky.raw_image_view'
 
 
-class LatestTimelapseVideoWatchRedirect(BaseView):
-    model = IndiAllSkyDbVideoTable
+class LatestTimelapseVideoWatchRedirect(LatestTimelapseVideoRedirect):
+    show_viewer = True
     watch_view = 'indi_allsky.timelapse_video_view'
-
-
-    def dispatch_request(self):
-        camera_id = int(request.args.get('camera_id', 0))
-        night = request.args.get('night')  # can be None
-
-
-        if not camera_id:
-            camera = self.getLatestCamera()
-            camera_id = camera.id
-
-
-        self.cameraSetup(camera_id=camera_id)
-
-
-        video_entry = self.getLatestVideo(camera_id, night=night)
-
-
-        view_url = url_for(self.watch_view, id=video_entry.id)
-
-
-        return redirect(view_url, code=302)
-
-
-    def getLatestVideo(self, camera_id, night=None):
-        if isinstance(night, type(None)):
-            latest_video_entry = self.model.query\
-                .join(self.model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-                .order_by(self.model.dayDate.desc())\
-                .first()
-        else:
-            # filter based on night
-            night_bool = bool(int(night))
-
-            latest_video_entry = self.model.query\
-                .join(self.model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-                .filter(self.model.night == night_bool)\
-                .order_by(self.model.dayDate.desc())\
-                .first()
-
-
-        return latest_video_entry
 
 
 class LatestStartrailVideoWatchRedirect(LatestTimelapseVideoWatchRedirect):
@@ -11858,81 +11663,10 @@ class CameraSimulatorView(TemplateView):
         return context
 
 
-class TimelapseImageView(TemplateView):
+class TimelapseImageView(PublicMediaViewerView):
     model = IndiAllSkyDbImageTable
     page_title = 'Timelapse Image'
     file_view = 'indi_allsky.timelapse_image_view'
-    decorators = [login_optional_media]
-
-
-    def get_context(self):
-        context = super(TimelapseImageView, self).get_context()
-
-        context['file_view'] = self.file_view
-
-        image_id = int(request.args.get('id', -1))
-
-        if image_id == -1:
-            latest_image = self.model.query\
-                .order_by(
-                    self.model.dayDate.desc(),
-                    self.model.createDate.desc(),
-                )\
-                .first()
-
-            if latest_image:
-                image_id = latest_image.id
-
-
-        context['image_id'] = image_id
-
-
-        #createDate = datetime.fromtimestamp(timestamp)
-        #app.logger.info('Timestamp date: %s', createDate)
-
-
-        image_q = self.model.query\
-            .filter(self.model.id == image_id)
-
-
-        local = True  # default to local assets
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
-
-                # Do not serve local assets
-                image_q = image_q\
-                    .filter(
-                        or_(
-                            self.model.remote_url != sa_null(),
-                            self.model.s3_key != sa_null(),
-                        )
-                    )
-
-        #app.logger.info('SQL: %s', str(image_q))
-
-        try:
-            image = image_q.one()
-        except NoResultFound:
-            app.logger.error('Image not found')
-            context['timeofday'] = ''
-            context['createDate_full'] = 'Image not found'
-            context['image_url'] = ''
-            return context
-
-
-        if image.night:
-            context['timeofday'] = 'Night'
-        else:
-            context['timeofday'] = 'Day'
-
-        context['createDate_full'] = image.dayDate.strftime('%B %d, %Y - %H:%M:%S')
-        context['image_url'] = image.getUrl(s3_prefix=self.s3_prefix, local=local)
-
-
-        return context
 
 
 class PanoramaImageView(TimelapseImageView):
@@ -11959,75 +11693,11 @@ class RawImageView(TimelapseImageView):
     file_view = 'indi_allsky.raw_image_view'
 
 
-class TimelapseVideoView(TemplateView):
+class TimelapseVideoView(PublicMediaViewerView):
     model = IndiAllSkyDbVideoTable
     page_title = 'Timelapse Video'
     file_view = 'indi_allsky.timelapse_video_view'
-    decorators = [login_optional_media]
-
-
-    def get_context(self):
-        context = super(TimelapseVideoView, self).get_context()
-
-        context['file_view'] = self.file_view
-
-        video_id = int(request.args.get('id', -1))
-
-        if video_id == -1:
-            latest_video = self.model.query\
-                .order_by(
-                    self.model.dayDate.desc(),
-                    self.model.createDate.desc(),
-                )\
-                .first()
-
-            if latest_video:
-                video_id = latest_video.id
-
-
-        context['video_id'] = video_id
-
-
-        video_q = self.model.query\
-            .filter(self.model.id == video_id)
-
-
-        local = True  # default to local assets
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
-
-                # Do not serve local assets
-                video_q = video_q\
-                    .filter(
-                        or_(
-                            self.model.remote_url != sa_null(),
-                            self.model.s3_key != sa_null(),
-                        )
-                    )
-
-        try:
-            video = video_q.one()
-        except NoResultFound:
-            app.logger.error('Video not found')
-            context['timeofday'] = ''
-            context['dayDate_full'] = 'Video not found'
-            context['video_url'] = ''
-            return context
-
-
-        if video.night:
-            context['timeofday'] = 'Night'
-        else:
-            context['timeofday'] = 'Day'
-
-        context['dayDate_full'] = video.dayDate.strftime('%B %d, %Y')
-        context['video_url'] = video.getUrl(s3_prefix=self.s3_prefix, local=local)
-
-
-        return context
+    video = True
 
 
 class MiniTimelapseVideoView(TimelapseVideoView):
@@ -21530,15 +21200,16 @@ def register_compatibility_routes(bp_allsky):
     bp_allsky.add_url_rule('/ajax/gallery', view_func=AjaxGalleryViewerView.as_view('ajax_gallery_view'))
     bp_allsky.add_url_rule('/ajax/videoviewer', view_func=AjaxVideoViewerView.as_view('ajax_videoviewer_view'))
     bp_allsky.add_url_rule('/ajax/minivideoviewer', view_func=AjaxMiniVideoViewerView.as_view('ajax_mini_videoviewer_view'))
-    bp_allsky.add_url_rule('/view_image', view_func=TimelapseImageView.as_view('timelapse_image_view', template_name='view_image.html'))
-    bp_allsky.add_url_rule('/view_panorama', view_func=PanoramaImageView.as_view('panorama_image_view', template_name='view_image.html'))
-    bp_allsky.add_url_rule('/view_startrail', view_func=StartrailImageView.as_view('startrail_image_view', template_name='view_image.html'))
-    bp_allsky.add_url_rule('/view_keogram', view_func=KeogramImageView.as_view('keogram_image_view', template_name='view_image.html'))
-    bp_allsky.add_url_rule('/view_raw', view_func=RawImageView.as_view('raw_image_view', template_name='view_image.html'))
-    bp_allsky.add_url_rule('/watch_timelapse', view_func=TimelapseVideoView.as_view('timelapse_video_view', template_name='watch_video.html'))
-    bp_allsky.add_url_rule('/watch_mini_timelapse', view_func=MiniTimelapseVideoView.as_view('mini_timelapse_video_view', template_name='watch_video.html'))
-    bp_allsky.add_url_rule('/watch_startrail', view_func=StartrailVideoView.as_view('startrail_video_view', template_name='watch_video.html'))
-    bp_allsky.add_url_rule('/watch_panorama', view_func=PanoramaVideoView.as_view('panorama_video_view', template_name='watch_video.html'))
+    bp_allsky.add_url_rule('/media/<kind>/<int:camera_id>/<int:media_id>/original', view_func=PublicMediaOriginalView.as_view('public_media_original_view'))
+    bp_allsky.add_url_rule('/view_image', view_func=TimelapseImageView.as_view('timelapse_image_view', template_name='modern_admin/public_media.html'))
+    bp_allsky.add_url_rule('/view_panorama', view_func=PanoramaImageView.as_view('panorama_image_view', template_name='modern_admin/public_media.html'))
+    bp_allsky.add_url_rule('/view_startrail', view_func=StartrailImageView.as_view('startrail_image_view', template_name='modern_admin/public_media.html'))
+    bp_allsky.add_url_rule('/view_keogram', view_func=KeogramImageView.as_view('keogram_image_view', template_name='modern_admin/public_media.html'))
+    bp_allsky.add_url_rule('/view_raw', view_func=RawImageView.as_view('raw_image_view', template_name='modern_admin/public_media.html'))
+    bp_allsky.add_url_rule('/watch_timelapse', view_func=TimelapseVideoView.as_view('timelapse_video_view', template_name='modern_admin/public_media.html'))
+    bp_allsky.add_url_rule('/watch_mini_timelapse', view_func=MiniTimelapseVideoView.as_view('mini_timelapse_video_view', template_name='modern_admin/public_media.html'))
+    bp_allsky.add_url_rule('/watch_startrail', view_func=StartrailVideoView.as_view('startrail_video_view', template_name='modern_admin/public_media.html'))
+    bp_allsky.add_url_rule('/watch_panorama', view_func=PanoramaVideoView.as_view('panorama_video_view', template_name='modern_admin/public_media.html'))
     bp_allsky.add_url_rule('/ajax/generate', view_func=AjaxTimelapseGeneratorView.as_view('ajax_generate_view'))
     bp_allsky.add_url_rule('/ajax/minigenerate', view_func=AjaxMiniTimelapseGeneratorView.as_view('ajax_mini_generate_view'))
     bp_allsky.add_url_rule('/ajax/config', view_func=AjaxConfigView.as_view('ajax_config_view'))

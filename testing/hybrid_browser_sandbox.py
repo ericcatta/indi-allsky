@@ -13,6 +13,7 @@ from hybrid_source_media_fixture import seed_source_media
 from hybrid_generation_fixture import seed_generation, seed_preview_frames
 from hybrid_generated_media_fixture import seed_generated_media
 from hybrid_archive_fixture import seed_archive
+from hybrid_public_media_fixture import seed_public_media
 
 class SandboxEffectBlocked(RuntimeError):
     pass
@@ -20,6 +21,7 @@ class SandboxEffectBlocked(RuntimeError):
 def run(runtime_config, port):
     with isolated_app(runtime_config, multi_camera=True) as app:
         app.jinja_env.auto_reload = True
+        app.config.update(INDI_ALLSKY_AUTH_ALL_VIEWS=False, INDI_ALLSKY_AUTH_MEDIA_VIEWS=False)
         app.config['ADMIN_NETWORKS'] = ['127.0.0.0/8', '::1/128']
         seed_operations(app)
         seed_source_media(app)
@@ -27,6 +29,7 @@ def run(runtime_config, port):
         seed_preview_frames(app)
         seed_generated_media(app)
         seed_archive(app)
+        seed_public_media(app)
         from flask import request, jsonify
         from indi_allsky.flask.views import AjaxConfigRestoreView
         @app.before_request

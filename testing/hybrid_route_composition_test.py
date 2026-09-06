@@ -19,13 +19,18 @@ def test_route_contract_is_unchanged():
                 isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute)
                 and node.func.attr == 'add_url_rule'
-                and node.args[0].value not in ('/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
+                and node.args[0].value not in ('/media/<kind>/<int:camera_id>/<int:media_id>/original', '/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
             ):
                 if node.args[0].value in ('/modern-admin/tools/camera-simulator', '/modern-admin/tools/generate'):
                     template = next(k for k in node.keywords if k.arg == 'view_func').value
                     setting = next(k for k in template.keywords if k.arg == 'template_name')
                     assert setting.value.value == ('modern_admin/camera_simulator.html' if node.args[0].value.endswith('camera-simulator') else 'modern_admin/generate.html')
                     setting.value.value = 'modern_admin/safe_controls.html'
+                if node.args[0].value in ('/view_image','/view_panorama','/view_startrail','/view_keogram','/view_raw','/watch_timelapse','/watch_mini_timelapse','/watch_startrail','/watch_panorama'):
+                    template = next(k for k in node.keywords if k.arg == 'view_func').value
+                    setting = next(k for k in template.keywords if k.arg == 'template_name')
+                    assert setting.value.value == 'modern_admin/public_media.html'
+                    setting.value.value = 'watch_video.html' if node.args[0].value.startswith('/watch_') else 'view_image.html'
                 calls.append(ast.dump(node, include_attributes=False))
     assert len(calls) == 224
     fingerprint = hashlib.sha256('\n'.join(sorted(calls)).encode()).hexdigest()

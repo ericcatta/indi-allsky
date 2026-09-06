@@ -31,6 +31,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     conservati. Test su task reali in DB temporaneo e cancellazioni di fixture;
   - browser desktop/mobile verificato; encoding/upload dei worker e produzione
     restano da collaudare. Evidenze in `HYBRID_ACCEPTANCE_STATUS.md`.
+- Compatibilita' media pubblici: handler Hybrid per lookup latest/thumbnail,
+  viewer e originali, con URL esistenti e autenticazione opzionale preservati.
+  Nove viewer indipendenti dal layout Classic; policy della camera proprietaria,
+  errori controllati e test Flask/browser su entrambi i profili.
 - Archivio completo Hybrid per dieci tipi di media: query e filtri su tutti i
   record, cursori timestamp/ID, anteprime, originali e accesso ai dettagli. Superato
   il limite funzionale dei soli 100 record recenti; camera/profilo mantenuti anche

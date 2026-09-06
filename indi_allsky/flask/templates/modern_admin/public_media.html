@@ -1,0 +1,34 @@
+{% extends 'shared/document.html' %}
+{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
+{% block head %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='public-media-v2') }}">
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/public-media.css', v='public-media-v2') }}">
+{% endblock %}
+{% block body_class %}hybrid-public-media-body{% endblock %}
+{% block content %}
+<main class="hybrid-public-media">
+  <header>
+    <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Hybrid</a>
+    <h1>{{ page_title }}</h1>
+    <p>{{ media.camera.friendlyName or media.camera.name }} · {{ media.dayDate }} · {{ 'Night' if media.night else 'Day' }}</p>
+  </header>
+  <section id="public-media-preview" aria-label="Media preview">
+    <button id="public-media-exit" type="button">Exit fullscreen</button>
+    {% if is_video %}<video controls preload="metadata" src="{{ media_url }}" aria-label="Play {{ filename }}"></video>
+    {% else %}<img src="{{ media_url }}" alt="{{ filename }}">{% endif %}
+  </section>
+  <p id="public-media-error" role="status" hidden>The media file could not be loaded. It may be missing or unreachable.</p>
+  <p>{{ filename }}</p>
+  <div class="modern-admin-filter-bar">
+    <a class="modern-admin-file-action" href="{{ original_url }}">Download original</a>
+    <button type="button" id="public-media-copy" data-permalink="{{ permalink }}">Copy link</button>
+    <button type="button" id="public-media-fullscreen">Fullscreen</button>
+  </div>
+  <p id="public-media-status" role="status" aria-live="polite"></p>
+  {% if current_user.is_authenticated %}
+  <a href="{{ url_for('indi_allsky.modern_admin_media_archive_view', kind=media_kind, camera_id=media.camera_id) }}">Browse this camera in Hybrid</a>
+  {% else %}<a href="{{ url_for('auth_indi_allsky.login_view') }}">Sign in to Hybrid</a>{% endif %}
+</main>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/public-media.js', v='public-media-v2') }}"></script>
+{% endblock %}

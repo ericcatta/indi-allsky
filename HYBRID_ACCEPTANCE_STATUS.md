@@ -390,3 +390,43 @@ Remaining gates include live production workload/performance, complete media
 mutation/player coverage, operational tools, integrations/product placeholders,
 physical Classic removal and the minimum 24-hour post-deployment acceptance run.
 The overall product audit remains open.
+
+
+## Verified mission: public media compatibility without Classic
+
+Existing latest/view/watch URLs remain registered. Their lookup, file access and
+viewer implementations now live behind independent Hybrid handlers in
+`public_media.py`. Nine viewers use an independent public Hybrid template rather
+than Classic's base/navigation. Public originals support configured media roots,
+including RAW export outside the usual image folder, with scoped record lookup,
+range responses and controlled file errors. FITS are deliberately not added to
+the public-media surface; their authenticated Hybrid access remains unchanged.
+
+Corrected defects include absent records causing 500 responses, invalid parameter
+conversions, the incompatible latest-thumbnail method signature, and camera
+policy being taken from unrelated session context. Thumbnail lookup verifies the
+owning camera; latest video ordering has deterministic creation/ID tie-breaks.
+Public latest redirects retain their existing public role. Viewers/originals
+respect both existing optional-auth flags and owning-camera local/remote policy.
+Remote-only cameras without a remote URL receive 404 rather than a local fallback.
+No public URL, scientific file or capture-worker algorithm was removed.
+
+`hybrid_public_media_flow_test.py` passes for 17 latest endpoints, nine viewers,
+both cameras, anonymous/ordinary/admin sessions, both optional-auth flags,
+original/range responses, separate RAW export, empty selections, invalid inputs
+and remote policy. It forbids loading Classic view/template files. Full Book 2,
+route fingerprints, shell, all JS controller suites and 11 isolated Flask suites
+pass. The registration fingerprint normalizes only explicitly checked template
+migrations; original URL/class registrations remain guarded.
+
+Browser evidence: `testing/evidence/hybrid-public-media-2026-09-06.json`. It covers
+anonymous image/video viewing, correct redirects/camera captions, thumbnail,
+copy/download/fullscreen, explicit missing/invalid states and mobile playback.
+A 64px fixture video initially hid native playback controls; the corrected player
+measures 358px within a 390px viewport and was played through its full 2-second clip.
+Contrast and buttons now match Hybrid. These are fixture-level rendering and
+playback measurements, not production performance results.
+
+Classic removal, OAuth/integrations, remaining operational controls/product
+placeholders, production deployment and the 24-hour acceptance period are still
+open. The old public template files are left for the separate verified cleanup.
