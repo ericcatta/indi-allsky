@@ -678,3 +678,28 @@ entry/exit were attempted but fullscreen state was not conclusively observed;
 that browser acceptance remains open. No physical device or production setting
 was changed. The final DOM wrapper/JSON-error wording edits were covered by
 static/controller checks, not a second browser pass.
+
+## Focus live publication for every camera
+
+The worker's Focus branch now publishes the already encoded image atomically to
+`focus-camera-<id>.<extension>` for every camera, including a non-primary camera
+which does not update global latest. Each file replaces only that camera's prior
+focus frame. No archive records or timelapse files are created in Focus mode.
+The primary legacy latest behavior and worker return values remain unchanged.
+Publication failures are logged, remove staging files and preserve the previous
+focus frame without crashing the worker; the API still reports frame age.
+
+Hybrid Focus reads the camera-specific file first. The old primary latest fallback
+remains for a worker that has not yet been updated. A secondary with no published
+file reports that state instead of showing the primary. This supersedes the
+previous implementation limitation; **live production validation remains open**.
+
+`focus_frames_test.py` executes the actual worker write_img method on synthetic
+PNG frames for primary/non-primary cameras, verifies pixels and global latest,
+replacement failure, cleanup and no crash on publication failure. The extended
+native Focus Flask test decodes the secondary live response and verifies its
+70x50 dimensions and pixel value120, distinct from the primary48x64 frame.
+Both roles, owner-media policy and missing-source behavior remain covered.
+Full Book 2/shell/route regression and the real NumPy/OpenCV multicamera processor
+and stretch isolation tests pass. No production worker was restarted or deployed;
+real 24-hour acceptance must cover the final deployed worker version.

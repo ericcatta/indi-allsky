@@ -47,6 +47,15 @@ def run(runtime_config):
         response=client.get(api+'?camera_id=1')
         assert response.status_code==200 and response.json['source']=='Live focus frame',response.text
         assert client.get(api+'?camera_id=2').status_code==409 # Never substitute primary camera frame.
+        from indi_allsky.focus_frames import publish_focus_frame
+        secondary=root/('secondary.'+extension)
+        cv2.imwrite(str(secondary),np.full((50,70,3),120,dtype=np.uint8))
+        publish_focus_frame(secondary,root,2,extension)
+        response=client.get(api+'?camera_id=2')
+        assert response.status_code==200 and response.json['camera_id']==2 and response.json['source']=='Live focus frame',response.text
+        import base64
+        decoded=cv2.imdecode(np.frombuffer(base64.b64decode(response.json['image_b64']),dtype=np.uint8),cv2.IMREAD_COLOR)
+        assert decoded.shape[:2]==(50,70) and np.all(decoded==120)
         admin=login_client(app,1)
         with patch.object(ModernAdminFocusView,'verify_admin_network',return_value=True):
             assert 'id="focus-movement" disabled' not in admin.get(page).text

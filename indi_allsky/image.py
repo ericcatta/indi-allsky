@@ -4190,6 +4190,11 @@ class ImageWorker(Process):
 
         ### disable timelapse images in focus mode
         if self.config.get('FOCUS_MODE', False):
+            from .focus_frames import publish_focus_frame
+            try:
+                publish_focus_frame(tmpfile_name, self.image_dir, camera.id, self.config['IMAGE_FILE_TYPE'])
+            except (OSError, ValueError):
+                logger.exception('Unable to publish focus preview for camera %s', camera.id)
             logger.warning('Focus mode enabled, not saving timelapse image')
             if diag_enabled:
                 self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='focus_mode')

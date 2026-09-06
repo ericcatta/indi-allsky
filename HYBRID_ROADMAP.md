@@ -19,8 +19,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Focus: decodifica, ritaglio e misurazione ora nel modulo condiviso
   `indi_allsky/focus_preview.py`; parita' JPEG/score/stelle verificata.
   Pagina nativa con preview per camera, zoom/offset, cronologia e comandi focuser
-  con permessi/rete. Resta aperta la pubblicazione live della camera secondaria
-  durante FOCUS_MODE e il collaudo hardware.
+  con permessi/rete. Il worker pubblica atomicamente un frame Focus per camera,
+  anche per la secondaria; resta aperto il deploy e il collaudo hardware/live.
 
 - Recovery IMX708 2026-09-06: la cache della maschera Mode 1 stretch distingue
   binning e dimensioni del frame; processor separati anche per profili con

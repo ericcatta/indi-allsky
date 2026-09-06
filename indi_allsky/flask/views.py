@@ -14776,16 +14776,20 @@ class ModernAdminFocusPreviewView(ModernAdminMediaBrowseView, BaseView):
             focus_mode = bool(self.indi_allsky_config.get('FOCUS_MODE', False))
             source = 'Saved frame'
             if focus_mode:
-                profiles = self.get_media_filter_profiles()
-                primary = next((p for p in profiles if p.get('enabled') and p.get('primary')), None)
-                rows = self.get_media_filter_camera_rows()
-                primary_id = self.get_media_profile_camera_id(primary, rows, profiles.index(primary)) if primary else (rows[0].id if len(rows) == 1 else None)
-                if camera_id != primary_id:
-                    return jsonify({'error': 'Focus mode currently publishes live previews only for the primary camera. No live frame is available for this camera.'}), 409
+                from ..focus_frames import focus_frame_path
                 root = Path(self.indi_allsky_config['IMAGE_FOLDER']).resolve()
-                path = (root / ('latest.' + self.indi_allsky_config['IMAGE_FILE_TYPE'])).resolve()
-                if not path.is_relative_to(root):
-                    abort(404)
+                path = focus_frame_path(root, camera_id, self.indi_allsky_config['IMAGE_FILE_TYPE'])
+                if not path.is_file():
+                    # Preserve primary-camera preview while an older worker is still deployed.
+                    profiles = self.get_media_filter_profiles()
+                    primary = next((p for p in profiles if p.get('enabled') and p.get('primary')), None)
+                    rows = self.get_media_filter_camera_rows()
+                    primary_id = self.get_media_profile_camera_id(primary, rows, profiles.index(primary)) if primary else (rows[0].id if len(rows) == 1 else None)
+                    if camera_id != primary_id:
+                        return jsonify({'error': 'No live focus frame has been published for this camera yet.'}), 409
+                    path = (root / ('latest.' + self.indi_allsky_config['IMAGE_FILE_TYPE'])).resolve()
+                    if not path.is_relative_to(root):
+                        abort(404)
                 source = 'Live focus frame'
                 timestamp = datetime.fromtimestamp(path.stat().st_mtime)
             else:
