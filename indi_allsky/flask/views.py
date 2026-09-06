@@ -16008,55 +16008,17 @@ class ModernAdminImageCircleHelperView(ModernAdminSafeControlsMixin, ImageCircle
         return context
 
 
-class ModernAdminConfigView(ModernAdminSafeControlsMixin, ConfigView):
-    page_title = 'Modern Admin Config'
+class ModernAdminConfigView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Configuration'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
-    def get_context(self):
-        context = super(ModernAdminConfigView, self).get_context()
-        form = context['form_config']
-
-        context['modern_admin_safe_title'] = 'Config'
-        context['modern_admin_safe_note'] = 'Configuration values are loaded from the existing classic config form. Saving configuration remains disabled in Modern Admin.'
-        context['modern_admin_safe_sections'] = (
-            {
-                'title' : 'Camera',
-                'rows'  : self.field_rows(form, (
-                    'CAMERA_INTERFACE',
-                    'INDI_SERVER',
-                    'INDI_PORT',
-                    'INDI_CAMERA_NAME',
-                    'LENS_NAME',
-                    'LENS_FOCAL_LENGTH',
-                    'LENS_FOCAL_RATIO',
-                )),
-            },
-            {
-                'title' : 'Exposure',
-                'rows'  : self.field_rows(form, (
-                    'CCD_EXPOSURE_MAX',
-                    'CCD_EXPOSURE_DEF',
-                    'CCD_EXPOSURE_MIN',
-                    'EXPOSURE_PERIOD',
-                    'CCD_BIT_DEPTH',
-                    'FOCUS_MODE',
-                )),
-            },
-            {
-                'title' : 'System controls',
-                'rows'  : (
-                    {'label' : 'Config ID', 'value' : context.get('config_id')},
-                    {'label' : 'Timezone validation', 'value' : 'Warning' if context.get('longitude_validation_message') else 'OK'},
-                    {'label' : 'Dew heater status', 'value' : context.get('dh_status_str')},
-                    {'label' : 'Fan status', 'value' : context.get('fan_status_str')},
-                ),
-            },
-        )
-        context['modern_admin_safe_actions'] = (
-            self.disabled_action('Save config', 'Writes configuration and may reload services; disabled in Modern Admin.'),
-            self.disabled_action('Restore config', 'Restores configuration state; disabled in Modern Admin.'),
-        )
-        return context
+    def dispatch_request(self):
+        # Preserve the existing entry URL while keeping one working editor.
+        return redirect(url_for(
+            'indi_allsky.modern_admin_full_settings_view',
+            camera_id=request.args.get('camera_id'),
+            profile_id=request.args.get('profile_id'),
+        ))
 
 
 class ModernAdminSettingsInventoryView(ModernAdminContextMixin, ConfigView):

@@ -65,6 +65,33 @@ python testing/hybrid_authenticated_flow_test.py
 node testing/hybrid_account_browser_test.js
 ```
 
+## Verified mission: Settings rendering and persistence
+
+- Fixed ten contract pages: Jinja's `section.keys` resolved the dictionary method
+  instead of the `keys` collection. Explicit dictionary indexing preserves the
+  contract shape and displayed content.
+- `/modern-admin/system/config` now redirects to the working Full Settings
+  editor, retaining camera/profile query values. The contradictory disabled
+  editor has been removed; the entry URL remains supported.
+- Full Settings controller is separate from the template; duplicate submission
+  and expired/unreadable responses are covered. Non-admin users receive a
+  disabled form and a clear explanation; server permissions remain enforced.
+- Removed redundant native-validation diagnostics from the controller. Form
+  submission already used `novalidate`; server-side validation remains authoritative.
+
+Evidence: `testing/hybrid_settings_flow_test.py` uses actual rendered form
+values and Flask HTTP requests to save, download and restore with Classic
+absent. It verifies new revision persistence, unchanged older revisions,
+unchanged two-camera profile dictionaries (including extension keys), no reload
+task when disabled, and rejection of invalid values, empty/oversize/malformed
+restore files, missing CSRF and ordinary-user writes. No operational config,
+security keys, live database or capture service are modified by this test.
+
+`testing/hybrid_full_settings_browser_test.js` covers the controller's payload,
+checkbox values, filtering, duplicate submit, permissions, field errors,
+network failures, session expiry and invalid responses. Actual browser clicks,
+live save/restore and the complete camera-profile editor matrix remain open.
+
 ## Remaining gates
 
 Complete Settings, media, operational tools and all supported effects; replace

@@ -18,7 +18,7 @@ class ForbidClassicImport(importlib.abc.MetaPathFinder):
             raise AssertionError('Hybrid imported Classic views')
 
 @contextmanager
-def isolated_app(runtime_config='/etc/indi-allsky/flask.json'):
+def isolated_app(runtime_config='/etc/indi-allsky/flask.json', *, multi_camera=False):
     sys.path.insert(0, str(ROOT))
     assert 'indi_allsky.flask' not in sys.modules, 'Run this fixture in a fresh process'
     guard = ForbidClassicImport()
@@ -50,6 +50,13 @@ def isolated_app(runtime_config='/etc/indi-allsky/flask.json'):
                         password=argon2.hash(PASSWORD), email='test@example.invalid', name='Test User', admin=admin))
                 settings = deepcopy(IndiAllSkyConfigBase().base_config)
                 settings.update(IMAGE_FOLDER=directory, WEB_EXTRA_TEXT='', IMAGE_EXPORT_FOLDER=directory)
+                if multi_camera:
+                    settings['MULTI_CAMERA'] = {'profiles': [
+                        {'profile_id':'test-profile-'+str(cid), 'enabled':True, 'primary':cid==1,
+                         'camera_interface':'indi', 'db_camera_id':cid, 'indi_camera_name':'Test Camera '+str(cid),
+                         'exposure_max':10.0+cid, 'gain_night':40.0+cid,
+                         'outputs':{'images':True, 'timelapse':True}, 'test_extension':{'preserve':cid}}
+                        for cid in (1,2)]}
                 db.session.add(IndiAllSkyDbConfigTable(id=1, level=__config_level__, data=settings,
                     note='Synthetic acceptance fixture', user_id=1))
                 for cid in (1, 2):

@@ -122,14 +122,14 @@
                     <span class="modern-admin-settings-badge">Read-only</span>
                 </small>
                 <small>
-                    {% for key_row in section.keys %}
+                    {% for key_row in section['keys'] %}
                     <code>{{ key_row.key }}</code>{% if not loop.last %}<br>{% endif %}
                     {% else %}
                     No static keys listed.
                     {% endfor %}
                 </small>
                 <small>
-                    {% for key_row in section.keys %}
+                    {% for key_row in section['keys'] %}
                     {{ key_row.notes }}{% if not loop.last %}<br>{% endif %}
                     {% else %}
                     No notes.

@@ -167,7 +167,7 @@ var camera_id = {{ camera_id }};
                     <small>{{ section.description }}</small>
                     <small><span class="modern-admin-settings-badge">{{ section.key_count }} keys</span></small>
                     <small>
-                        {% for row in section.keys %}
+                        {% for row in section['keys'] %}
                         <code>{{ row.key }}</code><br>
                         {{ row.source }} — {{ row.notes }}{% if not loop.last %}<br><br>{% endif %}
                         {% endfor %}

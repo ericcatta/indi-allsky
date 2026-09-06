@@ -28,6 +28,13 @@ def run(runtime_config):
         for route in ('now', 'config-history', 'config-restore', 'settings/full', 'account', 'users', 'users/1'):
             response = client.get('/indi-allsky/modern-admin/'+route)
             assert response.status_code == 200, (route, response.status_code)
+        for group in ('acquisition-save', 'analytics', 'auto-exposure-gain', 'camera-connection',
+                      'camera-profile', 'exposure-gain', 'fits-source', 'hybrid-awb', 'notifications', 'storage'):
+            response = client.get('/indi-allsky/modern-admin/settings/'+group)
+            assert response.status_code == 200, (group, response.status_code)
+        duplicate = client.get('/indi-allsky/modern-admin/system/config?camera_id=2&profile_id=test-profile')
+        assert duplicate.status_code == 302
+        assert duplicate.location == '/indi-allsky/modern-admin/settings/full?camera_id=2&profile_id=test-profile'
         account = client.get('/indi-allsky/modern-admin/account')
         assert 'hybrid-account-form' in account.text
         token = FormFields(account.text).fields['csrf_token']

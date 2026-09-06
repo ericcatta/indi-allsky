@@ -65,7 +65,11 @@ var camera_id = {{ camera_id }};
         <input id="modern-admin-full-settings-filter" class="modern-admin-settings-filter" type="search" placeholder="Filter by label, field, value, type, risk, or scope" autocomplete="off">
     </section>
 
+    {% if not login_disabled and not current_user.is_admin %}
+    <p class="modern-admin-note">You can inspect these settings. An administrator account is required to save changes.</p>
+    {% endif %}
     <form id="modern-admin-full-settings-form" class="modern-admin-settings-form" autocomplete="off" novalidate>
+        <fieldset style="border:0;padding:0;min-width:0" {% if not login_disabled and not current_user.is_admin %}disabled{% endif %}>
         {% for field_meta in modern_admin_full_settings_profile_operated_hidden_fields %}
         {% set field = field_meta.field %}
         {{ field(id=field_meta.name, data_modern_full_field='1', hidden=true) }}
@@ -137,197 +141,18 @@ var camera_id = {{ camera_id }};
             </div>
             <button id="modern-admin-full-settings-save" class="modern-admin-button modern-admin-primary-action" type="submit" formnovalidate>Save Full Settings</button>
         </section>
+        </fieldset>
     </form>
 
     <section class="modern-admin-table-panel" id="modern-admin-full-settings-message" hidden></section>
 </main>
 
-<script>
-(function () {
-    const form = document.getElementById('modern-admin-full-settings-form');
-    const saveButton = document.getElementById('modern-admin-full-settings-save');
-    const message = document.getElementById('modern-admin-full-settings-message');
-    const filter = document.getElementById('modern-admin-full-settings-filter');
-    const sections = Array.from(document.querySelectorAll('[data-full-settings-section]'));
-    const fieldNames = {{ modern_admin_full_settings_field_names | tojson }};
-    const checkboxNames = new Set({{ modern_admin_full_settings_checkbox_names | tojson }});
-    const ajaxUrl = new URL({{ url_for('indi_allsky.ajax_config_view') | tojson }}, window.location.href).toString();
-    const csrfToken = {{ csrf_token() | tojson }};
-
-    function setMessage(text, tone) {
-        message.hidden = false;
-        message.className = 'modern-admin-table-panel modern-admin-full-settings-message modern-admin-full-settings-message-' + tone;
-        message.textContent = text;
-    }
-
-    function clearErrors() {
-        form.querySelectorAll('.modern-admin-settings-edit-error').forEach((error) => {
-            error.hidden = true;
-            error.textContent = '';
-        });
-        form.querySelectorAll('.is-invalid').forEach((input) => {
-            input.classList.remove('is-invalid');
-        });
-    }
-
-    function collectPayload() {
-        const payload = {};
-        fieldNames.forEach((name) => {
-            try {
-                const input = document.getElementById(name);
-                if (!input) {
-                    return;
-                }
-
-                if (checkboxNames.has(name)) {
-                    payload[name] = Boolean(input.checked);
-                } else {
-                    payload[name] = input.value;
-                }
-            } catch (error) {
-                throw new Error('Unable to read field "' + name + '": ' + error.message);
-            }
-        });
-        return payload;
-    }
-
-    function describeInput(input) {
-        if (!input) {
-            return 'field=<missing>';
-        }
-
-        const value = input.type === 'password' ? '<redacted>' : input.value;
-        return 'field=' + (input.id || input.name || '<unnamed>') +
-            ' type=' + (input.type || input.tagName || '<unknown>') +
-            ' value=' + JSON.stringify(value) +
-            ' pattern=' + JSON.stringify(input.getAttribute('pattern')) +
-            ' min=' + JSON.stringify(input.getAttribute('min')) +
-            ' max=' + JSON.stringify(input.getAttribute('max')) +
-            ' step=' + JSON.stringify(input.getAttribute('step'));
-    }
-
-    function getNativeValidationDiagnostics() {
-        const diagnostics = [];
-        const inputs = Array.from(form.querySelectorAll('[data-modern-full-field]'));
-        inputs.forEach((input) => {
-            try {
-                if (typeof input.checkValidity === 'function') {
-                    input.checkValidity();
-                }
-            } catch (error) {
-                diagnostics.push(describeInput(input) + ' error=' + error.message);
-            }
-        });
-        return diagnostics;
-    }
-
-    function stringifyPayload(payload) {
-        Object.entries(payload).forEach(([key, value]) => {
-            try {
-                JSON.stringify({[key]: value});
-            } catch (error) {
-                throw new Error('Unable to serialize field "' + key + '" value=' + JSON.stringify(String(value)) + ': ' + error.message);
-            }
-        });
-        return JSON.stringify(payload);
-    }
-
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        clearErrors();
-        message.hidden = true;
-        saveButton.disabled = true;
-        saveButton.textContent = 'Saving...';
-
-        let saveStage = 'initializing';
-        let nativeValidationDiagnostics = [];
-        try {
-            saveStage = 'native validation preflight';
-            form.noValidate = true;
-            nativeValidationDiagnostics = getNativeValidationDiagnostics();
-            saveStage = 'payload collection';
-            const payload = collectPayload();
-            saveStage = 'ajax request';
-            const response = await fetch(ajaxUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: stringifyPayload(payload)
-            });
-
-            let data = {};
-            let responseText = '';
-            try {
-                saveStage = 'response json parse';
-                responseText = await response.text();
-                data = responseText ? JSON.parse(responseText) : {};
-            } catch (error) {
-                throw new Error('Unable to parse save response as JSON: HTTP ' + response.status + ' ' + response.statusText + ' body=' + JSON.stringify(responseText.slice(0, 500)) + ' error=' + error.message);
-            }
-            if (!response.ok) {
-                saveStage = 'server validation';
-                Object.entries(data).forEach(([key, errors]) => {
-                    const input = document.getElementById(key);
-                    const error = document.getElementById(key + '-error');
-                    if (input) {
-                        input.classList.add('is-invalid');
-                    }
-                    if (error) {
-                        error.textContent = Array.isArray(errors) ? errors.join(' ') : String(errors);
-                        error.hidden = false;
-                    }
-                });
-                setMessage(data.form_global ? data.form_global.join(' ') : 'Please fix the highlighted fields. No config was saved.', 'error');
-                return;
-            }
-
-            setMessage(data['success-message'] || 'Saved new config', 'success');
-            const note = document.getElementById('CONFIG_NOTE');
-            if (note) {
-                note.value = '';
-            }
-            const reload = document.getElementById('RELOAD_ON_SAVE');
-            if (reload) {
-                reload.checked = false;
-            }
-        } catch (error) {
-            const diagnosticText = nativeValidationDiagnostics.length ? ' Native validation diagnostics: ' + nativeValidationDiagnostics.join(' | ') : '';
-            setMessage('Unable to save settings during ' + saveStage + ': ' + error.message + diagnosticText, 'error');
-        } finally {
-            saveButton.disabled = false;
-            saveButton.textContent = 'Save Full Settings';
-        }
-    });
-
-    function filterSettings() {
-        const query = filter.value.trim().toLowerCase();
-        sections.forEach((section) => {
-            const rows = Array.from(section.querySelectorAll('[data-full-settings-row]'));
-            let visibleCount = 0;
-            rows.forEach((row) => {
-                const matches = !query || row.dataset.fullSettingsSearch.indexOf(query) !== -1;
-                row.hidden = !matches;
-                if (matches) {
-                    visibleCount += 1;
-                }
-            });
-
-            const count = section.querySelector('[data-full-settings-visible-count]');
-            if (count) {
-                count.textContent = visibleCount;
-            }
-
-            section.hidden = visibleCount === 0;
-            if (query && visibleCount > 0) {
-                section.open = true;
-            }
-        });
-    }
-
-    filter.addEventListener('input', filterSettings);
-})();
-</script>
+<script type="application/json" id="hybrid-full-settings-config">{{ {
+    'fieldNames': modern_admin_full_settings_field_names,
+    'checkboxNames': modern_admin_full_settings_checkbox_names,
+    'ajaxUrl': url_for('indi_allsky.ajax_config_view'),
+    'csrfToken': csrf_token(),
+    'canSave': (login_disabled or current_user.is_admin)|default(false)
+}|tojson }}</script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/full-settings.js') }}" defer></script>
 {% endblock %}

@@ -51,6 +51,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     Passano 18 entrypoint locali e il rendering della shell in Flask sul Pi
     con Classic escluso, sempre in staging e senza accesso al DB operativo.
 - Book 2 / Settings Runtime Independence:
+  - collaudato il ciclo HTTP Full Settings save/download/restore con DB reale
+    isolato: revisioni precedenti e due profili conservati, input/file invalidi
+    e utenti non admin respinti, nessun task creato quando reload e' disattivo.
+    Corretto il rendering di dieci pagine contratto (`section['keys']`),
+    unificato l'ingresso Config nell'editor funzionante e separato il controller
+    browser testabile con protezione dai doppi invii e stato lettura per non admin.
   - il flusso upload/restore e download delle revisioni e' disponibile nelle
     pagine Hybrid, senza link alle pagine Classic: form, CSRF, gate admin,
     opzioni flush/reset e gestione del risultato usano il contratto esistente.
