@@ -1,0 +1,18 @@
+{
+  "source_commit": "fb09ba26",
+  "normalized_method_fingerprints": {
+    "activateConnection": "a73adf2cfd9ddf4328a67cfbfd188aae8bc7476732e5da216bb20710e342528f",
+    "deactivateConnection": "14c800ea34ab75340d8fecd897a0bc8f60ee0fe229c54de638634fd5eb8d1724",
+    "deleteConnection": "4751d44bf7f749565b7120bc89038195a5d43a478c9f9984e33610599e9a7ec4",
+    "setAutostartConnection": "751ff80bc8c8d59efc82cedffc2a656faccf878bf3d661a46038742a94085ae6",
+    "incrementConnectionPriority": "dcfe20cd334741c05b47f2858b4fd35aaa43dafadff9c4851fe5025a28351691",
+    "decrementConnectionPriority": "c695779f07f9360dc53455cd9e2878bb8a67990341b83aa25592daaf32989b67",
+    "setPowersave": "65d4b2299263bc3ce5711a80f726d48c22654b2a604e9b66deadf190f3b88288",
+    "getSettingsPath": "241e866e2232227cb684c5f4bb1089ee9236caf73d70f141314a55adc6e73caf",
+    "getActiveConnection": "88234961684a757253addc8ad96faf860eea1ed9f7c5b2c9dbfd6bb062dca7a6",
+    "scanAPs": "88f3069a80695f5a077a308afc544882888f352b22e75f8b27e32c3266bd4eec",
+    "connectAP": "3e8e0e1e029a56d27495c357b848e86373187fe696813f5dbc6864f61ad8999c",
+    "createHotspot": "28f083077f79484b4954b60aa6cabe70a66292988b4d06231e71b32b79fbaef7",
+    "ip2int": "807d560259b0336cec998b97c35b1796e77f394d5fb44570c4bc1402924c0aaa"
+  }
+}

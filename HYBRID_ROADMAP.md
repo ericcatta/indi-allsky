@@ -16,6 +16,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Network: parsing dei dodici comandi in `network_commands.py`, adapter
+  NetworkManager separato dalle view con fingerprint dei metodi conservati.
+  NOSECURITY richiede un booleano esplicito. Pagina nativa e collaudo live aperti.
+
 - Drives Hybrid: inventario e validazione comandi nel servizio `drive_manager.py`,
   pagina nativa con metadata/mount/unmount/poweroff. Snapshot UDisks unico,
   protezione di tutti i mount point e dei percorsi media configurati.

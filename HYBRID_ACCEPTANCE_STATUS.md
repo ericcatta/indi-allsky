@@ -764,3 +764,32 @@ No real disks were mounted, unmounted or powered off. Native browser acceptance,
 physical storage/recovery and production deployment remain open. The necessary
 hardware maintenance window has not yet been supplied. Network management remains
 a separate unfinished domain; this mission does not claim to complete it.
+
+## Network command ownership and independent effect adapter
+
+The twelve NetworkManager intents now use `network_commands.py` for required
+inputs, explicit argument types and bounds before constructing an effect adapter.
+In particular, hotspot NOSECURITY must be a JSON boolean: the string "false" no
+longer becomes true and creates an unintended open hotspot. Saved connection,
+scan, connect-AP and hotspot capabilities remain; route/permissions/CSRF persist.
+
+`network_manager_effects.py` contains the existing NetworkManager effects without
+Flask view inheritance, request access or Flask response construction. Methods
+return the same dictionaries/status tuples which Flask serializes at the route
+boundary. The captured normalized AST fingerprints in
+`testing/fixtures/network_effects_legacy.json` verify every extracted method;
+normalization removes jsonify wrappers and changes app.logger to module logger.
+Effect logic, polling, settings updates and D-Bus calls are otherwise unchanged.
+
+`network_commands_test.py` checks all intents, hotspot boolean semantics, required
+inputs and ranges, plus every effect fingerprint. Real Flask test
+`hybrid_network_command_flow_test.py` runs with Classic imports forbidden and
+mocked effects: admin dispatch, protected hotspot arguments, rejected malformed
+payloads, ordinary user/CSRF rejection and uncaught provider errors. Full Book 2,
+shell and route regression passes with original Full Config fingerprints intact.
+
+This is a prerequisite mission. The native Network page remains unfinished.
+The old activation polling can call int(None) after a first failed state read;
+that known defect still needs correction and a behavioral test. Live network
+changes, reconnect/recovery, browser acceptance and production deployment remain
+open. No saved connections, Wi-Fi settings or credentials were changed on the Pi.
