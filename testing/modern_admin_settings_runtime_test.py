@@ -937,7 +937,7 @@ def test_modern_config_history_views_use_revision_metadata_service():
     views_path = Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py'
     source = views_path.read_text()
     start = source.index('class ModernAdminConfigRevisionMetadataMixin')
-    end = source.index('class ConfigListView')
+    end = source.index('class ConfigDownloadView')
     modern_history_source = source[start:end]
 
     assert 'ModernAdminSettingsRevisionMetadataService' in modern_history_source

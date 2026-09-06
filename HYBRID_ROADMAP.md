@@ -16,12 +16,27 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
-- Codex lavora sul repository locale, non ha accesso diretto al Raspberry.
+- Codex lavora sul repository locale; l'accesso SSH al Raspberry e' autorizzato
+  per staging isolato, deploy controllato e collaudo.
 - Il Raspberry riceve modifiche tramite `git pull`.
 - I test runtime reali vanno eseguiti sul Raspberry dopo pull/restart.
 - Le modifiche runtime devono restare conservative: niente refactor ampi senza motivo.
 - Le impostazioni operative multicamera devono vivere nei Camera Profiles.
 - I global settings restano fallback legacy/single-camera/advanced, non UI operativa primaria.
+- Classic frontend isolation:
+  - 56 route UI Classic e 27 classi esclusive sono isolate in `classic_views`;
+    Hybrid e compatibilita' pubblica/AJAX hanno registrazioni separate;
+  - ogni app costruisce il proprio blueprint. `HYBRID_ENABLE_CLASSIC_UI=false`
+    evita l'import delle pagine Classic e la registrazione delle loro route;
+  - il flag resta true per default: la modalita' senza Classic e' una condizione
+    di test, non ancora una modalita' Product completa. Template condivisi,
+    fallback e flussi operativi incompleti devono ancora essere migrati;
+  - i test verificano parita' delle 224 registrazioni precedenti, classi
+    spostate invariate e import condizionale. La rimozione resta subordinata
+    alla parita' funzionale e al collaudo completo.
+  - verificati 17 entrypoint locali; in staging temporaneo sul Raspberry,
+    `hybrid_app_startup_test.py` passa con Classic true/false, database in
+    memoria, due app consecutive, statici, login e CSRF. Nessun deploy live.
 - Book 2 / Settings Runtime Independence:
   - la responsabilita' "Modern settings save -> nuova revisione config" e' ora
     Hybrid-owned tramite `ModernAdminSettingsRuntimeService`;

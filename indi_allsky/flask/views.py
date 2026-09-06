@@ -139,7 +139,6 @@ from cryptography.fernet import InvalidToken
 from flask import request
 from flask import session
 from flask import jsonify
-from flask import Blueprint
 from flask import redirect
 from flask import flash
 from flask import Response
@@ -243,15 +242,6 @@ from ..exceptions import ConfigSaveException
 from ..exceptions import NotFound
 
 
-bp_allsky = Blueprint(
-    'indi_allsky',
-    __name__,
-    template_folder='templates',
-    static_folder='static',
-    #url_prefix='/',  # wsgi
-    url_prefix='/indi-allsky',  # gunicorn
-    static_url_path='static',
-)
 
 
 class AjaxStatusUpdateView(BaseView):
@@ -295,20 +285,6 @@ class AjaxStatusUpdateView(BaseView):
         return jsonify(data)
 
 
-class IndexCanvasView(TemplateView):
-    page_title = 'Latest'
-    latest_image_view = 'indi_allsky.js_latest_image_view'
-
-
-    def get_context(self):
-        context = super(IndexCanvasView, self).get_context()
-
-        context['latest_image_view'] = self.latest_image_view
-
-        refreshInterval_ms = math.ceil(self.indi_allsky_config.get('CCD_EXPOSURE_MAX', 15.0)) * 1000
-        context['refreshInterval'] = refreshInterval_ms + 1000  # additional time for exposures to download
-
-        return context
 
 
 class JsonLatestImageView(JsonView):
@@ -493,20 +469,6 @@ class JsonLatestImageView(JsonView):
         return image_data
 
 
-class IndexImgView(TemplateView):
-    page_title = 'Latest'
-    latest_image_view = 'indi_allsky.js_latest_image_view'
-
-
-    def get_context(self):
-        context = super(IndexImgView, self).get_context()
-
-        context['latest_image_view'] = self.latest_image_view
-
-        refreshInterval_ms = math.ceil(self.indi_allsky_config.get('CCD_EXPOSURE_MAX', 15.0)) * 1000
-        context['refreshInterval'] = refreshInterval_ms + 1000  # additional time for exposures to download
-
-        return context
 
 
 class VirtualSkyView(TemplateView):
@@ -839,29 +801,9 @@ class LatestPanoramaVideoWatchRedirect(LatestTimelapseVideoWatchRedirect):
     watch_view = 'indi_allsky.panorama_video_view'
 
 
-class LatestPanoramaCanvasView(IndexCanvasView):
-    page_title = 'Panorama'
-    latest_image_view = 'indi_allsky.js_latest_panorama_view'
-
-
-class LatestPanoramaImgView(IndexImgView):
-    page_title = 'Panorama'
-    latest_image_view = 'indi_allsky.js_latest_panorama_view'
-
-
 class JsonLatestPanoramaView(JsonLatestImageView):
     model = IndiAllSkyDbPanoramaImageTable
     latest_image_t = 'images/panorama.{0}'
-
-
-class LatestRawImageCanvasView(IndexCanvasView):
-    page_title = 'RAW Image'
-    latest_image_view = 'indi_allsky.js_latest_rawimage_view'
-
-
-class LatestRawImageImgView(IndexImgView):
-    page_title = 'RAW Image'
-    latest_image_view = 'indi_allsky.js_latest_rawimage_view'
 
 
 class JsonLatestRawImageView(JsonLatestImageView):
@@ -906,114 +848,6 @@ class MaskView(TemplateView):
             return None
 
         return mask_image_p.stat().st_mtime
-
-
-class CamerasView(TemplateView):
-    page_title = 'Cameras'
-    decorators = [login_required]
-
-    def get_context(self):
-        context = super(CamerasView, self).get_context()
-
-        context['camera_list'] = IndiAllSkyDbCameraTable.query\
-            .all()
-
-        return context
-
-
-class DarkFramesView(TemplateView):
-    page_title = 'Dark Frames'
-    decorators = [login_required]
-
-    def get_context(self):
-        context = super(DarkFramesView, self).get_context()
-
-        darkframe_list = IndiAllSkyDbDarkFrameTable.query\
-            .join(IndiAllSkyDbCameraTable)\
-            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-            .order_by(
-                IndiAllSkyDbCameraTable.id.desc(),
-                IndiAllSkyDbDarkFrameTable.gain.asc(),
-                IndiAllSkyDbDarkFrameTable.exposure.asc(),
-            )
-
-        bpm_list = IndiAllSkyDbBadPixelMapTable.query\
-            .join(IndiAllSkyDbCameraTable)\
-            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-            .order_by(
-                IndiAllSkyDbCameraTable.id.desc(),
-                IndiAllSkyDbBadPixelMapTable.gain.asc(),
-                IndiAllSkyDbBadPixelMapTable.exposure.asc(),
-            )
-
-
-        d_info_list = list()
-        for d in darkframe_list:
-            file_path = d.getFilesystemPath()
-
-            try:
-                file_size = file_path.stat().st_size
-            except FileNotFoundError:
-                file_size = 0
-
-            d_info = {
-                'id' : d.id,
-                'camera_name'  : d.camera.name,
-                'createDate'   : d.createDate,
-                'active'       : d.active,
-                'bitdepth'     : d.bitdepth,
-                'gain'         : d.gain,
-                'exposure'     : d.exposure,
-                'binmode'      : d.binmode,
-                'width'        : d.width,
-                'height'       : d.height,
-                'temp'         : d.temp,
-                'adu'          : d.adu,
-                'filename'     : d.filename,
-                'url'          : d.getUrl(),
-                'hot_pixels'   : d.data.get('hot_pixels', -1),
-                'method'       : d.data.get('method', ''),
-                'size_mb'      : file_size / 1024 / 1024,
-            }
-
-            d_info_list.append(d_info)
-
-
-        b_info_list = list()
-        for b in bpm_list:
-            file_path = d.getFilesystemPath()
-
-            try:
-                file_size = file_path.stat().st_size
-            except FileNotFoundError:
-                file_size = 0
-
-            b_info = {
-                'id' : b.id,
-                'camera_name'  : b.camera.name,
-                'createDate'   : b.createDate,
-                'active'       : b.active,
-                'bitdepth'     : b.bitdepth,
-                'gain'         : b.gain,
-                'exposure'     : b.exposure,
-                'binmode'      : b.binmode,
-                'width'        : d.width,
-                'height'       : d.height,
-                'temp'         : b.temp,
-                'adu'          : b.adu,
-                'filename'     : b.filename,
-                'url'          : b.getUrl(),
-                'hot_pixels'   : d.data.get('hot_pixels', -1),
-                'size_mb'      : file_size / 1024 / 1024,
-            }
-
-            b_info_list.append(b_info)
-
-
-        context['darkframe_list'] = d_info_list
-        context['bpm_list'] = b_info_list
-
-        return context
 
 
 class ImageLagView(TemplateView):
@@ -1165,23 +999,6 @@ class SqmView(TemplateView):
         return context
 
 
-class ImageLoopCanvasView(TemplateView):
-    page_title = 'Loop'
-    image_loop_view = 'indi_allsky.js_image_loop_view'
-
-    def get_context(self):
-        context = super(ImageLoopCanvasView, self).get_context()
-
-        context['image_loop_view'] = self.image_loop_view
-
-        context['timestamp'] = int(request.args.get('timestamp', 0))
-
-        refreshInterval_ms = math.ceil(self.indi_allsky_config.get('CCD_EXPOSURE_MAX', 15.0)) * 1000
-        context['refreshInterval'] = refreshInterval_ms + 1000  # additional time for exposures to download
-
-        context['form_history'] = IndiAllskyLoopHistoryForm()
-
-        return context
 
 
 class JsonImageLoopView(JsonView):
@@ -1468,16 +1285,6 @@ class ImageLoopImgView(TemplateView):
         return context
 
 
-class PanoramaLoopCanvasView(ImageLoopCanvasView):
-    page_title = 'Panorama Loop'
-    image_loop_view = 'indi_allsky.js_panorama_loop_view'
-
-
-class PanoramaLoopImgView(ImageLoopImgView):
-    page_title = 'Panorama Loop'
-    image_loop_view = 'indi_allsky.js_panorama_loop_view'
-
-
 class JsonPanoramaLoopView(JsonImageLoopView):
     model = IndiAllSkyDbPanoramaImageTable
 
@@ -1502,16 +1309,6 @@ class JsonPanoramaLoopView(JsonImageLoopView):
         }
 
         return stars_data
-
-
-class RawImageLoopCanvasView(ImageLoopCanvasView):
-    page_title = 'RAW Image Loop'
-    image_loop_view = 'indi_allsky.js_rawimage_loop_view'
-
-
-class RawImageLoopImgView(ImageLoopImgView):
-    page_title = 'RAW Image Loop'
-    image_loop_view = 'indi_allsky.js_rawimage_loop_view'
 
 
 class JsonRawImageLoopView(JsonImageLoopView):
@@ -4311,43 +4108,6 @@ class AjaxSetTimezoneView(BaseView):
         return r2
 
 
-class ImageViewerView(FormView):
-    page_title = 'Image Viewer'
-    decorators = [login_optional_media]
-
-    def get_context(self):
-        context = super(ImageViewerView, self).get_context()
-
-        form_data = {
-            'CAMERA_ID'    : self.camera.id,
-            'YEAR_SELECT'  : None,
-            'MONTH_SELECT' : None,
-            'DAY_SELECT'   : None,
-            'HOUR_SELECT'  : None,
-            'FILTER_DETECTIONS' : None,
-        }
-
-
-        local = True  # default to local assets
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
-
-
-        context['panorama__enable'] = int(self.indi_allsky_config.get('FISH2PANO', {}).get('ENABLE', 0))
-
-        context['form_viewer'] = IndiAllskyImageViewerPreload(
-            data=form_data,
-            camera_id=self.camera.id,
-            s3_prefix=self.s3_prefix,
-            local=local,
-        )
-
-        context['form_image_exclude'] = IndiAllskyImageExcludeForm()
-
-        return context
 
 
 class AjaxImageViewerView(BaseView):
@@ -4482,28 +4242,6 @@ class AjaxImageViewerView(BaseView):
         return jsonify(json_data)
 
 
-class FitsImageViewerView(FormView):
-    page_title = 'FITS Image Viewer'
-    decorators = [login_required]
-
-    def get_context(self):
-        context = super(FitsImageViewerView, self).get_context()
-
-        form_data = {
-            'CAMERA_ID'    : self.camera.id,
-            'YEAR_SELECT'  : None,
-            'MONTH_SELECT' : None,
-            'DAY_SELECT'   : None,
-            'HOUR_SELECT'  : None,
-        }
-
-
-        context['form_fits_viewer'] = IndiAllskyFitsImageViewerPreload(
-            data=form_data,
-            camera_id=self.camera.id,
-        )
-
-        return context
 
 
 class AjaxFitsImageViewerView(BaseView):
@@ -4749,39 +4487,6 @@ class Fits2JpegView(BaseView):
         )
 
 
-class GalleryViewerView(FormView):
-    page_title = 'Gallery'
-    decorators = [login_optional_media]
-
-    def get_context(self):
-        context = super(GalleryViewerView, self).get_context()
-
-        form_data = {
-            'CAMERA_ID'    : self.camera.id,
-            'YEAR_SELECT'  : None,
-            'MONTH_SELECT' : None,
-            'DAY_SELECT'   : None,
-            'HOUR_SELECT'  : None,
-            'FILTER_DETECTIONS' : None,
-        }
-
-
-        local = True  # default to local assets
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
-
-
-        context['form_viewer'] = IndiAllskyGalleryViewerPreload(
-            data=form_data,
-            camera_id=self.camera.id,
-            s3_prefix=self.s3_prefix,
-            local=local,
-        )
-
-        return context
 
 
 class AjaxGalleryViewerView(BaseView):
@@ -4916,38 +4621,6 @@ class AjaxGalleryViewerView(BaseView):
         return jsonify(json_data)
 
 
-class VideoViewerView(FormView):
-    page_title = 'Timelapse Viewer'
-    decorators = [login_optional_media]
-
-    def get_context(self):
-        context = super(VideoViewerView, self).get_context()
-
-        context['youtube__enable'] = int(self.indi_allsky_config.get('YOUTUBE', {}).get('ENABLE', 0))
-
-        form_data = {
-            'CAMERA_ID'    : self.camera.id,
-            'YEAR_SELECT'  : None,
-            'MONTH_SELECT' : None,
-        }
-
-
-        local = True  # default to local assets
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
-
-
-        context['form_video_viewer'] = IndiAllskyVideoViewerPreload(
-            data=form_data,
-            camera_id=self.camera.id,
-            s3_prefix=self.s3_prefix,
-            local=local,
-        )
-
-        return context
 
 
 class AjaxVideoViewerView(BaseView):
@@ -5012,38 +4685,6 @@ class AjaxVideoViewerView(BaseView):
         return jsonify(json_data)
 
 
-class MiniVideoViewerView(FormView):
-    page_title = 'Mini-Timelapse Viewer'
-    decorators = [login_optional_media]
-
-    def get_context(self):
-        context = super(MiniVideoViewerView, self).get_context()
-
-        context['youtube__enable'] = int(self.indi_allsky_config.get('YOUTUBE', {}).get('ENABLE', 0))
-
-        form_data = {
-            'CAMERA_ID'    : self.camera.id,
-            'YEAR_SELECT'  : None,
-            'MONTH_SELECT' : None,
-        }
-
-
-        local = True  # default to local assets
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
-
-
-        context['form_mini_video_viewer'] = IndiAllskyMiniVideoViewerPreload(
-            data=form_data,
-            camera_id=self.camera.id,
-            s3_prefix=self.s3_prefix,
-            local=local,
-        )
-
-        return context
 
 
 class AjaxMiniVideoViewerView(BaseView):
@@ -8878,80 +8519,6 @@ class SystemInfoView(TemplateView):
         return timedate1_dict
 
 
-class TaskQueueView(TemplateView):
-    page_title = 'Task Queue'
-    decorators = [login_required]
-
-    def get_task_data_value(self, task_data, key, default=''):
-        if not isinstance(task_data, dict):
-            return default
-
-        value = task_data.get(key)
-        if value not in (None, ''):
-            return value
-
-        task_kwargs = task_data.get('kwargs')
-        if isinstance(task_kwargs, dict):
-            value = task_kwargs.get(key)
-            if value not in (None, ''):
-                return value
-
-        return default
-
-    def get_context(self):
-        context = super(TaskQueueView, self).get_context()
-
-        state_list = (
-            TaskQueueState.MANUAL,
-            TaskQueueState.QUEUED,
-            TaskQueueState.RUNNING,
-            TaskQueueState.SUCCESS,
-            TaskQueueState.FAILED,
-        )
-
-        exclude_queues = (
-            TaskQueueQueue.IMAGE,
-            TaskQueueQueue.UPLOAD,
-        )
-
-        camera_now_minus_3d = self.camera_now - timedelta(days=3)
-
-        tasks = IndiAllSkyDbTaskQueueTable.query\
-            .filter(
-                and_(
-                    IndiAllSkyDbTaskQueueTable.createDate > camera_now_minus_3d,
-                    IndiAllSkyDbTaskQueueTable.state.in_(state_list),
-                    ~IndiAllSkyDbTaskQueueTable.queue.in_(exclude_queues),
-                )
-            )\
-            .order_by(IndiAllSkyDbTaskQueueTable.createDate.desc())
-
-
-        task_list = list()
-        for task in tasks:
-            if isinstance(task.data, dict):
-                task_data = task.data
-            else:
-                task_data = {}
-
-            t = {
-                'id'         : task.id,
-                'createDate' : task.createDate,
-                'updateDate' : getattr(task, 'updateDate', None),
-                'queue'      : task.queue.name,
-                'state'      : task.state.name,
-                'action'     : self.get_task_data_value(task_data, 'action', 'MISSING'),
-                'camera_id'  : self.get_task_data_value(task_data, 'camera_id'),
-                'profile_id' : self.get_task_data_value(task_data, 'profile_id'),
-                'message'    : self.get_task_data_value(task_data, 'message') or self.get_task_data_value(task_data, 'error'),
-                'result'     : task.result,
-            }
-
-            task_list.append(t)
-
-        context['task_list'] = task_list
-
-        return context
 
 
 class ModernAdminTaskStatusView(ModernAdminContextMixin):
@@ -12119,34 +11686,6 @@ class JsonSupportInfoView(JsonView):
         return jsonify(json_data)
 
 
-class NotificationsView(TemplateView):
-    page_title = 'Notifications'
-    decorators = [login_required]
-
-    def get_context(self):
-        context = super(NotificationsView, self).get_context()
-
-        notices = IndiAllSkyDbNotificationTable.query\
-            .order_by(IndiAllSkyDbNotificationTable.createDate.desc())\
-            .limit(50)
-
-
-        notice_list = list()
-        for notice in notices:
-            n = {
-                'id'            : notice.id,
-                'createDate'    : notice.createDate,
-                'expireDate'    : notice.expireDate,
-                'category'      : notice.category.value,
-                'ack'           : notice.ack,
-                'notification'  : notice.notification,
-            }
-
-            notice_list.append(n)
-
-        context['notice_list'] = notice_list
-
-        return context
 
 
 class ModernAdminNotificationStatusView(ModernAdminContextMixin):
@@ -12286,23 +11825,6 @@ class AjaxNotificationView(BaseView):
         return self.get(camera_id=camera_id)
 
 
-class UserInfoView(TemplateView):
-    page_title = 'User Info'
-    decorators = [login_required]
-
-    def get_context(self):
-        context = super(UserInfoView, self).get_context()
-
-        form_data = {
-            'USERNAME' : current_user.username,
-            'NAME'     : current_user.name,
-            'EMAIL'    : current_user.email,
-            'ADMIN'    : current_user.admin,
-        }
-
-        context['form_userinfo'] = IndiAllskyUserInfoForm(data=form_data)
-
-        return context
 
 
 class AjaxUserInfoView(BaseView):
@@ -12365,19 +11887,6 @@ class AjaxUserInfoView(BaseView):
         return jsonify(message)
 
 
-class UsersView(TemplateView):
-    page_title = 'Users'
-    decorators = [login_required]
-
-    def get_context(self):
-        context = super(UsersView, self).get_context()
-
-        user_list = IndiAllSkyDbUserTable.query\
-            .order_by(IndiAllSkyDbUserTable.createDate.asc())
-
-        context['user_list'] = user_list
-
-        return context
 
 
 class ModernAdminUsersView(ModernAdminContextMixin, TemplateView):
@@ -12533,29 +12042,6 @@ class ModernAdminConfigRestoreDetailView(ModernAdminConfigRestoreView):
         return context
 
 
-class ConfigListView(TemplateView):
-    page_title = 'Config History'
-    decorators = [login_required]
-
-    def get_context(self):
-        context = super(ConfigListView, self).get_context()
-
-        config_list = IndiAllSkyDbConfigTable.query\
-            .add_columns(
-                IndiAllSkyDbConfigTable.id,
-                IndiAllSkyDbConfigTable.createDate,
-                IndiAllSkyDbConfigTable.level,
-                IndiAllSkyDbConfigTable.note,
-                IndiAllSkyDbConfigTable.encrypted,
-                IndiAllSkyDbUserTable.username,
-            )\
-            .join(IndiAllSkyDbUserTable)\
-            .order_by(IndiAllSkyDbConfigTable.createDate.desc())\
-            .limit(25)
-
-        context['config_list'] = config_list
-
-        return context
 
 
 class ConfigDownloadView(BaseView):
@@ -12678,18 +12164,6 @@ class ConfigDownloadView(BaseView):
         return a_dict
 
 
-class ConfigRestoreView(TemplateView):
-    page_title = 'Config Restore'
-    decorators = [login_required]
-
-    def get_context(self):
-        context = super(ConfigRestoreView, self).get_context()
-
-        context['camera_id'] = self.camera.id
-
-        context['form_config_restore'] = IndiAllskyConfigRestoreForm(indi_allsky_config=self.indi_allsky_config)
-
-        return context
 
 
 class AjaxConfigRestoreView(BaseView):
@@ -13313,48 +12787,6 @@ class PanoramaVideoView(TimelapseVideoView):
     file_view = 'indi_allsky.panorama_video_view'
 
 
-class MiniTimelapseGeneratorView(TemplateView):
-    decorators = [login_required]
-
-    page_title = 'Mini Timelapse'
-    image_loop_view = 'indi_allsky.js_image_loop_view'
-
-    def get_context(self):
-        context = super(MiniTimelapseGeneratorView, self).get_context()
-
-        image_id = int(request.args.get('image_id', 0))
-
-        if image_id:
-            image_entry = IndiAllSkyDbImageTable.query\
-                .join(IndiAllSkyDbImageTable.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                .filter(IndiAllSkyDbImageTable.id == image_id)\
-                .one()
-        else:
-            # load last image
-            image_entry = IndiAllSkyDbImageTable.query\
-                .join(IndiAllSkyDbImageTable.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                .order_by(IndiAllSkyDbImageTable.createDate.desc())\
-                .first()
-
-
-        context['image_loop_view'] = self.image_loop_view
-
-        context['timestamp'] = int(image_entry.createDate.timestamp())
-
-
-        form_data = {
-            'CAMERA_ID'             : self.camera.id,
-            'IMAGE_ID'              : image_id,
-            'PRE_SECONDS_SELECT'    : '240',
-            'POST_SECONDS_SELECT'   : '120',
-            'FRAMERATE_SELECT'      : '10',
-        }
-
-        context['form_mini_timelapse'] = IndiAllskyMiniTimelapseForm(data=form_data)
-
-        return context
 
 
 class AjaxMiniTimelapseGeneratorView(BaseView):
@@ -15560,37 +14992,6 @@ class ModernAdminFitsDetailView(ModernAdminFitsView):
         return context
 
 
-class LongTermKeogramView(TemplateView):
-    page_title = 'Long Term Keogram'
-
-
-    def get_context(self):
-        context = super(LongTermKeogramView, self).get_context()
-
-        data = {
-            'CAMERA_ID' : self.camera.id
-        }
-
-        context['form_longterm_keogram'] = IndiAllskyLongTermKeogramForm(data=data)
-
-
-        # Load cached longterm keogram if it exists
-        longterm_keogram_image_p = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']).joinpath('ccd_{0:s}'.format(self.camera.uuid), 'longterm_keogram.jpg')
-        if longterm_keogram_image_p.is_file():
-            image_age_s = time.time() - longterm_keogram_image_p.stat().st_mtime
-
-            image_age_days = int(image_age_s / 86400)
-            image_age_hours = int((image_age_s % 86400) / 3600)
-            image_age_minutes = int(((image_age_s % 86400) % 3600 ) / 60)
-
-            context['keogram_age'] = 'Generated {0:d} days, {1:d} hours, {2:d} minutes ago'.format(image_age_days, image_age_hours, image_age_minutes)
-            context['keogram_uri'] = str(Path('images').joinpath('ccd_{0:s}'.format(self.camera.uuid), 'longterm_keogram.jpg'))
-        else:
-            context['keogram_age'] = ''
-            context['keogram_uri'] = ''
-
-
-        return context
 
 
 class JsonLongTermKeogramView(JsonView):
@@ -22407,12 +21808,6 @@ class ModernAdminManualGpioView(ModernAdminSafeControlsMixin, ManualGpioView):
         return context
 
 
-class AstroPanelView(TemplateView):
-    page_title = 'astropanel'
-
-    def get_context(self):
-        context = super(AstroPanelView, self).get_context()
-        return context
 
 
 class AjaxAstroPanelView(BaseView):
@@ -22806,7 +22201,6 @@ class AjaxAstroPanelView(BaseView):
 
 
 # images are normally served directly by the web server, this is a backup method
-@bp_allsky.route('/images/<path:path>')  # noqa: E302
 def images_folder(path):
     app.logger.warning('Serving image file: %s', path)
     return ModernAdminMediaServeAdapter(
@@ -22815,265 +22209,176 @@ def images_folder(path):
     ).serve_image_folder_path(path)
 
 
-bp_allsky.add_url_rule('/ajax/status_update', view_func=AjaxStatusUpdateView.as_view('ajax_status_update_view'))
+def register_hybrid_routes(bp_allsky):
+    bp_allsky.add_url_rule('/modern-admin/media/gallery', view_func=ModernAdminMediaGalleryView.as_view('modern_admin_media_gallery_view', template_name='modern_admin/media_list.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/gallery/page', view_func=ModernAdminMediaGalleryPageView.as_view('modern_admin_media_gallery_page_view', template_name='modern_admin/media_list.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/images', view_func=ModernAdminMediaImagesView.as_view('modern_admin_media_images_view', template_name='modern_admin/media_list.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/images/<int:image_id>', view_func=ModernAdminMediaImageDetailView.as_view('modern_admin_media_image_detail_view', template_name='modern_admin/image_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/timelapses', view_func=ModernAdminMediaTimelapsesView.as_view('modern_admin_media_timelapses_view', template_name='modern_admin/media_list.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/timelapses/<int:video_id>', view_func=ModernAdminMediaVideoDetailView.as_view('modern_admin_media_video_detail_view', template_name='modern_admin/video_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/keograms', view_func=ModernAdminMediaKeogramsView.as_view('modern_admin_media_keograms_view', template_name='modern_admin/keograms.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/startrails', view_func=ModernAdminMediaStartrailsView.as_view('modern_admin_media_startrails_view', template_name='modern_admin/startrails.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/startrail-videos', view_func=ModernAdminMediaStartrailVideosView.as_view('modern_admin_media_startrail_videos_view', template_name='modern_admin/startrail_videos.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/mini_timelapses.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/panoramas.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/raw', view_func=ModernAdminMediaRawImagesView.as_view('modern_admin_media_raw_images_view', template_name='modern_admin/raw_images.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/public-endpoints', view_func=ModernAdminPublicMediaEndpointsView.as_view('modern_admin_public_media_endpoints_view', template_name='modern_admin/public_media_endpoints.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))
+    bp_allsky.add_url_rule('/modern-admin/fits', view_func=ModernAdminFitsView.as_view('modern_admin_fits_view', template_name='modern_admin/fits.html'))
+    bp_allsky.add_url_rule('/modern-admin/fits/<int:fits_id>', view_func=ModernAdminFitsDetailView.as_view('modern_admin_fits_detail_view', template_name='modern_admin/fits_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
+    bp_allsky.add_url_rule('/modern-admin/now', view_func=ModernAdminNowView.as_view('modern_admin_now_view', template_name='modern_admin/now.html'))
+    bp_allsky.add_url_rule('/modern-admin/highlights', view_func=ModernAdminHighlightsView.as_view('modern_admin_highlights_view', template_name='modern_admin/highlights.html'))
+    bp_allsky.add_url_rule('/modern-admin/moment', view_func=ModernAdminMomentDetailView.as_view('modern_admin_moment_detail_view', template_name='modern_admin/moment_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/output', view_func=ModernAdminOutputDetailView.as_view('modern_admin_output_detail_view', template_name='modern_admin/output_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/library', view_func=ModernAdminLibraryView.as_view('modern_admin_library_view', template_name='modern_admin/library.html'))
+    bp_allsky.add_url_rule('/modern-admin/sky-cycle', view_func=ModernAdminSkyCycleView.as_view('modern_admin_sky_cycle_view', template_name='modern_admin/sky_cycle.html'))
+    bp_allsky.add_url_rule('/modern-admin/safe-action/dry-run', view_func=ModernAdminSafeActionDryRunView.as_view('modern_admin_safe_action_dry_run_view'), methods=['POST'])
+    bp_allsky.add_url_rule('/modern-admin/capture/service', view_func=ModernAdminCaptureServiceActionView.as_view('modern_admin_capture_service_action_view'))
+    bp_allsky.add_url_rule('/modern-admin/capture/abort-exposure', view_func=ModernAdminAbortExposureActionView.as_view('modern_admin_abort_exposure_action_view'))
+    bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
+    bp_allsky.add_url_rule('/modern-admin/cameras/add', view_func=ModernAdminCameraAddView.as_view('modern_admin_camera_add_view', template_name='modern_admin/camera_add.html'))
+    bp_allsky.add_url_rule('/modern-admin/cameras/detect-indi', view_func=ModernAdminIndiCameraDetectView.as_view('modern_admin_camera_detect_indi_view'))
+    bp_allsky.add_url_rule('/modern-admin/cameras/start-indi', view_func=ModernAdminIndiServerStartView.as_view('modern_admin_start_indi_view'))
+    bp_allsky.add_url_rule('/modern-admin/cameras/info', view_func=ModernAdminCameraInfoView.as_view('modern_admin_camera_info_view', template_name='modern_admin/camera_info.html'))
+    bp_allsky.add_url_rule('/modern-admin/cameras/image-lag', view_func=ModernAdminImageLagView.as_view('modern_admin_image_lag_view', template_name='modern_admin/image_lag.html'))
+    bp_allsky.add_url_rule('/modern-admin/cameras/adu-history', view_func=ModernAdminAduHistoryView.as_view('modern_admin_adu_history_view', template_name='modern_admin/adu_history.html'))
+    bp_allsky.add_url_rule('/modern-admin/storage', view_func=ModernAdminStorageView.as_view('modern_admin_storage_view', template_name='modern_admin/storage.html'))
+    bp_allsky.add_url_rule('/modern-admin/storage/file-space-usage', view_func=ModernAdminFileSpaceUsageView.as_view('modern_admin_file_space_usage_view', template_name='modern_admin/file_space_usage.html'))
+    bp_allsky.add_url_rule('/modern-admin/uploads', view_func=ModernAdminUploadsView.as_view('modern_admin_uploads_view', template_name='modern_admin/uploads.html'))
+    bp_allsky.add_url_rule('/modern-admin/uploads/<provider_slug>', view_func=ModernAdminUploadDetailView.as_view('modern_admin_upload_detail_view', template_name='modern_admin/upload_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/youtube', view_func=ModernAdminYoutubeView.as_view('modern_admin_youtube_view', template_name='modern_admin/youtube.html'))
+    bp_allsky.add_url_rule('/modern-admin/observatory', view_func=ModernAdminObservatoryView.as_view('modern_admin_observatory_view', template_name='modern_admin/observatory.html'))
+    bp_allsky.add_url_rule('/modern-admin/observatory/sqm', view_func=ModernAdminSqmView.as_view('modern_admin_sqm_view', template_name='modern_admin/observatory_status.html'))
+    bp_allsky.add_url_rule('/modern-admin/observatory/charts', view_func=ModernAdminChartsView.as_view('modern_admin_charts_view', template_name='modern_admin/charts.html'))
+    bp_allsky.add_url_rule('/modern-admin/observatory/sensor-panel', view_func=ModernAdminSensorPanelView.as_view('modern_admin_sensor_panel_view', template_name='modern_admin/sensor_panel.html'))
+    bp_allsky.add_url_rule('/modern-admin/observatory/astropanel', view_func=ModernAdminAstroPanelView.as_view('modern_admin_astropanel_view', template_name='modern_admin/astropanel.html'))
+    bp_allsky.add_url_rule('/modern-admin/observatory/virtualsky', view_func=ModernAdminVirtualSkyView.as_view('modern_admin_virtualsky_view', template_name='modern_admin/virtualsky.html'))
+    bp_allsky.add_url_rule('/modern-admin/observatory/realtime-keogram', view_func=ModernAdminRealtimeKeogramView.as_view('modern_admin_realtime_keogram_view', template_name='modern_admin/realtime_keogram.html'))
+    bp_allsky.add_url_rule('/modern-admin/observatory/long-term-keogram', view_func=ModernAdminLongTermKeogramView.as_view('modern_admin_longterm_keogram_view', template_name='modern_admin/longterm_keogram.html'))
+    bp_allsky.add_url_rule('/modern-admin/system', view_func=ModernAdminSystemView.as_view('modern_admin_system_view', template_name='modern_admin/system.html'))
+    bp_allsky.add_url_rule('/modern-admin/system/info', view_func=ModernAdminSystemInfoView.as_view('modern_admin_system_info_view', template_name='modern_admin/system_info.html'))
+    bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupportInfoView.as_view('modern_admin_support_info_view', template_name='modern_admin/support_info.html'))
+    bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.as_view('modern_admin_log_view', template_name='modern_admin/log.html'))
+    bp_allsky.add_url_rule('/modern-admin/system/log/<log_name>', view_func=ModernAdminLogDetailView.as_view('modern_admin_log_detail_view', template_name='modern_admin/log_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView.as_view('modern_admin_taskqueue_view', template_name='modern_admin/tasks.html'))
+    bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdminTaskDetailView.as_view('modern_admin_task_detail_view', template_name='modern_admin/task_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/users', view_func=ModernAdminUsersView.as_view('modern_admin_users_view', template_name='modern_admin/users.html'))
+    bp_allsky.add_url_rule('/modern-admin/users/<int:user_id>', view_func=ModernAdminUserDetailView.as_view('modern_admin_user_detail_view', template_name='modern_admin/user_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/config-history', view_func=ModernAdminConfigHistoryView.as_view('modern_admin_config_history_view', template_name='modern_admin/config_history.html'))
+    bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
+    bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/notifications', view_func=ModernAdminNotificationsView.as_view('modern_admin_notifications_view', template_name='modern_admin/notifications.html'))
+    bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>', view_func=ModernAdminNotificationDetailView.as_view('modern_admin_notification_detail_view', template_name='modern_admin/notification_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
+    bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/generate', view_func=ModernAdminGenerateView.as_view('modern_admin_generate_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusView.as_view('modern_admin_focus_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsInventoryView.as_view('modern_admin_settings_view', template_name='modern_admin/settings_inventory.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/basic', view_func=ModernAdminBasicSettingsPreviewView.as_view('modern_admin_basic_settings_view', template_name='modern_admin/settings_basic.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/advanced', view_func=ModernAdminAdvancedSettingsPreviewView.as_view('modern_admin_advanced_settings_view', template_name='modern_admin/settings_basic.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/developer', view_func=ModernAdminDeveloperSettingsPreviewView.as_view('modern_admin_developer_settings_view', template_name='modern_admin/settings_basic.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/ready', view_func=ModernAdminReadySettingsPreviewView.as_view('modern_admin_ready_settings_view', template_name='modern_admin/settings_basic.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/analytics', view_func=ModernAdminAnalyticsSettingsView.as_view('modern_admin_analytics_settings_view', template_name='modern_admin/settings_analytics.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/storage', view_func=ModernAdminStorageSettingsView.as_view('modern_admin_storage_settings_view', template_name='modern_admin/settings_storage.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/notifications', view_func=ModernAdminNotificationsSettingsView.as_view('modern_admin_notifications_settings_view', template_name='modern_admin/settings_notifications.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/camera-profile', view_func=ModernAdminCameraProfileSettingsView.as_view('modern_admin_camera_profile_settings_view', template_name='modern_admin/settings_camera_profile.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/camera-connection', view_func=ModernAdminCameraConnectionSettingsView.as_view('modern_admin_camera_connection_settings_view', template_name='modern_admin/settings_camera_connection.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/exposure-gain', view_func=ModernAdminExposureGainSettingsView.as_view('modern_admin_exposure_gain_settings_view', template_name='modern_admin/settings_exposure_gain.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/auto-exposure-gain', view_func=ModernAdminAutoExposureGainSettingsView.as_view('modern_admin_auto_exposure_gain_settings_view', template_name='modern_admin/settings_auto_exposure_gain.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/hybrid-awb', view_func=ModernAdminHybridAwbSettingsView.as_view('modern_admin_hybrid_awb_settings_view', template_name='modern_admin/settings_hybrid_awb.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/acquisition-save', view_func=ModernAdminAcquisitionSaveSettingsView.as_view('modern_admin_acquisition_save_settings_view', template_name='modern_admin/settings_acquisition_save.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/fits-source', view_func=ModernAdminFitsSourceSettingsView.as_view('modern_admin_fits_source_settings_view', template_name='modern_admin/settings_fits_source.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))
+    bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/system/gpio-control', view_func=ModernAdminManualGpioView.as_view('modern_admin_manual_gpio_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
+    bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))
+    bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminClassicPlaceholderView.as_view('modern_admin_classic_placeholder_view', template_name='modern_admin/placeholder.html'))
+    bp_allsky.add_url_rule('/modern-admin/mode/<mode>', view_func=ModernAdminModeView.as_view('modern_admin_mode_view'))
 
-bp_allsky.add_url_rule('/js/sensor_panel', view_func=JsonSensorPanelView.as_view('js_sensor_panel_view'))
-bp_allsky.add_url_rule('/sensor_panel', view_func=SensorPanelView.as_view('sensor_panel_view', template_name='sensor_panel.html'))
 
-bp_allsky.add_url_rule('/', view_func=IndexImgView.as_view('index_view', template_name='index_img.html'))
-bp_allsky.add_url_rule('/index_canvas', view_func=IndexCanvasView.as_view('index_canvas_view', template_name='index_canvas.html'))
-bp_allsky.add_url_rule('/index_img', view_func=IndexImgView.as_view('index_img_view', template_name='index_img.html'))
-bp_allsky.add_url_rule('/js/latest', view_func=JsonLatestImageView.as_view('js_latest_image_view'))
-bp_allsky.add_url_rule('/panorama', view_func=LatestPanoramaImgView.as_view('latest_panorama_view', template_name='index_img.html'))
-bp_allsky.add_url_rule('/panorama_canvas', view_func=LatestPanoramaCanvasView.as_view('latest_panorama_canvas_view', template_name='index_canvas.html'))
-bp_allsky.add_url_rule('/panorama_img', view_func=LatestPanoramaImgView.as_view('latest_panorama_img_view', template_name='index_img.html'))
-bp_allsky.add_url_rule('/js/latest_panorama', view_func=JsonLatestPanoramaView.as_view('js_latest_panorama_view'))
-bp_allsky.add_url_rule('/raw', view_func=LatestRawImageImgView.as_view('latest_rawimage_view', template_name='index_img.html'))
-bp_allsky.add_url_rule('/raw_canvas', view_func=LatestRawImageCanvasView.as_view('latest_rawimage_canvas_view', template_name='index_canvas.html'))
-bp_allsky.add_url_rule('/raw_img', view_func=LatestRawImageImgView.as_view('latest_rawimage_img_view', template_name='index_img.html'))
-bp_allsky.add_url_rule('/js/latest_rawimage', view_func=JsonLatestRawImageView.as_view('js_latest_rawimage_view'))
-bp_allsky.add_url_rule('/realtime_keogram', view_func=RealtimeKeogramView.as_view('realtime_keogram_view', template_name='realtime_keogram.html'))
-
-bp_allsky.add_url_rule('/loop', view_func=ImageLoopImgView.as_view('image_loop_view', template_name='loop_img.html'))
-bp_allsky.add_url_rule('/loop_canvas', view_func=ImageLoopCanvasView.as_view('image_loop_canvas_view', template_name='loop_canvas.html'))
-bp_allsky.add_url_rule('/loop_img', view_func=ImageLoopImgView.as_view('image_loop_img_view', template_name='loop_img.html'))
-bp_allsky.add_url_rule('/js/loop', view_func=JsonImageLoopView.as_view('js_image_loop_view'))
-bp_allsky.add_url_rule('/looppanorama', view_func=PanoramaLoopImgView.as_view('panorama_loop_view', template_name='loop_img.html'))
-bp_allsky.add_url_rule('/looppanorama_canvas', view_func=PanoramaLoopCanvasView.as_view('panorama_loop_canvas_view', template_name='loop_canvas.html'))
-bp_allsky.add_url_rule('/looppanorama_img', view_func=PanoramaLoopImgView.as_view('panorama_loop_img_view', template_name='loop_img.html'))
-bp_allsky.add_url_rule('/js/looppanorama', view_func=JsonPanoramaLoopView.as_view('js_panorama_loop_view'))
-bp_allsky.add_url_rule('/loopraw', view_func=RawImageLoopImgView.as_view('rawimage_loop_view', template_name='loop_img.html'))
-bp_allsky.add_url_rule('/loopraw_canvas', view_func=RawImageLoopCanvasView.as_view('rawimage_loop_canvas_view', template_name='loop_canvas.html'))
-bp_allsky.add_url_rule('/loopraw_img', view_func=RawImageLoopImgView.as_view('rawimage_loop_img_view', template_name='loop_img.html'))
-bp_allsky.add_url_rule('/js/loopraw', view_func=JsonRawImageLoopView.as_view('js_rawimage_loop_view'))
-
-bp_allsky.add_url_rule('/sqm', view_func=SqmView.as_view('sqm_view', template_name='sqm.html'))
-
-bp_allsky.add_url_rule('/charts', view_func=ChartView.as_view('chart_view', template_name='chart.html'))
-bp_allsky.add_url_rule('/js/charts', view_func=JsonChartView.as_view('js_chart_view'))
-
-bp_allsky.add_url_rule('/imageviewer', view_func=ImageViewerView.as_view('imageviewer_view', template_name='imageviewer.html'))
-bp_allsky.add_url_rule('/ajax/imageviewer', view_func=AjaxImageViewerView.as_view('ajax_imageviewer_view'))
-bp_allsky.add_url_rule('/ajax/exclude', view_func=AjaxImageExcludeView.as_view('ajax_image_exclude_view'))
-
-bp_allsky.add_url_rule('/fitsimageviewer', view_func=FitsImageViewerView.as_view('fitsimageviewer_view', template_name='fitsimageviewer.html'))
-bp_allsky.add_url_rule('/ajax/fitsimageviewer', view_func=AjaxFitsImageViewerView.as_view('ajax_fitsimageviewer_view'))
-bp_allsky.add_url_rule('/fits2jpeg', view_func=Fits2JpegView.as_view('fits2jpeg_view'))
-
-bp_allsky.add_url_rule('/gallery', view_func=GalleryViewerView.as_view('gallery_view', template_name='gallery.html'))
-bp_allsky.add_url_rule('/ajax/gallery', view_func=AjaxGalleryViewerView.as_view('ajax_gallery_view'))
-
-bp_allsky.add_url_rule('/videoviewer', view_func=VideoViewerView.as_view('videoviewer_view', template_name='videoviewer.html'))
-bp_allsky.add_url_rule('/ajax/videoviewer', view_func=AjaxVideoViewerView.as_view('ajax_videoviewer_view'))
-
-bp_allsky.add_url_rule('/minivideoviewer', view_func=MiniVideoViewerView.as_view('mini_videoviewer_view', template_name='minivideoviewer.html'))
-bp_allsky.add_url_rule('/ajax/minivideoviewer', view_func=AjaxMiniVideoViewerView.as_view('ajax_mini_videoviewer_view'))
-
-bp_allsky.add_url_rule('/modern-admin/media/gallery', view_func=ModernAdminMediaGalleryView.as_view('modern_admin_media_gallery_view', template_name='modern_admin/media_list.html'))
-bp_allsky.add_url_rule('/modern-admin/media/gallery/page', view_func=ModernAdminMediaGalleryPageView.as_view('modern_admin_media_gallery_page_view', template_name='modern_admin/media_list.html'))
-bp_allsky.add_url_rule('/modern-admin/media/images', view_func=ModernAdminMediaImagesView.as_view('modern_admin_media_images_view', template_name='modern_admin/media_list.html'))
-bp_allsky.add_url_rule('/modern-admin/media/images/<int:image_id>', view_func=ModernAdminMediaImageDetailView.as_view('modern_admin_media_image_detail_view', template_name='modern_admin/image_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/media/timelapses', view_func=ModernAdminMediaTimelapsesView.as_view('modern_admin_media_timelapses_view', template_name='modern_admin/media_list.html'))
-bp_allsky.add_url_rule('/modern-admin/media/timelapses/<int:video_id>', view_func=ModernAdminMediaVideoDetailView.as_view('modern_admin_media_video_detail_view', template_name='modern_admin/video_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/media/keograms', view_func=ModernAdminMediaKeogramsView.as_view('modern_admin_media_keograms_view', template_name='modern_admin/keograms.html'))
-bp_allsky.add_url_rule('/modern-admin/media/startrails', view_func=ModernAdminMediaStartrailsView.as_view('modern_admin_media_startrails_view', template_name='modern_admin/startrails.html'))
-bp_allsky.add_url_rule('/modern-admin/media/startrail-videos', view_func=ModernAdminMediaStartrailVideosView.as_view('modern_admin_media_startrail_videos_view', template_name='modern_admin/startrail_videos.html'))
-bp_allsky.add_url_rule('/modern-admin/media/mini-timelapses', view_func=ModernAdminMediaMiniTimelapsesView.as_view('modern_admin_media_mini_timelapses_view', template_name='modern_admin/mini_timelapses.html'))
-bp_allsky.add_url_rule('/modern-admin/media/panorama', view_func=ModernAdminMediaPanoramaView.as_view('modern_admin_media_panorama_view', template_name='modern_admin/panoramas.html'))
-bp_allsky.add_url_rule('/modern-admin/media/panorama-loop', view_func=ModernAdminMediaPanoramaLoopView.as_view('modern_admin_media_panorama_loop_view', template_name='modern_admin/media_list.html'))
-bp_allsky.add_url_rule('/modern-admin/media/raw', view_func=ModernAdminMediaRawImagesView.as_view('modern_admin_media_raw_images_view', template_name='modern_admin/raw_images.html'))
-bp_allsky.add_url_rule('/modern-admin/media/public-endpoints', view_func=ModernAdminPublicMediaEndpointsView.as_view('modern_admin_public_media_endpoints_view', template_name='modern_admin/public_media_endpoints.html'))
-bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))
-bp_allsky.add_url_rule('/modern-admin/fits', view_func=ModernAdminFitsView.as_view('modern_admin_fits_view', template_name='modern_admin/fits.html'))
-bp_allsky.add_url_rule('/modern-admin/fits/<int:fits_id>', view_func=ModernAdminFitsDetailView.as_view('modern_admin_fits_detail_view', template_name='modern_admin/fits_detail.html'))
-
-bp_allsky.add_url_rule('/view_image', view_func=TimelapseImageView.as_view('timelapse_image_view', template_name='view_image.html'))
-bp_allsky.add_url_rule('/view_panorama', view_func=PanoramaImageView.as_view('panorama_image_view', template_name='view_image.html'))
-bp_allsky.add_url_rule('/view_startrail', view_func=StartrailImageView.as_view('startrail_image_view', template_name='view_image.html'))
-bp_allsky.add_url_rule('/view_keogram', view_func=KeogramImageView.as_view('keogram_image_view', template_name='view_image.html'))
-bp_allsky.add_url_rule('/view_raw', view_func=RawImageView.as_view('raw_image_view', template_name='view_image.html'))
-
-bp_allsky.add_url_rule('/watch_timelapse', view_func=TimelapseVideoView.as_view('timelapse_video_view', template_name='watch_video.html'))
-bp_allsky.add_url_rule('/watch_mini_timelapse', view_func=MiniTimelapseVideoView.as_view('mini_timelapse_video_view', template_name='watch_video.html'))
-bp_allsky.add_url_rule('/watch_startrail', view_func=StartrailVideoView.as_view('startrail_video_view', template_name='watch_video.html'))
-bp_allsky.add_url_rule('/watch_panorama', view_func=PanoramaVideoView.as_view('panorama_video_view', template_name='watch_video.html'))
-
-bp_allsky.add_url_rule('/generate', view_func=TimelapseGeneratorView.as_view('generate_view', template_name='generate.html'))
-bp_allsky.add_url_rule('/ajax/generate', view_func=AjaxTimelapseGeneratorView.as_view('ajax_generate_view'))
-
-bp_allsky.add_url_rule('/minigenerate', view_func=MiniTimelapseGeneratorView.as_view('mini_generate_view', template_name='mini_generate.html'))
-bp_allsky.add_url_rule('/ajax/minigenerate', view_func=AjaxMiniTimelapseGeneratorView.as_view('ajax_mini_generate_view'))
-
-bp_allsky.add_url_rule('/config', view_func=ConfigView.as_view('config_view', template_name='config.html'))
-bp_allsky.add_url_rule('/ajax/config', view_func=AjaxConfigView.as_view('ajax_config_view'))
-bp_allsky.add_url_rule('/config/list', view_func=ConfigListView.as_view('config_list_view', template_name='config_list.html'))
-bp_allsky.add_url_rule('/config/download', view_func=ConfigDownloadView.as_view('config_download_view'))
-bp_allsky.add_url_rule('/config/restore', view_func=ConfigRestoreView.as_view('config_restore_view', template_name='config_restore.html'))
-bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.as_view('ajax_config_restore_view'))
-
-bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
-bp_allsky.add_url_rule('/modern-admin/now', view_func=ModernAdminNowView.as_view('modern_admin_now_view', template_name='modern_admin/now.html'))
-bp_allsky.add_url_rule('/modern-admin/highlights', view_func=ModernAdminHighlightsView.as_view('modern_admin_highlights_view', template_name='modern_admin/highlights.html'))
-bp_allsky.add_url_rule('/modern-admin/moment', view_func=ModernAdminMomentDetailView.as_view('modern_admin_moment_detail_view', template_name='modern_admin/moment_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/output', view_func=ModernAdminOutputDetailView.as_view('modern_admin_output_detail_view', template_name='modern_admin/output_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/library', view_func=ModernAdminLibraryView.as_view('modern_admin_library_view', template_name='modern_admin/library.html'))
-bp_allsky.add_url_rule('/modern-admin/sky-cycle', view_func=ModernAdminSkyCycleView.as_view('modern_admin_sky_cycle_view', template_name='modern_admin/sky_cycle.html'))
-bp_allsky.add_url_rule('/modern-admin/safe-action/dry-run', view_func=ModernAdminSafeActionDryRunView.as_view('modern_admin_safe_action_dry_run_view'), methods=['POST'])
-bp_allsky.add_url_rule('/modern-admin/capture/service', view_func=ModernAdminCaptureServiceActionView.as_view('modern_admin_capture_service_action_view'))
-bp_allsky.add_url_rule('/modern-admin/capture/abort-exposure', view_func=ModernAdminAbortExposureActionView.as_view('modern_admin_abort_exposure_action_view'))
-bp_allsky.add_url_rule('/modern-admin/cameras', view_func=ModernAdminCamerasView.as_view('modern_admin_cameras_view', template_name='modern_admin/cameras.html'))
-bp_allsky.add_url_rule('/modern-admin/cameras/add', view_func=ModernAdminCameraAddView.as_view('modern_admin_camera_add_view', template_name='modern_admin/camera_add.html'))
-bp_allsky.add_url_rule('/modern-admin/cameras/detect-indi', view_func=ModernAdminIndiCameraDetectView.as_view('modern_admin_camera_detect_indi_view'))
-bp_allsky.add_url_rule('/modern-admin/cameras/start-indi', view_func=ModernAdminIndiServerStartView.as_view('modern_admin_start_indi_view'))
-bp_allsky.add_url_rule('/modern-admin/cameras/info', view_func=ModernAdminCameraInfoView.as_view('modern_admin_camera_info_view', template_name='modern_admin/camera_info.html'))
-bp_allsky.add_url_rule('/modern-admin/cameras/image-lag', view_func=ModernAdminImageLagView.as_view('modern_admin_image_lag_view', template_name='modern_admin/image_lag.html'))
-bp_allsky.add_url_rule('/modern-admin/cameras/adu-history', view_func=ModernAdminAduHistoryView.as_view('modern_admin_adu_history_view', template_name='modern_admin/adu_history.html'))
-bp_allsky.add_url_rule('/modern-admin/storage', view_func=ModernAdminStorageView.as_view('modern_admin_storage_view', template_name='modern_admin/storage.html'))
-bp_allsky.add_url_rule('/modern-admin/storage/file-space-usage', view_func=ModernAdminFileSpaceUsageView.as_view('modern_admin_file_space_usage_view', template_name='modern_admin/file_space_usage.html'))
-bp_allsky.add_url_rule('/modern-admin/uploads', view_func=ModernAdminUploadsView.as_view('modern_admin_uploads_view', template_name='modern_admin/uploads.html'))
-bp_allsky.add_url_rule('/modern-admin/uploads/<provider_slug>', view_func=ModernAdminUploadDetailView.as_view('modern_admin_upload_detail_view', template_name='modern_admin/upload_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/youtube', view_func=ModernAdminYoutubeView.as_view('modern_admin_youtube_view', template_name='modern_admin/youtube.html'))
-bp_allsky.add_url_rule('/modern-admin/observatory', view_func=ModernAdminObservatoryView.as_view('modern_admin_observatory_view', template_name='modern_admin/observatory.html'))
-bp_allsky.add_url_rule('/modern-admin/observatory/sqm', view_func=ModernAdminSqmView.as_view('modern_admin_sqm_view', template_name='modern_admin/observatory_status.html'))
-bp_allsky.add_url_rule('/modern-admin/observatory/charts', view_func=ModernAdminChartsView.as_view('modern_admin_charts_view', template_name='modern_admin/charts.html'))
-bp_allsky.add_url_rule('/modern-admin/observatory/sensor-panel', view_func=ModernAdminSensorPanelView.as_view('modern_admin_sensor_panel_view', template_name='modern_admin/sensor_panel.html'))
-bp_allsky.add_url_rule('/modern-admin/observatory/astropanel', view_func=ModernAdminAstroPanelView.as_view('modern_admin_astropanel_view', template_name='modern_admin/astropanel.html'))
-bp_allsky.add_url_rule('/modern-admin/observatory/virtualsky', view_func=ModernAdminVirtualSkyView.as_view('modern_admin_virtualsky_view', template_name='modern_admin/virtualsky.html'))
-bp_allsky.add_url_rule('/modern-admin/observatory/realtime-keogram', view_func=ModernAdminRealtimeKeogramView.as_view('modern_admin_realtime_keogram_view', template_name='modern_admin/realtime_keogram.html'))
-bp_allsky.add_url_rule('/modern-admin/observatory/long-term-keogram', view_func=ModernAdminLongTermKeogramView.as_view('modern_admin_longterm_keogram_view', template_name='modern_admin/longterm_keogram.html'))
-bp_allsky.add_url_rule('/modern-admin/system', view_func=ModernAdminSystemView.as_view('modern_admin_system_view', template_name='modern_admin/system.html'))
-bp_allsky.add_url_rule('/modern-admin/system/info', view_func=ModernAdminSystemInfoView.as_view('modern_admin_system_info_view', template_name='modern_admin/system_info.html'))
-bp_allsky.add_url_rule('/modern-admin/system/support', view_func=ModernAdminSupportInfoView.as_view('modern_admin_support_info_view', template_name='modern_admin/support_info.html'))
-bp_allsky.add_url_rule('/modern-admin/system/log', view_func=ModernAdminLogView.as_view('modern_admin_log_view', template_name='modern_admin/log.html'))
-bp_allsky.add_url_rule('/modern-admin/system/log/<log_name>', view_func=ModernAdminLogDetailView.as_view('modern_admin_log_detail_view', template_name='modern_admin/log_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView.as_view('modern_admin_taskqueue_view', template_name='modern_admin/tasks.html'))
-bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdminTaskDetailView.as_view('modern_admin_task_detail_view', template_name='modern_admin/task_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/users', view_func=ModernAdminUsersView.as_view('modern_admin_users_view', template_name='modern_admin/users.html'))
-bp_allsky.add_url_rule('/modern-admin/users/<int:user_id>', view_func=ModernAdminUserDetailView.as_view('modern_admin_user_detail_view', template_name='modern_admin/user_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/config-history', view_func=ModernAdminConfigHistoryView.as_view('modern_admin_config_history_view', template_name='modern_admin/config_history.html'))
-bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
-bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/notifications', view_func=ModernAdminNotificationsView.as_view('modern_admin_notifications_view', template_name='modern_admin/notifications.html'))
-bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>', view_func=ModernAdminNotificationDetailView.as_view('modern_admin_notification_detail_view', template_name='modern_admin/notification_detail.html'))
-bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))
-bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
-bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/safe_controls.html'))
-bp_allsky.add_url_rule('/modern-admin/tools/generate', view_func=ModernAdminGenerateView.as_view('modern_admin_generate_view', template_name='modern_admin/safe_controls.html'))
-bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusView.as_view('modern_admin_focus_view', template_name='modern_admin/safe_controls.html'))
-bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))
-bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))
-bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsInventoryView.as_view('modern_admin_settings_view', template_name='modern_admin/settings_inventory.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/basic', view_func=ModernAdminBasicSettingsPreviewView.as_view('modern_admin_basic_settings_view', template_name='modern_admin/settings_basic.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/advanced', view_func=ModernAdminAdvancedSettingsPreviewView.as_view('modern_admin_advanced_settings_view', template_name='modern_admin/settings_basic.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/developer', view_func=ModernAdminDeveloperSettingsPreviewView.as_view('modern_admin_developer_settings_view', template_name='modern_admin/settings_basic.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/ready', view_func=ModernAdminReadySettingsPreviewView.as_view('modern_admin_ready_settings_view', template_name='modern_admin/settings_basic.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/analytics', view_func=ModernAdminAnalyticsSettingsView.as_view('modern_admin_analytics_settings_view', template_name='modern_admin/settings_analytics.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/storage', view_func=ModernAdminStorageSettingsView.as_view('modern_admin_storage_settings_view', template_name='modern_admin/settings_storage.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/notifications', view_func=ModernAdminNotificationsSettingsView.as_view('modern_admin_notifications_settings_view', template_name='modern_admin/settings_notifications.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/camera-profile', view_func=ModernAdminCameraProfileSettingsView.as_view('modern_admin_camera_profile_settings_view', template_name='modern_admin/settings_camera_profile.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/camera-connection', view_func=ModernAdminCameraConnectionSettingsView.as_view('modern_admin_camera_connection_settings_view', template_name='modern_admin/settings_camera_connection.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/exposure-gain', view_func=ModernAdminExposureGainSettingsView.as_view('modern_admin_exposure_gain_settings_view', template_name='modern_admin/settings_exposure_gain.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/auto-exposure-gain', view_func=ModernAdminAutoExposureGainSettingsView.as_view('modern_admin_auto_exposure_gain_settings_view', template_name='modern_admin/settings_auto_exposure_gain.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/hybrid-awb', view_func=ModernAdminHybridAwbSettingsView.as_view('modern_admin_hybrid_awb_settings_view', template_name='modern_admin/settings_hybrid_awb.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/acquisition-save', view_func=ModernAdminAcquisitionSaveSettingsView.as_view('modern_admin_acquisition_save_settings_view', template_name='modern_admin/settings_acquisition_save.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/fits-source', view_func=ModernAdminFitsSourceSettingsView.as_view('modern_admin_fits_source_settings_view', template_name='modern_admin/settings_fits_source.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
-bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))
-bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))
-bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/safe_controls.html'))
-bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/safe_controls.html'))
-bp_allsky.add_url_rule('/modern-admin/system/gpio-control', view_func=ModernAdminManualGpioView.as_view('modern_admin_manual_gpio_view', template_name='modern_admin/safe_controls.html'))
-bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
-bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))
-bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminClassicPlaceholderView.as_view('modern_admin_classic_placeholder_view', template_name='modern_admin/placeholder.html'))
-bp_allsky.add_url_rule('/modern-admin/mode/<mode>', view_func=ModernAdminModeView.as_view('modern_admin_mode_view'))
-bp_allsky.add_url_rule('/system', view_func=SystemInfoView.as_view('system_view', template_name='system.html'))
-bp_allsky.add_url_rule('/ajax/system', view_func=AjaxSystemInfoView.as_view('ajax_system_view'))
-bp_allsky.add_url_rule('/ajax/settime', view_func=AjaxSetTimeView.as_view('ajax_settime_view'))
-bp_allsky.add_url_rule('/ajax/settimezone', view_func=AjaxSetTimezoneView.as_view('ajax_settimezone_view'))
-bp_allsky.add_url_rule('/ajax/indiserver', view_func=AjaxIndiServerChangeView.as_view('ajax_indiserver_change_view'))
-
-bp_allsky.add_url_rule('/focus', view_func=FocusView.as_view('focus_view', template_name='focus.html'))
-bp_allsky.add_url_rule('/js/focus', view_func=JsonFocusView.as_view('js_focus_view'))
-bp_allsky.add_url_rule('/ajax/focuscontroller', view_func=AjaxFocusControllerView.as_view('focus_controller_view'))
-
-bp_allsky.add_url_rule('/manual_gpio', view_func=ManualGpioView.as_view('manual_gpio_view', template_name='manual_gpio.html'))
-bp_allsky.add_url_rule('/ajax/manual_gpio', view_func=AjaxManualGpioView.as_view('ajax_manual_gpio_view'))
-
-bp_allsky.add_url_rule('/log', view_func=LogView.as_view('log_view', template_name='log.html'))
-bp_allsky.add_url_rule('/js/log', view_func=JsonLogView.as_view('js_log_view'))
-bp_allsky.add_url_rule('/log/download', view_func=LogDownloadView.as_view('log_download_view'))
-bp_allsky.add_url_rule('/log/webapp_download', view_func=LogWebappDownloadView.as_view('log_webapp_download_view'))
-bp_allsky.add_url_rule('/log/syslog_download', view_func=LogSyslogDownloadView.as_view('log_syslog_download_view'))
-bp_allsky.add_url_rule('/log/kern_download', view_func=LogKernDownloadView.as_view('log_kern_download_view'))
-
-bp_allsky.add_url_rule('/support', view_func=SupportInfoView.as_view('support_info_view', template_name='support_info.html'))
-bp_allsky.add_url_rule('/js/support', view_func=JsonSupportInfoView.as_view('js_support_info_view'))
-
-bp_allsky.add_url_rule('/user', view_func=UserInfoView.as_view('user_view', template_name='user.html'))
-bp_allsky.add_url_rule('/ajax/user', view_func=AjaxUserInfoView.as_view('ajax_user_view'))
-
-bp_allsky.add_url_rule('/astropanel', view_func=AstroPanelView.as_view('astropanel_view', template_name='astropanel.html'))
-bp_allsky.add_url_rule('/ajax/astropanel', view_func=AjaxAstroPanelView.as_view('ajax_astropanel_view'))
-
-bp_allsky.add_url_rule('/processing', view_func=ImageProcessingView.as_view('image_processing_view', template_name='imageprocessing.html'))
-bp_allsky.add_url_rule('/js/processing', view_func=JsonImageProcessingView.as_view('js_image_processing_view'))
-
-bp_allsky.add_url_rule('/longtermkeogram', view_func=LongTermKeogramView.as_view('longterm_keogram_view', template_name='longterm_keogram.html'))
-bp_allsky.add_url_rule('/js/longtermkeogram', view_func=JsonLongTermKeogramView.as_view('js_longterm_keogram_view'))
-
-bp_allsky.add_url_rule('/camera', view_func=CameraLensView.as_view('camera_lens_view', template_name='cameraLens.html'))
-bp_allsky.add_url_rule('/lag', view_func=ImageLagView.as_view('image_lag_view', template_name='lag.html'))
-bp_allsky.add_url_rule('/adu', view_func=RollingAduView.as_view('rolling_adu_view', template_name='adu.html'))
-bp_allsky.add_url_rule('/darks', view_func=DarkFramesView.as_view('darks_view', template_name='darks.html'))
-bp_allsky.add_url_rule('/mask', view_func=MaskView.as_view('mask_view', template_name='mask.html'))
-bp_allsky.add_url_rule('/camerasimulator', view_func=CameraSimulatorView.as_view('camera_simulator_view', template_name='camera_simulator.html'))
-bp_allsky.add_url_rule('/imagecirclehelper', view_func=ImageCircleHelperView.as_view('image_circle_helper_view', template_name='imagecirclehelper.html'))
-bp_allsky.add_url_rule('/filespaceusage', view_func=FileSpaceUsageView.as_view('filespaceusage_view', template_name='filespaceusage.html'))
-
-bp_allsky.add_url_rule('/public', view_func=PublicIndexView.as_view('public_index_view'))  # redirect
-
-bp_allsky.add_url_rule('/network', view_func=NetworkManagerView.as_view('network_manager_view', template_name='network.html'))
-bp_allsky.add_url_rule('/ajax/network', view_func=AjaxNetworkManagerView.as_view('ajax_network_manager_view'))
-
-bp_allsky.add_url_rule('/drives', view_func=DriveManagerView.as_view('drive_manager_view', template_name='drive_manager.html'))
-bp_allsky.add_url_rule('/ajax/drives', view_func=AjaxDriveManagerView.as_view('ajax_drive_manager_view'))
-
-bp_allsky.add_url_rule('/virtualsky', view_func=VirtualSkyView.as_view('virtualsky_view', template_name='virtualsky.html'))
-
-bp_allsky.add_url_rule('/ajax/notification', view_func=AjaxNotificationView.as_view('ajax_notification_view'))
-bp_allsky.add_url_rule('/ajax/selectcamera', view_func=AjaxSelectCameraView.as_view('ajax_select_camera_view'))
-bp_allsky.add_url_rule('/ajax/uploadyoutube', view_func=AjaxUploadYoutubeView.as_view('ajax_upload_youtube_view'))
-
-# youtube
-bp_allsky.add_url_rule('/youtube/authorize', view_func=YoutubeAuthorizeView.as_view('youtube_authorize_view'))
-bp_allsky.add_url_rule('/youtube/oauth2callback', view_func=YoutubeCallbackView.as_view('youtube_oauth2callback_view'))
-bp_allsky.add_url_rule('/youtube/oauth2refresh', view_func=YoutubeRefreshAuthView.as_view('youtube_oauth2refresh_view'))
-bp_allsky.add_url_rule('/youtube/oauth2revoke', view_func=YoutubeRevokeAuthView.as_view('youtube_oauth2revoke_view'))
-
-# redirects
-bp_allsky.add_url_rule('/latestimage', view_func=LatestImageRedirect.as_view('latest_image_redirect_view'))
-bp_allsky.add_url_rule('/latestkeogram', view_func=LatestKeogramRedirect.as_view('latest_keogram_redirect_view'))
-bp_allsky.add_url_rule('/lateststartrail', view_func=LatestStartrailRedirect.as_view('latest_startrail_redirect_view'))
-bp_allsky.add_url_rule('/latestpanorama', view_func=LatestPanoramaImageRedirect.as_view('latest_panorama_image_redirect_view'))
-bp_allsky.add_url_rule('/latestraw', view_func=LatestRawImageRedirect.as_view('latest_raw_image_redirect_view'))
-bp_allsky.add_url_rule('/latestthumbnail', view_func=LatestThumbnailRedirect.as_view('latest_thumbnail_redirect_view'))
-bp_allsky.add_url_rule('/latesttimelapse', view_func=LatestTimelapseVideoRedirect.as_view('latest_timelapse_video_redirect_view'))
-bp_allsky.add_url_rule('/lateststartrailvideo', view_func=LatestStartrailVideoRedirect.as_view('latest_startrail_video_redirect_view'))
-bp_allsky.add_url_rule('/latestpanoramavideo', view_func=LatestPanoramaVideoRedirect.as_view('latest_panorama_video_redirect_view'))
-
-bp_allsky.add_url_rule('/latestimageview', view_func=LatestImageViewRedirect.as_view('latest_image_view_redirect_view'))
-bp_allsky.add_url_rule('/latestkeogramview', view_func=LatestKeogramViewRedirect.as_view('latest_keogram_view_redirect_view'))
-bp_allsky.add_url_rule('/lateststartrailview', view_func=LatestStartrailViewRedirect.as_view('latest_startrail_view_redirect_view'))
-bp_allsky.add_url_rule('/latestpanoramaview', view_func=LatestPanoramaImageViewRedirect.as_view('latest_panorama_image_view_redirect_view'))
-bp_allsky.add_url_rule('/latestrawview', view_func=LatestRawImageViewRedirect.as_view('latest_raw_image_view_redirect_view'))
-bp_allsky.add_url_rule('/latesttimelapsewatch', view_func=LatestTimelapseVideoWatchRedirect.as_view('latest_timelapse_video_watch_redirect_view'))
-bp_allsky.add_url_rule('/lateststartrailvideowatch', view_func=LatestStartrailVideoWatchRedirect.as_view('latest_startrail_video_watch_redirect_view'))
-bp_allsky.add_url_rule('/latestpanoramavideowatch', view_func=LatestPanoramaVideoWatchRedirect.as_view('latest_panorama_video_watch_redirect_view'))
-
-# hidden
-bp_allsky.add_url_rule('/cameras', view_func=CamerasView.as_view('cameras_view', template_name='cameras.html'))
-bp_allsky.add_url_rule('/tasks', view_func=TaskQueueView.as_view('taskqueue_view', template_name='taskqueue.html'))
-bp_allsky.add_url_rule('/notifications', view_func=NotificationsView.as_view('notifications_view', template_name='notifications.html'))
-bp_allsky.add_url_rule('/users', view_func=UsersView.as_view('users_view', template_name='users.html'))
+def register_compatibility_routes(bp_allsky):
+    bp_allsky.add_url_rule('/ajax/status_update', view_func=AjaxStatusUpdateView.as_view('ajax_status_update_view'))
+    bp_allsky.add_url_rule('/js/sensor_panel', view_func=JsonSensorPanelView.as_view('js_sensor_panel_view'))
+    bp_allsky.add_url_rule('/js/latest', view_func=JsonLatestImageView.as_view('js_latest_image_view'))
+    bp_allsky.add_url_rule('/js/latest_panorama', view_func=JsonLatestPanoramaView.as_view('js_latest_panorama_view'))
+    bp_allsky.add_url_rule('/js/latest_rawimage', view_func=JsonLatestRawImageView.as_view('js_latest_rawimage_view'))
+    bp_allsky.add_url_rule('/js/loop', view_func=JsonImageLoopView.as_view('js_image_loop_view'))
+    bp_allsky.add_url_rule('/js/looppanorama', view_func=JsonPanoramaLoopView.as_view('js_panorama_loop_view'))
+    bp_allsky.add_url_rule('/js/loopraw', view_func=JsonRawImageLoopView.as_view('js_rawimage_loop_view'))
+    bp_allsky.add_url_rule('/js/charts', view_func=JsonChartView.as_view('js_chart_view'))
+    bp_allsky.add_url_rule('/ajax/imageviewer', view_func=AjaxImageViewerView.as_view('ajax_imageviewer_view'))
+    bp_allsky.add_url_rule('/ajax/exclude', view_func=AjaxImageExcludeView.as_view('ajax_image_exclude_view'))
+    bp_allsky.add_url_rule('/ajax/fitsimageviewer', view_func=AjaxFitsImageViewerView.as_view('ajax_fitsimageviewer_view'))
+    bp_allsky.add_url_rule('/fits2jpeg', view_func=Fits2JpegView.as_view('fits2jpeg_view'))
+    bp_allsky.add_url_rule('/ajax/gallery', view_func=AjaxGalleryViewerView.as_view('ajax_gallery_view'))
+    bp_allsky.add_url_rule('/ajax/videoviewer', view_func=AjaxVideoViewerView.as_view('ajax_videoviewer_view'))
+    bp_allsky.add_url_rule('/ajax/minivideoviewer', view_func=AjaxMiniVideoViewerView.as_view('ajax_mini_videoviewer_view'))
+    bp_allsky.add_url_rule('/view_image', view_func=TimelapseImageView.as_view('timelapse_image_view', template_name='view_image.html'))
+    bp_allsky.add_url_rule('/view_panorama', view_func=PanoramaImageView.as_view('panorama_image_view', template_name='view_image.html'))
+    bp_allsky.add_url_rule('/view_startrail', view_func=StartrailImageView.as_view('startrail_image_view', template_name='view_image.html'))
+    bp_allsky.add_url_rule('/view_keogram', view_func=KeogramImageView.as_view('keogram_image_view', template_name='view_image.html'))
+    bp_allsky.add_url_rule('/view_raw', view_func=RawImageView.as_view('raw_image_view', template_name='view_image.html'))
+    bp_allsky.add_url_rule('/watch_timelapse', view_func=TimelapseVideoView.as_view('timelapse_video_view', template_name='watch_video.html'))
+    bp_allsky.add_url_rule('/watch_mini_timelapse', view_func=MiniTimelapseVideoView.as_view('mini_timelapse_video_view', template_name='watch_video.html'))
+    bp_allsky.add_url_rule('/watch_startrail', view_func=StartrailVideoView.as_view('startrail_video_view', template_name='watch_video.html'))
+    bp_allsky.add_url_rule('/watch_panorama', view_func=PanoramaVideoView.as_view('panorama_video_view', template_name='watch_video.html'))
+    bp_allsky.add_url_rule('/ajax/generate', view_func=AjaxTimelapseGeneratorView.as_view('ajax_generate_view'))
+    bp_allsky.add_url_rule('/ajax/minigenerate', view_func=AjaxMiniTimelapseGeneratorView.as_view('ajax_mini_generate_view'))
+    bp_allsky.add_url_rule('/ajax/config', view_func=AjaxConfigView.as_view('ajax_config_view'))
+    bp_allsky.add_url_rule('/config/download', view_func=ConfigDownloadView.as_view('config_download_view'))
+    bp_allsky.add_url_rule('/ajax/config/restore', view_func=AjaxConfigRestoreView.as_view('ajax_config_restore_view'))
+    bp_allsky.add_url_rule('/ajax/system', view_func=AjaxSystemInfoView.as_view('ajax_system_view'))
+    bp_allsky.add_url_rule('/ajax/settime', view_func=AjaxSetTimeView.as_view('ajax_settime_view'))
+    bp_allsky.add_url_rule('/ajax/settimezone', view_func=AjaxSetTimezoneView.as_view('ajax_settimezone_view'))
+    bp_allsky.add_url_rule('/ajax/indiserver', view_func=AjaxIndiServerChangeView.as_view('ajax_indiserver_change_view'))
+    bp_allsky.add_url_rule('/js/focus', view_func=JsonFocusView.as_view('js_focus_view'))
+    bp_allsky.add_url_rule('/ajax/focuscontroller', view_func=AjaxFocusControllerView.as_view('focus_controller_view'))
+    bp_allsky.add_url_rule('/ajax/manual_gpio', view_func=AjaxManualGpioView.as_view('ajax_manual_gpio_view'))
+    bp_allsky.add_url_rule('/js/log', view_func=JsonLogView.as_view('js_log_view'))
+    bp_allsky.add_url_rule('/log/download', view_func=LogDownloadView.as_view('log_download_view'))
+    bp_allsky.add_url_rule('/log/webapp_download', view_func=LogWebappDownloadView.as_view('log_webapp_download_view'))
+    bp_allsky.add_url_rule('/log/syslog_download', view_func=LogSyslogDownloadView.as_view('log_syslog_download_view'))
+    bp_allsky.add_url_rule('/log/kern_download', view_func=LogKernDownloadView.as_view('log_kern_download_view'))
+    bp_allsky.add_url_rule('/js/support', view_func=JsonSupportInfoView.as_view('js_support_info_view'))
+    bp_allsky.add_url_rule('/ajax/user', view_func=AjaxUserInfoView.as_view('ajax_user_view'))
+    bp_allsky.add_url_rule('/ajax/astropanel', view_func=AjaxAstroPanelView.as_view('ajax_astropanel_view'))
+    bp_allsky.add_url_rule('/js/processing', view_func=JsonImageProcessingView.as_view('js_image_processing_view'))
+    bp_allsky.add_url_rule('/js/longtermkeogram', view_func=JsonLongTermKeogramView.as_view('js_longterm_keogram_view'))
+    bp_allsky.add_url_rule('/public', view_func=PublicIndexView.as_view('public_index_view'))  # redirect
+    bp_allsky.add_url_rule('/ajax/network', view_func=AjaxNetworkManagerView.as_view('ajax_network_manager_view'))
+    bp_allsky.add_url_rule('/ajax/drives', view_func=AjaxDriveManagerView.as_view('ajax_drive_manager_view'))
+    bp_allsky.add_url_rule('/ajax/notification', view_func=AjaxNotificationView.as_view('ajax_notification_view'))
+    bp_allsky.add_url_rule('/ajax/selectcamera', view_func=AjaxSelectCameraView.as_view('ajax_select_camera_view'))
+    bp_allsky.add_url_rule('/ajax/uploadyoutube', view_func=AjaxUploadYoutubeView.as_view('ajax_upload_youtube_view'))
+    bp_allsky.add_url_rule('/youtube/authorize', view_func=YoutubeAuthorizeView.as_view('youtube_authorize_view'))
+    bp_allsky.add_url_rule('/youtube/oauth2callback', view_func=YoutubeCallbackView.as_view('youtube_oauth2callback_view'))
+    bp_allsky.add_url_rule('/youtube/oauth2refresh', view_func=YoutubeRefreshAuthView.as_view('youtube_oauth2refresh_view'))
+    bp_allsky.add_url_rule('/youtube/oauth2revoke', view_func=YoutubeRevokeAuthView.as_view('youtube_oauth2revoke_view'))
+    bp_allsky.add_url_rule('/latestimage', view_func=LatestImageRedirect.as_view('latest_image_redirect_view'))
+    bp_allsky.add_url_rule('/latestkeogram', view_func=LatestKeogramRedirect.as_view('latest_keogram_redirect_view'))
+    bp_allsky.add_url_rule('/lateststartrail', view_func=LatestStartrailRedirect.as_view('latest_startrail_redirect_view'))
+    bp_allsky.add_url_rule('/latestpanorama', view_func=LatestPanoramaImageRedirect.as_view('latest_panorama_image_redirect_view'))
+    bp_allsky.add_url_rule('/latestraw', view_func=LatestRawImageRedirect.as_view('latest_raw_image_redirect_view'))
+    bp_allsky.add_url_rule('/latestthumbnail', view_func=LatestThumbnailRedirect.as_view('latest_thumbnail_redirect_view'))
+    bp_allsky.add_url_rule('/latesttimelapse', view_func=LatestTimelapseVideoRedirect.as_view('latest_timelapse_video_redirect_view'))
+    bp_allsky.add_url_rule('/lateststartrailvideo', view_func=LatestStartrailVideoRedirect.as_view('latest_startrail_video_redirect_view'))
+    bp_allsky.add_url_rule('/latestpanoramavideo', view_func=LatestPanoramaVideoRedirect.as_view('latest_panorama_video_redirect_view'))
+    bp_allsky.add_url_rule('/latestimageview', view_func=LatestImageViewRedirect.as_view('latest_image_view_redirect_view'))
+    bp_allsky.add_url_rule('/latestkeogramview', view_func=LatestKeogramViewRedirect.as_view('latest_keogram_view_redirect_view'))
+    bp_allsky.add_url_rule('/lateststartrailview', view_func=LatestStartrailViewRedirect.as_view('latest_startrail_view_redirect_view'))
+    bp_allsky.add_url_rule('/latestpanoramaview', view_func=LatestPanoramaImageViewRedirect.as_view('latest_panorama_image_view_redirect_view'))
+    bp_allsky.add_url_rule('/latestrawview', view_func=LatestRawImageViewRedirect.as_view('latest_raw_image_view_redirect_view'))
+    bp_allsky.add_url_rule('/latesttimelapsewatch', view_func=LatestTimelapseVideoWatchRedirect.as_view('latest_timelapse_video_watch_redirect_view'))
+    bp_allsky.add_url_rule('/lateststartrailvideowatch', view_func=LatestStartrailVideoWatchRedirect.as_view('latest_startrail_video_watch_redirect_view'))
+    bp_allsky.add_url_rule('/latestpanoramavideowatch', view_func=LatestPanoramaVideoWatchRedirect.as_view('latest_panorama_video_watch_redirect_view'))
+    bp_allsky.add_url_rule('/images/<path:path>', view_func=images_folder)

@@ -15,7 +15,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 csrf = CSRFProtect()
 
-from .views import bp_allsky  # noqa: E402
+from .route_registry import create_allsky_blueprint  # noqa: E402
 from .auth_views import bp_auth_allsky  # noqa: E402
 from .syncapi_views import bp_syncapi_allsky  # noqa: E402
 from .actionapi_views import bp_actionapi_allsky  # noqa: E402
@@ -97,7 +97,12 @@ def create_app():
 
     csrf.init_app(app)
 
-    app.register_blueprint(bp_allsky)
+    # Default stays compatible until all Hybrid flows pass without Classic.
+    app.config.setdefault('HYBRID_ENABLE_CLASSIC_UI', True)
+    app.register_blueprint(create_allsky_blueprint(
+        enable_classic_ui=app.config['HYBRID_ENABLE_CLASSIC_UI'],
+    ))
+    app.add_template_filter(basename)
     app.register_blueprint(bp_auth_allsky)
     app.register_blueprint(bp_syncapi_allsky)
     app.register_blueprint(bp_actionapi_allsky)
@@ -135,6 +140,5 @@ def create_app():
         return app
 
 
-@bp_allsky.app_template_filter()
 def basename(p):
     return Path(p).name

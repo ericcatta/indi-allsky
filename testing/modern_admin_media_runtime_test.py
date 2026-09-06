@@ -622,7 +622,7 @@ def test_images_folder_route_delegates_serving_to_media_serve_adapter():
 def test_fits_preview_route_delegates_path_resolution_to_media_access_adapter():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
     start = source.index('class Fits2JpegView')
-    end = source.index('class GalleryViewerView', start)
+    end = source.index('class AjaxGalleryViewerView', start)
     body = source[start:end]
 
     assert_true('def get_media_access_adapter(self):' in body, 'FITS preview route must construct media access adapter')
@@ -633,7 +633,7 @@ def test_fits_preview_route_delegates_path_resolution_to_media_access_adapter():
 def test_fits_preview_route_delegates_header_metadata_to_media_access_adapter():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
     start = source.index('class Fits2JpegView')
-    end = source.index('class GalleryViewerView', start)
+    end = source.index('class AjaxGalleryViewerView', start)
     body = source[start:end]
 
     assert_true('.read_fits_preview_metadata(filename_p, fits.open)' in body, 'FITS preview metadata should go through Hybrid media access adapter')
@@ -644,7 +644,7 @@ def test_fits_preview_route_delegates_header_metadata_to_media_access_adapter():
 def test_fits_preview_route_delegates_file_mtime_to_media_access_adapter():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
     start = source.index('class Fits2JpegView')
-    end = source.index('class GalleryViewerView', start)
+    end = source.index('class AjaxGalleryViewerView', start)
     body = source[start:end]
 
     assert_true('.resolve_file_mtime(filename_p)' in body, 'FITS preview file mtime should go through Hybrid media access adapter')
@@ -678,7 +678,7 @@ def test_modern_mask_delegates_file_metadata_to_media_access_adapter():
 def test_classic_mask_preserves_default_file_metadata_hook():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
     start = source.index('class MaskView')
-    end = source.index('class CamerasView', start)
+    end = source.index('class ImageLagView', start)
     body = source[start:end]
 
     assert_true('self.resolve_mask_mtime(mask_image_p)' in body, 'Mask base view should call the overridable filesystem metadata boundary')
