@@ -44,6 +44,7 @@ class NetworkManagerEffects:
                 state = connection_props.Get('org.freedesktop.NetworkManager.Connection.Active', 'State')
             except dbus.exceptions.DBusException as e:
                 logger.error('D-Bus Exception: %s', str(e))
+                continue
             if int(state) == self.nm_conn_states['Active']:
                 logger.warning('Connection established!')
                 break

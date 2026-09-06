@@ -789,7 +789,14 @@ payloads, ordinary user/CSRF rejection and uncaught provider errors. Full Book 2
 shell and route regression passes with original Full Config fingerprints intact.
 
 This is a prerequisite mission. The native Network page remains unfinished.
-The old activation polling can call int(None) after a first failed state read;
-that known defect still needs correction and a behavioral test. Live network
+Activation polling now skips failed D-Bus state reads instead of calling int(None)
+after a first failed read. `network_activation_polling_test.py` executes the real
+adapter with a fake bus: transient failure followed by success, thirty failed
+reads, thirty still-activating reads and immediate success. It checks the bounded
+poll count, response contract and exactly one activation request. These tests and
+the real Flask network flow pass on the Pi's Python environment with mocked
+effects; all nineteen local Book 2/shell/route/network entrypoints pass. Original
+effect fingerprints remain unchanged, with only this explicit recovery addition
+accounted for by the guard. The correction is not deployed to production. Live network
 changes, reconnect/recovery, browser acceptance and production deployment remain
 open. No saved connections, Wi-Fi settings or credentials were changed on the Pi.
