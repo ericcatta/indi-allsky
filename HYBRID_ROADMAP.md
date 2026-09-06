@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Observatory: riepilogo operativo Hybrid da record per camera, freschezza frame,
+  fonti FITS/RAW, conteggi task e capacita' del filesystem media. Errori di lettura
+  distinti da dati assenti; indicatori integrazioni descrivono configurazione,
+  non connettivita' verificata. Navigazione agli strumenti esistenti. Il builder
+  prototipo non e' piu' invocato dalla route. Test Flask con Classic vietato e
+  percorso browser camera 2/FITS verificati nel sandbox; deploy ancora aperto.
+
 - Highlights: selezione reale di massimo otto immagini per scope camera/profilo,
   ordinata per detections/stars/SQM/data, con valori mostrati e senza fallback di
   candidati simulati. Moment porta al dettaglio dell'immagine selezionata; senza

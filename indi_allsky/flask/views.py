@@ -88,7 +88,6 @@ from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..modern_admin_tasks import ModernAdminTaskReadPolicy
 from ..processing import ImageProcessor
 from ..product_view_models import build_now_view
-from ..product_view_models import build_observatory_view
 from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import LatestFrameImageTableRepository
 from ..product_view_models import LatestCameraFramesProvider
@@ -6684,7 +6683,8 @@ class ModernAdminObservatoryView(ModernAdminProductView):
     product_context_key = 'observatory_view'
 
     def build_product_context(self, context):
-        return build_observatory_view()
+        from ..observatory_runtime import ObservatoryRuntime
+        return ObservatoryRuntime().snapshot(self.indi_allsky_config)
 
 
 class ModernAdminSystemView(ModernAdminView):

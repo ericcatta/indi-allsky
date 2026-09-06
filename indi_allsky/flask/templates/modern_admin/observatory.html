@@ -1,165 +1,73 @@
 {% extends 'modern_admin/base.html' %}
-
-{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
-
-{% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-observatory-product-v1') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-shell-005') }}" rel="stylesheet">
-{% endblock %}
-
+{% block title %}Observatory — Hybrid{% endblock %}
+{% block head %}<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">{% endblock %}
 {% block content %}
-<main class="modern-admin-shell hybrid-product-shell hybrid-product-observatory" aria-labelledby="observatory-title">
-    <header class="modern-admin-table-panel" aria-label="Observatory product view">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Hybrid AllSky / Observatory</p>
-                <h1 id="observatory-title">{{ observatory_view.observatory_summary.title }}</h1>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ observatory_view.observatory_summary.overall_status | replace('_', ' ') | title }}</span>
-        </div>
-
-        <h2>{{ observatory_view.observatory_summary.readiness_label }}</h2>
-        <p class="modern-admin-note">{{ observatory_view.observatory_summary.note }}</p>
-        <p class="modern-admin-note"><strong>Can the observatory capture reliably?</strong> Observatory summarizes readiness for camera, capture, source preservation, storage, generation, and integrations. It is not Developer diagnostics or Settings editing.</p>
-        <p class="modern-admin-note">Contract: <code>{{ observatory_view.metadata.contract }}</code> / <code>{{ observatory_view.metadata.contract_version }}</code>. Source: <code>{{ observatory_view.metadata.source }}</code>.</p>
-
-        <div class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
-        </div>
-    </header>
-
-    <section class="modern-admin-table-panel" aria-labelledby="observatory-readiness-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Readiness summary</p>
-                <h2 id="observatory-readiness-title">Can It Capture Reliably?</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">{{ observatory_view.observatory_summary.overall_status | replace('_', ' ') | title }}</span>
-        </div>
-        <p class="modern-admin-note">Readiness is not evaluated yet. This prototype does not run live hardware, camera, storage, network, or service checks.</p>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory readiness summary">
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Ready to observe?</div>
-                <h3>{{ observatory_view.observatory_summary.readiness_label }}</h3>
-                <p>Future backend contracts will summarize whether the system can capture and preserve source data reliably.</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">What looks OK?</div>
-                <h3>Nothing is claimed yet</h3>
-                <p>Static v1 does not mark hardware, storage, generation, or integrations as healthy.</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">What needs attention?</div>
-                <h3>{{ observatory_view.attention_items.data_status | replace('_', ' ') | title }}</h3>
-                <p>Future attention items should explain operational risk without exposing Developer internals.</p>
-            </article>
-        </section>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="observatory-core-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Capture readiness</p>
-                <h2 id="observatory-core-title">Camera, Capture, and Source Preservation</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">{{ observatory_view.data_status | replace('_', ' ') | title }}</span>
-        </div>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory capture health">
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ observatory_view.camera_system_summary.label }}</div>
-                <h3>{{ observatory_view.camera_system_summary.status | replace('_', ' ') | title }}</h3>
-                <p><strong>Camera:</strong> {{ observatory_view.camera_system_summary.camera_label }}</p>
-                <p><strong>Profile:</strong> {{ observatory_view.camera_system_summary.profile_label }}</p>
-                <p>{{ observatory_view.camera_system_summary.backend_status }}</p>
-                <p>Developer internals stay out of this readiness view.</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ observatory_view.capture_pipeline_summary.label }}</div>
-                <h3>{{ observatory_view.capture_pipeline_summary.status | replace('_', ' ') | title }}</h3>
-                <p>{{ observatory_view.capture_pipeline_summary.latest_frame_status }}</p>
-                <p>{{ observatory_view.capture_pipeline_summary.cadence_status }}</p>
-                <p>{{ observatory_view.capture_pipeline_summary.day_night_status }}</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ observatory_view.source_preservation_summary.label }}</div>
-                <h3>{{ observatory_view.source_preservation_summary.preservation_label }}</h3>
-                <p>{{ observatory_view.source_preservation_summary.raw_status }}</p>
-                <p>{{ observatory_view.source_preservation_summary.fits_status }}</p>
-                <p>{{ observatory_view.source_preservation_summary.lineage_status }}</p>
-                <p>Trust: {{ observatory_view.source_preservation_summary.trust_level | title }}</p>
-            </article>
-        </section>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="observatory-operations-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Operational readiness</p>
-                <h2 id="observatory-operations-title">Storage, Generation, and Integrations</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only readiness</span>
-        </div>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory operations">
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ observatory_view.storage_summary.label }}</div>
-                <h3>{{ observatory_view.storage_summary.storage_label }}</h3>
-                <p>{{ observatory_view.storage_summary.retention_status }}</p>
-                <p>Risk: {{ observatory_view.storage_summary.risk_level | title }}</p>
-                <p>{{ observatory_view.storage_summary.note }}</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ observatory_view.generation_summary.label }}</div>
-                <h3>{{ observatory_view.generation_summary.outputs_status }}</h3>
-                <p>{{ observatory_view.generation_summary.queue_status }}</p>
-                <p>{{ observatory_view.generation_summary.rendering_status }}</p>
-                <p>{{ observatory_view.generation_summary.note }}</p>
-                <p>Generation readiness is summarized here; rendering controls belong elsewhere.</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ observatory_view.integration_summary.label }}</div>
-                <h3>{{ observatory_view.integration_summary.status | replace('_', ' ') | title }}</h3>
-                <p>{{ observatory_view.integration_summary.upload_status }}</p>
-                <p>{{ observatory_view.integration_summary.remote_status }}</p>
-                <p>{{ observatory_view.integration_summary.notification_status }}</p>
-            </article>
-        </section>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="observatory-attention-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Operational attention</p>
-                <h2 id="observatory-attention-title">System Readiness Items</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">{{ observatory_view.attention_items.data_status | replace('_', ' ') | title }}</span>
-        </div>
-        <p class="modern-admin-note">{{ observatory_view.attention_items.note }}</p>
-
-        <section class="modern-admin-status-grid" aria-label="Observatory attention items">
-            {% for item in observatory_view.attention_items['items'] %}
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ item.status | replace('_', ' ') | title }} / Risk {{ item.risk_level | title }}</div>
-                <h3>{{ item.label }}</h3>
-                <p>{{ item.note }}</p>
-            </article>
-            {% endfor %}
-        </section>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="observatory-boundary-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Boundary</p>
-                <h2 id="observatory-boundary-title">Static Product Contract</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">No live checks</span>
-        </div>
-        <p class="modern-admin-note">This page is a static Observatory readiness surface. It does not inspect devices, connect to cameras, contact remote services, read media, show previews, edit settings, expose Developer internals, or run a refresh loop.</p>
-    </section>
+<main class="modern-admin-shell hybrid-product-shell" aria-labelledby="observatory-title">
+<header class="modern-admin-table-panel">
+<h1 id="observatory-title">Observatory</h1>
+<p>Snapshot at {{ observatory_view.observed_at }}. All registered cameras are shown.</p>
+<p>Capture service: <strong>{{ modern_admin_capture_service_status.label }}</strong></p>
+<p>Frame freshness reflects saved image timestamps. It does not prove camera connectivity, file integrity or uninterrupted capture.</p>
+<nav class="modern-admin-link-grid" aria-label="Observatory navigation">
+<a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Refresh status</a>
+<a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
+<a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Capture cycles and generated outputs</a>
+<a href="{{ url_for('indi_allsky.modern_admin_notifications_view') }}">Notifications</a>
+</nav>
+</header>
+<section class="modern-admin-table-panel" aria-labelledby="observatory-cameras">
+<h2 id="observatory-cameras">Cameras and saved sources</h2>
+{% if observatory_view.cameras_error %}<p role="alert">{{ observatory_view.cameras_error }}</p>{% endif %}
+<div class="modern-admin-status-grid">
+{% for camera in observatory_view.cameras %}<article class="modern-admin-status-card" data-observatory-camera="{{ camera.id }}">
+<h3>{{ camera.name }}</h3>
+{% for profile in camera.profiles %}<p>Profile: {{ profile.id }} — {{ 'Enabled' if profile.enabled else 'Disabled' }}</p>{% endfor %}
+{% for health in camera.health %}
+<p>{{ health.status_label }}</p>
+{% if health.latest_frame_timestamp %}<p>Latest image: <time>{{ health.latest_frame_timestamp }}</time> ({{ health.latest_frame_age_seconds }} seconds ago)</p>{% endif %}
+<p>Stale after {{ health.stale_after_seconds }} seconds{% if health.profile_id %} for {{ health.profile_id }}{% endif %}.</p>
+{% endfor %}
+<nav class="modern-admin-link-grid" aria-label="{{ camera.name }} media">
+<a href="{{ url_for('indi_allsky.modern_admin_library_view', camera_id=camera.id, kind='image') }}">Browse camera images</a>
+{% if camera.image_id %}<a href="{{ url_for('indi_allsky.modern_admin_media_image_detail_view', image_id=camera.image_id, camera_id=camera.id) }}">Latest image details</a>{% endif %}
+</nav>
+{% for source in camera.sources %}<p>{{ source.kind|upper }}: {% if source.latest %}latest record {{ source.latest }}{% else %}No saved records{% endif %}</p>
+<a href="{{ url_for('indi_allsky.modern_admin_library_view', camera_id=camera.id, kind=source.kind) }}">Browse {{ source.kind|upper }}</a>{% endfor %}
+</article>{% else %}{% if not observatory_view.cameras_error %}<p>No cameras are registered.</p>{% endif %}{% endfor %}
+</div>
+<p>Source timestamps do not establish frame-by-frame correspondence or verify file availability. Inspect the files in Library.</p>
+</section>
+<section class="modern-admin-table-panel" aria-labelledby="observatory-storage">
+<h2 id="observatory-storage">Media filesystem</h2>
+{% if observatory_view.storage_error %}<p role="alert">{{ observatory_view.storage_error }}</p>{% else %}
+<p>{{ '%.2f'|format(observatory_view.storage.free / 1073741824) }} GiB free of {{ '%.2f'|format(observatory_view.storage.total / 1073741824) }} GiB; {{ observatory_view.storage.percent }}% used.</p>
+<p>Filesystem capacity for the configured media directory, including other files on that filesystem. This read does not test write access.</p>
+{% endif %}<a href="{{ url_for('indi_allsky.modern_admin_storage_view') }}">Storage details</a>
+</section>
+<section class="modern-admin-table-panel" aria-labelledby="observatory-tasks">
+<h2 id="observatory-tasks">Task records</h2>
+{% if observatory_view.tasks_error %}<p role="alert">{{ observatory_view.tasks_error }}</p>{% else %}
+<p>Counts cover retained task history across all cameras. Queued and running rows are pending work; saved state alone does not prove a worker is active.</p>
+<div style="overflow-x:auto"><table class="table"><thead><tr><th>Queue</th><th>State</th><th>Count</th><th>Oldest record</th></tr></thead><tbody>
+{% for row in observatory_view.tasks %}<tr><td>{{ row.queue }}</td><td>{{ row.state }}</td><td>{{ row.count }}</td><td>{{ row.oldest }}</td></tr>{% else %}<tr><td colspan="4">No task records.</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+<a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Inspect tasks and results</a>
+</section>
+<section class="modern-admin-table-panel" aria-labelledby="observatory-integrations">
+<h2 id="observatory-integrations">Integration configuration</h2>
+{% for integration in observatory_view.integrations %}<p>{{ integration.label }}: {{ 'Configured or enabled' if integration.configured else 'Not configured or disabled' }}</p>{% endfor %}
+<p>Configuration indicators do not test credentials, connectivity or successful delivery.</p>
+<a href="{{ url_for('indi_allsky.modern_admin_uploads_view') }}">Upload configuration and results</a>
+</section>
+<section class="modern-admin-table-panel" aria-labelledby="observatory-tools">
+<h2 id="observatory-tools">Observation tools</h2>
+<nav class="modern-admin-link-grid" aria-label="Observation tools">
+<a href="{{ url_for('indi_allsky.modern_admin_sqm_view') }}">SQM</a>
+<a href="{{ url_for('indi_allsky.modern_admin_astropanel_view') }}">AstroPanel</a>
+<a href="{{ url_for('indi_allsky.modern_admin_virtualsky_view') }}">VirtualSky</a>
+<a href="{{ url_for('indi_allsky.modern_admin_realtime_keogram_view') }}">Realtime Keogram</a>
+<a href="{{ url_for('indi_allsky.modern_admin_longterm_keogram_view') }}">Long-term Keogram</a>
+</nav>
+</section>
 </main>
 {% endblock %}

@@ -1171,3 +1171,42 @@ ancestors, secret-value exclusion and stable IDs across value/state changes. All
 18 modern_admin/Book 2/Safe Actions/parity/Product/shell/composition entrypoints
 pass, along with compilation and diff checks. No runtime code or capture settings
 changed; production soak is unaffected by this test-only mission.
+
+
+## Observatory: operational evidence replaces the static readiness prototype
+
+The Observatory route now invokes `ObservatoryRuntime` rather than the prototype
+product builder. It reads the latest image/FITS/RAW records separately for every
+registered camera, reuses the Hybrid capture-health timestamp thresholds, shows
+associated enabled/disabled profiles, groups retained tasks by queue/state, and
+reads capacity of the configured media filesystem. Service state comes from the
+existing shell provider. Configuration indicators expose no credentials and do
+not claim integration connectivity. No capture action or scientific algorithm
+changed. Historical prototype builder tests remain until the final cleanup audit.
+
+Each independent read section reports errors rather than substituting healthy
+zero counts. Missing images do not hide existing FITS/RAW sources. Saved-record
+freshness, file integrity, source correspondence, worker liveness and write access
+are explicitly distinguished. All registered cameras are shown; camera-specific
+media links use the record owner's ID. Existing SQM, AstroPanel, VirtualSky and
+keogram tools now have operational links from the summary.
+
+`hybrid_observatory_flow_test.py` passes against the isolated Pi copy with Classic
+imports forbidden, real Flask/SQLite and temporary files: fresh/stale/missing
+image records, source-only acquisition, profile association, task aggregation,
+filesystem capacity, both roles, anonymous redirect, every content link rendering,
+and sanitized database/filesystem errors. The injected failure tracebacks in the
+test log are expected; none are rendered to users. All 18 Book 2/modern_admin/
+Safe Actions/parity/Product/shell/composition entrypoints pass, plus compilation
+and diff checks. Remote log: `/tmp/hybrid-observatory-flow.log`.
+
+Direct browser acceptance used a separate synthetic server on localhost:18100,
+backed by `/home/eric/hybrid-acceptance-observatory`, with subprocess/DBus effects
+blocked. Observatory displayed two camera/profile cards, saved timestamps, task
+counts and filesystem capacity. Its Browse FITS link for camera 2 opened Library
+with type FITS and Test Profile 2 selected, one camera-2 result; FITS details then
+showed ID 2, camera 2, source-camera-2.fit, 64x48, 0.5s and gain 20. The fixture's
+old timestamps appeared stale and the blocked service adapter appeared Unknown.
+This is partial admin browser acceptance, not a hardware or full-control pass.
+The new Observatory page is not deployed to production; the existing capture
+soak remains on faf53d86 without interruption from this mission.
