@@ -30,9 +30,9 @@ var camera_id = {{ camera_id }};
             <span class="modern-admin-status-pill {{ modern_admin_task_detail.state_tone }}">{{ modern_admin_task_detail.state }}</span>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Legacy fallback</div>
-            <h3>Available</h3>
-            <p><a href="{{ url_for('indi_allsky.taskqueue_view') }}">Open legacy Task Queue</a></p>
+            <div class="modern-admin-card-label">Task queue</div>
+            <h3>Latest status</h3>
+            <p><a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Refresh Task Queue</a></p>
         </article>
     </section>
 
@@ -72,7 +72,7 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-table-panel" aria-label="Task detail navigation">
         <div class="modern-admin-link-grid">
             <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Back to Task Queue</a>
-            <a href="{{ url_for('indi_allsky.taskqueue_view') }}">Open legacy Task Queue</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Refresh Task Queue</a>
         </div>
     </section>
 </main>

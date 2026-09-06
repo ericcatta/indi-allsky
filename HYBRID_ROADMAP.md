@@ -23,6 +23,18 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Le modifiche runtime devono restare conservative: niente refactor ampi senza motivo.
 - Le impostazioni operative multicamera devono vivere nei Camera Profiles.
 - I global settings restano fallback legacy/single-camera/advanced, non UI operativa primaria.
+- Task e notifiche Hybrid:
+  - liste e dettagli si aprono con Classic escluso; riconoscimento notifiche
+    disponibile nel dettaglio con handler Hybrid autenticato, CSRF, servizio
+    di dominio esistente e risultato persistito. Ambito system-wide e permessi
+    di qualunque utente autenticato conservati rispetto al modal esistente;
+  - ricerca, filtri, ordinamento, paginazione e copia usano DataTables gia'
+    distribuito. Il limite UI di 200 task e' rimosso; restano finestra di tre
+    giorni e scope delle code esistenti. Nessuna ottimizzazione prestazionale
+    rivendicata: la query caricava gia' tutti i record della finestra;
+  - download CSV/XLSX del contenuto filtrato/ordinato ora consegnati da un
+    handler Hybrid indipendente, con limiti di input e celle non eseguibili.
+    Verificati payload e download browser in staging sintetico, nessun deploy.
 - Classic frontend isolation:
   - avviato il collaudo autenticato reale con database in memoria e identita'
     sintetiche: corretti home post-login/logout e link profilo che richiedevano

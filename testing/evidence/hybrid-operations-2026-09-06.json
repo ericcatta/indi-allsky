@@ -1,0 +1,217 @@
+{
+  "date": "2026-09-06",
+  "baseline": "20731758 plus task/notification/export mission",
+  "scope": "Actual browser and isolated synthetic runtime; production untouched",
+  "coverage": "Partial acceptance evidence; not a complete product audit",
+  "controls": [
+    {
+      "page": "/indi-allsky/modern-admin/notifications",
+      "control_id": "modern-notifications-search",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Filter notices",
+      "proof": "notification 2 reduced table to one matching row and matching count.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/notifications",
+      "control_id": "modern-notifications-ack-filter",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Show unacknowledged notices",
+      "proof": "After confirming notice 2, selecting Unacknowledged through the native picker left only notice 1.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/notifications",
+      "control_id": "Details/2",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "GET /notifications/2",
+      "expected_effect": "Open selected notice",
+      "proof": "Detail displayed notice ID 2, text, dates and current No state.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/notifications/2",
+      "control_id": "hybrid-notification-ack/submit",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "POST /notifications/2/acknowledge",
+      "expected_effect": "Persist acknowledgement",
+      "proof": "Status Notification acknowledged, both state labels Yes; reload showed already acknowledged; notice remained in list.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/notifications/2",
+      "control_id": "Back to Notifications",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "GET /notifications",
+      "expected_effect": "Return to updated list",
+      "proof": "Unacknowledged count decreased from 2 to 1; row 2 remained with Yes.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/notifications",
+      "control_id": "Copy",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Copy filtered table",
+      "proof": "DataTables displayed Copied one row to clipboard; clipboard contents not read back.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "pagination/Last",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Reach records beyond 200",
+      "proof": "Showing 201 to 205 of 205 entries, row 205 visible.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "pagination/Previous",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Previous page",
+      "proof": "Showing 181 to 200 of 205 entries.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "pagination/First+Next",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Return then advance",
+      "proof": "First reset to first page; Next displayed 21 to 40 of 205.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "modern-admin-task-search/profile",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Filter by camera profile",
+      "proof": "test-profile-2 yielded 102 records; list showed the expected profile/camera.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "modern-admin-task-search/missing",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Explain no matching data",
+      "proof": "Missing search showed No records match the current filters and zero filtered count.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "Details/205",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "GET /tasks/205",
+      "expected_effect": "Inspect selected task",
+      "proof": "ID 205, camera 1, profile test-profile-1, Synthetic result 205; token rendered <redacted>.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks/205",
+      "control_id": "Back to Task Queue",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "GET /tasks",
+      "expected_effect": "Return to list",
+      "proof": "Task list with all 205 entries restored.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "ID/sort ascending+descending",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Sort numerically",
+      "proof": "Second ID sort click inverted order; first visible row ID 205, followed by 204/203.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "entries per page/50",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "none",
+      "expected_effect": "Change page size",
+      "proof": "Selected 50 through native picker; Showing 1 to 50 of 205 entries.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "CSV",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "POST /operations/export",
+      "expected_effect": "Download filtered CSV",
+      "proof": "Before fix: blob download timeout. After attachment handler: browser download event confirmed for table filtered to Synthetic result 205; Flask test verifies contents.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "Excel",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "POST /operations/export",
+      "expected_effect": "Download filtered XLSX",
+      "proof": "Before fix: blob download timeout. After attachment handler: browser download event confirmed; ZIP/XML content test verifies cells and no formulas.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/tasks",
+      "control_id": "mobile filters",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "GET /tasks",
+      "expected_effect": "Use narrow viewport",
+      "proof": "390x844 screenshot: stacked summaries and wrapped filters fit; entire mobile runtime toolbar not covered.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/notifications/1",
+      "control_id": "ordinary-user acknowledgement",
+      "role": "ordinary user",
+      "camera_profile": "synthetic cameras 1/2; notices system-wide",
+      "prerequisites": "Classic-disabled browser sandbox with 205 tasks and 3 notifications",
+      "request": "attempted login/navigation",
+      "expected_effect": "Confirm notice as ordinary user",
+      "proof": "CDP navigation/focus timeouts prevented confirmation of reached state; Flask ordinary-user effect/persistence test passes separately.",
+      "status": "bloccato"
+    }
+  ]
+}

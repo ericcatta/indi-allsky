@@ -3,6 +3,8 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.css') }}" rel="stylesheet">
+<script src="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.js') }}"></script>
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
@@ -20,18 +22,18 @@ var camera_id = {{ camera_id }};
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Notifications</div>
             <h3>{{ modern_admin_notification_count }}</h3>
-            <p>Most recent notification records.</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+            <p>Latest 100 system-wide notifications.</p>
+            <span class="modern-admin-status-pill modern-admin-status-muted">System-wide</span>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Unacked</div>
+            <div class="modern-admin-card-label">Unacknowledged</div>
             <h3>{{ modern_admin_notification_unacked_count }}</h3>
             <p>Notifications not acknowledged yet.</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Legacy fallback</div>
-            <h3>Available</h3>
-            <p><a href="{{ url_for('indi_allsky.notifications_view') }}">Open legacy Notifications</a></p>
+            <div class="modern-admin-card-label">Refresh</div>
+            <h3>Latest status</h3>
+            <p><a href="{{ url_for('indi_allsky.modern_admin_notifications_view') }}">Refresh Notifications</a></p>
         </article>
     </section>
 
@@ -73,7 +75,7 @@ var camera_id = {{ camera_id }};
                 Acked
                 <select id="modern-notifications-ack-filter">
                     <option value="">All</option>
-                    <option value="no">Unacked</option>
+                    <option value="no">Unacknowledged</option>
                     <option value="yes">Acked</option>
                 </select>
             </label>
@@ -116,54 +118,10 @@ var camera_id = {{ camera_id }};
                 </tbody>
             </table>
         </div>
-        <p class="modern-admin-note">Acknowledgement remains in the existing notification modal flow. This page does not change notification state.</p>
+        <p class="modern-admin-note">Open Details to acknowledge a notification. Acknowledgement applies to all users; the notification record is retained.</p>
     </section>
 
-    <section class="modern-admin-table-panel" aria-label="Notification fallbacks">
-        <div class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.notifications_view') }}">Open legacy Notifications</a>
-        </div>
-    </section>
 </main>
-<script>
-(function() {
-    const searchInput = document.getElementById('modern-notifications-search');
-    const categoryFilter = document.getElementById('modern-notifications-category-filter');
-    const itemFilter = document.getElementById('modern-notifications-item-filter');
-    const ackFilter = document.getElementById('modern-notifications-ack-filter');
-    const countBadge = document.getElementById('modern-notifications-filter-count');
-    const rows = Array.from(document.querySelectorAll('#modern-notifications-table tbody tr[data-search]'));
-    const emptyRow = document.getElementById('modern-notifications-filter-empty-row');
-
-    function applyFilters() {
-        const searchText = searchInput.value.trim().toLowerCase();
-        const categoryValue = categoryFilter.value;
-        const itemValue = itemFilter.value;
-        const ackValue = ackFilter.value;
-        let visibleCount = 0;
-
-        rows.forEach(function(row) {
-            const matchesSearch = !searchText || row.dataset.search.includes(searchText);
-            const matchesCategory = !categoryValue || row.dataset.category === categoryValue;
-            const matchesItem = !itemValue || row.dataset.item === itemValue;
-            const matchesAck = !ackValue || row.dataset.ack === ackValue;
-            const visible = matchesSearch && matchesCategory && matchesItem && matchesAck;
-            row.hidden = !visible;
-            if (visible) {
-                visibleCount += 1;
-            }
-        });
-
-        countBadge.textContent = visibleCount + ' shown';
-        if (emptyRow) {
-            emptyRow.hidden = visibleCount !== 0 || rows.length === 0;
-        }
-    }
-
-    [searchInput, categoryFilter, itemFilter, ackFilter].forEach(function(control) {
-        control.addEventListener('input', applyFilters);
-        control.addEventListener('change', applyFilters);
-    });
-})();
-</script>
+<script type="application/json" id="hybrid-operations-table-config">{"csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}, "table": "modern-notifications-table", "rowAttribute": "data-search", "count": "modern-notifications-filter-count", "countSuffix": " shown", "emptyMessage": "No notifications are available.", "filters": [{"id": "modern-notifications-search", "attribute": "search", "contains": true}, {"id": "modern-notifications-category-filter", "attribute": "category"}, {"id": "modern-notifications-item-filter", "attribute": "item"}, {"id": "modern-notifications-ack-filter", "attribute": "ack"}]}</script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}" defer></script>
 {% endblock %}

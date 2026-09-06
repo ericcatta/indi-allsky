@@ -198,6 +198,8 @@ from .forms import IndiAllskyVirtualSkyHelperForm
 from .forms import IndiAllskyConfigRestoreForm
 from .forms import IndiAllskyIndiServerChangeForm
 
+from .notification_views import ModernAdminNotificationAcknowledgeView
+from .table_export_views import ModernAdminTableExportView
 from .base_views import BaseView
 from .base_views import TemplateView
 from .base_views import FormView
@@ -7752,7 +7754,7 @@ class ModernAdminTaskStatusView(ModernAdminContextMixin):
 
 class ModernAdminTaskQueueView(ModernAdminTaskStatusView, TemplateView):
     page_title = 'Modern Admin Task Queue'
-    modern_admin_task_display_limit = 200
+    modern_admin_task_display_limit = None
 
     def get_context(self):
         context = super(ModernAdminTaskQueueView, self).get_context()
@@ -21458,6 +21460,8 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/config-history', view_func=ModernAdminConfigHistoryView.as_view('modern_admin_config_history_view', template_name='modern_admin/config_history.html'))
     bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
     bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>/acknowledge', view_func=ModernAdminNotificationAcknowledgeView.as_view('modern_admin_notification_acknowledge_view'), methods=['POST'])
+    bp_allsky.add_url_rule('/modern-admin/operations/export', view_func=ModernAdminTableExportView.as_view('modern_admin_table_export_view'), methods=['POST'])
     bp_allsky.add_url_rule('/modern-admin/notifications', view_func=ModernAdminNotificationsView.as_view('modern_admin_notifications_view', template_name='modern_admin/notifications.html'))
     bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>', view_func=ModernAdminNotificationDetailView.as_view('modern_admin_notification_detail_view', template_name='modern_admin/notification_detail.html'))
     bp_allsky.add_url_rule('/modern-admin/cameras/dark-library', view_func=ModernAdminDarkLibraryView.as_view('modern_admin_dark_library_view', template_name='modern_admin/dark_library.html'))

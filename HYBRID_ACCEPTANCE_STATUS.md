@@ -135,3 +135,43 @@ is verified by the separate Flask persistence test. The browser restore file
 was generated independently from the synthetic fixture, not taken from live
 configuration. Full Config parity fingerprints remain unchanged. No performance
 improvement is claimed from these usability changes.
+
+
+## Verified mission: task and notification workflows
+
+Baseline `20731758`. Task/notification list and detail templates contained
+Classic links that raised BuildError when Classic was disabled. These links
+are replaced with working Hybrid navigation. Notification detail now permits
+acknowledgement through a Hybrid command handler and the existing domain
+service. Every authenticated user retains the old modal's permission; notices
+are explicitly system-wide. Missing IDs, CSRF failures, duplicate requests and
+failed effects are tested; failures roll back the session and expose sanitized
+messages. The notification record remains present.
+
+Task and notification tables retain sorting, pagination, Copy, CSV and Excel
+capabilities using the bundled DataTables library. Task rows beyond the former
+200-row display cut are accessible; the existing three-day queue policy is
+unchanged. Both lists share a small controller. No query speedup is claimed.
+
+Browser blob exports produced no observable download in the in-app browser.
+CSV and XLSX now use a bounded Hybrid attachment response instead, preserving
+the currently filtered/sorted columns and rows. Both browser download events
+then passed. The exporter uses in-memory CSV/ZIP/XML, no optional package or
+temporary filesystem, escapes CSV formulas and writes Excel cells as strings.
+Content, malformed input, size bounds, CSRF and authenticated access are tested.
+
+`hybrid_operations_flow_test.py` covers both roles/cameras, 205 task records,
+detail redaction, missing records, acknowledgement persistence/idempotency,
+effect failure and CSV/XLSX payloads against actual Flask with Classic absent.
+`hybrid_notification_ack_browser_test.js` tests pending/error/session-expiry
+controller behavior. `hybrid_table_export_test.py` checks actual CSV and workbook
+contents. The full Book 2 regression, shell/route checks and existing runtime
+login/Settings/startup tests pass after the changes.
+
+Actual browser results are in `testing/evidence/hybrid-operations-2026-09-06.json`.
+A later attempt to repeat acknowledgement as the ordinary user hit CDP navigation
+and focus-command timeouts; that browser-only case remains blocked, although
+the real Flask ordinary-user case passes. The new inventory still finds nine
+parameter-free pages with Classic URL BuildErrors (media, generation, YouTube).
+Parameterized routes and all other control states remain subject to the full
+acceptance matrix. Classic removal and live validation remain open.

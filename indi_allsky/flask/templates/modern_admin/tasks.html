@@ -3,6 +3,8 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.css') }}" rel="stylesheet">
+<script src="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.js') }}"></script>
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
@@ -20,18 +22,18 @@ var camera_id = {{ camera_id }};
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Visible Tasks</div>
             <h3>{{ modern_admin_task_display_count }} / {{ modern_admin_task_count }}</h3>
-            <p>Newest task rows first. Display is capped at {{ modern_admin_task_display_limit }} rows for readability.</p>
+            <p>Tasks from the last three days, newest first. Use sorting, filters and pagination to inspect them.</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Recent Tasks</div>
             <h3>{{ modern_admin_task_recent_count }}</h3>
-            <p>Tasks created in the last hour within the legacy task queue scope.</p>
+            <p>Tasks created in the last hour. Capture and media-generation queues are shown.</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Legacy fallback</div>
-            <h3>Available</h3>
-            <p><a href="{{ url_for('indi_allsky.taskqueue_view') }}">Open legacy Task Queue</a></p>
+            <div class="modern-admin-card-label">Task queue</div>
+            <h3>Latest status</h3>
+            <p><a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Refresh Task Queue</a></p>
         </article>
     </section>
 
@@ -74,10 +76,10 @@ var camera_id = {{ camera_id }};
                 </select>
             </label>
         </section>
-        <p class="modern-admin-note"><span id="modern-admin-task-visible-count">{{ modern_admin_task_display_count }}</span> displayed rows match the current read-only filters.</p>
+        <p class="modern-admin-note"><span id="modern-admin-task-visible-count">{{ modern_admin_task_display_count }}</span> displayed rows match the current filters.</p>
 
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
+            <table class="modern-admin-data-table" id="modern-admin-task-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -110,7 +112,7 @@ var camera_id = {{ camera_id }};
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="11">No recent task queue rows matched the legacy task queue scope.</td>
+                        <td colspan="11">No recent capture or media-generation tasks are available.</td>
                     </tr>
                     {% endfor %}
                     <tr id="modern-admin-task-no-filter-match" hidden>
@@ -119,52 +121,10 @@ var camera_id = {{ camera_id }};
                 </tbody>
             </table>
         </div>
-        <p class="modern-admin-note">This Hybrid page is diagnostic only. Use the legacy task queue fallback for the legacy table view.</p>
+        <p class="modern-admin-note">Image-processing and upload queues are not included in this list. Open task details for the result and camera/profile context.</p>
     </section>
 </main>
 
-<script>
-(function () {
-    const searchInput = document.getElementById('modern-admin-task-search');
-    const stateSelect = document.getElementById('modern-admin-task-state');
-    const queueSelect = document.getElementById('modern-admin-task-queue');
-    const actionSelect = document.getElementById('modern-admin-task-action');
-    const visibleCount = document.getElementById('modern-admin-task-visible-count');
-    const noMatchRow = document.getElementById('modern-admin-task-no-filter-match');
-    const rows = Array.from(document.querySelectorAll('.modern-admin-task-row'));
-
-    function normalize(value) {
-        return (value || '').toString().toLowerCase().trim();
-    }
-
-    function applyTaskFilters() {
-        const query = normalize(searchInput.value);
-        const state = normalize(stateSelect.value);
-        const queue = normalize(queueSelect.value);
-        const action = normalize(actionSelect.value);
-        let matches = 0;
-
-        rows.forEach((row) => {
-            const rowMatches = (
-                (!query || normalize(row.dataset.taskSearch).includes(query)) &&
-                (!state || normalize(row.dataset.taskState) === state) &&
-                (!queue || normalize(row.dataset.taskQueue) === queue) &&
-                (!action || normalize(row.dataset.taskAction) === action)
-            );
-            row.hidden = !rowMatches;
-            if (rowMatches) {
-                matches += 1;
-            }
-        });
-
-        visibleCount.textContent = matches;
-        noMatchRow.hidden = matches !== 0 || rows.length === 0;
-    }
-
-    [searchInput, stateSelect, queueSelect, actionSelect].forEach((control) => {
-        control.addEventListener('input', applyTaskFilters);
-        control.addEventListener('change', applyTaskFilters);
-    });
-})();
-</script>
+<script type="application/json" id="hybrid-operations-table-config">{"csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}, "table": "modern-admin-task-table", "rowAttribute": "data-task-search", "count": "modern-admin-task-visible-count", "emptyMessage": "No recent capture or media-generation tasks are available.", "filters": [{"id": "modern-admin-task-search", "attribute": "taskSearch", "contains": true}, {"id": "modern-admin-task-state", "attribute": "taskState", "contains": false}, {"id": "modern-admin-task-queue", "attribute": "taskQueue", "contains": false}, {"id": "modern-admin-task-action", "attribute": "taskAction", "contains": false}]}</script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}" defer></script>
 {% endblock %}
