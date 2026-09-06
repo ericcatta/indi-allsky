@@ -847,3 +847,24 @@ ordering, empty scans, rejected scans and radio enabling only when initially off
 It passes on the Pi Python environment alongside activation and Flask network
 tests. The historical fingerprint remains unchanged with only the exact display
 decoding replacement accounted for. No live Wi-Fi scan was performed.
+
+### Direct Network browser observations (isolated server, 2026-09-06)
+
+The browser sandbox now provides explicitly synthetic saved connections and a
+wireless interface through read-only form providers. Its existing POST allowlist
+still rejects network effects; D-Bus and process effects remain blocked. The
+server was restarted only on loopback port 8099, leaving production untouched.
+
+| Page/control | Context and expected behavior | Direct result / evidence |
+| --- | --- | --- |
+| Network / twelve command controls | Administrator, synthetic inventory; expose existing capabilities | Superato for rendering: accessibility tree contains all twelve named command buttons and the synthetic connection/interface choices. This does not prove command execution. |
+| `connectap` without a scan result | Refuse connection before a target exists | Superato: click displays “Scan this interface and choose an access point first.” |
+| `createhotspot` protected, empty password | Refuse an insufficient password before submission | Superato: click displays “Enter a hotspot password with at least 8 characters.” |
+| `activate` confirmation | Show selected target and interruption warning | Superato for dialog content: browser reports confirmation naming “Synthetic Wi-Fi — Active [prio: 0]” and the remote-access warning. |
+| `activate` cancel/submit | Dismiss or accept dialog and observe outcome | Bloccato: CUA click was interrupted by the JavaScript confirm, subsequent DOM inspection timed out, and dialog lookup returned no handle. No retry was sent. Server log contains no network POST. Neither cancellation nor command execution is counted as passed. |
+| Other command effects, ordinary/anonymous browser sessions, keyboard/mobile | Full direct interaction acceptance | Still open; automated Flask/controller coverage is separate evidence. |
+
+The live sandbox process was verified listening on 127.0.0.1:8099 (PID 3193471)
+after the browser interruption. This is a tool observation issue, not evidence of
+a crashed server or a successful network change. Drives/GPIO direct browser
+acceptance remains open as well.

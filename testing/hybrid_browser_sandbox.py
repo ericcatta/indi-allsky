@@ -32,6 +32,13 @@ def run(runtime_config, port):
         seed_public_media(app)
         from flask import request, jsonify
         from indi_allsky.flask.views import AjaxConfigRestoreView
+        from indi_allsky.flask.forms import IndiAllskyNetworkManagerForm
+        # Read-only browser fixtures; command requests remain blocked below.
+        def network_connections(self):
+            return {'Wi-Fi': [('sandbox-wifi', 'Synthetic Wi-Fi — Active [prio: 0]')],
+                    'Ethernet': [('sandbox-ethernet', 'Synthetic Ethernet — Not Active')]}
+        def network_devices(self):
+            return [('sandbox-wlan', 'Synthetic wireless interface')]
         @app.before_request
         def restrict_sandbox_effects():
             if request.method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
@@ -59,6 +66,8 @@ def run(runtime_config, port):
         # Defense in depth: even accidentally called adapters cannot reach Pi services.
         with patch('subprocess.Popen', side_effect=blocked), patch('os.system', side_effect=blocked), \
              patch('dbus.SystemBus', side_effect=blocked), patch('dbus.SessionBus', side_effect=blocked), \
+             patch.object(IndiAllskyNetworkManagerForm, 'getConnections', network_connections), \
+             patch.object(IndiAllskyNetworkManagerForm, 'getWifiDevices', network_devices), \
              patch.object(AjaxConfigRestoreView, 'reset_security_keys_after_restore', side_effect=blocked):
             print('Isolated acceptance server; no production data or effects.', flush=True)
             app.run(host='127.0.0.1', port=port, debug=False, use_reloader=False, threaded=False)
