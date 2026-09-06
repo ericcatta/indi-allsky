@@ -14729,31 +14729,82 @@ class ModernAdminMiniGenerateView(ModernAdminMediaBrowseView, TemplateView):
         return context
 
 
-class ModernAdminFocusView(ModernAdminSafeControlsMixin, FocusView):
-    page_title = 'Modern Admin Focus'
+class ModernAdminFocusView(ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Focus'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
     def get_context(self):
-        context = super(ModernAdminFocusView, self).get_context()
-
-        context['modern_admin_safe_title'] = 'Focus'
-        context['modern_admin_safe_note'] = 'The focus monitor uses the existing read-only focus image endpoint. Focuser movement controls remain disabled.'
-        context['modern_admin_focus_monitor'] = True
-        context['modern_admin_safe_sections'] = (
-            {
-                'title' : 'Focus status',
-                'rows'  : (
-                    {'label' : 'Focus mode', 'value' : 'Enabled' if self.indi_allsky_config.get('FOCUS_MODE', False) else 'Disabled'},
-                    {'label' : 'Focuser device', 'value' : 'Configured' if context.get('focuser_device') else 'Not configured'},
-                    {'label' : 'Refresh interval', 'value' : 'Manual preview load'},
-                ),
-            },
-        )
-        context['modern_admin_safe_actions'] = (
-            self.disabled_action('Move counter-clockwise', 'Moves hardware and remains disabled in Modern Admin.'),
-            self.disabled_action('Move clockwise', 'Moves hardware and remains disabled in Modern Admin.'),
-        )
+        context = super().get_context()
+        filters = self.get_media_camera_filters()
+        selected = self.get_selected_media_camera_filter(filters)
+        camera_id = selected.get('camera_id') or self.camera.id
+        device = self.indi_allsky_config.get('FOCUSER', {}).get('CLASSNAME') or ''
+        reason = ''
+        if not current_user.is_admin:
+            reason = 'Administrator access is required to move the focuser.'
+        elif not self.verify_admin_network():
+            reason = 'Focuser movement requires the configured admin network.'
+        elif not device:
+            reason = 'No focuser is configured.'
+        context.update(focus_camera_id=camera_id, focus_device=device,
+            focus_filters=[item for item in filters if item.get('camera_id')],
+            focus_movement_reason=reason,
+            form_focus=IndiAllskyFocusForm(), form_focuscontroller=IndiAllskyFocusControllerForm())
         return context
+
+
+class ModernAdminFocusPreviewView(ModernAdminMediaBrowseView, BaseView):
+    methods = ['GET']
+    decorators = [login_required]
+
+    def dispatch_request(self):
+        from ..focus_preview import load_focus_image, focus_preview
+        from cv2 import error as ImageError
+        selected = self.get_selected_media_camera_filter()
+        camera_id = selected.get('camera_id')
+        if not camera_id:
+            abort(400, description='Choose a camera for the focus preview.')
+        camera = IndiAllSkyDbCameraTable.query.filter_by(id=camera_id).first_or_404()
+        if not local_source_allowed(camera, self.verify_admin_network):
+            return jsonify({'error': 'Local focus preview is unavailable under this camera media policy.'}), 403
+        try:
+            zoom = int(request.args.get('zoom', 2))
+            x = int(request.args.get('x_offset', 0))
+            y = int(request.args.get('y_offset', 0))
+            image = IndiAllSkyDbImageTable.query.filter_by(camera_id=camera_id).order_by(
+                IndiAllSkyDbImageTable.createDate.desc(), IndiAllSkyDbImageTable.id.desc()).first()
+            focus_mode = bool(self.indi_allsky_config.get('FOCUS_MODE', False))
+            source = 'Saved frame'
+            if focus_mode:
+                profiles = self.get_media_filter_profiles()
+                primary = next((p for p in profiles if p.get('enabled') and p.get('primary')), None)
+                rows = self.get_media_filter_camera_rows()
+                primary_id = self.get_media_profile_camera_id(primary, rows, profiles.index(primary)) if primary else (rows[0].id if len(rows) == 1 else None)
+                if camera_id != primary_id:
+                    return jsonify({'error': 'Focus mode currently publishes live previews only for the primary camera. No live frame is available for this camera.'}), 409
+                root = Path(self.indi_allsky_config['IMAGE_FOLDER']).resolve()
+                path = (root / ('latest.' + self.indi_allsky_config['IMAGE_FILE_TYPE'])).resolve()
+                if not path.is_relative_to(root):
+                    abort(404)
+                source = 'Live focus frame'
+                timestamp = datetime.fromtimestamp(path.stat().st_mtime)
+            else:
+                if image is None:
+                    return jsonify({'error': 'No saved frame is available for this camera.'}), 404
+                path = source_file_path(image, self.indi_allsky_config)
+                timestamp = image.createDate
+            result = focus_preview(load_focus_image(path), self.indi_allsky_config,
+                                   zoom=zoom, x_offset=x, y_offset=y)
+            result.update(camera_id=camera_id, source=source,
+                          timestamp=timestamp.isoformat(), age_seconds=max(0, (datetime.now()-timestamp).total_seconds()))
+            response = jsonify(result)
+            response.headers['Cache-Control'] = 'no-store'
+            return response
+        except (ValueError, OSError, ImageError):
+            return jsonify({'error': 'Preview unavailable: check the source image and keep the zoom region inside it.'}), 400
+        except SQLAlchemyError:
+            app.logger.exception('Focus source query failed')
+            return jsonify({'error': 'Focus source could not be loaded. Please retry.'}), 503
 
 
 class ModernAdminImageProcessingView(ModernAdminMediaBrowseView, TemplateView):
@@ -20307,7 +20358,8 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/cameras/mask-base', view_func=ModernAdminMaskView.as_view('modern_admin_mask_view', template_name='modern_admin/mask.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/camera-simulator', view_func=ModernAdminCameraSimulatorView.as_view('modern_admin_camera_simulator_view', template_name='modern_admin/camera_simulator.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/generate', view_func=ModernAdminGenerateView.as_view('modern_admin_generate_view', template_name='modern_admin/generate.html'))
-    bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusView.as_view('modern_admin_focus_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/focus/preview', view_func=ModernAdminFocusPreviewView.as_view('modern_admin_focus_preview_view'))
+    bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusView.as_view('modern_admin_focus_view', template_name='modern_admin/focus.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/image_processing.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/image_geometry.html'))
     bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsInventoryView.as_view('modern_admin_settings_view', template_name='modern_admin/settings_inventory.html'))

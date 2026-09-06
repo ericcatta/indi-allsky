@@ -642,3 +642,39 @@ forbidden. The full 17-entrypoint Book 2/shell regression passes unchanged.
 The endpoint still uses the legacy latest file selection. Native Focus UI and
 camera-specific live preview are explicitly unfinished; this extraction does not
 claim those flows or hardware acceptance are complete. Production is unchanged.
+
+## Native Focus page and camera-owned previews
+
+Hybrid Focus no longer inherits FocusView or renders the disabled Safe Controls
+wrapper. It provides camera selection, eight zoom choices, pixel offsets, reset,
+manual/optional automatic refresh, bounded measurement history including region,
+fullscreen controls and the existing configured focuser commands. The latter
+remain admin/network gated and disabled when no device is configured; wording
+states that the observatory focuser is global, not selected by the preview camera.
+
+New authenticated `/modern-admin/tools/focus/preview` reads the selected camera's
+saved frame under its own local-media policy and returns source, timestamp and
+age alongside the existing measurement payload. With FOCUS_MODE enabled, the
+shared latest file is used only for the known primary camera. Secondary live
+focus requests return an explicit unavailable response rather than substituting
+another camera. **Publishing a live secondary focus frame remains open**, as does
+physical movement/recovery acceptance and production deployment.
+
+Flask test `hybrid_native_focus_flow_test.py`: both roles/cameras, actual decoded
+previews, invalid selection/ROI, local-media denial, primary-only live source,
+cache prevention and device/network movement gates; Classic imports forbidden.
+`hybrid_focus_browser_test.js`: duplicate requests, target camera, decoding,
+errors, session expiration, disabled controls, CSRF and movement-completed/release
+failure feedback. Existing focuser effect tests and Book 2 regression pass.
+Original measurement fingerprints remain unchanged; route guard explicitly
+accounts for the native template and new Hybrid endpoint.
+
+Browser localhost sandbox, ordinary user, 2026-09-06: camera2 preview decoded
+64x48; Low zoom decoded25x19 and added a history row. Offset9999 displayed an
+explicit error and cleared the previous preview. Reset restored offset0/zoom2
+and a decoded64px image. Choosing camera1 returned camera1 metadata and decoded
+frame. Movement stayed disabled with its real permission explanation. Fullscreen
+entry/exit were attempted but fullscreen state was not conclusively observed;
+that browser acceptance remains open. No physical device or production setting
+was changed. The final DOM wrapper/JSON-error wording edits were covered by
+static/controller checks, not a second browser pass.

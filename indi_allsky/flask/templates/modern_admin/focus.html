@@ -1,0 +1,30 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}Focus — Hybrid{% endblock %}
+{% block head %}{{ super() }}<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/focus.css') }}">{% endblock %}
+{% block content %}
+<section aria-label="Focus tools" class="modern-admin-content" id="focus-tool" data-preview-url="{{ url_for('indi_allsky.modern_admin_focus_preview_view') }}" data-move-url="{{ url_for('indi_allsky.focus_controller_view') }}" data-camera="{{ focus_camera_id }}" data-csrf="{{ csrf_token() }}">
+<h1>Focus</h1>
+<form method="get"><label for="focus-camera">Preview camera</label>
+<select name="camera_id" id="focus-camera">{% for item in focus_filters %}<option value="{{ item.camera_id }}"{% if item.camera_id == focus_camera_id %} selected{% endif %}>{{ item.label }}</option>{% endfor %}</select><button type="submit">Choose camera</button></form>
+<form id="focus-preview-form">
+<label for="focus-zoom">Zoom</label><select id="focus-zoom">{% for value,label in form_focus.ZOOM_SELECT.choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select>
+<label for="focus-x">Horizontal offset (pixels)</label><input id="focus-x" type="number" step="1" value="0" required>
+<label for="focus-y">Vertical offset (pixels)</label><input id="focus-y" type="number" step="1" value="0" required>
+<button type="submit">Refresh preview</button><button type="reset">Reset view</button>
+<label><input type="checkbox" id="focus-auto">Automatic refresh</label>
+<label for="focus-interval">Refresh interval</label><select id="focus-interval">{% for value,label in form_focus.REFRESH_SELECT.choices %}<option value="{{ value }}"{% if value == 5 %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+</form>
+<p id="focus-message" role="status" aria-live="polite">Load a preview to measure focus.</p>
+<figure id="focus-figure"><img id="focus-image" alt="Focus preview" hidden style="max-width:100%;max-height:70vh;object-fit:contain"><figcaption id="focus-score"></figcaption><button type="button" id="focus-exit-fullscreen" hidden>Exit fullscreen</button></figure>
+<button type="button" id="focus-fullscreen" disabled>Fullscreen preview</button>
+<h2>Measurement history</h2><p>Recent measurements from this page. Higher sharpness scores can help compare focus at the same zoom and position.</p>
+<table><thead><tr><th>Frame time</th><th>Sharpness</th><th>Stars</th><th>Region</th></tr></thead><tbody id="focus-history"></tbody></table>
+<h2>Configured focuser</h2><p>{{ focus_device or 'Not configured' }}. This is the observatory focuser; changing the preview camera does not select a different motor.</p>
+{% if focus_movement_reason %}<p id="focus-permission">{{ focus_movement_reason }}</p>{% endif %}
+<fieldset id="focus-movement"{% if focus_movement_reason %} disabled aria-describedby="focus-permission"{% endif %}>
+<label for="focus-degrees">Movement angle</label><select id="focus-degrees">{% for value,label in form_focuscontroller.STEP_DEGREES.choices %}<option value="{{ value }}"{% if value == 24 %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+<button type="button" data-focus-direction="ccw">Move counter-clockwise</button><button type="button" data-focus-direction="cw">Move clockwise</button>
+</fieldset><p id="focus-move-message" role="status" aria-live="polite"></p>
+</section>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/focus.js') }}"></script>
+{% endblock %}
