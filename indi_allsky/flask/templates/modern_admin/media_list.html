@@ -159,8 +159,13 @@ var camera_id = {{ camera_id }};
     {% endif %}
     {% else %}
     <section class="modern-admin-empty-state">
+        {% if modern_admin_media_error %}
+        <h3>Media unavailable</h3>
+        <p role="alert">{{ modern_admin_media_error }}</p>
+        {% else %}
         <h3>No media found</h3>
         <p>No {{ modern_admin_section|lower }} entries are available for the selected camera yet.</p>
+        {% endif %}
     </section>
     {% endif %}
 </main>

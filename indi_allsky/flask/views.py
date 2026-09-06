@@ -11678,30 +11678,33 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
 
         selected_profile_id = str(request.args.get('profile_id', '') or '')
         selected_camera_id = request.args.get('camera_id', type=int)
+        if request.args.get('camera_id') and (selected_camera_id is None or selected_camera_id <= 0):
+            abort(400, description='Invalid camera selection.')
 
         selected_filter = camera_filters[0]
         if selected_profile_id:
-            for camera_filter in camera_filters:
-                if camera_filter.get('profile_id') == selected_profile_id:
-                    selected_filter = camera_filter
-                    break
-        elif selected_camera_id:
-            for camera_filter in camera_filters:
-                if camera_filter.get('camera_id') == selected_camera_id:
-                    selected_filter = camera_filter
-                    break
-            else:
+            selected_filter = next((item for item in camera_filters
+                                    if item.get('profile_id') == selected_profile_id), None)
+            if selected_filter is None:
+                abort(400, description='Unknown camera profile.')
+            if selected_camera_id is not None and selected_filter.get('camera_id') != selected_camera_id:
+                abort(400, description='Camera and profile do not match.')
+        elif selected_camera_id is not None:
+            selected_filter = next((item for item in camera_filters
+                                    if item.get('camera_id') == selected_camera_id), None)
+            if selected_filter is None:
+                camera = next((row for row in self.get_media_filter_camera_rows()
+                               if row.id == selected_camera_id), None)
+                if camera is None:
+                    abort(404, description='Camera is unavailable.')
                 selected_filter = {
-                    'label'      : 'Camera {0:d}'.format(selected_camera_id),
-                    'profile_id' : '',
-                    'camera_id'  : selected_camera_id,
-                    'active'     : False,
+                    'label': str(camera.friendlyName or camera.name or 'Camera {0:d}'.format(camera.id)),
+                    'profile_id': '', 'camera_id': camera.id, 'active': False,
                 }
                 camera_filters.append(selected_filter)
 
         for camera_filter in camera_filters:
             camera_filter['active'] = camera_filter is selected_filter
-
         return selected_filter
 
 
@@ -11914,7 +11917,13 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
         context = super(ModernAdminMediaListView, self).get_context()
         self.add_media_camera_filter_context(context)
 
-        media_entries = self.get_media_entries()
+        self.modern_admin_media_error = None
+        try:
+            media_entries = self.get_media_entries()
+        except SQLAlchemyError:
+            app.logger.exception('Error loading Hybrid media')
+            self.modern_admin_media_error = 'The media list could not be loaded. Please retry.'
+            media_entries = []
         media_items = list()
 
         for media_entry in media_entries:
@@ -11928,6 +11937,7 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
         context['modern_admin_media_kind'] = self.modern_admin_media_kind
         context['modern_admin_media_layout'] = self.modern_admin_media_layout
         context['modern_admin_media_items'] = media_items
+        context['modern_admin_media_error'] = self.modern_admin_media_error
         context['modern_admin_featured_media'] = media_items[0] if media_items else None
 
         return context
@@ -11942,15 +11952,9 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
 
         query_plan = self.get_media_list_query_plan()
 
-        # Read-only media inventory; reuses the existing DB models behind classic viewers.
-        try:
-            query = self.modern_admin_media_model.query
-            query = self.apply_media_list_query_plan(query, query_plan)
-
-            return query.all()
-        except Exception as e:
-            app.logger.error('Error querying modern admin media entries: %s', str(e))
-            return list()
+        query = self.modern_admin_media_model.query
+        query = self.apply_media_list_query_plan(query, query_plan)
+        return query.all()
 
 
     def get_media_list_query_plan(self):
@@ -11986,22 +11990,16 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
 
 
     def get_media_url(self, media_entry):
-        local = True
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
-                if not media_entry.remote_url and not media_entry.s3_key:
-                    return None
-
-        return self.get_media_access_adapter().resolve_media_url(media_entry, local=local)
+        local = local_source_allowed(media_entry.camera, self.verify_admin_network)
+        if not local and not media_entry.remote_url and not media_entry.s3_key:
+            return None
+        return self.get_media_access_adapter(media_entry.camera).resolve_media_url(media_entry, local=local)
 
 
-    def get_media_access_adapter(self):
+    def get_media_access_adapter(self, camera=None):
         return ModernAdminMediaAccessAdapter(
             url_normalizer=self.get_modern_admin_media_url_normalizer(),
-            s3_prefix=self.s3_prefix,
+            s3_prefix=camera.s3_prefix if camera is not None else self.s3_prefix,
             logger=app.logger,
         )
 
@@ -12036,7 +12034,7 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
         context['modern_admin_gallery_page_url'] = url_for('indi_allsky.modern_admin_media_gallery_page_view')
         context['modern_admin_gallery_limit'] = self.modern_admin_media_limit
         context['modern_admin_gallery_next_cursor'] = context['modern_admin_media_items'][-1]['id'] if context['modern_admin_media_items'] else None
-        context['modern_admin_gallery_has_more'] = len(context['modern_admin_media_items']) == self.modern_admin_media_limit
+        context['modern_admin_gallery_has_more'] = getattr(self, '_gallery_has_more', False)
         context['modern_admin_gallery_camera_filters'] = camera_filters
         context['modern_admin_gallery_selected_filter'] = selected_filter
         context['modern_admin_gallery_loaded_count'] = len(context['modern_admin_media_items'])
@@ -12047,10 +12045,12 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
 
     def get_media_entries(self):
         selected_filter = self.get_selected_gallery_camera_filter()
-        return self.get_media_entries_page(
+        entries = self.get_media_entries_page(
             limit=self.modern_admin_media_limit,
             camera_id=selected_filter.get('camera_id'),
         )
+        self._gallery_has_more = len(entries) > self.modern_admin_media_limit
+        return entries[:self.modern_admin_media_limit]
 
 
     def get_media_entries_page(self, limit=72, before_id=None, camera_id=None):
@@ -12118,26 +12118,21 @@ class ModernAdminMediaGalleryView(ModernAdminMediaListView):
     def get_media_preview_url(self, media_entry, media_url=None):
         fallback_url = media_url if media_url is not None else self.get_media_url(media_entry)
 
-        local = True
-        if self.web_nonlocal_images:
-            if self.web_local_images_admin and self.verify_admin_network():
-                pass
-            else:
-                local = False
+        local = local_source_allowed(media_entry.camera, self.verify_admin_network)
 
-        return self.get_preview_metadata_lookup_service().get_preview_url(
+        return self.get_preview_metadata_lookup_service(media_entry.camera).get_preview_url(
             media_entry,
             media_url=fallback_url,
             local=local,
         )
 
 
-    def get_preview_metadata_lookup_service(self):
+    def get_preview_metadata_lookup_service(self, camera=None):
         return ModernAdminPreviewMetadataLookupService(
             thumbnail_query=IndiAllSkyDbThumbnailTable.query,
             thumbnail_uuid_field=IndiAllSkyDbThumbnailTable.uuid,
             url_normalizer=self.get_modern_admin_media_url_normalizer(),
-            s3_prefix=self.s3_prefix,
+            s3_prefix=camera.s3_prefix if camera is not None else self.s3_prefix,
             logger=app.logger,
         )
 
@@ -12183,15 +12178,7 @@ class ModernAdminMediaGalleryPageView(ModernAdminMediaGalleryView):
 
 
     def get_gallery_page_camera_id(self):
-        selected_profile_id = str(request.args.get('profile_id', '') or '')
-        if selected_profile_id:
-            for camera_filter in self.get_gallery_camera_filters():
-                if camera_filter.get('profile_id') == selected_profile_id:
-                    return camera_filter.get('camera_id')
-
-            return None
-
-        return request.args.get('camera_id', type=int)
+        return self.get_selected_media_camera_filter().get('camera_id')
 
 
 class ModernAdminMediaImagesView(ModernAdminMediaListView):

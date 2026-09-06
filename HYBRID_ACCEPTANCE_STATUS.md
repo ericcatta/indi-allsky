@@ -573,3 +573,30 @@ is not evidence of service start or failed-effect recovery. The sandbox blocks
 subprocess effects, so its Unknown status is legitimate. Running status is
 covered by the injected-provider Flask test, not a live service observation.
 Production deployment and real recovery-effects acceptance remain open.
+
+## Verified correction: Gallery isolation and complete pagination
+
+Gallery, Images and the shared media selector now reject malformed/unknown camera
+selections and mismatched camera/profile pairs instead of silently broadening the
+query to all cameras. Gallery JSON pagination uses the same selection validation.
+Local/remote policy, S3 prefixes and preview lookup use each record's owner camera,
+not the camera stored in the user's session. A database query failure produces an
+explicit unavailable state rather than a misleading empty archive.
+
+Fixed Gallery's initial lookahead: query 73 records to detect continuation, render
+only 72 and preserve the continuation flag. Previously rendering all 73 made the
+72-item equality check false and hid Load more prematurely.
+
+`testing/hybrid_gallery_isolation_flow_test.py` passes with Classic forbidden,
+both roles, malformed/mismatched/absent selections, initial 72 cards, 111 fixture
+records across two pages without overlap, both directions of session/owner policy
+mismatch, owner S3 URL and injected database failures. Full 17-entrypoint Book 2
+and shell regression passes with all fingerprints unchanged. Archive, FITS/RAW
+and runtime shell Flask regressions pass on the Raspberry's isolated checkout.
+
+Browser localhost sandbox, ordinary user, 2026-09-06: initial camera1 page showed
+72 cards and Load more. Scrolling toward Load more triggered automatic loading
+before the explicit click could resolve; observed 113 unique cards, end-of-archive
+visible and Load more hidden. This proves automatic continuation, not a separate
+manual-button click. Selecting Test Profile 2 displayed exactly IDs 2, 6, 5 with
+camera filter 2. Production deployment and broader Gallery acceptance remain open.

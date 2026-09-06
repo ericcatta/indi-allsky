@@ -564,7 +564,7 @@ def test_modern_views_delegate_media_url_normalization_to_runtime_service():
     assert_true('from ..modern_admin_media_runtime import ModernAdminMediaAccessAdapter' in source, 'views must import Hybrid media access adapter')
     assert_true('def normalize_media_url(' not in source, 'views must not own inline media URL normalization')
     assert_true('ModernAdminMediaListView.normalize_media_url' not in source, 'views must not call legacy class-level URL normalization')
-    assert_true('def get_media_access_adapter(self):' in body, 'media list view must construct media access adapter')
+    assert_true('def get_media_access_adapter(self, camera=None):' in body, 'media list view must construct media access adapter')
     assert_true('.resolve_media_url(media_entry, local=local)' in body, 'media list URL resolution should go through Hybrid media access adapter')
     assert_true('.getUrl(s3_prefix=self.s3_prefix, local=local)' not in body, 'media list view must not own direct getUrl call')
     assert_true('.normalize_media_url(' in source, 'views should delegate final URL shaping to Hybrid runtime normalizer')
