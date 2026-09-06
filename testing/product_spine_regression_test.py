@@ -201,7 +201,7 @@ def test_product_templates_are_server_rendered_and_read_only():
 
         template_text = read_text(template_path)
         assert_true(
-            re.search(r"{%\s*extends\s+['\"]base\.html['\"]\s*%}", template_text) is not None,
+            re.search(r"{%\s*extends\s+['\"]modern_admin/base\.html['\"]\s*%}", template_text) is not None,
             '{0:s} template must use the Hybrid shell'.format(surface['name']),
         )
 

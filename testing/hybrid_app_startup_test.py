@@ -55,6 +55,11 @@ def check_startup(config_path, classic_enabled):
                      'fits2jpeg_view', 'latest_image_redirect_view', 'images_folder'):
             assert 'indi_allsky.' + name in routes, name
         assert 'basename' in app.jinja_env.filters
+        from flask import render_template
+        with app.test_request_context('/indi-allsky/modern-admin/now'):
+            shell = render_template('modern_admin/base.html')
+            assert 'hybrid-app-shell' in shell
+            assert 'admin-mode-switch-classic' not in shell
         client = app.test_client()
         response = client.get('/indi-allsky/static/images/favicon_32.png')
         assert response.status_code == 200

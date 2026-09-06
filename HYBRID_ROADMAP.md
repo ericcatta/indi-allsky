@@ -37,6 +37,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - verificati 17 entrypoint locali; in staging temporaneo sul Raspberry,
     `hybrid_app_startup_test.py` passa con Classic true/false, database in
     memoria, due app consecutive, statici, login e CSRF. Nessun deploy live.
+  - la shell di tutte le 72 pagine Hybrid usa ora `modern_admin/base.html` e
+    il documento comune `shared/document.html`, senza caricare `base.html`
+    Classic. Parita' del DOM e degli asset verificata per entrambe le shell;
+    il grafo include/extends Hybrid e' protetto contro dipendenze Classic.
+    Passano 18 entrypoint locali e il rendering della shell in Flask sul Pi
+    con Classic escluso, sempre in staging e senza accesso al DB operativo.
 - Book 2 / Settings Runtime Independence:
   - la responsabilita' "Modern settings save -> nuova revisione config" e' ora
     Hybrid-owned tramite `ModernAdminSettingsRuntimeService`;

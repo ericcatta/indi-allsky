@@ -2166,7 +2166,7 @@ def get_ajax_system_view_source():
 
 
 def get_base_template_source():
-    return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'templates' / 'base.html').read_text()
+    return (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'templates' / 'modern_admin' / 'base.html').read_text()
 
 
 def get_hybrid_product_css_source():

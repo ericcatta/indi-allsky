@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+<title>{% block title %}{% endblock %}</title>
+<link rel="icon" type="image/png" href="{{ url_for('indi_allsky.static', filename='images/favicon_32.png') }}" sizes="32x32">
+<link rel="icon" type="image/png" href="{{ url_for('indi_allsky.static', filename='images/favicon_128.png') }}" sizes="128x128">
+<link href="{{ url_for('indi_allsky.static', filename='bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='css/style.css') }}" rel="stylesheet">
+{% block shell_stylesheet %}{% endblock %}
+<script src="{{ url_for('indi_allsky.static', filename='js/jquery-3.7.1.min.js') }}"></script>
+<script src="{{ url_for('indi_allsky.static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('indi_allsky.static', filename='js/indi-allsky-tabs.js') }}"></script>
+<style>
+.container{
+    max-width: 2000px;
+}
+{% block shell_style %}{% endblock %}
+</style>
+{% block head %}{% endblock %}
+  </head>
+  <body class="{% block body_class %}bg-dark bg-opacity-75{% endblock %}">
+{% block shell %}{% block content %}{% endblock %}{% endblock %}
+  </body>
+</html>
