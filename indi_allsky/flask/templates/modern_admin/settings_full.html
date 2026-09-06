@@ -15,6 +15,7 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_heading = 'Full Settings' %}
     {% set modern_admin_title_id = 'modern-admin-full-settings-title' %}
     {% include 'modern_admin/_shell_header.html' %}
+    {% if geometry_draft %}<p class="modern-admin-table-panel" role="status">Unsaved geometry from Image Circle Helper: review Diameter, X Offset and Y Offset below, then save to apply them. Other settings are unchanged. Keogram angle is reviewed separately in Full Settings.</p>{% endif %}
 
     <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Full settings summary">
         <div class="modern-admin-section-heading">

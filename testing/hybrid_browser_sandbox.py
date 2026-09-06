@@ -38,6 +38,8 @@ def run(runtime_config, port):
                 return None
             # Only generation queues into the in-memory DB; no worker consumes it.
             payload = request.get_json(silent=True)
+            if request.path == '/indi-allsky/modern-admin/settings/cameras' and request.form.get('modern_admin_action') == 'lens_optics' and not request.form.get('modern_admin_save_sync'):
+                return None
             if request.path == '/indi-allsky/ajax/minigenerate':
                 return None
             if request.path == '/indi-allsky/ajax/generate' and isinstance(payload, dict) and payload.get('ACTION_SELECT') in ('generate_video', 'generate_k_st', 'generate_video_k_st', 'generate_panorama_video'):

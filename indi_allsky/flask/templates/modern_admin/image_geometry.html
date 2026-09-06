@@ -1,0 +1,51 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}{{ website_title }}: Image Circle Helper{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/image-geometry.css', v='geometry-v2') }}">
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/image-geometry.js', v='geometry-v2') }}" defer></script>
+{% endblock %}
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="geometry-title">
+<section class="modern-admin-table-panel">
+<h1 id="geometry-title">Image Circle Helper</h1>
+<p>Align the circle and keogram line with a saved image. Offsets are image pixels: positive X moves right, positive Y moves up. Initial geometry comes from this camera's recorded metadata.</p>
+<nav class="modern-admin-link-grid" aria-label="Geometry camera">
+{% for choice in geometry_filters %}<a href="{{ url_for('indi_allsky.modern_admin_image_circle_helper_view', camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == geometry_camera.id %}aria-current="page"{% endif %}>{{ choice.label }}</a>{% endfor %}
+</nav>
+<h2>{{ geometry_camera.friendlyName or geometry_camera.name }}</h2>
+<form method="get" class="modern-admin-filter-bar">
+<input type="hidden" name="camera_id" value="{{ geometry_camera.id }}"><input type="hidden" name="profile_id" value="{{ geometry_profile }}">
+<label>Image ID <input name="image_id" type="number" min="1" value="{{ geometry_image.id if geometry_image else '' }}" required></label>
+<button type="submit">Load image</button>
+<a href="{{ url_for('indi_allsky.modern_admin_image_circle_helper_view', camera_id=geometry_camera.id, profile_id=geometry_profile) }}">Use latest image</a>
+</form>
+{% if geometry_image %}<p>Image {{ geometry_image.id }} · {{ geometry_image.createDate }} · Camera {{ geometry_camera.id }}</p>{% else %}<p role="status">No saved images are available for this camera.</p>{% endif %}
+{% if geometry_image and not geometry_preview %}<p role="status">The selected image has no preview allowed by this camera's media policy.</p>{% endif %}
+<form id="geometry-form">
+<fieldset {% if not geometry_preview %}disabled{% endif %}>
+<div class="geometry-controls">
+{% for name in ('IMAGE_CIRCLE_DIAMETER','OFFSET_X','OFFSET_Y','LINE_WIDTH','LINE_COLOR','KEOGRAM_ANGLE','AZIMUTH_ANGLE','KEOGRAM_LINE') %}
+<label for="{{ name }}">{{ form_imagecircle[name].label.text }}{{ form_imagecircle[name]() }}</label>
+{% endfor %}
+</div>
+<div class="modern-admin-filter-bar">
+<button id="geometry-fit" type="button">Fit circle to image</button>
+<button id="geometry-reset" type="button">Reset geometry</button>
+<button id="geometry-copy" type="button">Copy values</button>
+<button id="geometry-review" type="button" data-settings-url="{{ geometry_settings_url }}">Review values in {{ 'Camera Settings' if geometry_profile else 'Full Settings' }}</button>
+<button id="geometry-fullscreen" type="button">Fullscreen preview</button>
+</div>
+</fieldset>
+</form>
+<p id="geometry-status" role="status" aria-live="polite">{{ 'Loading image…' if geometry_preview else 'Select an available image to edit the overlay.' }}</p>
+<div id="geometry-preview">
+<button type="button" id="geometry-exit">Exit fullscreen</button>
+<canvas id="geometry-canvas" aria-label="Image with circle and keogram overlay"></canvas>
+</div>
+<p>Reviewing values opens an unsaved Settings draft. Save only after checking the camera profile and the effect of any rotation, scaling or crop already applied to the image. Keogram angle remains a separate setting.</p>
+<a href="{{ url_for('indi_allsky.modern_admin_full_settings_view', search='KEOGRAM_ANGLE') }}">Review keogram angle setting</a>
+</section>
+<script type="application/json" id="geometry-config">{{ {'imageUrl':geometry_preview}|tojson }}</script>
+</main>
+{% endblock %}

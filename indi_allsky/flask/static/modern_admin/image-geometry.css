@@ -1,0 +1,11 @@
+.geometry-controls {display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0;}
+.geometry-controls label {display:flex;flex-direction:column;gap:6px;min-width:0;}
+.geometry-controls input,.geometry-controls select {max-width:100%;min-width:0;}
+#geometry-canvas {display:block;width:100%;height:auto;background:#000;}
+#geometry-preview {position:relative;}
+#geometry-preview:fullscreen {display:flex;align-items:center;background:#000;}
+#geometry-exit {display:none;position:absolute;right:16px;top:16px;z-index:1;}
+#geometry-preview:fullscreen #geometry-exit {display:block;}
+#geometry-status {overflow-wrap:anywhere;}
+
+#geometry-preview:fullscreen #geometry-canvas {max-height:100vh;object-fit:contain;}

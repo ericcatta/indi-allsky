@@ -15,6 +15,8 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_heading = 'Settings' %}
     {% set modern_admin_title_id = 'modern-admin-camera-settings-title' %}
     {% include 'modern_admin/_shell_header.html' %}
+    {% if not config.get('LOGIN_DISABLED') and not current_user.is_admin %}<p id="camera-settings-permission" role="status">Only an administrator can save or sync camera settings. You can inspect settings and review unsaved drafts.</p>{% endif %}
+    {% if geometry_draft %}<p class="modern-admin-table-panel" role="status">Unsaved geometry from Image Circle Helper: review Diameter, X Offset and Y Offset below, then save to apply them. Other settings are unchanged. Keogram angle is reviewed separately in Full Settings.</p>{% endif %}
 
     <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="Camera settings summary">
         <div class="modern-admin-section-heading">
@@ -215,9 +217,9 @@ var camera_id = {{ camera_id }};
                         </div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_hybrid_form.enabled %}
-                        <button class="modern-admin-media-button" type="submit">Save Hybrid Controller</button>
+                        <button class="modern-admin-media-button" type="submit" {% if not config.get('LOGIN_DISABLED') and not current_user.is_admin %}disabled aria-describedby="camera-settings-permission"{% endif %}>Save Hybrid Controller</button>
                         {% if modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
-                        <button class="modern-admin-media-button" type="submit" name="modern_admin_save_sync" value="hybrid" onclick="return confirm('Save Hybrid Controller settings for {{ modern_admin_camera_settings_profile.profile_id }} and sync them to the other camera profile? This copies only processing mode and Hybrid AWB apply mode. Camera identity, driver, hardware, lens, acquisition, and binding settings will not be copied.');">Save &amp; Sync</button>
+                        <button class="modern-admin-media-button" type="submit" {% if not config.get('LOGIN_DISABLED') and not current_user.is_admin %}disabled aria-describedby="camera-settings-permission"{% endif %} name="modern_admin_save_sync" value="hybrid" onclick="return confirm('Save Hybrid Controller settings for {{ modern_admin_camera_settings_profile.profile_id }} and sync them to the other camera profile? This copies only processing mode and Hybrid AWB apply mode. Camera identity, driver, hardware, lens, acquisition, and binding settings will not be copied.');">Save &amp; Sync</button>
                         {% endif %}
                         {% else %}
                         <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
@@ -336,9 +338,9 @@ var camera_id = {{ camera_id }};
                         </div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_driver_form.enabled %}
-                        <button class="modern-admin-media-button" type="submit">Save Driver / Connection</button>
+                        <button class="modern-admin-media-button" type="submit" {% if not config.get('LOGIN_DISABLED') and not current_user.is_admin %}disabled aria-describedby="camera-settings-permission"{% endif %}>Save Driver / Connection</button>
                         {% if modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
-                        <button class="modern-admin-media-button" type="submit" name="modern_admin_save_sync" value="driver_connection" onclick="return confirm('Save Driver / Connection settings for {{ modern_admin_camera_settings_profile.profile_id }} and sync safe settings to the other camera profile? This copies only the Enabled flag. Profile ID, primary flag, camera interface, INDI/libcamera binding, device names, ports, and hardware IDs will not be copied.');">Save &amp; Sync</button>
+                        <button class="modern-admin-media-button" type="submit" {% if not config.get('LOGIN_DISABLED') and not current_user.is_admin %}disabled aria-describedby="camera-settings-permission"{% endif %} name="modern_admin_save_sync" value="driver_connection" onclick="return confirm('Save Driver / Connection settings for {{ modern_admin_camera_settings_profile.profile_id }} and sync safe settings to the other camera profile? This copies only the Enabled flag. Profile ID, primary flag, camera interface, INDI/libcamera binding, device names, ports, and hardware IDs will not be copied.');">Save &amp; Sync</button>
                         {% endif %}
                         {% else %}
                         <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
@@ -462,9 +464,9 @@ var camera_id = {{ camera_id }};
                         </div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_capture_form.enabled %}
-                        <button class="modern-admin-media-button" type="submit">Save Acquisition</button>
+                        <button class="modern-admin-media-button" type="submit" {% if not config.get('LOGIN_DISABLED') and not current_user.is_admin %}disabled aria-describedby="camera-settings-permission"{% endif %}>Save Acquisition</button>
                         {% if modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
-                        <button class="modern-admin-media-button" type="submit" name="modern_admin_save_sync" value="acquisition" onclick="return confirm('Save Acquisition settings for {{ modern_admin_camera_settings_profile.profile_id }} and sync them to the other camera profile? This copies only gain, exposure, target ADU, and auto exposure settings. Camera identity, driver, hardware, lens, processing, binning, AWB, and CFA/Debayer Pattern will not be copied.');">Save &amp; Sync</button>
+                        <button class="modern-admin-media-button" type="submit" {% if not config.get('LOGIN_DISABLED') and not current_user.is_admin %}disabled aria-describedby="camera-settings-permission"{% endif %} name="modern_admin_save_sync" value="acquisition" onclick="return confirm('Save Acquisition settings for {{ modern_admin_camera_settings_profile.profile_id }} and sync them to the other camera profile? This copies only gain, exposure, target ADU, and auto exposure settings. Camera identity, driver, hardware, lens, processing, binning, AWB, and CFA/Debayer Pattern will not be copied.');">Save &amp; Sync</button>
                         {% endif %}
                         {% else %}
                         <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>
@@ -504,7 +506,7 @@ var camera_id = {{ camera_id }};
             </div>
         </details>
         {% elif section.key == 'lens-optics' %}
-        <details class="modern-admin-settings-section modern-admin-settings-edit-section modern-admin-settings-lens-editor" data-camera-settings-section="{{ section.key }}" data-camera-settings-editor="lens-optics" open>
+        <details class="modern-admin-settings-section modern-admin-settings-edit-section modern-admin-settings-lens-editor" data-camera-settings-section="{{ section.key }}" data-camera-settings-editor="lens-optics" id="geometry-lens-settings" open>
             <summary>
                 <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
                 <span class="modern-admin-settings-section-title">{{ section.title }}</span>
@@ -569,9 +571,9 @@ var camera_id = {{ camera_id }};
                         </div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
                         {% if modern_admin_camera_settings_lens_form.enabled %}
-                        <button class="modern-admin-media-button" type="submit">Save Lens & Optics</button>
+                        <button class="modern-admin-media-button" type="submit" {% if not config.get('LOGIN_DISABLED') and not current_user.is_admin %}disabled aria-describedby="camera-settings-permission"{% endif %}>Save Lens & Optics</button>
                         {% if modern_admin_camera_settings_profile.from_multi_camera and modern_admin_camera_settings_profile_count == 2 %}
-                        <button class="modern-admin-media-button" type="submit" name="modern_admin_save_sync" value="lens_optics" onclick="return confirm('Save Lens & Optics settings for {{ modern_admin_camera_settings_profile.profile_id }} and sync them to the other camera profile? This copies only Lens & Optics section overrides. Camera identity, driver, hardware binding, Acquisition, Processing, CFA/Debayer Pattern, and Hybrid settings will not be copied.');">Save &amp; Sync</button>
+                        <button class="modern-admin-media-button" type="submit" {% if not config.get('LOGIN_DISABLED') and not current_user.is_admin %}disabled aria-describedby="camera-settings-permission"{% endif %} name="modern_admin_save_sync" value="lens_optics" onclick="return confirm('Save Lens & Optics settings for {{ modern_admin_camera_settings_profile.profile_id }} and sync them to the other camera profile? This copies only Lens & Optics section overrides. Camera identity, driver, hardware binding, Acquisition, Processing, CFA/Debayer Pattern, and Hybrid settings will not be copied.');">Save &amp; Sync</button>
                         {% endif %}
                         {% else %}
                         <button class="modern-admin-media-button" type="submit" disabled>Profile required</button>

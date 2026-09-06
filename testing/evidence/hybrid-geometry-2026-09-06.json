@@ -1,0 +1,149 @@
+{
+  "date": "2026-09-06",
+  "baseline": "218a3ec7 plus image geometry mission",
+  "controls": [
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "IMAGE_CIRCLE_DIAMETER/OFFSET_X/OFFSET_Y",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Draw in source-image coordinates and reject invalid drafts",
+      "proof": "Fit yielded48px on64x48 image; edited diameter40, X5,Y-3 and viewed correctly shifted circle. Negative diameter blocked Review and showed validation message.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "KEOGRAM_LINE/KEOGRAM_ANGLE/AZIMUTH_ANGLE",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Synchronize angle fields before drawing",
+      "proof": "Enabled line; entered azimuth270 and observed keogram-90. Entered keogram-90 directly; fullscreen screenshot showed finite horizontal line through circle center.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "LINE_WIDTH/LINE_COLOR",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Update and retain display style without changing source image",
+      "proof": "Selected Red and width3; controls retained3/#ff0000 after reload. Screenshot of updated1280px canvas showed crisp red circle and line.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "geometry-fit/geometry-reset",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Explicit fit/reset, without silently changing saved settings",
+      "proof": "Fit changed diameter480 to48 and centered offsets. Reset restored480,0,0,angle0 after edits.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "geometry-copy",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Copy current values",
+      "proof": "Clicked Copy values and observed Geometry values copied.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "geometry-fullscreen/geometry-exit",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Display and leave fullscreen",
+      "proof": "Entered fullscreen, inspected screenshot, used visible Exit fullscreen control and returned to page.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "geometry-review/Save Lens & Optics",
+      "role": "administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Review then persist values only for selected profile",
+      "proof": "Helper profile2 values320/-25/35 appeared in Settings unsaved draft with profile_id=test-profile-2. Admin clicked Save Lens & Optics. Fresh URL without draft parameters retained320/-25/35; profile1 fields remained empty.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "Camera Settings save/sync permissions",
+      "role": "ordinary user",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Reflect backend authorization in the UI",
+      "proof": "Initially ordinary user saw active buttons (defect). After fix signed in again as test-user-2: all8 save/sync buttons disabled, aria-describedby camera-settings-permission, explicit admin-only text.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "Image ID/Load image/Use latest image",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Select historical/latest image in correct camera",
+      "proof": "Camera1 loaded historical image100 with decoded64x48 preview; Use latest image returned image1. Camera2 image2 was also previewed.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "Review keogram angle setting",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Open existing angle editor",
+      "proof": "Clicked link; Full Settings filter KEOGRAM_ANGLE displayed only the corresponding rotation-angle row.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "Responsive layout",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Keep mobile page within viewport",
+      "proof": "Helper page/document widths390/390, decoded preview and controls usable; desktop and fullscreen inspected at1280px.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "Missing image/recovery",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Distinguish failed preview from successful load and recover",
+      "proof": "Temporarily renamed only sandbox archive-image-140.jpg. Helper showed The image could not be loaded and disabled fieldset. Restored file and reloaded: Preview64x48, fieldset enabled.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/image-circle-helper",
+      "control_id": "Live production geometry/reload",
+      "role": "ordinary user and administrator",
+      "camera_profile": "Synthetic cameras/profiles 1 and 2",
+      "prerequisites": "Pi isolated sandbox; Classic disabled; synthetic JPEGs; no production effects",
+      "request": "GET helper/media, client overlay actions; explicit POST Camera Settings for reviewed save",
+      "expected_effect": "Verify real camera reload and resulting acquired images",
+      "proof": "Production camera configuration and capture effects were not changed during isolated acceptance.",
+      "status": "bloccato"
+    }
+  ]
+}

@@ -609,8 +609,8 @@ def test_safe_control_image_circle_preview_delegates_display_url_to_media_access
     view_body = source[view_start:view_end]
 
     assert_true('def get_safe_controls_media_access_adapter(self):' in mixin_body, 'safe controls must construct media access adapter')
-    assert_true('def resolve_latest_image_url(self, latest_image, local=True):' in view_body, 'Modern Image Circle helper must own its URL resolution hook')
-    assert_true('.resolve_media_url(latest_image, local=local)' in view_body, 'Image Circle preview URL should go through Hybrid media access adapter')
+    assert_true('ModernAdminMediaBrowseView, TemplateView' in view_body, 'Hybrid geometry must not inherit the historical helper')
+    assert_true("ModernAdminMediaArchive('image', target.id, self.verify_admin_network).item(image)" in view_body, 'Geometry preview must use owner-camera Hybrid media access')
     assert_true('latest_image.getUrl(' not in view_body, 'Modern Image Circle helper must not call Classic getUrl directly')
     assert_true('.normalize_media_url(' not in view_body, 'Image Circle helper must not own direct URL normalization')
 

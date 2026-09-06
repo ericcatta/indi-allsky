@@ -472,3 +472,40 @@ Inventory refresh after this mission: 91 discovered Hybrid template routes,
 rendering/inventory counts, not 16,178 completed interaction tests. Parameterized
 routes and real provider/effect prerequisites still need dedicated acceptance;
 public viewers have their separate tests and evidence.
+
+## Verified mission: interactive Image Circle Helper
+
+- Replaced the disabled reference wrapper with native Hybrid camera/image
+  selection, editable diameter/offsets, line color/width, keogram/azimuth angles,
+  fit/reset, clipboard, fullscreen and an explicit route to review Settings.
+  Historical images are selectable by ID; unavailable previews have a visible
+  reason. Media policy comes from the owning camera through Hybrid media access.
+- Geometry drafts populate only three existing lens fields. Opening the draft
+  does not save anything. Existing Camera Settings or Full Settings performs the
+  reviewed save using existing permissions, CSRF, revision and reload behavior.
+  Camera profile routing is checked and the other profile remains unchanged.
+- The original helper did not save geometry; its Hybrid replacement now supports
+  a review/save path without creating a second configuration writer. Keogram
+  angle has a separate link to its existing Full Settings field.
+- Fixed the old azimuth update order and unbounded `tan(90°)` line endpoints.
+  Circle center, offset signs and line orientation are preserved in 480 math
+  cases. The renderer uses screen resolution for crisp overlays on small source
+  images; source files and scientific image processing algorithms are untouched.
+- Browser testing found Camera Settings save/sync buttons enabled for ordinary
+  users despite backend rejection. All eight buttons now reflect the actual
+  permission and reference an accessible explanation. Backend permissions remain
+  enforced and tested.
+
+Evidence: `testing/hybrid_geometry_flow_test.py` exercises real Flask/database
+profile/global saves, unchanged foreign profile and extension keys, no automatic
+reload task, CSRF/roles, invalid drafts, missing image and owner-camera policy.
+`testing/hybrid_geometry_math_test.js` covers 480 geometric cases. Full Book 2,
+ten browser-controller suites, twelve Flask/startup suites plus isolated OAuth
+suite pass. No production settings, capture services or acquired media changed.
+
+Actual browser evidence: `testing/evidence/hybrid-geometry-2026-09-06.json`.
+The admin saved profile2 geometry 320/-25/35 and the values persisted on a fresh
+GET after the browser connection was interrupted; profile1 overrides stayed
+empty. The source image fixture remained available after the missing-file test.
+Production geometry changes and their capture/reload effects remain outside this
+isolated mission and require the planned live acceptance.

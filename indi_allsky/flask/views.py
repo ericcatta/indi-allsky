@@ -15654,30 +15654,41 @@ class ModernAdminImageProcessingView(ModernAdminSafeControlsMixin, ImageProcessi
         return context
 
 
-class ModernAdminImageCircleHelperView(ModernAdminSafeControlsMixin, ImageCircleHelperView):
-    page_title = 'Modern Admin Image Circle Helper'
+class ModernAdminImageCircleHelperView(ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Image Circle Helper'
+    decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_cameras_view'
 
-    def resolve_latest_image_url(self, latest_image, local=True):
-        return self.get_safe_controls_media_access_adapter().resolve_media_url(latest_image, local=local)
-
-
     def get_context(self):
-        context = super(ModernAdminImageCircleHelperView, self).get_context()
-        form = context['form_imagecircle']
-
-        context['modern_admin_safe_title'] = 'Image Circle Helper'
-        context['modern_admin_safe_note'] = 'Latest image and circle parameters come from the classic helper. Modern Admin keeps this as a read-only reference view.'
-        context['modern_admin_preview_url'] = context.get('latest_image_url')
-        context['modern_admin_safe_sections'] = (
-            {
-                'title' : 'Circle parameters',
-                'rows'  : self.field_rows(form, ('IMAGE_CIRCLE_DIAMETER', 'OFFSET_X', 'OFFSET_Y', 'KEOGRAM_ANGLE')),
-            },
-        )
-        context['modern_admin_safe_actions'] = (
-            self.disabled_action('Apply helper values', 'Saving camera geometry is a configuration action and remains disabled in Modern Admin.'),
-        )
+        from .media_archive import ModernAdminMediaArchive
+        context = super().get_context()
+        filters = self.get_media_camera_filters()
+        selected = self.get_selected_media_camera_filter(filters)
+        if request.args.get('profile_id') and not selected.get('profile_id'):
+            abort(400, description='Choose an available camera profile.')
+        target_id = selected.get('camera_id') or self.camera.id
+        if request.args.get('camera_id') and request.args.get('camera_id', type=int) != target_id:
+            abort(400, description='Camera and profile do not match.')
+        target = IndiAllSkyDbCameraTable.query.filter_by(id=target_id).first_or_404()
+        choice = next((item for item in filters if item.get('camera_id') == target.id), {})
+        query = IndiAllSkyDbImageTable.query.filter_by(camera_id=target.id)
+        if request.args.get('image_id'):
+            image_id = request.args.get('image_id', type=int)
+            if not image_id or not 0 < image_id <= 2**63 - 1:
+                abort(400, description='Choose a valid image ID.')
+            image = query.filter_by(id=image_id).first_or_404()
+        else:
+            image = query.order_by(IndiAllSkyDbImageTable.createDate.desc(), IndiAllSkyDbImageTable.id.desc()).first()
+        metadata = ModernAdminMediaArchive('image', target.id, self.verify_admin_network).item(image) if image else {}
+        context.update(geometry_camera=target, geometry_image=image,
+            geometry_preview=metadata.get('preview_url'), geometry_profile=choice.get('profile_id', ''),
+            geometry_filters=[item for item in filters if item.get('camera_id')],
+            geometry_settings_url=url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=choice['profile_id'])
+                if choice.get('profile_id') else url_for('indi_allsky.modern_admin_full_settings_view', search='LENS'),
+            form_imagecircle=IndiAllskyImageCircleHelperForm(data={
+                'IMAGE_CIRCLE_DIAMETER': target.lensImageCircle,
+                'OFFSET_X': target.lensOffsetX, 'OFFSET_Y': target.lensOffsetY,
+                'KEOGRAM_ANGLE': self.indi_allsky_config.get('KEOGRAM_ANGLE', 90.0)}))
         return context
 
 
@@ -16781,6 +16792,11 @@ class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
     def get_context(self):
         context = super(ModernAdminFullSettingsView, self).get_context()
         form = context['form_config']
+        from .image_geometry import GEOMETRY_FIELDS, geometry_draft
+        draft = geometry_draft(request.args)
+        for key, value in draft.items():
+            form[GEOMETRY_FIELDS[key][1]].data = value
+        context['geometry_draft'] = bool(draft)
         editor_groups = self.get_full_settings_editor_groups(form)
         profile_operated_hidden_fields = self.get_full_settings_profile_operated_hidden_fields(form)
 
@@ -17815,7 +17831,13 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         if 'modern_admin_camera_settings_capture_form' not in context:
             context['modern_admin_camera_settings_capture_form'] = self.get_camera_settings_capture_form(selected_profile)
         if 'modern_admin_camera_settings_lens_form' not in context:
-            context['modern_admin_camera_settings_lens_form'] = self.get_camera_settings_lens_form(selected_profile)
+            from .image_geometry import GEOMETRY_FIELDS, geometry_draft
+            draft = geometry_draft(request.args) if request.method == 'GET' else {}
+            if draft and (not selected_profile.get('from_multi_camera') or request.args.get('profile_id') != selected_profile.get('profile_id')):
+                abort(400, description='Choose a configured camera profile for this geometry draft.')
+            context['geometry_draft'] = bool(draft)
+            context['modern_admin_camera_settings_lens_form'] = self.get_camera_settings_lens_form(
+                selected_profile, submitted_data={GEOMETRY_FIELDS[key][0]: value for key, value in draft.items()})
         if 'modern_admin_camera_settings_hybrid_form' not in context:
             context['modern_admin_camera_settings_hybrid_form'] = self.get_camera_settings_hybrid_form(selected_profile)
 
@@ -21145,7 +21167,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/tools/generate', view_func=ModernAdminGenerateView.as_view('modern_admin_generate_view', template_name='modern_admin/generate.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/focus', view_func=ModernAdminFocusView.as_view('modern_admin_focus_view', template_name='modern_admin/safe_controls.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/process-fits', view_func=ModernAdminImageProcessingView.as_view('modern_admin_image_processing_view', template_name='modern_admin/safe_controls.html'))
-    bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/tools/image-circle-helper', view_func=ModernAdminImageCircleHelperView.as_view('modern_admin_image_circle_helper_view', template_name='modern_admin/image_geometry.html'))
     bp_allsky.add_url_rule('/modern-admin/settings', view_func=ModernAdminSettingsInventoryView.as_view('modern_admin_settings_view', template_name='modern_admin/settings_inventory.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/basic', view_func=ModernAdminBasicSettingsPreviewView.as_view('modern_admin_basic_settings_view', template_name='modern_admin/settings_basic.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/advanced', view_func=ModernAdminAdvancedSettingsPreviewView.as_view('modern_admin_advanced_settings_view', template_name='modern_admin/settings_basic.html'))
