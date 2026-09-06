@@ -868,3 +868,33 @@ The live sandbox process was verified listening on 127.0.0.1:8099 (PID 3193471)
 after the browser interruption. This is a tool observation issue, not evidence of
 a crashed server or a successful network change. Drives/GPIO direct browser
 acceptance remains open as well.
+
+## Sky Cycle uses persisted per-camera acquisition records
+
+The operational Sky Cycle page no longer renders the prototype timeline, source
+confidence, health, moment or output cards. Its view now calls the independent
+`sky_cycle_runtime.camera_cycle` query service. Each camera's latest cycle is
+selected from image, FITS and RAW acquisition timestamps, then all aggregates
+are scoped to that camera and stored acquisition date. This also exposes the
+important FITS-without-JPEG case instead of presenting an empty camera.
+
+The page reports recorded day/night image counts and first/last timestamps,
+FITS/RAW counts, and total/successful generation records for timelapse, keogram,
+star trails, star-trail video, mini timelapse and panorama video. These are DB
+records, explicitly not verified files or uninterrupted coverage. No media bytes
+are opened, no AI classifications are simulated, and no capture setting changes.
+The obsolete runtime prototype builder call and imports were removed from this
+view; historical product payload contracts remain covered by their own tests.
+
+`hybrid_sky_cycle_flow_test.py` uses real Flask with Classic imports forbidden,
+in-memory SQL records, both roles and anonymous access: camera/date isolation,
+day/night aggregation, successful versus failed output records, missing data,
+source-only capture and sanitized provider failures. It passes on the Pi runtime.
+All nineteen Book 2/shell/route/network regression entrypoints pass; Product Spine
+was repeated after the source-only case, and git diff --check passes.
+
+The report intentionally names the latest recorded cycle rather than claiming
+current capture health. Twilight computation, event/condition evidence, lineage,
+direct browser acceptance and deployment remain open. This replaces a static
+surface with actual acquisition evidence, but does not complete the overall
+Sky Cycle feature set or the complete product plan.

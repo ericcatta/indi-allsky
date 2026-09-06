@@ -1,221 +1,48 @@
 {% extends 'modern_admin/base.html' %}
-
-{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
-
+{% block title %}Sky Cycle — Hybrid{% endblock %}
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-sky-cycle-product-v1') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-shell-005') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">
 {% endblock %}
-
 {% block content %}
-<main class="modern-admin-shell hybrid-product-shell hybrid-product-sky-cycle" aria-labelledby="sky-cycle-title">
-    <header class="modern-admin-table-panel" aria-label="Sky Cycle product report">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Hybrid AllSky</p>
-                <h1 id="sky-cycle-title">{{ sky_cycle_report.cycle_summary.title }}</h1>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ sky_cycle_report.data_status | replace('_', ' ') | title }}</span>
-        </div>
-
-        <h2>{{ sky_cycle_report.cycle_summary.cycle_verdict }}</h2>
-        <p class="modern-admin-note">{{ sky_cycle_report.cycle_summary.note }}</p>
-        <p class="modern-admin-note">Contract: <code>{{ sky_cycle_report.metadata.contract }}</code> / <code>{{ sky_cycle_report.metadata.contract_version }}</code>. Source: <code>{{ sky_cycle_report.metadata.source }}</code>.</p>
-
-        <div class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_moment_detail_view') }}">Moment Detail</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_output_detail_view') }}">Output Detail</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
-        </div>
-    </header>
-
-    <section class="modern-admin-table-panel" aria-labelledby="sky-cycle-summary-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Cycle</p>
-                <h2 id="sky-cycle-summary-title">{{ sky_cycle_report.cycle_summary.cycle_label }}</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">{{ sky_cycle_report.cycle_summary.data_status | replace('_', ' ') | title }}</span>
-        </div>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Cycle summary">
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Current phase</div>
-                <h3>{{ sky_cycle_report.cycle_summary.current_phase }}</h3>
-                <p>Status: {{ sky_cycle_report.cycle_summary.cycle_status | replace('_', ' ') | title }}.</p>
-                <p>{{ sky_cycle_report.cycle_summary.confidence_label }}</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Time range</div>
-                <h3>{{ sky_cycle_report.cycle_summary.time_range_label }}</h3>
-                <p>Started: {{ sky_cycle_report.cycle_summary.cycle_started_label }}</p>
-                <p>Latest frame: {{ sky_cycle_report.cycle_summary.latest_frame_label }}</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Report status</div>
-                <h3>{{ sky_cycle_report.status }}</h3>
-                <p>{{ sky_cycle_report.cycle_summary.coverage_label }}</p>
-                {% for evidence_item in sky_cycle_report.cycle_summary.evidence %}
-                    <p>{{ evidence_item }}</p>
-                {% endfor %}
-            </article>
-        </section>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="sky-cycle-phases-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Phase timeline</p>
-                <h2 id="sky-cycle-phases-title">Day, Twilight, Night</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Static placeholders</span>
-        </div>
-        <p class="modern-admin-note">Phase timeline uses static placeholders. Twilight classification is not evaluated yet.</p>
-
-        <div class="modern-admin-status-grid">
-            {% for phase in sky_cycle_report.phase_timeline %}
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ phase.data_status | replace('_', ' ') | title }}</div>
-                <h3>{{ phase.label }}</h3>
-                <span class="modern-admin-status-pill {% if phase.supported %}modern-admin-status-neutral{% else %}modern-admin-status-muted{% endif %}">
-                    {% if phase.supported %}Supported placeholder{% else %}Not supported yet{% endif %}
-                </span>
-                <p>{{ phase.time_range_label }}</p>
-                <p><strong>Value:</strong> {{ phase.observation_value }}</p>
-                <p><strong>Sources:</strong> {{ phase.source_expectation }}</p>
-                <p><strong>Outputs:</strong> {{ phase.output_expectation }}</p>
-                <p><strong>Science:</strong> {{ phase.science_note }}</p>
-                <p><strong>Astrophoto:</strong> {{ phase.astrophoto_note }}</p>
-                {% if phase.unsupported_reason %}
-                    <p>{{ phase.unsupported_reason }}</p>
-                {% endif %}
-            </article>
-            {% endfor %}
-        </div>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="sky-cycle-evidence-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Evidence</p>
-                <h2 id="sky-cycle-evidence-title">Moments and Source Confidence</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Not evaluated</span>
-        </div>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Moment and source summary">
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ sky_cycle_report.moments_summary.label }}</div>
-                <h3>{{ sky_cycle_report.moments_summary.status }}</h3>
-                <p>{{ sky_cycle_report.moments_summary.count_label }}. Primary: {{ sky_cycle_report.moments_summary.primary_moment }}.</p>
-                <p>Categories: {{ sky_cycle_report.moments_summary.moment_categories | join(', ') }}</p>
-                <p>{{ sky_cycle_report.moments_summary.detection_status }}</p>
-                <p>{{ sky_cycle_report.moments_summary.review_queue_status }}</p>
-                <p>{{ sky_cycle_report.moments_summary.note }}</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ sky_cycle_report.source_confidence_summary.label }}</div>
-                <h3>{{ sky_cycle_report.source_confidence_summary.confidence_label }}</h3>
-                <p>{{ sky_cycle_report.source_confidence_summary.note }}</p>
-                <p><strong>Coverage:</strong> {{ sky_cycle_report.source_confidence_summary.coverage_label }}</p>
-                <p><strong>Preservation:</strong> {{ sky_cycle_report.source_confidence_summary.preservation_status }}</p>
-                <p><strong>Retention:</strong> {{ sky_cycle_report.source_confidence_summary.retention_status }}</p>
-                <p><strong>Lineage:</strong> {{ sky_cycle_report.source_confidence_summary.lineage_status }}</p>
-                <p><strong>Gaps:</strong> {{ sky_cycle_report.source_confidence_summary.gap_status }}</p>
-                <p><strong>Risk:</strong> {{ sky_cycle_report.source_confidence_summary.risk_level | title }}</p>
-                {% for evidence_item in sky_cycle_report.source_confidence_summary.evidence %}
-                    <p>{{ evidence_item }}</p>
-                {% endfor %}
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ sky_cycle_report.attention_items.label }}</div>
-                <h3>{{ sky_cycle_report.attention_items.status }}</h3>
-                <p>{{ sky_cycle_report.attention_items.summary }}</p>
-                <p>{{ sky_cycle_report.attention_items.note }}</p>
-            </article>
-        </section>
-
-        <section class="modern-admin-status-grid" aria-label="Moment candidates">
-            {% for moment in sky_cycle_report.moments_summary['items'] %}
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ moment.type | replace('_', ' ') | title }} / {{ moment.phase | replace('_', ' ') | title }}</div>
-                <h3>{{ moment.label }}</h3>
-                <p>{{ moment.time_label }}. {{ moment.confidence_label }}.</p>
-                {% for evidence_item in moment.evidence %}
-                    <p>{{ evidence_item }}</p>
-                {% endfor %}
-                <p>{{ moment.source_lineage_status }}</p>
-                <p>{{ moment.related_outputs_status }}</p>
-                <p><strong>Science:</strong> {{ moment.science_note }}</p>
-                <p><strong>Astrophoto:</strong> {{ moment.astrophoto_note }}</p>
-                <span class="modern-admin-status-pill modern-admin-status-muted">{{ moment.review_status }}</span>
-            </article>
-            {% endfor %}
-        </section>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="sky-cycle-results-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Results</p>
-                <h2 id="sky-cycle-results-title">Generated Outputs and Observatory Health</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
-        </div>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Output and health summary">
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ sky_cycle_report.outputs_summary.label }}</div>
-                <h3>{{ sky_cycle_report.outputs_summary.status }}</h3>
-                <p>{{ sky_cycle_report.outputs_summary.count_label }}</p>
-                <p>{{ sky_cycle_report.outputs_summary.generation_status }}</p>
-                <p>{{ sky_cycle_report.outputs_summary.look_policy_status }}</p>
-                <p>{{ sky_cycle_report.outputs_summary.share_readiness_status }}</p>
-                <p>{{ sky_cycle_report.outputs_summary.note }}</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ sky_cycle_report.observatory_health_summary.label }}</div>
-                <h3>{{ sky_cycle_report.observatory_health_summary.overall_label }}</h3>
-                <p>{{ sky_cycle_report.observatory_health_summary.note }}</p>
-                <p><strong>Camera:</strong> {{ sky_cycle_report.observatory_health_summary.camera_status }}</p>
-                <p><strong>Capture:</strong> {{ sky_cycle_report.observatory_health_summary.capture_status }}</p>
-                <p><strong>Storage:</strong> {{ sky_cycle_report.observatory_health_summary.storage_status }}</p>
-                <p><strong>Generation:</strong> {{ sky_cycle_report.observatory_health_summary.generation_status }}</p>
-                <p><strong>Integration:</strong> {{ sky_cycle_report.observatory_health_summary.integration_status }}</p>
-                <p><strong>Warnings:</strong> {{ sky_cycle_report.observatory_health_summary.warnings_count_label }}. Risk: {{ sky_cycle_report.observatory_health_summary.risk_level | title }}.</p>
-                {% for evidence_item in sky_cycle_report.observatory_health_summary.evidence %}
-                    <p>{{ evidence_item }}</p>
-                {% endfor %}
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Safety boundary</div>
-                <h3>No actions connected</h3>
-                <p>No database, filesystem, RAW/FITS, media generation, preview URL, or safe action is connected to this prototype.</p>
-            </article>
-        </section>
-
-        <section class="modern-admin-status-grid" aria-label="Generated output candidates">
-            {% for output in sky_cycle_report.outputs_summary['items'] %}
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ output.type | replace('_', ' ') | title }} / {{ output.phase | replace('_', ' ') | title }}</div>
-                <h3>{{ output.label }}</h3>
-                <p>{{ output.generation_status }}</p>
-                <p>Look: {{ output.look_applied }}</p>
-                <p>{{ output.source_lineage_status }}</p>
-                <p>{{ output.related_moments_status }}</p>
-                <p>{{ output.share_status }}</p>
-                <p><strong>Quality:</strong> {{ output.quality_note }}</p>
-                <p><strong>Astrophoto:</strong> {{ output.astrophoto_note }}</p>
-                <p><strong>Science:</strong> {{ output.science_note }}</p>
-                <span class="modern-admin-status-pill modern-admin-status-muted">
-                    Safe actions: {{ output.safe_actions_available | length }}
-                </span>
-            </article>
-            {% endfor %}
-        </section>
-    </section>
+<main class="modern-admin-shell" aria-labelledby="sky-cycle-title">
+<header class="modern-admin-table-panel">
+<h1 id="sky-cycle-title">Sky Cycle</h1>
+<p>Latest recorded capture cycle for each camera. A cycle uses the acquisition date stored with the frames and may span midnight.</p>
+<p>Day and night below are recorded capture modes. They do not classify astronomical twilight or prove uninterrupted coverage.</p>
+<nav class="modern-admin-link-grid" aria-label="Cycle navigation">
+<a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Refresh report</a>
+<a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
+<a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
+<a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
+<a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
+</nav>
+</header>
+{% if capture_cycles_error %}<p role="alert">{{ capture_cycles_error }}</p>{% endif %}
+{% for cycle in capture_cycles %}
+<section class="modern-admin-table-panel" aria-labelledby="cycle-camera-{{ cycle.camera_id }}">
+<h2 id="cycle-camera-{{ cycle.camera_id }}">{{ cycle.camera_name }}</h2>
+{% if cycle.status == 'empty' %}<p>No saved image, FITS or RAW records for this camera.</p>{% else %}
+<h3>Capture date: {{ cycle.day_date }}</h3><p>Latest recorded frame: {{ cycle.latest }}</p>
+<div class="modern-admin-status-grid">
+{% for phase in cycle.phases %}<article class="modern-admin-status-card">
+<h3>{{ phase.label }}</h3><p>{{ phase.count }} image records</p>
+<p>First: {{ phase.first }}</p><p>Last: {{ phase.last }}</p>
+</article>{% else %}<p>No processed image records for this cycle. Scientific sources may still be available below.</p>{% endfor %}</div>
+<h3>Scientific sources</h3>
+<p>Records associated with this camera and capture date. File availability and frame-by-frame correspondence are not inferred from these counts.</p>
+{% for source in cycle.sources %}<p>{{ source.label }}: {{ source.count }} records</p>{% endfor %}
+<h3>Generated outputs</h3>
+<div style="overflow-x:auto"><table class="table"><thead><tr><th>Type</th><th>Successful</th><th>Total records</th></tr></thead><tbody>
+{% for output in cycle.outputs %}<tr><td>{{ output.label }}</td><td>{{ output.successful }}</td><td>{{ output.count }}</td></tr>{% endfor %}
+</tbody></table></div>
+<p>Success is the stored generation result. Open the media library to inspect or download the files.</p>
+{% endif %}
+</section>
+{% else %}{% if not capture_cycles_error %}<p>No cameras are registered.</p>{% endif %}{% endfor %}
+<section class="modern-admin-table-panel"><h2>Events and sky conditions</h2>
+<p>This report does not yet evaluate twilight, detection events, source lineage or sky conditions. No simulated results are shown.</p>
+<a href="{{ url_for('indi_allsky.modern_admin_moment_detail_view') }}">Moment detail</a>
+<a href="{{ url_for('indi_allsky.modern_admin_output_detail_view') }}">Output detail</a>
+</section>
 </main>
 {% endblock %}

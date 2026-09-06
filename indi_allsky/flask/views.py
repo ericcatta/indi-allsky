@@ -93,7 +93,6 @@ from ..product_view_models import build_moment_detail_view
 from ..product_view_models import build_output_detail_view
 from ..product_view_models import build_library_view
 from ..product_view_models import build_observatory_view
-from ..product_view_models import build_sky_cycle_report_view
 from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import HighlightsMetadataRepository
 from ..product_view_models import LatestFrameImageTableRepository
@@ -102,7 +101,6 @@ from ..product_view_models import LatestGeneratedOutputRepository
 from ..product_view_models import LatestFrameSummaryProvider
 from ..product_view_models import SourceTrustDescriptor
 from ..product_view_models import SourceTrustRepository
-from ..product_view_models import SkyCycleSummaryRepository
 
 from cryptography.fernet import InvalidToken
 
@@ -6424,35 +6422,24 @@ class ModernAdminLibraryView(ModernAdminProductView):
 
 class ModernAdminSkyCycleView(ModernAdminProductView):
     page_title = 'Sky Cycle Report'
-    product_context_key = 'sky_cycle_report'
 
-    def build_product_context(self, context):
-        return build_sky_cycle_report_view(
-            sky_cycle_repository=self.get_sky_cycle_repository(),
-            current_phase_night=context.get('night'),
-        )
-
-    def get_sky_cycle_repository(self):
+    def get_context(self):
+        from ..sky_cycle_runtime import camera_cycle
+        context = super().get_context()
+        cycles, error = [], ''
         try:
-            camera = getattr(self, 'camera', None)
-            camera_id = getattr(camera, 'id', None)
-            if not camera_id:
-                return None
-
-            return SkyCycleSummaryRepository(
-                latest_query=IndiAllSkyDbImageTable.query,
-                cycle_start_query=IndiAllSkyDbImageTable.query,
-                camera_id=camera_id,
-                camera_id_field=IndiAllSkyDbImageTable.camera_id,
-                day_date_field=IndiAllSkyDbImageTable.dayDate,
-                latest_order_by_expression=IndiAllSkyDbImageTable.createDate.desc(),
-                start_order_by_expression=IndiAllSkyDbImageTable.createDate.asc(),
-                current_date=self.camera_now.date(),
-            )
-        except Exception:
-            app.logger.error('Unable to build Sky Cycle metadata repository')
-            return None
-
+            for camera in IndiAllSkyDbCameraTable.query.order_by(IndiAllSkyDbCameraTable.id).all():
+                cycles.append(camera_cycle(camera, IndiAllSkyDbImageTable,
+                    (('FITS', IndiAllSkyDbFitsImageTable), ('RAW', IndiAllSkyDbRawImageTable)),
+                    (('Timelapse', IndiAllSkyDbVideoTable), ('Keogram', IndiAllSkyDbKeogramTable),
+                     ('Star trails', IndiAllSkyDbStarTrailsTable), ('Star trail video', IndiAllSkyDbStarTrailsVideoTable),
+                     ('Mini timelapse', IndiAllSkyDbMiniVideoTable), ('Panorama video', IndiAllSkyDbPanoramaVideoTable))))
+        except SQLAlchemyError:
+            app.logger.exception('Sky Cycle records unavailable')
+            cycles = []
+            error = 'Capture-cycle records could not be read. Try refreshing the page.'
+        context.update(capture_cycles=cycles, capture_cycles_error=error)
+        return context
 
 class ModernAdminStorageView(ModernAdminView):
     page_title = 'Modern Admin Storage'

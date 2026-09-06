@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Sky Cycle: pagina basata sui record reali di ciascuna camera, con ultimo ciclo
+  individuato da immagini/FITS/RAW, aggregati giorno/notte e conteggi sorgenti e
+  output. Query/aggregazione nel servizio `sky_cycle_runtime.py`; rimossi dalla
+  pagina timeline e risultati statici. Conteggi DB distinti da disponibilita' file
+  e copertura continua. Twilight, eventi, lineage e condizioni cielo restano da
+  collegare; test Flask senza Classic passano, browser/deploy ancora aperti.
+
 - Network: parsing dei dodici comandi in `network_commands.py`, adapter
   NetworkManager separato dalle view con fingerprint dei metodi conservati.
   NOSECURITY richiede un booleano esplicito. Pagina Hybrid nativa indipendente da
