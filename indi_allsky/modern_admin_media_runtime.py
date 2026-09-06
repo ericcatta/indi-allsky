@@ -178,16 +178,18 @@ class ModernAdminMediaAccessAdapter:
 
     def read_fits_preview_metadata(self, filename_p, fits_opener):
         hdulist = fits_opener(filename_p)
-        header = hdulist[0].header
-        sensor_temp = float(header.get('CCD-TEMP', 0))
-        metadata = {
-            'exposure'    : float(header.get('EXPTIME', 0)),
-            'gain'        : float(header.get('GAIN', 0)),
-            'binning'     : int(header.get('XBINNING', 1)),
-            'sensor_temp' : sensor_temp,
-        }
-        hdulist.close()
-        return metadata
+        try:
+            header = hdulist[0].header
+            sensor_temp = float(header.get('CCD-TEMP', 0))
+            metadata = {
+                'exposure'    : float(header.get('EXPTIME', 0)),
+                'gain'        : float(header.get('GAIN', 0)),
+                'binning'     : int(header.get('XBINNING', 1)),
+                'sensor_temp' : sensor_temp,
+            }
+            return metadata
+        finally:
+            hdulist.close()
 
 
     def log_error(self, message, *args):

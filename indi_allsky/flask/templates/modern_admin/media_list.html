@@ -4,7 +4,7 @@
 
 {% block head %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-gallery-filter-pills-v2') }}">
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='source-lightbox-v1') }}">
 {% endblock %}
 
 {% block content %}
@@ -70,7 +70,7 @@ var camera_id = {{ camera_id }};
             <h3 id="modern-admin-media-viewer-title">{{ modern_admin_featured_media.title }}</h3>
             <p>{{ modern_admin_featured_media.created }}</p>
             {% if modern_admin_featured_media.url %}
-            <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ modern_admin_featured_media.url }}" target="_blank" rel="noopener">Open read-only</a>
+            <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ modern_admin_featured_media.url }}" target="_blank" rel="noopener">{{ 'Download original' if modern_admin_media_kind == 'fits' else 'Open read-only' }}</a>
             {% endif %}
         </div>
     </section>
@@ -130,7 +130,10 @@ var camera_id = {{ camera_id }};
                 </dl>
 
                 {% if item.url %}
-                <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ item.url }}" target="_blank" rel="noopener">Open read-only</a>
+                <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ item.url }}" target="_blank" rel="noopener">{{ 'Download original' if modern_admin_media_kind == 'fits' else 'Open read-only' }}</a>
+                {% endif %}
+                {% if modern_admin_media_kind == 'fits' %}
+                <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ url_for('indi_allsky.modern_admin_fits_detail_view', fits_id=item.id, camera_id=item.camera_id, profile_id=request.args.get('profile_id', '')) }}">Details</a>
                 {% endif %}
                 {% if modern_admin_media_kind == 'image' %}
                 <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ url_for('indi_allsky.modern_admin_media_image_detail_view', image_id=item.id) }}">Details</a>
@@ -161,13 +164,14 @@ var camera_id = {{ camera_id }};
 </main>
 
 {% if modern_admin_media_kind in ('image', 'fits') and modern_admin_media_items %}
-<div class="modern-admin-lightbox" id="modern-admin-lightbox" aria-hidden="true" role="dialog" aria-label="Media preview">
+<div class="modern-admin-lightbox" id="modern-admin-lightbox" aria-hidden="true" role="dialog" aria-label="Media preview" aria-modal="true" inert>
     <button class="modern-admin-lightbox-backdrop" type="button" data-lightbox-close aria-label="Close preview"></button>
     <div class="modern-admin-lightbox-panel">
         <button class="modern-admin-lightbox-close" type="button" data-lightbox-close aria-label="Close preview">Close</button>
         <button class="modern-admin-lightbox-nav modern-admin-lightbox-prev" type="button" id="modern-admin-lightbox-prev" aria-label="Previous image">Previous</button>
         <figure class="modern-admin-lightbox-frame">
             <img id="modern-admin-lightbox-image" alt="">
+            <p id="modern-admin-lightbox-status" role="status" hidden></p>
             <figcaption>
                 <span id="modern-admin-lightbox-title"></span>
                 <a id="modern-admin-lightbox-download" href="#" download>Download original</a>
@@ -182,6 +186,13 @@ let modernAdminMediaItems = {{ modern_admin_media_items | tojson }};
 const modernAdminMediaKind = '{{ modern_admin_media_kind }}';
 const modernAdminLightbox = document.getElementById('modern-admin-lightbox');
 const modernAdminLightboxImage = document.getElementById('modern-admin-lightbox-image');
+const modernAdminLightboxStatus = document.getElementById('modern-admin-lightbox-status');
+let modernAdminLightboxOpener = null;
+modernAdminLightboxImage.addEventListener('error', () => {
+    modernAdminLightboxImage.hidden = true;
+    modernAdminLightboxStatus.textContent = 'Preview could not be loaded. Try downloading the original to inspect it.';
+    modernAdminLightboxStatus.hidden = false;
+});
 const modernAdminLightboxTitle = document.getElementById('modern-admin-lightbox-title');
 const modernAdminLightboxDownload = document.getElementById('modern-admin-lightbox-download');
 const modernAdminDownloadSelected = document.getElementById('modern-admin-download-selected');
@@ -216,7 +227,7 @@ function modernAdminLightboxItem(index) {
 
 function modernAdminLightboxDisplayUrl(item) {
     if (modernAdminMediaKind === 'fits') {
-        return item.preview_url || item.url;
+        return item.preview_url;
     }
 
     return item.url || item.preview_url;
@@ -229,18 +240,33 @@ function modernAdminOpenLightbox(index) {
     }
 
     modernAdminLightboxIndex = index;
-    modernAdminLightboxImage.src = modernAdminLightboxDisplayUrl(item);
+    if (modernAdminLightbox.getAttribute('aria-hidden') === 'true') {
+        modernAdminLightboxOpener = document.activeElement;
+    }
+    const displayUrl = modernAdminLightboxDisplayUrl(item);
+    modernAdminLightboxImage.hidden = !displayUrl;
+    modernAdminLightboxStatus.hidden = Boolean(displayUrl);
+    modernAdminLightboxStatus.textContent = displayUrl ? '' : 'No local preview is available. Use Download original to open the recorded source.';
+    if (displayUrl) {
+        modernAdminLightboxImage.src = displayUrl;
+    } else {
+        modernAdminLightboxImage.removeAttribute('src');
+    }
     modernAdminLightboxImage.alt = item.title;
-    modernAdminLightboxTitle.textContent = item.title + ' · ' + item.created;
+    modernAdminLightboxTitle.textContent = item.filename + ' · ' + item.created;
     modernAdminLightboxDownload.href = item.url || item.preview_url;
     modernAdminLightboxDownload.setAttribute('download', item.filename || '');
+    modernAdminLightbox.inert = false;
     modernAdminLightbox.setAttribute('aria-hidden', 'false');
+    modernAdminLightbox.querySelector('.modern-admin-lightbox-close').focus();
     document.documentElement.classList.add('modern-admin-lightbox-open');
     document.body.classList.add('modern-admin-lightbox-open');
 }
 
 function modernAdminCloseLightbox() {
+    modernAdminLightbox.inert = true;
     modernAdminLightbox.setAttribute('aria-hidden', 'true');
+    if (modernAdminLightboxOpener && modernAdminLightboxOpener.isConnected) modernAdminLightboxOpener.focus();
     document.documentElement.classList.remove('modern-admin-lightbox-open');
     document.body.classList.remove('modern-admin-lightbox-open');
     modernAdminLightboxImage.removeAttribute('src');
@@ -444,7 +470,7 @@ async function modernAdminApplyGalleryFilter(filterLink) {
 
 document.addEventListener('click', (event) => {
     const filterLink = event.target.closest('.modern-admin-gallery-filter');
-    if (filterLink) {
+    if (filterLink && modernAdminGalleryGrid && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
         event.preventDefault();
         modernAdminApplyGalleryFilter(filterLink);
         return;
@@ -491,7 +517,13 @@ document.addEventListener('keydown', (event) => {
         return;
     }
 
-    if (event.key === 'Escape') {
+    if (event.key === 'Tab') {
+        const controls = Array.from(modernAdminLightbox.querySelectorAll('button, a[href]')).filter((control) => !control.disabled);
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    } else if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
         modernAdminCloseLightbox();

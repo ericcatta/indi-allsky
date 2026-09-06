@@ -31,7 +31,7 @@ var camera_id = {{ camera_id }};
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Source</div>
             <h3>{{ modern_admin_fits_detail.source }}</h3>
-            <p>No file contents are inspected.</p>
+            <p>Original file metadata recorded during acquisition.</p>
         </article>
     </section>
 
@@ -60,12 +60,15 @@ var camera_id = {{ camera_id }};
             <div><dt>Metadata</dt><dd>{{ modern_admin_fits_detail.data_summary }}</dd></div>
         </dl>
 
-        <p class="modern-admin-note">This page shows database metadata only. It does not convert, preview, download, delete, process, read or inspect FITS file contents.</p>
+        <p class="modern-admin-note">Preview creates a JPEG for inspection. Download preserves the original FITS data and header.</p>
+        <section class="modern-admin-link-grid" aria-label="FITS file actions">
+            {% if modern_admin_fits_preview_url %}<a href="{{ modern_admin_fits_preview_url }}" target="_blank" rel="noopener">Preview JPEG</a>{% else %}<span>JPEG preview is unavailable under this camera storage policy.</span>{% endif %}
+            <a href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='fits', camera_id=modern_admin_fits_detail.camera_id, media_id=modern_admin_fits_detail.id) }}">Download original</a>
+        </section>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_fits_view') }}">Back to FITS Inspection</a>
-            <a href="{{ url_for('indi_allsky.fitsimageviewer_view') }}">Open legacy FITS Viewer</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_media_fits_view') }}">Open FITS Media Viewer</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_fits_view', camera_id=modern_admin_fits_detail.camera_id, profile_id=request.args.get('profile_id', '')) }}">Back to FITS Inspection</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_fits_view', camera_id=modern_admin_fits_detail.camera_id, profile_id=request.args.get('profile_id', '')) }}">Open FITS Media Viewer</a>
         </section>
     </section>
 </main>

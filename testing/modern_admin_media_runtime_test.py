@@ -505,6 +505,23 @@ def test_media_access_adapter_reads_fits_preview_metadata_and_closes_file():
     assert_true(hdu_list.closed is True, 'FITS metadata reader must close the opened FITS handle')
 
 
+def test_fits_metadata_reader_closes_after_conversion_failure():
+    adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
+    for key in ('CCD-TEMP', 'EXPTIME', 'GAIN', 'XBINNING'):
+        hdus = FakeFitsHduList({key: 'invalid'})
+        try:
+            adapter.read_fits_preview_metadata('test.fit', lambda path: hdus)
+        except ValueError as error:
+            converter = int if key == 'XBINNING' else float
+            try:
+                converter('invalid')
+            except ValueError as expected:
+                assert error.args == expected.args
+        else:
+            raise AssertionError('Invalid header must raise the original conversion error')
+        assert hdus.closed
+
+
 def test_media_access_adapter_reads_fits_preview_metadata_defaults():
     hdu_list = FakeFitsHduList()
     adapter = ModernAdminMediaAccessAdapter(url_normalizer=ModernAdminMediaUrlNormalizer())
@@ -626,7 +643,7 @@ def test_fits_preview_route_delegates_path_resolution_to_media_access_adapter():
     body = source[start:end]
 
     assert_true('def get_media_access_adapter(self):' in body, 'FITS preview route must construct media access adapter')
-    assert_true('.resolve_filesystem_path(fits_entry)' in body, 'FITS preview path resolution should go through Hybrid media access adapter')
+    assert_true('source_file_path(fits_entry, self.indi_allsky_config)' in body, 'FITS preview path resolution should go through the constrained Hybrid source resolver')
     assert_true('fits_entry.getFilesystemPath()' not in body, 'FITS preview route must not own direct getFilesystemPath call')
 
 
@@ -912,6 +929,7 @@ def run_tests():
     test_media_access_adapter_resolves_existing_path_mtime()
     test_media_access_adapter_resolves_file_mtime_without_changing_errors()
     test_media_access_adapter_reads_fits_preview_metadata_and_closes_file()
+    test_fits_metadata_reader_closes_after_conversion_failure()
     test_media_access_adapter_reads_fits_preview_metadata_defaults()
     test_media_serve_adapter_preserves_sender_arguments()
     test_modern_views_delegate_media_url_normalization_to_runtime_service()

@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='source-media-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -77,6 +77,7 @@ var camera_id = {{ camera_id }};
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Original</th>
                         <th>Created</th>
                         <th>Day</th>
                         <th>Camera</th>
@@ -95,6 +96,7 @@ var camera_id = {{ camera_id }};
                     {% for raw_image in modern_admin_raw_image_rows %}
                     <tr data-search="{{ (raw_image.id ~ ' ' ~ raw_image.filename)|lower }}" data-timeofday="{{ raw_image.timeofday|lower }}" data-uploaded="{{ raw_image.uploaded|lower }}">
                         <td>{{ raw_image.id }}</td>
+                        <td><a class="modern-admin-file-action" href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='raw', camera_id=raw_image.camera_id, media_id=raw_image.id) }}">Download original</a></td>
                         <td>{{ raw_image.created }}</td>
                         <td>{{ raw_image.day_date }}</td>
                         <td>{{ raw_image.camera_id }}</td>
@@ -110,21 +112,21 @@ var camera_id = {{ camera_id }};
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="13">No raw image metadata rows are available.</td>
+                        <td colspan="14">No raw image metadata rows are available.</td>
                     </tr>
                     {% endfor %}
                     <tr id="modern-raw-image-filter-empty-row" hidden>
-                        <td colspan="13">No raw images match the current filters.</td>
+                        <td colspan="14">No raw images match the current filters.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <p class="modern-admin-note">This page shows database metadata only. It does not decode, convert, download, delete, open paths or inspect file contents.</p>
+        <p class="modern-admin-note">Download the original RAW export for processing in your imaging software. Remote files open at their configured storage location; unavailable files are reported when opened.</p>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.latest_rawimage_view') }}">Open legacy Raw Latest</a>
-            <a href="{{ url_for('indi_allsky.raw_image_view') }}">Open legacy Raw Viewer</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_images_view', camera_id=modern_admin_media_selected_filter.camera_id, profile_id=request.args.get('profile_id', '')) }}">Browse processed images</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_fits_view', camera_id=modern_admin_media_selected_filter.camera_id, profile_id=request.args.get('profile_id', '')) }}">Inspect FITS files</a>
         </section>
     </section>
 </main>

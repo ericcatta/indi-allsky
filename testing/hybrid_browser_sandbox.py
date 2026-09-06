@@ -9,6 +9,7 @@ import re
 from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app
 from hybrid_operations_fixture import seed_operations
+from hybrid_source_media_fixture import seed_source_media
 
 class SandboxEffectBlocked(RuntimeError):
     pass
@@ -17,6 +18,7 @@ def run(runtime_config, port):
     with isolated_app(runtime_config, multi_camera=True) as app:
         app.jinja_env.auto_reload = True
         seed_operations(app)
+        seed_source_media(app)
         from flask import request, jsonify
         from indi_allsky.flask.views import AjaxConfigRestoreView
         @app.before_request

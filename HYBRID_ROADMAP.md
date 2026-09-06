@@ -23,6 +23,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Le modifiche runtime devono restare conservative: niente refactor ampi senza motivo.
 - Le impostazioni operative multicamera devono vivere nei Camera Profiles.
 - I global settings restano fallback legacy/single-camera/advanced, non UI operativa primaria.
+- Collaudo sorgenti FITS/RAW: download originali Hybrid per record/camera,
+  policy locale/remota e cartella export separata; preview JPEG senza Classic,
+  gestione file/header mancanti o invalidi e chiusura handle su errore.
+  Corretto filtro camera dei viewer e lightbox mobile/tastiera. Evidenze in
+  `HYBRID_ACCEPTANCE_STATUS.md`; archivio completo e collaudo produzione aperti.
 - Camera Simulator Hybrid:
   - sostituito wrapper disabilitato con selettori, offset, canvas e permalink
     interattivi. View/template propri, nessuna eredita' dal frontend simulatore

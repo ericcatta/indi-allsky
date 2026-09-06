@@ -1490,6 +1490,7 @@
 .modern-admin-lightbox-frame {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   max-width: 90vw;
@@ -1504,47 +1505,32 @@
 .modern-admin-lightbox-frame img {
   display: block;
   width: auto;
-  max-width: min(90vw, 100%);
+  max-width: 100%;
   height: auto;
-  max-height: 80vh;
+  max-height: calc(100dvh - 240px);
   margin: 0 auto;
   object-fit: contain;
 }
 
-.modern-admin-lightbox-frame::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: min(34%, 220px);
-  pointer-events: none;
-  content: "";
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.78),
-    rgba(0, 0, 0, 0.42) 52%,
-    rgba(0, 0, 0, 0)
-  );
+.modern-admin-lightbox-frame img[hidden] {
+  display: none;
 }
 
 .modern-admin-lightbox .modern-admin-lightbox-frame > figcaption {
-  position: absolute;
-  z-index: 1;
-  right: 14px;
-  bottom: 14px;
-  left: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 12px;
+  align-self: stretch;
+  padding: 12px;
   color: #ffffff;
-  background: rgba(6, 9, 15, 0.76);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(16px) saturate(145%);
+  background: rgba(6, 9, 15, 0.96);
+}
+
+.modern-admin-lightbox #modern-admin-lightbox-status {
+  padding: 16px;
+  margin: 0;
+  color: #ffffff;
 }
 
 .modern-admin-lightbox #modern-admin-lightbox-title {
@@ -1953,26 +1939,25 @@ body.modern-admin-lightbox-open {
   }
 
   .modern-admin-lightbox-panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .modern-admin-lightbox-frame {
+    grid-column: 1 / -1;
+    grid-row: 1;
   }
 
   .modern-admin-lightbox-nav {
-    position: absolute;
-    top: 50%;
-    z-index: 2;
-    min-width: 42px;
-    width: 42px;
-    overflow: hidden;
-    color: transparent;
-    transform: translateY(-50%);
+    grid-row: 2;
+    min-height: 44px;
   }
 
   .modern-admin-lightbox-prev {
-    left: 10px;
+    grid-column: 1;
   }
 
   .modern-admin-lightbox-next {
-    right: 10px;
+    grid-column: 2;
   }
 
   .modern-admin-lightbox-frame figcaption {
@@ -3193,4 +3178,13 @@ body.modern-admin-lightbox-open {
     align-items: stretch;
     flex-direction: column;
   }
+}
+
+/* Keep source download targets continuous when wide metadata tables scroll. */
+.modern-admin-data-table .modern-admin-file-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 8px;
+  white-space: nowrap;
 }

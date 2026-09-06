@@ -202,3 +202,56 @@ image-circle geometry is unchanged. The simulator writes no settings or tasks.
 both user roles, IMX708/IMX678 and invalid requests in Flask with Classic absent.
 `hybrid_camera_simulator_parity_test.js` verifies catalog and drawing parity.
 Browser results are in `testing/evidence/hybrid-simulator-2026-09-06.json`.
+
+
+## Verified mission: FITS/RAW source access and media interactions
+
+Baseline `15ebbbe0`. FITS Inspection, FITS Detail and RAW Source render without
+Classic links and provide original downloads through a new Hybrid handler.
+Downloads resolve a database record scoped to its camera, enforce that camera's
+local/remote storage policy, support the configured separate RAW export folder,
+and reject paths/symlinks outside configured media roots. Local responses are
+private binary attachments with range support. Remote originals redirect only
+to a recorded HTTP(S) location; no server-side remote fetch is introduced.
+
+FITS preview keeps the existing ImageProcessor algorithm. Missing/invalid IDs,
+missing files and malformed headers now have explicit 400/404/422 responses;
+local previews obey storage policy. The metadata reader closes its FITS handle
+even when a header conversion fails. Its valid output/defaults are unchanged.
+
+Actual clicks found and corrected a shared media defect: the Gallery script
+intercepted camera links on FITS/Image viewer pages even when no Gallery grid
+existed. Only AJAX Gallery now intercepts its ordinary clicks; other pages and
+modified clicks retain native navigation. Lightbox keyboard focus, return focus,
+missing-preview feedback, filename caption and narrow-screen controls are fixed.
+The caption now sits below the image, preserving visibility of small originals.
+Source download actions appear near the table ID with a continuous hit area.
+
+`hybrid_source_media_flow_test.py` uses two real synthetic FITS and 16-bit PNG
+exports: both roles/cameras, exact download bytes, unchanged FITS after JPEG
+conversion, 64x48 JPEG dimensions, byte ranges, anonymous redirects, camera-ID
+mismatch, missing original, invalid header, configured external export folder,
+outside path/symlink rejection, permission failure and remote policy. No task
+or config revision is created. `hybrid_media_browser_test.js` guards the camera
+link interception and prevents trying to display FITS originals as images.
+
+Browser evidence: `testing/evidence/hybrid-source-media-2026-09-06.json`.
+The first RAW semantic clicks were inconclusive; after inspecting the wrapped
+link and making its hit area continuous, semantic download events passed for
+both cameras, including 390x844. Native mobile filtering, FITS preview, lightbox
+navigation and scope-preserving links were observed directly. Browser admin
+coverage and production storage remain open; Flask role coverage is not
+substituted for browser coverage. Full Book 2, existing JS regressions and all
+six isolated Flask startup/account/Settings/operations/simulator/media suites
+pass. No throughput or memory optimization is claimed from these small fixtures.
+
+The source lists still have their existing recent-item limits; complete archive
+traversal and the remaining media actions are not declared finished. Classic,
+production deployment and the 24-hour day/night validation remain open.
+
+Post-mission discovery still contains 89 template routes and 316 parameter-free
+role/camera contexts: 198 successful renders, 21 defective renders across seven
+page families, and 97 redirects/blocked contexts. The 14,378 discovered control
+occurrences are not click passes. Remaining render failures are generated media
+(keograms, mini timelapses, panoramas, startrail images/videos), generation and
+YouTube; parameterized routes need their separate fixtures and evidence.

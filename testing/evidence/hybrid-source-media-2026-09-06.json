@@ -1,0 +1,144 @@
+{
+  "date": "2026-09-06",
+  "baseline": "15ebbbe0 plus source media mission",
+  "scope": "Synthetic browser sandbox; no live camera acquisition or external storage claimed",
+  "controls": [
+    {
+      "page": "/modern-admin/fits",
+      "control_id": "Search + Type + Day/Night + Uploaded + Source",
+      "role": "ordinary user",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Filter recorded FITS rows and distinguish empty matches",
+      "proof": "Search absent filename gave empty-match message; valid search gave source-camera-2.fit. FITS type + Night: 0 shown; Day + uploaded: 0; Day + not uploaded + Local DB entry: 1.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/fits",
+      "control_id": "Details",
+      "role": "ordinary user",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Open metadata for the chosen record",
+      "proof": "Details showed ID 2, camera 2, source-camera-2.fit, 64x48, exposure 0.5s, gain 20; camera/profile retained in return links.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/fits/2",
+      "control_id": "Preview JPEG",
+      "role": "ordinary user",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Generate and display JPEG without altering source",
+      "proof": "Clicked link opened fits2jpeg?id=2 in a new tab; image loaded with natural size 64x48. Byte preservation is additionally verified by Flask test.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/fits/2",
+      "control_id": "Download original",
+      "role": "ordinary user",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Download original FITS",
+      "proof": "Browser download event observed. Flask test separately checks attachment name, exact bytes and byte-range response.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/fits",
+      "control_id": "Download selected + checkbox",
+      "role": "ordinary user",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Enable selection action only after choosing a file",
+      "proof": "Initially disabled with 0 selected; selecting file enabled action and clicking produced a download event.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/fits",
+      "control_id": "All Cameras + Test Profile 1",
+      "role": "ordinary user",
+      "camera_profile": "both synthetic cameras",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Apply requested camera scope",
+      "proof": "Initial All Cameras click had no effect: shared Gallery handler intercepted normal links. After fix, All Cameras displayed both source files; Profile 1 displayed only camera 1. JS regression added.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/fits",
+      "control_id": "Lightbox Enter / Close / Escape / Next / Previous",
+      "role": "ordinary user",
+      "camera_profile": "both synthetic cameras",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Inspect selected image, navigate and restore keyboard focus",
+      "proof": "Enter focused Close; Next changed original link from camera 2 to camera 1, Previous returned to camera 2. Close and Escape dismissed; focus returned to invoking frame.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/raw",
+      "control_id": "Search + Day/Night",
+      "role": "ordinary user",
+      "camera_profile": "camera 1 desktop; camera 2 at 390x844",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Filter RAW records",
+      "proof": "Absent filename showed no matches; valid camera-1 filename restored row. On camera 2, Night showed no matches and Day restored its row.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/raw",
+      "control_id": "Download original",
+      "role": "ordinary user",
+      "camera_profile": "camera 1 desktop; camera 2 at 390x844",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Download correct RAW export",
+      "proof": "Initial semantic clicks on a wrapped inline link gave no event; direct visible-text click worked. Moved action near ID and made its hit area continuous. Semantic clicks then produced download events for both cameras, including narrow viewport.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/raw",
+      "control_id": "Test Profile 2 + Inspect FITS files",
+      "role": "ordinary user",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Navigate between source pages retaining scope",
+      "proof": "Profile 2 showed only raw-camera-2.png. Inspect FITS files and Open FITS Media Viewer retained camera_id=2 and profile_id=test-profile-2.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/fits",
+      "control_id": "Mobile lightbox",
+      "role": "ordinary user",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated Raspberry Flask sandbox, Classic disabled, synthetic FITS/RAW files",
+      "request": "GET / read-only",
+      "expected_effect": "Keep preview and commands visible at 390x844",
+      "proof": "Initial 64x48 preview was covered by an absolute caption and navigation buttons had transparent text. After CSS correction, screenshot showed image, filename, timestamp, Download original, Close, Previous and Next separately. Escape worked; viewport reset.",
+      "status": "superato"
+    }
+  ],
+  "open_checks": [
+    "Browser administrator source-media cases (covered through real Flask, not browser)",
+    "Real remote storage downloads and unavailable hardware",
+    "Archive traversal beyond current recent-item limits",
+    "Remaining generated-media, deletion and upload flows"
+  ],
+  "post_mission_render_discovery": {
+    "template_routes": 89,
+    "contexts": 316,
+    "render_passes": 198,
+    "render_defects": 21,
+    "redirects_or_blocked": 97,
+    "defective_page_families": 7,
+    "control_occurrences": 14378,
+    "note": "Discovery only. These counts are not successful interactions."
+  }
+}

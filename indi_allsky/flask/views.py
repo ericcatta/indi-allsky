@@ -200,6 +200,7 @@ from .forms import IndiAllskyIndiServerChangeForm
 
 from .notification_views import ModernAdminNotificationAcknowledgeView
 from .table_export_views import ModernAdminTableExportView
+from .source_media_views import ModernAdminSourceDownloadView, local_source_allowed, source_file_path
 from .base_views import BaseView
 from .base_views import TemplateView
 from .base_views import FormView
@@ -3577,7 +3578,10 @@ class Fits2JpegView(BaseView):
         #from PIL import Image
         from multiprocessing import Array
 
-        fits_id = int(request.args['id'])
+        try:
+            fits_id = int(request.args['id'])
+        except (KeyError, ValueError):
+            abort(400, description='A valid FITS identifier is required.')
 
 
         table = IndiAllSkyDbFitsImageTable
@@ -3594,13 +3598,22 @@ class Fits2JpegView(BaseView):
 
 
         media_access_adapter = self.get_media_access_adapter()
-        filename_p = Path(media_access_adapter.resolve_filesystem_path(fits_entry))
+        if not local_source_allowed(fits_entry.camera, self.verify_admin_network):
+            abort(403, description='Local FITS previews are unavailable under this camera storage policy.')
+        filename_p = source_file_path(fits_entry, self.indi_allsky_config)
 
 
         p_config = self.indi_allsky_config.copy()
 
 
-        fits_metadata = media_access_adapter.read_fits_preview_metadata(filename_p, fits.open)
+        try:
+            fits_metadata = media_access_adapter.read_fits_preview_metadata(filename_p, fits.open)
+        except FileNotFoundError:
+            abort(404, description='The FITS file is no longer available locally.')
+        except PermissionError:
+            abort(403, description='The FITS file cannot be read by the web service.')
+        except (OSError, ValueError, TypeError, IndexError):
+            abort(422, description='The FITS header cannot be read. Download the original to inspect it.')
 
         exposure = fits_metadata['exposure']
         gain = fits_metadata['gain']
@@ -14044,7 +14057,14 @@ class ModernAdminMediaFitsView(ModernAdminMediaListView):
     modern_admin_media_kind = 'fits'
     modern_admin_media_layout = 'viewer'
 
+    def get_media_url(self, media_entry):
+        return url_for('indi_allsky.modern_admin_source_download_view', kind='fits',
+                       camera_id=media_entry.camera_id, media_id=media_entry.id)
+
+
     def get_media_preview_url(self, media_entry, media_url=None):
+        if not local_source_allowed(media_entry.camera, self.verify_admin_network):
+            return None
         return url_for('indi_allsky.fits2jpeg_view', id=media_entry.id)
 
 
@@ -14197,6 +14217,9 @@ class ModernAdminFitsDetailView(ModernAdminFitsView):
                 .one()
         except NoResultFound:
             abort(404)
+
+        context['modern_admin_fits_preview_url'] = (url_for('indi_allsky.fits2jpeg_view', id=entry.id)
+            if local_source_allowed(entry.camera, self.verify_admin_network) else None)
 
         context['modern_admin_fits_detail'] = {
             'id'            : entry.id,
@@ -21461,6 +21484,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
     bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
     bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>/acknowledge', view_func=ModernAdminNotificationAcknowledgeView.as_view('modern_admin_notification_acknowledge_view'), methods=['POST'])
+    bp_allsky.add_url_rule('/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download', view_func=ModernAdminSourceDownloadView.as_view('modern_admin_source_download_view'))
     bp_allsky.add_url_rule('/modern-admin/operations/export', view_func=ModernAdminTableExportView.as_view('modern_admin_table_export_view'), methods=['POST'])
     bp_allsky.add_url_rule('/modern-admin/notifications', view_func=ModernAdminNotificationsView.as_view('modern_admin_notifications_view', template_name='modern_admin/notifications.html'))
     bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>', view_func=ModernAdminNotificationDetailView.as_view('modern_admin_notification_detail_view', template_name='modern_admin/notification_detail.html'))

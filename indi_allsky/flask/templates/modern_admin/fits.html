@@ -3,7 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='source-media-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -37,14 +37,14 @@ var camera_id = {{ camera_id }};
 
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="FITS safety summary">
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Legacy fallback</div>
-            <h3>Available</h3>
-            <p><a href="{{ url_for('indi_allsky.fitsimageviewer_view') }}">Open legacy FITS Viewer</a></p>
+            <div class="modern-admin-card-label">FITS Viewer</div>
+            <h3>Preview and download</h3>
+            <p><a href="{{ url_for('indi_allsky.modern_admin_media_fits_view', camera_id=modern_admin_media_selected_filter.camera_id, profile_id=request.args.get('profile_id', '')) }}">Browse recent FITS files</a></p>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Mode</div>
-            <h3>Metadata only</h3>
-            <p>No file reads, conversion, download, processing or deletion.</p>
+            <h3>Originals preserved</h3>
+            <p>Preview a JPEG or download the original without modifying the FITS file.</p>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Camera Scope</div>
@@ -112,6 +112,7 @@ var camera_id = {{ camera_id }};
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Open</th>
                         <th>Created</th>
                         <th>Camera ID</th>
                         <th>Filename</th>
@@ -124,13 +125,13 @@ var camera_id = {{ camera_id }};
                         <th>Day/Night</th>
                         <th>Uploaded</th>
                         <th>Source</th>
-                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for fits in modern_admin_fits_rows %}
                     <tr data-search="{{ (fits.id ~ ' ' ~ fits.filename)|lower }}" data-file-type="{{ fits.file_type|lower }}" data-timeofday="{{ fits.timeofday|lower }}" data-uploaded="{{ fits.uploaded|lower }}" data-source="{{ fits.source|lower }}">
                         <td>{{ fits.id }}</td>
+                        <td><a href="{{ url_for('indi_allsky.modern_admin_fits_detail_view', fits_id=fits.id, camera_id=fits.camera_id, profile_id=request.args.get('profile_id', '')) }}">Details</a> · <a class="modern-admin-file-action" href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='fits', camera_id=fits.camera_id, media_id=fits.id) }}">Download original</a></td>
                         <td>{{ fits.created }}</td>
                         <td>{{ fits.camera_id }}</td>
                         <td>{{ fits.filename }}</td>
@@ -143,7 +144,6 @@ var camera_id = {{ camera_id }};
                         <td><span class="modern-admin-status-pill modern-admin-status-muted">{{ fits.timeofday }}</span></td>
                         <td><span class="modern-admin-status-pill {% if fits.uploaded == 'Yes' %}modern-admin-status-good{% else %}modern-admin-status-muted{% endif %}">{{ fits.uploaded }}</span></td>
                         <td>{{ fits.source }}</td>
-                        <td><a href="{{ url_for('indi_allsky.modern_admin_fits_detail_view', fits_id=fits.id) }}">Details</a></td>
                     </tr>
                     {% else %}
                     <tr id="modern-fits-empty-row">
@@ -158,12 +158,11 @@ var camera_id = {{ camera_id }};
         </div>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.fitsimageviewer_view') }}">Open legacy FITS Viewer</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_media_fits_view') }}">Open FITS Media Viewer</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_fits_view', camera_id=modern_admin_media_selected_filter.camera_id, profile_id=request.args.get('profile_id', '')) }}">Open FITS Media Viewer</a>
             <a href="{{ url_for('indi_allsky.modern_admin_storage_view') }}">Back to Storage</a>
         </section>
 
-        <p class="modern-admin-note">This page shows database metadata only. It does not convert, download, delete, process, or inspect FITS file contents.</p>
+        <p class="modern-admin-note">Download original retrieves the recorded source file. For remote storage, it opens the configured remote location. A missing file is reported when opened.</p>
     </section>
 </main>
 <script>

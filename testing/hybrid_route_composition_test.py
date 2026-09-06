@@ -19,7 +19,7 @@ def test_route_contract_is_unchanged():
                 isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute)
                 and node.func.attr == 'add_url_rule'
-                and node.args[0].value not in ('/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export')
+                and node.args[0].value not in ('/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
             ):
                 if node.args[0].value == '/modern-admin/tools/camera-simulator':
                     template = next(k for k in node.keywords if k.arg == 'view_func').value
@@ -57,6 +57,15 @@ def test_notification_ack_route_is_hybrid_owned():
     assert len(exports) == 1 and "methods=['POST']" in ast.unparse(exports[0])
 
     assert 'ModernAdminNotificationAcknowledgeView.as_view' in ast.unparse(calls[0])
+
+
+def test_source_download_is_hybrid_owned():
+    tree = ast.parse((FLASK / 'views.py').read_text())
+    register = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'register_hybrid_routes')
+    calls = [n for n in ast.walk(register) if isinstance(n, ast.Call)
+             and isinstance(n.func, ast.Attribute) and n.func.attr == 'add_url_rule'
+             and n.args[0].value == '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download']
+    assert len(calls) == 1 and 'ModernAdminSourceDownloadView.as_view' in ast.unparse(calls[0])
 
 
 def test_classic_class_bodies_are_preserved_and_isolated():
@@ -99,6 +108,7 @@ if __name__ == '__main__':
     test_route_contract_is_unchanged()
     test_account_route_is_hybrid_owned()
     test_notification_ack_route_is_hybrid_owned()
+    test_source_download_is_hybrid_owned()
     test_classic_class_bodies_are_preserved_and_isolated()
     test_classic_import_is_conditional_and_blueprints_are_per_app()
     print('Hybrid route composition checks passed')
