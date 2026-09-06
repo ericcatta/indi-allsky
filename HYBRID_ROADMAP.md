@@ -37,6 +37,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     conservati. Test su task reali in DB temporaneo e cancellazioni di fixture;
   - browser desktop/mobile verificato; encoding/upload dei worker e produzione
     restano da collaudare. Evidenze in `HYBRID_ACCEPTANCE_STATUS.md`.
+- Process FITS nativo Hybrid: form e parser preview, accesso sorgenti e risposta
+  indipendenti dalla view storica; pipeline scientifica condivisa conservata.
+  Corretti PNG, isolamento della configurazione, chiusura FITS e selezione stack.
+  Evidenze e limiti live in `HYBRID_ACCEPTANCE_STATUS.md`.
 - Image Circle Helper nativo Hybrid: preview e geometria interattive, selezione
   camera/immagine, bozza dei tre valori ottici verso gli editor Settings esistenti.
   Salvataggio per profilo verificato su DB temporaneo; nessuna dipendenza dalla

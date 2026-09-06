@@ -509,3 +509,40 @@ GET after the browser connection was interrupted; profile1 overrides stayed
 empty. The source image fixture remained available after the missing-file test.
 Production geometry changes and their capture/reload effects remain outside this
 isolated mission and require the planned live acceptance.
+
+
+## Verified mission: native Process FITS
+
+Hybrid now owns the processing form, parameter interpretation, source validation,
+preview response and native controls. The existing image processor remains a
+shared backend. The old view wrapper only composes the shared form; Hybrid no
+longer inherits it or uses the disabled generic tool template.
+
+Extracted 144 preview input assignments and 46 scientific stage calls with
+pre-extraction fingerprints. These are preview parameters, not additional Full
+Config migration counts. Default form values and scientific call order remain
+unchanged. Output choices now produce genuine JPEG/PNG; previews deep-copy nested
+settings and close owned FITS resources even when processing fails. Source reads
+follow camera ownership/media policy and confined media/export roots. Ordinary
+users cannot select arbitrary server-side text, mask or font files.
+
+Stack selection excludes the current frame explicitly (SQLite's second-only
+server timestamps could otherwise compare before their own bound microsecond
+representation). Messages report the actual available frame count. Dark/BPM
+stacking cannot silently mix light frames. No source files, config revisions or
+worker tasks are changed by previews.
+
+Tests: full Book 2, native route/shell checks, original pixel parity for two
+cameras and two roles, true binary PNG, dark/BPM, insufficient/available stack,
+CSRF, missing/corrupt files, DB failures, owner-camera media policy, configuration
+identity/isolation and resource closure. All twelve existing/new Flask domain
+suites plus startup checks pass; the FITS controller test covers duplicate
+requests, filter/reset, visible validation and session/error recovery.
+
+Browser evidence: `testing/evidence/hybrid-fits-processing-2026-09-06.json`.
+Actual previews, both cameras, search/validation/reset, fullscreen/exit, empty
+dark state, archive navigation, anonymous redirect and mobile390px checked.
+The data-URL download event was not confirmed by the browser tool, so device-side
+receipt remains blocked rather than passed. Production FITS UI deployment and
+full-resolution live acceptance are still open. The urgent runtime recovery
+record is separate: `HYBRID_IMX708_STRETCH_RECOVERY.md`.

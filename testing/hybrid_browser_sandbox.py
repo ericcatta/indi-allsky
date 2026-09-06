@@ -40,6 +40,9 @@ def run(runtime_config, port):
             payload = request.get_json(silent=True)
             if request.path == '/indi-allsky/modern-admin/settings/cameras' and request.form.get('modern_admin_action') == 'lens_optics' and not request.form.get('modern_admin_save_sync'):
                 return None
+            # FITS previews read only synthetic files; no source/config is overwritten.
+            if request.path == '/indi-allsky/js/processing':
+                return None
             if request.path == '/indi-allsky/ajax/minigenerate':
                 return None
             if request.path == '/indi-allsky/ajax/generate' and isinstance(payload, dict) and payload.get('ACTION_SELECT') in ('generate_video', 'generate_k_st', 'generate_video_k_st', 'generate_panorama_video'):

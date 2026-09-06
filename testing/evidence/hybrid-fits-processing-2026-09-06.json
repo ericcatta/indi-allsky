@@ -1,0 +1,116 @@
+{
+  "date": "2026-09-06",
+  "baseline": "7f2c0f15; runtime recovery18813c57 subsequently applied",
+  "controls": [
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "processing-source/processing-run",
+      "request": "POST /js/processing; render returned bytes",
+      "expected_effect": "Generate actual previews",
+      "proof": "Browser source JPEG camera1:64x48; processed PNG camera1:64x48; processed JPEG camera2:64x48. API pixel hashes match pre-extraction reference for both cameras and both roles.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "OUTPUT_IMAGE_TYPE",
+      "request": "POST /js/processing",
+      "expected_effect": "Match output encoding to chosen type",
+      "proof": "Browser PNG data URL and .png filename; Flask binary PNG signature and decoded JPEG pixel hashes verified. Fixed legacy PNG branch that encoded JPEG.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "processing-search/processing-reset",
+      "request": "Client filter/reset",
+      "expected_effect": "Find parameters and clear edits/errors",
+      "proof": "Searched IMAGE_ROTATE_ANGLE; set999, filtered OUTPUT_IMAGE_TYPE, submitted: filter cleared and Rotation angle must be180 or less visible. Reset restored defaults and removed stale preview. Controller tests also cover reset after no matches.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "camera links/Frame type/FITS ID/Load frame",
+      "request": "GET native page with camera/profile/type/id",
+      "expected_effect": "Preserve owner camera and show absent data honestly",
+      "proof": "Selected profile2 and generated camera-2-light-2.jpg; empty ID+Dark showed no dark FITS and disabled fieldset. Explicit nonexistent ID returns404. Archive link showed only camera2 FITS.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "processing-fullscreen/processing-exit",
+      "request": "Browser fullscreen API",
+      "expected_effect": "Enter and leave preview fullscreen",
+      "proof": "Entered fullscreen and used visible Exit fullscreen control successfully.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "processing-download",
+      "request": "Data URL download link",
+      "expected_effect": "Save generated preview to user device",
+      "proof": "Click performed; valid PNG payload and camera-specific filename present. Browser tool timed out waiting for download event; device-side file receipt not confirmed.",
+      "status": "bloccato"
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "roles/CSRF/pending/errors",
+      "request": "GET page and POST API",
+      "expected_effect": "Enforce access and preserve retry ability",
+      "proof": "Anonymous browser redirected to Sign in. Administrator and ordinary API tests cover CSRF, malformed payload, wrong camera, invalid profile, missing/corrupt file, provider errors, server-side file selection restrictions and no config/task mutations. Node controller verifies duplicate prevention and session-expired recovery.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "responsive layout",
+      "request": "DOM at390px and1280px",
+      "expected_effect": "Keep controls inside viewport",
+      "proof": "Mobile viewport/document widths390/390; controls usable; full desktop restored.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "144 processing fields and46 processing calls",
+      "request": "Reference AST and real pipeline tests",
+      "expected_effect": "Retain parser/defaults/scientific call order",
+      "proof": "Fingerprints acquired from7f2c0f15 before extraction; defaults and assignments unchanged apart from deep-copy isolation. All46 scientific calls retain order. Does not claim every parameter combination was clicked.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "role": "ordinary user (browser), administrator (Flask and browser)",
+      "camera_profile": "Synthetic cameras 1 and 2 / test-profile-1 and test-profile-2",
+      "prerequisites": "Isolated Pi server, temporary FITS and DB, Classic disabled; no production effects",
+      "control_id": "production FITS preview",
+      "request": "Live production user flow",
+      "expected_effect": "Verify real installation and full-resolution parameters",
+      "proof": "This UI migration is not deployed to production. Separate urgent multicamera runtime fix was deployed and verified; see HYBRID_IMX708_STRETCH_RECOVERY.md.",
+      "status": "bloccato"
+    }
+  ]
+}

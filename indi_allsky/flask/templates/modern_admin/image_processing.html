@@ -1,0 +1,65 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}{{ website_title }}: Process FITS{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('indi_allsky.static', filename='modern_admin/image-processing.css', v='processing-v1') }}">
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/image-processing.js', v='processing-v1') }}" defer></script>
+{% endblock %}
+{% block content %}
+<main class="modern-admin-shell" aria-labelledby="processing-title">
+<section class="modern-admin-table-panel">
+<h1 id="processing-title">Process FITS</h1>
+<p>Create and download a preview from a saved FITS frame. Parameters start from the saved global settings. Preview changes do not save configuration or overwrite source files.</p>
+<nav class="modern-admin-link-grid" aria-label="FITS processing camera">
+{% for choice in processing_filters %}<a href="{{ url_for('indi_allsky.modern_admin_image_processing_view', camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == processing_camera.id %}aria-current="page"{% endif %}>{{ choice.label }}</a>{% endfor %}
+</nav>
+<h2>{{ processing_camera.friendlyName or processing_camera.name }}</h2>
+<form method="get" class="modern-admin-filter-bar">
+<input type="hidden" name="camera_id" value="{{ processing_camera.id }}"><input type="hidden" name="profile_id" value="{{ request.args.get('profile_id','') }}">
+<label>Frame type <select name="type"><option value="light" {% if processing_type=='light' %}selected{% endif %}>Light</option><option value="dark" {% if processing_type=='dark' %}selected{% endif %}>Dark</option><option value="bpm" {% if processing_type=='bpm' %}selected{% endif %}>Bad pixel map</option></select></label>
+<label>FITS ID <input type="number" min="1" name="id" value="{{ processing_entry.id if processing_entry else '' }}"></label>
+<button type="submit">Load frame</button>
+<p>Leave the ID empty to select the latest frame of this type.</p>
+</form>
+{% if processing_entry %}<p>Camera {{ processing_camera.id }} · {{ processing_type }} {{ processing_entry.id }} · {{ processing_entry.createDate }}</p>{% else %}<p role="status">No {{ processing_type }} FITS frames are available for this camera.</p>{% endif %}
+{% if not processing_local_allowed %}<p role="status">Local FITS processing is unavailable under this camera's media policy.</p>{% endif %}
+<form id="fits-processing-form" action="{{ url_for('indi_allsky.js_image_processing_view') }}" method="post" novalidate>
+{{ form_image_processing.csrf_token }}{{ form_image_processing.CAMERA_ID }}{{ form_image_processing.FITS_ID }}{{ form_image_processing.FRAME_TYPE }}
+{{ form_image_processing.DISABLE_PROCESSING(hidden=true) }}
+<fieldset id="processing-parameters" {% if not processing_entry or not processing_local_allowed %}disabled{% endif %}>
+<label for="processing-search">Find a parameter <input type="search" id="processing-search"></label>
+{% for title, fields in processing_groups.items() %}
+<details class="processing-group" {% if loop.first %}open{% endif %}>
+<summary>{{ title }} <span>{{ fields|length }}</span></summary>
+<div class="processing-fields">
+{% for field in fields %}
+<label for="{{ field.id }}" data-processing-row data-search="{{ (field.name ~ ' ' ~ field.label.text)|lower }}">
+<span>{{ field.label.text }}</span>{{ field() }}
+{% if field.render_kw and field.render_kw.get('disabled') %}<small>This value follows the saved configuration.</small>{% endif %}
+<small id="{{ field.id }}-error" class="processing-field-error" hidden></small>
+</label>
+{% endfor %}
+</div>
+</details>
+{% endfor %}
+<div class="modern-admin-filter-bar">
+<button id="processing-run" type="submit">Process preview</button>
+<button id="processing-source" type="button">Source preview</button>
+<button id="processing-reset" type="reset">Reset parameters</button>
+</div>
+<p>Source preview keeps the original display conversions, rotation and flips. Stacking uses earlier light frames from the same camera; dark frames and bad-pixel maps require stack count 1.</p>
+</fieldset>
+</form>
+<p id="processing-status" role="status" aria-live="polite">{% if not processing_entry %}Load an available frame to enable processing.{% elif not processing_local_allowed %}Processing is disabled by the camera media policy.{% else %}Choose parameters and generate a preview.{% endif %}</p>
+<div id="processing-preview">
+<button id="processing-exit" type="button">Exit fullscreen</button>
+<img id="processing-image" alt="Processed FITS preview" hidden>
+</div>
+<div class="modern-admin-filter-bar">
+<button id="processing-fullscreen" type="button" disabled>Fullscreen preview</button>
+<a id="processing-download" hidden>Download preview</a>
+</div>
+<a href="{{ url_for('indi_allsky.modern_admin_media_archive_view',kind='fits',camera_id=processing_camera.id,profile_id=request.args.get('profile_id','')) }}">Browse FITS archive</a>
+</section>
+</main>
+{% endblock %}
