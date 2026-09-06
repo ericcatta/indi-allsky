@@ -733,3 +733,34 @@ No physical pins were read or changed by this mission's tests. Native-page brows
 acceptance, real configured devices, production deployment and recovery remain
 open pending the identified hardware/maintenance window. Classic's old GPIO page
 is still present and must be removed with the final frontend removal.
+
+## Native Drives and shared UDisks command ownership
+
+Hybrid Drives no longer inherits DriveManagerView or its disabled wrapper.
+`indi_allsky/drive_manager.py` owns discovery, target selection and validation;
+Flask retains authentication, CSRF and response handling. The legacy action URL
+and payload names remain. Metadata keeps its thirteen-row response contract.
+Each service operation reads one UDisks managed-object snapshot instead of
+repeating per-device property queries inside view methods.
+
+The native page lists drives/filesystems, shows metadata, mount/unmount and power
+off with admin permission, target-specific confirmation and unavailable reasons.
+It requires refreshed inventory after mutation/error before another command.
+Mount rejects any existing mount, fixing the old >1 check. Unmount checks every
+mount point, not just the first, and protects configured image/export paths in
+addition to existing system mount points. Power off requires every filesystem on
+the drive to be unmounted. Unknown/ambiguous IDs and non-filesystem blocks fail
+without executing effects. D-Bus failures produce a sanitized error.
+
+`hybrid_drives_flow_test.py`: real Flask with Classic forbidden and a mutable fake
+UDisks graph, inventory/metadata, mount/unmount/poweroff, one-mounted guard, second
+protected mount, configured-media protection, missing inputs/IDs, both roles,
+CSRF and provider failure. The fake graph records exact effects and updates mount
+state. `hybrid_drives_browser_test.js`: controller confirmation/cancel, duplicate
+prevention, metadata rendered as text, exact target/CSRF and fresh-inventory gate.
+Full Book 2/shell/route regression passes; Full Config fingerprints unchanged.
+
+No real disks were mounted, unmounted or powered off. Native browser acceptance,
+physical storage/recovery and production deployment remain open. The necessary
+hardware maintenance window has not yet been supplied. Network management remains
+a separate unfinished domain; this mission does not claim to complete it.

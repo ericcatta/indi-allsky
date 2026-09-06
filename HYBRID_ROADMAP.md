@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Drives Hybrid: inventario e validazione comandi nel servizio `drive_manager.py`,
+  pagina nativa con metadata/mount/unmount/poweroff. Snapshot UDisks unico,
+  protezione di tutti i mount point e dei percorsi media configurati.
+  Collaudo su dispositivi fisici e deploy ancora aperti.
+
 - GPIO Hybrid: pagina nativa indipendente da ManualGpioView; lettura senza
   setup/output/cleanup, comandi espliciti On/Off limitati ai pin configurati.
   RPi.GPIO resta il backend supportato. Collaudo fisico ancora aperto.

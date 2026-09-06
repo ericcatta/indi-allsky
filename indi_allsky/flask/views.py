@@ -14166,331 +14166,17 @@ class AjaxDriveManagerView(BaseView):
     methods = ['POST']
     decorators = [login_required]
 
-
-    protected_filesystems = (
-        '/',
-        '/boot',
-        '/boot/firmware',
-        '/boot/efi',
-        '/var',
-        '/home',
-        '/tmp',
-        '/var/tmp',
-        '/run',
-        '/dev',
-        '/dev/shm',
-    )
-
-
-    def __init__(self, **kwargs):
-        super(AjaxDriveManagerView, self).__init__(**kwargs)
-
-
     def dispatch_request(self):
+        from ..drive_manager import DriveManager
         if not current_user.is_admin:
-            json_data = {
-                'failure-message' : 'User does not have permission to access this resource',
-            }
-            return jsonify(json_data), 400
-
-
-        command = str(request.json['COMMAND'])
-
-
-        if command == 'getmetadata':
-            query_drive_id = str(request.json['DRIVE_ID'])
-            return self.getMetadata(query_drive_id)
-        if command == 'poweroff':
-            query_drive_id = str(request.json['DRIVE_ID'])
-            return self.powerOffDrive(query_drive_id)
-        if command == 'unmount':
-            query_device_id = str(request.json['DEVICE_ID'])
-            return self.unmountDevice(query_device_id)
-        if command == 'mount':
-            query_device_id = str(request.json['DEVICE_ID'])
-            return self.mountDevice(query_device_id)
-        else:
-            json_data = {
-                'failure-message' : 'Unknown command',
-            }
-            return jsonify(json_data), 400
-
-
-    def getMetadata(self, query_drive_id):
-        bus = dbus.SystemBus()
-
-
-        nm_udisks2 = bus.get_object(
-            "org.freedesktop.UDisks2",
-            "/org/freedesktop/UDisks2")
-
-        iface = dbus.Interface(
-            nm_udisks2,
-            'org.freedesktop.DBus.ObjectManager')
-
-
-        object_paths = iface.GetManagedObjects()
-
-        for object_path in object_paths:
-            if not object_path.startswith('/org/freedesktop/UDisks2/drives/'):
-                continue
-
-
-            settings = bus.get_object(
-                "org.freedesktop.UDisks2",
-                object_path)
-
-            settings_connection = dbus.Interface(
-                settings,
-                dbus_interface='org.freedesktop.DBus.Properties')
-
-            settings_dict = settings_connection.GetAll('org.freedesktop.UDisks2.Drive')
-
-
-            drive_id = str(settings_dict['Id'])
-            if query_drive_id != drive_id:
-                continue
-
-
-            TimeDetected = int(settings_dict['TimeDetected'])
-            drive_TimeDetected = datetime.fromtimestamp(TimeDetected / 1000 / 1000)
-
-            TimeMediaDetected = int(settings_dict['TimeMediaDetected'])
-            if TimeMediaDetected:
-                drive_TimeMediaDetected = datetime.fromtimestamp(TimeMediaDetected / 1000 / 1000)
-            else:
-                drive_TimeMediaDetected = ''
-
-
-            drive_data = [
-                [0, 'Id', drive_id],
-                [1, 'Vendor', str(settings_dict['Vendor'])],
-                [2, 'Model', str(settings_dict['Model'])],
-                [3, 'Size', '{0:0.1f} GB'.format(float(settings_dict['Size']) / 1024 / 1024 / 1024)],
-                [4, 'ConnectionBus', str(settings_dict['ConnectionBus'])],
-                [5, 'Serial', str(settings_dict['Serial'])],
-                [6, 'Media', str(settings_dict['Media'])],
-                [7, 'MediaCompatibility', ', '.join(str(x) for x in settings_dict['MediaCompatibility'])],
-                [8, 'CanPowerOff', bool(settings_dict['CanPowerOff'])],
-                [9, 'Removable', bool(settings_dict['Removable'])],
-                [10, 'Ejectable', bool(settings_dict['Ejectable'])],
-                [11, 'TimeDetected', drive_TimeDetected],
-                [12, 'TimeMediaDetected', drive_TimeMediaDetected],
-            ]
-
-
-            return_data = {
-                'success-message' : '',
-                'drive_data' : drive_data,
-            }
-
-            return jsonify(return_data)
-
-
-        # fail if drive not found
-        return jsonify({'failure-message' : 'Drive not found'}), 400
-
-
-    def powerOffDrive(self, query_drive_id):
-        bus = dbus.SystemBus()
-
-
-        nm_udisks2 = bus.get_object(
-            "org.freedesktop.UDisks2",
-            "/org/freedesktop/UDisks2")
-
-        iface = dbus.Interface(
-            nm_udisks2,
-            'org.freedesktop.DBus.ObjectManager')
-
-
-        object_paths = iface.GetManagedObjects()
-
-        for object_path in object_paths:
-            if not object_path.startswith('/org/freedesktop/UDisks2/drives/'):
-                continue
-
-
-            settings = bus.get_object(
-                "org.freedesktop.UDisks2",
-                object_path)
-
-            settings_connection = dbus.Interface(
-                settings,
-                dbus_interface='org.freedesktop.DBus.Properties')
-
-
-
-            settings_dict = settings_connection.GetAll('org.freedesktop.UDisks2.Drive')
-
-
-            drive_id = str(settings_dict['Id'])
-            if query_drive_id != drive_id:
-                continue
-
-
-            CanPowerOff = bool(settings_dict['CanPowerOff'])
-            if not CanPowerOff:
-                return jsonify({'failure-message' : 'Drive cannot be powered off'}), 400
-
-
-
-            drive_interface = dbus.Interface(
-                bus.get_object('org.freedesktop.UDisks2', object_path),
-                'org.freedesktop.UDisks2.Drive')
-
-
-            try:
-                drive_interface.PowerOff({})
-            except dbus.exceptions.DBusException as e:
-                app.logger.error('D-Bus Exception: %s', str(e))
-                return jsonify({'failure-message' : str(e)}), 400
-
-
-            return_data = {
-                'success-message' : 'Power Off Successful'
-            }
-            return jsonify(return_data)
-
-
-        # fail if drive not found
-        return jsonify({'failure-message' : 'Drive not found'}), 400
-
-
-    def unmountDevice(self, query_device_id):
-        bus = dbus.SystemBus()
-
-
-        nm_udisks2 = bus.get_object(
-            "org.freedesktop.UDisks2",
-            "/org/freedesktop/UDisks2")
-
-        iface = dbus.Interface(
-            nm_udisks2,
-            'org.freedesktop.DBus.ObjectManager')
-
-
-        objects = iface.GetManagedObjects()
-
-        for object_path, object_info in objects.items():
-            if not object_path.startswith('/org/freedesktop/UDisks2/block_devices/'):
-                continue
-
-
-            settings = bus.get_object(
-                "org.freedesktop.UDisks2",
-                object_path)
-
-            settings_connection = dbus.Interface(
-                settings,
-                dbus_interface='org.freedesktop.DBus.Properties')
-
-
-
-            settings_dict = settings_connection.GetAll('org.freedesktop.UDisks2.Block')
-
-
-            device_id = str(settings_dict['Id'])
-            if query_device_id != device_id:
-                continue
-
-
-            if len(object_info['org.freedesktop.UDisks2.Filesystem']['MountPoints']) == 0:
-                return jsonify({'failure-message' : 'Filesystem not mounted'}), 400
-
-
-            MountPoints0 = "".join(chr(i) for i in object_info['org.freedesktop.UDisks2.Filesystem']['MountPoints'][0][:-1])  # trim null char
-
-
-            app.logger.info('Unmount %s', MountPoints0)
-            if MountPoints0 in self.protected_filesystems:
-                return jsonify({'failure-message' : 'Not allowed to unmount protected filesystem: {0:s}'.format(MountPoints0)}), 400
-
-
-            fs_interface = dbus.Interface(
-                settings,
-                dbus_interface='org.freedesktop.UDisks2.Filesystem')
-
-
-            try:
-                fs_interface.Unmount({})
-            except dbus.exceptions.DBusException as e:
-                app.logger.error('D-Bus Exception: %s', str(e))
-                return jsonify({'failure-message' : str(e)}), 400
-
-
-            return_data = {
-                'success-message' : 'Unmount Successful'
-            }
-            return jsonify(return_data)
-
-
-        # fail if drive not found
-        return jsonify({'failure-message' : 'Device not found'}), 400
-
-
-    def mountDevice(self, query_device_id):
-        bus = dbus.SystemBus()
-
-
-        nm_udisks2 = bus.get_object(
-            "org.freedesktop.UDisks2",
-            "/org/freedesktop/UDisks2")
-
-        iface = dbus.Interface(
-            nm_udisks2,
-            'org.freedesktop.DBus.ObjectManager')
-
-
-        objects = iface.GetManagedObjects()
-
-        for object_path, object_info in objects.items():
-            if not object_path.startswith('/org/freedesktop/UDisks2/block_devices/'):
-                continue
-
-
-            settings = bus.get_object(
-                "org.freedesktop.UDisks2",
-                object_path)
-
-            settings_connection = dbus.Interface(
-                settings,
-                dbus_interface='org.freedesktop.DBus.Properties')
-
-
-
-            settings_dict = settings_connection.GetAll('org.freedesktop.UDisks2.Block')
-
-
-            device_id = str(settings_dict['Id'])
-            if query_device_id != device_id:
-                continue
-
-
-            if len(object_info['org.freedesktop.UDisks2.Filesystem']['MountPoints']) > 1:
-                return jsonify({'failure-message' : 'Filesystem already mounted'}), 400
-
-
-            fs_interface = dbus.Interface(
-                settings,
-                dbus_interface='org.freedesktop.UDisks2.Filesystem')
-
-
-            try:
-                fs_interface.Mount({})
-            except dbus.exceptions.DBusException as e:
-                app.logger.error('D-Bus Exception: %s', str(e))
-                return jsonify({'failure-message' : str(e)}), 400
-
-
-            return_data = {
-                'success-message' : 'Mount Successful'
-            }
-            return jsonify(return_data)
-
-
-        # fail if drive not found
-        return jsonify({'failure-message' : 'Device not found'}), 400
+            return jsonify({'failure-message': 'User does not have permission to access this resource'}), 400
+        try:
+            return jsonify(DriveManager(protected_paths=(self.indi_allsky_config.get('IMAGE_FOLDER'), self.indi_allsky_config.get('IMAGE_EXPORT_FOLDER'))).execute(request.get_json(silent=True)))
+        except ValueError as error:
+            return jsonify({'failure-message': str(error)}), 400
+        except dbus.exceptions.DBusException:
+            app.logger.exception('Drive manager request failed')
+            return jsonify({'failure-message': 'The drive manager could not complete the request. Refresh the device list before retrying.'}), 503
 
 
 class ImageCircleHelperView(TemplateView):
@@ -19801,33 +19487,21 @@ class ModernAdminNetworkView(ModernAdminSafeControlsMixin, NetworkManagerView):
         return context
 
 
-class ModernAdminDriveManagerView(ModernAdminSafeControlsMixin, DriveManagerView):
-    page_title = 'Modern Admin Drives'
+class ModernAdminDriveManagerView(ModernAdminContextMixin, TemplateView):
+    page_title = 'Drives'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
 
     def get_context(self):
-        context = super(ModernAdminDriveManagerView, self).get_context()
-        form = context['form_drives']
-
-        context['modern_admin_safe_title'] = 'Drives'
-        context['modern_admin_safe_note'] = 'Drive and mount selectors come from the existing drive manager. Mount, unmount, and power-off remain disabled in Modern Admin.'
-        context['modern_admin_safe_sections'] = (
-            {
-                'title' : 'Drive manager',
-                'rows'  : (
-                    {'label' : 'UDisks2', 'value' : 'Available' if context.get('udisks2_installed') else 'Unavailable'},
-                ),
-            },
-            {
-                'title' : 'Available devices',
-                'rows'  : self.field_rows(form, ('DRIVES_SELECT', 'DEVICES_SELECT')),
-            },
-        )
-        context['modern_admin_safe_actions'] = (
-            self.disabled_action('Power off drive', 'Can disconnect storage; disabled in Modern Admin.'),
-            self.disabled_action('Mount device', 'Changes system mount state; disabled in Modern Admin.'),
-            self.disabled_action('Unmount device', 'Can interrupt media storage; disabled in Modern Admin.'),
-        )
+        from ..drive_manager import DriveManager
+        context = super().get_context()
+        drives, error = [], ''
+        try:
+            drives = DriveManager(protected_paths=(self.indi_allsky_config.get('IMAGE_FOLDER'), self.indi_allsky_config.get('IMAGE_EXPORT_FOLDER'))).inventory()
+        except (dbus.exceptions.DBusException, ValueError):
+            app.logger.exception('Drive inventory unavailable')
+            error = 'UDisks2 is unavailable or its device list could not be read.'
+        context.update(drive_inventory=drives, drive_error=error,
+                       drive_can_control=bool(current_user.is_admin))
         return context
 
 
@@ -20352,7 +20026,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))
     bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))
     bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/safe_controls.html'))
-    bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/drives.html'))
     bp_allsky.add_url_rule('/modern-admin/system/gpio-control', view_func=ModernAdminManualGpioView.as_view('modern_admin_manual_gpio_view', template_name='modern_admin/manual_gpio.html'))
     bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
     bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))

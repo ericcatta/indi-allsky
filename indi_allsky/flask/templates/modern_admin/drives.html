@@ -1,0 +1,25 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}Drives — Hybrid{% endblock %}
+{% block content %}
+<section id="drive-tool" style="max-width:1100px;margin:auto;padding:1rem" data-url="{{ url_for('indi_allsky.ajax_drive_manager_view') }}" data-csrf="{{ csrf_token() }}">
+<h1>Drives</h1><p>Inspect storage and manage mounted filesystems. Unmount every filesystem before powering off a drive.</p>
+<a href="{{ url_for('indi_allsky.modern_admin_drive_manager_view') }}">Refresh devices</a>
+{% if drive_error %}<p role="alert">{{ drive_error }}</p>{% elif not drive_inventory %}<p>No drives were reported by UDisks2.</p>{% endif %}
+{% if not drive_can_control %}<p id="drive-permission">Administrator access is required for drive commands and metadata.</p>{% endif %}
+{% for drive in drive_inventory %}
+<article style="border:1px solid #64748b;border-radius:.5rem;padding:1rem;margin:1rem 0">
+<h2>{{ drive.vendor }} {{ drive.model }}</h2><p>{{ drive.id }} · {{ '%.1f'|format(drive.size / 1073741824) }} GiB</p>
+<button type="button" data-drive-command="getmetadata" data-drive-id="{{ drive.id }}"{% if not drive_can_control %} disabled aria-describedby="drive-permission"{% endif %}>Show metadata</button>
+{% set mounted = drive.volumes|selectattr('mounts')|list %}
+<button type="button" data-drive-command="poweroff" data-drive-id="{{ drive.id }}"{% if not drive_can_control or not drive.can_power_off or mounted %} disabled{% endif %}>Power off drive</button>
+{% if not drive.can_power_off %}<p>This drive does not support power off.</p>{% elif mounted %}<p>Unmount all filesystems to enable power off.</p>{% endif %}
+{% for volume in drive.volumes %}
+<fieldset style="margin:1rem 0"><legend>{{ volume.id }}</legend><p>{{ volume.mounts|join(', ') if volume.mounts else 'Not mounted' }}</p>
+{% if volume.protected %}<p>Protected system or configured media filesystem.</p>{% endif %}
+<button type="button" data-drive-command="{{ 'unmount' if volume.mounts else 'mount' }}" data-device-id="{{ volume.id }}"{% if not drive_can_control or volume.protected or not volume.id %} disabled{% endif %}>{{ 'Unmount' if volume.mounts else 'Mount' }}</button>
+</fieldset>{% endfor %}
+</article>{% endfor %}
+<p id="drive-result" role="status" aria-live="polite"></p><table><tbody id="drive-metadata"></tbody></table>
+</section>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/drives.js') }}"></script>
+{% endblock %}
