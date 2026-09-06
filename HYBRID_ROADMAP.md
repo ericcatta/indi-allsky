@@ -16,6 +16,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- GPIO Hybrid: pagina nativa indipendente da ManualGpioView; lettura senza
+  setup/output/cleanup, comandi espliciti On/Off limitati ai pin configurati.
+  RPi.GPIO resta il backend supportato. Collaudo fisico ancora aperto.
+
 - Focus: decodifica, ritaglio e misurazione ora nel modulo condiviso
   `indi_allsky/focus_preview.py`; parita' JPEG/score/stelle verificata.
   Pagina nativa con preview per camera, zoom/offset, cronologia e comandi focuser

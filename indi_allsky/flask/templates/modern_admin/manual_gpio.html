@@ -1,0 +1,21 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}GPIO Control — Hybrid{% endblock %}
+{% block content %}
+<section aria-labelledby="gpio-title" style="max-width:1000px;margin:auto;padding:1rem" id="gpio-tool" data-url="{{ url_for('indi_allsky.ajax_manual_gpio_view') }}" data-csrf="{{ csrf_token() }}">
+<h1 id="gpio-title">GPIO Control</h1>
+<p>Control the three configured manual outputs using BCM pin numbering. An output stays set until another command or device reset changes it.</p>
+<a href="{{ url_for('indi_allsky.modern_admin_manual_gpio_view') }}">Refresh pin states</a>
+{% if gpio_reason %}<p id="gpio-permission" role="status">{{ gpio_reason }}</p>{% endif %}
+{% if gpio_error and gpio_error != gpio_reason %}<p role="alert">{{ gpio_error }}</p>{% endif %}
+{% for pin in gpio_pins %}
+<fieldset style="margin:1rem 0;padding:1rem"{% if gpio_reason or pin.number is none %} disabled{% if gpio_reason %} aria-describedby="gpio-permission"{% endif %}{% endif %}>
+<legend>Output {{ pin.id }} — {{ 'BCM ' ~ pin.name if pin.number is not none else 'Pin not configured' }}</legend>
+<p>Observed state: {{ 'On' if pin.state == 1 else 'Off' if pin.state == 0 else 'Unknown / not configured as an output' }}</p>
+<button type="button" data-gpio-id="{{ pin.id }}" data-gpio-name="{{ pin.name }}" data-gpio-state="1">Set On</button>
+<button type="button" data-gpio-id="{{ pin.id }}" data-gpio-name="{{ pin.name }}" data-gpio-state="0">Set Off</button>
+</fieldset>
+{% endfor %}
+<p id="gpio-result" role="status" aria-live="polite"></p>
+</section>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/manual-gpio.js') }}"></script>
+{% endblock %}

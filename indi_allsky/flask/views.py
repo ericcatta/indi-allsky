@@ -9444,42 +9444,26 @@ class AjaxManualGpioView(BaseView):
                 message = {
                     'failure-message' : 'User is not an admin',
                 }
-                return jsonify({}), 400
+                return jsonify(message), 400
 
 
         from ..devices import generic as indi_allsky_gpio
-
-
-        pin_id = int(request.json['PIN_ID'])
-        new_pin_state = request.json['NEW_PIN_STATE']
-
-
-        gpio_class_str = self.indi_allsky_config.get('MANUAL_GPIO', {}).get('A_CLASSNAME')
-        if not gpio_class_str:
-            message = {
-                'failure-message' : 'Manual GPIO not configured',
-            }
-            return jsonify(message), 400
+        from ..manual_gpio import command_target
+        from ..devices.exceptions import DeviceControlException
+        try:
+            target, new_pin_state = command_target(self.indi_allsky_config, request.get_json(silent=True))
+        except ValueError as error:
+            return jsonify({'failure-message': str(error)}), 400
+        pin_id = target['id']
+        pin_str = target['name']
+        gpio_class = indi_allsky_gpio.rpigpio_gpio_rpigpio
 
         try:
-            gpio_class = getattr(indi_allsky_gpio, gpio_class_str)
-        except AttributeError:
-            message = {
-                'failure-message' : 'Invalid GPIO class',
-            }
-            return jsonify(), 400
-
-
-        pin_str = self.indi_allsky_config.get('MANUAL_GPIO', {}).get('A_PIN_{0:d}'.format(pin_id))
-        if not pin_str:
-            message = {
-                'failure-message' : 'Unknown pin'
-            }
-            return jsonify({}), 400
-
-
-        pin = gpio_class(self.indi_allsky_config, pin_1_name=pin_str)
-        pin.state = new_pin_state
+            pin = gpio_class(self.indi_allsky_config, pin_1_name=pin_str)
+            pin.state = new_pin_state
+        except (DeviceControlException, OSError, ValueError, RuntimeError, ImportError):
+            app.logger.exception('Manual GPIO command failed')
+            return jsonify({'failure-message': 'GPIO command failed. Inspect the pin state before retrying.'}), 503
 
         time.sleep(0.5)
 
@@ -19847,46 +19831,28 @@ class ModernAdminDriveManagerView(ModernAdminSafeControlsMixin, DriveManagerView
         return context
 
 
-class ModernAdminManualGpioView(ModernAdminSafeControlsMixin, ManualGpioView):
-    page_title = 'Modern Admin GPIO Control'
+class ModernAdminManualGpioView(ModernAdminContextMixin, TemplateView):
+    page_title = 'GPIO Control'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
     def get_context(self):
-        context = super(ModernAdminManualGpioView, self).get_context()
-
-        pin_rows = list()
-        for index, pin_name in enumerate(context.get('pin_names', tuple())):
-            pin_state = context.get('pin_states', [-1, -1, -1])[index]
-            if pin_state == -1:
-                state_label = 'Unavailable'
-            elif pin_state:
-                state_label = 'On'
-            else:
-                state_label = 'Off'
-
-            pin_rows.append({'label' : 'Pin {0:s}'.format(pin_name), 'value' : state_label})
-
-        context['modern_admin_safe_title'] = 'GPIO Control'
-        context['modern_admin_safe_note'] = 'GPIO class and pin states are read from the existing manual GPIO view. Toggling pins remains disabled in Modern Admin.'
-        context['modern_admin_safe_sections'] = (
-            {
-                'title' : 'GPIO interface',
-                'rows'  : (
-                    {'label' : 'GPIO class', 'value' : context.get('gpio_class') or 'Not configured'},
-                ),
-            },
-            {
-                'title' : 'Pins',
-                'rows'  : pin_rows,
-            },
-        )
-        context['modern_admin_safe_actions'] = (
-            self.disabled_action('Toggle pin 1', 'Manual GPIO control can affect hardware and remains disabled in Modern Admin.'),
-            self.disabled_action('Toggle pin 2', 'Manual GPIO control can affect hardware and remains disabled in Modern Admin.'),
-            self.disabled_action('Toggle pin 3', 'Manual GPIO control can affect hardware and remains disabled in Modern Admin.'),
-        )
+        from ..manual_gpio import configured_pins, observe_pins
+        context = super().get_context()
+        configured = self.indi_allsky_config.get('MANUAL_GPIO', {}).get('A_CLASSNAME') == 'rpigpio_gpio_rpigpio'
+        pins = configured_pins(self.indi_allsky_config)
+        error = ''
+        if configured:
+            try:
+                import RPi.GPIO as gpio
+                pins = observe_pins(self.indi_allsky_config, gpio)
+            except (ImportError, RuntimeError, OSError, ValueError):
+                app.logger.exception('Manual GPIO state unavailable')
+                error = 'GPIO state could not be read on this device.'
+        reason = '' if configured else 'No supported manual GPIO interface is configured.'
+        if not app.config.get('LOGIN_DISABLED') and not current_user.is_admin:
+            reason = 'Administrator access is required to change GPIO outputs.'
+        context.update(gpio_pins=pins, gpio_error=error, gpio_reason=reason or error)
         return context
-
 
 
 
@@ -20387,7 +20353,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))
     bp_allsky.add_url_rule('/modern-admin/system/network', view_func=ModernAdminNetworkView.as_view('modern_admin_network_view', template_name='modern_admin/safe_controls.html'))
     bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/safe_controls.html'))
-    bp_allsky.add_url_rule('/modern-admin/system/gpio-control', view_func=ModernAdminManualGpioView.as_view('modern_admin_manual_gpio_view', template_name='modern_admin/safe_controls.html'))
+    bp_allsky.add_url_rule('/modern-admin/system/gpio-control', view_func=ModernAdminManualGpioView.as_view('modern_admin_manual_gpio_view', template_name='modern_admin/manual_gpio.html'))
     bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
     bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))
     bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminClassicPlaceholderView.as_view('modern_admin_classic_placeholder_view', template_name='modern_admin/placeholder.html'))

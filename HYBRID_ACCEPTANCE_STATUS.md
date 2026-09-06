@@ -703,3 +703,33 @@ Both roles, owner-media policy and missing-source behavior remain covered.
 Full Book 2/shell/route regression and the real NumPy/OpenCV multicamera processor
 and stretch isolation tests pass. No production worker was restarted or deployed;
 real 24-hour acceptance must cover the final deployed worker version.
+
+## Native GPIO: observation separated from hardware commands
+
+Hybrid GPIO no longer inherits ManualGpioView. That legacy GET instantiated three
+output drivers, calling GPIO.setup even with disabled UI buttons. Hybrid now reads
+configured BCM pin functions and output values without setup/output/cleanup.
+Selecting BCM numbering changes only process-local numbering. Input/unconfigured
+pins remain explicitly unknown; provider errors disable controls with a reason.
+
+The native page offers explicit On/Off commands, confirmation with the physical
+BCM number and manual state refresh. The existing POST endpoint remains
+admin/CSRF protected and now validates the three allowed slots, configured pin,
+supported RPi.GPIO class and boolean/0/1 state before constructing a driver.
+Strings such as "false" are rejected rather than interpreted as true. Invalid
+configuration and failed effects return useful messages. Successful commands
+still leave the output latched: cleanup would reset it and is intentionally not
+called. The UI labels the command-reported state separately from read observation.
+
+`hybrid_gpio_flow_test.py` runs real Flask with Classic imports forbidden and a
+mocked GPIO module/driver: both roles, GET never constructing drivers or calling
+setup/output/cleanup, On/Off/unknown reads, invalid payloads, CSRF, slot-to-pin
+mapping, provider failure and failed effects. `hybrid_gpio_browser_test.js` checks
+confirmation/cancel, explicit Off, CSRF, duplicate prevention, session/error
+feedback and retaining disabled controls. All 18 Book 2/shell/route entrypoints
+pass, with existing fingerprints unchanged and native template accounted for.
+
+No physical pins were read or changed by this mission's tests. Native-page browser
+acceptance, real configured devices, production deployment and recovery remain
+open pending the identified hardware/maintenance window. Classic's old GPIO page
+is still present and must be removed with the final frontend removal.
