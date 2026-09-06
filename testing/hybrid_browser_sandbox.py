@@ -12,6 +12,7 @@ from hybrid_operations_fixture import seed_operations
 from hybrid_source_media_fixture import seed_source_media
 from hybrid_generation_fixture import seed_generation, seed_preview_frames
 from hybrid_generated_media_fixture import seed_generated_media
+from hybrid_archive_fixture import seed_archive
 
 class SandboxEffectBlocked(RuntimeError):
     pass
@@ -25,6 +26,7 @@ def run(runtime_config, port):
         seed_generation(app)
         seed_preview_frames(app)
         seed_generated_media(app)
+        seed_archive(app)
         from flask import request, jsonify
         from indi_allsky.flask.views import AjaxConfigRestoreView
         @app.before_request

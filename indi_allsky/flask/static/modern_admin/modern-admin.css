@@ -3216,3 +3216,7 @@ body.modern-admin-lightbox-open {
 
 #mini-exit-fullscreen { display: none; }
 #mini-preview-container:fullscreen #mini-exit-fullscreen { display: block; position: absolute; top: 1rem; right: 1rem; z-index: 1; }
+
+#hybrid-archive-filters { flex-wrap: wrap; }
+#hybrid-archive-filters label, #hybrid-archive-filters input, #hybrid-archive-filters select { max-width: 100%; min-width: 0; }
+[data-archive-id] h2 { font-size: 1rem; overflow-wrap: anywhere; }

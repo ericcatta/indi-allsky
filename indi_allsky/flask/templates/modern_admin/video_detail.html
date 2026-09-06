@@ -59,11 +59,12 @@ var camera_id = {{ camera_id }};
             <div><dt>Metadata</dt><dd>{{ modern_admin_video_detail.metadata }}</dd></div>
         </dl>
 
-        <p class="modern-admin-note">This page shows database metadata only. It does not download, upload, share, delete, process, preview, open video paths or inspect file contents.</p>
+        <p class="modern-admin-note">Inspect video metadata, download the original, or open it in the archive.</p>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_media_timelapses_view') }}">Back to Timelapses</a>
-            <a href="{{ url_for('indi_allsky.videoviewer_view') }}">Open legacy Video Viewer</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_timelapses_view', camera_id=modern_admin_video_detail.camera_id) }}">Back to Timelapses</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='video', camera_id=modern_admin_video_detail.camera_id, media_id=modern_admin_video_detail.id) }}">Download original</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_archive_view', kind='video', camera_id=modern_admin_video_detail.camera_id, search=modern_admin_video_detail.filename) }}">View in archive</a>
         </section>
     </section>
 </main>

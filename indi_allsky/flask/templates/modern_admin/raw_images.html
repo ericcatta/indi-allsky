@@ -47,6 +47,8 @@ var camera_id = {{ camera_id }};
         </div>
 
         {% include 'modern_admin/_media_camera_filter.html' %}
+        {% set archive_kind = 'raw' %}
+        {% include 'modern_admin/_media_archive_link.html' %}
 
         <div class="modern-admin-filter-bar" aria-label="Raw image filters">
             <label>

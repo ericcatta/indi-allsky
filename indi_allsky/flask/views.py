@@ -201,6 +201,7 @@ from .forms import IndiAllskyIndiServerChangeForm
 
 from .notification_views import ModernAdminNotificationAcknowledgeView
 from .table_export_views import ModernAdminTableExportView
+from .media_archive import ModernAdminMediaArchive, archive_parameters, KINDS as ARCHIVE_KINDS
 from .mini_generation import ModernAdminMiniPreviewView, queue_mini_generation
 from .source_media_views import ModernAdminSourceDownloadView, local_source_allowed, source_file_path
 from .base_views import BaseView
@@ -12957,6 +12958,36 @@ class ModernAdminLoopView(ModernAdminMediaBrowseView, ImageLoopImgView):
         return camera_views
 
 
+class ModernAdminMediaArchiveView(ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Media archive'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_media_gallery_view'
+
+    def get_context(self):
+        context = super().get_context()
+        self.add_media_camera_filter_context(context)
+        selected = context['modern_admin_media_selected_filter']
+        if request.args.get('profile_id') and not selected.get('profile_id'):
+            abort(400, description='Choose an available camera profile.')
+        if request.args.get('camera_id') and (request.args.get('camera_id', type=int) is None or request.args.get('camera_id', type=int) != selected.get('camera_id')):
+            abort(400, description='Camera and profile do not match.')
+        if selected.get('camera_id') is not None:
+            IndiAllSkyDbCameraTable.query.filter_by(id=selected['camera_id']).first_or_404()
+        values, anchor, direction = archive_parameters(request.args)
+        archive = ModernAdminMediaArchive(values['kind'], selected.get('camera_id'), self.verify_admin_network)
+        context.update(archive_values=values, archive_kinds=ARCHIVE_KINDS)
+        try:
+            context['archive'] = archive.load(values, anchor, direction)
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception('Unable to read media archive')
+            context['archive'] = {'items': [], 'previous': None, 'next': None}
+            context['archive_error'] = 'The media archive could not be loaded. Retry or check the system log.'
+        context['archive_scope'] = dict(values, camera_id=selected.get('camera_id'),
+                                        profile_id=selected.get('profile_id', ''))
+        return context
+
+
 class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
     page_title = 'Modern Admin Media'
     modern_admin_section = 'Media'
@@ -21440,6 +21471,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
     bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
     bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>/acknowledge', view_func=ModernAdminNotificationAcknowledgeView.as_view('modern_admin_notification_acknowledge_view'), methods=['POST'])
+    bp_allsky.add_url_rule('/modern-admin/media/archive', view_func=ModernAdminMediaArchiveView.as_view('modern_admin_media_archive_view', template_name='modern_admin/media_archive.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/mini-generate', view_func=ModernAdminMiniGenerateView.as_view('modern_admin_mini_generate_view', template_name='modern_admin/mini_generate.html'))
     bp_allsky.add_url_rule('/modern-admin/tools/mini-preview', view_func=ModernAdminMiniPreviewView.as_view('modern_admin_mini_preview_view'))
     bp_allsky.add_url_rule('/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download', view_func=ModernAdminSourceDownloadView.as_view('modern_admin_source_download_view'))

@@ -19,7 +19,7 @@ def test_route_contract_is_unchanged():
                 isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute)
                 and node.func.attr == 'add_url_rule'
-                and node.args[0].value not in ('/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
+                and node.args[0].value not in ('/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
             ):
                 if node.args[0].value in ('/modern-admin/tools/camera-simulator', '/modern-admin/tools/generate'):
                     template = next(k for k in node.keywords if k.arg == 'view_func').value

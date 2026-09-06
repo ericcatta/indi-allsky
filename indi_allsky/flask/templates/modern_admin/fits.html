@@ -64,6 +64,8 @@ var camera_id = {{ camera_id }};
         {% endif %}
 
         {% include 'modern_admin/_media_camera_filter.html' %}
+        {% set archive_kind = 'fits' %}
+        {% include 'modern_admin/_media_archive_link.html' %}
 
         <div class="modern-admin-filter-row" aria-label="FITS metadata filters">
             <label>

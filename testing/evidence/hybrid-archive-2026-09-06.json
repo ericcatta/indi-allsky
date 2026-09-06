@@ -1,0 +1,172 @@
+{
+  "date": "2026-09-06",
+  "baseline": "72c31eb0 plus complete archive mission",
+  "scope": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+  "controls": [
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Browse the complete archive / recent images",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 1 / test-profile-1",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Enter full archive with scope preserved",
+      "proof": "Clicked from Images; URL included kind=image, camera_id=1 and profile_id=test-profile-1. First page contained 48 records.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Next page / Previous page",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 1",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Reach every record in deterministic order",
+      "proof": "Browser fixture had 113 camera-1 images: pages of 48, 48 and 17. Page-2 IDs 164..117 did not overlap page 1; page 3 reached ID100 and had no Next. Previous returned the same page-2 IDs. Flask fixture independently covers 111 records, tied timestamps, both orders, deletion of cursor anchor and newer arrivals.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Order",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 1",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Reverse complete archive order",
+      "proof": "Oldest first started with IDs100,101,102,103. This changed the server query, not only visible cards.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Capture day from / Capture day to / Day/Night / Uploaded",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 1",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Filter all archive records",
+      "proof": "Selected 2024-01-01 through 2024-01-01, Night and Uploaded, oldest order: exactly IDs102,108,...,204 (18 records).",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Filename contains / Apply filters",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 1",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Find a historical record beyond previous recent limits",
+      "proof": "archive-image-100.jpg returned exactly ID100. Enter in the search field also submitted the form and returned ID100.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Download original",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 1 / image100",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Download historical file",
+      "proof": "Browser download event observed for /media/image/1/100/download. Flask tests verify nonempty originals for every displayed kind and both cameras.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Image details / Create mini timelapse",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 1 / image100",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Open the correct historical record in dependent workflows",
+      "proof": "Detail showed image100 metadata and camera1 original link; mini generator target was image100 dated 2024-01-02 03:04:05.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Media type",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 2",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Browse all ten supported types",
+      "proof": "Images and Timelapses verified individually; changed through mini-video, keogram, startrail, startrail-video, panorama, panorama-video, fits and raw. Every page showed the correct filename/type and camera2 original URL.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Camera",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 2, all cameras",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Isolate camera and combine intentionally",
+      "proof": "Camera2 returned only camera2 rows. All Cameras on RAW returned IDs2/1 with camera IDs2/1. Both FITS previews decoded at64px width; RAW PNG preview decoded at64px.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Video details / View in archive",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 2 / video2",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Native video detail and return navigation",
+      "proof": "Video details rendered without Classic; View in archive returned kind=video/camera2 with video-camera-2.mp4 filename filter.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Gallery camera filter / archive link",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 2 / test-profile-2",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Update archive destination after dynamic gallery filtering",
+      "proof": "Changed Gallery profile1 to profile2; link became /media/archive?kind=image&profile_id=test-profile-2. Clicked link; every archive card belonged to camera2.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Reset filters / empty state",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera 2",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Distinguish no matches and recover",
+      "proof": "does-not-exist returned zero results with explicit no-media message. Reset removed filters while retaining camera2.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Responsive layout",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "390x844 and1280x900",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Keep controls and cards within viewport",
+      "proof": "document.scrollWidth equalled innerWidth at390 and1280; mobile date/type/camera/order controls operated successfully.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Preview failure / missing original / recovery",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "camera1 / image140",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Show request failure, safe404 and restored preview",
+      "proof": "Temporarily moved only a synthetic JPEG inside /tmp/hybrid-acceptance-* after verifying sqlite://. Uncached preview displayed failure message; Download original displayed The original file is no longer available locally. Restored file and reloaded: image width64, no visible error. Previously cached image100 still displayed cached content; it was restored as well.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control_id": "Live archive, production data and performance",
+      "role": "ordinary user (both roles additionally verified by Flask tests)",
+      "camera_profile": "production cameras",
+      "prerequisites": "Isolated Raspberry Flask server; Classic disabled; temporary DB/media; ordinary synthetic user; no production effects.",
+      "request": "GET archive / native browser interaction",
+      "expected_effect": "Validate real workload and integrated acquisition",
+      "proof": "This mission uses synthetic media. No throughput claim, production deployment or24-hour acceptance run.",
+      "status": "bloccato"
+    }
+  ]
+}

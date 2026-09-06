@@ -353,3 +353,40 @@ player/context controls across every media type, YouTube/integrations, remaining
 operational tools, product placeholders, physical Classic removal, production
 deploy/rollback verification, and the minimum 24-hour day/night acceptance run.
 No performance improvement or complete product acceptance is claimed.
+
+
+## Verified mission: complete media archive
+
+Hybrid now exposes a complete archive for all ten media types, linked from the
+recent views. Queries apply camera/profile, capture-day range, filename,
+day/night and upload filters to the full dataset. Newest/oldest ordering uses
+creation timestamp plus ID. Next/previous cursors paginate 48 records at a time;
+changing filters restarts navigation. Preview, original downloads, image/FITS/
+video detail and image-centred mini generation remain available for old records.
+Video detail no longer requires a Classic viewer endpoint. Gallery updates its
+archive link after an AJAX camera switch. Database failures have an explicit
+error state rather than masquerading as an empty archive.
+
+`hybrid_archive_flow_test.py` verifies both roles/cameras, all ten types and
+original downloads, 111 image records across three pages, both ordering
+directions, exact forward/backward traversal, inclusive capture-day filters,
+literal wildcard searches, invalid/mismatched scope, anonymous access, provider
+failure, deleted cursor anchors, newly arriving records and remote camera policy.
+All ten isolated Flask suites, Book 2, original route fingerprints, shell and
+existing JS controller suites pass. No config, driver, worker or capture change.
+
+Browser evidence: `testing/evidence/hybrid-archive-2026-09-06.json`. The browser
+fixture adds two preview frames, so its camera-1 archive has 113 records. It
+reached record 100 beyond the old 100-row limit, downloaded it, inspected detail
+and selected it for mini generation. All type/camera/filter controls, pagination,
+keyboard submission, empty/reset states, desktop/mobile widths and Gallery
+scope preservation were exercised. FITS and RAW previews decoded successfully.
+A temporarily moved synthetic JPEG produced an explicit preview failure and
+404 original download; restoration recovered the preview. A previously cached
+image can remain visible after local-file loss, as expected from browser caching.
+
+The earlier "older than 100 rows" access gap is closed through this archive.
+Remaining gates include live production workload/performance, complete media
+mutation/player coverage, operational tools, integrations/product placeholders,
+physical Classic removal and the minimum 24-hour post-deployment acceptance run.
+The overall product audit remains open.

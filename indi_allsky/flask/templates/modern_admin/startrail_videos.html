@@ -47,6 +47,8 @@ var camera_id = {{ camera_id }};
         </div>
 
         {% include 'modern_admin/_media_camera_filter.html' %}
+        {% set archive_kind = 'startrail-video' %}
+        {% include 'modern_admin/_media_archive_link.html' %}
 
         {% include 'modern_admin/_generated_media_strip.html' %}
 

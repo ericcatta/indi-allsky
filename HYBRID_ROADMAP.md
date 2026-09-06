@@ -31,6 +31,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     conservati. Test su task reali in DB temporaneo e cancellazioni di fixture;
   - browser desktop/mobile verificato; encoding/upload dei worker e produzione
     restano da collaudare. Evidenze in `HYBRID_ACCEPTANCE_STATUS.md`.
+- Archivio completo Hybrid per dieci tipi di media: query e filtri su tutti i
+  record, cursori timestamp/ID, anteprime, originali e accesso ai dettagli. Superato
+  il limite funzionale dei soli 100 record recenti; camera/profilo mantenuti anche
+  passando dalla Gallery dinamica. Parita' Flask e browser verificata su fixture.
 - Media generati: download Hybrid per record/camera estesi ai prodotti immagini,
   timelapse, mini-video, startrail e panorama; preview con policy della camera
   proprietaria. Cinque pagine non richiedono piu' route UI Classic.

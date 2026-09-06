@@ -42,6 +42,8 @@ var camera_id = {{ camera_id }};
         </section>
         {% endif %}
         {% include 'modern_admin/_media_camera_filter.html' %}
+        {% set archive_kind = 'panorama' if modern_admin_section == 'Panorama Loop' else ('video' if modern_admin_media_kind == 'video' else ('fits' if modern_admin_media_kind == 'fits' else 'image')) %}
+        {% include 'modern_admin/_media_archive_link.html' %}
         {% if modern_admin_media_kind in ('image', 'fits') %}
         <div class="modern-admin-media-toolbar" aria-label="Media selection actions">
             <button class="modern-admin-media-button" id="modern-admin-download-selected" type="button" disabled>Download selected</button>
@@ -458,6 +460,14 @@ async function modernAdminApplyGalleryFilter(filterLink) {
             modernAdminGalleryLoadMore.hidden = false;
         }
 
+        const archiveLink = document.getElementById('modern-admin-archive-link');
+        if (archiveLink) {
+            const archiveUrl = new URL(archiveLink.href, window.location.href);
+            archiveUrl.searchParams.delete('camera_id');
+            archiveUrl.searchParams.delete('profile_id');
+            modernAdminGalleryApplyFilterParams(archiveUrl);
+            archiveLink.href = archiveUrl.toString();
+        }
         window.history.pushState({}, '', filterLink.href);
         modernAdminUpdateSelection();
     } catch (error) {
