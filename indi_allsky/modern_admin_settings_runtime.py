@@ -764,6 +764,80 @@ class ModernAdminFullConfigImageOutputParser:
         return config
 
 
+class ModernAdminFullConfigImageTransformParser:
+    """Hybrid-owned parser for full-config image transform fields."""
+
+    REQUIRED_FIELDS = (
+        'IMAGE_ROTATE',
+        'IMAGE_ROTATE_ANGLE',
+        'IMAGE_ROTATE_KEEP_SIZE',
+        'IMAGE_FLIP_V',
+        'IMAGE_FLIP_H',
+        'IMAGE_SCALE',
+        'IMAGE_COLORMAP',
+        'IMAGE_CIRCLE_MASK__ENABLE',
+        'IMAGE_CIRCLE_MASK__DIAMETER',
+        'IMAGE_CIRCLE_MASK__OFFSET_X',
+        'IMAGE_CIRCLE_MASK__OFFSET_Y',
+        'IMAGE_CIRCLE_MASK__BLUR',
+        'IMAGE_CIRCLE_MASK__OPACITY',
+        'IMAGE_CIRCLE_MASK__OUTLINE',
+        'IMAGE_CROP_IMAGE_CIRCLE',
+    )
+
+    def apply(self, config, payload):
+        config['IMAGE_ROTATE'] = str(payload['IMAGE_ROTATE'])
+        config['IMAGE_ROTATE_ANGLE'] = int(payload['IMAGE_ROTATE_ANGLE'])
+        config['IMAGE_ROTATE_KEEP_SIZE'] = bool(payload['IMAGE_ROTATE_KEEP_SIZE'])
+        config['IMAGE_FLIP_V'] = bool(payload['IMAGE_FLIP_V'])
+        config['IMAGE_FLIP_H'] = bool(payload['IMAGE_FLIP_H'])
+        config['IMAGE_SCALE'] = int(payload['IMAGE_SCALE'])
+        config['IMAGE_COLORMAP'] = str(payload['IMAGE_COLORMAP'])
+        config['IMAGE_CIRCLE_MASK']['ENABLE'] = bool(payload['IMAGE_CIRCLE_MASK__ENABLE'])
+        config['IMAGE_CIRCLE_MASK']['DIAMETER'] = int(payload['IMAGE_CIRCLE_MASK__DIAMETER'])
+        config['IMAGE_CIRCLE_MASK']['OFFSET_X'] = int(payload['IMAGE_CIRCLE_MASK__OFFSET_X'])
+        config['IMAGE_CIRCLE_MASK']['OFFSET_Y'] = int(payload['IMAGE_CIRCLE_MASK__OFFSET_Y'])
+        config['IMAGE_CIRCLE_MASK']['BLUR'] = int(payload['IMAGE_CIRCLE_MASK__BLUR'])
+        config['IMAGE_CIRCLE_MASK']['OPACITY'] = int(payload['IMAGE_CIRCLE_MASK__OPACITY'])
+        config['IMAGE_CIRCLE_MASK']['OUTLINE'] = bool(payload['IMAGE_CIRCLE_MASK__OUTLINE'])
+        config['IMAGE_CROP_IMAGE_CIRCLE'] = bool(payload['IMAGE_CROP_IMAGE_CIRCLE'])
+        return config
+
+
+class ModernAdminFullConfigFish2PanoParser:
+    """Hybrid-owned parser for full-config fish2pano fields."""
+
+    REQUIRED_FIELDS = (
+        'FISH2PANO__ENABLE',
+        'FISH2PANO__DIAMETER',
+        'FISH2PANO__OFFSET_X',
+        'FISH2PANO__OFFSET_Y',
+        'FISH2PANO__ROTATE_ANGLE',
+        'FISH2PANO__SCALE',
+        'FISH2PANO__MODULUS',
+        'FISH2PANO__FLIP_H',
+        'FISH2PANO__ENABLE_CARDINAL_DIRS',
+        'FISH2PANO__DIRS_OFFSET_BOTTOM',
+        'FISH2PANO__OPENCV_FONT_SCALE',
+        'FISH2PANO__PIL_FONT_SIZE',
+    )
+
+    def apply(self, config, payload):
+        config['FISH2PANO']['ENABLE'] = bool(payload['FISH2PANO__ENABLE'])
+        config['FISH2PANO']['DIAMETER'] = int(payload['FISH2PANO__DIAMETER'])
+        config['FISH2PANO']['OFFSET_X'] = int(payload['FISH2PANO__OFFSET_X'])
+        config['FISH2PANO']['OFFSET_Y'] = int(payload['FISH2PANO__OFFSET_Y'])
+        config['FISH2PANO']['ROTATE_ANGLE'] = int(payload['FISH2PANO__ROTATE_ANGLE'])
+        config['FISH2PANO']['SCALE'] = float(payload['FISH2PANO__SCALE'])
+        config['FISH2PANO']['MODULUS'] = int(payload['FISH2PANO__MODULUS'])
+        config['FISH2PANO']['FLIP_H'] = bool(payload['FISH2PANO__FLIP_H'])
+        config['FISH2PANO']['ENABLE_CARDINAL_DIRS'] = bool(payload['FISH2PANO__ENABLE_CARDINAL_DIRS'])
+        config['FISH2PANO']['DIRS_OFFSET_BOTTOM'] = int(payload['FISH2PANO__DIRS_OFFSET_BOTTOM'])
+        config['FISH2PANO']['OPENCV_FONT_SCALE'] = float(payload['FISH2PANO__OPENCV_FONT_SCALE'])
+        config['FISH2PANO']['PIL_FONT_SIZE'] = int(payload['FISH2PANO__PIL_FONT_SIZE'])
+        return config
+
+
 class ModernAdminSettingsConfigValidationService:
     """Hybrid-owned type validation for config payloads before persistence."""
 

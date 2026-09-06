@@ -87,11 +87,13 @@ from ..modern_admin_settings_runtime import ModernAdminFullConfigDenoiseParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigDisplayUnitsParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigEnvironmentParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigFish2PanoParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageCalibrationParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageOutputParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigImageStretchParser
+from ..modern_admin_settings_runtime import ModernAdminFullConfigImageTransformParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigKeogramParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from ..modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
@@ -3404,6 +3406,14 @@ class AjaxConfigView(BaseView):
         return ModernAdminFullConfigImageOutputParser()
 
 
+    def full_config_image_transform_parser(self):
+        return ModernAdminFullConfigImageTransformParser()
+
+
+    def full_config_fish2pano_parser(self):
+        return ModernAdminFullConfigFish2PanoParser()
+
+
     def settings_reload_command_service(self):
         return ModernAdminSettingsReloadCommandService()
 
@@ -3530,34 +3540,9 @@ class AjaxConfigView(BaseView):
         self.full_config_startrails_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_image_calibration_parser().apply(self.indi_allsky_config, request.json)
         self.full_config_image_output_parser().apply(self.indi_allsky_config, request.json)
-        self.indi_allsky_config['IMAGE_ROTATE']                         = str(request.json['IMAGE_ROTATE'])
-        self.indi_allsky_config['IMAGE_ROTATE_ANGLE']                   = int(request.json['IMAGE_ROTATE_ANGLE'])
-        self.indi_allsky_config['IMAGE_ROTATE_KEEP_SIZE']               = bool(request.json['IMAGE_ROTATE_KEEP_SIZE'])
+        self.full_config_image_transform_parser().apply(self.indi_allsky_config, request.json)
         #self.indi_allsky_config['IMAGE_ROTATE_WITH_OFFSET']             = bool(request.json['IMAGE_ROTATE_WITH_OFFSET'])
-        self.indi_allsky_config['IMAGE_FLIP_V']                         = bool(request.json['IMAGE_FLIP_V'])
-        self.indi_allsky_config['IMAGE_FLIP_H']                         = bool(request.json['IMAGE_FLIP_H'])
-        self.indi_allsky_config['IMAGE_SCALE']                          = int(request.json['IMAGE_SCALE'])
-        self.indi_allsky_config['IMAGE_COLORMAP']                       = str(request.json['IMAGE_COLORMAP'])
-        self.indi_allsky_config['IMAGE_CIRCLE_MASK']['ENABLE']          = bool(request.json['IMAGE_CIRCLE_MASK__ENABLE'])
-        self.indi_allsky_config['IMAGE_CIRCLE_MASK']['DIAMETER']        = int(request.json['IMAGE_CIRCLE_MASK__DIAMETER'])
-        self.indi_allsky_config['IMAGE_CIRCLE_MASK']['OFFSET_X']        = int(request.json['IMAGE_CIRCLE_MASK__OFFSET_X'])
-        self.indi_allsky_config['IMAGE_CIRCLE_MASK']['OFFSET_Y']        = int(request.json['IMAGE_CIRCLE_MASK__OFFSET_Y'])
-        self.indi_allsky_config['IMAGE_CIRCLE_MASK']['BLUR']            = int(request.json['IMAGE_CIRCLE_MASK__BLUR'])
-        self.indi_allsky_config['IMAGE_CIRCLE_MASK']['OPACITY']         = int(request.json['IMAGE_CIRCLE_MASK__OPACITY'])
-        self.indi_allsky_config['IMAGE_CIRCLE_MASK']['OUTLINE']         = bool(request.json['IMAGE_CIRCLE_MASK__OUTLINE'])
-        self.indi_allsky_config['IMAGE_CROP_IMAGE_CIRCLE']              = bool(request.json['IMAGE_CROP_IMAGE_CIRCLE'])
-        self.indi_allsky_config['FISH2PANO']['ENABLE']                  = bool(request.json['FISH2PANO__ENABLE'])
-        self.indi_allsky_config['FISH2PANO']['DIAMETER']                = int(request.json['FISH2PANO__DIAMETER'])
-        self.indi_allsky_config['FISH2PANO']['OFFSET_X']                = int(request.json['FISH2PANO__OFFSET_X'])
-        self.indi_allsky_config['FISH2PANO']['OFFSET_Y']                = int(request.json['FISH2PANO__OFFSET_Y'])
-        self.indi_allsky_config['FISH2PANO']['ROTATE_ANGLE']            = int(request.json['FISH2PANO__ROTATE_ANGLE'])
-        self.indi_allsky_config['FISH2PANO']['SCALE']                   = float(request.json['FISH2PANO__SCALE'])
-        self.indi_allsky_config['FISH2PANO']['MODULUS']                 = int(request.json['FISH2PANO__MODULUS'])
-        self.indi_allsky_config['FISH2PANO']['FLIP_H']                  = bool(request.json['FISH2PANO__FLIP_H'])
-        self.indi_allsky_config['FISH2PANO']['ENABLE_CARDINAL_DIRS']    = bool(request.json['FISH2PANO__ENABLE_CARDINAL_DIRS'])
-        self.indi_allsky_config['FISH2PANO']['DIRS_OFFSET_BOTTOM']      = int(request.json['FISH2PANO__DIRS_OFFSET_BOTTOM'])
-        self.indi_allsky_config['FISH2PANO']['OPENCV_FONT_SCALE']       = float(request.json['FISH2PANO__OPENCV_FONT_SCALE'])
-        self.indi_allsky_config['FISH2PANO']['PIL_FONT_SIZE']           = int(request.json['FISH2PANO__PIL_FONT_SIZE'])
+        self.full_config_fish2pano_parser().apply(self.indi_allsky_config, request.json)
         self.indi_allsky_config['IMAGE_SAVE_FITS']                      = bool(request.json['IMAGE_SAVE_FITS'])
         self.indi_allsky_config['IMAGE_SAVE_FITS_COMPRESSED']           = bool(request.json['IMAGE_SAVE_FITS_COMPRESSED'])
         self.indi_allsky_config['IMAGE_SAVE_FITS_PERIOD']               = int(request.json['IMAGE_SAVE_FITS_PERIOD'])

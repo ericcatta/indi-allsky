@@ -25,11 +25,13 @@ from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigDenoi
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigDisplayUnitsParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigEnvironmentParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigExposureGainParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigFish2PanoParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigFocusParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageCalibrationParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageEnhancementParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageOutputParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageStretchParser
+from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigImageTransformParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigKeogramParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensGeometryParser
 from indi_allsky.modern_admin_settings_runtime import ModernAdminFullConfigLensMetadataParser
@@ -116,6 +118,8 @@ class LegacyFullConfigParserHarness:
         ModernAdminFullConfigStartrailsParser,
         ModernAdminFullConfigImageCalibrationParser,
         ModernAdminFullConfigImageOutputParser,
+        ModernAdminFullConfigImageTransformParser,
+        ModernAdminFullConfigFish2PanoParser,
         ModernAdminFullConfigAutoWhiteBalanceParser,
     )
 
@@ -299,6 +303,12 @@ class LegacyFullConfigParserHarness:
                 full_config_image_output_parser=(
                     lambda: ModernAdminFullConfigImageOutputParser()
                 ),
+                full_config_image_transform_parser=(
+                    lambda: ModernAdminFullConfigImageTransformParser()
+                ),
+                full_config_fish2pano_parser=(
+                    lambda: ModernAdminFullConfigFish2PanoParser()
+                ),
             ),
         }
         exec(self.code, namespace)
@@ -369,10 +379,47 @@ class LegacyFullConfigParserHarness:
         assert actual == expected
 
 
+# Frozen from AjaxConfigView at b380742c, before extracting these parsers.
+IMAGE_TRANSFORM_LEGACY_SOURCE = """
+config['IMAGE_ROTATE'] = str(payload['IMAGE_ROTATE'])
+config['IMAGE_ROTATE_ANGLE'] = int(payload['IMAGE_ROTATE_ANGLE'])
+config['IMAGE_ROTATE_KEEP_SIZE'] = bool(payload['IMAGE_ROTATE_KEEP_SIZE'])
+config['IMAGE_FLIP_V'] = bool(payload['IMAGE_FLIP_V'])
+config['IMAGE_FLIP_H'] = bool(payload['IMAGE_FLIP_H'])
+config['IMAGE_SCALE'] = int(payload['IMAGE_SCALE'])
+config['IMAGE_COLORMAP'] = str(payload['IMAGE_COLORMAP'])
+config['IMAGE_CIRCLE_MASK']['ENABLE'] = bool(payload['IMAGE_CIRCLE_MASK__ENABLE'])
+config['IMAGE_CIRCLE_MASK']['DIAMETER'] = int(payload['IMAGE_CIRCLE_MASK__DIAMETER'])
+config['IMAGE_CIRCLE_MASK']['OFFSET_X'] = int(payload['IMAGE_CIRCLE_MASK__OFFSET_X'])
+config['IMAGE_CIRCLE_MASK']['OFFSET_Y'] = int(payload['IMAGE_CIRCLE_MASK__OFFSET_Y'])
+config['IMAGE_CIRCLE_MASK']['BLUR'] = int(payload['IMAGE_CIRCLE_MASK__BLUR'])
+config['IMAGE_CIRCLE_MASK']['OPACITY'] = int(payload['IMAGE_CIRCLE_MASK__OPACITY'])
+config['IMAGE_CIRCLE_MASK']['OUTLINE'] = bool(payload['IMAGE_CIRCLE_MASK__OUTLINE'])
+config['IMAGE_CROP_IMAGE_CIRCLE'] = bool(payload['IMAGE_CROP_IMAGE_CIRCLE'])
+"""
+
+FISH2PANO_LEGACY_SOURCE = """
+config['FISH2PANO']['ENABLE'] = bool(payload['FISH2PANO__ENABLE'])
+config['FISH2PANO']['DIAMETER'] = int(payload['FISH2PANO__DIAMETER'])
+config['FISH2PANO']['OFFSET_X'] = int(payload['FISH2PANO__OFFSET_X'])
+config['FISH2PANO']['OFFSET_Y'] = int(payload['FISH2PANO__OFFSET_Y'])
+config['FISH2PANO']['ROTATE_ANGLE'] = int(payload['FISH2PANO__ROTATE_ANGLE'])
+config['FISH2PANO']['SCALE'] = float(payload['FISH2PANO__SCALE'])
+config['FISH2PANO']['MODULUS'] = int(payload['FISH2PANO__MODULUS'])
+config['FISH2PANO']['FLIP_H'] = bool(payload['FISH2PANO__FLIP_H'])
+config['FISH2PANO']['ENABLE_CARDINAL_DIRS'] = bool(payload['FISH2PANO__ENABLE_CARDINAL_DIRS'])
+config['FISH2PANO']['DIRS_OFFSET_BOTTOM'] = int(payload['FISH2PANO__DIRS_OFFSET_BOTTOM'])
+config['FISH2PANO']['OPENCV_FONT_SCALE'] = float(payload['FISH2PANO__OPENCV_FONT_SCALE'])
+config['FISH2PANO']['PIL_FONT_SIZE'] = int(payload['FISH2PANO__PIL_FONT_SIZE'])
+"""
+
+
 def test_parity_corpus_covers_current_legacy_parser_contract():
     harness = LegacyFullConfigParserHarness()
 
-    assert len(harness.direct_payload_keys) == 544
+    assert len(harness.direct_payload_keys) == 517
+    assert len(harness.HYBRID_PARSERS) == 31
+    assert len({field for parser in harness.HYBRID_PARSERS for field in parser.REQUIRED_FIELDS}) == 202
     assert len(harness.required_payload_keys) == 719
     for parser_class in harness.HYBRID_PARSERS:
         assert set(parser_class.REQUIRED_FIELDS).issubset(harness.required_payload_keys)
@@ -1674,6 +1721,74 @@ def test_ajax_config_view_delegates_image_calibration_parsing():
         assert field_name not in harness.direct_payload_keys
 
 
+def test_image_transform_and_panorama_parsers_match_frozen_legacy():
+    for parser_class, legacy_source, section in (
+        (ModernAdminFullConfigImageTransformParser, IMAGE_TRANSFORM_LEGACY_SOURCE, 'IMAGE_CIRCLE_MASK'),
+        (ModernAdminFullConfigFish2PanoParser, FISH2PANO_LEGACY_SOURCE, 'FISH2PANO'),
+    ):
+        parser = parser_class()
+        legacy_code = compile(legacy_source, '<frozen legacy image parser>', 'exec')
+        statements = ast.parse(legacy_source).body
+        fields = tuple(statement.value.args[0].slice.value for statement in statements)
+        assert parser.REQUIRED_FIELDS == fields
+        payload = {field: '1' for field in fields}
+        initial = {'UNRELATED': 'preserve', section: {'legacy': 42}}
+
+        def compare(config, candidate_payload):
+            expected_config = copy.deepcopy(config)
+            actual_config = copy.deepcopy(config)
+            original_payload = copy.deepcopy(candidate_payload)
+            try:
+                exec(legacy_code, {'config': expected_config, 'payload': candidate_payload})
+                expected = ('ok',)
+            except Exception as error:
+                expected = (type(error), error.args)
+            try:
+                assert parser.apply(actual_config, candidate_payload) is actual_config
+                actual = ('ok',)
+            except Exception as error:
+                actual = (type(error), error.args)
+            assert actual == expected
+            assert actual_config == expected_config
+            assert candidate_payload == original_payload
+            return actual_config
+
+        result = compare(initial, payload)
+        assert result['UNRELATED'] == 'preserve'
+        assert result[section]['legacy'] == 42
+        for field in fields:
+            missing = dict(payload)
+            del missing[field]
+            compare(initial, missing)
+            # Includes permissive bool/str casts and failing numeric casts.
+            for value in ('false', '', '3.5', '-2', None, 0, False, 2.75, [], {}):
+                compare(initial, dict(payload, **{field: value}))
+
+        compare({'UNRELATED': 'preserve'}, payload)
+        for container in (None, [], 42, 'invalid'):
+            compare(dict(initial, **{section: container}), payload)
+            # Missing payload access must still fail before target access.
+            first_nested_field = next(field for field in fields if '__' in field)
+            incomplete = dict(payload)
+            del incomplete[first_nested_field]
+            compare(dict(initial, **{section: container}), incomplete)
+
+
+def test_ajax_config_view_delegates_image_transform_and_panorama_in_order():
+    harness = LegacyFullConfigParserHarness()
+    statements = [ast.unparse(statement) for statement in harness.parser_statements]
+    calls = [
+        'self.full_config_{0}_parser().apply(self.indi_allsky_config, request.json)'.format(name)
+        for name in ('image_output', 'image_transform', 'fish2pano')
+    ]
+    start = statements.index(calls[0])
+    assert statements[start:start + 3] == calls
+    assert statements[start + 3].startswith("self.indi_allsky_config['IMAGE_SAVE_FITS'] =")
+    for parser_class in (ModernAdminFullConfigImageTransformParser, ModernAdminFullConfigFish2PanoParser):
+        assert set(parser_class.REQUIRED_FIELDS).isdisjoint(harness.direct_payload_keys)
+    assert 'IMAGE_ROTATE_WITH_OFFSET' not in harness.required_payload_keys
+
+
 def test_ajax_config_view_delegates_image_output_parsing():
     harness = LegacyFullConfigParserHarness()
     parser_source = '\n'.join(ast.unparse(statement) for statement in harness.parser_statements)
@@ -1838,6 +1953,8 @@ def test_parity_harness_detects_candidate_drift():
 
 
 if __name__ == '__main__':
+    test_image_transform_and_panorama_parsers_match_frozen_legacy()
+    test_ajax_config_view_delegates_image_transform_and_panorama_in_order()
     test_parity_corpus_covers_current_legacy_parser_contract()
     test_camera_connection_parser_preserves_legacy_casting_and_required_fields()
     test_station_identity_parser_preserves_legacy_casting_and_required_fields()

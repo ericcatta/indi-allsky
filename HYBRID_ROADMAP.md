@@ -165,6 +165,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     parsati da `ModernAdminFullConfigImageOutputParser`; encoder, EXIF runtime,
     template rendering, creazione directory e scrittura filesystem restano
     Classic-owned e invariati.
+  - trasformazioni immagine, colormap e maschera circolare sono ora parsate da
+    `ModernAdminFullConfigImageTransformParser`; i parametri panorama FISH2PANO
+    sono ora parsati da `ModernAdminFullConfigFish2PanoParser`. Pipeline immagini,
+    generazione panorama e gate Safe Actions restano invariati; il parser
+    full-config conta ora 31 parser Hybrid-owned e 202 campi su 719, con 517
+    campi ancora inline.
 - Book 2 / Media Runtime Independence:
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
