@@ -55,6 +55,9 @@
         {% elif archive_values.kind == 'video' %}
         <a href="{{ url_for('indi_allsky.modern_admin_media_video_detail_view', video_id=item.id, camera_id=item.camera_id) }}">Video details</a>
         {% endif %}
+        {% if archive_values.kind not in ('image', 'fits', 'raw') %}
+        <a href="{{ url_for('indi_allsky.modern_admin_output_detail_view', kind=archive_values.kind, id=item.id, camera_id=item.camera_id, profile_id=modern_admin_media_selected_filter.profile_id) }}">Output details</a>
+        {% endif %}
         <p class="archive-preview-error" role="status" hidden>Preview could not be loaded. The original may be missing or unreachable.</p>
       </div>
     </article>

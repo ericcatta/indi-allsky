@@ -24,7 +24,6 @@ BOUNDARIES = (
             'ModernAdminNowView',
             'ModernAdminHighlightsView',
             'ModernAdminMomentDetailView',
-            'ModernAdminOutputDetailView',
             'ModernAdminSkyCycleView',
             'ModernAdminObservatoryView',
         ),
@@ -113,6 +112,7 @@ BOUNDARIES = (
         'parent': 'ModernAdminContextMixin',
         'wrappers': (
             'ModernAdminMediaListView',
+            'ModernAdminOutputDetailView',
             'ModernAdminLoopView',
         ),
     },

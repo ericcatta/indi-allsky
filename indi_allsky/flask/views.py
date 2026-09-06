@@ -90,7 +90,6 @@ from ..processing import ImageProcessor
 from ..product_view_models import build_now_view
 from ..product_view_models import build_highlights_view
 from ..product_view_models import build_moment_detail_view
-from ..product_view_models import build_output_detail_view
 from ..product_view_models import build_observatory_view
 from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import HighlightsMetadataRepository
@@ -6403,14 +6402,6 @@ class ModernAdminMomentDetailView(ModernAdminProductView):
         return build_moment_detail_view()
 
 
-class ModernAdminOutputDetailView(ModernAdminProductView):
-    page_title = 'Output Detail'
-    product_context_key = 'output_detail'
-
-    def build_product_context(self, context):
-        return build_output_detail_view()
-
-
 class ModernAdminSkyCycleView(ModernAdminProductView):
     page_title = 'Sky Cycle Report'
 
@@ -11770,6 +11761,46 @@ class ModernAdminMediaArchiveView(ModernAdminMediaBrowseView, TemplateView):
 class ModernAdminLibraryView(ModernAdminMediaArchiveView):
     page_title = 'Library'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_library_view'
+
+
+class ModernAdminOutputDetailView(ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Output detail'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_output_detail_view'
+
+    def get_context(self):
+        context = super().get_context()
+        self.add_media_camera_filter_context(context)
+        selected = context['modern_admin_media_selected_filter']
+        kinds = {key: label for key, label in ARCHIVE_KINDS.items() if key not in ('image', 'fits', 'raw')}
+        kind = request.args.get('kind', 'video')
+        if kind not in kinds:
+            abort(400, description='Choose a supported generated output type.')
+        context.update(output_kinds=kinds, output_kind=kind, output_item=None,
+                       output_scope={'camera_id': selected.get('camera_id'), 'profile_id': selected.get('profile_id', '')})
+        identifier = request.args.get('id')
+        if identifier is None:
+            return context
+        try:
+            identifier = int(identifier)
+            if not 0 < identifier <= 2**63 - 1:
+                raise ValueError()
+        except ValueError:
+            abort(400, description='Choose a valid output identifier.')
+        archive = ModernAdminMediaArchive(kind, selected.get('camera_id'), self.verify_admin_network)
+        try:
+            query = archive.model.query.filter(archive.model.id == identifier)
+            if selected.get('camera_id') is not None:
+                query = query.filter(archive.model.camera_id == selected['camera_id'])
+            entry = query.first_or_404()
+            context['output_item'] = archive.item(entry)
+            context['output_scope']['camera_id'] = entry.camera_id
+            context['output_item'].update(file_size=entry.fileSize, framerate=getattr(entry, 'framerate', None))
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception('Output detail unavailable')
+            context['output_error'] = 'The output record could not be loaded. Refresh the page to retry.'
+        return context
 
 
 class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):

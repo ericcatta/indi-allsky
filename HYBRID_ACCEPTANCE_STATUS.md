@@ -927,3 +927,30 @@ implemented features by this change. Direct browser acceptance of Library and
 production deployment remain open. This completes the connection between the
 primary Library entry and existing supported media retrieval, not the entire
 product migration or final acceptance.
+
+## Output Detail opens saved generated records
+
+The static Output Detail dossier has been replaced by real metadata/preview/
+download for seven output kinds: timelapse, mini timelapse, keogram, star trails,
+star-trail video, panorama image and panorama video. Library/archive result cards
+link to the exact kind/ID/camera/profile. The existing public Product URL remains;
+without an ID it offers the corresponding Library collections, preserving scope.
+With an ID it validates kind and bounds, enforces camera/profile scope, and uses
+the existing per-record archive serializer and independent download handler.
+
+Displayed dimensions, frame count/rate, size, timestamps, upload/generation state
+and notes come from the stored record. Missing recipe and lineage are not filled
+with simulated values. Preview errors are observable using the shared archive
+controller. No generation, upload or deletion is executed by the page.
+
+`hybrid_output_detail_flow_test.py` passes on the Pi runtime with Classic imports
+forbidden, temporary decodable outputs and an in-memory DB: all seven types,
+both cameras/roles, real Library-to-detail links and downloaded bytes, empty
+selection, malformed IDs/kinds/profiles, wrong-camera/not-found results, anonymous
+redirect, sanitized provider errors, remote-only media policy and missing original
+returning 404. All nineteen Book 2/shell/route/network entrypoints pass with the
+updated explicit Hybrid media boundary. git diff --check passes.
+
+Direct browser playback, production deployment, source lineage and processing
+recipe reconstruction remain open. The change completes real generated-record
+inspection through this Product entry, not the complete product acceptance.

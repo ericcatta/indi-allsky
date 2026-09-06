@@ -116,7 +116,7 @@ def test_product_routes_are_registered():
     )
 
     for surface in PRODUCT_SPINE:
-        base = 'ModernAdminMediaArchiveView' if surface['name'] == 'Library' else 'ModernAdminProductView'
+        base = {'Library': 'ModernAdminMediaArchiveView', 'Output': 'ModernAdminMediaBrowseView, TemplateView'}.get(surface['name'], 'ModernAdminProductView')
         class_pattern = 'class {0:s}({1:s}):'.format(surface['view'], base)
         assert_true(
             class_pattern in views_text,

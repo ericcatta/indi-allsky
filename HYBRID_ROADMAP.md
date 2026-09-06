@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Output Detail: dettaglio reale per sette tipi generati, collegato da Library e
+  archivio. Riusa policy URL e download per-record; valida tipo, ID e scope
+  camera/profilo. Senza selezione propone le raccolte reali. Metadata e risultato
+  salvato distinti da disponibilita' file/recipe/lineage. Test Flask passano;
+  browser e deploy restano aperti.
+
 - Library: ingresso Product operativo dell'archivio Hybrid, con filtri su tipo,
   camera, data, nome, giorno/notte e upload, paginazione e download. Riusa lo
   stesso controller e contenuto dell'archivio; eliminati esempi e ricerca statica.
