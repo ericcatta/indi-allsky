@@ -16,6 +16,9 @@
 <main class="hybrid-login-card" aria-labelledby="login-title">
     <div class="hybrid-login-brand" aria-hidden="true">H</div>
     <h1 id="login-title">Sign in to Hybrid</h1>
+    {% for message in get_flashed_messages() %}
+    <p role="status">{{ message }}</p>
+    {% endfor %}
     <form id="form_login" autocomplete="on">
         {{ form_login.csrf_token }}
         {{ form_login.NEXT() }}

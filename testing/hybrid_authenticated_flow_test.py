@@ -60,12 +60,14 @@ def run(runtime_config):
         assert client.get('/indi-allsky/logout').location == '/indi-allsky/modern-admin/now'
         assert client.get('/indi-allsky/modern-admin/account').status_code == 302
         login = client.get('/indi-allsky/login')
+        assert 'Please log in to access this page.' in login.text
         token = FormFields(login.text).fields['csrf_token']
         headers = {'X-CSRFToken': token}
         login_payload = {'USERNAME': 'test-user-1', 'PASSWORD': PASSWORD, 'NEXT': ''}
         assert client.post('/indi-allsky/login', json=login_payload, headers=headers).status_code == 400
         login_payload['PASSWORD'] = changed['NEW_PASSWORD']
         assert client.post('/indi-allsky/login', json=login_payload, headers=headers).status_code == 200
+        assert 'Please log in to access this page.' not in client.get('/indi-allsky/modern-admin/account').text
         client.get('/indi-allsky/logout')
         login = client.get('/indi-allsky/login')
         token = FormFields(login.text).fields['csrf_token']

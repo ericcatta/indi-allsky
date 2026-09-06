@@ -296,3 +296,14 @@ reuse the already-tested operations controller for sorting, paging and exports.
 All Book 2/JS regressions and seven isolated Flask suites pass. No execution-
 throughput improvement is claimed. A stale login-required flash seen after
 sign-in remains an identified shared-auth UI defect for the subsequent pass.
+
+
+## Verified correction: stale login-required message
+
+The browser generation test exposed a login-required flash that survived the
+login form and appeared later on an authenticated task detail. The native login
+template now displays/consumes pending flash messages, with normal template
+escaping. The authenticated flow test confirms the notice appears before login
+and is absent after successful authentication. A browser logout/login/task-detail
+sequence reproduced and verified the correction. This changes no credentials,
+permissions, sessions or redirects. The full Book 2/shell/route regression passes.
