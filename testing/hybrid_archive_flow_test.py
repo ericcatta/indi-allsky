@@ -32,6 +32,16 @@ def run(runtime_config, entrypoint='archive'):
         user,admin=login_client(app,2),login_client(app,1)
         route='/indi-allsky/modern-admin/'+('library' if entrypoint=='library' else 'media/archive')
         for client in (user,admin):
+            for family in ('images','timelapses'):
+                detail='/indi-allsky/modern-admin/media/'+family+'/2'
+                response=client.get(detail+'?camera_id=2&profile_id=test-profile-2')
+                assert response.status_code==200 and 'var camera_id = 2;' in response.text
+                assert 'profile_id=test-profile-2' in response.text
+                assert client.get(detail+'?camera_id=1').status_code==404
+                assert client.get(detail+'?profile_id=test-profile-1').status_code==404
+                for query in ('camera_id=bad','profile_id=unknown','camera_id=2&profile_id=test-profile-1'):
+                    assert client.get(detail+'?'+query).status_code==400
+                assert 'var camera_id = 2;' in client.get(detail).text
             for kind in KINDS:
                 for cid in (1,2):
                     page=client.get(route,query_string=dict(kind=kind,camera_id=cid,profile_id='test-profile-'+str(cid)))

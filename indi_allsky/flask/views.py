@@ -12110,11 +12110,14 @@ class ModernAdminMediaImageDetailView(ModernAdminMediaImagesView):
     def get_context(self):
         context = super(ModernAdminMediaListView, self).get_context()
 
+        selected = self.get_selected_media_camera_filter()
+        context['modern_admin_detail_profile_id'] = selected.get('profile_id', '')
         try:
-            entry = IndiAllSkyDbImageTable.query\
-                .join(IndiAllSkyDbImageTable.camera)\
-                .filter(IndiAllSkyDbImageTable.id == self.image_id)\
-                .one()
+            query = IndiAllSkyDbImageTable.query.join(IndiAllSkyDbImageTable.camera).filter(IndiAllSkyDbImageTable.id == self.image_id)
+            if selected.get('camera_id') is not None:
+                query = query.filter(IndiAllSkyDbImageTable.camera_id == selected['camera_id'])
+            entry = query.one()
+            context['camera_id'] = entry.camera_id
         except NoResultFound:
             abort(404)
 
@@ -12376,11 +12379,14 @@ class ModernAdminMediaVideoDetailView(ModernAdminMediaTimelapsesView):
     def get_context(self):
         context = super(ModernAdminMediaListView, self).get_context()
 
+        selected = self.get_selected_media_camera_filter()
+        context['modern_admin_detail_profile_id'] = selected.get('profile_id', '')
         try:
-            entry = IndiAllSkyDbVideoTable.query\
-                .join(IndiAllSkyDbVideoTable.camera)\
-                .filter(IndiAllSkyDbVideoTable.id == self.video_id)\
-                .one()
+            query = IndiAllSkyDbVideoTable.query.join(IndiAllSkyDbVideoTable.camera).filter(IndiAllSkyDbVideoTable.id == self.video_id)
+            if selected.get('camera_id') is not None:
+                query = query.filter(IndiAllSkyDbVideoTable.camera_id == selected['camera_id'])
+            entry = query.one()
+            context['camera_id'] = entry.camera_id
         except NoResultFound:
             abort(404)
 

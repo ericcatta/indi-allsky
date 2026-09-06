@@ -984,3 +984,20 @@ Direct browser preview/interaction, production deployment, persisted event
 review/classification and source lineage remain open. Moment currently provides
 image inspection, not the completed detector-event workflow; the larger plan
 must still account for that distinction.
+
+### Direct image/video detail scope correction
+
+The older native image/video detail URLs previously looked up only the record ID,
+ignoring requested camera/profile scope. Both now resolve the shared camera filter
+and constrain the record query accordingly: malformed or mismatched scope is 400,
+a record outside the selected camera is 404. An unscoped valid ID remains supported.
+The template camera ID comes from the actual record, and navigation back to media,
+archive or mini-generation preserves the validated profile.
+
+The extended `hybrid_archive_flow_test.py --entrypoint library` verifies both roles
+and direct image/video URLs, valid/invalid/mismatched scope, owner camera context
+without query parameters and retained profile links, alongside its complete media
+navigation/download tests. `hybrid_highlights_flow_test.py` verifies the connected
+Moment path remains functional. Both pass, as do all nineteen Book 2/shell/route/
+network entrypoints and git diff --check. This correction has not been deployed to
+production; direct browser acceptance remains separate.

@@ -74,9 +74,9 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-note">Inspect capture metadata, download the original or use this image as the centre of a mini timelapse.</p>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_media_images_view', camera_id=modern_admin_image_detail.camera_id) }}">Back to Images</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_media_images_view', camera_id=modern_admin_image_detail.camera_id, profile_id=modern_admin_detail_profile_id) }}">Back to Images</a>
             <a href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='image', camera_id=modern_admin_image_detail.camera_id, media_id=modern_admin_image_detail.id) }}">Download image</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_mini_generate_view', camera_id=modern_admin_image_detail.camera_id, image_id=modern_admin_image_detail.id) }}">Create mini timelapse around this image</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_mini_generate_view', camera_id=modern_admin_image_detail.camera_id, image_id=modern_admin_image_detail.id, profile_id=modern_admin_detail_profile_id) }}">Create mini timelapse around this image</a>
         </section>
     </section>
 </main>
