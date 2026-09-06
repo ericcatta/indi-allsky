@@ -1025,3 +1025,36 @@ checks cached failure, load recovery, subsequent error and missing-image cards.
 The full nineteen-entry Book 2/shell/route/network regression and diff check pass.
 Production deployment, direct browser visual acceptance and sustained capture
 health remain open; no fake detector or AI result was introduced.
+
+## Production capture check and off-grid legacy gain correction
+
+At 2026-09-07 00:15 CEST, production still runs commit 9e721647 plus the two
+documented IMX708 recovery hotfixes, not the newly completed UI. Service active
+since 22:28:24, same main PID 3184687; 85 GiB free. Since that restart the DB had
+141 IMX708 and 142 ZWO JPEG records. Subsequent latest files were verified present:
+IMX708 00:16:13, 4608x2592, 6,345,398 bytes; ZWO 00:15:56, 3840x2160,
+2,144,051 bytes. No media/configuration was deleted or modified.
+
+The initial SYSLOG_IDENTIFIER=python3 filter returned only three entries and was
+not sufficient evidence. The authoritative filter on this installation is
+`_SYSTEMD_USER_UNIT=indi-allsky.service`. It returned 15,402 entries since restart,
+no Traceback/MaskError/CRITICAL markers, but 66 ERROR markers: six initial gain
+limit clamps and sixty “Current gain not found” messages between 22:42:26 and
+00:09:58. These errors prevent claiming an error-free soak. The snapshot covers
+less than two hours, not the required 24-hour day/night acceptance.
+
+Inspection reproduced a defect in legacy exposure recalculation: off-grid gain
+fell back to index zero, so a downward gain step could use index -1 and select
+the maximum gain. Runtime recalculation now uses the adjacent ordered step in the
+requested direction, with endpoint bounds; exact on-grid behavior is unchanged.
+The modern AutoGainController, configuration, drivers and scheduling are unchanged.
+The log observation alone does not prove that every observed reset triggered the
+wrong-direction branch; that branch was reproduced in an isolated behavioral test.
+
+`legacy_auto_gain_steps_test.py` executes the actual recalculation method, compares
+40 on-grid cases against the captured pre-change method, reproduces old off-grid
+wraparound, and checks increasing/decreasing intermediate gains and extremes.
+It passes with all 23 Book 2/shell/route/network/AE/AG entrypoints. The real NumPy/
+OpenCV multicamera processor and stretch tests also pass on the isolated Pi copy.
+The correction is not deployed to production. The final capture build still needs
+deployment/recovery tests and a new uninterrupted 24-hour acceptance period.

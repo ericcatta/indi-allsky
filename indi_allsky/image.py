@@ -8,6 +8,7 @@ from datetime import timedelta
 from datetime import timezone
 import time
 import functools
+import bisect
 import tempfile
 import shutil
 import psutil
@@ -4787,14 +4788,6 @@ class ImageWorker(Process):
 
 
         if self._auto_gain_enabled():
-            try:
-                auto_gain_idx = self.auto_gain_step_list.index(gain)
-            except ValueError:
-                # fallback to min if gain does not match
-                logger.error('Current gain not found in list, reset to minimum gain')
-                auto_gain_idx = 0
-
-
             if next_exposure == exposure:
                 # no change
                 #logger.warning('Auto-Gain - no changes')
@@ -4803,7 +4796,7 @@ class ImageWorker(Process):
                 gain_delta = 0.0
             elif next_exposure > exposure:
                 # exposure/gain needs to increase
-                if gain == self.auto_gain_step_list[-1]:
+                if gain >= self.auto_gain_step_list[-1]:
                     # already at max gain, increase exposure
                     next_gain = gain
                     exposure_delta = next_exposure - exposure
@@ -4819,7 +4812,7 @@ class ImageWorker(Process):
                         logger.info('Auto-Gain increasing exposure to %0.6f (%+0.8f) [maintain gain]', next_exposure, exposure_delta)
                     else:
                         # increase gain, maintain exposure
-                        next_gain = self.auto_gain_step_list[auto_gain_idx + 1]
+                        next_gain = self.auto_gain_step_list[min(bisect.bisect_right(self.auto_gain_step_list, gain), len(self.auto_gain_step_list) - 1)]
                         next_exposure = min(exposure, self.auto_gain_exposure_cutoff_high)  # prevent hitting max exposure
                         exposure_delta = 0.0
                         gain_delta = next_gain - gain
@@ -4827,7 +4820,7 @@ class ImageWorker(Process):
 
             else:
                 # exposure/gain needs to decrease
-                if gain == self.auto_gain_step_list[0]:
+                if gain <= self.auto_gain_step_list[0]:
                     # already at minimum gain, decrease exposure
                     next_gain = gain
                     exposure_delta = next_exposure - exposure
@@ -4843,7 +4836,7 @@ class ImageWorker(Process):
                         logger.info('Auto-Gain decreasing exposure to %0.6f (%+0.8f) [maintain gain]', next_exposure, exposure_delta)
                     else:
                         # decrease gain, maintain exposure
-                        next_gain = self.auto_gain_step_list[auto_gain_idx - 1]
+                        next_gain = self.auto_gain_step_list[max(0, bisect.bisect_left(self.auto_gain_step_list, gain) - 1)]
                         #next_exposure = max(exposure, self.auto_gain_exposure_cutoff_low)
                         next_exposure = max(exposure, self.auto_gain_exposure_cutoff_mid)
                         exposure_delta = 0.0
