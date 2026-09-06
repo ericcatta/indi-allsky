@@ -6,65 +6,31 @@
 <link rel="icon" type="image/png" href="{{ url_for('indi_allsky.static', filename='images/favicon_32.png') }}" sizes="32x32">
 <link rel="icon" type="image/png" href="{{ url_for('indi_allsky.static', filename='images/favicon_128.png') }}" sizes="128x128">
 <link href="{{ url_for('indi_allsky.static', filename='bootstrap/bootstrap.min.css') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='css/style.css') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/login.css') }}" rel="stylesheet">
 <script src="{{ url_for('indi_allsky.static', filename='js/jquery-3.7.1.min.js') }}"></script>
 <script src="{{ url_for('indi_allsky.static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
-<style>
-html, body {
-    height: 100%;
-};
-</style>
+
   </head>
-  <body class="bg-dark bg-opacity-75">
+  <body class="hybrid-login-body">
 
-<div class="row h-100 justify-content-center">
-  <div class="col-11 col-sm-8 col-md-6 col-lg-4 align-self-center">
-  <div class="card card-block bg-dark bg-opacity-25">
-    <div class="text-center text-white pt-2 fs-5">
-        <img src="{{ url_for('indi_allsky.static', filename='images/logo_outline_full.png') }}" height="200" alt="indi-allsky">
-    </div>
-
-    <form id="form_login" onSubmit="return false;">
+<main class="hybrid-login-card" aria-labelledby="login-title">
+    <div class="hybrid-login-brand" aria-hidden="true">H</div>
+    <h1 id="login-title">Sign in to Hybrid</h1>
+    <form id="form_login" autocomplete="on">
         {{ form_login.csrf_token }}
-        <div class="text-danger my-2" id="csrf_token-error"></div>
-
-        <div class="form-group row">
-            <div class="col-2 offset-1">
-                {{ form_login.USERNAME.label(class='col-form-label') }}
-            </div>
-            <div class="col-8">
-                {{ form_login.NEXT(class='form-control bg-secondary') }}
-                {{ form_login.USERNAME(class='form-control bg-secondary') }}
-                <div id="USERNAME-error" class="invalid-feedback text-danger" style="display: none;"></div>
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <div class="col-sm-2 offset-1">
-                {{ form_login.PASSWORD.label(class='col-form-label') }}
-            </div>
-            <div class="col-sm-8">
-                {{ form_login.PASSWORD(class='form-control bg-secondary') }}
-                <div id="PASSWORD-error" class="invalid-feedback text-danger" style="display: none;"></div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="text-center">
-                <button class="btn btn-primary" type="submit">Sign in</button>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="text-center">
-                <div id="success-message" class="text-success" style="display: none;"></div>
-                <div id="failure-message" class="invalid-feedback text-danger" style="display: none;"></div>
-            </div>
-        </div>
+        {{ form_login.NEXT() }}
+        <div class="text-danger" id="csrf_token-error"></div>
+        <label for="USERNAME">Username</label>
+        {{ form_login.USERNAME(autocomplete='username', required=true) }}
+        <div id="USERNAME-error" class="invalid-feedback text-danger" style="display:none;"></div>
+        <label for="PASSWORD">Password</label>
+        {{ form_login.PASSWORD(autocomplete='current-password', required=true) }}
+        <div id="PASSWORD-error" class="invalid-feedback text-danger" style="display:none;"></div>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+        <div id="success-message" role="status" style="display:none;"></div>
+        <div id="failure-message" class="text-danger" role="alert" style="display:none;"></div>
     </form>
-  </div>
-  </div>
-</div>
+</main>
 
 <script>
 const successMessage = $('#success-message');
@@ -108,7 +74,8 @@ $.ajaxSetup({
 
 
 let loginPending = false;
-$('#form_login').on('submit', function() {
+$('#form_login').on('submit', function(event) {
+    event.preventDefault();
     if (loginPending) return;
     loginPending = true;
     const submitButton = $(this).find('button[type="submit"]');

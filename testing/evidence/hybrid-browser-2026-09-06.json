@@ -1,0 +1,228 @@
+{
+  "date": "2026-09-06",
+  "baseline": "6848096d plus reviewed navigation/login/history changes",
+  "scope": "Actual in-app browser against isolated Flask on Raspberry; no production effects",
+  "coverage": "Partial. Other inventory controls remain unverified; no 100% claim.",
+  "controls": [
+    {
+      "page": "/indi-allsky/login",
+      "control_id": "form-login/submit",
+      "role": "anonymous",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "POST /indi-allsky/login",
+      "expected_effect": "Reject incorrect password; permit retry",
+      "proof": "Browser displayed Invalid username or password and re-enabled Sign in; valid retry reached Hybrid Now.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/logout",
+      "control_id": "account/sign-out",
+      "role": "authenticated",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/logout",
+      "expected_effect": "End session",
+      "proof": "Sign out returned to login; synthetic ordinary user could sign in subsequently.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/account",
+      "control_id": "NAME + CURRENT_PASSWORD + save",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "POST /indi-allsky/ajax/user",
+      "expected_effect": "Persist account name",
+      "proof": "User info updated; reloaded form retained Browser Acceptance User; password fields left unchanged.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/account",
+      "control_id": "hybrid-menu-button/Enter",
+      "role": "authenticated",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "none",
+      "expected_effect": "Open keyboard-accessible navigation",
+      "proof": "Enter opened drawer; aria-expanded true; first My Account link received focus.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/account",
+      "control_id": "hybrid-navigation/Escape",
+      "role": "authenticated",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "none",
+      "expected_effect": "Close drawer and return focus",
+      "proof": "Escape closed drawer, aria-expanded false, trigger regained focus.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/account",
+      "control_id": "hybrid-navigation/My Account",
+      "role": "authenticated",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/modern-admin/account",
+      "expected_effect": "Navigate and close menu",
+      "proof": "My Account loaded and new page drawer remained closed.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/login",
+      "control_id": "mobile form",
+      "role": "anonymous",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/login",
+      "expected_effect": "Readable usable narrow layout",
+      "proof": "Screenshot inspection at 390x844 after CSS correction: aligned fields, visible labels, card fits viewport.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/account",
+      "control_id": "mobile form",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/modern-admin/account",
+      "expected_effect": "Usable narrow layout",
+      "proof": "Screenshot inspection at 390x844: account fields and save action fit; runtime toolbar still needs full mobile audit.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/settings/full",
+      "control_id": "Search settings",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "none",
+      "expected_effect": "Filter global settings",
+      "proof": "Searching OWNER showed Owner field and one matching group; nonmatching rows hidden.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/settings/full",
+      "control_id": "OWNER + CONFIG_NOTE + Save Full Settings",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "POST /indi-allsky/ajax/config",
+      "expected_effect": "Save new revision without capture reload",
+      "proof": "Saved new config; reload then OWNER filter showed Browser test observer. Reload on Save unchecked.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/settings/full",
+      "control_id": "Save Full Settings/ordinary-user",
+      "role": "ordinary user",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/modern-admin/settings/full",
+      "expected_effect": "Prevent unauthorized editing",
+      "proof": "Administrator-required explanation visible; save, reload and note controls disabled. HTTP authorization checked separately.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/settings/full",
+      "control_id": "Config History",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/modern-admin/config-history",
+      "expected_effect": "Reach actual revision list",
+      "proof": "Displayed synthetic revision with ID, author, date, note and metadata.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/config-history",
+      "control_id": "modern-config-history-search",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "none",
+      "expected_effect": "Filter and show empty state",
+      "proof": "Nonmatching search displayed No config history rows match the current filters; clearing search restored row.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/config-history",
+      "control_id": "Snapshot 2 details",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/modern-admin/config-restore/2",
+      "expected_effect": "Inspect restored revision",
+      "proof": "Metadata showed ID 2 and Manual config restore from upload.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/config-history",
+      "control_id": "Open Config Restore",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/modern-admin/config-restore",
+      "expected_effect": "Reach restore upload form",
+      "proof": "Actual file, option and submit controls rendered with snapshot list.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/config-restore",
+      "control_id": "Details/revision-1",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/modern-admin/config-restore/1",
+      "expected_effect": "Inspect snapshot",
+      "proof": "ID, date, type, author and size visible; download and return links present.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/config-restore/1",
+      "control_id": "Download this snapshot",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/config/download?id=1",
+      "expected_effect": "Initiate browser download",
+      "proof": "Browser download event received; server logged 200. Payload validity covered by hybrid_settings_flow_test.py; downloaded disk file not inspected.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/config-restore/1",
+      "control_id": "Back to Config Restore",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "GET /indi-allsky/modern-admin/config-restore",
+      "expected_effect": "Return to upload form",
+      "proof": "File chooser control accessible after navigation.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/config-restore",
+      "control_id": "CONFIG_UPLOAD + Restore configuration",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "POST /indi-allsky/ajax/config/restore",
+      "expected_effect": "Persist uploaded synthetic config",
+      "proof": "File chooser selected /tmp/hybrid-browser-restore.json; status Restored Config; history revision 2 created; Full Settings showed Browser restored synthetic observer. RESET_KEYS and FLUSH_CONFIGS unchecked.",
+      "status": "superato"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/config-restore",
+      "control_id": "RESET_KEYS/FLUSH_CONFIGS",
+      "role": "admin",
+      "camera_profile": "synthetic cameras 1 and 2; global flow",
+      "prerequisites": "Isolated browser sandbox; synthetic users; Classic disabled",
+      "request": "not executed",
+      "expected_effect": "Reset keys or purge history only in dedicated acceptance case",
+      "proof": "Blocked in browser sandbox; no live execution and no action-time destructive confirmation requested.",
+      "status": "bloccato"
+    }
+  ]
+}

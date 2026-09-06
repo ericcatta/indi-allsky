@@ -1225,8 +1225,8 @@ class ModernAdminSettingsRevisionMetadataService:
     ownership out of Modern views.
     """
 
-    RESTORE_WARNING = 'Read-only inspection only. Actual restore flow remains in Classic UI.'
-    RESTORE_DETAIL_WARNING = 'Read-only metadata inspection only. Raw config payload and restore actions are intentionally hidden.'
+    RESTORE_WARNING = 'Open a snapshot to inspect its metadata and download it. Use Config Restore to restore a configuration file.'
+    RESTORE_DETAIL_WARNING = 'Snapshot metadata is shown below. Configuration values are omitted because they may contain secrets.'
 
     def __init__(self, query, id_field=None, created_field=None):
         self.query = query

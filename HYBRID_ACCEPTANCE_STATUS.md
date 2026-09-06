@@ -31,8 +31,9 @@ Evidence:
 - `testing/hybrid_account_browser_test.js`: controller request contract,
   duplicate submission, failed/expired/network responses, clearing passwords
   only after success. This is a controller test, **not a browser click test**.
-- Existing shell and route fingerprints retained. The new account navigation
-  and additional route are explicitly tested separately.
+- Classic shell and existing route fingerprints retained. The Hybrid shell
+  baseline is updated for its accessible navigation button and controller; the
+  account navigation and additional route are explicitly tested separately.
 
 ## Initial runtime discovery: gaps remain
 
@@ -89,8 +90,8 @@ security keys, live database or capture service are modified by this test.
 
 `testing/hybrid_full_settings_browser_test.js` covers the controller's payload,
 checkbox values, filtering, duplicate submit, permissions, field errors,
-network failures, session expiry and invalid responses. Actual browser clicks,
-live save/restore and the complete camera-profile editor matrix remain open.
+network failures, session expiry and invalid responses. Browser save and restore now also pass against the isolated app (see below).
+Live save/restore and the complete camera-profile editor matrix remain open.
 
 ## Remaining gates
 
@@ -100,3 +101,37 @@ actual browser paths and hardware/integration checks. Test destructive actions
 only on dedicated new fixtures. Arrange physical presence for connectivity
 and device interruption tests. Keep migration and physical Classic removal in
 separate commits, then repeat essential tests and the required day/night soak.
+
+
+## Verified mission: browser navigation, mobile login and restore
+
+Actual in-app browser tests on 2026-09-06 used `hybrid_browser_sandbox.py`
+on the Raspberry's installed Python environment, forwarded over SSH to
+localhost. This is a separate worktree with Classic disabled, synthetic users,
+two synthetic camera profiles and an in-memory database. External processes,
+DBus, security-key resets and history purge are blocked. These results do not
+claim validation of production effects or real camera acquisition.
+
+Browser defects corrected:
+- Navigation was a label without native keyboard-button behavior and persisted
+  open across page changes. It now uses a button, Escape/return focus, explicit
+  expanded state and an inert closed drawer; navigation closes after selection.
+- Mobile login had low-contrast labels and misaligned Bootstrap columns. A
+  dedicated Hybrid card fits the inspected 390 × 844 viewport, with visible
+  focus and appropriately sized fields and submit button.
+- Full Settings now links directly to history and restore. History revision IDs
+  open snapshot details; stale claims that restore requires Classic are removed.
+
+Observed browser outcomes are recorded in
+`testing/evidence/hybrid-browser-2026-09-06.json`. They include invalid-login
+feedback and successful retry, sign-out, account-name persistence after reload,
+Settings filtering and saved-value persistence, ordinary-user read-only state,
+menu keyboard behavior, history filtering/details, download event, file chooser
+upload, successful restore, a new history revision and the restored OWNER value
+in Full Settings. No password was changed through the browser.
+
+The download event proves browser initiation; the complete downloaded payload
+is verified by the separate Flask persistence test. The browser restore file
+was generated independently from the synthetic fixture, not taken from live
+configuration. Full Config parity fingerprints remain unchanged. No performance
+improvement is claimed from these usability changes.

@@ -26,6 +26,10 @@ var camera_id = {{ camera_id }};
         </div>
         <p class="modern-admin-note">Use Camera Profile Settings for acquisition, gain, exposure, target ADU, binning, and AWB controls. Those fields are intentionally hidden from this global editor so there is one operational path for both single-camera and multi-camera systems.</p>
         <p class="modern-admin-note"><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Open Camera Profiles</a></p>
+        <p class="modern-admin-note">
+            <a href="{{ url_for('indi_allsky.modern_admin_config_history_view') }}">Config History</a>
+            · <a href="{{ url_for('indi_allsky.modern_admin_config_restore_view') }}">Restore Config</a>
+        </p>
         <div class="modern-admin-settings-summary-grid">
             <div class="modern-admin-settings-summary-card">
                 <span>{{ modern_admin_full_settings_field_count }}</span>

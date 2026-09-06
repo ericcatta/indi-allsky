@@ -359,6 +359,8 @@
 }
 
 .hybrid-menu-scrim {
+  border: 0;
+  padding: 0;
   position: fixed;
   inset: 0;
   z-index: 50;
@@ -1761,4 +1763,11 @@
     justify-content: flex-start;
     overflow-x: auto;
   }
+}
+
+.hybrid-menu-button:focus-visible,
+.hybrid-theme-toggle:focus-visible,
+.hybrid-app-drawer a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }

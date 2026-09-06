@@ -899,7 +899,7 @@ def test_settings_revision_restore_context_adds_restore_metadata_only():
     assert context['modern_admin_config_restore_rows'][0]['user'] == 'Deleted user'
     assert context['modern_admin_config_restore_rows'][1]['restore_state'] == 'Unavailable'
     assert context['modern_admin_config_restore_warning'] == (
-        'Read-only inspection only. Actual restore flow remains in Classic UI.'
+        'Open a snapshot to inspect its metadata and download it. Use Config Restore to restore a configuration file.'
     )
 
 
@@ -917,7 +917,7 @@ def test_settings_revision_restore_detail_uses_injected_lookup():
     assert context['modern_admin_config_restore_detail']['id'] == 10
     assert context['modern_admin_config_restore_detail']['restore_state'] == 'Likely restore candidate'
     assert context['modern_admin_config_restore_warning'] == (
-        'Read-only metadata inspection only. Raw config payload and restore actions are intentionally hidden.'
+        'Snapshot metadata is shown below. Configuration values are omitted because they may contain secrets.'
     )
 
 

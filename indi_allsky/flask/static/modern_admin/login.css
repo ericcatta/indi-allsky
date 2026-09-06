@@ -1,0 +1,46 @@
+.hybrid-login-body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: #0d1110;
+  color: #edf4ef;
+}
+.hybrid-login-card {
+  box-sizing: border-box;
+  width: min(100%, 420px);
+  padding: 28px;
+  border: 1px solid #36453e;
+  border-radius: 16px;
+  background: #19201d;
+}
+.hybrid-login-brand {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  color: #142621;
+  background: #b6ded2;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.hybrid-login-card h1 { margin: 20px 0; font-size: 1.6rem; }
+.hybrid-login-card label { display: block; margin: 18px 0 6px; }
+.hybrid-login-card input:not([type="hidden"]) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #71867a;
+  border-radius: 7px;
+  background: #101713;
+  color: #fff;
+  font-size: 16px;
+}
+.hybrid-login-card button { width: 100%; min-height: 44px; margin-top: 24px; }
+.hybrid-login-card :focus-visible { outline: 3px solid #b6ded2; outline-offset: 3px; }
+.hybrid-login-card .text-danger { color: #ffb4a9 !important; margin-top: 8px; }

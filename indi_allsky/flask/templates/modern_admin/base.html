@@ -1,19 +1,19 @@
 {% extends 'shared/document.html' %}
 {% set is_hybrid_shell_ui = true %}
 {% block shell_stylesheet %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-shell-005') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-shell-006') }}" rel="stylesheet">
 {% endblock %}
 {% block body_class %}hybrid-shell-body hybrid-theme-night{% endblock %}
 {% block shell %}
 <div class="hybrid-app-shell">
-    <input class="hybrid-menu-checkbox" type="checkbox" id="hybrid-menu-toggle" aria-hidden="true">
+    <input class="hybrid-menu-checkbox" type="checkbox" id="hybrid-menu-toggle" aria-hidden="true" tabindex="-1">
     <header class="hybrid-app-topbar" aria-label="Hybrid product shell">
         <div class="hybrid-app-left">
-            <label class="hybrid-menu-button" for="hybrid-menu-toggle" aria-label="Open navigation menu">
+            <button class="hybrid-menu-button" id="hybrid-menu-button" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="hybrid-navigation">
                 <span></span>
                 <span></span>
                 <span></span>
-            </label>
+            </button>
             <a class="hybrid-app-brand" href="{{ url_for('indi_allsky.modern_admin_now_view') }}" aria-label="Hybrid home">
                 <span class="hybrid-app-brand-mark">H</span>
                 <span>
@@ -50,8 +50,8 @@
         </div>
     </header>
 
-    <label class="hybrid-menu-scrim" for="hybrid-menu-toggle" aria-label="Close navigation menu"></label>
-    <aside class="hybrid-app-drawer" aria-label="Hybrid navigation drawer">
+    <button class="hybrid-menu-scrim" type="button" aria-label="Close navigation menu" tabindex="-1"></button>
+    <aside class="hybrid-app-drawer" id="hybrid-navigation" aria-label="Hybrid navigation drawer" aria-hidden="true" inert>
         <div class="hybrid-drawer-section" data-hybrid-account-navigation>
             <span>Account</span>
             {% if current_user.is_authenticated %}
@@ -126,7 +126,6 @@
 (function () {
     var body = document.body;
     var themeButton = document.getElementById('hybrid-theme-toggle');
-    var menuToggle = document.getElementById('hybrid-menu-toggle');
     var captureActionUrl = {{ modern_admin_capture_action_url|default(none, true)|tojson }};
     var abortExposureActionUrl = {{ modern_admin_abort_exposure_action_url|default(none, true)|tojson }};
     var quickActionUrl = {{ modern_admin_quick_action_url|default(none, true)|tojson }};
@@ -163,10 +162,6 @@
             if (themeButton) themeButton.textContent = 'Night';
         }
 
-        var storedMenu = localStorage.getItem('hybrid-menu-open');
-        if (storedMenu === 'true' && menuToggle) {
-            menuToggle.checked = true;
-        }
     } catch (e) {}
 
     if (themeButton) {
@@ -175,12 +170,6 @@
             body.classList.toggle('hybrid-theme-night', !dayMode);
             themeButton.textContent = dayMode ? 'Night' : 'Day';
             try { localStorage.setItem('hybrid-theme', dayMode ? 'day' : 'night'); } catch (e) {}
-        });
-    }
-
-    if (menuToggle) {
-        menuToggle.addEventListener('change', function () {
-            try { localStorage.setItem('hybrid-menu-open', menuToggle.checked ? 'true' : 'false'); } catch (e) {}
         });
     }
 
@@ -301,4 +290,5 @@
     });
 })();
 </script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/navigation.js') }}" defer></script>
 {% endblock %}

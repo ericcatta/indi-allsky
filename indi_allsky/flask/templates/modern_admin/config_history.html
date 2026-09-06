@@ -87,7 +87,7 @@ var camera_id = {{ camera_id }};
                     <tr data-search="{{ (config.id|string ~ ' ' ~ config.user_id|string ~ ' ' ~ config.created ~ ' ' ~ config.user ~ ' ' ~ config.level ~ ' ' ~ config.encrypted ~ ' ' ~ config.summary ~ ' ' ~ config.data_size ~ ' ' ~ config.note)|lower }}"
                         data-level="{{ config.level|lower }}"
                         data-encrypted="{{ config.encrypted|lower }}">
-                        <td>{{ config.id }}</td>
+                        <td><a href="{{ url_for('indi_allsky.modern_admin_config_restore_detail_view', config_id=config.id) }}" aria-label="Snapshot {{ config.id }} details">{{ config.id }}</a></td>
                         <td>{{ config.user_id }}</td>
                         <td>{{ config.created }}</td>
                         <td>{{ config.user }}</td>
