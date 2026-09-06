@@ -13,17 +13,16 @@
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Hybrid AllSky Now</p>
-                <h1 id="modern-admin-now-title">{{ modern_admin_now.briefing_title }}</h1>
+                <h1 id="modern-admin-now-title">Now</h1>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_now.data_status | replace('_', ' ') | title }}</span>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">Snapshot at page load</span>
         </div>
 
         <h2>{{ modern_admin_now.current_verdict }}</h2>
-        <p class="modern-admin-note">Hybrid turns continuous sky observation into a short operational briefing: what is happening, what deserves attention, what was generated, and whether the sources remain trustworthy.</p>
-        <p class="modern-admin-note"><strong>Start with Highlights:</strong> review what Hybrid selected, then open the Moment or Output that explains the evidence.</p>
-
+        <p class="modern-admin-note">Latest saved frames and capture metadata. Refresh to update this snapshot; a saved frame does not by itself prove that capture is still running.</p>
         <div class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Start with Highlights</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Refresh status</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Review Highlights</a>
             <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle Report</a>
             <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
             <a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
@@ -42,7 +41,7 @@
         <p class="modern-admin-note">{{ camera_frames.note }}</p>
 
         <section class="hybrid-camera-frame-grid" aria-label="Latest frames by camera">
-            {% for frame in camera_frames['items'] %}
+            {% for frame in camera_frames['items'] if frame.camera_id %}
             <article class="hybrid-camera-frame-card">
                 <div class="hybrid-camera-frame-media">
                     {% if frame.image_available and frame.safe_image_url %}
@@ -58,9 +57,11 @@
                     <h3>{{ frame.camera_label }}</h3>
                     <p>{{ frame.timestamp }}{% if frame.age_label %} / {{ frame.age_label }}{% endif %}</p>
                     <p>{{ frame.note }}</p>
+                    <p class="now-frame-error" role="status" hidden>Frame preview could not be loaded. Refresh or inspect the camera's saved images.</p>
+                    <a href="{{ url_for('indi_allsky.modern_admin_library_view', kind='image', camera_id=frame.camera_id) }}">Browse camera images</a>
                 </div>
             </article>
-            {% endfor %}
+            {% else %}<p>No camera frame metadata is available.</p>{% endfor %}
         </section>
     </section>
 
@@ -150,197 +151,28 @@
                 {% if latest_output.file_size is not none %}
                     <p>Stored size metadata: {{ latest_output.file_size }} bytes.</p>
                 {% endif %}
-                <p>{{ latest_output.note }}</p>
+                <p>Stored metadata does not verify current file availability.</p>
+                {% set output_kind = {'timelapse':'video', 'mini_timelapse':'mini-video', 'keogram':'keogram', 'startrail':'startrail', 'startrail_video':'startrail-video', 'panorama_image':'panorama', 'panorama_video':'panorama-video'}.get(latest_output.output_type) %}
+                {% if output_kind %}<a href="{{ url_for('indi_allsky.modern_admin_library_view', kind=output_kind, camera_id=camera_id) }}">Browse these outputs</a>{% endif %}
                 <span class="modern-admin-status-pill modern-admin-status-muted">{{ latest_output.source_table_label }}</span>
             </article>
         </section>
     </section>
 
-    <section class="modern-admin-table-panel" aria-labelledby="now-briefing-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Briefing</p>
-                <h2 id="now-briefing-title">{{ modern_admin_now.sky_cycle_briefing.verdict_label }}</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_now.sky_cycle_briefing.verdict }}</span>
-        </div>
-        <p class="modern-admin-note">{{ modern_admin_now.sky_cycle_briefing.summary }}</p>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Sky Cycle briefing status">
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Source confidence</div>
-                <h3>{{ source_confidence.confidence_label }}</h3>
-                <p>{{ source_confidence.note }}</p>
-                <p>{{ source_confidence.preservation_status }}. Coverage: {{ source_confidence.coverage_label }}.</p>
-                <p>Source types: {{ source_confidence.source_types | join(', ') }}.</p>
-                <p>Risk: {{ source_confidence.risk_level | title }}. Next contract: {{ source_confidence.next_backend_contract }}.</p>
-                {% for evidence_item in source_confidence.evidence %}
-                    <p>{{ evidence_item }}</p>
-                {% endfor %}
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Generated results</div>
-                <h3>{{ modern_admin_now.sky_cycle_briefing.outputs_status }}</h3>
-                <p>Output readiness will come from the future rendering and output recipe contract.</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Moment evidence</div>
-                <h3>{{ modern_admin_now.sky_cycle_briefing.notable_moments_count }}</h3>
-                <p>Detector and analytics evidence are intentionally not connected yet.</p>
-            </article>
-        </section>
+    <section class="modern-admin-table-panel" aria-labelledby="now-source-title">
+        <h2 id="now-source-title">Source metadata</h2>
+        <h3>{{ source_confidence.confidence_label }}</h3>
+        <p>{{ source_confidence.note }}</p>
+        <p>{{ source_confidence.preservation_status }}. Coverage: {{ source_confidence.coverage_label }}.</p>
+        <p>Source types: {{ source_confidence.source_types | join(', ') }}.</p>
+        {% for evidence_item in source_confidence.evidence %}<p>{{ evidence_item }}</p>{% endfor %}
+        <a href="{{ url_for('indi_allsky.modern_admin_library_view', kind='fits', camera_id=camera_id) }}">Inspect FITS sources</a>
+        <a href="{{ url_for('indi_allsky.modern_admin_library_view', kind='raw', camera_id=camera_id) }}">Inspect RAW sources</a>
     </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="now-highlights-next-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Next step</p>
-                <h2 id="now-highlights-next-title">Review What Deserves Attention</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Attention first</span>
-        </div>
-        <p class="modern-admin-note">Highlights is the next product surface after Now. It separates the primary recommendation from items that are also worth reviewing, and it explains why each item was selected.</p>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Highlights transition">
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Start here</div>
-                <h3>Open Highlights</h3>
-                <p>Use Highlights before exploring reports or archives.</p>
-                <p><a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">See what deserves attention</a></p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Why it matters</div>
-                <h3>Hybrid suggests, user decides</h3>
-                <p>Every future recommendation must explain its evidence and source trust.</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">Current scope</div>
-                <h3>Static briefing</h3>
-                <p>Highlight selection remains placeholder-only until a bounded backend source exists.</p>
-            </article>
-        </section>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="now-questions-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Operator questions</p>
-                <h2 id="now-questions-title">What matters right now?</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Placeholder answers</span>
-        </div>
-
-        <div class="modern-admin-status-grid">
-            {% for answer in modern_admin_now.primary_question_answers %}
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ answer.data_status | replace('_', ' ') | title }}</div>
-                <h3>{{ answer.question }}</h3>
-                <p><strong>{{ answer.answer }}</strong></p>
-                <p>{{ answer.evidence }}</p>
-            </article>
-            {% endfor %}
-        </div>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="now-evidence-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Evidence and confidence</p>
-                <h2 id="now-evidence-title">What happened / Worth reviewing</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">No detector evidence connected yet</span>
-        </div>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Evidence context">
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ modern_admin_now.evidence_summary.status }}</div>
-                <h3>{{ modern_admin_now.evidence_summary.label }}</h3>
-                <p>{{ modern_admin_now.evidence_summary.summary }}</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ modern_admin_now.science_context.status }}</div>
-                <h3>{{ modern_admin_now.science_context.label }}</h3>
-                <p>{{ modern_admin_now.science_context.summary }}</p>
-            </article>
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ modern_admin_now.astrophoto_context.status }}</div>
-                <h3>{{ modern_admin_now.astrophoto_context.label }}</h3>
-                <p>{{ modern_admin_now.astrophoto_context.summary }}</p>
-            </article>
-        </section>
-
-        <div class="modern-admin-status-grid">
-            {% for moment in modern_admin_now.notable_moments %}
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ moment.status }}</div>
-                <h3>{{ moment.label }}</h3>
-                <p>{{ moment.evidence }}</p>
-                <span class="modern-admin-status-pill modern-admin-status-neutral">Confidence: {{ moment.confidence }}</span>
-            </article>
-            {% endfor %}
-        </div>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="now-outputs-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Generated results</p>
-                <h2 id="now-outputs-title">Outputs and Looks</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Non-destructive</span>
-        </div>
-
-        <div class="modern-admin-status-grid">
-            {% for output in modern_admin_now.generated_outputs %}
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ output.data_status | replace('_', ' ') | title }}</div>
-                <h3>{{ output.label }}</h3>
-                <p>{{ output.status }}</p>
-                <p>Look: {{ output.look }}. {{ output.lineage }}.</p>
-            </article>
-            {% endfor %}
-        </div>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="now-health-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Observatory</p>
-                <h2 id="now-health-title">Health and Attention</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
-        </div>
-
-        <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Observatory health">
-            {% for item in modern_admin_now.observatory_health %}
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ item.data_status | replace('_', ' ') | title }}</div>
-                <h3>{{ item.label }}</h3>
-                <p>{{ item.status }}</p>
-                <p>{{ item.note }}</p>
-            </article>
-            {% endfor %}
-        </section>
-    </section>
-
-    <section class="modern-admin-table-panel" aria-labelledby="now-attention-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Read-only boundary</p>
-                <h2 id="now-attention-title">Attention Items</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Metadata only</span>
-        </div>
-
-        <div class="modern-admin-status-grid modern-admin-status-grid-three">
-            {% for item in modern_admin_now.attention_items %}
-            <article class="modern-admin-status-card">
-                <div class="modern-admin-card-label">{{ item.status }}</div>
-                <h3>{{ item.label }}</h3>
-                <p>{{ item.note }}</p>
-            </article>
-            {% endfor %}
-        </div>
+    <section class="modern-admin-table-panel"><h2>Further checks</h2>
+        <p>Review saved image metadata in Highlights and capture records in Sky Cycle. Detector classifications, processing recipes and source lineage are not evaluated on this page.</p>
+        <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Open observatory tools</a>
     </section>
 </main>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/now-frames.js') }}"></script>
 {% endblock %}

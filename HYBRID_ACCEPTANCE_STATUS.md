@@ -1001,3 +1001,27 @@ navigation/download tests. `hybrid_highlights_flow_test.py` verifies the connect
 Moment path remains functional. Both pass, as do all nineteen Book 2/shell/route/
 network entrypoints and git diff --check. This correction has not been deployed to
 production; direct browser acceptance remains separate.
+
+## Now presents runtime evidence without prototype panels
+
+Now retains the existing frame, current capture, phase, generated-output metadata
+and source providers, but no longer renders static briefing answers, example
+moments/looks, prototype health or attention panels. It explicitly identifies the
+page as a snapshot at load time and offers refresh. Generated results and source
+metadata link to the working Library, scoped to the current camera; each real
+camera frame links to that camera's saved images. Missing camera metadata does
+not create synthetic Camera 1/2 cards. No capture polling/scheduling was changed.
+
+`now-frames.js` exposes an accessible error message and hides a failed preview,
+including a failure cached before script initialization. A later load restores
+the image and clears the error. This feedback does not treat a displayed saved
+frame as evidence of fresh acquisition.
+
+`hybrid_now_page_flow_test.py` passes with real Flask, Classic forbidden, two
+synthetic cameras and generated files: both roles, camera/source/output links
+rendering the destination, missing provider fallback without fake camera slots,
+absence of prototype sections and anonymous redirect. `hybrid_now_frames_test.js`
+checks cached failure, load recovery, subsequent error and missing-image cards.
+The full nineteen-entry Book 2/shell/route/network regression and diff check pass.
+Production deployment, direct browser visual acceptance and sustained capture
+health remain open; no fake detector or AI result was introduced.
