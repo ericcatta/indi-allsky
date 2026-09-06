@@ -1252,7 +1252,8 @@ class TemplateView(BaseView):
         if not current_user.is_authenticated:
             return '<a href="{0:s}" style="text-decoration: none">Login</a>'.format(url_for('auth_indi_allsky.login_view'))
 
-        return '<a href="{0:s}" style="text-decoration: none">{1:s}</a>'.format(url_for('indi_allsky.user_view'), current_user.username)
+        from markupsafe import escape
+        return '<a href="{0:s}" style="text-decoration: none">{1:s}</a>'.format(url_for('indi_allsky.modern_admin_account_view'), escape(current_user.username))
 
 
 class FormView(TemplateView):

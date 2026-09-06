@@ -11095,6 +11095,22 @@ class AjaxUserInfoView(BaseView):
 
 
 
+class ModernAdminAccountView(ModernAdminContextMixin, TemplateView):
+    page_title = 'My Account'
+    decorators = [login_required]
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_users_view'
+
+    def get_context(self):
+        context = super().get_context()
+        context['form_userinfo'] = IndiAllskyUserInfoForm(data={
+            'USERNAME': current_user.username,
+            'NAME': current_user.name,
+            'EMAIL': current_user.email,
+            'ADMIN': current_user.admin,
+        })
+        return context
+
+
 class ModernAdminUsersView(ModernAdminContextMixin, TemplateView):
     page_title = 'Modern Admin Users'
     decorators = [login_required]
@@ -21474,6 +21490,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/system/log/<log_name>', view_func=ModernAdminLogDetailView.as_view('modern_admin_log_detail_view', template_name='modern_admin/log_detail.html'))
     bp_allsky.add_url_rule('/modern-admin/tasks', view_func=ModernAdminTaskQueueView.as_view('modern_admin_taskqueue_view', template_name='modern_admin/tasks.html'))
     bp_allsky.add_url_rule('/modern-admin/tasks/<int:task_id>', view_func=ModernAdminTaskDetailView.as_view('modern_admin_task_detail_view', template_name='modern_admin/task_detail.html'))
+    bp_allsky.add_url_rule('/modern-admin/account', view_func=ModernAdminAccountView.as_view('modern_admin_account_view', template_name='modern_admin/account.html'))
     bp_allsky.add_url_rule('/modern-admin/users', view_func=ModernAdminUsersView.as_view('modern_admin_users_view', template_name='modern_admin/users.html'))
     bp_allsky.add_url_rule('/modern-admin/users/<int:user_id>', view_func=ModernAdminUserDetailView.as_view('modern_admin_user_detail_view', template_name='modern_admin/user_detail.html'))
     bp_allsky.add_url_rule('/modern-admin/config-history', view_func=ModernAdminConfigHistoryView.as_view('modern_admin_config_history_view', template_name='modern_admin/config_history.html'))

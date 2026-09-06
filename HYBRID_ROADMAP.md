@@ -24,6 +24,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Le impostazioni operative multicamera devono vivere nei Camera Profiles.
 - I global settings restano fallback legacy/single-camera/advanced, non UI operativa primaria.
 - Classic frontend isolation:
+  - avviato il collaudo autenticato reale con database in memoria e identita'
+    sintetiche: corretti home post-login/logout e link profilo che richiedevano
+    Classic. My Account Hybrid permette modifica nome/password via endpoint
+    esistente, con CSRF, password corrente e ruoli invariati;
+  - nuovo inventario runtime (`testing/hybrid_ui_acceptance_test.py`) censisce
+    controlli renderizzati e contesti senza attribuire successo ai click non
+    eseguiti. Stato e limiti del collaudo in `HYBRID_ACCEPTANCE_STATUS.md`.
   - 56 route UI Classic e 27 classi esclusive sono isolate in `classic_views`;
     Hybrid e compatibilita' pubblica/AJAX hanno registrazioni separate;
   - ogni app costruisce il proprio blueprint. `HYBRID_ENABLE_CLASSIC_UI=false`

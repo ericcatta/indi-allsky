@@ -65,7 +65,7 @@ class LoginView(TemplateView):
 
     def get(self):
         if current_user.is_authenticated:
-            return redirect(url_for('indi_allsky.index_view'))
+            return redirect(url_for('indi_allsky.modern_admin_now_view'))
 
         return super(LoginView, self).dispatch_request()
 
@@ -133,7 +133,7 @@ class LoginView(TemplateView):
         if not next_url or not is_safe_url(next_url, {'*'}):
             app.logger.warning('Next URL failed validation: %s', next_url)
             data = {
-                'redirect' : url_for('indi_allsky.index_view'),
+                'redirect' : url_for('indi_allsky.modern_admin_now_view'),
             }
             return jsonify(data)
 
@@ -150,11 +150,11 @@ class LogoutView(BaseView):
 
     def dispatch_request(self):
         if not current_user.is_authenticated:
-            return redirect(url_for('indi_allsky.index_view'))
+            return redirect(url_for('indi_allsky.modern_admin_now_view'))
 
         logout_user()
 
-        return redirect(url_for('indi_allsky.index_view'))
+        return redirect(url_for('indi_allsky.modern_admin_now_view'))
 
 
 bp_auth_allsky.add_url_rule('/login', view_func=LoginView.as_view('login_view', template_name='login.html'))

@@ -4,6 +4,7 @@
 import hashlib
 from html.parser import HTMLParser
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -59,6 +60,19 @@ def shell_contract(shell, modern, authenticated, original_source=None):
         camera_id=2, camera_count=2,
     )
     assert html.count("<p id='probe'>Content exactly once</p>") == 1
+    if modern:
+        # Intentional addition: authentication navigation. Preserve all older
+        # shell fingerprints after verifying this new section separately.
+        account = re.search(r'<div class="hybrid-drawer-section" data-hybrid-account-navigation>(.*?)</div>', html, re.S)
+        assert account is not None
+        if authenticated:
+            assert 'indi_allsky.modern_admin_account_view' in account[1]
+            assert 'auth_indi_allsky.logout_view' in account[1]
+            assert 'auth_indi_allsky.login_view' not in account[1]
+        else:
+            assert 'auth_indi_allsky.login_view' in account[1]
+            assert 'indi_allsky.modern_admin_account_view' not in account[1]
+        html = html[:account.start()] + html[account.end():]
     parser = BodyContract()
     parser.feed(html)
     contract = json.dumps((parser.tokens, parser.assets), sort_keys=True)

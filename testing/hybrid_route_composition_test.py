@@ -19,12 +19,23 @@ def test_route_contract_is_unchanged():
                 isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute)
                 and node.func.attr == 'add_url_rule'
-                and node.args[0].value != '/images/<path:path>'
+                and node.args[0].value not in ('/images/<path:path>', '/modern-admin/account')
             ):
                 calls.append(ast.dump(node, include_attributes=False))
     assert len(calls) == 224
     fingerprint = hashlib.sha256('\n'.join(sorted(calls)).encode()).hexdigest()
     assert fingerprint == '17514e70700d7f9d255e1026f2ffb42d6bdf96db13a97e65b9cdb4d9e8233d92'
+
+
+
+def test_account_route_is_hybrid_owned():
+    tree = ast.parse((FLASK / 'views.py').read_text())
+    registration = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'register_hybrid_routes')
+    additions = [node for node in ast.walk(registration) if isinstance(node, ast.Call)
+                 and isinstance(node.func, ast.Attribute) and node.func.attr == 'add_url_rule'
+                 and node.args[0].value == '/modern-admin/account']
+    assert len(additions) == 1
+    assert "ModernAdminAccountView.as_view('modern_admin_account_view', template_name='modern_admin/account.html')" in ast.unparse(additions[0])
 
 
 def test_classic_class_bodies_are_preserved_and_isolated():
@@ -65,6 +76,7 @@ def test_classic_import_is_conditional_and_blueprints_are_per_app():
 
 if __name__ == '__main__':
     test_route_contract_is_unchanged()
+    test_account_route_is_hybrid_owned()
     test_classic_class_bodies_are_preserved_and_isolated()
     test_classic_import_is_conditional_and_blueprints_are_per_app()
     print('Hybrid route composition checks passed')

@@ -1,7 +1,8 @@
 <!doctype html>
 <html>
   <head>
-<title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — Hybrid</title>
 <link rel="icon" type="image/png" href="{{ url_for('indi_allsky.static', filename='images/favicon_32.png') }}" sizes="32x32">
 <link rel="icon" type="image/png" href="{{ url_for('indi_allsky.static', filename='images/favicon_128.png') }}" sizes="128x128">
 <link href="{{ url_for('indi_allsky.static', filename='bootstrap/bootstrap.min.css') }}" rel="stylesheet">
@@ -17,7 +18,7 @@ html, body {
   <body class="bg-dark bg-opacity-75">
 
 <div class="row h-100 justify-content-center">
-  <div class="col-4 align-self-center">
+  <div class="col-11 col-sm-8 col-md-6 col-lg-4 align-self-center">
   <div class="card card-block bg-dark bg-opacity-25">
     <div class="text-center text-white pt-2 fs-5">
         <img src="{{ url_for('indi_allsky.static', filename='images/logo_outline_full.png') }}" height="200" alt="indi-allsky">
@@ -50,7 +51,7 @@ html, body {
 
         <div class="form-group">
             <div class="text-center">
-                <button class="btn btn-primary">Submit</button>
+                <button class="btn btn-primary" type="submit">Sign in</button>
             </div>
         </div>
 
@@ -106,7 +107,12 @@ $.ajaxSetup({
 });
 
 
+let loginPending = false;
 $('#form_login').on('submit', function() {
+    if (loginPending) return;
+    loginPending = true;
+    const submitButton = $(this).find('button[type="submit"]');
+    submitButton.prop('disabled', true);
 
     // hide all errors
     successMessage.css({'display' : 'none'});
@@ -138,12 +144,17 @@ $('#form_login').on('submit', function() {
             }
         },
         error: function(data){
-            var errors = JSON.parse(data.responseText);
+            var errors = data.responseJSON || {form_global: ['Unable to sign in. Check the connection and try again.']};
             Object.keys(errors).forEach((key) => {
-                fields[key].input.addClass('is-invalid');
-                fields[key].error.html(errors[key][0]);
-                fields[key].error.css({'display' : 'block'});
+                const field = fields[key] || fields.form_global;
+                field.input.addClass('is-invalid');
+                field.error.text(Array.isArray(errors[key]) ? errors[key].join(' ') : String(errors[key]));
+                field.error.css({'display' : 'block'});
             });
+        },
+        complete: function() {
+            loginPending = false;
+            submitButton.prop('disabled', false);
         },
     });
 

@@ -52,6 +52,15 @@
 
     <label class="hybrid-menu-scrim" for="hybrid-menu-toggle" aria-label="Close navigation menu"></label>
     <aside class="hybrid-app-drawer" aria-label="Hybrid navigation drawer">
+        <div class="hybrid-drawer-section" data-hybrid-account-navigation>
+            <span>Account</span>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('indi_allsky.modern_admin_account_view') }}">My Account</a>
+            <a href="{{ url_for('auth_indi_allsky.logout_view') }}">Sign out</a>
+            {% else %}
+            <a href="{{ url_for('auth_indi_allsky.login_view') }}">Sign in</a>
+            {% endif %}
+        </div>
         <div class="hybrid-drawer-section">
             <p>Product</p>
             <a class="{% if request.endpoint == 'indi_allsky.modern_admin_now_view' %}active{% endif %}" href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
