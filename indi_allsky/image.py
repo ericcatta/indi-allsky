@@ -315,7 +315,9 @@ class ImageWorker(Process):
 
 
     def _select_image_processor(self, profile_id, camera_id, images_only_diag):
-        if not images_only_diag:
+        # Full-output profiles need the same isolation as images-only profiles.
+        # Bit depth, stacks, masks and shared arrays belong to one camera/profile.
+        if not images_only_diag and not self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False):
             return
 
         processor_key = '{0:s}:{1!s}'.format(profile_id, camera_id)

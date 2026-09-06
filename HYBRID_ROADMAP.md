@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Recovery IMX708 2026-09-06: la cache della maschera Mode 1 stretch distingue
+  binning e dimensioni del frame; processor separati anche per profili con
+  FITS/output completi, non solo images-only. Corretto il crash notturno senza
+  cambiare esposizione o algoritmo; diagnosi e rollback in
+  `HYBRID_IMX708_STRETCH_RECOVERY.md`.
+
 - Codex lavora sul repository locale; l'accesso SSH al Raspberry e' autorizzato
   per staging isolato, deploy controllato e collaudo.
 - Il Raspberry riceve modifiche tramite `git pull`.

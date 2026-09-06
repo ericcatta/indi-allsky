@@ -18,8 +18,6 @@ class IndiAllSky_Mode1_Stretch(IndiAllSky_Stretch_Base):
 
 
         self._numpy_mask_dict = dict()
-        for x in self._sqm_mask_dict.keys():
-            self._numpy_mask_dict[x] = None
 
 
         self.gamma = self.config.get('IMAGE_STRETCH', {}).get('MODE1_GAMMA', 3.0)
@@ -27,8 +25,9 @@ class IndiAllSky_Mode1_Stretch(IndiAllSky_Stretch_Base):
 
 
     def stretch(self, data, image_bit_depth, binning):
-        if isinstance(self._numpy_mask_dict[binning], type(None)):
-            # This only needs to be done once
+        mask_key = (binning, data.shape[1], data.shape[0])
+        if self._numpy_mask_dict.get(mask_key) is None:
+            # Cameras may share binning while producing different frame sizes.
             self._generateNumpyMask(data, binning)
 
 
@@ -119,22 +118,23 @@ class IndiAllSky_Mode1_Stretch(IndiAllSky_Stretch_Base):
 
 
     def _get_image_stddev(self, data, binning):
+        mask_key = (binning, data.shape[1], data.shape[0])
         #mean_std_start = time.time()
 
 
         # mask arrays allow using the detection mask to perform calculations on
         # arbitrary boundaries in the image
         if len(data.shape) == 2:
-            ma = numpy.ma.masked_array(data, mask=self._numpy_mask_dict[binning])
+            ma = numpy.ma.masked_array(data, mask=self._numpy_mask_dict[mask_key])
 
             # mono
             mean = numpy.ma.mean(ma)
             stddev = numpy.ma.std(ma)
         else:
             # color
-            b_ma = numpy.ma.masked_array(data[:, :, 0], mask=self._numpy_mask_dict[binning])
-            g_ma = numpy.ma.masked_array(data[:, :, 1], mask=self._numpy_mask_dict[binning])
-            r_ma = numpy.ma.masked_array(data[:, :, 2], mask=self._numpy_mask_dict[binning])
+            b_ma = numpy.ma.masked_array(data[:, :, 0], mask=self._numpy_mask_dict[mask_key])
+            g_ma = numpy.ma.masked_array(data[:, :, 1], mask=self._numpy_mask_dict[mask_key])
+            r_ma = numpy.ma.masked_array(data[:, :, 2], mask=self._numpy_mask_dict[mask_key])
 
             b_mean = numpy.ma.mean(b_ma)
             g_mean = numpy.ma.mean(g_ma)
@@ -155,7 +155,14 @@ class IndiAllSky_Mode1_Stretch(IndiAllSky_Stretch_Base):
 
 
     def _generateNumpyMask(self, img, binning):
-        if isinstance(self._sqm_mask_dict[binning], type(None)):
+        image_height, image_width = img.shape[:2]
+        mask_key = (binning, image_width, image_height)
+        external_mask = self._sqm_mask_dict.get(binning)
+        if external_mask is not None and external_mask.shape != (image_height, image_width):
+            logger.warning('Ignoring stretch mask shape %s for image shape %s; using SQM ROI',
+                           external_mask.shape, (image_height, image_width))
+            external_mask = None
+        if external_mask is None:
             logger.info('Generating mask based on SQM_ROI')
 
             image_height, image_width = img.shape[:2]
@@ -183,8 +190,8 @@ class IndiAllSky_Mode1_Stretch(IndiAllSky_Stretch_Base):
 
         else:
             # True values will be masked
-            mask = self._sqm_mask_dict[binning] == 0
+            mask = external_mask == 0
 
 
-        self._numpy_mask_dict[binning] = mask
+        self._numpy_mask_dict[mask_key] = mask
 
