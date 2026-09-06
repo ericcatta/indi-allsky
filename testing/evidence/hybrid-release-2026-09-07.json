@@ -1,0 +1,557 @@
+{
+  "commit": "faf53d8653b6c62588025e954688c8ee220a6ce8",
+  "archive_sha256": "78c94c8d8d4ddb778d398586c44d9b4c5e12e68c0b4fb31e489d588ba466747c",
+  "root": "/home/eric/hybrid-acceptance-faf53d86",
+  "scope": "Automated isolated tests, not live hardware/browser acceptance",
+  "inventory": "Excluded: separate discovery entrypoint requires its own output and does not prove clicks",
+  "results": [
+    {
+      "case": "testing/auto_exposure_controller_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_auto_exposure_controller_test.py.log"
+    },
+    {
+      "case": "testing/auto_gain_controller_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_auto_gain_controller_test.py.log"
+    },
+    {
+      "case": "testing/auto_gain_runtime_state_test.py",
+      "exit_code": 0,
+      "seconds": 0.17,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_auto_gain_runtime_state_test.py.log"
+    },
+    {
+      "case": "testing/focus_frames_test.py",
+      "exit_code": 0,
+      "seconds": 0.53,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_focus_frames_test.py.log"
+    },
+    {
+      "case": "testing/full_config_parser_parity_test.py",
+      "exit_code": 0,
+      "seconds": 12.84,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_full_config_parser_parity_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_app_startup_test.py",
+      "exit_code": 0,
+      "seconds": 3.22,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_app_startup_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_archive_flow_test.py",
+      "exit_code": 0,
+      "seconds": 6.49,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_archive_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_authenticated_flow_test.py",
+      "exit_code": 0,
+      "seconds": 5.82,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_authenticated_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_camera_simulator_flow_test.py",
+      "exit_code": 0,
+      "seconds": 2.48,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_camera_simulator_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_drives_flow_test.py",
+      "exit_code": 0,
+      "seconds": 2.53,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_drives_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_fits_processing_flow_test.py",
+      "exit_code": 0,
+      "seconds": 3.33,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_fits_processing_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_fits_processing_parity_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_fits_processing_parity_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_focus_endpoint_flow_test.py",
+      "exit_code": 0,
+      "seconds": 2.33,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_focus_endpoint_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_focus_preview_parity_test.py",
+      "exit_code": 0,
+      "seconds": 2.32,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_focus_preview_parity_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_focuser_effect_flow_test.py",
+      "exit_code": 0,
+      "seconds": 2.48,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_focuser_effect_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_gallery_isolation_flow_test.py",
+      "exit_code": 0,
+      "seconds": 4.29,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_gallery_isolation_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_generated_media_flow_test.py",
+      "exit_code": 0,
+      "seconds": 6.23,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_generated_media_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_generation_flow_test.py",
+      "exit_code": 0,
+      "seconds": 2.85,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_generation_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_geometry_flow_test.py",
+      "exit_code": 0,
+      "seconds": 3.68,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_geometry_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_gpio_flow_test.py",
+      "exit_code": 0,
+      "seconds": 4.21,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_gpio_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_highlights_flow_test.py",
+      "exit_code": 0,
+      "seconds": 3.49,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_highlights_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_mini_generation_flow_test.py",
+      "exit_code": 0,
+      "seconds": 3.4,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_mini_generation_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_native_focus_flow_test.py",
+      "exit_code": 0,
+      "seconds": 2.88,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_native_focus_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_network_command_flow_test.py",
+      "exit_code": 0,
+      "seconds": 2.43,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_network_command_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_now_page_flow_test.py",
+      "exit_code": 0,
+      "seconds": 3.03,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_now_page_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_operations_flow_test.py",
+      "exit_code": 0,
+      "seconds": 3.08,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_operations_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_output_detail_flow_test.py",
+      "exit_code": 0,
+      "seconds": 6.57,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_output_detail_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_public_media_flow_test.py",
+      "exit_code": 0,
+      "seconds": 7.97,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_public_media_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_route_composition_test.py",
+      "exit_code": 0,
+      "seconds": 1.52,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_route_composition_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_runtime_shell_flow_test.py",
+      "exit_code": 0,
+      "seconds": 4.03,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_runtime_shell_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_settings_flow_test.py",
+      "exit_code": 0,
+      "seconds": 3.73,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_settings_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_shell_test.py",
+      "exit_code": 0,
+      "seconds": 0.77,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_shell_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_sky_cycle_flow_test.py",
+      "exit_code": 0,
+      "seconds": 2.63,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_sky_cycle_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_source_media_flow_test.py",
+      "exit_code": 0,
+      "seconds": 3.6,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_source_media_flow_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_table_export_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_table_export_test.py.log"
+    },
+    {
+      "case": "testing/hybrid_youtube_flow_test.py",
+      "exit_code": 0,
+      "seconds": 50.91,
+      "interpreter": "/home/eric/hybrid-acceptance-oauth-venv/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_hybrid_youtube_flow_test.py.log"
+    },
+    {
+      "case": "testing/legacy_auto_gain_steps_test.py",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_legacy_auto_gain_steps_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_boundary_test.py",
+      "exit_code": 0,
+      "seconds": 0.57,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_boundary_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_camera_diagnostics_service_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_media_camera_filter_test.py",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_media_camera_filter_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_media_metadata_service_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_media_metadata_service_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_media_runtime_test.py",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_media_runtime_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_notification_read_service_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_notification_read_service_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_observatory_tools_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_observatory_tools_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_runtime_providers_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_runtime_providers_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_settings_contracts_test.py",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_settings_contracts_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_settings_runtime_test.py",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_settings_runtime_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_system_tools_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_system_tools_test.py.log"
+    },
+    {
+      "case": "testing/modern_admin_task_read_service_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_admin_task_read_service_test.py.log"
+    },
+    {
+      "case": "testing/modern_safe_action_test.py",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_modern_safe_action_test.py.log"
+    },
+    {
+      "case": "testing/multicamera_processor_isolation_test.py",
+      "exit_code": 0,
+      "seconds": 1.97,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_multicamera_processor_isolation_test.py.log"
+    },
+    {
+      "case": "testing/network_activation_polling_test.py",
+      "exit_code": 0,
+      "seconds": 0.26,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_network_activation_polling_test.py.log"
+    },
+    {
+      "case": "testing/network_commands_test.py",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_network_commands_test.py.log"
+    },
+    {
+      "case": "testing/network_scan_effects_test.py",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_network_scan_effects_test.py.log"
+    },
+    {
+      "case": "testing/product_spine_regression_test.py",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_product_spine_regression_test.py.log"
+    },
+    {
+      "case": "testing/product_view_models_test.py",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_product_view_models_test.py.log"
+    },
+    {
+      "case": "testing/stretch_multicamera_mask_test.py",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/testing_stretch_multicamera_mask_test.py.log"
+    },
+    {
+      "case": "hybrid_archive_flow_test.py:library",
+      "exit_code": 0,
+      "seconds": 5.48,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/hybrid_archive_flow_test.py_library.log"
+    },
+    {
+      "case": "compileall",
+      "exit_code": 0,
+      "seconds": 0.26,
+      "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+      "log": "/home/eric/hybrid-release-evidence-faf53d86/compileall.log"
+    }
+  ],
+  "javascript_results": [
+    {
+      "test": "testing/hybrid_account_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid account browser controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_camera_simulator_parity_test.js",
+      "exit_code": 0,
+      "output": "Hybrid simulator catalog and canvas parity: PASS (3000 scenarios)\n"
+    },
+    {
+      "test": "testing/hybrid_config_restore_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid restore browser controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_drives_browser_test.js",
+      "exit_code": 0,
+      "output": "Drive controller: metadata as text, duplicates, confirmation/cancel, target/CSRF and fresh-inventory requirement: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_fits_processing_browser_test.js",
+      "exit_code": 0,
+      "output": "FITS controller: duplicate prevention, output identity, search/reset, visible validation and failed-session recovery: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_focus_browser_test.js",
+      "exit_code": 0,
+      "output": "Native Focus browser controller: target camera, duplicate prevention, decode, errors, expired session, permissions and movement feedback: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_full_settings_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid full Settings controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_generation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid generation confirmation, role gate, duplicate submission, failure and scope changes: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_geometry_math_test.js",
+      "exit_code": 0,
+      "output": "Image geometry circle/offset parity and finite keogram lines: PASS (480 cases)\n"
+    },
+    {
+      "test": "testing/hybrid_gpio_browser_test.js",
+      "exit_code": 0,
+      "output": "GPIO controller: confirmation/cancel, explicit Off, CSRF, duplicate prevention, errors and retained disabled controls: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_media_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid media camera navigation and source preview behavior: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_mini_generation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid mini controls: role, confirmation, duplicate submissions, failure recovery and task result: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_navigation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid navigation controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_network_browser_test.js",
+      "exit_code": 0,
+      "output": "Network controller: all intents, scan results/empty state, target binding, security boolean, CSRF, pending/refresh guards, cancellation, permissions and errors: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_notification_ack_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid notification acknowledgement controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_now_frames_test.js",
+      "exit_code": 0,
+      "output": "Now frames: cached failure, load recovery, error and missing image: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_public_media_browser_test.js",
+      "exit_code": 0,
+      "output": "Public media clipboard fallback, fullscreen capability errors and failed preview feedback: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_youtube_browser_test.js",
+      "exit_code": 0,
+      "output": "YouTube revoke cancellation, action feedback and duplicate form prevention: PASS\n"
+    }
+  ],
+  "live_snapshot": {
+    "observed_at": "2026-09-07T00:43:19.444753+02:00",
+    "since": "2026-09-07 00:32:40",
+    "scope": "Live read-only snapshot; not proof of uninterrupted 24 hours",
+    "commit": "faf53d8653b6c62588025e954688c8ee220a6ce8",
+    "service": "MainPID=3206060\nActiveState=active\nActiveEnterTimestamp=Mon 2026-09-07 00:32:40 CEST\n",
+    "free_bytes": 89694134272,
+    "cameras": [
+      {
+        "id": 1901,
+        "camera_id": 1,
+        "createDate": "2026-09-07 00:43:01.000000",
+        "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260906/night/07_00/ccd1_20260907_004301.jpg",
+        "night": 1,
+        "exposure": 40.0,
+        "file_exists": true,
+        "file_bytes": 6115755,
+        "images_since_restart": 13
+      },
+      {
+        "id": 1900,
+        "camera_id": 2,
+        "createDate": "2026-09-07 00:42:36.000000",
+        "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260906/night/07_00/ccd2_20260907_004236.jpg",
+        "night": 1,
+        "exposure": 35.75,
+        "file_exists": true,
+        "file_bytes": 2016562,
+        "images_since_restart": 13
+      }
+    ],
+    "pending_tasks": [],
+    "journal_lines": 1629,
+    "error_lines": [
+      "[ERROR] Capture-1-3206086/MainThread capture._initialize() [1938]: CCD night gain above maximum, changing to 16.00",
+      "[ERROR] Capture-1-3206086/MainThread capture._initialize() [1950]: CCD moon mode gain above maximum, changing to 16.00",
+      "[ERROR] Capture-1-3206086/MainThread capture._initialize() [1958]: CCD day gain below minimum, changing to 1.13",
+      "[ERROR] Capture-1-3206086/MainThread capture._profile_gain_max() [1923]: GAIN_MAX_DAY below minimum, changing to 1.13",
+      "[ERROR] Capture-1-3206086/MainThread capture._profile_gain_max() [1927]: GAIN_MAX_NIGHT above maximum, changing to 16.00",
+      "[ERROR] Capture-1-3206086/MainThread capture._profile_gain_max() [1927]: GAIN_MAX_MOONMODE above maximum, changing to 16.00"
+    ]
+  },
+  "acceptance_status": "Incomplete: snapshots and isolated tests do not prove all controls, hardware or 24-hour stability; Classic remains enabled."
+}

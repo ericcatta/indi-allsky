@@ -3,9 +3,10 @@
 ## Completion gate
 
 The complete product audit is **open**. Detector/AI are deferred; their absence
-must be represented honestly. Classic has not been removed and these changes
-have not been deployed to the live Raspberry checkout. A 24-hour product
-validation has not started.
+must be represented honestly. Classic has not been removed. Commit `faf53d86`
+was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour day/night observation
+period has started but has not passed. Historical sections below retain the
+deployment status at the time of each mission; this section is the current status.
 
 ## Verified mission: authenticated Hybrid navigation and account
 
@@ -1058,3 +1059,77 @@ It passes with all 23 Book 2/shell/route/network/AE/AG entrypoints. The real Num
 OpenCV multicamera processor and stretch tests also pass on the isolated Pi copy.
 The correction is not deployed to production. The final capture build still needs
 deployment/recovery tests and a new uninterrupted 24-hour acceptance period.
+
+
+## Verified deployment: 2026-09-07
+
+Production is now `faf53d8653b6c62588025e954688c8ee220a6ce8`. Capture was
+restarted at 00:32:40 CEST, PID 3206060. Apache configuration passed and both
+services started. Classic is still enabled; its removal gate remains open.
+No database migration, user configuration change or media deletion occurred.
+
+The exact tracked release archive (SHA256
+`78c94c8d8d4ddb778d398586c44d9b4c5e12e68c0b4fb31e489d588ba466747c`)
+was extracted into `/home/eric/hybrid-acceptance-faf53d86`. All 59 Python/check
+entries passed there, including compileall; all 18 JavaScript test entrypoints
+passed locally. Results and the live snapshot are recorded in
+`testing/evidence/hybrid-release-2026-09-07.json`. Full Python logs remain in
+`/home/eric/hybrid-release-evidence-faf53d86`. These isolated tests do not prove
+hardware effects or browser clicks. Discovery inventory is deliberately excluded
+from the pass count because it does not verify interactions.
+
+Only the six missing, tested OAuth packages were installed into production:
+google-auth 2.57.1, google-auth-oauthlib 1.4.1, requests-oauthlib 2.0.0,
+oauthlib 3.2.2, pyasn1 0.6.4 and pyasn1_modules 0.4.2. The YouTube flow test
+then passed using production Python, with Google transport mocked. Actual account
+consent/upload remains open. `pip check` reports the pre-existing missing
+`rpi-gpio` dependency of adafruit-blinka 9.1.0; GPIO hardware support remains
+unverified and no unidentified pin was driven.
+
+Direct production browser evidence: Now decoded both camera previews; the IMX708
+Library link showed 48 records scoped to camera 1, loaded previews and a next-page
+URL preserving `imx708-wide`. Image details opened record 1881 with camera 1,
+4608x2592, 40-second exposure and profile-preserving navigation. This is a partial
+admin flow, not acceptance of every media control or ordinary/anonymous sessions.
+
+At 00:43:19 CEST both cameras had saved 13 JPEG records since restart. The latest
+IMX708 file (00:43:01, 6,115,755 bytes) and ZWO file (00:42:36, 2,016,562 bytes)
+were present. Service PID/start time were unchanged, no queued/running/manual
+tasks were found, and 89,694,134,272 bytes remained free. The 1,629 journal lines
+contained six initial gain clamps, no new gain lookup errors, MaskError or
+Traceback. This eleven-minute sample is not a 24-hour result. Use
+`journalctl _SYSTEMD_USER_UNIT=indi-allsky.service`: `journalctl --user -u ...`
+returned no journal files on this installation and cannot prove absence of errors.
+
+A thread heartbeat runs every 15 minutes to collect subsequent read-only evidence.
+The first possible 24-hour boundary is 2026-09-08 00:32:40 CEST, provided capture
+remains continuous and both day and night are evidenced. Restarts or capture/
+scheduling changes invalidate that starting point. Unavailable observations stay
+unverified, and completion of this period does not close the migration plan.
+
+### Deployment backup and rollback
+
+Backup: `/home/eric/hybrid-backups/release-faf53d86-20260907-002621`.
+It contains the online SQLite backup (828,977,152 bytes, integrity check `ok`),
+Flask configuration, original hotfix files, binary tracked diff, package inventory,
+manifest, deployment record and git deploy log. Keep this directory private.
+The old tracked hotfixes are also preserved in stash commit
+`74e8b489343eb3295298fcd4fb0d03f93dcd79e8`.
+
+For a rollback, first record the current checkout, service/timer states and any
+changes made since this release; preserve new work and acquisition data. Stop
+both the user capture timer and capture service, then Apache, before changing the
+checkout. Restore previous commit `9e721647765f18c053b89e18619fcf26c3fb4014`
+and the two backed-up hotfix files (`indi_allsky/image.py` and
+`indi_allsky/stretch/mode1_stddev_cutoff.py`), rather than discarding those fixes.
+Validate compilation and Apache configuration, then restore Apache and the
+recorded capture service/timer states and verify new files for both cameras.
+No schema changed in this deployment: do not overwrite the live database with
+its backup as a routine code rollback, since this would lose newer records.
+The six added OAuth packages may remain; they did not upgrade existing packages.
+
+The deployment stop emitted an active-timer warning. No premature restart was
+observed, but future maintenance must explicitly stop and restore that timer.
+The rollback path was prepared in the deployment script; a live rollback was not
+executed and is not claimed as a passed recovery drill. Production's four
+pre-existing untracked entries were preserved; tracked files are clean.
