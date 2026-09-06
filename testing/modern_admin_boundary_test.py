@@ -10,6 +10,14 @@ VIEWS_PATH = REPO_ROOT / 'indi_allsky/flask/views.py'
 
 BOUNDARIES = (
     {
+        'boundary': 'ModernAdminMediaArchiveView',
+        'parent': 'ModernAdminMediaBrowseView',
+        'expected_bases': ('ModernAdminMediaBrowseView', 'TemplateView'),
+        'decorator': 'login_required',
+        'wrappers_defer_decorator': True,
+        'wrappers': ('ModernAdminLibraryView',),
+    },
+    {
         'boundary': 'ModernAdminProductView',
         'parent': 'TemplateView',
         'wrappers': (
@@ -17,7 +25,6 @@ BOUNDARIES = (
             'ModernAdminHighlightsView',
             'ModernAdminMomentDetailView',
             'ModernAdminOutputDetailView',
-            'ModernAdminLibraryView',
             'ModernAdminSkyCycleView',
             'ModernAdminObservatoryView',
         ),
@@ -156,7 +163,7 @@ def test_boundaries_exist_with_expected_parent():
     for spec in BOUNDARIES:
         bases = class_bases(views_text, spec['boundary'])
         assert_true(
-            bases == (spec['parent'],),
+            bases == spec.get('expected_bases', (spec['parent'],)),
             '{0:s} must inherit only from {1:s}'.format(spec['boundary'], spec['parent']),
         )
 

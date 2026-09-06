@@ -91,7 +91,6 @@ from ..product_view_models import build_now_view
 from ..product_view_models import build_highlights_view
 from ..product_view_models import build_moment_detail_view
 from ..product_view_models import build_output_detail_view
-from ..product_view_models import build_library_view
 from ..product_view_models import build_observatory_view
 from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import HighlightsMetadataRepository
@@ -6412,14 +6411,6 @@ class ModernAdminOutputDetailView(ModernAdminProductView):
         return build_output_detail_view()
 
 
-class ModernAdminLibraryView(ModernAdminProductView):
-    page_title = 'Library'
-    product_context_key = 'library_view'
-
-    def build_product_context(self, context):
-        return build_library_view()
-
-
 class ModernAdminSkyCycleView(ModernAdminProductView):
     page_title = 'Sky Cycle Report'
 
@@ -11762,7 +11753,8 @@ class ModernAdminMediaArchiveView(ModernAdminMediaBrowseView, TemplateView):
             IndiAllSkyDbCameraTable.query.filter_by(id=selected['camera_id']).first_or_404()
         values, anchor, direction = archive_parameters(request.args)
         archive = ModernAdminMediaArchive(values['kind'], selected.get('camera_id'), self.verify_admin_network)
-        context.update(archive_values=values, archive_kinds=ARCHIVE_KINDS)
+        context.update(archive_values=values, archive_kinds=ARCHIVE_KINDS,
+                       archive_endpoint=request.endpoint, archive_title=self.page_title)
         try:
             context['archive'] = archive.load(values, anchor, direction)
         except SQLAlchemyError:
@@ -11773,6 +11765,11 @@ class ModernAdminMediaArchiveView(ModernAdminMediaBrowseView, TemplateView):
         context['archive_scope'] = dict(values, camera_id=selected.get('camera_id'),
                                         profile_id=selected.get('profile_id', ''))
         return context
+
+
+class ModernAdminLibraryView(ModernAdminMediaArchiveView):
+    page_title = 'Library'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_library_view'
 
 
 class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):

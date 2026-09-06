@@ -898,3 +898,32 @@ current capture health. Twilight computation, event/condition evidence, lineage,
 direct browser acceptance and deployment remain open. This replaces a static
 surface with actual acquisition evidence, but does not complete the overall
 Sky Cycle feature set or the complete product plan.
+
+## Library opens the operational Hybrid archive
+
+The primary Library navigation no longer renders a static product-memory contract
+or example observations. It uses the existing Hybrid archive controller and a
+shared content template, exposing the ten supported media types, camera/date/name/
+day-night/upload filters, sorting, cursor pagination, previews and original
+downloads. Pagination and reset links remain on the selected Library/archive
+entrypoint. The separate archive URL remains compatible. No duplicate query or
+file-access implementation was introduced, and the unused Library prototype
+builder import/call was removed from runtime views.
+
+`hybrid_archive_flow_test.py --entrypoint library` and `--entrypoint archive`
+exercise both entries against real Flask with Classic forbidden, temporary files
+and an in-memory database: all media types, both roles/cameras, 111-image traversal,
+forward/backward/oldest order, date/name/upload filters, literal wildcard search,
+bad input, profile isolation, cursor-anchor deletion/new arrivals, provider errors,
+remote-media policy and actual download response bytes. Both pass. Pagination
+retains the entrypoint and selected camera/profile. Product Spine now permits
+explicit GET search forms while retaining its mutation bans, inspects the shared
+Library content, and asserts the Hybrid archive inheritance/login boundary.
+All other Book 2 regression entrypoints pass; the updated boundary and Spine
+guards pass after the intentional ownership change. git diff --check passes.
+
+Semantic retrieval, favorites, tags and AI classifications are not represented as
+implemented features by this change. Direct browser acceptance of Library and
+production deployment remain open. This completes the connection between the
+primary Library entry and existing supported media retrieval, not the entire
+product migration or final acceptance.

@@ -83,7 +83,7 @@ PRODUCT_SPINE = (
 
 
 FORBIDDEN_TEMPLATE_PATTERNS = (
-    (re.compile(r'<form\b', re.IGNORECASE), 'form element'),
+    (re.compile(r"<form\b(?![^>]*\bmethod=[\"']get[\"'])", re.IGNORECASE), 'form without explicit GET method'),
     (re.compile(r'\bmethod\s*=\s*["\']?post', re.IGNORECASE), 'POST form method'),
     (re.compile(r'\bfetch\s*\(', re.IGNORECASE), 'fetch call'),
     (re.compile(r'\$\.ajax\s*\(', re.IGNORECASE), 'jQuery AJAX call'),
@@ -116,10 +116,11 @@ def test_product_routes_are_registered():
     )
 
     for surface in PRODUCT_SPINE:
-        class_pattern = 'class {0:s}(ModernAdminProductView):'.format(surface['view'])
+        base = 'ModernAdminMediaArchiveView' if surface['name'] == 'Library' else 'ModernAdminProductView'
+        class_pattern = 'class {0:s}({1:s}):'.format(surface['view'], base)
         assert_true(
             class_pattern in views_text,
-            '{0:s} must inherit from ModernAdminProductView'.format(surface['name']),
+            '{0:s} must inherit from its Hybrid boundary {1:s}'.format(surface['name'], base),
         )
 
         route = re.escape(surface['route'])
@@ -200,6 +201,9 @@ def test_product_templates_are_server_rendered_and_read_only():
         assert_true(template_path.exists(), '{0:s} template is missing'.format(surface['name']))
 
         template_text = read_text(template_path)
+        if surface['name'] == 'Library':
+            assert_true("{% include 'modern_admin/_media_archive_content.html' %}" in template_text, 'Library must share the operational archive')
+            template_text += read_text(TEMPLATE_ROOT / '_media_archive_content.html')
         assert_true(
             re.search(r"{%\s*extends\s+['\"]modern_admin/base\.html['\"]\s*%}", template_text) is not None,
             '{0:s} template must use the Hybrid shell'.format(surface['name']),

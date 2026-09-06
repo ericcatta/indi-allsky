@@ -22,7 +22,7 @@ def link(response, direction):
     return html.unescape(match[1]) if match else None
 
 
-def run(runtime_config):
+def run(runtime_config, entrypoint='archive'):
     with isolated_app(runtime_config,multi_camera=True) as app:
         seed_generation(app);seed_source_media(app);seed_generated_media(app);seed_archive(app)
         from indi_allsky.flask import db
@@ -30,19 +30,24 @@ def run(runtime_config):
         from indi_allsky.flask.models import IndiAllSkyDbImageTable, IndiAllSkyDbCameraTable
         from sqlalchemy.exc import SQLAlchemyError
         user,admin=login_client(app,2),login_client(app,1)
-        route='/indi-allsky/modern-admin/media/archive'
+        route='/indi-allsky/modern-admin/'+('library' if entrypoint=='library' else 'media/archive')
         for client in (user,admin):
             for kind in KINDS:
                 for cid in (1,2):
                     page=client.get(route,query_string=dict(kind=kind,camera_id=cid,profile_id='test-profile-'+str(cid)))
                     assert ids(page),(kind,cid,page.status_code)
                     assert set(re.findall(r'data-camera-id="(\d+)"',page.text))=={str(cid)}
+                    if link(page,'next'):
+                        assert link(page,'next').split('?')[0]==route
+                        assert 'profile_id=test-profile-'+str(cid) in link(page,'next')
+                    assert ('<h1>Library</h1>' if entrypoint=='library' else '<h1>Media archive</h1>') in page.text
                     for href in re.findall(r'href="([^"]+/download)"',page.text):
                         response=client.get(html.unescape(href))
                         assert response.status_code==200 and response.data
         first=user.get(route+'?kind=image&camera_id=1')
         first_ids=ids(first)
         assert len(first_ids)==48 and first_ids[:3]==[1,209,208]
+        assert link(first,'next').split('?')[0]==route
         second=user.get(link(first,'next')); second_ids=ids(second)
         assert len(second_ids)==48 and not set(first_ids)&set(second_ids)
         assert ids(user.get(link(second,'prev')))==first_ids
@@ -93,4 +98,6 @@ def run(runtime_config):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime-config',default='/etc/indi-allsky/flask.json')
-    run(parser.parse_args().runtime_config)
+    parser.add_argument('--entrypoint',choices=('archive','library'),default='archive')
+    args=parser.parse_args()
+    run(args.runtime_config,args.entrypoint)

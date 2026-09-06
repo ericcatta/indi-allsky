@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Library: ingresso Product operativo dell'archivio Hybrid, con filtri su tipo,
+  camera, data, nome, giorno/notte e upload, paginazione e download. Riusa lo
+  stesso controller e contenuto dell'archivio; eliminati esempi e ricerca statica.
+  Paginazione conserva ingresso, camera e profilo. Ricerca semantica, preferiti e
+  classificazioni AI non sono simulati. Collaudo browser e deploy ancora aperti.
+
 - Sky Cycle: pagina basata sui record reali di ciascuna camera, con ultimo ciclo
   individuato da immagini/FITS/RAW, aggregati giorno/notte e conteggi sorgenti e
   output. Query/aggregazione nel servizio `sky_cycle_runtime.py`; rimossi dalla
