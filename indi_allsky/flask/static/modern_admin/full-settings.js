@@ -141,4 +141,9 @@
     }
 
     filter.addEventListener('input', filterSettings);
+    const initialSearch = new URL(window.location.href).searchParams.get('search');
+    if (initialSearch) {
+        filter.value = initialSearch;
+        filterSettings();
+    }
 })();

@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-06",
+  "baseline": "821c78a7 plus YouTube mission",
+  "controls": [
+    {
+      "page": "/modern-admin/youtube",
+      "control_id": "youtube-connect / youtube-refresh / youtube-revoke prerequisites",
+      "role": "administrator",
+      "camera_profile": "Global authorization; synthetic camera profiles 1/2",
+      "prerequisites": "Isolated Pi browser sandbox; Classic disabled; production Google modules absent",
+      "request": "GET /modern-admin/youtube",
+      "expected_effect": "Disable unavailable actions with accessible reasons",
+      "proof": "Actual DOM: all three disabled; aria-describedby resolves youtube-modules-required and explains missing optional modules. Google account credentials absent.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/youtube",
+      "control_id": "YouTube settings",
+      "role": "administrator",
+      "camera_profile": "Global authorization; synthetic camera profiles 1/2",
+      "prerequisites": "Isolated Pi browser sandbox; Classic disabled; production Google modules absent",
+      "request": "GET /modern-admin/youtube",
+      "expected_effect": "Open existing Full Settings filtered to YouTube fields",
+      "proof": "Clicked link; URL /modern-admin/settings/full?search=YOUTUBE, filter value YOUTUBE. Timelapse/keogram/startrail and upload/publishing groups open; visible fields include YOUTUBE__UPLOAD_STARTRAIL_VIDEO and YOUTUBE__SECRETS_FILE.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/youtube",
+      "control_id": "Back to Uploads",
+      "role": "administrator",
+      "camera_profile": "Global authorization; synthetic camera profiles 1/2",
+      "prerequisites": "Isolated Pi browser sandbox; Classic disabled; production Google modules absent",
+      "request": "GET /modern-admin/youtube",
+      "expected_effect": "Return to upload status",
+      "proof": "Clicked link; URL /modern-admin/uploads and document title Modern Admin Uploads.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/youtube",
+      "control_id": "OAuth action permissions",
+      "role": "ordinary user",
+      "camera_profile": "Global authorization; synthetic camera profiles 1/2",
+      "prerequisites": "Isolated Pi browser sandbox; Classic disabled; production Google modules absent",
+      "request": "GET /modern-admin/youtube",
+      "expected_effect": "Ordinary users cannot mutate authorization",
+      "proof": "Signed in as test-user-2. All buttons disabled and aria-describedby youtube-permission. Text: Only administrators can change account access.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/youtube",
+      "control_id": "Responsive layout / heading",
+      "role": "administrator",
+      "camera_profile": "Global authorization; synthetic camera profiles 1/2",
+      "prerequisites": "Isolated Pi browser sandbox; Classic disabled; production Google modules absent",
+      "request": "GET /modern-admin/youtube",
+      "expected_effect": "Page fits narrow and desktop viewport",
+      "proof": "Initial table extended to785px in390px viewport. After scoped CSS fix document width390 at viewport390; desktop1280/1280. Visible YouTube h1 and no browser error logs.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/youtube",
+      "control_id": "Anonymous access",
+      "role": "anonymous",
+      "camera_profile": "Global authorization; synthetic camera profiles 1/2",
+      "prerequisites": "Isolated Pi browser sandbox; Classic disabled; production Google modules absent",
+      "request": "GET /modern-admin/youtube",
+      "expected_effect": "Require login before account management",
+      "proof": "After sign out, navigating to /modern-admin/youtube displayed real Hybrid sign-in form.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/youtube",
+      "control_id": "Live OAuth connect / refresh / revoke / upload",
+      "role": "administrator",
+      "camera_profile": "Global authorization; synthetic camera profiles 1/2",
+      "prerequisites": "Isolated Pi browser sandbox; Classic disabled; production Google modules absent",
+      "request": "GET /modern-admin/youtube",
+      "expected_effect": "Google account authorization and real upload result",
+      "proof": "No designated test Google account or client secrets available. Isolated Flask suite simulated provider responses; this is not live acceptance.",
+      "status": "bloccato"
+    }
+  ]
+}

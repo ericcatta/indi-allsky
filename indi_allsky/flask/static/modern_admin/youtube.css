@@ -1,0 +1,11 @@
+.modern-admin-youtube .modern-admin-table-panel {
+    min-width: 0;
+}
+.modern-admin-youtube .modern-admin-data-table {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.modern-admin-youtube form button {
+    max-width: 100%;
+    white-space: normal;
+}

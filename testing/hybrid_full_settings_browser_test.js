@@ -4,7 +4,7 @@ const vm = require('node:vm');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../indi_allsky/flask/static/modern_admin/full-settings.js'), 'utf8');
 
-async function run({canSave=true, response, duplicate=false, filterText=''}={}) {
+async function run({canSave=true, response, duplicate=false, filterText='', initialSearch=''}={}) {
     let submit, filterHandler, calls=0, sent;
     const classList = {add() {}, remove() {}};
     const control = value => ({value, checked:false, classList});
@@ -24,7 +24,7 @@ async function run({canSave=true, response, duplicate=false, filterText=''}={}) 
     const elements = {...fields,'modern-admin-full-settings-form':form,'modern-admin-full-settings-save':button,
         'modern-admin-full-settings-message':message,'modern-admin-full-settings-filter':filter,
         'hybrid-full-settings-config':{textContent:JSON.stringify(config)}};
-    vm.runInNewContext(source, {URL, window:{location:{href:'https://test.invalid/indi-allsky/modern-admin/settings/full'}},
+    vm.runInNewContext(source, {URL, window:{location:{href:'https://test.invalid/indi-allsky/modern-admin/settings/full?search='+encodeURIComponent(initialSearch)}},
         document:{getElementById:id=>elements[id] || null,querySelectorAll:()=>[section]},
         fetch:async (url,options)=>{
             calls++; sent=JSON.parse(options.body);
@@ -33,6 +33,7 @@ async function run({canSave=true, response, duplicate=false, filterText=''}={}) 
             if (response instanceof Error) throw response;
             return response || {ok:true,status:200,text:async()=>JSON.stringify({'success-message':'Saved'})};
         }});
+    if (initialSearch) { assert.equal(filter.value, initialSearch); assert.equal(section.open, true); filterText = initialSearch; }
     filterHandler();
     assert.equal(row.hidden, filterText !== '' && !'owner test observer'.includes(filterText.toLowerCase()));
     const promise = submit({preventDefault() {}});
@@ -45,6 +46,7 @@ async function run({canSave=true, response, duplicate=false, filterText=''}={}) 
     return {message:message.textContent,fields};
 }
 (async()=>{
+    await run({initialSearch:'owner'});
     const success=await run({duplicate:true,filterText:'owner'});
     assert.equal(success.message,'Saved');
     assert.equal(success.fields.CONFIG_NOTE.value,'');

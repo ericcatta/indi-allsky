@@ -6695,7 +6695,12 @@ class ModernAdminYoutubeView(ModernAdminView):
         if not isinstance(youtube_config, dict):
             youtube_config = {}
 
-        credentials_status = self.get_youtube_credentials_status()
+        from .youtube_views import authorization_status, oauth_modules_available
+        context['modern_admin_youtube_modules_available'] = oauth_modules_available()
+        authorization = authorization_status(self._miscDb)
+        credentials_status = authorization['label']
+        context['modern_admin_youtube_authorization'] = authorization
+        context['modern_admin_youtube_client_configured'] = bool(youtube_config.get('SECRETS_FILE'))
         upload_flags = (
             ('Timelapse uploads', youtube_config.get('UPLOAD_VIDEO', False)),
             ('Mini timelapse uploads', youtube_config.get('UPLOAD_MINI_VIDEO', False)),
@@ -6717,7 +6722,7 @@ class ModernAdminYoutubeView(ModernAdminView):
             {
                 'label' : 'Credentials stored',
                 'value' : credentials_status,
-                'tone'  : self.get_youtube_tone(credentials_status == 'Yes'),
+                'tone'  : self.get_youtube_tone(authorization['stored']),
             },
         )
         context['modern_admin_youtube_upload_rows'] = [
@@ -6734,20 +6739,6 @@ class ModernAdminYoutubeView(ModernAdminView):
         ])
 
         return context
-
-
-    def get_youtube_credentials_status(self):
-        try:
-            IndiAllSkyDbStateTable.query\
-                .filter(IndiAllSkyDbStateTable.key == 'YOUTUBE_CREDENTIALS')\
-                .one()
-        except NoResultFound:
-            return 'No'
-        except Exception as e:
-            app.logger.warning('Unable to read YouTube credential state for Modern Admin audit: %s', str(e))
-            return 'Unknown'
-
-        return 'Yes'
 
 
     def format_youtube_bool(self, value):

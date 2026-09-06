@@ -31,6 +31,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     conservati. Test su task reali in DB temporaneo e cancellazioni di fixture;
   - browser desktop/mobile verificato; encoding/upload dei worker e produzione
     restano da collaudare. Evidenze in `HYBRID_ACCEPTANCE_STATUS.md`.
+- YouTube/OAuth: pagina Hybrid operativa, form amministratore con CSRF, callback
+  con stato/PKCE/scadenza e storage cifrato; refresh esplicito e revoca con timeout
+  e gestione errori. Nessun ritorno alla configurazione Classic. Dipendenze
+  opzionali esplicite; prove Google simulate, collaudo account/upload reale aperto.
 - Compatibilita' media pubblici: handler Hybrid per lookup latest/thumbnail,
   viewer e originali, con URL esistenti e autenticazione opzionale preservati.
   Nove viewer indipendenti dal layout Classic; policy della camera proprietaria,

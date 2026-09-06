@@ -430,3 +430,45 @@ playback measurements, not production performance results.
 Classic removal, OAuth/integrations, remaining operational controls/product
 placeholders, production deployment and the 24-hour acceptance period are still
 open. The old public template files are left for the separate verified cleanup.
+
+## Verified mission: native YouTube authorization
+
+- The YouTube page now provides account connection, explicit refresh and confirmed
+  revocation through the existing OAuth URLs. Admin-only POST forms use CSRF;
+  old GET bookmarks safely return to the Hybrid page. The callback checks the
+  initiating user, state, PKCE verifier and ten-minute lifetime and consumes the
+  pending request. Google denial keeps existing credentials.
+- Fixed manual refresh: existing credential payloads do not store expiry, so
+  testing `credentials.expired` prevented the requested refresh. Explicit refresh
+  now uses the refresh token, preserving the worker payload and encrypted store.
+- Token exchange/refresh/revoke have bounded transport timeouts. Failed effects
+  retain authorization; storage failures roll back and return controlled errors.
+  Revocation sends its token in the request body and removes local credentials
+  only after Google confirms success. Tokens/secrets are not rendered or logged.
+- Optional Google modules are absent in the production Python environment. The
+  page explains this and disables OAuth controls with accessible reasons. An
+  isolated OAuth venv was created for tests; production dependencies are unchanged.
+- Native Full Settings link filters all YouTube fields across their existing
+  groups. Fixed the page's mobile overflow (785 px content at 390 px viewport;
+  now 390 px), added its visible heading, and verified desktop at 1280 px.
+
+Evidence: `testing/hybrid_youtube_flow_test.py` uses real Flask auth/CSRF,
+configuration and encrypted SQLite state with Classic imports forbidden; **Google
+responses are mocked**, not live verification. Cases include admin/ordinary/
+anonymous sessions, missing modules/files/credentials, malformed and expired
+callbacks, duplicate callback, denied access, absent offline grant, refresh,
+revoke, transport failures and database rollback. Controller tests cover revoke
+cancellation and duplicate submission. Full Book 2, ten browser-controller tests,
+eleven existing Flask/startup suites and the new OAuth suite pass.
+
+Actual browser evidence: `testing/evidence/hybrid-youtube-2026-09-06.json`.
+Google account consent, live refresh/revoke and uploads remain **blocked pending
+an available test integration**; no external account was connected or changed.
+Installation/rollback notes: `HYBRID_YOUTUBE_OPERATIONS.md`.
+
+Inventory refresh after this mission: 91 discovered Hybrid template routes,
+324 role/camera contexts, 225 successful renders, 99 blocked/redirected contexts,
+**zero rendering defects**, 16,178 discovered control instances. These are
+rendering/inventory counts, not 16,178 completed interaction tests. Parameterized
+routes and real provider/effect prerequisites still need dedicated acceptance;
+public viewers have their separate tests and evidence.
