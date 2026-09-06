@@ -600,3 +600,22 @@ before the explicit click could resolve; observed 113 unique cards, end-of-archi
 visible and Load more hidden. This proves automatic continuation, not a separate
 manual-button click. Selecting Test Profile 2 displayed exactly IDs 2, 6, 5 with
 camera filter 2. Production deployment and broader Gallery acceptance remain open.
+
+## Verified prerequisite: focuser failure cleanup
+
+The existing authenticated focuser effect now validates the JSON object, direction
+and explicit movement angle before constructing a device. Previously arbitrary
+directions could reach a driver and missing angles could select a form default.
+Every successfully constructed focuser is released in a finally block, including
+failed movement. A successful move followed by release failure returns the step
+result and explicitly says movement completed; this avoids representing that
+case as an unexecuted move. Combined movement/release failures preserve both
+errors without exposing driver details in those responses.
+
+`testing/hybrid_focuser_effect_flow_test.py` uses real Flask/CSRF and a mocked
+hardware interface with Classic imports forbidden: input rejection, CSRF, network
+and role rejection, success, four movement-error classes, release error and
+combined failures. The complete 17-entrypoint Book 2/shell regression passes.
+No physical focuser was moved. This is a prerequisite correction: native Focus
+controls, multicamera preview isolation and real hardware acceptance remain open;
+the existing disabled Hybrid movement controls have not been declared complete.

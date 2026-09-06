@@ -9407,7 +9407,15 @@ class AjaxFocusControllerView(BaseView):
             return jsonify(json_data), 400
 
 
-        form_focuscontroller = IndiAllskyFocusControllerForm(data=request.json)
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({'focuser_error': ['A JSON object is required.']}), 400
+        if payload.get('DIRECTION') not in ('cw', 'ccw'):
+            return jsonify({'focuser_error': ['Choose clockwise or counter-clockwise.']}), 400
+        if 'STEP_DEGREES' not in payload:
+            return jsonify({'focuser_error': ['Choose the movement angle.']}), 400
+
+        form_focuscontroller = IndiAllskyFocusControllerForm(data=payload)
 
 
         if not form_focuscontroller.validate():
@@ -9446,24 +9454,32 @@ class AjaxFocusControllerView(BaseView):
             return jsonify(json_data), 400
 
 
+        movement_error = None
+        cleanup_error = None
         try:
             steps_offset = focuser_interface.move(direction, degrees)
-        except DeviceControlException as e:
-            json_data = {
-                'focuser_error' : ['Error moving focuser: {0:s}'.format(str(e))],
-            }
-            return jsonify(json_data), 400
+        except (DeviceControlException, OSError, ValueError, SystemError):
+            app.logger.exception('Focuser movement failed')
+            movement_error = 'Focuser movement failed; inspect the device before retrying.'
+        finally:
+            try:
+                focuser_interface.deinit()
+            except Exception:
+                app.logger.exception('Focuser release failed')
+                cleanup_error = 'The focuser could not be released; inspect the device before retrying.'
 
+        if movement_error:
+            errors = [movement_error]
+            if cleanup_error:
+                errors.append(cleanup_error)
+            return jsonify({'focuser_error': errors}), 400
+        if cleanup_error:
+            return jsonify({
+                'steps': steps_offset,
+                'focuser_error': ['Movement completed. ' + cleanup_error],
+            }), 500
+        return jsonify({'steps': steps_offset})
 
-        # cleanup
-        focuser_interface.deinit()
-
-
-        r = {
-            'steps' : steps_offset,
-        }
-
-        return jsonify(r)
 
 
 class ManualGpioView(TemplateView):
