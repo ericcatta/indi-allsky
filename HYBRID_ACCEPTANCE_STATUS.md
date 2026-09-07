@@ -1431,3 +1431,33 @@ is `/tmp/hybrid-end-night-polar-flow.log`.
 The fix is not yet deployed. Temporary-file cleanup and failure handling after
 preparation remain a separate open review; polar fallback completion does not
 claim that these other branches or live upload delivery have been validated.
+
+## EndOfNight temporary payload preparation
+
+Hybrid `prepare_end_of_night_payload` now owns remote-path formatting and the
+new temporary JSON artifact. It validates/formats the configured destination
+before allocating a file, preserves the timestamp/ts/camera_uuid substitutions,
+JSON indentation/Unicode behavior and data.json basename, and removes only its
+own incomplete temporary file when writing or closing fails. Interrupted writes
+also clean up before propagating interruption. It does not delete acquisition
+media or files already handed to an upload task.
+
+Expected preparation errors now fail the parent task with a sanitized message
+and retain the exception in logs; no upload record or queue request is created.
+The path timestamp is captured immediately before preparation instead of after
+the JSON write. Astronomy, fields and upload destination semantics are unchanged.
+Database commit and queue-dispatch error recovery after preparation are not
+covered by this cleanup and remain explicitly open: ownership may already have
+passed to a persisted transfer, so blind deletion there would be unsafe.
+
+`end_of_night_payload_test.py` verifies exact JSON/path, owner-only temporary
+permissions, malformed named/positional/bracket formats rejected before file
+creation, partial-write/disk-full/serialization/interruption cleanup and preservation
+of an unrelated file. The full real SQLite/PyEphem worker test verifies three
+malformed configurations produce failed parent tasks, no new upload task and
+no additional files; ordinary and all four polar cases still pass. All 22 Book 2/
+modern_admin/Safe Actions/parity/Product/shell/composition/generation-receipt/
+EndOfNight entrypoints pass, plus compilation and diff checks. Expected injected
+formatting exceptions appear in `/tmp/hybrid-end-night-payload-flow.log`.
+
+The worker change is not deployed and no live upload was attempted.

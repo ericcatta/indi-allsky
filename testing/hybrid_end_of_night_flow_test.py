@@ -13,12 +13,13 @@ def run():
     with isolated_app(multi_camera=True) as app:
         import ephem
         from indi_allsky import constants
+        from indi_allsky.end_of_night import prepare_end_of_night_payload
         from indi_allsky.flask import db
         from indi_allsky.flask.models import IndiAllSkyDbCameraTable,IndiAllSkyDbTaskQueueTable,TaskQueueQueue,TaskQueueState
         from hybrid_runtime_fixture import login_client
         source=(Path(__file__).resolve().parents[1]/'indi_allsky/video.py').read_text()
         method=next(n for n in ast.walk(ast.parse(source)) if isinstance(n,ast.FunctionDef) and n.name=='uploadAllskyEndOfNight')
-        namespace=dict(ephem=ephem,math=math,datetime=datetime,timedelta=timedelta,timezone=timezone,
+        namespace=dict(prepare_end_of_night_payload=prepare_end_of_night_payload,ephem=ephem,math=math,datetime=datetime,timedelta=timedelta,timezone=timezone,
                        json=json,tempfile=tempfile,Path=Path,constants=constants,db=db,
                        IndiAllSkyDbCameraTable=IndiAllSkyDbCameraTable,IndiAllSkyDbTaskQueueTable=IndiAllSkyDbTaskQueueTable,
                        TaskQueueQueue=TaskQueueQueue,TaskQueueState=TaskQueueState,logger=logging.getLogger('test'))
@@ -49,6 +50,23 @@ def run():
             assert f'Inspect upload task {child_id}' in response.text
             response=client.get('/indi-allsky/modern-admin/tasks/'+str(child_id))
             assert response.status_code==200 and 'QUEUED' in response.text and 'test-profile-2' in response.text
+        with app.app_context():
+            root=Path(app.config['INDI_ALLSKY_IMAGE_FOLDER'])
+            before=set(root.iterdir())
+            count=IndiAllSkyDbTaskQueueTable.query.filter_by(queue=TaskQueueQueue.UPLOAD).count()
+            for invalid in ('{unknown}','{0}','{'):
+                worker.config['FILETRANSFER']['REMOTE_ENDOFNIGHT_FOLDER']=invalid
+                failed=IndiAllSkyDbTaskQueueTable(queue=TaskQueueQueue.VIDEO,state=TaskQueueState.QUEUED,data={})
+                db.session.add(failed);db.session.commit()
+                worker._queue_upload_task.reset_mock()
+                with patch.object(tempfile,'NamedTemporaryFile',side_effect=lambda **kwargs:original(dir=root,**kwargs)):
+                    namespace['uploadAllskyEndOfNight'](worker,failed,camera_id=2,night=True)
+                assert failed.state==TaskQueueState.FAILED
+                assert 'Could not prepare EndOfNight upload metadata' in failed.result
+                worker._queue_upload_task.assert_not_called()
+                assert set(root.iterdir())==before
+                assert IndiAllSkyDbTaskQueueTable.query.filter_by(queue=TaskQueueQueue.UPLOAD).count()==count
+            worker.config['FILETRANSFER']['REMOTE_ENDOFNIGHT_FOLDER']='test-destination/{camera_uuid}'
         # Real PyEphem at both poles in summer/winter, not synthetic exceptions.
         with app.app_context():
             camera=db.session.get(IndiAllSkyDbCameraTable,2)

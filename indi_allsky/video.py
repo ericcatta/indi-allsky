@@ -18,6 +18,7 @@ import logging
 import ephem
 
 from . import constants
+from .end_of_night import prepare_end_of_night_payload
 
 from .timelapse import TimelapseGenerator
 from .keogram import KeogramGenerator
@@ -1848,31 +1849,17 @@ class VideoWorker(Process):
         }
 
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as data_tempfile_f:
-            json.dump(
+        try:
+            data_json_p, remote_file_p = prepare_end_of_night_payload(
                 data,
-                data_tempfile_f,
-                indent=4,
-                ensure_ascii=False,
+                remote_folder=self.config['FILETRANSFER']['REMOTE_ENDOFNIGHT_FOLDER'],
+                camera_uuid=camera.uuid, now=datetime.now(),
+                temp_factory=tempfile.NamedTemporaryFile,
             )
-
-            data_json_p = Path(data_tempfile_f.name)
-
-
-        now = datetime.now()
-
-        # Parameters for string formatting
-        file_data_dict = {
-            'timestamp'    : now,
-            'ts'           : now,  # shortcut
-            'camera_uuid'  : camera.uuid,
-        }
-
-
-        # Replace parameters in names
-        remote_dir = self.config['FILETRANSFER']['REMOTE_ENDOFNIGHT_FOLDER'].format(**file_data_dict)
-
-        remote_file_p = Path(remote_dir).joinpath('data.json')
+        except (OSError, ValueError, TypeError, KeyError, IndexError, AttributeError):
+            logger.exception('Could not prepare EndOfNight upload metadata')
+            task.setFailed('Could not prepare EndOfNight upload metadata; inspect configuration and system logs')
+            return
 
 
         jobdata = {

@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- EndOfNight payload: preparazione file temporaneo posseduta da Hybrid;
+  destinazione formattata prima della creazione, cleanup della sola scrittura
+  fallita e task terminale su errori di preparazione. Test file reali/SQLite/
+  PyEphem verdi; commit DB e handoff alla coda richiedono review separata.
+
 - EndOfNight: richieste diurne/disabilitate terminano come saltate; preparazione
   riuscita significa upload accodato, non consegnato. Il task padre collega il
   trasferimento e il record figlio conserva camera/profilo. Test metodo reale,
