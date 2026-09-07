@@ -13,6 +13,7 @@ import requests
 import numpy
 import logging
 
+from .aurora_rtsw import normalize_rtsw
 from .flask import db
 from .flask.miscDb import miscDb
 
@@ -24,8 +25,8 @@ class IndiAllskyAuroraUpdate(object):
 
     ovation_json_url = 'https://services.swpc.noaa.gov/json/ovation_aurora_latest.json'
     kpindex_json_url = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'
-    solar_wind_mag_json_url = 'https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json'
-    solar_wind_plasma_json_url = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json'
+    solar_wind_mag_json_url = 'https://services.swpc.noaa.gov/json/rtsw/rtsw_mag_1m.json'
+    solar_wind_plasma_json_url = 'https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json'
     hemi_power_url = 'https://services.swpc.noaa.gov/text/aurora-nowcast-hemi-power.txt'
 
 
@@ -237,7 +238,7 @@ class IndiAllskyAuroraUpdate(object):
     def update_solar_wind_mag_data(self, camera_data):
         if not self.solar_wind_mag_json_data:
             try:
-                self.solar_wind_mag_json_data = self.download_json(self.solar_wind_mag_json_url)
+                self.solar_wind_mag_json_data = normalize_rtsw(self.download_json(self.solar_wind_mag_json_url), 'mag')
             except json.JSONDecodeError as e:
                 logger.error('JSON parse error: %s', str(e))
                 raise AuroraDataUpdateFailure from e
@@ -339,7 +340,7 @@ class IndiAllskyAuroraUpdate(object):
     def update_solar_wind_plasma_data(self, camera_data):
         if not self.solar_wind_plasma_json_data:
             try:
-                self.solar_wind_plasma_json_data = self.download_json(self.solar_wind_plasma_json_url)
+                self.solar_wind_plasma_json_data = normalize_rtsw(self.download_json(self.solar_wind_plasma_json_url), 'wind')
             except json.JSONDecodeError as e:
                 logger.error('JSON parse error: %s', str(e))
                 raise AuroraDataUpdateFailure from e

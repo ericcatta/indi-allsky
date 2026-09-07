@@ -1,0 +1,50 @@
+{
+  "observed_at": "2026-09-07T08:00:00.119644+00:00",
+  "scope": "Real public NOAA reads; isolated camera/database, not production metadata or scientific validation",
+  "result": {
+    "updated": [
+      "ovation",
+      "kpindex",
+      "mag",
+      "plasma",
+      "hemi_power"
+    ],
+    "failed": []
+  },
+  "metadata": {
+    "AURORA_MAG_BT": 10.13,
+    "AURORA_MAG_GSM_BZ": -5.32,
+    "AURORA_PLASMA_DENSITY": 14.9,
+    "AURORA_PLASMA_SPEED": 371.37,
+    "AURORA_PLASMA_TEMP": 131977,
+    "AURORA_N_HEMI_GW": 39,
+    "AURORA_S_HEMI_GW": 41,
+    "AURORA_DATA_TS": 1788768000,
+    "AURORA_COMPONENT_STATUS": {
+      "ovation": {
+        "state": "available",
+        "last_success": 1788767997
+      },
+      "kpindex": {
+        "state": "available",
+        "last_success": 1788767997
+      },
+      "mag": {
+        "state": "available",
+        "last_success": 1788767999
+      },
+      "plasma": {
+        "state": "available",
+        "last_success": 1788767999
+      },
+      "hemi_power": {
+        "state": "available",
+        "last_success": 1788768000
+      }
+    }
+  },
+  "solar_wind_urls": [
+    "https://services.swpc.noaa.gov/json/rtsw/rtsw_mag_1m.json",
+    "https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json"
+  ]
+}

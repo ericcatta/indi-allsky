@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- NOAA RTSW: adapter condiviso seleziona la sorgente attiva/valida e converte
+  timestamp/campi protonici nel contratto storico; medie a 20 minuti invariate.
+  Parita' e lettura dei cinque feed reali verificate su camera isolata. Adapter e
+  contenimento errori provider da distribuire dopo il difetto osservato sul Pi.
+
 - Dispatch VIDEO multicamera: policy Hybrid distingue generazione/aurora/fumo
   per camera da TLE/backup/health check globali. Rimosso il blocco MVP su questi
   task periodici, riscontrato nel journal reale; rigetti ancora necessari hanno

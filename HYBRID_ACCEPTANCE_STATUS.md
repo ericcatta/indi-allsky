@@ -8,6 +8,32 @@ was deployed to the live Raspberry on 2026-09-07 at 09:42:33 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: current NOAA solar-wind adapter and real-feed acceptance
+
+The previously failing mag/plasma table URLs are replaced with the current
+[NOAA RTSW feeds](https://services.swpc.noaa.gov/json/rtsw/). A dedicated adapter
+selects records marked active with overall_quality zero, maps proton fields and
+UTC timestamps into the existing table contract, sorts/deduplicates timestamps,
+and rejects conflicting active samples. Inactive sources, absent/nonfinite
+measurements and malformed timestamps are excluded; no fallback chooses an
+inactive spacecraft or fabricates values. Existing twenty-minute averaging
+methods are unchanged and continue accepting historical table fixtures.
+
+`hybrid_aurora_rtsw_test.py` verifies both schemas, invalid/conflicting input,
+duplicate handling and identical calculation results for equivalent old/new
+inputs. The 35-entrypoint regression passes. Separately,
+`hybrid_aurora_live_acceptance.py` fetched all five public NOAA feeds and updated
+only a disposable camera/database at 08:00 UTC on 2026-09-07. All five components
+succeeded. Actual calculated Bt/Bz were 10.13/-5.32, plasma density/speed/temperature
+14.9/371.37/131977, hemispheric powers 39/41. These are observed test outputs,
+not independent scientific validation or current production readings.
+Evidence: `testing/evidence/hybrid-aurora-rtsw-2026-09-07.json`.
+
+This restores the external data flow in isolated live-feed testing. Production
+still runs b65cd856; this adapter and the preceding failure-containment change
+must be deployed and the task/provider results verified there. The existing
+24-hour acceptance remains open after the observed worker failures.
+
 ## Verified mission: live maintenance results and provider-failure containment
 
 `testing/evidence/hybrid-live-maintenance-2026-09-07.json` verifies the first
