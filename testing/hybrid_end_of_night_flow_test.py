@@ -49,6 +49,29 @@ def run():
             assert f'Inspect upload task {child_id}' in response.text
             response=client.get('/indi-allsky/modern-admin/tasks/'+str(child_id))
             assert response.status_code==200 and 'QUEUED' in response.text and 'test-profile-2' in response.text
-        print('EndOfNight: real metadata file, persisted scoped upload request, truthful queued receipt and linked task for both roles; no transfer executed: PASS')
+        # Real PyEphem at both poles in summer/winter, not synthetic exceptions.
+        with app.app_context():
+            camera=db.session.get(IndiAllSkyDbCameraTable,2)
+            for latitude in (-90,90):
+                for month in (6,12):
+                    instant=datetime(2024,month,21,12,tzinfo=timezone.utc)
+                    class FixedClock:
+                        @staticmethod
+                        def now(tz=None):return instant
+                    namespace['datetime']=FixedClock
+                    camera.latitude=latitude;camera.longitude=0;db.session.commit()
+                    polar_task=IndiAllSkyDbTaskQueueTable(queue=TaskQueueQueue.VIDEO,state=TaskQueueState.QUEUED,
+                        data={'action':'uploadAllskyEndOfNight','kwargs':{'camera_id':2,'night':True}})
+                    db.session.add(polar_task);db.session.commit()
+                    worker._queue_upload_task.reset_mock()
+                    with patch.object(tempfile,'NamedTemporaryFile',side_effect=lambda **kwargs:original(dir=app.config['INDI_ALLSKY_IMAGE_FOLDER'],**kwargs)):
+                        namespace['uploadAllskyEndOfNight'](worker,polar_task,camera_id=2,night=True)
+                    worker._queue_upload_task.assert_called_once()
+                    data=json.loads(Path(worker._queue_upload_task.call_args.args[0].data['local_file']).read_text())
+                    daylight=(latitude>0 and month==6) or (latitude<0 and month==12)
+                    expected=instant+timedelta(days=-1 if daylight else 3650)
+                    assert datetime.fromisoformat(data['sunrise'])==expected,(latitude,month,data)
+                    assert datetime.fromisoformat(data['sunset'])==expected,(latitude,month,data)
+        print('EndOfNight: real metadata file, scoped queued task, linked UI and four real PyEphem polar cases; no transfer executed: PASS')
 
 if __name__=='__main__':run()

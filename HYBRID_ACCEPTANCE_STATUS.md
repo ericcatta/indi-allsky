@@ -1405,3 +1405,29 @@ was changed. The worker/UI correction is not deployed and live upload completion
 remains unverified. Follow-up review remains necessary for the existing polar
 fallback `timedelta(years=10)` and temporary-file handling on formatting/enqueue
 errors; this mission does not claim those branches passed.
+
+## EndOfNight polar fallback no longer raises TypeError
+
+Both missing-solar-event branches used `timedelta(years=10)`, which Python rejects.
+They now use `timedelta(days=3650)` as the intended far-future sentinel. The
+existing one-day-past sentinels for continuous daylight remain unchanged. These
+values represent unavailable events, not a prediction of sunrise/sunset ten years
+later. Ordinary ephemeris calculations and JSON keys/formats are unchanged.
+Incorrect hemisphere-only comments were replaced with the actual event condition.
+
+`end_of_night_polar_test.py` reproduces the original TypeError and executes the
+actual worker method for eight combinations of rising/setting exception and
+solar-altitude branch, including a leap-day clock. It verifies valid ISO timestamps,
+the retained streamDaytime field and exactly one queued upload request.
+The extended `hybrid_end_of_night_flow_test.py` passes with real PyEphem, temporary
+SQLite/files and Classic prohibited: North/South Pole at June/December solstices,
+both resulting sentinel values, plus the previous ordinary preparation and linked
+Hybrid task-page checks. Only delivery enqueue is mocked; no external transfer
+or production coordinate/configuration change occurs. All 21 Book 2/modern_admin/
+Safe Actions/parity/Product/shell/composition/generation-receipt/EndOfNight
+entrypoints pass, along with compilation and diff checks. The real-PyEphem log
+is `/tmp/hybrid-end-night-polar-flow.log`.
+
+The fix is not yet deployed. Temporary-file cleanup and failure handling after
+preparation remain a separate open review; polar fallback completion does not
+claim that these other branches or live upload delivery have been validated.

@@ -1824,21 +1824,21 @@ class VideoWorker(Process):
             else:
                 sun_civilDawn_date = obs.previous_rising(sun).datetime()
         except ephem.NeverUpError:
-            # northern hemisphere
-            sun_civilDawn_date = utcnow + timedelta(years=10)
+            # Far-future sentinel for a missing rising event, not a prediction.
+            sun_civilDawn_date = utcnow + timedelta(days=3650)
         except ephem.AlwaysUpError:
-            # southern hemisphere
+            # Keep the existing past-event sentinel for continuous daylight.
             sun_civilDawn_date = utcnow - timedelta(days=1)
 
 
         try:
             sun_civilTwilight_date = obs.next_setting(sun).datetime()
         except ephem.AlwaysUpError:
-            # northern hemisphere
+            # Keep the existing past-event sentinel for continuous daylight.
             sun_civilTwilight_date = utcnow - timedelta(days=1)
         except ephem.NeverUpError:
-            # southern hemisphere
-            sun_civilTwilight_date = utcnow + timedelta(years=10)
+            # Far-future sentinel for a missing setting event, not a prediction.
+            sun_civilTwilight_date = utcnow + timedelta(days=3650)
 
 
         data = {
