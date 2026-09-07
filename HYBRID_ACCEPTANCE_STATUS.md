@@ -3,10 +3,15 @@
 ## Completion gate
 
 The complete product audit is **open**. Detector/AI are deferred; their absence
-must be represented honestly. Classic has not been removed. Commit `775a19d0`
-was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour day/night observation
-period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
-deployment status at the time of each mission; this section is the current status.
+must be represented honestly. Classic has not been removed. The shared capture
+cadence mission, operational settings, rollback and live evidence locations are
+recorded in [HYBRID_CAPTURE_CADENCE.md](HYBRID_CAPTURE_CADENCE.md).
+Its protected `deployment.json` records the installed commit and service start;
+`config-change.json` records the configuration revisions. A deployment or capture
+restart requires a new 24-hour day/night observation, which has not passed.
+The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
+post-change interval. Historical sections below retain each mission's deployment
+status at that time; they are not a statement of the currently installed version.
 
 ## User detail compact layout
 

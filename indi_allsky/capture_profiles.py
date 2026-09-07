@@ -764,6 +764,10 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
     profile_config['CCD_EXPOSURE_TIMEOUT'] = profile.exposure_timeout
     profile_config['EXPOSURE_PERIOD'] = profile.exposure_period
     profile_config['EXPOSURE_PERIOD_DAY'] = profile.exposure_period_day
+    if config.get('MULTI_CAMERA_CAPTURE_ENABLE', False):
+        # Cadence belongs to the observatory; exposure and gain remain per camera.
+        profile_config['EXPOSURE_PERIOD'] = float(config.get('EXPOSURE_PERIOD', 15.0))
+        profile_config['EXPOSURE_PERIOD_DAY'] = float(config.get('EXPOSURE_PERIOD_DAY', profile_config['EXPOSURE_PERIOD']))
     profile_config['AUTO_EXPOSURE_ENABLED'] = profile.auto_exposure_enabled
     profile_config['AUTO_EXPOSURE_METERING_MODE'] = profile.auto_exposure_metering_mode
     profile_config['AUTO_EXPOSURE_DAY_MAX_STEP'] = profile.auto_exposure_day_max_step

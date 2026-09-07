@@ -865,6 +865,11 @@ class ModernAdminSettingsConfigValidationService:
             else:
                 self.validate_value(config, key)
 
+        from .capture_cadence import validate_capture_cadence
+        try:
+            validate_capture_cadence(config)
+        except (TypeError, ValueError) as error:
+            raise ConfigSaveException(str(error)) from error
         return True
 
 

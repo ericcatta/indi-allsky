@@ -164,7 +164,70 @@ def test_aggressive_increase_uses_estimate_when_inside_safety_limit():
     assert decision.safety_limited is False
 
 
+def test_gain_first_reduction_in_every_correction_band():
+    # Real minima differ: ZWO supports 0, IMX708 starts at 1.13.
+    for minimum in (0.0, 1.13):
+        for is_day in (True, False):
+            for error in (-40.0, -15.0, -7.0, -3.0):
+                gain = minimum + 0.02
+                for _ in range(10):
+                    decision = _decision(
+                        current_gain=gain, gain_min=minimum, gain_max=300.0,
+                        current_exposure=9.0, exposure_max=9.0,
+                        smoothed_value=95.0-error, trend_count=5,
+                        allow_gain_control=True, is_day=is_day,
+                    )
+                    if gain > minimum:
+                        assert decision.action == 'decrease_gain', (error, decision)
+                        assert minimum <= decision.proposed_gain < gain
+                        assert decision.proposed_exposure == 9.0
+                        gain = decision.proposed_gain
+                    else:
+                        assert decision.action == 'decrease_exposure'
+                        assert decision.proposed_gain == minimum
+                        assert decision.proposed_exposure < 9.0
+                        break
+                else:
+                    raise AssertionError('Gain never reached minimum')
+
+
+def test_exposure_first_increase_in_every_correction_band():
+    for error in (40.0, 15.0, 7.0, 3.0):
+        for exposure in (8.0, 9.0):
+            decision = _decision(
+                current_gain=1.13, gain_min=1.13, gain_max=16.0,
+                current_exposure=exposure, exposure_max=9.0,
+                smoothed_value=95.0-error, trend_count=5,
+                allow_gain_control=True,
+            )
+            if exposure < 9.0:
+                assert decision.action == 'increase_exposure'
+                assert exposure < decision.proposed_exposure <= 9.0
+                assert decision.proposed_gain == 1.13
+            else:
+                assert decision.action == 'increase_gain'
+                assert decision.proposed_exposure == 9.0
+                assert 1.13 < decision.proposed_gain <= 16.0
+
+
+def test_small_correction_preserves_trend_and_manual_gain_gates():
+    for error in (-7.0, -3.0, 3.0, 7.0):
+        decision = _decision(current_gain=5.0, smoothed_value=95.0-error,
+                             allow_gain_control=True, trend_count=0)
+        assert decision.action == 'hold'
+        assert decision.proposed_gain == 5.0
+        decision = _decision(current_gain=5.0, smoothed_value=95.0-error,
+                             allow_gain_control=False, trend_count=5)
+        assert decision.proposed_gain == 5.0
+    decision = _decision(current_gain=5.0, smoothed_value=95.0,
+                         allow_gain_control=True, trend_count=5)
+    assert decision.action == 'hold'
+
+
 if __name__ == '__main__':
+    test_gain_first_reduction_in_every_correction_band()
+    test_exposure_first_increase_in_every_correction_band()
+    test_small_correction_preserves_trend_and_manual_gain_gates()
     test_large_error_uses_aggressive_mode()
     test_saturated_day_exposure_uses_aggressive_halving()
     test_normal_medium_day_error_keeps_day_bounded()

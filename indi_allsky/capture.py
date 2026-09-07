@@ -1,3 +1,4 @@
+from .capture_cadence import exposure_budget
 import os
 import time
 import io
@@ -649,6 +650,23 @@ class CaptureWorker(Process):
         return mode, period_key, configured_period
 
 
+    def _limit_exposure_to_cadence(self):
+        if not self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False) or self.focus_mode:
+            return
+        _, _, period = self._configured_exposure_period()
+        minimum_slot = constants.EXPOSURE_MIN_NIGHT if self.night else constants.EXPOSURE_MIN_DAY
+        with self.exposure_av.get_lock():
+            maximum = exposure_budget(period, self.config['CCD_EXPOSURE_MAX'],
+                                      self.exposure_av[minimum_slot], self._hardware_exposure_max)
+            old_maximum = self.exposure_av[constants.EXPOSURE_MAX]
+            self.exposure_av[constants.EXPOSURE_MAX] = maximum
+            self.exposure_av[constants.EXPOSURE_NEXT] = min(
+                maximum, max(self.exposure_av[minimum_slot], self.exposure_av[constants.EXPOSURE_NEXT]))
+        if old_maximum != maximum:
+            logger.info('[CAPTURE_CADENCE] profile=%s period=%.3fs exposure_limit=%.6fs',
+                        self.profile_id, period, maximum)
+
+
     def _effective_exposure_period(self, exposure):
         try:
             requested_exposure = float(exposure)
@@ -1297,6 +1315,7 @@ class CaptureWorker(Process):
                         self.capture_pre_hook()
 
 
+                        self._limit_exposure_to_cadence()
                         frame_start_time = now_time
                         exposure_period_info = self._effective_exposure_period(self.exposure_av[constants.EXPOSURE_NEXT])
                         self._log_effective_exposure_period(exposure_period_info)
@@ -1863,6 +1882,7 @@ class CaptureWorker(Process):
 
         # set maximum exposure
         ccd_max_exp = float(ccd_info['CCD_EXPOSURE']['CCD_EXPOSURE_VALUE']['max'])
+        self._hardware_exposure_max = ccd_max_exp
         maximum_exposure = self.config.get('CCD_EXPOSURE_MAX')
 
         if self.config.get('CCD_EXPOSURE_MAX') > ccd_max_exp:
@@ -3004,6 +3024,18 @@ class CaptureWorker(Process):
 
 
     def shoot(self, exposure, gain, binning, sync=True, timeout=None, sqm_exposure=False):
+        if self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False) and not self.focus_mode and not sqm_exposure:
+            self._limit_exposure_to_cadence()
+            # A worker decision computed before a day/night limit change must
+            # not send the old, longer exposure to the camera driver.
+            exposure = min(exposure, self.exposure_av[constants.EXPOSURE_MAX])
+            _, _, period = self._configured_exposure_period()
+            started = time.monotonic()
+            previous = getattr(self, '_last_cadence_start', None)
+            if previous is not None and started - previous > period + 1.0:
+                logger.warning('[CAPTURE_CADENCE_LATE] profile=%s interval=%.3fs target=%.3fs',
+                               self.profile_id, started - previous, period)
+            self._last_cadence_start = started
         # sqm used for an image taking at a specific exposure/gain for a controlled SQM measurement
         logger.info('Taking %0.8fs exposure (gain %0.2f / bin %d)', exposure, gain, binning)
 

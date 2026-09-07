@@ -15671,6 +15671,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_effective_value(self, config_key, profile, db_camera):
+        if self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE') and config_key in ('EXPOSURE_PERIOD', 'EXPOSURE_PERIOD_DAY', 'exposure_period', 'exposure_period_day'):
+            key = self.CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS.get(config_key, config_key)
+            return self.indi_allsky_config.get(key, 15.0), 'global config'
         if config_key in self.CAMERA_SETTINGS_PROFILE_FIELDS:
             return self.get_camera_settings_profile_field_value(config_key, profile), 'derived'
 
@@ -16543,6 +16546,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'badges'     : self.get_camera_settings_capture_field_badges(profile, field_name),
             })
 
+        if self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE'):
+            for field in fields:
+                if field['name'] in ('exposure_period', 'exposure_period_day'):
+                    field['label'] = 'Shared interval ' + ('Day' if field['name'].endswith('_day') else 'Night')
+                    field['config_key'] = 'EXPOSURE_PERIOD_DAY' if field['name'].endswith('_day') else 'EXPOSURE_PERIOD'
+                    field['help'] = 'Seconds between exposure starts for all cameras. Saves globally. Exposure uses the available time first, then gain increases; when too bright, gain decreases first. Reserve 6 seconds for capture overhead.'
+                    field['badges'] = ['All cameras']
+                    field['min'] = 6.001
+
         groups = list()
         for group_name in self.CAMERA_SETTINGS_CAPTURE_GROUP_ORDER:
             group_fields = [
@@ -16583,6 +16595,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def get_camera_settings_capture_field_value(self, profile, field_name):
+        if self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE') and field_name in ('exposure_period', 'exposure_period_day'):
+            key = 'EXPOSURE_PERIOD_DAY' if field_name.endswith('_day') else 'EXPOSURE_PERIOD'
+            return self.indi_allsky_config.get(key, 15.0)
         config_key = self.CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS.get(field_name)
         if config_key:
             found, value = self.get_camera_settings_profile_override(profile, field_name)
@@ -17022,6 +17037,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
     def sync_camera_settings_capture_section(self, source_profile, target_config_profile):
         copied_fields = list()
         for field_name in self.CAMERA_SETTINGS_CAPTURE_SYNC_FIELD_ORDER:
+            if self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE') and field_name in ('exposure_period', 'exposure_period_day'):
+                continue
             ccd_config_path = self.get_camera_settings_capture_ccd_config_path(field_name)
             if not ccd_config_path:
                 continue
@@ -17165,6 +17182,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def validate_camera_settings_capture_ranges(self, submitted_data, validation_errors):
+        if self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE'):
+            for field in ('exposure_period', 'exposure_period_day'):
+                value = self.get_camera_settings_submitted_number(submitted_data, field)
+                if value is not None and (not math.isfinite(value) or value <= 6.0):
+                    validation_errors.setdefault(field, []).append('Shared interval must exceed 6 seconds to allow exposure and capture overhead.')
         exposure_min = self.get_camera_settings_submitted_number(submitted_data, 'exposure_min')
         exposure_max = self.get_camera_settings_submitted_number(submitted_data, 'exposure_max')
         exposure_default = self.get_camera_settings_submitted_number(submitted_data, 'exposure_default')
@@ -17245,6 +17267,11 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             raise ValueError('Selected profile changed before save. Reload and try again.')
 
         for field_name, field_data in submitted_data.items():
+            if config.get('MULTI_CAMERA_CAPTURE_ENABLE') and field_name in ('exposure_period', 'exposure_period_day'):
+                if not field_data['delete']:
+                    key = 'EXPOSURE_PERIOD_DAY' if field_name.endswith('_day') else 'EXPOSURE_PERIOD'
+                    config[key] = field_data['value']
+                continue
             if field_name.startswith('libcamera_'):
                 self.delete_camera_settings_capture_override_aliases(profile, field_name)
                 self.apply_camera_settings_capture_awb_field(profile, field_name, field_data)
@@ -17368,6 +17395,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
     def preserve_camera_settings_capture_global_values(self, config):
         for config_key in self.CAMERA_SETTINGS_CAPTURE_FIELD_CONFIG_KEYS.values():
+            if config.get('MULTI_CAMERA_CAPTURE_ENABLE') and config_key in ('EXPOSURE_PERIOD', 'EXPOSURE_PERIOD_DAY'):
+                continue
             found, original_value = self.get_camera_settings_nested_value(self.indi_allsky_config, config_key)
             if found:
                 self.set_camera_settings_profile_path(config, self.get_camera_settings_config_path(config_key), original_value)
@@ -17764,6 +17793,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
 
 
     def estimate_camera_settings_scope(self, config_key):
+        if self.indi_allsky_config.get('MULTI_CAMERA_CAPTURE_ENABLE') and config_key in ('EXPOSURE_PERIOD', 'EXPOSURE_PERIOD_DAY', 'exposure_period', 'exposure_period_day'):
+            return 'all cameras'
         if config_key in self.CAMERA_SETTINGS_PROFILE_FIELDS:
             return 'profile'
         elif config_key in self.CAMERA_SETTINGS_DB_FIELDS:

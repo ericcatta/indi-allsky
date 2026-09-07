@@ -30,7 +30,7 @@ class AutoExposureDecision:
 
 
 class AutoExposureController:
-    """Shadow controller for future exposure-first, gain-second decisions."""
+    """Plan exposure-first increases and gain-first decreases."""
 
     deadband = 10.0
     inner_deadband = 5.0
@@ -279,6 +279,25 @@ class AutoExposureController:
             else:
                 reason = 'exposure_already_min'
                 blocker = 'exposure_already_min'
+
+        # Small, confirmed corrections must follow the same priority as large
+        # corrections. Never shorten exposure while automatic gain can fall.
+        if trend_active and allow_gain_control:
+            gain_direction = 0
+            if error < 0 and current_gain > gain_min:
+                gain_direction = -1
+            elif error > 0 and current_exposure >= exposure_max and current_gain < gain_max:
+                gain_direction = 1
+            if gain_direction:
+                fraction = self.gain_step_fraction / (4.0 if fine_convergence else 2.0)
+                gain_step = max(0.01, max(abs(current_gain), 1.0) * fraction)
+                proposed_gain = self._clamp(current_gain + gain_direction * gain_step, gain_min, gain_max)
+                proposed_exposure = current_exposure
+                exposure_step = 0.0
+                trend_step = 0.0
+                action = 'decrease_gain' if gain_direction < 0 else 'increase_gain'
+                reason = 'decrease_gain_before_exposure' if gain_direction < 0 else 'exposure_at_limit_increase_gain'
+                blocker = 'none'
 
         return AutoExposureDecision(
             action=action,
