@@ -8,6 +8,35 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: flush failure termination and partial results
+
+The four system flush operations repeatedly fetched the first 500 matching rows.
+When deleteAsset raised OSError, the row remained and the loop retried it forever.
+An isolated real HTTP request reproduced a second attempt on the same denied file;
+the test stopped that retry with a sentinel exception to avoid hanging the worker.
+
+Hybrid now owns the shared batch progress/termination policy. Existing scoped
+queries and per-asset filesystem/database effects remain unchanged. If a batch
+reports fewer successful deletions than selected entries, cleanup stops before
+another batch/category and returns HTTP 400 with form_global, deleted_count,
+failed_count (current batch) and camera_id. Already committed deletions are not
+rolled back or described as all-or-nothing. A deliberate retry after fixing the
+file error can remove the remaining entries; an empty retry retains the existing
+zero-deleted success response. Concurrent deletion/DB failures and crash recovery
+are not made transactional by this change.
+
+The isolated test exercises flush_images, flush_16min_images, flush_daytime and
+flush_timelapses with actual synthetic files and SQLite records. It checks CSRF,
+ordinary-user and admin-network rejection, partial progress, no repeated failing
+file, preservation of the other camera, explicit retry and empty completion.
+Each command uses a fresh process because the fixture forbids repeated Flask
+initialization; the first candidate run reached that fixture guard after its
+first command and was corrected without changing runtime behavior. Browser and
+production failure acceptance remain open; no acquisition data were touched.
+All 88 Python/compile checks pass, including Full Config parity and the complete
+selected Book 2 regression. Diff checks pass. Evidence:
+`testing/evidence/hybrid-cleanup-failure-2026-09-07.json`.
+
 ## Verified correction: Camera Settings processing descriptions
 
 Camera Settings still called Hybrid an opt-in placeholder and exposure control a

@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Cleanup media Hybrid: il ciclo a lotti dei quattro flush interrompe il lavoro
+  quando un lotto fallisce parzialmente, invece di ripetere senza fine gli stessi
+  file. Restituisce errore osservabile e conteggio gia' eliminato; query per camera,
+  categorie, ordine e adapter filesystem/DB restano invariati. Non ancora distribuito.
+
 - Autenticazione condivisa: account disabilitati esclusi anche da sessioni e
   cookie persistenti gia' esistenti, Action API e Sync API. Controllo sullo stato
   corrente, senza rotazione delle chiavi o modifica dei contratti pubblici.

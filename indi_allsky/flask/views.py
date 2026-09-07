@@ -1,3 +1,4 @@
+from ..modern_admin_media_cleanup import MediaCleanupIncomplete, flush_media_batches
 from ..modern_admin_sensor_panel import build_sensor_rows
 from ..modern_admin_full_config import ModernAdminFullConfigParser
 import os
@@ -7694,7 +7695,11 @@ class AjaxSystemInfoView(BaseView):
                     }
                     return jsonify(json_data), 400
 
-                image_count = self.flushImages(camera_id)
+                try:
+                    image_count = self.flushImages(camera_id)
+                except MediaCleanupIncomplete as error:
+                    return jsonify(form_global=[str(error)], deleted_count=error.deleted_count,
+                                   failed_count=error.failed_count, camera_id=camera_id), 400
 
                 json_data = {
                     'success-message' : '{0:d} Images Deleted'.format(image_count),
@@ -7707,7 +7712,11 @@ class AjaxSystemInfoView(BaseView):
                     }
                     return jsonify(json_data), 400
 
-                image_count = self.flush16MinutesImages(camera_id)
+                try:
+                    image_count = self.flush16MinutesImages(camera_id)
+                except MediaCleanupIncomplete as error:
+                    return jsonify(form_global=[str(error)], deleted_count=error.deleted_count,
+                                   failed_count=error.failed_count, camera_id=camera_id), 400
 
                 json_data = {
                     'success-message' : '{0:d} Images Deleted'.format(image_count),
@@ -7721,7 +7730,11 @@ class AjaxSystemInfoView(BaseView):
                     return jsonify(json_data), 400
 
 
-                file_count = self.flushTimelapses(camera_id)
+                try:
+                    file_count = self.flushTimelapses(camera_id)
+                except MediaCleanupIncomplete as error:
+                    return jsonify(form_global=[str(error)], deleted_count=error.deleted_count,
+                                   failed_count=error.failed_count, camera_id=camera_id), 400
 
                 json_data = {
                     'success-message' : '{0:d} Files Deleted'.format(file_count),
@@ -7735,7 +7748,11 @@ class AjaxSystemInfoView(BaseView):
                     return jsonify(json_data), 400
 
 
-                file_count = self.flushDaytime(camera_id)
+                try:
+                    file_count = self.flushDaytime(camera_id)
+                except MediaCleanupIncomplete as error:
+                    return jsonify(form_global=[str(error)], deleted_count=error.deleted_count,
+                                   failed_count=error.failed_count, camera_id=camera_id), 400
 
                 json_data = {
                     'success-message' : '{0:d} Files Deleted'.format(file_count),
@@ -7831,18 +7848,7 @@ class AjaxSystemInfoView(BaseView):
         ]
 
 
-        delete_count = 0
-        for asset_list, asset_table in asset_lists:
-            while True:
-                id_list = [entry.id for entry in asset_list.limit(500)]
-
-                if not id_list:
-                    break
-
-                delete_count += self._deleteAssets(asset_table, id_list)
-
-
-        return delete_count
+        return flush_media_batches(asset_lists, self._deleteAssets)
 
 
     def flush16MinutesImages(self, camera_id):
@@ -7867,18 +7873,7 @@ class AjaxSystemInfoView(BaseView):
         ]
 
 
-        delete_count = 0
-        for asset_list, asset_table in asset_lists:
-            while True:
-                id_list = [entry.id for entry in asset_list.limit(500)]
-
-                if not id_list:
-                    break
-
-                delete_count += self._deleteAssets(asset_table, id_list)
-
-
-        return delete_count
+        return flush_media_batches(asset_lists, self._deleteAssets)
 
 
     def flushTimelapses(self, camera_id):
@@ -7928,18 +7923,7 @@ class AjaxSystemInfoView(BaseView):
         ]
 
 
-        delete_count = 0
-        for asset_list, asset_table in asset_lists:
-            while True:
-                id_list = [entry.id for entry in asset_list.limit(500)]
-
-                if not id_list:
-                    break
-
-                delete_count += self._deleteAssets(asset_table, id_list)
-
-
-        return delete_count
+        return flush_media_batches(asset_lists, self._deleteAssets)
 
 
     def flushDaytime(self, camera_id):
@@ -8019,18 +8003,7 @@ class AjaxSystemInfoView(BaseView):
         ]
 
 
-        delete_count = 0
-        for asset_list, asset_table in asset_lists:
-            while True:
-                id_list = [entry.id for entry in asset_list.limit(500)]
-
-                if not id_list:
-                    break
-
-                delete_count += self._deleteAssets(asset_table, id_list)
-
-
-        return delete_count
+        return flush_media_batches(asset_lists, self._deleteAssets)
 
 
     def _deleteAssets(self, table, entry_id_list):
