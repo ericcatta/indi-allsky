@@ -21,6 +21,13 @@ def test_route_contract_is_unchanged():
                 and node.func.attr == 'add_url_rule'
                 and node.args[0].value not in ('/modern-admin/updates/start', '/modern-admin/tools/focus/preview', '/media/<kind>/<int:camera_id>/<int:media_id>/original', '/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
             ):
+                if node.args[0].value == '/modern-admin/classic/<classic_page>':
+                    # A redirect has no template. Verify the replacement before
+                    # restoring its historical registration for the fingerprint.
+                    view = next(k for k in node.keywords if k.arg == 'view_func').value
+                    assert ast.unparse(view) == "ModernAdminCompatibilityRedirectView.as_view('modern_admin_classic_placeholder_view')"
+                    view.func.value.id = 'ModernAdminClassicPlaceholderView'
+                    view.keywords.append(ast.keyword(arg='template_name', value=ast.Constant(value='modern_admin/placeholder.html')))
                 if node.args[0].value in ('/modern-admin/tools/camera-simulator', '/modern-admin/tools/generate', '/modern-admin/tools/image-circle-helper', '/modern-admin/tools/process-fits', '/modern-admin/tools/focus', '/modern-admin/system/gpio-control', '/modern-admin/storage/drives', '/modern-admin/system/network'):
                     template = next(k for k in node.keywords if k.arg == 'view_func').value
                     setting = next(k for k in template.keywords if k.arg == 'template_name')

@@ -6112,23 +6112,6 @@ class ModernAdminIndiServerStartView(ModernAdminIndiCameraDetectView):
         }), 504
 
 
-class ModernAdminPlaceholderView(ModernAdminView):
-    # Read-only placeholder for future modern admin sections.
-    page_title = 'Modern Admin'
-    modern_admin_section = 'Modern Admin'
-    modern_admin_message = 'This section is coming later.'
-    modern_admin_links = tuple()
-
-    def get_context(self):
-        context = super(ModernAdminPlaceholderView, self).get_context()
-
-        context['modern_admin_section'] = self.modern_admin_section
-        context['modern_admin_message'] = self.modern_admin_message
-        context['modern_admin_links'] = self.modern_admin_links
-
-        return context
-
-
 class ModernAdminProductView(TemplateView):
     decorators = [login_required]
     product_context_key = None
@@ -6756,8 +6739,9 @@ class ModernAdminUpgradeStartView(BaseView):
         return jsonify(data), status
 
 
-class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
-    page_title = 'Modern Admin Placeholder'
+class ModernAdminCompatibilityRedirectView(BaseView):
+    """Stable ingress aliases for migrated Hybrid tools."""
+    decorators = [login_required]
 
     modern_page_redirect_map = {
         'gallery'         : 'indi_allsky.modern_admin_media_gallery_view',
@@ -6784,33 +6768,6 @@ class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
         'network'           : 'indi_allsky.modern_admin_network_view',
         'drives'            : 'indi_allsky.modern_admin_drive_manager_view',
         'gpio-control'      : 'indi_allsky.modern_admin_manual_gpio_view',
-    }
-
-    classic_page_map = {
-        'loop'                  : ('Dashboard', 'Loop is being folded into the modern Dashboard.', 'indi_allsky.modern_admin_view'),
-        'gallery'               : ('Media', 'Modern media browsing is coming later.', None),
-        'images'                : ('Media', 'Modern image browsing is coming later.', None),
-        'timelapses'            : ('Media', 'Modern timelapse browsing is coming later.', None),
-        'mini-timelapses'       : ('Media', 'Modern mini-timelapse browsing is coming later.', None),
-        'panorama'              : ('Media', 'Modern panorama viewing is coming later.', None),
-        'panorama-loop'         : ('Media', 'Modern panorama loop viewing is coming later.', None),
-        'realtime-keogram'      : ('Observatory', 'Modern realtime keogram viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
-        'long-term-keogram'     : ('Observatory', 'Modern long term keogram viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
-        'fits-viewer'           : ('Media', 'Modern FITS viewing is coming later.', None),
-        'dark-library'          : ('Cameras', 'Modern dark library viewing is coming later.', 'indi_allsky.modern_admin_cameras_view'),
-        'virtualsky'            : ('Observatory', 'Modern VirtualSky viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
-        'camera-simulator'      : ('Cameras', 'Modern camera simulator safe view is available.', 'indi_allsky.modern_admin_camera_simulator_view'),
-        'astropanel'            : ('Observatory', 'Modern AstroPanel viewing is coming later.', 'indi_allsky.modern_admin_observatory_view'),
-        'generate'              : ('Storage', 'Generate outputs from saved images and inspect task results.', 'indi_allsky.modern_admin_generate_view'),
-        'focus'                 : ('Cameras', 'Modern focus safe view is available.', 'indi_allsky.modern_admin_focus_view'),
-        'process-fits'          : ('Storage', 'Modern FITS processing safe view is available.', 'indi_allsky.modern_admin_image_processing_view'),
-        'image-circle-helper'   : ('Cameras', 'Modern image circle helper safe view is available.', 'indi_allsky.modern_admin_image_circle_helper_view'),
-        'mask-base'             : ('Cameras', 'Modern mask tooling is coming later.', 'indi_allsky.modern_admin_cameras_view'),
-        'log'                   : ('System', 'Modern log viewing is coming later.', 'indi_allsky.modern_admin_system_view'),
-        'config'                : ('System', 'Modern config safe view is available.', 'indi_allsky.modern_admin_config_view'),
-        'network'               : ('System', 'Modern network safe view is available.', 'indi_allsky.modern_admin_network_view'),
-        'drives'                : ('Storage', 'Modern drives safe view is available.', 'indi_allsky.modern_admin_drive_manager_view'),
-        'gpio-control'          : ('System', 'Modern GPIO safe view is available.', 'indi_allsky.modern_admin_manual_gpio_view'),
     }
 
     def dispatch_request(self, classic_page):
@@ -18881,7 +18838,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
     bp_allsky.add_url_rule('/modern-admin/updates/start', view_func=ModernAdminUpgradeStartView.as_view('modern_admin_upgrade_start_view'))
     bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))
-    bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminClassicPlaceholderView.as_view('modern_admin_classic_placeholder_view', template_name='modern_admin/placeholder.html'))
+    bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminCompatibilityRedirectView.as_view('modern_admin_classic_placeholder_view'))
     bp_allsky.add_url_rule('/modern-admin/mode/<mode>', view_func=ModernAdminModeView.as_view('modern_admin_mode_view'))
 
 

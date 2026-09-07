@@ -331,7 +331,6 @@
         "/watch_*"
       ],
       "templates": [
-        "modern_admin/placeholder.html",
         "view_image.html",
         "watch_video.html"
       ],
@@ -797,7 +796,6 @@
       "templates": [
         "modern_admin/index.html",
         "modern_admin/_shell_header.html",
-        "modern_admin/placeholder.html",
         "modern_admin/updates.html"
       ],
       "assets": [

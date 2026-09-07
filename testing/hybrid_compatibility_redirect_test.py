@@ -7,8 +7,15 @@ from hybrid_runtime_fixture import isolated_app, login_client
 def run():
     with isolated_app(multi_camera=True) as app:
         from flask import url_for
-        from indi_allsky.flask.views import ModernAdminClassicPlaceholderView
-        routes = ModernAdminClassicPlaceholderView.modern_page_redirect_map
+        from indi_allsky.flask.views import ModernAdminCompatibilityRedirectView
+        routes = ModernAdminCompatibilityRedirectView.modern_page_redirect_map
+        from pathlib import Path
+        from unittest.mock import patch
+        root = Path(__file__).resolve().parents[1]
+        assert not (root / 'indi_allsky/flask/templates/modern_admin/placeholder.html').exists()
+        source = (root / 'indi_allsky/flask/views.py').read_text()
+        assert 'class ModernAdminPlaceholderView(' not in source
+        assert 'classic_page_map =' not in source
         assert set(routes) == {
             'gallery', 'images', 'timelapses', 'mini-timelapses', 'panorama',
             'panorama-loop', 'fits-viewer', 'loop', 'realtime-keogram',
@@ -22,7 +29,8 @@ def run():
                 with app.test_request_context():
                     expected = url_for(endpoint)
                 for suffix in ('', '?' + query):
-                    response = client.get('/indi-allsky/modern-admin/classic/' + slug + suffix)
+                    with patch.object(app.jinja_env, 'get_template', side_effect=AssertionError('Redirect tried to load a template')):
+                        response = client.get('/indi-allsky/modern-admin/classic/' + slug + suffix)
                     assert response.status_code == 302, (uid, slug, response.status_code)
                     destination = urlsplit(response.headers['Location'])
                     assert not destination.netloc and not destination.scheme

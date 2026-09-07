@@ -8,6 +8,33 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified cleanup: obsolete Hybrid compatibility placeholder removed
+
+After the scoped redirect correction, the unused `ModernAdminPlaceholderView`,
+24 stale "coming later" descriptions and `modern_admin/placeholder.html` were
+removed. The replacement `ModernAdminCompatibilityRedirectView` derives directly
+from the shared BaseView, retains login enforcement and does not require a
+template constructor. Its 24 destination mappings, registered ingress URL and
+public endpoint name remain unchanged. The ownership map no longer declares the
+deleted template and the operational next-steps document reflects this cleanup.
+
+The redirect acceptance test now runs every supported alias with Jinja template
+loading explicitly forbidden, both roles and preserved camera/profile queries.
+It also asserts physical absence of the placeholder and obsolete class/map.
+The historical route fingerprint remains unchanged: its guard explicitly verifies
+the new no-template registration before normalizing only that internal class/
+template change to the original fingerprint representation. Public route behavior
+is separately exercised through Flask. Existing dated inventory/audit reports
+remain historical evidence; they were not regenerated as a side effect.
+
+This removes an unused Hybrid placeholder, not the remaining Classic frontend.
+Mode switching, the complete interaction matrix and final production acceptance
+remain open. No production restart or deployment occurs in this cleanup.
+
+All 25 Python regression entrypoints and `git diff --check` pass after physical
+template removal. Searches of application code and ownership tooling find no
+remaining references to the removed classes/template; test references are guards.
+
 ## Verified correction: scoped compatibility navigation
 
 The 24 supported `/modern-admin/classic/<page>` ingress aliases redirected to

@@ -150,8 +150,10 @@ runtime behavior.
   `ModernAdminSystemView`, `ModernAdminUpdatesView`): these are shell/section
   pages rather than direct Classic wrapper families. Leave them until a
   dedicated section ownership pass.
-- `ModernAdminPlaceholderView` and related mode/placeholder routing remain
-  compatibility glue. Changing them would risk navigation/session behavior.
+- The former placeholder bridge is now `ModernAdminCompatibilityRedirectView`:
+  its 24 aliases retain camera/profile queries without loading a template.
+  Its obsolete placeholder class/template have been removed after dedicated
+  Classic-disabled regression. Mode switching remains a separate migration gate.
 
 ### Risky / Requires Dedicated Review
 
