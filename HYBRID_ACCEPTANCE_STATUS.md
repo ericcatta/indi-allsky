@@ -8,6 +8,20 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## User detail compact layout
+
+The redundant three-card user summary is removed; ID, identity, active/staff/admin
+flags, login date and configuration count remain in the metadata panel. The
+duplicate Users link is removed. Administrators alone see a Password row explaining
+that the original password cannot be retrieved: the application stores an Argon2
+hash, not recoverable plaintext. No hash is rendered and storage is unchanged.
+
+Isolated Flask checks passed for both viewer roles and both target users: all
+metadata retained, the password explanation only for administrators and no stored
+hash in HTML. Existing operations, shell and Product View Models checks passed;
+diff checks passed. Native browser verification was blocked by the locked Mac.
+This template change has not been deployed to production.
+
 ## Clean candidate regression — 6ca73bfe
 
 A fresh `git archive` of `6ca73bfe8d2efe9d95314c14c22b26f90867dec6` was
