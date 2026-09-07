@@ -54,57 +54,35 @@ class IndiAllskyAuroraUpdate(object):
             camera_data = dict()
 
 
-        camera_update = False
-
-        try:
-            self.update_ovation(camera_data, latitude, longitude)
-            camera_update = True
-        except AuroraDataUpdateFailure:
-            pass
-        except AuroraDataProcessingError:
-            pass
-
-
-        try:
-            self.update_kpindex(camera_data)
-            camera_update = True
-        except AuroraDataUpdateFailure:
-            pass
-        except AuroraDataProcessingError:
-            pass
-
-
-        try:
-            self.update_solar_wind_mag_data(camera_data)
-            camera_update = True
-        except AuroraDataUpdateFailure:
-            pass
-        except AuroraDataProcessingError:
-            pass
-
-
-        try:
-            self.update_solar_wind_plasma_data(camera_data)
-            camera_update = True
-        except AuroraDataUpdateFailure:
-            pass
-        except AuroraDataProcessingError:
-            pass
-
-
-        try:
-            self.update_hemi_power_data(camera_data)
-            camera_update = True
-        except AuroraDataUpdateFailure:
-            pass
-        except AuroraDataProcessingError:
-            pass
-
-
-        if camera_update:
+        updated, failed = [], []
+        components = (
+            ('ovation', self.update_ovation, (latitude, longitude)),
+            ('kpindex', self.update_kpindex, ()),
+            ('mag', self.update_solar_wind_mag_data, ()),
+            ('plasma', self.update_solar_wind_plasma_data, ()),
+            ('hemi_power', self.update_hemi_power_data, ()),
+        )
+        status = dict(camera_data.get('AURORA_COMPONENT_STATUS') or {})
+        for name, method, args in components:
+            component_data = dict(camera_data)
+            try:
+                method(component_data, *args)
+            except (AuroraDataUpdateFailure, AuroraDataProcessingError,
+                    requests.exceptions.RequestException, TypeError, ValueError, KeyError, IndexError) as error:
+                logger.warning('Aurora component %s unavailable: %s', name, type(error).__name__)
+                failed.append(name)
+                previous = status.get(name, {})
+                status[name] = {'state': 'unavailable', 'last_success': previous.get('last_success')}
+            else:
+                camera_data.update(component_data)
+                updated.append(name)
+                status[name] = {'state': 'available', 'last_success': int(time.time())}
+        if updated:
             camera_data['AURORA_DATA_TS'] = int(time.time())
-            camera.data = camera_data
-            db.session.commit()
+        camera_data['AURORA_COMPONENT_STATUS'] = status
+        camera.data = camera_data
+        db.session.commit()
+        return {'updated': updated, 'failed': failed}
 
 
     def update_ovation(self, camera_data, latitude, longitude):
@@ -559,7 +537,7 @@ class IndiAllskyAuroraUpdate(object):
 
         if r.status_code >= 400:
             logger.error('URL returned %d', r.status_code)
-            return None
+            raise AuroraDataUpdateFailure('HTTP {0}'.format(r.status_code))
 
         json_data = json.loads(r.text)
         #logger.warning('Response: %s', json_data)
@@ -574,7 +552,7 @@ class IndiAllskyAuroraUpdate(object):
 
         if r.status_code >= 400:
             logger.error('URL returned %d', r.status_code)
-            return None
+            raise AuroraDataUpdateFailure('HTTP {0}'.format(r.status_code))
 
         data = r.text
         #logger.warning('Response: %s', data)

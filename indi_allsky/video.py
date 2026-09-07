@@ -266,11 +266,19 @@ class VideoWorker(Process):
             action_method = getattr(self, action)
         except AttributeError:
             logger.error('Unknown action: %s', action)
+            task.setFailed('Unknown video task action')
             return
 
 
         # perform the action
-        action_method(task, **kwargs)
+        try:
+            action_method(task, **kwargs)
+        except Exception as error:
+            logger.exception('Video task %d action=%s failed', task.id, action)
+            db.session.rollback()
+            db.session.refresh(task)
+            if task.state in (TaskQueueState.QUEUED, TaskQueueState.RUNNING):
+                task.setFailed('Task failed ({0}); see service log'.format(type(error).__name__))
 
 
     def generateVideo(self, task, **kwargs):
@@ -1953,9 +1961,12 @@ class VideoWorker(Process):
         task.setRunning()
 
         aurora = IndiAllskyAuroraUpdate(self.config)
-        aurora.update(camera)
-
-        task.setSuccess('Aurora data updated')
+        result = aurora.update(camera)
+        if result['failed']:
+            task.setFailed('Aurora updated {0}/5 sources; unavailable: {1}'.format(
+                len(result['updated']), ', '.join(result['failed'])))
+        else:
+            task.setSuccess('Aurora data updated')
 
 
     def updateSmokeData(self, task, **kwargs):

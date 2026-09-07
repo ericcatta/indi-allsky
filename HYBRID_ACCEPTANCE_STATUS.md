@@ -8,6 +8,38 @@ was deployed to the live Raspberry on 2026-09-07 at 09:42:33 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: live maintenance results and provider-failure containment
+
+`testing/evidence/hybrid-live-maintenance-2026-09-07.json` verifies the first
+post-deploy periodic effects. Backup task 10706 produced an 8,463,874-byte gzip;
+its actual contents were restored only into a disposable directory, yielding an
+828,977,152-byte SQLite database with integrity ok, two cameras and image metadata
+through 09:48:38. The original compressed backup was untouched. TLE groups now
+contain 157, 10,715 and 21 records updated at 07:48 UTC. Health and smoke tasks
+reported SUCCESS; smoke sensor/provider correctness is not proved by that status.
+
+Aurora tasks 10701/10702 exposed an uncaught failure after NOAA returned HTTP 404:
+the magnetic-data processor indexed None, killing the video worker and leaving
+tasks RUNNING. They remain failed/unresolved live work, not acceptance passes.
+The local correction turns HTTP errors into explicit provider failures, records
+per-component availability/last-success, preserves prior readings on component
+failure (including partial mutation), and reports partial updates as failed tasks
+rather than full success. No astronomical calculations were changed.
+The video execution boundary now rolls back pending DB changes on an effect
+exception, marks an unfinished task FAILED, and allows the next job to execute;
+unknown actions also receive a terminal failure. Existing terminal outcomes are
+not overwritten. This does not supply worker crash leases or external exactly-once
+effect guarantees.
+
+The 34-entrypoint regression passed; targeted tests execute provider failures and
+the actual video processTask method with real isolated database state. NOAA's
+[current RTSW directory](https://services.swpc.noaa.gov/json/rtsw/) and live probes
+confirm rtsw_mag_1m.json/rtsw_wind_1m.json return 200, with per-record source/active
+flags and a different plasma schema. The adapter migration remains open: URLs
+were not replaced blindly, and current aurora data is not declared restored.
+This containment correction is not yet deployed. The 24-hour acceptance cannot
+be declared passed in the presence of these unresolved runtime errors.
+
 ## Verified mission: clean release verification and production deployment b65cd856
 
 Evidence: `testing/evidence/hybrid-release-b65cd856-2026-09-07.json`.

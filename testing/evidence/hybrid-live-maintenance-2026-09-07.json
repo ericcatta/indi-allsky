@@ -1,0 +1,70 @@
+{
+  "observed_at": "2026-09-07T09:53:31.008753+02:00",
+  "backup_file": "/var/lib/indi-allsky/backup/backup_indi-allsky_20260907_094841_992227.sqlite.gz",
+  "compressed_bytes": 8463874,
+  "backup_integrity": "ok",
+  "backup_camera_count": 2,
+  "backup_latest_image": "2026-09-07 09:48:38.000000",
+  "restored_bytes": 828977152,
+  "tle_groups": [
+    [
+      800,
+      157,
+      "2026-09-07 07:48:15"
+    ],
+    [
+      801,
+      10715,
+      "2026-09-07 07:48:40"
+    ],
+    [
+      802,
+      21,
+      "2026-09-07 07:48:41"
+    ]
+  ],
+  "tasks": [
+    [
+      10700,
+      "SUCCESS",
+      "systemHealthCheck",
+      "Health check complete"
+    ],
+    [
+      10701,
+      "RUNNING",
+      "updateAuroraData",
+      null
+    ],
+    [
+      10702,
+      "RUNNING",
+      "updateAuroraData",
+      null
+    ],
+    [
+      10703,
+      "SUCCESS",
+      "updateSmokeData",
+      "Smoke data updated"
+    ],
+    [
+      10704,
+      "SUCCESS",
+      "updateSmokeData",
+      "Smoke data updated"
+    ],
+    [
+      10705,
+      "SUCCESS",
+      "updateSatelliteTleData",
+      "Satellite data updated"
+    ],
+    [
+      10706,
+      "SUCCESS",
+      "backupDatabase",
+      "Backup complete"
+    ]
+  ]
+}
