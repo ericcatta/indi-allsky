@@ -30,6 +30,28 @@ browser interactions or real hardware/integration effects. Production remains
 Classic removal and the 24-hour day/night gate remain open. Evidence:
 `testing/evidence/hybrid-release-6ca73bfe-2026-09-07.json`.
 
+## Browser sandbox refreshed — 2026-09-07 12:05 CEST
+
+Three obsolete browser acceptance processes were identified by their exact
+command lines and checkout paths and terminated (3193471, 3207416, 3245270).
+The verified `6ca73bfe` source now serves the isolated sandbox at remote loopback
+127.0.0.1:8101, PID 3430143, through the local SSH tunnel 127.0.0.1:18102.
+It uses only synthetic in-memory database/media and blocks external effects.
+The optional upgrade state remains explicitly synthetic.
+
+An HTTP readiness check through the tunnel logged in with the synthetic identity,
+loaded Now, Camera Settings, Tasks and My Account, checked the updated processing
+wording, and received sandbox HTTP 409 before a system command could execute.
+The Python client explicitly allowed secure session cookies over this loopback
+HTTP tunnel after the default cookie policy caused login rejection; no production
+cookie configuration was weakened. This client check is not native browser or
+click acceptance. The Mac remains unavailable until the user's return.
+
+Production capture remained PID 3284487, active, NRestarts=0. No production
+service or acquisition data was changed. The sandbox is ephemeral; recheck its
+process and tunnel before relying on this address. Readiness details are in
+`testing/evidence/hybrid-release-6ca73bfe-2026-09-07.json`.
+
 ## Clean candidate UI discovery — 6ca73bfe
 
 The explicit inventory entrypoint was rerun on the clean candidate with synthetic

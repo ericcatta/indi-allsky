@@ -151,5 +151,48 @@
     "detail_families": 9,
     "placeholder_phrase_matches": [],
     "limitations": "Known phrase scan only; JavaScript-created controls and actual effects still need native browser acceptance"
+  },
+  "browser_sandbox_preparation": {
+    "scope": "HTTP readiness of isolated server via loopback SSH tunnel; no browser acceptance",
+    "client_note": "Synthetic loopback client allows secure cookies over HTTP for the SSH-tunneled sandbox only; production cookie settings unchanged",
+    "candidate": "6ca73bfe",
+    "url": "http://127.0.0.1:18102",
+    "checks": [
+      {
+        "path": "/indi-allsky/modern-admin/now",
+        "status": 200
+      },
+      {
+        "path": "/indi-allsky/modern-admin/settings/cameras?profile_id=test-profile-1",
+        "status": 200
+      },
+      {
+        "path": "/indi-allsky/modern-admin/tasks",
+        "status": 200
+      },
+      {
+        "path": "/indi-allsky/modern-admin/account",
+        "status": 200
+      },
+      {
+        "path": "/indi-allsky/ajax/system",
+        "status": 409,
+        "result": "Sandbox middleware rejected request before effect"
+      }
+    ],
+    "pid": 3430143,
+    "remote_bind": "127.0.0.1:8101",
+    "local_tunnel": "127.0.0.1:18102",
+    "root": "/home/eric/hybrid-acceptance-6ca73bfe",
+    "log": "/home/eric/hybrid-release-evidence-6ca73bfe/browser-sandbox.log",
+    "retired_confirmed_sandbox_pids": [
+      3193471,
+      3207416,
+      3245270
+    ],
+    "production_capture_pid": 3284487,
+    "production_capture_restarts": 0,
+    "native_browser_acceptance": "open; user cannot unlock Mac until evening",
+    "state_lifetime": "Synthetic database/media are ephemeral; readiness is a point-in-time observation, not a permanent availability guarantee"
   }
 }
