@@ -1293,3 +1293,46 @@ can_start=true. No StartUnit/RestartUnit was called on the live service. Direct
 browser acceptance, deployment and real unattended-upgrade/recovery acceptance
 remain open. Script timer handling and failure recovery remain separate work;
 the production capture soak was not intentionally interrupted by this mission.
+
+
+## Live night/day transition: 2026-09-07 07:09 CEST
+
+Production remains faf53d86 with capture PID 3206060, started 00:32:40 CEST.
+At 07:09:19 both latest JPEG files existed, no pending tasks were found, and
+84,521,414,656 bytes remained free. The subsequent history query found 524 IMX708
+images (459 night, 65 day) and 612 ZWO images (464 night, 148 day) since restart.
+The largest adjacent-image gaps were 46 seconds and 53 seconds respectively.
+First day records were 06:21:12 and 06:21:55. Thus the stored frames evidence a
+night/day transition and ongoing acquisition, not yet 24 hours. Task createDate
+uses UTC/default database time while these image timestamps use local capture
+time; do not compare their displayed hours as if they shared a time zone.
+
+The 56,994 journal lines contain the six previously documented startup gain
+clamps and one insufficient-frame startrail-video error (59 eligible frames),
+without new gain-lookup/MaskError/Traceback markers in the snapshot filter.
+No claim of an entirely error-free run is made. The current IMX708 daytime
+exposure remains 40s at gain 1.13, with recent saved ADU rising 54 to 60;
+its exposure duration alone does not establish a stalled acquisition.
+
+Actual generated night files for capture date 2026-09-06 were inspected:
+- IMX708 timelapse: H.264, 4608x2592, 620 frames, 24.80s, 16,409,460 bytes.
+- ZWO timelapse: H.264, 3840x2160, 789 frames, 31.56s, 21,321,892 bytes.
+- Keograms: IMX708 621x843; ZWO 790x700; both JPEG structures verified.
+- Startrail images: IMX708 4608x2592; ZWO 3840x2160; both structures verified.
+- IMX708 startrail video: H.264, 496 frames, 19.84s, 9,918,747 bytes.
+- ZWO startrail video: no record; no file was verified; not passed. The worker's insufficient-frame
+  branch omits that output rather than writing a successful empty video.
+
+All seven inspected records have success=true and existing nonempty files.
+ffprobe read video stream/container metadata successfully; this does not prove
+full decoding or browser playback. Image.verify is structural, not visual or
+scientific validation. End-of-night uploads were disabled and recorded failed;
+several expired task rows have no result explanation. Upload acceptance and that
+observability review remain open. No new media was deleted or generated manually.
+
+Evidence: `testing/evidence/hybrid-live-night-day-2026-09-07.json`. Raw JSON also
+remains under `/home/eric/hybrid-release-evidence-faf53d86`. Only two timestamped
+snapshot files were actually present (00:43 and 07:09). The configured heartbeat
+is not evidence of fifteen-minute execution; the gap is explicitly unverified
+for periodic resource/backlog sampling, even though frame history covers capture.
+Do not declare the monitor cadence or the full 24-hour requirement passed.
