@@ -882,6 +882,12 @@
   min-height: 280px;
 }
 
+.modern-admin-chart-canvas {
+  position: relative;
+  height: 260px;
+  min-width: 0;
+}
+
 .modern-admin-log-output {
   max-height: 62vh;
   overflow: auto;

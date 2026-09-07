@@ -1288,12 +1288,14 @@ class JsonChartView(JsonView):
 
             star_data = {
                 'x' : x,
-                'y' : int(i.stars_rolling),
+                'y' : int(i.stars_rolling) if i.stars_rolling is not None else None,
             }
             chart_data['stars'].append(star_data)
 
 
-            if self.indi_allsky_config.get('TEMP_DISPLAY') == 'f':
+            if i.temp is None:
+                sensortemp = None
+            elif self.indi_allsky_config.get('TEMP_DISPLAY') == 'f':
                 sensortemp = ((i.temp * 9.0) / 5.0) + 32
             elif self.indi_allsky_config.get('TEMP_DISPLAY') == 'k':
                 sensortemp = i.temp + 273.15
@@ -1340,8 +1342,8 @@ class JsonChartView(JsonView):
             # custom chart 1
             try:
                 custom_1_y = i.data[custom_chart_1_key]
-            except KeyError:
-                custom_1_y = 0
+            except (KeyError, TypeError):
+                custom_1_y = None
 
             custom_1_data = {
                 'x' : x,
@@ -1353,8 +1355,8 @@ class JsonChartView(JsonView):
             # custom chart 2
             try:
                 custom_2_y = i.data[custom_chart_2_key]
-            except KeyError:
-                custom_2_y = 0
+            except (KeyError, TypeError):
+                custom_2_y = None
 
             custom_2_data = {
                 'x' : x,
@@ -1366,8 +1368,8 @@ class JsonChartView(JsonView):
             # custom chart 3
             try:
                 custom_3_y = i.data[custom_chart_3_key]
-            except KeyError:
-                custom_3_y = 0
+            except (KeyError, TypeError):
+                custom_3_y = None
 
             custom_3_data = {
                 'x' : x,
@@ -1379,8 +1381,8 @@ class JsonChartView(JsonView):
             # custom chart 4
             try:
                 custom_4_y = i.data[custom_chart_4_key]
-            except KeyError:
-                custom_4_y = 0
+            except (KeyError, TypeError):
+                custom_4_y = None
 
             custom_4_data = {
                 'x' : x,
@@ -1392,8 +1394,8 @@ class JsonChartView(JsonView):
             # custom chart 5
             try:
                 custom_5_y = i.data[custom_chart_5_key]
-            except KeyError:
-                custom_5_y = 0
+            except (KeyError, TypeError):
+                custom_5_y = None
 
             custom_5_data = {
                 'x' : x,
@@ -1405,8 +1407,8 @@ class JsonChartView(JsonView):
             # custom chart 6
             try:
                 custom_6_y = i.data[custom_chart_6_key]
-            except KeyError:
-                custom_6_y = 0
+            except (KeyError, TypeError):
+                custom_6_y = None
 
             custom_6_data = {
                 'x' : x,
@@ -1418,8 +1420,8 @@ class JsonChartView(JsonView):
             # custom chart 7
             try:
                 custom_7_y = i.data[custom_chart_7_key]
-            except KeyError:
-                custom_7_y = 0
+            except (KeyError, TypeError):
+                custom_7_y = None
 
             custom_7_data = {
                 'x' : x,
@@ -1431,8 +1433,8 @@ class JsonChartView(JsonView):
             # custom chart 8
             try:
                 custom_8_y = i.data[custom_chart_8_key]
-            except KeyError:
-                custom_8_y = 0
+            except (KeyError, TypeError):
+                custom_8_y = None
 
             custom_8_data = {
                 'x' : x,
@@ -1444,8 +1446,8 @@ class JsonChartView(JsonView):
             # custom chart 9
             try:
                 custom_9_y = i.data[custom_chart_9_key]
-            except KeyError:
-                custom_9_y = 0
+            except (KeyError, TypeError):
+                custom_9_y = None
 
             custom_9_data = {
                 'x' : x,

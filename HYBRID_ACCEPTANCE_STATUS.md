@@ -8,6 +8,40 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: complete chart series and tolerate absent readings
+
+Hybrid Charts now displays all six active standard series, nine configured custom
+series, and the latest image RGB/gray histogram. Previously gain, detections,
+custom plots and the histogram were absent from this interface. The chart canvas
+has a bounded-height container. The controller validates a complete response
+before replacing plots, aborts superseded history requests, prevents overlapping
+polls, and reports expired sessions and failed requests while retaining prior data.
+Empty and null-only series explicitly report no readings.
+
+Direct isolated-browser selection of 24 Hours reproduced a real HTTP 500 from
+`int(None)` when no star count was stored. The API now retains missing star and
+temperature values as null; absent custom readings likewise use null instead of
+an invented zero. Existing numerical readings, rolling-star calculation, detection
+semantics, camera filtering and histogram algorithms are unchanged.
+
+`hybrid_charts_flow_test.py` exercises actual Flask queries and JPEG histogram
+calculation with Classic disabled, both roles and cameras, all series, absent
+history, missing files and nullable readings. `hybrid_charts_browser_test.js`
+executes the actual controller for all datasets, empty/null responses, atomic
+validation, range changes, out-of-order responses, polling, HTTP/network/session
+errors and teardown. All 27 Python regression entrypoints in the current mission
+passed, including Book 2, Full Config parity, Settings, Safe Actions, Product View
+Models and Product Spine. Existing fingerprints remain unchanged.
+
+At approximately 08:55–08:59 CEST on 2026-09-07, direct browser acceptance in the
+isolated application verified the 16 accessible charts, empty 15-minute history,
+selection of 24 Hours, visible error before the fix, and automatic recovery to
+"Charts updated" after restarting only the disposable test server. Server output
+confirms the same camera-2 / 86400-second request now returns 200; absent metrics
+remain marked unavailable. This does not establish full visual/mobile/keyboard
+acceptance, every legend interaction, or production deployment. Production capture
+was not restarted. The overall completion gate remains open.
+
 ## Verified mission: clearer Now capture evidence and live continuity sample
 
 Now no longer displays "Preview remains disabled" beside working image previews
