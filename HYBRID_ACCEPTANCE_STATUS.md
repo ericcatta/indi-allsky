@@ -8,6 +8,27 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: Hybrid polar finder
+
+Astropanel now includes an independent inline SVG polar finder with accessible
+hour-angle description, HH:MM:SS angle display and cardinal-position clock times.
+The marker uses the established scope orientation (180 minus hour angle degrees);
+no Classic image or stylesheet is needed. Missing angle hides the marker. Missing
+or invalid transit makes the cardinal clock times unavailable. Existing 18/12/6
+hour offsets are retained, now wrapped to a valid 24-hour clock instead of showing
+negative hours. This is a presentation correction; ephemeris calculations and
+public payloads are unchanged. These are clock times relative to the reported
+transit, not newly calculated astronomical event dates.
+
+The Astropanel controller tests now exercise 0/90/180/270/360 degree positions,
+angle formatting, midnight wrapping, absent angle and invalid transit. Direct
+isolated-browser inspection at 09:06:45 CEST on 2026-09-07 confirmed the accessible
+finder and angle 03:36:44 for 54.18423 degrees, transit 05:26:40 and cardinal times
+11:26:40, 17:26:40 and 23:26:40. The 28-entrypoint Python regression and controller
+tests pass. This closes the previously missing polar-finder presentation; telescope
+alignment, mobile visual inspection and satellite-orbit acceptance remain open.
+No production restart or deployment was performed.
+
 ## Verified mission: Astropanel details and whole-page refresh feedback
 
 The Hybrid page now exposes the existing lunar transit/coordinates/phases, solar

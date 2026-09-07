@@ -4,7 +4,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const base=path.join(__dirname,'../indi_allsky/flask');
 const template=fs.readFileSync(path.join(base,'templates/modern_admin/astropanel.html'),'utf8');
 const source=fs.readFileSync(path.join(base,'static/modern_admin/astropanel.js'),'utf8');
-function element(){return {textContent:'',children:[],appendChild(child){this.children.push(child);},replaceChildren(...children){this.children=children;},get firstChild(){return this.children[0];},addEventListener(event,fn){this[event]=fn;}};}
+function element(){return {textContent:'',attributes:{},setAttribute(key,value){this.attributes[key]=value;},children:[],appendChild(child){this.children.push(child);},replaceChildren(...children){this.children=children;},get firstChild(){return this.children[0];},addEventListener(event,fn){this[event]=fn;}};}
 const nodes={};for(const id of [...template.matchAll(/id="([^"]+)"/g)].map(m=>m[1]))nodes[id]=element();
 const fields=[...template.matchAll(/data-astro-field="([^"]+)"/g)].map(m=>Object.assign(element(),{dataset:{astroField:m[1]}}));
 nodes['astropanel-tool'].dataset={url:'/ajax/astropanel',camera:'2'};
@@ -30,6 +30,9 @@ const respond=(i,value,extra={})=>pending[i].resolve({ok:true,json:async()=>valu
  assert.equal(nodes['modern-admin-satellite-rows'].children[0].firstChild.textContent,'<script>test</script>');
  assert.equal(nodes['modern-admin-satellite-rows'].children[0].children[6].textContent,'10');
  assert(fields.every(field=>field.textContent==='12:00'));
+ assert.equal(nodes['modern-admin-polar-clock'].textContent,'00:04:00');
+ assert.equal(nodes['modern-admin-polar-marker'].attributes.transform,'rotate(179 120 120)');
+ assert.equal(nodes['modern-admin-polar-three'].textContent,'Unavailable');
  poll();respond(2,{...data,sun_alt:{invalid:true}});await tick();
  assert(nodes['astropanel-status'].textContent.includes('out of date'));
  assert.equal(nodes['modern-admin-sun-alt'].textContent,'1 deg');
@@ -37,6 +40,17 @@ const respond=(i,value,extra={})=>pending[i].resolve({ok:true,json:async()=>valu
  poll();respond(4,{...data,satellite_list:[],sun_alt:null});await tick();
  assert.equal(nodes['modern-admin-sun-alt'].textContent,'Unavailable');
  assert.equal(nodes['modern-admin-satellite-rows'].children[0].firstChild.textContent,'No satellite data available.');
- poll();events.pagehide();assert(pending[5].options.signal.aborted);
+ for (const [angle, expected] of [[0,'00:00:00'],[90,'06:00:00'],[180,'12:00:00'],[270,'18:00:00'],[360,'00:00:00']]) {
+  poll();respond(pending.length-1,{...data,polaris_hour_angle:angle,polaris_next_transit:'05:26:40'});await tick();
+  assert.equal(nodes['modern-admin-polar-clock'].textContent,expected);
+  assert.equal(nodes['modern-admin-polar-marker'].attributes.transform,`rotate(${180-angle} 120 120)`);
+  assert.equal(nodes['modern-admin-polar-three'].textContent,'11:26:40');
+  assert.equal(nodes['modern-admin-polar-twelve'].textContent,'17:26:40');
+  assert.equal(nodes['modern-admin-polar-nine'].textContent,'23:26:40');
+ }
+ poll();respond(pending.length-1,{...data,polaris_hour_angle:null,polaris_next_transit:'None'});await tick();
+ assert.equal(nodes['modern-admin-polar-marker'].attributes.visibility,'hidden');
+ assert.equal(nodes['modern-admin-polar-clock'].textContent,'Unavailable');
+ poll();events.pagehide();assert(pending.at(-1).options.signal.aborted);
  console.log('Astropanel controller: all detail fields, 20 satellites, literal text, unavailable/stale/session states, refresh and polling: PASS');
 })().catch(error=>{console.error(error);process.exitCode=1;});

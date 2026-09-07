@@ -56,7 +56,20 @@
             <dt>Next equinox</dt><dd data-astro-field="sun_equinox">Loading...</dd>
             <dt>Next solstice</dt><dd data-astro-field="sun_solstice">Loading...</dd>
         </dl></article>
-        <article class="modern-admin-table-panel"><h2>Polaris details</h2><dl>
+        <article class="modern-admin-table-panel"><h2>Polar finder</h2>
+            <svg id="modern-admin-polar-dial" viewBox="0 0 240 240" role="img" aria-labelledby="polar-dial-title polar-dial-description" style="display:block;width:100%;max-width:280px;margin:auto">
+                <title id="polar-dial-title">Polaris in the polar finder scope</title>
+                <desc id="polar-dial-description">Position unavailable until ephemeris data loads.</desc>
+                <circle cx="120" cy="120" r="84" fill="none" stroke="currentColor"/>
+                <path d="M120 24v24 M120 192v24 M24 120h24 M192 120h24 M110 120h20 M120 110v20" stroke="currentColor"/>
+                <g fill="currentColor" text-anchor="middle" font-size="14"><text x="120" y="18">12</text><text x="228" y="125">3</text><text x="120" y="236">6</text><text x="12" y="125">9</text></g>
+                <g id="modern-admin-polar-marker" visibility="hidden"><circle cx="120" cy="36" r="6" fill="#ff6666" stroke="currentColor"/></g>
+            </svg>
+            <p>View through a polar finder scope. Times below use the same local clock as transit.</p><dl>
+            <dt>Hour angle</dt><dd id="modern-admin-polar-clock">Loading...</dd>
+            <dt>At 3 o'clock</dt><dd id="modern-admin-polar-three">Loading...</dd>
+            <dt>At 12 o'clock</dt><dd id="modern-admin-polar-twelve">Loading...</dd>
+            <dt>At 9 o'clock</dt><dd id="modern-admin-polar-nine">Loading...</dd>
             <dt>Next transit</dt><dd data-astro-field="polaris_next_transit">Loading...</dd>
         </dl></article>
     </section>

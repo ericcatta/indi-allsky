@@ -31,6 +31,24 @@
         if (!data.satellite_list.every(satellite => satellite && ['name','alt','az','rise','transit','set','duration','elevation']
             .every(key => Object.hasOwn(satellite, key) && scalar(scalarValue(satellite[key]))))) throw Error('invalid_satellites');
     }
+    function polarFinder(data) {
+        const angle = data?.polaris_hour_angle;
+        const valid = typeof angle === 'number' && Number.isFinite(angle);
+        const clock = seconds => [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60]
+            .map(value => String(value).padStart(2, '0')).join(':');
+        const hourAngle = valid ? clock(Math.floor((((angle % 360) + 360) % 360) * 240)) : 'Unavailable';
+        node('polar-clock').textContent = hourAngle;
+        node('polar-marker').setAttribute('visibility', valid ? 'visible' : 'hidden');
+        if (valid) node('polar-marker').setAttribute('transform', 'rotate(' + (180 - angle) + ' 120 120)');
+        document.getElementById('polar-dial-description').textContent = valid
+            ? 'Polaris hour angle ' + hourAngle + ', view through a polar finder scope.' : 'Polaris position unavailable.';
+        const transit = /^(\d{2}):(\d{2}):(\d{2})$/.exec(data?.polaris_next_transit || '');
+        const timeValid = transit && +transit[1] < 24 && +transit[2] < 60 && +transit[3] < 60;
+        const seconds = timeValid ? +transit[1] * 3600 + +transit[2] * 60 + +transit[3] : 0;
+        [['three', 18], ['twelve', 12], ['nine', 6]].forEach(([name, hours]) => {
+            node('polar-' + name).textContent = timeValid ? clock((seconds - hours * 3600 + 86400) % 86400) : 'Unavailable';
+        });
+    }
     async function load() {
         if (active) return;
         const controller = new AbortController(); active = controller;
@@ -51,12 +69,14 @@
             node('polaris-ha').textContent = display(data.polaris_hour_angle, ' deg hour angle');
             node('polaris-alt').textContent = 'Altitude ' + display(data.polaris_alt, ' deg');
             fields.forEach(field => {field.textContent = display(data[field.dataset.astroField]);});
+            polarFinder(data);
             node('planet-rows').replaceChildren(...planetRows);
             node('satellite-rows').replaceChildren(...(satelliteRows.length ? satelliteRows : [emptyRow('No satellite data available.', 8)]));
             loaded = true; status.textContent = 'Updated ' + new Date().toLocaleTimeString() + ' · refreshes every minute.';
         } catch (error) {
             if (error.name === 'AbortError') return;
             if (!loaded) {
+                polarFinder(null);
                 ['moon-phase','moon-times','sun-alt','sun-times','polaris-ha','polaris-alt'].forEach(key => {node(key).textContent = 'Unavailable';});
                 fields.forEach(field => {field.textContent = 'Unavailable';});
                 node('planet-rows').replaceChildren(emptyRow('Astropanel data unavailable.', 6));
