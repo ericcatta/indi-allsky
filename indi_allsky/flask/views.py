@@ -9615,7 +9615,14 @@ class AjaxUserInfoView(BaseView):
 
 
     def post(self):
-        form_userinfo = IndiAllskyUserInfoForm(data=request.json)
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify(form_global=['Expected a JSON object.']), 400
+        invalid = {key: ['Expected text.'] for key in ('NAME', 'CURRENT_PASSWORD', 'NEW_PASSWORD', 'NEW_PASSWORD2')
+                   if not isinstance(payload.get(key), str)}
+        if invalid:
+            return jsonify({**invalid, 'form_global': ['Please fix the errors above']}), 400
+        form_userinfo = IndiAllskyUserInfoForm(data=payload)
 
 
         if not form_userinfo.validate(current_user):

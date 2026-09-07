@@ -75,7 +75,14 @@ class LoginView(TemplateView):
         random_sleep = random.randint(0, 250) / 1000.0
         time.sleep(random_sleep)
 
-        form_login = IndiAllskyLoginForm(data=request.json)
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify(form_global=['Expected a JSON object.']), 400
+        invalid = {key: ['Expected text.'] for key in ('USERNAME', 'PASSWORD', 'NEXT')
+                   if not isinstance(payload.get(key), str)}
+        if invalid:
+            return jsonify({**invalid, 'form_global': ['Please fix errors above']}), 400
+        form_login = IndiAllskyLoginForm(data=payload)
 
         if not form_login.validate():
             form_errors = form_login.errors  # this must be a property

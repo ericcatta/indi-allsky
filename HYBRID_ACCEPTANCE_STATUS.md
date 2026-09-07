@@ -8,6 +8,27 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: login/account JSON input contracts
+
+A non-object JSON body reached Flask-WTF's automatic form conversion and raised
+TypeError instead of a controlled validation response. Login and account updates
+now require an object and text values for the fields their existing forms submit.
+Missing fields, nulls, booleans, numbers, arrays and objects receive field-specific
+HTTP 400 JSON errors before form/password handling. Malformed JSON and non-JSON
+bodies receive a global error. Valid form validation, CSRF, current-password checks,
+name/password effects and ignored privilege fields retain their existing behavior.
+
+`hybrid_account_input_test.py` reproduces the original array-body failure and
+exercises invalid body/field variants for administrator and ordinary users. Failed
+login requests leave login metadata unchanged and cannot open My Account; failed
+account requests preserve name, password, role and email. A valid request after
+the failures still succeeds. All state is synthetic and Classic imports are
+forbidden. No real account, credential, service or configuration is modified;
+the correction is not deployed and browser acceptance remains open.
+All 85 Python/compile checks pass, including Full Config parity, Settings,
+Safe Actions and Product regressions. `git diff --check` passes. Evidence:
+`testing/evidence/hybrid-account-input-2026-09-07.json`.
+
 ## Verified correction: disabled-account sessions and API authentication
 
 The existing login rejected disabled users, but the session loader returned them
