@@ -18,7 +18,7 @@ import logging
 import ephem
 
 from . import constants
-from .end_of_night import prepare_end_of_night_payload
+from .end_of_night import prepare_end_of_night_payload, handoff_end_of_night_upload
 
 from .timelapse import TimelapseGenerator
 from .keogram import KeogramGenerator
@@ -1801,6 +1801,10 @@ class VideoWorker(Process):
             return
 
 
+        if isinstance((task.data or {}).get('end_of_night_upload'), dict):
+            task.setFailed('Existing EndOfNight upload receipt; inspect its state before preparing another upload')
+            return
+
         logger.info('Generating Allsky EndOfNight data.json')
 
         utcnow = datetime.now(tz=timezone.utc)  # ephem expects UTC dates
@@ -1876,16 +1880,10 @@ class VideoWorker(Process):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
-
-        # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
-        self._queue_upload_task(upload_task, camera_id=camera.id)
-
-        task.data = dict(task.data or {}, end_of_night_upload={
-            'status': 'queued', 'task_id': upload_task.id, 'camera_id': camera.id,
-        })
-        task.setSuccess('Queued EndOfNight upload task {0}; delivery is not yet confirmed'.format(upload_task.id))
+        handoff_end_of_night_upload(
+            task, upload_task, session=db.session,
+            dispatch=self._queue_upload_task, camera_id=camera.id,
+        )
 
 
     def systemHealthCheck(self, task, **kwargs):

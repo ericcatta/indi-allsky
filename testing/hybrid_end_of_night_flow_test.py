@@ -13,13 +13,13 @@ def run():
     with isolated_app(multi_camera=True) as app:
         import ephem
         from indi_allsky import constants
-        from indi_allsky.end_of_night import prepare_end_of_night_payload
+        from indi_allsky.end_of_night import prepare_end_of_night_payload, handoff_end_of_night_upload
         from indi_allsky.flask import db
         from indi_allsky.flask.models import IndiAllSkyDbCameraTable,IndiAllSkyDbTaskQueueTable,TaskQueueQueue,TaskQueueState
         from hybrid_runtime_fixture import login_client
         source=(Path(__file__).resolve().parents[1]/'indi_allsky/video.py').read_text()
         method=next(n for n in ast.walk(ast.parse(source)) if isinstance(n,ast.FunctionDef) and n.name=='uploadAllskyEndOfNight')
-        namespace=dict(prepare_end_of_night_payload=prepare_end_of_night_payload,ephem=ephem,math=math,datetime=datetime,timedelta=timedelta,timezone=timezone,
+        namespace=dict(handoff_end_of_night_upload=handoff_end_of_night_upload,prepare_end_of_night_payload=prepare_end_of_night_payload,ephem=ephem,math=math,datetime=datetime,timedelta=timedelta,timezone=timezone,
                        json=json,tempfile=tempfile,Path=Path,constants=constants,db=db,
                        IndiAllSkyDbCameraTable=IndiAllSkyDbCameraTable,IndiAllSkyDbTaskQueueTable=IndiAllSkyDbTaskQueueTable,
                        TaskQueueQueue=TaskQueueQueue,TaskQueueState=TaskQueueState,logger=logging.getLogger('test'))
@@ -43,6 +43,14 @@ def run():
             db.session.expire_all();parent=db.session.get(IndiAllSkyDbTaskQueueTable,parent_id)
             assert parent.data['end_of_night_upload']['task_id']==child_id
             assert 'Queued EndOfNight upload task' in parent.result and 'delivery is not yet confirmed' in parent.result
+            before=set(Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']).iterdir())
+            total=IndiAllSkyDbTaskQueueTable.query.count()
+            worker._queue_upload_task.reset_mock()
+            namespace['uploadAllskyEndOfNight'](worker,parent,camera_id=2,night=True)
+            worker._queue_upload_task.assert_not_called()
+            assert IndiAllSkyDbTaskQueueTable.query.count()==total
+            assert set(Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']).iterdir())==before
+            assert parent.data['end_of_night_upload']['task_id']==child_id
         for uid in (1,2):
             client=login_client(app,uid)
             response=client.get('/indi-allsky/modern-admin/tasks/'+str(parent_id))

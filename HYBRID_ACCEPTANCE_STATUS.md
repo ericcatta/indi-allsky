@@ -1461,3 +1461,39 @@ EndOfNight entrypoints pass, plus compilation and diff checks. Expected injected
 formatting exceptions appear in `/tmp/hybrid-end-night-payload-flow.log`.
 
 The worker change is not deployed and no live upload was attempted.
+
+## EndOfNight database-to-queue handoff
+
+Hybrid now commits the child upload record and parent linkage together before
+queue dispatch. The prepared receipt makes file ownership and child identity
+observable even when later completion cannot be saved. A persistence exception
+prevents dispatch, rolls back the session, records uncertainty/candidate ID and
+retains the metadata file for recovery. It does not assume that a lost commit
+acknowledgement proves no row exists.
+
+A queue exception records dispatch uncertainty and links the child, retaining its
+file. Child state is never overwritten, since a consumer may already have received
+or completed that request. After successful dispatch, a failed parent-completion
+commit is logged and rolled back without redispatch or file deletion; the durable
+prepared linkage remains. A repeated worker invocation with an existing receipt
+stops before metadata preparation or creation of another upload. This is a
+sequential re-entry guard, not a claim of distributed exactly-once delivery.
+
+`hybrid_end_of_night_handoff_test.py` passes with real SQLite: failed pre-commit,
+committed-but-unacknowledged insert, a consumer completing before dispatch raises,
+successful dispatch seeing the durable parent link, and final parent-commit
+failure. Every ambiguous case retains the owned file; no dispatch occurs after
+persistence uncertainty and consumed-child success remains intact. The full
+worker flow verifies re-entry creates neither another file nor another task,
+alongside existing preparation/error/polar/UI cases. All 22 Book 2/modern_admin/
+Safe Actions/parity/Product/shell/composition/generation-receipt/EndOfNight
+entrypoints pass; related polar/payload checks were repeated after final changes.
+Compilation and diff checks pass. Logs: `/tmp/hybrid-end-night-handoff.log` and
+`/tmp/hybrid-end-night-handoff-final.log`; injected tracebacks are expected.
+
+Recovery remains deliberate: inspect the linked upload task, logs and retained
+file before resubmission. A persistent database outage can prevent recording a
+terminal parent state; the prepared receipt and log are retained rather than
+inventing a success. Candidate IDs after persistence uncertainty are diagnostic,
+not proof of a committed child. No production task, file or service changed; this
+worker change and real external delivery still require deployment/acceptance.

@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- EndOfNight handoff: record upload e collegamento padre salvati insieme prima
+  dell'invio alla coda. Esiti incerti conservano file e riferimento senza
+  risottomettere o sovrascrivere lo stato del consumer. Un rientro con ricevuta
+  esistente blocca nuova preparazione. Test transazionali/queue-failure verdi;
+  recovery dopo errore richiede verifica dell'effettivo task di trasferimento.
+
 - EndOfNight payload: preparazione file temporaneo posseduta da Hybrid;
   destinazione formattata prima della creazione, cleanup della sola scrittura
   fallita e task terminale su errori di preparazione. Test file reali/SQLite/

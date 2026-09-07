@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from indi_allsky.end_of_night import prepare_end_of_night_payload
+from indi_allsky.end_of_night import prepare_end_of_night_payload, handoff_end_of_night_upload
 
 
 class NeverUpError(Exception):pass
@@ -32,7 +32,7 @@ def run():
                 camera=SimpleNamespace(id=2,latitude=90,longitude=0,elevation=0,uuid='polar-camera')
                 camera_model=Mock();camera_model.id=2;camera_model.query.filter.return_value.one.return_value=camera
                 task_model=Mock(side_effect=lambda **kwargs:SimpleNamespace(id=42,**kwargs))
-                env={'prepare_end_of_night_payload':prepare_end_of_night_payload,'IndiAllSkyDbCameraTable':camera_model,'IndiAllSkyDbTaskQueueTable':task_model,
+                env={'prepare_end_of_night_payload':prepare_end_of_night_payload,'handoff_end_of_night_upload':handoff_end_of_night_upload,'IndiAllSkyDbCameraTable':camera_model,'IndiAllSkyDbTaskQueueTable':task_model,
                      'TaskQueueQueue':SimpleNamespace(UPLOAD='UPLOAD'),'TaskQueueState':SimpleNamespace(QUEUED='QUEUED'),
                      'logger':logging.getLogger('test'),'datetime':Clock,'timezone':timezone,'timedelta':timedelta,
                      'math':math,'Path':Path,'json':json,'db':Mock(),'constants':SimpleNamespace(TRANSFER_UPLOAD=1),
