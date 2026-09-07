@@ -4,18 +4,18 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
-<script type="text/javascript">
-var camera_id = {{ camera_id }};
-</script>
+
 {% endblock %}
 
 {% block content %}
-<main class="modern-admin-shell" aria-labelledby="modern-admin-astropanel-title">
+<main id="astropanel-tool" data-url="{{ url_for('indi_allsky.ajax_astropanel_view') }}" data-camera="{{ camera_id }}" class="modern-admin-shell" aria-labelledby="modern-admin-astropanel-title">
     {% set modern_admin_header_label = 'Astropanel header' %}
     {% set modern_admin_heading = 'Astropanel' %}
     {% set modern_admin_title_id = 'modern-admin-astropanel-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
+    <p id="astropanel-status" role="status">Loading astropanel data...</p>
+    <button type="button" id="astropanel-refresh" class="modern-admin-button">Refresh</button>
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Astropanel overview">
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Moon</div>
@@ -34,6 +34,32 @@ var camera_id = {{ camera_id }};
         </article>
     </section>
 
+    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Ephemeris details">
+        <article class="modern-admin-table-panel"><h2>Moon details</h2><dl>
+            <dt>Transit</dt><dd data-astro-field="moon_transit">Loading...</dd>
+            <dt>Altitude (degrees)</dt><dd data-astro-field="moon_alt">Loading...</dd>
+            <dt>Azimuth (degrees)</dt><dd data-astro-field="moon_az">Loading...</dd>
+            <dt>Right ascension</dt><dd data-astro-field="moon_ra">Loading...</dd>
+            <dt>Declination</dt><dd data-astro-field="moon_dec">Loading...</dd>
+            <dt>Next new moon</dt><dd data-astro-field="moon_new">Loading...</dd>
+            <dt>Next full moon</dt><dd data-astro-field="moon_full">Loading...</dd>
+        </dl></article>
+        <article class="modern-admin-table-panel"><h2>Sun and twilight</h2><dl>
+            <dt>Transit</dt><dd data-astro-field="sun_transit">Loading...</dd>
+            <dt>Azimuth (degrees)</dt><dd data-astro-field="sun_az">Loading...</dd>
+            <dt>Right ascension</dt><dd data-astro-field="sun_ra">Loading...</dd>
+            <dt>Declination</dt><dd data-astro-field="sun_dec">Loading...</dd>
+            <dt>Astronomical dawn</dt><dd data-astro-field="sun_at_start">Loading...</dd>
+            <dt>Civil dawn</dt><dd data-astro-field="sun_ct_start">Loading...</dd>
+            <dt>Civil dusk</dt><dd data-astro-field="sun_ct_end">Loading...</dd>
+            <dt>Astronomical dusk</dt><dd data-astro-field="sun_at_end">Loading...</dd>
+            <dt>Next equinox</dt><dd data-astro-field="sun_equinox">Loading...</dd>
+            <dt>Next solstice</dt><dd data-astro-field="sun_solstice">Loading...</dd>
+        </dl></article>
+        <article class="modern-admin-table-panel"><h2>Polaris details</h2><dl>
+            <dt>Next transit</dt><dd data-astro-field="polaris_next_transit">Loading...</dd>
+        </dl></article>
+    </section>
     <section class="modern-admin-table-panel" aria-labelledby="planet-table-title">
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">Planets</p>
@@ -54,69 +80,12 @@ var camera_id = {{ camera_id }};
         </div>
         <div class="modern-admin-table-scroll">
             <table class="modern-admin-data-table">
-                <thead><tr><th>Name</th><th>Altitude</th><th>Azimuth</th><th>Rise</th><th>Transit</th><th>Set</th></tr></thead>
-                <tbody id="modern-admin-satellite-rows"><tr><td colspan="6">Loading satellite data...</td></tr></tbody>
+                <thead><tr><th>Name</th><th>Altitude</th><th>Azimuth</th><th>Rise</th><th>Transit</th><th>Set</th><th>Duration (s)</th><th>Elevation (km)</th></tr></thead>
+                <tbody id="modern-admin-satellite-rows"><tr><td colspan="8">Loading satellite data...</td></tr></tbody>
             </table>
         </div>
     </section>
 </main>
 
-<script>
-function modernAdminCell(text) {
-    const cell = document.createElement('td');
-    cell.textContent = text == null ? 'Unknown' : text;
-    return cell;
-}
-
-function modernAdminLoadAstropanel() {
-    fetch('{{ url_for('indi_allsky.ajax_astropanel_view') }}?camera_id=' + camera_id)
-        .then((response) => response.json())
-        .then((data) => {
-            document.getElementById('modern-admin-moon-phase').textContent = data.moon_phase + ' (' + data.moon_light + '%)';
-            document.getElementById('modern-admin-moon-times').textContent = 'Rise ' + data.moon_rise + ' · Set ' + data.moon_set;
-            document.getElementById('modern-admin-sun-alt').textContent = data.sun_alt + ' deg';
-            document.getElementById('modern-admin-sun-times').textContent = 'Rise ' + data.sun_rise + ' · Set ' + data.sun_set;
-            document.getElementById('modern-admin-polaris-ha').textContent = data.polaris_hour_angle;
-            document.getElementById('modern-admin-polaris-alt').textContent = 'Altitude ' + data.polaris_alt + ' deg';
-
-            const planetBody = document.getElementById('modern-admin-planet-rows');
-            planetBody.replaceChildren();
-            ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].forEach((planet) => {
-                const row = document.createElement('tr');
-                row.appendChild(modernAdminCell(planet.charAt(0).toUpperCase() + planet.slice(1)));
-                row.appendChild(modernAdminCell(data[planet + '_rise']));
-                row.appendChild(modernAdminCell(data[planet + '_transit']));
-                row.appendChild(modernAdminCell(data[planet + '_set']));
-                row.appendChild(modernAdminCell(data[planet + '_alt'] + ' deg'));
-                row.appendChild(modernAdminCell(data[planet + '_az'] + ' deg'));
-                planetBody.appendChild(row);
-            });
-
-            const satelliteBody = document.getElementById('modern-admin-satellite-rows');
-            satelliteBody.replaceChildren();
-            (data.satellite_list || []).slice(0, 12).forEach((satellite) => {
-                const row = document.createElement('tr');
-                row.appendChild(modernAdminCell(satellite.name));
-                row.appendChild(modernAdminCell(satellite.alt + ' deg'));
-                row.appendChild(modernAdminCell(satellite.az + ' deg'));
-                row.appendChild(modernAdminCell(satellite.rise));
-                row.appendChild(modernAdminCell(satellite.transit));
-                row.appendChild(modernAdminCell(satellite.set));
-                satelliteBody.appendChild(row);
-            });
-            if (!satelliteBody.children.length) {
-                const row = document.createElement('tr');
-                row.appendChild(modernAdminCell('No satellite rows available'));
-                row.firstChild.colSpan = 6;
-                satelliteBody.appendChild(row);
-            }
-        })
-        .catch(() => {
-            document.getElementById('modern-admin-planet-rows').innerHTML = '<tr><td colspan="6">Error loading astropanel data.</td></tr>';
-        });
-}
-
-modernAdminLoadAstropanel();
-window.setInterval(modernAdminLoadAstropanel, 60000);
-</script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/astropanel.js') }}"></script>
 {% endblock %}

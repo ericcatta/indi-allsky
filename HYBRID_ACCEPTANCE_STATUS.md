@@ -8,6 +8,31 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: Astropanel details and whole-page refresh feedback
+
+The Hybrid page now exposes the existing lunar transit/coordinates/phases, solar
+transit/coordinates/twilights/seasons and Polaris next transit. Satellite rows are
+no longer arbitrarily limited to twelve, and include duration and elevation. The
+controller accepts the existing singleton-array representation of satellite pass
+times/duration without changing the public API. All inserted values use text nodes.
+Refresh is explicit, duplicate polling is prevented, and failures mark the whole
+page unavailable or explicitly stale instead of leaving overview cards loading or
+silently preserving old satellite data. Provider calculations are unchanged.
+
+`hybrid_astropanel_flow_test.py` verifies real ephemeris responses, rendered detail
+fields, both roles/cameras and no-satellite state with Classic disabled. The actual
+controller test covers twenty satellites (including the public array shapes),
+literal untrusted names, manual refresh, polling, malformed/failed responses,
+expired sessions, unavailable values, retained stale data and teardown. All 28
+Python regression entrypoints passed; chart and Astropanel JavaScript tests pass.
+Direct isolated browser inspection at 09:02:54 CEST on 2026-09-07 confirmed computed
+values and empty satellites. Clicking Refresh at 09:03:05 updated the timestamp,
+solar altitude (21.02 to 21.05 degrees) and Polaris hour angle. This is a real API
+refresh against disposable camera configuration, not production deployment or
+validation of astronomical accuracy. Satellite-orbit fixtures, full mobile and
+keyboard acceptance, and the Classic polar-finder visualization/cardinal-position
+presentation remain open; this mission does not claim complete Astropanel parity.
+
 ## Verified mission: complete chart series and tolerate absent readings
 
 Hybrid Charts now displays all six active standard series, nine configured custom
