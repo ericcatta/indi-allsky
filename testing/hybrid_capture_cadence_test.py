@@ -53,6 +53,16 @@ def run():
     methods = [node for node in cls.body if isinstance(node,ast.FunctionDef) and node.name in names]
     namespace = dict(constants=constants, exposure_budget=exposure_budget, logger=logging.getLogger('test'), time=time)
     exec(compile(ast.Module(body=methods,type_ignores=[]),'<capture-methods>','exec'),namespace)
+    # Model a four-second setup/hook delay: the next start must be 15s
+    # after the actual request, not 11s after it using a stale loop timestamp.
+    frame_start = next(node for node in ast.walk(cls) if isinstance(node,ast.Assign)
+                       and any(isinstance(target,ast.Name) and target.id=='frame_start_time' for target in node.targets)
+                       and isinstance(node.value,ast.Call)
+                       and isinstance(node.value.func,ast.Attribute) and node.lineno>1000)
+    timing={'now_time':100.0,'time':SimpleNamespace(time=lambda:104.0)}
+    exec(compile(ast.Module(body=[frame_start],type_ignores=[]),'<frame-start-clock>','exec'),timing)
+    assert timing['frame_start_time']==104.0
+    assert timing['frame_start_time']+15.0==119.0
     worker_type = type('Worker',(),{name:namespace[name] for name in names})
     worker = worker_type()
     worker.config = resolved[0]; worker.focus_mode=False; worker.night=False; worker.moonmode=False

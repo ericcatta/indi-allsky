@@ -1316,7 +1316,9 @@ class CaptureWorker(Process):
 
 
                         self._limit_exposure_to_cadence()
-                        frame_start_time = now_time
+                        # Reconfiguration, periodic work and pre-hooks can take
+                        # seconds. Start the interval and timeout clocks now.
+                        frame_start_time = time.time()
                         exposure_period_info = self._effective_exposure_period(self.exposure_av[constants.EXPOSURE_NEXT])
                         self._log_effective_exposure_period(exposure_period_info)
                         exposure_timeout_plan = self._exposure_timeout_plan(self.exposure_av[constants.EXPOSURE_NEXT])

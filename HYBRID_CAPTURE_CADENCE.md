@@ -69,3 +69,29 @@ over new media records. Copies of the deployment/config helpers are retained in
 the protected backup directory for rollback. No acquisition files are deleted.
 Every capture restart or scheduling change starts a new 24-hour observation;
 this mission does not complete the broader Classic-removal acceptance gate.
+
+## Live timing follow-up
+
+The first live deployment at 14:02:12 CEST saved revision 110 and produced
+15-second steady-state intervals for both cameras. IMX708 actual driver requests
+held exposure at 9 seconds while gain rose from 1.13 to 1.30, 1.49 and beyond.
+All observed output files were present and nonempty, with no capture errors.
+
+The first ZWO interval was 11 seconds: the scheduler reused a timestamp taken
+before preparation/reconfiguration work. The follow-up changes the interval and
+exposure-timeout origin to a fresh clock reading after that work, retaining the
+full interval following preparation delays. A simulated four-second delay
+regression checks that a 15-second interval does not become 11 seconds.
+
+The follow-up backup and authoritative deployment/service-start record are in
+`/home/eric/hybrid-backups/cadence-clock-20260907-140555`; it preserves revision
+110 unchanged. This deployment restarts capture only. Its automatic test report
+and live samples are in `/home/eric/hybrid-cadence-clock-evidence`.
+The required 24-hour observation starts again at the follow-up restart.
+
+All 92 Python/compile checks also pass on the timing follow-up (source hashes
+verified); see `testing/evidence/hybrid-capture-cadence-clock-2026-09-07.json`.
+The longer pre-follow-up sample contained 29 IMX708 and 30 ZWO frames, both
+with median interval 15 seconds and all files nonempty. A separate satellite
+TLE download returned HTTP 403; that integration remains an open verification
+item and is not counted as a successful provider check.
