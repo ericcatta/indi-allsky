@@ -8,6 +8,39 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: atomic upload task acquisition (2026-09-07 07:58 CEST)
+
+Two upload workers could read the same QUEUED row and both call `setRunning()`:
+the read and write were separate, so both could perform the transfer. The new
+shared backend helper `indi_allsky/task_claim.py` conditionally updates only an
+UPLOAD/QUEUED row and commits ownership before returning it. Zero affected rows
+means no effect. Commit errors propagate after rollback; an uncertain commit is
+never treated as permission to upload. Terminal or missing duplicate tasks are
+now informational log events instead of misleading missing-task errors.
+
+`testing/hybrid_upload_claim_test.py` deterministically reproduces two winners
+with the former algorithm. Ten races using independent sessions/connections to
+file-backed SQLite then produce exactly one winner with the new implementation,
+including preloaded identity-map entries. It also checks all non-queued states,
+other queues, missing IDs, preserved camera/profile payload and failure before
+commit versus lost acknowledgement after a real commit. The worker delegates
+before connecting to a destination. No database migration is required.
+
+The eight real loopback SFTP cases were repeated successfully after this change:
+`testing/evidence/hybrid-upload-worker-atomic-2026-09-07.json`. All 20 regression
+entrypoints pass (the previous 19 plus the new claim test). This used the isolated
+`hybrid-acceptance-fcc8ab81` copy with the changed helper, uploader and tests
+overlaid; it is no longer an unmodified archive. Checked source SHA256 values:
+- `uploader.py`: `85fc436867ed4413a05227010eb43054584df56a37105be058e8df6ba64d5efd`.
+- `task_claim.py`: `0f6e965ef019f9d2ce64c278d7c5e6b16ee71708137aa1cd5340af2b28da6cbb`.
+
+Scope: one acquisition of one QUEUED task ID. This is not deduplication of distinct
+tasks, a lease, automatic recovery after worker death or an exactly-once guarantee
+across database/remote-storage failures. A lost commit acknowledgement may leave
+RUNNING work requiring inspection. Concurrent database claims and sequential
+real upload effects were tested separately; full threaded queue scheduling and
+non-SQLite databases remain unverified. No production restart/deployment occurred.
+
 ## Verified mission: real SFTP through the upload worker (2026-09-07 07:53 CEST)
 
 `testing/hybrid_upload_worker_loopback.py` executes the actual `processUpload`,

@@ -40,13 +40,14 @@ def run(output):
         from indi_allsky import constants, filetransfer
         from indi_allsky.flask import db, models
         from indi_allsky.flask.miscDb import miscDb
+        from indi_allsky.task_claim import claim_upload_task
         source = (Path(__file__).resolve().parents[1] / 'indi_allsky/uploader.py').read_text()
         tree = ast.parse(source)
         cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'FileUploader')
         names = {'processUpload', 'cleanup', '_validate_profile_id', '_set_queue_context'}
         methods = [n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name in names]
         assert len(methods) == len(names)
-        namespace = dict(Path=Path, time=time, timedelta=timedelta, constants=constants,
+        namespace = dict(claim_upload_task=claim_upload_task, Path=Path, time=time, timedelta=timedelta, constants=constants,
                          filetransfer=filetransfer, db=db, models=models,
                          NoResultFound=NoResultFound, logger=logging.getLogger('upload-acceptance'))
         exec(compile(ast.fix_missing_locations(ast.Module(body=methods, type_ignores=[])), 'uploader.py', 'exec'), namespace)

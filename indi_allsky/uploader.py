@@ -19,6 +19,7 @@ from .flask.miscDb import miscDb
 from .flask import models
 
 from . import filetransfer
+from .task_claim import claim_upload_task
 
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -185,19 +186,10 @@ class FileUploader(Thread):
         logger.debug('Upload queue route: profile=%s camera_id=%s task_id=%s', profile_id, camera_id, task_id)
 
 
-        try:
-            task = models.IndiAllSkyDbTaskQueueTable.query\
-                .filter(models.IndiAllSkyDbTaskQueueTable.id == task_id)\
-                .filter(models.IndiAllSkyDbTaskQueueTable.state == models.TaskQueueState.QUEUED)\
-                .filter(models.IndiAllSkyDbTaskQueueTable.queue == models.TaskQueueQueue.UPLOAD)\
-                .one()
-
-        except NoResultFound:
-            logger.error('Task ID %d not found', task_id)
+        task = claim_upload_task(task_id)
+        if task is None:
+            logger.info('Upload task %s is absent or already claimed', task_id)
             return
-
-
-        task.setRunning()
 
 
         action = task.data['action']
