@@ -1,0 +1,445 @@
+{
+  "environment": "Isolated Flask candidate on 20389002 runtime; no production deployment",
+  "defect_reproduced": "Isolated surrogate accepted by JSON parser caused UnicodeEncodeError during CSV output; XLSX omitted it",
+  "result": "Controlled HTTP 400 for CSV and XLSX; valid international Unicode round-trips",
+  "controller_scope": "Actual operations-table.js with simulated DataTables and DOM adapters; no browser/clipboard/download acceptance",
+  "python_checks": [
+    {
+      "case": "testing/auto_exposure_controller_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/auto_gain_controller_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/auto_gain_runtime_state_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/focus_frames_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/full_config_parser_parity_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_app_startup_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_archive_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_astropanel_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_astropanel_satellite_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_aurora_failure_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_aurora_rtsw_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_aurora_status_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_authenticated_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_camera_simulator_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_charts_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_compatibility_redirect_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_database_backup_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_drives_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_end_of_night_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_end_of_night_handoff_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_fits_processing_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_fits_processing_parity_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_focus_endpoint_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_focus_preview_parity_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_focuser_effect_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_gallery_isolation_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_generated_media_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_generation_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_generation_result_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_geometry_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_gpio_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_highlights_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_log_download_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_log_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_mini_generation_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_native_focus_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_network_command_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_now_page_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_observatory_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_operations_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_output_detail_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_public_media_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_route_composition_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_runtime_shell_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_sensor_panel_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_settings_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_shell_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_sky_cycle_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_source_media_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_table_export_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_task_visibility_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_ui_inventory_parser_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_updates_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_upgrade_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_upload_claim_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_video_dispatch_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_video_failure_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_youtube_flow_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/legacy_auto_gain_steps_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_boundary_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_log_reader_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_media_camera_filter_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_media_metadata_service_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_media_runtime_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_notification_read_service_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_observatory_tools_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_runtime_providers_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_settings_contracts_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_settings_runtime_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_system_tools_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_task_read_service_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/modern_safe_action_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/multicamera_processor_isolation_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/network_activation_polling_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/network_commands_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/network_scan_effects_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/product_spine_regression_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/product_view_models_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/sftp_adapter_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/stretch_multicamera_mask_test.py",
+      "exit_code": 0
+    },
+    {
+      "case": "hybrid_archive_flow_test.py:library",
+      "exit_code": 0
+    },
+    {
+      "case": "compileall",
+      "exit_code": 0
+    }
+  ],
+  "javascript_checks": [
+    {
+      "case": "testing/hybrid_account_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_astropanel_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_camera_simulator_parity_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_charts_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_config_restore_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_drives_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_fits_processing_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_focus_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_full_settings_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_generation_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_geometry_math_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_gpio_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_log_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_media_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_mini_generation_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_navigation_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_network_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_notification_ack_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_now_frames_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_operations_table_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_public_media_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_sensor_panel_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_updates_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_youtube_browser_test.js",
+      "exit_code": 0
+    }
+  ],
+  "log_directory": "/home/eric/hybrid-export-validation-evidence",
+  "candidate_sha256": {
+    "indi_allsky/modern_admin_table_export.py": "2ff50f987abb6ef9a872ff133d5af281c26a91c2b7d57606f0e0192e8e6dfc36",
+    "testing/hybrid_operations_flow_test.py": "2060703d9874dfc90510b0342806174bc553efa97997c6e843e00f89fb94008b",
+    "testing/hybrid_table_export_test.py": "54fbe189eb244aa41a19a7b3d0b4d402371762dfb4aee47641c1f5f23f4fcec7",
+    "testing/hybrid_operations_table_browser_test.js": "69af48f907c7a68ef148dc3cf2e0583536080660a6b70e4f1237852bed39ae08"
+  }
+}

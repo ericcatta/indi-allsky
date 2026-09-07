@@ -60,6 +60,11 @@ def run(runtime_config):
             assert b'Synthetic result 205' in archive.read('xl/worksheets/sheet1.xml')
         assert client.post(export_url,data={'table':data['table'],'format':'csv'}).status_code==400
         assert client.post(export_url,data={'table':'{}','format':'csv','csrf_token':token}).status_code==400
+        for format_name in ('csv', 'xlsx'):
+            invalid=client.post(export_url,data={'table':json.dumps({'header':['A'],'body':[['\ud800']]}),
+                'format':format_name,'csrf_token':token})
+            assert invalid.status_code==400 and 'Invalid Unicode' in invalid.json['message']
+            assert 'attachment' not in invalid.headers.get('Content-Disposition','')
         missing = client.post('/indi-allsky/modern-admin/notifications/9999/acknowledge',json={},headers=headers)
         assert missing.status_code == 404 and missing.json['status']=='not_found'
         with patch.object(IndiAllSkyDbNotificationTable,'setAck',side_effect=RuntimeError('private backend detail')):

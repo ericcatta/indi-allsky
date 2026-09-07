@@ -26,6 +26,21 @@ for invalid in ('null','{}','[]','invalid',json.dumps({'header':['A'],'body':[['
     try: module.parse_table_payload(invalid)
     except ValueError: pass
     else: raise AssertionError(invalid)
+for cell in ('\ud800', '\udfff', 'before\ud800after'):
+    for payload in ({'header':['A'], 'body':[[cell]]}, {'header':[cell], 'body':[['value']]}):
+        try: module.parse_table_payload(json.dumps(payload))
+        except ValueError as error: assert 'Unicode' in str(error)
+        else: raise AssertionError('Invalid Unicode accepted')
+try: module.parse_table_payload('\ud800')
+except ValueError: pass
+else: raise AssertionError('Invalid UTF-8 input accepted')
+unicode_rows=module.parse_table_payload(json.dumps({'header':['Español — 日本語'], 'body':[['🌌 e\u0301']]}))
+content,_=module.export_table(unicode_rows,'csv')
+assert list(csv.reader(io.StringIO(content.decode('utf-8-sig')))) == unicode_rows
+content,_=module.export_table(unicode_rows,'xlsx')
+with ZipFile(io.BytesIO(content)) as archive:
+    root=ET.fromstring(archive.read('xl/worksheets/sheet1.xml'))
+    assert [text.text for text in root.findall('.//s:t',ns)] == [cell for row in unicode_rows for cell in row]
 try: module.parse_table_payload(' '*(module.MAX_PAYLOAD_BYTES+1))
 except ValueError: pass
 else: raise AssertionError('Oversize export accepted')

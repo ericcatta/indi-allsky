@@ -10,7 +10,13 @@ MAX_CELLS = 200000
 
 
 def parse_table_payload(value):
-    if not isinstance(value, str) or len(value.encode('utf-8')) > MAX_PAYLOAD_BYTES:
+    if not isinstance(value, str):
+        raise ValueError('Invalid table export.')
+    try:
+        payload_size = len(value.encode('utf-8'))
+    except UnicodeError:
+        raise ValueError('Invalid table export text.') from None
+    if payload_size > MAX_PAYLOAD_BYTES:
         raise ValueError('Export is too large. Narrow the table filters and try again.')
     try:
         payload = json.loads(value)
@@ -27,6 +33,10 @@ def parse_table_payload(value):
         raise ValueError('Invalid table export.')
     if any(not isinstance(cell, str) or len(cell) > 32767 for row in [header, *rows] for cell in row):
         raise ValueError('Invalid table export cell.')
+    # JSON accepts isolated surrogate escapes, but they are not Unicode scalar
+    # values: UTF-8 CSV encoding fails and XML cannot preserve them in XLSX.
+    if any(0xd800 <= ord(char) <= 0xdfff for row in [header, *rows] for cell in row for char in cell):
+        raise ValueError('Invalid Unicode text in table export. Remove the invalid character and try again.')
     return [header, *rows]
 
 

@@ -8,6 +8,29 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: export Unicode validation and table controller contracts
+
+A JSON table containing an isolated Unicode surrogate passed shape validation,
+then CSV encoding raised UnicodeEncodeError. XLSX could silently drop the same
+invalid character. The parser now rejects invalid UTF-8 input and surrogate cell
+values with a controlled validation error. Both authenticated export formats
+return HTTP 400 without an attachment for invalid text. Valid accents, Japanese,
+emoji and combining characters round-trip through CSV and XLSX unchanged.
+Native attachment responses remain in use; browser blob downloads previously
+failed direct acceptance and were not reintroduced.
+
+`hybrid_operations_table_browser_test.js` executes the actual controller with a
+simulated DataTables adapter: combined case-insensitive search/exact dropdowns,
+visible counts, empty results, filter reset, placeholder-row removal and CSV/XLSX
+form payloads containing the filtered data and CSRF token. It also retains the
+Copy formula-escaping configuration. This validates controller contracts, not
+DataTables implementation, actual clipboard/download behavior or browser layout.
+The real Flask operations test covers the new 400 responses and still checks
+CSRF, attachment content, notification acknowledgment and failed effects.
+All 83 Python/compile and 24 JavaScript checks pass. Evidence:
+`testing/evidence/hybrid-export-validation-2026-09-07.json`. No production deploy
+or capture restart occurs in this mission.
+
 ## Verified correction: all persisted task queues and terminal outcomes
 
 The Hybrid list excluded IMAGE and UPLOAD queues and all EXPIRED tasks, hiding
