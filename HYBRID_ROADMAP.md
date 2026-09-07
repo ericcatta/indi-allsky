@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Dispatch VIDEO multicamera: policy Hybrid distingue generazione/aurora/fumo
+  per camera da TLE/backup/health check globali. Rimosso il blocco MVP su questi
+  task periodici, riscontrato nel journal reale; rigetti ancora necessari hanno
+  una motivazione persistita. Worker ed effetti invariati. Correzione da distribuire
+  e verificare con file backup/aggiornamenti provider reali; osservazione da ripartire.
+
 - Sensor Panel: Hybrid possiede la costruzione delle righe, distinzione fra zero
   misurato e lettura assente, label e filtro slot utilizzati/tutti. Servizio
   `modern_admin_sensor_panel.py` condiviso da pagina e risposta JSON, senza driver

@@ -1,3 +1,4 @@
+from .hybrid_video_task_policy import multicamera_rejection
 import platform
 import sys
 import locale
@@ -689,27 +690,10 @@ class IndiAllSky(object):
         profile_id = self.capture_profiles[0].profile_id
 
         if self.multi_camera_capture_enable:
-            multicamera_safe_video_actions = {
-                'generateVideo',
-                'generateKeogramStarTrails',
-                'generatePanoramaVideo',
-            }
-
-            if action not in multicamera_safe_video_actions:
-                logger.warning(
-                    'Skipping VIDEO task %d action=%s while MULTI_CAMERA_CAPTURE_ENABLE images-only MVP is active',
-                    task.id,
-                    action,
-                )
-                task.setExpired()
-                return
-
-            if not camera_id:
-                logger.warning(
-                    'Skipping VIDEO task %d action=%s while MULTI_CAMERA_CAPTURE_ENABLE is active: missing camera_id',
-                    task.id,
-                    action,
-                )
+            rejection = multicamera_rejection(action, camera_id)
+            if rejection:
+                logger.warning('Skipping VIDEO task %d action=%s: %s', task.id, action, rejection)
+                task.result = rejection
                 task.setExpired()
                 return
 

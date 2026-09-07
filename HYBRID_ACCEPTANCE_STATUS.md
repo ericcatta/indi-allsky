@@ -8,6 +8,39 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: multicamera periodic-task dispatch and 09:20 live sample
+
+Production snapshot `hybrid-live-continuity-2026-09-07-0920.json` records unchanged
+`faf53d86`, PID 3206060 and 00:32:40 start. At 09:20 CEST both image files exist:
+IMX708 09:20:12 (714 images, 459 night/255 day), ZWO 09:20:23 (1114 images,
+464 night/650 day). Largest recorded image gaps remain 46/53 seconds. No queued
+or running tasks were present and free space was 83,787,968,512 bytes. Journal
+errors remain the six startup gain clamps and insufficient ZWO startrail-video
+frames. The elapsed interval is about 8h48m, not 24 hours.
+
+Investigation of EXPIRED periodic tasks found an active product defect: the
+coordinator's old multicamera images-only whitelist rejects aurora, smoke, TLE
+updates and database backups before the worker receives them. Production journal
+entries for tasks 10695–10697 explicitly confirm this rejection. An empty queue
+therefore does not establish successful maintenance or fresh external metadata.
+
+A Hybrid dispatch policy now distinguishes camera-scoped generation/aurora/smoke
+from global TLE/backup/health-check actions. The coordinator allows these known
+responsibilities and retains rejection of unsupported actions or missing camera
+scope, now persisting the reason. Queue envelopes, primary worker profile metadata,
+actual worker methods and single-camera dispatch remain unchanged.
+`hybrid_video_dispatch_test.py` executes the actual coordinator method against
+real isolated Flask task records and a local queue: thirteen allowed combinations,
+six rejected cases with persisted reasons, and single-camera compatibility. The
+31-entrypoint Python regression passes. This proves dispatch, not external-provider
+success, backup upload, worker recovery or live effect acceptance.
+
+The change is not deployed: production still rejects these maintenance tasks.
+Deploy must verify actual backup files/provider updates and restart the capture
+observation period because coordinator behavior changes. Dedicated pre-deploy
+backups remain separate from the broken automatic-backup flow. No capture restart,
+media deletion or production mutation was performed in this mission.
+
 ## Verified mission: live recorded-sensor panel without invented zero readings
 
 Hybrid Sensor Panel now refreshes recorded metadata every five seconds, supports
