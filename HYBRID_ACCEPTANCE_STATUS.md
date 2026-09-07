@@ -8,6 +8,34 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: per-component aurora web status
+
+The shared status formatter ignored AURORA_COMPONENT_STATUS: one successful
+feed renewed the global timestamp and could make retained failed readings look
+current. Missing numeric readings also appeared as zero, and malformed metadata
+could break the page. Hybrid now owns this read-only presentation in
+`modern_admin_aurora_status.py`; BaseView delegates to it.
+
+Each required reading contributes to its component status. Failed, missing,
+unknown-age and older-than-six-hour data are explicit; partial updates identify
+the affected feeds. Kp trend/rating is suppressed when its feed is not current.
+Absent readings display an em dash through a string value that accepts the
+existing numeric format specifications, keeping saved web templates usable.
+Actual zero remains numeric zero. Valid fresh values, rating thresholds and trend
+symbols retain their existing semantics. No config keys, defaults, provider
+calculations or capture behavior change.
+
+`hybrid_aurora_status_test.py` exercises zero/missing/nonfinite/malformed readings,
+stale and future timestamps, partial failure, retained values, unchanged inputs,
+numeric template formatting and real `/ajax/status_update` responses for both
+roles and cameras with Classic forbidden. All 82 Python/compile checks pass;
+a separate comparison against the captured legacy method passes 60 complete,
+fresh Kp/coefficient combinations. Evidence:
+`testing/evidence/hybrid-aurora-status-2026-09-07.json`. Direct browser acceptance remains
+blocked by the locked Mac. This presentation correction is not deployed; the
+live capture baseline remains 775a19d0 at 10:09:50 CEST. Full product acceptance
+and physical Classic removal remain open.
+
 ## Verified mission: release 775a19d0 deployed with provider failure containment
 
 Evidence: `testing/evidence/hybrid-release-775a19d0-2026-09-07.json`.

@@ -14,6 +14,7 @@ from pprint import pformat  # noqa: F401
 import ephem
 
 from .. import constants
+from ..modern_admin_aurora_status import build_aurora_status
 
 from flask import request
 from flask import session
@@ -584,101 +585,7 @@ class BaseView(View):
 
 
     def get_aurora_info(self):
-        if not self.camera_data:
-            data = {
-                'aurora_data_status' : 'No data',
-                'kpindex' : 0.0,
-                'kpindex_status' : 'No data',  # legacy
-                'kpindex_trend' : '',
-                'kpindex_rating' : '',
-                'ovation_max' : 0,
-                'ovation_max_status' : 'No data',  # legacy
-                'aurora_mag_bt' : 0.0,
-                'aurora_mag_gsm_bz' : 0.0,
-                'aurora_n_hemi_gw' : 0,
-                'aurora_s_hemi_gw' : 0,
-                'aurora_plasma_density' : 0.0,
-                'aurora_plasma_speed' : 0.0,
-                'aurora_plasma_temp' : 0,
-            }
-            return data
-
-
-        kpindex_current = float(self.camera_data.get('KPINDEX_CURRENT', 0))
-        kpindex_coef = float(self.camera_data.get('KPINDEX_COEF', 0))
-        ovation_max = int(self.camera_data.get('OVATION_MAX', 0))
-        aurora_mag_bt = float(self.camera_data.get('AURORA_MAG_BT', 0.0))
-        aurora_mag_gsm_bz = float(self.camera_data.get('AURORA_MAG_GSM_BZ', 0.0))
-        aurora_plasma_density = float(self.camera_data.get('AURORA_PLASMA_DENSITY', 0.0))
-        aurora_plasma_speed = float(self.camera_data.get('AURORA_PLASMA_SPEED', 0.0))
-        aurora_plasma_temp = int(self.camera_data.get('AURORA_PLASMA_TEMP', 0))
-        n_hemi_gw = int(self.camera_data.get('AURORA_N_HEMI_GW', 0))
-        s_hemi_gw = int(self.camera_data.get('AURORA_S_HEMI_GW', 0))
-
-
-        data = {
-            'aurora_data_status' : '',  # just use this for all statuses
-            'kpindex' : kpindex_current,
-            'kpindex_status' : '',  # legacy
-            'ovation_max' : ovation_max,
-            'ovation_max_status' : '',  # legacy
-            'aurora_mag_bt' : aurora_mag_bt,
-            'aurora_mag_gsm_bz' : aurora_mag_gsm_bz,
-            'aurora_plasma_density' : aurora_plasma_density,
-            'aurora_plasma_speed' : aurora_plasma_speed,
-            'aurora_plasma_temp' : aurora_plasma_temp,
-            'aurora_n_hemi_gw' : n_hemi_gw,
-            'aurora_s_hemi_gw' : s_hemi_gw,
-        }
-
-
-        now = datetime.now()
-        now_minus_6h = now - timedelta(hours=6)
-
-        data_timestamp = int(self.camera_data.get('AURORA_DATA_TS', 0))
-        if data_timestamp:
-            if data_timestamp < now_minus_6h.timestamp():
-                data.update({
-                    'aurora_data_status' : '[old]',
-                    'kpindex_status' : '[old]',  # legacy
-                    'kpindex_trend' : '',
-                    'kpindex_rating' : '',
-                    'ovation_max_status' : '[old]',  # legacy
-                })
-                return data
-
-
-        ### synthetic data below here
-
-        if kpindex_coef == 0:
-            kpindex_trend = ''
-        elif kpindex_coef >= 2:
-            kpindex_trend = '&nearr;'
-        elif kpindex_coef <= 0.5:
-            kpindex_trend = '&searr;'
-        else:
-            kpindex_trend = '&rarr;'
-
-
-        data['kpindex_trend'] = kpindex_trend
-
-
-        if kpindex_current == 0:
-            data['kpindex_rating'] = ''
-        elif kpindex_current > 0 and kpindex_current < 5.0:
-            data['kpindex_rating'] = '<span class="text-secondary">LOW</span>'
-        elif kpindex_current >= 5.0 and kpindex_current < 6.0:
-            data['kpindex_rating'] = '<span class="text-warning">MEDIUM</span>'
-        elif kpindex_current >= 6.0 and kpindex_current < 8.0:
-            data['kpindex_rating'] = '<span class="text-danger">HIGH</span>'
-        elif kpindex_current >= 8.0:
-            data['kpindex_rating'] = '<span class="text-danger">VERY HIGH</span>'
-        else:
-            # this should never happen
-            data['kpindex_rating'] = 'ERROR'
-
-
-        return data
+        return build_aurora_status(self.camera_data)
 
 
     def get_smoke_info(self):

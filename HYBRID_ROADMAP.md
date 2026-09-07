@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Stato web aurora: presentazione read-only posseduta da Hybrid, con freschezza
+  per componente, errori di aggiornamento espliciti e letture assenti distinte
+  dallo zero. I template numerici salvati rimangono utilizzabili; il worker e
+  le medie scientifiche non cambiano. Correzione di presentazione non distribuita.
+
 - NOAA RTSW: adapter condiviso seleziona la sorgente attiva/valida e converte
   timestamp/campi protonici nel contratto storico; medie a 20 minuti invariate.
   Parita' e lettura dei cinque feed reali verificate su camera isolata. Adapter e
