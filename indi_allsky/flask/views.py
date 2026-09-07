@@ -1,3 +1,4 @@
+from ..modern_admin_sensor_panel import build_sensor_rows
 from ..modern_admin_full_config import ModernAdminFullConfigParser
 import os
 from datetime import datetime
@@ -1618,11 +1619,11 @@ class JsonSensorPanelView(JsonView):
             .order_by(IndiAllSkyDbImageTable.createDate.desc())\
             .first()
 
-        data = self.get_image_data()
+        data = self.latest_image_entry.data if self.latest_image_entry and isinstance(self.latest_image_entry.data, dict) else {}
 
         # Pack values as arrays (index = slot number)
-        sensor_user = [data.get(f'sensor_user_{i}', 0.0) for i in range(60)]
-        sensor_temp = [data.get(f'sensor_temp_{i}', 0.0) for i in range(60)]
+        sensor_user = [data.get(f'sensor_user_{i}') for i in range(60)]
+        sensor_temp = [data.get(f'sensor_temp_{i}') for i in range(60)]
 
         if self.latest_image_entry:
             last_update = str(self.latest_image_entry.createDate)
@@ -1636,6 +1637,7 @@ class JsonSensorPanelView(JsonView):
             'last_update_age_s': last_update_age_s,
             'sensor_user': sensor_user,
             'sensor_temp': sensor_temp,
+            'readings': build_sensor_rows(self.camera.data, data),
         }
 
 
@@ -1645,50 +1647,14 @@ class SensorPanelView(TemplateView):
     def get_context(self):
         context = super(SensorPanelView, self).get_context()
 
-        # Use the latest image metadata as the "current" sensor values.
-        # This updates at your exposure cadence, which is typically good enough for a live panel.
-        image_data = self.get_image_data()
-
-        if self.camera.data:
-            camera_data = dict(self.camera.data)
-        else:
-            camera_data = dict()
-
-        show_all = int(request.args.get('all', 0))
-
-        # Build tables for user and temp sensor slots.
-        user_rows = []
-        temp_rows = []
-
-        for i in range(60):
-            key = f'sensor_user_{i}'
-            label = camera_data.get(key, key)
-            value = image_data.get(key, 0.0)
-
-            default_label = f'User Slot {i}'
-            if show_all or i < 10 or label != default_label or abs(value) > 0.0:
-                user_rows.append({
-                    'slot': key,
-                    'index': i,
-                    'label': label,
-                    'value': value,
-                })
-
-        for i in range(60):
-            key = f'sensor_temp_{i}'
-            label = camera_data.get(key, key)
-            value = image_data.get(key, 0.0)
-
-            # Default naming in capture.py uses "Future Use" for 1..9.
-            is_future_use = label.startswith('Future Use')
-
-            if show_all or i == 0 or (not is_future_use) or abs(value) > 0.0:
-                temp_rows.append({
-                    'slot': key,
-                    'index': i,
-                    'label': label,
-                    'value': value,
-                })
+        image_data = self.latest_image_entry.data if self.latest_image_entry else None
+        rows = build_sensor_rows(self.camera.data, image_data)
+        show_all = request.args.get('all') == '1'
+        user_rows = [row for row in rows['user'] if show_all or row['used']]
+        temp_rows = [row for row in rows['temp'] if show_all or row['used']]
+        for group in (user_rows, temp_rows):
+            for row in group:
+                row['index'] = int(row['slot'].rsplit('_', 1)[1])
 
         # Age of the "current" values
         if self.latest_image_entry:
@@ -10850,6 +10816,9 @@ class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, SensorPanelView
             config=getattr(self, 'indi_allsky_config', None),
         )
 
+        context['sensor_rows'] = build_sensor_rows(self.camera.data, latest_image_data)
+        context['show_all'] = request.args.get('all') == '1'
+        context['last_update'] = latest_image_timestamp
         return context
 
 

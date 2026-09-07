@@ -4,56 +4,34 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
-<script type="text/javascript">
-var camera_id = {{ camera_id }};
-</script>
+
 {% endblock %}
 
 {% block content %}
-<main class="modern-admin-shell" aria-labelledby="modern-admin-sensor-title">
+<main id="sensor-tool" data-url="{{ url_for('indi_allsky.js_sensor_panel_view') }}" data-camera="{{ camera_id }}" class="modern-admin-shell" aria-labelledby="modern-admin-sensor-title">
     {% set modern_admin_header_label = 'Sensor panel header' %}
     {% set modern_admin_heading = 'Sensor Panel' %}
     {% set modern_admin_title_id = 'modern-admin-sensor-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
+    <p>Readings from the last captured image; updated every five seconds.</p>
+    <p id="sensor-status" role="status">{% if last_update %}Last image: {{ last_update }}{% else %}No image metadata from the last 15 minutes.{% endif %}</p>
+    <button type="button" id="sensor-refresh" class="modern-admin-button">Refresh</button>
+    <label><input type="checkbox" id="sensor-show-all" {% if show_all %}checked{% endif %}> Show all slots</label>
     <section class="modern-admin-management-grid" aria-label="Sensor values">
-        <article class="modern-admin-table-panel">
-            <div class="modern-admin-section-heading">
-                <p class="modern-admin-eyebrow">User Sensors</p>
-                <h2>Current values</h2>
-            </div>
-            <div class="modern-admin-table-scroll">
-                <table class="modern-admin-data-table">
-                    <thead><tr><th>Sensor</th><th>Value</th></tr></thead>
-                    <tbody>
-                        {% for row in user_rows %}
-                        <tr><td>{{ row.label }}</td><td>{{ row.value }}</td></tr>
-                        {% else %}
-                        <tr><td colspan="2">No user sensor values are available.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        {% for group, title in [('user', 'User sensors'), ('temp', 'Temperature sensors')] %}
+        <article class="modern-admin-table-panel"><h2>{{ title }}</h2>
+            <div class="modern-admin-table-scroll"><table class="modern-admin-data-table">
+                <thead><tr><th>Slot</th><th>Sensor</th><th>Value</th></tr></thead>
+                <tbody id="sensor-{{ group }}-rows">
+                {% for row in sensor_rows[group] %}
+                    <tr data-used="{{ 'true' if row.used else 'false' }}" {% if not show_all and not row.used %}hidden{% endif %}><td>{{ row.slot }}</td><td>{{ row.label }}</td><td>{{ row.value if row.value is not none else 'Unavailable' }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table></div>
         </article>
-
-        <article class="modern-admin-table-panel">
-            <div class="modern-admin-section-heading">
-                <p class="modern-admin-eyebrow">Temperature Sensors</p>
-                <h2>Current values</h2>
-            </div>
-            <div class="modern-admin-table-scroll">
-                <table class="modern-admin-data-table">
-                    <thead><tr><th>Sensor</th><th>Value</th></tr></thead>
-                    <tbody>
-                        {% for row in temp_rows %}
-                        <tr><td>{{ row.label }}</td><td>{{ row.value }}</td></tr>
-                        {% else %}
-                        <tr><td colspan="2">No temperature sensor values are available.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </article>
+        {% endfor %}
     </section>
 </main>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/sensor-panel.js') }}"></script>
 {% endblock %}

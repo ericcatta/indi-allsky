@@ -8,6 +8,37 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: live recorded-sensor panel without invented zero readings
+
+Hybrid Sensor Panel now refreshes recorded metadata every five seconds, supports
+manual refresh and used/all-slot filtering, and shows source-image timestamp/age.
+A Hybrid row builder owns labels, slot visibility and missing-value presentation
+for all 60 user plus 60 temperature slots. The shared page and JSON handler use
+it; the former inline row loops are removed. Zero readings remain zero. Absent
+readings are null/Unavailable, including images outside the existing 15-minute
+window. Invalid/nonfinite display values are unavailable. Sensor acquisition,
+drivers and stored data are unchanged. The existing public sensor arrays retain
+their lengths/keys but now return null rather than fabricated zero for absent
+values; a `readings` field adds labels and visibility for Hybrid. The retained
+Classic JavaScript formatter already supports null values.
+
+`hybrid_sensor_panel_flow_test.py` checks both roles/cameras, real zero versus
+missing and null readings, text escaping, 120 slots, all/used configuration,
+stale-image exclusion, authentication and retained recovery context with Classic
+disabled. The actual JS controller test checks filter effects, refresh/polling,
+atomic response validation, stale/error/session messages and cleanup. All 30
+Python regression entrypoints pass, as do the sensor controller tests.
+
+The first direct browser check at 09:17 CEST confirmed metadata age and unavailable
+readings and exposed an implementation regression: bypassing normal context
+composition disabled the recovery toolbar. It was fixed by retaining normal MRO
+composition and replacing the shared inline row policy with the Hybrid service;
+the Flask test now guards the toolbar context. A final browser check at 09:19 CEST
+confirmed working recovery context, all 120 slots when selected, return to the
+11 default visible slots, and manual refresh updating the source-image age.
+Server logs also confirmed repeated five-second requests. Hardware sensor-read accuracy and
+production deployment remain open. Only the disposable test server was restarted.
+
 ## Verified mission: real orbital propagation and isolated satellite failures
 
 `hybrid_astropanel_satellite_test.py` seeds an isolated database with twenty

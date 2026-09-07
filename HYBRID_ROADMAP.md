@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Sensor Panel: Hybrid possiede la costruzione delle righe, distinzione fra zero
+  misurato e lettura assente, label e filtro slot utilizzati/tutti. Servizio
+  `modern_admin_sensor_panel.py` condiviso da pagina e risposta JSON, senza driver
+  o polling hardware. UI aggiornata ogni cinque secondi dai metadati immagine;
+  dati oltre la finestra esistente di 15 minuti sono esplicitamente indisponibili.
+  Nessuna modifica alle acquisizioni; test con Classic disabilitato e due camere.
+
 - Download log: un servizio Hybrid prepara i quattro export gzip con lettura
   limitata a 3 MB, mantenendo URL, nomi file e byte originali. Handler condiviso
   al posto di quattro implementazioni duplicate; errori 400/403/404/503 espliciti.
