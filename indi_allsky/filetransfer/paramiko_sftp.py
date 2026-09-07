@@ -2,6 +2,7 @@ from .generic import GenericFileTransfer
 from .exceptions import AuthenticationFailure
 from .exceptions import ConnectionFailure
 from .exceptions import TransferFailure
+from .exceptions import CertificateValidationFailure
 
 from pathlib import Path
 import socket
@@ -36,8 +37,18 @@ class paramiko_sftp(GenericFileTransfer):
         self.client = paramiko.SSHClient()
 
 
+        try:
+            self.client.load_system_host_keys()
+        except (OSError, paramiko.hostkeys.InvalidHostKey) as e:
+            raise CertificateValidationFailure('Unable to read SFTP known_hosts') from e
+
         if cert_bypass:
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        else:
+            class RejectUnknownHost(paramiko.RejectPolicy):
+                def missing_host_key(self, client, hostname, key):
+                    raise CertificateValidationFailure('Unknown SFTP host key; configure known_hosts before uploading')
+            self.client.set_missing_host_key_policy(RejectUnknownHost())
 
 
         connect_kwargs = {
@@ -60,6 +71,9 @@ class paramiko_sftp(GenericFileTransfer):
 
         try:
             self.client.connect(hostname, **connect_kwargs)
+            self.sftp = self.client.open_sftp()
+        except paramiko.ssh_exception.BadHostKeyException as e:
+            raise CertificateValidationFailure('SFTP host key does not match known_hosts') from e
         except paramiko.ssh_exception.AuthenticationException as e:
             raise AuthenticationFailure(str(e)) from e
         except paramiko.ssh_exception.NoValidConnectionsError as e:
@@ -69,20 +83,25 @@ class paramiko_sftp(GenericFileTransfer):
         except socket.timeout as e:
             raise ConnectionFailure(str(e)) from e
 
-        self.sftp = self.client.open_sftp()
+        except (paramiko.ssh_exception.SSHException, EOFError, OSError) as e:
+            raise ConnectionFailure(str(e)) from e
 
 
     def close(self):
         super(paramiko_sftp, self).close()
 
-        if self.sftp:
-            self.sftp.close()
-
-        if self.client:
-            self.client.close()
+        sftp, client = self.sftp, self.client
+        self.sftp = self.client = None
+        for connection in (sftp, client):
+            if connection is not None:
+                try:
+                    connection.close()
+                except Exception as e:
+                    logger.warning('Error closing SFTP connection: %s', str(e))
 
 
     def put(self, *args, **kwargs):
+        import paramiko
         super(paramiko_sftp, self).put(*args, **kwargs)
 
         local_file = kwargs['local_file']
@@ -104,6 +123,8 @@ class paramiko_sftp(GenericFileTransfer):
 
             try:
                 self.sftp.mkdir(d_str)
+            except (paramiko.ssh_exception.SSHException, EOFError) as e:
+                raise TransferFailure(str(e)) from e
             except OSError as e:  # noqa: F841
                 # will return an error if the directory already exists
                 #logger.warning('SFTP error creating directory: %s', str(e))
@@ -119,6 +140,8 @@ class paramiko_sftp(GenericFileTransfer):
         except FileNotFoundError as e:
             logger.error('Upload failed.  Paramiko does not support ~ in remote paths')
             raise TransferFailure(str(e)) from e
+        except (paramiko.ssh_exception.SSHException, EOFError, OSError) as e:
+            raise TransferFailure(str(e)) from e
 
         upload_elapsed_s = time.time() - start
         local_file_size = local_file_p.stat().st_size
@@ -126,11 +149,11 @@ class paramiko_sftp(GenericFileTransfer):
 
         try:
             self.sftp.chmod(str(remote_file_p), 0o644)
-        except OSError as e:
+        except (OSError, paramiko.ssh_exception.SSHException, EOFError) as e:
             logger.warning('SFTP unable to chmod file: %s', str(e))
 
         try:
             self.sftp.chmod(str(remote_file_p.parent), 0o755)
-        except OSError as e:
+        except (OSError, paramiko.ssh_exception.SSHException, EOFError) as e:
             logger.warning('SFTP unable to chmod dir: %s', str(e))
 

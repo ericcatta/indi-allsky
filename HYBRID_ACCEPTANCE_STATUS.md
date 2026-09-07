@@ -1497,3 +1497,38 @@ terminal parent state; the prepared receipt and log are retained rather than
 inventing a success. Candidate IDs after persistence uncertainty are diagnostic,
 not proof of a committed child. No production task, file or service changed; this
 worker change and real external delivery still require deployment/acceptance.
+
+## SFTP trust/error handling and real loopback transfer
+
+The shared Paramiko adapter did not load the service user's known_hosts, so a
+normal verified connection could not use an already trusted server. It now loads
+that trust store, rejects unknown/mismatched keys through the existing certificate
+failure contract, and treats malformed/unreadable trust stores as validation
+failures. The explicit legacy AutoAdd setting still allows unknown keys when
+configured; known-key mismatches remain rejected. No trust store is rewritten.
+SSH/subsystem/EOF/network failures map to existing connection/transfer errors,
+and a failed SFTP close no longer prevents closing the underlying SSH session.
+
+`sftp_adapter_test.py` executes the real adapter code with controlled transports:
+trusted-key loading, unknown/mismatched/malformed keys, authentication and network
+errors, failed SFTP subsystem, mkdir/put disconnects, explicit AutoAdd setting,
+and idempotent close after a channel error. It passes with all nineteen Book 2/
+modern_admin/Safe Actions/parity/Product/shell/composition/SFTP entrypoints and
+compilation/diff checks.
+
+`sftp_loopback_acceptance.py` ran on the Raspberry at 07:39 CEST using the candidate
+adapter against its actual SSH/SFTP service on 127.0.0.1. The installed public
+Ed25519 host key was pinned in the in-memory test client; cert_bypass=false.
+The password was entered without echo and was not saved. Only a private disposable
+directory, synthetic 84-byte JSON source and nested test destination were used.
+Received bytes matched exactly (SHA256
+`7d939c2a1e5b1b5976dad7761cc7542cc7d85471a53b05372fe5964fa5014335`).
+A directory without write permission rejected transfer through TransferFailure,
+left no destination file and preserved the source. Both channels were closed and
+the disposable directory was removed; no acquisition files were touched.
+Evidence: `testing/evidence/hybrid-sftp-loopback-2026-09-07.json`.
+
+This is a real network/file effect, but loopback only. The upload worker's full
+execution and any configured external SFTP destination remain unverified. The
+adapter correction is not deployed to production, and no integration settings,
+known_hosts, capture process or service configuration were changed.

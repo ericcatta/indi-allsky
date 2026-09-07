@@ -1,0 +1,22 @@
+{
+  "observed_at": "2026-09-07T05:39:22.666632+00:00",
+  "scope": "Real SSH/SFTP loopback; temporary source/destination only; not an external integration acceptance",
+  "host_key_verified": true,
+  "cert_bypass": false,
+  "checks": [
+    {
+      "case": "nested destination transfer",
+      "status": "superato",
+      "bytes": 84,
+      "sha256": "7d939c2a1e5b1b5976dad7761cc7542cc7d85471a53b05372fe5964fa5014335"
+    },
+    {
+      "case": "permission failure preserves source",
+      "status": "superato"
+    },
+    {
+      "case": "connection close and disposable-directory cleanup",
+      "status": "superato"
+    }
+  ]
+}
