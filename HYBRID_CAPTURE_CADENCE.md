@@ -95,3 +95,25 @@ The longer pre-follow-up sample contained 29 IMX708 and 30 ZWO frames, both
 with median interval 15 seconds and all files nonempty. A separate satellite
 TLE download returned HTTP 403; that integration remains an open verification
 item and is not counted as a successful provider check.
+
+## Hybrid hold isolation follow-up (2026-09-08)
+
+The legacy ADU calculation could still queue an exposure reduction before
+Hybrid applied its decision. A Hybrid `hold` then returned without overwriting
+that legacy command, bypassing gain-first reduction. The legacy recalculation
+now retains ADU target/stability bookkeeping but stops before planning changes
+when Hybrid automatic exposure is enabled. Disabled Hybrid control retains
+the legacy behavior. Capture cadence and saved configuration are unchanged.
+
+`hybrid_exposure_pipeline_test.py` exercises the actual worker calculation and
+apply methods with disagreeing legacy/Hybrid measurements, gain minima 0 and
+1.13, hold, gain reduction, exposure reduction and disabled Hybrid control.
+The local regression passed 25 entrypoints; 54 integration entrypoints remain
+blocked by unavailable runtime Flask configuration or OpenCV. These are not
+counted as passes. Controller and cadence tests also pass. See
+`testing/evidence/hybrid-exposure-pipeline-2026-09-08.json`.
+
+This follow-up is not deployed: SSH authentication/session establishment failed
+(connection reset). Production acquisition has not been restarted. Before
+deployment, complete the runtime regression, acquire a current rollback backup,
+and verify both cameras. Deployment requires a new 24-hour observation window.

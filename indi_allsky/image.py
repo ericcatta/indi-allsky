@@ -4744,6 +4744,13 @@ class ImageWorker(Process):
             return
 
 
+        # Keep ADU stability tracking above, but only one controller may plan
+        # exposure/gain. In particular, a Hybrid hold must not leave a legacy
+        # exposure reduction queued while gain is still above its minimum.
+        if self._auto_exposure_enabled():
+            return
+
+
         if self._auto_gain_enabled():
             # moonmode settings are ignored with auto-gain
 
