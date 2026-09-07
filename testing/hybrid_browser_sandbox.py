@@ -5,6 +5,8 @@ Synthetic identities are provided by hybrid_runtime_fixture. All media and DB
 state disappear on exit. External effects and integration writes are blocked.
 """
 import argparse
+from contextlib import ExitStack
+from pathlib import Path
 import re
 from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app
@@ -18,7 +20,7 @@ from hybrid_public_media_fixture import seed_public_media
 class SandboxEffectBlocked(RuntimeError):
     pass
 
-def run(runtime_config, port):
+def run(runtime_config, port, upgrade_fixture=None):
     with isolated_app(runtime_config, multi_camera=True) as app:
         app.jinja_env.auto_reload = True
         app.config.update(INDI_ALLSKY_AUTH_ALL_VIEWS=False, INDI_ALLSKY_AUTH_MEDIA_VIEWS=False)
@@ -31,8 +33,18 @@ def run(runtime_config, port):
         seed_archive(app)
         seed_public_media(app)
         from flask import request, jsonify
-        from indi_allsky.flask.views import AjaxConfigRestoreView
+        from indi_allsky.flask.views import AjaxConfigRestoreView, JsonLogView
         from indi_allsky.flask.forms import IndiAllskyNetworkManagerForm
+        synthetic_log = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']) / 'browser-acceptance.log'
+        synthetic_log.write_text('Synthetic log header\nCamera 1: synthetic capture ready\nCamera 2: synthetic capture ready\nSynthetic upload completed\n')
+        def sandbox_path(value, *parts):
+            if str(value) == '/var/log/indi-allsky/indi-allsky.log' and not parts:
+                return synthetic_log
+            return Path(value, *parts)
+        original_log_dispatch = JsonLogView.dispatch_request
+        def synthetic_log_dispatch(view):
+            with patch('indi_allsky.flask.views.Path', side_effect=sandbox_path):
+                return original_log_dispatch(view)
         # Read-only browser fixtures; command requests remain blocked below.
         def network_connections(self):
             return {'Wi-Fi': [('sandbox-wifi', 'Synthetic Wi-Fi — Active [prio: 0]')],
@@ -45,6 +57,10 @@ def run(runtime_config, port):
                 return None
             # Only generation queues into the in-memory DB; no worker consumes it.
             payload = request.get_json(silent=True)
+            if request.path == '/indi-allsky/js/log':
+                return None  # Read-only, redirected to the synthetic log below.
+            if upgrade_fixture and request.path == '/indi-allsky/modern-admin/updates/start':
+                return None  # Only the explicit synthetic service below can execute.
             if request.path == '/indi-allsky/modern-admin/settings/cameras' and request.form.get('modern_admin_action') == 'lens_optics' and not request.form.get('modern_admin_save_sync'):
                 return None
             # FITS previews read only synthetic files; no source/config is overwritten.
@@ -64,11 +80,15 @@ def run(runtime_config, port):
         def blocked(*args, **kwargs):
             raise SandboxEffectBlocked('External effect blocked in isolated acceptance server')
         # Defense in depth: even accidentally called adapters cannot reach Pi services.
-        with patch('subprocess.Popen', side_effect=blocked), patch('os.system', side_effect=blocked), \
+        with ExitStack() as stack, patch('subprocess.Popen', side_effect=blocked), patch('os.system', side_effect=blocked), \
              patch('dbus.SystemBus', side_effect=blocked), patch('dbus.SessionBus', side_effect=blocked), \
+             patch.object(JsonLogView, 'dispatch_request', synthetic_log_dispatch), \
              patch.object(IndiAllskyNetworkManagerForm, 'getConnections', network_connections), \
              patch.object(IndiAllskyNetworkManagerForm, 'getWifiDevices', network_devices), \
              patch.object(AjaxConfigRestoreView, 'reset_security_keys_after_restore', side_effect=blocked):
+            if upgrade_fixture:
+                from hybrid_upgrade_browser_fixture import install_upgrade_fixture
+                install_upgrade_fixture(stack, upgrade_fixture)
             print('Isolated acceptance server; no production data or effects.', flush=True)
             app.run(host='127.0.0.1', port=port, debug=False, use_reloader=False, threaded=False)
 
@@ -76,5 +96,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime-config', default='/etc/indi-allsky/flask.json')
     parser.add_argument('--port', type=int, default=8099)
+    parser.add_argument('--upgrade-fixture', type=Path, help='Explicit synthetic upgrade state JSON; never a production service')
     args = parser.parse_args()
-    run(args.runtime_config, args.port)
+    run(args.runtime_config, args.port, args.upgrade_fixture)

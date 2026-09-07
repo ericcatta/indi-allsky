@@ -53,18 +53,24 @@ function modernAdminLogRefreshMs() {
 function modernAdminLoadLog() {
     fetch('{{ url_for('indi_allsky.js_log_view') }}', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': {{ csrf_token()|tojson }}},
         body: JSON.stringify({
             lines: document.getElementById('LINES_SELECT').value,
             filter: document.getElementById('FILTER').value
         })
     })
-        .then((response) => response.json())
+        .then((response) => {
+            if (response.redirected) throw new Error('session_expired');
+            if (!response.ok) throw new Error('request_failed');
+            return response.json();
+        })
         .then((data) => {
             document.getElementById('modern-admin-log-output').textContent = data.log || '[No log data]';
         })
-        .catch(() => {
-            document.getElementById('modern-admin-log-output').textContent = 'Error loading log data.';
+        .catch((error) => {
+            document.getElementById('modern-admin-log-output').textContent = error.message === 'session_expired'
+                ? 'Session expired. Sign in and reload the log page.'
+                : 'Error loading log data. Check access and refresh the page.';
         });
 }
 

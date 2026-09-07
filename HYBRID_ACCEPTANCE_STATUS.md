@@ -8,6 +8,43 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: upgrade recovery log polling and direct browser controls
+
+On 2026-09-07 direct browser acceptance of Updates found that its System logs
+recovery link opened a viewer whose POST `/js/log` always failed CSRF validation.
+The Hybrid template omitted `X-CSRFToken`. It now sends the rendered token and
+handles expired sessions and unsuccessful HTTP responses explicitly, retaining
+plain-text log rendering. No authentication or CSRF exemption was introduced.
+
+`hybrid_log_flow_test.py` verifies the actual rendered header and real log reader
+against a disposable file, both authenticated roles, missing-token rejection,
+filtering, no matching lines, absent source and anonymous page redirect.
+`hybrid_log_browser_test.js` executes the actual inline controller for CSRF,
+plain text, redirected sessions and failed/malformed responses. The corrected
+recovery link was then clicked again in the real browser: the expected synthetic
+file contents appeared instead of the earlier HTTP 400 error.
+
+Direct browser checks also cover the two upgrade confirmations, no/one-confirmation
+rejection, valid submit, disabled controls and cleared confirmations, refreshed
+running state, unavailable provider, failed service command, completed-run restart,
+failed-run display, configuration history and both-camera Now recovery links.
+Flask logs show two accepted POSTs and the deliberately failed POST; the explicit
+synthetic effect ledger records one StartUnit and one RestartUnit. Neither starts
+a real service. Full per-control outcomes and remaining checks are recorded in
+`testing/evidence/hybrid-updates-browser-2026-09-07.json`.
+
+The browser sandbox now supports an explicit `--upgrade-fixture` JSON file and
+redirects application-log reads to a disposable synthetic file. Without the
+upgrade option, its existing command block remains in force. Real process and
+D-Bus calls remain blocked. Production code/configuration and capture were not
+restarted or deployed. Real upgrade/rollback, all browser roles, keyboard/mobile,
+and the remaining log controls/downloads are still open.
+
+Validation for this mission: all 22 Python regression entrypoints pass (the
+previous 20 plus log and upgrade Flask flows), both log/upgrade JavaScript
+controller tests pass, and `git diff --check` passes. Browser polling returned
+HTTP 200 repeatedly from 08:10:12 through 08:11:57 CEST after the correction.
+
 ## Verified correction: atomic upload task acquisition (2026-09-07 07:58 CEST)
 
 Two upload workers could read the same QUEUED row and both call `setRunning()`:

@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "date": "2026-09-07",
+  "baseline": "79106794",
+  "environment": "Isolated Flask on Raspberry, Classic disabled, synthetic SQLite/media/log; browser through localhost:18101. D-Bus/process effects blocked. Upgrade service replaced only in the explicitly enabled test fixture.",
+  "page": "/indi-allsky/modern-admin/updates",
+  "role": "administrator",
+  "camera_profile_scope": "System-wide upgrade; not a per-camera action. Recovery Now shows both synthetic cameras.",
+  "evidence_kind": "Direct CUA browser clicks and accessibility results, correlated with Flask request logs and synthetic effect ledger; not a real unattended upgrade.",
+  "checks": [
+    {"control":"#upgrade-form button[type=submit]","prerequisite":"Idle; neither confirmation checked","expected":"Prevent command and explain prerequisites","request":"none","effect":"ledger remained empty","observed":"Confirm both the backup and capture interruption first.","status":"superato"},
+    {"control":"#upgrade-backup","prerequisite":"Idle; only backup checked","expected":"Checkbox changes; submission still prevented","request":"none","effect":"ledger remained empty","observed":"Checked checkbox and unchanged prerequisite message after submit","status":"superato"},
+    {"control":"#upgrade-maintenance","prerequisite":"Backup already checked","expected":"Second confirmation enables valid submission","request":"POST /indi-allsky/modern-admin/updates/start: 202 at 08:03:05 CEST","effect":"Exactly one synthetic StartUnit entry","observed":"Upgrade job submitted. Both checkboxes cleared and all three controls disabled.","status":"superato"},
+    {"control":"a[href='/indi-allsky/modern-admin/updates']","prerequisite":"Synthetic job submitted","expected":"Refresh shows pending/running state and prevents another submit","request":"GET /indi-allsky/modern-admin/updates: 200","effect":"No second command","observed":"Upgrade service: Running; disabled controls with explanation","status":"superato"},
+    {"control":"#upgrade-fields","prerequisite":"Synthetic provider unavailable","expected":"Explain unavailable service; disable command","request":"GET /indi-allsky/modern-admin/updates: 200","effect":"No command","observed":"Upgrade service: Unavailable; controls disabled","status":"superato"},
+    {"control":"#upgrade-form button[type=submit]","prerequisite":"Both confirmations; synthetic manager rejects command","expected":"Report failure; do not imply completion or retry automatically","request":"POST /indi-allsky/modern-admin/updates/start: 503 at 08:05:22 CEST","effect":"No new ledger entry","observed":"The upgrade service could not be started. Inspect system logs before retrying. Controls disabled and confirmations cleared.","status":"superato"},
+    {"control":"#upgrade-form button[type=submit]","prerequisite":"Synthetic completed oneshot; both confirmations","expected":"Submit RestartUnit so the completed oneshot can run again","request":"POST /indi-allsky/modern-admin/updates/start: 202 at 08:06:06 CEST","effect":"Exactly one synthetic RestartUnit entry","observed":"Completed timestamps before submission; submitted message afterward","status":"superato"},
+    {"control":"a[href='/indi-allsky/modern-admin/updates']","prerequisite":"Synthetic previous run failed","expected":"Display failure and inspect-before-retry guidance","request":"GET /indi-allsky/modern-admin/updates: 200","effect":"No command","observed":"Upgrade service: Failed; exit-code and exit status 1; retry controls available","status":"superato"},
+    {"control":"a[href='/indi-allsky/modern-admin/config-history']","prerequisite":"Synthetic stored configuration","expected":"Open actual configuration history","request":"GET /indi-allsky/modern-admin/config-history: 200","effect":"Read-only","observed":"Snapshot 1, test-user-1, configuration level, size and detail link rendered","status":"superato"},
+    {"control":"a[href='/indi-allsky/modern-admin/system/log']","prerequisite":"Authenticated browser; CSRF enabled","expected":"Open log viewer and load records","request":"Before fix: POST /indi-allsky/js/log: 400","effect":"No log displayed","observed":"Missing CSRF header in polling request; Error loading log data.","status":"difetto","resolution":"Fixed in this mission; see next check"},
+    {"control":"a[href='/indi-allsky/modern-admin/system/log']","prerequisite":"Fixed template; dedicated synthetic log file","expected":"Open viewer and display real file contents through authenticated API","request":"GET log page and POST /indi-allsky/js/log: 200","effect":"Read-only synthetic file","observed":"Synthetic upload completed; Camera 2: synthetic capture ready; Camera 1: synthetic capture ready","status":"superato"},
+    {"control":"a[href='/indi-allsky/modern-admin/now']","prerequisite":"Synthetic frames for cameras 1 and 2","expected":"Open Now with both camera previews","request":"GET Now and both generation-camera image URLs: 200","effect":"Read-only synthetic media","observed":"Test Camera 1 and Test Camera 2 images plus camera-scoped browse links","status":"superato"}
+  ],
+  "synthetic_effect_ledger": [
+    {"method":"StartUnit","unit":"upgrade-indi-allsky.service","mode":"fail"},
+    {"method":"RestartUnit","unit":"upgrade-indi-allsky.service","mode":"fail"}
+  ],
+  "open_checks": [
+    {"control":"Real upgrade command and recovery","status":"bloccato","reason":"Controlled production maintenance and rollback exercise not performed; current capture observation continues"},
+    {"control":"Ordinary-user and anonymous browser sessions","status":"bloccato","reason":"Covered by real Flask tests, not directly exercised in this browser session"},
+    {"control":"Keyboard-only and narrow viewport","status":"bloccato","reason":"Not directly exercised in this session"},
+    {"control":"Log refresh/lines/filter selectors, detail and download links","status":"bloccato","reason":"Initial polling and recovery link tested directly; filter/absence/authentication covered by Flask, remaining browser interactions still open"},
+    {"control":"Shared shell runtime actions","status":"bloccato","reason":"Outside this page-specific acceptance; no production runtime command executed"}
+  ]
+}
