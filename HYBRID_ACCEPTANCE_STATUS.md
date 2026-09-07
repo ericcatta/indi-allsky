@@ -1336,3 +1336,38 @@ snapshot files were actually present (00:43 and 07:09). The configured heartbeat
 is not evidence of fifteen-minute execution; the gap is explicitly unverified
 for periodic resource/backlog sampling, even though frame history covers capture.
 Do not declare the monitor cadence or the full 24-hour requirement passed.
+
+
+## Generated-output task receipts: partial output is observable
+
+The live ZWO startrail-video omission exposed that the worker always finished
+with the generic `Generated keogram and/or star trail`, even when a requested
+output was missing. Its finalization now delegates to Hybrid
+`finish_keogram_task`: each output records generated/skipped/not_requested/failed,
+record ID and camera ID in `task.data.generation_outcome`, preserving existing
+request/profile fields. The task result gives a bounded readable summary.
+
+An optional video skipped for insufficient eligible frames reports Partial
+generation and the actual/minimum frame counts while preserving successful task
+completion. Disabled video and daytime-only exclusions are not failures. Actual
+output failures or missing/empty files fail the task; a missing file clears the
+associated record's success flag in the same commit. A result never claims file
+integrity or successful upload, only nonempty file presence and generation status.
+Existing task detail already displays the readable result and redacted payload;
+no fake result is backfilled into historical task rows.
+
+`generation_result_test.py` passes complete/partial/disabled/daytime/failure,
+missing/empty file, camera/profile preservation and message-length cases. An AST
+fingerprint captured from 3b172949 proves the existing generation method preceding
+its final task receipt remains unchanged: no image processing, frame selection,
+threshold, encoding or upload operation was altered.
+`hybrid_generation_result_flow_test.py` passes with Classic imports prohibited,
+real temporary SQLite/media and both roles: persisted partial result, visible
+59/250 eligible-frame reason, retained profile and committed missing-output
+failure. All 19 Book 2/modern_admin/Safe Actions/parity/Product/shell/composition/
+receipt entrypoints pass, plus compilation and diff check. The Pi log is
+`/tmp/hybrid-generation-result-flow.log`.
+
+This worker change is not deployed. The live acquisition and its existing
+observation period were not modified. Direct acceptance of a new worker-produced
+receipt remains open until deployment and another controlled generation.

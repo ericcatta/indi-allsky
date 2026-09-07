@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Esiti generazione: Hybrid registra per-output file generato, saltato per frame
+  insufficienti, non richiesto o fallito nel payload del task. Il completamento
+  parziale esplicita il conteggio frame; file mancanti/vuoti o fallimenti reali
+  fanno fallire il task. Camera/profilo preservati, algoritmi e upload invariati.
+  Prova SQLite/Flask con Classic vietato passata; worker non ancora distribuito.
+
 - Updates: pagina e comando Hybrid per l'upgrade unattended installato. Stato
   systemd reale (idle/running/completed/failed/unavailable), conferme backup e
   interruzione, permessi/CSRF, lock tra richieste e confronto dello stato visto.

@@ -1761,7 +1761,16 @@ class VideoWorker(Process):
                 pass
 
 
-        task.setSuccess('Generated keogram and/or star trail')
+        from .generation_result import finish_keogram_task
+        finish_keogram_task(
+            task, camera_id=camera.id, night=night,
+            keogram=(keogram_entry, keogram_file),
+            startrail=(startrail_entry, startrail_file),
+            video=(startrail_video_entry, startrail_video_file),
+            frames=stg.timelapse_frame_count if night else 0,
+            min_frames=self.config.get('STARTRAILS_TIMELAPSE_MINFRAMES', 250),
+            video_enabled=bool(self.config.get('STARTRAILS_TIMELAPSE', True)),
+        )
 
 
     def uploadAllskyEndOfNight(self, task, **kwargs):
