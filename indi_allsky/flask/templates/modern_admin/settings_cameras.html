@@ -109,12 +109,12 @@ var camera_id = {{ camera_id }};
             <div class="modern-admin-settings-edit-section-body">
                 <div class="modern-admin-section-heading">
                     <div>
-                        <p class="modern-admin-eyebrow">Foundation</p>
+                        <p class="modern-admin-eyebrow">Camera processing</p>
                         <h2>Hybrid Controller</h2>
                     </div>
                     <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
                 </div>
-                <p class="modern-admin-note">The legacy pipeline remains available for compatibility. Hybrid enables the per-camera controller path; AWB uses runtime gains from the previous frame while the other controllers remain placeholders.</p>
+                <p class="modern-admin-note">Choose the processing mode and where white-balance corrections are applied for this camera. Exposure and gain controls are configured in Acquisition; stretch and color adjustments keep their configured processing settings.</p>
 
                 <div class="modern-admin-camera-profile-summary" aria-label="Hybrid controller status">
                     <div>
@@ -122,12 +122,12 @@ var camera_id = {{ camera_id }};
                         <strong>{{ modern_admin_camera_settings_hybrid_form.processing_mode }}</strong>
                     </div>
                     <div>
-                        <span>Current status</span>
-                        <strong>{{ 'Hybrid foundation active' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Legacy pipeline active' }}</strong>
+                        <span>Selected processing mode</span>
+                        <strong>{{ 'Hybrid selected' if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Classic processing selected' }}</strong>
                     </div>
                     <div>
-                        <span>AWB status</span>
-                        <strong>{{ 'Measurement available · apply via ' ~ hybrid_capabilities.apply_backend if modern_admin_camera_settings_hybrid_form.processing_mode == 'hybrid' else 'Legacy AWB path' }}</strong>
+                        <span>Configured AWB behavior</span>
+                        <strong>{% if modern_admin_camera_settings_hybrid_form.processing_mode != 'hybrid' %}Classic white balance{% elif hybrid_capabilities.resolved_backend == 'disabled_not_applied' %}Measurement only · corrections disabled{% elif hybrid_capabilities.resolved_backend == 'unsupported_not_applied' %}Corrections unavailable for this interface{% else %}Apply via {{ hybrid_capabilities.apply_backend }}{% endif %}</strong>
                     </div>
                     <div>
                         <span>AWB apply mode</span>
@@ -139,7 +139,7 @@ var camera_id = {{ camera_id }};
                     </div>
                 </div>
 
-                <div class="modern-admin-camera-profile-tabs" aria-label="Hybrid controller future modules">
+                <div class="modern-admin-camera-profile-tabs" aria-label="Camera processing capabilities">
                     <span class="modern-admin-camera-profile-tab">
                         <strong>AWB measurement</strong>
                         <span>{{ hybrid_capabilities.measurement_status }} · {{ hybrid_capabilities.measurement_detail }}</span>
@@ -154,15 +154,15 @@ var camera_id = {{ camera_id }};
                     </span>
                     <span class="modern-admin-camera-profile-tab">
                         <strong>ADU / Exposure</strong>
-                        <span>Future per-camera controller</span>
+                        <span>Configure exposure, target ADU and automatic gain in Acquisition.</span>
                     </span>
                     <span class="modern-admin-camera-profile-tab">
                         <strong>Stretch</strong>
-                        <span>Future automatic stretch</span>
+                        <span>Uses the configured image stretch settings.</span>
                     </span>
                     <span class="modern-admin-camera-profile-tab">
                         <strong>Color</strong>
-                        <span>Future calibration stage</span>
+                        <span>Uses the configured white balance and color adjustments.</span>
                     </span>
                 </div>
 
@@ -178,7 +178,7 @@ var camera_id = {{ camera_id }};
                                 <option value="{{ choice.value }}" {% if choice.selected %}selected{% endif %}>{{ choice.label }}</option>
                                 {% endfor %}
                             </select>
-                            <span class="modern-admin-settings-edit-help">Hybrid is an opt-in placeholder for future per-camera AWB, ADU/exposure, stretch, and color calibration controllers.</span>
+                            <span class="modern-admin-settings-edit-help">These settings are not confirmation of the running service state. Save changes and restart capture to apply them.</span>
 
                             {% if modern_admin_camera_settings_hybrid_form.errors.processing_mode %}
                             <span class="modern-admin-settings-edit-error">

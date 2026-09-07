@@ -8,6 +8,31 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: Camera Settings processing descriptions
+
+Camera Settings still called Hybrid an opt-in placeholder and exposure control a
+future module, despite existing AutoExposureController/AutoGainController calls
+in ImageWorker. It also described the configured mode as an active pipeline,
+without evidence that capture had reloaded it. The page now identifies the
+selected mode and explicitly requires save/restart before applying changes.
+Exposure/gain point to Acquisition; stretch and color descriptions refer to
+existing configured processing rather than suggesting their functionality is absent.
+No new scientific controller, calibration algorithm or processing behavior is claimed.
+
+AWB descriptions distinguish Classic behavior, selected capture/postprocess
+application, measurement-only disabled application, and an unsupported interface.
+Existing backend capabilities, option values, unavailable choices and save/sync
+controls remain intact. This is a correction to product information, not a
+replacement of any runtime adapter or proof that the configured backend is live.
+
+The isolated Flask test checks administrator and ordinary-user pages for both
+profiles across Classic, Hybrid auto, disabled and unsupported capture modes.
+It verifies selected form values and unchanged configuration/task state. Browser
+and production acceptance remain open; the change is not deployed.
+All 87 Python/compile checks pass. The targeted rendered-page test also passes
+after the final wording adjustment; diff checks pass. Evidence:
+`testing/evidence/hybrid-processing-status-2026-09-07.json`.
+
 ## Live preliminary continuity check — 2026-09-07 11:27 CEST
 
 Production remains at `775a19d0`, capture PID 3284487, active since 10:09:50,
