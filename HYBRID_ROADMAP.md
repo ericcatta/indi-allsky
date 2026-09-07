@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Download log: un servizio Hybrid prepara i quattro export gzip con lettura
+  limitata a 3 MB, mantenendo URL, nomi file e byte originali. Handler condiviso
+  al posto di quattro implementazioni duplicate; errori 400/403/404/503 espliciti.
+  I dettagli Hybrid collegano il download della sorgente selezionata e non il
+  vecchio viewer Classic. Test Flask con Classic disabilitato e file dedicati.
+
 - Log viewer: lettura, limite effettivo delle righe, filtro e gestione errori
   sono posseduti da `ModernAdminLogReader`; la route autenticata `/js/log`
   delega e conserva il payload `log`. Corretti perdita della prima riga,

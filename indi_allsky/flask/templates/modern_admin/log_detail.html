@@ -20,7 +20,7 @@ var camera_id = {{ camera_id }};
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Log</div>
             <h3>{{ modern_admin_log_label }}</h3>
-            <p>Allowlisted log source: {{ modern_admin_log_name }}</p>
+            <p>Source: {{ modern_admin_log_name }}</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
         <article class="modern-admin-status-card">
@@ -29,7 +29,7 @@ var camera_id = {{ camera_id }};
             <p>Size: {{ modern_admin_log_file_size }}</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Displayed Lines</div>
+            <div class="modern-admin-card-label">Line limit</div>
             <h3>{{ modern_admin_log_line_limit }}</h3>
             <p>Newest lines are shown first.</p>
         </article>
@@ -58,10 +58,10 @@ var camera_id = {{ camera_id }};
 
         <section class="modern-admin-link-grid">
             <a href="{{ url_for('indi_allsky.modern_admin_log_view') }}">Back to Log</a>
-            <a href="{{ url_for('indi_allsky.log_view') }}">Open legacy Log Viewer</a>
+            <a href="{{ url_for(modern_admin_log_download_endpoint) }}">Download this log (.gz)</a>
         </section>
 
-        <p class="modern-admin-note">This page reads only allowlisted log files. It does not download, delete, rotate, truncate, or modify logs.</p>
+        <p class="modern-admin-note">Common secret fields are masked in this preview. Downloaded logs contain the original text.</p>
     </section>
 </main>
 {% endblock %}

@@ -82,6 +82,7 @@ from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataS
 from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreValidationError
 from ..modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
+from ..modern_admin_log_download import ModernAdminLogDownloadService, LogDownloadError
 from ..modern_admin_log_reader import ModernAdminLogReader
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
@@ -9450,224 +9451,41 @@ class JsonLogView(JsonView):
         return jsonify({'log': log})
 
 
-class LogDownloadView(BaseView):
+class ModernAdminLogDownloadView(BaseView):
     decorators = [login_required]
     methods = ['GET']
-
-
-    def dispatch_request(self):
-        import gzip
-
-        log_file_p = Path('/var/log/indi-allsky/indi-allsky.log')
-        line_size = 150  # assuming lines have an average length
-
-        lines = int(request.args.get('lines', 20000))
-
-
-        if not log_file_p.exists():
-            # this can happen in docker
-            return 'Log file does not exist'
-
-
-        read_bytes = lines * line_size
-
-
-        log_file_size = log_file_p.stat().st_size
-        if log_file_size == 0:
-            return 'Log file is empty'
-        elif log_file_size < read_bytes:
-            # just read the whole file
-            #app.logger.info('Returning %d bytes of log data', log_file_size)
-            log_file_seek = 0
-        else:
-            #app.logger.info('Returning %d bytes of log data', read_bytes)
-            log_file_seek = log_file_size - read_bytes
-
-
-        try:
-            with io.open(log_file_p, 'rb') as log_file_f:
-                log_file_f.seek(log_file_seek)
-                log_data = log_file_f.read()
-        except PermissionError as e:
-            return 'PermissionError: {0:s}'.format(str(e))
-
-
-        log_buffer = io.BytesIO(gzip.compress(log_data))
-
-
-        data = {
-            'ts'    : datetime.now(),
-        }
-
-
-        download_name = 'indi-allsky_log_{ts:%Y%m%d_%H%M%S}.txt.gz'.format(**data)
-
-        return send_file(log_buffer, mimetype='application/octet-stream', download_name=download_name, as_attachment=True)
-
-
-class LogWebappDownloadView(BaseView):
-    decorators = [login_required]
-    methods = ['GET']
-
+    default_lines = 20000
 
     def dispatch_request(self):
-        import gzip
-
-        log_file_p = Path('/var/log/indi-allsky/webapp-indi-allsky.log')
-        line_size = 150  # assuming lines have an average length
-
-        lines = int(request.args.get('lines', 5000))
-
-
-        if not log_file_p.exists():
-            # this can happen in docker
-            return 'Log file does not exist'
-
-
-        read_bytes = lines * line_size
-
-
-        log_file_size = log_file_p.stat().st_size
-        if log_file_size == 0:
-            return 'Log file is empty'
-        elif log_file_size < read_bytes:
-            # just read the whole file
-            #app.logger.info('Returning %d bytes of log data', log_file_size)
-            log_file_seek = 0
-        else:
-            #app.logger.info('Returning %d bytes of log data', read_bytes)
-            log_file_seek = log_file_size - read_bytes
-
-
         try:
-            with io.open(log_file_p, 'rb') as log_file_f:
-                log_file_f.seek(log_file_seek)
-                log_data = log_file_f.read()
-        except PermissionError as e:
-            return 'PermissionError: {0:s}'.format(str(e))
+            content = ModernAdminLogDownloadService().prepare(
+                Path(self.log_path), request.args.get('lines'), self.default_lines)
+        except LogDownloadError as error:
+            return str(error), error.status, {'Content-Type': 'text/plain; charset=utf-8'}
+        download_name = '{0}_{1:%Y%m%d_%H%M%S}.txt.gz'.format(self.download_prefix, datetime.now())
+        return send_file(io.BytesIO(content), mimetype='application/octet-stream',
+                         download_name=download_name, as_attachment=True)
 
 
-        log_buffer = io.BytesIO(gzip.compress(log_data))
+class LogDownloadView(ModernAdminLogDownloadView):
+    log_path = '/var/log/indi-allsky/indi-allsky.log'
+    download_prefix = 'indi-allsky_log'
 
 
-        data = {
-            'ts'    : datetime.now(),
-        }
+class LogWebappDownloadView(ModernAdminLogDownloadView):
+    log_path = '/var/log/indi-allsky/webapp-indi-allsky.log'
+    download_prefix = 'indi-allsky_webapp_log'
+    default_lines = 5000
 
 
-        download_name = 'indi-allsky_webapp_log_{ts:%Y%m%d_%H%M%S}.txt.gz'.format(**data)
-
-        return send_file(log_buffer, mimetype='application/octet-stream', download_name=download_name, as_attachment=True)
-
-
-class LogSyslogDownloadView(BaseView):
-    decorators = [login_required]
-    methods = ['GET']
+class LogSyslogDownloadView(ModernAdminLogDownloadView):
+    log_path = '/var/log/syslog'
+    download_prefix = 'indi-allsky_syslog_log'
 
 
-    def dispatch_request(self):
-        import gzip
-
-        log_file_p = Path('/var/log/syslog')
-        line_size = 150  # assuming lines have an average length
-
-        lines = int(request.args.get('lines', 20000))
-
-
-        if not log_file_p.exists():
-            # this can happen in docker
-            return 'Log file does not exist'
-
-
-        read_bytes = lines * line_size
-
-
-        log_file_size = log_file_p.stat().st_size
-        if log_file_size == 0:
-            return 'Log file is empty'
-        elif log_file_size < read_bytes:
-            # just read the whole file
-            #app.logger.info('Returning %d bytes of log data', log_file_size)
-            log_file_seek = 0
-        else:
-            #app.logger.info('Returning %d bytes of log data', read_bytes)
-            log_file_seek = log_file_size - read_bytes
-
-
-        try:
-            with io.open(log_file_p, 'rb') as log_file_f:
-                log_file_f.seek(log_file_seek)
-                log_data = log_file_f.read()
-        except PermissionError as e:
-            return 'PermissionError: {0:s}'.format(str(e))
-
-
-        log_buffer = io.BytesIO(gzip.compress(log_data))
-
-
-        data = {
-            'ts'    : datetime.now(),
-        }
-
-
-        download_name = 'indi-allsky_syslog_log_{ts:%Y%m%d_%H%M%S}.txt.gz'.format(**data)
-
-        return send_file(log_buffer, mimetype='application/octet-stream', download_name=download_name, as_attachment=True)
-
-
-class LogKernDownloadView(BaseView):
-    decorators = [login_required]
-    methods = ['GET']
-
-
-    def dispatch_request(self):
-        import gzip
-
-        log_file_p = Path('/var/log/kern.log')
-        line_size = 150  # assuming lines have an average length
-
-        lines = int(request.args.get('lines', 20000))
-
-
-        if not log_file_p.exists():
-            # this can happen in docker
-            return 'Log file does not exist'
-
-
-        read_bytes = lines * line_size
-
-
-        log_file_size = log_file_p.stat().st_size
-        if log_file_size == 0:
-            return 'Log file is empty'
-        elif log_file_size < read_bytes:
-            # just read the whole file
-            #app.logger.info('Returning %d bytes of log data', log_file_size)
-            log_file_seek = 0
-        else:
-            #app.logger.info('Returning %d bytes of log data', read_bytes)
-            log_file_seek = log_file_size - read_bytes
-
-
-        try:
-            with io.open(log_file_p, 'rb') as log_file_f:
-                log_file_f.seek(log_file_seek)
-                log_data = log_file_f.read()
-        except PermissionError as e:
-            return 'PermissionError: {0:s}'.format(str(e))
-
-
-        log_buffer = io.BytesIO(gzip.compress(log_data))
-
-
-        data = {
-            'ts'    : datetime.now(),
-        }
-
-
-        download_name = 'indi-allsky_kern_log_{ts:%Y%m%d_%H%M%S}.txt.gz'.format(**data)
-
-        return send_file(log_buffer, mimetype='application/octet-stream', download_name=download_name, as_attachment=True)
+class LogKernDownloadView(ModernAdminLogDownloadView):
+    log_path = '/var/log/kern.log'
+    download_prefix = 'indi-allsky_kern_log'
 
 
 class SupportInfoView(TemplateView):
@@ -11239,6 +11057,13 @@ class ModernAdminLogView(ModernAdminSystemToolView, LogView):
 class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
     page_title = 'Modern Admin Log Detail'
 
+    download_endpoints = {
+        'capture': 'indi_allsky.log_download_view',
+        'webapp': 'indi_allsky.log_webapp_download_view',
+        'syslog': 'indi_allsky.log_syslog_download_view',
+        'kernel': 'indi_allsky.log_kern_download_view',
+    }
+
     log_policy = ModernAdminLogDisplayPolicy()
     max_detail_lines = log_policy.max_detail_lines
     default_detail_lines = log_policy.default_detail_lines
@@ -11268,6 +11093,7 @@ class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
         context['modern_admin_log_line_limit'] = line_limit
         context['modern_admin_log_file_size'] = self.format_file_size(log_file_size)
         context['modern_admin_log_sources'] = self.log_policy.build_source_rows(log_name)
+        context['modern_admin_log_download_endpoint'] = self.download_endpoints[log_name]
 
         return context
 

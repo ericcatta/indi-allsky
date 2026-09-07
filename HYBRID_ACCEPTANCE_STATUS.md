@@ -8,6 +8,41 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: four Hybrid log downloads and detail recovery links
+
+`ModernAdminLogDownloadService` replaces the four duplicated filesystem/gzip
+implementations. A shared authenticated handler retains the capture, webapp,
+syslog and kernel URLs, attachment names and octet-stream gzip responses.
+Downloads retain original binary bytes (including non-UTF-8 data), oldest-first
+within the existing byte window; they do not use the preview's redaction or text
+normalization. Historical defaults remain 20,000 estimated lines for capture/
+syslog/kernel and 5,000 for webapp at 150 bytes per estimated line. Requests are
+now bounded at 3 MB; unlike the preview, this parameter still denotes the legacy
+estimated byte window, not an exact line count.
+
+Invalid/nonpositive counts return 400, missing files 404, denied access 403 and
+other source I/O errors 503. An empty file retains its explicit HTTP 200 text
+message. The same open file handle supplies size and bounded data; no unbounded
+read or source modification is performed. This intentionally corrects previously
+uncaught input/race errors and unbounded user-requested download size.
+
+All four detail pages contained a link to the Classic log viewer. They now link
+to the download of their selected source, retaining the Hybrid return link and
+source navigation. The card says "Line limit" rather than implying the requested
+limit is the number actually displayed. The preview/download distinction is
+explained without frontend architecture terminology.
+
+`testing/hybrid_log_download_flow_test.py` exercises all four endpoints with both
+authenticated roles in the Classic-disabled app. It decompresses actual returned
+gzip data and compares exact source bytes, filenames, content type, byte-window
+selection and maximum size. It also checks anonymous redirects, invalid counts,
+empty/missing files, source error mapping and all four detail-to-download links.
+Read denial is exercised by chmod on each dedicated temporary file, then restoring
+its permissions; missing detail pages show Missing. No production logs are changed.
+All 24 Python regression entrypoints pass; download clicks through the browser's
+save mechanism and live production files remain unverified. The change is not yet
+deployed and does not close the complete product acceptance gate.
+
 ## Verified correction: bounded Hybrid application-log reader
 
 The actual `JsonLogView` method at `7648f1d7` was executed against disposable
