@@ -1,0 +1,75 @@
+{
+  "observed_at": "2026-09-07T05:53:49.300434+00:00",
+  "scope": "Actual synchronous upload worker method; isolated SQLite, Classic disabled, real loopback SFTP; no queue scheduler or external destination acceptance",
+  "cert_bypass": false,
+  "checks": [
+    {
+      "case": "camera-1-success-True-remove-False",
+      "status": "superato",
+      "task_state": "SUCCESS",
+      "source_retained": true,
+      "sha256": "f563658d011af9946c85262709d716c850a84d0f3e86d1c928836d1cb436ea7b",
+      "terminal_duplicate_ignored": true
+    },
+    {
+      "case": "camera-1-success-True-remove-True",
+      "status": "superato",
+      "task_state": "SUCCESS",
+      "source_retained": false,
+      "sha256": "f563658d011af9946c85262709d716c850a84d0f3e86d1c928836d1cb436ea7b",
+      "terminal_duplicate_ignored": true
+    },
+    {
+      "case": "camera-1-success-False-remove-False",
+      "status": "superato",
+      "task_state": "FAILED",
+      "source_retained": true,
+      "sha256": "f563658d011af9946c85262709d716c850a84d0f3e86d1c928836d1cb436ea7b",
+      "terminal_duplicate_ignored": true
+    },
+    {
+      "case": "camera-1-success-False-remove-True",
+      "status": "superato",
+      "task_state": "FAILED",
+      "source_retained": false,
+      "sha256": "f563658d011af9946c85262709d716c850a84d0f3e86d1c928836d1cb436ea7b",
+      "terminal_duplicate_ignored": true
+    },
+    {
+      "case": "camera-2-success-True-remove-False",
+      "status": "superato",
+      "task_state": "SUCCESS",
+      "source_retained": true,
+      "sha256": "ff5326f0adb1294cc1fd9e1613d92f49d866e3dba7fbe5c4011ea73132afc9d3",
+      "terminal_duplicate_ignored": true
+    },
+    {
+      "case": "camera-2-success-True-remove-True",
+      "status": "superato",
+      "task_state": "SUCCESS",
+      "source_retained": false,
+      "sha256": "ff5326f0adb1294cc1fd9e1613d92f49d866e3dba7fbe5c4011ea73132afc9d3",
+      "terminal_duplicate_ignored": true
+    },
+    {
+      "case": "camera-2-success-False-remove-False",
+      "status": "superato",
+      "task_state": "FAILED",
+      "source_retained": true,
+      "sha256": "ff5326f0adb1294cc1fd9e1613d92f49d866e3dba7fbe5c4011ea73132afc9d3",
+      "terminal_duplicate_ignored": true
+    },
+    {
+      "case": "camera-2-success-False-remove-True",
+      "status": "superato",
+      "task_state": "FAILED",
+      "source_retained": false,
+      "sha256": "ff5326f0adb1294cc1fd9e1613d92f49d866e3dba7fbe5c4011ea73132afc9d3",
+      "terminal_duplicate_ignored": true
+    },
+    {
+      "case": "admin/ordinary task results, failure notification and disposable cleanup",
+      "status": "superato"
+    }
+  ]
+}

@@ -8,6 +8,45 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: real SFTP through the upload worker (2026-09-07 07:53 CEST)
+
+`testing/hybrid_upload_worker_loopback.py` executes the actual `processUpload`,
+`cleanup` and queue-context methods from `uploader.py`, using the Classic-disabled
+Flask fixture, real isolated SQLite task/notification records and real Paramiko
+SFTP to the Raspberry's loopback SSH service. The installed public host key is
+pinned in memory; certificate bypass remains false. Password input is not saved.
+
+Eight cases pass: two synthetic cameras/profiles, successful versus write-denied
+destinations, and both values of `remove_local`. Successful destination bytes are
+verified before removal. Failed transfers produce FAILED tasks and an upload
+notification. Existing semantics are explicit: `remove_local=True` removes the
+owned source even after transfer failure; false preserves it. Unrelated sentinel
+files remain unchanged. Replaying terminal tasks does not transfer again. Both
+administrator and ordinary-user Flask requests display the resulting task states.
+All test files are removed with the isolated fixture, without touching acquisition
+media, production records, services, configuration or external destinations.
+
+Evidence: `testing/evidence/hybrid-upload-worker-loopback-2026-09-07.json`.
+The isolated copy's source hashes match the local candidate:
+- `uploader.py`: `d3540bf81fe3b79751341c8d80dfba4dfafae8c40c0642f1cde4fbfea2fed1da`.
+- `paramiko_sftp.py`: `4e5d2bee47f395ef532f449a308f02d393b7d4c86336ae7293baac894aeb607c`.
+
+This exercises synchronous worker execution and Flask responses, not browser
+clicks, concurrent queue consumers, scheduler recovery, model-backed asset upload
+flags, other protocols or an external integration. Those remain separate gates.
+The SFTP correction is still a candidate, not a production deployment.
+
+The initial run at 07:46 passed, but its overlaid test directory had AppleDouble
+template metadata and an obsolete route-composition test. Final acceptance was
+therefore repeated successfully in `/home/eric/hybrid-acceptance-fcc8ab81`, created
+from the exact Git archive with only `examples/` and `content/` excluded. The
+archive SHA256 is `abbb643ea4a92e7a8d6f4ecb1cb5860421194ea5e2382d963cabd089106a05aa`.
+All 19 regression entrypoints pass there: the twelve `modern_admin_*_test.py`,
+Safe Actions, Full Config parity, Product View Models, Product Spine, Hybrid
+shell, route composition and SFTP adapter. Individual logs are retained in that
+directory's `regression-results/`. No fingerprints or application code changed
+in this acceptance mission. Local `git diff --check` also passes.
+
 ## Verified mission: authenticated Hybrid navigation and account
 
 Baseline: `6b80191f`. Real Flask reproduction found `BuildError` on successful
