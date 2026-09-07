@@ -8,6 +8,35 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: database backup failure semantics and round-trip acceptance
+
+Pre-deploy review found that database backup checked total filesystem capacity
+instead of free space and ignored gzip's nonzero exit code. The latter could
+return a nonexistent `.gz` path and prune previous backups after compression failed.
+The backup now checks free bytes on its actual destination filesystem, closes both
+SQLite connections on failure, uses owned temporary files, requires successful
+compression and a nonempty output, and atomically publishes a uniquely timestamped
+filename before retention. Retention is restricted to recognizable backup names
+in the backup directory, excluding symlinks and unrelated/nested files. The unused
+recursive enumerator is removed. Existing minimum space and retention count remain
+1000 MiB and seven; the pre-attempt BACKUP_DB_TS retry policy is unchanged.
+
+`hybrid_database_backup_test.py` creates a real SQLite backup from the isolated
+Flask fixture, gzip-decompresses it, checks SQLite integrity and both camera rows,
+and verifies restrictive output permissions. It exercises low free space despite
+large total capacity, failed/unavailable gzip, success without output, temporary
+cleanup, distinct output names and retention without deleting unrelated files.
+The 32-entrypoint regression passes. These are actual backup/compression/restore
+file effects on disposable data; production backups and upload remain unverified.
+
+The attempted clean-release extraction started before its large archive transfer
+completed and failed with an explicit unexpected-EOF error; no tests or deployment
+were run from that partial extraction. The full clean-release verification must
+be repeated against a complete, hash-verified archive including this backup fix.
+The earlier candidate `31aa263b` is not deployment-ready. No production changes
+were made. All 23 JavaScript entrypoints passed for that candidate; changes in this
+mission are confined to Python backup handling and its tests/documentation.
+
 ## Verified mission: multicamera periodic-task dispatch and 09:20 live sample
 
 Production snapshot `hybrid-live-continuity-2026-09-07-0920.json` records unchanged

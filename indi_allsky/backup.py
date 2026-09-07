@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import psutil
 import sqlite3
+import tempfile
+import os
 import logging
 
 from .flask import db
@@ -46,43 +48,46 @@ class IndiAllskyDatabaseBackup(object):
 
 
         now = datetime.now()
-        backup_file_p = self.backup_folder_p.joinpath('backup_indi-allsky_{0:%Y%m%d_%H%M%S}.sqlite'.format(now))
-        logger.warning('Backing up database to %s.gz', backup_file_p)
-
-
-        backup_conn = sqlite3.connect(str(backup_file_p))
-
-        raw_connection = db.engine.raw_connection()
-        raw_connection.backup(backup_conn)
-
-        raw_connection.close()
-        backup_conn.close()
-
-
-        backup_file_p.chmod(0o640)
-
-
+        final = self.backup_folder_p / ('backup_indi-allsky_{0:%Y%m%d_%H%M%S_%f}.sqlite.gz'.format(now))
+        temporary = None
+        compressed = None
         try:
-            subprocess.run(
-                ('/usr/bin/gzip', str(backup_file_p)),
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except OSError as e:
-            logger.error('Backup compress failed: %s', str(e))
-            raise BackupFailure('Backup compress failed')
-
+            with tempfile.NamedTemporaryFile(prefix='.backup_indi-allsky_', suffix='.sqlite',
+                                             dir=self.backup_folder_p, delete=False) as stream:
+                temporary = Path(stream.name)
+            compressed = Path(str(temporary) + '.gz')
+            backup_conn = sqlite3.connect(str(temporary))
+            try:
+                raw_connection = db.engine.raw_connection()
+                try:
+                    raw_connection.backup(backup_conn)
+                finally:
+                    raw_connection.close()
+            finally:
+                backup_conn.close()
+            temporary.chmod(0o640)
+            subprocess.run(('/usr/bin/gzip', str(temporary)), check=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if not compressed.is_file() or compressed.stat().st_size == 0:
+                raise BackupFailure('Backup compression produced no file')
+            os.replace(compressed, final)
+        except (OSError, sqlite3.Error, subprocess.CalledProcessError) as error:
+            logger.error('Database backup failed: %s', error)
+            raise BackupFailure('Database backup or compression failed') from error
+        finally:
+            for partial in (temporary, compressed):
+                if partial is not None:
+                    partial.unlink(missing_ok=True)
 
         self.expireBackups()
-
-
-        return '{0:s}.gz'.format(str(backup_file_p))
+        return str(final)
 
 
     def expireBackups(self):
-        backup_list = list()
-
-        self._getFolderFilesByExt(self.backup_folder_p, backup_list, extension_list=['gz', 'sqlite'])
+        backup_list = [path for path in self.backup_folder_p.iterdir()
+                       if path.is_file() and not path.is_symlink()
+                       and path.name.startswith('backup_indi-allsky_')
+                       and path.name.endswith(('.sqlite.gz', '.sqlite'))]
 
         backup_list_ordered = sorted(backup_list, key=lambda p: p.stat().st_mtime, reverse=True)
 
@@ -96,32 +101,10 @@ class IndiAllskyDatabaseBackup(object):
 
 
     def checkAvailableSpace(self):
-        fs_list = psutil.disk_partitions(all=True)
-
-        for fs in fs_list:
-            if fs.mountpoint not in ('/', '/var'):
-                continue
-
-            try:
-                disk_usage = psutil.disk_usage(fs.mountpoint)
-            except PermissionError as e:
-                logger.error('PermissionError: %s', str(e))
-                continue
-
-
-            fs_free_mb = disk_usage.total / 1024.0 / 1024.0
-            if fs_free_mb < 1000:
-                raise BackupFailure('Not enough available space on {0:s} filesystem'.format(fs.mountpoint))
-
-
-    def _getFolderFilesByExt(self, folder, file_list, extension_list=['gz']):
-        #logger.info('Searching for image files in %s', folder)
-
-        dot_extension_list = ['.{0:s}'.format(e) for e in extension_list]
-
-        for item in Path(folder).iterdir():
-            if item.is_file() and item.suffix in dot_extension_list:
-                file_list.append(item)
-            elif item.is_dir():
-                self._getFolderFilesByExt(item, file_list, extension_list=extension_list)  # recursion
+        try:
+            free_bytes = psutil.disk_usage(str(self.backup_folder_p)).free
+        except OSError as error:
+            raise BackupFailure('Cannot determine available backup space') from error
+        if free_bytes < 1000 * 1024 * 1024:
+            raise BackupFailure('Not enough available space on backup filesystem')
 
