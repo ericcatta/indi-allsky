@@ -1,0 +1,290 @@
+{
+  "scope": "Preliminary direct production acceptance: image-history continuity and file presence. Not full product or 24-hour acceptance.",
+  "observed_at": "2026-09-07T11:27:45.766356+02:00",
+  "since": "2026-09-07 10:09:50",
+  "installed_commit": "775a19d0e8a300fa24c10b47495720f6b4bcf0e4",
+  "service": "MainPID=3284487\nNRestarts=0\nActiveState=active\nActiveEnterTimestamp=Mon 2026-09-07 10:09:50 CEST\n",
+  "camera_history": [
+    {
+      "camera": {
+        "id": 1,
+        "name": "libcamera_imx708",
+        "driver": "rpicam-still"
+      },
+      "count": 102,
+      "first": {
+        "id": 3963,
+        "createDate": "2026-09-07 10:11:05.000000",
+        "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260907/day/07_10/ccd1_20260907_101105.jpg",
+        "night": 0,
+        "exposure": 40.0
+      },
+      "last": {
+        "id": 4369,
+        "createDate": "2026-09-07 11:27:29.000000",
+        "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260907/day/07_11/ccd1_20260907_112729.jpg",
+        "night": 0,
+        "exposure": 40.0
+      },
+      "day_frames": 102,
+      "night_frames": 0,
+      "missing_file_ids": [],
+      "empty_file_ids": [],
+      "largest_gaps": [
+        {
+          "seconds": 46.0,
+          "previous_id": 3963,
+          "next_id": 3967,
+          "previous_at": "2026-09-07 10:11:05.000000",
+          "next_at": "2026-09-07 10:11:51.000000"
+        },
+        {
+          "seconds": 46.0,
+          "previous_id": 3971,
+          "next_id": 3975,
+          "previous_at": "2026-09-07 10:12:36.000000",
+          "next_at": "2026-09-07 10:13:22.000000"
+        },
+        {
+          "seconds": 46.0,
+          "previous_id": 3983,
+          "next_id": 3987,
+          "previous_at": "2026-09-07 10:14:52.000000",
+          "next_at": "2026-09-07 10:15:38.000000"
+        },
+        {
+          "seconds": 46.0,
+          "previous_id": 3991,
+          "next_id": 3995,
+          "previous_at": "2026-09-07 10:16:23.000000",
+          "next_at": "2026-09-07 10:17:09.000000"
+        },
+        {
+          "seconds": 46.0,
+          "previous_id": 4003,
+          "next_id": 4007,
+          "previous_at": "2026-09-07 10:18:39.000000",
+          "next_at": "2026-09-07 10:19:25.000000"
+        }
+      ]
+    },
+    {
+      "camera": {
+        "id": 2,
+        "name": "ZWO CCD ASI678MC",
+        "driver": "indi_asi_ccd"
+      },
+      "count": 310,
+      "first": {
+        "id": 3959,
+        "createDate": "2026-09-07 10:10:14.000000",
+        "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260907/day/07_10/ccd2_20260907_101014.jpg",
+        "night": 0,
+        "exposure": 1.1405550241470337
+      },
+      "last": {
+        "id": 4370,
+        "createDate": "2026-09-07 11:27:34.000000",
+        "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260907/day/07_11/ccd2_20260907_112734.jpg",
+        "night": 0,
+        "exposure": 1.2278307676315308
+      },
+      "day_frames": 310,
+      "night_frames": 0,
+      "missing_file_ids": [],
+      "empty_file_ids": [],
+      "largest_gaps": [
+        {
+          "seconds": 16.0,
+          "previous_id": 3990,
+          "next_id": 3992,
+          "previous_at": "2026-09-07 10:16:10.000000",
+          "next_at": "2026-09-07 10:16:26.000000"
+        },
+        {
+          "seconds": 16.0,
+          "previous_id": 4000,
+          "next_id": 4001,
+          "previous_at": "2026-09-07 10:17:55.000000",
+          "next_at": "2026-09-07 10:18:11.000000"
+        },
+        {
+          "seconds": 16.0,
+          "previous_id": 4021,
+          "next_id": 4022,
+          "previous_at": "2026-09-07 10:21:56.000000",
+          "next_at": "2026-09-07 10:22:12.000000"
+        },
+        {
+          "seconds": 16.0,
+          "previous_id": 4024,
+          "next_id": 4025,
+          "previous_at": "2026-09-07 10:22:27.000000",
+          "next_at": "2026-09-07 10:22:43.000000"
+        },
+        {
+          "seconds": 16.0,
+          "previous_id": 4030,
+          "next_id": 4032,
+          "previous_at": "2026-09-07 10:23:42.000000",
+          "next_at": "2026-09-07 10:23:58.000000"
+        }
+      ]
+    }
+  ],
+  "task_snapshot_at": "2026-09-07T11:27:03.150291+02:00",
+  "pending_tasks": [],
+  "periodic_tasks": [
+    {
+      "id": 10707,
+      "createDate": "2026-09-07 08:15:04",
+      "state": "SUCCESS",
+      "action": "systemHealthCheck",
+      "result": "Health check complete"
+    },
+    {
+      "id": 10708,
+      "createDate": "2026-09-07 08:15:04",
+      "state": "SUCCESS",
+      "action": "updateAuroraData",
+      "result": "Aurora data updated"
+    },
+    {
+      "id": 10709,
+      "createDate": "2026-09-07 08:15:04",
+      "state": "SUCCESS",
+      "action": "updateAuroraData",
+      "result": "Aurora data updated"
+    },
+    {
+      "id": 10710,
+      "createDate": "2026-09-07 08:15:04",
+      "state": "SUCCESS",
+      "action": "updateSmokeData",
+      "result": "Smoke data updated"
+    },
+    {
+      "id": 10711,
+      "createDate": "2026-09-07 08:15:04",
+      "state": "SUCCESS",
+      "action": "updateSmokeData",
+      "result": "Smoke data updated"
+    },
+    {
+      "id": 10712,
+      "createDate": "2026-09-07 08:15:04",
+      "state": "SUCCESS",
+      "action": "updateSatelliteTleData",
+      "result": "Satellite data updated"
+    },
+    {
+      "id": 10713,
+      "createDate": "2026-09-07 08:46:17",
+      "state": "SUCCESS",
+      "action": "updateAuroraData",
+      "result": "Aurora data updated"
+    },
+    {
+      "id": 10714,
+      "createDate": "2026-09-07 08:46:17",
+      "state": "SUCCESS",
+      "action": "updateAuroraData",
+      "result": "Aurora data updated"
+    },
+    {
+      "id": 10715,
+      "createDate": "2026-09-07 09:17:29",
+      "state": "SUCCESS",
+      "action": "updateAuroraData",
+      "result": "Aurora data updated"
+    },
+    {
+      "id": 10716,
+      "createDate": "2026-09-07 09:17:29",
+      "state": "SUCCESS",
+      "action": "updateAuroraData",
+      "result": "Aurora data updated"
+    }
+  ],
+  "free_bytes": 81334702080,
+  "journal_error_lines": [
+    "[ERROR] Capture-1-3284511/MainThread capture._initialize() [1938]: CCD night gain above maximum, changing to 16.00",
+    "[ERROR] Capture-1-3284511/MainThread capture._initialize() [1950]: CCD moon mode gain above maximum, changing to 16.00",
+    "[ERROR] Capture-1-3284511/MainThread capture._initialize() [1958]: CCD day gain below minimum, changing to 1.13",
+    "[ERROR] Capture-1-3284511/MainThread capture._profile_gain_max() [1923]: GAIN_MAX_DAY below minimum, changing to 1.13",
+    "[ERROR] Capture-1-3284511/MainThread capture._profile_gain_max() [1927]: GAIN_MAX_NIGHT above maximum, changing to 16.00",
+    "[ERROR] Capture-1-3284511/MainThread capture._profile_gain_max() [1927]: GAIN_MAX_MOONMODE above maximum, changing to 16.00"
+  ],
+  "aurora_components": [
+    {
+      "id": 1,
+      "updated": 1788772663,
+      "components": {
+        "ovation": {
+          "state": "available",
+          "last_success": 1788772660
+        },
+        "kpindex": {
+          "state": "available",
+          "last_success": 1788772661
+        },
+        "mag": {
+          "state": "available",
+          "last_success": 1788772662
+        },
+        "plasma": {
+          "state": "available",
+          "last_success": 1788772663
+        },
+        "hemi_power": {
+          "state": "available",
+          "last_success": 1788772663
+        }
+      }
+    },
+    {
+      "id": 2,
+      "updated": 1788772659,
+      "components": {
+        "ovation": {
+          "state": "available",
+          "last_success": 1788772657
+        },
+        "kpindex": {
+          "state": "available",
+          "last_success": 1788772657
+        },
+        "mag": {
+          "state": "available",
+          "last_success": 1788772658
+        },
+        "plasma": {
+          "state": "available",
+          "last_success": 1788772659
+        },
+        "hemi_power": {
+          "state": "available",
+          "last_success": 1788772659
+        }
+      }
+    }
+  ],
+  "method": {
+    "database": "SQLite read-only URI mode=ro",
+    "image_query": "SELECT id,createDate,filename,night,exposure FROM image WHERE camera_id=? AND createDate>=? ORDER BY createDate,id",
+    "gaps": "Difference of consecutive createDate values per camera; all rows since restart included. Initial startup delay is represented by first timestamp.",
+    "files": "Every selected filename resolved under configured image root when relative, is_file and size checked; image contents were not decoded.",
+    "service": "systemctl --user show indi-allsky.service: MainPID, ActiveState, ActiveEnterTimestamp, NRestarts",
+    "source_script_sha256": "7a6f630e268c259728553dc96895a9659b035d50a341eac6d903a70de455bed0",
+    "remote_evidence": [
+      "/home/eric/hybrid-release-evidence-775a19d0/continuity-20260907-112745.json",
+      "/home/eric/hybrid-release-evidence-775a19d0/snapshot-20260907-112703.json"
+    ]
+  },
+  "remaining": [
+    "Night acquisition and full 24-hour duration",
+    "Browser and image-content acceptance",
+    "Latest candidate deployment and post-Classic-removal acceptance"
+  ],
+  "production_mutations": false
+}

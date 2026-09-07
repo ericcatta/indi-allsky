@@ -8,6 +8,25 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Live preliminary continuity check — 2026-09-07 11:27 CEST
+
+Production remains at `775a19d0`, capture PID 3284487, active since 10:09:50,
+with NRestarts=0. Read-only history inspection through 11:27:45 covers all 102
+IMX708 and 310 ZWO image records since that start. Every associated file exists
+and is nonempty. Maximum consecutive timestamp gaps are 46 seconds (IMX708)
+and 16 seconds (ZWO); first frames were at 10:11:05 and 10:10:14 respectively.
+This checks recorded cadence and file presence, not decoded image quality.
+
+The 11:27:03 snapshot has no queued/running/manual tasks, ten successful periodic
+tasks since deployment, all five aurora components available for both cameras,
+and 81,334,702,080 free bytes. Journal error matches remain the six known startup
+gain clamps. No services, settings or acquisition files were changed.
+
+All observed images are daytime. This roughly 78-minute preliminary check does
+not pass the 24-hour day/night gate, UI acceptance or the final Classic removal
+gate. Candidate corrections after `775a19d0` are still not deployed. Evidence:
+`testing/evidence/hybrid-capture-continuity-2026-09-07.json`.
+
 ## Verified correction: browser-ambiguous login return URLs
 
 The installed URL validator treated embedded ASCII controls as part of a local
