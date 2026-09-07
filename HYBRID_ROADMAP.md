@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Task Hybrid: policy di lettura estesa a IMAGE, VIDEO, UPLOAD, MAIN e a tutti
+  gli stati persistiti, incluso EXPIRED. Finestra di tre giorni invariata;
+  conteggi/eta' usano l'orologio del database, non l'offset della camera.
+  Nessuna modifica all'esecuzione dei task. Correzione non ancora distribuita.
+
 - Stato web aurora: presentazione read-only posseduta da Hybrid, con freschezza
   per componente, errori di aggiornamento espliciti e letture assenti distinte
   dallo zero. I template numerici salvati rimangono utilizzabili; il worker e

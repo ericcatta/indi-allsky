@@ -28,7 +28,7 @@ var camera_id = {{ camera_id }};
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Recent Tasks</div>
             <h3>{{ modern_admin_task_recent_count }}</h3>
-            <p>Tasks created in the last hour. Capture and media-generation queues are shown.</p>
+            <p>Tasks created in the last hour across capture, image processing, media generation and uploads.</p>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Task queue</div>
@@ -112,7 +112,7 @@ var camera_id = {{ camera_id }};
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="11">No recent capture or media-generation tasks are available.</td>
+                        <td colspan="11">No tasks are available from the last three days.</td>
                     </tr>
                     {% endfor %}
                     <tr id="modern-admin-task-no-filter-match" hidden>
@@ -121,10 +121,10 @@ var camera_id = {{ camera_id }};
                 </tbody>
             </table>
         </div>
-        <p class="modern-admin-note">Image-processing and upload queues are not included in this list. Open task details for the result and camera/profile context.</p>
+        <p class="modern-admin-note">All task queues are included. Expired tasks have no confirmed completion; open their details for the recorded reason and camera/profile context.</p>
     </section>
 </main>
 
-<script type="application/json" id="hybrid-operations-table-config">{"csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}, "table": "modern-admin-task-table", "rowAttribute": "data-task-search", "count": "modern-admin-task-visible-count", "emptyMessage": "No recent capture or media-generation tasks are available.", "filters": [{"id": "modern-admin-task-search", "attribute": "taskSearch", "contains": true}, {"id": "modern-admin-task-state", "attribute": "taskState", "contains": false}, {"id": "modern-admin-task-queue", "attribute": "taskQueue", "contains": false}, {"id": "modern-admin-task-action", "attribute": "taskAction", "contains": false}]}</script>
+<script type="application/json" id="hybrid-operations-table-config">{"csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}, "table": "modern-admin-task-table", "rowAttribute": "data-task-search", "count": "modern-admin-task-visible-count", "emptyMessage": "No tasks are available from the last three days.", "filters": [{"id": "modern-admin-task-search", "attribute": "taskSearch", "contains": true}, {"id": "modern-admin-task-state", "attribute": "taskState", "contains": false}, {"id": "modern-admin-task-queue", "attribute": "taskQueue", "contains": false}, {"id": "modern-admin-task-action", "attribute": "taskAction", "contains": false}]}</script>
 <script src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}" defer></script>
 {% endblock %}

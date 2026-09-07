@@ -7415,18 +7415,21 @@ class ModernAdminTaskStatusView(ModernAdminContextMixin):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
     def get_task_read_service(self):
+        # Task timestamps are assigned by the database, not by the camera's
+        # local clock. Keep age and lookback calculations in that time base.
+        task_now = db.session.query(func.now()).scalar()
         read_policy = ModernAdminTaskReadPolicy()
         filter_expression = read_policy.build_filter_expression(
             and_operator=and_,
             task_model=IndiAllSkyDbTaskQueueTable,
             state_enum=TaskQueueState,
             queue_enum=TaskQueueQueue,
-            now=self.camera_now,
+            now=task_now,
         )
 
         return ModernAdminTaskReadService(
             query=IndiAllSkyDbTaskQueueTable.query,
-            now=self.camera_now,
+            now=task_now,
             filter_expression=filter_expression,
             order_by_expression=IndiAllSkyDbTaskQueueTable.createDate.desc(),
             id_field=IndiAllSkyDbTaskQueueTable.id,

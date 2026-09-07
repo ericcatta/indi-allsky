@@ -8,6 +8,35 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: all persisted task queues and terminal outcomes
+
+The Hybrid list excluded IMAGE and UPLOAD queues and all EXPIRED tasks, hiding
+outcomes needed to inspect processing, delivery and rejected/recovered work.
+Its read policy now includes all four queue types and six persisted states,
+retaining the three-day window, existing client filters, sorting and pagination.
+The page explains that expiry has no confirmed completion and points to the
+recorded reason. No task is retried, changed or deleted by this correction.
+
+Task age, recent counts and the lookback now use the database clock, matching the
+server-assigned createDate time base instead of a camera-local offset. Details
+retain camera/profile context and payload redaction for every queue/state.
+`hybrid_task_visibility_test.py` exercises 48 recent queue/state/camera combinations,
+both authenticated roles, anonymous denial, an old excluded record, unchanged
+persistent states, readable results and ±12-hour camera-clock offsets. The domain
+policy unit test now asserts the expanded supported queue/state contract.
+
+A read-only Raspberry count found 475 task rows from the last three days: VIDEO
+423 EXPIRED, 7 FAILED, 45 SUCCESS. The aggregate query took about 2.6 ms. This is
+volume/query evidence, not a measured whole-page speedup or a large-backlog
+performance guarantee. No new index or artificial display cap was introduced.
+The correction is not deployed and does not restart capture. Browser filter,
+clipboard/export and keyboard acceptance remain separate pending checks. All 83
+Python/compile checks pass after removing five archive-generated AppleDouble files
+from the isolated copy and rerunning shell, Safe Actions and compilation checks.
+The task-flow test also passed again with the final template text. Original
+failures and successful reruns are recorded in
+`testing/evidence/hybrid-task-visibility-2026-09-07.json`.
+
 ## Verified correction: public media directory links and camera scope
 
 The rendered directory linked to root-relative `/latest...` strings rather than

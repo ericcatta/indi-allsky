@@ -66,6 +66,7 @@ class FakeStateEnum:
     RUNNING = 'running'
     SUCCESS = 'success'
     FAILED = 'failed'
+    EXPIRED = 'expired'
 
 
 class FakeQueueEnum:
@@ -223,15 +224,15 @@ def test_task_read_policy_owns_status_filter_contract():
         now=now,
     )
 
-    assert TASK_STATUS_VISIBLE_STATES == ('MANUAL', 'QUEUED', 'RUNNING', 'SUCCESS', 'FAILED')
-    assert TASK_STATUS_EXCLUDED_QUEUES == ('IMAGE', 'UPLOAD')
+    assert TASK_STATUS_VISIBLE_STATES == ('MANUAL', 'QUEUED', 'RUNNING', 'SUCCESS', 'FAILED', 'EXPIRED')
+    assert TASK_STATUS_EXCLUDED_QUEUES == ()
     assert TASK_STATUS_LOOKBACK_DAYS == 3
     assert expression == (
         'and',
         (
             ('gt', 'createDate', datetime(2026, 1, 2, 5, 4, 5)),
-            FakeInExpression('state', ('manual', 'queued', 'running', 'success', 'failed')),
-            ('not_in', 'queue', ('image', 'upload')),
+            FakeInExpression('state', ('manual', 'queued', 'running', 'success', 'failed', 'expired')),
+            ('not_in', 'queue', ()),
         ),
     )
 

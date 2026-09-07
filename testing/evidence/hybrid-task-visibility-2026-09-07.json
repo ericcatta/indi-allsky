@@ -1,0 +1,476 @@
+{
+  "scope": "Isolated Flask, Classic forbidden, task reads only; no browser or production deployment",
+  "queue_types": 4,
+  "states": 6,
+  "camera_ids": [
+    1,
+    2
+  ],
+  "roles": [
+    "admin",
+    "user"
+  ],
+  "recent_fixture_tasks": 48,
+  "old_fixture_tasks": 1,
+  "camera_clock_offsets_hours": [
+    -12,
+    12
+  ],
+  "checks": [
+    {
+      "case": "testing/auto_exposure_controller_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/auto_gain_controller_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/auto_gain_runtime_state_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/focus_frames_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/full_config_parser_parity_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_app_startup_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_archive_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_astropanel_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_astropanel_satellite_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_aurora_failure_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_aurora_rtsw_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_aurora_status_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_authenticated_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_camera_simulator_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_charts_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_compatibility_redirect_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_database_backup_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_drives_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_end_of_night_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_end_of_night_handoff_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_fits_processing_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_fits_processing_parity_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_focus_endpoint_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_focus_preview_parity_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_focuser_effect_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_gallery_isolation_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_generated_media_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_generation_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_generation_result_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_geometry_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_gpio_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_highlights_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_log_download_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_log_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_mini_generation_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_native_focus_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_network_command_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_now_page_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_observatory_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_operations_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_output_detail_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_public_media_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_route_composition_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_runtime_shell_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_sensor_panel_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_settings_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_shell_test.py",
+      "initial_exit_code": 1,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_sky_cycle_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_source_media_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_table_export_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_task_visibility_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_ui_inventory_parser_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_updates_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_upgrade_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_upload_claim_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_video_dispatch_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_video_failure_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_youtube_flow_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/legacy_auto_gain_steps_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_boundary_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_log_reader_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_media_camera_filter_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_media_metadata_service_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_media_runtime_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_notification_read_service_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_observatory_tools_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_runtime_providers_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_settings_contracts_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_settings_runtime_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_system_tools_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_admin_task_read_service_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/modern_safe_action_test.py",
+      "initial_exit_code": 1,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/multicamera_processor_isolation_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/network_activation_polling_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/network_commands_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/network_scan_effects_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/product_spine_regression_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/product_view_models_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/sftp_adapter_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "testing/stretch_multicamera_mask_test.py",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "hybrid_archive_flow_test.py:library",
+      "initial_exit_code": 0,
+      "final_exit_code": 0
+    },
+    {
+      "case": "compileall",
+      "initial_exit_code": 1,
+      "final_exit_code": 0
+    }
+  ],
+  "environment_recovery": {
+    "cause": "macOS tar included five AppleDouble ._* metadata files; template and compile checks attempted to parse them",
+    "action": "Removed only the exact archive-generated files after checking AppleDouble header in isolated root",
+    "rerun_passed": [
+      "testing/hybrid_shell_test.py",
+      "testing/modern_safe_action_test.py",
+      "compileall",
+      "testing/hybrid_task_visibility_test.py"
+    ],
+    "production_touched": false
+  },
+  "volume_observation": {
+    "rows_by_queue_state": [
+      [
+        "VIDEO",
+        "EXPIRED",
+        423
+      ],
+      [
+        "VIDEO",
+        "FAILED",
+        7
+      ],
+      [
+        "VIDEO",
+        "SUCCESS",
+        45
+      ]
+    ],
+    "aggregate_query_seconds": 0.0026451339945197105,
+    "scope": "Live read-only aggregate; not a full-page performance measurement"
+  },
+  "log_directory": "/home/eric/hybrid-task-visibility-evidence",
+  "candidate_sha256": {
+    "indi_allsky/modern_admin_tasks.py": "2525a408d55f99e04441a5e96d37666836b313a001966aee4442ef1ac3b55011",
+    "indi_allsky/flask/views.py": "cb6e98a248c80ae54cbe699b42f22ddfc893dab18ba224a3ec222a96f5451114",
+    "indi_allsky/flask/templates/modern_admin/tasks.html": "379291e4059798e6e455176f4197d4c44dba8b768a883353b5c58ef0389a55f7",
+    "testing/modern_admin_task_read_service_test.py": "648b99e273cbf76ce3d54b0ca8250b479eaab06ead6d7911fe9ea3b0572f8dea",
+    "testing/hybrid_task_visibility_test.py": "67b92cac88cdf9393856e2a733cd92390c72276583ff3d65b57a6562a6baab88"
+  }
+}
