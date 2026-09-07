@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-07",
+  "baseline": "7648f1d7",
+  "scope": "Hybrid application-log reader and isolated browser; production log files and capture untouched",
+  "baseline_reproduction": [
+    {"input": "one complete line", "actual": "[indi-allsky log empty]", "status": "difetto"},
+    {"input": "1000 numbered short lines; request 25", "actual_returned_lines": 374, "status": "difetto"}
+  ],
+  "automated_evidence": {
+    "reader": "testing/modern_admin_log_reader_test.py",
+    "http": "testing/hybrid_log_flow_test.py",
+    "controller": "testing/hybrid_log_browser_test.js",
+    "python_regression_entrypoints_passed": 23,
+    "short_tail_io": {"file_bytes": 5000000, "requested_lines": 25, "returned_lines": 25, "read_bytes": 8192},
+    "maximum_read_bytes": 750000,
+    "checks": ["first complete line retained", "exact newest-first limit", "unterminated final line separated", "CRLF", "invalid UTF-8 replacement", "regex validation", "recent-window filter", "empty source", "missing source", "permission and I/O errors", "oversized line reports read limit", "5000-line clamp", "both authenticated roles", "CSRF required"]
+  },
+  "browser_context": {
+    "url": "http://127.0.0.1:18101/indi-allsky/modern-admin/system/log",
+    "role": "administrator",
+    "camera_profile": "System-wide log; synthetic records name both test cameras",
+    "classic": "disabled",
+    "source": "disposable synthetic log file"
+  },
+  "browser_checks": [
+    {"control": "#modern-admin-log-output", "expected": "Display all four complete fixture lines, newest first", "request": "POST /indi-allsky/js/log: 200", "observed": "Synthetic upload completed; Camera 2 ready; Camera 1 ready; Synthetic log header retained", "status": "superato"},
+    {"control": "#LINES_SELECT", "expected": "Selection changes to 100 and reloads log", "request": "POST /indi-allsky/js/log: 200 at 08:20:42 CEST", "observed": "100 selected; all four available fixture lines remain visible", "status": "superato", "limit": "100-row result size is covered automatically, not by this four-line browser fixture"},
+    {"control": "#REFRESH_SELECT", "expected": "Change from 15s to 5s and repeat successful log requests", "request": "POST /indi-allsky/js/log: 200 at 08:21:02.397, 08:21:07.387 and 08:21:12.421 CEST", "observed": "5s selected; approximately five seconds between successful requests", "status": "superato"}
+  ],
+  "open_browser_checks": [
+    {"control": "FILTER", "status": "bloccato", "reason": "Actual reader and HTTP filters pass; typing/filter interaction not directly exercised in this browser session"},
+    {"control": "Other line/interval options", "status": "bloccato", "reason": "Not every option timed or counted in browser. 60s selected afterward only to reduce test polling."},
+    {"control": "Detail/download links and keyboard/mobile", "status": "bloccato", "reason": "Not included in this reader acceptance"}
+  ]
+}

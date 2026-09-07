@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Log viewer: lettura, limite effettivo delle righe, filtro e gestione errori
+  sono posseduti da `ModernAdminLogReader`; la route autenticata `/js/log`
+  delega e conserva il payload `log`. Corretti perdita della prima riga,
+  conteggio approssimativo e filtri regex non validi. Lettura binaria limitata
+  a 750 KB, righe recenti complete e UTF-8 degradato leggibile. Test reali di
+  file/Flask; nessuna migrazione o modifica dei file di log in produzione.
+
 - EndOfNight handoff: record upload e collegamento padre salvati insieme prima
   dell'invio alla coda. Esiti incerti conservano file e riferimento senza
   risottomettere o sovrascrivere lo stato del consumer. Un rientro con ricevuta

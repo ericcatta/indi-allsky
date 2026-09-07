@@ -8,6 +8,48 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: bounded Hybrid application-log reader
+
+The actual `JsonLogView` method at `7648f1d7` was executed against disposable
+files before replacement. A file containing only `only line\n` produced
+`[indi-allsky log empty]`; requesting 25 entries from a 1,000-line file produced
+374 entries. It always discarded the first read line and estimated line counts
+from bytes. Invalid but syntactically allowed regex strings could also raise.
+
+`ModernAdminLogReader` now owns validation, backward reading, exact recent-line
+selection, filtering and source errors. The Flask route remains POST, authenticated,
+CSRF-protected, with the same `{"log": ...}` response. Existing valid case-insensitive
+regex filtering, 30-character filter input and the 5,000-line maximum remain.
+Invalid line counts/requests/expressions produce explicit ERROR text instead of
+uncaught exceptions. Filter matches are selected within the requested recent
+lines, as the UI now explains. Complete first lines are retained; an unterminated
+last line remains separated from its predecessor; CRLF and malformed UTF-8 are
+handled without a decoding failure.
+
+Reading uses a single open file handle and backward chunks capped at 750,000
+bytes. An oversized line that cannot be read completely reports the read limit
+rather than pretending the file is empty. Missing, denied and unreadable sources
+have distinct messages. The shared handler contains only the Hybrid delegation;
+it no longer performs its own filesystem/filter algorithm.
+
+Evidence: `modern_admin_log_reader_test.py` uses real disposable files and
+instrumented byte streams, verifies exact newest-first results, filters, source
+errors, a 5 MB file read of only 8,192 bytes for its latest 25 short entries, and
+the hard 750,000-byte cap. This is a measured I/O bound, not a claim about Pi CPU
+or latency. `hybrid_log_flow_test.py` verifies actual Flask requests, rendered
+CSRF and both roles, including the selected line count and rejected inputs.
+Scientific processing, capture and production log files are unchanged.
+
+Direct browser acceptance confirms all four fixture lines including the previously
+lost header, changing the line selector from 25 to 100 with a successful reload,
+and a change from 15s to 5s polling observed in three successful request timestamps.
+The four-line fixture does not prove a 100-row browser result size; exact counts
+are covered by reader/HTTP tests. Evidence and remaining controls are explicit in
+`testing/evidence/hybrid-log-reader-2026-09-07.json`. All 23 Python regression
+entrypoints, the log controller test and `git diff --check` pass. This correction
+is not yet deployed; remaining log downloads, browser filter typing, keyboard and
+narrow-screen checks are not declared passed.
+
 ## Verified correction: upgrade recovery log polling and direct browser controls
 
 On 2026-09-07 direct browser acceptance of Updates found that its System logs

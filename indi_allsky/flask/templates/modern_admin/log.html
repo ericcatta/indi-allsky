@@ -29,6 +29,7 @@ var camera_id = {{ camera_id }};
             <label>Lines {{ form_logviewer.LINES_SELECT() }}</label>
             <label>Filter {{ form_logviewer.FILTER() }}</label>
         </div>
+        <p class="modern-admin-note">Newest entries first. The filter searches only the selected recent lines.</p>
         <pre class="modern-admin-log-output" id="modern-admin-log-output">Loading log...</pre>
         <div class="modern-admin-link-grid" aria-label="Log details">
             <a href="{{ url_for('indi_allsky.modern_admin_log_detail_view', log_name='capture') }}">Capture Log Detail</a>

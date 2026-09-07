@@ -28,7 +28,12 @@ def run():
                 payload = {'lines': '25', 'filter': ''}
                 assert client.post(endpoint, json=payload).status_code == 400
                 response = client.post(endpoint, json=payload, headers={'X-CSRFToken': token})
-                assert response.status_code == 200 and response.json['log'] == 'Upload done\nCamera 2 ready\nCamera 1 ready\n'
+                assert response.status_code == 200 and response.json['log'] == 'Upload done\nCamera 2 ready\nCamera 1 ready\nHeader\n'
+                limited = client.post(endpoint, json={'lines': 1}, headers={'X-CSRFToken': token})
+                assert limited.json['log'] == 'Upload done\n'
+                for bad in ([], {'lines': 0}, {'lines': 'invalid'}, {'filter': '\\'}):
+                    rejected = client.post(endpoint, json=bad, headers={'X-CSRFToken': token})
+                    assert rejected.status_code == 200 and rejected.json['log'].startswith('ERROR:')
                 payload['filter'] = 'Camera 2'
                 response = client.post(endpoint, json=payload, headers={'X-CSRFToken': token})
                 assert response.json['log'] == 'Camera 2 ready\n'

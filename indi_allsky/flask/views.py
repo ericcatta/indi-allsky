@@ -82,6 +82,7 @@ from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataS
 from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRestoreValidationError
 from ..modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
+from ..modern_admin_log_reader import ModernAdminLogReader
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
 from ..modern_admin_tasks import ModernAdminTaskReadService
@@ -9444,86 +9445,9 @@ class JsonLogView(JsonView):
     decorators = [login_required]
 
     def dispatch_request(self):
-        log_file_p = Path('/var/log/indi-allsky/indi-allsky.log')
-        line_size = 150  # assuming lines have an average length
-
-
-        lines = int(request.json.get('lines', 500))
-        filter_str = str(request.json.get('filter', ''))[:30]  # limit to 30 characters
-
-
-        json_data = dict()
-
-
-        filter_regex = r'^[a-zA-Z0-9_\.\-\\\ ]*$'
-        if not re.search(filter_regex, filter_str):
-            json_data['log'] = 'ERROR: Log filter has illegal characters'
-            return jsonify(json_data)
-
-
-        if lines > 5000:
-            # sanity check
-            lines = 5000
-
-
-        read_bytes = lines * line_size
-
-
-        if not log_file_p.exists():
-            # this can happen in docker
-            json_data['log'] = 'ERROR: Log file missing'
-            return jsonify(json_data)
-
-
-        log_file_size = log_file_p.stat().st_size
-        if log_file_size < read_bytes:
-            # just read the whole file
-            #app.logger.info('Returning %d bytes of log data', log_file_size)
-            log_file_seek = 0
-        else:
-            #app.logger.info('Returning %d bytes of log data', read_bytes)
-            log_file_seek = log_file_size - read_bytes
-
-
-        try:
-            with io.open(log_file_p, 'r') as log_file_f:
-                log_file_f.seek(log_file_seek)
-                log_lines = log_file_f.readlines()
-        except PermissionError as e:
-            log_lines = ['', 'PermissionError: {0:s}'.format(str(e))]
-
-
-        try:
-            log_lines.pop(0)  # skip the first partial line
-            log_lines.reverse()  # newer lines first
-        except IndexError:
-            app.logger.warning('indi-allsky log empty')
-            log_lines = list()
-
-
-        if len(log_lines) == 0:
-            log_lines.append('[indi-allsky log empty]')
-        elif filter_str:
-            filter_regex = re.compile(filter_str, re.IGNORECASE)
-
-            filtered_lines = list()
-            for line in log_lines:
-                ### this is probably insecure
-                if not re.search(filter_regex, line):
-                    continue
-
-                filtered_lines.append(line)
-
-            # replace original
-            log_lines = filtered_lines
-
-            if len(log_lines) == 0:
-                log_lines.append('[No matching lines]')
-
-
-        json_data['log'] = ''.join(log_lines)
-
-        return jsonify(json_data)
+        log = ModernAdminLogReader().read(
+            Path('/var/log/indi-allsky/indi-allsky.log'), request.get_json(silent=True))
+        return jsonify({'log': log})
 
 
 class LogDownloadView(BaseView):
