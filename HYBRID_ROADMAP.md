@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Autenticazione condivisa: account disabilitati esclusi anche da sessioni e
+  cookie persistenti gia' esistenti, Action API e Sync API. Controllo sullo stato
+  corrente, senza rotazione delle chiavi o modifica dei contratti pubblici.
+  Prove con identita' sintetiche; correzione non ancora distribuita.
+
 - Task Hybrid: policy di lettura estesa a IMAGE, VIDEO, UPLOAD, MAIN e a tutti
   gli stati persistiti, incluso EXPIRED. Finestra di tre giorni invariata;
   conteggi/eta' usano l'orologio del database, non l'offset della camera.

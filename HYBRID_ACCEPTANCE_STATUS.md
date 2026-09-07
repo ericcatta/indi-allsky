@@ -8,6 +8,33 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: disabled-account sessions and API authentication
+
+The existing login rejected disabled users, but the session loader returned them
+as authenticated. The new test reproduced a disabled administrator retaining
+access to My Account before the correction. Shared session loading now rejects
+disabled/deleted users and malformed/out-of-range identities. Active users still
+load normally, including through signed remember cookies. Disabling an account
+is checked on subsequent requests; requests already executing are not revoked.
+Reactivation continues to permit authentication; this change does not rotate
+passwords, API keys or globally invalidate every previously issued cookie.
+
+Action API and Sync API had the same missing active-account check. Both now reject
+disabled users through their existing authentication-failure response, before
+queuing capture commands or processing media. Active Action API administrator and
+network requirements and active Sync API HMAC behavior remain unchanged.
+
+`hybrid_session_revocation_test.py` uses two synthetic roles, actual login and
+remember cookies, account disabling/reactivation, real encrypted API keys and
+HMAC signatures. It verifies denied Hybrid GET/POST access, unchanged account data,
+no queued commands after disabled API requests, fresh-login rejection, deleted
+users and malformed identities. Active API authentication is exercised separately
+without hardware effects. The correction is not deployed; no real user, key,
+service or camera configuration is modified. All 84 Python/compile checks pass;
+the final targeted test also passed after separating cookie-protection scenarios
+and explicitly invoking the loader for invalid identities. Evidence:
+`testing/evidence/hybrid-session-revocation-2026-09-07.json`. Browser acceptance remains deferred.
+
 ## Verified correction: export Unicode validation and table controller contracts
 
 A JSON table containing an isolated Unicode surrogate passed shape validation,

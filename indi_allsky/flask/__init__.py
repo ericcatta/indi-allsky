@@ -123,8 +123,18 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        # since the user_id is just the primary key of our user table, use it in the query for the user
-        return IndiAllSkyDbUserTable.query.get(int(user_id))
+        # Existing sessions and remember cookies must respect account disabling,
+        # just like a new login. Invalid/stale identities are anonymous.
+        if type(user_id) not in (str, int):
+            return None
+        try:
+            user_id = int(user_id)
+        except (TypeError, ValueError):
+            return None
+        if not 0 < user_id < 2**63:
+            return None
+        user = db.session.get(IndiAllSkyDbUserTable, user_id)
+        return user if user is not None and user.is_active else None
 
 
     with app.app_context():

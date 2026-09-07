@@ -62,7 +62,7 @@ class ActionApiBaseView(BaseView):
             .first()
 
 
-        if not user:
+        if not user or not user.is_active:
             raise AuthenticationFailure('Unknown user: {0:s}'.format(username))
 
         if not argon2.verify(password, user.password):

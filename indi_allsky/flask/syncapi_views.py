@@ -355,7 +355,7 @@ class SyncApiBaseView(BaseView):
             .first()
 
 
-        if not user:
+        if not user or not user.is_active:
             raise AuthenticationFailure('Unknown user')
 
 
