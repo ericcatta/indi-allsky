@@ -23,6 +23,7 @@
     }
     function validate(data) {
         if (!data || typeof data !== 'object' || Array.isArray(data) || !Array.isArray(data.satellite_list)) throw Error('invalid_response');
+        if (data.satellite_errors !== undefined && (!Array.isArray(data.satellite_errors) || !data.satellite_errors.every(error => error && typeof error.name === 'string' && typeof error.reason === 'string'))) throw Error('invalid_satellite_errors');
         const keys = ['moon_phase','moon_light','moon_rise','moon_set','sun_alt','sun_rise','sun_set','polaris_hour_angle','polaris_alt',
             ...fields.map(field => field.dataset.astroField),
             ...planets.flatMap(planet => ['rise','transit','set','alt','az'].map(key => planet + '_' + key))];
@@ -71,12 +72,14 @@
             fields.forEach(field => {field.textContent = display(data[field.dataset.astroField]);});
             polarFinder(data);
             node('planet-rows').replaceChildren(...planetRows);
+            node('satellite-status').textContent = (data.satellite_errors || []).map(error => error.name + ': ' + error.reason).join(' · ');
             node('satellite-rows').replaceChildren(...(satelliteRows.length ? satelliteRows : [emptyRow('No satellite data available.', 8)]));
             loaded = true; status.textContent = 'Updated ' + new Date().toLocaleTimeString() + ' · refreshes every minute.';
         } catch (error) {
             if (error.name === 'AbortError') return;
             if (!loaded) {
                 polarFinder(null);
+                node('satellite-status').textContent = 'Satellite predictions unavailable.';
                 ['moon-phase','moon-times','sun-alt','sun-times','polaris-ha','polaris-alt'].forEach(key => {node(key).textContent = 'Unavailable';});
                 fields.forEach(field => {field.textContent = 'Unavailable';});
                 node('planet-rows').replaceChildren(emptyRow('Astropanel data unavailable.', 6));

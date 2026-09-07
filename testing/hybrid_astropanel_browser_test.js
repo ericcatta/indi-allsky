@@ -16,6 +16,7 @@ vm.runInNewContext(source,{document:{getElementById:id=>nodes[id],createElement:
 const data={};for(const field of fields)data[field.dataset.astroField]='12:00';
 for(const key of ['moon_phase','moon_light','moon_rise','moon_set','sun_alt','sun_rise','sun_set','polaris_hour_angle','polaris_alt'])data[key]=1;
 for(const planet of ['mercury','venus','mars','jupiter','saturn','uranus','neptune'])for(const key of ['rise','transit','set','alt','az'])data[planet+'_'+key]=1;
+data.satellite_errors=[{name:'old satellite',reason:'Orbital data unavailable for this date'}];
 data.satellite_list=Array.from({length:20},(_,i)=>({name:i===0?'<script>test</script>':'sat'+i,alt:1,az:2,rise:['1'],transit:['2'],set:['3'],duration:['10'],elevation:400}));
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 const respond=(i,value,extra={})=>pending[i].resolve({ok:true,json:async()=>value,...extra});
@@ -26,6 +27,7 @@ const respond=(i,value,extra={})=>pending[i].resolve({ok:true,json:async()=>valu
  assert.equal(nodes['modern-admin-satellite-rows'].children[0].firstChild.colSpan,8);
  nodes['astropanel-refresh'].click();respond(1,data);await tick();
  assert.equal(nodes['modern-admin-planet-rows'].children.length,7);
+ assert(nodes['modern-admin-satellite-status'].textContent.includes('old satellite: Orbital data unavailable for this date'));
  assert.equal(nodes['modern-admin-satellite-rows'].children.length,20,'No arbitrary truncation');
  assert.equal(nodes['modern-admin-satellite-rows'].children[0].firstChild.textContent,'<script>test</script>');
  assert.equal(nodes['modern-admin-satellite-rows'].children[0].children[6].textContent,'10');

@@ -18422,20 +18422,28 @@ class AjaxAstroPanelView(BaseView):
 
 
         satellite_list = list()
+        satellite_errors = list()
         for sat_entry in satellites_visual:
             try:
                 sat = ephem.readtle(sat_entry.title, sat_entry.line1, sat_entry.line2)
             except ValueError as e:
                 app.logger.error('Satellite TLE data error: %s', str(e))
+                satellite_errors.append({'name': str(sat_entry.title), 'reason': 'Invalid orbital data'})
                 continue
 
-            sat.compute(obs)
+            try:
+                sat.compute(obs)
+            except ValueError as e:
+                app.logger.error('Satellite computation error: %s', str(e))
+                satellite_errors.append({'name': str(sat_entry.title), 'reason': 'Orbital data unavailable for this date'})
+                continue
 
             try:
                 # all next_pass() values can be None
                 next_pass = obs.next_pass(sat)
             except ValueError as e:
                 app.logger.error('Next pass error: %s', str(e))
+                satellite_errors.append({'name': str(sat_entry.title), 'reason': 'Pass prediction unavailable'})
                 continue
 
 
@@ -18541,6 +18549,7 @@ class AjaxAstroPanelView(BaseView):
             'neptune_az'            : round(math.degrees(neptune.az), 2),
             'neptune_alt'           : round(math.degrees(neptune.alt), 2),
             'satellite_list'        : satellite_list,
+            'satellite_errors'      : satellite_errors,
         }
 
         return jsonify(data)

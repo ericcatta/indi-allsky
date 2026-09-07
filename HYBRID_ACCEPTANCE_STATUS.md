@@ -8,6 +8,29 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: real orbital propagation and isolated satellite failures
+
+`hybrid_astropanel_satellite_test.py` seeds an isolated database with twenty
+explicitly synthetic ISS-like TLEs, one malformed entry, one out-of-epoch entry
+and a different-group entry. A fixed clock and actual PyEphem propagation/pass
+calculation verify both roles and two distinct camera locations, all twenty rows,
+sorting, pass times/duration, eclipse/elevation fields and group filtering. These
+are orbital-code acceptance fixtures, not claims about current real satellites.
+
+The out-of-epoch entry reproduced an uncaught `ValueError` from `sat.compute()`:
+one stale TLE previously failed the entire endpoint. That error is now isolated
+per satellite. The additive `satellite_errors` response lists unavailable entries
+with a reason; Hybrid displays those reasons as plain text while showing the valid
+predictions. Parse and next-pass failures are also reported. Existing successful
+payload fields, orbital algorithms and singleton-array pass values are preserved.
+The controller remains compatible with responses lacking the new optional field.
+
+All 29 Python regression entrypoints and the Astropanel controller test passed.
+The regression exercises the stale-entry failure through real Flask and PyEphem,
+not a mocked exception. Current orbital-feed freshness, direct observation of
+satellite passes and production deployment remain unverified. The test is fully
+isolated and makes no changes to live TLE data or acquisition.
+
 ## Verified mission: Hybrid polar finder
 
 Astropanel now includes an independent inline SVG polar finder with accessible
