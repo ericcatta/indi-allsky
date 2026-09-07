@@ -8,6 +8,26 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: browser-ambiguous login return URLs
+
+The installed URL validator treated embedded ASCII controls as part of a local
+path. The real Flask login returned `/\t/external.invalid` unchanged before the
+fix, although browser URL parsing removes the tab. Login now rejects ASCII control
+characters before the existing destination validation and falls back to Hybrid
+Now. Ordinary local paths retain their camera/profile, repeated queries and
+fragments unchanged. No destination allowlist or authentication policy is expanded.
+
+`hybrid_login_redirect_test.py` covers external URLs, slash/backslash ambiguity,
+unsafe schemes, embedded tab/newline/carriage-return, NUL/DEL and valid scoped
+return paths through the actual login endpoint with CSRF in an isolated app with
+Classic forbidden. The pre-fix assertion failed on the tab-containing destination.
+This is HTTP/JSON acceptance, not a live browser execution test. The change is not
+deployed; no real account, capture service or configuration was modified.
+All 86 Python/compile checks pass, including Full Config parity and the complete
+selected Book 2 regression. Node URL parsing independently confirms the ambiguous
+URL interpretation; this does not substitute for browser acceptance. Evidence:
+`testing/evidence/hybrid-login-redirect-2026-09-07.json`.
+
 ## Verified correction: login/account JSON input contracts
 
 A non-object JSON body reached Flask-WTF's automatic form conversion and raised

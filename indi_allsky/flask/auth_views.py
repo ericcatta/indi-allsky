@@ -137,7 +137,10 @@ class LoginView(TemplateView):
 
         next_url = request.json['NEXT']
 
-        if not next_url or not is_safe_url(next_url, {'*'}):
+        # Browsers remove embedded ASCII controls while parsing URLs; the
+        # legacy validator can instead interpret those URLs as local paths.
+        if (not next_url or any(ord(char) < 32 or ord(char) == 127 for char in next_url)
+                or not is_safe_url(next_url, {'*'})):
             app.logger.warning('Next URL failed validation: %s', next_url)
             data = {
                 'redirect' : url_for('indi_allsky.modern_admin_now_view'),
