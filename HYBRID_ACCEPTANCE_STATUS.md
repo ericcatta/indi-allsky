@@ -8,6 +8,41 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: clearer Now capture evidence and live continuity sample
+
+Now no longer displays "Preview remains disabled" beside working image previews
+or internal repository/filesystem-scan commentary. It labels images as saved
+frames, distinguishes current capture mode from the saved image's mode, and shows
+an unavailable profile explicitly. The static "Not evaluated" sky badge is
+removed from the capture summary. Camera images, timestamps/ages, exposure/gain,
+source/output information, errors and navigation remain. View-model contracts,
+providers and scientific/runtime decisions are unchanged.
+
+`hybrid_now_page_flow_test.py` verifies both roles, retained image/source/output
+links, missing-provider behavior and absence of the contradictory copy. The
+existing image load/error controller tests also pass. Direct browser inspection
+at approximately 08:42 CEST in the isolated app confirmed both synthetic previews,
+current Day versus saved Night labels, profile Unavailable, exposure 0.5s, gain 10
+and the retained output/source links. This is presentation acceptance, not new
+proof of production capture health.
+
+Separately, `testing/evidence/hybrid-live-continuity-2026-09-07-0839.json` records
+a read-only production sample at 08:39 CEST. Commit `faf53d86`, capture PID 3206060
+and start time 00:32:40 remain unchanged. IMX708 has 659 image rows since restart
+(459 night/200 day), latest existing file 08:38:36; ZWO has 949 (464 night/485 day),
+latest existing file 08:39:10. Maximum adjacent image gaps remain 46s/53s. No
+pending tasks were observed and free space was 83,929,112,576 bytes. The journal
+sample retains the six startup gain clamps and previously recorded insufficient
+Startrail-video frames error; this does not resolve that generation acceptance.
+
+The sample covers about eight hours including the night/day transition, not the
+required 24 hours. It does not establish the unverified 15-minute monitor cadence,
+nor replace resource/hardware/recovery acceptance. No production restart, deploy,
+configuration change or media deletion occurred.
+
+All 26 Python regression entrypoints, the Now image-state JavaScript test and
+`git diff --check` pass for this mission. The presentation change is not deployed.
+
 ## Verified cleanup: obsolete Hybrid compatibility placeholder removed
 
 After the scoped redirect correction, the unused `ModernAdminPlaceholderView`,

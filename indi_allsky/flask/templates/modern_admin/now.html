@@ -33,12 +33,12 @@
         {% set camera_frames = modern_admin_now.latest_camera_frames %}
         <div class="modern-admin-section-heading">
             <div>
-                <p class="modern-admin-eyebrow">Live context</p>
+                <p class="modern-admin-eyebrow">Saved images</p>
                 <h2 id="now-camera-frames-title">Latest Camera Frames</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-neutral">{{ camera_frames.status }}</span>
         </div>
-        <p class="modern-admin-note">{{ camera_frames.note }}</p>
+        <p class="modern-admin-note">Most recent saved image for each camera. Browse camera images to inspect earlier frames.</p>
 
         <section class="hybrid-camera-frame-grid" aria-label="Latest frames by camera">
             {% for frame in camera_frames['items'] if frame.camera_id %}
@@ -53,10 +53,9 @@
                     {% endif %}
                 </div>
                 <div class="hybrid-camera-frame-copy">
-                    <div class="modern-admin-card-label">{{ frame.source_status }}</div>
+                    <div class="modern-admin-card-label">{{ 'Latest image' if frame.image_available and frame.safe_image_url else 'No preview available' }}</div>
                     <h3>{{ frame.camera_label }}</h3>
                     <p>{{ frame.timestamp }}{% if frame.age_label %} / {{ frame.age_label }}{% endif %}</p>
-                    <p>{{ frame.note }}</p>
                     <p class="now-frame-error" role="status" hidden>Frame preview could not be loaded. Refresh or inspect the camera's saved images.</p>
                     <a href="{{ url_for('indi_allsky.modern_admin_library_view', kind='image', camera_id=frame.camera_id) }}">Browse camera images</a>
                 </div>
@@ -74,26 +73,20 @@
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Current</p>
-                <h2 id="now-current-title">Current Sky</h2>
+                <h2 id="now-current-title">Capture summary</h2>
             </div>
-            <span class="modern-admin-status-pill modern-admin-status-muted">{{ modern_admin_now.current_sky.data_status | replace('_', ' ') | title }}</span>
         </div>
 
         <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Current sky status">
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">Current phase</div>
                 <h3>Current phase: {{ current_phase.phase | title }}</h3>
-                <p>{{ current_phase.note }}</p>
-                <p>Source: {{ current_phase.source }}. Confidence: {{ current_phase.confidence | replace('_', ' ') }}.</p>
-                {% for unsupported_phase in current_phase.unsupported_phases %}
-                    <p>{{ unsupported_phase.note }}</p>
-                {% endfor %}
+                <p>Current capture mode. A saved image may have been captured in a different mode.</p>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ latest_frame.label }}</div>
                 <h3>{{ latest_frame.status }}</h3>
-                <p>{{ latest_frame.note }}</p>
-                <p>Camera: {{ latest_frame.camera_label }}. Profile: {{ latest_frame.profile_label }}.</p>
+                <p>Camera: {{ latest_frame.camera_label }}. Profile: {{ latest_frame.profile_label if latest_frame.profile_label != 'Profile not evaluated yet' else 'Unavailable' }}.</p>
                 <p>Timestamp: {{ latest_frame.timestamp }}. Age: {{ latest_frame.age_label }}.</p>
                 {% set frame_metadata = latest_frame.frame_metadata %}
                 {% if frame_metadata %}
@@ -101,7 +94,7 @@
                     {% if frame_metadata.exposure is not none %}Exposure {{ frame_metadata.exposure }}s.{% endif %}
                     {% if frame_metadata.gain is not none %} Gain {{ frame_metadata.gain }}.{% endif %}
                     {% if frame_metadata.binmode is not none %} Binning {{ frame_metadata.binmode }}.{% endif %}
-                    {% if frame_metadata.night is not none %} Phase {{ 'Night' if frame_metadata.night else 'Day' }}.{% endif %}
+                    {% if frame_metadata.night is not none %} Saved image mode: {{ 'Night' if frame_metadata.night else 'Day' }}.{% endif %}
                     </p>
                     <p>
                     {% if frame_metadata.adu is not none %}ADU {{ frame_metadata.adu }}.{% endif %}
@@ -113,9 +106,8 @@
                         <p>Frame size: {{ frame_metadata.width }} x {{ frame_metadata.height }}.</p>
                     {% endif %}
                 {% else %}
-                    <p>Frame metadata is not available from the bounded source yet.</p>
+                    <p>Image details are unavailable.</p>
                 {% endif %}
-                <span class="modern-admin-status-pill modern-admin-status-muted">{{ latest_frame.source_status }}</span>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ current_capture.label }}</div>
@@ -125,7 +117,6 @@
                 <p>Camera: {{ current_capture.camera_label }}. Phase: {{ current_capture.phase | title }}.</p>
                 <p>{{ current_capture.last_frame_status }}</p>
                 <p>{{ current_capture.coherence_label }}</p>
-                <span class="modern-admin-status-pill modern-admin-status-muted">{{ current_capture.source_status }}</span>
             </article>
             <article class="modern-admin-status-card">
                 <div class="modern-admin-card-label">{{ latest_output.label }}</div>

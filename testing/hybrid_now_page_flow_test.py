@@ -20,8 +20,12 @@ def run():
             assert 'Snapshot at page load' in response.text
             assert response.text.count('>Browse camera images</a>')==2
             assert 'now-frame-error' in response.text
-            for removed in ('Placeholder answers','Static briefing','placeholder-only','now-outputs-title','now-health-title','now-questions-title'):
+            for removed in ('Placeholder answers','Static briefing','placeholder-only','now-outputs-title','now-health-title','now-questions-title',
+                            'Preview remains disabled', 'injected repository', 'no filesystem scan', 'template_context.night', 'Profile not evaluated yet'):
                 assert removed not in response.text,removed
+            assert 'Capture summary' in response.text and 'Saved image mode:' in response.text
+            assert 'Profile: Unavailable' in response.text
+            assert 'Exposure' in response.text and 'Gain' in response.text
             for label in ('Browse camera images','Browse these outputs','Inspect FITS sources','Inspect RAW sources'):
                 matches=re.findall(r'href="([^"]+)"\s*>'+label+'</a>',response.text)
                 assert matches,label

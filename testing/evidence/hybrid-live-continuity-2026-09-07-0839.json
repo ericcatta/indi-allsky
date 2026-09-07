@@ -1,0 +1,321 @@
+{
+  "scope": "Live read-only continuity sample, not a completed 24-hour acceptance or periodic-monitor proof",
+  "snapshot": {
+    "observed_at": "2026-09-07T08:39:17.915320+02:00",
+    "since": "2026-09-07 00:32:40",
+    "scope": "Live read-only snapshot; not proof of uninterrupted 24 hours",
+    "commit": "faf53d8653b6c62588025e954688c8ee220a6ce8",
+    "service": "MainPID=3206060\nActiveState=active\nActiveEnterTimestamp=Mon 2026-09-07 00:32:40 CEST\n",
+    "free_bytes": 83929112576,
+    "cameras": [
+      {
+        "id": 3480,
+        "camera_id": 1,
+        "createDate": "2026-09-07 08:38:36.000000",
+        "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260907/day/07_08/ccd1_20260907_083836.jpg",
+        "night": 0,
+        "exposure": 40.0,
+        "file_exists": true,
+        "file_bytes": 684141,
+        "images_since_restart": 659
+      },
+      {
+        "id": 3483,
+        "camera_id": 2,
+        "createDate": "2026-09-07 08:39:10.000000",
+        "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260907/day/07_08/ccd2_20260907_083910.jpg",
+        "night": 0,
+        "exposure": 8.846983909606934,
+        "file_exists": true,
+        "file_bytes": 665094,
+        "images_since_restart": 949
+      }
+    ],
+    "pending_tasks": [],
+    "journal_lines": 76490,
+    "error_lines": [
+      "[ERROR] Capture-1-3206086/MainThread capture._initialize() [1938]: CCD night gain above maximum, changing to 16.00",
+      "[ERROR] Capture-1-3206086/MainThread capture._initialize() [1950]: CCD moon mode gain above maximum, changing to 16.00",
+      "[ERROR] Capture-1-3206086/MainThread capture._initialize() [1958]: CCD day gain below minimum, changing to 1.13",
+      "[ERROR] Capture-1-3206086/MainThread capture._profile_gain_max() [1923]: GAIN_MAX_DAY below minimum, changing to 1.13",
+      "[ERROR] Capture-1-3206086/MainThread capture._profile_gain_max() [1927]: GAIN_MAX_NIGHT above maximum, changing to 16.00",
+      "[ERROR] Capture-1-3206086/MainThread capture._profile_gain_max() [1927]: GAIN_MAX_MOONMODE above maximum, changing to 16.00",
+      "[ERROR] Video-1-3206091/MainThread video.generateKeogramStarTrails() [1713]: Not enough frames to generate star trails timelapse: 59"
+    ]
+  },
+  "capture_history": {
+    "observed_at": "2026-09-07T08:39:18.363504+02:00",
+    "since": "2026-09-07 00:32:40",
+    "cameras": [
+      {
+        "camera_id": 1,
+        "count": 659,
+        "night_count": 459,
+        "day_count": 200,
+        "largest_gaps": [
+          {
+            "seconds": 46.0,
+            "from": "2026-09-07 00:33:55.000000",
+            "to": "2026-09-07 00:34:41.000000"
+          },
+          {
+            "seconds": 46.0,
+            "from": "2026-09-07 00:35:26.000000",
+            "to": "2026-09-07 00:36:12.000000"
+          },
+          {
+            "seconds": 46.0,
+            "from": "2026-09-07 00:36:57.000000",
+            "to": "2026-09-07 00:37:43.000000"
+          }
+        ],
+        "transitions": [
+          {
+            "id": 2799,
+            "createDate": "2026-09-07 06:21:12.000000",
+            "night": 0,
+            "exposure": 40.0,
+            "gain": 16.0,
+            "adu": 2.0,
+            "stars": 0
+          }
+        ],
+        "latest": [
+          {
+            "id": 3464,
+            "createDate": "2026-09-07 08:35:35.000000",
+            "night": 0,
+            "exposure": 40.0,
+            "gain": 1.13,
+            "adu": 7.0,
+            "stars": 0
+          },
+          {
+            "id": 3468,
+            "createDate": "2026-09-07 08:36:20.000000",
+            "night": 0,
+            "exposure": 40.0,
+            "gain": 1.13,
+            "adu": 6.0,
+            "stars": 0
+          },
+          {
+            "id": 3472,
+            "createDate": "2026-09-07 08:37:05.000000",
+            "night": 0,
+            "exposure": 40.0,
+            "gain": 1.13,
+            "adu": 7.0,
+            "stars": 0
+          },
+          {
+            "id": 3476,
+            "createDate": "2026-09-07 08:37:51.000000",
+            "night": 0,
+            "exposure": 40.0,
+            "gain": 1.13,
+            "adu": 7.0,
+            "stars": 0
+          },
+          {
+            "id": 3480,
+            "createDate": "2026-09-07 08:38:36.000000",
+            "night": 0,
+            "exposure": 40.0,
+            "gain": 1.13,
+            "adu": 7.0,
+            "stars": 0
+          }
+        ]
+      },
+      {
+        "camera_id": 2,
+        "count": 949,
+        "night_count": 464,
+        "day_count": 485,
+        "largest_gaps": [
+          {
+            "seconds": 53.0,
+            "from": "2026-09-07 00:57:32.000000",
+            "to": "2026-09-07 00:58:25.000000"
+          },
+          {
+            "seconds": 52.0,
+            "from": "2026-09-07 06:16:32.000000",
+            "to": "2026-09-07 06:17:24.000000"
+          },
+          {
+            "seconds": 50.0,
+            "from": "2026-09-07 01:03:36.000000",
+            "to": "2026-09-07 01:04:26.000000"
+          }
+        ],
+        "transitions": [
+          {
+            "id": 2800,
+            "createDate": "2026-09-07 06:21:55.000000",
+            "night": 0,
+            "exposure": 40.0,
+            "gain": 204.14,
+            "adu": 105.0,
+            "stars": 0
+          }
+        ],
+        "latest": [
+          {
+            "id": 3478,
+            "createDate": "2026-09-07 08:38:10.000000",
+            "night": 0,
+            "exposure": 8.826983451843262,
+            "gain": 0.0,
+            "adu": 128.0,
+            "stars": 0
+          },
+          {
+            "id": 3479,
+            "createDate": "2026-09-07 08:38:25.000000",
+            "night": 0,
+            "exposure": 8.83198356628418,
+            "gain": 0.0,
+            "adu": 128.0,
+            "stars": 0
+          },
+          {
+            "id": 3481,
+            "createDate": "2026-09-07 08:38:40.000000",
+            "night": 0,
+            "exposure": 8.836983680725098,
+            "gain": 0.0,
+            "adu": 128.0,
+            "stars": 0
+          },
+          {
+            "id": 3482,
+            "createDate": "2026-09-07 08:38:55.000000",
+            "night": 0,
+            "exposure": 8.841983795166016,
+            "gain": 0.0,
+            "adu": 129.0,
+            "stars": 0
+          },
+          {
+            "id": 3483,
+            "createDate": "2026-09-07 08:39:10.000000",
+            "night": 0,
+            "exposure": 8.846983909606934,
+            "gain": 0.0,
+            "adu": 129.0,
+            "stars": 0
+          }
+        ]
+      }
+    ],
+    "recent_tasks": [
+      {
+        "id": 10694,
+        "createDate": "2026-09-07 06:25:40",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10693,
+        "createDate": "2026-09-07 06:25:40",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10692,
+        "createDate": "2026-09-07 05:54:27",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10691,
+        "createDate": "2026-09-07 05:54:27",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10690,
+        "createDate": "2026-09-07 05:54:27",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10689,
+        "createDate": "2026-09-07 05:23:15",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10688,
+        "createDate": "2026-09-07 05:23:15",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10687,
+        "createDate": "2026-09-07 04:52:03",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10686,
+        "createDate": "2026-09-07 04:52:02",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10685,
+        "createDate": "2026-09-07 04:52:02",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10684,
+        "createDate": "2026-09-07 04:41:38",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10683,
+        "createDate": "2026-09-07 04:41:38",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10682,
+        "createDate": "2026-09-07 04:41:38",
+        "state": "EXPIRED",
+        "queue": "VIDEO",
+        "result": null
+      },
+      {
+        "id": 10681,
+        "createDate": "2026-09-07 04:21:05",
+        "state": "FAILED",
+        "queue": "VIDEO",
+        "result": "End of Night uploading disabled"
+      },
+      {
+        "id": 10680,
+        "createDate": "2026-09-07 04:21:05",
+        "state": "SUCCESS",
+        "queue": "VIDEO",
+        "result": "Generated timelapse: /var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260906/allsky-timelapse_ccd1_20260906_night_1788755425.mp4"
+      }
+    ]
+  }
+}
