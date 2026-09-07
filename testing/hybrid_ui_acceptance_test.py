@@ -116,10 +116,12 @@ class Controls(HTMLParser):
 
 def collect(runtime_config):
     from hybrid_runtime_fixture import isolated_app, login_client
-    report = {'schema_version': 2, 'environment': 'isolated Flask, memory database, synthetic users/cameras',
+    report = {'schema_version': 3, 'environment': 'isolated Flask, memory database, synthetic users/cameras',
               'classic_enabled': False, 'live_hardware_effects': False,
               'coverage_note': 'Static HTML discovery only; computed CSS, JavaScript-created controls, external form ownership and browser effects require DOM acceptance. No control is marked passed by discovery.', 'pages': []}
     with isolated_app(runtime_config, multi_camera=True) as app:
+        from hybrid_ui_detail_fixture import seed_detail_pages, detail_parameters
+        seed_detail_pages(app)
         from indi_allsky.flask.base_views import TemplateView
         from indi_allsky.flask import views
         source = ast.parse(Path(views.__file__).read_text())
@@ -140,35 +142,37 @@ def collect(runtime_config):
                     continue
                 page = {'route': rule.rule, 'endpoint': rule.endpoint, 'contexts': []}
                 report['pages'].append(page)
-                if rule.arguments:
+                if rule.arguments and detail_parameters(rule.endpoint, 1) is None:
                     page.update(status='bloccato', reason='Detail route requires dedicated fixture parameters')
                     continue
                 for role, uid, camera in [('admin',1,1), ('admin',1,2), ('user',2,1), ('user',2,2), ('anonymous',None,1)]:
-                    client = clients[role]
-                    with client.session_transaction() as session:
-                        session['camera_id'] = camera
-                    scope = {'camera_id': camera, 'profile_id': 'test-profile-' + str(camera)}
-                    case = {'role':role, **scope, 'controls':[]}
-                    started = time.monotonic()
-                    try:
-                        response = client.get(rule.rule, query_string=scope)
-                        case['http_status'] = response.status_code
-                        case['redirect'] = response.location
-                        if response.status_code == 200:
-                            parser = Controls()
-                            parser.feed(response.text)
-                            case['controls'] = parser.identified(rule.rule)
-                            case['render_status'] = 'superato'
-                            text = ' '.join(parser.text).lower()
-                            case['placeholder_signals'] = [s for s in ['placeholder-only', 'static placeholders', 'coming later', 'not implemented', 'disabled in modern admin', 'future backend contract'] if s in text]
-                        else:
-                            case['render_status'] = 'bloccato' if response.status_code in (301,302,303,401,403) else 'difetto'
-                    except ProviderUnavailable as exc:
-                        case.update(render_status='bloccato', error=str(exc))
-                    except Exception as exc:
-                        case.update(render_status='difetto', error=type(exc).__name__ + ': ' + str(exc)[:250])
-                    case['elapsed_ms'] = round((time.monotonic()-started)*1000, 1)
-                    page['contexts'].append(case)
+                    for parameters in (detail_parameters(rule.endpoint, camera) if rule.arguments else [{}]):
+                        client = clients[role]
+                        with client.session_transaction() as session:
+                            session['camera_id'] = camera
+                        scope = {'camera_id': camera, 'profile_id': 'test-profile-' + str(camera)}
+                        path = app.url_map.bind('localhost').build(rule.endpoint, parameters)
+                        case = {'role':role, **scope, 'path_parameters': parameters, 'request_path': path, 'controls':[]}
+                        started = time.monotonic()
+                        try:
+                            response = client.get(path, query_string=scope)
+                            case['http_status'] = response.status_code
+                            case['redirect'] = response.location
+                            if response.status_code == 200:
+                                parser = Controls()
+                                parser.feed(response.text)
+                                case['controls'] = parser.identified(rule.rule)
+                                case['render_status'] = 'superato'
+                                text = ' '.join(parser.text).lower()
+                                case['placeholder_signals'] = [s for s in ['placeholder-only', 'static placeholders', 'coming later', 'not implemented', 'disabled in modern admin', 'future backend contract'] if s in text]
+                            else:
+                                case['render_status'] = 'bloccato' if response.status_code in (301,302,303,401,403) else 'difetto'
+                        except ProviderUnavailable as exc:
+                            case.update(render_status='bloccato', error=str(exc))
+                        except Exception as exc:
+                            case.update(render_status='difetto', error=type(exc).__name__ + ': ' + str(exc)[:250])
+                        case['elapsed_ms'] = round((time.monotonic()-started)*1000, 1)
+                        page['contexts'].append(case)
                 failures = [c for c in page['contexts'] if c['render_status']=='difetto']
                 print(rule.rule, 'DEFECT' if failures else 'RENDERED/BLOCKED', (failures[0].get('error','') if failures else ''), flush=True)
     assert len(report['pages']) >= 70, 'Route discovery is incomplete'

@@ -1,0 +1,1643 @@
+{
+  "scope": "Static HTML discovery in isolated Flask. Rendering success is not interaction/effect acceptance.",
+  "source_sha256": "8d3ab7418144280ac1f3b947f4f96e56bc95145c6a2729764017c3b833f77bf3",
+  "pages": 90,
+  "contexts": 490,
+  "render_outcomes": {
+    "bloccato": 126,
+    "superato": 364
+  },
+  "controls_discovered": 28572,
+  "controls_verified": 0,
+  "detail_pages": [
+    {
+      "route": "/indi-allsky/modern-admin/config-restore/<int:config_id>",
+      "contexts": 5,
+      "render_outcomes": {
+        "superato": 4,
+        "bloccato": 1
+      },
+      "variants": [
+        "/indi-allsky/modern-admin/config-restore/1"
+      ],
+      "controls_discovered": 242
+    },
+    {
+      "route": "/indi-allsky/modern-admin/fits/<int:fits_id>",
+      "contexts": 5,
+      "render_outcomes": {
+        "superato": 4,
+        "bloccato": 1
+      },
+      "variants": [
+        "/indi-allsky/modern-admin/fits/1",
+        "/indi-allsky/modern-admin/fits/2"
+      ],
+      "controls_discovered": 248
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/images/<int:image_id>",
+      "contexts": 5,
+      "render_outcomes": {
+        "superato": 4,
+        "bloccato": 1
+      },
+      "variants": [
+        "/indi-allsky/modern-admin/media/images/1",
+        "/indi-allsky/modern-admin/media/images/2"
+      ],
+      "controls_discovered": 244
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/timelapses/<int:video_id>",
+      "contexts": 5,
+      "render_outcomes": {
+        "superato": 4,
+        "bloccato": 1
+      },
+      "variants": [
+        "/indi-allsky/modern-admin/media/timelapses/1",
+        "/indi-allsky/modern-admin/media/timelapses/2"
+      ],
+      "controls_discovered": 244
+    },
+    {
+      "route": "/indi-allsky/modern-admin/notifications/<int:notification_id>",
+      "contexts": 15,
+      "render_outcomes": {
+        "superato": 12,
+        "bloccato": 3
+      },
+      "variants": [
+        "/indi-allsky/modern-admin/notifications/1",
+        "/indi-allsky/modern-admin/notifications/2",
+        "/indi-allsky/modern-admin/notifications/3"
+      ],
+      "controls_discovered": 716
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/log/<log_name>",
+      "contexts": 20,
+      "render_outcomes": {
+        "superato": 16,
+        "bloccato": 4
+      },
+      "variants": [
+        "/indi-allsky/modern-admin/system/log/capture",
+        "/indi-allsky/modern-admin/system/log/kernel",
+        "/indi-allsky/modern-admin/system/log/syslog",
+        "/indi-allsky/modern-admin/system/log/webapp"
+      ],
+      "controls_discovered": 1024
+    },
+    {
+      "route": "/indi-allsky/modern-admin/tasks/<int:task_id>",
+      "contexts": 5,
+      "render_outcomes": {
+        "superato": 4,
+        "bloccato": 1
+      },
+      "variants": [
+        "/indi-allsky/modern-admin/tasks/1",
+        "/indi-allsky/modern-admin/tasks/2"
+      ],
+      "controls_discovered": 244
+    },
+    {
+      "route": "/indi-allsky/modern-admin/uploads/<provider_slug>",
+      "contexts": 15,
+      "render_outcomes": {
+        "superato": 12,
+        "bloccato": 3
+      },
+      "variants": [
+        "/indi-allsky/modern-admin/uploads/filetransfer",
+        "/indi-allsky/modern-admin/uploads/s3",
+        "/indi-allsky/modern-admin/uploads/youtube"
+      ],
+      "controls_discovered": 708
+    },
+    {
+      "route": "/indi-allsky/modern-admin/users/<int:user_id>",
+      "contexts": 10,
+      "render_outcomes": {
+        "superato": 8,
+        "bloccato": 2
+      },
+      "variants": [
+        "/indi-allsky/modern-admin/users/1",
+        "/indi-allsky/modern-admin/users/2"
+      ],
+      "controls_discovered": 488
+    }
+  ],
+  "blocked_contexts": [
+    {
+      "route": "/indi-allsky/modern-admin",
+      "role": "admin",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/now"
+    },
+    {
+      "route": "/indi-allsky/modern-admin",
+      "role": "admin",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/now"
+    },
+    {
+      "route": "/indi-allsky/modern-admin",
+      "role": "user",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/now"
+    },
+    {
+      "route": "/indi-allsky/modern-admin",
+      "role": "user",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/now"
+    },
+    {
+      "route": "/indi-allsky/modern-admin",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/account",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Faccount%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fcameras%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/add",
+      "role": "admin",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "External process blocked in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/add",
+      "role": "admin",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "External process blocked in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/add",
+      "role": "user",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "External process blocked in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/add",
+      "role": "user",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "External process blocked in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/add",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fcameras%2Fadd%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/adu-history",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fcameras%2Fadu-history%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/dark-library",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fcameras%2Fdark-library%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/image-lag",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fcameras%2Fimage-lag%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/info",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fcameras%2Finfo%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/cameras/mask-base",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fcameras%2Fmask-base%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/config-history",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fconfig-history%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/config-restore",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fconfig-restore%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/config-restore/<int:config_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "config_id": 1
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fconfig-restore%2F1%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/fits",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ffits%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/fits/<int:fits_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "fits_id": 1
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ffits%2F1%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/highlights",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fhighlights%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/library",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Flibrary%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/loop",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Floop%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/archive",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Farchive%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/fits",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Ffits%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/gallery",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fgallery%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/gallery/page",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fgallery%2Fpage%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/images",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fimages%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/images/<int:image_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "image_id": 1
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fimages%2F1%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/keograms",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fkeograms%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/mini-timelapses",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fmini-timelapses%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/panorama",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fpanorama%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/panorama-loop",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fpanorama-loop%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/public-endpoints",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fpublic-endpoints%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/raw",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fraw%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/startrail-videos",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fstartrail-videos%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/startrails",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Fstartrails%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/timelapses",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Ftimelapses%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/media/timelapses/<int:video_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "video_id": 1
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmedia%2Ftimelapses%2F1%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/moment",
+      "role": "admin",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/library?kind=image&camera_id=1&profile_id=test-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/moment",
+      "role": "admin",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/library?kind=image&camera_id=2&profile_id=test-profile-2"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/moment",
+      "role": "user",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/library?kind=image&camera_id=1&profile_id=test-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/moment",
+      "role": "user",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/library?kind=image&camera_id=2&profile_id=test-profile-2"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/moment",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fmoment%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/notifications",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fnotifications%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/notifications/<int:notification_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "notification_id": 1
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fnotifications%2F1%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/notifications/<int:notification_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "notification_id": 2
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fnotifications%2F2%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/notifications/<int:notification_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "notification_id": 3
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fnotifications%2F3%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/now",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fnow%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/observatory",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fobservatory%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/observatory/astropanel",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fobservatory%2Fastropanel%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/observatory/charts",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fobservatory%2Fcharts%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/observatory/long-term-keogram",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fobservatory%2Flong-term-keogram%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/observatory/realtime-keogram",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fobservatory%2Frealtime-keogram%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/observatory/sensor-panel",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fobservatory%2Fsensor-panel%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/observatory/sqm",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fobservatory%2Fsqm%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/observatory/virtualsky",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fobservatory%2Fvirtualsky%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/output",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Foutput%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/acquisition-save",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Facquisition-save%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/advanced",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fadvanced%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/analytics",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fanalytics%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/auto-exposure-gain",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fauto-exposure-gain%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/basic",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fbasic%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/camera-connection",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fcamera-connection%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/camera-profile",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fcamera-profile%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/cameras",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fcameras%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/capture",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fcapture%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/developer",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fdeveloper%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/exposure-gain",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fexposure-gain%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/fits-source",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Ffits-source%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/full",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Ffull%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/hybrid-awb",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fhybrid-awb%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/notifications",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fnotifications%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/ready",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fready%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/settings/storage",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsettings%2Fstorage%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/sky-cycle",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsky-cycle%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/storage",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fstorage%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/storage/drives",
+      "role": "admin",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/storage/drives",
+      "role": "admin",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/storage/drives",
+      "role": "user",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/storage/drives",
+      "role": "user",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/storage/drives",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fstorage%2Fdrives%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/storage/file-space-usage",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fstorage%2Ffile-space-usage%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/config",
+      "role": "admin",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/settings/full?camera_id=1&profile_id=test-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/config",
+      "role": "admin",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/settings/full?camera_id=2&profile_id=test-profile-2"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/config",
+      "role": "user",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/settings/full?camera_id=1&profile_id=test-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/config",
+      "role": "user",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/modern-admin/settings/full?camera_id=2&profile_id=test-profile-2"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/config",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Fconfig%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/gpio-control",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Fgpio-control%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/info",
+      "role": "admin",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/info",
+      "role": "admin",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/info",
+      "role": "user",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/info",
+      "role": "user",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/info",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Finfo%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/log",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Flog%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/log/<log_name>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "log_name": "capture"
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Flog%2Fcapture%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/log/<log_name>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "log_name": "webapp"
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Flog%2Fwebapp%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/log/<log_name>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "log_name": "syslog"
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Flog%2Fsyslog%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/log/<log_name>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "log_name": "kernel"
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Flog%2Fkernel%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/network",
+      "role": "admin",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/network",
+      "role": "admin",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/network",
+      "role": "user",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/network",
+      "role": "user",
+      "camera_id": 2,
+      "path_parameters": {},
+      "http_status": null,
+      "error": "Hardware bus unavailable in acceptance discovery",
+      "redirect": null
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/network",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Fnetwork%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/system/support",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fsystem%2Fsupport%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/tasks",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ftasks%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/tasks/<int:task_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "task_id": 1
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ftasks%2F1%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/tools/camera-simulator",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ftools%2Fcamera-simulator%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/tools/focus",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ftools%2Ffocus%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/tools/generate",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ftools%2Fgenerate%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/tools/image-circle-helper",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ftools%2Fimage-circle-helper%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/tools/mini-generate",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ftools%2Fmini-generate%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/tools/process-fits",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Ftools%2Fprocess-fits%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/updates",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fupdates%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/uploads",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fuploads%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/uploads/<provider_slug>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "provider_slug": "filetransfer"
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fuploads%2Ffiletransfer%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/uploads/<provider_slug>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "provider_slug": "s3"
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fuploads%2Fs3%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/uploads/<provider_slug>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "provider_slug": "youtube"
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fuploads%2Fyoutube%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/users",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fusers%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/users/<int:user_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "user_id": 1
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fusers%2F1%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/users/<int:user_id>",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {
+        "user_id": 2
+      },
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fusers%2F2%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    },
+    {
+      "route": "/indi-allsky/modern-admin/youtube",
+      "role": "anonymous",
+      "camera_id": 1,
+      "path_parameters": {},
+      "http_status": 302,
+      "error": null,
+      "redirect": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fyoutube%3Fcamera_id%3D1%26profile_id%3Dtest-profile-1"
+    }
+  ],
+  "regression": {
+    "environment": "Isolated 775a19d0 checkout with 1859082a runtime changes and this inventory candidate; production untouched",
+    "log_directory": "/home/eric/hybrid-ui-details-evidence",
+    "checks": [
+      {
+        "case": "testing/auto_exposure_controller_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/auto_gain_controller_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/auto_gain_runtime_state_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/focus_frames_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/full_config_parser_parity_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_app_startup_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_archive_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_astropanel_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_astropanel_satellite_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_aurora_failure_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_aurora_rtsw_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_aurora_status_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_authenticated_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_camera_simulator_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_charts_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_compatibility_redirect_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_database_backup_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_drives_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_end_of_night_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_end_of_night_handoff_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_fits_processing_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_fits_processing_parity_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_focus_endpoint_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_focus_preview_parity_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_focuser_effect_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_gallery_isolation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_generated_media_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_generation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_generation_result_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_geometry_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_gpio_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_highlights_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_log_download_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_log_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_mini_generation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_native_focus_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_network_command_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_now_page_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_observatory_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_operations_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_output_detail_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_public_media_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_route_composition_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_runtime_shell_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_settings_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_shell_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_sky_cycle_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_source_media_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_table_export_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_ui_inventory_parser_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_updates_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_upgrade_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_upload_claim_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_video_dispatch_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_video_failure_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_youtube_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/legacy_auto_gain_steps_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_boundary_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_log_reader_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_camera_filter_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_metadata_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_runtime_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_notification_read_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_observatory_tools_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_runtime_providers_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_settings_contracts_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_settings_runtime_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_system_tools_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_task_read_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_safe_action_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/multicamera_processor_isolation_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/network_activation_polling_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/network_commands_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/network_scan_effects_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/product_spine_regression_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/product_view_models_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/sftp_adapter_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/stretch_multicamera_mask_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "hybrid_archive_flow_test.py:library",
+        "exit_code": 0
+      },
+      {
+        "case": "compileall",
+        "exit_code": 0
+      }
+    ]
+  },
+  "candidate_files_sha256": {
+    "testing/hybrid_ui_acceptance_test.py": "c580df859b04c73ac6c4c91023b5571d0d24ac73f1ae2a85ddc4df08aa4242c4",
+    "testing/hybrid_ui_detail_fixture.py": "a38afe46fd9192b4768f1d1eb466824a7429a1b4ea334699e1362ef256a4400b",
+    "testing/hybrid_ui_detail_acceptance.py": "3c50fb0edcb20a6166259db0960ac7dbe6f620f46f370afe72acacfe16738008"
+  }
+}

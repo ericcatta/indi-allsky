@@ -8,6 +8,35 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified mission: detail pages included in acceptance discovery
+
+The schema-3 discovery uses disposable real JPEG/FITS/RAW/video files and
+synthetic task/notification records. It resolves image, video, FITS, task,
+notification, user and config IDs plus every registered upload-provider and log
+variant. Each case records its concrete request path, path parameters, role,
+camera and profile. No production files or configuration are used for fixtures.
+Unknown parameterized routes remain blocked rather than silently disappearing.
+
+The current registered TemplateView set contains 90 routes and 490 contexts:
+364 render successfully, 126 remain blocked (98 anonymous redirects, 12 other
+redirects, 12 hardware-bus blocks and 4 external-process blocks). Nine detail-route
+families previously omitted for missing URL parameters now contribute 85 contexts
+and 4,158 discovered controls. Overall 28,572 control occurrences are enumerated;
+**zero are promoted to interaction passes by this discovery**. There are no
+render defects in this fixture run. Static HTML discovery still cannot account
+for all JavaScript-created DOM or prove effects, keyboard/mobile behavior, or
+permission enforcement of mutating requests.
+
+`hybrid_ui_detail_acceptance.py` validates concrete detail URLs, all three roles,
+absence of detail render defects and preservation of pending control outcomes.
+The compact evidence retains every blocked context and concrete detail variant:
+`testing/evidence/hybrid-ui-details-2026-09-07.json`. The full explicitly generated
+inventory is at `/home/eric/hybrid-aurora-status-evidence/ui-details-inventory.json`
+with its hash in the compact evidence. Historical inventory files are untouched.
+All 82 Python/compile regression checks pass, as do the HTML-discovery parser
+checks and the detail-evidence validator. This expands test coverage only; no
+production deploy or capture restart occurs.
+
 ## Verified correction: per-component aurora web status
 
 The shared status formatter ignored AURORA_COMPONENT_STATUS: one successful
