@@ -8,6 +8,28 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Clean candidate regression — 6ca73bfe
+
+A fresh `git archive` of `6ca73bfe8d2efe9d95314c14c22b26f90867dec6` was
+transferred completely and its SHA256 verified before extraction. All 1,140
+tracked files and symlink targets match the local manifest in both the local
+JavaScript test copy and `/home/eric/hybrid-acceptance-6ca73bfe` on the Pi.
+Neither directory contains earlier candidate overlays or extra files before tests.
+
+All 88 Python/compile checks and 24 JavaScript checks pass on these clean copies.
+The Python suite includes Flask startup with Classic enabled/disabled, isolated
+Hybrid flows with Classic forbidden, Book 2, Full Config parity, Settings contracts,
+Safe Actions, Product View Models/Spine and the recent correction tests. It uses
+the installed runtime dependencies and the separate OAuth environment for YouTube.
+After testing, tracked source still matches exactly; only 258 Python cache files
+were added. The full UI inventory remains a separate discovery entrypoint.
+
+These results consolidate previous overlay-based results without substituting for
+browser interactions or real hardware/integration effects. Production remains
+`775a19d0`: no deploy, service restart or acquisition-data deletion occurred.
+Classic removal and the 24-hour day/night gate remain open. Evidence:
+`testing/evidence/hybrid-release-6ca73bfe-2026-09-07.json`.
+
 ## Verified correction: flush failure termination and partial results
 
 The four system flush operations repeatedly fetched the first 500 matching rows.
