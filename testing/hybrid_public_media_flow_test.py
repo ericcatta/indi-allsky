@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Public latest/view/download contracts with Classic views and templates forbidden."""
 import argparse
+import hashlib
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -11,7 +13,8 @@ from hybrid_generated_media_fixture import seed_generated_media
 from hybrid_public_media_fixture import seed_public_media
 
 
-def run(runtime_config):
+def run(runtime_config, output=None):
+    link_evidence = []
     with isolated_app(runtime_config,multi_camera=True) as app:
         seed_generation(app);seed_source_media(app);seed_generated_media(app);seed_public_media(app)
         from indi_allsky.flask import db
@@ -28,6 +31,54 @@ def run(runtime_config):
         anonymous=app.test_client()
         clients=(anonymous,login_client(app,2),login_client(app,1))
         with patch.object(app.jinja_env.loader,'get_source',side_effect=source):
+            # Follow the actual links rendered by the Hybrid directory, not URLs
+            # reconstructed from expected route names. Each must reach its camera.
+            from hybrid_ui_acceptance_test import Controls
+            from urllib.parse import urljoin, urlsplit, parse_qs
+            for client in clients[1:]:
+                for cid in (1, 2):
+                    scope = {'camera_id': cid, 'profile_id': 'test-profile-' + str(cid)}
+                    directory = client.get('/indi-allsky/modern-admin/media/public-endpoints', query_string=scope)
+                    assert directory.status_code == 200
+                    parser = Controls(); parser.feed(directory.text)
+                    identified = parser.identified('/indi-allsky/modern-admin/media/public-endpoints')
+                    link_ids = {item['href']: item['id'] for item in identified if '/latest' in item['href']}
+                    links = list(link_ids)
+                    assert len(links) == 16, links
+                    assert 'Flask endpoint' not in directory.text
+                    for link in links:
+                        assert urlsplit(link).path.startswith('/indi-allsky/latest'), link
+                        query = parse_qs(urlsplit(link).query)
+                        assert query['camera_id'] == [str(cid)] and query['profile_id'] == [scope['profile_id']]
+                        destination = link
+                        for _ in range(4):
+                            result = client.get(destination)
+                            if result.status_code not in (301, 302, 303, 307, 308):
+                                break
+                            destination = urljoin(destination, result.location)
+                        assert result.status_code == 200, (link, destination, result.status_code)
+                        if result.mimetype == 'text/html':
+                            assert 'camera-' + str(cid) in result.text
+                            assert 'Download original' in result.text
+                        else:
+                            filename = Path(urlsplit(destination).path).name
+                            matches = list(root.rglob(filename))
+                            assert len(matches) == 1 and result.data == matches[0].read_bytes(), destination
+                            assert 'camera-' + str(cid) in filename, destination
+                        link_evidence.append({'control_id': link_ids[link], 'role': 'user' if client is clients[1] else 'admin',
+                                              'camera_id': cid, 'profile_id': scope['profile_id'], 'request_url': link,
+                                              'resolved_url': destination, 'http_status': result.status_code,
+                                              'response_type': result.mimetype, 'response_sha256': hashlib.sha256(result.data).hexdigest(),
+                                              'proof': 'viewer exposes original download and selected camera' if result.mimetype == 'text/html' else 'response bytes equal dedicated camera file',
+                                              'outcome': 'superato', 'scope': 'HTTP navigation and destination; browser click/keyboard not verified'})
+                    for bad in ({'camera_id': 'bad'}, {'camera_id': cid, 'profile_id': 'test-profile-' + str(3-cid)}, {'profile_id': 'unknown'}):
+                        assert client.get('/indi-allsky/modern-admin/media/public-endpoints', query_string=bad).status_code == 400
+                    # Reverse-proxy mounting is reflected in generated links too.
+                    mounted = client.get('/indi-allsky/modern-admin/media/public-endpoints', query_string=scope,
+                                         environ_overrides={'SCRIPT_NAME': '/observatory'})
+                    parser = Controls(); parser.feed(mounted.text)
+                    links = [item['href'] for item in parser.controls if '/latest' in item['href']]
+                    assert len(links) == 16 and all(link.startswith('/observatory/indi-allsky/latest') for link in links)
             for client in clients:
                 for cid in (1,2):
                     for latest,kind,viewer in mappings:
@@ -107,9 +158,13 @@ def run(runtime_config):
                 IndiAllSkyDbImageTable.query.delete();db.session.commit()
             assert anonymous.get('/indi-allsky/latestimage?camera_id=1').status_code==404
             assert anonymous.get('/indi-allsky/latestthumbnail?camera_id=1').status_code==404
+        if output is not None:
+            output.write_text(json.dumps({'environment': 'isolated Flask; Classic forbidden; dedicated synthetic media', 'links': link_evidence}, indent=2) + '\n')
         print('Hybrid public latest, thumbnail, nine viewers, original/range, both cameras, optional authentication, RAW export, empty and remote policy contracts: PASS')
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime-config',default='/etc/indi-allsky/flask.json')
-    run(parser.parse_args().runtime_config)
+    parser.add_argument('--output', type=Path)
+    args = parser.parse_args()
+    run(args.runtime_config, args.output)

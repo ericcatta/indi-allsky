@@ -20,17 +20,17 @@ var camera_id = {{ camera_id }};
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Endpoints</div>
             <h3>{{ modern_admin_public_endpoint_count }}</h3>
-            <p>Known latest/public compatibility routes.</p>
+            <p>Links to the latest files and viewers.</p>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Categories</div>
             <h3>{{ modern_admin_public_endpoint_categories|length }}</h3>
-            <p>Media families represented by the compatibility routes.</p>
+            <p>Available types of media links.</p>
         </article>
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Mode</div>
-            <h3>Read-only</h3>
-            <p>This page does not modify route behavior.</p>
+            <div class="modern-admin-card-label">Camera</div>
+            <h3>{{ modern_admin_public_camera_id }}</h3>
+            <p>Links use the selected camera.</p>
         </article>
     </section>
 
@@ -47,23 +47,21 @@ var camera_id = {{ camera_id }};
                         <th>Label</th>
                         <th>Route</th>
                         <th>Category</th>
-                        <th>Flask endpoint</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for endpoint in modern_admin_public_endpoint_rows %}
                     <tr>
                         <td>{{ endpoint.label }}</td>
-                        <td><a href="{{ endpoint.route }}" rel="noopener">{{ endpoint.route }}</a></td>
+                        <td><a href="{{ endpoint.url }}" rel="noopener">{{ endpoint.url }}</a></td>
                         <td>{{ endpoint.category }}</td>
-                        <td>{{ endpoint.endpoint }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <p class="modern-admin-note">These routes are compatibility surfaces for bookmarks, embeds and external clients. This page does not change redirects, downloads, cache behavior, public/latest semantics or media generation.</p>
+        <p class="modern-admin-note">Use these links for bookmarks, embeds or external applications. They always select the latest available media for this camera. Access follows your public media settings; a link may require sign-in or report that no media is available.</p>
     </section>
 </main>
 {% endblock %}

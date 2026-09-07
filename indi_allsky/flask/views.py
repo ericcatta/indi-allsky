@@ -12495,13 +12495,20 @@ class ModernAdminMediaRawImagesView(ModernAdminMediaMetadataView, TemplateView):
         return 'Non-dict metadata payload'
 
 
-class ModernAdminPublicMediaEndpointsView(ModernAdminContextMixin, TemplateView):
+class ModernAdminPublicMediaEndpointsView(ModernAdminMediaBrowseView, TemplateView):
     page_title = 'Modern Admin Public Media Endpoints'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_public_media_endpoints_view'
 
 
     def get_context(self):
         context = super(ModernAdminPublicMediaEndpointsView, self).get_context()
+        self.add_media_camera_filter_context(context)
+        selected = self.get_selected_media_camera_filter()
+        selected_camera_id = selected.get('camera_id') or self.camera.id
+        link_scope = {'camera_id': selected_camera_id}
+        if selected.get('profile_id'):
+            link_scope['profile_id'] = selected['profile_id']
+        context['modern_admin_public_camera_id'] = selected_camera_id
         endpoint_rows = [
             ('Latest image redirect', '/latestimage', 'indi_allsky.latest_image_redirect_view', 'Image'),
             ('Latest image viewer', '/latestimageview', 'indi_allsky.latest_image_view_redirect_view', 'Image'),
@@ -12525,6 +12532,7 @@ class ModernAdminPublicMediaEndpointsView(ModernAdminContextMixin, TemplateView)
             {
                 'label'    : label,
                 'route'    : route,
+                'url'      : url_for(endpoint, **link_scope),
                 'endpoint' : endpoint,
                 'category' : category,
             }

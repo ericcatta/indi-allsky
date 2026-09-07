@@ -8,6 +8,29 @@ was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour d
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: public media directory links and camera scope
+
+The rendered directory linked to root-relative `/latest...` strings rather than
+registered Flask URLs. Under `/indi-allsky` these omitted the application prefix,
+and no camera/profile was attached. The page now uses url_for and the shared
+Hybrid media-camera selection validator. Each link names the selected camera,
+preserves a valid profile and respects SCRIPT_NAME mounting. Invalid or mismatched
+camera/profile input is rejected. Public handler semantics and media algorithms
+are unchanged. The page explains bookmarks/embeds, authentication and absent media
+without exposing Flask endpoint names as a user-facing column.
+
+The public-media flow test follows all 16 actual rendered links for both roles
+and cameras (64 HTTP navigations), checking final viewer content or byte-exact
+fixture files. It also checks a reverse-proxy prefix and rejects invalid scopes.
+Its optional evidence output records stable control IDs, requests, resolved URLs,
+role/profile, response hashes and observed result. These are HTTP destination
+passes, not browser click, keyboard or mobile passes. Existing public-media tests
+still cover optional authentication, range responses, RAW export roots, remote
+policy and missing media. Production is unchanged and direct browser acceptance
+is deferred until the user can unlock the Mac this evening. All 82 Python/compile
+checks pass; the targeted test was rerun after adding its evidence output.
+Evidence: `testing/evidence/hybrid-public-links-2026-09-07.json`.
+
 ## Verified mission: detail pages included in acceptance discovery
 
 The schema-3 discovery uses disposable real JPEG/FITS/RAW/video files and

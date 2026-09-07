@@ -1,0 +1,1242 @@
+{
+  "environment": "isolated Flask; Classic forbidden; dedicated synthetic media",
+  "links": [
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::9f0514d233459d08::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestimage?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/generation-camera-1.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "8d901823a2d5c004c895e288e5f194305504545e9aa856c27f3de2bfb9b17494",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::01081a9ec046f620::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestimageview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_image?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "628c3cca34b99792373ab186623b408d18047eb6c50534821bd58543d828cc3d",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::1843bf69f124ccfd::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latesttimelapse?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/video-camera-1.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "ef0fe7060f549a20ef140dc119eefa20154113af6499a99ce37ab3d06ddb46d5",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::273ad05543331f05::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latesttimelapsewatch?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/watch_timelapse?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "57bb8e8a7a7773bbc3d74f81dfca755b0b82bbe938f0eed2ddcc72ae100288dc",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::1b95dca1066d20cf::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestraw?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/ccd_test-camera-1/raw-camera-1.png",
+      "http_status": 200,
+      "response_type": "image/png",
+      "response_sha256": "1df0bc4cdcfa27f73d50df6396ecbe9044f95cfb08fe4a9f1f9019e0217ce616",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::0d093fb4638cfcda::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestrawview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_raw?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "75ad44181cad105c35cdd4eff7f2c528df18b55f2c19d6e3cf9c99b1be452155",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::beb99a15da30d74b::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestpanorama?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/panorama-camera-1.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "ed8529b3131fc8b37ebac5197a43b413c7af7f08846b1c29ae792bd6ec07b515",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::4770b8cfca9e8fa8::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestpanoramaview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_panorama?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "bff2e76ea80bd025205843fa1389b4f817bf62204efeaf0650d6737147c17dd0",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::925e020cadd85420::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestpanoramavideo?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/panorama-video-camera-1.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "ef0fe7060f549a20ef140dc119eefa20154113af6499a99ce37ab3d06ddb46d5",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::3205b7c440c715ae::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestpanoramavideowatch?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/watch_panorama?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "235b0f74cdb1b8d10b2dc2488b9d5f0716309020ca8eeb6ceb82ad7efdaa5a4b",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::3ab65a5088234139::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestkeogram?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/keogram-camera-1.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "ed8529b3131fc8b37ebac5197a43b413c7af7f08846b1c29ae792bd6ec07b515",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::2d3d337a467a78e4::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestkeogramview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_keogram?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "d1e6f04e4f56fd7ba80ac029f4319eb69b9b7a78b29163b246c99d0565044d5f",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::1b2eeb17a3d89cdb::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/lateststartrail?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/startrail-camera-1.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "ed8529b3131fc8b37ebac5197a43b413c7af7f08846b1c29ae792bd6ec07b515",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::b72c663b7e8394f7::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/lateststartrailview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_startrail?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "7a053fefa908db00a4fada2e3608037b5885374937bd43e708c8d19a574e8132",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::cfcc5515064b2ed5::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/lateststartrailvideo?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/startrail-video-camera-1.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "ef0fe7060f549a20ef140dc119eefa20154113af6499a99ce37ab3d06ddb46d5",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::4a6634074c7696d3::1",
+      "role": "user",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/lateststartrailvideowatch?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/watch_startrail?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "ed5acb6e1d0a9ef561bbef1107d9a914101fecf3ca52b1fe02258ca7c9843c1e",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::8e43ade842cc6fe2::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestimage?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/generation-camera-2.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "fb1b29a273bec67e8dac2a0bfe4dc5f009350f6476f851b6a47e27e4bb9ecb0f",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::a2da3e235c03a9ff::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestimageview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_image?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "4c041fbb4b08bedc2432dd82431f6886833fa25027dd218d350d2f7c3c43460e",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::3aa4bb931a2bdcf8::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latesttimelapse?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/video-camera-2.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "37a37f8438531720876e5d0f6eff2275db9633a47d4691aa3f295545fa1d67b4",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::5c50334565b417ae::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latesttimelapsewatch?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/watch_timelapse?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "7e363056ee47f8d43d7491f3b0e24edc63b656ac421488aeddd7d3e289c04261",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::9a7108fe269ac00c::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestraw?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/ccd_test-camera-2/raw-camera-2.png",
+      "http_status": 200,
+      "response_type": "image/png",
+      "response_sha256": "e2890d1d9ee710c9fc2df85b067f7434417f77df66f26e50e507a0e42250c9ab",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::dbc3f65119d71ca2::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestrawview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_raw?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "559e2e71c3bbb59f5d9f2856c07d4a3ada1c268ef58c7d0416c434dfb507fd29",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::bdef09a9533df67b::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestpanorama?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/panorama-camera-2.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "22f33365c0954bbba98045525df8a86089f1812f0462a0db4efb6f70ac99b385",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::ced8b6a3cfa0942e::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestpanoramaview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_panorama?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "fb2b41f2b5875bd82853c16b6be608bfabfc47e7ec99a079250f19ee0422b080",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::ec1187995ac32eb0::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestpanoramavideo?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/panorama-video-camera-2.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "37a37f8438531720876e5d0f6eff2275db9633a47d4691aa3f295545fa1d67b4",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::8076b806f41a5e29::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestpanoramavideowatch?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/watch_panorama?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "44ed4ca114833091567d37a2f9786d4039e067544c476eacbeed63a445097448",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::b2a531ad91eaed1f::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestkeogram?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/keogram-camera-2.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "22f33365c0954bbba98045525df8a86089f1812f0462a0db4efb6f70ac99b385",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::6e5500383354092d::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestkeogramview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_keogram?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "99e0a90e3226b153996036d3ab85b2304d2a5c08fb844bfddd95f4ee77c62cfe",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::f1bf8532dd044dc1::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/lateststartrail?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/startrail-camera-2.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "22f33365c0954bbba98045525df8a86089f1812f0462a0db4efb6f70ac99b385",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::2a67fbe8e9a7caee::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/lateststartrailview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_startrail?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "74559eb142291dd9d1dc5831d4a34ee9c114d5914111abb42237baa011788e4e",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::db7f1cd331108b51::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/lateststartrailvideo?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/startrail-video-camera-2.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "37a37f8438531720876e5d0f6eff2275db9633a47d4691aa3f295545fa1d67b4",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::2262f5f212f58e62::1",
+      "role": "user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/lateststartrailvideowatch?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/watch_startrail?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "b47463cb102ea42b4b5baffa3c5a21100a8f2af56766d3f0eda1aeae3fec3e66",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::9f0514d233459d08::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestimage?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/generation-camera-1.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "8d901823a2d5c004c895e288e5f194305504545e9aa856c27f3de2bfb9b17494",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::01081a9ec046f620::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestimageview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_image?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "628c3cca34b99792373ab186623b408d18047eb6c50534821bd58543d828cc3d",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::1843bf69f124ccfd::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latesttimelapse?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/video-camera-1.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "ef0fe7060f549a20ef140dc119eefa20154113af6499a99ce37ab3d06ddb46d5",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::273ad05543331f05::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latesttimelapsewatch?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/watch_timelapse?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "57bb8e8a7a7773bbc3d74f81dfca755b0b82bbe938f0eed2ddcc72ae100288dc",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::1b95dca1066d20cf::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestraw?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/ccd_test-camera-1/raw-camera-1.png",
+      "http_status": 200,
+      "response_type": "image/png",
+      "response_sha256": "1df0bc4cdcfa27f73d50df6396ecbe9044f95cfb08fe4a9f1f9019e0217ce616",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::0d093fb4638cfcda::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestrawview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_raw?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "75ad44181cad105c35cdd4eff7f2c528df18b55f2c19d6e3cf9c99b1be452155",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::beb99a15da30d74b::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestpanorama?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/panorama-camera-1.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "ed8529b3131fc8b37ebac5197a43b413c7af7f08846b1c29ae792bd6ec07b515",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::4770b8cfca9e8fa8::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestpanoramaview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_panorama?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "bff2e76ea80bd025205843fa1389b4f817bf62204efeaf0650d6737147c17dd0",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::925e020cadd85420::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestpanoramavideo?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/panorama-video-camera-1.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "ef0fe7060f549a20ef140dc119eefa20154113af6499a99ce37ab3d06ddb46d5",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::3205b7c440c715ae::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestpanoramavideowatch?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/watch_panorama?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "235b0f74cdb1b8d10b2dc2488b9d5f0716309020ca8eeb6ceb82ad7efdaa5a4b",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::3ab65a5088234139::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestkeogram?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/keogram-camera-1.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "ed8529b3131fc8b37ebac5197a43b413c7af7f08846b1c29ae792bd6ec07b515",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::2d3d337a467a78e4::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/latestkeogramview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_keogram?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "d1e6f04e4f56fd7ba80ac029f4319eb69b9b7a78b29163b246c99d0565044d5f",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::1b2eeb17a3d89cdb::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/lateststartrail?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/startrail-camera-1.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "ed8529b3131fc8b37ebac5197a43b413c7af7f08846b1c29ae792bd6ec07b515",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::b72c663b7e8394f7::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/lateststartrailview?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/view_startrail?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "7a053fefa908db00a4fada2e3608037b5885374937bd43e708c8d19a574e8132",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::cfcc5515064b2ed5::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/lateststartrailvideo?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/images/startrail-video-camera-1.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "ef0fe7060f549a20ef140dc119eefa20154113af6499a99ce37ab3d06ddb46d5",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::4a6634074c7696d3::1",
+      "role": "admin",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request_url": "/indi-allsky/lateststartrailvideowatch?camera_id=1&profile_id=test-profile-1",
+      "resolved_url": "/indi-allsky/watch_startrail?id=1&camera_id=1",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "ed5acb6e1d0a9ef561bbef1107d9a914101fecf3ca52b1fe02258ca7c9843c1e",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::8e43ade842cc6fe2::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestimage?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/generation-camera-2.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "fb1b29a273bec67e8dac2a0bfe4dc5f009350f6476f851b6a47e27e4bb9ecb0f",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::a2da3e235c03a9ff::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestimageview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_image?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "4c041fbb4b08bedc2432dd82431f6886833fa25027dd218d350d2f7c3c43460e",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::3aa4bb931a2bdcf8::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latesttimelapse?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/video-camera-2.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "37a37f8438531720876e5d0f6eff2275db9633a47d4691aa3f295545fa1d67b4",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::5c50334565b417ae::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latesttimelapsewatch?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/watch_timelapse?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "7e363056ee47f8d43d7491f3b0e24edc63b656ac421488aeddd7d3e289c04261",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::9a7108fe269ac00c::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestraw?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/ccd_test-camera-2/raw-camera-2.png",
+      "http_status": 200,
+      "response_type": "image/png",
+      "response_sha256": "e2890d1d9ee710c9fc2df85b067f7434417f77df66f26e50e507a0e42250c9ab",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::dbc3f65119d71ca2::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestrawview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_raw?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "559e2e71c3bbb59f5d9f2856c07d4a3ada1c268ef58c7d0416c434dfb507fd29",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::bdef09a9533df67b::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestpanorama?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/panorama-camera-2.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "22f33365c0954bbba98045525df8a86089f1812f0462a0db4efb6f70ac99b385",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::ced8b6a3cfa0942e::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestpanoramaview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_panorama?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "fb2b41f2b5875bd82853c16b6be608bfabfc47e7ec99a079250f19ee0422b080",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::ec1187995ac32eb0::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestpanoramavideo?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/panorama-video-camera-2.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "37a37f8438531720876e5d0f6eff2275db9633a47d4691aa3f295545fa1d67b4",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::8076b806f41a5e29::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestpanoramavideowatch?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/watch_panorama?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "44ed4ca114833091567d37a2f9786d4039e067544c476eacbeed63a445097448",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::b2a531ad91eaed1f::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestkeogram?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/keogram-camera-2.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "22f33365c0954bbba98045525df8a86089f1812f0462a0db4efb6f70ac99b385",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::6e5500383354092d::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/latestkeogramview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_keogram?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "99e0a90e3226b153996036d3ab85b2304d2a5c08fb844bfddd95f4ee77c62cfe",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::f1bf8532dd044dc1::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/lateststartrail?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/startrail-camera-2.jpg",
+      "http_status": 200,
+      "response_type": "image/jpeg",
+      "response_sha256": "22f33365c0954bbba98045525df8a86089f1812f0462a0db4efb6f70ac99b385",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::2a67fbe8e9a7caee::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/lateststartrailview?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/view_startrail?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "74559eb142291dd9d1dc5831d4a34ee9c114d5914111abb42237baa011788e4e",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::db7f1cd331108b51::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/lateststartrailvideo?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/images/startrail-video-camera-2.mp4",
+      "http_status": 200,
+      "response_type": "video/mp4",
+      "response_sha256": "37a37f8438531720876e5d0f6eff2275db9633a47d4691aa3f295545fa1d67b4",
+      "proof": "response bytes equal dedicated camera file",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    },
+    {
+      "control_id": "/indi-allsky/modern-admin/media/public-endpoints::2262f5f212f58e62::1",
+      "role": "admin",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request_url": "/indi-allsky/lateststartrailvideowatch?camera_id=2&profile_id=test-profile-2",
+      "resolved_url": "/indi-allsky/watch_startrail?id=2&camera_id=2",
+      "http_status": 200,
+      "response_type": "text/html",
+      "response_sha256": "b47463cb102ea42b4b5baffa3c5a21100a8f2af56766d3f0eda1aeae3fec3e66",
+      "proof": "viewer exposes original download and selected camera",
+      "outcome": "superato",
+      "scope": "HTTP navigation and destination; browser click/keyboard not verified"
+    }
+  ],
+  "regression": {
+    "checks": [
+      {
+        "case": "testing/auto_exposure_controller_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/auto_gain_controller_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/auto_gain_runtime_state_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/focus_frames_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/full_config_parser_parity_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_app_startup_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_archive_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_astropanel_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_astropanel_satellite_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_aurora_failure_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_aurora_rtsw_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_aurora_status_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_authenticated_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_camera_simulator_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_charts_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_compatibility_redirect_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_database_backup_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_drives_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_end_of_night_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_end_of_night_handoff_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_fits_processing_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_fits_processing_parity_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_focus_endpoint_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_focus_preview_parity_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_focuser_effect_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_gallery_isolation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_generated_media_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_generation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_generation_result_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_geometry_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_gpio_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_highlights_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_log_download_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_log_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_mini_generation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_native_focus_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_network_command_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_now_page_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_observatory_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_operations_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_output_detail_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_public_media_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_route_composition_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_runtime_shell_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_settings_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_shell_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_sky_cycle_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_source_media_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_table_export_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_ui_inventory_parser_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_updates_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_upgrade_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_upload_claim_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_video_dispatch_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_video_failure_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_youtube_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/legacy_auto_gain_steps_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_boundary_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_log_reader_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_camera_filter_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_metadata_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_runtime_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_notification_read_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_observatory_tools_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_runtime_providers_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_settings_contracts_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_settings_runtime_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_system_tools_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_task_read_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_safe_action_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/multicamera_processor_isolation_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/network_activation_polling_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/network_commands_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/network_scan_effects_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/product_spine_regression_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/product_view_models_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/sftp_adapter_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/stretch_multicamera_mask_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "hybrid_archive_flow_test.py:library",
+        "exit_code": 0
+      },
+      {
+        "case": "compileall",
+        "exit_code": 0
+      }
+    ],
+    "log_directory": "/home/eric/hybrid-public-links-evidence",
+    "note": "Full suite passed; targeted public-media test rerun after adding optional evidence output."
+  },
+  "candidate_sha256": {
+    "indi_allsky/flask/views.py": "51f05adcd3e5caee673f04abb3d57713dce3bc818c5b65ed53b8b0a0bd40e5ee",
+    "indi_allsky/flask/templates/modern_admin/public_media_endpoints.html": "87d89e985ea121c9cf44f7c0f0bcb7fb7f60d11a85cfa6ab5ffc742aedb5c50b",
+    "testing/hybrid_public_media_flow_test.py": "ce16dbba8cb37b9a1e049db61a47b368c19564c3f7ce68030af3b688fc66daeb"
+  },
+  "production_deployed": false,
+  "browser_acceptance": "deferred: user has no physical access until evening"
+}
