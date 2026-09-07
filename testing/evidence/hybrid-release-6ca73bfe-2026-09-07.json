@@ -135,5 +135,21 @@
     "Full UI inventory is a separate discovery command and is excluded from this regression",
     "No production deploy/restart or acquisition data deletion",
     "24-hour day/night and Classic removal acceptance remain open"
-  ]
+  ],
+  "ui_discovery": {
+    "scope": "Static HTML discovery in isolated Flask. Rendering success is not interaction/effect acceptance.",
+    "source_sha256": "d574df43e70cfc81bf5860c14d7034a6cfd3e99814ae4d3c894c07bbd94de1db",
+    "pages": 90,
+    "contexts": 490,
+    "render_outcomes": {
+      "bloccato": 126,
+      "superato": 364
+    },
+    "controls_discovered": 28572,
+    "controls_verified": 0,
+    "artifact": "/home/eric/hybrid-release-evidence-6ca73bfe/ui-inventory.json",
+    "detail_families": 9,
+    "placeholder_phrase_matches": [],
+    "limitations": "Known phrase scan only; JavaScript-created controls and actual effects still need native browser acceptance"
+  }
 }

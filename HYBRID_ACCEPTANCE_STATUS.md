@@ -30,6 +30,27 @@ browser interactions or real hardware/integration effects. Production remains
 Classic removal and the 24-hour day/night gate remain open. Evidence:
 `testing/evidence/hybrid-release-6ca73bfe-2026-09-07.json`.
 
+## Clean candidate UI discovery — 6ca73bfe
+
+The explicit inventory entrypoint was rerun on the clean candidate with synthetic
+users/cameras and hardware/process execution blocked. It discovers 90 pages,
+490 role/camera/detail contexts and 28,572 static control occurrences. Rendering
+passes for 364 contexts; 126 remain blocked by access redirects or unavailable
+providers. The detail verifier covers nine parameterized route families. There
+are no render defects in this run and no matches for the known placeholder phrase
+list. That phrase scan does not prove functionality or absence of all placeholders.
+
+Every discovered control still has blocked interaction status and no click
+evidence. JavaScript-generated controls, desktop/mobile layout, keyboard flows,
+modals and observable effects require direct browser acceptance. The unchanged
+counts versus prior discovery are not new interaction coverage. This refresh
+binds the inventory to the verified clean candidate rather than an overlay tree.
+
+Full matrix: `/home/eric/hybrid-release-evidence-6ca73bfe/ui-inventory.json`;
+local copy: `/tmp/hybrid-ui-inventory-6ca73bfe.json`. Its hash and compact counts
+are recorded in `testing/evidence/hybrid-release-6ca73bfe-2026-09-07.json`.
+Generated full reports remain outside the repository; older inventories are unchanged.
+
 ## Verified correction: flush failure termination and partial results
 
 The four system flush operations repeatedly fetched the first 500 matching rows.
