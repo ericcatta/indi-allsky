@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Compatibility ingress keeps scope and filters without rendering placeholders."""
+from urllib.parse import parse_qsl, urlsplit
+from hybrid_runtime_fixture import isolated_app, login_client
+
+
+def run():
+    with isolated_app(multi_camera=True) as app:
+        from flask import url_for
+        from indi_allsky.flask.views import ModernAdminClassicPlaceholderView
+        routes = ModernAdminClassicPlaceholderView.modern_page_redirect_map
+        assert set(routes) == {
+            'gallery', 'images', 'timelapses', 'mini-timelapses', 'panorama',
+            'panorama-loop', 'fits-viewer', 'loop', 'realtime-keogram',
+            'long-term-keogram', 'dark-library', 'virtualsky', 'astropanel',
+            'log', 'mask-base', 'camera-simulator', 'generate', 'focus',
+            'process-fits', 'image-circle-helper', 'config', 'network', 'drives', 'gpio-control'}
+        query = 'camera_id=2&profile_id=test-profile-2&filter=sky+%2B+moon&tag=a&tag=b&_external=1&_scheme=https'
+        for uid in (1, 2):
+            client = login_client(app, uid)
+            for slug, endpoint in routes.items():
+                with app.test_request_context():
+                    expected = url_for(endpoint)
+                for suffix in ('', '?' + query):
+                    response = client.get('/indi-allsky/modern-admin/classic/' + slug + suffix)
+                    assert response.status_code == 302, (uid, slug, response.status_code)
+                    destination = urlsplit(response.headers['Location'])
+                    assert not destination.netloc and not destination.scheme
+                    assert destination.path == expected
+                    assert parse_qsl(destination.query) == (parse_qsl(query) if suffix else [])
+            unknown = client.get('/indi-allsky/modern-admin/classic/no-such-feature')
+            assert unknown.status_code == 404 and 'coming later' not in unknown.text
+            # Complete a representative read-only redirect through its target.
+            log = client.get('/indi-allsky/modern-admin/classic/log?camera_id=2&profile_id=test-profile-2', follow_redirects=True)
+            assert log.status_code == 200 and 'Application log' in log.text
+            assert log.request.args['camera_id'] == '2' and log.request.args['profile_id'] == 'test-profile-2'
+        anonymous = app.test_client().get('/indi-allsky/modern-admin/classic/log')
+        assert anonymous.status_code == 302 and '/login' in anonymous.headers['Location']
+        print('24 redirect aliases, both roles, repeated filters, camera/profile, local destinations, missing aliases and real target rendering: PASS')
+
+
+if __name__ == '__main__':
+    run()

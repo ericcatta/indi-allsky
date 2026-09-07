@@ -8,6 +8,31 @@ was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour d
 period has started but has not passed. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
 
+## Verified correction: scoped compatibility navigation
+
+The 24 supported `/modern-admin/classic/<page>` ingress aliases redirected to
+Hybrid but discarded their entire query string, losing camera/profile selection
+and filters. They now preserve decoded query values and repeated parameters when
+building the destination. The endpoint is resolved separately before query
+encoding, so `_external`, `_scheme` and similar query names cannot become
+`url_for` control arguments or change the origin. Unknown aliases return 404
+instead of a successful placeholder page. Registered URLs and known destinations
+are unchanged; the historical class/template registration remains for later
+cleanup, but this handler never renders that placeholder.
+
+`testing/hybrid_compatibility_redirect_test.py` requests all 24 aliases with and
+without camera/profile/filter queries, both authenticated roles, repeated tags,
+spaces/plus signs and URL-builder argument names. It verifies destination paths,
+absence of external origins and preserved values. It also verifies unknown-alias
+404, anonymous login redirection and follows the log alias through its actual
+Hybrid target while retaining camera 2/profile 2. This proves navigation routing,
+not every destination's hardware effects or browser interactions. No production
+deployment or capture restart occurs in this mission.
+
+All 25 Python regression entrypoints and `git diff --check` pass. Full Config
+and route fingerprints are unchanged; this correction changes query handling
+and the response for unsupported aliases, not the list of supported functions.
+
 ## Verified mission: four Hybrid log downloads and detail recovery links
 
 `ModernAdminLogDownloadService` replaces the four duplicated filesystem/gzip

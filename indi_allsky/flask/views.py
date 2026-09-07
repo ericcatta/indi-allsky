@@ -6814,18 +6814,15 @@ class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
     }
 
     def dispatch_request(self, classic_page):
-        if classic_page in self.modern_page_redirect_map:
-            return redirect(url_for(self.modern_page_redirect_map[classic_page]))
-
-        self.classic_page = classic_page
-        section, message, active_endpoint = self.classic_page_map.get(
-            classic_page,
-            ('Modern Admin', 'This classic page has not been mapped yet.', None),
-        )
-        self.modern_admin_section = section
-        self.modern_admin_message = message
-        self.modern_admin_active_endpoint = active_endpoint
-        return super(ModernAdminClassicPlaceholderView, self).dispatch_request()
+        from urllib.parse import urlencode
+        endpoint = self.modern_page_redirect_map.get(classic_page)
+        if endpoint is None:
+            abort(404)
+        # Build the trusted destination separately: query names such as
+        # _external or _scheme must never become url_for control arguments.
+        destination = url_for(endpoint)
+        query = urlencode(list(request.args.items(multi=True)))
+        return redirect(destination + ('?' + query if query else ''))
 
 
 class ModernAdminModeView(BaseView):
