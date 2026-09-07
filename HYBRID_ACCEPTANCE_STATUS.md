@@ -3,10 +3,40 @@
 ## Completion gate
 
 The complete product audit is **open**. Detector/AI are deferred; their absence
-must be represented honestly. Classic has not been removed. Commit `faf53d86`
-was deployed to the live Raspberry on 2026-09-07 at 00:32:40 CEST. The 24-hour day/night observation
-period has started but has not passed. Historical sections below retain the
+must be represented honestly. Classic has not been removed. Commit `b65cd856`
+was deployed to the live Raspberry on 2026-09-07 at 09:42:33 CEST. The 24-hour day/night observation
+period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
+
+## Verified mission: clean release verification and production deployment b65cd856
+
+Evidence: `testing/evidence/hybrid-release-b65cd856-2026-09-07.json`.
+A fresh extraction plus the exact commit patch was verified against all 1,107
+tracked file contents/symlink types, with no extra files before tests. The full
+selected suite passed 78 Python/compile checks, including all Hybrid flow tests,
+Book 2, parser fingerprints, Settings, Safe Actions, Product Spine and processing
+isolation tests; all 23 JavaScript entrypoints passed. Eight real loopback SFTP
+worker-effect cases also passed, covering two cameras, success/permission failure,
+source ownership and duplicate deliveries, plus both roles viewing task results.
+This is not exhaustive browser/hardware acceptance.
+
+A separate online SQLite backup (828,977,152 bytes, integrity ok) and protected
+Flask configuration copy are at `/home/eric/hybrid-backups/release-b65cd856-20260907-093949`.
+The first deployment attempt stopped before checkout changes because sudo needed
+reauthentication, and restarted capture. After interactive authentication, timer,
+capture and Apache were stopped; the checkout advanced from faf53d86 to b65cd856,
+compilation and Apache config checks passed, and all services/timer restarted.
+Deployment completed at 09:42:33 CEST. Untracked user files were preserved.
+
+Live Now browser acceptance showed Running and new images for both cameras.
+The 09:45 snapshot independently confirms new real files: IMX708 09:44:33 and ZWO
+09:44:53, active PID 3263670, no pending tasks and 82,699,472,896 free bytes. Only
+the six known startup gain clamps were found in that log sample. This is early
+post-deploy evidence, not sustained stability or scientific-quality acceptance.
+The heartbeat baseline was updated to this commit/start time; earlier continuity
+cannot count toward the new 24-hour requirement. Production effects of newly
+allowed maintenance tasks, full browser acceptance, hardware and Classic removal
+remain open. Rollback instructions are in `HYBRID_DEPLOYMENT.md`.
 
 ## Verified mission: database backup failure semantics and round-trip acceptance
 

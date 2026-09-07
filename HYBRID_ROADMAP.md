@@ -19,8 +19,9 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Dispatch VIDEO multicamera: policy Hybrid distingue generazione/aurora/fumo
   per camera da TLE/backup/health check globali. Rimosso il blocco MVP su questi
   task periodici, riscontrato nel journal reale; rigetti ancora necessari hanno
-  una motivazione persistita. Worker ed effetti invariati. Correzione da distribuire
-  e verificare con file backup/aggiornamenti provider reali; osservazione da ripartire.
+  una motivazione persistita. Worker ed effetti invariati. Correzione distribuita con b65cd856 il 2026-09-07 alle 09:42:33 CEST;
+  file backup/aggiornamenti provider reali da verificare. Nuove 24 ore da questo avvio.
+  Evidenze e rollback: `HYBRID_DEPLOYMENT.md`.
 
 - Sensor Panel: Hybrid possiede la costruzione delle righe, distinzione fra zero
   misurato e lettura assente, label e filtro slot utilizzati/tutti. Servizio
