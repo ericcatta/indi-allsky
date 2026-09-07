@@ -1785,12 +1785,13 @@ class VideoWorker(Process):
         task.setRunning()
 
         if not night:
-            # Only upload at end of night
+            # A skipped request is terminal; it must not remain Running.
+            task.setSuccess('Skipped EndOfNight upload: daytime request')
             return
 
         if not self.config.get('FILETRANSFER', {}).get('UPLOAD_ENDOFNIGHT'):
             logger.warning('End of Night uploading disabled')
-            task.setFailed('End of Night uploading disabled')
+            task.setSuccess('Skipped EndOfNight upload: disabled in configuration')
             return
 
         if not self.config.get('FILETRANSFER', {}).get('REMOTE_ENDOFNIGHT_FOLDER'):
@@ -1879,6 +1880,8 @@ class VideoWorker(Process):
             'local_file'     : str(data_json_p),
             'remote_file'    : str(remote_file_p),
             'remove_local'   : True,
+            'camera_id'      : camera.id,
+            'profile_id'     : self.profile_id,
         }
 
         upload_task = IndiAllSkyDbTaskQueueTable(
@@ -1892,7 +1895,10 @@ class VideoWorker(Process):
         # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
         self._queue_upload_task(upload_task, camera_id=camera.id)
 
-        task.setSuccess('Uploaded EndOfNight data')
+        task.data = dict(task.data or {}, end_of_night_upload={
+            'status': 'queued', 'task_id': upload_task.id, 'camera_id': camera.id,
+        })
+        task.setSuccess('Queued EndOfNight upload task {0}; delivery is not yet confirmed'.format(upload_task.id))
 
 
     def systemHealthCheck(self, task, **kwargs):

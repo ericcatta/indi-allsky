@@ -7555,6 +7555,12 @@ class ModernAdminTaskDetailView(ModernAdminTaskStatusView, TemplateView):
             abort(404)
 
         context['modern_admin_task_detail'] = service.build_task_detail(task)
+        task_data = task.data if isinstance(task.data, dict) else {}
+        upload = task_data.get('end_of_night_upload')
+        upload_id = upload.get('task_id') if isinstance(upload, dict) else None
+        context['modern_admin_related_upload_task_id'] = (
+            upload_id if type(upload_id) is int and 0 < upload_id < 2**63 else None
+        )
 
         return context
 

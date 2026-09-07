@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- EndOfNight: richieste diurne/disabilitate terminano come saltate; preparazione
+  riuscita significa upload accodato, non consegnato. Il task padre collega il
+  trasferimento e il record figlio conserva camera/profilo. Test metodo reale,
+  ephem, SQLite e pagine Hybrid verdi; rete simulata e deploy ancora aperto.
+
 - Esiti generazione: Hybrid registra per-output file generato, saltato per frame
   insufficienti, non richiesto o fallito nel payload del task. Il completamento
   parziale esplicita il conteggio frame; file mancanti/vuoti o fallimenti reali

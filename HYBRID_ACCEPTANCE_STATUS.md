@@ -1371,3 +1371,37 @@ receipt entrypoints pass, plus compilation and diff check. The Pi log is
 This worker change is not deployed. The live acquisition and its existing
 observation period were not modified. Direct acceptance of a new worker-produced
 receipt remains open until deployment and another controlled generation.
+
+
+## End-of-night task state and delivery linkage
+
+Two incorrect outcomes were reproduced in the actual worker method: a daytime
+request returned after setRunning without a terminal state, and disabled uploads
+were marked Failed. They now finish as explicitly skipped requests. A missing
+remote folder when upload is enabled remains a failure. No transfer is attempted
+for these gates.
+
+Successful preparation previously reported Uploaded immediately after queueing a
+separate transfer. It now reports Queued, stores the child upload task ID and
+camera in the parent receipt, and persists camera/profile in the child payload.
+The Hybrid parent task page links to that child's current state/result; the link
+accepts only a positive integer task ID. A successful preparation is not delivery
+confirmation. Historical task records are not rewritten, so old misleading
+messages remain distinguishable by their generation version/time.
+
+`end_of_night_task_test.py` executes the actual worker method extracted by AST
+and verifies terminal daytime/disabled skips and missing-destination failure.
+`hybrid_end_of_night_flow_test.py` executes the full method with real ephem,
+temporary SQLite and media: writes data.json, checks its existing sunrise/sunset/
+streamDaytime contract and remote camera path, queues exactly once through a
+mocked queue adapter, persists parent/child scope and opens both Hybrid task pages
+for admin and ordinary user with Classic imports forbidden. No network transfer
+runs. All 20 Book 2/modern_admin/Safe Actions/parity/Product/shell/composition/
+generation-receipt/EndOfNight-gate entrypoints pass; compilation and diff checks
+pass. Pi log: `/tmp/hybrid-end-night-flow.log`.
+
+No scheduling, astronomy calculation, upload destination or credential behavior
+was changed. The worker/UI correction is not deployed and live upload completion
+remains unverified. Follow-up review remains necessary for the existing polar
+fallback `timedelta(years=10)` and temporary-file handling on formatting/enqueue
+errors; this mission does not claim those branches passed.

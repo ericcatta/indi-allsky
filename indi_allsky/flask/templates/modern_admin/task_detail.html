@@ -56,6 +56,14 @@ var camera_id = {{ camera_id }};
         </dl>
     </section>
 
+    {% if modern_admin_related_upload_task_id %}
+    <section class="modern-admin-table-panel" aria-label="Upload delivery result">
+        <h2>Upload delivery</h2>
+        <p>This task prepared the upload. The transfer has its own status and result.</p>
+        <a href="{{ url_for('indi_allsky.modern_admin_task_detail_view', task_id=modern_admin_related_upload_task_id) }}">Inspect upload task {{ modern_admin_related_upload_task_id }}</a>
+    </section>
+    {% endif %}
+
     <section class="modern-admin-table-panel" aria-labelledby="task-detail-payload-title">
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">Diagnostics</p>
