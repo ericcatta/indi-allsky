@@ -6727,14 +6727,31 @@ class ModernAdminUpdatesView(ModernAdminView):
     def get_context(self):
         context = super(ModernAdminUpdatesView, self).get_context()
 
+        from ..upgrade_runtime import UpgradeRuntime
         context['modern_admin_version'] = __version__
-        context['modern_admin_update_rows'] = (
-            {'label' : 'Installed Version', 'value' : __version__},
-            {'label' : 'Update Mode', 'value' : 'Read-only'},
-            {'label' : 'Classic Fallback', 'value' : 'Available'},
-        )
-
+        context['upgrade_can_control'] = bool(app.config['LOGIN_DISABLED'] or current_user.is_admin)
+        try:
+            context['upgrade_status'] = UpgradeRuntime(app.config['UPGRADE_ALLSKY_SERVICE_NAME']).snapshot()
+        except Exception:
+            app.logger.exception('Upgrade status unavailable')
+            context['upgrade_status'] = {'status': 'unavailable', 'can_start': False, 'token': ''}
         return context
+
+
+class ModernAdminUpgradeStartView(BaseView):
+    methods = ['POST']
+    decorators = [login_required]
+
+    def dispatch_request(self):
+        from ..upgrade_runtime import UpgradeRuntime
+        try:
+            data, status = UpgradeRuntime(app.config['UPGRADE_ALLSKY_SERVICE_NAME']).submit(
+                request.get_json(silent=True),
+                authorized=bool(app.config['LOGIN_DISABLED'] or current_user.is_admin))
+        except Exception:
+            app.logger.exception('Upgrade submission unavailable')
+            data, status = {'message': 'Upgrade request could not be verified. Refresh status before retrying.'}, 503
+        return jsonify(data), status
 
 
 class ModernAdminClassicPlaceholderView(ModernAdminPlaceholderView):
@@ -19109,6 +19126,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/drives.html'))
     bp_allsky.add_url_rule('/modern-admin/system/gpio-control', view_func=ModernAdminManualGpioView.as_view('modern_admin_manual_gpio_view', template_name='modern_admin/manual_gpio.html'))
     bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
+    bp_allsky.add_url_rule('/modern-admin/updates/start', view_func=ModernAdminUpgradeStartView.as_view('modern_admin_upgrade_start_view'))
     bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))
     bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminClassicPlaceholderView.as_view('modern_admin_classic_placeholder_view', template_name='modern_admin/placeholder.html'))
     bp_allsky.add_url_rule('/modern-admin/mode/<mode>', view_func=ModernAdminModeView.as_view('modern_admin_mode_view'))

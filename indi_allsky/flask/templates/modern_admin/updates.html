@@ -1,32 +1,33 @@
 {% extends 'modern_admin/base.html' %}
-
-{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
-
-{% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
-<script type="text/javascript">
-var camera_id = {{ camera_id }};
-</script>
-{% endblock %}
-
+{% block title %}Updates — Hybrid{% endblock %}
+{% block head %}<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">{% endblock %}
 {% block content %}
-<main class="modern-admin-shell" aria-labelledby="modern-admin-updates-title">
-    {% set modern_admin_header_label = 'Updates header' %}
-    {% set modern_admin_heading = 'Updates' %}
-    {% set modern_admin_title_id = 'modern-admin-updates-title' %}
-    {% include 'modern_admin/_shell_header.html' %}
-
-    <section class="modern-admin-table-panel" aria-labelledby="updates-title">
-        <div class="modern-admin-section-heading">
-            <p class="modern-admin-eyebrow">Updates</p>
-            <h2 id="updates-title">Installed version</h2>
-        </div>
-        <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
-            {% for row in modern_admin_update_rows %}
-            <div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
-            {% endfor %}
-        </dl>
-        <p class="modern-admin-note">Network update checks and package operations are intentionally not implemented in Hybrid yet.</p>
-    </section>
-</main>
+<main class="modern-admin-shell" aria-labelledby="updates-title">
+<section class="modern-admin-table-panel" id="upgrade-tool" data-url="{{ url_for('indi_allsky.modern_admin_upgrade_start_view') }}" data-csrf="{{ csrf_token() }}" data-token="{{ upgrade_status.token }}">
+<h1 id="updates-title">Updates</h1>
+<p>Installed application version: {{ modern_admin_version }}</p>
+<h2>Upgrade service: {{ upgrade_status.status|title }}</h2>
+{% if upgrade_status.started %}<p>Last start: {{ upgrade_status.started }}</p>{% endif %}
+{% if upgrade_status.finished %}<p>Last exit: {{ upgrade_status.finished }} — {{ upgrade_status.result }} (exit status {{ upgrade_status.exit_status }})</p>{% endif %}
+<p><a href="{{ url_for('indi_allsky.modern_admin_updates_view') }}">Refresh upgrade status</a></p>
+{% if upgrade_status.status == 'completed' %}<p>The service reports that its last run completed. Verify capture and both cameras after the upgrade.</p>{% elif upgrade_status.status == 'failed' %}<p role="alert">The last upgrade failed. Inspect logs and the installed state before retrying.</p>{% elif upgrade_status.status in ('unknown', 'unavailable') %}<p role="alert">The installed upgrade service could not be verified. Check service installation and logs.</p>{% elif upgrade_status.status == 'running' %}<p role="status">An upgrade is pending or running. Wait and refresh; another upgrade cannot be submitted now.</p>{% endif %}
+<p>The installed unattended upgrade script pulls from the repository's configured origin/main, updates dependencies and may migrate the database. Capture stops and the web interface may disconnect. This page does not check whether a newer release exists.</p>
+<p>Keep a verified backup and a recovery connection available before starting. A submitted job is not proof of successful completion.</p>
+<form id="upgrade-form">
+<fieldset id="upgrade-fields" {% if not upgrade_can_control or not upgrade_status.can_start %}disabled{% endif %} aria-describedby="upgrade-reason">
+<legend>Start an unattended upgrade</legend>
+<label><input type="checkbox" id="upgrade-backup">I have a verified backup and a recovery plan.</label><br>
+<label><input type="checkbox" id="upgrade-maintenance">I am ready for capture and web access to be interrupted.</label><br>
+<button type="submit">Start upgrade</button>
+</fieldset>
+</form>
+<p id="upgrade-reason">{% if not upgrade_can_control %}Administrator access is required.{% elif not upgrade_status.can_start %}Start is unavailable until the service is idle or its previous run has finished.{% else %}Confirm both conditions before starting.{% endif %}</p>
+<p id="upgrade-result" role="status" aria-live="polite"></p>
+<nav class="modern-admin-link-grid" aria-label="Upgrade recovery">
+<a href="{{ url_for('indi_allsky.modern_admin_config_history_view') }}">Configuration history and downloads</a>
+<a href="{{ url_for('indi_allsky.modern_admin_log_view') }}">System logs</a>
+<a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Check camera frames</a>
+</nav>
+</section></main>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/updates.js') }}"></script>
 {% endblock %}

@@ -1246,3 +1246,50 @@ uses RemainAfterExit: repeated Start after completion needs deliberate lifecycle
 handling before the UI can claim a new upgrade started. The script's capture
 stop also needs timer-aware maintenance review. These are not declared passed
 by the preflight correction. The fix is committed but not deployed to production.
+
+
+## Native Updates service lifecycle and command
+
+Updates now displays the installed application's version and the installed
+upgrade unit's actual state, start/exit times, result and exit status. It no longer
+claims Classic fallback is available or labels the supported upgrade as a future
+feature. It offers the existing unattended upgrade operation, which pulls the
+configured origin/main and can update dependencies and migrate the database.
+No network release-availability check is claimed.
+
+The new authenticated POST `/modern-admin/updates/start` requires administrator
+permission, CSRF, strict true backup/maintenance confirmations and the observed
+service token. A per-UID, no-follow, owner-checked file lock serializes submissions;
+under the lock the service state is reread. Pending jobs and running/unknown units
+are rejected, as is a confirmation of an obsolete start/exit/result state. An
+idle or failed unit uses StartUnit; a successfully exited oneshot uses RestartUnit
+because Start would otherwise do nothing with RemainAfterExit. The existing
+Hybrid free-space boundary runs before the effect. Acceptance returns 202 plus
+the job path, never a claim that upgrade completed. The legacy public system API
+remains available with its previous request shape.
+
+The controller disables submission while pending and after any response, clears
+confirmations, distinguishes expired sessions and asks for explicit refresh after
+network/non-JSON failures. It never automatically retries an uncertain operation.
+The page explains that capture/web access may stop, and links to configuration
+history, logs and camera frames. Configuration downloads are not presented as a
+complete system/database backup. Service result is not end-to-end camera recovery.
+
+`hybrid_updates_flow_test.py` passes with Classic imports forbidden and real
+Flask/SQLite: both roles, anonymous access, CSRF, strict confirmations, actual lock
+contention, stale confirmation, queued duplicate, completed oneshot restart,
+failed retry, and sanitized unavailable provider. Systemd commands are mocked.
+`hybrid_updates_browser_test.js` passes controller checks for confirmation,
+permissions, CSRF, pending and completed-request guards, accepted/failed/expired/
+lost responses. This is a JS controller test, not direct browser click evidence.
+All nineteen Book 2/modern_admin/Safe Actions/parity/Product/shell/composition/
+upgrade entrypoints pass. The historic route fingerprint is unchanged; the new
+POST route has a dedicated ownership/method/auth guard. Compilation and diff
+checks pass. Remote Flask log: `/tmp/hybrid-updates-flow.log`.
+
+A direct read-only call of the real DBus adapter on the Pi returned the installed
+`upgrade-indi-allsky.service` as idle, inactive/dead, with no prior start/exit and
+can_start=true. No StartUnit/RestartUnit was called on the live service. Direct
+browser acceptance, deployment and real unattended-upgrade/recovery acceptance
+remain open. Script timer handling and failure recovery remain separate work;
+the production capture soak was not intentionally interrupted by this mission.

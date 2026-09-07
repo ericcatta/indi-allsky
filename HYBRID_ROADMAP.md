@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Updates: pagina e comando Hybrid per l'upgrade unattended installato. Stato
+  systemd reale (idle/running/completed/failed/unavailable), conferme backup e
+  interruzione, permessi/CSRF, lock tra richieste e confronto dello stato visto.
+  Un oneshot completato usa RestartUnit; job pendenti respingono nuovi comandi.
+  Il browser non ripete automaticamente una richiesta dall'esito incerto.
+  Test isolati verdi e lettura live del servizio idle verificata; esecuzione
+  reale, recovery dello script e distribuzione della pagina ancora aperti.
+
 - Upgrade: il prerequisito spazio e la delega del comando sono ora nel boundary
   Hybrid `ModernAdminUpgradeCommandBoundary`. Corretto il confronto errato con
   capacita' totale: servono almeno 1000 MiB liberi sia su / sia su /var; letture

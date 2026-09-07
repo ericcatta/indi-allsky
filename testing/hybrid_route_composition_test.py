@@ -19,7 +19,7 @@ def test_route_contract_is_unchanged():
                 isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute)
                 and node.func.attr == 'add_url_rule'
-                and node.args[0].value not in ('/modern-admin/tools/focus/preview', '/media/<kind>/<int:camera_id>/<int:media_id>/original', '/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
+                and node.args[0].value not in ('/modern-admin/updates/start', '/modern-admin/tools/focus/preview', '/media/<kind>/<int:camera_id>/<int:media_id>/original', '/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
             ):
                 if node.args[0].value in ('/modern-admin/tools/camera-simulator', '/modern-admin/tools/generate', '/modern-admin/tools/image-circle-helper', '/modern-admin/tools/process-fits', '/modern-admin/tools/focus', '/modern-admin/system/gpio-control', '/modern-admin/storage/drives', '/modern-admin/system/network'):
                     template = next(k for k in node.keywords if k.arg == 'view_func').value
@@ -36,6 +36,19 @@ def test_route_contract_is_unchanged():
     fingerprint = hashlib.sha256('\n'.join(sorted(calls)).encode()).hexdigest()
     assert fingerprint == '17514e70700d7f9d255e1026f2ffb42d6bdf96db13a97e65b9cdb4d9e8233d92'
 
+
+
+def test_upgrade_route_is_hybrid_owned():
+    tree = ast.parse((FLASK / 'views.py').read_text())
+    registration = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'register_hybrid_routes')
+    calls = [n for n in ast.walk(registration) if isinstance(n, ast.Call)
+             and isinstance(n.func, ast.Attribute) and n.func.attr == 'add_url_rule'
+             and n.args[0].value == '/modern-admin/updates/start']
+    assert len(calls) == 1
+    assert "ModernAdminUpgradeStartView.as_view('modern_admin_upgrade_start_view')" in ast.unparse(calls[0])
+    view = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'ModernAdminUpgradeStartView')
+    assert "methods = ['POST']" in ast.unparse(view)
+    assert 'decorators = [login_required]' in ast.unparse(view)
 
 
 def test_account_route_is_hybrid_owned():
@@ -111,6 +124,7 @@ def test_classic_import_is_conditional_and_blueprints_are_per_app():
 
 if __name__ == '__main__':
     test_route_contract_is_unchanged()
+    test_upgrade_route_is_hybrid_owned()
     test_account_route_is_hybrid_owned()
     test_notification_ack_route_is_hybrid_owned()
     test_source_download_is_hybrid_owned()
