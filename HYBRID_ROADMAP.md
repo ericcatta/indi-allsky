@@ -19,13 +19,19 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - NOAA RTSW: adapter condiviso seleziona la sorgente attiva/valida e converte
   timestamp/campi protonici nel contratto storico; medie a 20 minuti invariate.
   Parita' e lettura dei cinque feed reali verificate su camera isolata. Adapter e
-  contenimento errori provider da distribuire dopo il difetto osservato sul Pi.
+  contenimento errori provider distribuiti con 775a19d0 il 2026-09-07 alle
+  10:09:50 CEST; entrambe le camere hanno salvato nuovi file dopo il riavvio.
+  Primo ciclo automatico: task aurora 10708/10709 riusciti, cinque componenti
+  aggiornati per entrambe le camere. Nuova baseline delle 24 ore, ancora aperte.
+  Evidenze della release:
+  `testing/evidence/hybrid-release-775a19d0-2026-09-07.json`.
 
 - Dispatch VIDEO multicamera: policy Hybrid distingue generazione/aurora/fumo
   per camera da TLE/backup/health check globali. Rimosso il blocco MVP su questi
   task periodici, riscontrato nel journal reale; rigetti ancora necessari hanno
   una motivazione persistita. Worker ed effetti invariati. Correzione distribuita con b65cd856 il 2026-09-07 alle 09:42:33 CEST;
-  file backup/aggiornamenti provider reali da verificare. Nuove 24 ore da questo avvio.
+  backup compresso verificato tramite ripristino in directory temporanea e SQLite
+  integrity check. Baseline corrente delle 24 ore: successivo deploy 775a19d0.
   Evidenze e rollback: `HYBRID_DEPLOYMENT.md`.
 
 - Sensor Panel: Hybrid possiede la costruzione delle righe, distinzione fra zero

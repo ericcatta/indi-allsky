@@ -3,10 +3,43 @@
 ## Completion gate
 
 The complete product audit is **open**. Detector/AI are deferred; their absence
-must be represented honestly. Classic has not been removed. Commit `b65cd856`
-was deployed to the live Raspberry on 2026-09-07 at 09:42:33 CEST. The 24-hour day/night observation
+must be represented honestly. Classic has not been removed. Commit `775a19d0`
+was deployed to the live Raspberry on 2026-09-07 at 10:09:50 CEST. The 24-hour day/night observation
 period restarted at that time and has not passed. The earlier interval is interrupted. Historical sections below retain the
 deployment status at the time of each mission; this section is the current status.
+
+## Verified mission: release 775a19d0 deployed with provider failure containment
+
+Evidence: `testing/evidence/hybrid-release-775a19d0-2026-09-07.json`.
+The clean release reconstruction matched all 1,116 tracked files before tests.
+All 81 Python/compile checks and 23 JavaScript entrypoints passed, including
+Full Config parity, Book 2, Hybrid Flask flows and provider/worker failure tests.
+These checks do not constitute exhaustive browser or hardware acceptance.
+
+A protected online SQLite backup (828,977,152 bytes, integrity ok) and Flask
+configuration copy were verified before maintenance. Sudo was authenticated
+before any service stop. Timer, capture and Apache were stopped; checkout was
+fast-forwarded from b65cd856 to 775a19d0; compilation and Apache configuration
+checks passed; services and the timer restarted at 10:09:50 CEST. Capture PID
+is 3284487. Existing untracked user files were preserved. Recovery instructions
+and backup location are in `HYBRID_DEPLOYMENT.md`.
+
+The 10:11:18 read-only snapshot confirms actual new image files for both cameras:
+IMX708 at 10:11:05 (518,414 bytes), ZWO at 10:11:10 (575,799 bytes). No queued or
+running tasks appeared in that sample; the periodic provider jobs had not yet
+run. The six known startup gain clamps were the only error lines in the sample.
+The subsequent 10:16:31 snapshot confirms automatic aurora tasks 10708/10709
+SUCCESS and all five component timestamps renewed for both cameras. Persisted
+Bt/Bz are 9.42/-6.46, plasma density/speed/temperature 16.34/372.24/140116,
+hemispheric powers 41/43. Both cameras continued writing files (8/26 images since
+restart). No new error class appeared. This proves the repaired live data flow,
+not independent scientific accuracy. Health, smoke and TLE jobs also report
+SUCCESS; smoke geographic coverage remains unverified. Task timestamps use UTC,
+whereas image/service timestamps here use local CEST; the evidence selects task
+IDs after the pre-deploy high-water mark to avoid mixing time bases.
+Direct browser verification is blocked by the locked Mac, not recorded as passed.
+The heartbeat baseline is updated to this deployment; 24-hour day/night stability,
+full UI acceptance, hardware and physical Classic removal remain open.
 
 ## Verified mission: current NOAA solar-wind adapter and real-feed acceptance
 

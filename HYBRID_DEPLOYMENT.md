@@ -3,24 +3,24 @@
 ## Installed release, 7 September 2026
 
 The Raspberry checkout `/home/eric/indi-allsky` runs
-`b65cd8560715b8878fbd44af7a8818f94cd67533`, deployed at 09:42:33 CEST.
-The previous installed revision was `faf53d8653b6c62588025e954688c8ee220a6ce8`.
+`775a19d0e8a300fa24c10b47495720f6b4bcf0e4`, deployed at 10:09:50 CEST.
+The previous installed revision was `b65cd8560715b8878fbd44af7a8818f94cd67533`.
 Classic is still enabled; this release does not remove it.
 
-The new 24-hour observation starts at 09:42:33. A service restart or capture/
+The new 24-hour observation starts at 10:09:50. A service restart or capture/
 scheduling correction requires a new observation period. Passing isolated tests
 and a fresh frame after deployment do not complete that requirement.
 
-Release evidence: `testing/evidence/hybrid-release-b65cd856-2026-09-07.json`.
+Release evidence: `testing/evidence/hybrid-release-775a19d0-2026-09-07.json`.
 On the Raspberry, detailed test logs are in
-`/home/eric/hybrid-release-evidence-b65cd856`.
+`/home/eric/hybrid-release-evidence-775a19d0`.
 
 ## Recovery assets
 
 Protected backup directory:
-`/home/eric/hybrid-backups/release-b65cd856-20260907-093949`.
+`/home/eric/hybrid-backups/release-775a19d0-20260907-100344`.
 It contains the online SQLite backup, copied Flask configuration, manifest and
-both deployment-attempt records. SQLite integrity was checked. Backup size is
+the deployment record. SQLite integrity was checked. Backup size is
 828,977,152 bytes. These files may contain credentials; keep their existing
 restricted permissions and do not attach them to public reports.
 
@@ -49,7 +49,7 @@ cd /home/eric/indi-allsky
   systemctl --user stop indi-allsky.timer
   systemctl --user stop indi-allsky.service
   sudo -n systemctl stop apache2
-  git reset --hard faf53d8653b6c62588025e954688c8ee220a6ce8
+  git reset --hard b65cd8560715b8878fbd44af7a8818f94cd67533
   /home/eric/indi-allsky/virtualenv/indi-allsky/bin/python -m compileall -q indi_allsky
   sudo -n /usr/sbin/apache2ctl configtest
 )
