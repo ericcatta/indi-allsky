@@ -13,6 +13,37 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Missing media record validation — 2026-09-09 (candidate, not deployed)
+
+Hybrid owns the 13-family validation policy in `ModernAdminMediaValidation`.
+The 315-line Flask implementation is replaced by a shared-service delegation;
+the service is 51 lines. No speed improvement is claimed. Every filesystem scan
+finishes before record deletions begin, with one commit and rollback on errors.
+Existing file bytes remain untouched. The old AJAX URL, all-camera scope and
+successful paragraph summary are preserved. One defect is intentionally fixed:
+nonempty remote URLs now protect records from deletion when no local file exists,
+as S3 references already did. Existing unsuccessful-output exclusions remain.
+
+System Info exposes “Remove missing media records” with explicit all-camera scope,
+storage-availability/backup guidance and administrator confirmation. Results render
+as text; committed summaries and failures are logged. Unconfirmed HTTP outcomes
+instruct the operator to check logs before retrying. An unavailable media mount
+can still look like missing local files: this operation must not run without
+checking the stated storage prerequisite.
+
+All 115 Python regression entries and 30 JavaScript tests passed. After that run,
+the error wording was refined to avoid promising a known commit outcome; the
+complete media-validation flow test passed again on the final source. The frozen
+legacy implementation, exact messages and remaining IDs were compared on real
+isolated tables for all families and both cameras. Scan/commit failure rollback,
+remote preservation, auth/CSRF and unchanged file bytes were verified. Evidence:
+`testing/evidence/hybrid-media-validation-2026-09-09.json`.
+
+No production cleanup or deployment occurred. Native browser/mobile acceptance
+remains open. The 00:14 read-only observation retained capture PID 4112458 with
+zero restarts, pending tasks or recorded errors. This is not 24-hour acceptance.
+Reload and expiration still require their own completion; Classic remains present.
+
 ## Shutdown and web service controls — 2026-09-09 (candidate, not deployed)
 
 Hybrid System Info adds a separate shutdown disclosure with an explicit recovery

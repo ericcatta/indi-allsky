@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Validazione media: Hybrid possiede selezione/verifica/rimozione dei record
+  mancanti per 13 famiglie, con parita' legacy e protezione aggiunta per URL
+  remoti. File preservati, rollback su errore e ambito globale dichiarato nella
+  UI. 115 verifiche Python, 30 JavaScript e verifica finale del messaggio d'errore;
+  non distribuito, nessun cleanup produzione. Evidenze:
+  `testing/evidence/hybrid-media-validation-2026-09-09.json`.
+
 - Spegnimento: policy Hybrid dedicata con gate rete amministrativa conservato;
   effetti login1 condivisi estratti dalle view Flask. Stop Gunicorn esposto con
   validazione Hybrid e spiegazione della disconnessione. 114 test Python e

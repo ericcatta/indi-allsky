@@ -69,7 +69,20 @@ var camera_id = {{ camera_id }};
                 </fieldset>
             </form>
         </details>
-        <p id="system-units-result" role="status" aria-live="polite"></p>
+        <details>
+            <summary>Remove missing media records</summary>
+            <p>Scan all cameras and remove database records whose local files are missing. Existing files, S3 records and media with a remote URL are kept. This does not check file contents or repair images.</p>
+            <p>Make sure all media disks are mounted and accessible before continuing. A missing disk could make valid local media appear missing. Keep a current database backup.</p>
+            <form class="system-validation-form" data-unit="system">
+                <fieldset {% if not system_units_can_control %}disabled{% endif %}>
+                    <legend>Media record cleanup — all cameras</legend>
+                    <input type="hidden" name="command" value="validate_db">
+                    <label><input type="checkbox" name="confirmed" required> I have checked storage availability and confirm removal of missing local media records from all cameras.</label>
+                    <button type="submit">Scan and remove missing records</button>
+                </fieldset>
+            </form>
+        </details>
+        <p id="system-units-result" style="white-space: pre-line" role="status" aria-live="polite"></p>
         <a href="{{ url_for('indi_allsky.modern_admin_system_info_view', camera_id=camera_id, profile_id=request.args.get('profile_id', '')) }}">Refresh service state</a>
     </section>
 </main>
