@@ -28,10 +28,19 @@ def run():
             assert saved.data['generation_outcome']['outputs'][2]['eligible_frames']==59
         endpoint='/indi-allsky/modern-admin/tasks/'+str(task_id)
         for uid in (1,2):
-            response=login_client(app,uid).get(endpoint)
+            client=login_client(app,uid)
+            response=client.get(endpoint)
             assert response.status_code==200,response.text[:500]
             assert 'Partial generation' in response.text and '59/250 eligible frames' in response.text
             assert 'test-profile-2' in response.text and 'Insufficient eligible frames' in response.text
+            import re
+            from html import unescape
+            for label in ('Keogram','Startrail'):
+                match=re.search(r'<a href="([^"]+)">Open '+re.escape(label)+r'</a>',response.text)
+                link={'href':unescape(match.group(1))} if match else None
+                assert link and 'camera_id=2' in link['href'] and 'profile_id=test-profile-2' in link['href']
+                assert client.get(link['href']).status_code==200
+            assert '>Open Startrail video</a>' not in response.text
         assert app.test_client().get(endpoint).status_code==302
         with app.app_context():
             kg=Keogram.query.filter_by(camera_id=2).first();st=Startrail.query.filter_by(camera_id=2).first()

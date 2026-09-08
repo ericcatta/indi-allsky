@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Risultati task: Hybrid possiede la risoluzione di ricevute e risultati video
+  storici verso i dettagli media, vincolata a camera, tipo e record DB.
+  Profilo conservato quando registrato; query Flask restano adapter. Generazione
+  e download non cambiano. Verificati output reali in isolamento; deploy e click
+  nativo dei nuovi collegamenti ancora da completare. Evidenze in
+  `testing/evidence/hybrid-task-output-navigation-2026-09-08.json`.
+
 - Panorama: pubblicazione completa per camera tramite adapter Hybrid condiviso,
   file prima dei metadati SQL, gestione duplicati/errori, anteprima globale solo
   primaria e API latest per-camera anche in focus/no-save. Policy multicamera

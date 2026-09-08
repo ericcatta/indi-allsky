@@ -105,6 +105,19 @@ def run(runtime_config, evidence=None):
                 for client in (admin,reader):
                     task_page=client.get('/indi-allsky/modern-admin/tasks/'+str(task_id))
                     assert task_page.status_code==200 and 'SUCCESS' in task_page.text and output.name in task_page.text
+                    from html import unescape
+                    label={'video':'Timelapse','mini-video':'Mini timelapse','panorama-video':'Panorama video'}[kind]
+                    match=re.search(r'<a href="([^"]+)">Open '+re.escape(label)+r'</a>',task_page.text)
+                    link={'href':unescape(match.group(1))} if match else None
+                    assert link and f'camera_id={cid}' in link['href'], (link, task.data, task.result)
+                    # Historical task payloads can omit profile metadata even when
+                    # the coordinator resolves a profile for the worker message.
+                    from urllib.parse import urlsplit, parse_qs
+                    recorded_profile=task.data.get('profile_id') or task.data.get('kwargs',{}).get('profile_id')
+                    query=parse_qs(urlsplit(link['href']).query)
+                    assert query.get('profile_id', [''])[0] == (recorded_profile or '')
+                    detail=client.get(link['href'])
+                    assert detail.status_code==200 and output.name in detail.text
                     download=client.get(f'/indi-allsky/modern-admin/media/{kind}/{cid}/{entry_id}/download')
                     assert download.status_code==200 and download.data==content
                     assert client.get(f'/indi-allsky/modern-admin/media/{kind}/{3-cid}/{entry_id}/download').status_code==404

@@ -56,6 +56,17 @@ var camera_id = {{ camera_id }};
         </dl>
     </section>
 
+    {% if modern_admin_task_outputs %}
+    <section class="modern-admin-table-panel" aria-label="Recorded outputs">
+        <h2>Recorded outputs</h2>
+        <div class="modern-admin-link-grid">
+            {% for output in modern_admin_task_outputs %}
+            <a href="{{ output.url }}">Open {{ output.label }}</a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
     {% if modern_admin_related_upload_task_id %}
     <section class="modern-admin-table-panel" aria-label="Upload delivery result">
         <h2>Upload delivery</h2>

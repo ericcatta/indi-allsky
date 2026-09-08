@@ -13,6 +13,32 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Task output navigation — 2026-09-08
+
+Native inspection found that successful task 10908 exposed only a video path,
+with no link to its result. Hybrid now resolves recorded generation outputs to
+its output detail pages. Database lookup is scoped to the task camera and action;
+recorded profiles are retained. Historical tasks with no profile keep neutral
+profile metadata rather than borrowing the worker's current profile. Failed,
+skipped, mismatched and duplicate receipt entries do not produce misleading links.
+Legacy video results require an exact database filename match inside the media root.
+
+The isolated suite passed all 108 Python entries after correcting and rerunning
+the extended video test, plus 29 JavaScript suites. Six real FFmpeg outputs cover
+both cameras and three video kinds, both authenticated roles, detail navigation,
+byte-identical downloads and cross-camera rejection. Keogram/Startrail partial
+results retain their valid links and omit the skipped video. Initial test failures
+and the successful rerun are retained in the evidence.
+
+Eight native task-list checks passed: back navigation, pagination, page size,
+empty search, keyboard clear/state filtering, combined filters, ID sorting and
+refresh with newly recorded tasks. The missing output link remains a production
+defect until this candidate is deployed and retested natively. Production remains
+80896495; capture was not restarted. CSV/Excel downloads, clipboard, other native
+roles and exhaustive task controls remain open.
+
+Evidence: [task results and browser matrix](testing/evidence/hybrid-task-output-navigation-2026-09-08.json).
+
 ## Native browser Keogram acceptance — 2026-09-08
 
 Fourteen bounded browser checks cover Observatory entry, Realtime Keogram camera

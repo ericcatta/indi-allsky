@@ -7333,6 +7333,24 @@ class ModernAdminTaskDetailView(ModernAdminTaskStatusView, TemplateView):
             abort(404)
 
         context['modern_admin_task_detail'] = service.build_task_detail(task)
+        from ..modern_admin_task_outputs import ModernAdminTaskOutputService
+        from .source_media_views import MEDIA_DOWNLOAD_MODELS
+
+        def lookup_output(kind, camera_id, record_id, filenames):
+            model = MEDIA_DOWNLOAD_MODELS[kind]
+            query = model.query.filter_by(camera_id=camera_id)
+            if record_id is not None:
+                query = query.filter_by(id=record_id)
+            else:
+                query = query.filter(model.filename.in_(filenames))
+            return query.order_by(model.id.desc()).first()
+
+        output_service = ModernAdminTaskOutputService(
+            self.indi_allsky_config['IMAGE_FOLDER'], lookup_output,
+            lambda **values: url_for('indi_allsky.modern_admin_output_detail_view', **values),
+        )
+        context['modern_admin_task_outputs'] = output_service.build_links(task)
+
         task_data = task.data if isinstance(task.data, dict) else {}
         upload = task_data.get('end_of_night_upload')
         upload_id = upload.get('task_id') if isinstance(upload, dict) else None
