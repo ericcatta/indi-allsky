@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Aggiornamento satelliti: il backend condiviso produce esiti per gruppo e
+  conserva i cataloghi precedenti su errore. Hybrid possiede la presentazione
+  esplicita dei risultati nel task; nessun successo completo su aggiornamento
+  parziale. Risposte validate prima della sostituzione SQL atomica. Regressione
+  e feed reali verificati in isolamento; worker non ancora distribuito.
+  Evidenze: `testing/evidence/hybrid-satellite-update-2026-09-08.json`.
+
 - Risultati task: Hybrid possiede la risoluzione di ricevute e risultati video
   storici verso i dettagli media, vincolata a camera, tipo e record DB.
   Profilo conservato quando registrato; query Flask restano adapter. Generazione

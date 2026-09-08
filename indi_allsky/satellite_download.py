@@ -1,152 +1,98 @@
-
-#from datetime import datetime
-#from datetime import timedelta
+"""Refresh shared satellite catalogs without discarding the last usable group."""
+import logging
 import socket
 import ssl
-import urllib3.exceptions
+
 import requests
-import logging
+import urllib3.exceptions
+from sqlalchemy.exc import SQLAlchemyError
 
 from . import constants
-
 from .flask import db
-from .flask.miscDb import miscDb
 from .flask.models import IndiAllSkyDbTleDataTable
 
 
 logger = logging.getLogger('indi_allsky')
 
 
+class SatelliteUpdateFailure(ValueError):
+    """A provider response cannot safely replace the saved catalog."""
+
+
 class IndiAllskyUpdateSatelliteData(object):
-
     tle_urls = {
-        constants.SATELLITE_VISUAL    : 'https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=tle',
-        constants.SATELLITE_STARLINK  : 'https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle',
-        constants.SATELLITE_STATIONS  : 'https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle',
+        constants.SATELLITE_VISUAL: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=tle',
+        constants.SATELLITE_STARLINK: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle',
+        constants.SATELLITE_STATIONS: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle',
     }
-
+    group_names = {
+        constants.SATELLITE_VISUAL: 'visual',
+        constants.SATELLITE_STARLINK: 'starlink',
+        constants.SATELLITE_STATIONS: 'stations',
+    }
 
     def __init__(self, config):
         self.config = config
 
-        self._miscDb = miscDb(self.config)
-
-
     def update(self):
-        for group, tle_url in self.tle_urls.items():
+        result = {'updated': [], 'failed': [], 'groups': []}
+        for group, url in self.tle_urls.items():
+            name = self.group_names[group]
+            row = {'group': group, 'name': name}
             try:
-                tle_data = self.download_tle(tle_url)
-            except socket.gaierror as e:
-                logger.error('Name resolution error: %s', str(e))
-                continue
-            except socket.timeout as e:
-                logger.error('Timeout error: %s', str(e))
-                continue
-            except requests.exceptions.ConnectTimeout as e:
-                logger.error('Connection timeout: %s', str(e))
-                continue
-            except requests.exceptions.ConnectionError as e:
-                logger.error('Connection error: %s', str(e))
-                continue
-            except requests.exceptions.ReadTimeout as e:
-                logger.error('Connection error: %s', str(e))
-                continue
-            except urllib3.exceptions.ReadTimeoutError as e:
-                logger.error('Connection error: %s', str(e))
-                continue
-            except ssl.SSLCertVerificationError as e:
-                logger.error('Certificate error: %s', str(e))
-                continue
-            except requests.exceptions.SSLError as e:
-                logger.error('Certificate error: %s', str(e))
-                continue
-
-
-            if isinstance(tle_data, type(None)):
-                # HTTP error condition
-                continue
-
-
-            # flush group entries
-            IndiAllSkyDbTleDataTable.query\
-                .filter(IndiAllSkyDbTleDataTable.group == group)\
-                .delete()
-            #db.session.commit()
-
-
-            self.import_entries(group, tle_data)
-
-
-
-        # remove old entries
-        #now_minus_30d = datetime.now() - timedelta(days=30)
-        #IndiAllSkyDbTleDataTable.query\
-        #    .filter(IndiAllSkyDbTleDataTable.createDate < now_minus_30d)\
-        #    .delete()
-        #db.session.commit()
-
+                count = self.import_entries(group, self.download_tle(url))
+            except SatelliteUpdateFailure as error:
+                row.update(status='failed', reason=str(error))
+            except (requests.exceptions.RequestException, socket.gaierror, socket.timeout,
+                    ssl.SSLCertVerificationError, urllib3.exceptions.ReadTimeoutError):
+                row.update(status='failed', reason='Network or TLS failure')
+            except SQLAlchemyError:
+                row.update(status='failed', reason='Database update failed')
+            else:
+                row.update(status='updated', entries=count)
+            result['groups'].append(row)
+            if row['status'] == 'updated':
+                result['updated'].append(name)
+            else:
+                result['failed'].append(name)
+                logger.error('Satellite group %s: %s; previous catalog retained', name, row['reason'])
+        return result
 
     def import_entries(self, group, tle_data):
-        tle_entry_list = list()
-
-        tle_iter = iter(tle_data.splitlines())
-        while True:
-            try:
-                title = next(tle_iter)
-            except StopIteration:
-                break
-
-
-            #if line.startswith('#'):
-            #    continue
-            #elif line == "":
-            #    continue
-
-
-            try:
-                line1 = next(tle_iter)
-                line2 = next(tle_iter)
-            except StopIteration:
-                logger.error('Error parsing TLE data')
-                db.session.rollback()
-                return
-
-
-            ### https://en.wikipedia.org/wiki/Two-line_element_set
-            try:
-                assert len(title) <= 24
-                assert len(line1) == 69
-                assert len(line2) == 69
-            except AssertionError:
-                logger.error('Error parsing TLE data')
-                db.session.rollback()
-                return
-
-
-            #logger.warning('Title: %s %s %s', title, line1, line2)
-
-            tle_entry = {
-                'title' : title.strip().upper(),
-                'line1' : line1.strip(),
-                'line2' : line2.strip(),
-                'group' : group,
-            }
-            tle_entry_list.append(tle_entry)
-
-
-        db.session.bulk_insert_mappings(IndiAllSkyDbTleDataTable, tle_entry_list)
-        db.session.commit()
-
-        logger.warning('Updated %d satellites', len(tle_entry_list))
-
+        # Validate the complete response before starting replacement. Empty,
+        # truncated or malformed HTTP-200 responses are not an empty catalog.
+        if not isinstance(tle_data, str) or not tle_data.strip():
+            raise SatelliteUpdateFailure('Empty TLE response')
+        lines = tle_data.splitlines()
+        if len(lines) % 3:
+            raise SatelliteUpdateFailure('Incomplete TLE record')
+        entries = []
+        for index in range(0, len(lines), 3):
+            title, line1, line2 = lines[index:index + 3]
+            if (not title.strip() or len(title) > 24 or len(line1) != 69 or len(line2) != 69
+                    or not line1.startswith('1 ') or not line2.startswith('2 ')
+                    or line1[2:7] != line2[2:7]):
+                raise SatelliteUpdateFailure('Malformed TLE record')
+            entries.append({'title': title.strip().upper(), 'line1': line1.strip(),
+                            'line2': line2.strip(), 'group': group})
+        # Delete and insert belong to one transaction. Failed insertion/commit
+        # rolls back this group while earlier successful groups remain committed.
+        try:
+            IndiAllSkyDbTleDataTable.query.filter(IndiAllSkyDbTleDataTable.group == group).delete()
+            db.session.bulk_insert_mappings(IndiAllSkyDbTleDataTable, entries)
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            raise
+        logger.warning('Updated %d satellites in group %s', len(entries), self.group_names[group])
+        return len(entries)
 
     def download_tle(self, url):
         logger.warning('Downloading %s', url)
-        r = requests.get(url, allow_redirects=True, verify=True, timeout=(15.0, 30.0))
-
-        if r.status_code >= 400:
-            logger.error('URL returned %d', r.status_code)
-            return None
-
-        return r.text
-
+        response = requests.get(url, allow_redirects=True, verify=True, timeout=(15.0, 30.0))
+        try:
+            if response.status_code >= 400:
+                raise SatelliteUpdateFailure('HTTP {0}'.format(response.status_code))
+            return response.text
+        finally:
+            response.close()

@@ -1994,9 +1994,13 @@ class VideoWorker(Process):
         task.setRunning()
 
         satellite = IndiAllskyUpdateSatelliteData(self.config)
-        satellite.update()
-
-        task.setSuccess('Satellite data updated')
+        result = satellite.update()
+        task.data = dict(task.data or {}, satellite_update_outcome=result)
+        if result['failed']:
+            task.setFailed('Satellite groups updated {0}/{1}; failed: {2}'.format(
+                len(result['updated']), len(result['groups']), ', '.join(result['failed'])))
+        else:
+            task.setSuccess('Satellite data updated')
 
 
     def backupDatabase(self, task, **kwargs):

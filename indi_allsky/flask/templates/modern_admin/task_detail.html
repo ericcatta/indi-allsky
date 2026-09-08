@@ -56,6 +56,17 @@ var camera_id = {{ camera_id }};
         </dl>
     </section>
 
+    {% if modern_admin_satellite_update_rows %}
+    <section class="modern-admin-table-panel" aria-labelledby="satellite-update-title">
+        <h2 id="satellite-update-title">Satellite update</h2>
+        <dl class="modern-admin-detail-list">
+            {% for group in modern_admin_satellite_update_rows %}
+            <div><dt>{{ group.label }}</dt><dd><strong>{{ group.status }}</strong> — {{ group.detail }}</dd></div>
+            {% endfor %}
+        </dl>
+    </section>
+    {% endif %}
+
     {% if modern_admin_task_outputs %}
     <section class="modern-admin-table-panel" aria-label="Recorded outputs">
         <h2>Recorded outputs</h2>

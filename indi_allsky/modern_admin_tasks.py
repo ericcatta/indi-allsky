@@ -166,6 +166,29 @@ class ModernAdminTaskReadService:
         }
 
 
+    def build_satellite_update_rows(self, task):
+        data = task.data if isinstance(getattr(task, 'data', None), dict) else {}
+        if data.get('action') != 'updateSatelliteTleData':
+            return []
+        outcome = data.get('satellite_update_outcome')
+        if not isinstance(outcome, dict) or not isinstance(outcome.get('groups'), list):
+            return []
+        rows = []
+        for name, label in (('visual', 'Visual satellites'), ('starlink', 'Starlink'), ('stations', 'Space stations')):
+            saved = next((row for row in outcome['groups'] if isinstance(row, dict) and row.get('name') == name), {})
+            count = saved.get('entries')
+            if saved.get('status') == 'updated' and type(count) is int and count > 0:
+                status, detail = 'Updated', '{0} satellites'.format(count)
+            elif saved.get('status') == 'failed':
+                status = 'Failed'
+                reason = saved.get('reason')
+                detail = (reason[:120] if isinstance(reason, str) else 'Update unavailable') + '; previous catalog retained'
+            else:
+                status, detail = 'Not reported', 'No result recorded for this group'
+            rows.append({'label': label, 'status': status, 'detail': detail})
+        return rows
+
+
     def get_task_data_value(self, task_data, key, default=''):
         if not isinstance(task_data, dict):
             return default

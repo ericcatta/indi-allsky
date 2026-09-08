@@ -13,6 +13,35 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Satellite group outcomes — 2026-09-08 (candidate, not deployed)
+
+The shared satellite updater now reports results for visual, Starlink and station
+catalogs separately. A failed group makes the worker task FAILED with an updated
+count; the persisted receipt and Hybrid detail show exactly which groups succeeded
+or failed. Prior usable data remain unchanged on network, HTTP, malformed/empty
+response and SQL failures. The full response is validated before DELETE, and
+replacement is transactional per group. Earlier successful groups remain committed.
+No orbital calculations, provider URLs, TLS settings or download timeouts changed.
+
+All 109 Python regression entries passed, including Full Config fingerprints,
+Settings, Safe Actions, Product Spine and Classic-disabled Flask integration.
+The new flow exercises a real SQLite trigger failure after deletion, seven bad
+response variants, network failures, recovery/repeat updates and both user roles.
+
+A separate real-provider check from the Pi at 22:15 imported 157 visual satellites,
+10,714 Starlink and 20 stations into isolated SQLite and rendered the persisted
+receipt for both roles. Production catalogs were only read to seed this test.
+The earlier 403 was intermittent; successful requests now do not prove permanent
+provider availability. This candidate has not been deployed to the worker; the
+production checkout remains `f695ea4c`, capture PID/start and its 24h window unchanged.
+
+Seven native notification navigation/filter/detail checks passed. No real alerts
+were acknowledged or deleted. Acknowledge effects, exports, other native roles and
+exhaustive controls remain open. Browser returned to Now. No JavaScript changed;
+this mission reran the Python regression, not the unchanged JavaScript suites.
+
+Evidence: [satellite outcome, real feeds and notification checks](testing/evidence/hybrid-satellite-update-2026-09-08.json).
+
 ## Task output deployment and native verification — 2026-09-08 22:01 CEST
 
 Release `f695ea4c` is installed. All 582 runtime files match the tested isolated

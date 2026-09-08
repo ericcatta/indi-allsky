@@ -7333,6 +7333,7 @@ class ModernAdminTaskDetailView(ModernAdminTaskStatusView, TemplateView):
             abort(404)
 
         context['modern_admin_task_detail'] = service.build_task_detail(task)
+        context['modern_admin_satellite_update_rows'] = service.build_satellite_update_rows(task)
         from ..modern_admin_task_outputs import ModernAdminTaskOutputService
         from .source_media_views import MEDIA_DOWNLOAD_MODELS
 

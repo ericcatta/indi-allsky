@@ -1,0 +1,706 @@
+{
+  "date": "2026-09-08",
+  "baseline": "86005f57",
+  "deployment": "Not deployed; production remains f695ea4c. Capture not restarted.",
+  "defects": [
+    "Task 10921 reported Satellite data updated despite HTTP 403 for Starlink.",
+    "An empty HTTP-200 response could commit removal of a catalog without replacement."
+  ],
+  "changes": [
+    "Each group reports updated count or a failure reason. Any failed group fails the task while retaining partial success details.",
+    "Entire response validated before DELETE; DELETE/INSERT commit together, SQL failure rolls back the group.",
+    "Response resources closed for success and HTTP errors. Existing URL, TLS verification and timeouts unchanged.",
+    "Hybrid task detail renders readable per-group status; historic tasks without a receipt keep existing detail."
+  ],
+  "candidate_sha256": {
+    "indi_allsky/satellite_download.py": "65346c46ed363903827d2e7bae05b1d5c4afe351e0aa6ea5d8b2cf58939e4339",
+    "indi_allsky/video.py": "81b574a420aa72a2bf0166ecb02a510476bdf3b152c99133f46717daef8031d6",
+    "indi_allsky/modern_admin_tasks.py": "507731940a09e8dba6a3f4f1ff4e81af8756c56afad29cfca706621abc3bc9e1",
+    "indi_allsky/flask/views.py": "8dbc67a892e4bcb5c4ca6155035abed73f6bd0e38aa92a9ac6debe29259c723e",
+    "indi_allsky/flask/templates/modern_admin/task_detail.html": "8b17db259acc0bd21ef4989cadf7e1bd0704573a6a71b0b52b884686351c42e1",
+    "testing/hybrid_satellite_update_flow_test.py": "b0fe33fe09f1bd0961072db9932a8d75ddd0034aa4b41fc0fdbf3521c73e0967"
+  },
+  "regression": {
+    "scope": "Isolated runtime overlay; not live hardware acceptance",
+    "root": "/home/eric/hybrid-acceptance-archive-return",
+    "count": 109,
+    "failed": [],
+    "cases": [
+      {
+        "case": "testing/auto_exposure_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/auto_gain_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/auto_gain_runtime_state_test.py",
+        "exit_code": 0,
+        "seconds": 0.11
+      },
+      {
+        "case": "testing/capture_profiles_test.py",
+        "exit_code": 0,
+        "seconds": 0.17
+      },
+      {
+        "case": "testing/capture_timeout_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.03
+      },
+      {
+        "case": "testing/focus_frames_test.py",
+        "exit_code": 0,
+        "seconds": 0.32
+      },
+      {
+        "case": "testing/full_config_parser_parity_test.py",
+        "exit_code": 0,
+        "seconds": 13.54
+      },
+      {
+        "case": "testing/generation_result_test.py",
+        "exit_code": 0,
+        "seconds": 0.11
+      },
+      {
+        "case": "testing/hybrid_account_input_test.py",
+        "exit_code": 0,
+        "seconds": 9.34
+      },
+      {
+        "case": "testing/hybrid_app_startup_test.py",
+        "exit_code": 0,
+        "seconds": 3.64
+      },
+      {
+        "case": "testing/hybrid_archive_flow_test.py",
+        "exit_code": 0,
+        "seconds": 12.35
+      },
+      {
+        "case": "testing/hybrid_astropanel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.68
+      },
+      {
+        "case": "testing/hybrid_astropanel_satellite_test.py",
+        "exit_code": 0,
+        "seconds": 2.83
+      },
+      {
+        "case": "testing/hybrid_aurora_failure_test.py",
+        "exit_code": 0,
+        "seconds": 1.72
+      },
+      {
+        "case": "testing/hybrid_aurora_rtsw_test.py",
+        "exit_code": 0,
+        "seconds": 1.67
+      },
+      {
+        "case": "testing/hybrid_aurora_status_test.py",
+        "exit_code": 0,
+        "seconds": 2.58
+      },
+      {
+        "case": "testing/hybrid_authenticated_flow_test.py",
+        "exit_code": 0,
+        "seconds": 6.58
+      },
+      {
+        "case": "testing/hybrid_camera_management_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.23
+      },
+      {
+        "case": "testing/hybrid_camera_management_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.22
+      },
+      {
+        "case": "testing/hybrid_camera_processing_status_test.py",
+        "exit_code": 0,
+        "seconds": 3.47
+      },
+      {
+        "case": "testing/hybrid_camera_simulator_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_settings_test.py",
+        "exit_code": 0,
+        "seconds": 4.09
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_test.py",
+        "exit_code": 0,
+        "seconds": 0.27
+      },
+      {
+        "case": "testing/hybrid_charts_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.38
+      },
+      {
+        "case": "testing/hybrid_compatibility_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 2.93
+      },
+      {
+        "case": "testing/hybrid_dark_library_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.42
+      },
+      {
+        "case": "testing/hybrid_database_backup_test.py",
+        "exit_code": 0,
+        "seconds": 1.67
+      },
+      {
+        "case": "testing/hybrid_drives_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.48
+      },
+      {
+        "case": "testing/hybrid_end_of_night_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.68
+      },
+      {
+        "case": "testing/hybrid_end_of_night_handoff_test.py",
+        "exit_code": 0,
+        "seconds": 1.72
+      },
+      {
+        "case": "testing/hybrid_exposure_pipeline_test.py",
+        "exit_code": 0,
+        "seconds": 0.46
+      },
+      {
+        "case": "testing/hybrid_fits_processing_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.18
+      },
+      {
+        "case": "testing/hybrid_fits_processing_parity_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/hybrid_focus_endpoint_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.48
+      },
+      {
+        "case": "testing/hybrid_focus_preview_parity_test.py",
+        "exit_code": 0,
+        "seconds": 2.32
+      },
+      {
+        "case": "testing/hybrid_focuser_effect_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58
+      },
+      {
+        "case": "testing/hybrid_gallery_isolation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.55
+      },
+      {
+        "case": "testing/hybrid_generated_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.97
+      },
+      {
+        "case": "testing/hybrid_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.73
+      },
+      {
+        "case": "testing/hybrid_generation_result_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.78
+      },
+      {
+        "case": "testing/hybrid_geometry_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.99
+      },
+      {
+        "case": "testing/hybrid_gpio_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.93
+      },
+      {
+        "case": "testing/hybrid_highlights_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.93
+      },
+      {
+        "case": "testing/hybrid_keogram_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.08
+      },
+      {
+        "case": "testing/hybrid_log_download_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.28
+      },
+      {
+        "case": "testing/hybrid_log_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.42
+      },
+      {
+        "case": "testing/hybrid_login_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 6.72
+      },
+      {
+        "case": "testing/hybrid_longterm_keogram_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.63
+      },
+      {
+        "case": "testing/hybrid_longterm_sampling_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.3
+      },
+      {
+        "case": "testing/hybrid_loop_statistics_test.py",
+        "exit_code": 0,
+        "seconds": 2.47
+      },
+      {
+        "case": "testing/hybrid_media_cleanup_failure_test.py",
+        "exit_code": 0,
+        "seconds": 10.57
+      },
+      {
+        "case": "testing/hybrid_mini_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.54
+      },
+      {
+        "case": "testing/hybrid_native_focus_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.73
+      },
+      {
+        "case": "testing/hybrid_network_command_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.43
+      },
+      {
+        "case": "testing/hybrid_now_page_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.93
+      },
+      {
+        "case": "testing/hybrid_observatory_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.13
+      },
+      {
+        "case": "testing/hybrid_operations_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.93
+      },
+      {
+        "case": "testing/hybrid_output_detail_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.08
+      },
+      {
+        "case": "testing/hybrid_panorama_cadence_test.py",
+        "exit_code": 0,
+        "seconds": 0.11
+      },
+      {
+        "case": "testing/hybrid_panorama_publication_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.78
+      },
+      {
+        "case": "testing/hybrid_public_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 6.86
+      },
+      {
+        "case": "testing/hybrid_realtime_history_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.77
+      },
+      {
+        "case": "testing/hybrid_realtime_preview_flow_test.py",
+        "exit_code": 0,
+        "seconds": 1.87
+      },
+      {
+        "case": "testing/hybrid_route_composition_test.py",
+        "exit_code": 0,
+        "seconds": 1.72
+      },
+      {
+        "case": "testing/hybrid_runtime_shell_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.44
+      },
+      {
+        "case": "testing/hybrid_satellite_update_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.24
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.48
+      },
+      {
+        "case": "testing/hybrid_session_revocation_test.py",
+        "exit_code": 0,
+        "seconds": 5.3
+      },
+      {
+        "case": "testing/hybrid_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.08
+      },
+      {
+        "case": "testing/hybrid_shell_test.py",
+        "exit_code": 0,
+        "seconds": 0.61
+      },
+      {
+        "case": "testing/hybrid_sky_cycle_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.03
+      },
+      {
+        "case": "testing/hybrid_source_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.17
+      },
+      {
+        "case": "testing/hybrid_table_export_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/hybrid_task_output_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/hybrid_task_visibility_test.py",
+        "exit_code": 0,
+        "seconds": 4.13
+      },
+      {
+        "case": "testing/hybrid_ui_inventory_parser_test.py",
+        "exit_code": 0,
+        "seconds": 0.11
+      },
+      {
+        "case": "testing/hybrid_updates_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.53
+      },
+      {
+        "case": "testing/hybrid_upgrade_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.38
+      },
+      {
+        "case": "testing/hybrid_upload_claim_test.py",
+        "exit_code": 0,
+        "seconds": 2.74
+      },
+      {
+        "case": "testing/hybrid_users_table_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.03
+      },
+      {
+        "case": "testing/hybrid_video_dispatch_test.py",
+        "exit_code": 0,
+        "seconds": 1.72
+      },
+      {
+        "case": "testing/hybrid_video_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 6.13
+      },
+      {
+        "case": "testing/hybrid_video_failure_test.py",
+        "exit_code": 0,
+        "seconds": 2.43
+      },
+      {
+        "case": "testing/hybrid_youtube_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.13
+      },
+      {
+        "case": "testing/legacy_auto_gain_steps_test.py",
+        "exit_code": 0,
+        "seconds": 0.16
+      },
+      {
+        "case": "testing/modern_admin_boundary_test.py",
+        "exit_code": 0,
+        "seconds": 0.51
+      },
+      {
+        "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/modern_admin_log_reader_test.py",
+        "exit_code": 0,
+        "seconds": 0.51
+      },
+      {
+        "case": "testing/modern_admin_media_camera_filter_test.py",
+        "exit_code": 0,
+        "seconds": 0.16
+      },
+      {
+        "case": "testing/modern_admin_media_metadata_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/modern_admin_media_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.11
+      },
+      {
+        "case": "testing/modern_admin_notification_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.11
+      },
+      {
+        "case": "testing/modern_admin_observatory_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/modern_admin_runtime_providers_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/modern_admin_settings_contracts_test.py",
+        "exit_code": 0,
+        "seconds": 0.11
+      },
+      {
+        "case": "testing/modern_admin_settings_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.11
+      },
+      {
+        "case": "testing/modern_admin_system_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/modern_admin_task_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/modern_safe_action_test.py",
+        "exit_code": 0,
+        "seconds": 0.16
+      },
+      {
+        "case": "testing/multicamera_processor_isolation_test.py",
+        "exit_code": 0,
+        "seconds": 1.92
+      },
+      {
+        "case": "testing/network_activation_polling_test.py",
+        "exit_code": 0,
+        "seconds": 0.26
+      },
+      {
+        "case": "testing/network_commands_test.py",
+        "exit_code": 0,
+        "seconds": 0.06
+      },
+      {
+        "case": "testing/network_scan_effects_test.py",
+        "exit_code": 0,
+        "seconds": 0.21
+      },
+      {
+        "case": "testing/product_spine_regression_test.py",
+        "exit_code": 0,
+        "seconds": 0.11
+      },
+      {
+        "case": "testing/product_view_models_test.py",
+        "exit_code": 0,
+        "seconds": 0.36
+      },
+      {
+        "case": "testing/sftp_adapter_test.py",
+        "exit_code": 0,
+        "seconds": 0.16
+      },
+      {
+        "case": "testing/stretch_multicamera_mask_test.py",
+        "exit_code": 0,
+        "seconds": 0.21
+      },
+      {
+        "case": "hybrid_archive_flow_test.py:library",
+        "exit_code": 0,
+        "seconds": 12.39
+      },
+      {
+        "case": "compileall",
+        "exit_code": 0,
+        "seconds": 0.06
+      }
+    ]
+  },
+  "targeted_cases": [
+    "HTTP 403 partial update preserves previous Starlink rows and timestamps",
+    "Seven empty/incomplete/malformed feed cases retain the group",
+    "Timeout, SSL and redirect errors retain prior data",
+    "Real SQLite trigger failure after DELETE rolls back that group",
+    "Other groups and unrelated catalog remain usable",
+    "Recovery and repeat valid update do not duplicate records",
+    "Real worker task state and outcome persist, unrelated payload preserved",
+    "Admin and reader see group details with Classic disabled; anonymous redirected"
+  ],
+  "live_provider": {
+    "observed_at": "2026-09-08T22:15:01.430663+02:00",
+    "scope": "Real CelesTrak requests from Pi; production catalogs read-only seed, writes only isolated SQLite. No production task or capture mutation.",
+    "before": {
+      "800": {
+        "entries": 157,
+        "sha256": "ccc5c40b31c82a94982d7c45af5bea8636a81d09302c4881e6fc07bee32c824b"
+      },
+      "801": {
+        "entries": 10715,
+        "sha256": "01db3f98544315a210738131bc0280961f806ee76c3a0f3d2f89bfecaaa04fdd"
+      },
+      "802": {
+        "entries": 21,
+        "sha256": "599b265c7a673cd7e29ba8027e33120e29029702a26a9cc88de685afc361f527"
+      }
+    },
+    "after": {
+      "800": {
+        "entries": 157,
+        "sha256": "ccc5c40b31c82a94982d7c45af5bea8636a81d09302c4881e6fc07bee32c824b"
+      },
+      "801": {
+        "entries": 10714,
+        "sha256": "b5160a710d92df0748b7e1868d68631cfa1b0ed4efbe89c26e327e27e115d677"
+      },
+      "802": {
+        "entries": 20,
+        "sha256": "2831aceb751738d73fafd9e397100b531264f45a8ae813821fec35b420f27c21"
+      }
+    },
+    "outcome": {
+      "updated": [
+        "visual",
+        "starlink",
+        "stations"
+      ],
+      "failed": [],
+      "groups": [
+        {
+          "group": 800,
+          "name": "visual",
+          "status": "updated",
+          "entries": 157
+        },
+        {
+          "group": 801,
+          "name": "starlink",
+          "status": "updated",
+          "entries": 10714
+        },
+        {
+          "group": 802,
+          "name": "stations",
+          "status": "updated",
+          "entries": 20
+        }
+      ]
+    },
+    "task_state": "SUCCESS",
+    "task_result": "Satellite data updated",
+    "hybrid_roles": [
+      1,
+      2
+    ]
+  },
+  "native_notifications": {
+    "version": "f695ea4c",
+    "session": "Existing authenticated browser session; role not independently switched",
+    "cases": [
+      {
+        "id": "notifications-menu",
+        "outcome": "superato",
+        "evidence": "Menu opened Notifications; 100 latest records, 98 unacknowledged."
+      },
+      {
+        "id": "notifications-acked-filter",
+        "outcome": "superato",
+        "evidence": "Acked filter showed only records 169 and 168, both Yes."
+      },
+      {
+        "id": "notifications-acked-detail",
+        "outcome": "superato",
+        "evidence": "Details opened record 169; already acknowledged message, no duplicate action offered."
+      },
+      {
+        "id": "notifications-back",
+        "outcome": "superato",
+        "evidence": "Back to Notifications restored list and filters."
+      },
+      {
+        "id": "notifications-category",
+        "outcome": "superato",
+        "evidence": "Media filter showed 31 matches; all 20 visible first-page rows categorized Media."
+      },
+      {
+        "id": "notifications-combined-empty",
+        "outcome": "superato",
+        "evidence": "Media plus ImageWorker yielded zero results and explicit No records match the current filters."
+      },
+      {
+        "id": "notifications-refresh",
+        "outcome": "superato",
+        "evidence": "Refresh restored 100 records, first ID 170; no console errors. Returned to Now."
+      }
+    ],
+    "not_tested": [
+      "Acknowledge mutation on a dedicated test record",
+      "Exports and clipboard",
+      "Other native roles",
+      "All filters/sort/page sizes",
+      "Mobile notification layout"
+    ],
+    "mutations": "No notifications acknowledged or deleted."
+  },
+  "limits": [
+    "Successful real feed requests at 22:15 do not imply the earlier HTTP 403 is permanently resolved.",
+    "No production task rewritten and no worker deployed or restarted. Native rendering of this new receipt remains pending deploy.",
+    "Full UI audit, Classic removal and 24-hour capture verification remain open."
+  ]
+}
