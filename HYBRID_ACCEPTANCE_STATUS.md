@@ -13,6 +13,33 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Navigation without Classic — 2026-09-08 (candidate, not deployed)
+
+All 56 URL paths registered by `classic_views.register_classic_routes` now have
+explicit Hybrid navigation destinations when Classic is disabled. The independent
+`navigation_redirects` module never imports Classic or renders a Classic template.
+It preserves camera/profile, timestamps and repeated query pairs, appending them
+after building the trusted local destination. Request keys such as `_external`,
+`_scheme` and `next` cannot choose the redirect host. GET/HEAD redirects do not
+submit actions. When Classic is enabled its original routes remain unchanged.
+
+The focused integration test passed with Classic import forbidden for all 56
+paths and three roles, including local destinations and query preservation. It
+followed account, Settings, users and RAW Loop to their actual pages; anonymous
+account access still reaches login. Public latest/media, JSON/AJAX, configuration
+download, Sync and Action handlers remain separately registered. The full route
+fingerprint is unchanged; the disabled-mode startup check now expects a working
+Hybrid Settings redirect instead of `/config` returning 404.
+
+This is navigation continuity, not a claim that every destination has full live
+acceptance. Old latest-image navigation variants map to the corresponding Hybrid
+Now/media browse pages; dedicated public media/latest URLs keep their handlers.
+Anonymous destination behavior follows each Hybrid page's own access policy and
+still needs the complete public-navigation acceptance review before retirement.
+All 112 Python regression entries passed. Evidence, destination map and hashes:
+`testing/evidence/hybrid-navigation-redirects-2026-09-08.json`.
+No deployment, default-flag change or Classic removal occurred in this mission.
+
 ## Production release 498ba959 — 2026-09-08 23:21:17 CEST
 
 Installed all pending runtime corrections through `498ba959`: RAW Loop and

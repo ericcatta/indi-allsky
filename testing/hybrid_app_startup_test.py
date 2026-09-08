@@ -114,7 +114,9 @@ def check_startup(config_path, classic_enabled):
         response = client.get('/indi-allsky/modern-admin/tasks')
         assert response.status_code == 302 and '/login' in response.location
         if not classic_enabled:
-            assert client.get('/indi-allsky/config').status_code == 404
+            response = client.get('/indi-allsky/config?camera_id=2&profile_id=wide')
+            assert response.status_code == 302
+            assert response.location == '/indi-allsky/modern-admin/settings/full?camera_id=2&profile_id=wide'
         print('Real Flask startup, static serving, auth and CSRF passed; Classic={0}'.format(classic_enabled))
 
 

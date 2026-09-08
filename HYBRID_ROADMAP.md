@@ -357,6 +357,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   browser rimangono scaricabili. Collaudo e deploy descritti in acceptance status.
 
 - Classic frontend isolation:
+  - i 56 ingressi di navigazione Classic hanno redirect indipendenti registrati
+    soltanto con Classic disabilitato, verso destinazioni Hybrid esplicite.
+    Camera/profilo e query ripetute sono conservati; API/media pubblici restano
+    handler separati. Flag predefinito e frontend operativo non sono cambiati;
   - il bookmark di cambio modalita' non richiede piu' la route Config Classic:
     con Classic assente apre Full Settings Hybrid, mentre Modern apre Now
     direttamente, conservando camera/profilo e parametri ripetuti. Login e

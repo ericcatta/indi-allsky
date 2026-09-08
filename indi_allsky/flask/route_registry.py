@@ -17,4 +17,7 @@ def create_allsky_blueprint(*, enable_classic_ui=True):
     if enable_classic_ui:
         from .classic_views import register_classic_routes
         register_classic_routes(bp_allsky)
+    else:
+        from .navigation_redirects import register_navigation_redirects
+        register_navigation_redirects(bp_allsky)
     return bp_allsky
