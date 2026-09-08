@@ -46,6 +46,9 @@ def run(runtime_config, evidence=None):
             from indi_allsky.uploader import FileUploader
         with app.app_context():
             config=deepcopy(db.session.get(Config,1).data)
+            for cid,profile in enumerate(config['MULTI_CAMERA']['profiles'],1):
+                profile.pop('db_camera_id',None)
+                profile['indi']={'camera_name':'Test Camera '+str(cid)}
             config['FILETRANSFER']={'UPLOAD_ENDOFNIGHT':True,'REMOTE_ENDOFNIGHT_FOLDER':'pending/{camera_uuid}',
                 'HOST':'127.0.0.1','USERNAME':getpass.getuser(),'PASSWORD':'',
                 'CERT_BYPASS':False,'CLASSNAME':'paramiko_sftp','PORT':22}

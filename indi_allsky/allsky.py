@@ -690,7 +690,11 @@ class IndiAllSky(object):
         profile_id = self.capture_profiles[0].profile_id
 
         if self.multi_camera_capture_enable:
-            profile_id = video_task_profile_id(self.config, camera_id, profile_id)
+            camera = db.session.get(IndiAllSkyDbCameraTable, camera_id) if camera_id else None
+            profile_id = video_task_profile_id(
+                self.config, camera_id, profile_id,
+                camera_name=camera.name if camera is not None and camera.local else None,
+            )
             rejection = multicamera_rejection(action, camera_id)
             if rejection:
                 logger.warning('Skipping VIDEO task %d action=%s: %s', task.id, action, rejection)

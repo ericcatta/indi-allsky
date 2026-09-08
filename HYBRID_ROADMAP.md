@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Routing task con profili senza ID DB: preflight reale ha mostrato che i profili
+  correnti usano l'identita' camera configurata. La policy Hybrid risolve ora
+  anche corrispondenze esatte e univoche dei nomi locali; gli ID espliciti hanno
+  precedenza. Nessun fallback per ordine, sottostringa o camera remota.
+  Valutazione read-only della revisione 110: camera 1 `imx708-wide`, camera 2
+  `asi678mc`. Distribuzione ancora da eseguire dopo la regressione aggiornata.
+
 - Upload EndOfNight multicamera: la policy Hybrid ammette il comando per camera,
   prima accettato dalla UI ma scartato dal coordinatore. Percorso completo
   richiesta/worker/SFTP provato su cartelle loopback temporanee per entrambe le

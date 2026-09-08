@@ -13,6 +13,32 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Production preflight and profile identity resolution — 2026-09-08
+
+Preflight confirmed production at `4b009133`, capture PID 3566586 since 12:01:07,
+configuration revision 110, no pending tasks and 60 GiB available. EndOfNight
+upload is disabled. All 571 runtime files initially matched the tested staging
+candidate `4a928942`. Deployment paused before any service/configuration changes
+because the real profiles have no explicit DB camera IDs: the earlier dispatch
+policy would give their jobs neutral `default` metadata.
+
+The coordinator now reads the local camera identity and passes it to the Hybrid
+policy. Explicit ID bindings keep precedence; otherwise only an exact configured
+camera name (including nested INDI names or a libcamera interface identity) with
+one matching profile is used. No substring, row-order or remote-camera fallback
+is allowed. Missing/ambiguous matches remain neutral. The policy has no database
+or view dependency, and saved configuration is unchanged.
+
+Read-only evaluation against actual revision 110 resolves camera 1 to
+`imx708-wide` and camera 2 to `asi678mc`. The real coordinator test covers named
+profiles and excludes remote-camera matching. The full request/worker/SFTP test
+also passes without explicit IDs, including success/failure and duplicate tasks
+for both cameras. All 96 regression entrypoints passed, including Book 2,
+Full Config parity, Settings, Safe Actions and Product Spine/View Models. All
+four source hashes match the tested candidate and `git diff --check` passed.
+These are isolated effects; **production remains unchanged**.
+See `testing/evidence/hybrid-profile-routing-2026-09-08.json`.
+
 ## EndOfNight request through actual SFTP delivery — 2026-09-08
 
 The real Hybrid request was accepted but the multicamera coordinator expired it
