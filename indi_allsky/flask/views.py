@@ -7456,15 +7456,6 @@ class AjaxSystemInfoView(BaseView):
                 }
                 return jsonify(errors_data), 400
 
-        elif service == app.config['GUNICORN_SERVICE_NAME']:
-            if command == 'stop':
-                r = self.stopSystemdUnit(app.config['GUNICORN_SERVICE_NAME'])
-            else:
-                errors_data = {
-                    'COMMAND_HIDDEN' : ['Unhandled command'],
-                }
-                return jsonify(errors_data), 400
-
         elif service == app.config['UPGRADE_ALLSKY_SERVICE_NAME']:
             from ..modern_safe_action import ModernAdminUpgradeCommandBoundary
             result = ModernAdminUpgradeCommandBoundary(
@@ -7496,19 +7487,15 @@ class AjaxSystemInfoView(BaseView):
 
                 r = action_result.details['service_result']
             elif command == 'poweroff':
-                if not self.verify_admin_network():
-                    json_data = {
-                        'form_global' : ['Request not from admin network (flask.json)'],
-                    }
-                    return jsonify(json_data), 400
-
-                try:
-                    r = self.poweroffSystemd()
-                except dbus.exceptions.DBusException as e:
-                    json_data = {
-                        'form_global' : [str(e)],
-                    }
-                    return jsonify(json_data), 400
+                from ..modern_safe_action import ModernAdminPowerOffCommandBoundary
+                result = ModernAdminPowerOffCommandBoundary(
+                    effect_adapter=lambda command: self.poweroffSystemd(),
+                ).run(command=command,
+                      authorized=bool(app.config['LOGIN_DISABLED'] or current_user.is_admin),
+                      admin_network=self.verify_admin_network())
+                if not result.allowed:
+                    return jsonify(form_global=[result.message]), (503 if result.status == 'effect_unconfirmed' else 400)
+                r = result.details['service_result']
             elif command == 'validate_db':
                 message_list = self.validateDbEntries()
 
@@ -7653,12 +7640,8 @@ class AjaxSystemInfoView(BaseView):
 
 
     def rebootSystemd(self):
-        system_bus = dbus.SystemBus()
-        systemd1 = system_bus.get_object('org.freedesktop.login1', '/org/freedesktop/login1')
-        manager = dbus.Interface(systemd1, 'org.freedesktop.login1.Manager')
-        r = manager.Reboot(False)
-
-        return r
+        from ..modern_admin_runtime_effects import ModernAdminLogin1PowerEffects
+        return ModernAdminLogin1PowerEffects(dbus).reboot()
 
 
     def run_system_power_command(self, command):
@@ -7668,12 +7651,8 @@ class AjaxSystemInfoView(BaseView):
 
 
     def poweroffSystemd(self):
-        system_bus = dbus.SystemBus()
-        systemd1 = system_bus.get_object('org.freedesktop.login1', '/org/freedesktop/login1')
-        manager = dbus.Interface(systemd1, 'org.freedesktop.login1.Manager')
-        r = manager.PowerOff(False)
-
-        return r
+        from ..modern_admin_runtime_effects import ModernAdminLogin1PowerEffects
+        return ModernAdminLogin1PowerEffects(dbus).poweroff()
 
 
     def flushImages(self, camera_id):
@@ -10685,6 +10664,7 @@ class ModernAdminSystemInfoView(ModernAdminSystemToolView, SystemInfoView):
         from ..modern_admin_system_units import ModernAdminSystemUnits
         context['system_units'] = ModernAdminSystemUnits(app.config).rows(context)
         context['system_units_can_control'] = bool(app.config['LOGIN_DISABLED'] or current_user.is_admin)
+        context['system_poweroff_can_control'] = context['system_units_can_control'] and self.verify_admin_network()
         return context
 
 

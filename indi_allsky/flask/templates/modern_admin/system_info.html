@@ -40,7 +40,7 @@ var camera_id = {{ camera_id }};
         </dl>
     </section>
     <section class="modern-admin-table-panel" id="system-units" data-url="{{ url_for('indi_allsky.ajax_system_view') }}" data-csrf="{{ csrf_token() }}" data-camera="{{ camera_id }}" aria-labelledby="system-controls-title">
-        <h2 id="system-controls-title">INDI and automatic start</h2>
+        <h2 id="system-controls-title">Service controls</h2>
         <p>These controls affect the whole device, not just the selected camera. Stopping INDI interrupts cameras connected through INDI.</p>
         <p>Enable and disable change automatic activation of the timer. They do not start or stop a running timer or capture. Use the capture controls for immediate capture changes.</p>
         {% if not system_units_can_control %}<p>Administrator access is required to change services.</p>{% endif %}
@@ -49,12 +49,26 @@ var camera_id = {{ camera_id }};
             <fieldset {% if not system_units_can_control %}disabled{% endif %}>
                 <legend>{{ unit.label }}</legend>
                 <p>Current state: {{ unit.active }} / {{ unit.enabled }}</p>
+                {% if unit.commands == ('stop',) %}<p>Stopping the web service can disconnect this interface. An active socket may start it again on the next request. Keep SSH or another recovery connection available.</p>{% endif %}
                 <label>Action <select name="command">{% for command in unit.commands %}<option value="{{ command }}">{{ command|title }}</option>{% endfor %}</select></label>
                 <label><input type="checkbox" name="confirmed" required> I confirm this device-wide change.</label>
                 <button type="submit">Apply to {{ unit.label }}</button>
             </fieldset>
         </form>
         {% endfor %}
+        <details>
+            <summary>Shut down the device</summary>
+            <p>Shutdown stops all cameras and the web interface. You will need physical access or an independent power controller to turn the device on again.</p>
+            {% if not system_units_can_control %}<p>Administrator access is required.</p>{% elif not system_poweroff_can_control %}<p>Shutdown is available only from a configured administrator network.</p>{% endif %}
+            <form class="system-poweroff-form" data-unit="system">
+                <fieldset {% if not system_poweroff_can_control %}disabled{% endif %}>
+                    <legend>Device shutdown</legend>
+                    <input type="hidden" name="command" value="poweroff">
+                    <label><input type="checkbox" name="confirmed" required> I am ready to stop all acquisition and can turn this device on again.</label>
+                    <button type="submit">Shut down device</button>
+                </fieldset>
+            </form>
+        </details>
         <p id="system-units-result" role="status" aria-live="polite"></p>
         <a href="{{ url_for('indi_allsky.modern_admin_system_info_view', camera_id=camera_id, profile_id=request.args.get('profile_id', '')) }}">Refresh service state</a>
     </section>

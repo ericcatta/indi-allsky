@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Spegnimento: policy Hybrid dedicata con gate rete amministrativa conservato;
+  effetti login1 condivisi estratti dalle view Flask. Stop Gunicorn esposto con
+  validazione Hybrid e spiegazione della disconnessione. 114 test Python e
+  30 JavaScript; candidato non distribuito, collaudo fisico ancora aperto.
+  Evidenze: `testing/evidence/hybrid-system-power-2026-09-09.json`.
+
 - System Info: Hybrid possiede comandi e presentazione per start/stop INDI e
   abilitazione/disabilitazione dei timer INDI/capture. Effetti D-Bus condivisi,
   semantica timer conservata, autorizzazione e CSRF invariati. 113 verifiche

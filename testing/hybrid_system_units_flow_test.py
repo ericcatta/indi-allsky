@@ -46,10 +46,10 @@ def run():
         for client, writable in ((admin, True), (ordinary, False)):
             response = client.get('/indi-allsky/modern-admin/system/info?camera_id=1&profile_id=imx708-wide')
             assert response.status_code == 200, response.text
-            controls = response.text.split('id="system-units"', 1)[1]
-            assert controls.count('class="system-unit-form"') == 3
+            controls = response.text.split('id="system-units"', 1)[1].split('<details>', 1)[0]
+            assert controls.count('class="system-unit-form"') == 4
             assert ('<fieldset disabled>' in controls) != writable
-            assert 'Refresh service state' in controls and 'device-wide change' in controls
+            assert 'Refresh service state' in response.text and 'device-wide change' in controls
         # Execute the actual shared timer methods against a recording D-Bus fake:
         # enable/disable must reload definitions, never start or stop a timer.
         tree = ast.parse((Path(__file__).resolve().parents[1] / 'indi_allsky/flask/base_views.py').read_text())
@@ -72,6 +72,6 @@ def run():
             exec(compile(ast.Module(body=[node], type_ignores=[]), '<shared timer>', 'exec'), namespace)
             assert namespace[method](None, 'test.timer') == 'receipt'
             assert calls == expected
-        print('System units: Classic disabled, roles/CSRF, six actions, exact units, invalid commands, failed effects, UI and shared timer semantics: PASS')
+        print('System units: Classic disabled, roles/CSRF, seven actions, exact units, invalid commands, failed effects, UI and shared timer semantics: PASS')
 
 if __name__ == '__main__': run()

@@ -13,6 +13,28 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Shutdown and web service controls — 2026-09-09 (candidate, not deployed)
+
+Hybrid System Info adds a separate shutdown disclosure with an explicit recovery
+confirmation and an enabled control only for administrators on the configured
+admin network. The same network gate is owned by `ModernAdminPowerOffCommandBoundary`
+and enforced again on POST. Unknown effect outcomes return a sanitized 503.
+`ModernAdminLogin1PowerEffects` now owns the exact shared SystemBus login1
+Reboot(False)/PowerOff(False) calls independently of Flask views. Reboot policy
+and the existing AJAX URL/success payload remain unchanged.
+
+The existing Gunicorn stop action is now exposed with a disconnection/socket
+activation explanation and uses Hybrid configured-unit validation. Classic's
+Start button had no supported backend command; Hybrid does not advertise it.
+All 114 Python regression entries and 30 JavaScript tests passed. Evidence and
+control matrix: `testing/evidence/hybrid-system-power-2026-09-09.json`.
+The initial rendering-test failure and its corrected assertion are recorded.
+
+No real shutdown, reboot or web-service stop was performed. Native browser,
+mobile and live maintenance acceptance remain open. No deployment or capture
+restart occurred. Capture reload and database validation/expiry still need their
+own entrance/parity review; these controls do not close the entire System domain.
+
 ## INDI and automatic-start controls — 2026-09-08 (candidate, not deployed)
 
 Hybrid System Info now exposes INDI start/stop and enable/disable for the INDI

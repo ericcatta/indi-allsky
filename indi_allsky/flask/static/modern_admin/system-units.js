@@ -23,7 +23,9 @@
             }
             const data = await response.json();
             if (response.ok && data['success-message']) {
-                result.textContent = 'Request accepted. Refresh service state to verify the result.';
+                result.textContent = payload.COMMAND_HIDDEN === 'poweroff'
+                    ? 'Shutdown request accepted. The connection will close; verify shutdown on the device. Turn it on again before reconnecting.'
+                    : 'Request accepted. Refresh service state to verify the result.';
             } else {
                 result.textContent = Object.values(data).flat().join(' ') || 'Request not confirmed. Refresh service state before retrying.';
             }

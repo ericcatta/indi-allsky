@@ -1586,6 +1586,32 @@ class ModernAdminSystemPowerCommandBoundary:
         )
 
 
+class ModernAdminPowerOffCommandBoundary(ModernAdminSystemPowerCommandBoundary):
+    """Keep shutdown separate from reboot and restrict it to the admin network."""
+
+    action_id = 'system.poweroff'
+    DEFAULT_COMMANDS = {'poweroff': 'powered off'}
+
+    def run(self, command=None, actor=None, payload=None, *, authorized=False, admin_network=False):
+        if not authorized or not admin_network:
+            return ModernAdminSafeActionResult(
+                action_id=self.action_id, feature=self.feature, risk_level=self.risk_level,
+                status='authorization_failed', dry_run=False, allowed=False,
+                message=('Administrator access is required.' if not authorized
+                         else 'Request not from admin network (flask.json)'),
+                details={},
+            )
+        try:
+            return super().run(command=command, actor=actor, payload=payload)
+        except Exception:
+            return ModernAdminSafeActionResult(
+                action_id=self.action_id, feature=self.feature, risk_level=self.risk_level,
+                status='effect_unconfirmed', dry_run=False, allowed=False,
+                message='Shutdown outcome could not be confirmed. Check the device before retrying.',
+                details={},
+            )
+
+
 class ModernAdminGeneratedOutputActionPlanner:
     """Hybrid-owned planning boundary for generated-output actions.
 

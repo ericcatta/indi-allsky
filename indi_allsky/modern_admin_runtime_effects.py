@@ -108,3 +108,23 @@ class ModernAdminSystemPowerEffectAdapter:
             return self.reboot_effect()
 
         raise ValueError('Unhandled system power command')
+
+
+class ModernAdminLogin1PowerEffects:
+    """Shared login1 effects, independent of Flask and frontend view classes."""
+
+    def __init__(self, dbus_module=None):
+        if dbus_module is None:
+            import dbus as dbus_module
+        self.dbus = dbus_module
+
+    def _manager(self):
+        bus = self.dbus.SystemBus()
+        obj = bus.get_object('org.freedesktop.login1', '/org/freedesktop/login1')
+        return self.dbus.Interface(obj, 'org.freedesktop.login1.Manager')
+
+    def reboot(self):
+        return self._manager().Reboot(False)
+
+    def poweroff(self):
+        return self._manager().PowerOff(False)

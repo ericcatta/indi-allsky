@@ -6,6 +6,7 @@ class ModernAdminSystemUnits:
         ('INDISERVER_SERVICE_NAME', 'INDI Server', 'indiserver_service', ('start', 'stop')),
         ('INDISERVER_TIMER_NAME', 'INDI automatic start', 'indiserver_timer', ('enable', 'disable')),
         ('ALLSKY_TIMER_NAME', 'Capture automatic start', 'indi_allsky_timer', ('enable', 'disable')),
+        ('GUNICORN_SERVICE_NAME', 'Web service', 'gunicorn_indi_allsky_service', ('stop',)),
     )
 
     def __init__(self, config):
