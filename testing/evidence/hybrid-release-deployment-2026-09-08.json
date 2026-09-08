@@ -1,0 +1,183 @@
+{
+  "date": "2026-09-08",
+  "deployment": {
+    "previous": "f695ea4c1e7354679568e858e8d2cd26a0a5f36b",
+    "candidate": "498ba95944fe11881cc5d863c70ca99621fabd78",
+    "backup": "/home/eric/hybrid-backups/hybrid-release-20260908-231947",
+    "capture_before": {
+      "MainPID": "3977508",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 21:15:41 CEST",
+      "ActiveState": "active"
+    },
+    "web_before": {
+      "MainPID": "3997175",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 22:01:17 CEST",
+      "ActiveState": "active"
+    },
+    "configuration_revision": 110,
+    "runtime_files_verified": 583,
+    "changed_runtime_files": [
+      "indi_allsky/flask/base_views.py",
+      "indi_allsky/flask/forms.py",
+      "indi_allsky/flask/templates/modern_admin/loop.html",
+      "indi_allsky/flask/templates/modern_admin/raw_images.html",
+      "indi_allsky/flask/templates/modern_admin/task_detail.html",
+      "indi_allsky/flask/templates/modern_admin/users.html",
+      "indi_allsky/flask/views.py",
+      "indi_allsky/modern_admin_smoke_status.py",
+      "indi_allsky/modern_admin_tasks.py",
+      "indi_allsky/satellite_download.py",
+      "indi_allsky/smoke.py",
+      "indi_allsky/video.py"
+    ],
+    "started": "2026-09-08T23:20:44.000616+02:00",
+    "status": "installed-initial-live-and-native-checks-passed",
+    "capture_after": {
+      "MainPID": "4112458",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 23:21:17 CEST",
+      "ActiveState": "active"
+    },
+    "web_after": {
+      "MainPID": "4112462",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 23:21:17 CEST",
+      "ActiveState": "active"
+    },
+    "completed": "2026-09-08T23:21:17.402687+02:00",
+    "checked_at": "2026-09-08T23:28:18.368752+02:00",
+    "postcheck": "/home/eric/hybrid-release-evidence/postcheck.json",
+    "native_checks": [
+      "Now shows fresh frames for both cameras",
+      "RAW Source links to RAW Loop",
+      "RAW Loop empty data for both cameras and four-hour history",
+      "RAW Loop IMX708 profile selection retains RAW route",
+      "Processed Loop link retains IMX708 and decodes 4608x2592 image"
+    ],
+    "open_checks": [
+      "24-hour day/night observation",
+      "RAW playback with actual RAW frames",
+      "Live provider effects and exhaustive product acceptance"
+    ]
+  },
+  "backup": {
+    "path": "/home/eric/hybrid-backups/hybrid-release-20260908-231947",
+    "sqlite_bytes": 828977152,
+    "sqlite_integrity": "ok",
+    "flask_config": "Protected copy on Pi; no secret content transferred.",
+    "restore_note": "Code rollback only for this release; do not restore the database snapshot over new captures."
+  },
+  "postcheck": {
+    "observed_at": "2026-09-08T23:24:58.147587+02:00",
+    "candidate": "498ba95944fe11881cc5d863c70ca99621fabd78",
+    "since": "2026-09-08T23:21:17.402687",
+    "cameras": {
+      "1": {
+        "files": 4,
+        "latest_id": 16976,
+        "latest_at": "2026-09-08 23:24:28.000000",
+        "age_seconds": 30.477075,
+        "decoded_dimensions": [
+          4608,
+          2592
+        ],
+        "saved_interval_median": 45.0,
+        "request_interval_median": 45.0397915,
+        "request_interval_max": 45.046278,
+        "exposure": 39.0,
+        "gain": 16.0
+      },
+      "2": {
+        "files": 4,
+        "latest_id": 16975,
+        "latest_at": "2026-09-08 23:24:17.000000",
+        "age_seconds": 41.522375,
+        "decoded_dimensions": [
+          3840,
+          2160
+        ],
+        "saved_interval_median": 45.0,
+        "request_interval_median": 45.0336375,
+        "request_interval_max": 45.038373,
+        "exposure": 24.178091049194336,
+        "gain": 0.0
+      }
+    },
+    "capture_service": "MainPID=4112458\nNRestarts=0\nActiveState=active\nActiveEnterTimestamp=Tue 2026-09-08 23:21:17 CEST",
+    "errors": [],
+    "pending_tasks": [],
+    "configuration_revision": 110,
+    "upload_flags": {
+      "UPLOAD_VIDEO": false,
+      "UPLOAD_MINI_VIDEO": false,
+      "UPLOAD_ENDOFNIGHT": false
+    },
+    "integration_enabled": {
+      "S3UPLOAD": false,
+      "SYNCAPI": false,
+      "YOUTUBE": false
+    },
+    "web": {
+      "/indi-allsky/login": {
+        "status": 200,
+        "bytes": 4524
+      },
+      "/indi-allsky/modern-admin/now": {
+        "status": 302,
+        "bytes": 305
+      },
+      "/indi-allsky/modern-admin/loop": {
+        "status": 302,
+        "bytes": 307
+      }
+    }
+  },
+  "early_check": {
+    "outcome": "Too early for three-image minimum; only one IMX frame yet.",
+    "response": "Waited for normal captures; no additional restart; subsequent check passed for both cameras."
+  },
+  "native_browser": {
+    "scope": "Existing authenticated session; selected production checks, not full acceptance.",
+    "checks": [
+      "Now shows fresh frames for both cameras",
+      "RAW Source links to RAW Loop",
+      "RAW Loop empty data for both cameras and four-hour history",
+      "RAW Loop IMX708 profile selection retains RAW route",
+      "Processed Loop link retains IMX708 and decodes 4608x2592 image"
+    ],
+    "console_errors": [],
+    "processed_frame_decoded": {
+      "camera_id": 1,
+      "width": 4608,
+      "height": 2592,
+      "complete": true,
+      "hidden": false
+    },
+    "restored_url": "https://allsky-pi.local/indi-allsky/modern-admin/now",
+    "limits": [
+      "RAW loop has no frames in tested time ranges, so no native RAW playback success is claimed.",
+      "Processed frame decoding does not by itself prove playback sequence correctness."
+    ]
+  },
+  "observation": {
+    "started": "2026-09-08T23:21:17+02:00",
+    "earliest_possible_completion": "2026-09-09T23:21:17+02:00",
+    "prior_windows": "Interrupted; cannot be added to this window.",
+    "automation": "collaudo-hybrid-raspberry-giorno-e-notte",
+    "status": "Active, quiet unless actionable; not complete."
+  },
+  "classic": {
+    "present": true,
+    "enabled": true,
+    "removal": "Not performed."
+  },
+  "rollback": {
+    "script": "/home/eric/hybrid-backups/hybrid-release-20260908-231947/deploy.py",
+    "command": "python3 /home/eric/hybrid-backups/hybrid-release-20260908-231947/deploy.py --rollback --backup /home/eric/hybrid-backups/hybrid-release-20260908-231947",
+    "executed": false,
+    "preconditions": "Installed HEAD is candidate, tracked tree clean, manifest verified; preserve untracked files and current production DB."
+  },
+  "regression": "Installed 583 tracked runtime files matched tested candidate; 111 Python and 29 JavaScript tests passed before release."
+}

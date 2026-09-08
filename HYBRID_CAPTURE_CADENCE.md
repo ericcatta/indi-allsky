@@ -1,5 +1,13 @@
 # Shared capture cadence and independent exposure control
 
+Current observation baseline: production release `498ba959`, capture PID 4112458,
+started **2026-09-08 23:21:17 Europe/Zurich**. The earlier 21:15:41 window ended
+at the controlled release restart. Configuration revision 110 and cadence
+settings are unchanged. Initial post-release images pass; 24-hour day/night
+acceptance is still open, earliest September 9 at 23:21:17. See
+`testing/evidence/hybrid-release-deployment-2026-09-08.json` and the latest
+production-release section of `HYBRID_ACCEPTANCE_STATUS.md` for backup/rollback.
+
 With `MULTI_CAMERA_CAPTURE_ENABLE`, `EXPOSURE_PERIOD_DAY` and
 `EXPOSURE_PERIOD` are the shared day and night start-to-start intervals.
 Camera Settings → Acquisition exposes them as **Shared interval Day/Night**.

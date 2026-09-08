@@ -13,6 +13,50 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Production release 498ba959 — 2026-09-08 23:21:17 CEST
+
+Installed all pending runtime corrections through `498ba959`: RAW Loop and
+original access, satellite/smoke task outcomes, account save cost and mode-switch
+compatibility. All 583 tracked runtime files matched the tested isolated
+candidate (111 Python entries and 29 JavaScript entries passed). Config revision
+110 and Flask configuration were preserved. Classic is still present and enabled.
+Historical candidate-only labels below describe their original mission dates;
+this section records their subsequent deployment.
+
+Before deployment a coherent SQLite backup (828,977,152 bytes, integrity `ok`)
+and protected Flask config were saved under
+`/home/eric/hybrid-backups/hybrid-release-20260908-231947`.
+Tracked production tree was clean; untracked files were preserved. Capture and
+web restarted at 23:21:17, PIDs 4112458 and 4112462, with no further restart.
+The initial check preceded three complete frames; after waiting normally the
+23:24:58 check found four valid new images per camera, medians 45 seconds,
+no pending tasks and no journal errors. Both latest images decoded at native
+resolution. This initial check is not long-term stability acceptance.
+
+Native browser checks verified fresh Now images, RAW Source → RAW Loop,
+four-hour empty state for both cameras, IMX708 profile isolation and return to
+the processed Loop retaining that profile. A processed frame decoded at
+4608×2592. No RAW frames were available in the tested ranges; actual native RAW
+playback and new provider task effects remain open. Browser returned to Now.
+Evidence: `testing/evidence/hybrid-release-deployment-2026-09-08.json`.
+
+The 24-hour monitor now starts at **2026-09-08 23:21:17 Europe/Zurich**; previous
+windows cannot be added. Earliest possible completion is September 9 at 23:21:17,
+only if uninterrupted day/night evidence supports it. New read-only scripts:
+`/tmp/hybrid-release-live.py`, `/tmp/hybrid-release-starts.py`; evidence directory:
+`/home/eric/hybrid-release-evidence`.
+
+Rollback (not executed), run on the Pi:
+
+```sh
+python3 /home/eric/hybrid-backups/hybrid-release-20260908-231947/deploy.py --rollback --backup /home/eric/hybrid-backups/hybrid-release-20260908-231947
+```
+
+It checks the installed candidate and clean tracked tree, stops the
+capture/web services, restores code to `f695ea4c`, and restores service state.
+Do not replace the live database with the older snapshot: new captures must
+remain. Any capture restart begins another observation window.
+
 ## RAW Loop parity — 2026-09-08 (candidate, not deployed)
 
 Classic exposed a RAW loop, but Hybrid had no playback entry. The existing RAW
