@@ -7414,20 +7414,16 @@ class AjaxSystemInfoView(BaseView):
 
         self.cameraSetup(camera_id=camera_id)
 
-        if service == app.config['INDISERVER_SERVICE_NAME']:
-            if command == 'stop':
-                r = self.stopSystemdUnit(app.config['INDISERVER_SERVICE_NAME'])
-            elif command == 'start':
-                r = self.startSystemdUnit(app.config['INDISERVER_SERVICE_NAME'])
-            #elif command == 'disable':
-            #    r = self.disableSystemdUnit(app.config['INDISERVER_SERVICE_NAME'])
-            #elif command == 'enable':
-            #    r = self.enableSystemdUnit(app.config['INDISERVER_SERVICE_NAME'])
-            else:
-                errors_data = {
-                    'COMMAND_HIDDEN' : ['Unhandled command'],
-                }
-                return jsonify(errors_data), 400
+        from ..modern_admin_system_units import ModernAdminSystemUnits
+        units = ModernAdminSystemUnits(app.config)
+        if units.handles(service):
+            body, status = units.run(
+                service, command,
+                authorized=bool(app.config['LOGIN_DISABLED'] or current_user.is_admin),
+                effects={'start': self.startSystemdUnit, 'stop': self.stopSystemdUnit,
+                         'enable': self.enableSystemdUnit, 'disable': self.disableSystemdUnit},
+            )
+            return jsonify(body), status
 
         elif service == app.config['ALLSKY_SERVICE_NAME']:
             if command == 'hup':
@@ -7454,28 +7450,6 @@ class AjaxSystemInfoView(BaseView):
             #    r = self.disableSystemdUnit(app.config['ALLSKY_SERVICE_NAME'])
             #elif command == 'enable':
             #    r = self.enableSystemdUnit(app.config['ALLSKY_SERVICE_NAME'])
-            else:
-                errors_data = {
-                    'COMMAND_HIDDEN' : ['Unhandled command'],
-                }
-                return jsonify(errors_data), 400
-
-        elif service == app.config['INDISERVER_TIMER_NAME']:
-            if command == 'disable':
-                r = self.disableSystemdUnit(app.config['INDISERVER_TIMER_NAME'])
-            elif command == 'enable':
-                r = self.enableSystemdUnit(app.config['INDISERVER_TIMER_NAME'])
-            else:
-                errors_data = {
-                    'COMMAND_HIDDEN' : ['Unhandled command'],
-                }
-                return jsonify(errors_data), 400
-
-        elif service == app.config['ALLSKY_TIMER_NAME']:
-            if command == 'disable':
-                r = self.disableSystemdUnit(app.config['ALLSKY_TIMER_NAME'])
-            elif command == 'enable':
-                r = self.enableSystemdUnit(app.config['ALLSKY_TIMER_NAME'])
             else:
                 errors_data = {
                     'COMMAND_HIDDEN' : ['Unhandled command'],
@@ -10708,6 +10682,9 @@ class ModernAdminSystemInfoView(ModernAdminSystemToolView, SystemInfoView):
     def get_context(self):
         context = super(ModernAdminSystemInfoView, self).get_context()
         context['modern_admin_system_summary_cards'] = self.summary_service.build_summary_cards(context)
+        from ..modern_admin_system_units import ModernAdminSystemUnits
+        context['system_units'] = ModernAdminSystemUnits(app.config).rows(context)
+        context['system_units_can_control'] = bool(app.config['LOGIN_DISABLED'] or current_user.is_admin)
         return context
 
 

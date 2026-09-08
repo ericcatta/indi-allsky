@@ -13,6 +13,29 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## INDI and automatic-start controls — 2026-09-08 (candidate, not deployed)
+
+Hybrid System Info now exposes INDI start/stop and enable/disable for the INDI
+and capture timers. `ModernAdminSystemUnits` owns the configured-unit/command
+allowlist and presentation; the existing shared D-Bus methods remain effects.
+The old AJAX URL and successful response are preserved. Unknown effect outcomes
+return 503 with an explicit refresh instruction rather than a false success.
+Timer changes retain their exact semantics: enable/disable unit files and reload
+systemd definitions, without starting or stopping a currently running timer.
+
+Controls require administrator access, CSRF and a device-wide confirmation.
+JavaScript suppresses repeated submissions and requires a status refresh after
+accepted, failed or lost responses. Ordinary users retain read-only status.
+All 113 Python regression entries and 30 JavaScript tests passed. Evidence:
+`testing/evidence/hybrid-system-units-2026-09-08.json`.
+
+The six effects were tested with controlled adapters in isolated Flask with
+Classic forbidden, not executed on production. Native browser/mobile and real
+service/timer maintenance acceptance remain open, as do other System controls.
+No deployment or capture restart occurred. The read-only 23:56:47 check found
+both cameras at a 45-second median saved-frame interval, no missing/empty files,
+no pending tasks and no recorded errors. This is not 24-hour acceptance.
+
 ## Anonymous navigation policy — 2026-09-08 (decision open)
 
 The navigation review found a real access-policy difference that must be resolved

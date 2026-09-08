@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- System Info: Hybrid possiede comandi e presentazione per start/stop INDI e
+  abilitazione/disabilitazione dei timer INDI/capture. Effetti D-Bus condivisi,
+  semantica timer conservata, autorizzazione e CSRF invariati. 113 verifiche
+  Python e 30 JavaScript; candidato non distribuito, effetti live ancora aperti.
+  Evidenze: `testing/evidence/hybrid-system-units-2026-09-08.json`.
+
 - Fumo: esito disponibile/errore/fuori copertura restituito dal provider condiviso
   e osservabile nel task. Hybrid possiede la presentazione di letture mancanti,
   obsolete o non aggiornate; timestamp valido precedente conservato su errore.
