@@ -178,3 +178,16 @@ the `live_observation` in `testing/evidence/hybrid-users-table-2026-09-08.json`
 contains the summary and transition examples. This check did not deploy the
 users-table candidate or modify services/configuration. The 24-hour gate,
 browser acceptance and post-Classic-removal tests remain open.
+
+## Production observation restarted — 2026-09-08 21:15 CEST
+
+The completed panorama/Keogram/camera-management batch is installed as `80896495`.
+Capture PID 3977508 and web PID 3977512 started at 21:15:41 CEST; configuration
+revision 110 remains unchanged. Both cameras produced decoded frames at a
+45-second median night interval in the first postcheck. This short sample does
+not prove 24-hour stability. The monitor now uses `/home/eric/hybrid-batch-evidence`
+and `/tmp/hybrid-batch-live.py` plus `/tmp/hybrid-batch-starts.py`.
+The previous 17:47:25 window is closed and cannot be added to this one.
+Backup/rollback and precise live evidence are recorded in
+[the deployment report](testing/evidence/hybrid-batch-deployment-2026-09-08.json)
+and [acceptance status](HYBRID_ACCEPTANCE_STATUS.md).

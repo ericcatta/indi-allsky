@@ -13,6 +13,43 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Production batch deployment and renewed observation — 2026-09-08
+
+Release **80896495** is installed on the Raspberry. This supersedes the earlier
+“not deployed” status of the completed missions below. All 581 runtime files
+matched the tested candidate before and after installation. The preflight found
+no tracked changes or pending tasks and approximately 61.9 GB free. Configuration
+revision 110 and all existing media were preserved. Capture and Gunicorn restarted
+at **21:15:41 CEST**, with PIDs 3977508 and 3977512 respectively.
+
+The first postcheck decoded current images from both real cameras and measured
+45-second median saved-frame cadence, with approximately 45.03-second median
+capture-request cadence. Capture had no restarts, recorded errors or pending
+tasks. A subsequent sample confirmed two new panoramas per camera, four/five new
+Long-term Keogram samples, and fresh, decodable camera-specific panorama and
+Realtime Keogram previews. The web server served the exact installed Loop script.
+Anonymous login/redirect checks are only routing evidence, not authenticated UI
+interaction acceptance. No uploads were enabled.
+
+The coherent SQLite backup (828,977,152 bytes, integrity check `ok`), configuration
+and retained rollback helper are in
+`/home/eric/hybrid-backups/hybrid-batch-20260908-211426`.
+Rollback command, **not executed**:
+
+```sh
+python3 /home/eric/hybrid-backups/hybrid-batch-20260908-211426/deploy.py --rollback --backup /home/eric/hybrid-backups/hybrid-batch-20260908-211426
+```
+
+Rollback restores the preceding code and restarts services; it does not restore
+an old database over new acquisitions. The earlier observation starting at
+17:47:25 ended with this restart. The 15-minute read-only monitor now follows the
+new baseline; the earliest possible 24-hour completion is **2026-09-09 21:15:41
+CEST**, only with evidence of uninterrupted operation spanning day and night.
+Native browser acceptance, full effects/hardware audit, Classic removal and
+post-removal validation remain open.
+
+Evidence: [batch deployment and live outputs](testing/evidence/hybrid-batch-deployment-2026-09-08.json).
+
 ## Panorama Loop playback and frame identity — 2026-09-08
 
 The previous 350 ms interval changed only the image source and alt text. Its

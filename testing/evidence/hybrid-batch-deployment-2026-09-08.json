@@ -1,0 +1,357 @@
+{
+  "deployment": {
+    "previous": "ca60464980a475a38385b6a179c2eda4b64bc562",
+    "candidate": "808964953eace9777b366b7651a946734a776308",
+    "backup": "/home/eric/hybrid-backups/hybrid-batch-20260908-211426",
+    "capture_before": {
+      "MainPID": "3734524",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 17:47:25 CEST",
+      "ActiveState": "active"
+    },
+    "web_before": {
+      "MainPID": "3734527",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 17:47:25 CEST",
+      "ActiveState": "active"
+    },
+    "configuration_revision": 110,
+    "runtime_files_verified": 581,
+    "changed_runtime_files": [
+      "indi_allsky/allsky.py",
+      "indi_allsky/capture_profiles.py",
+      "indi_allsky/flask/source_media_views.py",
+      "indi_allsky/flask/static/modern_admin/camera-management.js",
+      "indi_allsky/flask/static/modern_admin/longterm-keogram.js",
+      "indi_allsky/flask/static/modern_admin/panorama-loop.js",
+      "indi_allsky/flask/static/modern_admin/realtime-keogram.js",
+      "indi_allsky/flask/templates/modern_admin/cameras.html",
+      "indi_allsky/flask/templates/modern_admin/dark_library.html",
+      "indi_allsky/flask/templates/modern_admin/longterm_keogram.html",
+      "indi_allsky/flask/templates/modern_admin/media_list.html",
+      "indi_allsky/flask/templates/modern_admin/panoramas.html",
+      "indi_allsky/flask/templates/modern_admin/realtime_keogram.html",
+      "indi_allsky/flask/templates/modern_admin/users.html",
+      "indi_allsky/flask/views.py",
+      "indi_allsky/generation_result.py",
+      "indi_allsky/hybrid_camera_management.py",
+      "indi_allsky/image.py",
+      "indi_allsky/longterm_keogram_cache.py",
+      "indi_allsky/longterm_keogram_sampling.py",
+      "indi_allsky/panorama_publication.py",
+      "indi_allsky/processing.py",
+      "indi_allsky/realtime_keogram_history.py",
+      "indi_allsky/realtime_keogram_preview.py",
+      "indi_allsky/video.py"
+    ],
+    "started": "2026-09-08T21:15:27.196652+02:00",
+    "status": "installed-live-capture-and-camera-outputs-verified-browser-pending",
+    "capture_after": {
+      "MainPID": "3977508",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 21:15:41 CEST",
+      "ActiveState": "active"
+    },
+    "web_after": {
+      "MainPID": "3977512",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 21:15:41 CEST",
+      "ActiveState": "active"
+    },
+    "completed": "2026-09-08T21:15:42.080498+02:00"
+  },
+  "preflight": {
+    "observed_at": "2026-09-08T21:12:59.222972+02:00",
+    "production_commit": "ca60464980a475a38385b6a179c2eda4b64bc562",
+    "tracked_changes": "",
+    "staged_changes": "",
+    "candidate": "808964953eace9777b366b7651a946734a776308",
+    "stage_files": 581,
+    "stage_mismatch": [],
+    "free_bytes": 61853024256,
+    "capture": "MainPID=3734524\nNRestarts=0\nExecMainStartTimestamp=Tue 2026-09-08 17:47:25 CEST\nActiveState=active",
+    "web": "MainPID=3734527\nNRestarts=0\nActiveState=active",
+    "revision": 110,
+    "tasks": [],
+    "frames": [
+      {
+        "camera_id": 1,
+        "rows": [
+          {
+            "id": 16630,
+            "createDate": "2026-09-08 21:12:44.000000",
+            "exposure": 39.0,
+            "gain": 2.84,
+            "night": 1
+          },
+          {
+            "id": 16628,
+            "createDate": "2026-09-08 21:11:59.000000",
+            "exposure": 39.0,
+            "gain": 3.34,
+            "night": 1
+          },
+          {
+            "id": 16626,
+            "createDate": "2026-09-08 21:11:14.000000",
+            "exposure": 39.0,
+            "gain": 3.93,
+            "night": 1
+          },
+          {
+            "id": 16624,
+            "createDate": "2026-09-08 21:10:29.000000",
+            "exposure": 39.0,
+            "gain": 3.93,
+            "night": 1
+          },
+          {
+            "id": 16622,
+            "createDate": "2026-09-08 21:09:44.000000",
+            "exposure": 39.0,
+            "gain": 3.65,
+            "night": 1
+          },
+          {
+            "id": 16620,
+            "createDate": "2026-09-08 21:08:58.000000",
+            "exposure": 39.0,
+            "gain": 3.4,
+            "night": 1
+          },
+          {
+            "id": 16618,
+            "createDate": "2026-09-08 21:08:13.000000",
+            "exposure": 39.0,
+            "gain": 3.16,
+            "night": 1
+          },
+          {
+            "id": 16616,
+            "createDate": "2026-09-08 21:07:28.000000",
+            "exposure": 39.0,
+            "gain": 3.16,
+            "night": 1
+          }
+        ]
+      },
+      {
+        "camera_id": 2,
+        "rows": [
+          {
+            "id": 16629,
+            "createDate": "2026-09-08 21:12:38.000000",
+            "exposure": 0.5218221545219421,
+            "gain": 0.0,
+            "night": 1
+          },
+          {
+            "id": 16627,
+            "createDate": "2026-09-08 21:11:53.000000",
+            "exposure": 0.5218221545219421,
+            "gain": 0.0,
+            "night": 1
+          },
+          {
+            "id": 16625,
+            "createDate": "2026-09-08 21:11:08.000000",
+            "exposure": 0.5218221545219421,
+            "gain": 0.0,
+            "night": 1
+          },
+          {
+            "id": 16623,
+            "createDate": "2026-09-08 21:10:24.000000",
+            "exposure": 0.6957628726959229,
+            "gain": 0.0,
+            "night": 1
+          },
+          {
+            "id": 16621,
+            "createDate": "2026-09-08 21:09:39.000000",
+            "exposure": 0.9276838302612305,
+            "gain": 0.0,
+            "night": 1
+          },
+          {
+            "id": 16619,
+            "createDate": "2026-09-08 21:08:54.000000",
+            "exposure": 0.9276838302612305,
+            "gain": 0.0,
+            "night": 1
+          },
+          {
+            "id": 16617,
+            "createDate": "2026-09-08 21:08:09.000000",
+            "exposure": 0.9276838302612305,
+            "gain": 0.0,
+            "night": 1
+          },
+          {
+            "id": 16615,
+            "createDate": "2026-09-08 21:07:24.000000",
+            "exposure": 0.9276838302612305,
+            "gain": 0.0,
+            "night": 1
+          }
+        ]
+      }
+    ],
+    "configuration_gates": {
+      "MULTI_CAMERA_CAPTURE_ENABLE": true,
+      "EXPOSURE_PERIOD": 45.0,
+      "EXPOSURE_PERIOD_DAY": 15.0,
+      "outputs": {
+        "FISH2PANO": true,
+        "LONGTERM_KEOGRAM": true,
+        "REALTIME_KEOGRAM": null
+      },
+      "profiles": [
+        {
+          "profile_id": "imx708-wide",
+          "enabled": true,
+          "db_camera_id": null,
+          "outputs": null
+        },
+        {
+          "profile_id": "asi678mc",
+          "enabled": true,
+          "db_camera_id": null,
+          "outputs": null
+        }
+      ]
+    },
+    "scope": "Read-only production preflight; no restart, backup or deployment"
+  },
+  "capture_postcheck": {
+    "observed_at": "2026-09-08T21:18:27.835387+02:00",
+    "candidate": "808964953eace9777b366b7651a946734a776308",
+    "since": "2026-09-08T21:15:42.080498",
+    "cameras": {
+      "1": {
+        "files": 3,
+        "latest_id": 16642,
+        "latest_at": "2026-09-08 21:18:07.000000",
+        "age_seconds": 21.093698,
+        "decoded_dimensions": [
+          4608,
+          2592
+        ],
+        "saved_interval_median": 45.0,
+        "request_interval_median": 45.03918,
+        "request_interval_max": 45.04004,
+        "exposure": 39.0,
+        "gain": 2.41
+      },
+      "2": {
+        "files": 4,
+        "latest_id": 16643,
+        "latest_at": "2026-09-08 21:18:18.000000",
+        "age_seconds": 10.136494,
+        "decoded_dimensions": [
+          3840,
+          2160
+        ],
+        "saved_interval_median": 45.0,
+        "request_interval_median": 45.02904,
+        "request_interval_max": 45.039465,
+        "exposure": 0.8153471350669861,
+        "gain": 0.0
+      }
+    },
+    "capture_service": "MainPID=3977508\nNRestarts=0\nActiveState=active\nActiveEnterTimestamp=Tue 2026-09-08 21:15:41 CEST",
+    "errors": [],
+    "pending_tasks": [],
+    "configuration_revision": 110,
+    "upload_flags": {
+      "UPLOAD_VIDEO": false,
+      "UPLOAD_MINI_VIDEO": false,
+      "UPLOAD_ENDOFNIGHT": false
+    },
+    "integration_enabled": {
+      "S3UPLOAD": false,
+      "SYNCAPI": false,
+      "YOUTUBE": false
+    },
+    "web": {
+      "/indi-allsky/login": {
+        "status": 200,
+        "bytes": 4524
+      },
+      "/indi-allsky/modern-admin/now": {
+        "status": 302,
+        "bytes": 305
+      },
+      "/indi-allsky/modern-admin/loop": {
+        "status": 302,
+        "bytes": 307
+      }
+    }
+  },
+  "outputs_postcheck": {
+    "observed_at": "2026-09-08T21:19:07.057483+02:00",
+    "cameras": {
+      "1": {
+        "panorama_count": 2,
+        "longterm_samples": 4,
+        "previews": {
+          "panorama.jpg": {
+            "bytes": 206076,
+            "dimensions": [
+              4712,
+              750
+            ],
+            "age_seconds": 11.271276712417603
+          },
+          "realtime_keogram.jpg": {
+            "bytes": 123130,
+            "dimensions": [
+              1000,
+              843
+            ],
+            "age_seconds": 11.005192041397095
+          }
+        }
+      },
+      "2": {
+        "panorama_count": 2,
+        "longterm_samples": 5,
+        "previews": {
+          "panorama.jpg": {
+            "bytes": 321369,
+            "dimensions": [
+              4712,
+              750
+            ],
+            "age_seconds": 45.798943519592285
+          },
+          "realtime_keogram.jpg": {
+            "bytes": 81472,
+            "dimensions": [
+              1000,
+              700
+            ],
+            "age_seconds": 1.1369643211364746
+          }
+        }
+      }
+    },
+    "served_loop_controller": {
+      "status": 200,
+      "matches_installed": true
+    }
+  },
+  "backup": {
+    "path": "/home/eric/hybrid-backups/hybrid-batch-20260908-211426",
+    "database_bytes": 828977152,
+    "integrity": "ok",
+    "rollback": "python3 /home/eric/hybrid-backups/hybrid-batch-20260908-211426/deploy.py --rollback --backup /home/eric/hybrid-backups/hybrid-batch-20260908-211426",
+    "rollback_executed": false
+  },
+  "limitations": [
+    "Native browser interaction acceptance is still open",
+    "Only first night samples after deployment; not 24 hours",
+    "Classic frontend remains present",
+    "No live upload, cleanup or hardware acceptance added"
+  ]
+}
