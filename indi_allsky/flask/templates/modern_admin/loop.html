@@ -4,6 +4,10 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-loop-preview-layout-v6') }}" rel="stylesheet">
+<style>
+/* The shared preview display rule must not override the empty/loading state. */
+.modern-admin-loop-preview-card img[hidden] { display: none; }
+</style>
 <script type="text/javascript">
 const modernAdminLoopCameras = {{ modern_admin_loop_camera_views | tojson }};
 var refreshInterval = {{ refreshInterval | int }};
@@ -26,8 +30,8 @@ var timestamp = {{ timestamp | int }};
         {% include 'modern_admin/_media_camera_filter.html' %}
         <div class="modern-admin-control-strip">
             <label>History {{ form_history.HISTORY_SELECT() }}</label>
-            <label>Frame Delay {{ form_history.FRAMEDELAY_SELECT() }}</label>
-            <label>Rock {{ form_history.ROCK_CHECKBOX() }}</label>
+            <label>Playback speed {{ form_history.FRAMEDELAY_SELECT() }}</label>
+            <label>Play back and forth {{ form_history.ROCK_CHECKBOX() }}</label>
         </div>
         <section class="modern-admin-loop-preview-grid{% if modern_admin_loop_camera_views|length > 1 %} modern-admin-loop-preview-grid-multi{% endif %}" aria-label="Camera loops">
             {% for loop_camera in modern_admin_loop_camera_views %}
@@ -35,9 +39,9 @@ var timestamp = {{ timestamp | int }};
                 <div class="modern-admin-card-label">Camera loop</div>
                 <h3>{{ loop_camera.label }}</h3>
                 <figure class="modern-admin-live-frame">
-                    <img data-loop-image="{{ loop_camera.loop_id }}" alt="Latest loop frame for {{ loop_camera.label }}">
+                    <img data-loop-image="{{ loop_camera.loop_id }}" alt="Loop frame for {{ loop_camera.label }}" hidden>
                 </figure>
-                <p class="modern-admin-note" data-loop-message="{{ loop_camera.loop_id }}">Loading loop frames...</p>
+                <p class="modern-admin-note" data-loop-message="{{ loop_camera.loop_id }}" aria-live="polite">Loading loop frames...</p>
             </article>
             {% endfor %}
         </section>
@@ -75,11 +79,8 @@ function modernAdminLoopRock() {
 
 function modernAdminLoopSequence(loopState) {
     const imageList = loopState.data.image_list || [];
-    if (modernAdminLoopRock()) {
-        return imageList.concat([...imageList].reverse());
-    }
-
-    return [...imageList].reverse();
+    const forward = [...imageList].reverse();
+    return modernAdminLoopRock() ? forward.concat(forward.slice(1, -1).reverse()) : forward;
 }
 
 function modernAdminGetLoopState(loopCamera) {
@@ -87,13 +88,44 @@ function modernAdminGetLoopState(loopCamera) {
         modernAdminLoopState[loopCamera.loop_id] = {
             data: { image_list: [], message: '' },
             index: 0,
+            request: 0,
+            frame: 0,
+            timer: null,
+            pending: false,
         };
     }
 
     return modernAdminLoopState[loopCamera.loop_id];
 }
 
-function modernAdminLoadLoop(loopCamera) {
+function modernAdminStopLoopFrame(loopCamera, clearImage) {
+    const state = modernAdminGetLoopState(loopCamera);
+    window.clearTimeout(state.timer);
+    state.frame += 1; // Ignore an older image which finishes loading later.
+    if (clearImage) {
+        const image = document.querySelector('[data-loop-image="' + loopCamera.loop_id + '"]');
+        if (image) {
+            image.hidden = true;
+            image.removeAttribute('src');
+        }
+    }
+}
+
+function modernAdminLoopMessage(loopCamera, text) {
+    const message = document.querySelector('[data-loop-message="' + loopCamera.loop_id + '"]');
+    if (message) message.textContent = text;
+}
+
+function modernAdminLoadLoop(loopCamera, replaceHistory = false) {
+    const state = modernAdminGetLoopState(loopCamera);
+    if (state.pending && !replaceHistory) return;
+    const request = ++state.request;
+    state.pending = true;
+    if (replaceHistory) {
+        modernAdminStopLoopFrame(loopCamera, true);
+        state.data = { image_list: [] };
+        modernAdminLoopMessage(loopCamera, 'Loading loop frames...');
+    }
     const params = new URLSearchParams({
         limit_s: modernAdminLoopHistory(),
         timestamp: timestamp
@@ -102,55 +134,80 @@ function modernAdminLoadLoop(loopCamera) {
         params.set('camera_id', loopCamera.camera_id);
     }
 
-    fetch('{{ url_for(image_loop_view) }}?' + params.toString())
-        .then((response) => response.json())
+    return fetch('{{ url_for(image_loop_view) }}?' + params.toString())
+        .then((response) => {
+            if (!response.ok) throw new Error('Loop request failed');
+            return response.json();
+        })
         .then((data) => {
-            const loopState = modernAdminGetLoopState(loopCamera);
-            loopState.data = data;
-            const message = document.querySelector('[data-loop-message="' + loopCamera.loop_id + '"]');
-            if (message) {
-                message.textContent = data.message || '';
-            }
+            if (request !== state.request) return;
+            if (!data || !Array.isArray(data.image_list)) throw new Error('Invalid loop response');
+            modernAdminStopLoopFrame(loopCamera, data.image_list.length === 0);
+            state.data = data;
+            state.index = 0;
+            modernAdminLoopMessage(loopCamera, data.image_list.length ? (data.message || '') : 'No frames in this time range.');
+            modernAdminShowLoopFrame(loopCamera);
         })
         .catch(() => {
-            const message = document.querySelector('[data-loop-message="' + loopCamera.loop_id + '"]');
-            if (message) {
-                message.textContent = 'Error loading loop frames.';
-            }
+            if (request !== state.request) return;
+            modernAdminStopLoopFrame(loopCamera, true);
+            state.data = { image_list: [] };
+            modernAdminLoopMessage(loopCamera, 'Error loading loop frames. Retrying automatically.');
+        })
+        .finally(() => {
+            if (request === state.request) state.pending = false;
         });
 }
 
 function modernAdminShowLoopFrame(loopCamera) {
-    const loopState = modernAdminGetLoopState(loopCamera);
-    if (!loopState.data.image_list.length) {
-        window.setTimeout(() => modernAdminShowLoopFrame(loopCamera), 500);
-        return;
-    }
-
-    const imageList = modernAdminLoopSequence(loopState);
+    const state = modernAdminGetLoopState(loopCamera);
+    const imageList = modernAdminLoopSequence(state);
+    if (!imageList.length) return;
     const image = document.querySelector('[data-loop-image="' + loopCamera.loop_id + '"]');
-    if (!image) {
+    if (!image) return;
+    const frame = ++state.frame;
+    const item = imageList[state.index % imageList.length];
+    state.index = (state.index + 1) % imageList.length;
+    const preloadImage = new Image();
+    function nextFrame() {
+        state.timer = window.setTimeout(() => modernAdminShowLoopFrame(loopCamera), modernAdminLoopDelay());
+    }
+    preloadImage.onload = function() {
+        if (frame !== state.frame) return;
+        image.src = this.src;
+        image.hidden = false;
+        modernAdminLoopMessage(loopCamera, state.data.message || '');
+        nextFrame();
+    };
+    preloadImage.onerror = function() {
+        if (frame !== state.frame) return;
+        image.hidden = true;
+        image.removeAttribute('src');
+        modernAdminLoopMessage(loopCamera, 'Unable to load this frame. Trying the next frame.');
+        nextFrame();
+    };
+    if (!item || typeof item.url !== 'string' || !item.url) {
+        preloadImage.onerror();
         return;
     }
-
-    const preloadImage = new Image();
-    preloadImage.onload = function() {
-        image.src = this.src;
-    };
-    preloadImage.src = modernAdminResolveImageUrl(imageList[loopState.index % imageList.length].url);
-
-    loopState.index += 1;
-    if (loopState.index >= imageList.length) {
-        loopState.index = 0;
-    }
-
-    window.setTimeout(() => modernAdminShowLoopFrame(loopCamera), modernAdminLoopDelay());
+    preloadImage.src = modernAdminResolveImageUrl(item.url);
 }
 
+document.getElementById('HISTORY_SELECT').addEventListener('change', () => {
+    modernAdminLoopCameras.forEach((camera) => modernAdminLoadLoop(camera, true));
+});
+['FRAMEDELAY_SELECT', 'ROCK_CHECKBOX'].forEach((id) => {
+    document.getElementById(id).addEventListener('change', () => {
+        modernAdminLoopCameras.forEach((camera) => {
+            modernAdminStopLoopFrame(camera, false);
+            modernAdminGetLoopState(camera).index = 0;
+            modernAdminShowLoopFrame(camera);
+        });
+    });
+});
 modernAdminLoopCameras.forEach((loopCamera) => {
     modernAdminLoadLoop(loopCamera);
     window.setInterval(() => modernAdminLoadLoop(loopCamera), refreshInterval);
-    modernAdminShowLoopFrame(loopCamera);
 });
 </script>
 {% endblock %}

@@ -1,0 +1,32 @@
+<!doctype html>
+<meta charset="utf-8"><title>Hybrid Loop interaction acceptance</title>
+<style>body{font:14px system-ui}iframe{width:100%;height:610px}pre{white-space:pre-wrap;max-height:210px;overflow:auto}</style>
+<h1>Hybrid Loop interaction acceptance</h1>
+<p>Isolated sandbox only. Change the actual Loop controls below, then snapshot observed requests and displayed image changes. No camera or system effects are invoked.</p>
+<button id="snapshot">Snapshot evidence</button><pre id="report">Ready</pre>
+<iframe id="loop" title="Isolated Loop controls" src="/indi-allsky/modern-admin/loop"></iframe>
+<script>
+const changes=[],requests=[],frames={};let lastChange=null;
+const frame=document.getElementById('loop');
+frame.onload=()=>{
+ const win=frame.contentWindow,doc=frame.contentDocument,originalFetch=win.fetch.bind(win);
+ win.fetch=(url,...args)=>{requests.push({url:String(url),at:Date.now()});return originalFetch(url,...args);};
+ doc.addEventListener('change',event=>{
+  if(!['HISTORY_SELECT','FRAMEDELAY_SELECT','ROCK_CHECKBOX'].includes(event.target.id))return;
+  lastChange={control:event.target.id,value:event.target.type==='checkbox'?event.target.checked:event.target.value,at:Date.now()};
+  changes.push(lastChange);for(const key of Object.keys(frames))frames[key]=[];
+ });
+ doc.querySelectorAll('[data-loop-image]').forEach(image=>{
+  const id=image.dataset.loopImage;frames[id]=[];
+  new MutationObserver(()=>{
+   const row={at:Date.now(),src:image.getAttribute('src'),hidden:image.hidden};
+   const list=frames[id];if(!list.length||list.at(-1).src!==row.src||list.at(-1).hidden!==row.hidden){list.push(row);if(list.length>30)list.shift();}
+  }).observe(image,{attributes:true,attributeFilter:['src','hidden']});
+ });
+};
+document.getElementById('snapshot').onclick=()=>{
+ const doc=frame.contentDocument;
+ const display=[...doc.querySelectorAll('[data-loop-image]')].map(image=>({camera:image.dataset.loopImage,src:image.getAttribute('src'),hidden:image.hidden}));
+ document.getElementById('report').textContent=JSON.stringify({lastChange,changes,requests:requests.slice(-8),display,frames},null,2);
+};
+</script>

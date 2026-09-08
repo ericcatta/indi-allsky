@@ -13,6 +13,41 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Loop playback controls and empty/error states — 2026-09-08
+
+History changes previously waited for periodic polling; an empty response left
+the previous image visible, and independent preload completions could display
+frames out of order. History now reloads both selected cameras immediately and
+ignores responses/preloads from superseded selections. Playback advances only
+after image completion, keeps one timer per camera, and applies speed/bounce
+changes immediately. Bounce preserves chronological playback and avoids repeated
+endpoints. Empty or failed requests clear the image; failed frames report an error
+and continue to the next frame. The existing periodic refresh can recover after
+request failures. Labels now say Playback speed and Play back and forth.
+
+The deterministic JavaScript test executes the actual template script with
+controlled fetch/image/timer completions. It fails against the prior template and
+passes the corrected history, speed, bounce, camera-isolation, stale-response,
+empty/error and recovery cases. The reusable native-browser fixture observes
+actual DOM image changes and fetch requests; it is for the isolated sandbox only.
+
+Native checks measured simultaneous per-camera history requests at the control
+change, 100–104ms frame changes at 10 FPS and 201–203ms at 5 FPS on cached synthetic
+JPEGs. Both cameras bounce through their own three frames without duplicate
+endpoints. A historical range without data hides both images and explicitly says
+No frames in this time range. These are playback measurements, not camera capture
+cadence or production throughput claims. Evidence:
+`testing/evidence/hybrid-loop-controls-2026-09-08.json`.
+
+All 94 Python/compile entrypoints pass on the final isolated Pi candidate; both
+candidate template and JS test hashes match. All 22 deterministic JavaScript
+entrypoints pass locally. These VM-based JS checks are separate from the native
+browser observations above. `git diff --check` passes.
+
+Production deployment and broader acceptance remain open. Capture, configuration,
+media files and image-processing algorithms are unchanged; only the disposable
+browser sandbox was restarted to refresh its fixtures.
+
 ## Responsive header correction — 2026-09-08
 
 The header grid allowed the primary navigation column to collapse while runtime

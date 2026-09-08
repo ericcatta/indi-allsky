@@ -1,0 +1,232 @@
+{
+  "date": "2026-09-08",
+  "base": "a8499934",
+  "source_sha256": {
+    "indi_allsky/flask/templates/modern_admin/loop.html": "12c235de3ae6de669b1e5b8b6e859533577f7d31ec2f350d33f10b0830f6323d",
+    "testing/hybrid_loop_browser_test.js": "5d049fe9928a7c88a3e40ce8f995d8e3ace8c2d16daade003433b3f2d031cb95",
+    "testing/hybrid_loop_controls_browser.html": "d38874dbb5aa13f39341c881c3ced7c70fe3e0e7c1e0986155168f5e4912bcc5"
+  },
+  "defects": [
+    "History changes waited for periodic polling",
+    "Empty history retained the last displayed image",
+    "Independent image loads could complete out of order",
+    "Bounce repeated endpoint frames and changed chronological direction"
+  ],
+  "automated": {
+    "javascript": "node testing/hybrid_loop_browser_test.js: PASS",
+    "baseline_reproduction": "Same test against HEAD Loop template fails: missing HISTORY_SELECT change handler",
+    "coverage": [
+      "Immediate history requests for both cameras",
+      "Ignore responses belonging to superseded history",
+      "Wait for image completion before advancing",
+      "Speed change replaces the existing playback timer",
+      "Bounce without duplicated endpoints",
+      "Clear images and timers for empty data",
+      "Ignore late preloads after history replacement",
+      "HTTP errors, network errors and invalid payload shape",
+      "Image load failure and subsequent recovery",
+      "Per-camera state and no duplicate periodic requests while pending"
+    ],
+    "pi_regression_results": "/home/eric/hybrid-loop-controls-evidence/results.json",
+    "javascript_suite": [
+      {
+        "case": "testing/hybrid_account_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid account browser controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_astropanel_browser_test.js",
+        "exit_code": 0,
+        "output": "Astropanel controller: all detail fields, 20 satellites, literal text, unavailable/stale/session states, refresh and polling: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_charts_browser_test.js",
+        "exit_code": 0,
+        "output": "Charts: all 15 series and histogram, empty/null data, atomic validation, history, stale responses, polling, HTTP/session/network errors and teardown: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_config_restore_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid restore browser controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_drives_browser_test.js",
+        "exit_code": 0,
+        "output": "Drive controller: metadata as text, duplicates, confirmation/cancel, target/CSRF and fresh-inventory requirement: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_browser_test.js",
+        "exit_code": 0,
+        "output": "FITS controller: duplicate prevention, output identity, search/reset, visible validation and failed-session recovery: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_focus_browser_test.js",
+        "exit_code": 0,
+        "output": "Native Focus browser controller: target camera, duplicate prevention, decode, errors, expired session, permissions and movement feedback: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_full_settings_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid full Settings controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_generation_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid generation confirmation, role gate, duplicate submission, failure and scope changes: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_gpio_browser_test.js",
+        "exit_code": 0,
+        "output": "GPIO controller: confirmation/cancel, explicit Off, CSRF, duplicate prevention, errors and retained disabled controls: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_log_browser_test.js",
+        "exit_code": 0,
+        "output": "Log controller CSRF, plain text, expired session and failed/malformed responses: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_loop_browser_test.js",
+        "exit_code": 0,
+        "output": "Loop controls: history, speed, bounce, camera isolation, stale responses, image errors and recovery PASS\n"
+      },
+      {
+        "case": "testing/hybrid_media_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid media camera navigation and source preview behavior: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_mini_generation_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid mini controls: role, confirmation, duplicate submissions, failure recovery and task result: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_navigation_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid navigation controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_network_browser_test.js",
+        "exit_code": 0,
+        "output": "Network controller: all intents, scan results/empty state, target binding, security boolean, CSRF, pending/refresh guards, cancellation, permissions and errors: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_notification_ack_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid notification acknowledgement controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_operations_table_browser_test.js",
+        "exit_code": 0,
+        "output": "Operations table controller: combined filters, counts, reset, empty rows, filtered export payload/CSRF and native attachment forms: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_public_media_browser_test.js",
+        "exit_code": 0,
+        "output": "Public media clipboard fallback, fullscreen capability errors and failed preview feedback: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_browser_test.js",
+        "exit_code": 0,
+        "output": "Sensor controller: camera scope, 120 slots, real zero, absent values, filter, atomic errors, expired session, refresh and teardown: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_updates_browser_test.js",
+        "exit_code": 0,
+        "output": "Updates controller: confirmations, permissions, CSRF, duplicate suppression, accepted/failed/expired/lost responses and explicit refresh: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_youtube_browser_test.js",
+        "exit_code": 0,
+        "output": "YouTube revoke cancellation, action feedback and duplicate form prevention: PASS\n"
+      }
+    ],
+    "pi_final": {
+      "entrypoints": 94,
+      "failed": 0,
+      "source_hashes_verified": true,
+      "scope": "Full final-template isolated regression, including Book 2, Full Config parity, contracts, Safe Actions, Product and compilation"
+    }
+  },
+  "browser": {
+    "environment": "CUA native in-app browser; isolated Pi sandbox with two synthetic cameras",
+    "fixture": "testing/hybrid_loop_controls_browser.html",
+    "measurements": [
+      {
+        "control": "HISTORY_SELECT",
+        "status": "superato",
+        "selected": "14400",
+        "change_at_ms": 1788865064722,
+        "camera_request_at_ms": [
+          1788865064722,
+          1788865064722
+        ],
+        "expected": "Immediately request four-hour history for both cameras",
+        "observed": "Both camera-scoped limit_s=14400 requests issued in same millisecond; both display their own frames"
+      },
+      {
+        "control": "FRAMEDELAY_SELECT",
+        "status": "superato",
+        "selected": "200 (5 FPS)",
+        "expected": "Displayed frame changes slow from approximately 100 to 200 milliseconds",
+        "sample_size_per_camera": 30,
+        "before_ms": {
+          "camera-1": [
+            100,
+            104
+          ],
+          "camera-2": [
+            101,
+            103
+          ]
+        },
+        "after_ms": {
+          "camera-1": [
+            201,
+            203
+          ],
+          "camera-2": [
+            201,
+            203
+          ]
+        }
+      },
+      {
+        "control": "ROCK_CHECKBOX",
+        "status": "superato",
+        "selected": true,
+        "expected": "Forward then reverse without duplicate endpoints",
+        "observed_sequence_camera_1": [
+          "preview-camera-1-1.jpg",
+          "preview-camera-1-2.jpg",
+          "preview-camera-1-1.jpg",
+          "generation-camera-1.jpg",
+          "preview-camera-1-1.jpg",
+          "preview-camera-1-2.jpg"
+        ],
+        "observed_sequence_camera_2": [
+          "preview-camera-2-1.jpg",
+          "preview-camera-2-2.jpg",
+          "preview-camera-2-1.jpg",
+          "generation-camera-2.jpg",
+          "preview-camera-2-1.jpg",
+          "preview-camera-2-2.jpg"
+        ]
+      },
+      {
+        "control": "Empty historical view",
+        "status": "superato",
+        "url": "/indi-allsky/modern-admin/loop?timestamp=1",
+        "observed": "Both image elements absent from accessibility tree; browser screenshot confirms blank frame area and No frames in this time range. on final template"
+      }
+    ],
+    "limits": [
+      "Cached 64x48 synthetic JPEGs; these timings are not a production bandwidth benchmark",
+      "Browser check used administrator and two cameras; API camera/role coverage is separate",
+      "Error/race injection verified in deterministic JS tests, not live network interruption",
+      "No capture setting or cadence changed"
+    ]
+  },
+  "production_deployed": false,
+  "capture_restarted": false,
+  "sandbox_pid": 3619041
+}
