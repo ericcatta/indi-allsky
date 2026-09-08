@@ -13,6 +13,58 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Realtime Keogram multicamera flow — 2026-09-08
+
+Hybrid now honors each profile's realtime output option rather than forcing it
+off in multicamera mode. Core images-only and explicit realtime opt-out gates
+remain effective. Extra uploads remain disabled by the shared policy, including
+the realtime upload flag fixed in the preceding mission. Camera Management shows
+the effective realtime setting; mini timelapse, panorama and extra automatic
+uploads remain restricted. Existing legacy policy fingerprints are unchanged;
+only the long-term/realtime differences are allowed in 1,027 parity cases.
+
+A reproducible cache defect was found before enabling the flow: syntactically
+valid NumPy metadata with an invalid shape raised IndexError and terminated the
+worker. The shared history adapter validates image columns and integer timestamps
+as a matching pair before assigning them. Invalid/missing history starts afresh;
+unreadable or non-removable caches are diagnosed without preventing the next
+sample. Cache filenames and valid persisted arrays are unchanged.
+
+A second reproduced defect used the global frame count for periodic saves:
+with camera sequence 1,2,1,2 and interval 2, the old worker saved camera 2 twice
+and never camera 1. Multicamera saves now count eligible frames per cached
+camera/profile processor. Single-camera counter semantics remain unchanged.
+The acceptance checks the actual history writes once for each camera.
+
+The isolated acceptance alternates 16 synthetic frames through real per-camera
+ImageProcessors and the actual worker admission gate, verifies the five-column
+limit, saves every processor, restores both histories exactly and appends new
+samples. Corruption of camera 1's metadata leaves camera 2's history intact.
+Cache paths in this fixture use the production camera-ID filename templates;
+sensor acquisition and process restart are not exercised by this test.
+Actual worker publication then produces the files served by Hybrid to both roles.
+The upload queue stays empty even with an enabled global realtime upload setting
+because the effective profile forbids extra uploads.
+
+The Hybrid page no longer inherits the shared legacy Realtime page class. It
+selects the explicit camera/profile, rejects unknown or inconsistent selections,
+and provides the matching preview/download plus an explicit missing-file state.
+The controller fetches and decodes a complete replacement before showing it,
+reports stale Last-Modified values or unavailable timestamps, retains the last
+valid preview on missing/network/session/decode errors, prevents overlapping
+requests, pauses in hidden tabs and tears down pending work on navigation.
+
+All 105 Python regression entrypoints and 25 JavaScript suites passed on the
+final candidate. The original media delegation guardrail now locates Realtime
+by class name rather than its former file position, without relaxing delegation.
+Evidence: [Realtime multicamera flow](testing/evidence/hybrid-realtime-flow-2026-09-08.json).
+
+These are isolated Flask/worker/codec and Node-controller proofs. Native browser
+interaction, live sensor history, sustained disk performance and production
+deployment remain open. A capture-affecting deployment must start a new complete
+24-hour day/night observation; the previous production interval is not reusable
+as acceptance of this candidate. Classic removal remains a separate later gate.
+
 ## Realtime Keogram publication and shutdown recovery — 2026-09-08
 
 The shared worker removed the published preview before copying its replacement,

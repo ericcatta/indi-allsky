@@ -4577,8 +4577,12 @@ class ImageWorker(Process):
 
 
         save_interval = self.config.get('REALTIME_KEOGRAM', {}).get('SAVE_INTERVAL', 25)
-        if self.image_count % save_interval == 0:
-            # store keogram data every X images
+        save_count = self.image_count
+        if self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False):
+            self.image_processor.realtime_save_count = getattr(self.image_processor, 'realtime_save_count', 0) + 1
+            save_count = self.image_processor.realtime_save_count
+        if save_count % save_interval == 0:
+            # Store each camera/profile history after its own configured frame count.
             try:
                 self.image_processor.realtimeKeogramDataSave()
             except (OSError, ValueError):

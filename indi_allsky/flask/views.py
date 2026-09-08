@@ -10666,18 +10666,6 @@ class ModernAdminSupportInfoView(ModernAdminSystemToolView, SupportInfoView):
     page_title = 'Modern Admin Support Info'
 
 
-class ModernAdminRealtimeKeogramView(ModernAdminObservatoryToolView, RealtimeKeogramView):
-    page_title = 'Modern Admin Realtime Keogram'
-
-    def get_context(self):
-        context = super(ModernAdminRealtimeKeogramView, self).get_context()
-        keogram_uri = context.get('keogram_uri')
-        if keogram_uri:
-            context['keogram_uri'] = self.get_observatory_media_access_adapter().resolve_existing_media_url(keogram_uri)
-
-        return context
-
-
 class ModernAdminAstroPanelView(ModernAdminObservatoryToolView, TemplateView):
     page_title = 'Modern Admin Astropanel'
 
@@ -11168,6 +11156,41 @@ class ModernAdminDarkLibraryView(ModernAdminCameraToolView, ModernAdminMediaBrow
             })
 
         return row_list
+
+
+class ModernAdminRealtimeKeogramView(ModernAdminObservatoryToolView, ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Realtime Keogram'
+    decorators = [login_required]
+
+    def get_context(self):
+        filters = self.get_media_camera_filters()
+        selected = self.get_selected_media_camera_filter(filters)
+        camera_id = selected.get('camera_id') or self.camera.id
+        self.camera = IndiAllSkyDbCameraTable.query.filter_by(id=camera_id).first_or_404()
+        self.cameraSetup(camera_id=camera_id)
+        context = super(ModernAdminRealtimeKeogramView, self).get_context()
+        context['realtime_camera_filters'] = [item for item in filters if item.get('camera_id')]
+        context['realtime_camera_id'] = camera_id
+        context['realtime_camera_label'] = self.camera.friendlyName or self.camera.name
+        filename = 'realtime_keogram.' + self.indi_allsky_config.get('IMAGE_FILE_TYPE', 'jpg')
+        relative = Path('ccd_' + self.camera.uuid) / filename
+        keogram_uri = str(Path('images') / relative)
+        context['keogram_uri'] = self.get_observatory_media_access_adapter().resolve_existing_media_url(keogram_uri)
+        context['refreshInterval'] = max(5000, int(min(float(self.indi_allsky_config.get('EXPOSURE_PERIOD', 15)), float(self.indi_allsky_config.get('EXPOSURE_PERIOD_DAY', 15))) * 1000))
+        context['keogram_available'] = False
+        context['keogram_status'] = 'No realtime keogram has been generated for this camera yet.'
+        try:
+            root = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']).resolve()
+            path = (root / relative).resolve()
+            if not path.is_relative_to(root):
+                raise ValueError('Invalid camera preview path')
+            if path.is_file() and path.stat().st_size:
+                context['keogram_available'] = True
+                context['keogram_status'] = 'Saved preview available. Checking for updates…'
+        except (OSError, ValueError):
+            context['keogram_uri'] = ''
+            context['keogram_status'] = 'The realtime preview could not be read.'
+        return context
 
 
 class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, ModernAdminMediaBrowseView, TemplateView):

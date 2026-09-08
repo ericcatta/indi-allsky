@@ -587,14 +587,17 @@ def test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter
     start = source.index('class ModernAdminObservatoryToolView')
     end = source.index('class ModernAdminAstroPanelView', start)
     body = source[start:end]
+    realtime_start = source.index('class ModernAdminRealtimeKeogramView')
+    realtime_end = source.index('\nclass ', realtime_start + 1)
+    realtime_body = source[realtime_start:realtime_end]
     longterm_start = source.index('class ModernAdminLongTermKeogramView')
     longterm_end = source.index('\nclass ', longterm_start + 1)
     longterm_body = source[longterm_start:longterm_end]
 
     assert_true('def get_observatory_media_access_adapter(self):' in body, 'observatory tools must construct media access adapter')
-    assert_true('.resolve_existing_media_url(keogram_uri)' in body, 'observatory keogram URLs should go through Hybrid media access adapter')
+    assert_true('.resolve_existing_media_url(keogram_uri)' in realtime_body, 'observatory keogram URLs should go through Hybrid media access adapter')
     assert_true('.resolve_existing_file_mtime(longterm_keogram_image_p)' in longterm_body, 'long-term keogram filesystem metadata should go through Hybrid media access adapter')
-    assert_true('.normalize_media_url(keogram_uri)' not in body, 'observatory keogram views must not own direct URL normalization')
+    assert_true('.normalize_media_url(keogram_uri)' not in realtime_body, 'observatory keogram views must not own direct URL normalization')
 
     assert_true('.resolve_existing_media_url(keogram_uri)' in longterm_body, 'long-term display URL must use the media adapter')
     assert_true('.normalize_media_url(keogram_uri)' not in longterm_body, 'long-term view must not normalize display URLs directly')

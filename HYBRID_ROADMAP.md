@@ -16,12 +16,19 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Realtime Keogram multicamera completato in isolamento: policy per profilo,
+  cronologie separate con validazione e recupero cache, anteprima e download
+  della camera/profilo selezionati, polling con errori/stato obsoleto espliciti.
+  Pagina Hybrid indipendente dalla classe di pagina Realtime condivisa.
+  Immagini-only e opt-out restano rispettati; upload extra rimangono bloccati.
+  Deploy, prove browser native e collaudo sensori/disco/24 ore restano aperti.
+
 - Realtime Keogram: pubblicazione camera-scoped spostata in adapter condiviso
   con sostituzione atomica, verifica encoder e recupero dopo errori. Primo
   campione valido anche con scala ridotta; shutdown salva tutti i processori.
   Opt-out extra_uploads ora include anche il Realtime. Parita' dei sei formati
-  verificata; raccolta automatica multicamera resta bloccata fino al collaudo
-  completo di cronologia, selezione e UI. Non ancora distribuito.
+  verificata; il flusso multicamera e' completato nella missione successiva
+  descritta sopra. Non ancora distribuito.
 
 - Long-term Keogram multicamera: la policy Hybrid rispetta ora l'opzione del
   profilo invece di forzarla off. Campioni RGB e persistenza restano nel worker

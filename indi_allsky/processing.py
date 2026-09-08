@@ -3951,30 +3951,11 @@ class ImageProcessor(object):
             # load stored data
             try:
                 self.realtime_keogram_data, self.realtime_keogram_timestamps = self.realtimeKeogramDataLoad()
-            except ValueError:
-                logger.error('Invalid numpy data for realtime keogram')
-
-                if self._keogram_store_p.exists():
-                    self._keogram_store_p.unlink()
-
-                if self._keogram_store_metadata_p.exists():
-                    self._keogram_store_metadata_p.unlink()
-            except EOFError:
-                logger.error('Invalid numpy data for realtime keogram')
-
-                if self._keogram_store_p.exists():
-                    self._keogram_store_p.unlink()
-
-                if self._keogram_store_metadata_p.exists():
-                    self._keogram_store_metadata_p.unlink()
-            except FileNotFoundError:
-                logger.error('Realtime keogram data files missing')
-
-                if self._keogram_store_p.exists():
-                    self._keogram_store_p.unlink()
-
-                if self._keogram_store_metadata_p.exists():
-                    self._keogram_store_metadata_p.unlink()
+            except (ValueError, EOFError, FileNotFoundError):
+                logger.warning('Realtime keogram history missing or invalid; starting a new history')
+                self._discard_realtime_keogram_history()
+            except OSError:
+                logger.exception('Realtime keogram history could not be read; starting a new history')
 
 
         try:
@@ -3984,12 +3965,7 @@ class ImageProcessor(object):
             self.realtime_keogram_data = None
             self.realtime_keogram_timestamps = list()
 
-            if self._keogram_store_p.exists():
-                # remove any existing data store
-                self._keogram_store_p.unlink()
-
-            if self._keogram_store_metadata_p.exists():
-                self._keogram_store_metadata_p.unlink()
+            self._discard_realtime_keogram_history()
 
             return
 
@@ -4003,21 +3979,18 @@ class ImageProcessor(object):
             self.realtime_keogram_timestamps.pop(0)
 
 
+    def _discard_realtime_keogram_history(self):
+        for path in (self._keogram_store_p, self._keogram_store_metadata_p):
+            try:
+                path.unlink(missing_ok=True)
+            except OSError:
+                logger.exception('Unable to discard invalid realtime keogram cache')
+
+
     def realtimeKeogramDataLoad(self):
+        from .realtime_keogram_history import load_realtime_keogram_history
         logger.info('Loading stored realtime keogram data')
-        with io.open(str(self._keogram_store_p), 'r+b') as f_numpy:
-            keogram_data = numpy.load(f_numpy)
-
-
-        with io.open(str(self._keogram_store_metadata_p), 'r+b') as f_numpy:
-            keogram_metadata = numpy.load(f_numpy)
-
-
-        #logger.info('Keogram shape: %s, timestamps %s', keogram_data.shape, keogram_metadata.shape)
-        keogram_timestamps = keogram_metadata[0]
-
-
-        return keogram_data, keogram_timestamps
+        return load_realtime_keogram_history(self._keogram_store_p, self._keogram_store_metadata_p)
 
 
     def realtimeKeogramDataSave(self):

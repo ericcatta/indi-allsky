@@ -4,7 +4,7 @@ from dataclasses import replace
 
 
 DEFERRED_CAPTURE_OUTPUTS = (
-    'mini_timelapse', 'realtime_keogram',
+    'mini_timelapse',
     'panorama', 'panorama_loop', 'extra_uploads',
 )
 
@@ -49,6 +49,11 @@ def camera_mode_context(config):
                    camera_interface=profile.camera_interface, capture_outputs=multicamera_capture_outputs(profile.outputs))
         effective = build_profile_config(proposed, replace(profile, outputs=row['capture_outputs']))
         row['generated_capture_enabled'] = bool(effective.get('TIMELAPSE_ENABLE', True))
+        row['realtime_capture_enabled'] = bool(
+            row['capture_outputs'].get('realtime_keogram', True)
+            and any(row['capture_outputs'].get(key, True)
+                    for key in ('timelapse', 'keogram', 'startrails'))
+        )
         row['longterm_capture_enabled'] = bool(
             effective.get('LONGTERM_KEOGRAM', {}).get('ENABLE', True)
             and row['capture_outputs'].get('longterm_keogram', True)

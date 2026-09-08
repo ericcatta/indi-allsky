@@ -25,19 +25,21 @@ def run():
         outputs:dict
         profile_id:str='fixture'
         unrelated:float=12.5
-    for values in itertools.product((False,True),repeat=9):
-        outputs=dict(zip(('images','timelapse','keogram','startrails','mini_timelapse','panorama','extra_uploads','future_key','longterm_keogram'),values))
+    for values in itertools.product((False,True),repeat=10):
+        outputs=dict(zip(('images','timelapse','keogram','startrails','mini_timelapse','panorama','extra_uploads','future_key','longterm_keogram','realtime_keogram'),values))
         profile=Profile(outputs)
         expected=namespace['_images_only_capture_profile'](None,profile)
-        # Sole intentional delta: long-term collection honors its profile value.
-        expected.outputs.pop('longterm_keogram')
-        if 'longterm_keogram' in outputs:expected.outputs['longterm_keogram']=outputs['longterm_keogram']
+        # Intentional deltas: both keogram outputs honor their profile values.
+        for key in ('longterm_keogram','realtime_keogram'):
+            expected.outputs.pop(key)
+            if key in outputs:expected.outputs[key]=outputs[key]
         actual=multicamera_capture_outputs(outputs)
         assert actual==expected.outputs and actual is not outputs and profile.outputs==outputs
     for outputs in ({}, {'future_key': {'value': 1}}, {'timelapse': 'custom', 'images': False}):
         expected=namespace['_images_only_capture_profile'](None,Profile(outputs))
-        expected.outputs.pop('longterm_keogram')
-        if 'longterm_keogram' in outputs:expected.outputs['longterm_keogram']=outputs['longterm_keogram']
+        for key in ('longterm_keogram','realtime_keogram'):
+            expected.outputs.pop(key)
+            if key in outputs:expected.outputs[key]=outputs[key]
         assert multicamera_capture_outputs(outputs)==expected.outputs
     tree=ast.parse((root/'indi_allsky/allsky.py').read_text())
     method=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='_images_only_capture_profile')
@@ -50,6 +52,10 @@ def run():
     assert context['enable_allowed'] and len(context['profiles'])==2
     assert all(p['generated_capture_enabled'] for p in context['profiles'])
     assert all(p['longterm_capture_enabled'] for p in context['profiles'])
+    assert all(p['realtime_capture_enabled'] for p in context['profiles'])
+    no_realtime=deepcopy(config)
+    no_realtime['MULTI_CAMERA']['profiles'][0]['outputs']={'realtime_keogram':False}
+    assert not camera_mode_context(no_realtime)['profiles'][0]['realtime_capture_enabled']
     disabled_samples=deepcopy(config)
     disabled_samples['LONGTERM_KEOGRAM']={'ENABLE':False}
     assert not any(p['longterm_capture_enabled'] for p in camera_mode_context(disabled_samples)['profiles'])
@@ -85,6 +91,6 @@ def run():
         try:plan_camera_switch(candidate,camera_name=name,driver='rpicam-still',supported_interfaces=interfaces)
         except ValueError:pass
         else:raise AssertionError('Ambiguous or multicamera switch accepted')
-    print('Camera management plans and 515 output-policy cases (only long-term restriction removed): PASS')
+    print('Camera management plans and 1027 output-policy cases (long-term/realtime restrictions removed): PASS')
 
 if __name__=='__main__':run()
