@@ -1,0 +1,58 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Hybrid header layout acceptance</title>
+<style>body{font:14px system-ui;margin:12px}iframe{height:360px;border:1px solid #777;transform-origin:top left}pre{white-space:pre-wrap;max-height:160px;overflow:auto}#preview{overflow:auto}</style>
+<h1>Hybrid header layout acceptance</h1>
+<p>Runs against the isolated sandbox only. Checks actual rendered header bounds and control overlap, including long profile labels. No runtime action is invoked.</p>
+<button id="run">Run layout checks</button>
+<select id="width"><option>320</option><option>390</option><option>640</option><option>811</option><option>900</option><option>901</option><option>1024</option><option selected>1280</option><option>1920</option></select>
+<button id="preview-button">Preview width</button>
+<pre id="result">Ready</pre><div id="preview"></div>
+<script>
+const widths=[320,390,640,811,900,901,1024,1280,1920];
+const result=document.getElementById('result'), preview=document.getElementById('preview');
+async function frameAt(width){
+  const frame=document.createElement('iframe');frame.style.width=width+'px';
+  frame.title='Isolated Hybrid Loop at '+width+' pixels';
+  const loaded=new Promise(resolve=>frame.onload=resolve);
+  frame.src='/indi-allsky/modern-admin/loop?layout_probe='+Date.now();
+  preview.replaceChildren(frame);await loaded;
+  const sheet=frame.contentDocument.querySelector('link[href*="hybrid-product-ui.css"]');
+  if(!sheet)throw Error('Hybrid stylesheet missing');
+  const refreshed=new Promise((resolve,reject)=>{sheet.onload=resolve;sheet.onerror=reject;});
+  const stylesheetURL=new URL(sheet.href);stylesheetURL.searchParams.set('layout_probe',Date.now());
+  sheet.href=stylesheetURL;await refreshed;await frame.contentDocument.fonts.ready;
+  return frame;
+}
+async function settle(frame){await new Promise(resolve=>frame.contentWindow.requestAnimationFrame(()=>frame.contentWindow.requestAnimationFrame(resolve)));}
+function inspect(frame,width,theme,labels){
+  const doc=frame.contentDocument,header=doc.querySelector('.hybrid-app-topbar');
+  if(!header)throw Error('Hybrid shell missing');
+  const rect=header.getBoundingClientRect(),errors=[];
+  const items=[...header.querySelectorAll('a,button,.hybrid-runtime-status')].map(el=>({label:el.textContent.trim()||el.getAttribute('aria-label'),rect:el.getBoundingClientRect()})).filter(x=>x.rect.width&&x.rect.height);
+  for(const x of items){const b=x.rect;if(b.left < -.5 || b.right > width+.5 || b.top<rect.top-.5 || b.bottom>rect.bottom+.5)errors.push('Out of bounds: '+x.label);}
+  for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){
+    const a=items[i].rect,b=items[j].rect;
+    if(Math.min(a.right,b.right)-Math.max(a.left,b.left)>.5 && Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>.5)errors.push('Overlap: '+items[i].label+' / '+items[j].label);
+  }
+  if(items.length<10)errors.push('Expected administrator controls for both cameras');
+  return {width,theme,labels,controls:items.length,headerHeight:rect.height,status:errors.length?'defect':'passed',errors};
+}
+document.getElementById('run').onclick=async()=>{
+  const results=[];document.getElementById('run').disabled=true;
+  try{for(const width of widths){
+    const frame=await frameAt(width),doc=frame.contentDocument;
+    for(const labels of ['normal','long']){
+      if(labels==='long')doc.querySelectorAll('[data-hybrid-abort-exposure]').forEach(el=>el.textContent='Abort ObservatoryCameraWithAVeryLongUnbrokenProfileIdentifier');
+      for(const theme of ['night','day']){
+        doc.body.classList.toggle('hybrid-theme-day',theme==='day');doc.body.classList.toggle('hybrid-theme-night',theme==='night');await settle(frame);
+        results.push(inspect(frame,width,theme,labels));
+      }
+    }
+    result.textContent=JSON.stringify({completed:results.length,results},null,2);
+  }
+  result.textContent=JSON.stringify({complete:true,passed:results.filter(x=>x.status==='passed').length,failed:results.filter(x=>x.status!=='passed').length,results},null,2);
+  }catch(error){result.textContent=JSON.stringify({complete:false,error:String(error),results},null,2);}finally{document.getElementById('run').disabled=false;}
+};
+document.getElementById('preview-button').onclick=async()=>{const width=Number(document.getElementById('width').value),frame=await frameAt(width);frame.style.transform='scale('+Math.min(1,(innerWidth-30)/width)+')';};
+</script>

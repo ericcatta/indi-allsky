@@ -27,8 +27,8 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 18px;
   align-items: center;
   min-height: 66px;
@@ -133,6 +133,8 @@
 }
 
 .hybrid-app-primary-nav {
+  flex: 1 1 auto;
+  flex-wrap: wrap;
   gap: 6px;
   justify-content: center;
 }
@@ -171,6 +173,9 @@
 }
 
 .hybrid-app-actions {
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
   min-width: 0;
 }
@@ -179,17 +184,13 @@
   display: inline-flex;
   gap: 6px;
   align-items: center;
-  max-width: min(58vw, 760px);
+  flex-wrap: wrap;
+  max-width: 100%;
+  min-width: 0;
   padding: 4px;
   border: 1px solid rgba(143, 216, 208, 0.18);
-  border-radius: 999px;
+  border-radius: 18px;
   background: rgba(0, 0, 0, 0.18);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.hybrid-runtime-actions::-webkit-scrollbar {
-  display: none;
 }
 
 .hybrid-theme-day .hybrid-runtime-actions {
@@ -208,7 +209,9 @@
   font: inherit;
   font-size: 0.74rem;
   line-height: 1;
-  white-space: nowrap;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .hybrid-runtime-status {
@@ -1707,7 +1710,6 @@
 
 @media (max-width: 900px) {
   .hybrid-app-topbar {
-    grid-template-columns: auto 1fr auto;
     gap: 10px;
     padding-inline: 12px;
   }
@@ -1727,6 +1729,7 @@
   }
 
   .hybrid-app-actions {
+    flex-basis: 100%;
     flex-wrap: wrap;
     justify-content: flex-end;
   }
@@ -1761,7 +1764,6 @@
   .hybrid-runtime-actions {
     width: 100%;
     justify-content: flex-start;
-    overflow-x: auto;
   }
 }
 

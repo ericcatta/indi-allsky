@@ -13,6 +13,34 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Responsive header correction — 2026-09-08
+
+The header grid allowed the primary navigation column to collapse while runtime
+controls exceeded their container. At 1280px links overlapped; smaller screens
+hid abort/reboot controls behind an unmarked horizontal scroll area. The shell
+now wraps navigation/action groups and individual recovery controls. Long profile
+labels wrap within available width. All actions and permission gates remain;
+CSS cache version is 007. Only the Hybrid shell asset-version fingerprints change;
+Classic and Full Config baselines are unchanged. No ownership claim is made for
+this layout correction.
+
+The browser fixture measures real rendered header controls at nine widths from
+320 to 1920px, in both themes with normal and long profile labels: 36/36 pass.
+Visual inspection at 1280 and 390px confirms all controls are visible. Mobile
+checks verify the theme toggle, menu opening/initial focus and Escape restoring
+focus. The header becomes taller on narrow screens to keep all controls visible.
+
+The 94-entrypoint isolated Pi regression initially passed 92 checks. Two template
+scanners encountered AppleDouble metadata added by the macOS tar transfer. After
+removing only those identified transfer files, both checks passed without source
+changes. Candidate hashes match the tested source. Evidence and exact limits:
+`testing/evidence/hybrid-header-layout-2026-09-08.json`. The reusable browser
+fixture belongs under `testing/` and must only be served in the isolated sandbox.
+
+This resolves the header layout defect recorded below in the candidate. Production
+deployment, complete role/browser coverage and the overall acceptance remain open.
+No acquisition service, configuration or data changed.
+
 ## Loop optional measurements and media browser checks — 2026-09-08
 
 Synthetic multi-camera browser testing exposed a real API failure: nullable SQM

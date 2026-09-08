@@ -83,13 +83,13 @@ def shell_contract(shell, modern, authenticated, original_source=None):
 def test_shell_dom_parity():
     # Classic retains the pre-split 17c5a322 baselines. Hybrid's baseline
     # intentionally includes accessible navigation and role-aware recovery controls;
-    # account links are checked separately below. Full Config fingerprints
+    # CSS cache version 007 is included; account links are checked separately. Full Config fingerprints
     # are independent and unchanged.
     expected = {
         (False, False): 'da24764ffdc54509edae10c1475666dc2ebe6808599afddbbe9fa65426a46010',
         (False, True): '5231472cc413795e3f2b4c2a380db4bc0f7a8205a9e092569f76999d806383fc',
-        (True, False): 'bf087aa4d926a19e29b0f976093a73f7691bc42d1231f1360c24a290bb8fe2dc',
-        (True, True): '12f93629460d77ce9aceb4ae771e005d160f8800d099c04f5df7132584dfc5bd',
+        (True, False): 'd09716dc2fe6cefe86857a48e188713814d317595427e728a3583da26d5965a4',
+        (True, True): 'c5f89c397dcef41c5e05974586929bd76b239f87f54ec9ccfaacb660b6839eaa',
     }
     for (modern, authenticated), fingerprint in expected.items():
         shell = 'modern_admin/base.html' if modern else 'base.html'

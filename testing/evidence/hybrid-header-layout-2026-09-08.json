@@ -1,0 +1,93 @@
+{
+  "date": "2026-09-08",
+  "base": "876c191d",
+  "source_sha256": {
+    "indi_allsky/flask/static/modern_admin/hybrid-product-ui.css": "0f1d35f6ce620702ef73be4e970e8e7c7f37f6acf8a51cf317826a38cd291a30",
+    "indi_allsky/flask/templates/modern_admin/base.html": "448cd8fa70c1f1181119387545c9c0bfcd7b9f796517a2cb15b6a7fb2577f734",
+    "testing/hybrid_shell_test.py": "a8cfa6dd031d93c85a3950483c9f8a8fff8e5f53e9dd4d9bf846cf9e64a884c7",
+    "testing/hybrid_header_layout_browser.html": "08a1c5672ea238e732cdc2918413a8c8b58bfcf11b89047c0f33f06b32dd7703"
+  },
+  "environment": "Pi isolated checkout /home/eric/hybrid-acceptance-archive-return; candidate runtime overlay, not production",
+  "browser": {
+    "tool": "CUA in-app browser",
+    "fixture": "testing/hybrid_header_layout_browser.html",
+    "execution": "Serve fixture under isolated sandbox static/modern_admin only; open it in an authenticated administrator session and Run layout checks. It loads actual Loop pages in same-origin frames, forces stylesheet refresh and measures header control bounds. No runtime actions are invoked.",
+    "widths": [
+      320,
+      390,
+      640,
+      811,
+      900,
+      901,
+      1024,
+      1280,
+      1920
+    ],
+    "themes": [
+      "night",
+      "day"
+    ],
+    "labels": [
+      "normal",
+      "long unbroken profile identifier"
+    ],
+    "combinations_passed": 36,
+    "combinations_failed": 0,
+    "normal_header_heights": [
+      259,
+      223,
+      187,
+      187,
+      151,
+      163,
+      117,
+      117,
+      66
+    ],
+    "long_label_header_heights": [
+      383,
+      347,
+      223,
+      223,
+      187,
+      235,
+      199,
+      199,
+      117
+    ],
+    "baseline": "Cached previous stylesheet reproduced out-of-bounds/overlapping controls in all 36 combinations; 1280px also reproduced visually in prior Loop mission. Candidate run forces fresh stylesheet load.",
+    "visual_checks": [
+      "1280px frame scaled to fit browser: navigation and all recovery controls visible",
+      "390px unscaled: all recovery controls including both profile aborts and reboot visible",
+      "390px theme toggle changes to day palette and retains focus",
+      "390px menu opens and focuses My Account; Escape closes and restores focus to menu button"
+    ],
+    "limits": [
+      "Sandbox administrator with two synthetic cameras",
+      "No effects invoked",
+      "Not a full browser engine/role/accessibility matrix",
+      "No production deployment"
+    ]
+  },
+  "automated": {
+    "entrypoints": 94,
+    "initial_passed": 92,
+    "initial_failed": [
+      "hybrid_shell_test.py",
+      "modern_safe_action_test.py"
+    ],
+    "cause": "Four macOS AppleDouble ._ metadata files introduced by tar transfer; a binary ._base.html was scanned as a template.",
+    "resolution": "Removed only the four identified 163-byte AppleDouble files after checking magic 00051607. Both affected entrypoints rerun passed with unchanged candidate sources.",
+    "final_failed": 0,
+    "remote_results": "/home/eric/hybrid-header-layout-evidence/results.json",
+    "remote_rerun": "/home/eric/hybrid-header-layout-evidence/rerun.json",
+    "local_checks": [
+      "hybrid_shell_test.py",
+      "modern_safe_action_test.py",
+      "node testing/hybrid_navigation_browser_test.js",
+      "git diff --check"
+    ]
+  },
+  "capture_runtime_changed": false,
+  "production_deployed": false
+}
