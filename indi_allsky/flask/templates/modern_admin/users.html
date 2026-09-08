@@ -19,7 +19,7 @@ var camera_id = {{ camera_id }};
     {% include 'modern_admin/_shell_header.html' %}
 
     <p id="modern-users-summary">{{ modern_admin_user_count }} accounts · {{ modern_admin_user_active_count }} active · {{ modern_admin_user_admin_count }} administrators</p>
-    <p><a href="{{ url_for('indi_allsky.modern_admin_account_view') }}">My Account</a> — update your own name, email or password.</p>
+    <p><a href="{{ url_for('indi_allsky.modern_admin_account_view') }}">My Account</a> — update your own name or password.</p>
 
     <section class="modern-admin-table-panel" aria-labelledby="modern-users-title">
         <div class="modern-admin-section-heading">

@@ -13,6 +13,31 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Native users/account acceptance — 2026-09-08
+
+Production `f695ea4c` was checked in the native in-app browser with the existing
+administrator session. The evidence matrix records actual outcomes for active,
+inactive and combined filters; search and keyboard clearing; ID ordering; row
+count selection; detail navigation and return; and narrow-screen filter bounds.
+The selected account detail already uses one compact metadata panel and explains
+that passwords are stored as non-recoverable hashes. An invalid account save
+showed its rejection and re-enabled submission; successful save was not tested.
+
+The Users guidance incorrectly promised email editing while Account exposes
+email read-only. The candidate changes the guidance to name or password.
+All 110 Python regression entries passed against the isolated candidate.
+`testing/evidence/hybrid-native-users-2026-09-08.json` includes the case matrix,
+regression and the following live capture sample. The wording fix is not deployed.
+Native exports, other roles, positive credential changes and horizontal table
+interaction remain open. The Home click returned without observed navigation;
+its cause is unresolved. Explicit navigation restored Now, verified by URL/title.
+
+At 22:52 CEST each camera had saved 128 images since 21:15:42, all present and
+nonempty, median interval 45 seconds. Actual capture requests numbered 129 each,
+with medians 45.039 s (IMX708) and 45.029 s (ZWO). Capture PID 3977508 remained
+active with no restarts, no pending tasks, and 56 GB free. The known satellite
+HTTP 403 remains in the journal. This is about 96 minutes, not 24-hour acceptance.
+
 ## Account save authentication cost — 2026-09-08 (candidate, not deployed)
 
 Name-only saves performed three Argon2 verifications: current password in the
