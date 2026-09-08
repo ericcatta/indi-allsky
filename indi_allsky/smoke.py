@@ -12,7 +12,6 @@ import logging
 from . import constants
 
 from .flask import db
-from .flask.miscDb import miscDb
 
 
 logger = logging.getLogger('indi_allsky')
@@ -35,8 +34,6 @@ class IndiAllskySmokeUpdate(object):
     def __init__(self, config):
         self.config = config
 
-        self._miscDb = miscDb(self.config)
-
         self.hms_kml_data = None
 
 
@@ -58,7 +55,11 @@ class IndiAllskySmokeUpdate(object):
             except NoSmokeData as e:
                 # Leave previous values in place
                 logger.error('No smoke data: %s', str(e))
-                return
+                result = {'state': 'unavailable', 'reason': str(e)[:160], 'attempted_at': int(time.time())}
+                camera_data['SMOKE_UPDATE_STATUS'] = result
+                camera.data = camera_data
+                db.session.commit()
+                return result
 
         else:
             # all other regions report no data
@@ -68,12 +69,16 @@ class IndiAllskySmokeUpdate(object):
         if smoke_rating:
             logger.info('Smoke rating: %s', constants.SMOKE_RATING_MAP_STR[smoke_rating])
 
+            result = {'state': 'not_covered' if smoke_rating == constants.SMOKE_RATING_NODATA else 'available',
+                      'attempted_at': int(time.time())}
+            camera_data['SMOKE_UPDATE_STATUS'] = result
             camera_data['SMOKE_RATING'] = smoke_rating
             camera_data['SMOKE_DATA_TS'] = int(time.time())
             camera.data = camera_data
             db.session.commit()
+            return result
         else:
-            logger.warning('Smoke data not updated')
+            raise NoSmokeData('Smoke rating unavailable')
 
 
     def update_na_hms(self, camera):
@@ -116,6 +121,9 @@ class IndiAllskySmokeUpdate(object):
             except requests.exceptions.SSLError as e:
                 logger.error('Certificate error: %s', str(e))
                 self.hms_kml_data = None
+            except requests.exceptions.RequestException as e:
+                logger.error('Smoke download error: %s', str(e))
+                self.hms_kml_data = None
 
 
         if isinstance(self.hms_kml_data, type(None)):
@@ -127,7 +135,7 @@ class IndiAllskySmokeUpdate(object):
 
 
         try:
-            xml_root = etree.fromstring(self.hms_kml_data)
+            xml_root = etree.fromstring(self.hms_kml_data, parser=etree.XMLParser(resolve_entities=False, no_network=True))
         except etree.XMLSyntaxError as e:
             self.hms_kml_data = None  # force redownload
             raise NoSmokeData('Unable to parse XML: {0:s}'.format(str(e)))
@@ -168,7 +176,8 @@ class IndiAllskySmokeUpdate(object):
             for e_placemark in e_folder[0].xpath('.//kml:Placemark', namespaces=NS):
                 for e_polygon in e_placemark.xpath('.//kml:Polygon', namespaces=NS):
                     e_coord = e_polygon.find(".//kml:coordinates", namespaces=NS)
-                    #logger.info('   %s', pformat(e_coord.text))
+                    if e_coord is None or not e_coord.text:
+                        raise NoSmokeData('Missing polygon coordinates')
 
                     coord_list = list()
                     for line in e_coord.text.splitlines():
@@ -178,10 +187,18 @@ class IndiAllskySmokeUpdate(object):
                             continue
 
                         #logger.info('line: %s', pformat(line))
-                        p_long, p_lat, p_z = line.split(',')
-                        coord_list.append((float(p_long), float(p_lat)))
+                        try:
+                            p_long, p_lat, p_z = line.split(',')
+                            coord_list.append((float(p_long), float(p_lat)))
+                        except (TypeError, ValueError):
+                            raise NoSmokeData('Invalid polygon coordinates')
 
-                    smoke_polygon = shapely.Polygon(coord_list)
+                    try:
+                        smoke_polygon = shapely.Polygon(coord_list)
+                    except (ValueError, shapely.errors.GEOSException):
+                        raise NoSmokeData('Invalid smoke polygon')
+                    if smoke_polygon.is_empty or not smoke_polygon.is_valid:
+                        raise NoSmokeData('Invalid smoke polygon')
 
                     if location_area.intersects(smoke_polygon):
                         # first match wins
@@ -201,11 +218,12 @@ class IndiAllskySmokeUpdate(object):
         logger.warning('Downloading %s', url)
         r = requests.get(url, allow_redirects=True, verify=True, timeout=(15.0, 30.0))
 
-        if r.status_code >= 400:
-            logger.error('URL returned %d', r.status_code)
-            return None
-
-        return r.text.encode()
+        try:
+            if r.status_code >= 400:
+                raise NoSmokeData('HTTP {0}'.format(r.status_code))
+            return r.text.encode()
+        finally:
+            r.close()
 
 
 class NoSmokeData(Exception):

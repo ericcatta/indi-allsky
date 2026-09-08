@@ -1985,9 +1985,14 @@ class VideoWorker(Process):
         task.setRunning()
 
         smoke = IndiAllskySmokeUpdate(self.config)
-        smoke.update(camera)
-
-        task.setSuccess('Smoke data updated')
+        result = smoke.update(camera)
+        task.data = dict(task.data or {}, smoke_update_outcome=result)
+        if result['state'] == 'unavailable':
+            task.setFailed('Smoke update failed; previous reading retained')
+        elif result['state'] == 'not_covered':
+            task.setSuccess('Smoke provider does not cover this location')
+        else:
+            task.setSuccess('Smoke data updated')
 
 
     def updateSatelliteTleData(self, task, **kwargs):

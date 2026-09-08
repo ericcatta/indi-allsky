@@ -13,6 +13,35 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Smoke provider outcomes — 2026-09-08 (candidate, not deployed)
+
+The worker now distinguishes an updated smoke reading, provider failure and a
+location outside the provider's existing coverage rule. Failed updates preserve
+the prior rating and reading timestamp and fail the task; camera metadata record
+the attempt/error. Hybrid web status shows failure, stale/unknown-age readings,
+missing data and outside coverage explicitly. Bad rating/timestamp metadata no
+longer cause formatting exceptions or imply a fresh measurement.
+
+Malformed XML and missing/invalid polygon coordinates produce a handled failure;
+valid Heavy/Medium/Light/Clear geometry and the one-degree intersection area remain
+unchanged. XML external entity resolution is disabled and HTTP responses are closed.
+All 110 Python regression entries passed, including real Shapely fixtures, both
+roles through task/status endpoints, per-camera isolation, recovery and no network
+request outside coverage. The NOAA live feed was not queried in this mission.
+
+Four bounded production Astropanel checks passed: menu navigation/data population,
+manual refresh, automatic refresh and page bounds at 390px. The page loaded seven
+planet and 157 satellite entries. Sun altitude and update timestamp advanced;
+console errors were empty. This verifies refresh behavior, not independent
+astronomical ground truth, all roles or a complete visual/keyboard audit. Default
+viewport and Now were restored.
+
+Production remains `f695ea4c`; satellite and smoke worker changes await deployment.
+No services or production configuration were changed, preserving the current
+capture observation window. The overall acceptance and Classic removal remain open.
+
+Evidence: [smoke regression and native Astropanel checks](testing/evidence/hybrid-smoke-update-2026-09-08.json).
+
 ## Satellite group outcomes — 2026-09-08 (candidate, not deployed)
 
 The shared satellite updater now reports results for visual, Starlink and station

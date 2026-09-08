@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Fumo: esito disponibile/errore/fuori copertura restituito dal provider condiviso
+  e osservabile nel task. Hybrid possiede la presentazione di letture mancanti,
+  obsolete o non aggiornate; timestamp valido precedente conservato su errore.
+  Geometria valida e priorita' dei livelli invariate. Regressione 110 verifiche;
+  correzione non distribuita. Evidenze: `testing/evidence/hybrid-smoke-update-2026-09-08.json`.
+
 - Aggiornamento satelliti: il backend condiviso produce esiti per gruppo e
   conserva i cataloghi precedenti su errore. Hybrid possiede la presentazione
   esplicita dei risultati nel task; nessun successo completo su aggiornamento

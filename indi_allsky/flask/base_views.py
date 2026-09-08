@@ -589,31 +589,8 @@ class BaseView(View):
 
 
     def get_smoke_info(self):
-        data = {
-            'smoke_rating' : '',
-            'smoke_rating_status' : '',
-        }
-
-
-        if not self.camera_data:
-            data['smoke_rating'] = 'No data'
-            return data
-
-
-        #app.logger.info('Smoke data: %s', camera_data)
-
-        data['smoke_rating'] = constants.SMOKE_RATING_MAP_STR[self.camera_data.get('SMOKE_RATING', constants.SMOKE_RATING_NODATA)]
-
-
-        now = datetime.now()
-        now_minus_24h = now - timedelta(hours=24)
-
-        data_timestamp = int(self.camera_data.get('SMOKE_DATA_TS', 0))
-        if data_timestamp:
-            if data_timestamp < now_minus_24h.timestamp():
-                data['smoke_rating_status'] = '[old]'
-
-        return data
+        from ..modern_admin_smoke_status import build_smoke_status
+        return build_smoke_status(self.camera_data)
 
 
     def validate_longitude_timezone(self):
