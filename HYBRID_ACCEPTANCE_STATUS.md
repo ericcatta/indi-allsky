@@ -13,6 +13,30 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Exposure hold correction deployed — 2026-09-08 12:01 CEST
+
+Production now runs `a886a9d7`, configuration revision 110 unchanged. Capture
+restarted at **2026-09-08 12:01:07 CEST**, PID 3566586. The prior observation
+period is interrupted and does not count toward acceptance of this correction.
+Backup `/home/eric/hybrid-backups/exposure-hold-20260908-115906` contains a
+coherent 828,977,152-byte SQLite backup with integrity `ok`, protected Flask
+configuration, deployment state and the deploy/rollback helper. Existing
+untracked user files on the Pi were preserved. Only `image.py` changed at runtime.
+
+Both cameras produced valid JPEGs after restart. Initial actual request gaps
+were 15.034–15.040 seconds for IMX708 and 15.033–15.034 for ZWO, without capture
+errors. Direct on-Pi decoding verified 4608×2592 and 3840×2160 output. A ZWO
+Hybrid hold at 0.01669774 seconds/gain 0 was followed by matching capture
+requests; no legacy exposure writes appeared in the sample. This does not yet
+prove above-minimum gain reduction under live changing illumination.
+
+The existing heartbeat now targets this baseline and retains request timestamps
+across journal rotation. New evidence is in `/home/eric/hybrid-exposure-hold-evidence`;
+local summary: `testing/evidence/hybrid-exposure-hold-deployment-2026-09-08.json`.
+The earliest possible 24-hour completion is September 9 at 12:01:07 CEST,
+conditional on complete evidence, day/night coverage and no new restart/change.
+The complete product/Classic-removal gate remains open.
+
 ## Exposure pipeline regression and first resumed browser checks — 2026-09-08
 
 The exact published `0bf4eb96` candidate was checked out in a new isolated Pi

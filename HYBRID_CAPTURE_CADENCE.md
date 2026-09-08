@@ -117,3 +117,20 @@ This follow-up is not deployed: SSH authentication/session establishment failed
 (connection reset). Production acquisition has not been restarted. Before
 deployment, complete the runtime regression, acquire a current rollback backup,
 and verify both cameras. Deployment requires a new 24-hour observation window.
+
+## Deployment of hold isolation (2026-09-08)
+
+The follow-up above is now deployed as `a886a9d7`, after runtime regression and
+a coherent backup in `/home/eric/hybrid-backups/exposure-hold-20260908-115906`.
+Revision 110 is unchanged; capture restarted at 12:01:07 CEST, PID 3566586.
+Both cameras produced decoded JPEGs with approximately 15.03-second request
+intervals. The ZWO hold was observed in subsequent real requests; live gain
+reduction above minimum and the new 24-hour day/night gate remain open.
+See `testing/evidence/hybrid-exposure-hold-deployment-2026-09-08.json`.
+
+Rollback uses the recorded previous commit `0104b282` and unchanged revision 110.
+Stop capture/timer, verify tracked files are clean, return tracked code to that
+commit, then restart capture and restore the timer's recorded state. Preserve
+untracked user files and current media records; do not restore the whole database
+over acquisitions made since the backup. A rollback also resets the observation
+period. The protected `deploy.py` records the automatic failure rollback procedure.

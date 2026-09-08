@@ -1,0 +1,77 @@
+{
+  "deployed_commit": "a886a9d74aedc5e72d3106ba43640080da761c8e",
+  "previous_commit": "0104b2827df32084847460522f6743203b17c0b6",
+  "configuration_revision": 110,
+  "service_start": "2026-09-08T12:01:07+02:00",
+  "pid": 3566586,
+  "backup": {
+    "path": "/home/eric/hybrid-backups/exposure-hold-20260908-115906",
+    "sqlite_bytes": 828977152,
+    "integrity": "ok",
+    "permissions": "directory 0700; database/config 0600"
+  },
+  "initial_live": {
+    "at": "2026-09-08T12:02:11+02:00",
+    "frames_each_camera": 3,
+    "missing_or_empty_files": [],
+    "journal_errors": [],
+    "pending_tasks": [],
+    "shoot_interval_seconds": {
+      "camera_1": [
+        15.034289,
+        15.040257
+      ],
+      "camera_2": [
+        15.032848,
+        15.033593
+      ]
+    }
+  },
+  "decoded_images": {
+    "at": "2026-09-08T12:03:34+02:00",
+    "camera_1": {
+      "id": 12529,
+      "shape": [
+        2592,
+        4608,
+        3
+      ],
+      "gain": 1.13
+    },
+    "camera_2": {
+      "id": 12530,
+      "shape": [
+        2160,
+        3840,
+        3
+      ],
+      "gain": 0
+    }
+  },
+  "hold_observation": {
+    "camera": 2,
+    "decision_times": [
+      "12:03:00",
+      "12:03:15"
+    ],
+    "following_capture_times": [
+      "12:03:13",
+      "12:03:28"
+    ],
+    "exposure_seconds": 0.01669774,
+    "gain": 0,
+    "legacy_exposure_writes_since_restart": 0
+  },
+  "remote_evidence": [
+    "/home/eric/hybrid-backups/exposure-hold-20260908-115906/deployment.json",
+    "/home/eric/hybrid-exposure-hold-evidence/live-20260908-120211.json",
+    "/home/eric/hybrid-exposure-hold-evidence/starts-20260908-120211.json",
+    "/home/eric/hybrid-exposure-hold-evidence/post-deploy-20260908-120334.json"
+  ],
+  "open": [
+    "Live reduction with gain above minimum",
+    "Night transition and 24 consecutive hours after this restart",
+    "Full product acceptance and Classic removal"
+  ],
+  "monitoring": "Existing heartbeat updated to new baseline; request timestamps retained to handle journal rotation"
+}
