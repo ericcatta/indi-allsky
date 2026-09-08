@@ -8995,7 +8995,7 @@ class IndiAllskyUserInfoForm(FlaskForm):
             result = False
 
 
-        if argon2.verify(self.NEW_PASSWORD.data, user.password):
+        if self.NEW_PASSWORD.data and argon2.verify(self.NEW_PASSWORD.data, user.password):
             self.NEW_PASSWORD.errors.append('Password cannot be the same as the old password')
             result = False
 

@@ -9464,6 +9464,8 @@ class AjaxUserInfoView(BaseView):
                    if not isinstance(payload.get(key), str)}
         if invalid:
             return jsonify({**invalid, 'form_global': ['Please fix the errors above']}), 400
+        if not payload['CURRENT_PASSWORD']:
+            return jsonify(CURRENT_PASSWORD=['Current password is not valid']), 400
         form_userinfo = IndiAllskyUserInfoForm(data=payload)
 
 
@@ -9473,15 +9475,7 @@ class AjaxUserInfoView(BaseView):
             return jsonify(form_errors), 400
 
 
-        # check current password (again)
-        current_password = str(request.json['CURRENT_PASSWORD'])
-        if not argon2.verify(current_password, current_user.password):
-            message = {
-                'CURRENT_PASSWORD' : ['Current password is not valid'],
-            }
-            return jsonify(message), 400
-
-
+        # Form validation has verified the non-empty current password.
         new_name = str(request.json['NAME'])
         new_password = str(request.json['NEW_PASSWORD'])
         # email is read only

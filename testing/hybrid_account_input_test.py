@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Malformed authentication/account JSON never reaches credential mutation."""
 import re
+from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app, login_client, PASSWORD
 
 
@@ -28,6 +29,7 @@ def invalid_requests(client, url, token, valid):
 
 def run():
     with isolated_app(multi_camera=True) as app:
+        from passlib.hash import argon2
         from indi_allsky.flask import db
         from indi_allsky.flask.models import IndiAllSkyDbUserTable
         for uid in (1, 2):
@@ -45,11 +47,19 @@ def run():
                 user = db.session.get(IndiAllSkyDbUserTable, uid)
                 before = (user.name, user.password, user.admin, user.email)
             invalid_requests(client, '/indi-allsky/ajax/user', token, payload)
+            for current in ('', 'incorrect'):
+                response=client.post('/indi-allsky/ajax/user',json={**payload,'CURRENT_PASSWORD':current},headers={'X-CSRFToken':token})
+                assert response.status_code==400 and 'CURRENT_PASSWORD' in response.json
+            reused={**payload,'NEW_PASSWORD':PASSWORD,'NEW_PASSWORD2':PASSWORD}
+            response=client.post('/indi-allsky/ajax/user',json=reused,headers={'X-CSRFToken':token})
+            assert response.status_code==400 and 'NEW_PASSWORD' in response.json
             with app.app_context():
                 user = db.session.get(IndiAllSkyDbUserTable, uid)
                 assert (user.name, user.password, user.admin, user.email) == before
-            response = client.post('/indi-allsky/ajax/user', json=payload, headers={'X-CSRFToken': token})
-            assert response.status_code == 200
+            with patch.object(argon2,'verify',wraps=argon2.verify) as verify:
+                response = client.post('/indi-allsky/ajax/user', json=payload, headers={'X-CSRFToken': token})
+                assert response.status_code == 200
+                assert verify.call_count==1, 'A name-only save must authenticate once without redundant expensive hashes'
             with app.app_context():
                 assert db.session.get(IndiAllSkyDbUserTable, uid).name == 'Updated User'
         print('Account/login input: malformed JSON, missing/wrong-type fields, both roles, no authentication or mutation, valid recovery: PASS')

@@ -13,6 +13,27 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Account save authentication cost — 2026-09-08 (candidate, not deployed)
+
+Name-only saves performed three Argon2 verifications: current password in the
+form, an unnecessary empty new-password comparison, and current password again
+in the handler. The handler now requires a nonempty current password and relies
+on form authentication; new-password comparison runs only when one is supplied.
+Password hashing, authorization, CSRF and account mutation semantics remain.
+
+On the Raspberry, five synthetic authenticated Flask POSTs per version had a
+median of 311.7 ms before and 183.0 ms after (three verifications reduced to one).
+This isolated SQLite measurement is not a general production latency guarantee.
+All 110 Python regression entries passed, including invalid/empty credentials,
+password reuse, valid name saves for both roles, password-change/login flows,
+CSRF and session tests. Evidence: `testing/evidence/hybrid-account-save-2026-09-08.json`.
+Positive native account save and deployment remain open.
+
+Classic's web users list is read-only and its account editor modifies the current
+user's name/password. Hybrid offers those same web functions; provisioning and
+role management remain supported by `misc/usertool.py`. Stored password hashes
+cannot provide a recoverable plaintext password for the user detail page.
+
 ## Smoke provider outcomes — 2026-09-08 (candidate, not deployed)
 
 The worker now distinguishes an updated smoke reading, provider failure and a
