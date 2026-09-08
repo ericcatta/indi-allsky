@@ -13,6 +13,37 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Task output deployment and native verification — 2026-09-08 22:01 CEST
+
+Release `f695ea4c` is installed. All 582 runtime files match the tested isolated
+candidate. Backup `/home/eric/hybrid-backups/hybrid-task-output-20260908-220103`
+contains a coherent 828,977,152-byte SQLite snapshot (integrity check `ok`), protected
+Flask configuration, manifest and deployment record. Only Gunicorn restarted
+(PID 3997175 at 22:01:17); capture remains PID 3977508, started at 21:15:41.
+The 24-hour observation baseline is unchanged and has not completed.
+
+Native clicks now open the correct IMX708 and ZWO timelapses from tasks 10908 and
+10905. Browser video readiness is 4 with no media error, dimensions 4608x2592 and
+3840x2160, durations 133.4s and 133.32s. Task 10904 opens its ZWO Keogram record 9,
+loaded at 3333x700; night-only outputs have no spurious links. Console errors were
+empty and Now was restored. Playback and native downloads were not exercised.
+At 22:05, 66 saved frames per camera were present and non-empty, median interval
+45s; actual request medians were 45.039s and 45.028s. No capture restart occurred.
+
+A separate defect is confirmed: task 10921 reports `SUCCESS / Satellite data
+updated` despite a Starlink HTTP 403 at 21:21:06. Visual and station groups updated;
+Starlink retained its previous records. Per-group failure reporting remains open.
+This is not an acquisition failure, but prevents claiming all providers passed.
+
+Rollback for this web-only release (not executed): first verify HEAD is `f695ea4c`
+and tracked files are clean; stop `gunicorn-indi-allsky.socket` then its `.service`,
+reset the production checkout to `808964953eace9777b366b7651a946734a776308`, then start
+the socket and service. Verify both web health and unchanged capture PID/start.
+Do not restore the snapshot database over captures acquired since the backup.
+The deployed script includes automatic code rollback if installation fails.
+
+Evidence: [deployment, native outputs and capture sample](testing/evidence/hybrid-task-output-deployment-2026-09-08.json).
+
 ## Task output navigation — 2026-09-08
 
 Native inspection found that successful task 10908 exposed only a video path,

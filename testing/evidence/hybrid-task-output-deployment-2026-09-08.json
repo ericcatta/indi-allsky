@@ -1,0 +1,154 @@
+{
+  "live": {
+    "path": "/home/eric/hybrid-batch-evidence/live-20260908-220537.json",
+    "observed_at": "2026-09-08T22:05:37.392899+02:00",
+    "cameras": {
+      "1": {
+        "count": 66,
+        "latest": {
+          "id": 16768,
+          "createDate": "2026-09-08 22:05:25.000000",
+          "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260908/night/08_22/ccd1_20260908_220525.jpg",
+          "exposure": 39,
+          "gain": 5.99,
+          "night": 1
+        },
+        "median_interval": 45,
+        "invalid_files": []
+      },
+      "2": {
+        "count": 66,
+        "latest": {
+          "id": 16767,
+          "createDate": "2026-09-08 22:04:55.000000",
+          "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260908/night/08_22/ccd2_20260908_220455.jpg",
+          "exposure": 5.084043502807617,
+          "gain": 0,
+          "night": 1
+        },
+        "median_interval": 45,
+        "invalid_files": []
+      }
+    },
+    "service": "MainPID=3977508\nNRestarts=0\nActiveState=active\nActiveEnterTimestamp=Tue 2026-09-08 21:15:41 CEST",
+    "errors": [
+      "[ERROR] Video-1-3977544/MainThread satellite_download.download_tle() [148]: URL returned 403"
+    ],
+    "cadence_events": [
+      "[INFO] Capture-1-3977539/MainThread capture._limit_exposure_to_cadence() [666]: [CAPTURE_CADENCE] profile=imx708-wide period=45.000s exposure_limit=39.000000s",
+      "[INFO] Capture-2-3977541/MainThread capture._limit_exposure_to_cadence() [666]: [CAPTURE_CADENCE] profile=asi678mc period=45.000s exposure_limit=39.000000s"
+    ],
+    "pending_tasks": []
+  },
+  "starts": {
+    "path": "/home/eric/hybrid-batch-evidence/starts-20260908-220538.json",
+    "observed_at": "2026-09-08T22:05:38.415693+02:00",
+    "cameras": {
+      "1": {
+        "starts": 67,
+        "min": 45.00147,
+        "max": 45.194078,
+        "median": 45.0391715
+      },
+      "2": {
+        "starts": 67,
+        "min": 45.008396,
+        "max": 45.281505,
+        "median": 45.0282495
+      }
+    }
+  },
+  "deployment": {
+    "previous": "808964953eace9777b366b7651a946734a776308",
+    "candidate": "f695ea4c1e7354679568e858e8d2cd26a0a5f36b",
+    "backup": "/home/eric/hybrid-backups/hybrid-task-output-20260908-220103",
+    "capture_before": {
+      "MainPID": "3977508",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 21:15:41 CEST",
+      "ActiveState": "active"
+    },
+    "runtime_files_verified": 582,
+    "changed_runtime_files": [
+      "indi_allsky/flask/templates/modern_admin/task_detail.html",
+      "indi_allsky/flask/views.py",
+      "indi_allsky/modern_admin_task_outputs.py"
+    ],
+    "started": "2026-09-08T22:01:16.386287+02:00",
+    "status": "installed-native-task-links-verified",
+    "capture_after": {
+      "MainPID": "3977508",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 21:15:41 CEST",
+      "ActiveState": "active"
+    },
+    "web_after": {
+      "MainPID": "3997175",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 22:01:17 CEST",
+      "ActiveState": "active"
+    },
+    "completed": "2026-09-08T22:01:17.597570+02:00"
+  },
+  "native": {
+    "session": "Existing authenticated production browser session",
+    "cases": [
+      {
+        "id": "task-imx-video-link",
+        "outcome": "superato",
+        "task": 10908,
+        "kind": "video",
+        "camera_id": 1,
+        "record_id": 10,
+        "filename": "allsky-timelapse_ccd1_20260908_day_1788893000.mp4",
+        "readyState": 4,
+        "width": 4608,
+        "height": 2592,
+        "duration": 133.4,
+        "error": null
+      },
+      {
+        "id": "task-zwo-video-link",
+        "outcome": "superato",
+        "task": 10905,
+        "kind": "video",
+        "camera_id": 2,
+        "record_id": 9,
+        "filename": "allsky-timelapse_ccd2_20260908_day_1788891910.mp4",
+        "readyState": 4,
+        "width": 3840,
+        "height": 2160,
+        "duration": 133.32,
+        "error": null
+      },
+      {
+        "id": "task-keogram-link",
+        "outcome": "superato",
+        "task": 10904,
+        "kind": "keogram",
+        "camera_id": 2,
+        "record_id": 9,
+        "filename": "allsky-keogram_ccd2_20260908_day_1788891602.jpg",
+        "complete": true,
+        "width": 3333,
+        "height": 700,
+        "not_requested_links_absent": [
+          "startrail",
+          "startrail-video"
+        ]
+      }
+    ],
+    "console_errors": [],
+    "restored": "Now",
+    "limits": "Video metadata/decoded readiness verified; no native playback, download completion or alternate browser roles claimed."
+  },
+  "open_defect": {
+    "domain": "Satellite update",
+    "task": 10921,
+    "state": "SUCCESS",
+    "message": "Satellite data updated",
+    "evidence": "21:21:06 CEST: visual group 157 entries updated; Starlink HTTP 403; stations 21 entries updated. DB latest group 801 remains 18:59:31 UTC, other groups 19:21:06/07 UTC. Task incorrectly reports full success after partial provider failure.",
+    "next_action": "Make per-group failure and partial update observable while preserving prior TLE data; separate mission, no capture restart in this deployment."
+  },
+  "observation": "Capture remains PID 3977508 started 2026-09-08 21:15:41 CEST. ~50 minutes sampled, not 24h acceptance."
+}
