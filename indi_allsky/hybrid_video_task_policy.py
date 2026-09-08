@@ -1,7 +1,7 @@
 """Multicamera dispatch policy for verified video-worker responsibilities."""
 CAMERA_ACTIONS = frozenset({
     'generateVideo', 'generateMiniVideo', 'generateKeogramStarTrails', 'generatePanoramaVideo',
-    'updateAuroraData', 'updateSmokeData',
+    'updateAuroraData', 'updateSmokeData', 'uploadAllskyEndOfNight',
 })
 GLOBAL_ACTIONS = frozenset({'updateSatelliteTleData', 'backupDatabase', 'systemHealthCheck'})
 

@@ -13,6 +13,34 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## EndOfNight request through actual SFTP delivery — 2026-09-08
+
+The real Hybrid request was accepted but the multicamera coordinator expired it
+as unsupported before reaching VideoWorker. Hybrid's camera-scoped policy now
+admits `uploadAllskyEndOfNight`, retaining required camera scope and explicit
+profile routing. Global actions and destructive-action restrictions are unchanged.
+
+`hybrid_end_of_night_pipeline_loopback.py` reproduces the rejected baseline and
+checks the corrected request -> coordinator -> VideoWorker -> upload queue ->
+FileUploader -> real SFTP chain. Both cameras deliver byte-identical `data.json`
+to separate disposable loopback folders with the installed SSH host key pinned.
+Both also exercise a non-writable destination: the upload child is FAILED and
+no destination file appears. Parent receipts link to the child and do not claim
+confirmed delivery. Both roles can inspect outcomes; terminal duplicate delivery
+cannot open a second SFTP connection. Existing `remove_local=True` cleanup
+semantics are verified, and an unrelated disposable sentinel remains intact.
+
+This uses an isolated in-memory database with Classic imports blocked and actual
+worker methods called synchronously. It does not prove production scheduling or
+an external integration. The test prompts privately for a loopback password and
+is a separate manual acceptance entrypoint. All 96 regression entrypoints
+passed, including Book 2, Full Config parity, Settings, Safe Actions and Product
+Spine/View Models. The three source hashes match the tested candidate and
+`git diff --check` passed. The policy fix is **not deployed**. Before deployment,
+inspect configured destinations: the tested separation uses `{camera_uuid}`;
+existing static destination/overwrite semantics have not been changed.
+See `testing/evidence/hybrid-end-of-night-pipeline-2026-09-08.json`.
+
 ## Keogram and Startrail real effects — 2026-09-08
 
 The real generation test exposed two backend defects. Nullable camera lens

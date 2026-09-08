@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Upload EndOfNight multicamera: la policy Hybrid ammette il comando per camera,
+  prima accettato dalla UI ma scartato dal coordinatore. Percorso completo
+  richiesta/worker/SFTP provato su cartelle loopback temporanee per entrambe le
+  camere, inclusi fallimento e duplicazione del task. Restano distinti ricezione
+  della richiesta e consegna effettiva. Non ancora distribuito in produzione.
+
 - Collaudo degli effetti Keogram/Startrail: corretti EXIF con metadati obiettivo
   assenti e la colonna iniziale non inizializzata del Keogram. Ogni fotogramma
   contribuisce ora una sola colonna reale. Sei output prodotti nella copia
