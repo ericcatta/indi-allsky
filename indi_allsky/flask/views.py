@@ -6602,16 +6602,21 @@ class ModernAdminCompatibilityRedirectView(BaseView):
 
 
 class ModernAdminModeView(BaseView):
-    # Stores the user's preferred admin shell while keeping classic admin fully available.
+    # Keep bookmarked shell switches valid when Classic is not registered.
     decorators = [login_required]
 
     def dispatch_request(self, mode):
-        if mode == 'classic':
+        from urllib.parse import urlencode
+        if mode == 'classic' and 'indi_allsky.config_view' in app.view_functions:
             session['admin_mode'] = 'classic'
-            return redirect(url_for('indi_allsky.config_view'))
-
-        session['admin_mode'] = 'modern'
-        return redirect(url_for('indi_allsky.modern_admin_view'))
+            endpoint = 'indi_allsky.config_view'
+        else:
+            session['admin_mode'] = 'modern'
+            endpoint = ('indi_allsky.modern_admin_full_settings_view' if mode == 'classic'
+                        else 'indi_allsky.modern_admin_now_view')
+        destination = url_for(endpoint)
+        query = urlencode(list(request.args.items(multi=True)))
+        return redirect(destination + ('?' + query if query else ''))
 
 
 class ModernAdminSafeActionDryRunView(BaseView):

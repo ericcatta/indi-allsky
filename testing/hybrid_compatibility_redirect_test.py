@@ -42,6 +42,27 @@ def run():
             log = client.get('/indi-allsky/modern-admin/classic/log?camera_id=2&profile_id=test-profile-2', follow_redirects=True)
             assert log.status_code == 200 and 'Application log' in log.text
             assert log.request.args['camera_id'] == '2' and log.request.args['profile_id'] == 'test-profile-2'
+        # Bookmarked shell switches must remain usable without Classic routes.
+        for uid in (1, 2):
+            client = login_client(app, uid)
+            for mode, endpoint in [('classic', 'modern_admin_full_settings_view'),
+                                   ('modern', 'modern_admin_now_view')]:
+                response = client.get('/indi-allsky/modern-admin/mode/' + mode + '?' + query)
+                assert response.status_code == 302
+                destination = urlsplit(response.location)
+                with app.test_request_context():
+                    assert destination.path == url_for('indi_allsky.' + endpoint)
+                assert not destination.netloc and not destination.scheme
+                assert parse_qsl(destination.query) == parse_qsl(query)
+                with client.session_transaction() as session:
+                    assert session['admin_mode'] == 'modern'
+                final = client.get(response.location)
+                assert final.status_code == 200
+                assert final.request.args['camera_id'] == '2'
+                assert final.request.args['profile_id'] == 'test-profile-2'
+                assert final.request.args.getlist('tag') == ['a', 'b']
+        anonymous_mode = app.test_client().get('/indi-allsky/modern-admin/mode/classic')
+        assert anonymous_mode.status_code == 302 and '/login' in anonymous_mode.location
         anonymous = app.test_client().get('/indi-allsky/modern-admin/classic/log')
         assert anonymous.status_code == 302 and '/login' in anonymous.headers['Location']
         print('24 redirect aliases, both roles, repeated filters, camera/profile, local destinations, missing aliases and real target rendering: PASS')

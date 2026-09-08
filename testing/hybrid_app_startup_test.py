@@ -92,6 +92,20 @@ def check_startup(config_path, classic_enabled):
             assert 'id="hybrid-config-restore"' not in readonly
             readonly = render_template('modern_admin/config_restore_detail.html', **context)
             assert '/config/download?id=1' not in readonly
+        # Both real route compositions keep the bookmarked mode-switch target
+        # local and preserve camera/profile scope, including repeated filters.
+        from indi_allsky.flask.views import ModernAdminModeView
+        from flask import session, url_for
+        from urllib.parse import parse_qsl, urlsplit
+        query = 'camera_id=2&profile_id=wide&tag=a&tag=b&_external=1&_scheme=https'
+        with app.test_request_context('/indi-allsky/modern-admin/mode/classic?' + query):
+            response = ModernAdminModeView.dispatch_request(None, 'classic')
+            destination = urlsplit(response.location)
+            expected = 'config_view' if classic_enabled else 'modern_admin_full_settings_view'
+            assert destination.path == url_for('indi_allsky.' + expected)
+            assert not destination.netloc and not destination.scheme
+            assert parse_qsl(destination.query) == parse_qsl(query)
+            assert session['admin_mode'] == ('classic' if classic_enabled else 'modern')
         client = app.test_client()
         response = client.get('/indi-allsky/static/images/favicon_32.png')
         assert response.status_code == 200

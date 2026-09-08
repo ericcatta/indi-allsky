@@ -349,6 +349,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     handler Hybrid indipendente, con limiti di input e celle non eseguibili.
     Verificati payload e download browser in staging sintetico, nessun deploy.
 - Classic frontend isolation:
+  - il bookmark di cambio modalita' non richiede piu' la route Config Classic:
+    con Classic assente apre Full Settings Hybrid, mentre Modern apre Now
+    direttamente, conservando camera/profilo e parametri ripetuti. Login e
+    modalita' Classic quando disponibile rimangono invariati;
   - avviato il collaudo autenticato reale con database in memoria e identita'
     sintetiche: corretti home post-login/logout e link profilo che richiedevano
     Classic. My Account Hybrid permette modifica nome/password via endpoint

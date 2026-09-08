@@ -13,6 +13,36 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Hybrid-only mode-switch compatibility — 2026-09-08 (candidate, not deployed)
+
+The retained `/modern-admin/mode/classic` URL still tried to build the removed
+`config_view` endpoint when Classic was disabled. The new authenticated regression
+reproduced a Werkzeug BuildError in the isolated application. The candidate sends
+that bookmark directly to Hybrid Full Settings when Classic is absent, and keeps
+the Classic destination when it is registered. Modern mode goes directly to Now.
+Camera/profile and repeated query filters are encoded after building the trusted
+local URL; `_external` and `_scheme` remain inert query data. Session mode matches
+the selected available frontend. Direct destinations avoid intermediate redirects
+that discarded scope. Production has not been changed by this mission.
+The initial repair passed all 110 regression entries. After replacing intermediate
+destinations with direct final pages, the five affected integration suites passed
+again: startup, compatibility, composition, Settings and Now. The final redirect
+tests load both destination pages and verify preserved camera/profile/filter
+parameters. Tested file hashes and results are recorded in
+`testing/evidence/hybrid-mode-compatibility-2026-09-08.json`.
+
+A fresh static-render inventory of the prior `de4bb72f` runtime with Classic
+forbidden covered 90 pages and 490 contexts (both cameras, administrator, ordinary
+user and anonymous). There were 364 rendered contexts, 110 login redirects,
+4 blocked external-process contexts and 12 unavailable hardware-bus contexts;
+no rendering exceptions or searched placeholder phrases were reported. The
+28,646 discovered control instances include repeated shell/role/camera contexts;
+they are not unique functions and none are promoted to interaction passes.
+Source report on Pi: `/tmp/hybrid-current-ui-discovery.json`, SHA256
+`f1aaca40209ebeff5124bd86ebbebb8411355b2c1eedc85f57ba8407656ea382`.
+This inventory excludes non-template redirect handlers: the mode-switch defect
+was found by inspecting those handlers and testing the actual request.
+
 ## Native users/account acceptance — 2026-09-08
 
 Production `f695ea4c` was checked in the native in-app browser with the existing
