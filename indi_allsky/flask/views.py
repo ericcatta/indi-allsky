@@ -10752,65 +10752,6 @@ class ModernAdminRealtimeKeogramView(ModernAdminObservatoryToolView, RealtimeKeo
         return context
 
 
-class ModernAdminDarkLibraryView(ModernAdminCameraToolView, TemplateView):
-    page_title = 'Modern Admin Dark Library'
-
-    def get_context(self):
-        context = super(ModernAdminDarkLibraryView, self).get_context()
-
-        context['darkframe_list'] = self.serialize_calibration_rows(
-            IndiAllSkyDbDarkFrameTable,
-            order_model=IndiAllSkyDbDarkFrameTable,
-        )
-        context['bpm_list'] = self.serialize_calibration_rows(
-            IndiAllSkyDbBadPixelMapTable,
-            order_model=IndiAllSkyDbBadPixelMapTable,
-        )
-
-        return context
-
-
-    def serialize_calibration_rows(self, model, order_model):
-        try:
-            rows = model.query\
-                .join(model.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                .order_by(
-                    IndiAllSkyDbCameraTable.id.desc(),
-                    order_model.gain.asc(),
-                    order_model.exposure.asc(),
-                )\
-                .all()
-        except Exception as e:
-            app.logger.error('Error loading modern admin calibration rows: %s', str(e))
-            return list()
-
-        media_access_adapter = self.get_camera_media_access_adapter()
-        row_list = list()
-        for row in rows:
-            file_size = media_access_adapter.resolve_media_file_size(row, default=0)
-            row_url = media_access_adapter.resolve_media_url(row, local=True)
-
-            row_list.append({
-                'id'         : row.id,
-                'createDate' : row.createDate,
-                'active'     : row.active,
-                'resolution' : '{0:d}x{1:d}'.format(row.width, row.height) if row.width and row.height else 'Unknown',
-                'bitdepth'   : row.bitdepth,
-                'gain'       : row.gain,
-                'exposure'   : row.exposure,
-                'binmode'    : row.binmode,
-                'temp'       : row.temp,
-                'adu'        : row.adu,
-                'hot_pixels' : row.data.get('hot_pixels', -1) if row.data else -1,
-                'method'     : row.data.get('method', '') if row.data else '',
-                'url'        : row_url,
-                'size_mb'    : file_size / 1024 / 1024,
-            })
-
-        return row_list
-
-
 class ModernAdminAstroPanelView(ModernAdminObservatoryToolView, TemplateView):
     page_title = 'Modern Admin Astropanel'
 
@@ -11221,6 +11162,86 @@ class ModernAdminLoopView(ModernAdminMediaBrowseView, ImageLoopImgView):
             })
 
         return camera_views
+
+
+class ModernAdminDarkLibraryView(ModernAdminCameraToolView, ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Modern Admin Dark Library'
+
+    def get_context(self):
+        from .source_media_views import local_source_allowed
+        filters = self.get_media_camera_filters()
+        selected = self.get_selected_media_camera_filter(filters)
+        camera_id = selected.get('camera_id') or self.camera.id
+        self.camera = IndiAllSkyDbCameraTable.query.filter_by(id=camera_id).first_or_404()
+        self.cameraSetup(camera_id=camera_id)
+        self.calibration_errors = []
+        self.calibration_local_allowed = local_source_allowed(self.camera, self.verify_admin_network)
+        context = super(ModernAdminDarkLibraryView, self).get_context()
+        context.update(calibration_camera_filters=[item for item in filters if item.get('camera_id')],
+                       calibration_camera_id=camera_id,
+                       calibration_camera_label=self.camera.friendlyName or self.camera.name,
+                       calibration_errors=self.calibration_errors,
+                       calibration_local_allowed=self.calibration_local_allowed)
+
+        context['darkframe_list'] = self.serialize_calibration_rows(
+            IndiAllSkyDbDarkFrameTable,
+            order_model=IndiAllSkyDbDarkFrameTable, kind='dark',
+        )
+        context['bpm_list'] = self.serialize_calibration_rows(
+            IndiAllSkyDbBadPixelMapTable,
+            order_model=IndiAllSkyDbBadPixelMapTable, kind='bpm',
+        )
+
+        return context
+
+
+    def serialize_calibration_rows(self, model, order_model, kind):
+        try:
+            rows = model.query\
+                .join(model.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(
+                    IndiAllSkyDbCameraTable.id.desc(),
+                    order_model.gain.asc(),
+                    order_model.exposure.asc(),
+                )\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin calibration rows: %s', str(e))
+            self.calibration_errors.append('Unable to load ' + ('dark frames' if kind == 'dark' else 'bad pixel maps') + '. Try again.')
+            return list()
+
+        media_access_adapter = self.get_camera_media_access_adapter()
+        row_list = list()
+        for row in rows:
+            file_size = media_access_adapter.resolve_media_file_size(row, default=0)
+            available = file_size > 0 and self.calibration_local_allowed
+            row_url = url_for('indi_allsky.modern_admin_source_download_view',
+                              kind=kind, camera_id=self.camera.id, media_id=row.id) if available else None
+            process_url = url_for('indi_allsky.modern_admin_image_processing_view',
+                                  camera_id=self.camera.id, type=kind, id=row.id,
+                                  profile_id=request.args.get('profile_id', '')) if available else None
+
+            row_list.append({
+                'id'         : row.id,
+                'kind'       : kind,
+                'process_url': process_url,
+                'createDate' : row.createDate,
+                'active'     : row.active,
+                'resolution' : '{0:d}x{1:d}'.format(row.width, row.height) if row.width and row.height else 'Unknown',
+                'bitdepth'   : row.bitdepth,
+                'gain'       : row.gain,
+                'exposure'   : row.exposure,
+                'binmode'    : row.binmode,
+                'temp'       : row.temp,
+                'adu'        : row.adu,
+                'hot_pixels' : row.data.get('hot_pixels', -1) if row.data else -1,
+                'method'     : row.data.get('method', '') if row.data else '',
+                'url'        : row_url,
+                'size_mb'    : file_size / 1024 / 1024,
+            })
+
+        return row_list
 
 
 class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, ModernAdminMediaBrowseView, TemplateView):

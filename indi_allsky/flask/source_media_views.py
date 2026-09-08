@@ -7,9 +7,11 @@ from .base_views import BaseView
 from .models import (IndiAllSkyDbFitsImageTable, IndiAllSkyDbRawImageTable,
     IndiAllSkyDbImageTable, IndiAllSkyDbVideoTable, IndiAllSkyDbMiniVideoTable,
     IndiAllSkyDbKeogramTable, IndiAllSkyDbStarTrailsTable, IndiAllSkyDbStarTrailsVideoTable,
-    IndiAllSkyDbPanoramaImageTable, IndiAllSkyDbPanoramaVideoTable)
+    IndiAllSkyDbPanoramaImageTable, IndiAllSkyDbPanoramaVideoTable,
+    IndiAllSkyDbDarkFrameTable, IndiAllSkyDbBadPixelMapTable)
 
 MEDIA_DOWNLOAD_MODELS = {
+    'dark': IndiAllSkyDbDarkFrameTable, 'bpm': IndiAllSkyDbBadPixelMapTable,
     'fits': IndiAllSkyDbFitsImageTable, 'raw': IndiAllSkyDbRawImageTable,
     'image': IndiAllSkyDbImageTable, 'video': IndiAllSkyDbVideoTable,
     'mini-video': IndiAllSkyDbMiniVideoTable, 'keogram': IndiAllSkyDbKeogramTable,

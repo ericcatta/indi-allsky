@@ -605,6 +605,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     `ModernAdminSystemPowerEffectAdapter`; DBus `rebootSystemd()` resta adapter
     operativo low-level.
 - Book 2 / Media Access Compatibility Layer:
+  - Dark Library: completato l'ingresso Hybrid al processore FITS per dark frame
+    e bad pixel map; selezione camera/profilo, ricerca, filtri, ordinamento ed
+    export sono disponibili dalla libreria. Download originali tramite handler
+    Hybrid con controllo camera, autenticazione, policy e percorsi consentiti;
+    nessuna dipendenza dalla pagina di elaborazione Classic. Prove con file
+    sintetici; collaudo browser e deploy restano aperti.
   - Long-term Keogram: Hybrid offre ora selezione camera/profilo, opzioni del
     generatore condiviso, anteprima e download JPEG; rimossa la pagina solo cache.
     La scrittura della cache per camera passa a un helper atomico indipendente

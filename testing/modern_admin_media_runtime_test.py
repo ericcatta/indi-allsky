@@ -585,7 +585,7 @@ def test_generated_media_metadata_delegates_media_access_to_runtime_adapter():
 def test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
     start = source.index('class ModernAdminObservatoryToolView')
-    end = source.index('class ModernAdminDarkLibraryView', start)
+    end = source.index('class ModernAdminAstroPanelView', start)
     body = source[start:end]
     longterm_start = source.index('class ModernAdminLongTermKeogramView')
     longterm_end = source.index('\nclass ', longterm_start + 1)
@@ -674,11 +674,11 @@ def test_fits_preview_route_delegates_file_mtime_to_media_access_adapter():
 def test_dark_library_delegates_read_only_media_access_to_adapter():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
     start = source.index('class ModernAdminDarkLibraryView')
-    end = source.index('class ModernAdminAstroPanelView', start)
+    end = source.index('\nclass ', start + 1)
     body = source[start:end]
 
     assert_true('.resolve_media_file_size(row, default=0)' in body, 'dark library file size lookup should go through Hybrid media access adapter')
-    assert_true('.resolve_media_url(row, local=True)' in body, 'dark library URL lookup should go through Hybrid media access adapter')
+    assert_true("url_for('indi_allsky.modern_admin_source_download_view'" in body, 'calibration downloads must use scoped Hybrid original-file handler')
     assert_true('row.getFilesystemPath()' not in body, 'dark library must not own direct filesystem path resolution')
     assert_true('row.getUrl()' not in body, 'dark library must not own direct media URL resolution')
 

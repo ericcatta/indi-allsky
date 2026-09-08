@@ -13,6 +13,39 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Calibration library workflow — 2026-09-08
+
+Dark Library previously omitted Classic's Process links and table tools. Hybrid
+now links each dark frame and bad pixel map to the existing Hybrid FITS processor
+with the exact frame type, record ID, camera and selected profile. Camera/profile
+selection also scopes the library itself; mismatches are rejected. A single table
+keeps both record types with type/active/search filters, sorting, pagination,
+copy, CSV and Excel through the existing shared table controls. Calibration
+method is visible again. Missing temperature/ADU/hot-pixel values show Unknown.
+
+Original FITS downloads use the independent Hybrid source-download handler,
+extended for dark/BPM records: camera-scoped DB lookup, authenticated access,
+media policy, configured-root confinement and attachment responses. Missing or
+restricted local files have an explicit state rather than a dead Process link.
+Database read failures are distinguished from empty data without exposing the
+exception. No calibration or image-processing algorithm, acquisition setting,
+active flag or source file is changed by these UI paths.
+
+The new isolated Classic-disabled acceptance follows actual library links for
+administrator and ordinary users, both cameras and both frame types. It decodes
+eight generated PNG previews, checks byte-identical FITS downloads, CSV/XLSX,
+CSRF, camera/profile mismatch, missing/restricted files, empty records, null
+metadata and an injected query failure. It verifies unchanged source hashes,
+configuration and task count. Shared table-handler tests cover combined filters,
+counts and export payloads; native DataTables interaction remains unverified
+while the Mac is locked. The candidate is not deployed and does not interrupt
+capture observation. No production calibration files were altered.
+
+All 99 Python regression entrypoints and 23 JavaScript suites passed. Fresh
+render inventory and the scoped control matrix are recorded in
+[Dark Library evidence](testing/evidence/hybrid-dark-library-2026-09-08.json).
+The inventory is discovery, not proof of every click or effect.
+
 ## Long-term Keogram functional flow — 2026-09-08
 
 The former cache-only page now exposes the supported shared generator through

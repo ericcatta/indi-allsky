@@ -1,59 +1,51 @@
 {% extends 'modern_admin/base.html' %}
-
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
-
 {% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.css') }}" rel="stylesheet">
+<script src="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.js') }}"></script>
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
-<script type="text/javascript">
-var camera_id = {{ camera_id }};
-</script>
 {% endblock %}
-
 {% block content %}
 <main class="modern-admin-shell" aria-labelledby="modern-admin-dark-library-title">
     {% set modern_admin_header_label = 'Dark library header' %}
     {% set modern_admin_heading = 'Dark Library' %}
     {% set modern_admin_title_id = 'modern-admin-dark-library-title' %}
     {% include 'modern_admin/_shell_header.html' %}
-
-    {% for title, rows in [('Dark Frames', darkframe_list), ('Bad Pixel Maps', bpm_list)] %}
-    <section class="modern-admin-table-panel" aria-labelledby="dark-library-{{ loop.index }}-title">
-        <div class="modern-admin-section-heading">
-            <p class="modern-admin-eyebrow">Cameras</p>
-            <h2 id="dark-library-{{ loop.index }}-title">{{ title }}</h2>
+    <nav class="modern-admin-link-grid" aria-label="Calibration camera">
+        {% for item in calibration_camera_filters %}
+        <a class="modern-admin-media-button" href="{{ url_for('indi_allsky.modern_admin_dark_library_view', camera_id=item.camera_id, profile_id=item.profile_id) }}" {% if item.camera_id == calibration_camera_id %}aria-current="page"{% endif %}>{{ item.label }}</a>
+        {% endfor %}
+    </nav>
+    <section class="modern-admin-table-panel" aria-labelledby="calibration-title">
+        <h2 id="calibration-title">Calibration files — {{ calibration_camera_label }}</h2>
+        <p>Inspect dark frames and bad pixel maps. Process opens a preview without changing the source file or capture settings.</p>
+        {% if not calibration_local_allowed %}<p role="status">Local calibration files are unavailable under this camera's media access policy.</p>{% endif %}
+        {% for error in calibration_errors %}<p role="alert">{{ error }}</p>{% endfor %}
+        <div class="modern-admin-filter-row" aria-label="Calibration filters">
+            <label>Search <input id="calibration-search" type="search" placeholder="ID, resolution or method"></label>
+            <label>Type <select id="calibration-kind"><option value="">All types</option><option value="dark">Dark frames</option><option value="bpm">Bad pixel maps</option></select></label>
+            <label>Active <select id="calibration-active"><option value="">All</option><option value="yes">Active</option><option value="no">Inactive</option></select></label>
+            <span id="calibration-count" role="status" aria-live="polite">{{ (darkframe_list|length) + (bpm_list|length) }} shown</span>
         </div>
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th><th>Date</th><th>Active</th><th>Resolution</th><th>Bits</th><th>Gain</th><th>Exposure</th><th>Bin</th><th>Temp</th><th>ADU</th><th>Hot Pixels</th><th>Size</th><th>File</th>
-                    </tr>
-                </thead>
+            <table class="modern-admin-data-table" id="calibration-table">
+                <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Active</th><th>Resolution</th><th>Bits</th><th>Gain</th><th>Exposure</th><th>Bin</th><th>Temp</th><th>ADU</th><th>Hot Pixels</th><th>Size (MB)</th><th>Method</th><th>Actions</th></tr></thead>
                 <tbody>
-                    {% for row in rows %}
-                    <tr>
-                        <td>{{ row.id }}</td>
-                        <td>{{ row.createDate.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                        <td>{{ row.active }}</td>
-                        <td>{{ row.resolution }}</td>
-                        <td>{{ row.bitdepth }}</td>
-                        <td>{{ "%0.2f"|format(row.gain | float) }}</td>
-                        <td>{{ row.exposure }}</td>
-                        <td>{{ row.binmode }}</td>
-                        <td>{{ "%0.2f"|format(row.temp | float) }}</td>
-                        <td>{{ "%0.1f"|format(row.adu | float) }}</td>
-                        <td>{{ row.hot_pixels }}</td>
-                        <td>{{ "%0.1f"|format(row.size_mb | float) }} MB</td>
-                        <td>{% if row.url %}<a class="modern-admin-placeholder-link" href="{{ row.url }}">Download</a>{% else %}Unavailable{% endif %}</td>
+                    {% for row in darkframe_list + bpm_list %}
+                    <tr data-calibration-row data-search="{{ row.id }} {{ row.resolution }} {{ row.method }}" data-kind="{{ row.kind }}" data-active="{{ 'yes' if row.active else 'no' }}">
+                        <td>{{ row.id }}</td><td>{{ row.createDate.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ 'Dark frame' if row.kind == 'dark' else 'Bad pixel map' }}</td><td>{{ 'Yes' if row.active else 'No' }}</td>
+                        <td>{{ row.resolution }}</td><td>{{ row.bitdepth }}</td><td>{{ '%0.2f'|format(row.gain) }}</td><td>{{ row.exposure }}</td><td>{{ row.binmode }}</td>
+                        <td>{{ '%0.2f'|format(row.temp) if row.temp is not none else 'Unknown' }}</td><td>{{ '%0.1f'|format(row.adu) if row.adu is not none else 'Unknown' }}</td>
+                        <td>{{ row.hot_pixels if row.hot_pixels is number and row.hot_pixels >= 0 else 'Unknown' }}</td><td>{{ '%0.2f'|format(row.size_mb) }}</td><td>{{ row.method or 'Unknown' }}</td>
+                        <td>{% if row.url %}<a data-calibration-process href="{{ row.process_url }}">Process</a> <a data-calibration-download href="{{ row.url }}">Download FITS</a>{% else %}<span>{{ 'Local access restricted' if not calibration_local_allowed else 'File unavailable' }}</span>{% endif %}</td>
                     </tr>
-                    {% else %}
-                    <tr><td colspan="13">No {{ title|lower }} are available for the active camera.</td></tr>
-                    {% endfor %}
+                    {% else %}<tr><td colspan="15">{{ 'Calibration records could not be loaded.' if calibration_errors else 'No calibration records are available for this camera.' }}</td></tr>{% endfor %}
                 </tbody>
             </table>
         </div>
-        <p class="modern-admin-note">Processing actions from the classic page are intentionally omitted here.</p>
     </section>
-    {% endfor %}
 </main>
+<script type="application/json" id="hybrid-operations-table-config">{"csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}, "table": "calibration-table", "rowAttribute": "data-calibration-row", "count": "calibration-count", "countSuffix": " shown", "emptyMessage": {{ ('Calibration records could not be loaded.' if calibration_errors else 'No calibration records are available for this camera.')|tojson }}, "filters": [{"id": "calibration-search", "attribute": "search", "contains": true}, {"id": "calibration-kind", "attribute": "kind", "contains": false}, {"id": "calibration-active", "attribute": "active", "contains": false}]}</script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}" defer></script>
 {% endblock %}
