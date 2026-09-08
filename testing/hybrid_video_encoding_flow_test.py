@@ -30,7 +30,7 @@ def run(runtime_config, evidence=None):
         from indi_allsky.flask import db
         from indi_allsky.flask.models import IndiAllSkyDbConfigTable as Config, IndiAllSkyDbTaskQueueTable as Task
         from indi_allsky.flask.models import IndiAllSkyDbImageTable as SourceImage
-        from indi_allsky.flask.models import IndiAllSkyDbVideoTable as Video, IndiAllSkyDbMiniVideoTable as Mini, TaskQueueState as State
+        from indi_allsky.flask.models import IndiAllSkyDbVideoTable as Video, IndiAllSkyDbMiniVideoTable as Mini, IndiAllSkyDbPanoramaVideoTable as PanoramaVideo, IndiAllSkyDbPanoramaImageTable as Panorama, TaskQueueState as State
         # Both real modules bind their application to this isolated database.
         with patch('indi_allsky.flask.create_app', return_value=app):
             from indi_allsky.allsky import IndiAllSky
@@ -40,8 +40,18 @@ def run(runtime_config, evidence=None):
             config.update(FFMPEG_CODEC='libx264',FFMPEG_FRAMERATE=10,FFMPEG_EXTRA_OPTIONS='-threads 1 -preset ultrafast',
                           FFMPEG_VFSCALE='',TIMELAPSE_SKIP_FRAMES=0,TIMELAPSE_OVERWRITE=False)
             config['TIMELAPSE'].update(PRE_PROCESSOR='standard',USE_NIGHT_CONFIG=True,FFMPEG_REPORT=False)
+            config['FISH2PANO']['ENABLE']=True
             config['FILETRANSFER']={};config['S3UPLOAD']={'ENABLE':False};config['SYNCAPI']={'ENABLE':False};config['YOUTUBE']={}
-            row=db.session.get(Config,1);row.data=config;db.session.commit()
+            row=db.session.get(Config,1);row.data=config
+            for source in SourceImage.query.all():
+                db.session.add(Panorama(filename=source.filename,camera_id=source.camera_id,
+                    createDate=source.createDate,dayDate=source.dayDate,exposure=source.exposure,
+                    gain=source.gain,night=source.night,data={},width=64,height=48))
+            # Stale database rows must not inflate the encoded frame count.
+            for cid in (1,2):
+                db.session.add(Panorama(filename='missing-panorama-'+str(cid)+'.jpg',camera_id=cid,
+                    dayDate=date.today(),exposure=.5,gain=10,night=True,data={}))
+            db.session.commit()
         coordinator=IndiAllSky.__new__(IndiAllSky)
         coordinator.config=config;coordinator.multi_camera_capture_enable=True
         coordinator.capture_profiles=[SimpleNamespace(profile_id='test-profile-'+str(cid)) for cid in (1,2)]
@@ -50,12 +60,12 @@ def run(runtime_config, evidence=None):
         worker=VideoWorker(99,config,Queue(),coordinator.video_q,uploads,[1,0],[1])
         admin=login_client(app,1);reader=login_client(app,2)
         root=Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']).resolve()
-        for kind in ('video','mini-video'):
+        for kind in ('video','mini-video','panorama-video'):
             for cid in (1,2):
-                if kind=='video':
+                if kind in ('video','panorama-video'):
                     page=admin.get('/indi-allsky/modern-admin/tools/generate?camera_id='+str(cid))
                     url='/indi-allsky/ajax/generate'
-                    payload={'CAMERA_ID':str(cid),'ACTION_SELECT':'generate_video','DAY_SELECT':str(date.today())+'_night'}
+                    payload={'CAMERA_ID':str(cid),'ACTION_SELECT':'generate_panorama_video' if kind=='panorama-video' else 'generate_video','DAY_SELECT':str(date.today())+'_night'}
                 else:
                     page=admin.get('/indi-allsky/modern-admin/tools/mini-generate?camera_id='+str(cid))
                     url='/indi-allsky/ajax/minigenerate'
@@ -75,7 +85,7 @@ def run(runtime_config, evidence=None):
                     worker.processTask(message)
                     db.session.refresh(task)
                     assert task.state==State.SUCCESS,(kind,cid,task.state,task.result)
-                    model=Video if kind=='video' else Mini
+                    model={'video':Video,'mini-video':Mini,'panorama-video':PanoramaVideo}[kind]
                     entry=model.query.filter_by(camera_id=cid).one();entry_id=entry.id
                     output=Path(entry.getFilesystemPath()).resolve()
                     assert output.is_relative_to(root) and output.is_file()
@@ -123,7 +133,7 @@ def run(runtime_config, evidence=None):
         for client in (admin,reader):
             page=client.get('/indi-allsky/modern-admin/tasks/'+str(failed_task_id))
             assert page.status_code==200 and 'FAILED' in page.text and 'Failed to generate timelapse' in page.text
-        failure={'task_state':'FAILED','encoder':'real FFmpeg rejected intentional invalid option','asset_success':False,'broken_output_exists':False,'successful_outputs_preserved':4,'upload_queue_empty':True}
+        failure={'task_state':'FAILED','encoder':'real FFmpeg rejected intentional invalid option','asset_success':False,'broken_output_exists':False,'successful_outputs_preserved':6,'upload_queue_empty':True}
     report={'scope':'Real coordinator/worker/FFmpeg on isolated SQLite and disposable media; no live capture or external upload','outputs':results,'failure_case':failure}
     if evidence:Path(evidence).write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))

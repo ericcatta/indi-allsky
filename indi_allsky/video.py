@@ -1040,7 +1040,7 @@ class VideoWorker(Process):
             'dayDate'       : d_dayDate.strftime('%Y%m%d'),
             'night'         : night,
             'framerate'     : self.config['FFMPEG_FRAMERATE'],
-            'frames'        : timelapse_files_entries_count - timelapse_skip_frames,
+            'frames'        : len(timelapse_files[timelapse_skip_frames:]),
             'camera_uuid'   : camera.uuid,
         }
 

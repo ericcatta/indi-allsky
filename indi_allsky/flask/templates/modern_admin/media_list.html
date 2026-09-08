@@ -137,7 +137,9 @@ var camera_id = {{ camera_id }};
                 {% if modern_admin_media_kind == 'fits' %}
                 <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ url_for('indi_allsky.modern_admin_fits_detail_view', fits_id=item.id, camera_id=item.camera_id, profile_id=request.args.get('profile_id', '')) }}">Details</a>
                 {% endif %}
-                {% if modern_admin_media_kind == 'image' %}
+                {% if modern_admin_section == 'Panorama Loop' %}
+                <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ url_for('indi_allsky.modern_admin_output_detail_view', kind='panorama', id=item.id, camera_id=item.camera_id, profile_id=request.args.get('profile_id', '')) }}">Details</a>
+                {% elif modern_admin_media_kind == 'image' %}
                 <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ url_for('indi_allsky.modern_admin_media_image_detail_view', image_id=item.id) }}">Details</a>
                 {% endif %}
                 {% if modern_admin_media_kind == 'video' and modern_admin_section == 'Timelapses' %}

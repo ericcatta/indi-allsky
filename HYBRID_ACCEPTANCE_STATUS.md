@@ -13,6 +13,32 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Panorama video and detail navigation — 2026-09-08
+
+A real Hybrid generation request, coordinator dispatch and VideoWorker invocation
+now have FFmpeg acceptance coverage for panorama videos on both camera profiles.
+The fixture contains three valid frames and one missing file per camera. Before
+the correction the successful asset reported four frames; the stored count now
+uses the existing, nonempty files after the configured skip, matching the encoder.
+The test probes and decodes the actual MP4, checks camera-specific pixel values,
+SUCCESS task output, byte-exact downloads for both roles and cross-camera denial.
+Normal and mini timelapses remain covered by the same six-output flow; the
+existing real encoder-failure check verifies that all six outputs remain intact.
+
+Panorama Loop's Details link previously opened a normal image with the panorama's
+numeric ID. It now opens Hybrid's panorama detail with camera/profile preserved.
+The Flask flow follows the rendered link for both roles and cameras, including
+colliding image/panorama IDs. The duplicate unscoped Loop link was removed from
+the panorama listing. This is request/file/effect acceptance in the isolated
+Classic-disabled application, not native browser animation/keyboard acceptance.
+Production deployment, live panorama generation and full day/night observation
+remain open.
+
+Validation: **107 regression entries passed**, including full parser parity,
+Settings contracts, Safe Actions, Product Spine and compileall. The five changed
+runtime/test files match the isolated overlay by SHA-256. Evidence:
+[panorama video and navigation](testing/evidence/hybrid-panorama-video-2026-09-08.json).
+
 ## Panorama capture publication and camera-scoped latest API — 2026-09-08
 
 The shared worker previously replaced one global preview from either camera,

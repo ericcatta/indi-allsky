@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Generated media pages and byte-exact originals without Classic routes."""
 import argparse
+import html
+import re
 from pathlib import Path
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_generation_fixture import seed_generation
@@ -25,6 +27,16 @@ def run(runtime_config):
                     assert 'camera-'+str(cid)+'.' in response.text
                     assert 'camera-'+str(3-cid)+'.' not in response.text
                     assert 'camera_id='+str(cid) in response.text
+                loop=client.get('/indi-allsky/modern-admin/media/panorama-loop',query_string={'camera_id':cid,'profile_id':'test-profile-'+str(cid)})
+                links=re.findall(r'href="([^"]+)"[^>]*>Details</a>',loop.text)
+                assert links,loop.text
+                for link in links:
+                    link=html.unescape(link)
+                    assert '/modern-admin/output?' in link and 'kind=panorama' in link,link
+                    assert 'camera_id='+str(cid) in link and 'profile_id=test-profile-'+str(cid) in link
+                    detail=client.get(link)
+                    assert detail.status_code==200 and 'panorama-camera-'+str(cid)+'.jpg' in detail.text
+                    assert 'generation-camera-' not in detail.text
                 for kind in kinds:
                     url='/indi-allsky/modern-admin/media/'+kind+'/'+str(cid)+'/'+str(cid)+'/download'
                     result=client.get(url)
