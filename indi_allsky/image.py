@@ -4927,29 +4927,21 @@ class ImageWorker(Process):
             logger.info('Long term keogram data disabled')
             return
 
-        offset_x = self.config.get('LONGTERM_KEOGRAM', {}).get('OFFSET_X', 0)
-        offset_y = self.config.get('LONGTERM_KEOGRAM', {}).get('OFFSET_Y', 0)
-
-        image_height, image_width = self.image_processor.image.shape[:2]
-
-
-        x = int(image_width / 2) + offset_x
-        y = int(image_height / 2) - offset_y  # minus
-
-
-        rgb_pixel_list = list()
-        for p_y in range(5):
-            pixel = self.image_processor.image[y + p_y, x]
-            rgb_pixel_list.append([int(pixel[2]), int(pixel[1]), int(pixel[0])])  # bgr
-
-
-        self._miscDb.add_long_term_keogram_data(
-            exp_date,
-            camera_id,
-            rgb_pixel_list,
-        )
-
-
+        from .longterm_keogram_sampling import longterm_keogram_pixels
+        from sqlalchemy.exc import SQLAlchemyError
+        settings = self.config.get('LONGTERM_KEOGRAM', {})
+        try:
+            rgb_pixel_list = longterm_keogram_pixels(
+                self.image_processor.image, settings.get('OFFSET_X', 0), settings.get('OFFSET_Y', 0))
+        except (TypeError, ValueError, IndexError) as error:
+            logger.warning('[LONGTERM_SAMPLE_SKIPPED][camera_id=%s] %s', camera_id, error)
+            return None
+        try:
+            self._miscDb.add_long_term_keogram_data(exp_date, camera_id, rgb_pixel_list)
+        except SQLAlchemyError:
+            db.session.rollback()
+            logger.exception('[LONGTERM_SAMPLE_FAILED][camera_id=%s] Unable to save sample', camera_id)
+            return None
         return rgb_pixel_list
 
 

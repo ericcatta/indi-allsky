@@ -13,6 +13,41 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Multicamera long-term sample collection — 2026-09-08
+
+The daemon previously forced `longterm_keogram=False` for every multicamera
+profile, preventing the working Hybrid generator from receiving new samples.
+The shared Hybrid output policy now honors this profile option (default enabled).
+Global `LONGTERM_KEOGRAM.ENABLE`, focus mode and the existing images-only gate
+remain effective. Camera Management displays the resulting sample setting.
+Other deferred automatic outputs remain restricted.
+
+Sampling retains the original five vertical RGB pixels from the configured BGR
+image position before display colormap. The original worker block is fingerprinted;
+27 valid-coordinate cases agree exactly. Invalid offsets formerly could wrap to
+unrelated NumPy pixels or terminate the worker; they now skip the sample with a
+camera-specific diagnostic. A SQLAlchemy failure rolls back the sample transaction
+and reports the camera instead of escaping this optional sampling step.
+
+The isolated Classic-disabled flow exercises the actual worker method and its
+processImage gate, writes 120 samples for each camera, and verifies RGB/camera
+association. It covers profile/global opt-out, images-only, focus, invalid offsets,
+small/monochrome images and a real failed SQL transaction. The next sample persists
+after rollback (121 for camera 2). Real Hybrid requests by administrator and
+ordinary user produce camera-specific JPEGs with matching cache bytes. These are
+synthetic frames and an in-memory database, not live sensor or SD-card performance
+measurements. The daemon-policy fingerprint remains unchanged; 515 cases allow
+only the intentional long-term output-policy difference.
+
+All 103 Python entrypoints and 24 JavaScript suites passed. The refreshed
+inventory covers 90 pages / 490 contexts (364 rendered, 126 blocked), with no
+rendering defects. These counts are discovery, not complete click acceptance.
+Evidence: [Long-term sampling](testing/evidence/hybrid-longterm-sampling-2026-09-08.json).
+
+Deployment, native browser interactions and live collection remain open. This
+candidate changes capture-side sampling: deployment must begin a new uninterrupted
+24-hour day/night observation. It does not complete the overall acceptance gate.
+
 ## Camera mode decisions and persistence — 2026-09-08
 
 Camera Management still described all multicamera output as disabled, and its

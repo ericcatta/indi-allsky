@@ -1,0 +1,949 @@
+{
+  "baseline": "9afd9227 plus Long-term sampling candidate",
+  "deployment": "Not deployed; isolated overlay, not live browser acceptance",
+  "flow": {
+    "scope": "Isolated Classic-disabled Flask; real worker sampling, SQL writes and JPEG generator; synthetic frames",
+    "pixel_parity_cases": 27,
+    "samples_per_camera": [
+      120,
+      121
+    ],
+    "outputs": [
+      {
+        "camera_id": 1,
+        "bytes": 1268,
+        "sha256": "46c3f467d33dd4104ff95b3281b03540ab5fc5883148a29272660cb63067a0ca"
+      },
+      {
+        "camera_id": 2,
+        "bytes": 1250,
+        "sha256": "812d2c429a61bf9c6c5a9bb21e80aaf6ee9f754cc21405172f99adbc8c3f8362"
+      }
+    ],
+    "guards": "Profile/global opt-out, images-only, focus, invalid offsets/shapes",
+    "recovery": "Failed SQL transaction rolled back; next valid sample persisted",
+    "performance": "In-memory fixture; not a live SD-card latency or 24h test"
+  },
+  "regression": {
+    "baseline": "9afd9227 runtime overlay plus Long-term sampling candidate",
+    "root": "/home/eric/hybrid-acceptance-archive-return",
+    "scope": "Isolated runtime overlay; not live hardware acceptance",
+    "results": [
+      {
+        "case": "testing/auto_exposure_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_auto_exposure_controller_test.py.log"
+      },
+      {
+        "case": "testing/auto_gain_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_auto_gain_controller_test.py.log"
+      },
+      {
+        "case": "testing/auto_gain_runtime_state_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_auto_gain_runtime_state_test.py.log"
+      },
+      {
+        "case": "testing/capture_profiles_test.py",
+        "exit_code": 0,
+        "seconds": 0.17,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_capture_profiles_test.py.log"
+      },
+      {
+        "case": "testing/capture_timeout_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.03,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_capture_timeout_policy_test.py.log"
+      },
+      {
+        "case": "testing/focus_frames_test.py",
+        "exit_code": 0,
+        "seconds": 0.32,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_focus_frames_test.py.log"
+      },
+      {
+        "case": "testing/full_config_parser_parity_test.py",
+        "exit_code": 0,
+        "seconds": 12.78,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_full_config_parser_parity_test.py.log"
+      },
+      {
+        "case": "testing/generation_result_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_generation_result_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_account_input_test.py",
+        "exit_code": 0,
+        "seconds": 11.57,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_account_input_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_app_startup_test.py",
+        "exit_code": 0,
+        "seconds": 2.82,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_app_startup_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_archive_flow_test.py",
+        "exit_code": 0,
+        "seconds": 13.21,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_archive_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_astropanel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.53,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_astropanel_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_astropanel_satellite_test.py",
+        "exit_code": 0,
+        "seconds": 3.14,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_astropanel_satellite_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_aurora_failure_test.py",
+        "exit_code": 0,
+        "seconds": 1.67,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_aurora_failure_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_aurora_rtsw_test.py",
+        "exit_code": 0,
+        "seconds": 2.23,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_aurora_rtsw_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_aurora_status_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_aurora_status_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_authenticated_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.01,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_authenticated_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_camera_management_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.53,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_camera_management_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_camera_management_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_camera_management_policy_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_camera_processing_status_test.py",
+        "exit_code": 0,
+        "seconds": 3.68,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_camera_processing_status_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_camera_simulator_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.68,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_camera_simulator_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_settings_test.py",
+        "exit_code": 0,
+        "seconds": 3.48,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_capture_cadence_settings_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_test.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_capture_cadence_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_charts_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.78,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_charts_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_compatibility_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 2.93,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_compatibility_redirect_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_dark_library_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.14,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_dark_library_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_database_backup_test.py",
+        "exit_code": 0,
+        "seconds": 1.77,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_database_backup_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_drives_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.53,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_drives_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_end_of_night_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.43,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_end_of_night_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_end_of_night_handoff_test.py",
+        "exit_code": 0,
+        "seconds": 2.18,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_end_of_night_handoff_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_exposure_pipeline_test.py",
+        "exit_code": 0,
+        "seconds": 0.46,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_exposure_pipeline_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.63,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_fits_processing_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_parity_test.py",
+        "exit_code": 0,
+        "seconds": 0.12,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_fits_processing_parity_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_focus_endpoint_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.43,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_focus_endpoint_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_focus_preview_parity_test.py",
+        "exit_code": 0,
+        "seconds": 2.37,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_focus_preview_parity_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_focuser_effect_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_focuser_effect_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_gallery_isolation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.88,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_gallery_isolation_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_generated_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.59,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_generated_media_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.83,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_generation_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_generation_result_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.62,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_generation_result_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_geometry_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.84,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_geometry_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_gpio_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.93,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_gpio_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_highlights_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.69,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_highlights_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_keogram_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.78,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_keogram_encoding_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_log_download_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.9,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_log_download_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_log_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_log_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_login_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 6.98,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_login_redirect_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_longterm_keogram_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.83,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_longterm_keogram_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_longterm_sampling_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.28,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_longterm_sampling_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_loop_statistics_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_loop_statistics_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_media_cleanup_failure_test.py",
+        "exit_code": 0,
+        "seconds": 10.68,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_media_cleanup_failure_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_mini_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.98,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_mini_generation_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_native_focus_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.14,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_native_focus_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_network_command_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.93,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_network_command_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_now_page_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.88,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_now_page_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_observatory_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.24,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_observatory_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_operations_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.23,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_operations_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_output_detail_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.89,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_output_detail_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_public_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.33,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_public_media_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_route_composition_test.py",
+        "exit_code": 0,
+        "seconds": 1.82,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_route_composition_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_runtime_shell_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.29,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_runtime_shell_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.98,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_sensor_panel_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_session_revocation_test.py",
+        "exit_code": 0,
+        "seconds": 5.15,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_session_revocation_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.53,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_settings_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_shell_test.py",
+        "exit_code": 0,
+        "seconds": 0.56,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_shell_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_sky_cycle_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.94,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_sky_cycle_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_source_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.33,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_source_media_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_table_export_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_table_export_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_task_visibility_test.py",
+        "exit_code": 0,
+        "seconds": 4.28,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_task_visibility_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_ui_inventory_parser_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_ui_inventory_parser_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_updates_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.08,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_updates_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_upgrade_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.43,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_upgrade_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_upload_claim_test.py",
+        "exit_code": 0,
+        "seconds": 2.33,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_upload_claim_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_users_table_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.97,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_users_table_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_video_dispatch_test.py",
+        "exit_code": 0,
+        "seconds": 1.77,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_video_dispatch_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_video_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.09,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_video_encoding_flow_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_video_failure_test.py",
+        "exit_code": 0,
+        "seconds": 1.72,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_video_failure_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_youtube_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.23,
+        "interpreter": "/home/eric/hybrid-acceptance-oauth-venv/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_hybrid_youtube_flow_test.py.log"
+      },
+      {
+        "case": "testing/legacy_auto_gain_steps_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_legacy_auto_gain_steps_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_boundary_test.py",
+        "exit_code": 0,
+        "seconds": 0.51,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_boundary_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_camera_diagnostics_service_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_log_reader_test.py",
+        "exit_code": 0,
+        "seconds": 0.57,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_log_reader_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_media_camera_filter_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_media_camera_filter_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_media_metadata_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_media_metadata_service_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_media_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_media_runtime_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_notification_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_notification_read_service_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_observatory_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_observatory_tools_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_runtime_providers_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_runtime_providers_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_settings_contracts_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_settings_contracts_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_settings_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_settings_runtime_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_system_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_system_tools_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_task_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_admin_task_read_service_test.py.log"
+      },
+      {
+        "case": "testing/modern_safe_action_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_modern_safe_action_test.py.log"
+      },
+      {
+        "case": "testing/multicamera_processor_isolation_test.py",
+        "exit_code": 0,
+        "seconds": 1.97,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_multicamera_processor_isolation_test.py.log"
+      },
+      {
+        "case": "testing/network_activation_polling_test.py",
+        "exit_code": 0,
+        "seconds": 0.26,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_network_activation_polling_test.py.log"
+      },
+      {
+        "case": "testing/network_commands_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_network_commands_test.py.log"
+      },
+      {
+        "case": "testing/network_scan_effects_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_network_scan_effects_test.py.log"
+      },
+      {
+        "case": "testing/product_spine_regression_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_product_spine_regression_test.py.log"
+      },
+      {
+        "case": "testing/product_view_models_test.py",
+        "exit_code": 0,
+        "seconds": 0.36,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_product_view_models_test.py.log"
+      },
+      {
+        "case": "testing/sftp_adapter_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_sftp_adapter_test.py.log"
+      },
+      {
+        "case": "testing/stretch_multicamera_mask_test.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/testing_stretch_multicamera_mask_test.py.log"
+      },
+      {
+        "case": "hybrid_archive_flow_test.py:library",
+        "exit_code": 0,
+        "seconds": 13.75,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/hybrid_archive_flow_test.py_library.log"
+      },
+      {
+        "case": "compileall",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "interpreter": "/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python",
+        "log": "/home/eric/hybrid-longterm-sampling-evidence/compileall.log"
+      }
+    ]
+  },
+  "inventory": {
+    "file": "/home/eric/hybrid-longterm-sampling-evidence/ui-inventory.json",
+    "sha256": "7d8b1b7bc328f9dd5a93da4a62fe83a654779e17c08cd57209a4c932b3107d7c",
+    "pages": 90,
+    "contexts": 490,
+    "render_status": {
+      "bloccato": 126,
+      "superato": 364
+    },
+    "controls": 28622,
+    "defects": [],
+    "placeholder_signals": [],
+    "note": "Rendered-control discovery only. Does not pass click/effect acceptance."
+  },
+  "javascript": {
+    "scope": "Node browser adapters; not native browser click acceptance",
+    "results": [
+      {
+        "case": "testing/hybrid_account_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid account browser controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_astropanel_browser_test.js",
+        "exit_code": 0,
+        "output": "Astropanel controller: all detail fields, 20 satellites, literal text, unavailable/stale/session states, refresh and polling: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_camera_management_browser_test.js",
+        "exit_code": 0,
+        "output": "Camera form guard: native first submit, duplicate/cross-form prevention and back-navigation permission state: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_charts_browser_test.js",
+        "exit_code": 0,
+        "output": "Charts: all 15 series and histogram, empty/null data, atomic validation, history, stale responses, polling, HTTP/session/network errors and teardown: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_config_restore_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid restore browser controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_drives_browser_test.js",
+        "exit_code": 0,
+        "output": "Drive controller: metadata as text, duplicates, confirmation/cancel, target/CSRF and fresh-inventory requirement: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_browser_test.js",
+        "exit_code": 0,
+        "output": "FITS controller: duplicate prevention, output identity, search/reset, visible validation and failed-session recovery: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_focus_browser_test.js",
+        "exit_code": 0,
+        "output": "Native Focus browser controller: target camera, duplicate prevention, decode, errors, expired session, permissions and movement feedback: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_full_settings_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid full Settings controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_generation_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid generation confirmation, role gate, duplicate submission, failure and scope changes: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_gpio_browser_test.js",
+        "exit_code": 0,
+        "output": "GPIO controller: confirmation/cancel, explicit Off, CSRF, duplicate prevention, errors and retained disabled controls: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_log_browser_test.js",
+        "exit_code": 0,
+        "output": "Log controller CSRF, plain text, expired session and failed/malformed responses: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_longterm_keogram_browser_test.js",
+        "exit_code": 0,
+        "output": "Long-term keogram controls: scoped payload, CSRF, duplicate prevention, preview/download, reset and errors preserve prior result: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_loop_browser_test.js",
+        "exit_code": 0,
+        "output": "Loop controls: history, speed, bounce, camera isolation, stale responses, image errors and recovery PASS\n"
+      },
+      {
+        "case": "testing/hybrid_media_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid media camera navigation and source preview behavior: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_mini_generation_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid mini controls: role, confirmation, duplicate submissions, failure recovery and task result: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_navigation_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid navigation controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_network_browser_test.js",
+        "exit_code": 0,
+        "output": "Network controller: all intents, scan results/empty state, target binding, security boolean, CSRF, pending/refresh guards, cancellation, permissions and errors: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_notification_ack_browser_test.js",
+        "exit_code": 0,
+        "output": "Hybrid notification acknowledgement controller: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_operations_table_browser_test.js",
+        "exit_code": 0,
+        "output": "Operations table controller: combined filters, counts, reset, empty rows, filtered export payload/CSRF and native attachment forms: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_public_media_browser_test.js",
+        "exit_code": 0,
+        "output": "Public media clipboard fallback, fullscreen capability errors and failed preview feedback: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_browser_test.js",
+        "exit_code": 0,
+        "output": "Sensor controller: camera scope, 120 slots, real zero, absent values, filter, atomic errors, expired session, refresh and teardown: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_updates_browser_test.js",
+        "exit_code": 0,
+        "output": "Updates controller: confirmations, permissions, CSRF, duplicate suppression, accepted/failed/expired/lost responses and explicit refresh: PASS\n"
+      },
+      {
+        "case": "testing/hybrid_youtube_browser_test.js",
+        "exit_code": 0,
+        "output": "YouTube revoke cancellation, action feedback and duplicate form prevention: PASS\n"
+      }
+    ]
+  },
+  "source_sha256": {
+    "indi_allsky/allsky.py": "ea25d47204fb7305b9c8d96e824d028afe4fec135f270598798181ecac4efffa",
+    "indi_allsky/hybrid_camera_management.py": "478774ebdc2270f54a797f9025f479109a2be893ba325142d5d42207ffa5c108",
+    "indi_allsky/image.py": "619e9abf271e65d01da4fc56d4a773fd938f28ef08f4add8d02bd52ac90e1144",
+    "indi_allsky/longterm_keogram_sampling.py": "28963c229185e7ec01e4a8088042fc4c2e98fe11155767bde8d922498d44457c",
+    "indi_allsky/flask/templates/modern_admin/cameras.html": "47d6edf3a1115c175d1111315c25a8649a86821319630e42bff0509888c60bbb",
+    "testing/hybrid_camera_management_policy_test.py": "193b65973657f6c0c640299a48daf4d24d4460dad7023783587948947cb0e43c",
+    "testing/hybrid_longterm_sampling_flow_test.py": "0ce538fc6b890eb1646a30c432e122d014947d7a113fc0d68a4bc72595efd8ae",
+    "testing/fixtures/hybrid_longterm_sampling_legacy.json": "1f4a1d12862c94dbfb8c8bf4299356c761a5040424ef70ad6a55042c15b416e2",
+    "testing/fixtures/hybrid_multicamera_outputs_legacy.json": "f5e9ce0a400eb042c22965337b20ce4f188d88a6e21fb38f9506b239333103a7"
+  },
+  "policy_parity": {
+    "cases": 515,
+    "legacy_sha256": "ef5afb450a961703907eb6992f0187346e346beb55dfb0fa21a80720c094f1a2",
+    "allowed_difference": "Only longterm_keogram honors the supplied profile value instead of forced false"
+  },
+  "pixel_parity": {
+    "cases": 27,
+    "legacy_sha256": "8289093d7559704d807e111393a048ca41c32ef9bf9355db36900301d85c844f",
+    "baseline": "9afd9227",
+    "scope": "Original valid five-pixel RGB extraction; invalid coordinates now explicitly skipped"
+  },
+  "controls": [
+    {
+      "page": "/indi-allsky/modern-admin/cameras",
+      "identifier": "Long-term samples column",
+      "automated_status": "superato",
+      "expected": "Global/profile opt-out and images-only reflected in effective setting",
+      "native_status": "bloccato",
+      "reason": "Candidate not deployed; native visual acceptance still open"
+    },
+    {
+      "page": "/indi-allsky/modern-admin/observatory/long-term-keogram",
+      "identifier": "longterm-form",
+      "roles": [
+        "admin",
+        "ordinary"
+      ],
+      "cameras": [
+        1,
+        2
+      ],
+      "automated_status": "superato",
+      "expected": "Worker samples from each synthetic camera persist and produce its own JPEG/cache",
+      "native_status": "bloccato",
+      "reason": "No live sensor collection or native click acceptance of candidate"
+    }
+  ],
+  "open_gates": [
+    "Controlled production deployment and live sampling",
+    "SD-card latency and capture stability",
+    "Native UI and effect acceptance",
+    "New uninterrupted 24h day/night after capture-affecting deployment",
+    "Remaining deferred automatic outputs and overall Classic removal"
+  ]
+}

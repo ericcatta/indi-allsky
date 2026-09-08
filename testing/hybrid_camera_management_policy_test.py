@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Camera save plans and unchanged multicamera capture-output restrictions."""
+"""Camera save plans and bounded relaxation of multicamera output restrictions."""
 import ast
 from copy import deepcopy
 from dataclasses import dataclass, replace
@@ -25,14 +25,19 @@ def run():
         outputs:dict
         profile_id:str='fixture'
         unrelated:float=12.5
-    for values in itertools.product((False,True),repeat=8):
-        outputs=dict(zip(('images','timelapse','keogram','startrails','mini_timelapse','panorama','extra_uploads','future_key'),values))
+    for values in itertools.product((False,True),repeat=9):
+        outputs=dict(zip(('images','timelapse','keogram','startrails','mini_timelapse','panorama','extra_uploads','future_key','longterm_keogram'),values))
         profile=Profile(outputs)
         expected=namespace['_images_only_capture_profile'](None,profile)
+        # Sole intentional delta: long-term collection honors its profile value.
+        expected.outputs.pop('longterm_keogram')
+        if 'longterm_keogram' in outputs:expected.outputs['longterm_keogram']=outputs['longterm_keogram']
         actual=multicamera_capture_outputs(outputs)
         assert actual==expected.outputs and actual is not outputs and profile.outputs==outputs
     for outputs in ({}, {'future_key': {'value': 1}}, {'timelapse': 'custom', 'images': False}):
         expected=namespace['_images_only_capture_profile'](None,Profile(outputs))
+        expected.outputs.pop('longterm_keogram')
+        if 'longterm_keogram' in outputs:expected.outputs['longterm_keogram']=outputs['longterm_keogram']
         assert multicamera_capture_outputs(outputs)==expected.outputs
     tree=ast.parse((root/'indi_allsky/allsky.py').read_text())
     method=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='_images_only_capture_profile')
@@ -44,6 +49,15 @@ def run():
     context=camera_mode_context(config)
     assert context['enable_allowed'] and len(context['profiles'])==2
     assert all(p['generated_capture_enabled'] for p in context['profiles'])
+    assert all(p['longterm_capture_enabled'] for p in context['profiles'])
+    disabled_samples=deepcopy(config)
+    disabled_samples['LONGTERM_KEOGRAM']={'ENABLE':False}
+    assert not any(p['longterm_capture_enabled'] for p in camera_mode_context(disabled_samples)['profiles'])
+    for outputs in ({'longterm_keogram':False}, {'timelapse':False,'keogram':False,'startrails':False}):
+        disabled_samples=deepcopy(config)
+        disabled_samples['MULTI_CAMERA']['profiles'][0]['outputs']=outputs
+        rows=camera_mode_context(disabled_samples)['profiles']
+        assert not rows[0]['longterm_capture_enabled'] and rows[1]['longterm_capture_enabled']
     assert all(not p['capture_outputs']['extra_uploads'] for p in context['profiles'])
     implicit=deepcopy(config)
     for p in implicit['MULTI_CAMERA']['profiles']:p.pop('profile_id')
@@ -71,6 +85,6 @@ def run():
         try:plan_camera_switch(candidate,camera_name=name,driver='rpicam-still',supported_interfaces=interfaces)
         except ValueError:pass
         else:raise AssertionError('Ambiguous or multicamera switch accepted')
-    print('Camera management plans and 256 legacy output-policy parity cases: PASS')
+    print('Camera management plans and 515 output-policy cases (only long-term restriction removed): PASS')
 
 if __name__=='__main__':run()

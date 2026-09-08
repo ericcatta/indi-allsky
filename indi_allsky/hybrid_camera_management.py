@@ -4,13 +4,13 @@ from dataclasses import replace
 
 
 DEFERRED_CAPTURE_OUTPUTS = (
-    'mini_timelapse', 'realtime_keogram', 'longterm_keogram',
+    'mini_timelapse', 'realtime_keogram',
     'panorama', 'panorama_loop', 'extra_uploads',
 )
 
 
 def multicamera_capture_outputs(outputs):
-    """Preserve the existing live-capture restrictions, including unknown keys."""
+    """Apply remaining capture restrictions while honoring long-term sample preferences."""
     result = dict(outputs)
     for key in DEFERRED_CAPTURE_OUTPUTS:
         result[key] = False
@@ -49,6 +49,12 @@ def camera_mode_context(config):
                    camera_interface=profile.camera_interface, capture_outputs=multicamera_capture_outputs(profile.outputs))
         effective = build_profile_config(proposed, replace(profile, outputs=row['capture_outputs']))
         row['generated_capture_enabled'] = bool(effective.get('TIMELAPSE_ENABLE', True))
+        row['longterm_capture_enabled'] = bool(
+            effective.get('LONGTERM_KEOGRAM', {}).get('ENABLE', True)
+            and row['capture_outputs'].get('longterm_keogram', True)
+            and any(row['capture_outputs'].get(key, True)
+                    for key in ('timelapse', 'keogram', 'startrails'))
+        )
         result['profiles'].append(row)
     result['enabled_count'] = sum(p['enabled'] for p in result['profiles'])
     result['enable_allowed'] = result['enabled_count'] >= 2

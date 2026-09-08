@@ -16,11 +16,20 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Long-term Keogram multicamera: la policy Hybrid rispetta ora l'opzione del
+  profilo invece di forzarla off. Campioni RGB e persistenza restano nel worker
+  condiviso, con controllo coordinate e rollback su errori SQL. UI Camera
+  Management mostra l'abilitazione effettiva; opt-out globale/profilo, focus e
+  immagini-only restano rispettati. Percorso campioni per camera -> SQL -> JPEG
+  verificato con frame sintetici e Classic disabilitato. Non distribuito;
+  il deploy richiedera' una nuova finestra completa di 24 ore giorno/notte.
+
 - Camera Management: Hybrid possiede validazione cambio modalita', piano di
   selezione camera e riepilogo output effettivi. I salvataggi usano il servizio
   revisioni Settings con l'utente corrente, senza caricamenti CLI temporanei.
   Corretta selezione IMX708/rpicam come libcamera; helper condiviso con il daemon
-  preserva le restrizioni multicamera esistenti, senza abilitarne altre.
+  preserva le altre restrizioni multicamera; Long-term e' ora abilitabile come
+  descritto sopra.
   Parita' e salvataggi verificati in isolamento; deploy e switch hardware aperti.
 
 - Startrail senza fotogrammi idonei: il worker non produce piu' un'immagine
