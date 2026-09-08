@@ -7,7 +7,7 @@ are real subprocesses, limited to three tiny frames and one encoding thread.
 """
 import argparse
 from copy import deepcopy
-from datetime import date
+from datetime import date, timedelta
 import hashlib
 import json
 from pathlib import Path
@@ -30,6 +30,7 @@ def run(runtime_config, evidence=None):
         from indi_allsky.flask import db
         from indi_allsky.flask.models import IndiAllSkyDbConfigTable as Config, IndiAllSkyDbTaskQueueTable as Task
         from indi_allsky.flask.models import IndiAllSkyDbKeogramTable as Keogram, IndiAllSkyDbStarTrailsTable as Startrail, IndiAllSkyDbStarTrailsVideoTable as StarVideo
+        from indi_allsky.flask.models import IndiAllSkyDbImageTable as SourceImage
         from PIL import Image
         from indi_allsky.flask.models import TaskQueueState as State
         from indi_allsky.flask.models import IndiAllSkyDbCameraTable as Camera
@@ -131,7 +132,36 @@ def run(runtime_config, evidence=None):
                     assert response.status_code==200 and response.data==content,(kind,response.status_code)
                     assert client.get(f'/indi-allsky/modern-admin/media/{kind}/{3-cid}/{eid}/download').status_code==404
             results.append({'camera_id':cid,'profile_id':message['profile_id'],'task_id':task_id,'outcome':outcome,'outputs':[{'kind':kind,'bytes':len(content),'sha256':hashlib.sha256(content).hexdigest()} for kind,eid,name,content in outputs]})
-    report={'scope':'Real Keogram, Startrail and FFmpeg algorithms on synthetic isolated fixtures; configured thresholds permit synthetic frames; not scientific or live capture acceptance','results':results}
+        preserved={p:hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*') if p.is_file()}
+        excluded_day=date.today()-timedelta(days=1)
+        worker.config['STARTRAILS_MAX_ADU']=0
+        with app.app_context():
+            for entry in SourceImage.query:entry.dayDate=excluded_day
+            db.session.commit()
+        excluded=[]
+        for cid in (1,2):
+            page=admin.get('/indi-allsky/modern-admin/tools/generate?camera_id='+str(cid))
+            token=re.search(r'name="csrf_token"[^>]*value="([^"]+)"',page.text)[1]
+            response=admin.post('/indi-allsky/ajax/generate',json={'CAMERA_ID':str(cid),'ACTION_SELECT':'generate_k_st','DAY_SELECT':str(excluded_day)+'_night'},headers={'X-CSRFToken':token})
+            assert response.status_code==200,response.text
+            with app.app_context():
+                task=Task.query.order_by(Task.id.desc()).first();task_id=task.id
+                coordinator._queueManualTasks();worker.processTask(coordinator.video_q.get_nowait());db.session.refresh(task)
+                outcome=task.data['generation_outcome']
+                assert task.state==State.SUCCESS and outcome['status']=='partial',(task.state,task.result)
+                assert [row['status'] for row in outcome['outputs']]==['generated','skipped','skipped'],outcome
+                startrail=Startrail.query.filter_by(camera_id=cid,dayDate=excluded_day).one()
+                assert startrail.frames==0 and not startrail.success and not Path(startrail.getFilesystemPath()).exists()
+                assert StarVideo.query.filter_by(camera_id=cid,dayDate=excluded_day).count()==0
+                assert uploads.empty()
+                assert all(p.is_file() and hashlib.sha256(p.read_bytes()).hexdigest()==digest for p,digest in preserved.items())
+                startrail_id=startrail.id
+            for client in (admin,reader):
+                page=client.get('/indi-allsky/modern-admin/tasks/'+str(task_id))
+                assert page.status_code==200 and 'Startrail: skipped (0/1 eligible frames)' in page.text
+                assert client.get(f'/indi-allsky/modern-admin/media/startrail/{cid}/{startrail_id}/download').status_code==404
+            excluded.append({'camera_id':cid,'task_id':task_id,'outcome':outcome,'startrail_file_exists':False,'earlier_outputs_preserved':True})
+    report={'scope':'Real Keogram, Startrail and FFmpeg algorithms on synthetic isolated fixtures; configured thresholds permit synthetic frames; not scientific or live capture acceptance','results':results,'all_frames_excluded':excluded}
     if evidence:Path(evidence).write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))
 

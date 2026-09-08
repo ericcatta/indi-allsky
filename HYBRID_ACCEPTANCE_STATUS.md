@@ -13,6 +13,32 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Startrails with no eligible frames — 2026-09-08
+
+The real worker produced a placeholder Startrail and marked it generated when
+all source frames were rejected. A valid Keogram still existed, while the
+Startrail video was correctly skipped. The worker now bypasses Startrail image,
+thumbnail, video and upload generation when its actual accepted-frame count is
+zero. The unsuccessful DB record retains frames=0; no substitute file is created.
+Hybrid's result receipt reports `Startrail: skipped (0/1 eligible frames)` and
+keeps the successful Keogram as a partial result. Disabled video stays explicitly
+not requested. Existing successful output paths and selection thresholds are
+unchanged; previously stored media are not removed or rewritten.
+
+The real generation test covers both cameras with eligible and fully excluded
+synthetic frames, administrator/ordinary task pages, missing-output download 404,
+and unchanged hashes for all earlier fixture files. The receipt unit test also
+covers disabled video and retains the original worker fingerprint by normalizing
+only the two new eligibility gates and bookkeeping statements. Scientific image
+selection and processing remain covered by the unchanged fingerprint. All 97
+regression entrypoints passed, including the receipt guard, Book 2, Full Config
+parity, Settings, Safe Actions and Product Spine/View Models. The four source
+hashes match the tested candidate and `git diff --check` passed.
+
+This correction is **not deployed** and does not interrupt the observation
+started at 17:47:25. Evidence:
+`testing/evidence/hybrid-startrail-empty-2026-09-08.json`.
+
 ## Generated-output fixes deployed; live capture verified — 2026-09-08
 
 Production runs `ca604649`: mini timelapse and EndOfNight dispatch, exact local

@@ -1611,7 +1611,11 @@ class VideoWorker(Process):
         keogram_thumbnail_metadata['fileSize'] = keogram_thumbnail_entry.fileSize
 
 
-        if night:
+        startrail_video_entry = None
+        if startrail_entry is not None:
+            startrail_entry.frames = stg.trail_count
+
+        if night and stg.trail_count > 0:
             stg.finalize(startrail_file, camera)
 
 
@@ -1743,7 +1747,7 @@ class VideoWorker(Process):
                 db.session.commit()
 
 
-        if startrail_entry and night:
+        if startrail_entry and night and stg.trail_count > 0:
             # upload thumbnail first
             if startrail_thumbnail_entry:
                 self._miscUpload.syncapi_thumbnail(startrail_thumbnail_entry, startrail_thumbnail_metadata)  # syncapi before S3
@@ -1777,6 +1781,7 @@ class VideoWorker(Process):
             startrail=(startrail_entry, startrail_file),
             video=(startrail_video_entry, startrail_video_file),
             frames=stg.timelapse_frame_count if night else 0,
+            startrail_frames=stg.trail_count if night else 0,
             min_frames=self.config.get('STARTRAILS_TIMELAPSE_MINFRAMES', 250),
             video_enabled=bool(self.config.get('STARTRAILS_TIMELAPSE', True)),
         )

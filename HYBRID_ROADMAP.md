@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Startrail senza fotogrammi idonei: il worker non produce piu' un'immagine
+  sostitutiva dichiarata generata. La ricevuta Hybrid espone output saltato e
+  conteggio zero, mantenendo il Keogram valido come risultato parziale.
+  Criteri scientifici e output precedenti invariati. Collaudo reale isolato per
+  entrambe le camere; modifica non ancora distribuita.
+
 - Release effetti `ca604649` distribuita sul Pi: dispatch mini/EndOfNight,
   risoluzione profili per identita' locale esatta, EXIF opzionali e Keogram
   senza colonna estranea. Backup coerente e rollback pronti; acquisizione

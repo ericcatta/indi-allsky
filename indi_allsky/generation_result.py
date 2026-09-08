@@ -2,7 +2,7 @@
 
 
 def finish_keogram_task(task, *, camera_id, night, keogram, startrail, video,
-                        frames, min_frames, video_enabled):
+                        frames, min_frames, video_enabled, startrail_frames=None):
     outputs = []
     for kind, label, pair in (('keogram', 'Keogram', keogram),
                               ('startrail', 'Startrail', startrail),
@@ -12,6 +12,11 @@ def finish_keogram_task(task, *, camera_id, night, keogram, startrail, video,
                'record_id': getattr(entry, 'id', None)}
         if kind != 'keogram' and not night:
             row.update(status='not_requested', reason='Night-only output')
+        elif kind == 'startrail' and startrail_frames == 0:
+            row.update(status='skipped', reason='No eligible frames',
+                       eligible_frames=0, minimum_frames=1)
+            if entry is not None:
+                entry.success = False
         elif kind == 'startrail-video' and not video_enabled:
             row.update(status='not_requested', reason='Disabled in configuration')
         elif kind == 'startrail-video' and frames < min_frames:
@@ -41,7 +46,7 @@ def finish_keogram_task(task, *, camera_id, night, keogram, startrail, video,
             continue
         detail = row['status']
         if row['status'] == 'skipped':
-            detail += ' ({0}/{1} eligible frames)'.format(frames, min_frames)
+            detail += ' ({0}/{1} eligible frames)'.format(row['eligible_frames'], row['minimum_frames'])
         parts.append(row['label'] + ': ' + detail)
     message = (status.title() + ' generation — ' + '; '.join(parts))[:255]
     # Skipped optional video preserves successful task completion but the result
