@@ -7,11 +7,53 @@ must be represented honestly. Classic has not been removed. The shared capture
 cadence mission, operational settings, rollback and live evidence locations are
 recorded in [HYBRID_CAPTURE_CADENCE.md](HYBRID_CAPTURE_CADENCE.md).
 Its protected `deployment.json` records the installed commit and service start;
-`config-change.json` records the configuration revisions. A deployment or capture
+`config-change.json` records the configuration revisions. A capture-affecting deployment or capture
 restart requires a new 24-hour day/night observation, which has not passed.
 The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
+
+## UI corrections deployed and checked on the Raspberry — 2026-09-08
+
+Production now runs `4b009133`: archive detail return context, optional Loop
+measurements, responsive header and Loop playback controls are deployed. Before
+release, all 571 runtime files matched the isolated candidate that passed 94
+Python/compile entrypoints; 22 JavaScript entrypoints also passed locally.
+A coherent 828,977,152-byte SQLite backup passed integrity checking. Protected
+configuration, manifest, deployment record and rollback helper are stored at
+`/home/eric/hybrid-backups/web-ui-20260908-131241`.
+
+Only Gunicorn restarted, at 13:14:45 CEST (PID 3649890). Capture remained PID
+3566586, started at 12:01:07 CEST, with zero restarts and revision 110 unchanged.
+The postcheck spans the web deployment: 45 files per camera, none missing/empty,
+latest JPEGs decoded at 4608x2592 and 3840x2160. Request-interval medians were
+15.038s and 15.032s, with no capture errors in the checked window. This confirms
+continuity across this web update; it does not complete the day/night acceptance.
+The monitor retains the original capture window and records the new web commit.
+
+Native production-browser checks confirm styled recovery controls, both Loop
+image elements, filtered Library -> image 13101 -> Back to results with camera,
+profile and search preserved, and recent frames for both cameras on Now.
+A deployment defect was caught by visual inspection: the backup's restrictive
+umask made Git's replacement CSS file unreadable to Apache. Only the published
+tracked files were restored to readable 0644 permissions. The saved helper now
+uses checkout umask 022 while protecting its private files explicitly; the styled
+production page and CSS hash were rechecked. No acquisition data was deleted.
+Evidence: `testing/evidence/hybrid-web-deployment-2026-09-08.json`.
+
+Rollback for this exact release, after inspecting current repository state:
+
+```sh
+ssh eric@allsky-pi.local
+python3 /home/eric/hybrid-backups/web-ui-20260908-131241/deploy.py --rollback --backup /home/eric/hybrid-backups/web-ui-20260908-131241
+```
+
+The helper requires the expected release and no tracked edits, restores the
+previous code and restarts Gunicorn only. It preserves user files and never
+restores the backup database over new acquisitions. A changed release must be
+reviewed before using an older rollback helper. The complete audit, remaining
+operational/hardware effects, Classic removal and 24-hour observation remain open.
+Earlier mission sections below describe their status before this deployment.
 
 ## Loop playback controls and empty/error states — 2026-09-08
 

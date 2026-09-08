@@ -134,3 +134,13 @@ commit, then restart capture and restore the timer's recorded state. Preserve
 untracked user files and current media records; do not restore the whole database
 over acquisitions made since the backup. A rollback also resets the observation
 period. The protected `deploy.py` records the automatic failure rollback procedure.
+
+## Web-only update during observation — 2026-09-08
+
+The UI release `4b009133` restarted only Gunicorn at 13:14:45 CEST. Capture remained
+PID 3566586, start 12:01:07, zero restarts, revision 110. Its code and scheduling
+were unchanged. File and request evidence across the deploy is recorded in
+`testing/evidence/hybrid-web-deployment-2026-09-08.json`; median request intervals
+remain about 15.03s for each camera. The capture observation window therefore
+continues; 24 hours including night have not yet been verified. Web backup and
+rollback are separate at `/home/eric/hybrid-backups/web-ui-20260908-131241`.

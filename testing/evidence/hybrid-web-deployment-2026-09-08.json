@@ -1,0 +1,94 @@
+{
+  "date": "2026-09-08",
+  "deployed_commit": "4b009133074fbcbc872bd9db7bb08328add49e69",
+  "previous_commit": "a886a9d74aedc5e72d3106ba43640080da761c8e",
+  "backup": "/home/eric/hybrid-backups/web-ui-20260908-131241",
+  "backup_database_bytes": 828977152,
+  "backup_integrity": "ok",
+  "configuration_revision": 110,
+  "preflight": {
+    "isolated_runtime_files_matching_candidate": 571,
+    "passed_python_compile_entrypoints": 94,
+    "passed_javascript_entrypoints": 22,
+    "free_space_gib_approx": 62
+  },
+  "deployment": {
+    "started": "2026-09-08T13:14:44.436093+02:00",
+    "completed": "2026-09-08T13:14:46.568358+02:00",
+    "web_pid": 3649890,
+    "web_started": "2026-09-08 13:14:45 CEST",
+    "capture_pid_before_after": 3566586,
+    "capture_started_before_after": "2026-09-08 12:01:07 CEST",
+    "capture_restarts_before_after": 0,
+    "status": "installed-web-and-browser-verified",
+    "configuration_changed": false,
+    "capture_restarted": false,
+    "permission_defect": {
+      "observed": "New shell CSS failed to render; published file mode was 0600 while Apache serves static files directly",
+      "cause": "Backup umask 077 leaked into Git checkout during deployment",
+      "fixed": "Only the 26 published tracked files restored to 0644. Saved deploy/rollback helper now uses checkout umask 022 and explicitly protects private report/helper files. Backup directory remains 0700; rollback helper is 0600.",
+      "verification": "Reloaded production browser renders styled header with both abort controls and reboot visible; CSS hash matches tested candidate",
+      "css_sha256": "0f1d35f6ce620702ef73be4e970e8e7c7f37f6acf8a51cf317826a38cd291a30"
+    }
+  },
+  "browser_checks": [
+    {
+      "control": "Authenticated Images + header",
+      "status": "superato",
+      "observed": "Current ZWO images and styled header after CSS permission correction"
+    },
+    {
+      "control": "Loop",
+      "status": "superato",
+      "observed": "Both IMX708 Wide and ASI678MC real image elements load; IMX708 image visible in native screenshot"
+    },
+    {
+      "control": "Library -> Image details -> Back to results",
+      "status": "superato",
+      "observed": "Image ID 13101; search ccd2_20260908_131509, camera 2 and profile asi678mc retained; same one result after return"
+    },
+    {
+      "control": "Now",
+      "status": "superato",
+      "observed": "Capture Running; RPi frame 13:24:15 age 6s and ZWO frame 13:24:10 age 11s at page load"
+    }
+  ],
+  "postcheck": {
+    "observed_at": "2026-09-08T13:24:03.924692+02:00",
+    "since": "2026-09-08T13:12:44.436093",
+    "camera_1": {
+      "files": 45,
+      "missing_or_empty": 0,
+      "latest_decoded": "JPEG 4608x2592",
+      "median_saved_gap_s": 15.0,
+      "max_saved_gap_s": 17.0,
+      "median_request_interval_s": 15.037734031677246,
+      "max_request_interval_s": 15.089529037475586
+    },
+    "camera_2": {
+      "files": 45,
+      "missing_or_empty": 0,
+      "latest_decoded": "JPEG 3840x2160",
+      "median_saved_gap_s": 15.0,
+      "max_saved_gap_s": 16.0,
+      "median_request_interval_s": 15.031724095344543,
+      "max_request_interval_s": 15.287559032440186
+    },
+    "capture_errors": [],
+    "web_errors": [],
+    "full_evidence": "/home/eric/hybrid-backups/web-ui-20260908-131241/postcheck.json"
+  },
+  "monitor": {
+    "automation_id": "collaudo-hybrid-raspberry-giorno-e-notte",
+    "status": "ACTIVE",
+    "capture_observation_baseline_unchanged": "2026-09-08 12:01:07 CEST",
+    "expected_web_commit": "4b009133074fbcbc872bd9db7bb08328add49e69",
+    "24h_complete": false
+  },
+  "limits": [
+    "No full control/role/hardware acceptance claim",
+    "No production destructive action, upload or configuration mutation performed",
+    "Classic remains present",
+    "Future documentation commits may be ahead of this deployed runtime; no untracked Pi user files removed"
+  ]
+}
