@@ -1,0 +1,592 @@
+{
+  "date": "2026-09-08",
+  "baseline": "3101046c",
+  "production_release": "498ba959",
+  "scope": "Read-only access-policy audit; no runtime, permission or configuration changes.",
+  "audit_script_sha256": "48be4babec08220516b1791f56c7cdba8e1daed434a2bc4567e08d17fc62bb8b",
+  "isolated_authentication": {
+    "scope": "Authentication gates only: actual decorators in isolated Flask, Classic inheritance read via AST; no Classic import or live effect.",
+    "legacy_gate_counts": {
+      "login_optional": 27,
+      "login_optional_media": 4,
+      "login_required": 25
+    },
+    "hybrid_gate_counts": {
+      "login_required": 56
+    },
+    "different_gate_count": 31,
+    "gate_results": {
+      "all=False,media=False": {
+        "login_required": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional": {
+          "anonymous": 200,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional_media": {
+          "anonymous": 200,
+          "user": 200,
+          "admin": 200
+        }
+      },
+      "all=False,media=True": {
+        "login_required": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional": {
+          "anonymous": 200,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional_media": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        }
+      },
+      "all=True,media=False": {
+        "login_required": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional_media": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        }
+      },
+      "all=True,media=True": {
+        "login_required": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional_media": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        }
+      }
+    },
+    "routes": [
+      {
+        "path": "/",
+        "legacy_class": "IndexImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_now_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/index_canvas",
+        "legacy_class": "IndexCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_now_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/index_img",
+        "legacy_class": "IndexImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_now_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/panorama",
+        "legacy_class": "LatestPanoramaImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/panorama_canvas",
+        "legacy_class": "LatestPanoramaCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/panorama_img",
+        "legacy_class": "LatestPanoramaImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/raw",
+        "legacy_class": "LatestRawImageImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_raw_images_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/raw_canvas",
+        "legacy_class": "LatestRawImageCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_raw_images_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/raw_img",
+        "legacy_class": "LatestRawImageImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_raw_images_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loop",
+        "legacy_class": "ImageLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loop_canvas",
+        "legacy_class": "ImageLoopCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loop_img",
+        "legacy_class": "ImageLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/looppanorama",
+        "legacy_class": "PanoramaLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/looppanorama_canvas",
+        "legacy_class": "PanoramaLoopCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/looppanorama_img",
+        "legacy_class": "PanoramaLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loopraw",
+        "legacy_class": "RawImageLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_raw_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loopraw_canvas",
+        "legacy_class": "RawImageLoopCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_raw_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loopraw_img",
+        "legacy_class": "RawImageLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_raw_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/sensor_panel",
+        "legacy_class": "SensorPanelView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_sensor_panel_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/realtime_keogram",
+        "legacy_class": "RealtimeKeogramView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_realtime_keogram_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/sqm",
+        "legacy_class": "SqmView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_sqm_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/charts",
+        "legacy_class": "ChartView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_charts_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/imageviewer",
+        "legacy_class": "ImageViewerView",
+        "legacy_gate": "login_optional_media",
+        "hybrid_endpoint": "modern_admin_media_images_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/fitsimageviewer",
+        "legacy_class": "FitsImageViewerView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_fits_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/gallery",
+        "legacy_class": "GalleryViewerView",
+        "legacy_gate": "login_optional_media",
+        "hybrid_endpoint": "modern_admin_media_gallery_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/videoviewer",
+        "legacy_class": "VideoViewerView",
+        "legacy_gate": "login_optional_media",
+        "hybrid_endpoint": "modern_admin_media_timelapses_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/minivideoviewer",
+        "legacy_class": "MiniVideoViewerView",
+        "legacy_gate": "login_optional_media",
+        "hybrid_endpoint": "modern_admin_media_mini_timelapses_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/generate",
+        "legacy_class": "TimelapseGeneratorView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_generate_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/minigenerate",
+        "legacy_class": "MiniTimelapseGeneratorView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_mini_generate_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/config",
+        "legacy_class": "ConfigView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_full_settings_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/config/list",
+        "legacy_class": "ConfigListView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_config_history_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/config/restore",
+        "legacy_class": "ConfigRestoreView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_config_restore_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/system",
+        "legacy_class": "SystemInfoView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_system_info_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/focus",
+        "legacy_class": "FocusView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_focus_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/manual_gpio",
+        "legacy_class": "ManualGpioView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_manual_gpio_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/log",
+        "legacy_class": "LogView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_log_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/support",
+        "legacy_class": "SupportInfoView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_support_info_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/user",
+        "legacy_class": "UserInfoView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_account_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/astropanel",
+        "legacy_class": "AstroPanelView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_astropanel_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/processing",
+        "legacy_class": "ImageProcessingView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_image_processing_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/longtermkeogram",
+        "legacy_class": "LongTermKeogramView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_longterm_keogram_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/camera",
+        "legacy_class": "CameraLensView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_camera_info_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/lag",
+        "legacy_class": "ImageLagView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_image_lag_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/adu",
+        "legacy_class": "RollingAduView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_adu_history_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/darks",
+        "legacy_class": "DarkFramesView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_dark_library_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/mask",
+        "legacy_class": "MaskView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_mask_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/camerasimulator",
+        "legacy_class": "CameraSimulatorView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_camera_simulator_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/imagecirclehelper",
+        "legacy_class": "ImageCircleHelperView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_image_circle_helper_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/filespaceusage",
+        "legacy_class": "FileSpaceUsageView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_file_space_usage_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/network",
+        "legacy_class": "NetworkManagerView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_network_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/drives",
+        "legacy_class": "DriveManagerView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_drive_manager_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/virtualsky",
+        "legacy_class": "VirtualSkyView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_virtualsky_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/cameras",
+        "legacy_class": "CamerasView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_cameras_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/tasks",
+        "legacy_class": "TaskQueueView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_taskqueue_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/notifications",
+        "legacy_class": "NotificationsView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_notifications_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/users",
+        "legacy_class": "UsersView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_users_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      }
+    ],
+    "open": "Choose public navigation policy before Classic retirement; public media/API handlers are separate. This audit does not validate page payload disclosure or every authorization inside a view."
+  },
+  "production_anonymous_http": {
+    "observed_at": "2026-09-08T23:45:17.667644+02:00",
+    "flags": {
+      "INDI_ALLSKY_AUTH_ALL_VIEWS": false,
+      "INDI_ALLSKY_AUTH_MEDIA_VIEWS": false
+    },
+    "anonymous_requests": [
+      {
+        "path": "/indi-allsky/",
+        "status": 200,
+        "location": null,
+        "bytes": 20337
+      },
+      {
+        "path": "/indi-allsky/loop",
+        "status": 200,
+        "location": null,
+        "bytes": 24617
+      },
+      {
+        "path": "/indi-allsky/modern-admin/now",
+        "status": 302,
+        "location": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fnow",
+        "bytes": 305
+      },
+      {
+        "path": "/indi-allsky/modern-admin/loop",
+        "status": 302,
+        "location": "/indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Floop",
+        "bytes": 307
+      },
+      {
+        "path": "/indi-allsky/latestimageview?camera_id=1",
+        "status": 302,
+        "location": "/indi-allsky/view_image?id=17029&camera_id=1",
+        "bytes": 283
+      },
+      {
+        "path": "/indi-allsky/config",
+        "status": 302,
+        "location": "/indi-allsky/login?next=%2Findi-allsky%2Fconfig",
+        "bytes": 281
+      }
+    ]
+  },
+  "decision": "User preference requested: preserve configurable anonymous read pages, or require Hybrid login while keeping configured public media/API. No choice assumed implemented.",
+  "validation": "Executed actual Flask authentication decorators for four flag combinations and three roles, with Classic import forbidden. Current runtime already passed 112 regression entries; no runtime changed in this audit.",
+  "limits": [
+    "Gate tests do not inspect every page payload or authorize publishing additional data.",
+    "Production probes only covered six read-only URLs and did not execute browser JavaScript.",
+    "Classic retirement and full public navigation acceptance remain open."
+  ]
+}

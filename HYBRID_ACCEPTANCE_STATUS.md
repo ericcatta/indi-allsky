@@ -13,6 +13,32 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Anonymous navigation policy — 2026-09-08 (decision open)
+
+The navigation review found a real access-policy difference that must be resolved
+before Classic retirement: 27 Classic entrances use `login_optional`, four use
+`login_optional_media`, and 25 already require login. All 56 Hybrid destination
+entrances currently use `login_required`. The 31 differing paths are listed in
+`testing/evidence/hybrid-navigation-access-2026-09-08.json`.
+
+`testing/hybrid_navigation_access_audit.py` reconstructs the Classic decorator
+inheritance without importing its views, then executes the actual authentication
+decorators in isolated Flask for all four AUTH_ALL/AUTH_MEDIA combinations and
+anonymous/user/admin roles. All 36 gate checks passed. This is a gate comparison,
+not proof that a page's additional Hybrid payload is safe to publish.
+
+At 23:45:17 CEST the actual Pi had AUTH_ALL_VIEWS=false and AUTH_MEDIA_VIEWS=false.
+Anonymous Home `/indi-allsky/` and `/indi-allsky/loop` returned 200; Hybrid Now and
+Loop redirected to login. `/latestimageview?camera_id=1` still redirected to the
+public image viewer, while `/config` correctly required login. No production
+configuration, session, service or file was changed by those six read-only probes.
+
+The user has been asked whether to retain configurable anonymous read pages or
+make Hybrid private while retaining the configured public media/API contracts.
+The existing runtime is unchanged and its 112-entry regression remains the
+baseline. Do not claim complete public-navigation parity or disable Classic on
+the strength of the navigation-redirect tests alone.
+
 ## Navigation without Classic — 2026-09-08 (candidate, not deployed)
 
 All 56 URL paths registered by `classic_views.register_classic_routes` now have
