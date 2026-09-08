@@ -2206,6 +2206,20 @@ class ImageWorker(Process):
 
 
 
+    def _save_realtime_keogram_processors(self):
+        processors = dict(self.image_processors)
+        processors.setdefault('current', self.image_processor)
+        saved = set()
+        for key, processor in processors.items():
+            if id(processor) in saved:
+                continue
+            saved.add(id(processor))
+            try:
+                processor.realtimeKeogramDataSave()
+            except (OSError, ValueError):
+                logger.exception('[REALTIME_STORE_FAILED][processor=%s] Unable to save keogram history', key)
+
+
     def saferun(self):
         #raise Exception('Test exception handling in worker')
 
@@ -2221,7 +2235,7 @@ class ImageWorker(Process):
 
 
             if self._shutdown:
-                self.image_processor.realtimeKeogramDataSave()
+                self._save_realtime_keogram_processors()
 
                 logger.warning('Goodbye')
 
@@ -4565,74 +4579,19 @@ class ImageWorker(Process):
         save_interval = self.config.get('REALTIME_KEOGRAM', {}).get('SAVE_INTERVAL', 25)
         if self.image_count % save_interval == 0:
             # store keogram data every X images
-            self.image_processor.realtimeKeogramDataSave()
+            try:
+                self.image_processor.realtimeKeogramDataSave()
+            except (OSError, ValueError):
+                logger.exception('[REALTIME_STORE_FAILED][camera_id=%s] Unable to save keogram history', camera.id)
 
-
-        keogram_height, keogram_width = data.shape[:2]
-
-        # scale size
-        h_scale_factor = int(self.config.get('KEOGRAM_H_SCALE', 100))
-        v_scale_factor = int(self.config.get('KEOGRAM_V_SCALE', 33))
-        new_width = int(keogram_width * h_scale_factor / 100)
-        new_height = int(keogram_height * v_scale_factor / 100)
-
-        #logger.info('Keogram: %d x %d', new_width, new_height)
-        data = cv2.resize(data, (new_width, new_height), interpolation=cv2.INTER_AREA)
-
-        data = self.image_processor.realtimeKeogramApplyLabels(data)
-
-        f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.{0}'.format(self.config['IMAGE_FILE_TYPE']))
-        f_tmpfile.close()
-
-        tmpfile_name = Path(f_tmpfile.name)
-
-
-        #write_img_start = time.time()
-
-        # write to temporary file
-        if self.config['IMAGE_FILE_TYPE'] in ('jpg', 'jpeg'):
-            #img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
-            #img_rgb.save(str(tmpfile_name), quality=self.config['IMAGE_FILE_COMPRESSION']['jpg'])
-
-            # opencv is faster
-            cv2.imwrite(str(tmpfile_name), data, [cv2.IMWRITE_JPEG_QUALITY, self.config['IMAGE_FILE_COMPRESSION']['jpg']])
-        elif self.config['IMAGE_FILE_TYPE'] in ('png',):
-            # opencv is faster than Pillow with PNG
-            cv2.imwrite(str(tmpfile_name), data, [cv2.IMWRITE_PNG_COMPRESSION, self.config['IMAGE_FILE_COMPRESSION']['png']])
-        elif self.config['IMAGE_FILE_TYPE'] in ('webp',):
-            img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
-            img_rgb.save(str(tmpfile_name), quality=90, lossless=False)
-        elif self.config['IMAGE_FILE_TYPE'] in ('tif', 'tiff'):
-            # exif does not appear to work with tiff
-            img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
-            img_rgb.save(str(tmpfile_name), compression='tiff_lzw')
-        else:
-            tmpfile_name.unlink()
-            raise Exception('Unknown file type: %s', self.config['IMAGE_FILE_TYPE'])
-
-        #write_img_elapsed_s = time.time() - write_img_start
-        #logger.info('Image compressed in %0.4f s', write_img_elapsed_s)
-
-
-        ccd_folder = self.image_dir.joinpath('ccd_{0:s}'.format(camera.uuid))
-
-        if not ccd_folder.exists():
-            ccd_folder.mkdir(mode=0o755, parents=True)
-
-
-        ### Always write the latest file for web access
-        keogram_file = ccd_folder.joinpath('realtime_keogram.{0:s}'.format(self.config['IMAGE_FILE_TYPE']))
-
+        from .realtime_keogram_preview import publish_realtime_keogram
         try:
-            keogram_file.unlink()
-        except FileNotFoundError:
-            pass
-
-
-        shutil.copy2(str(tmpfile_name), str(keogram_file))
-        keogram_file.chmod(0o644)
-
-        tmpfile_name.unlink()
+            keogram_file = publish_realtime_keogram(
+                self.image_dir, camera.uuid, data, self.config,
+                self.image_processor.realtimeKeogramApplyLabels)
+        except (OSError, ValueError, cv2.error):
+            logger.exception('[REALTIME_PREVIEW_FAILED][camera_id=%s] Unable to publish keogram', camera.id)
+            return
 
         self._miscUpload.upload_realtime_keogram(keogram_file, camera)
 

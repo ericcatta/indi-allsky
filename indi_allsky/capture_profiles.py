@@ -849,6 +849,7 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
         filetransfer_config = deepcopy(profile_config.get('FILETRANSFER') or {})
         filetransfer_config['UPLOAD_IMAGE'] = False
         filetransfer_config['UPLOAD_METADATA'] = False
+        filetransfer_config['UPLOAD_REALTIME_KEOGRAM'] = False
         profile_config['FILETRANSFER'] = filetransfer_config
 
         s3upload_config = deepcopy(profile_config.get('S3UPLOAD') or {})

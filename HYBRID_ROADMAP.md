@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Realtime Keogram: pubblicazione camera-scoped spostata in adapter condiviso
+  con sostituzione atomica, verifica encoder e recupero dopo errori. Primo
+  campione valido anche con scala ridotta; shutdown salva tutti i processori.
+  Opt-out extra_uploads ora include anche il Realtime. Parita' dei sei formati
+  verificata; raccolta automatica multicamera resta bloccata fino al collaudo
+  completo di cronologia, selezione e UI. Non ancora distribuito.
+
 - Long-term Keogram multicamera: la policy Hybrid rispetta ora l'opzione del
   profilo invece di forzarla off. Campioni RGB e persistenza restano nel worker
   condiviso, con controllo coordinate e rollback su errori SQL. UI Camera

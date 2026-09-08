@@ -13,6 +13,43 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Realtime Keogram publication and shutdown recovery — 2026-09-08
+
+The shared worker removed the published preview before copying its replacement,
+ignored OpenCV's failed-write result, and could resize the first column to width
+zero. `realtime_keogram_preview.py` now owns camera-scoped encoding/publication:
+a temporary file in the destination directory is flushed, made readable and
+atomically replaced only after successful encoding. Failure preserves the previous
+preview, cleans the temporary file and does not enqueue an upload. Scaled output
+has a minimum dimension of one pixel; existing nonzero scaling and codec options
+are unchanged. The original worker method is retained as a fingerprinted fixture;
+all six formats have exact decoded-pixel parity for valid legacy dimensions.
+
+Shutdown previously saved only the most recently selected ImageProcessor. It now
+attempts every distinct cached processor once and continues after a failed store.
+A failed periodic history save also no longer prevents preview publication.
+The existing `extra_uploads=False` profile policy now explicitly disables
+`FILETRANSFER.UPLOAD_REALTIME_KEOGRAM`, closing an effect that would otherwise
+escape that restriction when realtime collection becomes available.
+
+The isolated test uses real JPEG/PNG/WebP/TIFF codecs, actual worker publishing,
+failed encoder and atomic replacement effects, first-column sizing, camera path
+isolation and escaping-path rejection. Store callbacks verify shutdown traversal
+and recovery; these are not real SD-card persistence/restart measurements.
+Automatic multicamera realtime collection remains restricted until its complete
+history/selection/browser flow is verified. No production service or configuration
+was modified. A future capture-affecting deployment requires a new 24-hour window.
+
+All 104 Python regression entrypoints passed, including Book 2 parity and
+contracts. Runtime file hashes agree with the local candidate. No templates or
+JavaScript changed in this mission; the preceding inventory is not relabeled as
+new click acceptance. Evidence: [Realtime preview](testing/evidence/hybrid-realtime-preview-2026-09-08.json).
+A separate read-only production check at 19:43 CEST found 463 saved images per
+camera since 17:47, median saved-file interval 15 seconds, no invalid files,
+no pending tasks and no errors in the collected journal. Capture PID 3734524
+remained active with zero restarts. This verifies neither the undeployed candidate
+nor a complete day/night cycle.
+
 ## Multicamera long-term sample collection — 2026-09-08
 
 The daemon previously forced `longterm_keogram=False` for every multicamera
