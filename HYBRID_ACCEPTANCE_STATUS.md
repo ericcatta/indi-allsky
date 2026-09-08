@@ -13,6 +13,30 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Native browser Keogram acceptance — 2026-09-08
+
+Fourteen bounded browser checks cover Observatory entry, Realtime Keogram camera
+selection/refresh and Long-term generation. The ZWO and IMX708 realtime images
+loaded at 1000x700 and 1000x843 respectively; visible Last updated timestamps
+advanced. Both camera refresh buttons returned the saved-preview status.
+
+Long-term generation used real production samples. ZWO default options produced
+1440x150; one line/day and a 120-second interval produced 720x30, with reverse and
+labels selected. Reset restored all defaults. A last-year period displayed the
+explicit no-samples error while retaining the previous image. Defaults generated
+again successfully. IMX708 generated its own 1440x150 image; cache display survived
+reload and switching back to ZWO. Reported generation times were 0.083–0.231s for
+these small available sample sets, not a historical-volume performance benchmark.
+
+At 390px width, form controls and preview fit with no document overflow. No console
+error entries were observed. Viewport and Now page were restored. Only derived
+Keogram caches changed: acquisition/configuration and the 21:15:41 observation
+baseline remain unchanged. Other roles, downloads, native provider failures and
+all option combinations are not claimed complete. The runtime remains unchanged
+from its existing 107 Python/29 JavaScript regression; this commit adds evidence.
+
+Matrix: [native Keogram checks](testing/evidence/hybrid-native-keogram-2026-09-08.json).
+
 ## Native browser panorama acceptance — 2026-09-08 21:22–21:28 CEST
 
 The in-app browser now accepts real interactions. Refreshing Now displayed fresh

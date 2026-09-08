@@ -1,0 +1,117 @@
+{
+  "observed_at": "2026-09-08T21:39:18.960187+02:00",
+  "release": "808964953eace9777b366b7651a946734a776308",
+  "environment": "Production native in-app browser; real CUA clicks/selects, accessibility/DOM state and screenshot",
+  "session": "Existing authenticated session; no role switch",
+  "cases": [
+    {
+      "id": "observatory.navigation",
+      "control": "Open observatory tools",
+      "camera_profile": "all",
+      "status": "superato",
+      "evidence": "Actual page showed both fresh cameras, storage, tasks and links to Realtime/Long-term Keogram."
+    },
+    {
+      "id": "realtime.zwo.load",
+      "control": "Realtime Keogram",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Live image complete=true, natural dimensions 1000x700; camera-specific download link matched ZWO UUID."
+    },
+    {
+      "id": "realtime.zwo.auto-update",
+      "control": "Automatic refresh",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Last updated changed from 21:31:06 to 21:31:51 in visible status."
+    },
+    {
+      "id": "realtime.zwo.refresh",
+      "control": "Refresh",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Clicked enabled Refresh; returned Last updated status and retained the valid current image. No expectation of a new capture per click."
+    },
+    {
+      "id": "realtime.imx.load-refresh",
+      "control": "IMX708 Wide and Refresh",
+      "camera_profile": "imx708-wide",
+      "status": "superato",
+      "evidence": "Navigation selected camera 1/profile; decoded image 1000x843; Last updated 21:32:26; manual refresh returned the saved-preview status."
+    },
+    {
+      "id": "longterm.zwo.generate",
+      "control": "Generate with defaults",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Changed from No cached keogram to Generated in 0.231 seconds; image complete=true, 1440x150."
+    },
+    {
+      "id": "longterm.appearance",
+      "control": "Lines per day, Sample interval, Reverse day order, Show date labels, Generate",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Selected 1 line/day,120 seconds,REVERSE=true,LABEL=true; generated in 0.083 seconds, complete JPEG 720x30. Pixel-level label/order correctness remains covered by automated parity, not this DOM check."
+    },
+    {
+      "id": "longterm.reset",
+      "control": "Reset options",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Restored today,30 days,5 lines,60 seconds,offset0,reverse=false,label=false."
+    },
+    {
+      "id": "longterm.empty-period",
+      "control": "Period ending and Generate",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "End of last year returned No long-term samples are available for this camera and period; existing preview remained. A preceding 3-month/offset1 request was also submitted but its exact message was not captured."
+    },
+    {
+      "id": "longterm.current-recovery",
+      "control": "Reset options and Generate",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Current-period defaults generated successfully again in 0.091 seconds."
+    },
+    {
+      "id": "longterm.imx.generate",
+      "control": "IMX708 Wide and Generate",
+      "camera_profile": "imx708-wide",
+      "status": "superato",
+      "evidence": "Page identified libcamera_imx708 samples; generated in 0.103 seconds, complete JPEG 1440x150."
+    },
+    {
+      "id": "longterm.cache.reload",
+      "control": "Page reload",
+      "camera_profile": "imx708-wide",
+      "status": "superato",
+      "evidence": "Cached long term keogram remained visible with generated age and Download JPEG link."
+    },
+    {
+      "id": "longterm.cache.camera-switch",
+      "control": "ASI678MC",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Returning after IMX708 generation showed ZWO cached preview, complete 1440x150."
+    },
+    {
+      "id": "longterm.mobile",
+      "control": "390x844 viewport",
+      "camera_profile": "imx708-wide",
+      "status": "superato",
+      "evidence": "Document clientWidth=scrollWidth=390; all selects bounded x40..350; Generate/Reset bounded x40..266.09; preview rendered width307.95 and loaded naturalWidth1440."
+    }
+  ],
+  "console_errors_observed": [],
+  "effects": "Generated/replaced per-camera Long-term Keogram preview caches only; no capture restart or acquisition configuration change",
+  "restored_state": "Default viewport and Now page restored; current-period default cache generated for both cameras",
+  "open": [
+    "Native download completion",
+    "Other roles and anonymous interaction coverage",
+    "All combinations of period/range/offset",
+    "Native network/provider failure injection",
+    "Whole-product interaction audit and Classic removal",
+    "24h day/night observation"
+  ]
+}
