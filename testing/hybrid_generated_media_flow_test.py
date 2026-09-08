@@ -28,6 +28,8 @@ def run(runtime_config):
                     assert 'camera-'+str(3-cid)+'.' not in response.text
                     assert 'camera_id='+str(cid) in response.text
                 loop=client.get('/indi-allsky/modern-admin/media/panorama-loop',query_string={'camera_id':cid,'profile_id':'test-profile-'+str(cid)})
+                assert 'id="panorama-loop-controls"' in loop.text and 'modern_admin/panorama-loop.js' in loop.text
+                assert 'window.setInterval(modernAdminShowNextLoopFrame' not in loop.text
                 links=re.findall(r'href="([^"]+)"[^>]*>Details</a>',loop.text)
                 assert links,loop.text
                 for link in links:

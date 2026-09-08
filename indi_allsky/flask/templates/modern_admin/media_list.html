@@ -55,8 +55,8 @@ var camera_id = {{ camera_id }};
     {% if modern_admin_featured_media and modern_admin_media_layout in ('viewer', 'loop') %}
     <section class="modern-admin-media-viewer" aria-labelledby="modern-admin-media-viewer-title">
         <figure class="modern-admin-media-viewer-frame modern-admin-lightbox-trigger" data-media-index="0" tabindex="0" role="button" aria-label="Open {{ modern_admin_featured_media.title }}">
-            {% if modern_admin_featured_media.preview_url and modern_admin_media_kind in ('image', 'fits') %}
-            <img id="modern-admin-media-featured-image" src="{{ modern_admin_featured_media.preview_url }}" alt="{{ modern_admin_featured_media.title }}" data-original-url="{{ modern_admin_featured_media.url or modern_admin_featured_media.preview_url }}">
+            {% if (modern_admin_featured_media.preview_url or modern_admin_media_layout == 'loop') and modern_admin_media_kind in ('image', 'fits') %}
+            <img id="modern-admin-media-featured-image" {% if modern_admin_featured_media.preview_url %}src="{{ modern_admin_featured_media.preview_url }}"{% else %}hidden{% endif %} alt="{{ modern_admin_featured_media.title }}" data-original-url="{{ modern_admin_featured_media.url or modern_admin_featured_media.preview_url }}">
             {% elif modern_admin_featured_media.url and modern_admin_media_kind == 'video' %}
             <video src="{{ modern_admin_featured_media.url }}" controls preload="metadata"></video>
             {% else %}
@@ -68,11 +68,24 @@ var camera_id = {{ camera_id }};
             </figcaption>
         </figure>
         <div class="modern-admin-media-viewer-copy">
-            <p class="modern-admin-eyebrow">{{ modern_admin_featured_media.timeofday }}</p>
+            <p class="modern-admin-eyebrow" data-loop-timeofday>{{ modern_admin_featured_media.timeofday }}</p>
             <h3 id="modern-admin-media-viewer-title">{{ modern_admin_featured_media.title }}</h3>
-            <p>{{ modern_admin_featured_media.created }}</p>
-            {% if modern_admin_featured_media.url %}
-            <a class="modern-admin-placeholder-link modern-admin-media-open" href="{{ modern_admin_featured_media.url }}" target="_blank" rel="noopener">{{ 'Download original' if modern_admin_media_kind == 'fits' else 'Open read-only' }}</a>
+            <p data-loop-created>{{ modern_admin_featured_media.created }}</p>
+            <a data-loop-original class="modern-admin-placeholder-link modern-admin-media-open" {% if modern_admin_featured_media.url %}href="{{ modern_admin_featured_media.url }}"{% else %}hidden{% endif %} target="_blank" rel="noopener">{{ 'Download original' if modern_admin_media_kind == 'fits' else 'Open read-only' }}</a>
+            {% if modern_admin_media_layout == 'loop' %}
+            <div id="panorama-loop-controls" class="modern-admin-media-toolbar" role="group" aria-label="Panorama playback">
+                <button id="panorama-loop-prev" type="button" class="modern-admin-media-button">Previous</button>
+                <button id="panorama-loop-toggle" type="button" class="modern-admin-media-button" aria-pressed="true">Pause</button>
+                <button id="panorama-loop-next" type="button" class="modern-admin-media-button">Next</button>
+                <label>Frame interval
+                    <select id="panorama-loop-speed">
+                        <option value="350">0.35 seconds</option>
+                        <option value="1000">1 second</option>
+                        <option value="2000">2 seconds</option>
+                    </select>
+                </label>
+                <span id="panorama-loop-status" role="status" aria-live="polite"></span>
+            </div>
             {% endif %}
         </div>
     </section>
@@ -602,25 +615,7 @@ if (modernAdminGalleryGrid) {
 {% endif %}
 
 {% if modern_admin_media_layout == 'loop' and modern_admin_media_items %}
-<script>
-const modernAdminLoopFrames = {{ modern_admin_media_items | tojson }};
-let modernAdminLoopIndex = 0;
-const modernAdminLoopImage = document.getElementById('modern-admin-media-featured-image');
-
-function modernAdminShowNextLoopFrame() {
-    if (!modernAdminLoopImage || !modernAdminLoopFrames.length) {
-        return;
-    }
-
-    modernAdminLoopIndex = (modernAdminLoopIndex + 1) % modernAdminLoopFrames.length;
-    const frame = modernAdminLoopFrames[modernAdminLoopIndex];
-    if (frame.preview_url) {
-        modernAdminLoopImage.src = frame.preview_url;
-        modernAdminLoopImage.alt = frame.title;
-    }
-}
-
-window.setInterval(modernAdminShowNextLoopFrame, 350);
-</script>
+<script id="panorama-loop-frames" type="application/json">{{ modern_admin_media_items | tojson }}</script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/panorama-loop.js') }}" defer></script>
 {% endif %}
 {% endblock %}

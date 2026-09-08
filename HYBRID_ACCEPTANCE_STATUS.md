@@ -13,6 +13,32 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Panorama Loop playback and frame identity — 2026-09-08
+
+The previous 350 ms interval changed only the image source and alt text. Its
+caption, original link and lightbox index remained on the first frame, and no
+pause, manual navigation or load-failure feedback was available. The Hybrid
+controller now owns playback, preloads one frame at a time, updates image and
+metadata together, and preserves the last successful frame on errors. Previous,
+Play/Pause, Next and three frame intervals are available. Arrow keys work within
+the playback controls; opening the lightbox freezes the selected frame, including
+cancelling an in-flight advance. Hidden tabs suspend scheduling; pagehide cancels
+pending UI work and bfcache restoration resumes safely. A failed frame pauses
+playback with an explicit message; navigation can move past it. A single-frame
+set disables unnecessary playback controls. Automatic playback avoids announcing
+every frame through the live region.
+
+JavaScript acceptance executes the shipped controller against controlled DOM,
+image and timer events. It covers identity, original link, caption, keyboard,
+failed first/later frames, timeout, overlapping requests, hidden tab and teardown.
+Flask checks the rendered controls and asset reference for both cameras and roles.
+These are deterministic controller/Flask proofs, not native browser or production
+acceptance. Deployment and direct keyboard/mobile/animation checks remain open.
+
+Validation: **107 Python and 29 JavaScript suites passed**; source hashes match
+the isolated runtime and local controller test. Evidence:
+[Panorama Loop playback](testing/evidence/hybrid-panorama-loop-2026-09-08.json).
+
 ## Panorama video and detail navigation — 2026-09-08
 
 A real Hybrid generation request, coordinator dispatch and VideoWorker invocation
