@@ -13,6 +13,33 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## RAW Loop parity — 2026-09-08 (candidate, not deployed)
+
+Classic exposed a RAW loop, but Hybrid had no playback entry. The existing RAW
+JSON endpoint was also unusable: its SQM override returned three values while the
+caller requires four, and its inherited query accessed an `exclude` column absent
+from `rawimage`. The first candidate test reproduced the SQM unpacking error;
+inspection confirmed the invalid query column. Both are corrected.
+
+Hybrid now exposes `/modern-admin/media/raw-loop`, linked from RAW Source and the
+processed Loop. Both use the same history, playback speed, bounce and camera
+controls; camera switches stay on the RAW route. The RAW query uses its own table
+and the Hybrid media URL/access boundary, including separate configured export
+folders, missing-file handling and the owning camera's local/remote policy.
+Original PNG/JPEG exports play without processing; formats unsupported by the
+browser remain downloadable through RAW Source. No scientific conversion is
+introduced and no existing media API URL is removed.
+
+The focused Flask test passed for both roles and cameras, real PNG decoding,
+separate export folder and scoped original serving, missing-file removal from the
+loop, camera isolation and remote-only policy. All 29 JavaScript entrypoints
+passed; the real shared Loop script is executed for both processed and RAW URLs,
+including playback controls, stale requests, image failures and recovery.
+All 111 Python regression entries passed, including Full Config fingerprints,
+Settings, Safe Actions and Product Spine. Evidence and tested hashes:
+`testing/evidence/hybrid-raw-loop-2026-09-08.json`.
+Production remains unchanged; no native RAW playback or deployment is claimed.
+
 ## Hybrid-only mode-switch compatibility — 2026-09-08 (candidate, not deployed)
 
 The retained `/modern-admin/mode/classic` URL still tried to build the removed

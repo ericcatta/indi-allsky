@@ -1017,6 +1017,28 @@ class JsonPanoramaLoopView(JsonImageLoopView):
 class JsonRawImageLoopView(JsonImageLoopView):
     model = IndiAllSkyDbRawImageTable
 
+    def getLoopImages(self, camera_id, loop_dt, history_seconds):
+        from werkzeug.exceptions import HTTPException
+        from .public_media import media_url
+        query = self.model.query.filter(
+            self.model.createDate > loop_dt - timedelta(seconds=history_seconds),
+            self.model.createDate < loop_dt,
+        )
+        if camera_id:
+            query = query.filter(self.model.camera_id == camera_id)
+        frames = []
+        for entry in query.order_by(self.model.createDate.desc()).limit(self.limit):
+            try:
+                target = media_url(entry, self.indi_allsky_config, self.verify_admin_network)
+            except HTTPException as error:
+                if error.code not in (403, 404):
+                    raise
+                continue
+            frames.append({'url': str(target), 'width': entry.width,
+                           'height': entry.height, 'timestamp': int(entry.createDate.timestamp()),
+                           'jsqm': 0, 'stars': 0, 'detections': 0})
+        return frames
+
 
     def getSqmData(self, *args):
         sqm_data = {
@@ -1027,7 +1049,7 @@ class JsonRawImageLoopView(JsonImageLoopView):
         }
 
         # jsqm, camera, device
-        return sqm_data, sqm_data, sqm_data
+        return sqm_data, sqm_data, sqm_data, sqm_data
 
 
     def getStarsData(self, *args):
@@ -11068,6 +11090,12 @@ class ModernAdminLoopView(ModernAdminMediaBrowseView, ImageLoopImgView):
         context['modern_admin_loop_camera_id'] = selected_filter.get('camera_id')
         context['modern_admin_loop_selected_label'] = selected_filter.get('label') or 'All Cameras'
         context['modern_admin_loop_camera_views'] = self.get_loop_camera_views(selected_filter)
+        raw = self.image_loop_view == 'indi_allsky.js_rawimage_loop_view'
+        context['modern_admin_loop_raw'] = raw
+        context['modern_admin_loop_other_url'] = url_for(
+            'indi_allsky.modern_admin_loop_view' if raw else 'indi_allsky.modern_admin_raw_loop_view',
+            camera_id=selected_filter.get('camera_id'), profile_id=selected_filter.get('profile_id'),
+        )
 
         return context
 
@@ -11103,6 +11131,11 @@ class ModernAdminLoopView(ModernAdminMediaBrowseView, ImageLoopImgView):
             })
 
         return camera_views
+
+
+class ModernAdminRawLoopView(ModernAdminLoopView):
+    page_title = 'RAW Loop'
+    image_loop_view = 'indi_allsky.js_rawimage_loop_view'
 
 
 class ModernAdminDarkLibraryView(ModernAdminCameraToolView, ModernAdminMediaBrowseView, TemplateView):
@@ -18771,6 +18804,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/storage/drives', view_func=ModernAdminDriveManagerView.as_view('modern_admin_drive_manager_view', template_name='modern_admin/drives.html'))
     bp_allsky.add_url_rule('/modern-admin/system/gpio-control', view_func=ModernAdminManualGpioView.as_view('modern_admin_manual_gpio_view', template_name='modern_admin/manual_gpio.html'))
     bp_allsky.add_url_rule('/modern-admin/loop', view_func=ModernAdminLoopView.as_view('modern_admin_loop_view', template_name='modern_admin/loop.html'))
+    bp_allsky.add_url_rule('/modern-admin/media/raw-loop', view_func=ModernAdminRawLoopView.as_view('modern_admin_raw_loop_view', template_name='modern_admin/loop.html'))
     bp_allsky.add_url_rule('/modern-admin/updates/start', view_func=ModernAdminUpgradeStartView.as_view('modern_admin_upgrade_start_view'))
     bp_allsky.add_url_rule('/modern-admin/updates', view_func=ModernAdminUpdatesView.as_view('modern_admin_updates_view', template_name='modern_admin/updates.html'))
     bp_allsky.add_url_rule('/modern-admin/classic/<classic_page>', view_func=ModernAdminCompatibilityRedirectView.as_view('modern_admin_classic_placeholder_view'))

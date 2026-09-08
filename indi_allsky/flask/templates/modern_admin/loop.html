@@ -18,16 +18,18 @@ var timestamp = {{ timestamp | int }};
 {% block content %}
 <main class="modern-admin-shell" aria-labelledby="modern-admin-loop-title">
     {% set modern_admin_header_label = 'Loop header' %}
-    {% set modern_admin_heading = 'Loop' %}
+    {% set modern_admin_heading = 'RAW Loop' if modern_admin_loop_raw else 'Loop' %}
     {% set modern_admin_title_id = 'modern-admin-loop-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
     <section class="modern-admin-table-panel" aria-labelledby="loop-title">
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">Dashboard</p>
-            <h2 id="loop-title">Recent image loop</h2>
+            <h2 id="loop-title">{{ 'Recent RAW image loop' if modern_admin_loop_raw else 'Recent image loop' }}</h2>
         </div>
         {% include 'modern_admin/_media_camera_filter.html' %}
+        <p><a href="{{ modern_admin_loop_other_url }}">{{ 'Processed image loop' if modern_admin_loop_raw else 'RAW image loop' }}</a></p>
+        {% if modern_admin_loop_raw %}<p>Original RAW exports are shown without processing. Playback requires a browser-supported image format such as PNG or JPEG; use RAW Source to download other formats.</p>{% endif %}
         <div class="modern-admin-control-strip">
             <label>History {{ form_history.HISTORY_SELECT() }}</label>
             <label>Playback speed {{ form_history.FRAMEDELAY_SELECT() }}</label>

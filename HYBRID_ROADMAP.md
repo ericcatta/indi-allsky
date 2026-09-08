@@ -348,6 +348,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   - download CSV/XLSX del contenuto filtrato/ordinato ora consegnati da un
     handler Hybrid indipendente, con limiti di input e celle non eseguibili.
     Verificati payload e download browser in staging sintetico, nessun deploy.
+- Loop RAW Hybrid: ingresso dedicato e collegamenti da Loop e RAW Source,
+  controlli condivisi di cronologia/velocita'/riproduzione e filtri multicamera.
+  La lettura RAW non usa piu' il campo inesistente `exclude`; il contratto SQM
+  riporta le quattro serie richieste. URL e accesso file riusano il boundary media
+  Hybrid, rispettando cartella export separata e policy della camera proprietaria.
+  Nessun algoritmo di elaborazione RAW aggiunto; formati non visualizzabili dal
+  browser rimangono scaricabili. Collaudo e deploy descritti in acceptance status.
+
 - Classic frontend isolation:
   - il bookmark di cambio modalita' non richiede piu' la route Config Classic:
     con Classic assente apre Full Settings Hybrid, mentre Modern apre Now

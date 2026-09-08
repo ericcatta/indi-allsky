@@ -6,7 +6,7 @@ const path = require('node:path');
 const template = fs.readFileSync(path.join(__dirname, '../indi_allsky/flask/templates/modern_admin/loop.html'), 'utf8');
 const source = template.slice(template.indexOf('let modernAdminLoopState'), template.lastIndexOf('</script>'))
     .replace(/{{[\s\S]*?}}/g, value => value.includes('images_folder') ? '/images/__modern_admin_path__' : '/js/loop');
-function fixture() {
+function fixture(endpoint = '/js/loop') {
     const requests=[], preloads=[], timers=new Map(), intervals=[], nodes={}, controls={};
     let timerId=0;
     for(const id of ['HISTORY_SELECT','FRAMEDELAY_SELECT','ROCK_CHECKBOX']) controls[id]={value:id==='HISTORY_SELECT'?'900':'100',checked:false,addEventListener(event,fn){this[event]=fn;}};
@@ -19,15 +19,16 @@ function fixture() {
         window:{setTimeout(fn,delay){const id=++timerId;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id),setInterval:fn=>intervals.push(fn)},
         Image:class{constructor(){preloads.push(this);}},
         fetch:url=>new Promise((resolve,reject)=>requests.push({url,resolve,reject}))};
-    vm.runInNewContext(source,context);
+    vm.runInNewContext(source.replaceAll('/js/loop', endpoint),context);
     return {context,requests,preloads,timers,intervals,controls,nodes,
         image:id=>nodes[`[data-loop-image="${id}"]`], message:id=>nodes[`[data-loop-message="${id}"]`],
         reply:async(index,images,ok=true)=>{requests[index].resolve({ok,json:async()=>({image_list:images,message:''})});await flush();}};
 }
 async function flush(){for(let i=0;i<12;i++)await Promise.resolve();}
 const frames=[{url:'images/new.jpg'},{url:'images/middle.jpg'},{url:'images/old.jpg'}];
-async function run(){
-    const f=fixture();
+async function run(endpoint){
+    const f=fixture(endpoint);
+    assert.equal(new URL(f.requests[0].url, 'http://test').pathname, endpoint);
     assert.equal(f.requests.length,2);
     assert.equal(new URL(f.requests[0].url,'http://test').searchParams.get('camera_id'),'1');
     assert.equal(new URL(f.requests[1].url,'http://test').searchParams.get('camera_id'),'2');
@@ -73,4 +74,4 @@ async function run(){
     f.intervals[0]();await f.reply(f.requests.length-1,null);assert.match(f.message('one').textContent,/Error loading/);
     console.log('Loop controls: history, speed, bounce, camera isolation, stale responses, image errors and recovery PASS');
 }
-run().catch(error=>{console.error(error);process.exitCode=1;});
+(async () => { for (const endpoint of ['/js/loop', '/js/loopraw']) await run(endpoint); })().catch(error=>{console.error(error);process.exitCode=1;});

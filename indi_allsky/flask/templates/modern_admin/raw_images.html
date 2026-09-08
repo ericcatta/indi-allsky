@@ -47,6 +47,7 @@ var camera_id = {{ camera_id }};
         </div>
 
         {% include 'modern_admin/_media_camera_filter.html' %}
+        <p><a href="{{ url_for('indi_allsky.modern_admin_raw_loop_view', camera_id=request.args.get('camera_id'), profile_id=request.args.get('profile_id')) }}">RAW image loop</a></p>
         {% set archive_kind = 'raw' %}
         {% include 'modern_admin/_media_archive_link.html' %}
 
