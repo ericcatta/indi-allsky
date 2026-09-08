@@ -437,6 +437,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     full-config conta ora 31 parser Hybrid-owned e 202 campi su 719, con 517
     campi ancora inline.
 - Book 2 / Media Runtime Independence:
+  - aggregazione delle misure opzionali Loop ora Hybrid-owned in
+    `loop_statistics.py`: campioni invalidi non impediscono il caricamento
+    delle immagini; query camera-scoped e contratto pubblico restano invariati.
+    Regressione e browser isolati verificati; deploy ancora aperto (2026-09-08);
   - la responsabilita' "Now -> latest camera frames -> bounded latest image
     metadata + safe local image route" e' ora Hybrid-owned tramite
     `ModernAdminLatestCameraFramesRepository`;

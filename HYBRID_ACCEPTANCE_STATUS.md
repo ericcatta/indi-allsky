@@ -13,6 +13,29 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Loop optional measurements and media browser checks — 2026-09-08
+
+Synthetic multi-camera browser testing exposed a real API failure: nullable SQM
+samples caused `max(jsqm_list)` to raise TypeError, leaving both Loop panels in
+an error state. Hybrid now owns the pure measurement-summary calculation in
+`loop_statistics.py`; the existing view retains its scoped query and delegates
+aggregation. Invalid/non-finite samples are excluded. Valid numeric results,
+missing-key fallbacks, panorama fallback and the public empty-summary shape are
+preserved. Image algorithms, capture scheduling and saved configuration are unchanged.
+
+All 94 Python/compile entrypoints pass in the isolated Pi environment; SHA256
+checks confirm the three candidate source files match the tested files. Coverage
+includes both camera/role combinations, mixed optional sensor data and actual
+image-list availability. Native browser checks verified JPEG lightbox opening,
+Right/Escape navigation and restored focus, selection/reset across cameras, a
+saved and decoded JPEG download, both corrected Loop panels and FITS preview.
+Evidence: `testing/evidence/hybrid-loop-statistics-2026-09-08.json`.
+
+The header overlaps navigation/runtime controls at 1280x720: this is an open
+layout defect. Loop FPS/Rock/history controls, original FITS download, full role/
+viewport coverage and production acceptance remain open. These changes are not
+yet deployed; capture was not restarted for this mission.
+
 ## Archive detail return context — 2026-09-08
 
 A production browser interaction reproduced loss of Library filename filters:

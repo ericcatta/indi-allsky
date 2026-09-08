@@ -1,3 +1,4 @@
+from ..loop_statistics import loop_sqm_summaries
 from ..modern_admin_media_cleanup import MediaCleanupIncomplete, flush_media_batches
 from ..modern_admin_sensor_panel import build_sensor_rows
 from ..modern_admin_full_config import ModernAdminFullConfigParser
@@ -926,93 +927,7 @@ class JsonImageLoopView(JsonView):
             .order_by(self.model.createDate.desc())
 
 
-        jsqm_list = list()
-        camera_sqm_mag_list = list()
-        camera_sqm_adu_list = list()
-        device_sqm_mag_list = list()
-        for i in sqm_images:
-            try:
-                jsqm = i.sqm
-            except AttributeError:
-                jsqm = 0
-
-
-            jsqm_list.append(jsqm)
-            camera_sqm_mag_list.append(i.data.get('sensor_user_8', 0.0))
-            camera_sqm_adu_list.append(i.data.get('sensor_user_9', 0.0))
-            device_sqm_mag_list.append(i.data.get('sensor_user_7', 0.0))
-
-
-        try:
-            jsqm_data = {
-                'max'  : max(jsqm_list),
-                'min'  : min(jsqm_list),
-                'avg'  : sum(jsqm_list) / len(jsqm_list),
-                'last' : jsqm_list[0],
-            }
-
-        except (ValueError, IndexError):
-            # list is probably empty
-            jsqm_data = {
-                'max' : 0.0,
-                'min' : 0.0,
-                'avg' : 0.0,
-                'last' : 0.0,
-            }
-
-
-        try:
-            camera_sqm_mag_data = {
-                'max'  : max(camera_sqm_mag_list),
-                'min'  : min(camera_sqm_mag_list),
-                'avg'  : sum(camera_sqm_mag_list) / len(camera_sqm_mag_list),
-                'last' : camera_sqm_mag_list[0],
-            }
-        except (ValueError, IndexError):
-            # list is probably empty
-            camera_sqm_mag_data = {
-                'max' : 0.0,
-                'min' : 0.0,
-                'avg' : 0.0,
-                'last' : 0.0,
-            }
-
-
-        try:
-            camera_sqm_adu_data = {
-                'max'  : max(camera_sqm_adu_list),
-                'min'  : min(camera_sqm_adu_list),
-                'avg'  : sum(camera_sqm_adu_list) / len(camera_sqm_adu_list),
-                'last' : camera_sqm_adu_list[0],
-            }
-        except (ValueError, IndexError):
-            # list is probably empty
-            camera_sqm_adu_data = {
-                'max' : 0.0,
-                'min' : 0.0,
-                'avg' : 0.0,
-                'last' : 0.0,
-            }
-
-
-        try:
-            device_sqm_mag_data = {
-                'max'  : max(device_sqm_mag_list),
-                'min'  : min(device_sqm_mag_list),
-                'avg'  : sum(device_sqm_mag_list) / len(device_sqm_mag_list),
-                'last' : device_sqm_mag_list[0],
-            }
-        except (ValueError, IndexError):
-            # list is probably empty
-            device_sqm_mag_data = {
-                'max' : 0.0,
-                'min' : 0.0,
-                'avg' : 0.0,
-                'last' : 0.0,
-            }
-
-
-        return jsqm_data, camera_sqm_mag_data, camera_sqm_adu_data, device_sqm_mag_data
+        return loop_sqm_summaries(sqm_images)
 
 
     def getStarsData(self, camera_id, ts_dt):
