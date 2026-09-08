@@ -419,25 +419,27 @@ class StarTrailGenerator(object):
         ### EXIF tags ###
         exp_date_utc = datetime.now(tz=timezone.utc)
 
-        # Python 3.6, 3.7 does not support as_integer_ratio()
-        focal_length_frac = Fraction(camera.lensFocalLength).limit_denominator()
-        focal_length = (focal_length_frac.numerator, focal_length_frac.denominator)
-
-        f_number_frac = Fraction(camera.lensFocalRatio).limit_denominator()
-        f_number = (f_number_frac.numerator, f_number_frac.denominator)
-
         zeroth_ifd = {
             piexif.ImageIFD.Model            : camera.name,
             piexif.ImageIFD.Software         : 'indi-allsky',
         }
         exif_ifd = {
             piexif.ExifIFD.DateTimeOriginal  : exp_date_utc.strftime('%Y:%m:%d %H:%M:%S'),
-            piexif.ExifIFD.LensModel         : camera.lensName,
-            piexif.ExifIFD.LensSpecification : (focal_length, focal_length, f_number, f_number),
-            piexif.ExifIFD.FocalLength       : focal_length,
-            piexif.ExifIFD.FNumber           : f_number,
         }
 
+
+        if camera.lensName is not None:
+            exif_ifd[piexif.ExifIFD.LensModel] = camera.lensName
+        if camera.lensFocalLength is not None:
+            focal_length_frac = Fraction(camera.lensFocalLength).limit_denominator()
+            focal_length = (focal_length_frac.numerator, focal_length_frac.denominator)
+            exif_ifd[piexif.ExifIFD.FocalLength] = focal_length
+        if camera.lensFocalRatio is not None:
+            f_number_frac = Fraction(camera.lensFocalRatio).limit_denominator()
+            f_number = (f_number_frac.numerator, f_number_frac.denominator)
+            exif_ifd[piexif.ExifIFD.FNumber] = f_number
+        if camera.lensFocalLength is not None and camera.lensFocalRatio is not None:
+            exif_ifd[piexif.ExifIFD.LensSpecification] = (focal_length, focal_length, f_number, f_number)
 
         jpeg_exif_dict = {
             '0th'   : zeroth_ifd,

@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Collaudo degli effetti Keogram/Startrail: corretti EXIF con metadati obiettivo
+  assenti e la colonna iniziale non inizializzata del Keogram. Ogni fotogramma
+  contribuisce ora una sola colonna reale. Sei output prodotti nella copia
+  isolata con Classic disabilitato, download e isolamento camera verificati.
+  Gli algoritmi di rotazione, ritaglio e combinazione restano invariati.
+  Non ancora distribuito; dettagli in `HYBRID_ACCEPTANCE_STATUS.md`.
+
 - Generazione video multicamera: la policy Hybrid ammette ora anche i mini
   timelapse e associa i task al profilo esplicitamente legato alla camera DB.
   Camere storiche senza associazione univoca usano metadata neutrali, senza

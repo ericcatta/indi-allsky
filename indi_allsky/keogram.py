@@ -217,7 +217,9 @@ class KeogramGenerator(object):
         if isinstance(self.keogram_data, type(None)):
             # this only happens on the first image
 
-            new_shape = rotated_center_line.shape
+            # Start with no columns; the first real frame is appended below.
+            new_shape = list(rotated_center_line.shape)
+            new_shape[1] = 0
             logger.info('New Shape: %s', pformat(new_shape))
 
             new_dtype = rotated_center_line.dtype
@@ -300,9 +302,11 @@ class KeogramGenerator(object):
         }
         exif_ifd = {
             piexif.ExifIFD.DateTimeOriginal  : exp_date_utc.strftime('%Y:%m:%d %H:%M:%S'),
-            piexif.ExifIFD.LensModel         : camera.lensName,
         }
 
+
+        if camera.lensName is not None:
+            exif_ifd[piexif.ExifIFD.LensModel] = camera.lensName
 
         jpeg_exif_dict = {
             '0th'   : zeroth_ifd,

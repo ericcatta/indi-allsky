@@ -13,6 +13,31 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Keogram and Startrail real effects — 2026-09-08
+
+The real generation test exposed two backend defects. Nullable camera lens
+metadata made EXIF serialization fail (Keogram lens name; Startrail name, focal
+length or aperture). Unknown tags are now omitted; supplied values retain their
+existing representation. Keogram also initialized an extra uninitialized column
+before appending actual frames, introducing arbitrary pixels and an extra frame
+in its width/count. It now starts with zero columns and appends each actual
+sample exactly once. Rotation, trimming, scaling and Startrail combination stay
+unchanged; no previously saved images or configuration are rewritten.
+
+`hybrid_keogram_encoding_flow_test.py` checks exact pre-compression samples and
+then submits real authenticated Hybrid requests through coordinator and worker,
+with Classic imports blocked. Both cameras produce a Keogram, Startrail and
+three-frame Startrail MP4. JPEG decoding, EXIF absent/present tags, per-camera
+colors, three Keogram columns, FFprobe, complete task receipts, byte-identical
+downloads for both roles and wrong-camera 404 responses are asserted. Uploads
+are disabled and all media/database fixtures are disposable. Thresholds explicitly
+admit the synthetic frames; this is not astronomical accuracy or live capture
+acceptance. All 96 Python/compile regression entrypoints passed, including
+Book 2, Full Config parity, Settings, Safe Actions and Product Spine/View Models.
+The three tested source hashes match the local candidate; `git diff --check`
+passed. The backend correction is **not yet deployed**. Evidence:
+`testing/evidence/hybrid-keogram-encoding-2026-09-08.json`.
+
 ## Real timelapse effects and multicamera dispatch — 2026-09-08
 
 The isolated end-to-end test exposed two coordinator defects: mini timelapses
