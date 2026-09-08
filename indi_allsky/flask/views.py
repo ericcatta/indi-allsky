@@ -10752,45 +10752,6 @@ class ModernAdminRealtimeKeogramView(ModernAdminObservatoryToolView, RealtimeKeo
         return context
 
 
-class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, TemplateView):
-    page_title = 'Modern Admin Long Term Keogram'
-
-    display_service = ModernAdminLongTermKeogramDisplayService()
-
-    def get_context(self):
-        context = super(ModernAdminLongTermKeogramView, self).get_context()
-        context['keogram_age'] = ''
-        context['keogram_uri'] = ''
-
-        longterm_keogram_image_p = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']).joinpath(
-            'ccd_{0:s}'.format(self.camera.uuid),
-            'longterm_keogram.jpg',
-        )
-        media_access_adapter = self.get_observatory_media_access_adapter()
-        longterm_keogram_mtime = media_access_adapter.resolve_existing_file_mtime(longterm_keogram_image_p)
-        if longterm_keogram_mtime is not None:
-            image_age_s = time.time() - longterm_keogram_mtime
-            context['keogram_age'] = self.display_service.format_generated_age(image_age_s)
-            context['keogram_uri'] = str(Path('images').joinpath('ccd_{0:s}'.format(self.camera.uuid), 'longterm_keogram.jpg'))
-
-        keogram_uri = context.get('keogram_uri')
-        if keogram_uri:
-            context['keogram_uri'] = media_access_adapter.resolve_existing_media_url(keogram_uri)
-
-        try:
-            context['modern_admin_longterm_rows'] = IndiAllSkyDbLongTermKeogramTable.query\
-                .join(IndiAllSkyDbLongTermKeogramTable.camera)\
-                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                .order_by(IndiAllSkyDbLongTermKeogramTable.ts.desc())\
-                .limit(8)\
-                .all()
-        except Exception as e:
-            app.logger.error('Error loading modern admin long term keogram rows: %s', str(e))
-            context['modern_admin_longterm_rows'] = list()
-
-        return context
-
-
 class ModernAdminDarkLibraryView(ModernAdminCameraToolView, TemplateView):
     page_title = 'Modern Admin Dark Library'
 
@@ -11260,6 +11221,54 @@ class ModernAdminLoopView(ModernAdminMediaBrowseView, ImageLoopImgView):
             })
 
         return camera_views
+
+
+class ModernAdminLongTermKeogramView(ModernAdminObservatoryToolView, ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Modern Admin Long Term Keogram'
+
+    display_service = ModernAdminLongTermKeogramDisplayService()
+
+    def get_context(self):
+        camera_filters = self.get_media_camera_filters()
+        selected = self.get_selected_media_camera_filter(camera_filters)
+        camera_id = selected.get('camera_id') or self.camera.id
+        self.camera = IndiAllSkyDbCameraTable.query.filter_by(id=camera_id).first_or_404()
+        self.cameraSetup(camera_id=camera_id)
+        context = super(ModernAdminLongTermKeogramView, self).get_context()
+        context['longterm_camera_filters'] = [item for item in camera_filters if item.get('camera_id')]
+        context['longterm_camera_id'] = camera_id
+        context['longterm_camera_label'] = self.camera.friendlyName or self.camera.name
+        context['form_longterm_keogram'] = IndiAllskyLongTermKeogramForm(data={'CAMERA_ID': self.camera.id})
+        context['keogram_age'] = ''
+        context['keogram_uri'] = ''
+
+        longterm_keogram_image_p = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']).joinpath(
+            'ccd_{0:s}'.format(self.camera.uuid),
+            'longterm_keogram.jpg',
+        )
+        media_access_adapter = self.get_observatory_media_access_adapter()
+        longterm_keogram_mtime = media_access_adapter.resolve_existing_file_mtime(longterm_keogram_image_p)
+        if longterm_keogram_mtime is not None:
+            image_age_s = time.time() - longterm_keogram_mtime
+            context['keogram_age'] = self.display_service.format_generated_age(image_age_s)
+            context['keogram_uri'] = str(Path('images').joinpath('ccd_{0:s}'.format(self.camera.uuid), 'longterm_keogram.jpg'))
+
+        keogram_uri = context.get('keogram_uri')
+        if keogram_uri:
+            context['keogram_uri'] = media_access_adapter.resolve_existing_media_url(keogram_uri)
+
+        try:
+            context['modern_admin_longterm_rows'] = IndiAllSkyDbLongTermKeogramTable.query\
+                .join(IndiAllSkyDbLongTermKeogramTable.camera)\
+                .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+                .order_by(IndiAllSkyDbLongTermKeogramTable.ts.desc())\
+                .limit(8)\
+                .all()
+        except Exception as e:
+            app.logger.error('Error loading modern admin long term keogram rows: %s', str(e))
+            context['modern_admin_longterm_rows'] = list()
+
+        return context
 
 
 class ModernAdminMediaArchiveView(ModernAdminMediaBrowseView, TemplateView):
@@ -12656,7 +12665,12 @@ class JsonLongTermKeogramView(JsonView):
             return jsonify(form_errors), 400
 
 
-        camera_id = int(request.json['CAMERA_ID'])
+        try:
+            camera_id = int(request.json['CAMERA_ID'])
+        except (TypeError, ValueError):
+            return jsonify({'CAMERA_ID': ['Select an available camera.']}), 400
+        if db.session.get(IndiAllSkyDbCameraTable, camera_id) is None:
+            return jsonify({'CAMERA_ID': ['Select an available camera.']}), 400
         end = str(request.json['END_SELECT'])
         query_days = int(request.json['DAYS_SELECT'])
         period_pixels = int(request.json['PIXELS_SELECT'])
@@ -12713,6 +12727,15 @@ class JsonLongTermKeogramView(JsonView):
             return jsonify(json_data), 400
 
 
+        samples = IndiAllSkyDbLongTermKeogramTable.query.filter(
+            IndiAllSkyDbLongTermKeogramTable.camera_id == self.camera.id,
+            IndiAllSkyDbLongTermKeogramTable.ts < query_end_date.timestamp() - offset_seconds,
+        )
+        if query_days != 42:
+            samples = samples.filter(IndiAllSkyDbLongTermKeogramTable.ts >= query_start_date.timestamp() - offset_seconds)
+        if samples.first() is None:
+            return jsonify({'failure-message': 'No long-term samples are available for this camera and period.'}), 400
+
         from ..longTermKeogram import LongTermKeogramGenerator
         ltg_gen = LongTermKeogramGenerator(self.indi_allsky_config)
         ltg_gen.camera_id = self.camera.id
@@ -12750,15 +12773,13 @@ class JsonLongTermKeogramView(JsonView):
         # It may take longer than 180 seconds to generate the keogram and the browser will stop
         #  waiting for the image and drop the connection.  The flask process will usually continue
         #  and should save the image to the filesystem
-        longterm_keogram_image_p = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']).joinpath('ccd_{0:s}'.format(self.camera.uuid), 'longterm_keogram.jpg')
 
+        from ..longterm_keogram_cache import write_longterm_keogram_cache
         try:
-            with io.open(str(longterm_keogram_image_p), 'wb') as lt_image_f:
-                app.logger.info('Writing keogram: %s', longterm_keogram_image_p)
-                lt_image_f.write(image_buffer.getbuffer())
-        except (PermissionError, FileNotFoundError) as e:
-            app.logger.error('Creating keogram failed: %s', str(e))
-            json_data['failure-message'] = 'Exception: {0:s}'.format(str(e))
+            write_longterm_keogram_cache(app.config['INDI_ALLSKY_IMAGE_FOLDER'], self.camera.uuid, image_buffer.getvalue())
+        except (OSError, ValueError):
+            app.logger.exception('Creating long term keogram cache failed')
+            json_data['failure-message'] = 'Unable to save the keogram. Check storage availability and permissions.'
 
 
         json_image_b64 = base64.b64encode(image_buffer.getvalue())

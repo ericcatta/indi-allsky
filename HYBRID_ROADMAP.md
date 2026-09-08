@@ -605,6 +605,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     `ModernAdminSystemPowerEffectAdapter`; DBus `rebootSystemd()` resta adapter
     operativo low-level.
 - Book 2 / Media Access Compatibility Layer:
+  - Long-term Keogram: Hybrid offre ora selezione camera/profilo, opzioni del
+    generatore condiviso, anteprima e download JPEG; rimossa la pagina solo cache.
+    La scrittura della cache per camera passa a un helper atomico indipendente
+    dalle view. Nessun campione restituisce un errore esplicito; un fallimento
+    di scrittura preserva il file precedente. Algoritmo e contratto pubblico
+    del generatore restano condivisi. Collaudo browser e deploy restano aperti.
   - il primo adapter read-only e' ora `ModernAdminMediaAccessAdapter`;
   - `ModernAdminMediaListView` risolve gli URL media tramite questo adapter,
     preservando l'attuale chiamata low-level `getUrl(s3_prefix=..., local=...)`

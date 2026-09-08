@@ -587,14 +587,17 @@ def test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter
     start = source.index('class ModernAdminObservatoryToolView')
     end = source.index('class ModernAdminDarkLibraryView', start)
     body = source[start:end]
+    longterm_start = source.index('class ModernAdminLongTermKeogramView')
+    longterm_end = source.index('\nclass ', longterm_start + 1)
+    longterm_body = source[longterm_start:longterm_end]
 
     assert_true('def get_observatory_media_access_adapter(self):' in body, 'observatory tools must construct media access adapter')
     assert_true('.resolve_existing_media_url(keogram_uri)' in body, 'observatory keogram URLs should go through Hybrid media access adapter')
-    assert_true('.resolve_existing_file_mtime(longterm_keogram_image_p)' in body, 'long-term keogram filesystem metadata should go through Hybrid media access adapter')
+    assert_true('.resolve_existing_file_mtime(longterm_keogram_image_p)' in longterm_body, 'long-term keogram filesystem metadata should go through Hybrid media access adapter')
     assert_true('.normalize_media_url(keogram_uri)' not in body, 'observatory keogram views must not own direct URL normalization')
 
-    longterm_start = body.index('class ModernAdminLongTermKeogramView')
-    longterm_body = body[longterm_start:]
+    assert_true('.resolve_existing_media_url(keogram_uri)' in longterm_body, 'long-term display URL must use the media adapter')
+    assert_true('.normalize_media_url(keogram_uri)' not in longterm_body, 'long-term view must not normalize display URLs directly')
     assert_true('longterm_keogram_image_p.is_file()' not in longterm_body, 'long-term keogram view must not own direct file availability checks')
     assert_true('longterm_keogram_image_p.stat()' not in longterm_body, 'long-term keogram view must not own direct file metadata reads')
 

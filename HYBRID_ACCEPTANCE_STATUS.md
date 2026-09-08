@@ -13,6 +13,42 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Long-term Keogram functional flow — 2026-09-08
+
+The former cache-only page now exposes the supported shared generator through
+Hybrid: camera/profile selection, ending period, time range, lines per day,
+sample interval, hour offset, reverse order, labels, generate, reset, preview and
+JPEG download. This removes the explicit unavailable-generation placeholder.
+The selected camera now controls the form, sample query and cached preview;
+invalid camera/profile combinations are rejected instead of silently selecting
+the session camera. Existing shared endpoint permissions and CSRF remain intact.
+
+Empty sample periods, including All Available, return an explicit no-data error.
+The per-camera cache helper writes and flushes a temporary sibling before atomic
+replacement. Storage failure preserves the previous complete file and removes
+its temporary file. The JS flow prevents duplicate submits while pending and
+preserves the last image/download if generation, saving, networking or decoding
+fails. The scientific generator and its configuration options are unchanged.
+
+The Classic-disabled Flask test uses actual SQLite samples, the shared generator,
+JPEG encoding and filesystem cache for both cameras. It verifies administrator
+and ordinary-user requests, anonymous denial, CSRF, invalid camera/profile,
+cache reload/download byte identity, missing data, invalid options and a forced
+write failure. The JavaScript tests execute the production handlers with DOM and
+fetch adapters; these are automated tests, not native-browser click acceptance.
+Evidence: [Long-term Keogram acceptance](testing/evidence/hybrid-longterm-keogram-2026-09-08.json).
+The 98 Python entrypoints passed after correcting one positional source guard
+(97 initial passes plus the passing targeted recheck; initial failure retained).
+All 23 JavaScript suites passed. Fresh discovery covers 90 pages, 490 contexts,
+364 successful renders, 126 blocked contexts and 28,612 control occurrences,
+with no render defects or matches for the inventory's limited placeholder
+phrases. This is not exhaustive functional or placeholder clearance; the native
+browser rows remain blocked and all generator option combinations are not yet
+accepted live.
+
+Native browser checks remain blocked by the locked Mac. This candidate has not
+been deployed, and does not restart capture or establish a new live baseline.
+
 ## Startrails with no eligible frames — 2026-09-08
 
 The real worker produced a placeholder Startrail and marked it generated when

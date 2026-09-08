@@ -129,7 +129,7 @@ def test_modern_sqm_view_uses_observatory_service():
 def test_modern_longterm_keogram_view_uses_display_service():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
     start = source.index('class ModernAdminLongTermKeogramView')
-    end = source.index('class ModernAdminDarkLibraryView', start)
+    end = source.index('\nclass ', start + 1)
     source = source[start:end]
 
     assert 'ModernAdminLongTermKeogramDisplayService' in source

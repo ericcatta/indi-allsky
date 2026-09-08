@@ -4,28 +4,59 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<style>#longterm-tool [hidden] { display: none !important; }</style>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/longterm-keogram.js', v='longterm-v1') }}" defer></script>
 {% endblock %}
 
 {% block content %}
-<main class="modern-admin-shell" aria-labelledby="modern-admin-longterm-keogram-title">
+<main id="longterm-tool" class="modern-admin-shell" aria-labelledby="modern-admin-longterm-keogram-title">
     {% set modern_admin_header_label = 'Long term keogram header' %}
     {% set modern_admin_heading = 'Long Term Keogram' %}
     {% set modern_admin_title_id = 'modern-admin-longterm-keogram-title' %}
     {% include 'modern_admin/_shell_header.html' %}
+
+    <nav class="modern-admin-link-grid" aria-label="Keogram camera">
+        {% for item in longterm_camera_filters %}
+        <a class="modern-admin-media-button" href="{{ url_for('indi_allsky.modern_admin_longterm_keogram_view', camera_id=item.camera_id, profile_id=item.profile_id) }}" {% if item.camera_id == longterm_camera_id %}aria-current="page"{% endif %}>{{ item.label }}</a>
+        {% endfor %}
+    </nav>
+    <section class="modern-admin-table-panel" aria-labelledby="longterm-options-title">
+        <h2 id="longterm-options-title">Generate long-term keogram</h2>
+        <p>Build a view from {{ longterm_camera_label }}'s recorded samples. Generating a new view replaces its cached preview.</p>
+        <form class="modern-admin-form" id="longterm-form" action="{{ url_for('indi_allsky.js_longterm_keogram_view') }}" method="post">
+            {{ form_longterm_keogram.hidden_tag() }}
+            <fieldset>
+                <legend>Time range and appearance</legend>
+                <div class="modern-admin-form-grid">
+                {% for name, label in [('END_SELECT', 'Period ending'), ('DAYS_SELECT', 'Time range'), ('PIXELS_SELECT', 'Lines per day'), ('ALIGNMENT_SELECT', 'Sample interval'), ('OFFSET_SELECT', 'Hour offset')] %}
+                    <label for="{{ name }}">{{ label }}{{ form_longterm_keogram[name]() }}</label>
+                {% endfor %}
+                </div>
+                <label>{{ form_longterm_keogram.REVERSE() }} Reverse day order</label>
+                <label>{{ form_longterm_keogram.LABEL() }} Show date labels</label>
+                <div class="modern-admin-link-grid">
+                    <button class="modern-admin-media-button" type="submit">Generate</button>
+                    <button class="modern-admin-media-button" type="reset">Reset options</button>
+                </div>
+            </fieldset>
+        </form>
+        <p id="longterm-status" role="status" aria-live="polite"></p>
+        <p id="longterm-error" role="alert" hidden></p>
+    </section>
 
     <section class="modern-admin-table-panel" aria-labelledby="longterm-keogram-title">
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">Observatory</p>
             <h2 id="longterm-keogram-title">Cached long term keogram</h2>
         </div>
-        {% if keogram_uri %}
-        <figure class="modern-admin-live-frame">
-            <img src="{{ keogram_uri }}" alt="Long term keogram">
+        <figure id="longterm-result" class="modern-admin-live-frame" {% if not keogram_uri %}hidden{% endif %}>
+            <img id="longterm-image" {% if keogram_uri %}src="{{ keogram_uri }}"{% endif %} alt="Long-term keogram for the selected camera">
         </figure>
-        <p class="modern-admin-note">{{ keogram_age }} <a class="modern-admin-placeholder-link" href="{{ keogram_uri }}" download>Download</a></p>
-        {% else %}
-        <div class="modern-admin-empty-state"><h3>No cached long term keogram</h3><p>The classic generation workflow remains unavailable from Hybrid because it creates new media.</p></div>
-        {% endif %}
+        <p id="longterm-download-row" class="modern-admin-note" {% if not keogram_uri %}hidden{% endif %}>
+            <span id="longterm-age">{{ keogram_age }}</span>
+            <a id="longterm-download" href="{{ keogram_uri or '#' }}" download="longterm-keogram-camera-{{ form_longterm_keogram.CAMERA_ID.data }}.jpg">Download JPEG</a>
+        </p>
+        <div id="longterm-empty" class="modern-admin-empty-state" {% if keogram_uri %}hidden{% endif %}><h3>No cached keogram</h3><p>Choose a time range above and generate a view from the available samples.</p></div>
     </section>
 
     <section class="modern-admin-table-panel" aria-labelledby="longterm-keogram-samples-title">
