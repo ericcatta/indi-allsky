@@ -158,3 +158,23 @@ on complete day/night evidence. Live gain-first decrease, browser checks (Mac
 locked), remaining effects and post-Classic-removal acceptance remain open.
 See `testing/evidence/hybrid-effects-deployment-2026-09-08.json` and the rollback
 instructions in `HYBRID_ACCEPTANCE_STATUS.md`.
+
+## Live gain-first reduction sample (2026-09-08, 18:56 CEST)
+
+The read-only check at 18:56:32 found the same capture PID 3734524 and start
+17:47:25, with zero restarts. Both cameras had 275 saved frames after the
+release, 15-second median file timestamps and no missing/empty files. There
+were no pending tasks or errors in the journal returned by this check.
+
+The IMX708 saved-frame sequence contains 59 decreases in gain, all with
+unchanged exposure. The final three are 5.51 → 5.30 → 5.10 → 4.91 while
+exposure remains 9 seconds. This directly supports gain-first reduction above
+the minimum. It does not yet verify the later transition at gain 1.13 or a
+complete night/day cycle. ZWO's latest frame has gain 0 and exposure 0.236054s;
+this snapshot alone does not prove its entire adjustment sequence.
+
+The raw evidence is `/home/eric/hybrid-effects-evidence/live-20260908-185632.json`;
+the `live_observation` in `testing/evidence/hybrid-users-table-2026-09-08.json`
+contains the summary and transition examples. This check did not deploy the
+users-table candidate or modify services/configuration. The 24-hour gate,
+browser acceptance and post-Classic-removal tests remain open.

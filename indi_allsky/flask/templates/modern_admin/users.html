@@ -3,6 +3,8 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.css') }}" rel="stylesheet">
+<script src="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.js') }}"></script>
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
@@ -16,24 +18,8 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-users-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
-    <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="User summary">
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Users</div>
-            <h3>{{ modern_admin_user_count }}</h3>
-            <p>Read-only account inventory.</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
-        </article>
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Active</div>
-            <h3>{{ modern_admin_user_active_count }}</h3>
-            <p>Accounts currently marked active.</p>
-        </article>
-        <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Legacy fallback</div>
-            <h3>Available</h3>
-            <p><a href="{{ url_for('indi_allsky.modern_admin_users_view') }}">Users</a></p>
-        </article>
-    </section>
+    <p id="modern-users-summary">{{ modern_admin_user_count }} accounts · {{ modern_admin_user_active_count }} active · {{ modern_admin_user_admin_count }} administrators</p>
+    <p><a href="{{ url_for('indi_allsky.modern_admin_account_view') }}">My Account</a> — update your own name, email or password.</p>
 
     <section class="modern-admin-table-panel" aria-labelledby="modern-users-title">
         <div class="modern-admin-section-heading">
@@ -69,7 +55,7 @@ var camera_id = {{ camera_id }};
                     <option value="no">Non-admin</option>
                 </select>
             </label>
-            <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-users-filter-count">{{ modern_admin_user_count }} shown</span>
+            <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-users-filter-count" role="status" aria-live="polite">{{ modern_admin_user_count }} shown</span>
         </div>
         <div class="modern-admin-table-scroll">
             <table class="modern-admin-data-table" id="modern-users-table">
@@ -104,61 +90,13 @@ var camera_id = {{ camera_id }};
                         <td colspan="9">No user accounts are available.</td>
                     </tr>
                     {% endfor %}
-                    <tr id="modern-users-filter-empty-row" hidden>
-                        <td colspan="9">No user accounts match the current filters.</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
         <p class="modern-admin-note">Password hashes, API keys, login IPs, session data and raw user JSON are intentionally not shown.</p>
     </section>
 
-    <section class="modern-admin-table-panel" aria-label="User management fallbacks">
-        <div class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_users_view') }}">Users</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_account_view') }}">My Account</a>
-        </div>
-    </section>
 </main>
-<script>
-(function() {
-    const searchInput = document.getElementById('modern-users-search');
-    const activeFilter = document.getElementById('modern-users-active-filter');
-    const staffFilter = document.getElementById('modern-users-staff-filter');
-    const adminFilter = document.getElementById('modern-users-admin-filter');
-    const countBadge = document.getElementById('modern-users-filter-count');
-    const rows = Array.from(document.querySelectorAll('#modern-users-table tbody tr[data-search]'));
-    const emptyRow = document.getElementById('modern-users-filter-empty-row');
-
-    function applyFilters() {
-        const searchText = searchInput.value.trim().toLowerCase();
-        const activeValue = activeFilter.value;
-        const staffValue = staffFilter.value;
-        const adminValue = adminFilter.value;
-        let visibleCount = 0;
-
-        rows.forEach(function(row) {
-            const matchesSearch = !searchText || row.dataset.search.includes(searchText);
-            const matchesActive = !activeValue || row.dataset.active === activeValue;
-            const matchesStaff = !staffValue || row.dataset.staff === staffValue;
-            const matchesAdmin = !adminValue || row.dataset.admin === adminValue;
-            const visible = matchesSearch && matchesActive && matchesStaff && matchesAdmin;
-            row.hidden = !visible;
-            if (visible) {
-                visibleCount += 1;
-            }
-        });
-
-        countBadge.textContent = visibleCount + ' shown';
-        if (emptyRow) {
-            emptyRow.hidden = visibleCount !== 0 || rows.length === 0;
-        }
-    }
-
-    [searchInput, activeFilter, staffFilter, adminFilter].forEach(function(control) {
-        control.addEventListener('input', applyFilters);
-        control.addEventListener('change', applyFilters);
-    });
-})();
-</script>
+<script type="application/json" id="hybrid-operations-table-config">{"csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}, "table": "modern-users-table", "rowAttribute": "data-search", "count": "modern-users-filter-count", "countSuffix": " shown", "emptyMessage": "No user accounts are available.", "filters": [{"id": "modern-users-search", "attribute": "search", "contains": true}, {"id": "modern-users-active-filter", "attribute": "active", "contains": false}, {"id": "modern-users-staff-filter", "attribute": "staff", "contains": false}, {"id": "modern-users-admin-filter", "attribute": "admin", "contains": false}]}</script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}" defer></script>
 {% endblock %}

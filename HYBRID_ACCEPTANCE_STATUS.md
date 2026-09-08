@@ -13,6 +13,33 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Users table parity and navigation — 2026-09-08
+
+Classic's users list offered sorting, pagination, copy, CSV and Excel. Hybrid's
+custom filter-only table had omitted those functions while retaining a misleading
+Legacy fallback card and a link back to the same page. Users now uses the shared
+Hybrid operations-table controls with all four existing search/active/staff/admin
+filters, sortable columns, page-size selection, pagination and filtered exports.
+The summary is compact and My Account remains the direct entry for self-service
+profile/password updates. No user creation, deletion or role mutation is added;
+these were not actions in the Classic users-list page either.
+
+The isolated Classic-disabled acceptance seeds 28 synthetic accounts with mixed
+flags, Unicode, markup and formula-like names. For administrator and ordinary
+users with either camera selected it verifies rendered records, detail links,
+My Account, missing/anonymous routes, export CSRF, filtered CSV/XLSX cell contents,
+formula handling and the absence of private fields/password hashes. Account
+content and roles are unchanged. Shared JS controller tests verify filter/count
+and export wiring; actual sorting, paging and clipboard operations still need
+native-browser acceptance. No real accounts were read or changed. This template
+change is not deployed and does not restart any capture service.
+
+All 100 Python regression entrypoints and 23 JavaScript suites passed. The
+[users table evidence](testing/evidence/hybrid-users-table-2026-09-08.json)
+contains the scoped control matrix, runtime inventory summary and test logs.
+The template is reduced from 164 to 102 lines by reusing shared controls; no
+page-speed improvement is claimed.
+
 ## Calibration library workflow — 2026-09-08
 
 Dark Library previously omitted Classic's Process links and table tools. Hybrid

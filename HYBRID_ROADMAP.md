@@ -267,6 +267,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
     precedente; catalogo e geometria verificati su 3.000 casi di parita';
   - test browser con IMX708/IMX678, cambio lente/offset, copia link e reload;
     nessuna scrittura di configurazione o azione hardware.
+- Elenco utenti Hybrid: ripristinati ordinamento, paginazione, copia ed export
+  CSV/XLSX attraverso i controlli condivisi; conservati filtri e accesso ai
+  dettagli/My Account. Eliminati fallback autoreferenziale e codice filtro
+  duplicato. Verificati contenuti esportati e campi privati su account sintetici;
+  operazioni native browser e deploy restano da collaudare.
 - Task e notifiche Hybrid:
   - liste e dettagli si aprono con Classic escluso; riconoscimento notifiche
     disponibile nel dettaglio con handler Hybrid autenticato, CSRF, servizio
