@@ -13,6 +13,51 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Panorama capture publication and camera-scoped latest API — 2026-09-08
+
+The shared worker previously replaced one global preview from either camera,
+inserted a panorama database row before the archive was complete, and created
+another row even for an existing capture filename. Hybrid's publication adapter
+now encodes the complete panorama, publishes an exclusive archive before the SQL
+record, and uses atomic replacement for each camera's preview. The global
+`panorama.<ext>` compatibility preview is written only by the primary profile.
+Mismatched frame/camera identity is rejected before file creation.
+
+The original writer is fingerprinted. Real warpPolar output is encoded in all
+six existing formats and has exact decoded-pixel parity with the original writer.
+Archive names, metadata fields, optics/geometry algorithms and the FISH2PANO gate
+are preserved. PNG encoder failure is checked explicitly; absent EXIF is accepted.
+Duplicates do not create rows or overwrite captures. A failed SQL transaction is
+rolled back and its newly created archive removed; previous previews remain.
+Preview or optional upload-enqueue failure does not delete a valid local archive.
+Focus and no-day-save modes update previews without adding archive rows.
+
+The shared latest-preview resolver preserves normal image behavior and gives the
+panorama API a per-camera path in both focus and daytime-without-archive modes.
+A missing secondary preview does not fall back to another camera's global image.
+The JSON response shape and public endpoint paths are unchanged.
+
+The multicamera policy now honors the panorama profile setting; an enabled
+FISH2PANO configuration and existing images-only/profile gates remain required.
+Extra uploads stay disabled, including the explicit UPLOAD_PANORAMA flag. Reserved
+mini_timelapse/panorama_loop compatibility fields remain unchanged. Camera
+Management displays the effective panorama setting. Native panorama browsing,
+loop/video effect acceptance and hardware/performance checks are not implied by
+this file-publication proof.
+
+The isolated Classic-disabled flow covers real transforms/codecs, SQL rows,
+camera-scoped files and matching Hybrid downloads for both roles, plus duplicate,
+encoding, archive, database, preview and upload failures. Archive publication uses
+an exclusive hard link within the target filesystem; this was tested on the Pi's
+isolated local filesystem, not an external disk or network mount. Production
+deployment and a new uninterrupted 24-hour day/night observation remain open.
+
+Validation: **107 Python regression entries passed**, including the new publication
+flow and compileall. Source hashes match the tested isolated overlay. The refreshed
+inventory covers 90 pages and 490 contexts (364 rendered, 126 blocked), with 28,634
+controls discovered; these are not individual interaction acceptance results.
+Evidence: [panorama publication report](testing/evidence/hybrid-panorama-publication-2026-09-08.json).
+
 ## Panorama cadence and mini-timelapse capability correction — 2026-09-08
 
 The panorama admission block had the same global-counter bias as realtime

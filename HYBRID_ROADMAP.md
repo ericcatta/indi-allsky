@@ -16,9 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Panorama: pubblicazione completa per camera tramite adapter Hybrid condiviso,
+  file prima dei metadati SQL, gestione duplicati/errori, anteprima globale solo
+  primaria e API latest per-camera anche in focus/no-save. Policy multicamera
+  ora rispetta FISH2PANO e l'opzione del profilo; upload extra restano disabilitati.
+  Trasformazione, sei codec e download verificati in isolamento. Deploy,
+  browser nativo, loop/video e collaudo hardware/prestazioni restano aperti.
+
 - Panorama: corretto contatore di ammissione per camera/profilo, prima globale
-  e sbilanciato verso una sola camera. Restrizione multicamera mantenuta fino
-  al collaudo completo di rendering/pubblicazione. Nessun deploy eseguito.
+  e sbilanciato verso una sola camera. Pubblicazione verificata nella missione
+  successiva descritta sopra. Nessun deploy eseguito.
   Mini timelapse: verifica del codice conferma generazione su richiesta, gia'
   supportata; rimossa la descrizione fuorviante di uno scheduler automatico
   mancante. Chiavi di compatibilita' conservate, nessuna nuova funzione inventata.

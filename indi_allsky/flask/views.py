@@ -274,6 +274,12 @@ class JsonLatestImageView(JsonView):
         self.history_seconds = 900
 
 
+    def get_preview_paths(self, focus=False):
+        template = 'images/latest.{0}' if focus else self.latest_image_t
+        uri = Path(template.format(self.indi_allsky_config.get('IMAGE_FILE_TYPE', 'jpg')))
+        return uri, Path(self.indi_allsky_config['IMAGE_FOLDER']).absolute() / uri.name
+
+
     def get_objects(self):
         camera_id = int(request.args['camera_id'])
         history_seconds = int(request.args.get('limit_s', self.history_seconds))
@@ -305,10 +311,7 @@ class JsonLatestImageView(JsonView):
 
 
         if self.indi_allsky_config.get('FOCUS_MODE', False):
-            latest_image_uri = Path('images/latest.{0}'.format(self.indi_allsky_config.get('IMAGE_FILE_TYPE', 'jpg')))
-
-            image_dir = Path(self.indi_allsky_config['IMAGE_FOLDER']).absolute()
-            latest_image_p = image_dir.joinpath(latest_image_uri.name)
+            latest_image_uri, latest_image_p = self.get_preview_paths(focus=True)
 
             if latest_image_p.exists():
                 # use latest image if it exists
@@ -356,10 +359,7 @@ class JsonLatestImageView(JsonView):
                         return data
 
                 # images are not stored in the DB in this condition
-                latest_image_uri = Path(self.latest_image_t.format(self.indi_allsky_config.get('IMAGE_FILE_TYPE', 'jpg')))
-
-                image_dir = Path(self.indi_allsky_config['IMAGE_FOLDER']).absolute()
-                latest_image_p = image_dir.joinpath(latest_image_uri.name)
+                latest_image_uri, latest_image_p = self.get_preview_paths()
 
 
                 if not latest_image_p.exists():
@@ -584,6 +584,15 @@ class LatestPanoramaVideoWatchRedirect(LatestTimelapseVideoWatchRedirect):
 class JsonLatestPanoramaView(JsonLatestImageView):
     model = IndiAllSkyDbPanoramaImageTable
     latest_image_t = 'images/panorama.{0}'
+
+    def get_preview_paths(self, focus=False):
+        relative = Path('ccd_' + self.camera.uuid) / ('panorama.' + self.indi_allsky_config.get('IMAGE_FILE_TYPE', 'jpg'))
+        root = Path(self.indi_allsky_config['IMAGE_FOLDER']).resolve()
+        path = (root / relative).resolve()
+        if not path.is_relative_to(root):
+            abort(404)
+        return Path('images') / relative, path
+
 
 
 class JsonLatestRawImageView(JsonLatestImageView):

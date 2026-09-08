@@ -560,7 +560,7 @@ class IndiAllSky(object):
         from .hybrid_camera_management import multicamera_capture_outputs
         outputs = multicamera_capture_outputs(profile.outputs)
         _multi_camera_diag(
-            '[MULTI_CAMERA_IMAGES_ONLY][%s] preserved timelapse/keogram/startrails and disabled mini/panorama/upload extras; realtime/longterm follow profile settings',
+            '[MULTI_CAMERA_IMAGES_ONLY][%s] preserved supported profile image outputs; extra uploads remain disabled',
             profile.profile_id,
         )
         return replace(profile, outputs=outputs)

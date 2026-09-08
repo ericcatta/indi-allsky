@@ -29,15 +29,15 @@ def run():
         outputs=dict(zip(('images','timelapse','keogram','startrails','mini_timelapse','panorama','extra_uploads','future_key','longterm_keogram','realtime_keogram'),values))
         profile=Profile(outputs)
         expected=namespace['_images_only_capture_profile'](None,profile)
-        # Intentional deltas: both keogram outputs honor their profile values.
-        for key in ('longterm_keogram','realtime_keogram'):
+        # Intentional deltas: keogram and panorama outputs honor their profile values.
+        for key in ('longterm_keogram','realtime_keogram','panorama'):
             expected.outputs.pop(key)
             if key in outputs:expected.outputs[key]=outputs[key]
         actual=multicamera_capture_outputs(outputs)
         assert actual==expected.outputs and actual is not outputs and profile.outputs==outputs
     for outputs in ({}, {'future_key': {'value': 1}}, {'timelapse': 'custom', 'images': False}):
         expected=namespace['_images_only_capture_profile'](None,Profile(outputs))
-        for key in ('longterm_keogram','realtime_keogram'):
+        for key in ('longterm_keogram','realtime_keogram','panorama'):
             expected.outputs.pop(key)
             if key in outputs:expected.outputs[key]=outputs[key]
         assert multicamera_capture_outputs(outputs)==expected.outputs
@@ -53,6 +53,10 @@ def run():
     assert all(p['generated_capture_enabled'] for p in context['profiles'])
     assert all(p['longterm_capture_enabled'] for p in context['profiles'])
     assert all(p['realtime_capture_enabled'] for p in context['profiles'])
+    panorama=deepcopy(config);panorama['FISH2PANO']={'ENABLE':True}
+    assert all(p['panorama_capture_enabled'] for p in camera_mode_context(panorama)['profiles'])
+    panorama['MULTI_CAMERA']['profiles'][0]['outputs']={'panorama':False}
+    assert not camera_mode_context(panorama)['profiles'][0]['panorama_capture_enabled']
     no_realtime=deepcopy(config)
     no_realtime['MULTI_CAMERA']['profiles'][0]['outputs']={'realtime_keogram':False}
     assert not camera_mode_context(no_realtime)['profiles'][0]['realtime_capture_enabled']
@@ -91,6 +95,6 @@ def run():
         try:plan_camera_switch(candidate,camera_name=name,driver='rpicam-still',supported_interfaces=interfaces)
         except ValueError:pass
         else:raise AssertionError('Ambiguous or multicamera switch accepted')
-    print('Camera management plans and 1027 output-policy cases (long-term/realtime restrictions removed): PASS')
+    print('Camera management plans and 1027 output-policy cases (long-term/realtime/panorama restrictions removed): PASS')
 
 if __name__=='__main__':run()

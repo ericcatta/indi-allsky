@@ -2992,7 +2992,7 @@ class ImageWorker(Process):
                     pano_data = self.image_processor.fish2pano_cardinal_dirs_label(pano_data)
 
 
-                self.write_panorama_img(pano_data, i_ref, camera, jpeg_exif=jpeg_exif)
+                self.write_panorama_img(pano_data, i_ref, camera, jpeg_exif=jpeg_exif, write_latest=profile_primary)
 
 
         if not images_only and self.config.get('CIRCULAR_DISPLAY', {}).get('ENABLE'):
@@ -4384,79 +4384,37 @@ class ImageWorker(Process):
         return hour_folder
 
 
-    def write_panorama_img(self, pano_data, i_ref, camera, jpeg_exif=None):
+    def write_panorama_img(self, pano_data, i_ref, camera, jpeg_exif=None, write_latest=True):
+        from .panorama_publication import encode_panorama, publish_panorama_file
+        from sqlalchemy.exc import SQLAlchemyError
         panorama_height, panorama_width = pano_data.shape[:2]
-
-        f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.{0}'.format(self.config['IMAGE_FILE_TYPE']))
-        f_tmpfile.close()
-
-        tmpfile_name = Path(f_tmpfile.name)
-
-
-        #write_img_start = time.time()
-
-        # write to temporary file
-        if self.config['IMAGE_FILE_TYPE'] in ('jpg', 'jpeg'):
-            img_rgb = Image.fromarray(cv2.cvtColor(pano_data, cv2.COLOR_BGR2RGB))
-            img_rgb.save(str(tmpfile_name), quality=self.config['IMAGE_FILE_COMPRESSION']['jpg'], exif=jpeg_exif)
-        elif self.config['IMAGE_FILE_TYPE'] in ('png',):
-            # exif does not appear to work with png
-            #img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
-            #img_rgb.save(str(tmpfile_name), compress_level=self.config['IMAGE_FILE_COMPRESSION']['png'])
-
-            # opencv is faster than Pillow with PNG
-            cv2.imwrite(str(tmpfile_name), pano_data, [cv2.IMWRITE_PNG_COMPRESSION, self.config['IMAGE_FILE_COMPRESSION']['png']])
-        elif self.config['IMAGE_FILE_TYPE'] in ('webp',):
-            img_rgb = Image.fromarray(cv2.cvtColor(pano_data, cv2.COLOR_BGR2RGB))
-            img_rgb.save(str(tmpfile_name), quality=90, lossless=False, exif=jpeg_exif)
-        elif self.config['IMAGE_FILE_TYPE'] in ('tif', 'tiff'):
-            # exif does not appear to work with tiff
-            img_rgb = Image.fromarray(cv2.cvtColor(pano_data, cv2.COLOR_BGR2RGB))
-            img_rgb.save(str(tmpfile_name), compression='tiff_lzw')
-        else:
-            tmpfile_name.unlink()
-            raise Exception('Unknown file type: %s', self.config['IMAGE_FILE_TYPE'])
-
-        #write_img_elapsed_s = time.time() - write_img_start
-        #logger.info('Panorama image compressed in %0.4f s', write_img_elapsed_s)
-
-
-        ### Always write the latest file for web access
-        latest_pano_file = self.image_dir.joinpath('panorama.{0:s}'.format(self.config['IMAGE_FILE_TYPE']))
-
+        root = self.image_dir.resolve()
+        camera_folder = (root / ('ccd_' + camera.uuid)).resolve()
         try:
-            latest_pano_file.unlink()
-        except FileNotFoundError:
-            pass
+            if camera.id != i_ref.camera_id or camera.uuid != i_ref.camera_uuid:
+                raise ValueError('Panorama frame and camera identity do not match')
+            if not camera_folder.is_relative_to(root):
+                raise ValueError('Invalid panorama camera path')
+            content = encode_panorama(pano_data, self.config, jpeg_exif)
+        except (OSError, ValueError, cv2.error):
+            logger.exception('[PANORAMA_ENCODE_FAILED][camera_id=%s]', camera.id)
+            return None
 
+        def publish_previews():
+            targets = [camera_folder / ('panorama.' + self.config['IMAGE_FILE_TYPE'])]
+            if write_latest:
+                targets.append(root / ('panorama.' + self.config['IMAGE_FILE_TYPE']))
+            for target in targets:
+                try:
+                    publish_panorama_file(root, target, content)
+                except (OSError, ValueError):
+                    logger.exception('[PANORAMA_PREVIEW_FAILED][camera_id=%s]', camera.id)
 
-        shutil.copy2(str(tmpfile_name), str(latest_pano_file))
-        latest_pano_file.chmod(0o644)
-
-
-        ### disable timelapse images in focus mode
-        if self.config.get('FOCUS_MODE', False):
-            logger.warning('Focus mode enabled, not saving timelapse image')
-            tmpfile_name.unlink()
-            return
-
-
-        ### Do not write daytime image files if daytime capture is disabled
-        if not self.night_av[constants.NIGHT_NIGHT] and self.config['DAYTIME_CAPTURE'] and not self.config.get('DAYTIME_CAPTURE_SAVE', True):
-            tmpfile_name.unlink()
-            return
-
-
-        ### Write the panorama file
-        folder = self._getImageFolder(i_ref.exp_date, i_ref.day_date, camera, 'panoramas')
-
-
-        panorama_filename_t = 'panorama_{0:s}'.format(self.filename_t)
-        date_str = i_ref.exp_date.strftime('%Y%m%d_%H%M%S')
-        filename = folder.joinpath(panorama_filename_t.format(i_ref.camera_id, date_str, self.config['IMAGE_FILE_TYPE']))
-
-        #logger.info('Panorama filename: %s', filename)
-
+        if self.config.get('FOCUS_MODE', False) or (
+                not self.night_av[constants.NIGHT_NIGHT] and self.config['DAYTIME_CAPTURE']
+                and not self.config.get('DAYTIME_CAPTURE_SAVE', True)):
+            publish_previews()
+            return None
 
         panorama_metadata = {
             'type'       : constants.PANORAMA_IMAGE,
@@ -4467,7 +4425,7 @@ class ImageWorker(Process):
             'gain'       : i_ref.gain,
             'binmode'    : i_ref.binning,
             'night'      : bool(self.night_av[constants.NIGHT_NIGHT]),
-            'fileSize'   : latest_pano_file.stat().st_size,
+            'fileSize'   : len(content),
             'height'     : panorama_height,
             'width'      : panorama_width,
             'camera_uuid': i_ref.camera_uuid,
@@ -4493,32 +4451,42 @@ class ImageWorker(Process):
         }
 
 
-        panorama_entry = self._miscDb.addPanoramaImage(
-            filename.relative_to(self.image_dir),
-            i_ref.camera_id,
-            panorama_metadata,
+        try:
+            folder = self._getImageFolder(i_ref.exp_date, i_ref.day_date, camera, 'panoramas')
+            date_str = i_ref.exp_date.strftime('%Y%m%d_%H%M%S')
+            name = ('panorama_' + self.filename_t).format(i_ref.camera_id, date_str, self.config['IMAGE_FILE_TYPE'])
+            filename = publish_panorama_file(root, folder / name, content, overwrite=False)
+        except FileExistsError:
+            logger.warning('[PANORAMA_DUPLICATE][camera_id=%s] Existing capture retained', camera.id)
+            return None
+        except (OSError, ValueError):
+            logger.exception('[PANORAMA_SAVE_FAILED][camera_id=%s]', camera.id)
+            return None
+
+        try:
+            panorama_entry = self._miscDb.addPanoramaImage(filename.relative_to(root), i_ref.camera_id, panorama_metadata)
+        except (SQLAlchemyError, TypeError, ValueError):
+            db.session.rollback()
+            try:
+                filename.unlink(missing_ok=True)
+            except OSError:
+                logger.exception('[PANORAMA_CLEANUP_FAILED][camera_id=%s]', camera.id)
+            logger.exception('[PANORAMA_DB_FAILED][camera_id=%s]', camera.id)
+            return None
+
+        publish_previews()
+        effects = (
+            (self._miscUpload.syncapi_panorama, (panorama_entry, panorama_metadata)),
+            (self._miscUpload.s3_upload_panorama, (panorama_entry, panorama_metadata)),
+            (self._miscUpload.mqtt_publish_image, (filename, 'panorama', {})),
+            (self._miscUpload.upload_panorama, (panorama_entry,)),
         )
-
-
-        if filename.exists():
-            logger.error('File exists: %s (skipping)', filename)
-            tmpfile_name.unlink()
-            return
-
-
-        shutil.copy2(str(tmpfile_name), str(filename))
-        filename.chmod(0o644)
-
-        tmpfile_name.unlink()
-
-
-        # set mtime to original exposure time
-        #os.utime(str(filename), (i_ref.exp_date.timestamp(), i_ref.exp_date.timestamp()))
-
-        self._miscUpload.syncapi_panorama(panorama_entry, panorama_metadata)  # syncapi before s3
-        self._miscUpload.s3_upload_panorama(panorama_entry, panorama_metadata)
-        self._miscUpload.mqtt_publish_image(filename, 'panorama', {})
-        self._miscUpload.upload_panorama(panorama_entry)
+        for effect, arguments in effects:
+            try:
+                effect(*arguments)
+            except Exception:
+                logger.exception('[PANORAMA_UPLOAD_FAILED][camera_id=%s] %s', camera.id, getattr(effect, '__name__', type(effect).__name__))
+        return panorama_entry
 
 
     def write_circular_display_img(self, circular_image_data, jpeg_exif=None):

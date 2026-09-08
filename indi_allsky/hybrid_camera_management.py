@@ -5,12 +5,12 @@ from dataclasses import replace
 
 DEFERRED_CAPTURE_OUTPUTS = (
     'mini_timelapse',
-    'panorama', 'panorama_loop', 'extra_uploads',
+    'panorama_loop', 'extra_uploads',
 )
 
 
 def multicamera_capture_outputs(outputs):
-    """Apply remaining capture restrictions while honoring long-term sample preferences."""
+    """Honor supported per-profile outputs while retaining compatibility restrictions."""
     result = dict(outputs)
     for key in DEFERRED_CAPTURE_OUTPUTS:
         result[key] = False
@@ -49,6 +49,11 @@ def camera_mode_context(config):
                    camera_interface=profile.camera_interface, capture_outputs=multicamera_capture_outputs(profile.outputs))
         effective = build_profile_config(proposed, replace(profile, outputs=row['capture_outputs']))
         row['generated_capture_enabled'] = bool(effective.get('TIMELAPSE_ENABLE', True))
+        row['panorama_capture_enabled'] = bool(
+            effective.get('FISH2PANO', {}).get('ENABLE', False)
+            and any(row['capture_outputs'].get(key, True)
+                    for key in ('timelapse', 'keogram', 'startrails'))
+        )
         row['realtime_capture_enabled'] = bool(
             row['capture_outputs'].get('realtime_keogram', True)
             and any(row['capture_outputs'].get(key, True)

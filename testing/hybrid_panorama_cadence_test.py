@@ -18,7 +18,7 @@ def run():
     def frame(cid,count,outputs=None,images_only=False):
         worker.image_processor=processors[cid];worker.image_count=count
         exec(code,dict(self=worker,images_only=images_only,profile_outputs=outputs or {},
-             i_ref=SimpleNamespace(binning=1),camera=SimpleNamespace(id=cid),jpeg_exif=b''))
+             i_ref=SimpleNamespace(binning=1),camera=SimpleNamespace(id=cid),jpeg_exif=b'',profile_primary=cid==1))
     for count,cid in enumerate((1,2,1,2),1):frame(cid,count)
     assert generated==[1,2],generated
     generated.clear()
