@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Camera Management: Hybrid possiede validazione cambio modalita', piano di
+  selezione camera e riepilogo output effettivi. I salvataggi usano il servizio
+  revisioni Settings con l'utente corrente, senza caricamenti CLI temporanei.
+  Corretta selezione IMX708/rpicam come libcamera; helper condiviso con il daemon
+  preserva le restrizioni multicamera esistenti, senza abilitarne altre.
+  Parita' e salvataggi verificati in isolamento; deploy e switch hardware aperti.
+
 - Startrail senza fotogrammi idonei: il worker non produce piu' un'immagine
   sostitutiva dichiarata generata. La ricevuta Hybrid espone output saltato e
   conteggio zero, mantenendo il Keogram valido come risultato parziale.

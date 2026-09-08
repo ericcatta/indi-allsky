@@ -3,6 +3,7 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/camera-management.js') }}" defer></script>
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-cameras-multicamera-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
@@ -10,7 +11,6 @@ var camera_id = {{ camera_id }};
 {% endblock %}
 
 {% block content %}
-<!-- Future camera management UI entry point; this first page is read-only. -->
 <main class="modern-admin-shell" aria-labelledby="modern-admin-cameras-title">
     {% set modern_admin_header_label = 'Camera management header' %}
     {% set modern_admin_heading = 'Camera Management' %}
@@ -87,13 +87,13 @@ var camera_id = {{ camera_id }};
                     <a class="modern-admin-media-button" href="{{ camera.gallery_url }}">Gallery</a>
                     {% endif %}
                 </div>
-                {% if camera.switch_enabled and not camera.profile_mode %}
-                <form class="modern-admin-camera-switch-form" method="post" action="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
+                {% if camera.switch_enabled and not camera.profile_mode and modern_admin_can_manage_cameras %}
+                <form data-camera-management-form class="modern-admin-camera-switch-form" method="post" action="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="camera_id" value="{{ camera.id }}">
                     <button class="modern-admin-media-button" type="submit">Use this camera</button>
                 </form>
-                {% elif not camera.profile_mode %}
+                {% elif not camera.profile_mode and camera.selected %}
                 <p class="modern-admin-note">Current active camera.</p>
                 {% endif %}
             </article>
@@ -102,14 +102,14 @@ var camera_id = {{ camera_id }};
         {% else %}
         <div class="modern-admin-empty-state">
             <h3>No configured cameras found</h3>
-            <p>The modern camera management page can still render, but there are no camera rows available yet.</p>
+            <p>No camera records are available. Add a camera to configure capture.</p>
         </div>
         {% endif %}
     </section>
 
     <section class="modern-admin-table-panel" aria-labelledby="multi-camera-title">
         <div class="modern-admin-section-heading">
-            <p class="modern-admin-eyebrow">Experimental Capture</p>
+            <p class="modern-admin-eyebrow">Capture mode</p>
             <h2 id="multi-camera-title">Multi-camera capture</h2>
         </div>
 
@@ -122,7 +122,7 @@ var camera_id = {{ camera_id }};
 
                 <div class="modern-admin-camera-card-main">
                     <h3>{{ modern_admin_multi_camera.mode_label }}</h3>
-                    <p>Experimental. Images-only. Timelapse, keogram, panorama and uploads are disabled.</p>
+                    <p>Each profile keeps its own exposure and gain settings. All cameras use the shared day/night capture intervals.</p>
                 </div>
 
                 {% if modern_admin_multi_camera.profiles %}
@@ -133,7 +133,7 @@ var camera_id = {{ camera_id }};
                                 <th>Profile</th>
                                 <th>Primary</th>
                                 <th>Interface</th>
-                                <th>Enabled</th>
+                                <th>Enabled</th><th>Images</th><th>Timelapse / Keogram</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -142,33 +142,35 @@ var camera_id = {{ camera_id }};
                                 <td>{{ profile.profile_id }}</td>
                                 <td>{{ 'Yes' if profile.primary else 'No' }}</td>
                                 <td>{{ profile.camera_interface }}</td>
-                                <td>{{ 'Yes' if profile.enabled else 'No' }}</td>
+                                <td>{{ 'Yes' if profile.enabled else 'No' }}</td><td>On</td><td>{{ 'On' if profile.generated_capture_enabled else 'Off' }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
                 {% else %}
-                <p class="modern-admin-note">No MULTI_CAMERA.profiles entries are configured.</p>
+                <p class="modern-admin-note">No usable camera profiles were found.</p>
                 {% endif %}
 
+                <p class="modern-admin-note">These settings are used when multi-camera capture is enabled. Disabled profiles do not acquire images. Automatic mini timelapse, realtime/long-term keogram, panorama and extra uploads remain restricted in multi-camera capture. Dedicated generation tools are available separately.</p>
+                {% if not modern_admin_can_manage_cameras %}<p role="status">Administrator access is required to change capture mode or select a capture camera.</p>{% endif %}
                 {% if modern_admin_multi_camera.enable_block_reason %}
                 <p class="modern-admin-note">{{ modern_admin_multi_camera.enable_block_reason }}</p>
                 {% endif %}
 
                 <div class="modern-admin-action-row">
-                    <form method="post" action="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
+                    <form data-camera-management-form method="post" action="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="modern_admin_action" value="multi_camera_enable">
-                        <button class="modern-admin-media-button" type="submit"{% if modern_admin_multi_camera.enabled or not modern_admin_multi_camera.enable_allowed %} disabled{% endif %}>Enable multi-camera</button>
+                        <button class="modern-admin-media-button" type="submit"{% if not modern_admin_can_manage_cameras or modern_admin_multi_camera.enabled or not modern_admin_multi_camera.enable_allowed %} disabled{% endif %}>Enable multi-camera</button>
                     </form>
-                    <form method="post" action="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
+                    <form data-camera-management-form method="post" action="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="modern_admin_action" value="multi_camera_disable">
-                        <button class="modern-admin-media-button" type="submit"{% if not modern_admin_multi_camera.enabled %} disabled{% endif %}>Disable multi-camera</button>
+                        <button class="modern-admin-media-button" type="submit"{% if not modern_admin_can_manage_cameras or not modern_admin_multi_camera.enabled %} disabled{% endif %}>Disable multi-camera</button>
                     </form>
                 </div>
-                <p class="modern-admin-note">Changing this flag saves a new active config. Restart indi-allsky manually for runtime changes to take effect.</p>
+                <p class="modern-admin-note">Save the mode, then restart indi-allsky to apply it.</p>
             </article>
         </div>
     </section>

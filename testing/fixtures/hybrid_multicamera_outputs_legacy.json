@@ -1,0 +1,5 @@
+{
+  "baseline": "3b3d426b",
+  "source": "def _images_only_capture_profile(self, profile):\n        # MULTI_CAMERA_PREP: keep core generated products that are already\n        # camera-scoped while disabling extra/continuous products during the\n        # multi-camera MVP.\n        outputs = dict(profile.outputs)\n        for key in (\n            'mini_timelapse',\n            'realtime_keogram',\n            'longterm_keogram',\n            'panorama',\n            'panorama_loop',\n            'extra_uploads',\n        ):\n            outputs[key] = False\n\n        outputs['images'] = True\n        _multi_camera_diag(\n            '[MULTI_CAMERA_IMAGES_ONLY][%s] preserved timelapse/keogram/startrails and disabled mini/realtime/longterm/panorama/upload extras',\n            profile.profile_id,\n        )\n        return replace(profile, outputs=outputs)",
+  "sha256": "ef5afb450a961703907eb6992f0187346e346beb55dfb0fa21a80720c094f1a2"
+}

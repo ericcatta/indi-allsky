@@ -557,18 +557,8 @@ class IndiAllSky(object):
         # MULTI_CAMERA_PREP: keep core generated products that are already
         # camera-scoped while disabling extra/continuous products during the
         # multi-camera MVP.
-        outputs = dict(profile.outputs)
-        for key in (
-            'mini_timelapse',
-            'realtime_keogram',
-            'longterm_keogram',
-            'panorama',
-            'panorama_loop',
-            'extra_uploads',
-        ):
-            outputs[key] = False
-
-        outputs['images'] = True
+        from .hybrid_camera_management import multicamera_capture_outputs
+        outputs = multicamera_capture_outputs(profile.outputs)
         _multi_camera_diag(
             '[MULTI_CAMERA_IMAGES_ONLY][%s] preserved timelapse/keogram/startrails and disabled mini/realtime/longterm/panorama/upload extras',
             profile.profile_id,

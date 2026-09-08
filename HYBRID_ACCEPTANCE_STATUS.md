@@ -13,6 +13,46 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Camera mode decisions and persistence — 2026-09-08
+
+Camera Management still described all multicamera output as disabled, and its
+save paths loaded temporary config files through the legacy CLI utility. The
+single-camera switch interpreted a database driver `rpicam-still` as INDI even
+when the camera identity was `libcamera_imx708`.
+
+Hybrid now owns mode validation, effective output summaries and camera-switch
+plans in `hybrid_camera_management.py`. Existing shared capture restrictions
+are applied by the same pure helper in the daemon and the UI, preserving core
+output flags, unknown keys and the deferred extra-output restrictions. The
+original daemon method is captured with a fingerprint for parity testing.
+This does not enable deferred multicamera features or change processing.
+
+Camera saves now use the Hybrid Settings revision service and the acting user,
+without temporary files, CLI loading or implicit system-account creation.
+Enabling requires two enabled valid profiles and valid shared intervals;
+existing implicit profile IDs are preserved. Disabling remains available for
+recovery. Repeating an already-saved request produces no extra revision.
+Camera selection recognizes supported libcamera/MQTT/network interfaces and
+INDI names; an unidentified rpicam sensor is rejected instead of saved as INDI.
+Forged single-camera selection while multicamera mode is enabled is rejected.
+No save automatically restarts capture or queues a task.
+
+The UI distinguishes saved mode/output settings from observed capture status,
+shows the actual automatic-output restrictions, and explains administrator-only
+controls. A native-form guard prevents duplicate and cross-form submissions
+while pending and restores original permission states on back navigation.
+The isolated Flask test verifies exact stored config, acting-user attribution,
+repeated requests, permissions/CSRF, invalid intervals/IDs and failed persistence.
+Native browser clicks and real camera switching remain open; no production
+configuration or service was changed for these tests. This candidate is not
+deployed and cannot be counted as completing the full product or 24-hour gate.
+
+All 102 Python regression entrypoints and 24 JavaScript suites passed. After
+restoring implicit profile-ID compatibility and clarifying labels, the affected
+policy/persistence/page tests were rerun successfully. The final source hashes,
+259 output-policy parity cases, inventory and control matrix are recorded in
+[Camera Management evidence](testing/evidence/hybrid-camera-management-2026-09-08.json).
+
 ## Users table parity and navigation — 2026-09-08
 
 Classic's users list offered sorting, pagination, copy, CSV and Excel. Hybrid's
