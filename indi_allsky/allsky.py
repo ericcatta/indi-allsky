@@ -1,4 +1,4 @@
-from .hybrid_video_task_policy import multicamera_rejection
+from .hybrid_video_task_policy import multicamera_rejection, video_task_profile_id
 import platform
 import sys
 import locale
@@ -690,6 +690,7 @@ class IndiAllSky(object):
         profile_id = self.capture_profiles[0].profile_id
 
         if self.multi_camera_capture_enable:
+            profile_id = video_task_profile_id(self.config, camera_id, profile_id)
             rejection = multicamera_rejection(action, camera_id)
             if rejection:
                 logger.warning('Skipping VIDEO task %d action=%s: %s', task.id, action, rejection)

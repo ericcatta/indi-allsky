@@ -12,17 +12,25 @@ def run():
     with isolated_app(multi_camera=True) as app:
         from indi_allsky.flask import db
         from indi_allsky.flask.models import IndiAllSkyDbTaskQueueTable as Task, TaskQueueState as State, TaskQueueQueue as Queue
-        from indi_allsky.hybrid_video_task_policy import multicamera_rejection
+        from indi_allsky.hybrid_video_task_policy import multicamera_rejection, video_task_profile_id
+        assert video_task_profile_id({}, None, 'primary') == 'primary'
+        assert video_task_profile_id({}, 2, 'primary') == 'default'
+        assert video_task_profile_id({'MULTI_CAMERA':None}, 2, 'primary') == 'default'
+        for key in ('db_camera_id','camera_db_id','camera_id'):
+            config={'MULTI_CAMERA':{'profiles':[{'profile_id':'second',key:'2'}]}}
+            assert video_task_profile_id(config, 2, 'primary') == 'second'
+            config['MULTI_CAMERA']['profiles'].append({'profile_id':'ambiguous',key:2})
+            assert video_task_profile_id(config, 2, 'primary') == 'default'
         source=Path(__file__).resolve().parents[1]/'indi_allsky/allsky.py'
         tree=ast.parse(source.read_text())
         method=next(node for node in ast.walk(tree) if isinstance(node,ast.FunctionDef) and node.name=='_queue_video_task')
-        namespace={'logger':logging.getLogger('dispatch-test'),'multicamera_rejection':multicamera_rejection}
+        namespace={'logger':logging.getLogger('dispatch-test'),'multicamera_rejection':multicamera_rejection,'video_task_profile_id':video_task_profile_id}
         exec(compile(ast.fix_missing_locations(ast.Module(body=[method],type_ignores=[])),str(source),'exec'),namespace)
         queue=LocalQueue()
-        coordinator=SimpleNamespace(multi_camera_capture_enable=True,capture_profiles=[SimpleNamespace(profile_id='test-profile-1')],video_q=queue)
-        cases=[(action,cid,True) for action in ('generateVideo','generateKeogramStarTrails','generatePanoramaVideo','updateAuroraData','updateSmokeData') for cid in (1,2)]
+        coordinator=SimpleNamespace(config={'MULTI_CAMERA':{'profiles':[{'profile_id':'test-profile-'+str(cid),'db_camera_id':cid} for cid in (1,2)]}},multi_camera_capture_enable=True,capture_profiles=[SimpleNamespace(profile_id='test-profile-1')],video_q=queue)
+        cases=[(action,cid,True) for action in ('generateVideo','generateMiniVideo','generateKeogramStarTrails','generatePanoramaVideo','updateAuroraData','updateSmokeData') for cid in (1,2)]
         cases += [(action,None,True) for action in ('backupDatabase','updateSatelliteTleData','systemHealthCheck')]
-        cases += [(action,None,False) for action in ('generateVideo','updateAuroraData','updateSmokeData')]
+        cases += [(action,None,False) for action in ('generateVideo','generateMiniVideo','updateAuroraData','updateSmokeData')]
         cases += [(action,2,False) for action in ('expireData','uploadAllskyEndOfNight','unknown')]
         with app.app_context():
             for action,cid,allowed in cases:
@@ -35,7 +43,7 @@ def run():
                 assert task.data==original
                 if allowed:
                     payload=queue.get_nowait()
-                    assert payload=={'task_id':task.id,'profile_id':'test-profile-1',**({'camera_id':cid} if cid else {})}
+                    assert payload=={'task_id':task.id,'profile_id':'test-profile-'+str(cid or 1),**({'camera_id':cid} if cid else {})}
                     assert task.state==State.QUEUED and task.result is None
                 else:
                     assert queue.empty() and task.state==State.EXPIRED and task.result
@@ -43,7 +51,7 @@ def run():
             task=Task(queue=Queue.VIDEO,state=State.QUEUED,data={'action':'expireData','kwargs':{}})
             db.session.add(task);db.session.commit();namespace['_queue_video_task'](coordinator,task)
             assert queue.get_nowait()['task_id']==task.id and task.state==State.QUEUED
-        print('Actual coordinator: 13 supported camera/global dispatch cases, missing-camera and unsupported rejection, persisted reasons, unchanged single-camera dispatch: PASS')
+        print('Actual coordinator: 15 supported camera/global dispatch cases, missing-camera and unsupported rejection, persisted reasons, unchanged single-camera dispatch: PASS')
 
 
 if __name__=='__main__':run()

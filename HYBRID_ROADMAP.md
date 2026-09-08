@@ -16,6 +16,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Generazione video multicamera: la policy Hybrid ammette ora anche i mini
+  timelapse e associa i task al profilo esplicitamente legato alla camera DB.
+  Camere storiche senza associazione univoca usano metadata neutrali, senza
+  ereditare il primo profilo. Il worker condiviso conserva gli algoritmi.
+  Collaudo con Classic disabilitato: quattro MP4 reali, download per entrambe
+  le camere e fallimento FFmpeg osservabile senza danneggiare output precedenti.
+  Modifica non ancora distribuita al coordinatore di produzione; evidenze in
+  `testing/evidence/hybrid-real-encoding-2026-09-08.json`.
+
 - Cleanup media Hybrid: il ciclo a lotti dei quattro flush interrompe il lavoro
   quando un lotto fallisce parzialmente, invece di ripetere senza fine gli stessi
   file. Restituisce errore osservabile e conteggio gia' eliminato; query per camera,
