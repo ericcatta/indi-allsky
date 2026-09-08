@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Release effetti `ca604649` distribuita sul Pi: dispatch mini/EndOfNight,
+  risoluzione profili per identita' locale esatta, EXIF opzionali e Keogram
+  senza colonna estranea. Backup coerente e rollback pronti; acquisizione
+  verificata dopo il riavvio delle 17:47:25, revisione 110 invariata.
+  Nuova finestra di 24 ore da quell'istante. Browser bloccato dal Mac locked;
+  collaudo completo e rimozione Classic restano aperti. Evidenze nel rapporto
+  `testing/evidence/hybrid-effects-deployment-2026-09-08.json`.
+
 - Routing task con profili senza ID DB: preflight reale ha mostrato che i profili
   correnti usano l'identita' camera configurata. La policy Hybrid risolve ora
   anche corrispondenze esatte e univoche dei nomi locali; gli ID espliciti hanno

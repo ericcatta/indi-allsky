@@ -13,6 +13,46 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Generated-output fixes deployed; live capture verified — 2026-09-08
+
+Production runs `ca604649`: mini timelapse and EndOfNight dispatch, exact local
+profile resolution, optional lens EXIF and the Keogram first-column correction
+are installed. All 571 runtime files matched the candidate with 96 passing
+regression entrypoints and real isolated generation/SFTP acceptance. The coherent
+828,977,152-byte SQLite backup passed integrity checking; protected configuration,
+manifest and rollback reside in `/home/eric/hybrid-backups/effects-20260908-174316`.
+Configuration revision 110 and all pre-existing untracked user files were preserved.
+
+Capture and Gunicorn restarted at 17:47:25 CEST, PIDs 3734524 and 3734527. At
+17:50:19, cameras 1/2 had produced 10/11 nonempty files since deployment; latest
+JPEGs decoded at 4608x2592 and 3840x2160. Request interval medians were 15.035s
+and 15.030s (maxima 15.042s and 15.229s), with no errors or pending tasks in this
+sample. Login returned HTTP 200; anonymous Now/Loop returned HTTP 302.
+These HTTP checks do not replace authenticated browser acceptance.
+
+Native browser verification is **blocked by the locked Mac**; automatic unlock
+failed and the user was asked to unlock it. Production generation through the UI
+and the exhaustive product audit remain open. Video/mini/EndOfNight uploads and
+S3, Sync API and YouTube were disabled at the postcheck; no integrations were
+enabled. Capture observation restarts at 17:47:25. Earlier periods are interrupted,
+not cumulative. The updated 15-minute monitor stores evidence under
+`/home/eric/hybrid-effects-evidence`; earliest possible 24-hour completion is
+2026-09-09 17:47:25 only with complete day/night evidence.
+
+Rollback for this exact release, after checking current state:
+
+```sh
+python3 /home/eric/hybrid-backups/effects-20260908-174316/deploy.py --rollback --backup /home/eric/hybrid-backups/effects-20260908-174316
+```
+
+The helper requires the expected release and clean tracked files, restores
+`4b009133`, restarts capture/web and preserves user files/configuration and new
+acquisitions. It does not restore the database over current data. Its saved
+version now stops the Gunicorn activation socket too; the executed original is
+retained as `deploy-executed.py`. The corrected helper compiled; rollback was
+not executed. Any rollback requires a fresh observation window.
+Evidence: `testing/evidence/hybrid-effects-deployment-2026-09-08.json`.
+
 ## Production preflight and profile identity resolution — 2026-09-08
 
 Preflight confirmed production at `4b009133`, capture PID 3566586 since 12:01:07,

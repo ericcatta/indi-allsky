@@ -1,0 +1,133 @@
+{
+  "deployment": {
+    "previous": "4b009133074fbcbc872bd9db7bb08328add49e69",
+    "candidate": "ca60464980a475a38385b6a179c2eda4b64bc562",
+    "backup": "/home/eric/hybrid-backups/effects-20260908-174316",
+    "capture_before": {
+      "MainPID": "3566586",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 12:01:07 CEST",
+      "ActiveState": "active"
+    },
+    "web_before": {
+      "MainPID": "3649890",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 13:14:45 CEST",
+      "ActiveState": "active"
+    },
+    "configuration_revision": 110,
+    "runtime_files_verified": 571,
+    "changed_runtime_files": [
+      "indi_allsky/allsky.py",
+      "indi_allsky/hybrid_video_task_policy.py",
+      "indi_allsky/keogram.py",
+      "indi_allsky/starTrails.py"
+    ],
+    "started": "2026-09-08T17:47:08.444397+02:00",
+    "status": "installed-live-capture-verified-browser-pending",
+    "capture_after": {
+      "MainPID": "3734524",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 17:47:25 CEST",
+      "ActiveState": "active"
+    },
+    "web_after": {
+      "MainPID": "3734527",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 17:47:25 CEST",
+      "ActiveState": "active"
+    },
+    "completed": "2026-09-08T17:47:25.359162+02:00",
+    "rollback_helper_note": "Saved helper now stops the activating Gunicorn socket and restores it; executed original retained as deploy-executed.py. Rollback not executed."
+  },
+  "postcheck": {
+    "observed_at": "2026-09-08T17:50:19.384616+02:00",
+    "candidate": "ca60464980a475a38385b6a179c2eda4b64bc562",
+    "since": "2026-09-08T17:47:25.359162",
+    "cameras": {
+      "1": {
+        "files": 10,
+        "latest_id": 15292,
+        "latest_at": "2026-09-08 17:50:06.000000",
+        "age_seconds": 13.741707,
+        "decoded_dimensions": [
+          4608,
+          2592
+        ],
+        "saved_interval_median": 15.0,
+        "request_interval_median": 15.035424500000001,
+        "request_interval_max": 15.041614,
+        "exposure": 9.0,
+        "gain": 9.41
+      },
+      "2": {
+        "files": 11,
+        "latest_id": 15293,
+        "latest_at": "2026-09-08 17:50:17.000000",
+        "age_seconds": 2.782746,
+        "decoded_dimensions": [
+          3840,
+          2160
+        ],
+        "saved_interval_median": 15.0,
+        "request_interval_median": 15.0300945,
+        "request_interval_max": 15.228924,
+        "exposure": 0.36360374093055725,
+        "gain": 0.0
+      }
+    },
+    "capture_service": "MainPID=3734524\nNRestarts=0\nActiveState=active\nActiveEnterTimestamp=Tue 2026-09-08 17:47:25 CEST",
+    "errors": [],
+    "pending_tasks": [],
+    "configuration_revision": 110,
+    "upload_flags": {
+      "UPLOAD_VIDEO": false,
+      "UPLOAD_MINI_VIDEO": false,
+      "UPLOAD_ENDOFNIGHT": false
+    },
+    "integration_enabled": {
+      "S3UPLOAD": false,
+      "SYNCAPI": false,
+      "YOUTUBE": false
+    },
+    "web": {
+      "/indi-allsky/login": {
+        "status": 200,
+        "bytes": 4524
+      },
+      "/indi-allsky/modern-admin/now": {
+        "status": 302,
+        "bytes": 305
+      },
+      "/indi-allsky/modern-admin/loop": {
+        "status": 302,
+        "bytes": 307
+      }
+    }
+  },
+  "backup": {
+    "bytes": 828977152,
+    "integrity": "ok",
+    "configuration_copy": "Protected on Raspberry; not exported"
+  },
+  "browser": {
+    "status": "bloccato",
+    "reason": "Mac locked; automatic unlock unsuccessful; user asked to unlock"
+  },
+  "observation": {
+    "baseline": "2026-09-08 17:47:25 Europe/Zurich",
+    "earliest_possible_completion": "2026-09-09 17:47:25 Europe/Zurich",
+    "status": "open",
+    "previous_window": "Interrupted by controlled capture restart; not accumulated",
+    "automation_id": "collaudo-hybrid-raspberry-giorno-e-notte",
+    "monitor_updated": true
+  },
+  "remaining": [
+    "Native browser post-deploy checks",
+    "Production generation/upload acceptance through product UI",
+    "Gain-first decrease observed on real hardware",
+    "Complete UI/control audit",
+    "Classic removal and repeated acceptance",
+    "Full 24-hour day/night evidence"
+  ]
+}

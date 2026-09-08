@@ -144,3 +144,17 @@ were unchanged. File and request evidence across the deploy is recorded in
 remain about 15.03s for each camera. The capture observation window therefore
 continues; 24 hours including night have not yet been verified. Web backup and
 rollback are separate at `/home/eric/hybrid-backups/web-ui-20260908-131241`.
+
+## Effects release observation reset (2026-09-08)
+
+Release `ca604649` required a controlled capture restart at **17:47:25 CEST**,
+PID 3734524, revision 110 unchanged. The 12:01:07 window is interrupted and
+cannot count toward the new 24 hours. First postcheck: 10/11 files, both latest
+JPEGs decoded; request medians 15.035s/15.030s and no errors in the sample.
+New evidence: `/home/eric/hybrid-effects-evidence`, scripts
+`/tmp/hybrid-effects-live.py` and `/tmp/hybrid-effects-starts.py`. The monitor was
+updated. Earliest possible completion is September 9 at 17:47:25, conditional
+on complete day/night evidence. Live gain-first decrease, browser checks (Mac
+locked), remaining effects and post-Classic-removal acceptance remain open.
+See `testing/evidence/hybrid-effects-deployment-2026-09-08.json` and the rollback
+instructions in `HYBRID_ACCEPTANCE_STATUS.md`.
