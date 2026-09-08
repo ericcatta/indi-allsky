@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Panorama: corretto contatore di ammissione per camera/profilo, prima globale
+  e sbilanciato verso una sola camera. Restrizione multicamera mantenuta fino
+  al collaudo completo di rendering/pubblicazione. Nessun deploy eseguito.
+  Mini timelapse: verifica del codice conferma generazione su richiesta, gia'
+  supportata; rimossa la descrizione fuorviante di uno scheduler automatico
+  mancante. Chiavi di compatibilita' conservate, nessuna nuova funzione inventata.
+
 - Realtime Keogram multicamera completato in isolamento: policy per profilo,
   cronologie separate con validazione e recupero cache, anteprima e download
   della camera/profilo selezionati, polling con errori/stato obsoleto espliciti.

@@ -39,7 +39,8 @@ def run():
             return client.post(route,data=dict(csrf_token=token(client),modern_admin_action=action,**values))
         page=admin.get(route)
         assert 'Images-only MVP' not in page.text and 'Timelapse, keogram, panorama and uploads are disabled' not in page.text
-        assert 'Automatic mini timelapse' in page.text and 'Timelapse / Keogram' in page.text
+        assert 'Mini timelapses are generated on request' in page.text and 'Timelapse / Keogram' in page.text
+        assert 'Automatic mini timelapse' not in page.text
         userpage=user.get(route)
         assert 'Administrator access is required' in userpage.text
         assert re.search(r'<button[^>]*disabled[^>]*>Enable multi-camera',userpage.text)

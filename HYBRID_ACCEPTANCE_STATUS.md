@@ -13,6 +13,32 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Panorama cadence and mini-timelapse capability correction — 2026-09-08
+
+The panorama admission block had the same global-counter bias as realtime
+history saves: for alternating camera sequence 1,2,1,2 and FISH2PANO modulus 2,
+the reproduced output sequence was 2,2. It now counts eligible frames on each
+cached camera/profile processor, yielding 1,2. Tests execute the actual
+processImage admission block, including moduli 1/2/3/5, uneven camera sequences,
+profile/config/images-only opt-out and unchanged single-camera modulo behavior.
+This is admission evidence; the renderer and publication effects are not tested
+by this lightweight case. The multicamera panorama restriction remains until
+those complete effects have acceptance evidence.
+
+Code verification also corrected an inaccurate feature description: mini
+timelapses are generated on operator request through mini_generation.py and
+VideoWorker.generateMiniVideo, already migrated and tested. There is no capture
+scheduler reading the `mini_timelapse` profile-output field. Camera Management
+now states that these clips are generated on request, instead of claiming a
+missing automatic mini-timelapse capability. Existing config/compatibility keys
+remain unchanged; no scheduler or new product feature is invented. Automatic
+panorama capture and extra uploads are still genuinely restricted.
+
+All 106 Python regression entrypoints passed and tested source hashes match.
+Evidence: [Panorama cadence](testing/evidence/hybrid-panorama-cadence-2026-09-08.json).
+No production deployment or restart was performed. The complete product audit,
+native browser acceptance, remaining effects and Classic removal stay open.
+
 ## Realtime Keogram multicamera flow — 2026-09-08
 
 Hybrid now honors each profile's realtime output option rather than forcing it

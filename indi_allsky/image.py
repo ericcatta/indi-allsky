@@ -2980,7 +2980,11 @@ class ImageWorker(Process):
 
 
         if not images_only and profile_outputs.get('panorama', True) and self.config.get('FISH2PANO', {}).get('ENABLE'):
-            if not self.image_count % self.config.get('FISH2PANO', {}).get('MODULUS', 2):
+            panorama_count = self.image_count
+            if self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False):
+                self.image_processor.panorama_frame_count = getattr(self.image_processor, 'panorama_frame_count', 0) + 1
+                panorama_count = self.image_processor.panorama_frame_count
+            if not panorama_count % self.config.get('FISH2PANO', {}).get('MODULUS', 2):
                 pano_data = self.image_processor.fish2pano(i_ref.binning)
 
 

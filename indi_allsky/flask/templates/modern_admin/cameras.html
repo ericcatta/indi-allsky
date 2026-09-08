@@ -152,7 +152,7 @@ var camera_id = {{ camera_id }};
                 <p class="modern-admin-note">No usable camera profiles were found.</p>
                 {% endif %}
 
-                <p class="modern-admin-note">These settings are used when multi-camera capture is enabled. Disabled profiles do not acquire images. Automatic mini timelapse, panorama and extra uploads remain restricted in multi-camera capture. Dedicated generation tools are available separately.</p>
+                <p class="modern-admin-note">These settings are used when multi-camera capture is enabled. Disabled profiles do not acquire images. Automatic panorama capture and extra uploads remain restricted in multi-camera capture. Mini timelapses are generated on request with the dedicated generation tool.</p>
                 {% if not modern_admin_can_manage_cameras %}<p role="status">Administrator access is required to change capture mode or select a capture camera.</p>{% endif %}
                 {% if modern_admin_multi_camera.enable_block_reason %}
                 <p class="modern-admin-note">{{ modern_admin_multi_camera.enable_block_reason }}</p>
