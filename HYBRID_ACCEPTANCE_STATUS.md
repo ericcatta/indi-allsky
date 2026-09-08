@@ -13,6 +13,26 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Archive detail return context — 2026-09-08
+
+A production browser interaction reproduced loss of Library filename filters:
+searching a ZWO frame, opening its detail and using Back to Images switched to
+the recent-images list. Detail links now carry their originating archive context.
+Image, FITS, video and generated-output details offer Back to results when that
+context names an allowed local Library/Media archive route. The helper rebuilds
+only whitelisted query fields and rejects external paths, unknown parameters,
+duplicates, fragments and control characters. Direct detail links retain their
+existing fallback navigation. Media permissions and effects are unchanged.
+
+All 93 Python/compile entrypoints pass in a new isolated Pi checkout, including
+both archive entrypoints, camera/role combinations, query/cursor round trips and
+untrusted return URLs. Native browser checks on synthetic data preserve a search
+and the second page through detail/back navigation; Reset retains camera/profile.
+Evidence: `testing/evidence/hybrid-archive-return-2026-09-08.json`.
+This correction is not yet deployed; production capture remains unchanged.
+The temporary sandbox is loopback-only at Pi port 8104/local tunnel 18104;
+revalidate its process before future use. These checks are not the complete audit.
+
 ## Exposure hold correction deployed — 2026-09-08 12:01 CEST
 
 Production now runs `a886a9d7`, configuration revision 110 unchanged. Capture

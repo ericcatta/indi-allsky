@@ -3,6 +3,7 @@
 import argparse
 import html
 import re
+from urllib.parse import urlsplit, parse_qs
 from datetime import datetime
 from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app, login_client
@@ -51,6 +52,17 @@ def run(runtime_config, entrypoint='archive'):
                         assert link(page,'next').split('?')[0]==route
                         assert 'profile_id=test-profile-'+str(cid) in link(page,'next')
                     assert ('<h1>Library</h1>' if entrypoint=='library' else '<h1>Media archive</h1>') in page.text
+                    # Follow every supported detail family and return to the exact
+                    # archive entrypoint and filter scope, not the recent-media list.
+                    for href in re.findall(r'href="([^"]*archive_return=[^"]+)"', page.text):
+                        detail = client.get(html.unescape(href))
+                        assert detail.status_code == 200
+                        back = re.search(r'href="([^"]+)" data-archive-return', detail.text)
+                        assert back, href
+                        back_url = html.unescape(back[1])
+                        assert urlsplit(back_url).path == route
+                        assert parse_qs(urlsplit(back_url).query)['profile_id'] == ['test-profile-'+str(cid)]
+                        assert ids(client.get(back_url)) == ids(page)
                     for href in re.findall(r'href="([^"]+/download)"',page.text):
                         response=client.get(html.unescape(href))
                         assert response.status_code==200 and response.data
@@ -61,6 +73,11 @@ def run(runtime_config, entrypoint='archive'):
         second=user.get(link(first,'next')); second_ids=ids(second)
         assert len(second_ids)==48 and not set(first_ids)&set(second_ids)
         assert ids(user.get(link(second,'prev')))==first_ids
+        detail_link = html.unescape(re.search(r'href="([^"]*archive_return=[^"]+)"', second.text)[1])
+        detail = user.get(detail_link)
+        back_url = html.unescape(re.search(r'href="([^"]+)" data-archive-return', detail.text)[1])
+        assert parse_qs(urlsplit(back_url).query) == parse_qs(urlsplit(link(first,'next')).query)
+        assert ids(user.get(back_url)) == second_ids
         third=user.get(link(second,'next'))
         assert len(ids(third))==15 and not link(third,'next')
         assert len(set(first_ids+second_ids+ids(third)))==111
@@ -71,6 +88,16 @@ def run(runtime_config, entrypoint='archive'):
         filtered=user.get(route,query_string=dict(kind='image',camera_id=1,start='2024-01-01',end='2024-01-01',period='night',uploaded='yes'))
         assert ids(filtered)==list(reversed([i for i in range(100,210) if i%2==0 and i%3==0]))
         assert ids(user.get(route+'?camera_id=1&search=archive-image-100.jpg'))==[100]
+        search_url = route+'?camera_id=1&search=archive-image-100.jpg&sort=oldest&period=night&uploaded=no'
+        search_page = user.get(search_url)
+        detail_link = html.unescape(re.search(r'href="([^"]*archive_return=[^"]+)"', search_page.text)[1])
+        back = re.search(r'href="([^"]+)" data-archive-return', user.get(detail_link).text)
+        assert parse_qs(urlsplit(html.unescape(back[1])).query) == parse_qs(urlsplit(search_url).query)
+        for unsafe in ('https://example.invalid/', '//example.invalid/', '/indi-allsky/modern-admin/users',
+                       route+'?search=a&search=b', route+'?next=https://example.invalid/',
+                       route+'#fragment', route+'\\evil', '\n'+route):
+            detail = user.get('/indi-allsky/modern-admin/media/images/2', query_string={'archive_return':unsafe})
+            assert detail.status_code == 200 and 'data-archive-return' not in detail.text
         assert ids(user.get(route+'?camera_id=1&search=%25'))==[] # '%' is literal, not a wildcard.
         assert ids(user.get(route+'?kind=image&camera_id=2'))==[2]
         assert ids(user.get(route+'?camera_id=1&start=1900-01-01&end=1900-01-02'))==[]

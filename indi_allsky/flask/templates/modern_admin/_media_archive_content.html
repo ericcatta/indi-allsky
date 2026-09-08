@@ -48,15 +48,15 @@
         {% if item.note %}<p>{{ item.note }}</p>{% endif %}
         <a class="modern-admin-file-action" href="{{ item.download_url }}">Download original</a>
         {% if archive_values.kind == 'image' %}
-        <a href="{{ url_for('indi_allsky.modern_admin_media_image_detail_view', image_id=item.id, camera_id=item.camera_id) }}">Image details</a>
+        <a href="{{ url_for('indi_allsky.modern_admin_media_image_detail_view', image_id=item.id, camera_id=item.camera_id, archive_return=request.full_path) }}">Image details</a>
         <a href="{{ url_for('indi_allsky.modern_admin_mini_generate_view', image_id=item.id, camera_id=item.camera_id) }}">Create mini timelapse</a>
         {% elif archive_values.kind == 'fits' %}
-        <a href="{{ url_for('indi_allsky.modern_admin_fits_detail_view', fits_id=item.id, camera_id=item.camera_id) }}">FITS details</a>
+        <a href="{{ url_for('indi_allsky.modern_admin_fits_detail_view', fits_id=item.id, camera_id=item.camera_id, archive_return=request.full_path) }}">FITS details</a>
         {% elif archive_values.kind == 'video' %}
-        <a href="{{ url_for('indi_allsky.modern_admin_media_video_detail_view', video_id=item.id, camera_id=item.camera_id) }}">Video details</a>
+        <a href="{{ url_for('indi_allsky.modern_admin_media_video_detail_view', video_id=item.id, camera_id=item.camera_id, archive_return=request.full_path) }}">Video details</a>
         {% endif %}
         {% if archive_values.kind not in ('image', 'fits', 'raw') %}
-        <a href="{{ url_for('indi_allsky.modern_admin_output_detail_view', kind=archive_values.kind, id=item.id, camera_id=item.camera_id, profile_id=modern_admin_media_selected_filter.profile_id) }}">Output details</a>
+        <a href="{{ url_for('indi_allsky.modern_admin_output_detail_view', kind=archive_values.kind, id=item.id, camera_id=item.camera_id, profile_id=modern_admin_media_selected_filter.profile_id, archive_return=request.full_path) }}">Output details</a>
         {% endif %}
         <p class="archive-preview-error" role="status" hidden>Preview could not be loaded. The original may be missing or unreachable.</p>
       </div>

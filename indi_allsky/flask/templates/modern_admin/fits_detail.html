@@ -67,7 +67,8 @@ var camera_id = {{ camera_id }};
         </section>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_fits_view', camera_id=modern_admin_fits_detail.camera_id, profile_id=request.args.get('profile_id', '')) }}">Back to FITS Inspection</a>
+            {% set archive_back = request.args.get('archive_return') | archive_return_url %}
+            {% if archive_back %}<a href="{{ archive_back }}" data-archive-return>Back to results</a>{% else %}<a href="{{ url_for('indi_allsky.modern_admin_fits_view', camera_id=modern_admin_fits_detail.camera_id, profile_id=request.args.get('profile_id', '')) }}">Back to FITS Inspection</a>{% endif %}
             <a href="{{ url_for('indi_allsky.modern_admin_media_fits_view', camera_id=modern_admin_fits_detail.camera_id, profile_id=request.args.get('profile_id', '')) }}">Open FITS Media Viewer</a>
         </section>
     </section>

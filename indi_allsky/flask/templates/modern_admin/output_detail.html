@@ -31,6 +31,8 @@
 <a href="{{ item.download_url }}">Download original</a>
 </article>
 {% else %}<p>Choose a saved output from the Library to inspect its preview, metadata and original file.</p>{% endif %}
+{% set archive_back = request.args.get('archive_return') | archive_return_url %}
+{% if archive_back %}<a href="{{ archive_back }}" data-archive-return>Back to results</a>{% endif %}
 <nav class="modern-admin-link-grid" aria-label="Choose output type">
 {% for kind, label in output_kinds.items() %}<a href="{{ url_for('indi_allsky.modern_admin_library_view', kind=kind, **output_scope) }}">{{ label }}</a>{% endfor %}
 </nav>

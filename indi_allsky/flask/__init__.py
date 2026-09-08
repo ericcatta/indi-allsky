@@ -102,6 +102,8 @@ def create_app():
     app.register_blueprint(create_allsky_blueprint(
         enable_classic_ui=app.config['HYBRID_ENABLE_CLASSIC_UI'],
     ))
+    from .archive_navigation import archive_return_url
+    app.add_template_filter(archive_return_url)
     app.add_template_filter(basename)
     app.register_blueprint(bp_auth_allsky)
     app.register_blueprint(bp_syncapi_allsky)
