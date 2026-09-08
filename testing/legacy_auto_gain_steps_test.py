@@ -26,7 +26,8 @@ def load(path, method=False):
     return env['recalculate_exposure']
 
 def calculate(fn,gain,exposure,adu,steps):
-    worker=SimpleNamespace(_auto_gain_enabled=lambda:True,_auto_gain_limits=lambda:(steps[0],steps[-1]),
+    worker=SimpleNamespace(_auto_exposure_enabled=lambda:False,
+        _auto_gain_enabled=lambda:True,_auto_gain_limits=lambda:(steps[0],steps[-1]),
         auto_gain_step_list=steps,auto_gain_exposure_cutoff_low=32,auto_gain_exposure_cutoff_mid=35.75,
         auto_gain_exposure_cutoff_high=39.5,profile_id='test',camera_id=1,
         _auto_gain_mode=lambda:'night',_save_auto_gain_runtime_state=Mock(),

@@ -13,6 +13,27 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Exposure pipeline regression and first resumed browser checks — 2026-09-08
+
+The exact published `0bf4eb96` candidate was checked out in a new isolated Pi
+clone. The full 93-entrypoint Python/compile suite passed 92 checks initially;
+the legacy auto-gain fixture lacked the new Hybrid-enable predicate. Declaring
+Hybrid disabled in that legacy-only fixture preserves all 40 on-grid parity
+cases and off-grid checks. That test and both Hybrid controller/pipeline tests
+then passed on the Pi. Runtime source was unchanged after the initial suite;
+only this test fixture differs from the clean candidate. Evidence and source
+hashes: `testing/evidence/hybrid-exposure-runtime-regression-2026-09-08.json`.
+This closes the previously environment-blocked runtime regression, not deployment.
+
+Native browser interaction is available again. Five controls were exercised on
+production `0104b282`: Now refresh, camera-1 archive entry, image detail, camera
+selection using keyboard, and applying the camera-2 filter. Updated timestamps,
+matching record metadata and camera-specific results were observed after actions.
+Evidence: `testing/evidence/hybrid-browser-media-2026-09-08.json`. These limited
+checks do not replace the full inventory, role/mobile matrix, image decoding,
+downloads or effect acceptance. No production settings/services/media changed.
+The gain-first hold fix still requires backup, deploy and fresh day/night testing.
+
 ## User detail compact layout
 
 The redundant three-card user summary is removed; ID, identity, active/staff/admin

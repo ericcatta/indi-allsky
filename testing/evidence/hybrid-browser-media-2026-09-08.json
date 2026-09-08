@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-08",
+  "production_commit": "0104b282",
+  "tool": "CUA in-app browser, existing signed-in session",
+  "scope": "Five observed controls only; no production writes/downloads or effect tests",
+  "controls": [
+    {
+      "id": "now.refresh",
+      "page": "/modern-admin/now",
+      "control": "Refresh status",
+      "expected_and_observed": "Updated old snapshot to 2026-09-08 11:51; latest RPi 11:51:01 and ZWO 11:50:56",
+      "status": "superato",
+      "role": "existing authenticated session; role not independently verified",
+      "evidence": "CUA action followed by fresh accessibility tree in task transcript"
+    },
+    {
+      "id": "now.browse-camera-1",
+      "page": "/modern-admin/now",
+      "control": "Browse camera images",
+      "expected_and_observed": "Navigated to library?kind=image&camera_id=1; IMX708 Wide selected; camera 1 records and 4608x2592 dimensions",
+      "status": "superato",
+      "role": "existing authenticated session; role not independently verified",
+      "evidence": "CUA action followed by fresh accessibility tree in task transcript"
+    },
+    {
+      "id": "library.image-detail",
+      "page": "/modern-admin/library?kind=image&camera_id=1",
+      "control": "Image details",
+      "expected_and_observed": "Opened media/images/12439?camera_id=1; ID, filename ccd1_20260908_115131.jpg, camera 1 and exposure 3.35s match selected record",
+      "status": "superato",
+      "role": "existing authenticated session; role not independently verified",
+      "evidence": "CUA action followed by fresh accessibility tree in task transcript"
+    },
+    {
+      "id": "library.camera-selector",
+      "page": "/modern-admin/library?kind=image&camera_id=1",
+      "control": "Camera selector via Down/Return",
+      "expected_and_observed": "Selected ASI678MC; list retained prior state until Apply filters",
+      "status": "superato",
+      "role": "existing authenticated session; role not independently verified",
+      "evidence": "CUA action followed by fresh accessibility tree in task transcript"
+    },
+    {
+      "id": "library.apply-camera-filter",
+      "page": "/modern-admin/library?kind=image&camera_id=1",
+      "control": "Apply filters",
+      "expected_and_observed": "URL camera_id=2; ASI678MC selected; 48 camera 2 records, ccd2 filenames and 3840x2160 dimensions",
+      "status": "superato",
+      "role": "existing authenticated session; role not independently verified",
+      "evidence": "CUA action followed by fresh accessibility tree in task transcript"
+    }
+  ],
+  "open": [
+    "Other controls and pages",
+    "Ordinary/anonymous roles",
+    "Mobile viewport and visual rendering",
+    "Download contents, lightbox and generated outputs",
+    "Effects and hardware",
+    "Classic-disabled browser suite"
+  ],
+  "note": "Accessibility observation verifies route/filter/detail contents; it does not establish successful decoding of image pixels."
+}
