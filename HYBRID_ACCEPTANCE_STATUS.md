@@ -13,6 +13,32 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Native browser panorama acceptance — 2026-09-08 21:22–21:28 CEST
+
+The in-app browser now accepts real interactions. Refreshing Now displayed fresh
+post-deploy frames. Eighteen bounded interaction/layout checks were completed on
+the installed `80896495` release, using the existing authenticated session.
+Panorama Loop navigation, both camera filters, pause, manual next/previous,
+interval selection, actual autoplay, correct featured-frame lightbox, keyboard
+lightbox navigation/closure and returned focus were observed. Details opened the
+correct panorama with camera/profile preserved. Selection enabled the batch
+button and deselection disabled it; no file download was performed.
+
+At an explicit 390px viewport, both Loop and detail had document scrollWidth equal
+to clientWidth (390px). Playback controls stayed in bounds, and the detail preview
+was fully loaded with naturalWidth 4712. Keyboard navigation worked at this width.
+The screenshot was also inspected at the default viewport. The captured console
+contained no error entries. The viewport override was reset and Now restored.
+
+This closes these particular browser checks, not the exhaustive product audit.
+Other roles, original/batch download completion and native failure/hidden-tab
+cases remain open; their automatic tests are distinct evidence. Capture was not
+restarted, so the 21:15:41 observation baseline is unchanged. No new automatic
+regression was needed for this evidence-only change; the installed runtime is
+unchanged from its recorded 107 Python/29 JavaScript validation.
+
+Matrix: [native panorama checks](testing/evidence/hybrid-native-panorama-2026-09-08.json).
+
 ## Production batch deployment and renewed observation — 2026-09-08
 
 Release **80896495** is installed on the Raspberry. This supersedes the earlier

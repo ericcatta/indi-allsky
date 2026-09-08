@@ -1,0 +1,166 @@
+{
+  "observed_at": "2026-09-08T21:29:40.208799+02:00",
+  "release": "808964953eace9777b366b7651a946734a776308",
+  "environment": "Production allsky-pi.local through native in-app browser CUA actions, accessibility tree, DOM inspection and screenshot",
+  "session": "Existing authenticated production session; no role switch performed",
+  "viewports": [
+    "Default 811 x 917 screenshot",
+    "Explicit 390 x 844; override reset afterwards"
+  ],
+  "cases": [
+    {
+      "id": "now.refresh",
+      "page": "Now",
+      "control": "Refresh status",
+      "camera_profile": "Both cameras",
+      "status": "superato",
+      "evidence": "Frame timestamps changed from 20:25 to 21:21:53/21:22:04 on actual refresh."
+    },
+    {
+      "id": "navigation.open",
+      "page": "Now",
+      "control": "hybrid-menu-button",
+      "camera_profile": "All",
+      "status": "superato",
+      "evidence": "Drawer opened and exposed Panorama Loop link."
+    },
+    {
+      "id": "navigation.panorama-loop",
+      "page": "Now",
+      "control": "Panorama Loop link",
+      "camera_profile": "All",
+      "status": "superato",
+      "evidence": "Navigation loaded the live Panorama Loop with eight saved panorama rows from both cameras."
+    },
+    {
+      "id": "panorama-loop.pause",
+      "page": "Panorama Loop",
+      "control": "panorama-loop-toggle",
+      "camera_profile": "All",
+      "status": "superato",
+      "evidence": "Pause became Play; displayed frame remained paused at 2 of 8."
+    },
+    {
+      "id": "panorama-loop.next",
+      "page": "Panorama Loop",
+      "control": "panorama-loop-next",
+      "camera_profile": "All",
+      "status": "superato",
+      "evidence": "Frame advanced from 2 to 3 of 8; filename, date and original link changed together to panorama_ccd1_20260908_212023.jpg."
+    },
+    {
+      "id": "panorama-loop.lightbox",
+      "page": "Panorama Loop",
+      "control": "modern-admin-media-featured-image",
+      "camera_profile": "Camera 1",
+      "status": "superato",
+      "evidence": "Opening displayed frame 3 showed matching panorama_ccd1_20260908_212023.jpg and original link in lightbox."
+    },
+    {
+      "id": "lightbox.keyboard.next",
+      "page": "Panorama Loop",
+      "control": "ArrowRight",
+      "camera_profile": "Both cameras",
+      "status": "superato",
+      "evidence": "Lightbox advanced to panorama_ccd2_20260908_211949.jpg and updated original link."
+    },
+    {
+      "id": "lightbox.keyboard.close",
+      "page": "Panorama Loop",
+      "control": "Escape",
+      "camera_profile": "Camera 1",
+      "status": "superato",
+      "evidence": "Lightbox closed; focus returned to the original featured frame; playback remained paused."
+    },
+    {
+      "id": "panorama-loop.filter.imx708",
+      "page": "Panorama Loop",
+      "control": "IMX708 Wide",
+      "camera_profile": "imx708-wide",
+      "status": "superato",
+      "evidence": "URL selected profile_id=imx708-wide; visible rows and detail links all belonged to camera 1."
+    },
+    {
+      "id": "panorama-loop.interval",
+      "page": "Panorama Loop",
+      "control": "panorama-loop-speed",
+      "camera_profile": "imx708-wide",
+      "status": "superato",
+      "evidence": "Selected 2 seconds; visible select confirmed value. Exact real-time interval was not instrumented."
+    },
+    {
+      "id": "panorama-loop.previous",
+      "page": "Panorama Loop",
+      "control": "panorama-loop-prev",
+      "camera_profile": "imx708-wide",
+      "status": "superato",
+      "evidence": "Frame moved from 4 to 3 of 5; filename, title and original link followed."
+    },
+    {
+      "id": "panorama-loop.filter.asi",
+      "page": "Panorama Loop",
+      "control": "ASI678MC",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "URL selected profile_id=asi678mc; visible rows and detail links belonged to camera 2."
+    },
+    {
+      "id": "panorama-loop.details",
+      "page": "Panorama Loop",
+      "control": "First visible Details link",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Opened /modern-admin/output?kind=panorama&id=11&camera_id=2&profile_id=asi678mc; page showed panorama_ccd2_20260908_212418.jpg, camera 2, ID 11 and 4712 x 750 dimensions."
+    },
+    {
+      "id": "panorama-detail.mobile",
+      "page": "Output detail",
+      "control": "390px viewport",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Document viewport/scroll widths both 390; content widths 390/356; image width 309.96, naturalWidth 4712 and complete=true."
+    },
+    {
+      "id": "panorama-loop.back",
+      "page": "Output detail",
+      "control": "Browser Back",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Returned to filtered Loop; actual playback resumed and showed Frame 5 of 7."
+    },
+    {
+      "id": "panorama-loop.mobile",
+      "page": "Panorama Loop",
+      "control": "390px viewport",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Document viewport/scroll widths both 390; all playback buttons and select were within horizontal viewport and enabled."
+    },
+    {
+      "id": "panorama-loop.keyboard.previous",
+      "page": "Panorama Loop",
+      "control": "ArrowLeft on Next button",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Paused at Frame 6 of 7, then ArrowLeft changed to Frame 5 of 7."
+    },
+    {
+      "id": "panorama-loop.selection",
+      "page": "Panorama Loop",
+      "control": "First visible media checkbox",
+      "camera_profile": "asi678mc",
+      "status": "superato",
+      "evidence": "Checking displayed 1 selected and enabled Download selected; unchecking disabled it again. No download initiated."
+    }
+  ],
+  "console_errors_observed": [],
+  "restored_state": "Default viewport and original Now URL restored; no runtime actions, settings mutations, media deletion or downloads",
+  "open": [
+    "Native ordinary-user and anonymous interaction coverage",
+    "Original and batch download completion in browser",
+    "Precise real-time playback interval measurement",
+    "Hidden-tab and failed-frame handling in native browser (automated controller tests only)",
+    "Remaining pages, controls, effects and Classic removal",
+    "Uninterrupted 24h day/night observation"
+  ]
+}
