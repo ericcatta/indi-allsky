@@ -18,7 +18,7 @@
 <dl class="modern-admin-media-meta">
 <div><dt>Created</dt><dd>{{ item.created }}</dd></div><div><dt>Capture day</dt><dd>{{ item.day_date }}</dd></div>
 <div><dt>Capture mode</dt><dd>{{ 'Night' if item.night else 'Day' }}</dd></div>
-<div><dt>Dimensions</dt><dd>{{ item.width or '?' }} × {{ item.height or '?' }}</dd></div>
+<div><dt>Dimensions</dt><dd{% if item.video and (not item.width or not item.height) %} data-preview-dimensions{% endif %}>{% if item.width and item.height %}{{ item.width }} × {{ item.height }}{% else %}Not recorded{% endif %}</dd></div>
 {% if item.frames is not none %}<div><dt>Frames</dt><dd>{{ item.frames }}</dd></div>{% endif %}
 {% if item.framerate is not none %}<div><dt>Frame rate</dt><dd>{{ item.framerate }}</dd></div>{% endif %}
 <div><dt>Recorded size (bytes)</dt><dd>{{ item.file_size if item.file_size is not none else 'Not recorded' }}</dd></div>
@@ -27,7 +27,7 @@
 {% if item.excluded %}<div><dt>Viewer state</dt><dd>Excluded</dd></div>{% endif %}
 </dl>
 {% if item.note %}<p>{{ item.note }}</p>{% endif %}
-<p>These are saved record values. They do not verify current file availability, source lineage or a processing recipe.</p>
+<p>Values are from saved records unless marked “preview”. They do not verify current file availability, source lineage or a processing recipe.</p>
 <a href="{{ item.download_url }}">Download original</a>
 </article>
 {% else %}<p>Choose a saved output from the Library to inspect its preview, metadata and original file.</p>{% endif %}
@@ -37,5 +37,5 @@
 {% for kind, label in output_kinds.items() %}<a href="{{ url_for('indi_allsky.modern_admin_library_view', kind=kind, **output_scope) }}">{{ label }}</a>{% endfor %}
 </nav>
 </section></main>
-<script src="{{ url_for('indi_allsky.static', filename='modern_admin/media-archive.js', v='archive-v1') }}"></script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/media-archive.js', v='archive-v2') }}"></script>
 {% endblock %}

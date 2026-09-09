@@ -13,6 +13,25 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Preview dimensions correction — candidate, 2026-09-09
+
+Library and Output detail now label missing dimensions explicitly rather than
+showing question marks. When saved video dimensions are absent, the existing
+player supplies positive dimensions after metadata loads, marked `(preview)`.
+Cached metadata, later loading, resize, emptied and error states are handled
+independently per card. Saved dimensions are preserved; no media record, capture
+setting or generated file is changed. The shared script cache version is updated.
+
+The new JavaScript test verifies those transitions and cross-camera isolation.
+All 31 JavaScript entrypoints and 116 Python regression entries passed.
+Evidence: `testing/evidence/hybrid-preview-dimensions-2026-09-09.json`.
+Native browser verification of this candidate and deployment remain open.
+
+Additional live playback on installed `498ba959` verified the two latest timelapses
+and two Startrail videos reaching their ends without media errors through native
+Library controls. Evidence: `testing/evidence/hybrid-native-video-playback-2026-09-09.json`.
+This proves those four clips, not all controls, roles or mobile layouts.
+
 ## Native panorama playback — 2026-09-09
 
 In the existing authenticated in-app browser, selected Panorama videos in Library,

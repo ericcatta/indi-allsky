@@ -1,0 +1,66 @@
+{
+  "date": "2026-09-09",
+  "installed": "498ba959",
+  "environment": "Existing authenticated native in-app browser session, production Library",
+  "interaction": "Select media type, Apply filters, press Space on each labelled native video control, observe progress and ended state",
+  "cases": [
+    {
+      "kind": "video",
+      "camera_id": 1,
+      "id": 12,
+      "duration": 31.96,
+      "final_current_time": 31.96,
+      "ended": true,
+      "paused": true,
+      "width": 4608,
+      "height": 2592,
+      "media_error": null,
+      "outcome": "passed"
+    },
+    {
+      "kind": "video",
+      "camera_id": 2,
+      "id": 11,
+      "duration": 32,
+      "final_current_time": 32,
+      "ended": true,
+      "paused": true,
+      "width": 3840,
+      "height": 2160,
+      "media_error": null,
+      "outcome": "passed"
+    },
+    {
+      "kind": "startrail-video",
+      "camera_id": 1,
+      "id": 5,
+      "duration": 22.6,
+      "final_current_time": 22.6,
+      "ended": true,
+      "paused": true,
+      "width": 4608,
+      "height": 2592,
+      "media_error": null,
+      "outcome": "passed"
+    },
+    {
+      "kind": "startrail-video",
+      "camera_id": 2,
+      "id": 4,
+      "duration": 15.92,
+      "final_current_time": 15.92,
+      "ended": true,
+      "paused": true,
+      "width": 3840,
+      "height": 2160,
+      "media_error": null,
+      "outcome": "passed"
+    }
+  ],
+  "limitations": [
+    "Not candidate dimensions validation; deployed templates still show missing recorded dimensions",
+    "No anonymous/ordinary-user/mobile tests in this run",
+    "No downloads or production mutations",
+    "Scientific quality and complete product acceptance remain open"
+  ]
+}
