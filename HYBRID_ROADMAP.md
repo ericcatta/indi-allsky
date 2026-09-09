@@ -16,6 +16,17 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Rilascio Raspberry 9 settembre 21:57 CEST: installato `9081093a`, web e
+  capture riavviati (PID 362733/362732, NRestarts 0 al controllo). Backup
+  coerente SQLite 828977152 byte, integrity_check ok, codice e configurazione
+  in `/home/eric/hybrid-backups/timelapse-20260909-215635`. File non tracciati
+  dell'utente preservati. Nuova pagina TL verificata nel browser di produzione;
+  salvataggio confermato in revisione 111 con sole DEFLICKER=true e
+  DEFLICKER_WINDOW=5, identiche ai default gia' attivi al riavvio. Nuovi file
+  verificati per entrambe le camere (25008/25009, poi 25012/25013).
+  Deflicker e stabilita' controller ora distribuiti; valutazione visiva dei TL
+  reali e stabilita' prolungata ancora aperte. Monitoraggio 24h non riattivato.
+
 - Impostazioni Timelapse: nuova pagina Hybrid `/modern-admin/settings/timelapse`
   e collegamento nel menu. Deflicker attivo per default su richiesta esplicita,
   finestra 5 frame, selezionabile 3/5/9 o disattivabile. Salvataggio globale

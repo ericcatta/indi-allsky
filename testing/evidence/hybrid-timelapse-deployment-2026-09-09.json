@@ -1,0 +1,40 @@
+{
+  "previous": "6072fae49c478143f8b00304ff6b15c76479c92b",
+  "installed": "9081093a979e1403b0cbe0226f1341db87a1304a",
+  "backup": "/home/eric/hybrid-backups/timelapse-20260909-215635",
+  "database_bytes": 828977152,
+  "database_integrity": "ok",
+  "backup_revision": 110,
+  "browser_saved_revision": 111,
+  "only_expected_config_changes": true,
+  "effective_deflicker_before_and_after_save": [true, 5],
+  "capture_started": "2026-09-09 21:57:48 CEST",
+  "capture_pid": 362732,
+  "web_pid": 362733,
+  "service_restarts_at_check": 0,
+  "first_frame_check_utc": "2026-09-09T19:59:10.854748+00:00",
+  "first_new_frames": [25008, 25009],
+  "later_new_frames": [25012, 25013],
+  "later_frame_times_local": ["2026-09-09 22:00:22", "2026-09-09 22:00:24"],
+  "production_browser": {
+    "url": "https://allsky-pi.local/indi-allsky/modern-admin/settings/timelapse",
+    "tab": 36,
+    "page_rendered": true,
+    "admin_controls_enabled": true,
+    "default_checked": true,
+    "window": 5,
+    "save_clicked": true,
+    "success_redirect_observed": true,
+    "database_save_verified": true
+  },
+  "untracked_user_files_preserved": true,
+  "rollback": "python3 /home/eric/hybrid-backups/timelapse-20260909-215635/deploy.py --rollback /home/eric/hybrid-backups/timelapse-20260909-215635",
+  "rollback_scope": "Previous code and service restart only; does not restore the old database over new frames or delete media.",
+  "limits": [
+    "Initial post-deploy checks, not sustained stability acceptance",
+    "Real timelapse visual quality still needs review",
+    "Highlight clipping protection is not implemented by this release",
+    "Classic migration/removal remains incomplete",
+    "24-hour observation remains deferred"
+  ]
+}
