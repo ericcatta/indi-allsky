@@ -13,6 +13,21 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Live continuity — 2026-09-09 09:16 CEST
+
+Installed release remains 498ba959, capture PID 4112458, active since September 8
+23:21:17 with NRestarts=0. At 09:16 both cameras had 1,249 records since deployment;
+latest frames were 09:15:58 and 09:15:53. All sampled-since-release files existed
+and were nonempty. Recent intervals had median 15 seconds (camera 1 range 14–16,
+camera 2 exactly 15). No pending task or journal ERROR/Traceback was found.
+This is 9.91 hours of service continuity, not the required 24-hour acceptance.
+
+Two cadence warnings remain associated with the 45-to-15-second day transition.
+Source inspection finds shoot() compares the elapsed interval with the newly
+selected period; request-level verification and correction remain open. No
+capture change, restart or deployment was made. Evidence:
+`testing/evidence/hybrid-live-continuity-2026-09-09-0916.json`.
+
 ## System summary metrics — candidate, 2026-09-09
 
 Native System Info showed CPU and memory as 0.0%. Source inspection confirmed

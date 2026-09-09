@@ -1,0 +1,77 @@
+{
+  "observed_at": "2026-09-09T09:16:02.951775+02:00",
+  "since": "2026-09-08T23:21:17.402687",
+  "candidate": "498ba95944fe11881cc5d863c70ca99621fabd78",
+  "scope": "Live cadence and file presence since deployment; not complete 24h acceptance",
+  "cameras": {
+    "1": {
+      "count": 1249,
+      "first": {
+        "id": 16970,
+        "createDate": "2026-09-08 23:22:13.000000",
+        "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260908/night/08_23/ccd1_20260908_232213.jpg",
+        "exposure": 39.0,
+        "gain": 16.0,
+        "night": 1
+      },
+      "latest": {
+        "id": 19466,
+        "createDate": "2026-09-09 09:15:58.000000",
+        "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260909/day/09_09/ccd1_20260909_091558.jpg",
+        "exposure": 9.0,
+        "gain": 6.97,
+        "night": 0
+      },
+      "median_interval": 15.0,
+      "invalid_files": [],
+      "last_20_interval_summary": {
+        "median": 15.0,
+        "min": 14.0,
+        "max": 16.0
+      }
+    },
+    "2": {
+      "count": 1249,
+      "first": {
+        "id": 16969,
+        "createDate": "2026-09-08 23:22:04.000000",
+        "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260908/night/08_23/ccd2_20260908_232204.jpg",
+        "exposure": 24.178091049194336,
+        "gain": 0.0,
+        "night": 1
+      },
+      "latest": {
+        "id": 19465,
+        "createDate": "2026-09-09 09:15:53.000000",
+        "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260909/day/09_09/ccd2_20260909_091553.jpg",
+        "exposure": 0.23079335689544678,
+        "gain": 0.0,
+        "night": 0
+      },
+      "median_interval": 15.0,
+      "invalid_files": [],
+      "last_20_interval_summary": {
+        "median": 15.0,
+        "min": 15.0,
+        "max": 15.0
+      }
+    }
+  },
+  "pending_tasks": [],
+  "service": "MainPID=4112458\nNRestarts=0\nActiveState=active\nActiveEnterTimestamp=Tue 2026-09-08 23:21:17 CEST",
+  "cadence_events": [
+    "[INFO] Capture-1-4112489/MainThread capture._limit_exposure_to_cadence() [666]: [CAPTURE_CADENCE] profile=imx708-wide period=45.000s exposure_limit=39.000000s",
+    "[INFO] Capture-2-4112491/MainThread capture._limit_exposure_to_cadence() [666]: [CAPTURE_CADENCE] profile=asi678mc period=45.000s exposure_limit=39.000000s",
+    "[INFO] Capture-1-4112489/MainThread capture._limit_exposure_to_cadence() [666]: [CAPTURE_CADENCE] profile=imx708-wide period=15.000s exposure_limit=9.000000s",
+    "[WARNING] Capture-1-4112489/MainThread capture.shoot() [3038]: [CAPTURE_CADENCE_LATE] profile=imx708-wide interval=45.041s target=15.000s",
+    "[INFO] Capture-2-4112491/MainThread capture._limit_exposure_to_cadence() [666]: [CAPTURE_CADENCE] profile=asi678mc period=15.000s exposure_limit=9.000000s",
+    "[WARNING] Capture-2-4112491/MainThread capture.shoot() [3038]: [CAPTURE_CADENCE_LATE] profile=asi678mc interval=45.039s target=15.000s"
+  ],
+  "errors": [],
+  "assessment": {
+    "continuous_hours": 9.91,
+    "passed_24_hours": false,
+    "cadence_warning_review": "shoot() compares the elapsed interval to the current period after mode change, not the preceding scheduled period. The two observed warnings are at 45-to-15 second mode transitions; request-level verification and correction remain open.",
+    "production_modified": false
+  }
+}
