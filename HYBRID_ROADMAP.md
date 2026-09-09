@@ -16,6 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Collaudo browser isolato dei quattro gruppi Settings completato: campi
+  mirati corretti, tutti i campi nuovamente accessibili, profilo conservato.
+  Un errore fuori gruppo disattiva il filtro e apre il campo da correggere.
+  Verificato anche Notifications Settings -> dettaglio -> acknowledge, con
+  esito osservabile sulla notifica sintetica. Rimossi in commit separato i
+  cinque template sostituiti (588 righe) e relativi parametri inutilizzati.
+  Analizzati 129 template residui: nessun riferimento ai file rimossi.
+  Regressione con file assenti: 128 Python e 31 JavaScript superati.
+  Distribuzione e collaudo di produzione ancora aperti.
+
 - Storage, Analytics, Acquisition/Save e FITS/Source aprono ora l'editor
   Full Config con selezione mirata dei campi, invece delle anteprime statiche.
   Il filtro e' disattivabile; campi non visibili inclusi nel payload invariato.
@@ -24,14 +34,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   descrittivi conservati. Parita' payload delle quattro viste e ciclo
   save/download/restore superati nella fixture; esclusa dal solo confronto
   dei valori la firma CSRF temporanea, mantenendo le prove CSRF effettive.
-  Regressione: 128 Python e 31 JavaScript superati. Prova browser nativa,
-  cleanup dei vecchi template e deploy ancora aperti.
+  Regressione: 128 Python e 31 JavaScript superati. Prova browser e cleanup
+  completati sopra; deploy ancora aperto.
 
 - Ingresso Notifications Settings collegato alle Notifiche operative: il
   vecchio contratto descrive record/acknowledge, non impostazioni Full Config.
   Il bookmark conserva query, camera e profilo e non carica piu' il form
-  globale. Contratto descrittivo conservato; template obsoleto da ripulire
-  separatamente. Test Flask con entrambi i ruoli, login, query ripetute, CSRF,
+  globale. Contratto descrittivo conservato; template obsoleto rimosso
+  nel cleanup separato descritto sopra. Test Flask con entrambi i ruoli, login, query ripetute, CSRF,
   acknowledge e doppio invio superati senza Classic. Regressione: 128 Python
   e 31 JavaScript superati. Deploy e prova browser di questo ingresso aperti.
 

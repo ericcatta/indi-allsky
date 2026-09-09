@@ -22,9 +22,25 @@
     "Full Config parity and route fingerprints preserved"
   ],
   "limits": [
-    "Native browser check pending",
-    "Old preview templates not yet removed",
     "Not deployed",
     "Full Classic removal remains incomplete"
-  ]
+  ],
+  "browser_fixture_checks": [
+    "Storage 9, Analytics 35, Acquisition/Save 29 and FITS/Source 22 visible controls",
+    "Disabling focus restores 679 global controls",
+    "Camera 2/profile 2 maintained through index navigation",
+    "Invalid hidden Image Scale rejected; filter disabled and error row and section shown"
+  ],
+  "cleanup": {
+    "removed_templates": 5,
+    "removed_template_lines": 588,
+    "remaining_templates_parsed": 129,
+    "references_to_removed_templates": 0,
+    "dynamic_template_dependencies": 0,
+    "matching_source_files": 745,
+    "source_manifest_sha256": "ea21b5fbb57b5ed73039e5bb44429d0b35be3cc73d7bfe0caf8241e410405657",
+    "python_cases": 128,
+    "javascript_cases": 31,
+    "failures": []
+  }
 }

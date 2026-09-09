@@ -13577,9 +13577,6 @@ class ModernAdminReadySettingsPreviewView(ModernAdminBasicSettingsPreviewView):
 
 
 class ModernAdminAnalyticsSettingsView(View):
-    def __init__(self, template_name=None):
-        pass
-
     def dispatch_request(self):
         from urllib.parse import urlencode
         query = [(key, value) for key, value in request.args.items(multi=True) if key != 'domain']
@@ -13588,9 +13585,6 @@ class ModernAdminAnalyticsSettingsView(View):
 
 
 class ModernAdminStorageSettingsView(View):
-    def __init__(self, template_name=None):
-        pass
-
     def dispatch_request(self):
         from urllib.parse import urlencode
         query = [(key, value) for key, value in request.args.items(multi=True) if key != 'domain']
@@ -13601,10 +13595,6 @@ class ModernAdminStorageSettingsView(View):
 class ModernAdminNotificationsSettingsView(View):
     """Keep the former settings bookmark pointed at actual notification controls."""
 
-    def __init__(self, template_name=None):
-        # The historical registration passes a template; this redirect renders none.
-        pass
-
     def dispatch_request(self):
         from urllib.parse import urlencode
         query = urlencode(list(request.args.items(multi=True)))
@@ -13613,9 +13603,6 @@ class ModernAdminNotificationsSettingsView(View):
 
 
 class ModernAdminAcquisitionSaveSettingsView(View):
-    def __init__(self, template_name=None):
-        pass
-
     def dispatch_request(self):
         from urllib.parse import urlencode
         query = [(key, value) for key, value in request.args.items(multi=True) if key != 'domain']
@@ -13624,9 +13611,6 @@ class ModernAdminAcquisitionSaveSettingsView(View):
 
 
 class ModernAdminFitsSourceSettingsView(View):
-    def __init__(self, template_name=None):
-        pass
-
     def dispatch_request(self):
         from urllib.parse import urlencode
         query = [(key, value) for key, value in request.args.items(multi=True) if key != 'domain']
@@ -18105,11 +18089,11 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/settings/advanced', view_func=ModernAdminAdvancedSettingsPreviewView.as_view('modern_admin_advanced_settings_view', template_name='modern_admin/settings_basic.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/developer', view_func=ModernAdminDeveloperSettingsPreviewView.as_view('modern_admin_developer_settings_view', template_name='modern_admin/settings_basic.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/ready', view_func=ModernAdminReadySettingsPreviewView.as_view('modern_admin_ready_settings_view', template_name='modern_admin/settings_basic.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/analytics', view_func=ModernAdminAnalyticsSettingsView.as_view('modern_admin_analytics_settings_view', template_name='modern_admin/settings_analytics.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/storage', view_func=ModernAdminStorageSettingsView.as_view('modern_admin_storage_settings_view', template_name='modern_admin/settings_storage.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/notifications', view_func=ModernAdminNotificationsSettingsView.as_view('modern_admin_notifications_settings_view', template_name='modern_admin/settings_notifications.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/acquisition-save', view_func=ModernAdminAcquisitionSaveSettingsView.as_view('modern_admin_acquisition_save_settings_view', template_name='modern_admin/settings_acquisition_save.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/fits-source', view_func=ModernAdminFitsSourceSettingsView.as_view('modern_admin_fits_source_settings_view', template_name='modern_admin/settings_fits_source.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/analytics', view_func=ModernAdminAnalyticsSettingsView.as_view('modern_admin_analytics_settings_view'))
+    bp_allsky.add_url_rule('/modern-admin/settings/storage', view_func=ModernAdminStorageSettingsView.as_view('modern_admin_storage_settings_view'))
+    bp_allsky.add_url_rule('/modern-admin/settings/notifications', view_func=ModernAdminNotificationsSettingsView.as_view('modern_admin_notifications_settings_view'))
+    bp_allsky.add_url_rule('/modern-admin/settings/acquisition-save', view_func=ModernAdminAcquisitionSaveSettingsView.as_view('modern_admin_acquisition_save_settings_view'))
+    bp_allsky.add_url_rule('/modern-admin/settings/fits-source', view_func=ModernAdminFitsSourceSettingsView.as_view('modern_admin_fits_source_settings_view'))
     bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/timelapse', view_func=ModernAdminTimelapseSettingsView.as_view('modern_admin_timelapse_settings_view', template_name='modern_admin/settings_timelapse.html'))

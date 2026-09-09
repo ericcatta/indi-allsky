@@ -21,6 +21,12 @@ def test_route_contract_is_unchanged():
                 and node.func.attr == 'add_url_rule'
                 and node.args[0].value not in ('/modern-admin/settings/timelapse', '/modern-admin/media/raw-loop', '/modern-admin/updates/start', '/modern-admin/tools/focus/preview', '/media/<kind>/<int:camera_id>/<int:media_id>/original', '/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
             ):
+                if node.args[0].value in ('/modern-admin/settings/analytics', '/modern-admin/settings/storage', '/modern-admin/settings/notifications', '/modern-admin/settings/acquisition-save', '/modern-admin/settings/fits-source'):
+                    # These entries are now redirects and must not carry template arguments.
+                    view = next(k for k in node.keywords if k.arg == 'view_func').value
+                    assert not view.keywords
+                    slug = node.args[0].value.rsplit('/', 1)[1].replace('-', '_')
+                    view.keywords.append(ast.keyword(arg='template_name', value=ast.Constant(value='modern_admin/settings_' + slug + '.html')))
                 if node.args[0].value == '/modern-admin/classic/<classic_page>':
                     # A redirect has no template. Verify the replacement before
                     # restoring its historical registration for the fingerprint.
