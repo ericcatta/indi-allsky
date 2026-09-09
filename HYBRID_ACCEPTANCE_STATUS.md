@@ -13,6 +13,20 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Native panorama playback — 2026-09-09
+
+In the existing authenticated in-app browser, selected Panorama videos in Library,
+opened each camera's output detail and started playback with the native keyboard
+control. Both clips progressed from time zero to `ended=true` at 14.44 seconds,
+without a media error, with decoded dimensions 4712 × 750. Back to results retained
+the panorama filter and both-camera result list after each detail.
+
+A presentation defect remains: both details show `? × ?` because saved dimensions
+are missing, despite dimensions being available from the loaded player. This is
+recorded separately from successful playback. Other video families, roles, narrow
+viewport and all remaining controls are not covered by this evidence:
+`testing/evidence/hybrid-native-panorama-playback-2026-09-09.json`.
+
 ## Live generated outputs and task outcomes — 2026-09-09
 
 Recovered the 07:44 read-only audit for installed `498ba959`: configuration 110,

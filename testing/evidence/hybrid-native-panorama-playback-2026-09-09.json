@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-09",
+  "installed": "498ba959",
+  "environment": "Native Codex in-app browser, existing authenticated production session",
+  "cases": [
+    {
+      "control": "Library media type + Apply filters",
+      "outcome": "passed",
+      "evidence": "Panorama videos selected; two results, camera 1 ID2 and camera2 ID1"
+    },
+    {
+      "control": "Output details and native keyboard playback, camera 1 ID2",
+      "outcome": "passed",
+      "evidence": {
+        "initial_time": 0.011783,
+        "initial_paused": false,
+        "final_time": 14.44,
+        "duration": 14.44,
+        "ended": true,
+        "videoWidth": 4712,
+        "videoHeight": 750,
+        "media_error": null
+      }
+    },
+    {
+      "control": "Output details and native keyboard playback, camera 2 ID1",
+      "outcome": "passed",
+      "evidence": {
+        "initial_time": 0.012563,
+        "initial_paused": false,
+        "final_time": 14.44,
+        "duration": 14.44,
+        "ended": true,
+        "videoWidth": 4712,
+        "videoHeight": 750,
+        "media_error": null
+      }
+    },
+    {
+      "control": "Back to results from each camera detail",
+      "outcome": "passed",
+      "evidence": "Restored Panorama videos / All Cameras and both results"
+    },
+    {
+      "control": "Displayed dimensions",
+      "outcome": "defect",
+      "evidence": "Both details show ? \u00d7 ? although loaded media metadata is 4712 \u00d7 750",
+      "next_action": "Present available player dimensions distinctly from missing saved record metadata"
+    }
+  ],
+  "limitations": [
+    "Only two panorama clips, not all video families or controls",
+    "Existing authenticated session only; anonymous/ordinary-user and narrow viewport remain open",
+    "No download, upload, generation, deletion, deployment or service restart",
+    "Playback completion does not prove scientific image quality or 24-hour stability"
+  ]
+}
