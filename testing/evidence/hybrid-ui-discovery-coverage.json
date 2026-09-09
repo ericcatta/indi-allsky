@@ -1,0 +1,27 @@
+{
+  "baseline": "4b9b8e9c",
+  "scope": "Complete Hybrid GET route discovery in isolated Flask; not complete interaction acceptance",
+  "routes": 98,
+  "route_kinds": {
+    "page": 74,
+    "settings-entry": 18,
+    "unclassified-get": 6
+  },
+  "contexts": 500,
+  "render_outcomes": {
+    "superato": 372,
+    "bloccato": 128,
+    "difetto": 0
+  },
+  "clicks_promoted_by_discovery": 0,
+  "python_cases": 129,
+  "javascript_cases": 31,
+  "failures": [],
+  "matching_source_files": 747,
+  "source_manifest_sha256": "4fe6524b1caed33c14bdfe9242bd09caba4eaaf4cdde47c662ad6ca8d6e5df2e",
+  "limits": [
+    "Six non-template GET entries require dedicated API/redirect acceptance mapping",
+    "Rendered HTML does not prove control effects or JavaScript-created controls",
+    "Complete live browser acceptance and Classic removal remain open"
+  ]
+}

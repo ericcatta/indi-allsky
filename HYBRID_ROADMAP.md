@@ -16,6 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Censimento UI corretto: include tutte le 98 route GET Hybrid, comprese
+  factory e redirect Settings prima esclusi dal filtro TemplateView.
+  Discovery isolata: 500 contesti, 372 rendering riusciti, 128 bloccati o
+  protetti, nessun difetto di rendering; zero click promossi a superati.
+  Sei ingressi non HTML restano esplicitamente da associare alle prove API
+  (stato capture, compatibilita', download, mode, focus/mini preview).
+  Prossimo controllo: semantica dei metodi di lettura e autorizzazione
+  di questi ingressi, incluso HEAD sul controllo capture.
+  Regressione del censimento: 129 Python e 31 JavaScript superati.
+
 - Basic, Advanced e Developer Settings ora sono ingressi operativi con
   collegamenti a editor e strumenti effettivi; rimosso il contenuto di
   anteprima. Le classificazioni restano nell'inventario tecnico. Il vecchio

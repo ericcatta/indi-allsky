@@ -15,7 +15,10 @@ def summarize(path):
     assert details
     rows = []
     for page in details:
-        assert page['contexts'], page['route']
+        if not page['contexts']:
+            assert page.get('status') == 'bloccato' and page.get('reason'), page['route']
+            rows.append({'route': page['route'], 'contexts': 0, 'status': 'bloccato', 'reason': page['reason'], 'controls_discovered': 0})
+            continue
         assert {case['role'] for case in page['contexts']} == {'admin', 'user', 'anonymous'}
         for case in page['contexts']:
             assert case['path_parameters'] and '<' not in case['request_path']

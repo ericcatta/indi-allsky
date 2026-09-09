@@ -114,6 +114,17 @@ class Controls(HTMLParser):
             item['label'] = item['label'][:160]
         return self.controls
 
+def route_kind(rule, view_class, template_base):
+    """Never silently drop a Hybrid GET entry just because it is not a template."""
+    if not rule.endpoint.startswith('indi_allsky.modern_admin_') or 'GET' not in rule.methods:
+        return None
+    if '/modern-admin/settings/' in rule.rule:
+        return 'settings-entry'
+    if view_class is not None and issubclass(view_class, template_base):
+        return 'page'
+    return 'unclassified-get'
+
+
 def collect(runtime_config):
     from hybrid_runtime_fixture import isolated_app, login_client
     report = {'schema_version': 3, 'environment': 'isolated Flask, memory database, synthetic users/cameras',
@@ -135,13 +146,14 @@ def collect(runtime_config):
              patch('dbus.SystemBus', side_effect=ProviderUnavailable('Hardware bus unavailable in acceptance discovery')), \
              patch('dbus.SessionBus', side_effect=ProviderUnavailable('Service bus unavailable in acceptance discovery')):
             for rule in sorted(app.url_map.iter_rules(), key=lambda r:r.rule):
-                if not rule.endpoint.startswith('indi_allsky.modern_admin_') or 'GET' not in rule.methods:
+                kind = route_kind(rule, classes.get(rule.endpoint), TemplateView)
+                if kind is None:
                     continue
-                cls = classes.get(rule.endpoint)
-                if cls is None or not issubclass(cls, TemplateView):
-                    continue
-                page = {'route': rule.rule, 'endpoint': rule.endpoint, 'contexts': []}
+                page = {'route': rule.rule, 'endpoint': rule.endpoint, 'kind': kind, 'contexts': []}
                 report['pages'].append(page)
+                if kind == 'unclassified-get':
+                    page.update(status='bloccato', reason='Non-template GET entry requires dedicated API or redirect acceptance; not executed by discovery')
+                    continue
                 if rule.arguments and detail_parameters(rule.endpoint, 1) is None:
                     page.update(status='bloccato', reason='Detail route requires dedicated fixture parameters')
                     continue
@@ -155,7 +167,9 @@ def collect(runtime_config):
                         case = {'role':role, **scope, 'path_parameters': parameters, 'request_path': path, 'controls':[]}
                         started = time.monotonic()
                         try:
-                            response = client.get(path, query_string=scope)
+                            response = client.get(path, query_string=scope, follow_redirects=(kind == 'settings-entry' and role != 'anonymous'))
+                            case['resolved_path'] = response.request.path
+                            case['redirect_chain'] = [{'status': item.status_code, 'location': item.location} for item in response.history]
                             case['http_status'] = response.status_code
                             case['redirect'] = response.location
                             if response.status_code == 200:
@@ -175,7 +189,9 @@ def collect(runtime_config):
                         page['contexts'].append(case)
                 failures = [c for c in page['contexts'] if c['render_status']=='difetto']
                 print(rule.rule, 'DEFECT' if failures else 'RENDERED/BLOCKED', (failures[0].get('error','') if failures else ''), flush=True)
-    assert len(report['pages']) >= 70, 'Route discovery is incomplete'
+        expected = {(rule.rule, rule.endpoint) for rule in app.url_map.iter_rules()
+                    if rule.endpoint.startswith('indi_allsky.modern_admin_') and 'GET' in rule.methods}
+        assert {(page['route'], page['endpoint']) for page in report['pages']} == expected, 'Hybrid GET discovery is incomplete'
     return report
 
 if __name__ == '__main__':

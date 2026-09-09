@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Regression for acceptance discovery blind spots; no Flask/hardware needed."""
 import json
-from hybrid_ui_acceptance_test import Controls
+from hybrid_ui_acceptance_test import Controls, route_kind
+from types import SimpleNamespace
 
 
 def parse(html):
@@ -70,3 +71,20 @@ _, first = parse('<form id="f"><input name="gain" value="1"></form>')
 _, second = parse('<form id="f"><input name="gain" value="2" disabled></form>')
 assert first['']['id'] == second['']['id'], 'Field values/state must not change stable identity'
 print('Hybrid acceptance HTML discovery: PASS (fieldset, disclosure, state, secret exclusion, identity)')
+
+class TemplateBase: pass
+class Page(TemplateBase): pass
+class Redirect: pass
+
+def rule(path, endpoint='indi_allsky.modern_admin_example_view', methods=('GET',)):
+    return SimpleNamespace(rule=path, endpoint=endpoint, methods=methods)
+
+assert route_kind(rule('/modern-admin/now'), Page, TemplateBase) == 'page'
+assert route_kind(rule('/modern-admin/settings/storage'), Redirect, TemplateBase) == 'settings-entry'
+assert route_kind(rule('/modern-admin/settings/camera-profile'), None, TemplateBase) == 'settings-entry'
+assert route_kind(rule('/modern-admin/provider'), None, TemplateBase) == 'unclassified-get'
+assert route_kind(rule('/modern-admin/action', methods=('POST',)), Page, TemplateBase) is None
+assert route_kind(rule('/external', endpoint='other.view'), Page, TemplateBase) is None
+print('Hybrid GET discovery includes factory and redirect entries: PASS')
+
+assert route_kind(rule('/indi-allsky/modern-admin/settings/storage'), Redirect, TemplateBase) == 'settings-entry'
