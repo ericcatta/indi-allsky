@@ -1,5 +1,19 @@
 # Hybrid acceptance status
 
+## FITS preview handler extracted — local candidate, 2026-09-09
+
+The complete Fits2JpegView now lives in source_media_views beside source download
+and storage policy, with no import of views or classic_views. Shared registration
+retains /fits2jpeg and the existing endpoint name. Its entire class AST matches
+the pre-extraction fingerprint, preserving statement order, errors, authorization,
+processing and response construction. The monolithic views module no longer owns
+the handler implementation or imports ImageProcessor for it.
+
+Local media runtime/boundary tests, Full Config parity, compilation and diff check
+pass. These do not replace full Flask regression or output parity; those remain
+pending the next test window. No Pi access or deployment occurred after the
+20:00 cutoff. Evidence: `testing/evidence/hybrid-fits-handler-extraction-2026-09-09.json`.
+
 ## Short live acceptance closed — 2026-09-09, by 20:00 CEST
 
 The hourly automation was paused at 19:59:50 CEST, within the user's deadline.

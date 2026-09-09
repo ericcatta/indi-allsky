@@ -1,0 +1,25 @@
+{
+  "class_ast_sha256": "dc524c7a72b1fe763e4e3938d984a3c5129159d4cba02f66c6659cf0d7113b69",
+  "removed_class_lines": 142,
+  "baseline": "b51d7cbb",
+  "responsibility": "Entire authenticated FITS-to-JPEG preview handler moved to source_media_views alongside original media access policies",
+  "preserved": [
+    "Class AST exactly matches pre-extraction snapshot",
+    "Public /fits2jpeg endpoint and login_required decorator",
+    "Camera-record scope, storage policy, file containment, metadata errors",
+    "Image processing sequence, compression, MIME type"
+  ],
+  "checks": [
+    "modern_admin_media_runtime_test.py passed",
+    "modern_admin_boundary_test.py passed",
+    "full_config_parser_parity_test.py passed",
+    "Changed Python modules compile",
+    "git diff --check passed"
+  ],
+  "limits": [
+    "Structural/AST parity is not image-output or runtime-import acceptance",
+    "Full Flask/Book 2 regression pending next authorized test window",
+    "No Pi access, browser test, deployment or monitoring after the cutoff",
+    "Classic remains present; shared registration still imports this independent handler"
+  ]
+}

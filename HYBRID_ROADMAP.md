@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Media: handler completo FITS->JPEG trasferito da views.py al modulo dei media
+  sorgente indipendente dalle view UI. Classe identica per fingerprint AST,
+  route e pipeline conservate. Verifiche locali superate; regressione Flask
+  completa e deploy ancora aperti, nessun accesso Pi dopo il limite del collaudo.
+
+
 - Collaudo breve chiuso entro le 20:00 del 9 settembre: automazione sospesa,
   acquisizione non fermata. Ultimo campione Pi 19:05 con entrambe le camere
   attive e backlog vuoto; lacune di osservazione dichiarate. Test 24 ore

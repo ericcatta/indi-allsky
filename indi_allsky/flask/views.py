@@ -92,7 +92,6 @@ from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
 from ..modern_admin_system_tools import ModernAdminCpuUsageProvider
 from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..modern_admin_tasks import ModernAdminTaskReadPolicy
-from ..processing import ImageProcessor
 from ..product_view_models import build_now_view
 from ..product_view_models import GeneratedOutputDescriptor
 from ..product_view_models import LatestFrameImageTableRepository
@@ -202,7 +201,7 @@ from .table_export_views import ModernAdminTableExportView
 from .public_media import PublicLatestMediaView, PublicMediaViewerView, PublicMediaOriginalView
 from .media_archive import ModernAdminMediaArchive, archive_parameters, KINDS as ARCHIVE_KINDS
 from .mini_generation import ModernAdminMiniPreviewView, queue_mini_generation
-from .source_media_views import ModernAdminSourceDownloadView, local_source_allowed, source_file_path
+from .source_media_views import ModernAdminSourceDownloadView, Fits2JpegView, local_source_allowed, source_file_path
 from .base_views import BaseView
 from .base_views import TemplateView
 from .base_views import FormView
@@ -3282,152 +3281,6 @@ class AjaxFitsImageViewerView(BaseView):
 
 
         return jsonify(json_data)
-
-
-class Fits2JpegView(BaseView):
-    methods = ['GET']  # this allows the output to be cached by the browser
-    decorators = [login_required]
-
-    def __init__(self, **kwargs):
-        super(Fits2JpegView, self).__init__(**kwargs)
-
-
-    def dispatch_request(self):
-        import cv2
-        from astropy.io import fits
-        #from PIL import Image
-        from multiprocessing import Array
-
-        try:
-            fits_id = int(request.args['id'])
-        except (KeyError, ValueError):
-            abort(400, description='A valid FITS identifier is required.')
-
-
-        table = IndiAllSkyDbFitsImageTable
-
-        try:
-            fits_entry = table.query\
-                .filter(table.id == fits_id)\
-                .one()
-        except NoResultFound:
-            return 'FITS not found', 404
-
-
-        self.cameraSetup(camera_id=fits_entry.camera_id)
-
-
-        media_access_adapter = self.get_media_access_adapter()
-        if not local_source_allowed(fits_entry.camera, self.verify_admin_network):
-            abort(403, description='Local FITS previews are unavailable under this camera storage policy.')
-        filename_p = source_file_path(fits_entry, self.indi_allsky_config)
-
-
-        p_config = self.indi_allsky_config.copy()
-
-
-        try:
-            fits_metadata = media_access_adapter.read_fits_preview_metadata(filename_p, fits.open)
-        except FileNotFoundError:
-            abort(404, description='The FITS file is no longer available locally.')
-        except PermissionError:
-            abort(403, description='The FITS file cannot be read by the web service.')
-        except (OSError, ValueError, TypeError, IndexError):
-            abort(422, description='The FITS header cannot be read. Download the original to inspect it.')
-
-        exposure = fits_metadata['exposure']
-        gain = fits_metadata['gain']
-        gain_av = Array('f', [gain])
-        position_av = Array('f', [self.camera.latitude, self.camera.longitude, self.camera.elevation])
-        binning = fits_metadata['binning']
-        binning_av = Array('i', [binning])
-        sensors_temp_av = Array('f', [fits_metadata['sensor_temp']])
-        sensors_user_av = Array('f', [fits_metadata['sensor_temp'], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        night_av = Array('i', [1, 0])  # using night values for processing
-        astro_av = Array('f', [0.0, 0.0, 0.0])
-
-        image_processor = ImageProcessor(
-            p_config,
-            position_av,
-            gain_av,
-            binning_av,
-            sensors_temp_av,
-            sensors_user_av,
-            night_av,
-            astro_av,
-        )
-
-
-        processing_start = time.time()
-
-
-        # use mtime for date
-        image_date = datetime.fromtimestamp(media_access_adapter.resolve_file_mtime(filename_p))
-
-
-        image_processor.update_astrometric_data(image_date)
-
-
-        image_processor.add(
-            filename_p,
-            exposure,
-            gain,
-            binning,
-            image_date,
-            0.0,
-            fits_entry.camera,
-        )
-
-
-        image_processor.debayer()  # populates self.opencv_data
-
-        image_processor.stack()  # populates self.image
-
-        image_processor.convert_16bit_to_8bit()
-
-
-        # verticle flip
-        if p_config.get('IMAGE_FLIP_V'):
-            image_processor.flip_v()
-
-        # horizontal flip
-        if p_config.get('IMAGE_FLIP_H'):
-            image_processor.flip_h()
-
-
-        image_processor.colorize()
-
-
-        processing_elapsed_s = time.time() - processing_start
-        app.logger.info('Image processed in %0.4f s', processing_elapsed_s)
-
-
-        image = image_processor.image
-
-
-        ### OpenCV
-        _, image_a = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, p_config['IMAGE_FILE_COMPRESSION']['jpg']])
-        image_buffer = io.BytesIO(image_a.tobytes())
-
-
-        ### pillow
-        #image_buffer = io.BytesIO()
-        #img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        #img.save(image_buffer, format='JPEG', quality=p_config['IMAGE_FILE_COMPRESSION']['jpg'])
-
-
-        return Response(image_buffer.getvalue(), mimetype='image/jpeg')
-
-
-    def get_media_access_adapter(self):
-        return ModernAdminMediaAccessAdapter(
-            url_normalizer=ModernAdminMediaUrlNormalizer(),
-            s3_prefix=self.s3_prefix,
-            logger=app.logger,
-            error_message='Error resolving FITS preview media path: %s',
-        )
-
-
 
 
 class AjaxGalleryViewerView(BaseView):

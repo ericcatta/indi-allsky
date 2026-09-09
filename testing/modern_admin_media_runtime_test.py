@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import inspect
+import ast
+import hashlib
 import sys
 from datetime import datetime
 from datetime import timedelta
@@ -643,21 +645,36 @@ def test_images_folder_route_delegates_serving_to_media_serve_adapter():
 
 
 def test_fits_preview_route_delegates_path_resolution_to_media_access_adapter():
-    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'source_media_views.py').read_text(encoding='utf-8')
     start = source.index('class Fits2JpegView')
-    end = source.index('class AjaxGalleryViewerView', start)
-    body = source[start:end]
+    body = source[start:]
 
     assert_true('def get_media_access_adapter(self):' in body, 'FITS preview route must construct media access adapter')
     assert_true('source_file_path(fits_entry, self.indi_allsky_config)' in body, 'FITS preview path resolution should go through the constrained Hybrid source resolver')
     assert_true('fits_entry.getFilesystemPath()' not in body, 'FITS preview route must not own direct getFilesystemPath call')
 
 
+def test_fits_preview_extraction_preserves_class_and_shared_handler_boundary():
+    source = (REPO_ROOT / 'indi_allsky/flask/source_media_views.py').read_text()
+    tree = ast.parse(source)
+    handler = next(node for node in tree.body if isinstance(node, ast.ClassDef)
+                   and node.name == 'Fits2JpegView')
+    # Snapshot captured from the complete pre-extraction class. This checks
+    # statement/order parity, not a claim of hardware or image-output acceptance.
+    canonical = ast.dump(ast.Module(body=[handler], type_ignores=[]), include_attributes=False)
+    assert hashlib.sha256(canonical.encode()).hexdigest() == 'dc524c7a72b1fe763e4e3938d984a3c5129159d4cba02f66c6659cf0d7113b69'
+    imports = {node.module for node in tree.body if isinstance(node, ast.ImportFrom)}
+    assert not imports.intersection({'views', 'classic_views'})
+    assert {'processing', 'base_views', 'models', 'modern_admin_media_runtime'} <= imports
+    views = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text()
+    assert 'class Fits2JpegView' not in views
+    assert "bp_allsky.add_url_rule('/fits2jpeg', view_func=Fits2JpegView.as_view('fits2jpeg_view'))" in views
+
+
 def test_fits_preview_route_delegates_header_metadata_to_media_access_adapter():
-    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'source_media_views.py').read_text(encoding='utf-8')
     start = source.index('class Fits2JpegView')
-    end = source.index('class AjaxGalleryViewerView', start)
-    body = source[start:end]
+    body = source[start:]
 
     assert_true('.read_fits_preview_metadata(filename_p, fits.open)' in body, 'FITS preview metadata should go through Hybrid media access adapter')
     assert_true('fits.open(filename_p)' not in body, 'FITS preview route must not own direct FITS open')
@@ -665,10 +682,9 @@ def test_fits_preview_route_delegates_header_metadata_to_media_access_adapter():
 
 
 def test_fits_preview_route_delegates_file_mtime_to_media_access_adapter():
-    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'source_media_views.py').read_text(encoding='utf-8')
     start = source.index('class Fits2JpegView')
-    end = source.index('class AjaxGalleryViewerView', start)
-    body = source[start:end]
+    body = source[start:]
 
     assert_true('.resolve_file_mtime(filename_p)' in body, 'FITS preview file mtime should go through Hybrid media access adapter')
     assert_true('filename_p.stat().st_mtime' not in body, 'FITS preview route must not own direct file metadata reads')
@@ -945,6 +961,7 @@ def run_tests():
     test_classic_image_circle_preview_preserves_default_url_hook()
     test_images_folder_route_delegates_serving_to_media_serve_adapter()
     test_fits_preview_route_delegates_path_resolution_to_media_access_adapter()
+    test_fits_preview_extraction_preserves_class_and_shared_handler_boundary()
     test_fits_preview_route_delegates_header_metadata_to_media_access_adapter()
     test_fits_preview_route_delegates_file_mtime_to_media_access_adapter()
     test_dark_library_delegates_read_only_media_access_to_adapter()
