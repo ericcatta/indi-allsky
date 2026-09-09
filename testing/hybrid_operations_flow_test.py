@@ -5,6 +5,7 @@ import re
 import json
 import io
 from zipfile import ZipFile
+from urllib.parse import urlsplit, parse_qs
 from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_operations_fixture import seed_operations
@@ -22,6 +23,16 @@ def run(runtime_config):
                     response = client.get('/indi-allsky/modern-admin/'+route+'?camera_id='+str(camera))
                     assert response.status_code == 200, (route,response.status_code)
                     assert 'Open legacy' not in response.text
+            query = '?camera_id=2&profile_id=test-profile-2&category=general&category=misc'
+            entry = client.get('/indi-allsky/modern-admin/settings/notifications' + query)
+            assert entry.status_code == 302
+            destination = urlsplit(entry.location)
+            assert destination.path == '/indi-allsky/modern-admin/notifications'
+            assert parse_qs(destination.query) == parse_qs(query[1:])
+            listing = client.get(entry.location)
+            assert listing.status_code == 200 and '/modern-admin/notifications/1' in listing.text
+            assert 'Preview only' not in listing.text
+            assert client.post('/indi-allsky/modern-admin/settings/notifications').status_code in (400, 405)
             tasks = client.get('/indi-allsky/modern-admin/tasks')
             assert tasks.text.count('class="modern-admin-task-row"') == 205
             assert '/modern-admin/tasks/205' in tasks.text
@@ -30,6 +41,8 @@ def run(runtime_config):
             assert 'synthetic-secret-must-be-redacted' not in detail.text
             for route in ('tasks/9999','notifications/9999'):
                 assert client.get('/indi-allsky/modern-admin/'+route).status_code == 404
+        anonymous = app.test_client().get('/indi-allsky/modern-admin/settings/notifications', follow_redirects=True)
+        assert '/login' in anonymous.request.path
         # Same permission as the old modal: any authenticated user can ack a
         # system-wide notice. The URL identifies the target, not camera state.
         detail = client.get('/indi-allsky/modern-admin/notifications/1')

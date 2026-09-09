@@ -1,0 +1,25 @@
+{
+  "baseline": "1edac4b1",
+  "scope": "Former Notifications Settings entry reaches operational notification list; isolated acceptance",
+  "python_cases": 128,
+  "javascript_cases": 31,
+  "failures": [],
+  "matching_source_files": 749,
+  "source_manifest_sha256": "a3c42732d0d618e12af94b8f6e0ba3c9641970c3f2699d38ceb22f8c03830d14",
+  "checks": [
+    "Both roles reach seeded notification records via previous Settings URL",
+    "Anonymous navigation reaches login",
+    "Camera/profile and repeated query parameters preserved",
+    "Navigation endpoint does not accept POST",
+    "Acknowledge changes target record only",
+    "Missing CSRF rejected and duplicate acknowledge idempotent",
+    "Historical route fingerprint unchanged"
+  ],
+  "limits": [
+    "Candidate not deployed",
+    "Native browser check for this entry pending",
+    "Obsolete notification preview template awaits separate cleanup",
+    "Other static Settings domains remain open",
+    "Classic frontend removal incomplete"
+  ]
+}

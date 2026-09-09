@@ -551,30 +551,6 @@ def test_notifications_settings_contract_handles_missing_group():
     )
 
 
-def test_notifications_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminNotificationsSettingsView')
-    end = views_text.index('class ModernAdminAcquisitionSaveSettingsView', start)
-    notifications_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminNotificationsSettingsContract' in notifications_view,
-        'notifications settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in notifications_view,
-        'notifications settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'NOTIFICATIONS_CONFIG_SECTIONS' not in notifications_view,
-        'notifications static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_notifications_overview_cards' not in notifications_view,
-        'notifications overview formatting must not remain inline on the view',
-    )
-
-
 def test_storage_settings_contract_preserves_context_shape():
     contract = ModernAdminStorageSettingsContract()
     storage_group = {
@@ -1509,7 +1485,6 @@ def run_tests():
     test_migrated_settings_contracts_preserve_top_level_context_contracts()
     test_notifications_settings_contract_preserves_context_shape()
     test_notifications_settings_contract_handles_missing_group()
-    test_notifications_settings_view_uses_hybrid_contract()
     test_storage_settings_contract_preserves_context_shape()
     test_storage_settings_contract_handles_missing_group()
     test_storage_settings_view_uses_hybrid_contract()

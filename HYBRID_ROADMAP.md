@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Ingresso Notifications Settings collegato alle Notifiche operative: il
+  vecchio contratto descrive record/acknowledge, non impostazioni Full Config.
+  Il bookmark conserva query, camera e profilo e non carica piu' il form
+  globale. Contratto descrittivo conservato; template obsoleto da ripulire
+  separatamente. Test Flask con entrambi i ruoli, login, query ripetute, CSRF,
+  acknowledge e doppio invio superati senza Classic. Regressione: 128 Python
+  e 31 JavaScript superati. Deploy e prova browser di questo ingresso aperti.
+
 - Indice Settings operativo: accessi diretti a profili camera, Timelapse,
   Full Settings, cronologia e restore; scorciatoie camera con profilo
   conservato. Inventario e filtri tecnici mantenuti in una sezione

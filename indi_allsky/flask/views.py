@@ -1,3 +1,4 @@
+from flask.views import View
 from ..loop_statistics import loop_sqm_summaries
 from ..modern_admin_media_cleanup import MediaCleanupIncomplete, flush_media_batches
 from ..modern_admin_sensor_panel import build_sensor_rows
@@ -72,7 +73,6 @@ from ..modern_admin_observatory_tools import ModernAdminVirtualSkyContextService
 from ..modern_admin_settings_contracts import ModernAdminAcquisitionSaveSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminAnalyticsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContract
-from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
@@ -13602,25 +13602,18 @@ class ModernAdminStorageSettingsView(ModernAdminSettingsInventoryView):
         return context
 
 
-class ModernAdminNotificationsSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Notifications Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminNotificationsSettingsContract()
+class ModernAdminNotificationsSettingsView(View):
+    """Keep the former settings bookmark pointed at actual notification controls."""
 
-    def get_context(self):
-        context = super(ModernAdminNotificationsSettingsView, self).get_context()
-        context.update(self.settings_contract.build_context(context.get('modern_admin_settings_groups', [])))
-        return context
+    def __init__(self, template_name=None):
+        # The historical registration passes a template; this redirect renders none.
+        pass
 
-
-
-
-
-
-
-
-
-
+    def dispatch_request(self):
+        from urllib.parse import urlencode
+        query = urlencode(list(request.args.items(multi=True)))
+        target = url_for('indi_allsky.modern_admin_notifications_view')
+        return redirect(target + ('?' + query if query else ''))
 
 
 class ModernAdminAcquisitionSaveSettingsView(ModernAdminSettingsInventoryView):
