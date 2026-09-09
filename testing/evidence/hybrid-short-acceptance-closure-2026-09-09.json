@@ -1,0 +1,35 @@
+{
+  "closed_at_utc": "2026-09-09T17:59:50Z",
+  "automation_status": "PAUSED",
+  "user_deadline": "2026-09-09 20:00 Europe/Zurich",
+  "scope": "Closure using already collected evidence; no further SSH or capture commands",
+  "last_live_sample": {
+    "pi_reported_time": "2026-09-09T19:05:51.304382+02:00",
+    "capture_pid": 188464,
+    "capture_active": true,
+    "capture_restarts": 0,
+    "latest_images": {
+      "1": {
+        "id": 24161,
+        "created": "2026-09-09 19:05:36",
+        "exposure": 9.0,
+        "gain": 16.0
+      },
+      "2": {
+        "id": 24162,
+        "created": "2026-09-09 19:05:47",
+        "exposure": 1.5692849159240723,
+        "gain": 0.0
+      }
+    },
+    "pending_tasks": [],
+    "errors_in_bounded_log_excerpt": []
+  },
+  "limitations": [
+    "Connectivity gaps prevent asserting continuous observation",
+    "No final live sample at 20:00; deadline closure uses existing samples",
+    "Earlier Starlink HTTP 403 is not proven resolved by later error-free log excerpts",
+    "24-hour day/night acceptance deferred to a future objective, not passed",
+    "CPU/Account/Settings candidates not deployed; full product acceptance and Classic removal incomplete"
+  ]
+}

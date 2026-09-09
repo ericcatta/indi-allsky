@@ -1,5 +1,20 @@
 # Hybrid acceptance status
 
+## Short live acceptance closed — 2026-09-09, by 20:00 CEST
+
+The hourly automation was paused at 19:59:50 CEST, within the user's deadline.
+No further live probe or capture command was issued for closure. The last stored
+heartbeat result (Pi-reported 19:05:51) showed PID 188464 active, no restarts,
+recent frames for both cameras, empty backlog and no errors in its bounded log
+excerpt. Earlier connectivity gaps prevent asserting uninterrupted observation;
+there is no live sample at 20:00. The earlier Starlink 403 is not proven resolved
+by an error-free later excerpt. Acquisition was not stopped.
+
+The 24-hour day/night test remains deferred to a future objective, not passed.
+The short observation is closed; the overall migration, remaining native
+acceptance, candidate deployment and Classic removal remain incomplete.
+Evidence: `testing/evidence/hybrid-short-acceptance-closure-2026-09-09.json`.
+
 ## Native CPU summary checked — 2026-09-09 19:55–19:57 CEST
 
 Candidate ebf7f688 rendered System Info in the isolated native-browser fixture.

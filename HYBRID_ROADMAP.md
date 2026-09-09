@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Collaudo breve chiuso entro le 20:00 del 9 settembre: automazione sospesa,
+  acquisizione non fermata. Ultimo campione Pi 19:05 con entrambe le camere
+  attive e backlog vuoto; lacune di osservazione dichiarate. Test 24 ore
+  rinviato, non superato; migrazione complessiva ancora aperta.
+
+
 - CPU System Info verificata nel browser nativo su fixture isolata prima delle
   20:00: refresh CPU 0.0% -> 69.2%, memoria 32.1% -> 32.3%, controlli protetti
   disabilitati. Fixture chiusa e processo assente verificato. Deploy ancora aperto.
