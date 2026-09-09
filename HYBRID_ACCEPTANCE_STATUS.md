@@ -13,6 +13,22 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Native production release checks — 2026-09-09
+
+After deployment, native HTTPS System Info rendered and Refresh service state
+updated CPU/memory from 0.0%/28.6% to 7.4%/29.9%. Cleanup controls displayed camera 2
+then camera 1 after selecting IMX708 Wide; no mutation was submitted. Now showed
+frames aged 6 and 10 seconds, both fully decoded (4608×2592 and 3840×2160).
+Library filters switched between cameras; night video 12 showed 4608×2592
+(preview), and video 11 showed 3840×2160 (preview), verifying the deployed
+metadata fallback. Full playback was not repeated in this pass.
+
+Evidence: `testing/evidence/hybrid-native-maintenance-release-2026-09-09.json`.
+Follow-up observations: first-sample CPU semantics need review, and Now reports
+Profile: Unavailable for the latest frame despite an existing camera/profile
+configuration. These are open audit items, not passed controls. The complete UI
+matrix, effects and 24-hour window remain open.
+
 ## Maintenance release deployed — 2026-09-09 12:12 CEST
 
 Production now runs cd45148f. The release checked 590 runtime hashes against the

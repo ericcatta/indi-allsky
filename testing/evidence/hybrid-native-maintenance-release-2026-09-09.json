@@ -1,0 +1,55 @@
+{
+  "date": "2026-09-09",
+  "installed": "cd45148f",
+  "environment": "Native browser, production HTTPS, existing authenticated session",
+  "checks": {
+    "system_metrics": {
+      "first_cpu": "0.0%",
+      "first_memory": "28.6%",
+      "refresh_cpu": "7.4%",
+      "refresh_memory": "29.9%"
+    },
+    "cleanup_scope": "Expanded controls for camera 2; selected IMX708 Wide; verified camera-1 labelled recent cleanup confirmation. No commands submitted.",
+    "now_frames": [
+      {
+        "camera": 1,
+        "timestamp": "2026-09-09 12:17:32",
+        "age_seconds": 6,
+        "decoded": true,
+        "dimensions": [
+          4608,
+          2592
+        ]
+      },
+      {
+        "camera": 2,
+        "timestamp": "2026-09-09 12:17:28",
+        "age_seconds": 10,
+        "decoded": true,
+        "dimensions": [
+          3840,
+          2160
+        ]
+      }
+    ],
+    "archive_dimensions": [
+      {
+        "camera": 1,
+        "video_id": 12,
+        "text": "4608 \u00d7 2592 (preview)"
+      },
+      {
+        "camera": 2,
+        "video_id": 11,
+        "text": "3840 \u00d7 2160 (preview)"
+      }
+    ]
+  },
+  "limitations": [
+    "No destructive operation or service command submitted in production.",
+    "Video metadata loaded; full playback was not repeated in this pass.",
+    "Initial CPU zero is not proof of idle CPU; first-sample semantics remain to review.",
+    "Now latest-frame summary displayed Profile: Unavailable despite configured camera profile; review remains open.",
+    "These selected controls do not complete the exhaustive UI matrix."
+  ]
+}
