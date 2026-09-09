@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Protezione alte luci attivata attraverso le impostazioni su entrambi i
+  profili. Verificati salvataggio, assenza di modifiche estranee e applicazione
+  delle correzioni da parte del runtime. Le prime misure richiedono ancora
+  recupero dalla saturazione: convergenza ed efficacia visiva restano aperte.
+  Evidenze operative dettagliate conservate localmente, escluse dal riepilogo
+  pubblicato. Nessun collaudo prolungato avviato.
+
 - Rilascio alte luci: `1bc56c1e` installato sul Pi; backup coerente in
   `/home/eric/hybrid-backups/highlight-20260909-223013`, revisione 111.
   Timer/socket fermati e ripristinati insieme ai servizi. Disconnessione SSH
