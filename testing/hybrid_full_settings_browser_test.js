@@ -59,5 +59,11 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
     assert.match((await run({response:{ok:false,status:500,text:async()=>'{}'}})).message,/could not be confirmed/);
     assert.match((await run({response:{ok:true,status:200,text:async()=>'<html>error</html>'}})).message,/unreadable response/);
     assert.match((await run({response:new Error('offline')})).message,/offline/);
+    for (const body of ['', '{}', 'null', '[]', '"OK"', '{"success-message":false}', '{"success-message":"   "}', '{"success-message":{}}']) {
+        const uncertain=await run({response:{ok:true,status:200,text:async()=>body}});
+        assert.match(uncertain.message,/could not be confirmed/);
+        assert.equal(uncertain.fields.CONFIG_NOTE.value,'Keep this until saved');
+        assert.equal(uncertain.fields.RELOAD_ON_SAVE.checked,true);
+    }
     console.log('Hybrid full Settings controller: PASS');
 })().catch(error=>{console.error(error);process.exitCode=1;});

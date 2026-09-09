@@ -97,7 +97,12 @@
                 return;
             }
 
-            setMessage(data['success-message'] || 'Saved new config', 'success');
+            if (!data || Array.isArray(data) ||
+                typeof data['success-message'] !== 'string' ||
+                !data['success-message'].trim()) {
+                throw new Error('The server did not confirm the save.');
+            }
+            setMessage(data['success-message'], 'success');
             const note = document.getElementById('CONFIG_NOTE');
             if (note) {
                 note.value = '';

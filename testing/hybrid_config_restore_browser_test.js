@@ -48,5 +48,10 @@ async function run({checked = false, disabled = false, response, reject, twice =
     assert.match(await run({response: {ok: false, json: async () => ({CONFIG_UPLOAD: ['Invalid JSON']})}}), /CONFIG_UPLOAD: Invalid JSON/);
     assert.match(await run({response: {redirected: true}}), /session has expired/);
     assert.match(await run({response: {ok: true, json: async () => {throw new Error('invalid response');}}}), /could not be confirmed/);
+    for (const body of [{}, null, [], 'OK', {'success-message': false}, {'success-message': '   '}, {'success-message': {}}]) {
+        const message = await run({checked: true, response: {ok: true, json: async () => body}});
+        assert.match(message, /could not be confirmed/);
+        assert.doesNotMatch(message, /Security keys were reset/);
+    }
     console.log('Hybrid restore browser controller: PASS');
 })().catch(error => {console.error(error); process.exitCode = 1;});

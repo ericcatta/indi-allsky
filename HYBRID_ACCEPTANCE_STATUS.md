@@ -1,5 +1,20 @@
 # Hybrid acceptance status
 
+## Full Settings and restore confirmations — candidate, 2026-09-09
+
+Both controllers falsely reported success for HTTP 200 without a valid backend
+acknowledgement. The save controller additionally cleared CONFIG_NOTE and
+RELOAD_ON_SAVE; restore claimed security keys had reset when requested, despite
+an unconfirmed response. New tests reproduced both failures before the fix.
+Both now require a nonempty string success-message. Uncertain outcomes direct
+the user to Config History and preserve input instead of claiming completion.
+Routes, payloads, permissions, persistence and key-reset effects are unchanged.
+
+All 31 JavaScript entrypoints and the Full Config parser parity entrypoint pass.
+Evidence: `testing/evidence/hybrid-settings-receipts-2026-09-09.json`. These are
+controller simulations; native browser, full target regression and deployment
+remain open. No real configuration save/restore was performed during this work.
+
 ## Account save confirmation — candidate, 2026-09-09
 
 A successful HTTP status with an empty/malformed acknowledgement previously

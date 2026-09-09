@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Full Settings e restore: conferma backend obbligatoria prima di mostrare
+  successo o azzerare nota/reload. Corretti falsi esiti con HTTP 200 vuoto;
+  31 test JavaScript e parita' Full Config superati. Solo candidato: prove
+  browser, regressione completa sul Pi e deploy ancora aperti.
+
+
 - My Account: eliminato falso successo con risposta HTTP 200 senza ricevuta
   valida. Conferma backend obbligatoria, campi conservati se non confermata;
   difetto riprodotto e 31 test JavaScript superati. Nessun deploy; collaudo

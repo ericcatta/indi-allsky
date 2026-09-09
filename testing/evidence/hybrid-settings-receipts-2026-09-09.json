@@ -1,0 +1,183 @@
+{
+  "baseline": "3e72c0ce",
+  "scope": "Full Settings save and restore acknowledgements; controller simulations",
+  "reproduced_before_fix": [
+    "Save returned Saved new config for empty HTTP 200 and cleared CONFIG_NOTE / RELOAD_ON_SAVE",
+    "Restore returned Configuration restored. Security keys were reset for empty object HTTP 200"
+  ],
+  "behavior": "Require nonempty string success-message; unconfirmed response retains input and directs user to Config History; no automatic retries",
+  "source_hashes": {
+    "indi_allsky/flask/static/modern_admin/config-restore.js": "91ac85342de2c44100cd77181fc0a6e5ebcde480f11c65d49fdb4a4cfbc2268f",
+    "indi_allsky/flask/static/modern_admin/full-settings.js": "d8847d27d34b95734dd853363914c672e10d5b191ecd71595294bff6dca33374",
+    "testing/hybrid_config_restore_browser_test.js": "70739530d5c63e2820bb3452dfde93bb679a25d5c08dc0037af84876996dba82",
+    "testing/hybrid_full_settings_browser_test.js": "30474d66466aae0adbd57dad8251a9a0396f3c0867129dbe21df0a99fbcd74fb"
+  },
+  "javascript": [
+    {
+      "test": "testing/hybrid_account_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid account browser controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_astropanel_browser_test.js",
+      "exit_code": 0,
+      "output": "Astropanel controller: all detail fields, 20 satellites, literal text, unavailable/stale/session states, refresh and polling: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_camera_management_browser_test.js",
+      "exit_code": 0,
+      "output": "Camera form guard: native first submit, duplicate/cross-form prevention and back-navigation permission state: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_camera_simulator_parity_test.js",
+      "exit_code": 0,
+      "output": "Hybrid simulator catalog and canvas parity: PASS (3000 scenarios)\n"
+    },
+    {
+      "test": "testing/hybrid_charts_browser_test.js",
+      "exit_code": 0,
+      "output": "Charts: all 15 series and histogram, empty/null data, atomic validation, history, stale responses, polling, HTTP/session/network errors and teardown: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_config_restore_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid restore browser controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_drives_browser_test.js",
+      "exit_code": 0,
+      "output": "Drive controller: metadata as text, duplicates, confirmation/cancel, target/CSRF and fresh-inventory requirement: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_fits_processing_browser_test.js",
+      "exit_code": 0,
+      "output": "FITS controller: duplicate prevention, output identity, search/reset, visible validation and failed-session recovery: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_focus_browser_test.js",
+      "exit_code": 0,
+      "output": "Native Focus browser controller: target camera, duplicate prevention, decode, errors, expired session, permissions and movement feedback: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_full_settings_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid full Settings controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_generation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid generation confirmation, role gate, duplicate submission, failure and scope changes: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_geometry_math_test.js",
+      "exit_code": 0,
+      "output": "Image geometry circle/offset parity and finite keogram lines: PASS (480 cases)\n"
+    },
+    {
+      "test": "testing/hybrid_gpio_browser_test.js",
+      "exit_code": 0,
+      "output": "GPIO controller: confirmation/cancel, explicit Off, CSRF, duplicate prevention, errors and retained disabled controls: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_log_browser_test.js",
+      "exit_code": 0,
+      "output": "Log controller CSRF, plain text, expired session and failed/malformed responses: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_longterm_keogram_browser_test.js",
+      "exit_code": 0,
+      "output": "Long-term keogram controls: scoped payload, CSRF, duplicate prevention, preview/download, reset and errors preserve prior result: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_loop_browser_test.js",
+      "exit_code": 0,
+      "output": "Loop controls: history, speed, bounce, camera isolation, stale responses, image errors and recovery PASS\nLoop controls: history, speed, bounce, camera isolation, stale responses, image errors and recovery PASS\n"
+    },
+    {
+      "test": "testing/hybrid_media_archive_browser_test.js",
+      "exit_code": 0,
+      "output": "Archive dimensions: cached/delayed metadata, resize, missing/error, camera isolation and saved values: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_media_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid media camera navigation and source preview behavior: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_mini_generation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid mini controls: role, confirmation, duplicate submissions, failure recovery and task result: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_navigation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid navigation controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_network_browser_test.js",
+      "exit_code": 0,
+      "output": "Network controller: all intents, scan results/empty state, target binding, security boolean, CSRF, pending/refresh guards, cancellation, permissions and errors: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_notification_ack_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid notification acknowledgement controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_now_frames_test.js",
+      "exit_code": 0,
+      "output": "Now frames: cached failure, load recovery, error and missing image: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_operations_table_browser_test.js",
+      "exit_code": 0,
+      "output": "Operations table controller: combined filters, counts, reset, empty rows, filtered export payload/CSRF and native attachment forms: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_panorama_loop_browser_test.js",
+      "exit_code": 0,
+      "output": "Panorama loop: playback, frame/detail/lightbox identity, pause, navigation, keyboard, timeout, failed frame recovery, hidden page and teardown: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_public_media_browser_test.js",
+      "exit_code": 0,
+      "output": "Public media clipboard fallback, fullscreen capability errors and failed preview feedback: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_realtime_keogram_browser_test.js",
+      "exit_code": 0,
+      "output": "Realtime preview: camera URL, success, stale/missing/session/network/decode errors, retained image, hidden tab, duplicate prevention and teardown: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_sensor_panel_browser_test.js",
+      "exit_code": 0,
+      "output": "Sensor controller: camera scope, 120 slots, real zero, absent values, filter, atomic errors, expired session, refresh and teardown: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_system_units_browser_test.js",
+      "exit_code": 0,
+      "output": "System controls: confirmations, roles, CSRF, payloads, duplicate suppression, failure/expiry/lost responses, safe task receipts and links: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_updates_browser_test.js",
+      "exit_code": 0,
+      "output": "Updates controller: confirmations, permissions, CSRF, duplicate suppression, accepted/failed/expired/lost responses and explicit refresh: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_youtube_browser_test.js",
+      "exit_code": 0,
+      "output": "YouTube revoke cancellation, action feedback and duplicate form prevention: PASS\n"
+    }
+  ],
+  "python_checks": [
+    {
+      "entrypoint": "testing/full_config_parser_parity_test.py",
+      "exit_code": 0
+    }
+  ],
+  "limitations": [
+    "No production deployment or real restore/save performed",
+    "Full target regression and native browser remain pending",
+    "Previous local full regression: 38 passed and 80 environment-blocked; not repeated for controller-only changes"
+  ]
+}

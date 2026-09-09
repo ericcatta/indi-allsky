@@ -34,7 +34,12 @@
                 });
                 throw new Error(errors.join(' — ') || 'Restore failed.');
             }
-            status.textContent = result['success-message'] || 'Configuration restored.';
+            if (!result || Array.isArray(result) ||
+                typeof result['success-message'] !== 'string' ||
+                !result['success-message'].trim()) {
+                throw new Error('The server did not confirm the restore.');
+            }
+            status.textContent = result['success-message'];
             if (payload.get('RESET_KEYS')) {
                 status.textContent += ' Security keys were reset; sign in again.';
             }
