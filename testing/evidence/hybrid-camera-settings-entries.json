@@ -23,7 +23,6 @@
     "Historical route fingerprint preserved"
   ],
   "limits": [
-    "Unused preview templates await separate cleanup",
     "Full Classic removal remains incomplete"
   ],
   "roundtrip_fix": {
@@ -39,5 +38,18 @@
       "Profile 2 to Settings index to Exposure/Gain retains profile 2 in native browser fixture"
     ],
     "scope": "Isolated acceptance; production deployment pending"
+  },
+  "cleanup": {
+    "baseline": "0fe3a617",
+    "removed_templates": 5,
+    "removed_lines": 636,
+    "remaining_templates_parsed": 133,
+    "dynamic_template_dependencies": 0,
+    "references_to_removed_templates": 0,
+    "matching_source_files": 748,
+    "python_cases": 128,
+    "javascript_cases": 31,
+    "failures": [],
+    "scope": "Templates physically absent during isolated Flask regression; production deployment pending"
   }
 }

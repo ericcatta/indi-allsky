@@ -16,20 +16,27 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Cleanup degli ingressi Settings camera: rimossi i cinque template di
+  anteprima sostituiti dagli editor operativi (636 righe). Nessun riferimento
+  applicativo residuo trovato; URL, contratti e impostazioni restano invariati.
+  Rendering degli ingressi verificato senza quei file: 128 casi Python e
+  31 JavaScript superati. Analizzati i 133 template rimasti: nessun riferimento
+  ai file rimossi e nessuna inclusione dinamica. Deploy ancora da eseguire.
+
 - Prova browser dei cinque ingressi Settings camera completata nella fixture
   isolata: editor e sezioni corretti. Individuata e corretta nel candidato una
   perdita di profilo nel ritorno all'indice: i link ora propagano camera e
   profilo. Percorso profilo 2 -> indice -> Exposure/Gain verificato nel browser
   e in Flask. Regressione del fix: 128 casi Python e 31 JavaScript superati;
   753 sorgenti verificati identici nella copia isolata. Deploy del fix e
-  cleanup dei template sostituiti ancora da completare.
+  collaudo in produzione ancora da completare; cleanup completato sopra.
 
 - Candidato consolidamento Settings camera: cinque ingressi di anteprima
   (profilo, connessione, esposizione/gain, auto exposure/gain, Hybrid AWB)
   rimandano agli editor operativi con sezioni ancorate e query preservata.
   Rimosse le vecchie classi di view; contratti di configurazione invariati.
-  I template di anteprima restano da eliminare nel successivo cleanup, dopo
-  verifica dei riferimenti. Test dei contratti, compilazione e integrazione
+  I template di anteprima sono stati eliminati nel cleanup descritto sopra.
+  Test dei contratti, compilazione e integrazione
   Flask superati: entrambi i ruoli/profili, autenticazione e nessuna mutazione
   via GET. Guardrail aggiornato per il registro, fingerprint storico invariato.
   Se la query indica soltanto una camera con binding univoco, viene scelto
