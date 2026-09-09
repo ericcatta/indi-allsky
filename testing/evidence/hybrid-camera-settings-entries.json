@@ -23,8 +23,21 @@
     "Historical route fingerprint preserved"
   ],
   "limits": [
-    "Native browser acceptance pending",
     "Unused preview templates await separate cleanup",
     "Full Classic removal remains incomplete"
-  ]
+  ],
+  "roundtrip_fix": {
+    "baseline": "6152cf8a",
+    "python_cases": 128,
+    "javascript_cases": 31,
+    "failures": [],
+    "matching_source_files": 753,
+    "source_manifest_sha256": "4be5afe6a5d180893cc69eb908d47479412456349948df5735fd6bb098caa23f",
+    "checks": [
+      "Settings index roundtrip retains selected camera profile in Flask",
+      "Five camera entries reach corresponding editor sections in native browser fixture",
+      "Profile 2 to Settings index to Exposure/Gain retains profile 2 in native browser fixture"
+    ],
+    "scope": "Isolated acceptance; production deployment pending"
+  }
 }

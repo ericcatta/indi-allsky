@@ -30,7 +30,7 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-note">
             <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Back to Cameras</a>
             ·
-            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Inventory</a>
+            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view', camera_id=camera_id, profile_id=modern_admin_camera_settings_profile.profile_id) }}">Back to Settings Inventory</a>
         </p>
     </section>
 

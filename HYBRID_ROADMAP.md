@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Prova browser dei cinque ingressi Settings camera completata nella fixture
+  isolata: editor e sezioni corretti. Individuata e corretta nel candidato una
+  perdita di profilo nel ritorno all'indice: i link ora propagano camera e
+  profilo. Percorso profilo 2 -> indice -> Exposure/Gain verificato nel browser
+  e in Flask. Regressione del fix: 128 casi Python e 31 JavaScript superati;
+  753 sorgenti verificati identici nella copia isolata. Deploy del fix e
+  cleanup dei template sostituiti ancora da completare.
+
 - Candidato consolidamento Settings camera: cinque ingressi di anteprima
   (profilo, connessione, esposizione/gain, auto exposure/gain, Hybrid AWB)
   rimandano agli editor operativi con sezioni ancorate e query preservata.

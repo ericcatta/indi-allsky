@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Former preview URLs lead to actual editors without changing scope or data."""
 from urllib.parse import urlsplit, parse_qs
+from html import unescape
+import re
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_settings_flow_test import BrowserValues
 
@@ -32,6 +34,16 @@ def run():
                     camera_only = client.get(url + '?camera_id=' + str(cid), follow_redirects=True)
                     assert camera_only.status_code == 200
                     assert BrowserValues(camera_only.text).values['camera-driver-profile_id'] == 'test-profile-' + str(cid)
+        # Round trip through the Settings index must retain the chosen profile.
+        page = clients[0].get('/indi-allsky/modern-admin/settings/cameras?camera_id=2&profile_id=test-profile-2')
+        back = unescape(re.search(r'href="([^"]+)"[^>]*>Back to Settings Inventory</a>', page.text)[1])
+        index = clients[0].get(back)
+        links = [unescape(href) for href in re.findall(r'href="([^"]+)"', index.text)
+                 if '/settings/exposure-gain' in href]
+        assert links
+        for href in links:
+            arrived = clients[0].get(href, follow_redirects=True)
+            assert BrowserValues(arrived.text).values['camera-driver-profile_id'] == 'test-profile-2'
         anonymous = app.test_client()
         response = anonymous.get('/indi-allsky/modern-admin/settings/exposure-gain', follow_redirects=True)
         assert 'USERNAME' in response.text or '/login' in response.request.path
