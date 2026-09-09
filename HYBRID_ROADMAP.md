@@ -21,8 +21,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   conservato. Inventario e filtri tecnici mantenuti in una sezione
   richiudibile, separata dagli editor. Nessuna modifica a chiavi o salvataggi.
   Verificati nella fixture browser apertura, filtro, profilo e accesso TL;
-  regressione: 128 Python e 31 JavaScript superati. Deploy del nuovo indice
-  ancora da eseguire; il collaudo browser di produzione resta aperto.
+  regressione: 128 Python e 31 JavaScript superati. Nuovo indice distribuito
+  (`b6c4f901`): backup verificato, riavviato solo il web, processo di cattura
+  e configurazione invariati, nuovi frame da entrambe le camere. Template
+  installati identici al candidato testato. Il collaudo browser di produzione
+  resta aperto per il certificato; nessun tentativo di aggiramento.
 
 - Settings camera consolidati e cleanup distribuiti (`ca247b60`). Backup
   database coerente e codice precedente conservati; riavviato solo il web.

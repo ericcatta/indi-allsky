@@ -20,9 +20,19 @@
     "GET navigation leaves configuration unchanged"
   ],
   "limits": [
-    "New index not deployed",
     "No full production browser acceptance",
     "Other preview domains still await consolidation",
     "Classic frontend removal remains incomplete"
-  ]
+  ],
+  "deployment": {
+    "installed_commit": "b6c4f90110340c25c4ed6cb1cc26979333bd9f72",
+    "backup_integrity": "ok",
+    "web_service_active": true,
+    "capture_process_unchanged": true,
+    "configuration_unchanged": true,
+    "both_cameras_produced_frames_after_deploy": true,
+    "installed_templates_match_tested_candidate": true,
+    "tracked_production_files_clean": true,
+    "production_browser_acceptance": "pending certificate trust; previous automatic browser rejection respected"
+  }
 }
