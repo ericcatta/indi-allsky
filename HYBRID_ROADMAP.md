@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Diagnostica cadenza: gli intervalli completati sono confrontati con il periodo
+  della richiesta precedente, evitando falsi avvisi al cambio notte/giorno e
+  preservando quelli per ritardi reali. Scheduler e comandi driver invariati.
+  118 test Python e 31 JavaScript superati; correzione non distribuita.
+
 - System Info: corretto il riepilogo CPU/memoria che convertiva dizionari in
   zero. Lettura dei campi provider e stato Unavailable per dati invalidi;
   prova browser isolata sul Pi con valori reali e aggiornamento verificato.

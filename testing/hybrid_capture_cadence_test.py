@@ -7,6 +7,7 @@ from multiprocessing import Array
 from pathlib import Path
 import sys
 import time
+from unittest.mock import Mock
 from types import SimpleNamespace
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from capture_profiles_test import _base_config
@@ -84,6 +85,28 @@ def run():
     worker.focus_mode=True
     worker.shoot(40,1.13,1)
     assert requests[-1][0][0] == 40
+    # Actual shoot() diagnostics must use the interval selected by the
+    # preceding request, in both transition directions, and still report lateness.
+    worker.focus_mode = False
+    del worker._last_cadence_start
+    del worker._last_cadence_period
+    clock = iter((100.0, 145.04, 160.04, 180.04, 225.04))
+    diagnostic_log = Mock()
+    namespace['time'] = SimpleNamespace(monotonic=lambda: next(clock))
+    namespace['logger'] = diagnostic_log
+    worker.night = True
+    worker.shoot(39, 1.13, 1)   # schedules a 45s interval
+    worker.night = False
+    worker.shoot(9, 1.13, 1)    # timely night-to-day transition
+    worker.shoot(9, 1.13, 1)    # timely 15s daytime interval
+    assert diagnostic_log.warning.call_count == 0
+    worker.night = True
+    worker.shoot(39, 1.13, 1)   # 20s after a day request: genuinely late
+    assert diagnostic_log.warning.call_count == 1
+    assert diagnostic_log.warning.call_args.args[-1] == 15.0
+    worker.shoot(39, 1.13, 1)   # timely 45s night interval
+    assert diagnostic_log.warning.call_count == 1
+    assert requests[-1][0] == (39, 1.13, 1)
     print('Shared cadence: profile isolation, day/night limits, invalid saves and actual driver request cap: PASS')
 
 

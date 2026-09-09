@@ -3034,10 +3034,14 @@ class CaptureWorker(Process):
             _, _, period = self._configured_exposure_period()
             started = time.monotonic()
             previous = getattr(self, '_last_cadence_start', None)
-            if previous is not None and started - previous > period + 1.0:
+            # The preceding request scheduled this interval. A mode change
+            # only selects the period for the next interval.
+            previous_period = getattr(self, '_last_cadence_period', period)
+            if previous is not None and started - previous > previous_period + 1.0:
                 logger.warning('[CAPTURE_CADENCE_LATE] profile=%s interval=%.3fs target=%.3fs',
-                               self.profile_id, started - previous, period)
+                               self.profile_id, started - previous, previous_period)
             self._last_cadence_start = started
+            self._last_cadence_period = period
         # sqm used for an image taking at a specific exposure/gain for a controlled SQM measurement
         logger.info('Taking %0.8fs exposure (gain %0.2f / bin %d)', exposure, gain, binning)
 

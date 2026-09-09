@@ -13,6 +13,24 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Cadence transition diagnostic — candidate, 2026-09-09
+
+The scheduler sets the next request deadline with the period selected for the
+preceding request. shoot() instead compared the completed interval with the newly
+selected period, causing the observed 45-to-15-second transition warnings and
+potentially masking lateness when changing from 15 to 45 seconds. The diagnostic
+now retains the preceding request's period for its comparison. No deadline,
+exposure, driver request or mode-selection logic changes.
+
+The focused test executes the real shoot() method with a controlled monotonic
+clock: timely night-to-day transition, regular day interval, a genuinely late
+20-second day-to-night interval and a regular night interval. Only the real late
+interval warns, with target 15 seconds; driver exposure caps remain verified.
+The test, all 31 JavaScript entries and all 118 isolated Python entries pass.
+Compilation and diff checks pass. Evidence and source hashes:
+`testing/evidence/hybrid-cadence-diagnostic-2026-09-09.json`. This correction is
+not deployed; existing live continuity is preserved.
+
 ## Live continuity — 2026-09-09 09:16 CEST
 
 Installed release remains 498ba959, capture PID 4112458, active since September 8
