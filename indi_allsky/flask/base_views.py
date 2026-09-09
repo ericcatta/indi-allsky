@@ -634,6 +634,9 @@ class BaseView(View):
 
     def get_image_data(self):
         if self.latest_image_entry:
+            image_metadata = self.latest_image_entry.data
+            if not isinstance(image_metadata, dict):
+                image_metadata = {}
             data = {
                 'exposure'        : self.latest_image_entry.exposure,
                 'exp_elapsed'     : self.latest_image_entry.exp_elapsed,
@@ -645,10 +648,9 @@ class BaseView(View):
                 'stars'           : self.latest_image_entry.stars,
                 'detections'      : self.latest_image_entry.detections,
                 'process_elapsed' : self.latest_image_entry.process_elapsed,
-                'camera_sqm_raw_mag' : self.latest_image_entry.data.get('camera_sqm_raw_mag', 0.0),
+                'camera_sqm_raw_mag' : image_metadata.get('camera_sqm_raw_mag', 0.0),
             }
 
-            image_metadata = self.latest_image_entry.data
         else:
             data = {
                 'exposure'        : 0.0,

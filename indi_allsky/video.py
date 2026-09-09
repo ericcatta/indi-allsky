@@ -18,6 +18,8 @@ import logging
 import ephem
 
 from . import constants
+from .modern_admin_queued_maintenance import retention_policy_token
+from .modern_admin_media_cleanup import MediaCleanupIncomplete, flush_media_batches, prune_empty_camera_directories
 from .end_of_night import prepare_end_of_night_payload, handoff_end_of_night_upload
 
 from .timelapse import TimelapseGenerator
@@ -2059,6 +2061,11 @@ class VideoWorker(Process):
 
 
         task.setRunning()
+        expected_retention = kwargs.get('retention_token')
+        if expected_retention is not None and expected_retention != retention_policy_token(self.config):
+            task.setFailed('Retention settings do not match the confirmed settings. Reload capture configuration, refresh System Info and retry. No media were expired.')
+            return
+
 
 
         now = datetime.now()
@@ -2155,34 +2162,25 @@ class VideoWorker(Process):
         ]
 
 
-        delete_count = 0
-        for asset_list, asset_table in asset_lists:
-            while True:
-                id_list = [entry.id for entry in asset_list.limit(500)]
+        try:
+            delete_count = flush_media_batches(asset_lists, self._deleteAssets)
+        except MediaCleanupIncomplete as error:
+            task.data = dict(task.data or {}, cleanup_result={
+                'camera_id': camera_id, 'deleted_count': error.deleted_count,
+                'failed_count': error.failed_count,
+            })
+            task.setFailed(str(error))
+            return
 
-                if not id_list:
-                    break
-
-                delete_count += self._deleteAssets(asset_table, id_list)
-
-
-        # Remove empty folders
-        dir_list = list()
-        self._getFolderFolders(self.image_dir, dir_list)
-
-        empty_dirs = filter(lambda p: not any(p.iterdir()), dir_list)
-        for d in empty_dirs:
-            logger.info('Removing empty directory: %s', d)
-
-            try:
-                d.rmdir()
-            except OSError as e:
-                logger.error('Cannot remove folder: %s', str(e))
-            except PermissionError as e:
-                logger.error('Cannot remove folder: %s', str(e))
-
-
-        task.setSuccess('Expired {0:d} assets'.format(delete_count))
+        directory_errors = prune_empty_camera_directories(self.image_dir, camera.uuid)
+        task.data = dict(task.data or {}, cleanup_result={
+            'camera_id': camera_id, 'deleted_count': delete_count,
+            'failed_count': 0, 'directory_errors': directory_errors,
+        })
+        if directory_errors:
+            task.setFailed('Expired {0:d} assets; {1:d} directories could not be inspected or removed.'.format(delete_count, directory_errors))
+        else:
+            task.setSuccess('Expired {0:d} assets'.format(delete_count))
 
 
     def _deleteAssets(self, table, entry_id_list):

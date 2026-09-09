@@ -25,3 +25,26 @@ def flush_media_batches(asset_lists, delete_batch):
             if count != len(ids):
                 raise MediaCleanupIncomplete(deleted_count, len(ids) - count)
     return deleted_count
+
+
+def prune_empty_camera_directories(image_root, camera_uuid):
+    """Prune only this camera tree, bottom-up, without following symlinks."""
+    import os
+    from pathlib import Path
+    identity = str(camera_uuid)
+    if not identity or Path(identity).name != identity:
+        raise ValueError('Invalid camera folder identity')
+    root = Path(image_root) / ('ccd_' + identity)
+    if root.is_symlink() or not root.exists():
+        return 0
+    errors = []
+    for folder, _, _ in os.walk(root, topdown=False, followlinks=False, onerror=errors.append):
+        path = Path(folder)
+        if path.is_symlink():
+            continue
+        try:
+            if not any(path.iterdir()):
+                path.rmdir()
+        except OSError as error:
+            errors.append(error)
+    return len(errors)

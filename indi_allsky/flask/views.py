@@ -7408,7 +7408,10 @@ class AjaxSystemInfoView(BaseView):
             return jsonify(form_errors), 400
 
 
-        camera_id = int(request.json['CAMERA_ID'])
+        try:
+            camera_id = int(request.json['CAMERA_ID'])
+        except (TypeError, ValueError, OverflowError):
+            return jsonify(CAMERA_ID=['Invalid camera ID.']), 400
         service = request.json['SERVICE_HIDDEN']
         command = request.json['COMMAND_HIDDEN']
 
@@ -7427,21 +7430,7 @@ class AjaxSystemInfoView(BaseView):
 
         elif service == app.config['ALLSKY_SERVICE_NAME']:
             if command == 'hup':
-                self._miscDb.setState('STATUS', constants.STATUS_RELOADING)
-
-                task_reload = IndiAllSkyDbTaskQueueTable(
-                    queue=TaskQueueQueue.MAIN,
-                    state=TaskQueueState.MANUAL,
-                    priority=100,
-                    data={'action' : 'reload'},
-                )
-
-                db.session.add(task_reload)
-                db.session.commit()
-
-                r = 'Submitted reload task'
-
-                #r = self.hupSystemdUnit(app.config['ALLSKY_SERVICE_NAME'])
+                return self.queue_maintenance_command(command, camera_id)
             elif command == 'stop':
                 r = self.stopSystemdUnit(app.config['ALLSKY_SERVICE_NAME'])
             elif command == 'start':
@@ -7528,27 +7517,7 @@ class AjaxSystemInfoView(BaseView):
                 }
                 return jsonify(json_data)
             elif command == 'expire_data':
-                task_expire = IndiAllSkyDbTaskQueueTable(
-                    queue=TaskQueueQueue.VIDEO,
-                    state=TaskQueueState.MANUAL,
-                    priority=100,
-                    data={
-                        'action' : 'expireData',
-                        'kwargs' : {
-                            'camera_id' : camera_id,
-                        },
-                    },
-                )
-
-                db.session.add(task_expire)
-                db.session.commit()
-
-                message_list = ['Submitted expire task']
-
-                json_data = {
-                    'success-message' : ''.join(message_list),
-                }
-                return jsonify(json_data)
+                return self.queue_maintenance_command(command, camera_id)
             elif command == 'flush_images':
                 if not self.verify_admin_network():
                     json_data = {
@@ -7641,6 +7610,29 @@ class AjaxSystemInfoView(BaseView):
         }
 
         return jsonify(json_data)
+
+
+    def queue_maintenance_command(self, command, camera_id):
+        from ..modern_admin_queued_maintenance import ModernAdminQueuedMaintenancePlanner, retention_policy_token
+        if command == 'expire_data' and db.session.get(IndiAllSkyDbCameraTable, camera_id) is None:
+            return jsonify(form_global=['Camera not found.']), 400
+        token = request.json.get('RETENTION_TOKEN') if command == 'expire_data' else None
+        if token is not None and token != retention_policy_token(self.indi_allsky_config):
+            return jsonify(form_global=['Saved retention settings changed. Refresh this page before submitting again.']), 409
+        plan = ModernAdminQueuedMaintenancePlanner().plan(command, camera_id, token)
+        try:
+            if plan['reload_status']:
+                self._miscDb.setState('STATUS', constants.STATUS_RELOADING)
+            receipt = ModernAdminTaskEnqueueEffectAdapter(
+                task_model=IndiAllSkyDbTaskQueueTable, db_session=db.session,
+                queue_enum=TaskQueueQueue, state_enum=TaskQueueState,
+            ).enqueue_from_plan(plan)
+        except Exception:
+            db.session.rollback()
+            app.logger.exception('Queued maintenance request could not be confirmed')
+            return jsonify(form_global=['Task submission could not be confirmed. Check the task queue before retrying.']), 503
+        # Keep the compatibility JSON unchanged; expose the receipt separately.
+        return jsonify({'success-message': plan['message']}), 200, {'X-Hybrid-Task-Id': str(receipt.task_id)}
 
 
     def rebootSystemd(self):
@@ -10348,25 +10340,6 @@ class ModernAdminSystemToolView(ModernAdminContextMixin):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
-class ModernAdminSystemInfoView(ModernAdminSystemToolView, SystemInfoView):
-    page_title = 'Modern Admin System Info'
-
-    summary_service = ModernAdminSystemInfoSummaryService()
-
-    def get_context(self):
-        context = super(ModernAdminSystemInfoView, self).get_context()
-        context['modern_admin_system_summary_cards'] = self.summary_service.build_summary_cards(context)
-        from ..modern_admin_system_units import ModernAdminSystemUnits
-        context['system_units'] = ModernAdminSystemUnits(app.config).rows(context)
-        context['system_units_can_control'] = bool(app.config['LOGIN_DISABLED'] or current_user.is_admin)
-        context['system_poweroff_can_control'] = context['system_units_can_control'] and self.verify_admin_network()
-        return context
-
-
-class ModernAdminSupportInfoView(ModernAdminSystemToolView, SupportInfoView):
-    page_title = 'Modern Admin Support Info'
-
-
 class ModernAdminAstroPanelView(ModernAdminObservatoryToolView, TemplateView):
     page_title = 'Modern Admin Astropanel'
 
@@ -10727,6 +10700,47 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
                 formatted_parts.append(part.capitalize())
 
         return ' '.join(formatted_parts)
+
+
+class ModernAdminSystemInfoView(ModernAdminSystemToolView, ModernAdminMediaBrowseView, SystemInfoView):
+    page_title = 'Modern Admin System Info'
+
+    summary_service = ModernAdminSystemInfoSummaryService()
+
+    def setupSession(self):
+        if request.args.get('camera_id') or request.args.get('profile_id'):
+            selected = self.get_selected_media_camera_filter()
+            self.camera = self.getCameraById(selected['camera_id'])
+            if self.camera.id != selected['camera_id']:
+                abort(404, description='Camera is unavailable.')
+            session['camera_id'] = self.camera.id
+            return
+        super().setupSession()
+
+    def get_context(self):
+        context = super(ModernAdminSystemInfoView, self).get_context()
+        context['modern_admin_system_summary_cards'] = self.summary_service.build_summary_cards(context)
+        from ..modern_admin_system_units import ModernAdminSystemUnits
+        context['system_units'] = ModernAdminSystemUnits(app.config).rows(context)
+        context['system_units_can_control'] = bool(app.config['LOGIN_DISABLED'] or current_user.is_admin)
+        context['system_camera_choices'] = self.get_media_camera_filters()[1:]
+        context['system_expire_can_control'] = context['system_units_can_control'] and self.camera.id > 0
+        context['system_poweroff_can_control'] = context['system_units_can_control'] and self.verify_admin_network()
+        from ..modern_admin_queued_maintenance import retention_policy_token
+        context['system_retention_token'] = retention_policy_token(self.indi_allsky_config)
+        context['system_retention_limits'] = [
+            (label, self.indi_allsky_config.get(key, default)) for label, key, default in (
+                ('Images and panoramas', 'IMAGE_EXPIRE_DAYS', 10),
+                ('RAW images', 'IMAGE_RAW_EXPIRE_DAYS', 10),
+                ('FITS images', 'IMAGE_FITS_EXPIRE_DAYS', 10),
+                ('Videos, keograms and star trails', 'TIMELAPSE_EXPIRE_DAYS', 365),
+            )
+        ]
+        return context
+
+
+class ModernAdminSupportInfoView(ModernAdminSystemToolView, SupportInfoView):
+    page_title = 'Modern Admin Support Info'
 
 
 class ModernAdminLoopView(ModernAdminMediaBrowseView, ImageLoopImgView):

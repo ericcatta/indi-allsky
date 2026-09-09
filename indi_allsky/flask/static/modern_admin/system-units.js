@@ -8,14 +8,15 @@
         event.preventDefault();
         if (submitted || form.querySelector('fieldset').disabled) return;
         if (!form.elements.confirmed.checked) {
-            result.textContent = 'Confirm the device-wide change first.';
+            result.textContent = 'Confirm this action first.';
             return;
         }
         const payload = {CAMERA_ID: Number(root.dataset.camera), SERVICE_HIDDEN: form.dataset.unit, COMMAND_HIDDEN: form.elements.command.value};
+        if (payload.COMMAND_HIDDEN === 'expire_data') payload.RETENTION_TOKEN = form.dataset.retentionToken;
         submitted = true;
         forms.forEach(item => { item.querySelector('fieldset').disabled = true; });
         result.textContent = payload.COMMAND_HIDDEN === 'validate_db'
-            ? 'Checking media records… This may take a while.' : 'Submitting service request…';
+            ? 'Checking media records… This may take a while.' : 'Submitting request…';
         try {
             const response = await fetch(root.dataset.url, {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': root.dataset.csrf}, body: JSON.stringify(payload)});
             if (response.redirected) {
@@ -24,6 +25,14 @@
             }
             const data = await response.json();
             if (response.ok && data['success-message']) {
+                const taskId = response.headers && response.headers.get('X-Hybrid-Task-Id');
+                if (taskId && /^[1-9]\d*$/.test(taskId)) {
+                    const link = document.getElementById('system-units-task');
+                    link.href = root.dataset.taskUrl.replace(/\/0$/, '/' + taskId);
+                    link.hidden = false;
+                    result.textContent = 'Task submitted. Open its details to check completion.';
+                    return;
+                }
                 if (payload.COMMAND_HIDDEN === 'validate_db') {
                     // The compatibility API returns numeric summary paragraphs.
                     // Render as text, never insert response markup into the page.

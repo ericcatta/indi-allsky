@@ -8,7 +8,7 @@ from hybrid_runtime_fixture import isolated_app, login_client
 
 
 def run():
-    with isolated_app() as app:
+    with isolated_app(multi_camera=True) as app:
         from indi_allsky.flask.views import AjaxSystemInfoView
         from indi_allsky.modern_admin_system_units import ModernAdminSystemUnits
         assert not app.config['HYBRID_ENABLE_CLASSIC_UI']
@@ -44,7 +44,7 @@ def run():
         assert policy.run('arbitrary.service', 'start', authorized=True, effects={})[1] == 400
         assert policy.run(app.config['INDISERVER_SERVICE_NAME'], 'start', authorized=False, effects={})[1] == 400
         for client, writable in ((admin, True), (ordinary, False)):
-            response = client.get('/indi-allsky/modern-admin/system/info?camera_id=1&profile_id=imx708-wide')
+            response = client.get('/indi-allsky/modern-admin/system/info?camera_id=1&profile_id=test-profile-1')
             assert response.status_code == 200, response.text
             controls = response.text.split('id="system-units"', 1)[1].split('<details>', 1)[0]
             assert controls.count('class="system-unit-form"') == 4

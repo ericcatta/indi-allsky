@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Manutenzione in coda: planning Hybrid per reload globale e scadenza media per
+  camera, ricevuta task e conferma delle retention salvate. Corretti dispatch
+  multicamera, loop su cancellazione fallita, ambito delle directory e selezione
+  camera/profilo System Info. 116 entrypoint Python e 30 test JavaScript superati;
+  candidato non distribuito, effetti live e browser nativo ancora da collaudare.
+  Evidenze: `testing/evidence/hybrid-queued-maintenance-2026-09-09.json`.
+
 - Validazione media: Hybrid possiede selezione/verifica/rimozione dei record
   mancanti per 13 famiglie, con parita' legacy e protezione aggiunta per URL
   remoti. File preservati, rollback su errore e ambito globale dichiarato nella

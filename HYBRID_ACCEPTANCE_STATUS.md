@@ -13,6 +13,33 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Queued maintenance — 2026-09-09 (candidate, not deployed)
+
+Hybrid now plans explicit global configuration reload and camera-scoped expiration.
+System Info presents confirmations, the saved retention limits, camera/profile
+selection and an observable task receipt. Existing AJAX success payloads remain
+unchanged; a task-ID response header supplies the detail link. UI expiration
+checks a retention token at submission and in the worker; legacy requests without
+that token keep their original semantics.
+
+Actual isolated worker execution exposed and fixes an expiration dispatch rejection,
+a nonterminating retry after failed deletion and directory cleanup outside the
+selected camera. Partial deletion now produces a failed task with committed counts;
+empty-directory pruning stays in the selected camera tree without following links.
+Task detail also tolerates absent/non-dictionary image metadata. Explicit System
+Info camera/profile selection is now validated rather than silently ignored.
+
+All 116 Python regression entries and 30 JavaScript tests passed. Real isolated
+files/tables cover ten media families, both cameras, retention cutoffs, partial
+failure and explicit retry. Evidence and source hashes:
+`testing/evidence/hybrid-queued-maintenance-2026-09-09.json`.
+No candidate deployment, real reload/expiration or native browser acceptance occurred.
+The 07:40 read-only observation recorded 868 frames per camera and recent saved-frame
+intervals with median 15 seconds, maximum 16 seconds. The capture process retained
+its 23:21 start. This is not 24-hour acceptance; two cadence warnings at the night/day
+transition still require interpretation against request timestamps. Production
+completed-task/provider outcomes require the separate audit receipt.
+
 ## Missing media record validation — 2026-09-09 (candidate, not deployed)
 
 Hybrid owns the 13-family validation policy in `ModernAdminMediaValidation`.

@@ -39,9 +39,9 @@ var camera_id = {{ camera_id }};
             <div><dt>Gunicorn Socket</dt><dd>{{ gunicorn_indi_allsky_socket_activestate }} / {{ gunicorn_indi_allsky_socket_unitstate }}</dd></div>
         </dl>
     </section>
-    <section class="modern-admin-table-panel" id="system-units" data-url="{{ url_for('indi_allsky.ajax_system_view') }}" data-csrf="{{ csrf_token() }}" data-camera="{{ camera_id }}" aria-labelledby="system-controls-title">
+    <section class="modern-admin-table-panel" id="system-units" data-task-url="{{ url_for('indi_allsky.modern_admin_task_detail_view', task_id=0) }}" data-url="{{ url_for('indi_allsky.ajax_system_view') }}" data-csrf="{{ csrf_token() }}" data-camera="{{ camera_id }}" aria-labelledby="system-controls-title">
         <h2 id="system-controls-title">Service controls</h2>
-        <p>These controls affect the whole device, not just the selected camera. Stopping INDI interrupts cameras connected through INDI.</p>
+        <p>Service and reload controls affect the whole device. Media expiration applies only to the camera shown below. Stopping INDI interrupts cameras connected through INDI.</p>
         <p>Enable and disable change automatic activation of the timer. They do not start or stop a running timer or capture. Use the capture controls for immediate capture changes.</p>
         {% if not system_units_can_control %}<p>Administrator access is required to change services.</p>{% endif %}
         {% for unit in system_units %}
@@ -82,7 +82,39 @@ var camera_id = {{ camera_id }};
                 </fieldset>
             </form>
         </details>
+        <details>
+            <summary>Reload saved configuration</summary>
+            <p>Apply the saved configuration to the capture runtime for all cameras. Acquisition may be interrupted while workers reload.</p>
+            <form class="system-reload-form" data-unit="{{ config['ALLSKY_SERVICE_NAME'] }}">
+                <fieldset {% if not system_units_can_control %}disabled{% endif %}>
+                    <legend>Reload capture configuration</legend>
+                    <input type="hidden" name="command" value="hup">
+                    <label><input type="checkbox" name="confirmed" required> I confirm applying the saved configuration to all cameras.</label>
+                    <button type="submit">Reload configuration</button>
+                </fieldset>
+            </form>
+        </details>
+        <details>
+            <summary>Expire old media for this camera</summary>
+            <nav aria-label="Camera for media expiration">{% for choice in system_camera_choices %}{% if choice.camera_id %}
+                <a href="{{ url_for('indi_allsky.modern_admin_system_info_view', camera_id=choice.camera_id, profile_id=choice.profile_id) }}"{% if choice.camera_id == camera_id %} aria-current="page"{% endif %}>{{ choice.label }}</a>
+            {% endif %}{% endfor %}</nav>
+            {% if camera_id <= 0 %}<p>Select an available camera before expiring media.</p>{% endif %}
+            <p>Delete media older than the configured retention limits for camera {{ camera_id }}. Other cameras are not included. This permanently removes matching files and database records.</p>
+            <p>The task checks that the worker uses these same retention settings before deleting anything. Reload capture configuration after changing them.</p>
+            <dl class="modern-admin-detail-list">{% for label, days in system_retention_limits %}<div><dt>{{ label }}</dt><dd>{{ days }} days</dd></div>{% endfor %}</dl>
+            <p><a href="{{ url_for('indi_allsky.modern_admin_full_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id', '')) }}">Review retention settings</a></p>
+            <form class="system-expire-form" data-unit="system" data-retention-token="{{ system_retention_token }}">
+                <fieldset {% if not system_expire_can_control %}disabled{% endif %}>
+                    <legend>Apply media retention — camera {{ camera_id }}</legend>
+                    <input type="hidden" name="command" value="expire_data">
+                    <label><input type="checkbox" name="confirmed" required> I have reviewed the retention settings and confirm deletion of expired media for camera {{ camera_id }}.</label>
+                    <button type="submit">Expire old media</button>
+                </fieldset>
+            </form>
+        </details>
         <p id="system-units-result" style="white-space: pre-line" role="status" aria-live="polite"></p>
+        <p><a id="system-units-task" hidden>View submitted task</a></p>
         <a href="{{ url_for('indi_allsky.modern_admin_system_info_view', camera_id=camera_id, profile_id=request.args.get('profile_id', '')) }}">Refresh service state</a>
     </section>
 </main>
