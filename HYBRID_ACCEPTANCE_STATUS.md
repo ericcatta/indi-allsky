@@ -13,6 +13,29 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Camera cleanup migration — candidate, 2026-09-09
+
+Hybrid owns query selection and family ordering for four existing cleanup commands:
+all images (including FITS/RAW/panoramas), processed images from the last 16 minutes,
+generated outputs, and daytime media. Frozen pre-extraction query methods are kept
+in `testing/fixtures/legacy_camera_cleanup_queries.py`. Existing deletion effects,
+500-row batching, success messages and partial-failure reporting remain shared.
+Invalid/nonexistent camera IDs now fail before deletion rather than silently
+accepting an empty or coerced target.
+
+System Info adds four separately confirmed camera-labelled controls, gated by
+administrator role, configured administrator network and an available camera.
+Descriptions preserve the intentional family differences, including retained
+mini timelapses/Startrails in daytime cleanup. Browser completion shows the actual
+deleted count; uncertain responses require inspection before explicit retry.
+
+Focused tests passed: exact frozen SQL/order/selected-ID parity, ten-family actual
+file/record deletion, 16-minute boundary, day/night and other-camera preservation,
+UI gates, and the four-command partial failure/retry suite. All 31 JavaScript tests
+passed, as did all 117 Python regression entries. Evidence and source fingerprints:
+`testing/evidence/hybrid-camera-cleanup-2026-09-09.json`. No production cleanup,
+deployment or native-browser destructive acceptance occurred.
+
 ## Database backup entrance — candidate, 2026-09-09
 
 System Info exposes the existing SQLite backup command with administrator-only

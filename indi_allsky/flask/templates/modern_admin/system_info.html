@@ -126,10 +126,29 @@ var camera_id = {{ camera_id }};
                 </fieldset>
             </form>
         </details>
+        <details>
+            <summary>Delete media for a camera</summary>
+            <nav aria-label="Camera for media deletion">{% for choice in system_camera_choices %}{% if choice.camera_id %}
+                <a href="{{ url_for('indi_allsky.modern_admin_system_info_view', camera_id=choice.camera_id, profile_id=choice.profile_id) }}"{% if choice.camera_id == camera_id %} aria-current="page"{% endif %}>{{ choice.label }}</a>
+            {% endif %}{% endfor %}</nav>
+            <p>These actions permanently remove matching files and database records for camera {{ camera_id }}. Other cameras are kept. They do not stop capture; new images may arrive during cleanup.</p>
+            {% if not system_cleanup_can_control %}<p>Select an available camera and sign in as an administrator from a configured administrator network to delete media.</p>{% endif %}
+            {% for command, label, description in system_cleanup_actions %}
+            <form class="system-cleanup-form" data-unit="system">
+                <fieldset {% if not system_cleanup_can_control %}disabled{% endif %}>
+                    <legend>{{ label }} — camera {{ camera_id }}</legend>
+                    <p>{{ description }}</p>
+                    <input type="hidden" name="command" value="{{ command }}">
+                    <label><input type="checkbox" name="confirmed" required> I confirm permanent deletion of these media for camera {{ camera_id }}.</label>
+                    <button type="submit">{{ label }}</button>
+                </fieldset>
+            </form>
+            {% endfor %}
+        </details>
         <p id="system-units-result" style="white-space: pre-line" role="status" aria-live="polite"></p>
         <p><a id="system-units-task" hidden>View submitted task</a></p>
         <a href="{{ url_for('indi_allsky.modern_admin_system_info_view', camera_id=camera_id, profile_id=request.args.get('profile_id', '')) }}">Refresh service state</a>
     </section>
 </main>
-<script src="{{ url_for('indi_allsky.static', filename='modern_admin/system-units.js') }}"></script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/system-units.js', v='cleanup-v1') }}"></script>
 {% endblock %}

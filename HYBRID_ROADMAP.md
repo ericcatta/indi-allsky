@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Pulizia camera: Hybrid possiede selezione e ordine delle query per eliminazione
+  immagini, ultimi 16 minuti, output generati e media diurni. Quattro ingressi UI
+  con conferma e gate amministratore/rete/camera; effetti condivisi conservati.
+  Parita' SQL e ID con fixture legacy, cancellazioni sintetiche di 10 famiglie,
+  117 entrypoint Python e 31 test JavaScript superati. Non distribuito, nessuna
+  cancellazione produzione. Evidenze: `testing/evidence/hybrid-camera-cleanup-2026-09-09.json`.
+
 - Backup database: ingresso System Info Hybrid con conferma, ambito globale,
   ricevuta task e gestione invio non confermato. Test isolato SQLite/gzip con
   ripristino e integrita', ruoli/CSRF e 31 test JavaScript; 115 entrypoint Python

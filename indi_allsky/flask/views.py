@@ -7456,6 +7456,11 @@ class AjaxSystemInfoView(BaseView):
                 return jsonify({'COMMAND_HIDDEN': [result.message]}), status
             r = result.details['service_result']
         elif service == 'system':
+            from ..modern_admin_camera_cleanup import ACTION_FAMILIES
+            if command in ACTION_FAMILIES:
+                raw_camera = request.json['CAMERA_ID']
+                if isinstance(raw_camera, bool) or not str(raw_camera).isdigit() or camera_id <= 0 or db.session.get(IndiAllSkyDbCameraTable, camera_id) is None:
+                    return jsonify(CAMERA_ID=['Select an available camera before deleting media.']), 400
             if command == 'reboot':
                 # allowing rebooting from non-admin networks for now
                 try:
@@ -7651,204 +7656,29 @@ class AjaxSystemInfoView(BaseView):
         return ModernAdminLogin1PowerEffects(dbus).poweroff()
 
 
+    def cleanup_camera_media(self, command, camera_id):
+        from . import models
+        from ..modern_admin_camera_cleanup import ACTION_FAMILIES, build_cleanup_queries
+        families = ('Camera',) + ACTION_FAMILIES[command]
+        tables = {name: getattr(models, 'IndiAllSkyDb' + name + 'Table') for name in families}
+        queries = build_cleanup_queries(command, camera_id, tables, datetime.now())
+        return flush_media_batches(queries, self._deleteAssets)
+
+
     def flushImages(self, camera_id):
-        ### Images
-        image_query = IndiAllSkyDbImageTable.query\
-            .join(IndiAllSkyDbImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbImageTable.createDate.asc())
-
-
-        ### FITS Images
-        fits_image_query = IndiAllSkyDbFitsImageTable.query\
-            .join(IndiAllSkyDbFitsImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbFitsImageTable.createDate.asc())
-
-
-        ### RAW Images
-        raw_image_query = IndiAllSkyDbRawImageTable.query\
-            .join(IndiAllSkyDbRawImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbRawImageTable.createDate.asc())
-
-
-        ### Panorama Images
-        panorama_image_query = IndiAllSkyDbPanoramaImageTable.query\
-            .join(IndiAllSkyDbPanoramaImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbPanoramaImageTable.createDate.asc())
-
-
-        ### Getting IDs first then deleting each file is faster than deleting all files with
-        ### thumbnails with a single query.  Deleting associated thumbnails causes sqlalchemy
-        ### to recache after every delete which cause a 1-5 second lag for each delete
-
-
-        asset_lists = [
-            (image_query, IndiAllSkyDbImageTable),
-            (fits_image_query, IndiAllSkyDbFitsImageTable),
-            (raw_image_query, IndiAllSkyDbRawImageTable),
-            (panorama_image_query, IndiAllSkyDbPanoramaImageTable),
-        ]
-
-
-        return flush_media_batches(asset_lists, self._deleteAssets)
+        return self.cleanup_camera_media('flush_images', camera_id)
 
 
     def flush16MinutesImages(self, camera_id):
-        now = datetime.now()
-        now_minus_x_minutes = now - timedelta(minutes=16)
-
-        ### Images
-        image_query_16 = IndiAllSkyDbImageTable.query\
-            .join(IndiAllSkyDbImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbImageTable.createDate >= now_minus_x_minutes)\
-            .order_by(IndiAllSkyDbImageTable.createDate.asc())
-
-
-        ### Getting IDs first then deleting each file is faster than deleting all files with
-        ### thumbnails with a single query.  Deleting associated thumbnails causes sqlalchemy
-        ### to recache after every delete which cause a 1-5 second lag for each delete
-
-
-        asset_lists = [
-            (image_query_16, IndiAllSkyDbImageTable),
-        ]
-
-
-        return flush_media_batches(asset_lists, self._deleteAssets)
+        return self.cleanup_camera_media('flush_16min_images', camera_id)
 
 
     def flushTimelapses(self, camera_id):
-        video_query = IndiAllSkyDbVideoTable.query\
-            .join(IndiAllSkyDbVideoTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbVideoTable.createDate.asc())
-
-        mini_video_query = IndiAllSkyDbMiniVideoTable.query\
-            .join(IndiAllSkyDbMiniVideoTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbMiniVideoTable.createDate.asc())
-
-        keogram_query = IndiAllSkyDbKeogramTable.query\
-            .join(IndiAllSkyDbKeogramTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbKeogramTable.createDate.asc())
-
-        startrail_query = IndiAllSkyDbStarTrailsTable.query\
-            .join(IndiAllSkyDbStarTrailsTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbStarTrailsTable.createDate.asc())
-
-        startrail_video_query = IndiAllSkyDbStarTrailsVideoTable.query\
-            .join(IndiAllSkyDbStarTrailsVideoTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbStarTrailsVideoTable.createDate.asc())
-
-        panorama_video_query = IndiAllSkyDbPanoramaVideoTable.query\
-            .join(IndiAllSkyDbPanoramaVideoTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .order_by(IndiAllSkyDbPanoramaVideoTable.createDate.asc())
-
-
-        ### Getting IDs first then deleting each file is faster than deleting all files with
-        ### thumbnails with a single query.  Deleting associated thumbnails causes sqlalchemy
-        ### to recache after every delete which cause a 1-5 second lag for each delete
-
-
-        asset_lists = [
-            (video_query, IndiAllSkyDbVideoTable),
-            (mini_video_query, IndiAllSkyDbMiniVideoTable),
-            (keogram_query, IndiAllSkyDbKeogramTable),
-            (startrail_query, IndiAllSkyDbStarTrailsTable),
-            (startrail_video_query, IndiAllSkyDbStarTrailsVideoTable),
-            (panorama_video_query, IndiAllSkyDbPanoramaVideoTable),
-        ]
-
-
-        return flush_media_batches(asset_lists, self._deleteAssets)
+        return self.cleanup_camera_media('flush_timelapses', camera_id)
 
 
     def flushDaytime(self, camera_id):
-        ### Images
-        image_query = IndiAllSkyDbImageTable.query\
-            .join(IndiAllSkyDbImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbImageTable.night == sa_false())\
-            .order_by(IndiAllSkyDbImageTable.createDate.asc())
-
-
-        ### FITS Images
-        fits_image_query = IndiAllSkyDbFitsImageTable.query\
-            .join(IndiAllSkyDbFitsImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbFitsImageTable.night == sa_false())\
-            .order_by(IndiAllSkyDbFitsImageTable.createDate.asc())
-
-
-        ### RAW Images
-        raw_image_query = IndiAllSkyDbRawImageTable.query\
-            .join(IndiAllSkyDbRawImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbRawImageTable.night == sa_false())\
-            .order_by(IndiAllSkyDbRawImageTable.createDate.asc())
-
-
-        ### Panorama Images
-        panorama_image_query = IndiAllSkyDbPanoramaImageTable.query\
-            .join(IndiAllSkyDbPanoramaImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbPanoramaImageTable.night == sa_false())\
-            .order_by(IndiAllSkyDbPanoramaImageTable.createDate.asc())
-
-
-        ### Timelapses
-        video_query = IndiAllSkyDbVideoTable.query\
-            .join(IndiAllSkyDbVideoTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbVideoTable.night == sa_false())\
-            .order_by(IndiAllSkyDbVideoTable.createDate.asc())
-
-        ### Not flushing daytime mini timelapses
-
-        ### Keograms
-        keogram_query = IndiAllSkyDbKeogramTable.query\
-            .join(IndiAllSkyDbKeogramTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbKeogramTable.night == sa_false())\
-            .order_by(IndiAllSkyDbKeogramTable.createDate.asc())
-
-
-        ### Panorama Videos
-        panorama_video_query = IndiAllSkyDbPanoramaVideoTable.query\
-            .join(IndiAllSkyDbPanoramaVideoTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbPanoramaVideoTable.night == sa_false())\
-            .order_by(IndiAllSkyDbPanoramaVideoTable.createDate.asc())
-
-        ## no startrails
-        ## no startrail videos
-
-
-        ### Getting IDs first then deleting each file is faster than deleting all files with
-        ### thumbnails with a single query.  Deleting associated thumbnails causes sqlalchemy
-        ### to recache after every delete which cause a 1-5 second lag for each delete
-
-
-        asset_lists = [
-            (image_query, IndiAllSkyDbImageTable),
-            (fits_image_query, IndiAllSkyDbFitsImageTable),
-            (raw_image_query, IndiAllSkyDbRawImageTable),
-            (panorama_image_query, IndiAllSkyDbPanoramaImageTable),
-            (video_query, IndiAllSkyDbVideoTable),
-            (keogram_query, IndiAllSkyDbKeogramTable),
-            (panorama_video_query, IndiAllSkyDbPanoramaVideoTable),
-        ]
-
-
-        return flush_media_batches(asset_lists, self._deleteAssets)
+        return self.cleanup_camera_media('flush_daytime', camera_id)
 
 
     def _deleteAssets(self, table, entry_id_list):
@@ -10725,6 +10555,9 @@ class ModernAdminSystemInfoView(ModernAdminSystemToolView, ModernAdminMediaBrows
         context['system_units_can_control'] = bool(app.config['LOGIN_DISABLED'] or current_user.is_admin)
         context['system_camera_choices'] = self.get_media_camera_filters()[1:]
         context['system_expire_can_control'] = context['system_units_can_control'] and self.camera.id > 0
+        from ..modern_admin_camera_cleanup import CLEANUP_ACTIONS
+        context['system_cleanup_actions'] = CLEANUP_ACTIONS
+        context['system_cleanup_can_control'] = context['system_expire_can_control'] and self.verify_admin_network()
         context['system_poweroff_can_control'] = context['system_units_can_control'] and self.verify_admin_network()
         from ..modern_admin_queued_maintenance import retention_policy_token
         context['system_retention_token'] = retention_policy_token(self.indi_allsky_config)

@@ -13,6 +13,7 @@
         }
         const payload = {CAMERA_ID: Number(root.dataset.camera), SERVICE_HIDDEN: form.dataset.unit, COMMAND_HIDDEN: form.elements.command.value};
         if (payload.COMMAND_HIDDEN === 'expire_data') payload.RETENTION_TOKEN = form.dataset.retentionToken;
+        const cleanup = ['flush_images', 'flush_16min_images', 'flush_timelapses', 'flush_daytime'].includes(payload.COMMAND_HIDDEN);
         submitted = true;
         forms.forEach(item => { item.querySelector('fieldset').disabled = true; });
         result.textContent = payload.COMMAND_HIDDEN === 'validate_db'
@@ -33,6 +34,10 @@
                     result.textContent = 'Task submitted. Open its details to check completion.';
                     return;
                 }
+                if (cleanup) {
+                    result.textContent = data['success-message'];
+                    return;
+                }
                 if (payload.COMMAND_HIDDEN === 'validate_db') {
                     // The compatibility API returns numeric summary paragraphs.
                     // Render as text, never insert response markup into the page.
@@ -46,7 +51,9 @@
                 result.textContent = Object.values(data).flat().join(' ') || 'Request not confirmed. Refresh service state before retrying.';
             }
         } catch (error) {
-            result.textContent = payload.COMMAND_HIDDEN === 'validate_db'
+            result.textContent = cleanup
+                ? 'Deletion outcome could not be confirmed. Inspect this camera’s media and system logs before retrying.'
+                : payload.COMMAND_HIDDEN === 'validate_db'
                 ? 'The request outcome could not be confirmed. Check the validation result in system logs before retrying.'
                 : 'The request outcome could not be confirmed. Refresh service state before retrying.';
         }
