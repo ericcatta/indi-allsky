@@ -10548,7 +10548,7 @@ class ModernAdminSystemInfoView(ModernAdminSystemToolView, ModernAdminMediaBrows
     summary_service = ModernAdminSystemInfoSummaryService()
 
     def getCpuUsage(self):
-        return ModernAdminCpuUsageProvider(psutil.cpu_times_percent).read()
+        return ModernAdminCpuUsageProvider(psutil.cpu_percent).read()
 
     def setupSession(self):
         if request.args.get('camera_id') or request.args.get('profile_id'):

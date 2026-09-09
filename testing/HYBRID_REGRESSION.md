@@ -28,8 +28,8 @@ existing directories are rejected to preserve previous evidence. Node must be
 available in the test environment. `--timeout` is a per-entrypoint timeout in
 seconds (default 240), not a deadline for the whole run.
 
-The current plan has 119 Python entries (including the separate Library entrypoint,
-compilation and the runner test) and 31 JavaScript entries. Discovery automatically
+The current plan has 120 Python entries (including the separate Library entrypoint,
+compilation, CPU sampling and the runner test) and 31 JavaScript entries. Discovery automatically
 includes new `modern_admin_*_test.py`, `hybrid_*_test.py` and `hybrid_*_test.js`
 entrypoints. `hybrid_ui_acceptance_test.py` remains a separate native acceptance
 workflow. Additional historical Book 2 entrypoints are listed in `EXTRA_TESTS`.

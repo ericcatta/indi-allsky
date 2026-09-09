@@ -1,5 +1,22 @@
 # Hybrid acceptance status
 
+## CPU subsecond normalization corrected — 2026-09-09
+
+Inspection of installed psutil 7.2.2 found cpu_times_percent scales by
+100/max(1, all_delta), undernormalizing aggregate counter deltas below one second.
+Hybrid now uses cpu_percent(interval=0.1), which divides busy time by total time
+directly. The summary already accepts scalar percentages; Classic's detailed
+counter reader remains unchanged. A test with the installed psutil implementation
+and controlled kernel-counter snapshots verifies 25%, true idle 0%, 100% busy and
+I/O-wait exclusion, while preserving the explicit first-sample interval.
+
+All 120 Python entries pass on the isolated Pi; 741 source hashes match before
+and after. The previous 31 JavaScript passes remain applicable to unchanged JS
+hashes. Real provider samples returned 26.8%, 0%, 0%, taking 0.1002–0.1003 seconds.
+This resolves the observed normalization defect at provider level, not native UI
+acceptance. No deployment occurred; browser and page-latency checks remain open.
+Evidence: `testing/evidence/hybrid-cpu-normalized-2026-09-09.json`.
+
 ## Pending candidates: target regression restored — 2026-09-09 evening
 
 SSH access returned. The isolated overlay was synchronized to candidate 19ef2afa;

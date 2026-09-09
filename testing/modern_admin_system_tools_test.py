@@ -30,23 +30,18 @@ def test_cpu_first_sample_and_view_dispatch():
     def sample(interval=None):
         calls.append(interval)
         # A new worker's nonblocking reading is not a measurement.
-        active = 12.0 if interval == 0.1 else 0.0
-        return SimpleNamespace(user=active, system=3.0 if active else 0.0,
-                               idle=85.0 if active else 0.0,
-                               nice=0.0, iowait=0.0, irq=0.0, softirq=0.0)
+        return 15.0 if interval == 0.1 else 0.0
 
     scope = {'ModernAdminCpuUsageProvider': ModernAdminCpuUsageProvider,
-             'psutil': SimpleNamespace(cpu_times_percent=sample)}
+             'psutil': SimpleNamespace(cpu_percent=sample)}
     exec(compile(ast.Module(body=[method], type_ignores=[]), '<view>', 'exec'), scope)
     for _ in range(2):
         assert ModernAdminSystemInfoSummaryService().format_cpu(
             scope['getCpuUsage'](object())) == '15.0%'
     assert calls == [0.1, 0.1]
 
-    idle = SimpleNamespace(user=0, system=0, nice=0, irq=0, softirq=0,
-                           idle=100, iowait=0)
     service = ModernAdminSystemInfoSummaryService()
-    assert service.format_cpu(ModernAdminCpuUsageProvider(lambda **kw: idle).read()) == '0.0%'
+    assert service.format_cpu(ModernAdminCpuUsageProvider(lambda **kw: 0).read()) == '0.0%'
     assert service.format_cpu(ModernAdminCpuUsageProvider(lambda **kw: None).read()) == 'Unavailable'
 
     def unavailable(**kw):

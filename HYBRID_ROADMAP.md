@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- CPU: risolta normalizzazione dei campioni brevi di psutil 7.2.2 usando
+  cpu_percent con intervallo esplicito 100 ms. Verifica della libreria reale,
+  120 test Python e 741 hash invariati; letture reali sul Pi documentate.
+  Nessun deploy: restano verifica browser e latenza della pagina.
+
+
 - Accesso Pi ripristinato: candidati 19ef2afa verificati con 119 test Python
   sull'overlay isolato e 31 JavaScript sul Mac; 740 hash invariati. Nessun deploy.
   Verifica reale CPU ancora aperta: campioni 100 ms restituiscono componenti

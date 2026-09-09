@@ -41,18 +41,16 @@ LOG_DETAIL_SENSITIVE_PATTERNS = (
 class ModernAdminCpuUsageProvider:
     """Measure a fresh interval even in a newly started web worker."""
 
-    def __init__(self, cpu_times_percent):
-        self.cpu_times_percent = cpu_times_percent
+    def __init__(self, cpu_percent):
+        self.cpu_percent = cpu_percent
 
     def read(self):
         # Nonblocking first calls have no valid baseline. An explicit interval
         # avoids presenting that initialization value as an idle machine.
         try:
-            sample = self.cpu_times_percent(interval=0.1)
+            return self.cpu_percent(interval=0.1)
         except OSError:
             return None
-        return {key: getattr(sample, key, None) for key in
-                ('user', 'system', 'idle', 'nice', 'iowait', 'irq', 'softirq')}
 
 
 class ModernAdminSystemInfoSummaryService:
