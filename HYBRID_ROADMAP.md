@@ -19,7 +19,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 - Protezione alte luci attivata attraverso le impostazioni su entrambi i
   profili. Verificati salvataggio, assenza di modifiche estranee e applicazione
   delle correzioni da parte del runtime. Le prime misure richiedono ancora
-  recupero dalla saturazione: convergenza ed efficacia visiva restano aperte.
+  recupero dalla saturazione. Un successivo confronto numerico dei JPEG mostra
+  una riduzione delle alte luci prossime al massimo su entrambe le camere,
+  sotto il budget iniziale. Si tratta di output elaborati e di un campione
+  limitato: stabilita' prolungata e accettazione visiva restano aperte.
   Evidenze operative dettagliate conservate localmente, escluse dal riepilogo
   pubblicato. Nessun collaudo prolungato avviato.
 
