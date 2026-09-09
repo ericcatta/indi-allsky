@@ -554,7 +554,7 @@ def test_notifications_settings_contract_handles_missing_group():
 def test_notifications_settings_view_uses_hybrid_contract():
     views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
     start = views_text.index('class ModernAdminNotificationsSettingsView')
-    end = views_text.index('class ModernAdminCameraProfileSettingsView', start)
+    end = views_text.index('class ModernAdminAcquisitionSaveSettingsView', start)
     notifications_view = views_text[start:end]
 
     assert_true(
@@ -703,28 +703,6 @@ def test_camera_profile_settings_contract_handles_missing_group():
     )
 
 
-def test_camera_profile_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminCameraProfileSettingsView')
-    end = views_text.index('class ModernAdminCameraConnectionSettingsView', start)
-    camera_profile_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminCameraProfileSettingsContract' in camera_profile_view,
-        'camera profile settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in camera_profile_view,
-        'camera profile settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'CAMERA_PROFILE_CONFIG_SECTIONS' not in camera_profile_view,
-        'camera profile static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_camera_profile_overview_cards' not in camera_profile_view,
-        'camera profile overview formatting must not remain inline on the view',
-    )
 
 
 def test_camera_connection_settings_contract_preserves_context_shape():
@@ -779,28 +757,6 @@ def test_camera_connection_settings_contract_handles_missing_group():
     )
 
 
-def test_camera_connection_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminCameraConnectionSettingsView')
-    end = views_text.index('class ModernAdminExposureGainSettingsView', start)
-    camera_connection_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminCameraConnectionSettingsContract' in camera_connection_view,
-        'camera connection settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in camera_connection_view,
-        'camera connection settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'CAMERA_CONNECTION_CONFIG_SECTIONS' not in camera_connection_view,
-        'camera connection static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_camera_connection_overview_cards' not in camera_connection_view,
-        'camera connection overview formatting must not remain inline on the view',
-    )
 
 
 def test_exposure_gain_settings_contract_preserves_context_shape():
@@ -880,28 +836,6 @@ def test_exposure_gain_settings_contract_handles_missing_groups():
     )
 
 
-def test_exposure_gain_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminExposureGainSettingsView')
-    end = views_text.index('class ModernAdminAutoExposureGainSettingsView', start)
-    exposure_gain_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminExposureGainSettingsContract' in exposure_gain_view,
-        'exposure/gain settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in exposure_gain_view,
-        'exposure/gain settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'EXPOSURE_GAIN_CONFIG_SECTIONS' not in exposure_gain_view,
-        'exposure/gain static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_exposure_gain_overview_cards' not in exposure_gain_view,
-        'exposure/gain overview formatting must not remain inline on the view',
-    )
 
 
 def test_auto_exposure_gain_settings_contract_preserves_context_shape():
@@ -981,28 +915,6 @@ def test_auto_exposure_gain_settings_contract_handles_missing_groups():
     )
 
 
-def test_auto_exposure_gain_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminAutoExposureGainSettingsView')
-    end = views_text.index('class ModernAdminHybridAwbSettingsView', start)
-    auto_exposure_gain_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminAutoExposureGainSettingsContract' in auto_exposure_gain_view,
-        'auto exposure/gain settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in auto_exposure_gain_view,
-        'auto exposure/gain settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'AUTO_EXPOSURE_GAIN_CONFIG_SECTIONS' not in auto_exposure_gain_view,
-        'auto exposure/gain static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_auto_exposure_gain_overview_cards' not in auto_exposure_gain_view,
-        'auto exposure/gain overview formatting must not remain inline on the view',
-    )
 
 
 def test_hybrid_awb_settings_contract_preserves_context_shape():
@@ -1061,28 +973,6 @@ def test_hybrid_awb_settings_contract_handles_missing_group():
     )
 
 
-def test_hybrid_awb_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminHybridAwbSettingsView')
-    end = views_text.index('class ModernAdminAcquisitionSaveSettingsView', start)
-    hybrid_awb_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminHybridAwbSettingsContract' in hybrid_awb_view,
-        'hybrid AWB settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in hybrid_awb_view,
-        'hybrid AWB settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'HYBRID_AWB_CONFIG_SECTIONS' not in hybrid_awb_view,
-        'hybrid AWB static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_hybrid_awb_overview_cards' not in hybrid_awb_view,
-        'hybrid AWB overview formatting must not remain inline on the view',
-    )
 
 
 def test_acquisition_save_settings_contract_preserves_context_shape():
@@ -1625,19 +1515,14 @@ def run_tests():
     test_storage_settings_view_uses_hybrid_contract()
     test_camera_profile_settings_contract_preserves_context_shape()
     test_camera_profile_settings_contract_handles_missing_group()
-    test_camera_profile_settings_view_uses_hybrid_contract()
     test_camera_connection_settings_contract_preserves_context_shape()
     test_camera_connection_settings_contract_handles_missing_group()
-    test_camera_connection_settings_view_uses_hybrid_contract()
     test_exposure_gain_settings_contract_preserves_context_shape()
     test_exposure_gain_settings_contract_handles_missing_groups()
-    test_exposure_gain_settings_view_uses_hybrid_contract()
     test_auto_exposure_gain_settings_contract_preserves_context_shape()
     test_auto_exposure_gain_settings_contract_handles_missing_groups()
-    test_auto_exposure_gain_settings_view_uses_hybrid_contract()
     test_hybrid_awb_settings_contract_preserves_context_shape()
     test_hybrid_awb_settings_contract_handles_missing_group()
-    test_hybrid_awb_settings_view_uses_hybrid_contract()
     test_acquisition_save_settings_contract_preserves_context_shape()
     test_acquisition_save_settings_contract_handles_missing_groups()
     test_acquisition_save_settings_view_uses_hybrid_contract()

@@ -39,6 +39,24 @@ def test_route_contract_is_unchanged():
                     assert setting.value.value == 'modern_admin/public_media.html'
                     setting.value.value = 'watch_video.html' if node.args[0].value.startswith('/watch_') else 'view_image.html'
                 calls.append(ast.dump(node, include_attributes=False))
+    # These former previews now redirect to the camera editors. Check the new
+    # registry, then retain the historical entries in the unchanged fingerprint.
+    entry_tree = ast.parse((FLASK / 'settings_entries.py').read_text())
+    entries = ast.literal_eval(next(n.value for n in entry_tree.body if isinstance(n, ast.Assign)
+                                   and any(isinstance(t, ast.Name) and t.id == 'CAMERA_SETTINGS_ENTRIES' for t in n.targets)))
+    expected = {
+        'camera-profile': ('modern_admin_camera_profile_settings_view', 'driver-connection', 'CameraProfile'),
+        'camera-connection': ('modern_admin_camera_connection_settings_view', 'driver-connection', 'CameraConnection'),
+        'exposure-gain': ('modern_admin_exposure_gain_settings_view', 'acquisition', 'ExposureGain'),
+        'auto-exposure-gain': ('modern_admin_auto_exposure_gain_settings_view', 'acquisition', 'AutoExposureGain'),
+        'hybrid-awb': ('modern_admin_hybrid_awb_settings_view', 'hybrid-controller', 'HybridAwb'),
+    }
+    assert entries == {key: value[:2] for key, value in expected.items()}
+    assert 'register_camera_settings_entries(bp_allsky)' in (FLASK / 'views.py').read_text()
+    for path, (endpoint, anchor, class_part) in expected.items():
+        template = 'modern_admin/settings_' + path.replace('-', '_') + '.html'
+        historical = "bp_allsky.add_url_rule('/modern-admin/settings/" + path + "', view_func=ModernAdmin" + class_part + "SettingsView.as_view('" + endpoint + "', template_name='" + template + "'))"
+        calls.append(ast.dump(ast.parse(historical).body[0].value, include_attributes=False))
     assert len(calls) == 224
     fingerprint = hashlib.sha256('\n'.join(sorted(calls)).encode()).hexdigest()
     assert fingerprint == '17514e70700d7f9d255e1026f2ffb42d6bdf96db13a97e65b9cdb4d9e8233d92'

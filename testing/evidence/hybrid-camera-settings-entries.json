@@ -1,0 +1,30 @@
+{
+  "baseline": "966e0f11",
+  "scope": "Isolated Flask and regression; no production deployment",
+  "python_cases": 128,
+  "javascript_cases": 31,
+  "failures": [],
+  "matching_source_files": 753,
+  "source_manifest_sha256": "8101dede4cb69cdebafd51f77c1067a79e868cc0a3f06a42e65429ba0eada748",
+  "routes": [
+    "camera-profile",
+    "camera-connection",
+    "exposure-gain",
+    "auto-exposure-gain",
+    "hybrid-awb"
+  ],
+  "checks": [
+    "Both authorized roles reach actual editors",
+    "Explicit profile and camera query preserved",
+    "Camera-only selection uses unique configured binding",
+    "Fixed local destination and section anchors",
+    "Anonymous session reaches login",
+    "Navigation leaves configuration unchanged",
+    "Historical route fingerprint preserved"
+  ],
+  "limits": [
+    "Native browser acceptance pending",
+    "Unused preview templates await separate cleanup",
+    "Full Classic removal remains incomplete"
+  ]
+}

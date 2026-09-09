@@ -30,7 +30,7 @@ def run(runtime_config):
             assert response.status_code == 200, (route, response.status_code)
         for group in ('acquisition-save', 'analytics', 'auto-exposure-gain', 'camera-connection',
                       'camera-profile', 'exposure-gain', 'fits-source', 'hybrid-awb', 'notifications', 'storage'):
-            response = client.get('/indi-allsky/modern-admin/settings/'+group)
+            response = client.get('/indi-allsky/modern-admin/settings/'+group, follow_redirects=True)
             assert response.status_code == 200, (group, response.status_code)
         duplicate = client.get('/indi-allsky/modern-admin/system/config?camera_id=2&profile_id=test-profile')
         assert duplicate.status_code == 302

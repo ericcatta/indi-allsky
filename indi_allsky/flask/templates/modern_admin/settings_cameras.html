@@ -99,7 +99,7 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-settings-sections" aria-label="Camera settings sections">
         {% for section in modern_admin_camera_settings_sections %}
         {% if section.key == 'hybrid-controller' %}
-        <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-camera-settings-section="{{ section.key }}" open>
+        <details id="hybrid-controller" class="modern-admin-settings-section modern-admin-settings-edit-section" data-camera-settings-section="{{ section.key }}" open>
             {% set hybrid_capabilities = modern_admin_camera_settings_hybrid_form.capabilities %}
             <summary>
                 <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
@@ -259,7 +259,7 @@ var camera_id = {{ camera_id }};
             </div>
         </details>
         {% elif section.key == 'driver-connection' %}
-        <details class="modern-admin-settings-section modern-admin-settings-edit-section" data-camera-settings-section="{{ section.key }}" open>
+        <details id="driver-connection" class="modern-admin-settings-section modern-admin-settings-edit-section" data-camera-settings-section="{{ section.key }}" open>
             <summary>
                 <span class="modern-admin-settings-arrow" aria-hidden="true">›</span>
                 <span class="modern-admin-settings-section-title">{{ section.title }}</span>

@@ -71,12 +71,7 @@ from ..modern_admin_observatory_tools import ModernAdminSqmSummaryService
 from ..modern_admin_observatory_tools import ModernAdminVirtualSkyContextService
 from ..modern_admin_settings_contracts import ModernAdminAcquisitionSaveSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminAnalyticsSettingsContract
-from ..modern_admin_settings_contracts import ModernAdminAutoExposureGainSettingsContract
-from ..modern_admin_settings_contracts import ModernAdminCameraConnectionSettingsContract
-from ..modern_admin_settings_contracts import ModernAdminCameraProfileSettingsContract
-from ..modern_admin_settings_contracts import ModernAdminExposureGainSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContract
-from ..modern_admin_settings_contracts import ModernAdminHybridAwbSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminNotificationsSettingsContract
 from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
@@ -13618,67 +13613,14 @@ class ModernAdminNotificationsSettingsView(ModernAdminSettingsInventoryView):
         return context
 
 
-class ModernAdminCameraProfileSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Camera Profile Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminCameraProfileSettingsContract()
-
-    def get_context(self):
-        context = super(ModernAdminCameraProfileSettingsView, self).get_context()
-        context.update(self.settings_contract.build_context(context.get('modern_admin_settings_groups', [])))
-        return context
 
 
-class ModernAdminCameraConnectionSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Camera Connection Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminCameraConnectionSettingsContract()
-
-    def get_context(self):
-        context = super(ModernAdminCameraConnectionSettingsView, self).get_context()
-        context.update(self.settings_contract.build_context(context.get('modern_admin_settings_groups', [])))
-        return context
 
 
-class ModernAdminExposureGainSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Exposure Gain Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminExposureGainSettingsContract()
-
-    def get_context(self):
-        context = super(ModernAdminExposureGainSettingsView, self).get_context()
-        context.update(self.settings_contract.build_context(context.get('modern_admin_settings_groups', [])))
-        return context
 
 
-class ModernAdminAutoExposureGainSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Auto Exposure Gain Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminAutoExposureGainSettingsContract()
-
-    def get_context(self):
-        context = super(ModernAdminAutoExposureGainSettingsView, self).get_context()
-        context.update(
-            self.settings_contract.build_context(
-                context.get('modern_admin_settings_groups', [])
-            )
-        )
-        return context
 
 
-class ModernAdminHybridAwbSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Hybrid AWB Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminHybridAwbSettingsContract()
-
-    def get_context(self):
-        context = super(ModernAdminHybridAwbSettingsView, self).get_context()
-        context.update(
-            self.settings_contract.build_context(
-                context.get('modern_admin_settings_groups', [])
-            )
-        )
-        return context
 
 
 class ModernAdminAcquisitionSaveSettingsView(ModernAdminSettingsInventoryView):
@@ -14893,6 +14835,14 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         for profile in profiles:
             if str(profile.get('profile_id')) == selected_profile_id:
                 return profile
+
+        if not selected_profile_id:
+            selected_camera_id = request.args.get('camera_id', type=int)
+            if selected_camera_id:
+                matches = [profile for profile in profiles
+                           if self.get_camera_settings_profile_camera_id(profile) == selected_camera_id]
+                if len(matches) == 1:
+                    return matches[0]
 
         return profiles[0]
 
@@ -18089,6 +18039,8 @@ def images_folder(path):
 
 
 def register_hybrid_routes(bp_allsky):
+    from .settings_entries import register_camera_settings_entries
+    register_camera_settings_entries(bp_allsky)
     bp_allsky.add_url_rule('/modern-admin/media/gallery', view_func=ModernAdminMediaGalleryView.as_view('modern_admin_media_gallery_view', template_name='modern_admin/media_list.html'))
     bp_allsky.add_url_rule('/modern-admin/media/gallery/page', view_func=ModernAdminMediaGalleryPageView.as_view('modern_admin_media_gallery_page_view', template_name='modern_admin/media_list.html'))
     bp_allsky.add_url_rule('/modern-admin/media/images', view_func=ModernAdminMediaImagesView.as_view('modern_admin_media_images_view', template_name='modern_admin/media_list.html'))
@@ -18173,11 +18125,6 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/settings/analytics', view_func=ModernAdminAnalyticsSettingsView.as_view('modern_admin_analytics_settings_view', template_name='modern_admin/settings_analytics.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/storage', view_func=ModernAdminStorageSettingsView.as_view('modern_admin_storage_settings_view', template_name='modern_admin/settings_storage.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/notifications', view_func=ModernAdminNotificationsSettingsView.as_view('modern_admin_notifications_settings_view', template_name='modern_admin/settings_notifications.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/camera-profile', view_func=ModernAdminCameraProfileSettingsView.as_view('modern_admin_camera_profile_settings_view', template_name='modern_admin/settings_camera_profile.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/camera-connection', view_func=ModernAdminCameraConnectionSettingsView.as_view('modern_admin_camera_connection_settings_view', template_name='modern_admin/settings_camera_connection.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/exposure-gain', view_func=ModernAdminExposureGainSettingsView.as_view('modern_admin_exposure_gain_settings_view', template_name='modern_admin/settings_exposure_gain.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/auto-exposure-gain', view_func=ModernAdminAutoExposureGainSettingsView.as_view('modern_admin_auto_exposure_gain_settings_view', template_name='modern_admin/settings_auto_exposure_gain.html'))
-    bp_allsky.add_url_rule('/modern-admin/settings/hybrid-awb', view_func=ModernAdminHybridAwbSettingsView.as_view('modern_admin_hybrid_awb_settings_view', template_name='modern_admin/settings_hybrid_awb.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/acquisition-save', view_func=ModernAdminAcquisitionSaveSettingsView.as_view('modern_admin_acquisition_save_settings_view', template_name='modern_admin/settings_acquisition_save.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/fits-source', view_func=ModernAdminFitsSourceSettingsView.as_view('modern_admin_fits_source_settings_view', template_name='modern_admin/settings_fits_source.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))

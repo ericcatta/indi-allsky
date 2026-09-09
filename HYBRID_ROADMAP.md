@@ -16,6 +16,20 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Candidato consolidamento Settings camera: cinque ingressi di anteprima
+  (profilo, connessione, esposizione/gain, auto exposure/gain, Hybrid AWB)
+  rimandano agli editor operativi con sezioni ancorate e query preservata.
+  Rimosse le vecchie classi di view; contratti di configurazione invariati.
+  I template di anteprima restano da eliminare nel successivo cleanup, dopo
+  verifica dei riferimenti. Test dei contratti, compilazione e integrazione
+  Flask superati: entrambi i ruoli/profili, autenticazione e nessuna mutazione
+  via GET. Guardrail aggiornato per il registro, fingerprint storico invariato.
+  Se la query indica soltanto una camera con binding univoco, viene scelto
+  il suo profilo; un profilo esplicito mantiene precedenza. Il nuovo caso passa
+  in Flask su entrambi i profili. Regressione completa superata: 128 casi Python
+  e 31 JavaScript; 753 sorgenti confrontati coincidono con il candidato locale.
+  Rilascio e cleanup dei template ancora da completare.
+
 - Revisione delle istruzioni Acquisition: rimosse le descrizioni obsolete che
   indicavano gain diurno sempre fisso e auto gain solo notturno. I testi ora
   spiegano priorita' esposizione/gain, minimo configurato e intervalli condivisi,
