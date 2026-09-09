@@ -1,0 +1,170 @@
+{
+  "scope": "Read-only production file presence and ffprobe metadata; not full decode, browser playback or 24-hour acceptance",
+  "observed_at": "2026-09-09T07:50:33.957775+02:00",
+  "outputs": [
+    {
+      "id": 11,
+      "camera_id": 2,
+      "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260908/allsky-timelapse_ccd2_20260908_night_1788928066.mp4",
+      "success": 1,
+      "table": "video",
+      "bytes": 20446646,
+      "probe_exit": 0,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 3840,
+            "height": 2160,
+            "duration": "32.000000",
+            "nb_frames": "800"
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "camera_id": 1,
+      "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260908/allsky-timelapse_ccd1_20260908_night_1788928594.mp4",
+      "success": 1,
+      "table": "video",
+      "bytes": 20072053,
+      "probe_exit": 0,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 4608,
+            "height": 2592,
+            "duration": "31.960000",
+            "nb_frames": "799"
+          }
+        ]
+      }
+    },
+    {
+      "id": 1,
+      "camera_id": 2,
+      "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260908/allsky-panorama_timelapse_ccd2_20260908_night_1788928210.mp4",
+      "success": 1,
+      "table": "panoramavideo",
+      "bytes": 9523297,
+      "probe_exit": 0,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 4712,
+            "height": 750,
+            "duration": "14.440000",
+            "nb_frames": "361"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "camera_id": 1,
+      "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260908/allsky-panorama_timelapse_ccd1_20260908_night_1788928876.mp4",
+      "success": 1,
+      "table": "panoramavideo",
+      "bytes": 9497391,
+      "probe_exit": 0,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 4712,
+            "height": 750,
+            "duration": "14.440000",
+            "nb_frames": "361"
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "camera_id": 2,
+      "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260908/allsky-keogram_ccd2_20260908_night_1788927830.jpg",
+      "success": 1,
+      "table": "keogram",
+      "bytes": 161103
+    },
+    {
+      "id": 12,
+      "camera_id": 1,
+      "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260908/allsky-keogram_ccd1_20260908_night_1788928247.jpg",
+      "success": 1,
+      "table": "keogram",
+      "bytes": 161323
+    },
+    {
+      "id": 5,
+      "camera_id": 2,
+      "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260908/allsky-startrail_ccd2_20260908_night_1788927830.jpg",
+      "success": 1,
+      "table": "startrail",
+      "bytes": 3315797
+    },
+    {
+      "id": 6,
+      "camera_id": 1,
+      "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260908/allsky-startrail_ccd1_20260908_night_1788928247.jpg",
+      "success": 1,
+      "table": "startrail",
+      "bytes": 2380313
+    },
+    {
+      "id": 4,
+      "camera_id": 2,
+      "filename": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260908/allsky-startrail_timelapse_ccd2_20260908_night_1788927830.mp4",
+      "success": 1,
+      "table": "startrailvideo",
+      "bytes": 10410906,
+      "probe_exit": 0,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 3840,
+            "height": 2160,
+            "duration": "15.920000",
+            "nb_frames": "398"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "camera_id": 1,
+      "filename": "ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260908/allsky-startrail_timelapse_ccd1_20260908_night_1788928247.mp4",
+      "success": 1,
+      "table": "startrailvideo",
+      "bytes": 13547225,
+      "probe_exit": 0,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 4608,
+            "height": 2592,
+            "duration": "22.600000",
+            "nb_frames": "565"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -13,6 +13,26 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Live generated outputs and task outcomes — 2026-09-09
+
+Recovered the 07:44 read-only audit for installed `498ba959`: configuration 110,
+52,350,693,376 free bytes, all 40 tasks since the 23:21 release recorded SUCCESS.
+This includes two each of video, panorama, Keogram/Startrail, expiration and
+end-of-night jobs; the latter does not prove any remote destination received data.
+Both cameras report available aurora components and smoke outside coverage.
+
+At 07:50, all ten generated output records (five families, two cameras) had
+nonempty local files. Six MP4 files passed ffprobe and contain H.264 streams with
+positive durations/frame counts; both panoramas contain 361 frames. Keogram and
+Startrail JPEG presence/size were checked, not full decoding. No media were
+transferred, created or deleted, and no services restarted. These checks do not
+prove full playback, scientific quality or 24-hour stability.
+
+Evidence: `testing/evidence/hybrid-live-task-provider-audit-2026-09-09.json` and
+`testing/evidence/hybrid-live-generated-outputs-2026-09-09.json`. This resolves the
+missing audit receipt mentioned in the previous mission, not its deployment or
+native browser acceptance gates.
+
 ## Queued maintenance — 2026-09-09 (candidate, not deployed)
 
 Hybrid now plans explicit global configuration reload and camera-scoped expiration.

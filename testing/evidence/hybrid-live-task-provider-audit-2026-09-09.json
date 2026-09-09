@@ -1,0 +1,393 @@
+{
+  "observed_at": "2026-09-09T07:44:07.428031+02:00",
+  "since": "2026-09-08 23:21:17",
+  "installed_head": "498ba95944fe11881cc5d863c70ca99621fabd78",
+  "free_bytes": 52350693376,
+  "config_revision": 110,
+  "task_outcomes": [
+    {
+      "id": 10940,
+      "createDate": "2026-09-08 23:31:20",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10941,
+      "createDate": "2026-09-08 23:31:20",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10942,
+      "createDate": "2026-09-09 00:02:33",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10943,
+      "createDate": "2026-09-09 00:02:33",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10944,
+      "createDate": "2026-09-09 00:28:33",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Smoke provider does not cover this location",
+      "action": "updateSmokeData"
+    },
+    {
+      "id": 10945,
+      "createDate": "2026-09-09 00:28:33",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Smoke provider does not cover this location",
+      "action": "updateSmokeData"
+    },
+    {
+      "id": 10946,
+      "createDate": "2026-09-09 00:28:33",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Satellite data updated",
+      "action": "updateSatelliteTleData"
+    },
+    {
+      "id": 10947,
+      "createDate": "2026-09-09 00:33:45",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10948,
+      "createDate": "2026-09-09 00:33:45",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10949,
+      "createDate": "2026-09-09 01:04:58",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10950,
+      "createDate": "2026-09-09 01:04:58",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10951,
+      "createDate": "2026-09-09 01:36:10",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10952,
+      "createDate": "2026-09-09 01:36:10",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10953,
+      "createDate": "2026-09-09 02:07:23",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10954,
+      "createDate": "2026-09-09 02:07:23",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10955,
+      "createDate": "2026-09-09 02:38:35",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10956,
+      "createDate": "2026-09-09 02:38:35",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10957,
+      "createDate": "2026-09-09 03:09:48",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10958,
+      "createDate": "2026-09-09 03:09:48",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10959,
+      "createDate": "2026-09-09 03:30:36",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Smoke provider does not cover this location",
+      "action": "updateSmokeData"
+    },
+    {
+      "id": 10960,
+      "createDate": "2026-09-09 03:30:36",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Smoke provider does not cover this location",
+      "action": "updateSmokeData"
+    },
+    {
+      "id": 10961,
+      "createDate": "2026-09-09 03:30:36",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Satellite data updated",
+      "action": "updateSatelliteTleData"
+    },
+    {
+      "id": 10962,
+      "createDate": "2026-09-09 03:41:00",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10963,
+      "createDate": "2026-09-09 03:41:00",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10964,
+      "createDate": "2026-09-09 04:12:13",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10965,
+      "createDate": "2026-09-09 04:12:13",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10966,
+      "createDate": "2026-09-09 04:23:43",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Expired 0 assets",
+      "action": "expireData"
+    },
+    {
+      "id": 10967,
+      "createDate": "2026-09-09 04:23:43",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Complete generation \u2014 Keogram: generated; Startrail: generated; Startrail video: generated",
+      "action": "generateKeogramStarTrails"
+    },
+    {
+      "id": 10968,
+      "createDate": "2026-09-09 04:23:43",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Generated timelapse: /var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260908/allsky-timelapse_ccd2_20260908_night_1788928066.mp4",
+      "action": "generateVideo"
+    },
+    {
+      "id": 10969,
+      "createDate": "2026-09-09 04:23:43",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Generated timelapse: /var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260908/allsky-panorama_timelapse_ccd2_20260908_night_1788928210.mp4",
+      "action": "generatePanoramaVideo"
+    },
+    {
+      "id": 10970,
+      "createDate": "2026-09-09 04:23:43",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Skipped EndOfNight upload: disabled in configuration",
+      "action": "uploadAllskyEndOfNight"
+    },
+    {
+      "id": 10971,
+      "createDate": "2026-09-09 04:23:47",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Expired 0 assets",
+      "action": "expireData"
+    },
+    {
+      "id": 10972,
+      "createDate": "2026-09-09 04:23:47",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Complete generation \u2014 Keogram: generated; Startrail: generated; Startrail video: generated",
+      "action": "generateKeogramStarTrails"
+    },
+    {
+      "id": 10973,
+      "createDate": "2026-09-09 04:23:47",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Generated timelapse: /var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260908/allsky-timelapse_ccd1_20260908_night_1788928594.mp4",
+      "action": "generateVideo"
+    },
+    {
+      "id": 10974,
+      "createDate": "2026-09-09 04:23:47",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Generated timelapse: /var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260908/allsky-panorama_timelapse_ccd1_20260908_night_1788928876.mp4",
+      "action": "generatePanoramaVideo"
+    },
+    {
+      "id": 10975,
+      "createDate": "2026-09-09 04:23:47",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Skipped EndOfNight upload: disabled in configuration",
+      "action": "uploadAllskyEndOfNight"
+    },
+    {
+      "id": 10976,
+      "createDate": "2026-09-09 04:43:25",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10977,
+      "createDate": "2026-09-09 04:43:25",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10978,
+      "createDate": "2026-09-09 05:14:38",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    },
+    {
+      "id": 10979,
+      "createDate": "2026-09-09 05:14:38",
+      "queue": "VIDEO",
+      "state": "SUCCESS",
+      "result": "Aurora data updated",
+      "action": "updateAuroraData"
+    }
+  ],
+  "camera_provider_status": {
+    "1": {
+      "AURORA_COMPONENT_STATUS": {
+        "ovation": {
+          "state": "available",
+          "last_success": 1788930889
+        },
+        "kpindex": {
+          "state": "available",
+          "last_success": 1788930890
+        },
+        "mag": {
+          "state": "available",
+          "last_success": 1788930892
+        },
+        "plasma": {
+          "state": "available",
+          "last_success": 1788930894
+        },
+        "hemi_power": {
+          "state": "available",
+          "last_success": 1788930894
+        }
+      },
+      "AURORA_DATA_TS": 1788930894,
+      "SMOKE_UPDATE_STATUS": {
+        "state": "not_covered",
+        "attempted_at": 1788924636
+      },
+      "SMOKE_RATING": -1,
+      "SMOKE_DATA_TS": 1788924636
+    },
+    "2": {
+      "AURORA_COMPONENT_STATUS": {
+        "ovation": {
+          "state": "available",
+          "last_success": 1788930881
+        },
+        "kpindex": {
+          "state": "available",
+          "last_success": 1788930881
+        },
+        "mag": {
+          "state": "available",
+          "last_success": 1788930884
+        },
+        "plasma": {
+          "state": "available",
+          "last_success": 1788930886
+        },
+        "hemi_power": {
+          "state": "available",
+          "last_success": 1788930886
+        }
+      },
+      "AURORA_DATA_TS": 1788930886,
+      "SMOKE_UPDATE_STATUS": {
+        "state": "not_covered",
+        "attempted_at": 1788924636
+      },
+      "SMOKE_RATING": -1,
+      "SMOKE_DATA_TS": 1788924636
+    }
+  }
+}
