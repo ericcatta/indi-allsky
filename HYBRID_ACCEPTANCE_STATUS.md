@@ -13,6 +13,24 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Native daytime cleanup — isolated browser, 2026-09-09
+
+The existing Classic-disabled maintenance fixture contained 55 daytime images
+(two pages: 48 + 7) and 58 night images (48 + 10) for camera 1. System Info initially
+selected camera 2; the test explicitly selected Test Profile 1 and verified its
+labelled confirmation before submitting Delete daytime media. Feedback reported
+55 Files Deleted and disabled resubmission. The daytime filter then showed zero;
+night pagination still showed 48 + 10, with no further page. No production data
+or services changed, and no product code changed for this acceptance pass.
+
+Evidence: `testing/evidence/hybrid-native-daytime-cleanup-2026-09-09.json`.
+This proves the positive image selection/count path in the browser. It does not
+claim per-file comparison, other-camera preservation on an already empty camera,
+or positive daytime FITS/RAW/output-family acceptance. Those remain distinguished
+from the existing automatic SQL/file tests. Positive recent-image cleanup remains
+open. The fixture runtime is 2acbd0cb; later published changes do not affect this
+cleanup handler.
+
 ## Cadence transition diagnostic — candidate, 2026-09-09
 
 The scheduler sets the next request deadline with the period selected for the

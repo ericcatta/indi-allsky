@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-09",
+  "scope": "Native browser against existing Classic-disabled synthetic maintenance server on port 8105",
+  "runtime_candidate": "2acbd0cb",
+  "production_mutated": false,
+  "command": "flush_daytime",
+  "camera_id": 1,
+  "before": {
+    "day_pages": [
+      48,
+      7
+    ],
+    "night_pages": [
+      48,
+      10
+    ],
+    "last_pages_have_next_link": false
+  },
+  "submission": {
+    "explicit_camera_selection": "System Info initially selected camera 2; selected Test Profile 1 and verified camera-1 fieldset before confirming",
+    "confirmation": true,
+    "feedback": "55 Files Deleted",
+    "submit_disabled_after": true
+  },
+  "after": {
+    "day_pages": [
+      0
+    ],
+    "night_pages": [
+      48,
+      10
+    ],
+    "night_last_page_has_next_link": false
+  },
+  "result": "passed for positive daytime-image deletion and preserved night-image counts",
+  "limits": [
+    "Browser counts are not a per-record filesystem comparison.",
+    "Other camera was already empty from earlier cleanup, so this pass does not prove cross-camera preservation.",
+    "No positive daytime FITS/RAW/generated fixtures were present; those family semantics are covered by the separate automated cleanup suite.",
+    "Positive recent-16-minute native cleanup remains open."
+  ]
+}
