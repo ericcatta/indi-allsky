@@ -12,7 +12,7 @@ from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app
 from hybrid_operations_fixture import seed_operations
 from hybrid_source_media_fixture import seed_source_media
-from hybrid_generation_fixture import seed_generation, seed_preview_frames
+from hybrid_generation_fixture import seed_generation, seed_preview_frames, seed_cleanup_frames
 from hybrid_generated_media_fixture import seed_generated_media
 from hybrid_archive_fixture import seed_archive
 from hybrid_public_media_fixture import seed_public_media
@@ -32,6 +32,8 @@ def run(runtime_config, port, upgrade_fixture=None, maintenance_fixture=False):
         seed_generated_media(app)
         seed_archive(app)
         seed_public_media(app)
+        if maintenance_fixture:
+            seed_cleanup_frames(app)
         from flask import request, jsonify
         from indi_allsky.flask.views import AjaxConfigRestoreView, JsonLogView
         from indi_allsky.flask.forms import IndiAllskyNetworkManagerForm

@@ -33,3 +33,25 @@ def seed_preview_frames(app):
                     createDate=target.createDate+timedelta(seconds=offset),dayDate=target.dayDate,
                     exposure=.5,gain=10,adu=.1,night=True,data={},width=64,height=48,fileSize=path.stat().st_size))
         db.session.commit()
+
+
+def seed_cleanup_frames(app):
+    """Recent/old pairs for native camera-scoped cleanup, in disposable media."""
+    from datetime import datetime, timedelta
+    from PIL import Image
+    from indi_allsky.flask import db
+    from indi_allsky.flask.models import IndiAllSkyDbImageTable
+    now = datetime.now()  # Match the cleanup query's local naive clock.
+    with app.app_context():
+        root = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER'])
+        for cid in (1, 2):
+            for label, minutes in (('recent', 1), ('old', 30)):
+                created = now - timedelta(minutes=minutes)
+                path = root / ('cleanup-%s-camera-%s.jpg' % (label, cid))
+                Image.new('RGB', (64, 48), (20 * cid, 60, 80)).save(path)
+                db.session.add(IndiAllSkyDbImageTable(
+                    filename=str(path), camera_id=cid, createDate=created,
+                    dayDate=created.date(), exposure=.5, gain=10, adu=.1,
+                    night=True, data={}, width=64, height=48,
+                    fileSize=path.stat().st_size))
+        db.session.commit()

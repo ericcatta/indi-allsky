@@ -13,6 +13,23 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Native recent-image cleanup — candidate, 2026-09-09
+
+The opt-in maintenance browser fixture now seeds one recent and one old synthetic
+image per camera using the local clock used by cleanup selection. The native
+browser showed IDs 210/212 created at 10:23:45 and IDs 211/213 at 09:54:45.
+After selecting camera 2 and confirming Delete recent images, feedback reported
+1 Images Deleted. Filtering all cameras by cleanup- showed exactly IDs 210, 211,
+213: both camera-1 fixtures and the old camera-2 fixture remained; recent camera-2
+ID 212 was absent. This verifies the positive temporal and camera selection path
+by archive identity, not a direct filesystem comparison or exact-boundary test.
+
+No production data changed. The maintenance request guard and all 31 JavaScript
+tests pass. After SSH disconnected, a read-only check confirmed that no runner or report
+existed. The subsequent full regression completed: 118 Python entries passed,
+including compilation. Diff check passed. Evidence:
+`testing/evidence/hybrid-native-recent-cleanup-2026-09-09.json`.
+
 ## Native daytime cleanup — isolated browser, 2026-09-09
 
 The existing Classic-disabled maintenance fixture contained 55 daytime images
