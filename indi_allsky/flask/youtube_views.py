@@ -81,7 +81,7 @@ class YoutubeActionView(BaseView):
     def dispatch_request(self):
         if not current_user.is_authenticated or not current_user.admin:
             abort(403, 'Administrator access is required to change YouTube authorization.')
-        if request.method == 'GET':
+        if request.method in ('GET', 'HEAD'):
             # Old bookmarks remain safe: changes require a CSRF-protected form.
             return redirect(url_for('indi_allsky.modern_admin_youtube_view'))
         require_oauth_modules()
@@ -133,6 +133,8 @@ class YoutubeCallbackView(YoutubeActionView):
         from oauthlib.oauth2 import OAuth2Error
         if not current_user.is_authenticated or not current_user.admin:
             abort(403, 'Administrator access is required to connect YouTube.')
+        if request.method == 'HEAD':
+            return redirect(url_for('indi_allsky.modern_admin_youtube_view'))
         expected = session.pop('youtube_state', None)
         verifier = session.pop('youtube_code_verifier', None)
         started = session.pop('youtube_started_at', None)

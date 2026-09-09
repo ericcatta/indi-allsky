@@ -37,6 +37,17 @@ def run(runtime_config):
         assert 'Not connected' in admin.get(panel).text
         for name in ('authorize','oauth2refresh','oauth2revoke'):
             assert admin.get(base+name).location.endswith(panel)
+            # Flask enables HEAD automatically; it must never reach OAuth effects.
+            action_classes = {'authorize': 'YoutubeAuthorizeView',
+                              'oauth2refresh': 'YoutubeRefreshAuthView',
+                              'oauth2revoke': 'YoutubeRevokeAuthView'}
+            with patch('indi_allsky.flask.youtube_views.' + action_classes[name] + '.perform') as effect:
+                response = admin.head(base+name, json={'command': name})
+                assert response.status_code == 302 and response.location.endswith(panel)
+                assert response.data == b''
+                assert user.head(base+name).status_code == 403
+                assert app.test_client().head(base+name).status_code == 302
+                effect.assert_not_called()
             assert admin.post(base+name).status_code==400
             assert user.get(base+name).status_code==403
             assert user.post(base+name,headers=userheaders).status_code==403
@@ -66,6 +77,9 @@ def run(runtime_config):
             begin()
             assert flow.authorization_url.call_args.kwargs['prompt']=='consent'
             assert flow.redirect_uri=='http://localhost/indi-allsky/youtube/oauth2callback'
+            probe = admin.head(base+'oauth2callback?state=test-state&code=test-code')
+            assert probe.status_code == 302 and probe.location.endswith(panel)
+            flow.fetch_token.assert_not_called()
             response=admin.get(base+'oauth2callback?state=test-state&code=test-code')
             assert response.status_code==303 and response.location.endswith(panel),response.text
             assert flow.fetch_token.call_args.kwargs['timeout']==NETWORK_TIMEOUT

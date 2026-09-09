@@ -6540,7 +6540,7 @@ class ModernAdminCaptureServiceActionView(BaseView):
 
     service_name = 'indi-allsky.service'
     def dispatch_request(self):
-        if request.method == 'GET':
+        if request.method in ('GET', 'HEAD'):
             return jsonify({
                 'service-status' : get_modern_admin_capture_service_status(self.service_name),
             })

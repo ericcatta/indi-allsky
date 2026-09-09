@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Capture service e azioni YouTube: HEAD segue il percorso di sola lettura,
+  senza invocare effetti o consumare lo stato OAuth del callback. Verificati
+  ruoli, CSRF e POST autorizzati in ambiente isolato con effetti simulati.
+  Regressione completa: 130 entrypoint Python e 31 JavaScript superati;
+  dopo l'estensione YouTube, ripetuti test OAuth e compilazione del modulo.
+  Evidenze aggregate in `testing/evidence/hybrid-read-methods.json`.
+
 - Censimento UI corretto: include tutte le 98 route GET Hybrid, comprese
   factory e redirect Settings prima esclusi dal filtro TemplateView.
   Discovery isolata: 500 contesti, 372 rendering riusciti, 128 bloccati o

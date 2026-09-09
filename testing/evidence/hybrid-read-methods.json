@@ -1,0 +1,22 @@
+{
+  "baseline": "196fa9f6",
+  "scope": "Read-method safety for capture commands and YouTube authorization",
+  "capture_reproduction": "Before the fix, isolated HEAD with command payload invoked the mocked effect",
+  "verified": [
+    "GET and HEAD capture status never dispatch commands, including JSON and form payloads",
+    "Capture POST commands require authorization and CSRF; invalid commands and unsupported methods are rejected",
+    "YouTube action HEAD redirects without calling authorization, refresh or revoke effects",
+    "YouTube callback HEAD leaves pending OAuth state intact and does not exchange tokens",
+    "A subsequent valid OAuth GET callback still succeeds"
+  ],
+  "regression": {
+    "python_cases": 130,
+    "javascript_cases": 31,
+    "failures": [],
+    "sequence": "Full regression on capture fix, then targeted OAuth flow and module compilation repeated after YouTube extension"
+  },
+  "limits": [
+    "Service and Google effects simulated in isolated tests",
+    "This evidence does not establish complete product acceptance or Classic independence"
+  ]
+}
