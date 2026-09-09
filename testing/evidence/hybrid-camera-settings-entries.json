@@ -51,5 +51,21 @@
     "javascript_cases": 31,
     "failures": [],
     "scope": "Templates physically absent during isolated Flask regression; production deployment pending"
+  },
+  "deployment": {
+    "installed_commit": "ca247b604defdb32b169811f53102bd875135d70",
+    "backup_integrity": "ok",
+    "web_service_active": true,
+    "capture_process_unchanged": true,
+    "configuration_unchanged": true,
+    "both_cameras_produced_frames_after_deploy": true,
+    "removed_templates_absent": true,
+    "tracked_production_files_clean": true,
+    "production_browser_acceptance": "blocked",
+    "reason": "Browser automatic approval rejected HTTPS origin access because of certificate-warning risk; no bypass attempted",
+    "limits": [
+      "Native production navigation remains unverified after deployment",
+      "Classic frontend still remains; full migration acceptance is incomplete"
+    ]
   }
 }

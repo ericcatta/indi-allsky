@@ -16,12 +16,20 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Settings camera consolidati e cleanup distribuiti (`ca247b60`). Backup
+  database coerente e codice precedente conservati; riavviato solo il web.
+  Processo di cattura invariato, configurazione invariata e nuovi frame di
+  entrambe le camere confermati dopo il deploy. Collaudo browser in produzione
+  ancora aperto: apertura bloccata dalla revisione automatica del browser per
+  il certificato HTTPS. Non equivale a collaudo UI superato; quello nella
+  fixture isolata resta distinto.
+
 - Cleanup degli ingressi Settings camera: rimossi i cinque template di
   anteprima sostituiti dagli editor operativi (636 righe). Nessun riferimento
   applicativo residuo trovato; URL, contratti e impostazioni restano invariati.
   Rendering degli ingressi verificato senza quei file: 128 casi Python e
   31 JavaScript superati. Analizzati i 133 template rimasti: nessun riferimento
-  ai file rimossi e nessuna inclusione dinamica. Deploy ancora da eseguire.
+  ai file rimossi e nessuna inclusione dinamica. Deploy completato sopra.
 
 - Prova browser dei cinque ingressi Settings camera completata nella fixture
   isolata: editor e sezioni corretti. Individuata e corretta nel candidato una
