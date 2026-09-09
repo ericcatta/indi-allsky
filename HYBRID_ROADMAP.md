@@ -16,10 +16,30 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Alte luci (9 settembre): JPEG delle 09:00 e coppie FITS/JPEG delle 09:22
+  confermano saturazione gia' nei dati sorgente; sulla IMX708 il FITS e' RGB
+  a 8 bit elaborato da libcamera, non RAW puro. Revisione 110 precedente agli
+  scatti: stretch diurno disabilitato, gamma 1. Il default del misuratore e'
+  moon_aware: non equivale a protezione delle alte luci. Su richiesta utente,
+  progettare un limite configurabile per camera alla saturazione prima dello
+  stretch, conservando cadenza comune e gain-first nelle riduzioni. Soglie e
+  verifica sugli effetti reali ancora aperte; nessuna modifica live applicata.
+  Corretto localmente il lookup della maschera ADU nel worker (chiave con
+  binning, larghezza, altezza): prova numerica prima/dopo 215 -> 40 ADU su ROI
+  sintetica, camere di dimensioni diverse e fallback senza maschera verificati.
+  Regressione della correzione: 121 entrypoint Python e 31 JavaScript superati,
+  768 file sorgente locali corrispondenti al candidato isolato. Deploy aperto.
+  Flicker: su 20 JPEG per camera delle 08:58–09:03, salto massimo della media
+  3.31% IMX708 e 1.27% ASI; variazioni IMX708 associate al gain. Campioni
+  precedenti al runtime di mezzogiorno: non dimostrano il comportamento attuale.
+  Deflicker richiesto, ancora da implementare e verificare.
+
 - Media: handler completo FITS->JPEG trasferito da views.py al modulo dei media
   sorgente indipendente dalle view UI. Classe identica per fingerprint AST,
-  route e pipeline conservate. Verifiche locali superate; regressione Flask
-  completa e deploy ancora aperti, nessun accesso Pi dopo il limite del collaudo.
+  route e pipeline conservate. Dopo il successivo consenso a continuare,
+  regressione isolata sul Pi: 120 entrypoint Python superati, 741 hash del
+  candidato c876a0ff invariati prima/dopo, inclusi flussi sorgente FITS/RAW.
+  Deploy ancora aperto; monitoraggio continuativo non riattivato.
 
 
 - Collaudo breve chiuso entro le 20:00 del 9 settembre: automazione sospesa,

@@ -1533,9 +1533,10 @@ class ImageWorker(Process):
     def _meter_auto_exposure(self, profile_id, camera_id, binning):
         try:
             adu_masks = getattr(self.image_processor, '_adu_mask_dict', None) or {}
+            image_height, image_width = self.image_processor.image.shape[:2]
             result = measure_auto_exposure(
                 self.image_processor.image,
-                mask=adu_masks.get(binning),
+                mask=adu_masks.get((binning, image_width, image_height)),
                 mode=self._auto_exposure_metering_mode(),
             )
             logger.info(
