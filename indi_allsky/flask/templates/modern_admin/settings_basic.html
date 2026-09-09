@@ -1,137 +1,31 @@
 {% extends 'modern_admin/base.html' %}
-
-{% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
-
+{% block title %}{{ website_title }}: {{ settings_level_title }} Settings{% endblock %}
 {% block head %}
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-settings-basic-preview-v1') }}" rel="stylesheet">
-<script type="text/javascript">
-var camera_id = {{ camera_id }};
-</script>
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">
+<script>var camera_id = {{ camera_id }};</script>
 {% endblock %}
-
 {% block content %}
-<main class="modern-admin-shell" aria-labelledby="modern-admin-settings-preview-title">
-    {% set modern_admin_header_label = modern_admin_settings_preview_label ~ ' settings preview header' %}
+<main class="modern-admin-shell" aria-labelledby="settings-level-title">
+    {% set modern_admin_header_label = settings_level_title ~ ' Settings header' %}
     {% set modern_admin_heading = 'Settings' %}
-    {% set modern_admin_title_id = 'modern-admin-settings-preview-title' %}
+    {% set modern_admin_title_id = 'settings-level-title' %}
     {% include 'modern_admin/_shell_header.html' %}
-
-    <section class="modern-admin-table-panel modern-admin-settings-intro" aria-label="{{ modern_admin_settings_preview_label }} settings preview summary">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Product consolidation</p>
-                <h2 id="modern-admin-settings-preview-title">{{ modern_admin_settings_preview_title }}</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Read-only</span>
-        </div>
-        <p class="modern-admin-note"><strong>Preview only — not a config editor.</strong> These are the {{ modern_admin_settings_preview_description }} currently classified as {{ modern_admin_settings_preview_label }} in the ownership map. This page does not show active config values and does not write configuration.</p>
-        <p class="modern-admin-note">
-            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">Back to Settings Index</a>
-            ·
-            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_basic_settings_view') }}">Basic</a>
-            ·
-            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_advanced_settings_view') }}">Advanced</a>
-            ·
-            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_developer_settings_view') }}">Developer</a>
-            ·
-            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_ready_settings_view') }}">Ready</a>
-        </p>
-
-        <div class="modern-admin-settings-summary-grid">
-            <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_settings_preview_count }}</span>
-                <p>{{ modern_admin_settings_preview_label }} groups</p>
-            </div>
-            <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_settings_preview_do_not_move_count }}</span>
-                <p>Do not move yet</p>
-            </div>
-            <div class="modern-admin-settings-summary-card">
-                <span>{{ modern_admin_settings_map_schema }}</span>
-                <p>Map schema</p>
-            </div>
-        </div>
-    </section>
-
-    {% if modern_admin_settings_map_error %}
-    <section class="modern-admin-alert modern-admin-alert-danger" role="alert">
-        {{ modern_admin_settings_map_error }}
-    </section>
-    {% endif %}
-
-    <section class="modern-admin-table-panel" aria-labelledby="settings-preview-groups-title">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">{{ modern_admin_settings_preview_label }} concepts</p>
-                <h2 id="settings-preview-groups-title">{{ modern_admin_settings_preview_label }} groups</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ modern_admin_settings_preview_count }} groups</span>
-        </div>
-
-        <div class="modern-admin-link-grid">
-            {% for group in modern_admin_settings_preview_groups %}
-            <article class="modern-admin-settings-action-card">
-                <span>
-                    <strong>{{ group.label }}</strong>
-                    <small><code>{{ group.group_id }}</code></small>
-                    <small>
-                        <span class="modern-admin-settings-badge">{{ group.owner | replace('_', ' ') | title }}</span>
-                        <span class="modern-admin-settings-badge">{{ group.status | replace('_', ' ') | title }}</span>
-                        <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ group.risk }}">{{ group.risk | title }} risk</span>
-                        {% if group.do_not_move_yet %}
-                        <span class="modern-admin-settings-badge modern-admin-settings-risk-high">Do not move yet</span>
-                        {% endif %}
-                    </small>
-                    <small>
-                        {% for note in group.notes %}
-                        {{ note }}{% if not loop.last %}<br>{% endif %}
-                        {% else %}
-                        No notes.
-                        {% endfor %}
-                    </small>
-                    <small>
-                        {% for surface in group.current_surfaces %}
-                        {{ surface }}{% if not loop.last %}<br>{% endif %}
-                        {% else %}
-                        No known surfaces.
-                        {% endfor %}
-                    </small>
-                    {% if modern_admin_settings_preview_level == 'ready' and group.group_id == 'analytics' %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_analytics_settings_view') }}">Open Analytics Settings</a></small>
-                    {% endif %}
-                    {% if modern_admin_settings_preview_level == 'basic' and group.group_id == 'storage_drives' %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_storage_settings_view') }}">Open Storage / Drives Settings</a></small>
-                    {% endif %}
-                    {% if modern_admin_settings_preview_level == 'basic' and group.group_id == 'notifications' %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_notifications_settings_view') }}">Open Notifications Settings</a></small>
-                    {% endif %}
-                    {% if modern_admin_settings_preview_level == 'basic' and group.group_id == 'camera_profile_identity' %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_camera_profile_settings_view') }}">Open Camera Profile Settings</a></small>
-                    {% endif %}
-                    {% if modern_admin_settings_preview_level == 'basic' and group.group_id == 'camera_connection' %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_camera_connection_settings_view') }}">Open Camera Connection Settings</a></small>
-                    {% endif %}
-                    {% if modern_admin_settings_preview_level == 'basic' and (group.group_id == 'exposure' or group.group_id == 'gain') %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_exposure_gain_settings_view') }}">Open Exposure / Gain Settings</a></small>
-                    {% endif %}
-                    {% if modern_admin_settings_preview_level == 'basic' and (group.group_id == 'auto_exposure' or group.group_id == 'auto_gain') %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_auto_exposure_gain_settings_view') }}">Open Auto Exposure / Auto Gain Settings</a></small>
-                    {% endif %}
-                    {% if modern_admin_settings_preview_level == 'basic' and group.group_id == 'hybrid_awb' %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_hybrid_awb_settings_view') }}">Open Hybrid AWB Settings</a></small>
-                    {% endif %}
-                    {% if modern_admin_settings_preview_level == 'advanced' and (group.group_id == 'image_acquisition' or group.group_id == 'image_save_formats') %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_acquisition_save_settings_view') }}">Open Acquisition / Save Settings</a></small>
-                    {% endif %}
-                    {% if modern_admin_settings_preview_level == 'advanced' and group.group_id == 'fits_source_files' %}
-                    <small><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_fits_source_settings_view') }}">Open FITS / Source Settings</a></small>
-                    {% endif %}
-                </span>
-            </article>
-            {% else %}
-            <span>No {{ modern_admin_settings_preview_label }} settings groups were loaded.</span>
+    <section class="modern-admin-table-panel">
+        <h2 id="settings-level-title">{{ settings_level_title }} Settings</h2>
+        <p>Open a section to inspect its current values or use its controls. Administrator access is required for configuration changes.</p>
+        <div class="modern-admin-settings-action-grid" data-settings-level-links>
+            {% for endpoint, label, description in settings_navigation %}
+            <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.' + endpoint, camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">
+                <span><strong>{{ label }}</strong><small>{{ description }}</small></span><span aria-hidden="true">›</span>
+            </a>
             {% endfor %}
         </div>
+        <nav class="modern-admin-link-grid" aria-label="Settings levels">
+            {% for level, endpoint in (('Basic', 'basic'), ('Advanced', 'advanced'), ('Developer', 'developer')) %}
+            <a href="{{ url_for('indi_allsky.modern_admin_' + endpoint + '_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">{{ level }}</a>
+            {% endfor %}
+            <a href="{{ url_for('indi_allsky.modern_admin_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">All settings</a>
+        </nav>
     </section>
 </main>
 {% endblock %}

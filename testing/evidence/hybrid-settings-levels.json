@@ -1,0 +1,26 @@
+{
+  "baseline": "60b87b54",
+  "scope": "Operational Settings entry levels; isolated acceptance",
+  "python_cases": 129,
+  "javascript_cases": 31,
+  "failures": [],
+  "matching_source_files": 747,
+  "source_manifest_sha256": "c94aa543a12c7a1c752452a9cfddf7f54ed51f42266487087116ccab1f903ae8",
+  "flask_checks": [
+    "Twelve operational destinations reached by administrator and ordinary user",
+    "Camera/profile query retained on all cards",
+    "Anonymous Basic request reaches login",
+    "Ready bookmark redirects to operational index",
+    "Navigation does not create configuration revisions"
+  ],
+  "native_browser_checks": [
+    "Ready opens Settings with selected profile",
+    "Basic, Advanced and Developer render operational links",
+    "Advanced FITS link opens focused editor with 22 controls and selected profile"
+  ],
+  "limits": [
+    "Not deployed",
+    "Full production browser acceptance still open",
+    "Complete program audit and Classic removal remain open"
+  ]
+}

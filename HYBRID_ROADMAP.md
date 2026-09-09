@@ -16,6 +16,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Basic, Advanced e Developer Settings ora sono ingressi operativi con
+  collegamenti a editor e strumenti effettivi; rimosso il contenuto di
+  anteprima. Le classificazioni restano nell'inventario tecnico. Il vecchio
+  URL Ready to Redesign torna a Settings, preservando camera e profilo.
+  Test Flask: dodici destinazioni con entrambi i ruoli, login e nessuna
+  mutazione via GET. Browser isolato: Ready, tre livelli e percorso
+  Advanced -> FITS verificati con profilo conservato. Regressione completa:
+  129 Python e 31 JavaScript superati. Deploy ancora da eseguire.
+
 - Viste Settings mirate, ingresso Notifiche operativo e cleanup distribuiti
   (`397df11d`). Backup coerente verificato; riavviato soltanto il servizio web.
   Processo di cattura e configurazione invariati; file installati identici

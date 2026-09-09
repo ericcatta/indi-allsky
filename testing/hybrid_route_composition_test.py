@@ -27,6 +27,10 @@ def test_route_contract_is_unchanged():
                     assert not view.keywords
                     slug = node.args[0].value.rsplit('/', 1)[1].replace('-', '_')
                     view.keywords.append(ast.keyword(arg='template_name', value=ast.Constant(value='modern_admin/settings_' + slug + '.html')))
+                if node.args[0].value == '/modern-admin/settings/ready':
+                    view = next(k for k in node.keywords if k.arg == 'view_func').value
+                    assert not view.keywords
+                    view.keywords.append(ast.keyword(arg='template_name', value=ast.Constant(value='modern_admin/settings_basic.html')))
                 if node.args[0].value == '/modern-admin/classic/<classic_page>':
                     # A redirect has no template. Verify the replacement before
                     # restoring its historical registration for the fingerprint.

@@ -33,6 +33,11 @@
             {% endfor %}
         </nav>
     </section>
+    <nav class="modern-admin-link-grid" aria-label="Settings levels">
+        {% for level in ('basic', 'advanced', 'developer') %}
+        <a href="{{ url_for('indi_allsky.modern_admin_' + level + '_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">{{ level | title }}</a>
+        {% endfor %}
+    </nav>
     <details class="modern-admin-table-panel" id="settings-technical-reference">
         <summary>Technical reference and settings inventory</summary>
         <p>Read-only ownership documentation and compatibility references. Use the editors above to change configuration.</p>
