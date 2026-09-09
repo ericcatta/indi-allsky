@@ -25,7 +25,12 @@
             if (!response.ok) {
                 throw new Error(Object.values(result).flat().join(' ') || 'Unable to save account.');
             }
-            status.textContent = result['success-message'] || 'Account saved.';
+            if (!result || Array.isArray(result) ||
+                typeof result['success-message'] !== 'string' ||
+                !result['success-message'].trim()) {
+                throw new Error('Save not confirmed. Check your account before trying again.');
+            }
+            status.textContent = result['success-message'];
             ['CURRENT_PASSWORD', 'NEW_PASSWORD', 'NEW_PASSWORD2'].forEach(name => {
                 form.elements.namedItem(name).value = '';
             });

@@ -1,5 +1,19 @@
 # Hybrid acceptance status
 
+## Account save confirmation — candidate, 2026-09-09
+
+A successful HTTP status with an empty/malformed acknowledgement previously
+showed Account saved and cleared password fields. A regression test reproduced
+this false positive before the fix. The controller now requires the backend's
+nonempty string success-message; otherwise it reports Save not confirmed and
+preserves entered fields. Backend validation, authorization and persistence are
+unchanged. All 31 JavaScript entrypoints pass, including duplicate submission,
+session expiry, valid success, validation errors and malformed success responses.
+
+Evidence: `testing/evidence/hybrid-account-receipt-2026-09-09.json`. Native browser,
+full target Python regression and deploy remain pending Pi connectivity. This is
+a controller simulation, not evidence of a password change on the real device.
+
 ## CPU first-sample correction — candidate, 2026-09-09
 
 The provider used a nonblocking psutil sample whose first value is documented as

@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- My Account: eliminato falso successo con risposta HTTP 200 senza ricevuta
+  valida. Conferma backend obbligatoria, campi conservati se non confermata;
+  difetto riprodotto e 31 test JavaScript superati. Nessun deploy; collaudo
+  browser e regressione completa sul Pi ancora aperti.
+
+
 - CPU System Info: provider Hybrid con campione esplicito di 100 ms per evitare
   lo zero iniziale non significativo. Test mirati e 31 JavaScript superati;
   regressione locale 38/118, altri 80 bloccati da ambiente mancante. Raspberry

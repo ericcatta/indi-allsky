@@ -39,5 +39,12 @@ async function run(response, duplicate = false) {
     assert.match((await run({redirected:true})).status, /session has expired/);
     assert.equal((await run(new Error('Network unavailable'))).status, 'Network unavailable');
     assert.equal((await run({ok:true, json:async () => {throw new Error('Invalid response');}})).status, 'Invalid response');
+    for (const body of [{}, [], null, 'OK', {'success-message': ''}, {'success-message': '   '}, {'success-message': true}, {'success-message': {saved: true}}]) {
+        result = await run({ok: true, json: async () => body});
+        assert.match(result.status, /Save not confirmed/);
+        for (const name of ['CURRENT_PASSWORD', 'NEW_PASSWORD', 'NEW_PASSWORD2']) {
+            assert.equal(result.values[name].value, name + '-test');
+        }
+    }
     console.log('Hybrid account browser controller: PASS');
 })().catch(error => {console.error(error); process.exitCode = 1;});
