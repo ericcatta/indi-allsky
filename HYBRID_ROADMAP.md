@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Backup database: ingresso System Info Hybrid con conferma, ambito globale,
+  ricevuta task e gestione invio non confermato. Test isolato SQLite/gzip con
+  ripristino e integrita', ruoli/CSRF e 31 test JavaScript; 115 entrypoint Python
+  verdi al primo passaggio, guardrail statico aggiornato e poi superato. Nessun
+  deploy o backup produzione. Evidenze: `testing/evidence/hybrid-backup-ui-2026-09-09.json`.
+
 - Manutenzione in coda: planning Hybrid per reload globale e scadenza media per
   camera, ricevuta task e conferma delle retention salvate. Corretti dispatch
   multicamera, loop su cancellazione fallita, ambito delle directory e selezione

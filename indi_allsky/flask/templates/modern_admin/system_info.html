@@ -70,6 +70,19 @@ var camera_id = {{ camera_id }};
             </form>
         </details>
         <details>
+            <summary>Back up the database</summary>
+            <p>Create a compressed SQLite backup for all cameras, users and settings. Image and video files are not included. The existing backup retention and configured upload policy apply.</p>
+            <p>The task runs in the background. Open its details to check whether it completed. Backups contain private account and configuration data; keep them protected.</p>
+            <form class="system-backup-form" data-unit="system">
+                <fieldset {% if not system_units_can_control %}disabled{% endif %}>
+                    <legend>Database backup — all cameras</legend>
+                    <input type="hidden" name="command" value="backup_db">
+                    <label><input type="checkbox" name="confirmed" required> I confirm creating a database backup using the configured backup policy.</label>
+                    <button type="submit">Create database backup</button>
+                </fieldset>
+            </form>
+        </details>
+        <details>
             <summary>Remove missing media records</summary>
             <p>Scan all cameras and remove database records whose local files are missing. Existing files, S3 records and media with a remote URL are kept. This does not check file contents or repair images.</p>
             <p>Make sure all media disks are mounted and accessible before continuing. A missing disk could make valid local media appear missing. Keep a current database backup.</p>

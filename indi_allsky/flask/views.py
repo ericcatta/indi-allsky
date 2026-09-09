@@ -7503,19 +7503,19 @@ class AjaxSystemInfoView(BaseView):
                         'COMMAND_HIDDEN': [plan.message],
                     }), 400
 
-                ModernAdminTaskEnqueueEffectAdapter(
-                    task_model=IndiAllSkyDbTaskQueueTable,
-                    db_session=db.session,
-                    queue_enum=TaskQueueQueue,
-                    state_enum=TaskQueueState,
-                ).enqueue_from_plan(plan.details)
+                try:
+                    receipt = ModernAdminTaskEnqueueEffectAdapter(
+                        task_model=IndiAllSkyDbTaskQueueTable,
+                        db_session=db.session,
+                        queue_enum=TaskQueueQueue,
+                        state_enum=TaskQueueState,
+                    ).enqueue_from_plan(plan.details)
+                except Exception:
+                    db.session.rollback()
+                    app.logger.exception('Database backup submission could not be confirmed')
+                    return jsonify(form_global=['Backup submission could not be confirmed. Check the task queue before retrying.']), 503
 
-                message_list = [plan.details['success_message']]
-
-                json_data = {
-                    'success-message' : ''.join(message_list),
-                }
-                return jsonify(json_data)
+                return jsonify({'success-message': plan.details['success_message']}), 200, {'X-Hybrid-Task-Id': str(receipt.task_id)}
             elif command == 'expire_data':
                 return self.queue_maintenance_command(command, camera_id)
             elif command == 'flush_images':

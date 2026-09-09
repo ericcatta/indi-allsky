@@ -2315,7 +2315,8 @@ def test_ajax_system_backup_db_uses_hybrid_maintenance_planner_static():
     assert 'ModernAdminMaintenanceActionPlanner().plan' in branch
     assert 'ModernAdminTaskEnqueueEffectAdapter' in branch
     assert '.enqueue_from_plan(plan.details)' in branch
-    assert "message_list = [plan.details['success_message']]" in branch
+    assert "'success-message': plan.details['success_message']" in branch
+    assert "'X-Hybrid-Task-Id': str(receipt.task_id)" in branch
 
 
 def test_ajax_system_reboot_uses_hybrid_power_boundary_static():

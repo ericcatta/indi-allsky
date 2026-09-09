@@ -13,6 +13,31 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Database backup entrance — candidate, 2026-09-09
+
+System Info exposes the existing SQLite backup command with administrator-only
+controls, explicit confirmation, all-camera scope and an explanation that media
+files are not included. Configured retention and upload policy remain in effect.
+Submission preserves the existing JSON/queue payload and adds a task receipt link.
+Unconfirmed queue outcomes return sanitized 503 with instructions to inspect tasks
+before retrying; duplicate browser submissions are suppressed.
+
+The expanded isolated backup test passed: role/CSRF gates, actual queue record,
+readable task detail, submission failure and UI gates, plus real SQLite/gzip restore
+and integrity, low-space/compression failure and retention. All 31 JavaScript tests
+passed. Of 116 Python regression entries, 115 passed initially; the remaining
+static Safe Actions guard expected a removed local variable. It was updated to
+assert the same planner message and new receipt, then passed locally. Runtime
+source was unchanged after the full run. Initial failure and retry are preserved
+in `testing/evidence/hybrid-backup-ui-2026-09-09.json`. Candidate deployment,
+native browser backup submission and production backup/upload remain open.
+
+The next confirmed Classic-only controls are `flush_images`, `flush_16min_images`,
+`flush_timelapses` and `flush_daytime` in `templates/system.html`. Their backend
+handlers remain; Hybrid has no equivalent entrance yet. Their migration must
+preserve administrator-network gates and camera scope, with destructive effects
+exercised only against dedicated synthetic fixtures.
+
 ## Preview dimensions correction — candidate, 2026-09-09
 
 Library and Output detail now label missing dimensions explicitly rather than
