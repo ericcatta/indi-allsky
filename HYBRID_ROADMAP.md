@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Rilascio alte luci: `1bc56c1e` installato sul Pi; backup coerente in
+  `/home/eric/hybrid-backups/highlight-20260909-223013`, revisione 111.
+  Timer/socket fermati e ripristinati insieme ai servizi. Disconnessione SSH
+  verificata successivamente: deploy completato, servizi attivi PID 384788/384789.
+  Nuovi file 25099/25101 e 25100/25102 verificati, intervalli 45 s. Nuova
+  opzione visibile nel browser; modalita' ancora non attivata nei profili.
+  Restano attivazione controllata e verifica dell'efficacia sulle camere.
+
 - Candidato protezione alte luci: misurazione whole-frame prima dello stretch,
   budget configurabile per profilo (proposta 1%, percentile a 235/255).
   Prime prove numeriche su ROI, canali e profondita' 12 bit superate nel

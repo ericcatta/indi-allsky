@@ -1,0 +1,36 @@
+{
+  "installed": "1bc56c1e4dc3f819c3f6706dd9c8d9ac3af89316",
+  "previous": "9081093a979e1403b0cbe0226f1341db87a1304a",
+  "backup": "/home/eric/hybrid-backups/highlight-20260909-223013",
+  "database_integrity": "ok",
+  "database_bytes": 828977152,
+  "config_revision": 111,
+  "capture_pid": 384788,
+  "web_pid": 384789,
+  "services_active": true,
+  "ssh_disconnect": "Deploy completed; independently verified installed version, terminal process and release state after reconnect",
+  "browser": {
+    "tab": 37,
+    "new_option_visible": true,
+    "current_imx_mode": "default",
+    "saved_or_activated": false
+  },
+  "post_deploy_frames": {
+    "1": [
+      25099,
+      25101
+    ],
+    "2": [
+      25100,
+      25102
+    ]
+  },
+  "files_exist_and_nonempty": true,
+  "last_pair_interval_seconds": 45,
+  "rollback_command": "python3 /home/eric/hybrid-backups/highlight-20260909-223013/deploy.py --rollback /home/eric/hybrid-backups/highlight-20260909-223013",
+  "limits": [
+    "Highlight mode not activated; live efficacy still open",
+    "Initial post-deploy check only",
+    "Full migration and Classic removal remain incomplete"
+  ]
+}
