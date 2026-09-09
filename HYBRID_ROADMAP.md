@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Revisione delle istruzioni Acquisition: rimosse le descrizioni obsolete che
+  indicavano gain diurno sempre fisso e auto gain solo notturno. I testi ora
+  spiegano priorita' esposizione/gain, minimo configurato e intervalli condivisi,
+  coerentemente con il controller e con i limiti applicati dal capture worker.
+  Modifica limitata al template, senza cambi runtime. Regressione del candidato
+  superata: 127 casi Python e 31 JavaScript. Hash del template verificato
+  nell'ambiente isolato. Rilascio delle istruzioni aggiornate ancora aperto.
+
 - Protezione alte luci attivata attraverso le impostazioni su entrambi i
   profili. Verificati salvataggio, assenza di modifiche estranee e applicazione
   delle correzioni da parte del runtime. Le prime misure richiedono ancora

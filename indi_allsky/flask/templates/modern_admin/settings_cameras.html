@@ -394,8 +394,8 @@ var camera_id = {{ camera_id }};
                     </div>
                     <span class="modern-admin-status-pill modern-admin-status-warning">Restart required after save</span>
                 </div>
-                <p class="modern-admin-note">Tune this camera here. Values are saved on the selected MULTI_CAMERA profile; global capture defaults are only fallback values when a profile field is empty.</p>
-                <p class="modern-admin-note">Day strategy: fixed profile gain with automatic exposure. Night strategy: exposure can rise to the profile maximum, then profile auto gain can take over when enabled for night or moon mode.</p>
+                <p class="modern-admin-note">Edit acquisition settings for the selected camera. Empty fields use the global defaults. The day and night capture intervals are shared by all cameras.</p>
+                <p class="modern-admin-note">With automatic exposure enabled, exposure increases before gain. When the scene is too bright, gain decreases to the configured minimum before exposure is shortened. Automatic gain can be enabled separately for day, night, and moon mode.</p>
 
                 <form method="post" action="{{ url_for('indi_allsky.modern_admin_camera_settings_view', profile_id=modern_admin_camera_settings_profile.profile_id) }}" class="modern-admin-settings-form" novalidate>
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -404,11 +404,11 @@ var camera_id = {{ camera_id }};
                     <div class="modern-admin-settings-edit-subsection">
                         <h3>{{ group.name }}</h3>
                         {% if group.name == 'Gain' %}
-                        <p class="modern-admin-note">Set fixed gain targets for day, night, and moon mode for this camera.</p>
+                        <p class="modern-admin-note">Set the gain values and automatic gain ceilings for this camera. Day Gain also provides the minimum gain when automatic gain is enabled.</p>
                         {% elif group.name == 'Auto Gain' %}
-                        <p class="modern-admin-note">Keep day gain fixed when disabled; allow night or moon mode gain adjustment after exposure reaches the profile limits.</p>
+                        <p class="modern-admin-note">Enable gain adjustment for the lighting modes you use. Gain increases only after exposure reaches its limit. Auto Exposure Enabled controls whether the exposure controller applies its corrections.</p>
                         {% elif group.name == 'Exposure' %}
-                        <p class="modern-admin-note">Exposure limits and cadence for this camera profile.</p>
+                        <p class="modern-admin-note">Exposure limits apply to this camera. Shared intervals apply to every camera, with time reserved for capture overhead.</p>
                         {% elif group.name == 'Debayer / Color' %}
                         <p class="modern-admin-note">CFA/debayer, legacy white balance, gamma, and daytime stretch are profile settings here. This is the first place to audit ASI678MC daytime color or saturation.</p>
                         {% elif group.name == 'AWB' %}
