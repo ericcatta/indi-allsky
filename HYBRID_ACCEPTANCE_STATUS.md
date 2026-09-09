@@ -13,6 +13,28 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Native queued maintenance — isolated browser, 2026-09-09
+
+An explicit `--maintenance-fixture` browser server runs Classic-disabled with
+synthetic accounts, an in-memory database and temporary media. Only the enumerated
+DB/file commands are allowed; service and power effects remain blocked. No worker
+consumes queued tasks. D-Bus blocking now raises the expected DBusException so
+read-only fallback handling can render the page; the initial sandbox-only 500
+and its resolution are recorded. The opt-in request guard passed a focused test
+including malformed payloads, wrong service pairs and all service/power commands.
+
+Native browser checks passed for backup confirmation/submission/detail (task 206,
+VIDEO/backupDatabase), reload (207, MAIN/reload, global) and expiration (208,
+VIDEO/expireData, camera 2, retention token present). All remain MANUAL, correctly
+shown as pending rather than completed. Submission disables controls and exposes
+the matching task link. A deliberately blocked INDI request showed the fixture's
+error feedback. No actual service action was performed.
+
+Evidence: `testing/evidence/hybrid-native-maintenance-2026-09-09.json`.
+Native deletion/validation, ordinary-user/mobile acceptance and real maintenance
+effects remain open. This changes test infrastructure only; product source remains
+at the previously tested candidate.
+
 ## Camera cleanup migration — candidate, 2026-09-09
 
 Hybrid owns query selection and family ordering for four existing cleanup commands:

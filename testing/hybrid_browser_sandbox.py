@@ -20,7 +20,7 @@ from hybrid_public_media_fixture import seed_public_media
 class SandboxEffectBlocked(RuntimeError):
     pass
 
-def run(runtime_config, port, upgrade_fixture=None):
+def run(runtime_config, port, upgrade_fixture=None, maintenance_fixture=False):
     with isolated_app(runtime_config, multi_camera=True) as app:
         app.jinja_env.auto_reload = True
         app.config.update(INDI_ALLSKY_AUTH_ALL_VIEWS=False, INDI_ALLSKY_AUTH_MEDIA_VIEWS=False)
@@ -57,6 +57,14 @@ def run(runtime_config, port, upgrade_fixture=None):
                 return None
             # Only generation queues into the in-memory DB; no worker consumes it.
             payload = request.get_json(silent=True)
+            if maintenance_fixture and request.path == '/indi-allsky/ajax/system' and isinstance(payload, dict):
+                command = payload.get('COMMAND_HIDDEN')
+                service = payload.get('SERVICE_HIDDEN')
+                # Only synthetic DB/file operations; no service or power effects.
+                if service == 'system' and command in ('backup_db', 'expire_data', 'validate_db', 'flush_images', 'flush_16min_images', 'flush_timelapses', 'flush_daytime'):
+                    return None
+                if service == app.config['ALLSKY_SERVICE_NAME'] and command == 'hup':
+                    return None  # Enqueued in memory; no capture worker consumes it.
             if request.path == '/indi-allsky/js/log':
                 return None  # Read-only, redirected to the synthetic log below.
             if upgrade_fixture and request.path == '/indi-allsky/modern-admin/updates/start':
@@ -79,9 +87,12 @@ def run(runtime_config, port, upgrade_fixture=None):
             return None
         def blocked(*args, **kwargs):
             raise SandboxEffectBlocked('External effect blocked in isolated acceptance server')
+        def blocked_bus(*args, **kwargs):
+            import dbus
+            raise dbus.exceptions.DBusException('D-Bus unavailable in synthetic browser fixture')
         # Defense in depth: even accidentally called adapters cannot reach Pi services.
         with ExitStack() as stack, patch('subprocess.Popen', side_effect=blocked), patch('os.system', side_effect=blocked), \
-             patch('dbus.SystemBus', side_effect=blocked), patch('dbus.SessionBus', side_effect=blocked), \
+             patch('dbus.SystemBus', side_effect=blocked_bus), patch('dbus.SessionBus', side_effect=blocked_bus), \
              patch.object(JsonLogView, 'dispatch_request', synthetic_log_dispatch), \
              patch.object(IndiAllskyNetworkManagerForm, 'getConnections', network_connections), \
              patch.object(IndiAllskyNetworkManagerForm, 'getWifiDevices', network_devices), \
@@ -97,5 +108,6 @@ if __name__ == '__main__':
     parser.add_argument('--runtime-config', default='/etc/indi-allsky/flask.json')
     parser.add_argument('--port', type=int, default=8099)
     parser.add_argument('--upgrade-fixture', type=Path, help='Explicit synthetic upgrade state JSON; never a production service')
+    parser.add_argument('--maintenance-fixture', action='store_true', help='Allow maintenance only against disposable synthetic DB/media; queued tasks have no worker')
     args = parser.parse_args()
-    run(args.runtime_config, args.port, args.upgrade_fixture)
+    run(args.runtime_config, args.port, args.upgrade_fixture, args.maintenance_fixture)

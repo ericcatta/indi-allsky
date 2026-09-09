@@ -1,0 +1,82 @@
+{
+  "date": "2026-09-09",
+  "candidate": "ffafd087 plus explicit maintenance sandbox",
+  "environment": "localhost:18105 -> Pi localhost:8105; temporary synthetic media and in-memory SQLite; Classic forbidden",
+  "server_pid": 94626,
+  "checks": [
+    {
+      "control": "System Info render",
+      "outcome": "passed",
+      "note": "First attempt exposed sandbox exception mismatch; D-Bus blocking now raises DBusException, with no real bus access"
+    },
+    {
+      "control": "Backup disclosure and confirmation",
+      "outcome": "passed"
+    },
+    {
+      "control": "Backup submit",
+      "outcome": "passed",
+      "task_id": 206,
+      "feedback": "Task submitted. Open its details to check completion.",
+      "submit_disabled": true
+    },
+    {
+      "control": "Task receipt navigation",
+      "outcome": "passed",
+      "task_id": 206,
+      "action": "backupDatabase",
+      "queue": "VIDEO",
+      "state": "MANUAL",
+      "priority": 100,
+      "camera": "Any",
+      "profile": "Any"
+    },
+    {
+      "control": "Reload confirmation, submit and task detail",
+      "outcome": "passed",
+      "task_id": 207,
+      "queue": "MAIN",
+      "state": "MANUAL",
+      "action": "reload",
+      "priority": 100,
+      "camera": "Any",
+      "profile": "Any"
+    },
+    {
+      "control": "Expiration retention display",
+      "outcome": "passed",
+      "camera": 2,
+      "limits_days": [
+        10,
+        10,
+        10,
+        365
+      ]
+    },
+    {
+      "control": "Expiration submit and task detail",
+      "outcome": "passed",
+      "task_id": 208,
+      "queue": "VIDEO",
+      "state": "MANUAL",
+      "action": "expireData",
+      "camera": 2,
+      "retention_token": "present, redacted in UI"
+    },
+    {
+      "control": "INDI command rejected by fixture",
+      "outcome": "passed",
+      "feedback": "External effects are blocked in this isolated acceptance server."
+    }
+  ],
+  "limitations": [
+    "Native deletion/validation, ordinary user and narrow viewport pending",
+    "No worker, production backup, upload or capture reload executed",
+    "Only test infrastructure changed after the 117 Python/31 JavaScript runtime regression; guard test and syntax compilation passed"
+  ],
+  "source_sha256": {
+    "testing/hybrid_browser_sandbox.py": "1203cab73d5f1083b8911570b0f1d4a0d37a704697db987d824b2bc3aa1506cf",
+    "testing/hybrid_browser_maintenance_guard_test.py": "ea10877c4745c362082effc0b66f8a7b9921e1fe31341e6f2b8df0f98d1115e1"
+  },
+  "guard_test": "PASS: opt-in whitelist, exact pairs, malformed requests and all service/power commands denied"
+}
