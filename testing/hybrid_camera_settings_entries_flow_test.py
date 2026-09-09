@@ -38,6 +38,13 @@ def run():
         page = clients[0].get('/indi-allsky/modern-admin/settings/cameras?camera_id=2&profile_id=test-profile-2')
         back = unescape(re.search(r'href="([^"]+)"[^>]*>Back to Settings Inventory</a>', page.text)[1])
         index = clients[0].get(back)
+        assert 'data-settings-editors' in index.text
+        assert '<summary>Technical reference and settings inventory</summary>' in index.text
+        for target in ('/settings/timelapse', '/settings/full', '/config-history', '/config-restore'):
+            hrefs = [unescape(href) for href in re.findall(r'href="([^"]+)"', index.text) if target in href]
+            assert hrefs, target
+            for href in hrefs:
+                assert clients[0].get(href, follow_redirects=True).status_code == 200, href
         links = [unescape(href) for href in re.findall(r'href="([^"]+)"', index.text)
                  if '/settings/exposure-gain' in href]
         assert links

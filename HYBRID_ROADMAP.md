@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Indice Settings operativo: accessi diretti a profili camera, Timelapse,
+  Full Settings, cronologia e restore; scorciatoie camera con profilo
+  conservato. Inventario e filtri tecnici mantenuti in una sezione
+  richiudibile, separata dagli editor. Nessuna modifica a chiavi o salvataggi.
+  Verificati nella fixture browser apertura, filtro, profilo e accesso TL;
+  regressione: 128 Python e 31 JavaScript superati. Deploy del nuovo indice
+  ancora da eseguire; il collaudo browser di produzione resta aperto.
+
 - Settings camera consolidati e cleanup distribuiti (`ca247b60`). Backup
   database coerente e codice precedente conservati; riavviato solo il web.
   Processo di cattura invariato, configurazione invariata e nuovi frame di

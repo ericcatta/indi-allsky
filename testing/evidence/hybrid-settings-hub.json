@@ -1,0 +1,28 @@
+{
+  "baseline": "1a6e6754",
+  "scope": "Operational Settings index; isolated acceptance only",
+  "python_cases": 128,
+  "javascript_cases": 31,
+  "failures": [],
+  "matching_source_files": 749,
+  "source_manifest_sha256": "be15dc6ec5fec5db56defbb6d7a6ea50ab6b1c0f6e4ad52a149ce3b945526c6a",
+  "browser_checks": [
+    "Operational editors visible with technical reference initially collapsed",
+    "Technical reference opens and closes",
+    "Inventory search hides nonmatching rows and updates count",
+    "Exposure/Gain shortcut reaches open acquisition section with profile 2",
+    "Timelapse link reaches editable form with deflicker on and window 5"
+  ],
+  "flask_checks": [
+    "Editor, history and restore destinations render",
+    "Existing camera entry role and profile checks pass",
+    "Settings index roundtrip retains profile",
+    "GET navigation leaves configuration unchanged"
+  ],
+  "limits": [
+    "New index not deployed",
+    "No full production browser acceptance",
+    "Other preview domains still await consolidation",
+    "Classic frontend removal remains incomplete"
+  ]
+}
