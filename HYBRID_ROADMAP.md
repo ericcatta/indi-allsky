@@ -16,10 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Decisione utente 9 settembre: collaudo live soltanto fino alle 20:00 CEST,
+  controlli orari compatti per contenere i crediti. Test 24 ore giorno/notte
+  rinviato a un futuro obiettivo, non superato. Acquisizione non interrotta.
+
 - Now: profilo configurato risolto tramite ID esplicito o nome dispositivo esatto,
   solo con associazione univoca; distinto dal profilo storico dello scatto.
   Corrispondenze reali IMX708/ZWO verificate in lettura; 118 test Python e 31
-  JavaScript superati. Correzione non ancora distribuita.
+  JavaScript superati. Distribuita come 6072fae4 alle 12:40 CEST con solo
+  riavvio web; capture invariato. Prova browser IMX708 e campione live entrambe
+  camere documentati; errore provider Starlink HTTP 403 ancora aperto.
 
 - Release produzione cd45148f installata il 9 settembre alle 12:12:35 CEST:
   manutenzione, riepilogo sistema e diagnostica cadenza distribuiti; backup

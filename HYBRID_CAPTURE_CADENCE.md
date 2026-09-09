@@ -1,11 +1,16 @@
-> Current production baseline (2026-09-09): cd45148f, capture start 12:12:35 CEST,
+> User decision: live acceptance ends 2026-09-09 at 20:00 Europe/Zurich.
+> The 24-hour day/night test is deferred to a future objective, not passed.
+> Acquisition continues; only automatic acceptance monitoring ends.
+
+> Current web checkout (2026-09-09): 6072fae4, web-only restart 12:40:37 CEST.
+> Capture baseline remains cd45148f, capture start 12:12:35 CEST,
 > PID 188464. Earlier observation periods are interrupted and cannot be added.
 > Earliest possible 24-hour completion: 2026-09-10 12:12:35 CEST. See
 > testing/evidence/hybrid-maintenance-deployment-2026-09-09.json.
 
 # Shared capture cadence and independent exposure control
 
-Current observation baseline: production release `498ba959`, capture PID 4112458,
+Historical observation baseline (superseded): production release `498ba959`, capture PID 4112458,
 started **2026-09-08 23:21:17 Europe/Zurich**. The earlier 21:15:41 window ended
 at the controlled release restart. Configuration revision 110 and cadence
 settings are unchanged. Initial post-release images pass; 24-hour day/night

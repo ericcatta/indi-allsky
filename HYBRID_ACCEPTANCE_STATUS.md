@@ -1,5 +1,14 @@
 # Hybrid acceptance status
 
+## User-authorized observation limit — 2026-09-09
+
+The user limited this live acceptance run to **September 9 at 20:00 Europe/Zurich**
+to conserve credits. Monitoring now runs hourly, with a recurrence ending at
+18:00 UTC; the final wake is instructed to suspend itself and summarize existing
+evidence. Acquisition must keep running. The 24-hour day/night acceptance is
+**deferred to a future user objective**, not passed and not part of this run.
+Earlier 24-hour deadlines below are historical and superseded by this decision.
+
 ## Completion gate
 
 The complete product audit is **open**. Detector/AI are deferred; their absence
@@ -12,6 +21,30 @@ restart requires a new 24-hour day/night observation, which has not passed.
 The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
+
+## Now profile deployed, capture uninterrupted — 2026-09-09 12:40 CEST
+
+Web checkout 6072fae4 is installed. Only views.py and the runtime metadata provider
+changed at runtime; Gunicorn restarted (PID 230842), while capture retained PID
+188464 and its 12:12:35 start. Configuration revision 110 is unchanged. Anonymous
+Now/Loop requests redirect to login. The authenticated native browser showed
+`imx708-wide (current configuration)` and fresh frames for both cameras; the ZWO
+selected-profile summary was not separately checked in that pass.
+
+At 12:46:07, the read-only live sample found 132 IMX708 and 133 ZWO images since
+the maintenance deployment, all files present/nonempty. Image timestamp intervals
+were 14–16 seconds with median 15 seconds for both cameras. No pending tasks;
+capture remained active with zero restarts. This is a short image-timestamp sample,
+not proof of request timing or 24-hour day/night stability. One integration error
+is open: Starlink catalog download returned HTTP 403 and retained its old catalog.
+
+Evidence: `testing/evidence/hybrid-now-web-deployment-2026-09-09.json`.
+Web code rollback: `/home/eric/hybrid-backups/web-ui-now-20260909-124036/deploy.py
+--rollback --backup /home/eric/hybrid-backups/web-ui-now-20260909-124036`.
+The directory reuses the preceding coherent database snapshot by hard link; it is
+not a fresh backup. Do not restore that snapshot over newly captured records.
+The capture observation still starts September 9 at 12:12:35 CEST; earliest
+possible completion remains September 10 at 12:12:35, subject to actual evidence.
 
 ## Now configured profile — verified candidate, 2026-09-09
 
