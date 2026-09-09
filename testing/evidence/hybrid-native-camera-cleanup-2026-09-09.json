@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-09",
+  "candidate": "2acbd0cb",
+  "environment": {
+    "url": "http://127.0.0.1:18105",
+    "classic": false,
+    "fixture": "hybrid_browser_sandbox.py --maintenance-fixture",
+    "media": "temporary synthetic only",
+    "production_mutated": false
+  },
+  "checks": [
+    {
+      "command": "flush_images",
+      "camera_id": 2,
+      "before_processed_images": 3,
+      "feedback": "6 Images Deleted",
+      "submit_disabled_after": true,
+      "after_counts": {
+        "Images": 0,
+        "FITS": 0,
+        "RAW": 0,
+        "Panorama images": 0
+      },
+      "preserved_camera_2_timelapses": 1,
+      "other_camera_observation": "Camera 1 page contains 48 image cards; first three previews decoded. This is a page count, not a complete before/after inventory."
+    },
+    {
+      "command": "flush_timelapses",
+      "camera_id": 2,
+      "before_timelapses": 1,
+      "feedback": "6 Files Deleted",
+      "submit_disabled_after": true,
+      "after_counts": {
+        "Timelapses": 0,
+        "Mini timelapses": 0,
+        "Keograms": 0,
+        "Startrails": 0,
+        "Startrail videos": 0,
+        "Panorama videos": 0
+      },
+      "other_camera_timelapses_after": 1
+    }
+  ],
+  "observation_notes": [
+    "Mini timelapses and Keograms initially returned stale status during rapid sequential navigation; repeated separately after navigation and confirmed matching labels with zero results.",
+    "Browser observations verify feedback and archive visibility. Per-file filesystem and database isolation are covered separately by the automated cleanup suite, not inferred from HTTP 200."
+  ],
+  "open": [
+    "Native positive recent-16-minute cleanup",
+    "Native positive daytime-only cleanup",
+    "Native partial-effect failure",
+    "Production deployment and acceptance",
+    "Classic physical removal",
+    "24-hour day/night observation"
+  ]
+}

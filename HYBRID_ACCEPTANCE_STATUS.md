@@ -13,6 +13,25 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Native camera cleanup — isolated browser, 2026-09-09
+
+The Classic-disabled maintenance fixture passed native admin submission of
+`flush_images` and `flush_timelapses` for synthetic camera 2. Image cleanup reported
+six deletions; Images, FITS, RAW and panorama-image filters then showed zero rows,
+while its timelapse remained. Generated-output cleanup subsequently reported six
+files deleted, and all six output-family filters showed zero rows. Each successful
+submission disabled its button. Camera 1 still showed its timelapse and a page of
+48 images (the latter is not a total inventory); three observed image previews
+decoded successfully. No production media or service was changed.
+
+Evidence: `testing/evidence/hybrid-native-camera-cleanup-2026-09-09.json`.
+Rapid filter navigation initially read two stale status labels; separate reads
+after navigation confirmed both actual results. Native positive recent/daytime
+cleanup and failure paths remain open. These browser checks supplement the
+previously passing real-file/SQL isolation tests; they do not independently prove
+every filesystem effect. Product code is unchanged from the 118-Python/31-JavaScript
+tested candidate. Deployment, full acceptance and Classic removal remain open.
+
 ## Maintenance layout — candidate, 2026-09-09
 
 Native testing at 390 px found that new maintenance forms still used default
