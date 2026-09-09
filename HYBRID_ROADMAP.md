@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Accesso Pi ripristinato: candidati 19ef2afa verificati con 119 test Python
+  sull'overlay isolato e 31 JavaScript sul Mac; 740 hash invariati. Nessun deploy.
+  Verifica reale CPU ancora aperta: campioni 100 ms restituiscono componenti
+  che sommano al 40%; approfondire psutil prima di distribuire la correzione.
+
+
 - Regressione riproducibile: runner versionato in testing/run_hybrid_regression.py,
   piano completo e hash sorgenti, esiti atomici e rilevamento interruzioni/modifiche.
   Conservati 118 controlli Python, aggiunto test runner e integrati 31 JavaScript.

@@ -1,5 +1,23 @@
 # Hybrid acceptance status
 
+## Pending candidates: target regression restored — 2026-09-09 evening
+
+SSH access returned. The isolated overlay was synchronized to candidate 19ef2afa;
+five stale test fixtures were corrected before starting. All 740 checked source
+hashes match before and after the run. All 119 Python entrypoints passed on the
+Pi (terminal exit 0); all 31 JavaScript entrypoints passed on the Mac. Node is not
+installed on the Pi, so these are two explicitly separate runtime executions.
+The maintained all-in-one runner was not used for the combined run; its own
+self-test passed as part of the Python suite.
+
+The real CPU-provider check remains **open**: three explicit 100 ms samples took
+0.1002–0.1003 seconds and returned idle=40, all active counters zero. The component
+sum is 40 rather than 100; installed psutil sampling/normalization needs review.
+Do not infer a valid idle measurement or declare the CPU correction complete
+from the green suite. No deploy was performed. Native browser acceptance and the
+broader control matrix/Classic removal remain open.
+Evidence: `testing/evidence/hybrid-pending-regression-2026-09-09.json`.
+
 ## Reproducible regression runner — 2026-09-09
 
 The previously temporary regression runner is now maintained in
