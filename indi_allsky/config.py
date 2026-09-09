@@ -177,6 +177,8 @@ class IndiAllSkyConfigBase(object):
         "TIMELAPSE_ENABLE"         : True,
         "TIMELAPSE_SKIP_FRAMES"    : 4,
         "TIMELAPSE" : {
+            "DEFLICKER"            : True,
+            "DEFLICKER_WINDOW"     : 5,
             "PRE_PROCESSOR"      : "standard",
             "PRE_PROCESSOR_DAY"  : "standard",
             "IMAGE_CIRCLE"   : 2000,

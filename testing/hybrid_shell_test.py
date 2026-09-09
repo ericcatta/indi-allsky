@@ -62,6 +62,11 @@ def shell_contract(shell, modern, authenticated, original_source=None):
     )
     assert html.count("<p id='probe'>Content exactly once</p>") == 1
     if modern:
+        # New timelapse navigation is verified separately so the existing
+        # shell contract and its fingerprints remain unchanged.
+        timelapse_link = '<a href="indi_allsky.modern_admin_timelapse_settings_view?{}">Timelapse Settings</a>'
+        assert html.count(timelapse_link) == 1
+        html = html.replace(timelapse_link, '')
         # Intentional addition: authentication navigation. Preserve all older
         # shell fingerprints after verifying this new section separately.
         account = re.search(r'<div class="hybrid-drawer-section" data-hybrid-account-navigation>(.*?)</div>', html, re.S)

@@ -1,0 +1,57 @@
+{
+  "initial_total": 125,
+  "initial_failed": [
+    "testing/hybrid_route_composition_test.py",
+    "testing/hybrid_shell_test.py"
+  ],
+  "delta_tests": [
+    {
+      "case": "testing/hybrid_route_composition_test.py",
+      "exit_code": 0,
+      "output": "Hybrid route composition checks passed\n"
+    },
+    {
+      "case": "testing/hybrid_shell_test.py",
+      "exit_code": 0,
+      "output": "Independent Hybrid shell checks passed\n"
+    }
+  ],
+  "source_changes_since_full_run": [
+    "testing/hybrid_route_composition_test.py",
+    "testing/hybrid_shell_test.py"
+  ],
+  "fixture_pid_346065_present_at_initial_check": true,
+  "local_matching_source_files": 775,
+  "final_fixture_state": "absent",
+  "final_fixture_port_open": false,
+  "javascript_cases": 31,
+  "javascript_failures": 0,
+  "report_sha256": "427af0e92fe19dabdfba9b7755cc8d54e23725fec767ab7332958a0ae16aa1b3",
+  "raw_report": "/home/eric/hybrid-timelapse-default-evidence/final-verification.json",
+  "encoding": {
+    "original_hashes_unchanged": true,
+    "frame_count": 30,
+    "dimensions": [
+      32,
+      24
+    ],
+    "adjacent_luminance_rms_off": 16.0,
+    "adjacent_luminance_rms_on": 2.936
+  },
+  "native_browser": {
+    "tab": 35,
+    "reader_controls_disabled": true,
+    "admin_controls_enabled": true,
+    "initial_enabled": true,
+    "initial_window": 5,
+    "unchecked_and_selected_window": 3,
+    "save_tested_in_browser": false,
+    "save_tested_in_isolated_flask": true
+  },
+  "limits": [
+    "Not deployed",
+    "No real-scene visual timelapse acceptance yet",
+    "Default filter can attenuate flashes; explicitly enabled by user request",
+    "Capture stability demonstrated with a synthetic plant, not physical cameras"
+  ]
+}

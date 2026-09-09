@@ -1,0 +1,31 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}Timelapse Settings{% endblock %}
+{% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<main class="modern-admin-shell">
+  <section class="modern-admin-table-panel" aria-labelledby="timelapse-title">
+    <h1 id="timelapse-title">Timelapse Settings</h1>
+    <p>Video processing shared by all cameras: timelapses, mini timelapses, panoramas and star-trail videos. Original images and existing videos are unchanged.</p>
+    {% if timelapse_error %}<p role="alert">{{ timelapse_error }}</p>{% endif %}
+    {% if timelapse_saved %}<p role="status">Settings saved. Restart or reload capture before generating videos with the new settings.</p>{% endif %}
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="revision" value="{{ timelapse_revision }}">
+      <fieldset {% if not login_disabled and not current_user.is_admin %}disabled{% endif %}>
+        <legend>Brightness smoothing</legend>
+        <p><label><input type="checkbox" name="deflicker" {% if timelapse_deflicker %}checked{% endif %}> Reduce flicker (enabled by default)</label></p>
+        <p><label for="timelapse-window">Smoothing window</label>
+        <select id="timelapse-window" name="window">
+          {% for value in (3, 5, 9) %}<option value="{{ value }}" {% if timelapse_window == value %}selected{% endif %}>{{ value }} frames{% if value == 5 %} — recommended{% endif %}</option>{% endfor %}
+        </select></p>
+        <p>Smooths brightness between neighbouring frames. Larger windows have a stronger effect. This can attenuate lightning and other brief flashes; turn it off to preserve their appearance.</p>
+        <button type="submit">Save timelapse settings</button>
+      </fieldset>
+    </form>
+    {% if not login_disabled and not current_user.is_admin %}<p>Administrator access is required to change these settings.</p>{% endif %}
+    <p><a href="{{ url_for('indi_allsky.modern_admin_full_settings_view', search='FFMPEG') }}">Encoding, frame rate and video size</a> · <a href="{{ url_for('indi_allsky.modern_admin_generate_view') }}">Generate videos</a> · <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">All settings</a></p>
+  </section>
+</main>
+{% endblock %}

@@ -16,6 +16,18 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Impostazioni Timelapse: nuova pagina Hybrid `/modern-admin/settings/timelapse`
+  e collegamento nel menu. Deflicker attivo per default su richiesta esplicita,
+  finestra 5 frame, selezionabile 3/5/9 o disattivabile. Salvataggio globale
+  tramite servizio Settings Hybrid, CSRF, permessi admin e controllo revisione.
+  Vale per i video generati dopo reload/restart; originali e video esistenti
+  intatti. FFmpeg reale: RMS tra frame 16.000 -> 2.936 nella sequenza sintetica,
+  frame count, dimensioni e hash degli originali verificati. Possibile
+  attenuazione dei lampi indicata in UI. Prove browser di navigazione, ruoli e
+  controlli superate; salvataggio verificato con Flask isolato, non dal browser.
+  125 casi Python complessivi e 31 JS superati; fingerprint storici conservati.
+  Fixture browser PID 346065 chiusa, porta 8111 chiusa. Deploy ancora aperto.
+
 - Stabilita' esposizione: il controller usa anche la misura dell'ultimo frame
   per fermare correzioni guidate da una media in ritardo e limitare il passo
   dell'esposizione. Priorita' gain/exposure conservate. La simulazione a luce
@@ -42,7 +54,8 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   Flicker: su 20 JPEG per camera delle 08:58–09:03, salto massimo della media
   3.31% IMX708 e 1.27% ASI; variazioni IMX708 associate al gain. Campioni
   precedenti al runtime di mezzogiorno: non dimostrano il comportamento attuale.
-  Deflicker richiesto, ancora da implementare e verificare.
+  Deflicker implementato e verificato su sequenze sintetiche, non ancora
+  distribuito o collaudato sui timelapse reali.
 
 - Media: handler completo FITS->JPEG trasferito da views.py al modulo dei media
   sorgente indipendente dalle view UI. Classe identica per fingerprint AST,

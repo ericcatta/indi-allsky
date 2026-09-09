@@ -39,7 +39,9 @@ def run(runtime_config, evidence=None):
             config=deepcopy(db.session.get(Config,1).data)
             config.update(FFMPEG_CODEC='libx264',FFMPEG_FRAMERATE=10,FFMPEG_EXTRA_OPTIONS='-threads 1 -preset ultrafast',
                           FFMPEG_VFSCALE='',TIMELAPSE_SKIP_FRAMES=0,TIMELAPSE_OVERWRITE=False)
-            config['TIMELAPSE'].update(PRE_PROCESSOR='standard',USE_NIGHT_CONFIG=True,FFMPEG_REPORT=False)
+            # Pixel identity/isolation assertions exercise the unfiltered mode.
+            # Default-on deflicker has separate real-encoding acceptance.
+            config['TIMELAPSE'].update(PRE_PROCESSOR='standard',USE_NIGHT_CONFIG=True,FFMPEG_REPORT=False,DEFLICKER=False)
             config['FISH2PANO']['ENABLE']=True
             config['FILETRANSFER']={};config['S3UPLOAD']={'ENABLE':False};config['SYNCAPI']={'ENABLE':False};config['YOUTUBE']={}
             row=db.session.get(Config,1);row.data=config

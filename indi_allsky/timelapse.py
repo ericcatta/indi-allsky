@@ -6,6 +6,7 @@ import logging
 
 from . import timelapse_preprocessor
 from .exceptions import TimelapseException
+from .timelapse_options import video_filter_arguments
 
 
 logger = logging.getLogger('indi_allsky')
@@ -142,16 +143,7 @@ class TimelapseGenerator(object):
         ])
 
 
-        # add scaling option if defined
-        if self.vf_scale:
-            logger.warning('Setting FFMPEG scaling option: %s', self.vf_scale)
-            cmd.append('-vf')
-            cmd.append('scale={0:s}'.format(self.vf_scale))
-
-
-        # add extra options
-        if self.ffmpeg_extra_options:
-            cmd.extend(self.ffmpeg_extra_options.split(' '))
+        cmd.extend(video_filter_arguments(self.config, self.vf_scale, self.ffmpeg_extra_options))
 
 
         # finally add filename
@@ -200,4 +192,3 @@ class TimelapseGenerator(object):
 
         # set default permissions
         video_file_p.chmod(0o644)
-
