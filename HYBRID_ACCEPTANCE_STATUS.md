@@ -13,6 +13,25 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## System summary metrics — candidate, 2026-09-09
+
+Native System Info showed CPU and memory as 0.0%. Source inspection confirmed
+that both provider values are dictionaries passed to float(), whose fallback
+silently returned zero. The existing summary test preserved this defect.
+The summary now totals active CPU fields (user, system, nice, irq, softirq),
+excluding idle and I/O wait, and reads memory user_percent. Missing, malformed,
+nonfinite or out-of-range percentages display Unavailable; real zero is retained.
+No polling interval, runtime effect or capture setting changes.
+
+Focused tests pass with the actual provider dictionary shape, nonzero values,
+missing keys, invalid values and genuine zero. All 118 Python regression entries
+and 31 JavaScript tests passed. Native Classic-disabled System Info on the Pi
+showed CPU 46.9% and memory 34.0%; Refresh service state updated these to 43.9%
+and 34.8%. These are real read-only host metrics with synthetic DB/media. No
+service command was submitted. Evidence and source hashes:
+`testing/evidence/hybrid-system-metrics-2026-09-09.json`. Production deployment
+remains open.
+
 ## Native camera cleanup — isolated browser, 2026-09-09
 
 The Classic-disabled maintenance fixture passed native admin submission of

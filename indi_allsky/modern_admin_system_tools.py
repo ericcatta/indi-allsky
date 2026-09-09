@@ -1,4 +1,5 @@
 import re
+import math
 from pathlib import Path
 
 
@@ -52,7 +53,7 @@ class ModernAdminSystemInfoSummaryService:
             },
             {
                 'label'      : 'CPU',
-                'value'      : self.format_percent(context.get('cpu_usage')),
+                'value'      : self.format_cpu(context.get('cpu_usage')),
                 'description': '{0:s} cores. Load: {1:s}, {2:s}, {3:s}.'.format(
                     str(context.get('cpu_count', '')),
                     self.format_number(context.get('cpu_load5')),
@@ -63,7 +64,7 @@ class ModernAdminSystemInfoSummaryService:
             },
             {
                 'label'      : 'Memory',
-                'value'      : self.format_percent(context.get('mem_usage')),
+                'value'      : self.format_memory(context.get('mem_usage')),
                 'description': 'Uptime: {0:s}. Swap usage: {1:s}.'.format(
                     str(context.get('uptime_str', '')),
                     self.format_percent(context.get('swap_usage')),
@@ -73,19 +74,39 @@ class ModernAdminSystemInfoSummaryService:
         ]
 
 
-    def format_percent(self, value):
-        return '{0:.1f}%'.format(self.safe_float(value))
+    def format_cpu(self, value):
+        if isinstance(value, dict):
+            # Active CPU time excludes idle and time waiting for I/O.
+            parts = [self.safe_float(value.get(key)) for key in
+                     ('user', 'system', 'nice', 'irq', 'softirq')]
+            if any(part is None or part < 0 for part in parts):
+                return 'Unavailable'
+            value = sum(parts)
+        return self.format_percent(value)
 
+    def format_memory(self, value):
+        if isinstance(value, dict):
+            value = value.get('user_percent')
+        return self.format_percent(value)
+
+    def format_percent(self, value):
+        number = self.safe_float(value)
+        if number is None or not 0 <= number <= 100:
+            return 'Unavailable'
+        return '{0:.1f}%'.format(number)
 
     def format_number(self, value):
-        return '{0:.2f}'.format(self.safe_float(value))
-
+        number = self.safe_float(value)
+        return 'Unavailable' if number is None else '{0:.2f}'.format(number)
 
     def safe_float(self, value):
+        if isinstance(value, bool):
+            return None
         try:
-            return float(value)
-        except (TypeError, ValueError):
-            return 0.0
+            number = float(value)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        return number if math.isfinite(number) else None
 
 
 class ModernAdminLogDisplayPolicy:

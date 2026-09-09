@@ -24,7 +24,7 @@ def test_system_info_summary_service_preserves_card_shape():
         'python_version' : '3.11.0',
         'python_platform': 'aarch64',
         'cpu_count'      : 4,
-        'cpu_usage'      : {'user': 4.2},
+        'cpu_usage'      : {'user': 4.2, 'system': 2.0, 'nice': 0.1, 'irq': 0.0, 'softirq': 0.2, 'idle': 90.0, 'iowait': 3.5},
         'cpu_load5'      : 0.1,
         'cpu_load10'     : 0.2,
         'cpu_load15'     : 0.3,
@@ -42,13 +42,13 @@ def test_system_info_summary_service_preserves_card_shape():
         },
         {
             'label'      : 'CPU',
-            'value'      : '0.0%',
+            'value'      : '6.5%',
             'description': '4 cores. Load: 0.10, 0.20, 0.30.',
             'status'     : 'Read-only',
         },
         {
             'label'      : 'Memory',
-            'value'      : '0.0%',
+            'value'      : '25.0%',
             'description': 'Uptime: 1 days, 2:3. Swap usage: 4.5%.',
             'status'     : 'Read-only',
         },
@@ -60,8 +60,16 @@ def test_system_info_summary_service_formats_numeric_values():
 
     assert service.format_percent(12) == '12.0%'
     assert service.format_percent('12.25') == '12.2%'
-    assert service.format_percent('not-a-number') == '0.0%'
+    assert service.format_percent('not-a-number') == 'Unavailable'
     assert service.format_number('3.14159') == '3.14'
+    for invalid in (None, {}, True, float('nan'), float('inf'), -1, 101):
+        assert service.format_percent(invalid) == 'Unavailable'
+    assert service.format_cpu({'user': 4.2}) == 'Unavailable'
+    assert service.format_memory({'cached_percent': 10}) == 'Unavailable'
+    assert service.format_memory({'user_percent': 0}) == '0.0%'
+    assert service.format_cpu(0) == '0.0%'
+    assert service.format_number(None) == 'Unavailable'
+
 
 
 def test_log_display_policy_preserves_line_limits():

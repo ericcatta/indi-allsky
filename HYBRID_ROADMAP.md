@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- System Info: corretto il riepilogo CPU/memoria che convertiva dizionari in
+  zero. Lettura dei campi provider e stato Unavailable per dati invalidi;
+  prova browser isolata sul Pi con valori reali e aggiornamento verificato.
+  Nessuna modifica ad acquisizione o polling; deploy ancora aperto.
+
 - Pulizia camera: Hybrid possiede selezione e ordine delle query per eliminazione
   immagini, ultimi 16 minuti, output generati e media diurni. Quattro ingressi UI
   con conferma e gate amministratore/rete/camera; effetti condivisi conservati.
