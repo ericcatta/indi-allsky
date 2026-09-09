@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- CPU System Info verificata nel browser nativo su fixture isolata prima delle
+  20:00: refresh CPU 0.0% -> 69.2%, memoria 32.1% -> 32.3%, controlli protetti
+  disabilitati. Fixture chiusa e processo assente verificato. Deploy ancora aperto.
+
+
 - CPU: risolta normalizzazione dei campioni brevi di psutil 7.2.2 usando
   cpu_percent con intervallo esplicito 100 ms. Verifica della libreria reale,
   120 test Python e 741 hash invariati; letture reali sul Pi documentate.

@@ -1,0 +1,29 @@
+{
+  "candidate": "ebf7f688",
+  "scope": "Native browser System Info, isolated Pi app on loopback port 8110 forwarded to localhost:18110",
+  "initial": {
+    "server_time": "2026-09-09 19:55:49 CEST",
+    "cpu": "0.0%",
+    "memory": "32.1%"
+  },
+  "refresh": {
+    "server_time": "2026-09-09 19:56:45 CEST",
+    "action": "Refresh service state",
+    "cpu": "69.2%",
+    "memory": "32.3%",
+    "url_query": "camera_id=2&profile_id="
+  },
+  "observed_permissions": "Administrator access required message; service controls remained disabled in the existing browser session. No role identity inferred.",
+  "fixture_cleanup": {
+    "pid": 297370,
+    "process_absent": true,
+    "ssh_session_terminal": true
+  },
+  "limitations": [
+    "No production deployment",
+    "No real service/configuration mutations",
+    "No end-to-end page latency measurement; tool wall times are not page latency",
+    "Native account save and Settings save/restore candidates not retested in this pass",
+    "24-hour acceptance deferred by user; this browser check ended before 20:00"
+  ]
+}

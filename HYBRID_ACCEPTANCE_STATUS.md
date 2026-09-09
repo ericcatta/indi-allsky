@@ -1,5 +1,19 @@
 # Hybrid acceptance status
 
+## Native CPU summary checked — 2026-09-09 19:55–19:57 CEST
+
+Candidate ebf7f688 rendered System Info in the isolated native-browser fixture.
+Initial CPU/memory were 0.0%/32.1%; clicking Refresh service state produced
+69.2%/32.3% and preserved the camera 2 query. The session displayed administrator
+access required and kept service controls disabled; no command was submitted.
+The newly launched fixture PID 297370 was confirmed absent after closing its SSH
+session. No production process was stopped or restarted. Evidence:
+`testing/evidence/hybrid-native-cpu-summary-2026-09-09.json`.
+
+This verifies rendered CPU values and the refresh interaction, not full page
+latency or production deployment. Native account/Settings mutation checks remain
+open. The browser check finished before the user's 20:00 cutoff.
+
 ## CPU subsecond normalization corrected — 2026-09-09
 
 Inspection of installed psutil 7.2.2 found cpu_times_percent scales by
