@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+import math
 
 
 @dataclass(frozen=True)
@@ -58,6 +59,7 @@ class AutoExposureController:
         day_min_step=None,
         day_max_step=None,
         allow_gain_control=True,
+        measured_value=None,
     ):
         smoothed_value = float(smoothed_value)
         current_exposure = float(current_exposure)
@@ -299,7 +301,7 @@ class AutoExposureController:
                 reason = 'decrease_gain_before_exposure' if gain_direction < 0 else 'exposure_at_limit_increase_gain'
                 blocker = 'none'
 
-        return AutoExposureDecision(
+        decision = AutoExposureDecision(
             action=action,
             reason=reason,
             blocker=blocker,
@@ -325,6 +327,51 @@ class AutoExposureController:
             safety_limited=safety_limited,
             shadow=True,
         )
+        return self._limit_to_latest_measurement(decision, measured_value)
+
+
+    def _limit_to_latest_measurement(self, decision, measured_value):
+        """Keep a lagging average from driving past the current frame's target.
+
+        The average still selects the action and rejects noise. The current
+        measurement can only hold or shorten that action, never reverse it or
+        change the exposure/gain priority. Gain units are camera-specific, so
+        proportional limiting applies only to exposure duration.
+        """
+        if measured_value is None or decision.action == 'hold':
+            return decision
+        try:
+            latest = float(measured_value)
+        except (TypeError, ValueError):
+            return decision
+        if not math.isfinite(latest) or latest < 0:
+            return decision
+
+        crossed = (decision.error > 0 and latest >= decision.target - 1.5) or (
+            decision.error < 0 and latest <= decision.target + 1.5)
+        if crossed:
+            return replace(
+                decision, action='hold', reason='latest_frame_target_reached',
+                blocker='latest_frame_target_reached',
+                proposed_exposure=decision.current_exposure,
+                proposed_gain=decision.current_gain, exposure_step=0.0,
+                trend_step=0.0, trend_active=False, fine_convergence=False,
+            )
+
+        if latest <= 0 or decision.proposed_exposure == decision.current_exposure:
+            return decision
+        estimate = decision.current_exposure * decision.target / latest
+        proposed = decision.proposed_exposure
+        if proposed > decision.current_exposure:
+            proposed = max(decision.current_exposure, min(proposed, estimate))
+        else:
+            proposed = min(decision.current_exposure, max(proposed, estimate))
+        if proposed == decision.proposed_exposure:
+            return decision
+        step = abs(proposed - decision.current_exposure)
+        return replace(decision, proposed_exposure=proposed, exposure_step=step,
+                       trend_step=min(decision.trend_step, step),
+                       safety_limited=True, step_strategy='latest_frame_bounded')
 
 
     def _clamp(self, value, minimum, maximum):

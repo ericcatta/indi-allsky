@@ -16,6 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Stabilita' esposizione: il controller usa anche la misura dell'ultimo frame
+  per fermare correzioni guidate da una media in ritardo e limitare il passo
+  dell'esposizione. Priorita' gain/exposure conservate. La simulazione a luce
+  costante riproduce oscillazioni notturne superiori a 30 ADU prima del fix e
+  convergenza entro 1.5 ADU dal target dopo. Test con cambi bruschi di luce e
+  recupero da saturazione superati. Candidato verificato insieme alle nuove
+  impostazioni TL: 125 entrypoint Python (due guardrail aggiornati e ripetuti),
+  31 JavaScript, 775 file locali corrispondenti all'overlay. Deploy e verifica
+  della stabilita' sulle camere reali ancora aperti.
+
 - Alte luci (9 settembre): JPEG delle 09:00 e coppie FITS/JPEG delle 09:22
   confermano saturazione gia' nei dati sorgente; sulla IMX708 il FITS e' RGB
   a 8 bit elaborato da libcamera, non RAW puro. Revisione 110 precedente agli

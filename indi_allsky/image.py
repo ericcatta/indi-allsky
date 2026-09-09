@@ -864,6 +864,7 @@ class ImageWorker(Process):
         try:
             decision = self.auto_exposure_controller.decide(
                 smoothed_value=smoothed_value,
+                measured_value=result.measured_value,
                 current_exposure=inputs['current_exposure'],
                 current_gain=inputs['current_gain'],
                 exposure_min=inputs['exposure_min'],
