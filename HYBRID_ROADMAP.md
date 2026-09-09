@@ -23,7 +23,10 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
   Test Flask: dodici destinazioni con entrambi i ruoli, login e nessuna
   mutazione via GET. Browser isolato: Ready, tre livelli e percorso
   Advanced -> FITS verificati con profilo conservato. Regressione completa:
-  129 Python e 31 JavaScript superati. Deploy ancora da eseguire.
+  129 Python e 31 JavaScript superati. Distribuito `07332348` con backup
+  coerente e riavvio del solo web. Sorgenti installati verificati, processo
+  di cattura e configurazione invariati; frame recenti di entrambe le camere.
+  Collaudo browser di produzione ancora aperto per il certificato.
 
 - Viste Settings mirate, ingresso Notifiche operativo e cleanup distribuiti
   (`397df11d`). Backup coerente verificato; riavviato soltanto il servizio web.

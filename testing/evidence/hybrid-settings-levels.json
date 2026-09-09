@@ -19,8 +19,17 @@
     "Advanced FITS link opens focused editor with 22 controls and selected profile"
   ],
   "limits": [
-    "Not deployed",
     "Full production browser acceptance still open",
     "Complete program audit and Classic removal remain open"
-  ]
+  ],
+  "deployment": {
+    "installed_commit": "0733234875d6d12e6e07a1fa0db5de7943df3ecb",
+    "backup_integrity": "ok",
+    "web_service_active": true,
+    "capture_process_unchanged": true,
+    "configuration_unchanged": true,
+    "tested_sources_match": true,
+    "tracked_production_tree_clean": true,
+    "production_browser_acceptance": "open; certificate trust required, earlier browser rejection respected"
+  }
 }
