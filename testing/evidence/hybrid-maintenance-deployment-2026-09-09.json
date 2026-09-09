@@ -1,0 +1,97 @@
+{
+  "date": "2026-09-09",
+  "deployment": {
+    "previous": "498ba95944fe11881cc5d863c70ca99621fabd78",
+    "candidate": "cd45148f143f4410146cc56cc4455f45f91208c9",
+    "backup": "/home/eric/hybrid-backups/hybrid-maintenance-release-20260909-120652",
+    "capture_before": {
+      "MainPID": "4112458",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 23:21:17 CEST",
+      "ActiveState": "active"
+    },
+    "web_before": {
+      "MainPID": "4112462",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Tue 2026-09-08 23:21:17 CEST",
+      "ActiveState": "active"
+    },
+    "configuration_revision": 110,
+    "runtime_files_verified": 590,
+    "changed_runtime_files": [
+      "indi_allsky/capture.py",
+      "indi_allsky/flask/base_views.py",
+      "indi_allsky/flask/navigation_redirects.py",
+      "indi_allsky/flask/route_registry.py",
+      "indi_allsky/flask/static/modern_admin/media-archive.js",
+      "indi_allsky/flask/static/modern_admin/system-controls.css",
+      "indi_allsky/flask/static/modern_admin/system-units.js",
+      "indi_allsky/flask/templates/modern_admin/_media_archive_content.html",
+      "indi_allsky/flask/templates/modern_admin/output_detail.html",
+      "indi_allsky/flask/templates/modern_admin/system_info.html",
+      "indi_allsky/flask/views.py",
+      "indi_allsky/hybrid_video_task_policy.py",
+      "indi_allsky/modern_admin_camera_cleanup.py",
+      "indi_allsky/modern_admin_media_cleanup.py",
+      "indi_allsky/modern_admin_media_validation.py",
+      "indi_allsky/modern_admin_queued_maintenance.py",
+      "indi_allsky/modern_admin_runtime_effects.py",
+      "indi_allsky/modern_admin_system_tools.py",
+      "indi_allsky/modern_admin_system_units.py",
+      "indi_allsky/modern_safe_action.py",
+      "indi_allsky/video.py"
+    ],
+    "started": "2026-09-09T12:12:28.531916+02:00",
+    "status": "installed-awaiting-live-verification",
+    "capture_after": {
+      "MainPID": "188464",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Wed 2026-09-09 12:12:35 CEST",
+      "ActiveState": "active"
+    },
+    "web_after": {
+      "MainPID": "188468",
+      "NRestarts": "0",
+      "ExecMainStartTimestamp": "Wed 2026-09-09 12:12:35 CEST",
+      "ActiveState": "active"
+    },
+    "completed": "2026-09-09T12:12:36.115017+02:00"
+  },
+  "backup": {
+    "bytes": 828977152,
+    "integrity": "ok",
+    "note": "Live backup completed before the guarded maintenance-pause script; no extra pause was performed."
+  },
+  "first_live_check": {
+    "observed_at": "2026-09-09T12:13:20.972325+02:00",
+    "camera_1": {
+      "count": 2,
+      "latest_id": 20871,
+      "latest": "2026-09-09 12:13:16",
+      "interval_seconds": 15,
+      "missing_or_empty_files": []
+    },
+    "camera_2": {
+      "count": 2,
+      "latest_id": 20870,
+      "latest": "2026-09-09 12:13:12",
+      "interval_seconds": 14,
+      "missing_or_empty_files": []
+    },
+    "pending_tasks": [],
+    "journal_errors": [],
+    "evidence": "/home/eric/hybrid-maintenance-release-evidence/live-20260909-121320.json"
+  },
+  "monitor": {
+    "baseline_updated": true,
+    "earliest_24h": "2026-09-10T12:12:35+02:00",
+    "passed": false
+  },
+  "open": [
+    "Native production UI acceptance after deployment",
+    "Longer cadence sample and request timestamps",
+    "24-hour day/night continuity",
+    "Complete control matrix and live effect acceptance",
+    "Classic removal and repeat acceptance"
+  ]
+}

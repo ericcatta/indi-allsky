@@ -13,6 +13,27 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Maintenance release deployed — 2026-09-09 12:12 CEST
+
+Production now runs cd45148f. The release checked 590 runtime hashes against the
+118-entry passing isolated regression, configuration revision 110, empty task
+queue and preservation of untracked local files. A coherent 828,977,152-byte
+SQLite backup passed integrity_check before deployment. Capture and web restarted
+at 12:12:35 (PIDs 188464 / 188468). The first live sample at 12:13:20 found two
+new frames per camera, present/nonempty files and no pending task or journal error.
+A two-frame sample is not long-term cadence acceptance. Native production UI
+checks and extended live verification are still pending.
+
+Backup and code-only rollback are in
+`/home/eric/hybrid-backups/hybrid-maintenance-release-20260909-120652`.
+`deploy.py --rollback --backup <that directory>` restores 498ba959 and services;
+do not restore the old database over newly captured records. The previous capture
+observation ended at this restart. The heartbeat now uses the new release and
+`/tmp/hybrid-maintenance-live.py`; earliest possible 24-hour completion is
+September 10 at 12:12:35 CEST, subject to actual continuous day/night evidence.
+Classic remains present and enabled. Evidence:
+`testing/evidence/hybrid-maintenance-deployment-2026-09-09.json`.
+
 ## Native recent-image cleanup — candidate, 2026-09-09
 
 The opt-in maintenance browser fixture now seeds one recent and one old synthetic

@@ -1,3 +1,8 @@
+> Current production baseline (2026-09-09): cd45148f, capture start 12:12:35 CEST,
+> PID 188464. Earlier observation periods are interrupted and cannot be added.
+> Earliest possible 24-hour completion: 2026-09-10 12:12:35 CEST. See
+> testing/evidence/hybrid-maintenance-deployment-2026-09-09.json.
+
 # Shared capture cadence and independent exposure control
 
 Current observation baseline: production release `498ba959`, capture PID 4112458,

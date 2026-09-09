@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Release produzione cd45148f installata il 9 settembre alle 12:12:35 CEST:
+  manutenzione, riepilogo sistema e diagnostica cadenza distribuiti; backup
+  coerente verificato, primi nuovi frame per entrambe le camere. Nuova finestra
+  24 ore avviata; collaudo produzione esteso e rimozione Classic ancora aperti.
+  Le note precedenti mantengono lo stato storico delle singole missioni.
+
 - Diagnostica cadenza: gli intervalli completati sono confrontati con il periodo
   della richiesta precedente, evitando falsi avvisi al cambio notte/giorno e
   preservando quelli per ritardi reali. Scheduler e comandi driver invariati.
