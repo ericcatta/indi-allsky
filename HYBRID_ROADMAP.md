@@ -16,6 +16,17 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Storage, Analytics, Acquisition/Save e FITS/Source aprono ora l'editor
+  Full Config con selezione mirata dei campi, invece delle anteprime statiche.
+  Il filtro e' disattivabile; campi non visibili inclusi nel payload invariato.
+  Errori di validazione rimuovono il filtro per mostrare tutti i campi.
+  Controlli dei profili e Drive Manager raggiungibili dall'editor. Contratti
+  descrittivi conservati. Parita' payload delle quattro viste e ciclo
+  save/download/restore superati nella fixture; esclusa dal solo confronto
+  dei valori la firma CSRF temporanea, mantenendo le prove CSRF effettive.
+  Regressione: 128 Python e 31 JavaScript superati. Prova browser nativa,
+  cleanup dei vecchi template e deploy ancora aperti.
+
 - Ingresso Notifications Settings collegato alle Notifiche operative: il
   vecchio contratto descrive record/acknowledge, non impostazioni Full Config.
   Il bookmark conserva query, camera e profilo e non carica piu' il form

@@ -1,0 +1,30 @@
+{
+  "baseline": "b06ee67c",
+  "domains": [
+    "storage",
+    "analytics",
+    "acquisition-save",
+    "fits-source"
+  ],
+  "scope": "Focused views of unchanged Full Config form; isolated acceptance",
+  "python_cases": 128,
+  "javascript_cases": 31,
+  "failures": [],
+  "matching_source_files": 750,
+  "source_manifest_sha256": "3bc3ada8e718c2e33bfb018d5d05dd5b22ee895f5564b3fd9cafe0add42f4ef9",
+  "checks": [
+    "All four aliases preserve camera/profile and select a fixed domain",
+    "Focused forms contain the same payload fields and configuration values as full form",
+    "Only timestamped CSRF signature excluded from value equality; real CSRF validation retained",
+    "Save/download/restore exercised using focused form payload",
+    "Hidden fields still submitted by JavaScript",
+    "Validation errors clear focus and text filter and open sections",
+    "Full Config parity and route fingerprints preserved"
+  ],
+  "limits": [
+    "Native browser check pending",
+    "Old preview templates not yet removed",
+    "Not deployed",
+    "Full Classic removal remains incomplete"
+  ]
+}

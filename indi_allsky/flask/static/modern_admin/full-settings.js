@@ -10,6 +10,8 @@
     const ajaxUrl = new URL(config.ajaxUrl, window.location.href).toString();
     const csrfToken = config.csrfToken;
     let pending = false;
+    const domainOnly = document.getElementById('settings-domain-only');
+    const focusFields = new Set(config.focusFields || []);
 
     function setMessage(text, tone) {
         message.hidden = false;
@@ -82,6 +84,10 @@
                 throw new Error('The server returned an unreadable response. Check Config History before retrying.');
             }
             if (!response.ok) {
+                if (domainOnly) domainOnly.checked = false;
+                filter.value = '';
+                filterSettings();
+                sections.forEach(section => { section.open = true; });
                 Object.entries(data).forEach(([key, errors]) => {
                     const input = document.getElementById(key);
                     const error = document.getElementById(key + '-error');
@@ -126,7 +132,8 @@
             const rows = Array.from(section.querySelectorAll('[data-full-settings-row]'));
             let visibleCount = 0;
             rows.forEach((row) => {
-                const matches = !query || row.dataset.fullSettingsSearch.indexOf(query) !== -1;
+                const matches = (!domainOnly || !domainOnly.checked || focusFields.has(row.dataset.fullSettingsField))
+                    && (!query || row.dataset.fullSettingsSearch.indexOf(query) !== -1);
                 row.hidden = !matches;
                 if (matches) {
                     visibleCount += 1;
@@ -139,16 +146,17 @@
             }
 
             section.hidden = visibleCount === 0;
-            if (query && visibleCount > 0) {
+            if ((query || (domainOnly && domainOnly.checked)) && visibleCount > 0) {
                 section.open = true;
             }
         });
     }
 
+    if (domainOnly) domainOnly.addEventListener('change', filterSettings);
     filter.addEventListener('input', filterSettings);
     const initialSearch = new URL(window.location.href).searchParams.get('search');
     if (initialSearch) {
         filter.value = initialSearch;
-        filterSettings();
     }
+    filterSettings();
 })();

@@ -70,10 +70,6 @@ from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
 from ..modern_admin_observatory_tools import ModernAdminSqmSummaryService
 from ..modern_admin_observatory_tools import ModernAdminVirtualSkyContextService
-from ..modern_admin_settings_contracts import ModernAdminAcquisitionSaveSettingsContract
-from ..modern_admin_settings_contracts import ModernAdminAnalyticsSettingsContract
-from ..modern_admin_settings_contracts import ModernAdminFitsSourceSettingsContract
-from ..modern_admin_settings_contracts import ModernAdminStorageSettingsContract
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
@@ -13580,26 +13576,26 @@ class ModernAdminReadySettingsPreviewView(ModernAdminBasicSettingsPreviewView):
         return context
 
 
-class ModernAdminAnalyticsSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Analytics Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminAnalyticsSettingsContract()
+class ModernAdminAnalyticsSettingsView(View):
+    def __init__(self, template_name=None):
+        pass
 
-    def get_context(self):
-        context = super(ModernAdminAnalyticsSettingsView, self).get_context()
-        context.update(self.settings_contract.build_context(context.get('modern_admin_settings_groups', [])))
-        return context
+    def dispatch_request(self):
+        from urllib.parse import urlencode
+        query = [(key, value) for key, value in request.args.items(multi=True) if key != 'domain']
+        query.append(('domain', 'analytics'))
+        return redirect(url_for('indi_allsky.modern_admin_full_settings_view') + '?' + urlencode(query))
 
 
-class ModernAdminStorageSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Storage Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminStorageSettingsContract()
+class ModernAdminStorageSettingsView(View):
+    def __init__(self, template_name=None):
+        pass
 
-    def get_context(self):
-        context = super(ModernAdminStorageSettingsView, self).get_context()
-        context.update(self.settings_contract.build_context(context.get('modern_admin_settings_groups', [])))
-        return context
+    def dispatch_request(self):
+        from urllib.parse import urlencode
+        query = [(key, value) for key, value in request.args.items(multi=True) if key != 'domain']
+        query.append(('domain', 'storage'))
+        return redirect(url_for('indi_allsky.modern_admin_full_settings_view') + '?' + urlencode(query))
 
 
 class ModernAdminNotificationsSettingsView(View):
@@ -13616,34 +13612,26 @@ class ModernAdminNotificationsSettingsView(View):
         return redirect(target + ('?' + query if query else ''))
 
 
-class ModernAdminAcquisitionSaveSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin Acquisition Save Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminAcquisitionSaveSettingsContract()
+class ModernAdminAcquisitionSaveSettingsView(View):
+    def __init__(self, template_name=None):
+        pass
 
-    def get_context(self):
-        context = super(ModernAdminAcquisitionSaveSettingsView, self).get_context()
-        context.update(
-            self.settings_contract.build_context(
-                context.get('modern_admin_settings_groups', [])
-            )
-        )
-        return context
+    def dispatch_request(self):
+        from urllib.parse import urlencode
+        query = [(key, value) for key, value in request.args.items(multi=True) if key != 'domain']
+        query.append(('domain', 'acquisition-save'))
+        return redirect(url_for('indi_allsky.modern_admin_full_settings_view') + '?' + urlencode(query))
 
 
-class ModernAdminFitsSourceSettingsView(ModernAdminSettingsInventoryView):
-    page_title = 'Modern Admin FITS Source Settings'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
-    settings_contract = ModernAdminFitsSourceSettingsContract()
+class ModernAdminFitsSourceSettingsView(View):
+    def __init__(self, template_name=None):
+        pass
 
-    def get_context(self):
-        context = super(ModernAdminFitsSourceSettingsView, self).get_context()
-        context.update(
-            self.settings_contract.build_context(
-                context.get('modern_admin_settings_groups', [])
-            )
-        )
-        return context
+    def dispatch_request(self):
+        from urllib.parse import urlencode
+        query = [(key, value) for key, value in request.args.items(multi=True) if key != 'domain']
+        query.append(('domain', 'fits-source'))
+        return redirect(url_for('indi_allsky.modern_admin_full_settings_view') + '?' + urlencode(query))
 
 
 class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
@@ -13733,6 +13721,8 @@ class ModernAdminFullSettingsView(ModernAdminSettingsInventoryView):
             for field in profile_operated_hidden_fields
             if field['is_checkbox']
         ]
+        from .settings_domains import settings_domain_context
+        context.update(settings_domain_context(request.args.get('domain'), [field['name'] for group in editor_groups for field in group['fields']]))
         context['modern_admin_full_settings_profile_count'] = self.get_multi_camera_profile_count()
         context['modern_admin_full_settings_profile_operated_fields'] = tuple(sorted(self.SETTINGS_FULL_PROFILE_OPERATED_FIELDS))
         return context

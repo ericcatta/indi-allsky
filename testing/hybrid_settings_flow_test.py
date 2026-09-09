@@ -60,6 +60,23 @@ def run(runtime_config):
         page = client.get('/indi-allsky/modern-admin/settings/full')
         assert page.status_code == 200
         payload, token = payload_from_page(page.text)
+        from urllib.parse import urlsplit, parse_qs
+        for slug, sample in (('storage','HEALTHCHECK__DISK_USAGE'), ('analytics','CHARTS__CUSTOM_SLOT_1'), ('acquisition-save','IMAGE_FILE_TYPE'), ('fits-source','IMAGE_SAVE_FITS')):
+            entry = client.get('/indi-allsky/modern-admin/settings/' + slug + '?camera_id=2&profile_id=test-profile-2&domain=invalid')
+            assert entry.status_code == 302
+            target = urlsplit(entry.location)
+            assert parse_qs(target.query) == {'camera_id':['2'], 'profile_id':['test-profile-2'], 'domain':[slug]}
+            scoped = client.get(entry.location)
+            assert scoped.status_code == 200 and 'settings-domain-only' in scoped.text
+            scoped_payload, scoped_token = payload_from_page(scoped.text)
+            assert scoped_payload.keys() == payload.keys(), slug
+            # Flask-WTF signs a fresh timestamp; compare configuration, not the CSRF signature.
+            assert {k:v for k,v in scoped_payload.items() if k != 'csrf_token'} == {k:v for k,v in payload.items() if k != 'csrf_token'}, slug
+            metadata = json.loads(re.search(r'id="hybrid-full-settings-config">(.*?)</script>', scoped.text, re.S)[1])
+            assert sample in metadata['focusFields'], (slug, metadata['focusFields'])
+            assert set(metadata['focusFields']) <= set(metadata['fieldNames'])
+        # Save the complete payload collected from a focused view, including fields outside its group.
+        payload, token = scoped_payload, scoped_token
         payload.update(CONFIG_NOTE='Acceptance save', RELOAD_ON_SAVE=False, OWNER='Acceptance observer')
         headers = {'X-CSRFToken':token}
         from indi_allsky.flask import db

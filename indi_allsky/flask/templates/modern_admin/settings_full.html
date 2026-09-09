@@ -21,7 +21,7 @@ var camera_id = {{ camera_id }};
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Modern editor</p>
-                <h2 id="modern-admin-full-settings-title">Full Settings</h2>
+                <h2 id="modern-admin-full-settings-title">{{ settings_domain_title or 'Full Settings' }}</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-warning">Global config</span>
         </div>
@@ -47,6 +47,13 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 
+    {% if settings_domain_title %}
+    <section class="modern-admin-table-panel" aria-label="Settings group">
+        <label><input id="settings-domain-only" type="checkbox" checked> Show only {{ settings_domain_title }} fields</label>
+        <p>This is the full editor with a focused view. Hidden fields retain their values and are included when saving. Uncheck to inspect all shared settings.</p>
+        <p><a href="{{ url_for('indi_allsky.modern_admin_camera_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">Camera exposure, cadence, bit depth and binning</a> · <a href="{{ url_for('indi_allsky.modern_admin_drive_manager_view') }}">Drive Manager</a> · <a href="{{ url_for('indi_allsky.modern_admin_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">All settings</a></p>
+    </section>
+    {% endif %}
     {% if longitude_validation_message %}
     <section class="modern-admin-table-panel">
         <p class="modern-admin-note">{{ longitude_validation_message | safe }}</p>
@@ -96,7 +103,7 @@ var camera_id = {{ camera_id }};
                     {% elif field_meta.is_submit_control %}
                         {# Rendered in the save action panel below. #}
                     {% else %}
-                    <label class="modern-admin-settings-edit-field {% if field_meta.is_checkbox %}modern-admin-settings-edit-field-checkbox{% endif %}" for="{{ field_meta.name }}" data-full-settings-row data-full-settings-search="{{ field_meta.search_text | e }}">
+                    <label class="modern-admin-settings-edit-field {% if field_meta.is_checkbox %}modern-admin-settings-edit-field-checkbox{% endif %}" for="{{ field_meta.name }}" data-full-settings-row data-full-settings-field="{{ field_meta.name }}" data-full-settings-search="{{ field_meta.search_text | e }}">
                         <span class="modern-admin-settings-edit-label">{{ field_meta.label }}</span>
                         <span class="modern-admin-settings-edit-meta">{{ field_meta.name }} · {{ field_meta.config_key }} · {{ field_meta.field_type }}</span>
                         {% if field_meta.is_checkbox %}
@@ -153,6 +160,7 @@ var camera_id = {{ camera_id }};
 </main>
 
 <script type="application/json" id="hybrid-full-settings-config">{{ {
+    'focusFields': settings_domain_fields,
     'fieldNames': modern_admin_full_settings_field_names,
     'checkboxNames': modern_admin_full_settings_checkbox_names,
     'ajaxUrl': url_for('indi_allsky.ajax_config_view'),

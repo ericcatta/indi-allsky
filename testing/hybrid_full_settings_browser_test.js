@@ -4,7 +4,7 @@ const vm = require('node:vm');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../indi_allsky/flask/static/modern_admin/full-settings.js'), 'utf8');
 
-async function run({canSave=true, response, duplicate=false, filterText='', initialSearch=''}={}) {
+async function run({canSave=true, response, duplicate=false, filterText='', initialSearch='', focused=false}={}) {
     let submit, filterHandler, calls=0, sent;
     const classList = {add() {}, remove() {}};
     const control = value => ({value, checked:false, classList});
@@ -13,17 +13,19 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
         RELOAD_ON_SAVE: {...control(''), checked:true}, FOCUS_MODE: {...control(''), checked:false},
         'OWNER-error': {hidden:true, textContent:''},
     };
-    const row = {dataset:{fullSettingsSearch:'owner test observer'}, hidden:false};
+    const row = {dataset:{fullSettingsSearch:'owner test observer',fullSettingsField:'OWNER'}, hidden:false};
+    const domainOnly = {checked:true,addEventListener() {}};
     const count = {textContent:''};
     const section = {hidden:false,open:false,querySelectorAll:()=>[row],querySelector:()=>count};
     const button = {disabled:!canSave, textContent:'Save Full Settings'};
     const message = {hidden:true, textContent:'', className:''};
     const form = {noValidate:true,addEventListener:(name,callback)=>{submit=callback;},querySelectorAll:()=>[]};
     const filter = {value:filterText,addEventListener:(name,callback)=>{filterHandler=callback;}};
-    const config = {fieldNames:['OWNER','CONFIG_NOTE','RELOAD_ON_SAVE','FOCUS_MODE'],checkboxNames:['RELOAD_ON_SAVE','FOCUS_MODE'],ajaxUrl:'/indi-allsky/ajax/config',csrfToken:'test-token',canSave};
+    const config = {focusFields:[],fieldNames:['OWNER','CONFIG_NOTE','RELOAD_ON_SAVE','FOCUS_MODE'],checkboxNames:['RELOAD_ON_SAVE','FOCUS_MODE'],ajaxUrl:'/indi-allsky/ajax/config',csrfToken:'test-token',canSave};
     const elements = {...fields,'modern-admin-full-settings-form':form,'modern-admin-full-settings-save':button,
         'modern-admin-full-settings-message':message,'modern-admin-full-settings-filter':filter,
         'hybrid-full-settings-config':{textContent:JSON.stringify(config)}};
+    if (focused) elements['settings-domain-only'] = domainOnly;
     vm.runInNewContext(source, {URL, window:{location:{href:'https://test.invalid/indi-allsky/modern-admin/settings/full?search='+encodeURIComponent(initialSearch)}},
         document:{getElementById:id=>elements[id] || null,querySelectorAll:()=>[section]},
         fetch:async (url,options)=>{
@@ -35,7 +37,7 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
         }});
     if (initialSearch) { assert.equal(filter.value, initialSearch); assert.equal(section.open, true); filterText = initialSearch; }
     filterHandler();
-    assert.equal(row.hidden, filterText !== '' && !'owner test observer'.includes(filterText.toLowerCase()));
+    assert.equal(row.hidden, focused || filterText !== '' && !'owner test observer'.includes(filterText.toLowerCase()));
     const promise = submit({preventDefault() {}});
     if (canSave) assert.equal(button.disabled,true);
     if (duplicate) await submit({preventDefault() {}});
@@ -43,10 +45,14 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
     assert.equal(calls,canSave ? 1 : 0);
     assert.equal(button.disabled,!canSave);
     if(canSave) assert.deepEqual(sent,{OWNER:'Test observer',CONFIG_NOTE:'Keep this until saved',RELOAD_ON_SAVE:true,FOCUS_MODE:false});
-    return {message:message.textContent,fields};
+    return {message:message.textContent,fields,row,domainOnly};
 }
 (async()=>{
     await run({initialSearch:'owner'});
+    await run({focused:true});
+    const hiddenError=await run({focused:true,response:{ok:false,status:400,text:async()=>JSON.stringify({OWNER:['Invalid owner']})}});
+    assert.equal(hiddenError.domainOnly.checked,false);
+    assert.equal(hiddenError.row.hidden,false);
     const success=await run({duplicate:true,filterText:'owner'});
     assert.equal(success.message,'Saved');
     assert.equal(success.fields.CONFIG_NOTE.value,'');

@@ -603,29 +603,6 @@ def test_storage_settings_contract_handles_missing_group():
     )
 
 
-def test_storage_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminStorageSettingsView')
-    end = views_text.index('class ModernAdminNotificationsSettingsView', start)
-    storage_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminStorageSettingsContract' in storage_view,
-        'storage settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in storage_view,
-        'storage settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'STORAGE_CONFIG_SECTIONS' not in storage_view,
-        'storage static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_storage_overview_cards' not in storage_view,
-        'storage overview formatting must not remain inline on the view',
-    )
-
 
 def test_camera_profile_settings_contract_preserves_context_shape():
     contract = ModernAdminCameraProfileSettingsContract()
@@ -1028,29 +1005,6 @@ def test_acquisition_save_settings_contract_handles_missing_groups():
     )
 
 
-def test_acquisition_save_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminAcquisitionSaveSettingsView')
-    end = views_text.index('class ModernAdminFitsSourceSettingsView', start)
-    acquisition_save_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminAcquisitionSaveSettingsContract' in acquisition_save_view,
-        'acquisition/save settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in acquisition_save_view,
-        'acquisition/save settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'ACQUISITION_SAVE_CONFIG_SECTIONS' not in acquisition_save_view,
-        'acquisition/save static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_acquisition_save_overview_cards' not in acquisition_save_view,
-        'acquisition/save overview formatting must not remain inline on the view',
-    )
-
 
 def test_fits_source_settings_contract_preserves_context_shape():
     contract = ModernAdminFitsSourceSettingsContract()
@@ -1108,29 +1062,6 @@ def test_fits_source_settings_contract_handles_missing_group():
     )
 
 
-def test_fits_source_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminFitsSourceSettingsView')
-    end = views_text.index('class ModernAdminFullSettingsView', start)
-    fits_source_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminFitsSourceSettingsContract' in fits_source_view,
-        'FITS/source settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in fits_source_view,
-        'FITS/source settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'FITS_SOURCE_CONFIG_SECTIONS' not in fits_source_view,
-        'FITS/source static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_fits_source_overview_cards' not in fits_source_view,
-        'FITS/source overview formatting must not remain inline on the view',
-    )
-
 
 def test_analytics_settings_contract_preserves_context_shape():
     contract = ModernAdminAnalyticsSettingsContract()
@@ -1183,29 +1114,6 @@ def test_analytics_settings_contract_handles_missing_group():
         'missing analytics group must remain a safe None fallback',
     )
 
-
-def test_analytics_settings_view_uses_hybrid_contract():
-    views_text = (REPO_ROOT / 'indi_allsky/flask/views.py').read_text(encoding='utf-8')
-    start = views_text.index('class ModernAdminAnalyticsSettingsView')
-    end = views_text.index('class ModernAdminStorageSettingsView', start)
-    analytics_view = views_text[start:end]
-
-    assert_true(
-        'ModernAdminAnalyticsSettingsContract' in analytics_view,
-        'analytics settings view must use the Hybrid settings contract',
-    )
-    assert_true(
-        'settings_contract' in analytics_view,
-        'analytics settings view must expose the contract dependency explicitly',
-    )
-    assert_true(
-        'ANALYTICS_CONFIG_SECTIONS' not in analytics_view,
-        'analytics static config sections must not remain inline on the view',
-    )
-    assert_true(
-        'get_analytics_overview_cards' not in analytics_view,
-        'analytics overview formatting must not remain inline on the view',
-    )
 
 
 def test_environmental_awareness_settings_contract_preserves_context_shape():
@@ -1487,7 +1395,6 @@ def run_tests():
     test_notifications_settings_contract_handles_missing_group()
     test_storage_settings_contract_preserves_context_shape()
     test_storage_settings_contract_handles_missing_group()
-    test_storage_settings_view_uses_hybrid_contract()
     test_camera_profile_settings_contract_preserves_context_shape()
     test_camera_profile_settings_contract_handles_missing_group()
     test_camera_connection_settings_contract_preserves_context_shape()
@@ -1500,13 +1407,10 @@ def run_tests():
     test_hybrid_awb_settings_contract_handles_missing_group()
     test_acquisition_save_settings_contract_preserves_context_shape()
     test_acquisition_save_settings_contract_handles_missing_groups()
-    test_acquisition_save_settings_view_uses_hybrid_contract()
     test_fits_source_settings_contract_preserves_context_shape()
     test_fits_source_settings_contract_handles_missing_group()
-    test_fits_source_settings_view_uses_hybrid_contract()
     test_analytics_settings_contract_preserves_context_shape()
     test_analytics_settings_contract_handles_missing_group()
-    test_analytics_settings_view_uses_hybrid_contract()
     test_environmental_awareness_settings_contract_preserves_context_shape()
     test_environmental_awareness_settings_contract_handles_missing_group()
     test_mini_timelapse_settings_contract_preserves_context_shape()
