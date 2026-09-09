@@ -89,6 +89,7 @@ from ..modern_admin_log_download import ModernAdminLogDownloadService, LogDownlo
 from ..modern_admin_log_reader import ModernAdminLogReader
 from ..modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from ..modern_admin_system_tools import ModernAdminSystemInfoSummaryService
+from ..modern_admin_system_tools import ModernAdminCpuUsageProvider
 from ..modern_admin_tasks import ModernAdminTaskReadService
 from ..modern_admin_tasks import ModernAdminTaskReadPolicy
 from ..processing import ImageProcessor
@@ -10545,6 +10546,9 @@ class ModernAdminSystemInfoView(ModernAdminSystemToolView, ModernAdminMediaBrows
     page_title = 'Modern Admin System Info'
 
     summary_service = ModernAdminSystemInfoSummaryService()
+
+    def getCpuUsage(self):
+        return ModernAdminCpuUsageProvider(psutil.cpu_times_percent).read()
 
     def setupSession(self):
         if request.args.get('camera_id') or request.args.get('profile_id'):

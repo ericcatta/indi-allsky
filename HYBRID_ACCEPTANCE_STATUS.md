@@ -1,5 +1,20 @@
 # Hybrid acceptance status
 
+## CPU first-sample correction — candidate, 2026-09-09
+
+The provider used a nonblocking psutil sample whose first value is documented as
+meaningless. Hybrid now overrides that read with its own explicit 100 ms sample,
+including valid zero and unavailable/error handling. The shared Classic method is
+unchanged. Focused tests exercise the actual Hybrid override and first/second
+read, idle, malformed and failed samples.
+
+Local regression: 38 of 118 Python entries pass; 80 cannot run because this Mac
+lacks the runtime configuration or dependencies (cv2, SQLAlchemy, Werkzeug,
+D-Bus, FFmpeg). All 31 JavaScript entries pass. SSH to the isolated Pi failed by
+name resolution and timed out at its known address. The full target regression,
+native browser check and latency measurement remain open; no deployment occurred.
+Evidence: `testing/evidence/hybrid-cpu-first-sample-2026-09-09.json`.
+
 ## User-authorized observation limit — 2026-09-09
 
 The user limited this live acceptance run to **September 9 at 20:00 Europe/Zurich**

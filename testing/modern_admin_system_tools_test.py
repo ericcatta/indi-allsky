@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import inspect
+import ast
+from types import SimpleNamespace
 import sys
 from pathlib import Path
 
@@ -13,6 +15,44 @@ from indi_allsky.modern_admin_system_tools import LOG_DETAIL_LINE_SIZE
 from indi_allsky.modern_admin_system_tools import LOG_DETAIL_MAX_LINES
 from indi_allsky.modern_admin_system_tools import ModernAdminLogDisplayPolicy
 from indi_allsky.modern_admin_system_tools import ModernAdminSystemInfoSummaryService
+from indi_allsky.modern_admin_system_tools import ModernAdminCpuUsageProvider
+
+
+def test_cpu_first_sample_and_view_dispatch():
+    # Exercise the actual override without importing hardware/web dependencies.
+    tree = ast.parse((REPO_ROOT / 'indi_allsky/flask/views.py').read_text())
+    view = next(n for n in tree.body if isinstance(n, ast.ClassDef)
+                and n.name == 'ModernAdminSystemInfoView')
+    method = next(n for n in view.body if isinstance(n, ast.FunctionDef)
+                  and n.name == 'getCpuUsage')
+    calls = []
+
+    def sample(interval=None):
+        calls.append(interval)
+        # A new worker's nonblocking reading is not a measurement.
+        active = 12.0 if interval == 0.1 else 0.0
+        return SimpleNamespace(user=active, system=3.0 if active else 0.0,
+                               idle=85.0 if active else 0.0,
+                               nice=0.0, iowait=0.0, irq=0.0, softirq=0.0)
+
+    scope = {'ModernAdminCpuUsageProvider': ModernAdminCpuUsageProvider,
+             'psutil': SimpleNamespace(cpu_times_percent=sample)}
+    exec(compile(ast.Module(body=[method], type_ignores=[]), '<view>', 'exec'), scope)
+    for _ in range(2):
+        assert ModernAdminSystemInfoSummaryService().format_cpu(
+            scope['getCpuUsage'](object())) == '15.0%'
+    assert calls == [0.1, 0.1]
+
+    idle = SimpleNamespace(user=0, system=0, nice=0, irq=0, softirq=0,
+                           idle=100, iowait=0)
+    service = ModernAdminSystemInfoSummaryService()
+    assert service.format_cpu(ModernAdminCpuUsageProvider(lambda **kw: idle).read()) == '0.0%'
+    assert service.format_cpu(ModernAdminCpuUsageProvider(lambda **kw: None).read()) == 'Unavailable'
+
+    def unavailable(**kw):
+        raise OSError('CPU counters unavailable')
+
+    assert service.format_cpu(ModernAdminCpuUsageProvider(unavailable).read()) == 'Unavailable'
 
 
 def test_system_info_summary_service_preserves_card_shape():
@@ -170,6 +210,7 @@ def test_system_tools_module_has_no_flask_db_or_file_read_dependency():
 
 
 def run_tests():
+    test_cpu_first_sample_and_view_dispatch()
     test_system_info_summary_service_preserves_card_shape()
     test_system_info_summary_service_formats_numeric_values()
     test_log_display_policy_preserves_line_limits()

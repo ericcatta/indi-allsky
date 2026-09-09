@@ -1,0 +1,1092 @@
+{
+  "status": "Candidate implemented; full target-environment regression and deployment pending",
+  "baseline": "59ad61cf",
+  "source_hashes": {
+    "indi_allsky/flask/views.py": "ebd556de77d798d886415609e7303d4e1e703efa3881ad54a6c40692c735f288",
+    "indi_allsky/modern_admin_system_tools.py": "e60eec632d60c943e40884dcc52d3deeab44e34c683eceee468fc873c41cc158",
+    "testing/modern_admin_system_tools_test.py": "afe385ed1c0689226d2516fee02a4cb1ac3f9dbd95516b9a3a1ed6e9fb7b24a2"
+  },
+  "provider_contract": "Explicit 0.1 second sample on every CPU summary read; OSError or missing counters displayed as Unavailable; valid zero preserved",
+  "reference": "https://psutil.readthedocs.io/stable/#psutil.cpu_times_percent",
+  "python_regression": {
+    "baseline": "59ad61cf plus explicit CPU sample candidate",
+    "root": "/Users/ericcattaneo/Documents/GitHub/indi-allsky",
+    "scope": "Isolated runtime overlay; not live hardware acceptance",
+    "results": [
+      {
+        "case": "testing/auto_exposure_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_auto_exposure_controller_test.py.log"
+      },
+      {
+        "case": "testing/auto_gain_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.04,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_auto_gain_controller_test.py.log"
+      },
+      {
+        "case": "testing/auto_gain_runtime_state_test.py",
+        "exit_code": 0,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_auto_gain_runtime_state_test.py.log"
+      },
+      {
+        "case": "testing/capture_profiles_test.py",
+        "exit_code": 0,
+        "seconds": 0.13,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_capture_profiles_test.py.log"
+      },
+      {
+        "case": "testing/capture_timeout_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.04,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_capture_timeout_policy_test.py.log"
+      },
+      {
+        "case": "testing/focus_frames_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_focus_frames_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/focus_frames_test.py\", line 58, in <module>\n    if __name__=='__main__':run()\n                            ~~~^^\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/focus_frames_test.py\", line 16, in run\n    import cv2\nModuleNotFoundError: No module named 'cv2'\n"
+      },
+      {
+        "case": "testing/full_config_parser_parity_test.py",
+        "exit_code": 0,
+        "seconds": 5.74,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_full_config_parser_parity_test.py.log"
+      },
+      {
+        "case": "testing/generation_result_test.py",
+        "exit_code": 0,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_generation_result_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_account_input_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_account_input_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_app_startup_test.py",
+        "exit_code": 1,
+        "seconds": 0.15,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_app_startup_test.py.log",
+        "failure_tail": "e 132, in <module>\n    subprocess.run([\n    ~~~~~~~~~~~~~~^^\n        sys.executable, __file__, '--runtime-config', args.runtime_config, '--mode', mode,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ], check=True)\n    ^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py\", line 577, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['/Library/Frameworks/Python.framework/Versions/3.13/bin/python3', '/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_app_startup_test.py', '--runtime-config', '/etc/indi-allsky/flask.json', '--mode', 'disabled']' returned non-zero exit status 1.\n"
+      },
+      {
+        "case": "testing/hybrid_archive_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_archive_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_astropanel_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_astropanel_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_astropanel_satellite_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_astropanel_satellite_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_aurora_failure_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_aurora_failure_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_aurora_rtsw_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_aurora_rtsw_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_aurora_status_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_aurora_status_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_authenticated_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_authenticated_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_browser_maintenance_guard_test.py",
+        "exit_code": 0,
+        "seconds": 0.04,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_browser_maintenance_guard_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_camera_cleanup_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_camera_cleanup_flow_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_camera_cleanup_flow_test.py\", line 6, in <module>\n    from sqlalchemy.sql.expression import false as sa_false\nModuleNotFoundError: No module named 'sqlalchemy'\n"
+      },
+      {
+        "case": "testing/hybrid_camera_management_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_camera_management_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_camera_management_policy_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_camera_management_policy_test.py.log",
+        "failure_tail": "y\", line 100, in <module>\n    if __name__=='__main__':run()\n                            ~~~^^\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_camera_management_policy_test.py\", line 51, in run\n    context=camera_mode_context(config)\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/indi_allsky/hybrid_camera_management.py\", line 22, in camera_mode_context\n    from .capture_profiles import derive_capture_profiles, build_profile_config\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/indi_allsky/capture_profiles.py\", line 10, in <module>\n    from .auto_meter import AUTO_EXPOSURE_METERING_MODES\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/indi_allsky/auto_meter.py\", line 4, in <module>\n    import cv2\nModuleNotFoundError: No module named 'cv2'\n"
+      },
+      {
+        "case": "testing/hybrid_camera_processing_status_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_camera_processing_status_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_camera_simulator_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_camera_simulator_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_settings_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_capture_cadence_settings_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_capture_cadence_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_charts_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_charts_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_compatibility_redirect_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_compatibility_redirect_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_dark_library_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.19,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_dark_library_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_database_backup_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_database_backup_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_drives_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_drives_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_end_of_night_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_end_of_night_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_end_of_night_handoff_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_end_of_night_handoff_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_exposure_pipeline_test.py",
+        "exit_code": 0,
+        "seconds": 0.24,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_exposure_pipeline_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_fits_processing_flow_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_fits_processing_flow_test.py\", line 145, in <module>\n    run(parser.parse_args().runtime_config)\n    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_fits_processing_flow_test.py\", line 30, in run\n    import cv2,numpy as np\nModuleNotFoundError: No module named 'cv2'\n"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_parity_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_fits_processing_parity_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_focus_endpoint_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_focus_endpoint_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_focus_preview_parity_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_focus_preview_parity_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_focus_preview_parity_test.py\", line 15, in <module>\n    import cv2\nModuleNotFoundError: No module named 'cv2'\n"
+      },
+      {
+        "case": "testing/hybrid_focuser_effect_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_focuser_effect_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_gallery_isolation_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.13,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_gallery_isolation_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_generated_media_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_generated_media_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_generation_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_generation_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_generation_result_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_generation_result_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_geometry_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_geometry_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_gpio_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_gpio_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_highlights_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_highlights_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_keogram_encoding_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_keogram_encoding_flow_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_keogram_encoding_flow_test.py\", line 172, in <module>\n    args=parser.parse_args();run(args.runtime_config,args.evidence)\n                             ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_keogram_encoding_flow_test.py\", line 25, in run\n    assert shutil.which('ffmpeg') and shutil.which('ffprobe'), 'Install FFmpeg/ffprobe to run real encoding acceptance'\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Install FFmpeg/ffprobe to run real encoding acceptance\n"
+      },
+      {
+        "case": "testing/hybrid_log_download_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_log_download_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_log_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_log_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_login_redirect_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_login_redirect_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_longterm_keogram_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_longterm_keogram_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_longterm_sampling_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.13,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_longterm_sampling_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_loop_statistics_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_loop_statistics_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_media_cleanup_failure_test.py",
+        "exit_code": 1,
+        "seconds": 0.2,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_media_cleanup_failure_test.py.log",
+        "failure_tail": ": '/etc/indi-allsky/flask.json'\nTraceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_media_cleanup_failure_test.py\", line 71, in <module>\n    subprocess.run([sys.executable, __file__, command], check=True)\n    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py\", line 577, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['/Library/Frameworks/Python.framework/Versions/3.13/bin/python3', '/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_media_cleanup_failure_test.py', 'flush_images']' returned non-zero exit status 1.\n"
+      },
+      {
+        "case": "testing/hybrid_media_validation_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_media_validation_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_mini_generation_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_mini_generation_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_native_focus_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_native_focus_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_navigation_redirect_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_navigation_redirect_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_network_command_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_network_command_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_now_page_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_now_page_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_observatory_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_observatory_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_operations_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_operations_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_output_detail_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_output_detail_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_panorama_cadence_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_panorama_cadence_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_panorama_publication_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_panorama_publication_flow_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_panorama_publication_flow_test.py\", line 160, in <module>\n    if __name__=='__main__':run()\n                            ~~~^^\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_panorama_publication_flow_test.py\", line 14, in run\n    import cv2\nModuleNotFoundError: No module named 'cv2'\n"
+      },
+      {
+        "case": "testing/hybrid_public_media_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_public_media_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_queued_maintenance_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_queued_maintenance_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_raw_loop_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_raw_loop_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_realtime_history_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.15,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_realtime_history_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_realtime_preview_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_realtime_preview_flow_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_realtime_preview_flow_test.py\", line 94, in <module>\n    if __name__=='__main__':run()\n                            ~~~^^\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_realtime_preview_flow_test.py\", line 15, in run\n    import cv2\nModuleNotFoundError: No module named 'cv2'\n"
+      },
+      {
+        "case": "testing/hybrid_route_composition_test.py",
+        "exit_code": 0,
+        "seconds": 0.67,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_route_composition_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_runtime_shell_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_runtime_shell_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_satellite_update_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_satellite_update_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_sensor_panel_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_session_revocation_test.py",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_session_revocation_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_settings_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_settings_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_shell_test.py",
+        "exit_code": 0,
+        "seconds": 0.31,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_shell_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_sky_cycle_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_sky_cycle_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_smoke_update_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_smoke_update_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_source_media_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_source_media_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_system_power_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_system_power_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_system_units_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_system_units_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_table_export_test.py",
+        "exit_code": 0,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_table_export_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_task_output_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_task_output_service_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_task_visibility_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_task_visibility_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_ui_inventory_parser_test.py",
+        "exit_code": 0,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_ui_inventory_parser_test.py.log"
+      },
+      {
+        "case": "testing/hybrid_updates_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_updates_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_upgrade_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_upgrade_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_upload_claim_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_upload_claim_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_users_table_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_users_table_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_video_dispatch_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_video_dispatch_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_video_encoding_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_video_encoding_flow_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_video_encoding_flow_test.py\", line 158, in <module>\n    args=parser.parse_args();run(args.runtime_config,args.evidence)\n                             ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/hybrid_video_encoding_flow_test.py\", line 25, in run\n    assert shutil.which('ffmpeg') and shutil.which('ffprobe'), 'Install FFmpeg/ffprobe to run real encoding acceptance'\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Install FFmpeg/ffprobe to run real encoding acceptance\n"
+      },
+      {
+        "case": "testing/hybrid_video_failure_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_video_failure_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/hybrid_youtube_flow_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_hybrid_youtube_flow_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/legacy_auto_gain_steps_test.py",
+        "exit_code": 0,
+        "seconds": 0.13,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_legacy_auto_gain_steps_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_boundary_test.py",
+        "exit_code": 0,
+        "seconds": 0.24,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_boundary_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_camera_diagnostics_service_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_log_reader_test.py",
+        "exit_code": 0,
+        "seconds": 0.19,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_log_reader_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_media_camera_filter_test.py",
+        "exit_code": 0,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_media_camera_filter_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_media_metadata_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.07,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_media_metadata_service_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_media_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_media_runtime_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_notification_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_notification_read_service_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_observatory_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.04,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_observatory_tools_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_runtime_providers_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_runtime_providers_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_settings_contracts_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_settings_contracts_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_settings_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_settings_runtime_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_system_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_system_tools_test.py.log"
+      },
+      {
+        "case": "testing/modern_admin_task_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_admin_task_read_service_test.py.log"
+      },
+      {
+        "case": "testing/modern_safe_action_test.py",
+        "exit_code": 0,
+        "seconds": 0.13,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_modern_safe_action_test.py.log"
+      },
+      {
+        "case": "testing/multicamera_processor_isolation_test.py",
+        "exit_code": 1,
+        "seconds": 0.13,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_multicamera_processor_isolation_test.py.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "testing/network_activation_polling_test.py",
+        "exit_code": 1,
+        "seconds": 0.09,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_network_activation_polling_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/network_activation_polling_test.py\", line 40, in <module>\n    if __name__=='__main__':run()\n                            ~~~^^\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/network_activation_polling_test.py\", line 15, in run\n    from indi_allsky.network_manager_effects import NetworkManagerEffects\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/indi_allsky/network_manager_effects.py\", line 6, in <module>\n    from werkzeug.exceptions import NotFound\nModuleNotFoundError: No module named 'werkzeug'\n"
+      },
+      {
+        "case": "testing/network_commands_test.py",
+        "exit_code": 0,
+        "seconds": 0.05,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_network_commands_test.py.log"
+      },
+      {
+        "case": "testing/network_scan_effects_test.py",
+        "exit_code": 1,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_network_scan_effects_test.py.log",
+        "failure_tail": "Traceback (most recent call last):\n  File \"/Users/ericcattaneo/Documents/GitHub/indi-allsky/testing/network_scan_effects_test.py\", line 7, in <module>\n    import dbus\nModuleNotFoundError: No module named 'dbus'\n"
+      },
+      {
+        "case": "testing/product_spine_regression_test.py",
+        "exit_code": 0,
+        "seconds": 0.07,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_product_spine_regression_test.py.log"
+      },
+      {
+        "case": "testing/product_view_models_test.py",
+        "exit_code": 0,
+        "seconds": 0.2,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_product_view_models_test.py.log"
+      },
+      {
+        "case": "testing/sftp_adapter_test.py",
+        "exit_code": 0,
+        "seconds": 0.08,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_sftp_adapter_test.py.log"
+      },
+      {
+        "case": "testing/stretch_multicamera_mask_test.py",
+        "exit_code": 0,
+        "seconds": 0.13,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/testing_stretch_multicamera_mask_test.py.log"
+      },
+      {
+        "case": "hybrid_archive_flow_test.py:library",
+        "exit_code": 1,
+        "seconds": 0.14,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/hybrid_archive_flow_test.py_library.log",
+        "failure_tail": "ib/python3.13/pathlib/_local.py\", line 546, in read_text\n    return PathBase.read_text(self, encoding, errors, newline)\n           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py\", line 632, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py\", line 537, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/etc/indi-allsky/flask.json'\n"
+      },
+      {
+        "case": "compileall",
+        "exit_code": 0,
+        "seconds": 0.43,
+        "interpreter": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "log": "/tmp/hybrid-cpu-sample-local-evidence/compileall.log"
+      }
+    ]
+  },
+  "javascript": [
+    {
+      "test": "testing/hybrid_account_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid account browser controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_astropanel_browser_test.js",
+      "exit_code": 0,
+      "output": "Astropanel controller: all detail fields, 20 satellites, literal text, unavailable/stale/session states, refresh and polling: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_camera_management_browser_test.js",
+      "exit_code": 0,
+      "output": "Camera form guard: native first submit, duplicate/cross-form prevention and back-navigation permission state: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_camera_simulator_parity_test.js",
+      "exit_code": 0,
+      "output": "Hybrid simulator catalog and canvas parity: PASS (3000 scenarios)\n"
+    },
+    {
+      "test": "testing/hybrid_charts_browser_test.js",
+      "exit_code": 0,
+      "output": "Charts: all 15 series and histogram, empty/null data, atomic validation, history, stale responses, polling, HTTP/session/network errors and teardown: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_config_restore_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid restore browser controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_drives_browser_test.js",
+      "exit_code": 0,
+      "output": "Drive controller: metadata as text, duplicates, confirmation/cancel, target/CSRF and fresh-inventory requirement: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_fits_processing_browser_test.js",
+      "exit_code": 0,
+      "output": "FITS controller: duplicate prevention, output identity, search/reset, visible validation and failed-session recovery: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_focus_browser_test.js",
+      "exit_code": 0,
+      "output": "Native Focus browser controller: target camera, duplicate prevention, decode, errors, expired session, permissions and movement feedback: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_full_settings_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid full Settings controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_generation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid generation confirmation, role gate, duplicate submission, failure and scope changes: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_geometry_math_test.js",
+      "exit_code": 0,
+      "output": "Image geometry circle/offset parity and finite keogram lines: PASS (480 cases)\n"
+    },
+    {
+      "test": "testing/hybrid_gpio_browser_test.js",
+      "exit_code": 0,
+      "output": "GPIO controller: confirmation/cancel, explicit Off, CSRF, duplicate prevention, errors and retained disabled controls: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_log_browser_test.js",
+      "exit_code": 0,
+      "output": "Log controller CSRF, plain text, expired session and failed/malformed responses: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_longterm_keogram_browser_test.js",
+      "exit_code": 0,
+      "output": "Long-term keogram controls: scoped payload, CSRF, duplicate prevention, preview/download, reset and errors preserve prior result: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_loop_browser_test.js",
+      "exit_code": 0,
+      "output": "Loop controls: history, speed, bounce, camera isolation, stale responses, image errors and recovery PASS\nLoop controls: history, speed, bounce, camera isolation, stale responses, image errors and recovery PASS\n"
+    },
+    {
+      "test": "testing/hybrid_media_archive_browser_test.js",
+      "exit_code": 0,
+      "output": "Archive dimensions: cached/delayed metadata, resize, missing/error, camera isolation and saved values: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_media_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid media camera navigation and source preview behavior: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_mini_generation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid mini controls: role, confirmation, duplicate submissions, failure recovery and task result: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_navigation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid navigation controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_network_browser_test.js",
+      "exit_code": 0,
+      "output": "Network controller: all intents, scan results/empty state, target binding, security boolean, CSRF, pending/refresh guards, cancellation, permissions and errors: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_notification_ack_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid notification acknowledgement controller: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_now_frames_test.js",
+      "exit_code": 0,
+      "output": "Now frames: cached failure, load recovery, error and missing image: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_operations_table_browser_test.js",
+      "exit_code": 0,
+      "output": "Operations table controller: combined filters, counts, reset, empty rows, filtered export payload/CSRF and native attachment forms: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_panorama_loop_browser_test.js",
+      "exit_code": 0,
+      "output": "Panorama loop: playback, frame/detail/lightbox identity, pause, navigation, keyboard, timeout, failed frame recovery, hidden page and teardown: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_public_media_browser_test.js",
+      "exit_code": 0,
+      "output": "Public media clipboard fallback, fullscreen capability errors and failed preview feedback: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_realtime_keogram_browser_test.js",
+      "exit_code": 0,
+      "output": "Realtime preview: camera URL, success, stale/missing/session/network/decode errors, retained image, hidden tab, duplicate prevention and teardown: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_sensor_panel_browser_test.js",
+      "exit_code": 0,
+      "output": "Sensor controller: camera scope, 120 slots, real zero, absent values, filter, atomic errors, expired session, refresh and teardown: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_system_units_browser_test.js",
+      "exit_code": 0,
+      "output": "System controls: confirmations, roles, CSRF, payloads, duplicate suppression, failure/expiry/lost responses, safe task receipts and links: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_updates_browser_test.js",
+      "exit_code": 0,
+      "output": "Updates controller: confirmations, permissions, CSRF, duplicate suppression, accepted/failed/expired/lost responses and explicit refresh: PASS\n"
+    },
+    {
+      "test": "testing/hybrid_youtube_browser_test.js",
+      "exit_code": 0,
+      "output": "YouTube revoke cancellation, action feedback and duplicate form prevention: PASS\n"
+    }
+  ],
+  "validation_summary": {
+    "python_passed": 38,
+    "python_environment_blocked": 80,
+    "javascript_passed": 31,
+    "remote_attempts": [
+      "mDNS resolution failed",
+      "Known IPv4 SSH timed out with strict host identity verification"
+    ],
+    "deployment": false,
+    "live_latency_measurement": "Not performed; 0.1 seconds is the configured sampling wait, not a measured page latency"
+  }
+}

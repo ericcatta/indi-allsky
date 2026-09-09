@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- CPU System Info: provider Hybrid con campione esplicito di 100 ms per evitare
+  lo zero iniziale non significativo. Test mirati e 31 JavaScript superati;
+  regressione locale 38/118, altri 80 bloccati da ambiente mancante. Raspberry
+  non raggiungibile in questa verifica: regressione completa, prova browser e
+  deploy del candidato ancora aperti.
+
+
 - Decisione utente 9 settembre: collaudo live soltanto fino alle 20:00 CEST,
   controlli orari compatti per contenere i crediti. Test 24 ore giorno/notte
   rinviato a un futuro obiettivo, non superato. Acquisizione non interrotta.
