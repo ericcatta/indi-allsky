@@ -16,10 +16,20 @@
     "Historical route fingerprint unchanged"
   ],
   "limits": [
-    "Candidate not deployed",
     "Other static Settings domains remain open",
     "Classic frontend removal incomplete"
   ],
   "browser_fixture_check": "Previous Settings entry reaches notification list; detail acknowledge changes visible status from No to Yes",
-  "obsolete_preview_template_removed": true
+  "obsolete_preview_template_removed": true,
+  "deployment": {
+    "installed_commit": "397df11d4fdb9b9c56ca3a9418cf95288d824b75",
+    "backup_integrity": "ok",
+    "web_service_active": true,
+    "capture_process_unchanged": true,
+    "configuration_unchanged": true,
+    "tested_sources_match": true,
+    "obsolete_templates_absent": true,
+    "tracked_production_tree_clean": true,
+    "production_browser_acceptance": "open; certificate trust required, earlier browser rejection respected"
+  }
 }

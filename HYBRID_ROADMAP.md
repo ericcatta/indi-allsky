@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Viste Settings mirate, ingresso Notifiche operativo e cleanup distribuiti
+  (`397df11d`). Backup coerente verificato; riavviato soltanto il servizio web.
+  Processo di cattura e configurazione invariati; file installati identici
+  al candidato verificato, cinque anteprime assenti e frame recenti di
+  entrambe le camere presenti. Collaudo browser in produzione ancora aperto
+  per il certificato; nessuna equivalenza con la prova browser isolata.
+
 - Collaudo browser isolato dei quattro gruppi Settings completato: campi
   mirati corretti, tutti i campi nuovamente accessibili, profilo conservato.
   Un errore fuori gruppo disattiva il filtro e apre il campo da correggere.

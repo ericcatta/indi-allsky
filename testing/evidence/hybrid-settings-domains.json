@@ -22,7 +22,6 @@
     "Full Config parity and route fingerprints preserved"
   ],
   "limits": [
-    "Not deployed",
     "Full Classic removal remains incomplete"
   ],
   "browser_fixture_checks": [
@@ -42,5 +41,16 @@
     "python_cases": 128,
     "javascript_cases": 31,
     "failures": []
+  },
+  "deployment": {
+    "installed_commit": "397df11d4fdb9b9c56ca3a9418cf95288d824b75",
+    "backup_integrity": "ok",
+    "web_service_active": true,
+    "capture_process_unchanged": true,
+    "configuration_unchanged": true,
+    "tested_sources_match": true,
+    "obsolete_templates_absent": true,
+    "tracked_production_tree_clean": true,
+    "production_browser_acceptance": "open; certificate trust required, earlier browser rejection respected"
   }
 }
