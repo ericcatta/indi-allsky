@@ -60,6 +60,7 @@ class AutoExposureController:
         day_max_step=None,
         allow_gain_control=True,
         measured_value=None,
+        highlight_saturated=False,
     ):
         smoothed_value = float(smoothed_value)
         current_exposure = float(current_exposure)
@@ -97,7 +98,31 @@ class AutoExposureController:
         estimated_exposure = self._clamp(current_exposure * correction_ratio, exposure_min, exposure_max)
         safety_limited = False
 
-        if abs_error <= 1.5:
+        if highlight_saturated:
+            # A clipped percentile is a lower bound, not a linear brightness
+            # measurement. Recover before using the normal proportional loop.
+            saturated = True
+            convergence_mode = 'highlight_recovery'
+            step_strategy = 'highlight_bounded'
+            if allow_gain_control and current_gain > gain_min:
+                action = 'decrease_gain'
+                reason = 'decrease_gain_before_exposure'
+                blocker = 'none'
+                gain_step = max(.01, max(abs(current_gain), 1.0) * self.gain_step_fraction)
+                proposed_gain = self._clamp(current_gain - gain_step, gain_min, gain_max)
+            elif current_exposure > exposure_min:
+                action = 'decrease_exposure'
+                reason = 'highlight_saturation_recovery'
+                blocker = 'none'
+                factor = .5 if current_exposure > 1 else .7 if current_exposure > .1 else .85
+                proposed_exposure = self._clamp(current_exposure * factor, exposure_min, exposure_max)
+                exposure_step = current_exposure - proposed_exposure
+                safety_limited = True
+            else:
+                reason = 'exposure_and_gain_already_min' if allow_gain_control else 'exposure_already_min'
+                blocker = reason
+
+        elif abs_error <= 1.5:
             action = 'hold'
             reason = 'target_reached'
             blocker = 'target_reached'
@@ -327,7 +352,7 @@ class AutoExposureController:
             safety_limited=safety_limited,
             shadow=True,
         )
-        return self._limit_to_latest_measurement(decision, measured_value)
+        return decision if highlight_saturated else self._limit_to_latest_measurement(decision, measured_value)
 
 
     def _limit_to_latest_measurement(self, decision, measured_value):

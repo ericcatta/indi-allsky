@@ -865,6 +865,7 @@ class ImageWorker(Process):
             decision = self.auto_exposure_controller.decide(
                 smoothed_value=smoothed_value,
                 measured_value=result.measured_value,
+                highlight_saturated=getattr(result, 'highlight_saturated', False),
                 current_exposure=inputs['current_exposure'],
                 current_gain=inputs['current_gain'],
                 exposure_min=inputs['exposure_min'],
@@ -1535,10 +1536,19 @@ class ImageWorker(Process):
         try:
             adu_masks = getattr(self.image_processor, '_adu_mask_dict', None) or {}
             image_height, image_width = self.image_processor.image.shape[:2]
+            metering_mode = self._auto_exposure_metering_mode()
+            metering_options = {}
+            if metering_mode == 'highlight_protected':
+                metering_options = {
+                    'target': self.config.get('TARGET_ADU' if self.night_av[constants.NIGHT_NIGHT] else 'TARGET_ADU_DAY', 75),
+                    'highlight_clip_percent': self.config.get('AUTO_EXPOSURE_HIGHLIGHT_CLIP_PERCENT', 1.0),
+                    'bit_depth': self.image_processor.max_bit_depth,
+                }
             result = measure_auto_exposure(
                 self.image_processor.image,
                 mask=adu_masks.get((binning, image_width, image_height)),
-                mode=self._auto_exposure_metering_mode(),
+                mode=metering_mode,
+                **metering_options,
             )
             logger.info(
                 '[AUTO_METER] profile=%s camera_id=%s mode=%s strategy=%s sample_count=%d measured_value=%0.2f excluded_pixels=%d status=%s',

@@ -13936,6 +13936,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels' : 'Auto Gain Levels',
         'auto_exposure_enabled' : 'Auto Exposure Enabled',
         'auto_exposure_metering_mode' : 'Auto Exposure Metering',
+        'auto_exposure_highlight_clip_percent' : 'Highlight pixel budget (%)',
         'binning_day' : 'Day Binning',
         'binning_night' : 'Night Binning',
         'cfa_pattern' : 'CFA Pattern',
@@ -14057,6 +14058,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels' : (('gain', 'auto_levels'), 'auto_gain_levels', ('ccd_config', 'AUTO_GAIN_LEVELS')),
         'auto_exposure_enabled' : (('auto_exposure', 'enabled'), 'AUTO_EXPOSURE_ENABLED', 'auto_exposure_enabled'),
         'auto_exposure_metering_mode' : (('auto_exposure', 'metering_mode'), 'AUTO_EXPOSURE_METERING_MODE', 'auto_exposure_metering_mode'),
+        'auto_exposure_highlight_clip_percent' : (('auto_exposure', 'highlight_clip_percent'), 'AUTO_EXPOSURE_HIGHLIGHT_CLIP_PERCENT', 'auto_exposure_highlight_clip_percent'),
         'cfa_pattern' : (('processing', 'cfa_pattern'), 'cfa_pattern', 'CFA_PATTERN'),
         'ccd_bit_depth' : (('processing', 'ccd_bit_depth'), 'ccd_bit_depth', 'CCD_BIT_DEPTH'),
         'auto_wb' : (('processing', 'auto_wb'), 'auto_wb', 'AUTO_WB'),
@@ -14191,6 +14193,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 'auto_gain_levels',
                 'auto_exposure_enabled',
                 'auto_exposure_metering_mode',
+                'auto_exposure_highlight_clip_percent',
                 'target_adu',
                 'target_adu_day',
                 'target_adu_dev',
@@ -14367,6 +14370,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'background',
         'moon_aware',
         'stars_only',
+        'highlight_protected',
     )
     CAMERA_SETTINGS_CAPTURE_EDIT_FIELD_ORDER = (
         'gain_day',
@@ -14381,6 +14385,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels',
         'auto_exposure_enabled',
         'auto_exposure_metering_mode',
+        'auto_exposure_highlight_clip_percent',
         'target_adu_day',
         'target_adu',
         'target_adu_dev_day',
@@ -14429,6 +14434,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels',
         'auto_exposure_enabled',
         'auto_exposure_metering_mode',
+        'auto_exposure_highlight_clip_percent',
         'target_adu_day',
         'target_adu',
         'target_adu_dev_day',
@@ -14466,6 +14472,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels'   : ('CCD_CONFIG', 'AUTO_GAIN_LEVELS'),
         'auto_exposure_enabled' : 'AUTO_EXPOSURE_ENABLED',
         'auto_exposure_metering_mode' : 'AUTO_EXPOSURE_METERING_MODE',
+        'auto_exposure_highlight_clip_percent' : 'AUTO_EXPOSURE_HIGHLIGHT_CLIP_PERCENT',
         'binning_night'      : ('CCD_CONFIG', 'NIGHT', 'BINNING'),
         'binning_moonmode'   : ('CCD_CONFIG', 'MOONMODE', 'BINNING'),
         'binning_day'        : ('CCD_CONFIG', 'DAY', 'BINNING'),
@@ -14518,6 +14525,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels'   : 'Auto Gain Levels',
         'auto_exposure_enabled' : 'Auto Exposure Enabled',
         'auto_exposure_metering_mode' : 'Auto Exposure Metering',
+        'auto_exposure_highlight_clip_percent' : 'Highlight pixel budget (%)',
         'binning_night'      : 'Night Binning',
         'binning_moonmode'   : 'Moon Mode Binning',
         'binning_day'        : 'Day Binning',
@@ -14570,6 +14578,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'auto_gain_levels'   : 'integer',
         'auto_exposure_enabled' : 'boolean_select',
         'auto_exposure_metering_mode' : 'select',
+        'auto_exposure_highlight_clip_percent' : 'float',
         'binning_night'      : 'integer',
         'binning_moonmode'   : 'integer',
         'binning_day'        : 'integer',
@@ -14626,6 +14635,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         'gain_max_moonmode' : 'Maximum gain Auto Gain may use in moon mode for this camera. Hardware-specific; not copied by Save & Sync.',
         'auto_exposure_enabled' : 'Default OFF. When enabled, the Auto Exposure Controller may apply proposed runtime exposure/gain to this camera only.',
         'auto_exposure_metering_mode' : 'Per-camera metering strategy used by the shadow/apply auto exposure controller.',
+        'auto_exposure_highlight_clip_percent' : 'Highlight-protected mode only: whole-frame bright pixel budget, 0.01–10%. Start with 1%. Smaller values protect more highlights but darken the scene. ROI is ignored in this mode.',
         'cfa_pattern' : 'Hardware-specific Bayer pattern override for this camera. Auto removes the override and lets legacy/default detection apply. This field is never copied by Save & Sync.',
         'ccd_bit_depth' : 'Sensor bit depth used for processing scale. Wrong values can push metering and stretch toward saturation.',
         'auto_wb_day' : 'Legacy daytime postprocess auto white balance. Separate from Hybrid AWB; use carefully with postprocess_rgb.',
@@ -15985,7 +15995,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             }]
             choices.extend({
                 'value'    : metering_mode,
-                'label'    : metering_mode,
+                'label'    : 'Protect highlights (whole frame)' if metering_mode == 'highlight_protected' else metering_mode,
                 'selected' : metering_mode == value,
             } for metering_mode in self.CAMERA_SETTINGS_AUTO_EXPOSURE_METERING_MODES)
             return tuple(choices)
@@ -16501,6 +16511,9 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         else:
             value = raw_value
 
+        if field_name == 'auto_exposure_highlight_clip_percent' and not .01 <= value <= 10:
+            raise ValueError('Highlight pixel budget must be between 0.01 and 10 percent.')
+
         if field_type in ('integer', 'float') and field_name in ('auto_gain_levels', 'binning_day', 'binning_moonmode', 'binning_night') and value < 1:
             raise ValueError('{0:s} must be greater than or equal to 1.'.format(self.CAMERA_SETTINGS_CAPTURE_FIELD_LABELS[field_name]))
 
@@ -16650,6 +16663,7 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
             'auto_gain_levels' : ('gain', 'auto_levels'),
             'auto_exposure_enabled' : ('auto_exposure', 'enabled'),
             'auto_exposure_metering_mode' : ('auto_exposure', 'metering_mode'),
+            'auto_exposure_highlight_clip_percent' : ('auto_exposure', 'highlight_clip_percent'),
             'cfa_pattern'       : ('processing', 'cfa_pattern'),
             'ccd_bit_depth'     : ('processing', 'ccd_bit_depth'),
             'auto_wb'           : ('processing', 'auto_wb'),

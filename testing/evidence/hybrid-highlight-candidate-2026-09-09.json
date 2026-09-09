@@ -1,0 +1,21 @@
+{
+  "baseline": "cc41e0ce",
+  "scope": "Isolated Raspberry overlay; not live hardware acceptance",
+  "python_cases": 127,
+  "javascript_cases": 31,
+  "failures": [],
+  "source_files_matched": 751,
+  "python_report_sha256": "7ddea75d8a8c83aa05cbfb49d409f633dab44bcf8974cb318496294e79285e79",
+  "python_report_remote": "/home/eric/hybrid-highlight-evidence/results.json",
+  "checks": [
+    "Highlight percentile with ROI excluded, RGB channel peaks, 12-bit source, invalid budgets",
+    "Closed-loop day/night convergence and illumination change, gain-first reduction and exposure-first increase",
+    "Per-profile save/read/runtime resolution, invalid inputs, CSRF, reader permissions, unchanged common cadence",
+    "Existing Full Config parity, Settings contracts, Safe Actions, Product Spine and view models"
+  ],
+  "limits": [
+    "Not deployed or activated in production",
+    "No live camera clipping or sustained stability acceptance",
+    "Classic migration and removal remain incomplete"
+  ]
+}

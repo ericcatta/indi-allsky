@@ -136,6 +136,7 @@ class CaptureProfile:
     daytime_grayscale: bool
     scnr_algorithm_day: str
     outputs: Dict[str, Any]
+    auto_exposure_highlight_clip_percent: float = 1.0
 
     def as_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -605,6 +606,7 @@ def _profile_from_config(
         exposure_period_day=_mapping_float(exposure_config, 'period_day', _float_config(profile_config, 'exposure_period_day', _float_config(config, 'EXPOSURE_PERIOD_DAY', 15.0))),
         auto_exposure_enabled=_auto_exposure_enabled(config, profile_config),
         auto_exposure_metering_mode=_auto_exposure_metering_mode(config, profile_config),
+        auto_exposure_highlight_clip_percent=_auto_exposure_float(config, profile_config, 'highlight_clip_percent', 'auto_exposure_highlight_clip_percent', 1.0),
         auto_exposure_day_max_step=_auto_exposure_float(config, profile_config, 'day_max_step', 'auto_exposure_day_max_step', 0.005),
         auto_exposure_day_min_step=_auto_exposure_float(config, profile_config, 'day_min_step', 'auto_exposure_day_min_step', 0.00025),
         auto_exposure_day_step_factor=_auto_exposure_float(config, profile_config, 'day_step_factor', 'auto_exposure_day_step_factor', 0.35),
@@ -770,6 +772,7 @@ def build_profile_config(config: Mapping[str, Any], profile: CaptureProfile) -> 
         profile_config['EXPOSURE_PERIOD_DAY'] = float(config.get('EXPOSURE_PERIOD_DAY', profile_config['EXPOSURE_PERIOD']))
     profile_config['AUTO_EXPOSURE_ENABLED'] = profile.auto_exposure_enabled
     profile_config['AUTO_EXPOSURE_METERING_MODE'] = profile.auto_exposure_metering_mode
+    profile_config['AUTO_EXPOSURE_HIGHLIGHT_CLIP_PERCENT'] = profile.auto_exposure_highlight_clip_percent
     profile_config['AUTO_EXPOSURE_DAY_MAX_STEP'] = profile.auto_exposure_day_max_step
     profile_config['AUTO_EXPOSURE_DAY_MIN_STEP'] = profile.auto_exposure_day_min_step
     profile_config['AUTO_EXPOSURE_DAY_STEP_FACTOR'] = profile.auto_exposure_day_step_factor

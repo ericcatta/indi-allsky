@@ -16,6 +16,28 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Candidato protezione alte luci: misurazione whole-frame prima dello stretch,
+  budget configurabile per profilo (proposta 1%, percentile a 235/255).
+  Prime prove numeriche su ROI, canali e profondita' 12 bit superate nel
+  candidato isolato. Il nuovo test a ciclo chiuso ha pero' rilevato un difetto:
+  in modalita' diurna, partendo da 9 s/gain 16, al frame 250 il dato rimane
+  saturo (misura normalizzata 86.8085 con target 80). La normalizzazione
+  nasconde al controller la gravita' della saturazione e il recupero e' lento.
+  Corretto nel candidato trasmettendo esplicitamente la saturazione al
+  controller: recupero limitato, prima gain poi esposizione, senza stimare
+  linearmente la luminosita' dai dati tagliati. Il test ora passa giorno/notte,
+  anche con cambio brusco di luce, e verifica il budget nelle fasi convergenti.
+  Passano anche isolamento dei valori fra profili, test di stabilita' esistente
+  e salvataggio della cadenza comune con ruoli/CSRF in Flask isolato.
+  Il test Flask della nuova opzione passa: salvataggio/rilettura su entrambe
+  le camere, configurazione runtime risolta, valori fuori range e non numerici,
+  permessi, CSRF e cadenza invariata. Passano 31 test JavaScript. Regressione
+  Python completa superata (127 casi) nell'overlay isolato con report in
+  `/home/eric/hybrid-highlight-evidence/results.json`; 751 sorgenti confrontati
+  coincidono con il candidato locale.
+  Candidato non distribuito, nessuna attivazione live. Restano deploy controllato
+  e verifica reale sulle camere; il collaudo complessivo resta aperto.
+
 - Rilascio Raspberry 9 settembre 21:57 CEST: installato `9081093a`, web e
   capture riavviati (PID 362733/362732, NRestarts 0 al controllo). Backup
   coerente SQLite 828977152 byte, integrity_check ok, codice e configurazione

@@ -16,6 +16,7 @@ AUTO_EXPOSURE_METERING_MODES = {
     'background',
     'moon_aware',
     'stars_only',
+    'highlight_protected',
 }
 
 DEFAULT_AUTO_EXPOSURE_METERING_MODE = 'default'
@@ -30,6 +31,7 @@ class MeteringResult:
     sample_count: int
     excluded_pixels: int
     status: str = 'ok'
+    highlight_saturated: bool = False
 
 
 class MeteringStrategy:
@@ -162,7 +164,15 @@ class StarsOnlyMeter(MeteringStrategy):
         )
 
 
+class HighlightProtectedMeter(MeteringStrategy):
+    name = 'highlight_protected'
+
+    def measure(self, luminance):
+        return measure_highlights(numpy.atleast_2d(luminance), 75.0)
+
+
 METERING_STRATEGIES = {
+    'highlight_protected': HighlightProtectedMeter(),
     'average': AverageMeter(),
     'median': MedianMeter(),
     'sigma_clipped': SigmaClippedMeter(),
@@ -205,7 +215,10 @@ def image_to_luminance_8bit(image):
     return numpy.clip(luminance, 0.0, 255.0)
 
 
-def measure_auto_exposure(image, mask=None, mode=DEFAULT_AUTO_EXPOSURE_METERING_MODE):
+def measure_auto_exposure(image, mask=None, mode=DEFAULT_AUTO_EXPOSURE_METERING_MODE,
+                          target=75.0, highlight_clip_percent=1.0, bit_depth=None):
+    if normalize_metering_mode(mode) == 'highlight_protected':
+        return measure_highlights(image, target, highlight_clip_percent, bit_depth)
     strategy, normalized_mode, strategy_name = resolve_metering_strategy(mode)
     luminance = image_to_luminance_8bit(image)
 
@@ -226,3 +239,35 @@ def measure_auto_exposure(image, mask=None, mode=DEFAULT_AUTO_EXPOSURE_METERING_
         result.excluded_pixels + excluded_by_mask,
         result.status,
     )
+
+
+def measure_highlights(image, target, clip_percent=1.0, bit_depth=None):
+    """Meter whole-frame channel peaks, allowing a small bright-source budget.
+
+    The percentile is mapped to the controller's existing target units. A
+    value of 235/255 leaves headroom; this is an exposure objective, not a
+    guarantee that saturated data can be recovered. ROI is deliberately not
+    applied in this mode so bright regions outside it are still protected.
+    """
+    clip_percent = float(clip_percent)
+    target = float(target)
+    if not numpy.isfinite(clip_percent) or not .01 <= clip_percent <= 10:
+        raise ValueError('Highlight pixel budget must be between 0.01 and 10 percent.')
+    if not numpy.isfinite(target) or target <= 0:
+        raise ValueError('Highlight metering requires a positive target.')
+    peaks = image if image.ndim == 2 else numpy.max(image, axis=2)
+    if numpy.issubdtype(image.dtype, numpy.integer):
+        depth = numpy.iinfo(image.dtype).bits if bit_depth is None else int(bit_depth)
+        if not 1 <= depth <= numpy.iinfo(image.dtype).bits:
+            raise ValueError('Invalid source bit depth.')
+        peaks = peaks.astype(numpy.float32) * (255.0 / ((1 << depth) - 1))
+    else:
+        peaks = image_to_luminance_8bit(peaks)
+    samples = peaks[numpy.isfinite(peaks)]
+    if not samples.size:
+        raise ValueError('No valid pixels for highlight metering.')
+    percentile = float(numpy.percentile(samples, 100.0 - clip_percent))
+    return MeteringResult('highlight_protected', 'highlight_protected',
+                         percentile * target / 235.0, int(samples.size),
+                         int(peaks.size - samples.size),
+                         highlight_saturated=percentile >= 250.0)
