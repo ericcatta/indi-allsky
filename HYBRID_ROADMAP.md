@@ -16,6 +16,12 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Regressione riproducibile: runner versionato in testing/run_hybrid_regression.py,
+  piano completo e hash sorgenti, esiti atomici e rilevamento interruzioni/modifiche.
+  Conservati 118 controlli Python, aggiunto test runner e integrati 31 JavaScript.
+  Autotest superato; suite completa sul Pi ancora da eseguire (SSH in timeout).
+
+
 - Full Settings e restore: conferma backend obbligatoria prima di mostrare
   successo o azzerare nota/reload. Corretti falsi esiti con HTTP 200 vuoto;
   31 test JavaScript e parita' Full Config superati. Solo candidato: prove

@@ -1,5 +1,16 @@
 # Hybrid acceptance status
 
+## Reproducible regression runner — 2026-09-09
+
+The previously temporary regression runner is now maintained in
+`testing/run_hybrid_regression.py`, with usage in `testing/HYBRID_REGRESSION.md`.
+Plan comparison retains all 118 previous Python entries, adds the runner's own
+check and incorporates all 31 JavaScript entrypoints. Its self-test uses real
+child processes to verify success, nonzero exit, source mutation, interruption
+and preservation of existing evidence. All self-checks pass; the 150-entry full
+suite has **not** been run with this candidate. Raspberry SSH still timed out at
+its known address during this mission. CPU and receipt candidates remain undeployed.
+
 ## Full Settings and restore confirmations — candidate, 2026-09-09
 
 Both controllers falsely reported success for HTTP 200 without a valid backend
