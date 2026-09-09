@@ -13,6 +13,26 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Now configured profile — verified candidate, 2026-09-09
+
+Now's latest-frame adapter always supplied a placeholder profile. Image table
+rows do not retain historical profile identity, so the candidate explicitly
+labels the resolved profile as current configuration. It resolves a unique
+explicit database camera ID, or (when no ID is configured) an exact configured
+INDI device name / libcamera interface matching the camera's stored name. It
+never uses row order, partial names, or an explicit conflicting ID. Missing or
+ambiguous matches remain Not recorded.
+
+Read-only production inspection confirmed neither profile has an explicit DB ID;
+therefore the initial ID-only candidate was insufficient and was extended before
+publication. Focused resolver tests pass; the initial Flask assertion was corrected
+to correlate the selected camera with its profile, then passed for both roles.
+The earlier ID-only regression passed all 118 entries. The final exact-name
+regression also passed all 118 entries; 31 JavaScript tests and diff checks pass.
+Evidence: `testing/evidence/hybrid-now-profile-2026-09-09.json`. Read-only production checks confirmed exact matches
+for libcamera_imx708 and nested indi.camera_name ZWO CCD ASI678MC. No deployment
+or acquisition restart has occurred for this change.
+
 ## Native production release checks — 2026-09-09
 
 After deployment, native HTTPS System Info rendered and Refresh service state

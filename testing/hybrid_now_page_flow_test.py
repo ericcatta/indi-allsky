@@ -24,7 +24,7 @@ def run():
                             'Preview remains disabled', 'injected repository', 'no filesystem scan', 'template_context.night', 'Profile not evaluated yet'):
                 assert removed not in response.text,removed
             assert 'Capture summary' in response.text and 'Saved image mode:' in response.text
-            assert 'Profile: Unavailable' in response.text
+            assert re.search(r'Camera: Test Camera ([12])\. Profile: test-profile-\1 \(current configuration\)', response.text), re.findall(r'Camera:.*?Profile:.*?</p>', response.text)
             assert 'Exposure' in response.text and 'Gain' in response.text
             for label in ('Browse camera images','Browse these outputs','Inspect FITS sources','Inspect RAW sources'):
                 matches=re.findall(r'href="([^"]+)"\s*>'+label+'</a>',response.text)
@@ -36,6 +36,20 @@ def run():
                 missing=client.get(endpoint)
                 assert missing.status_code==200 and 'No camera frame metadata is available.' in missing.text
                 assert '>Browse camera images</a>' not in missing.text
+        # Production profiles bind through device names, without database IDs.
+        from copy import deepcopy
+        from indi_allsky.flask import db
+        from indi_allsky.flask.models import IndiAllSkyDbConfigTable
+        with app.app_context():
+            row = db.session.get(IndiAllSkyDbConfigTable, 1)
+            settings = deepcopy(row.data)
+            for profile in settings['MULTI_CAMERA']['profiles']:
+                profile.pop('db_camera_id')
+            row.data = settings
+            db.session.commit()
+        named = client.get(endpoint)
+        assert named.status_code == 200
+        assert re.search(r'Camera: Test Camera ([12])\. Profile: test-profile-\1 \(current configuration\)', named.text)
         assert app.test_client().get(endpoint).status_code==302
         print('Now: real camera/source/output links, both roles, no prototype panels or fake camera slots, provider fallback and authentication: PASS')
 

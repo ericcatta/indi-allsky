@@ -162,6 +162,34 @@ class ModernAdminCameraRuntimeMetadataProvider:
         )
 
 
+    def configured_profile_label(self, profiles, camera_id, camera_name=None):
+        """Resolve unique explicit IDs or exact configured device names, never order."""
+        if isinstance(camera_id, bool) or not isinstance(camera_id, int):
+            return None
+        matches = []
+        for profile in profiles or []:
+            if not isinstance(profile, dict) or not profile.get('enabled', False):
+                continue
+            binding = next((profile[key] for key in ('camera_id', 'camera_db_id', 'db_camera_id')
+                            if profile.get(key) is not None), None)
+            if binding is not None:
+                if isinstance(binding, bool) or str(binding) != str(camera_id):
+                    continue
+            else:
+                indi = profile.get('indi')
+                names = [profile.get('indi_camera_name')]
+                if isinstance(indi, dict):
+                    names.append(indi.get('camera_name'))
+                interface = profile.get('camera_interface')
+                if isinstance(interface, str) and interface.startswith('libcamera_'):
+                    names.append(interface)
+                if not camera_name or camera_name not in names:
+                    continue
+            label = profile.get('label') or profile.get('camera_name') or profile.get('profile_id') or profile.get('id')
+            matches.append(str(label).strip() if isinstance(label, (str, int)) else '')
+        return matches[0] if len(matches) == 1 and matches[0] else None
+
+
     def profile_labels(self, enabled_profiles):
         profile_labels = list()
         for profile_config in enabled_profiles:

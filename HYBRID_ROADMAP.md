@@ -16,6 +16,11 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Now: profilo configurato risolto tramite ID esplicito o nome dispositivo esatto,
+  solo con associazione univoca; distinto dal profilo storico dello scatto.
+  Corrispondenze reali IMX708/ZWO verificate in lettura; 118 test Python e 31
+  JavaScript superati. Correzione non ancora distribuita.
+
 - Release produzione cd45148f installata il 9 settembre alle 12:12:35 CEST:
   manutenzione, riepilogo sistema e diagnostica cadenza distribuiti; backup
   coerente verificato, primi nuovi frame per entrambe le camere. Nuova finestra

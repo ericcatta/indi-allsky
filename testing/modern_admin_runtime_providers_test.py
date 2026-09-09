@@ -847,8 +847,30 @@ def test_modern_current_capture_repository_uses_hybrid_watchdog_provider_static(
     )
 
 
+def test_configured_profile_requires_unique_explicit_camera_binding():
+    provider = ModernAdminCameraRuntimeMetadataProvider()
+    profile = {'profile_id': 'one', 'enabled': True, 'db_camera_id': 1}
+    assert provider.configured_profile_label([profile], 1) == 'one'
+    assert provider.configured_profile_label([profile], 2) is None
+    assert provider.configured_profile_label([profile, profile], 1) is None
+    for change in ({'enabled': False}, {'db_camera_id': True}, {'db_camera_id': None}, {'db_camera_id': 2}):
+        assert provider.configured_profile_label([dict(profile, **change)], 1) is None
+    assert provider.configured_profile_label([dict(profile, db_camera_id='1', label='Wide')], 1) == 'Wide'
+    assert provider.configured_profile_label([None, []], 1) is None
+    named = {'profile_id': 'zwo', 'enabled': True, 'indi_camera_name': 'ZWO Camera'}
+    assert provider.configured_profile_label([named], 2, 'ZWO Camera') == 'zwo'
+    assert provider.configured_profile_label([named], 2, 'ZWO') is None
+    assert provider.configured_profile_label([dict(named, db_camera_id=1)], 2, 'ZWO Camera') is None
+    assert provider.configured_profile_label([named, named], 2, 'ZWO Camera') is None
+    assert provider.configured_profile_label([dict(named, camera_id=False)], 2, 'ZWO Camera') is None
+    rpi = {'profile_id': 'wide', 'enabled': True, 'camera_interface': 'libcamera_imx708'}
+    assert provider.configured_profile_label([rpi], 1, 'libcamera_imx708') == 'wide'
+
+
+
 def run_tests():
     tests = [
+        test_configured_profile_requires_unique_explicit_camera_binding,
         test_service_status_provider_reports_active_service,
         test_service_status_provider_reports_failed_service,
         test_service_status_provider_reports_stopped_service,

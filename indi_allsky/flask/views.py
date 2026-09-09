@@ -6000,11 +6000,20 @@ class ModernAdminNowView(ModernAdminProductView):
                 or 'Unknown camera'
             )
 
+            configured_profile = ModernAdminCameraRuntimeMetadataProvider().configured_profile_label(
+                (self.indi_allsky_config.get('MULTI_CAMERA') or {}).get('profiles'),
+                camera_id,
+                camera_name=getattr(camera, 'name', None),
+            )
+
             repository = LatestFrameImageTableRepository(
                 query=IndiAllSkyDbImageTable.query,
                 order_by_expression=IndiAllSkyDbImageTable.createDate.desc(),
                 camera_label=camera_label,
-                profile_label='Profile not evaluated yet',
+                profile_label=(
+                    '{0} (current configuration)'.format(configured_profile)
+                    if configured_profile else 'Not recorded'
+                ),
                 clock=lambda: self.camera_now,
                 camera_id=camera_id,
                 camera_id_field=IndiAllSkyDbImageTable.camera_id,
