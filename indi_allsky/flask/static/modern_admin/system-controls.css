@@ -1,0 +1,40 @@
+/* Maintenance controls share the product palette and remain usable on narrow screens. */
+#system-units form { margin: 16px 0; }
+#system-units fieldset {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid var(--modern-admin-line-strong);
+  border-radius: 14px;
+}
+#system-units legend { padding: 0 6px; font-size: 1rem; font-weight: 700; }
+#system-units fieldset p { margin: 0; color: var(--modern-admin-muted); }
+#system-units label { display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+#system-units input[type="checkbox"] { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; accent-color: var(--modern-admin-good); }
+#system-units button, #system-units select {
+  box-sizing: border-box;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 16px;
+  border: 1px solid var(--modern-admin-line-strong);
+  border-radius: 10px;
+  background: var(--modern-admin-panel);
+  color: var(--modern-admin-text);
+  font: inherit;
+}
+#system-units button { cursor: pointer; font-weight: 700; white-space: normal; }
+#system-units button:hover:not(:disabled) { border-color: var(--modern-admin-good); }
+#system-units button:disabled, #system-units select:disabled { opacity: .55; cursor: not-allowed; }
+#system-units :is(button, select, input, summary, a):focus-visible { outline: 3px solid var(--modern-admin-good); outline-offset: 3px; }
+#system-units details { margin: 12px 0; padding: 12px; border: 1px solid var(--modern-admin-line); border-radius: 14px; }
+#system-units summary { padding: 10px 0; cursor: pointer; font-weight: 700; }
+#system-units details nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+#system-units details nav a { padding: 10px; border: 1px solid var(--modern-admin-line-strong); border-radius: 10px; }
+#system-units details nav a[aria-current="page"] { border-color: var(--modern-admin-good); font-weight: 700; }
+#system-units-result:not(:empty) { padding: 14px; border: 1px solid var(--modern-admin-line-strong); border-radius: 10px; }
+@media (max-width: 520px) {
+  #system-units fieldset { padding: 12px; }
+  #system-units details { padding: 10px; }
+}

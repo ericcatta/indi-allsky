@@ -13,6 +13,23 @@ The earlier `775a19d0` interval starting at 10:09:50 CEST must not be added to a
 post-change interval. Historical sections below retain each mission's deployment
 status at that time; they are not a statement of the currently installed version.
 
+## Maintenance layout — candidate, 2026-09-09
+
+Native testing at 390 px found that new maintenance forms still used default
+browser controls. A stylesheet scoped to System Info now gives disclosures,
+fieldsets, confirmations and buttons the product palette and spacing, with visible
+keyboard focus and 46 px observed button heights. At 390 and 1280 px the document
+width matched the viewport; visual inspection confirmed wrapping and legibility.
+The temporary viewport override was reset. No action semantics or permissions
+changed, and no deletion was submitted in this browser pass.
+
+All 118 Python regression entries and 31 JavaScript tests passed. Native login
+as the synthetic ordinary user showed all 13 maintenance fieldsets disabled,
+including after switching from camera 2 to camera 1. Logging out and reopening
+System Info displayed the login form. Evidence and source hashes:
+`testing/evidence/hybrid-system-controls-style-2026-09-09.json`.
+Production deployment and native destructive acceptance remain open.
+
 ## Native queued maintenance — isolated browser, 2026-09-09
 
 An explicit `--maintenance-fixture` browser server runs Classic-disabled with
