@@ -26,9 +26,40 @@
     "diff_check": "passed"
   },
   "limits": [
-    "Native browser visual acceptance pending",
     "Not deployed to production",
     "No claim of full control-matrix completion or Classic physical removal",
     "24-hour observation excluded"
-  ]
+  ],
+  "native_browser": {
+    "candidate": "0c0904d2",
+    "environment": "Isolated Flask sandbox; Classic forbidden; synthetic images only",
+    "cases": [
+      {
+        "case": "Both camera previews",
+        "result": "passed",
+        "evidence": "Each rendered preview decoded at 64x48 from its camera-specific original URL; no horizontal overflow."
+      },
+      {
+        "case": "Mobile layout",
+        "result": "passed",
+        "evidence": "390x844 viewport: 310px preview width, contain fit, no horizontal overflow; screenshot inspected; viewport reset."
+      },
+      {
+        "case": "Missing file and recovery",
+        "result": "passed",
+        "evidence": "Temporarily renamed the uniquely identified synthetic camera-2 JPEG with automatic restoration. Reload showed unavailable message with metadata retained; after restoration and reload image decoded and status cleared."
+      },
+      {
+        "case": "Mini timelapse entry",
+        "result": "passed",
+        "evidence": "Click from camera-2 detail opened mini generation with image 2 and camera/profile 2 preserved; no generation submitted."
+      }
+    ],
+    "cleanup": "Temporary browser tab closed and synthetic file restored; sandbox stopped",
+    "limits": [
+      "Native check used ordinary-user sandbox session; admin coverage comes from Flask tests",
+      "No production deployment or live media manipulation",
+      "No claim that download receipt is resolved"
+    ]
+  }
 }
