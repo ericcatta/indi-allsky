@@ -166,7 +166,7 @@ def test_log_display_policy_formats_file_size():
 def test_modern_log_detail_view_uses_system_tool_policy():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
     start = source.index('class ModernAdminLogDetailView')
-    end = source.index('class ModernAdminMaskView', start)
+    end = source.index('class ModernAdminMediaBrowseView', start)
     source = source[start:end]
 
     assert 'ModernAdminLogDisplayPolicy' in source

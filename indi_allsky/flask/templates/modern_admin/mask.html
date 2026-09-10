@@ -16,20 +16,23 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_title_id = 'modern-admin-mask-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
+    <nav aria-label="Mask camera" class="modern-admin-link-grid">
+    {% for item in mask_filters %}<a class="modern-admin-media-button" href="{{ url_for('indi_allsky.modern_admin_mask_view', camera_id=item.camera_id, profile_id=item.profile_id) }}"{% if item.camera_id == mask_camera_id %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
+    </nav>
     <section class="modern-admin-table-panel" aria-labelledby="mask-base-title">
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">Cameras</p>
-            <h2 id="mask-base-title">Mask base image</h2>
+            <h2 id="mask-base-title">Mask base image — {{ mask_camera_label }}</h2>
         </div>
         {% if mask_date %}
         <figure class="modern-admin-live-frame">
-            <img src="{{ mask_image_uri }}?t={{ mask_date | urlencode }}" alt="Mask base">
+            <img src="{{ mask_image_uri }}?t={{ mask_date | urlencode }}" alt="Mask base for {{ mask_camera_label }}">
         </figure>
-        <p class="modern-admin-note">Generated: {{ mask_date }} <a class="modern-admin-placeholder-link" href="{{ mask_image_uri }}" download="mask_base.png">Download Mask Base</a></p>
+        <p class="modern-admin-note">Generated: {{ mask_date }} <a class="modern-admin-placeholder-link" href="{{ mask_image_uri }}" download="mask-camera-{{ mask_camera_id }}.png">Download Mask Base</a></p>
         {% else %}
         <div class="modern-admin-empty-state">
             <h3>No mask base available</h3>
-            <p>The mask base image has not been generated yet.</p>
+            <p>{% if mask_error %}{{ mask_error }}{% elif not mask_local_allowed %}Local media are unavailable under this camera's media policy.{% else %}A base for this camera is generated once exposure stabilizes after capture starts. No other camera's base is substituted.{% endif %}</p>
         </div>
         {% endif %}
     </section>

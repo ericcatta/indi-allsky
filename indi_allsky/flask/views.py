@@ -10013,22 +10013,6 @@ class ModernAdminLogDetailView(ModernAdminSystemToolView, TemplateView):
         return self.log_policy.format_file_size(value)
 
 
-class ModernAdminMaskView(ModernAdminCameraToolView, MaskView):
-    page_title = 'Modern Admin Mask Base'
-
-    def resolve_mask_mtime(self, mask_image_p):
-        return self.get_camera_media_access_adapter().resolve_existing_path_mtime(mask_image_p)
-
-
-    def get_context(self):
-        context = super(ModernAdminMaskView, self).get_context()
-        mask_image_uri = context.get('mask_image_uri')
-        if mask_image_uri:
-            context['mask_image_uri'] = self.get_modern_admin_media_url_normalizer().normalize_media_url(mask_image_uri)
-
-        return context
-
-
 class ModernAdminMediaBrowseView(ModernAdminContextMixin):
     def add_media_camera_filter_context(self, context):
         camera_filters = self.get_media_camera_filters()
@@ -12538,6 +12522,37 @@ class ModernAdminMiniGenerateView(ModernAdminMediaBrowseView, TemplateView):
                 'POST_SECONDS_SELECT':'120', 'FRAMERATE_SELECT':'10'}))
         for field in (context['form_mini'].PRE_SECONDS_SELECT, context['form_mini'].POST_SECONDS_SELECT):
             field.choices = list(dict(field.choices).items())
+        return context
+
+
+class ModernAdminMaskView(ModernAdminCameraToolView, ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Mask Base'
+    decorators = [login_required]
+
+    def resolve_mask_mtime(self, mask_image_p):
+        return self.get_camera_media_access_adapter().resolve_existing_path_mtime(mask_image_p)
+
+    def get_context(self):
+        from ..mask_frames import mask_frame_path
+        context = super().get_context()
+        filters = self.get_media_camera_filters()
+        selected = self.get_selected_media_camera_filter(filters)
+        camera_id = selected.get('camera_id') or self.camera.id
+        camera = IndiAllSkyDbCameraTable.query.filter_by(id=camera_id).first_or_404()
+        allowed = local_source_allowed(camera, self.verify_admin_network)
+        error = ''
+        try:
+            path = mask_frame_path(self.indi_allsky_config['IMAGE_FOLDER'], camera_id)
+            mtime = self.resolve_mask_mtime(path) if allowed else None
+        except (ValueError, OSError):
+            path, mtime = None, None
+            error = 'The mask base could not be accessed safely.'
+        context.update(mask_camera_id=camera_id,
+                       mask_camera_label=camera.friendlyName or camera.name,
+                       mask_filters=[item for item in filters if item.get('camera_id')],
+                       mask_local_allowed=allowed, mask_error=error,
+                       mask_image_uri=self.get_modern_admin_media_url_normalizer().normalize_media_url('images/' + path.name) if allowed and path is not None else '',
+                       mask_date=datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S') if mtime is not None else '')
         return context
 
 

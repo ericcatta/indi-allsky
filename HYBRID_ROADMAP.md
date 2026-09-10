@@ -3,6 +3,19 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Mask Base per camera — candidato 10 settembre 2026
+
+La pubblicazione della base maschera mantiene ora un PNG distinto per camera,
+con sostituzione atomica e conservazione del file precedente in caso di errore.
+Il file condiviso `mask_base.png` resta per i consumatori storici. Hybrid non lo
+usa come fallback: seleziona la camera/profilo e legge soltanto la relativa base,
+rispettando la policy dei media locali. La view Hybrid non eredita piu' `MaskView`.
+Algoritmi e condizioni di generazione restano invariati. Dopo il deploy le basi
+per camera saranno disponibili quando il worker le genera alla stabilizzazione
+dell'esposizione; una base storica senza ownership non viene attribuita a caso.
+Test e collaudo sono registrati in `testing/evidence/hybrid-mask-camera.json`.
+Deploy e verifica del worker reale rimangono aperti.
+
 ## Restore diretto snapshot Hybrid — candidato 10 settembre 2026
 
 Il dettaglio snapshot consente all'amministratore di ripristinare una revisione

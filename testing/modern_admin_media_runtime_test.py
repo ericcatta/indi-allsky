@@ -705,7 +705,7 @@ def test_dark_library_delegates_read_only_media_access_to_adapter():
 def test_modern_mask_delegates_file_metadata_to_media_access_adapter():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
     start = source.index('class ModernAdminMaskView')
-    end = source.index('class ModernAdminMediaBrowseView', start)
+    end = source.index('class ModernAdminFocusView', start)
     body = source[start:end]
 
     assert_true('def resolve_mask_mtime(self, mask_image_p):' in body, 'Modern Mask must own its filesystem metadata boundary')

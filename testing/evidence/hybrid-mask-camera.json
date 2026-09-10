@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-10",
+  "baseline": "c419ea57",
+  "scope": "Camera-owned mask base publication and Hybrid browsing without MaskView inheritance",
+  "defect": "Both cameras overwrote mask_base.png and Hybrid displayed that unscoped file regardless of the selected camera.",
+  "automatic": {
+    "full_regression_entrypoints": 138,
+    "initial_failures": [
+      "modern_admin_boundary_test.py: CameraTool boundary must be first base"
+    ],
+    "correction": "Preserved CameraTool first base; MediaBrowse supplies validated camera/profile selection",
+    "followup_passed": [
+      "modern_admin_boundary_test.py",
+      "hybrid_app_startup_test.py",
+      "hybrid_mask_camera_flow_test.py"
+    ],
+    "remaining_failures": [],
+    "javascript_entrypoints": 34,
+    "javascript_failures": [],
+    "cases": [
+      "Different camera pixels remain distinct",
+      "Worker delegates actual camera ID to publication",
+      "Atomic replacement failure preserves previous camera image",
+      "Encoding failure cleans temporary file",
+      "Historical unscoped compatibility output retained",
+      "Hybrid does not inherit MaskView",
+      "Both roles can browse both camera bases",
+      "Camera/profile mismatch rejected",
+      "Missing camera base does not fall back to shared file",
+      "Unsafe symlink represented as unavailable",
+      "Local media policy respected"
+    ],
+    "diff_check": "passed"
+  },
+  "native_browser": {
+    "environment": "Synthetic localhost fixture; Classic forbidden",
+    "camera_1": "Decoded mask-camera-1.png, 256x128; download name mask-camera-1.png",
+    "camera_2": "Profile link loaded Test Camera 2 and decoded mask-camera-2.png, 256x128; download name mask-camera-2.png",
+    "cleanup": "Temporary tab closed and server exited"
+  },
+  "limits": [
+    "Download receipt not verified",
+    "Not deployed; real worker publication remains unverified",
+    "Existing unscoped image is not attributed to a camera; scoped bases appear after worker generation",
+    "Full product acceptance and physical Classic removal remain open",
+    "24-hour observation excluded"
+  ]
+}

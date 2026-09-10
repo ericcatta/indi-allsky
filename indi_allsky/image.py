@@ -2895,7 +2895,7 @@ class ImageWorker(Process):
             self.generate_mask_base = False
             if images_only_diag:
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_STABLE_CHECK', action='write_mask_base_start')
-            self.write_mask_base_img(self.image_processor.image)
+            self.write_mask_base_img(self.image_processor.image, camera_id)
             if images_only_diag:
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_STABLE_CHECK', action='write_mask_base_end')
 
@@ -4061,29 +4061,10 @@ class ImageWorker(Process):
         }
 
 
-    def write_mask_base_img(self, data):
-        logger.info('Generating new mask base')
-        f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.png')
-        f_tmpfile.close()
-
-        tmpfile_name = Path(f_tmpfile.name)
-
-
-        cv2.imwrite(str(tmpfile_name), data, [cv2.IMWRITE_PNG_COMPRESSION, self.config['IMAGE_FILE_COMPRESSION']['png']])
-
-        mask_file = self.image_dir.joinpath('mask_base.png')
-
-        try:
-            mask_file.unlink()
-        except FileNotFoundError:
-            pass
-
-
-        shutil.copy2(str(tmpfile_name), str(mask_file))
-        mask_file.chmod(0o644)
-
-
-        tmpfile_name.unlink()
+    def write_mask_base_img(self, data, camera_id):
+        from .mask_frames import publish_mask_base
+        logger.info('Generating new mask base for camera %s', camera_id)
+        return publish_mask_base(data, self.image_dir, camera_id, self.config['IMAGE_FILE_COMPRESSION']['png'])
 
 
     def write_focus_fit(self, data):
