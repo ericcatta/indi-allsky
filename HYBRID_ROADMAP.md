@@ -16,6 +16,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Cronologia ADU: corretta la finestra temporale camera-local. Lo scarto orario
+  non viene applicato due volte e il limite inferiore segue il timestamp richiesto
+  anche per navigazione storica. Preservati aggregazione, filtro notturno e ambito
+  camera/profilo. Riprodotto il difetto prima della correzione; 135 entrypoint
+  Python e 33 JavaScript superati. Browser nuovamente disponibile: verificati
+  alcuni controlli storage e Image Lag su dati sintetici, con esiti parziali e
+  limiti in `testing/evidence/hybrid-adu-time-window.json`. Rimane da correggere
+  la barra recovery indisponibile su Image Lag. Nessun deploy o rimozione Classic.
+
 - Tabelle diagnostiche Hybrid e cronologia Settings: ripristinati ricerca,
   ordinamento, paginazione ed export copia/CSV/Excel. Ripristinate le colonne
   storage panorama-video, startrail-video e thumbnail; corretto il conteggio

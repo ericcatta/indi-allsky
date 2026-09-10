@@ -1,0 +1,47 @@
+{
+  "baseline": "278133b2",
+  "scope": "ADU history camera-local time window",
+  "reproduced_before_fix": "Recent synthetic 00:30 frame missing with camera offset -4h and current camera-local time 01:00",
+  "fix": "Resolve camera-local end once; anchor both bounds to requested time, including historical navigation",
+  "preserved": [
+    "Seven-day lookback",
+    "15-minute aggregates",
+    "Indexed night-hour filter",
+    "Camera/profile isolation",
+    "Explicit timestamp conversion"
+  ],
+  "automatic": {
+    "python_entrypoints": 135,
+    "javascript_entrypoints": 33,
+    "failures": [],
+    "cases": [
+      "Recent frame retained at negative offset",
+      "Future frame excluded at positive offset",
+      "Historical frame older than current seven-day window included at requested timestamp",
+      "Pure policy checks at negative, zero and positive offsets"
+    ]
+  },
+  "native_browser_partial": {
+    "environment": "Synthetic isolated fixture; Classic templates/assets blocked; no production effects",
+    "storage_search": "3 rows -> 2 matching date -> 0 with explicit no-match message",
+    "storage_camera": "Camera/profile link changed query and rows to second camera",
+    "storage_sort": "Time ascending then descending visibly reversed day/night rows",
+    "storage_csv": "Native download event observed after export click; server POST successful",
+    "storage_copy": "Toast reported two copied rows; clipboard contents not verified",
+    "image_lag": "Three rows filtered to one timestamp; nullable times displayed as em dash",
+    "open": [
+      "Excel file contents",
+      "Clipboard contents",
+      "Multi-page pagination with enough rows",
+      "Roles/mobile matrix",
+      "ADU time-window visual acceptance",
+      "Image Lag topbar recovery controls unexpectedly unavailable"
+    ]
+  },
+  "limits": [
+    "No production deploy",
+    "No Classic removal",
+    "Native acceptance remains partial",
+    "No new sustained observation"
+  ]
+}

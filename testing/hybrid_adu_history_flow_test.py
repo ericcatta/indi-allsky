@@ -6,6 +6,7 @@ import html
 import io
 import json
 import re
+from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_generation_fixture import seed_generation
 
@@ -53,6 +54,29 @@ def run():
             assert profile.status_code == 200 and '<td>12.34</td>' in profile.text
             for query in ('camera_id=bad','camera_id=1&profile_id=test-profile-2','profile_id=missing'):
                 assert client.get(endpoint + '?' + query).status_code == 400
+        # Fix only the clock: requests still use the real camera resolver and SQL.
+        from indi_allsky.flask.base_views import BaseView
+        camera_setup = BaseView.cameraSetup
+        fixed_now = datetime(2026, 9, 10, 1, 0)
+        for offset, frame_time, timestamp, expected in (
+            (-14400, fixed_now - timedelta(minutes=30), 0, True),
+            (14400, fixed_now + timedelta(hours=2), 0, False),
+            (14400, fixed_now - timedelta(days=20, minutes=30),
+             int((fixed_now - timedelta(days=20, seconds=14400)).timestamp()), True),
+        ):
+            def setup_clock(view, camera_id=None):
+                camera_setup(view, camera_id)
+                view.camera_now = fixed_now
+                view.camera_time_offset = offset
+            with app.app_context():
+                row = db.session.get(IndiAllSkyDbImageTable, 1)
+                row.createDate = frame_time
+                row.createDate_hour = frame_time.hour
+                db.session.commit()
+            with patch.object(BaseView, 'cameraSetup', setup_clock):
+                page = client.get(endpoint + '?camera_id=1&timestamp=' + str(timestamp))
+            assert page.status_code == 200
+            assert ('<td>12.34</td>' in page.text) == expected, (offset, frame_time, timestamp)
         assert app.test_client().get(endpoint).status_code == 302
         with app.app_context():
             assert db.session.query(IndiAllSkyDbConfigTable).count() == 1

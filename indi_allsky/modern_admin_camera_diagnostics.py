@@ -82,3 +82,12 @@ class ModernAdminImageLagPolicy:
         if not timestamp:
             return camera_now
         return datetime.fromtimestamp(timestamp) + timedelta(seconds=camera_time_offset)
+
+
+class ModernAdminAduHistoryPolicy:
+    """Seven camera-local days ending at now or an explicit navigation time."""
+
+    def window_bounds(self, timestamp, camera_now, camera_time_offset):
+        end = (datetime.fromtimestamp(timestamp) + timedelta(seconds=camera_time_offset)
+               if timestamp else camera_now)
+        return end - timedelta(days=7), end

@@ -13,6 +13,7 @@ from indi_allsky.modern_admin_camera_diagnostics import IMAGE_LAG_LOOKBACK_HOURS
 from indi_allsky.modern_admin_camera_diagnostics import IMAGE_LAG_ROW_LIMIT
 from indi_allsky.modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from indi_allsky.modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
+from indi_allsky.modern_admin_camera_diagnostics import ModernAdminAduHistoryPolicy
 
 
 class FakeCamera:
@@ -112,6 +113,12 @@ def run_tests():
     for offset in (-14400, 14400):
         assert policy.window_end(0, camera_now, offset) == camera_now
         assert policy.window_end(1700000000, camera_now, offset) == datetime.fromtimestamp(1700000000) + timedelta(seconds=offset)
+    history = ModernAdminAduHistoryPolicy()
+    for offset in (-14400, 0, 14400):
+        for timestamp in (0, 1700000000):
+            start, end = history.window_bounds(timestamp, camera_now, offset)
+            expected = datetime.fromtimestamp(timestamp) + timedelta(seconds=offset) if timestamp else camera_now
+            assert end == expected and end - start == timedelta(days=7)
     test_camera_info_service_preserves_camera_lens_context_shape()
     test_camera_info_service_preserves_privacy_owner()
     test_modern_camera_info_view_uses_camera_info_service()

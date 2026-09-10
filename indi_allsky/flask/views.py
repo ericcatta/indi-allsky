@@ -68,6 +68,7 @@ from ..modern_admin_runtime_effects import ModernAdminServiceControlEffectAdapte
 from ..modern_admin_runtime_effects import ModernAdminSystemPowerEffectAdapter
 from ..modern_admin_camera_diagnostics import ModernAdminCameraInfoService
 from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
+from ..modern_admin_camera_diagnostics import ModernAdminAduHistoryPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
 from ..modern_admin_observatory_tools import ModernAdminSqmSummaryService
 from ..modern_admin_observatory_tools import ModernAdminVirtualSkyContextService
@@ -694,12 +695,9 @@ class RollingAduView(TemplateView):
 
 
         timestamp = int(request.args.get('timestamp', 0))
-        if not timestamp:
-            timestamp = int(datetime.timestamp(self.camera_now))
-
-
-        ts_dt = datetime.fromtimestamp(timestamp) + timedelta(seconds=self.camera_time_offset)
-        ts_dt_minus_7d = self.camera_now - timedelta(days=7)
+        ts_dt_minus_7d, ts_dt = ModernAdminAduHistoryPolicy().window_bounds(
+            timestamp, self.camera_now, self.camera_time_offset,
+        )
 
 
         if db.engine.dialect.name == 'mysql':
