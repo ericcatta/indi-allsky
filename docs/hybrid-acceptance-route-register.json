@@ -1,0 +1,2185 @@
+{
+  "baseline": "4122b122",
+  "scope": "Literal routes in register_hybrid_routes only; explicit page/control records from existing evidence",
+  "not_a_complete_control_inventory": true,
+  "limitations": [
+    "Other registration modules and external/public compatibility endpoints are not included here",
+    "Historical recorded outcomes are preserved, not re-certified against current code",
+    "No success inferred from route rendering, HTTP status, test name or file name",
+    "Records without explicit page/control association and nested evidence schemas require manual mapping",
+    "Dynamic DOM, roles, camera/profile prerequisites, effects and production validation still require the complete acceptance matrix"
+  ],
+  "routes": [
+    {
+      "route": "/modern-admin",
+      "endpoint": "modern_admin_view",
+      "line": 18042,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/account",
+      "endpoint": "modern_admin_account_view",
+      "line": 18079,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "NAME + CURRENT_PASSWORD + save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "hybrid-menu-button/Enter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "hybrid-navigation/Escape",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "hybrid-navigation/My Account",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[7]",
+          "control": "mobile form",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[17]",
+          "control": "Save account",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[18]",
+          "control": "Successful account save/password change",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/cameras",
+      "endpoint": "modern_admin_cameras_view",
+      "line": 18052,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/cameras/add",
+      "endpoint": "modern_admin_camera_add_view",
+      "line": 18053,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/cameras/adu-history",
+      "endpoint": "modern_admin_adu_history_view",
+      "line": 18058,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/cameras/dark-library",
+      "endpoint": "modern_admin_dark_library_view",
+      "line": 18094,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/cameras/detect-indi",
+      "endpoint": "modern_admin_camera_detect_indi_view",
+      "line": 18054,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/cameras/image-lag",
+      "endpoint": "modern_admin_image_lag_view",
+      "line": 18057,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/cameras/info",
+      "endpoint": "modern_admin_camera_info_view",
+      "line": 18056,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/cameras/mask-base",
+      "endpoint": "modern_admin_mask_view",
+      "line": 18095,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/cameras/start-indi",
+      "endpoint": "modern_admin_start_indi_view",
+      "line": 18055,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/capture/abort-exposure",
+      "endpoint": "modern_admin_abort_exposure_action_view",
+      "line": 18051,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/capture/service",
+      "endpoint": "modern_admin_capture_service_action_view",
+      "line": 18050,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/classic/<classic_page>",
+      "endpoint": "modern_admin_classic_placeholder_view",
+      "line": 18124,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/config-history",
+      "endpoint": "modern_admin_config_history_view",
+      "line": 18082,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[12]",
+          "control": "modern-config-history-search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[13]",
+          "control": "Snapshot 2 details",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[14]",
+          "control": "Open Config Restore",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/config-restore",
+      "endpoint": "modern_admin_config_restore_view",
+      "line": 18083,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[15]",
+          "control": "Details/revision-1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[18]",
+          "control": "CONFIG_UPLOAD + Restore configuration",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[19]",
+          "control": "RESET_KEYS/FLUSH_CONFIGS",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/config-restore/<int:config_id>",
+      "endpoint": "modern_admin_config_restore_detail_view",
+      "line": 18085,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[16]",
+          "control": "Download this snapshot",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[17]",
+          "control": "Back to Config Restore",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/config-restore/<int:config_id>/apply",
+      "endpoint": "modern_admin_snapshot_restore_view",
+      "line": 18084,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/fits",
+      "endpoint": "modern_admin_fits_view",
+      "line": 18040,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "Search + Type + Day/Night + Uploaded + Source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "Details",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/fits/<int:fits_id>",
+      "endpoint": "modern_admin_fits_detail_view",
+      "line": 18041,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "Preview JPEG",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "Download original",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/highlights",
+      "endpoint": "modern_admin_highlights_view",
+      "line": 18044,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/library",
+      "endpoint": "modern_admin_library_view",
+      "line": 18047,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-browser-media-2026-09-08.json",
+          "record": "controls[2]",
+          "control": "Image details",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-media-2026-09-08.json",
+          "record": "controls[3]",
+          "control": "Camera selector via Down/Return",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-media-2026-09-08.json",
+          "record": "controls[4]",
+          "control": "Apply filters",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/loop",
+      "endpoint": "modern_admin_loop_view",
+      "line": 18120,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download",
+      "endpoint": "modern_admin_source_download_view",
+      "line": 18090,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/archive",
+      "endpoint": "modern_admin_media_archive_view",
+      "line": 18087,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "Browse the complete archive / recent images",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "Next page / Previous page",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "Order",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "Capture day from / Capture day to / Day/Night / Uploaded",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "Filename contains / Apply filters",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "Download original",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "Image details / Create mini timelapse",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[7]",
+          "control": "Media type",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[8]",
+          "control": "Camera",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[9]",
+          "control": "Video details / View in archive",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[10]",
+          "control": "Gallery camera filter / archive link",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[11]",
+          "control": "Reset filters / empty state",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[12]",
+          "control": "Responsive layout",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[13]",
+          "control": "Preview failure / missing original / recovery",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-2026-09-06.json",
+          "record": "controls[14]",
+          "control": "Live archive, production data and performance",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/media/fits",
+      "endpoint": "modern_admin_media_fits_view",
+      "line": 18039,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "Download selected + checkbox",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "All Cameras + Test Profile 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "Lightbox Enter / Close / Escape / Next / Previous",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[10]",
+          "control": "Mobile lightbox",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/media/gallery",
+      "endpoint": "modern_admin_media_gallery_view",
+      "line": 18025,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/gallery/page",
+      "endpoint": "modern_admin_media_gallery_page_view",
+      "line": 18026,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/images",
+      "endpoint": "modern_admin_media_images_view",
+      "line": 18027,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/images/<int:image_id>",
+      "endpoint": "modern_admin_media_image_detail_view",
+      "line": 18028,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/keograms",
+      "endpoint": "modern_admin_media_keograms_view",
+      "line": 18031,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "modern-keogram-search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "modern-keogram-timeofday-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "modern-keogram-uploaded-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "Camera filter / All Cameras",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "Camera filter / Test Profile 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "Camera filter / Test Profile 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "Download / camera 2 / record 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[7]",
+          "control": "Open read-only",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[8]",
+          "control": "Generate media",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/media/mini-timelapses",
+      "endpoint": "modern_admin_media_mini_timelapses_view",
+      "line": 18034,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[27]",
+          "control": "modern-mini-timelapse-search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[28]",
+          "control": "modern-mini-timelapse-timeofday-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[29]",
+          "control": "modern-mini-timelapse-uploaded-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[30]",
+          "control": "Camera filter / All Cameras",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[31]",
+          "control": "Camera filter / Test Profile 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[32]",
+          "control": "Camera filter / Test Profile 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[33]",
+          "control": "Download / camera 2 / record 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[34]",
+          "control": "Open read-only",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[35]",
+          "control": "Create mini timelapse",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/media/panorama",
+      "endpoint": "modern_admin_media_panorama_view",
+      "line": 18035,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[36]",
+          "control": "modern-panorama-search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[37]",
+          "control": "modern-panorama-timeofday-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[38]",
+          "control": "modern-panorama-uploaded-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[39]",
+          "control": "Camera filter / All Cameras",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[40]",
+          "control": "Camera filter / Test Profile 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[41]",
+          "control": "Camera filter / Test Profile 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[42]",
+          "control": "Download / camera 2 / record 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[43]",
+          "control": "Open read-only",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[44]",
+          "control": "Generate media",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/media/panorama-loop",
+      "endpoint": "modern_admin_media_panorama_loop_view",
+      "line": 18036,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/public-endpoints",
+      "endpoint": "modern_admin_public_media_endpoints_view",
+      "line": 18038,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/raw",
+      "endpoint": "modern_admin_media_raw_images_view",
+      "line": 18037,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[7]",
+          "control": "Search + Day/Night",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[8]",
+          "control": "Download original",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
+          "record": "controls[9]",
+          "control": "Test Profile 2 + Inspect FITS files",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/media/raw-loop",
+      "endpoint": "modern_admin_raw_loop_view",
+      "line": 18121,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/startrail-videos",
+      "endpoint": "modern_admin_media_startrail_videos_view",
+      "line": 18033,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[18]",
+          "control": "modern-startrail-video-search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[19]",
+          "control": "modern-startrail-video-timeofday-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[20]",
+          "control": "modern-startrail-video-uploaded-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[21]",
+          "control": "Camera filter / All Cameras",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[22]",
+          "control": "Camera filter / Test Profile 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[23]",
+          "control": "Camera filter / Test Profile 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[24]",
+          "control": "Download / camera 2 / record 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[25]",
+          "control": "Open read-only",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[26]",
+          "control": "Generate media",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/media/startrails",
+      "endpoint": "modern_admin_media_startrails_view",
+      "line": 18032,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[9]",
+          "control": "modern-startrail-search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[10]",
+          "control": "modern-startrail-timeofday-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[11]",
+          "control": "modern-startrail-uploaded-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[12]",
+          "control": "Camera filter / All Cameras",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[13]",
+          "control": "Camera filter / Test Profile 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[14]",
+          "control": "Camera filter / Test Profile 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[15]",
+          "control": "Download / camera 2 / record 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[16]",
+          "control": "Open read-only",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[17]",
+          "control": "Generate media",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/media/timelapses",
+      "endpoint": "modern_admin_media_timelapses_view",
+      "line": 18029,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/media/timelapses/<int:video_id>",
+      "endpoint": "modern_admin_media_video_detail_view",
+      "line": 18030,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/mode/<mode>",
+      "endpoint": "modern_admin_mode_view",
+      "line": 18125,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/moment",
+      "endpoint": "modern_admin_moment_detail_view",
+      "line": 18045,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/notifications",
+      "endpoint": "modern_admin_notifications_view",
+      "line": 18092,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "modern-notifications-search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "modern-notifications-ack-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "Details/2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "Copy",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/notifications/<int:notification_id>",
+      "endpoint": "modern_admin_notification_detail_view",
+      "line": 18093,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "hybrid-notification-ack/submit",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "Back to Notifications",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[18]",
+          "control": "ordinary-user acknowledgement",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/notifications/<int:notification_id>/acknowledge",
+      "endpoint": "modern_admin_notification_acknowledge_view",
+      "line": 18086,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/now",
+      "endpoint": "modern_admin_now_view",
+      "line": 18043,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-browser-media-2026-09-08.json",
+          "record": "controls[0]",
+          "control": "Refresh status",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-media-2026-09-08.json",
+          "record": "controls[1]",
+          "control": "Browse camera images",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/observatory",
+      "endpoint": "modern_admin_observatory_view",
+      "line": 18064,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/observatory/astropanel",
+      "endpoint": "modern_admin_astropanel_view",
+      "line": 18068,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/observatory/charts",
+      "endpoint": "modern_admin_charts_view",
+      "line": 18066,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/observatory/long-term-keogram",
+      "endpoint": "modern_admin_longterm_keogram_view",
+      "line": 18071,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/observatory/realtime-keogram",
+      "endpoint": "modern_admin_realtime_keogram_view",
+      "line": 18070,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/observatory/sensor-panel",
+      "endpoint": "modern_admin_sensor_panel_view",
+      "line": 18067,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/observatory/sqm",
+      "endpoint": "modern_admin_sqm_view",
+      "line": 18065,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/observatory/virtualsky",
+      "endpoint": "modern_admin_virtualsky_view",
+      "line": 18069,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/operations/export",
+      "endpoint": "modern_admin_table_export_view",
+      "line": 18091,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/output",
+      "endpoint": "modern_admin_output_detail_view",
+      "line": 18046,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/safe-action/dry-run",
+      "endpoint": "modern_admin_safe_action_dry_run_view",
+      "line": 18049,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings",
+      "endpoint": "modern_admin_settings_view",
+      "line": 18102,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/acquisition-save",
+      "endpoint": "modern_admin_acquisition_save_settings_view",
+      "line": 18110,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/advanced",
+      "endpoint": "modern_admin_advanced_settings_view",
+      "line": 18104,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/analytics",
+      "endpoint": "modern_admin_analytics_settings_view",
+      "line": 18107,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/basic",
+      "endpoint": "modern_admin_basic_settings_view",
+      "line": 18103,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/cameras",
+      "endpoint": "modern_admin_camera_settings_view",
+      "line": 18115,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/capture",
+      "endpoint": "modern_admin_capture_settings_view",
+      "line": 18113,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/developer",
+      "endpoint": "modern_admin_developer_settings_view",
+      "line": 18105,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/fits-source",
+      "endpoint": "modern_admin_fits_source_settings_view",
+      "line": 18111,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/full",
+      "endpoint": "modern_admin_full_settings_view",
+      "line": 18112,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[8]",
+          "control": "Search settings",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[9]",
+          "control": "OWNER + CONFIG_NOTE + Save Full Settings",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[10]",
+          "control": "Save Full Settings/ordinary-user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[11]",
+          "control": "Config History",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/settings/notifications",
+      "endpoint": "modern_admin_notifications_settings_view",
+      "line": 18109,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/ready",
+      "endpoint": "modern_admin_ready_settings_view",
+      "line": 18106,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/storage",
+      "endpoint": "modern_admin_storage_settings_view",
+      "line": 18108,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/timelapse",
+      "endpoint": "modern_admin_timelapse_settings_view",
+      "line": 18114,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/sky-cycle",
+      "endpoint": "modern_admin_sky_cycle_view",
+      "line": 18048,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/storage",
+      "endpoint": "modern_admin_storage_view",
+      "line": 18059,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/storage/drives",
+      "endpoint": "modern_admin_drive_manager_view",
+      "line": 18118,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/storage/file-space-usage",
+      "endpoint": "modern_admin_file_space_usage_view",
+      "line": 18060,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/system",
+      "endpoint": "modern_admin_system_view",
+      "line": 18072,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/system/config",
+      "endpoint": "modern_admin_config_view",
+      "line": 18116,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/system/gpio-control",
+      "endpoint": "modern_admin_manual_gpio_view",
+      "line": 18119,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/system/info",
+      "endpoint": "modern_admin_system_info_view",
+      "line": 18073,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/system/log",
+      "endpoint": "modern_admin_log_view",
+      "line": 18075,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/system/log/<log_name>",
+      "endpoint": "modern_admin_log_detail_view",
+      "line": 18076,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/system/network",
+      "endpoint": "modern_admin_network_view",
+      "line": 18117,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/system/support",
+      "endpoint": "modern_admin_support_info_view",
+      "line": 18074,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "endpoint": "modern_admin_taskqueue_view",
+      "line": 18077,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "pagination/Last",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[7]",
+          "control": "pagination/Previous",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[8]",
+          "control": "pagination/First+Next",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[9]",
+          "control": "modern-admin-task-search/profile",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[10]",
+          "control": "modern-admin-task-search/missing",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[11]",
+          "control": "Details/205",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[13]",
+          "control": "ID/sort ascending+descending",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[14]",
+          "control": "entries per page/50",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[15]",
+          "control": "CSV",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[16]",
+          "control": "Excel",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[17]",
+          "control": "mobile filters",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "endpoint": "modern_admin_task_detail_view",
+      "line": 18078,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-operations-2026-09-06.json",
+          "record": "controls[12]",
+          "control": "Back to Task Queue",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/tools/camera-simulator",
+      "endpoint": "modern_admin_camera_simulator_view",
+      "line": 18096,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-simulator-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "SENSOR_SELECT",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-simulator-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "OFFSET_X + OFFSET_Y + Update simulation",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-simulator-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "LENS_SELECT",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-simulator-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "copy-simulator-link",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-simulator-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "simulator-permalink/reload",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-simulator-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "OFFSET_X/invalid",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-simulator-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "mobile canvas + controls",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/tools/focus",
+      "endpoint": "modern_admin_focus_view",
+      "line": 18099,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/tools/focus/preview",
+      "endpoint": "modern_admin_focus_preview_view",
+      "line": 18098,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/tools/generate",
+      "endpoint": "modern_admin_generate_view",
+      "line": 18097,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-end-of-night-pipeline-2026-09-08.json",
+          "record": "controls[0]",
+          "control": "Upload End of Night",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-end-of-night-pipeline-2026-09-08.json",
+          "record": "controls[1]",
+          "control": "Upload End of Night",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-end-of-night-pipeline-2026-09-08.json",
+          "record": "controls[2]",
+          "control": "Upload End of Night",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-end-of-night-pipeline-2026-09-08.json",
+          "record": "controls[3]",
+          "control": "Upload End of Night",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "Action, period, confirmation, submit (role gate)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "Action + Submit without confirmation",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "Generate Timelapse Only",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "Day and period change",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "Generate Keogram/Star Trails",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "Generate All",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "Refresh dates/tasks + Search tasks + Details",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[7]",
+          "control": "Mobile form",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[8]",
+          "control": "Delete and Upload selections",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[9]",
+          "control": "Delete submission and external upload",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-2026-09-06.json",
+          "record": "controls[10]",
+          "control": "Worker execution",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-keogram-encoding-2026-09-08.json",
+          "record": "controls[0]",
+          "control": "Generate Keogram / Startrail",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-keogram-encoding-2026-09-08.json",
+          "record": "controls[1]",
+          "control": "Generate Keogram / Startrail",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-real-encoding-2026-09-08.json",
+          "record": "controls[0]",
+          "control": "Generate Timelapse Only",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-real-encoding-2026-09-08.json",
+          "record": "controls[1]",
+          "control": "Generate Timelapse Only",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-real-encoding-2026-09-08.json",
+          "record": "controls[4]",
+          "control": "Generate with encoder failure",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-startrail-empty-2026-09-08.json",
+          "record": "controls[0]",
+          "control": "Generate Keogram / Startrail with all frames excluded",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-startrail-empty-2026-09-08.json",
+          "record": "controls[1]",
+          "control": "Generate Keogram / Startrail with all frames excluded",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/tools/image-circle-helper",
+      "endpoint": "modern_admin_image_circle_helper_view",
+      "line": 18101,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "IMAGE_CIRCLE_DIAMETER/OFFSET_X/OFFSET_Y",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "KEOGRAM_LINE/KEOGRAM_ANGLE/AZIMUTH_ANGLE",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "LINE_WIDTH/LINE_COLOR",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "geometry-fit/geometry-reset",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "geometry-copy",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "geometry-fullscreen/geometry-exit",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "geometry-review/Save Lens & Optics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[7]",
+          "control": "Camera Settings save/sync permissions",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[8]",
+          "control": "Image ID/Load image/Use latest image",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[9]",
+          "control": "Review keogram angle setting",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[10]",
+          "control": "Responsive layout",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[11]",
+          "control": "Missing image/recovery",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
+          "record": "controls[12]",
+          "control": "Live production geometry/reload",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/tools/mini-generate",
+      "endpoint": "modern_admin_mini_generate_view",
+      "line": 18088,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[45]",
+          "control": "Image ID / Load image / camera links",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[46]",
+          "control": "PRE_SECONDS_SELECT / POST_SECONDS_SELECT / FRAMERATE_SELECT",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[47]",
+          "control": "mini-play / mini-refresh",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[48]",
+          "control": "mini-fullscreen / mini-exit-fullscreen",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[49]",
+          "control": "mini-confirm / Queue mini timelapse",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[50]",
+          "control": "NOTE",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[51]",
+          "control": "Queue mini timelapse / ordinary role",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[52]",
+          "control": "mini-task",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+          "record": "controls[53]",
+          "control": "Live worker output and hardware recovery",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-real-encoding-2026-09-08.json",
+          "record": "controls[2]",
+          "control": "Generate mini timelapse",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-real-encoding-2026-09-08.json",
+          "record": "controls[3]",
+          "control": "Generate mini timelapse",
+          "recorded_status": "superato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/tools/mini-preview",
+      "endpoint": "modern_admin_mini_preview_view",
+      "line": 18089,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/tools/process-fits",
+      "endpoint": "modern_admin_image_processing_view",
+      "line": 18100,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "processing-source/processing-run",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "OUTPUT_IMAGE_TYPE",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "processing-search/processing-reset",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "camera links/Frame type/FITS ID/Load frame",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "processing-fullscreen/processing-exit",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "processing-download",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "roles/CSRF/pending/errors",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[7]",
+          "control": "responsive layout",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[8]",
+          "control": "144 processing fields and46 processing calls",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
+          "record": "controls[9]",
+          "control": "production FITS preview",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/updates",
+      "endpoint": "modern_admin_updates_view",
+      "line": 18123,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/updates/start",
+      "endpoint": "modern_admin_upgrade_start_view",
+      "line": 18122,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/uploads",
+      "endpoint": "modern_admin_uploads_view",
+      "line": 18061,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/uploads/<provider_slug>",
+      "endpoint": "modern_admin_upload_detail_view",
+      "line": 18062,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/users",
+      "endpoint": "modern_admin_users_view",
+      "line": 18080,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[0]",
+          "control": "Navigation menu > Users",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[1]",
+          "control": "Active: Inactive",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[2]",
+          "control": "Active: Active",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[3]",
+          "control": "Active: Active + Admin: Non-admin",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[4]",
+          "control": "Admin: All, then Details",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[5]",
+          "control": "Back to Users",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[6]",
+          "control": "Search system",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[7]",
+          "control": "Search Meta+A, Backspace",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[8]",
+          "control": "ID: Activate to sort",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[9]",
+          "control": "Staff: Non-staff",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[10]",
+          "control": "Staff: All; entries per page: All",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[11]",
+          "control": "390x844 viewport",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[12]",
+          "control": "My Account guidance",
+          "recorded_status": "difetto"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[13]",
+          "control": "Home link",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[14]",
+          "control": "Copy, CSV, Excel",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[15]",
+          "control": "First, Previous, Next, Last",
+          "recorded_status": "non applicabile con motivazione"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
+          "record": "cases[16]",
+          "control": "Ordinary and anonymous sessions",
+          "recorded_status": "bloccato"
+        }
+      ]
+    },
+    {
+      "route": "/modern-admin/users/<int:user_id>",
+      "endpoint": "modern_admin_user_detail_view",
+      "line": 18081,
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/youtube",
+      "endpoint": "modern_admin_youtube_view",
+      "line": 18063,
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-youtube-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "youtube-connect / youtube-refresh / youtube-revoke prerequisites",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-youtube-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "YouTube settings",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-youtube-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "Back to Uploads",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-youtube-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "OAuth action permissions",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-youtube-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "Responsive layout / heading",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-youtube-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "Anonymous access",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-youtube-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "Live OAuth connect / refresh / revoke / upload",
+          "recorded_status": "bloccato"
+        }
+      ]
+    }
+  ],
+  "unmatched_explicit_records": [
+    {
+      "page": "/indi-allsky/login",
+      "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+      "record": "controls[0]",
+      "control": "form-login/submit",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/indi-allsky/logout",
+      "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+      "record": "controls[1]",
+      "control": "account/sign-out",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/indi-allsky/login",
+      "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+      "record": "controls[6]",
+      "control": "mobile form",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Now",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[0]",
+      "control": "Refresh status",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Now",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[1]",
+      "control": "hybrid-menu-button",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Now",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[2]",
+      "control": "Panorama Loop link",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[3]",
+      "control": "panorama-loop-toggle",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[4]",
+      "control": "panorama-loop-next",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[5]",
+      "control": "modern-admin-media-featured-image",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[6]",
+      "control": "ArrowRight",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[7]",
+      "control": "Escape",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[8]",
+      "control": "IMX708 Wide",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[9]",
+      "control": "panorama-loop-speed",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[10]",
+      "control": "panorama-loop-prev",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[11]",
+      "control": "ASI678MC",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[12]",
+      "control": "First visible Details link",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Output detail",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[13]",
+      "control": "390px viewport",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Output detail",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[14]",
+      "control": "Browser Back",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[15]",
+      "control": "390px viewport",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[16]",
+      "control": "ArrowLeft on Next button",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "Panorama Loop",
+      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+      "record": "cases[17]",
+      "control": "First visible media checkbox",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "SQM",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[0]",
+      "control": "camera profile links",
+      "recorded_status": "passed"
+    },
+    {
+      "page": "SQM",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[1]",
+      "control": "reading display",
+      "recorded_status": "passed"
+    },
+    {
+      "page": "Charts",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[2]",
+      "control": "camera profile links",
+      "recorded_status": "passed"
+    },
+    {
+      "page": "Charts",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[3]",
+      "control": "HISTORY_SELECT",
+      "recorded_status": "passed"
+    },
+    {
+      "page": "Sensor Panel",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[4]",
+      "control": "camera profile links",
+      "recorded_status": "passed"
+    },
+    {
+      "page": "Sensor Panel",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[5]",
+      "control": "sensor-show-all",
+      "recorded_status": "passed"
+    },
+    {
+      "page": "Sensor Panel",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[6]",
+      "control": "sensor-refresh",
+      "recorded_status": "passed"
+    },
+    {
+      "page": "Sensor Panel",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[7]",
+      "control": "sensor-show-all followed by camera link",
+      "recorded_status": "passed after correction"
+    },
+    {
+      "page": "Charts",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[8]",
+      "control": "anonymous access and login return",
+      "recorded_status": "passed"
+    },
+    {
+      "page": "Observatory pages",
+      "source": "testing/evidence/hybrid-observatory-native-controls.json",
+      "record": "cases[9]",
+      "control": "runtime recovery permissions",
+      "recorded_status": "passed"
+    },
+    {
+      "page": "/latestimageview",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[0]",
+      "control": "redirect and image preview",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/view_image",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[1]",
+      "control": "Copy link",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/view_image",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[2]",
+      "control": "Download original",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/view_image",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[3]",
+      "control": "Fullscreen / Exit fullscreen",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/latesttimelapsewatch",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[4]",
+      "control": "video playback",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/watch_timelapse",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[5]",
+      "control": "Download original",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/latestkeogramview",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[6]",
+      "control": "redirect / viewer",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/lateststartrailview",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[7]",
+      "control": "redirect / viewer",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/latestpanoramaview",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[8]",
+      "control": "redirect / viewer",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/latestrawview",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[9]",
+      "control": "redirect / viewer",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/lateststartrailvideowatch",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[10]",
+      "control": "redirect / viewer",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/latestpanoramavideowatch",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[11]",
+      "control": "redirect / viewer",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/latestthumbnail",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[12]",
+      "control": "thumbnail redirect",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/latestpanorama",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[13]",
+      "control": "night selection without data",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/latestimage",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[14]",
+      "control": "invalid camera parameter",
+      "recorded_status": "superato"
+    },
+    {
+      "page": "/public media",
+      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+      "record": "controls[15]",
+      "control": "remote integrations and live dataset",
+      "recorded_status": "bloccato"
+    }
+  ]
+}

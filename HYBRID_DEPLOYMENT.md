@@ -111,6 +111,8 @@ remains unchanged.
 ## Remaining acceptance
 
 - Complete the page/control matrix, roles, camera/profile isolation and mobile checks.
+  The [route evidence register](docs/hybrid-acceptance-route-register.md) links
+  explicit historical records without certifying current coverage.
 - Verify remaining effects and integrations using dedicated test data/destinations.
 - Treat image jSQM as an uncalibrated index; dedicated magnitude measurements are separate.
 - Demonstrate functional parity, remove Classic, and repeat essential checks.
