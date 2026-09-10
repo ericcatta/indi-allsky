@@ -101,6 +101,9 @@ def run(runtime_config):
             assert db.session.get(IndiAllSkyDbConfigTable, 1).data == original
             saved_id = saved.id
         download_url = '/indi-allsky/config/download?id=' + str(saved_id)
+        for query in ('', '?id=bad', '?id=', '?id=0', '?id=-1', '?id=' + '9' * 100):
+            assert client.get('/indi-allsky/config/download' + query).status_code == 400
+        assert client.get('/indi-allsky/config/download?id=999999').status_code == 404
         assert app.test_client().get(download_url).status_code == 302
         assert login_client(app, 2).get(download_url).status_code == 403
         assert login_client(app, 2).get(download_url + '&redact=1').status_code == 403

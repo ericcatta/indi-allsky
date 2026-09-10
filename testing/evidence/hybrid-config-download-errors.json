@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-10",
+  "baseline": "313d7fc8",
+  "scope": "Controlled configuration-download errors",
+  "changes": [
+    "Validate ID before querying, including missing, empty, malformed, nonpositive and out-of-range integers",
+    "Return 404 for a well-formed ID without a matching snapshot",
+    "Retain admin authorization before validation and lookup"
+  ],
+  "verification": {
+    "environment": "Isolated Flask; Classic forbidden; synthetic snapshots",
+    "invalid_id_status": 400,
+    "unknown_snapshot_status": 404,
+    "existing_admin_download_restore": "passed",
+    "ordinary_and_anonymous_access_checks": "passed",
+    "python_entrypoints": 137,
+    "python_failures": [],
+    "javascript": "Unchanged from previous 34 passing entrypoints; not rerun",
+    "diff_check": "passed"
+  },
+  "limits": [
+    "Not deployed",
+    "Production browser acceptance remains pending the previously reported security-review block",
+    "Does not complete full product acceptance or Classic removal"
+  ]
+}

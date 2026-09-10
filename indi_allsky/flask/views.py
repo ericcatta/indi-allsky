@@ -9103,13 +9103,14 @@ class ConfigDownloadView(BaseView):
         if not current_user.is_admin:
             abort(403)
 
-        config_id = int(request.args.get('id', -1))
+        config_id = request.args.get('id', type=int)
+        if config_id is None or not 0 < config_id <= 9223372036854775807:
+            abort(400, description='A valid snapshot ID is required.')
         redact = bool(request.args.get('redact', 0))
 
-        # not catching NoResultFound
         config_entry = IndiAllSkyDbConfigTable.query\
             .filter(IndiAllSkyDbConfigTable.id == config_id)\
-            .one()
+            .first_or_404()
 
 
         from copy import deepcopy
