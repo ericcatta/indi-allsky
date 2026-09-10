@@ -1,0 +1,72 @@
+{
+  "date": "2026-09-10",
+  "installed_release": "0291efd493a12a7b4eae204f33f4e193d12b7d90",
+  "scope": "Enable reversible Hybrid-only frontend mode in production",
+  "configuration": {
+    "HYBRID_ENABLE_CLASSIC_UI": false,
+    "only_flag_changed": true,
+    "original_configuration_saved_with_restricted_permissions": true,
+    "ownership_and_mode_preserved": true,
+    "automatic_restore_on_startup_failure": true
+  },
+  "verification": {
+    "application_factory_classic_import_absent": true,
+    "classic_config_route_absent": true,
+    "hybrid_and_public_routes_present": true,
+    "web_restarted": true,
+    "capture_process_unchanged": true,
+    "new_frames_both_cameras": true
+  },
+  "browser": [
+    {
+      "case": "Now and Library navigation",
+      "result": "passed",
+      "evidence": "Running summary, no Classic navigation and real Library images loaded."
+    },
+    {
+      "case": "Image detail metadata",
+      "result": "passed",
+      "evidence": "Detail route loaded and exposed Download image; this page has no embedded preview."
+    },
+    {
+      "case": "Legacy Config navigation",
+      "result": "passed",
+      "evidence": "Redirected to Hybrid Full Settings preserving selected camera/profile; real form and CSRF token present. No settings submitted."
+    },
+    {
+      "case": "Public latest image",
+      "result": "passed",
+      "evidence": "Selected camera image loaded as an image document with expected 3840px width."
+    }
+  ],
+  "limits": [
+    "Classic files are still present; physical removal has not happened",
+    "Complete per-control acceptance and real effects remain open",
+    "Production settings save/restore in disabled mode not exercised in this mission",
+    "No rollback drill was performed",
+    "24-hour observation remains a separate future activity"
+  ],
+  "tests": {
+    "installed_startup_test": {
+      "modes": [
+        "disabled",
+        "enabled"
+      ],
+      "result": "passed",
+      "coverage": [
+        "fresh factory",
+        "Classic import prohibited in disabled mode",
+        "static serving",
+        "authentication redirect",
+        "CSRF rejection",
+        "camera/profile redirect preservation"
+      ]
+    },
+    "previous_release_regression": {
+      "python_entrypoints": 136,
+      "javascript_entrypoints": 33,
+      "failures": [],
+      "note": "Previously passed for installed code; no source changes in this mode-switch mission"
+    }
+  }
+}

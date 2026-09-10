@@ -8,7 +8,9 @@ observatory/diagnostic reads, camera navigation and VirtualSky. It does not chan
 capture workers, scheduling, database schema or saved configuration.
 
 Only the user web service and its activating socket were stopped and started.
-The capture process remained unchanged. Classic is still enabled and present.
+The capture process remained unchanged. Classic files remain present, but the
+frontend was disabled on 10 September with `HYBRID_ENABLE_CLASSIC_UI=false`.
+Hybrid-only production acceptance is now active; physical removal remains open.
 
 Release evidence: `testing/evidence/hybrid-observatory-ui-deployment.json`.
 The 136 Python and 33 JavaScript entrypoints passed before deployment. Direct
@@ -32,6 +34,24 @@ Keep backup permissions restricted; do not publish their contents or private log
 Preserve untracked user files in the checkout. Never use `git clean` for
 deployment. The checkout database copy is not the runtime database. This release
 preserved the untracked files and verified a clean tracked checkout.
+
+## Restore the previous frontend mode
+
+The latest protected `~/hybrid-backups/classic-mode-*` directory contains the
+original Flask configuration, `mode.json` and `mode.py`. Only the Classic flag
+changed. Restoring it restarts only the web service/socket and preserves capture.
+The helper refuses to overwrite configuration modified since the mode change.
+If reverting both mode and code, restore the mode first while the recorded
+release is still installed.
+
+```sh
+mode_backup="$(python3 -c 'from pathlib import Path; print(max((Path.home()/"hybrid-backups").glob("classic-mode-*"), key=lambda p: p.stat().st_mtime))')"
+python3 "$mode_backup/mode.py" --rollback "$mode_backup"
+```
+
+Check the protected `mode.json` result and verify HTTPS Now and both cameras.
+Do not copy the entire old configuration over subsequent user changes. This
+fallback is prepared; it has not been drilled by reverting the current mode.
 
 ## Roll back this web release
 

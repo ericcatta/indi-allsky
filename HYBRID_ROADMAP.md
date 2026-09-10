@@ -16,6 +16,17 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Attivata in produzione la modalita' senza frontend Classic sulla versione
+  `0291efd4`: solo `HYBRID_ENABLE_CLASSIC_UI=false`, configurazione originale
+  protetta e ripristino predisposto. Web riavviato, acquisizione invariata e nuovi
+  frame su entrambe le camere. Avvio con import Classic assente, route Hybrid e
+  pubbliche presenti; browser HTTPS prova Now, Library, metadati immagine,
+  redirect Config con camera/profilo e immagine pubblica latest. File Classic
+  ancora presenti; rimozione fisica e collaudo esaustivo restano aperti. Test
+  mirati della versione installata passati in entrambe le modalita': avvio, asset,
+  autenticazione, CSRF e redirect.
+  Evidenze: `testing/evidence/hybrid-classic-disabled-production.json`.
+
 - Verificato sul Pi il recupero dei provider dopo i fallimenti storici: tutti
   i cinque componenti aurora disponibili su entrambe le camere; aggiornamento
   satelliti successivo riuscito con tutti e tre i cataloghi presenti e conteggi
