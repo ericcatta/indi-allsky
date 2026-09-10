@@ -1,13 +1,13 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const source=fs.readFileSync('indi_allsky/flask/static/modern_admin/focus.js','utf8');
-function element(value='') {return {value,disabled:false,hidden:true,checked:false,textContent:'',children:[],dataset:{},listeners:{},addEventListener(k,f){this.listeners[k]=f;},reportValidity(){return true;},removeAttribute(k){delete this[k];},decode:async()=>{},append(node){this.children.push(node);},prepend(node){this.children.unshift(node);},replaceChildren(){this.children=[];}};}
+function element(value='') {return {value,classList:{toggle(){}},setAttribute(k,v){this[k]=v;},focus(){this.focused=true;},disabled:false,hidden:true,checked:false,textContent:'',children:[],dataset:{},listeners:{},addEventListener(k,f){this.listeners[k]=f;},reportValidity(){return true;},removeAttribute(k){delete this[k];},decode:async()=>{},append(node){this.children.push(node);},prepend(node){this.children.unshift(node);},replaceChildren(){this.children=[];}};}
 async function run(){
  const ids={};['focus-tool','focus-preview-form','focus-image','focus-message','focus-auto','focus-interval','focus-zoom','focus-x','focus-y','focus-history','focus-score','focus-fullscreen','focus-figure','focus-exit-fullscreen','focus-movement','focus-degrees','focus-move-message'].forEach(id=>ids[id]=element());
  ids['focus-tool'].dataset={camera:'2',previewUrl:'/preview',moveUrl:'/move',csrf:'token'};
  ids['focus-zoom'].value='5';ids['focus-x'].value='12';ids['focus-y'].value='-15';ids['focus-interval'].value='5';ids['focus-degrees'].value='24';
  const form=ids['focus-preview-form'];form.elements=[ids['focus-zoom'],ids['focus-x'],ids['focus-y'],ids['focus-auto']];
  const move=element();move.dataset.focusDirection='cw';let requests=[],resolveRequest;const timers=new Map(),windowEvents={};let timerId=0;
- const document={hidden:false,getElementById:id=>ids[id],querySelectorAll:()=>[move],createElement:()=>element(),addEventListener(){}};
+ const documentEvents={};const document={body:{style:{overflow:'auto'}},hidden:false,getElementById:id=>ids[id],querySelectorAll:()=>[move],createElement:()=>element(),addEventListener:(name,fn)=>documentEvents[name]=fn};
  const context={document,location:{origin:'http://localhost'},URL,console,AbortController,setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),window:{addEventListener:(name,fn)=>windowEvents[name]=fn,confirm:()=>true},fetch:(url,options)=>{requests.push({url:String(url),options});return new Promise((resolve,reject)=>{resolveRequest=resolve;if(options.signal) options.signal.addEventListener('abort',()=>reject(Object.assign(new Error('aborted'),{name:'AbortError'})));});}};
  vm.runInNewContext(source,context);
  const submit=()=>form.listeners.submit({preventDefault(){}});
@@ -25,6 +25,18 @@ async function run(){
  assert.deepEqual(JSON.parse(requests[3].options.body),{DIRECTION:'cw',STEP_DEGREES:24});assert.equal(requests[3].options.headers['X-CSRFToken'],'token');
  resolveRequest({ok:false,json:async()=>({focuser_error:['Movement completed. Release failed; inspect before retrying.']})});await pending;
  assert(ids['focus-move-message'].textContent.includes('Movement completed.'));assert.equal(ids['focus-movement'].disabled,false);
+ // Fullscreen must still expand when the native API is absent or never resolves.
+ ids['focus-fullscreen'].listeners.click();assert.equal(ids['focus-fullscreen']['aria-expanded'],'true');
+ assert.equal(ids['focus-exit-fullscreen'].hidden,false);assert.equal(document.body.style.overflow,'hidden');
+ let tabPrevented=false;documentEvents.keydown({key:'Tab',preventDefault(){tabPrevented=true;}});assert(tabPrevented);assert(ids['focus-exit-fullscreen'].focused);
+ ids['focus-exit-fullscreen'].listeners.click();assert.equal(document.body.style.overflow,'auto');assert(ids['focus-fullscreen'].focused);
+ ids['focus-figure'].requestFullscreen=()=>new Promise(()=>{});
+ ids['focus-fullscreen'].listeners.click();documentEvents.keydown({key:'Escape',preventDefault(){}});
+ assert.equal(ids['focus-fullscreen']['aria-expanded'],'false');assert.equal(document.body.style.overflow,'auto');
+ ids['focus-figure'].requestFullscreen=()=>Promise.reject(new Error('Unsupported'));
+ ids['focus-fullscreen'].listeners.click();await new Promise(setImmediate);
+ assert.equal(ids['focus-exit-fullscreen'].hidden,false);
+ ids['focus-exit-fullscreen'].listeners.click();
  // A stalled preview must release controls and allow an explicit retry.
  ids['focus-auto'].checked=true;submit();
  const timeout=[...timers.values()].find(timer=>timer.ms===15000);assert(timeout);

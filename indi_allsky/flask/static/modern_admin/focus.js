@@ -44,11 +44,36 @@
     byId('focus-auto').addEventListener('change',schedule);
     byId('focus-interval').addEventListener('change',schedule);
     document.addEventListener('visibilitychange',schedule);
-    window.addEventListener('pagehide',()=>{stopped=true;clearTimeout(timer);if(previewController) previewController.abort();});
+    window.addEventListener('pagehide',()=>{stopped=true;if(expanded) setExpanded(false);clearTimeout(timer);if(previewController) previewController.abort();});
     window.addEventListener('pageshow',event=>{if(event.persisted){stopped=false;Array.from(form.elements).forEach(element=>element.disabled=false);schedule();}});
-    byId('focus-fullscreen').addEventListener('click',async()=>{try {await byId('focus-figure').requestFullscreen();}catch(error){message.textContent='Fullscreen is unavailable.';}});
-    document.addEventListener('fullscreenchange',()=>{byId('focus-exit-fullscreen').hidden=!document.fullscreenElement;});
-    byId('focus-exit-fullscreen').addEventListener('click',()=>document.exitFullscreen());
+    const figure=byId('focus-figure'), expandButton=byId('focus-fullscreen'), exitButton=byId('focus-exit-fullscreen');
+    let expanded=false, previousOverflow='';
+    function setExpanded(value) {
+        if(expanded===value) return;
+        expanded=value;
+        figure.classList.toggle('is-expanded',value);
+        exitButton.hidden=!value;
+        expandButton.setAttribute('aria-expanded',String(value));
+        if(value) {previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';exitButton.focus();}
+        else {document.body.style.overflow=previousOverflow;expandButton.focus();}
+    }
+    function closePreview() {
+        setExpanded(false);
+        if(document.fullscreenElement===figure && document.exitFullscreen) {
+            Promise.resolve(document.exitFullscreen()).catch(()=>{message.textContent='Use your browser fullscreen control to finish exiting.';});
+        }
+    }
+    expandButton.addEventListener('click',()=>{
+        setExpanded(true);
+        // The in-window preview is usable even if the browser ignores the native request.
+        if(figure.requestFullscreen) {
+            try {Promise.resolve(figure.requestFullscreen()).then(()=>{
+                if(!expanded && document.fullscreenElement===figure) closePreview();
+            }).catch(()=>{});} catch (_) { /* Keep the in-window preview available. */ }
+        }
+    });
+    exitButton.addEventListener('click',closePreview);
+    document.addEventListener('keydown',event=>{if(!expanded) return;if(event.key==='Escape'){event.preventDefault();closePreview();}else if(event.key==='Tab'){event.preventDefault();exitButton.focus();}});
     document.querySelectorAll('[data-focus-direction]').forEach(button=>button.addEventListener('click',async()=>{
         const fieldset=byId('focus-movement');
         if(moving || fieldset.disabled) return;

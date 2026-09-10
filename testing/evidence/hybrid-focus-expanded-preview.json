@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-10",
+  "baseline": "a21055bd",
+  "scope": "Usable Focus expansion and exit when browser fullscreen does not remain active",
+  "changes": [
+    "Immediate in-window expansion with optional native fullscreen request",
+    "Explicit exit restores scrolling and focus",
+    "Escape exits and Tab stays on the exit control"
+  ],
+  "automatic": {
+    "python_entrypoints": 137,
+    "python_failures": [],
+    "javascript_entrypoints": 34,
+    "javascript_failures": [],
+    "javascript_final_rerun": true,
+    "cases": [
+      "Native API absent",
+      "Native request pending indefinitely",
+      "Native request rejected",
+      "Explicit exit restores overflow and focus",
+      "Escape closes expanded preview",
+      "Tab keeps keyboard focus on exit"
+    ],
+    "diff_check": "passed"
+  },
+  "native_browser": {
+    "environment": "Synthetic localhost fixture; Classic forbidden; no hardware effects",
+    "before": "Fullscreen click left normal page without accessible exit control",
+    "after": "Expanded preview visible on black background; Exit fullscreen visible and clickable; exit restored collapsed state and scrolling",
+    "camera_id": 2,
+    "cleanup": "Test tab closed and fixture exited successfully"
+  },
+  "limits": [
+    "Native OS fullscreen persistence is browser-dependent; in-window expansion verified",
+    "Final Tab handling verified in controller tests, not native keyboard input",
+    "Production deployment and acceptance pending",
+    "Whole product acceptance and Classic removal incomplete",
+    "24-hour observation excluded"
+  ]
+}
