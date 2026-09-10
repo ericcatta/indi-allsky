@@ -2,25 +2,24 @@
 
 ## Installed release, 10 September 2026
 
-The Raspberry runs `ba6cbd3b42d54eeb46f93a1aa2a704815ae534b0`, upgraded from
-`aa0afeff43de388bb2c393518a545ff4482435a9`. This release adds direct internal
-snapshot restore and SQLite serialization of simultaneous restores. Capture,
-scheduling, schema and saved configuration were not changed by deployment.
+The Raspberry runs `f9aeaf880dc4ba2e271a36b04323ee9f8c02eb61`, upgraded from
+`ba6cbd3b42d54eeb46f93a1aa2a704815ae534b0`. Configuration downloads now require
+administrator permission at the handler, matching the UI, and redaction works
+on a deep copy of the snapshot. Capture, scheduling, schema and saved
+configuration were not changed by deployment.
 
 Only the user web service and its activating socket were restarted. Capture
 remained unchanged; both cameras produced fresh nonempty files after deployment.
 `HYBRID_ENABLE_CLASSIC_UI=false` is preserved byte-for-byte in Flask configuration.
 Classic files remain present; physical removal is still open.
 
-Release evidence: `testing/evidence/hybrid-snapshot-restore-deployment.json`.
-All 137 Python entrypoints passed before deployment. The unchanged JavaScript
-has 34 passing entrypoints from the preceding candidate. Native sandbox checks
-verified direct restore, history and sequential duplicate rejection; the two-process
-SQLite test reproduced two successes before the fix and one success/one rejection
-after it. Production browser acceptance is **blocked** by automatic browser
-security review of the HTTPS origin. No bypass was attempted, and no production
-configuration restore was submitted. Service readiness and new capture files do
-not establish acceptance of the deployed restore form.
+Release evidence: `testing/evidence/hybrid-config-download-deployment.json`.
+All 137 Python entrypoints passed before deployment, including anonymous,
+ordinary-user and administrator download checks and redaction immutability.
+JavaScript is unchanged from the previous 34 passing entrypoints. Production
+browser acceptance remains **blocked** by automatic browser security review of
+the HTTPS origin. No bypass was attempted. Process readiness and capture files
+do not prove native download receipt or full product acceptance.
 
 These are bounded acceptance checks, not completion of the whole migration.
 The 24-hour day/night observation is a separate future activity, after migration
@@ -29,7 +28,7 @@ not be restarted automatically.
 
 ## Recovery assets
 
-On the Raspberry, `~/hybrid-snapshot-restore-release-state.json` records the exact
+On the Raspberry, `~/hybrid-config-download-release-state.json` records the exact
 previous/candidate revisions and protected backup directory. That directory
 contains an online SQLite backup with successful integrity check, the previous
 code archive, Flask configuration, deployment script and deployment record.
@@ -45,12 +44,19 @@ The latest protected `~/hybrid-backups/classic-mode-*` directory contains the
 original Flask configuration, `mode.json` and `mode.py`. Only the Classic flag
 changed. Restoring it restarts only the web service/socket and preserves capture.
 The helper refuses to overwrite configuration modified since the mode change.
-The mode helper is pinned to release `0291efd4`. From the current release, first
-roll back this snapshot release to `aa0afeff`, preserving the disabled mode.
-If mode rollback is also needed, then use the previous image-preview release's
-protected script, located by `~/hybrid-image-preview-release-state.json`, to return
-to `0291efd4`. Only then run the mode helper below. Do not bypass revision guards.
-An even older code rollback must follow its own recorded recovery instructions.
+The mode helper is pinned to release `0291efd4`. To reach that release, the
+prepared code rollbacks must follow this order, using each state's recorded
+backup/deploy.py rather than bypassing revision guards:
+
+| Installed candidate | Rollback target | State file under `~/` |
+| --- | --- | --- |
+| `f9aeaf88` | `ba6cbd3b` | `hybrid-config-download-release-state.json` |
+| `ba6cbd3b` | `aa0afeff` | `hybrid-snapshot-restore-release-state.json` |
+| `aa0afeff` | `0291efd4` | `hybrid-image-preview-release-state.json` |
+
+Only then run the mode helper below if restoring Classic is necessary. Every
+code rollback preserves the current Flask configuration. An older code rollback
+must follow its own recorded recovery instructions.
 
 ```sh
 mode_backup="$(python3 -c 'from pathlib import Path; print(max((Path.home()/"hybrid-backups").glob("classic-mode-*"), key=lambda p: p.stat().st_mtime))')"
@@ -63,6 +69,9 @@ fallback is prepared; it has not been drilled by reverting the current mode.
 
 ## Roll back this web release
 
+Rolling back this permission fix restores the previous download authorization
+defect. Account for that exposure when choosing a recovery action.
+
 Use an authenticated SSH terminal on the Raspberry under the deployment user.
 Inspect the current Git revision and tracked changes before proceeding. Save any
 new work first. The protected script requires the exact installed candidate and
@@ -70,7 +79,7 @@ a clean tracked checkout; it refuses to discard tracked edits or roll back an
 unrelated release.
 
 ```sh
-release_backup="$(python3 -c 'import json; from pathlib import Path; print(json.loads((Path.home()/"hybrid-snapshot-restore-release-state.json").read_text())["backup"])')"
+release_backup="$(python3 -c 'import json; from pathlib import Path; print(json.loads((Path.home()/"hybrid-config-download-release-state.json").read_text())["backup"])')"
 python3 "$release_backup/deploy.py" --rollback "$release_backup"
 ```
 
