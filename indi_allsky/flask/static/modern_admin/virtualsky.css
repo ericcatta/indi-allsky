@@ -3,7 +3,11 @@
 #virtualsky-wrapper img { display:block; max-width:100%; max-height:70vh; width:auto; height:auto; }
 #virtualsky-clip { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
 #hybrid-starmap { position:relative; }
+/* The sky canvas is a non-interactive overlay; its library help button is not a product control. */
+#hybrid-starmap .virtualskybutton { display:none; }
 #virtualsky-wrapper:fullscreen { display:flex; align-items:center; justify-content:center; }
 #virtualsky-wrapper:fullscreen img { max-height:100vh; }
+#virtualsky-exit-fullscreen { display:none; }
+#virtualsky-wrapper:fullscreen #virtualsky-exit-fullscreen { display:block; position:absolute; top:1rem; right:1rem; z-index:30; }
 .virtualsky-fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:1rem; margin:1rem 0; }
 .virtualsky-fields input[type=number] { display:block; width:100%; }

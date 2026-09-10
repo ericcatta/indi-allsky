@@ -25,6 +25,7 @@ def run():
                 assert 'read-only here' not in page.text
                 assert 'id="virtualsky-clip" aria-hidden="true"' in page.text
                 assert 'alt="Selected camera frame with sky overlay"' in page.text
+                assert 'id="virtualsky-exit-fullscreen" data-html2canvas-ignore' in page.text
                 nav = re.search(r'<nav[^>]+aria-label="Observatory camera">(.*?)</nav>', page.text, re.S)[1]
                 assert nav.count('aria-current="page"') == 1
                 links = re.findall(r'<a[^>]+href="([^"]+)"([^>]*)>', nav)

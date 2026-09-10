@@ -16,6 +16,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- VirtualSky fullscreen/export: aggiunta uscita esplicita nel frame a schermo
+  intero con ritorno del focus. Il pulsante e' escluso dal PNG; nascosto anche
+  l'aiuto non interattivo della libreria che contaminava l'immagine esportata.
+  Asset versionati per evitare stili/script obsoleti nella cache. Prove native:
+  ingresso/uscita fullscreen e PNG reale superati sul fixture sintetico; formato,
+  dimensioni e presenza di frame/mappa verificati. Allineamento astronomico reale
+  resta distinto e aperto. Regressione: 136 Python e 33 JavaScript superati;
+  nessun deploy. Evidenze in `testing/evidence/hybrid-virtualsky-native-controls.json`.
+
 - VirtualSky: aggiunto selettore camera/profilo condiviso e aggiornamento preview
   durante l'inserimento dei valori. Overlay decorativo escluso dalla lettura
   assistita per evitare etichette interne undefined; descrizione e controlli

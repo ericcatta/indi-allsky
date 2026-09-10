@@ -7,9 +7,9 @@ function deferred() { let resolve; const promise = new Promise(r => { resolve = 
 function fixture() {
     const ids = ['virtualsky-config','virtualsky-controls','modern-admin-virtualsky-image',
         'virtualsky-wrapper','virtualsky-clip','hybrid-starmap','modern-admin-virtualsky-message',
-        'virtualsky-refresh','virtualsky-download','virtualsky-fullscreen'];
+        'virtualsky-refresh','virtualsky-download','virtualsky-fullscreen','virtualsky-exit-fullscreen'];
     const elements = Object.fromEntries(ids.map(id => [id, {style:{}, events:{}, disabled:false,
-        addEventListener(name, fn) { this.events[name] = fn; }}]));
+        addEventListener(name, fn) { this.events[name] = fn; }, focus() { this.focused=true; }}]));
     const byId = id => elements[id], form = byId('virtualsky-controls'), image = byId('modern-admin-virtualsky-image');
     const defaults = {AZIMUTH_ANGLE:0,LATITUDE_OFFSET:0,LONGITUDE_OFFSET:0,IMAGE_CIRCLE_DIAMETER:600,
         OFFSET_X:0,OFFSET_Y:0,MAGNITUDE:6,CONSTELLATIONS:true,CONSTELLATIONLABELS:false,
@@ -82,6 +82,13 @@ function fixture() {
     diameter.value='600';f.form.events.reset();await f.runTimer(0);assert.equal(f.byId('virtualsky-clip').hidden,false);
     await f.byId('virtualsky-fullscreen').events.click();assert.ok(f.doc.fullscreenElement);
     await f.byId('virtualsky-fullscreen').events.click();assert.equal(f.doc.fullscreenElement,null);
+    await f.byId('virtualsky-fullscreen').events.click();
+    await f.byId('virtualsky-exit-fullscreen').events.click();
+    assert.equal(f.doc.fullscreenElement,null);
+    assert.equal(f.byId('virtualsky-fullscreen').focused,true);
+    f.doc.exitFullscreen=async()=>{throw Error('blocked');};
+    await f.byId('virtualsky-exit-fullscreen').events.click();
+    assert.match(f.byId('modern-admin-virtualsky-message').textContent,/Use your browser fullscreen control/);
     const capture=deferred();f.win.html2canvas=()=>{f.captures++;return capture.promise;};
     const first=f.byId('virtualsky-download').events.click();await f.byId('virtualsky-download').events.click();
     assert.equal(f.captures,1);assert.equal(f.byId('virtualsky-download').disabled,true);

@@ -2,11 +2,11 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/virtualsky.css') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/virtualsky.css', v='virtualsky-002') }}" rel="stylesheet">
 <script defer src="{{ url_for('indi_allsky.static', filename='virtualsky/stuquery.min.js') }}"></script>
 <script defer src="{{ url_for('indi_allsky.static', filename='virtualsky/virtualsky.min.js') }}"></script>
 <script defer src="{{ url_for('indi_allsky.static', filename='html2canvas/html2canvas.min.js') }}"></script>
-<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/virtualsky.js') }}"></script>
+<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/virtualsky.js', v='virtualsky-002') }}"></script>
 {% endblock %}
 {% block content %}
 <main class="modern-admin-shell" aria-labelledby="modern-admin-virtualsky-title">
@@ -20,6 +20,7 @@
         <div id="virtualsky-wrapper" hidden>
             <img id="modern-admin-virtualsky-image" alt="Selected camera frame with sky overlay">
             <div id="virtualsky-clip" aria-hidden="true"><div id="hybrid-starmap"></div></div>
+            <button type="button" id="virtualsky-exit-fullscreen" data-html2canvas-ignore>Exit fullscreen</button>
         </div>
         <p id="modern-admin-virtualsky-message" role="status" aria-live="polite">Loading latest frame…</p>
         <div class="modern-admin-actions">

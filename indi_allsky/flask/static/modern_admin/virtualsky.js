@@ -35,6 +35,7 @@
     const map = document.getElementById('hybrid-starmap'), message = document.getElementById('modern-admin-virtualsky-message');
     const refresh = document.getElementById('virtualsky-refresh'), download = document.getElementById('virtualsky-download');
     const fullscreen = document.getElementById('virtualsky-fullscreen');
+    const exitFullscreen = document.getElementById('virtualsky-exit-fullscreen');
     let frame = null, sky = null, pending = false, exporting = false, timer = null, stopped = false;
     function draw() {
         if (!frame) return;
@@ -103,6 +104,10 @@
     fullscreen.addEventListener('click', async () => {
         try { if (document.fullscreenElement) await document.exitFullscreen(); else await wrapper.requestFullscreen(); }
         catch (_) { message.textContent = 'Fullscreen is unavailable in this browser.'; }
+    });
+    exitFullscreen.addEventListener('click', async () => {
+        try { await document.exitFullscreen(); fullscreen.focus(); }
+        catch (_) { message.textContent = 'Unable to exit fullscreen. Use your browser fullscreen control.'; }
     });
     download.addEventListener('click', async () => {
         if (exporting || pending || !frame) return;

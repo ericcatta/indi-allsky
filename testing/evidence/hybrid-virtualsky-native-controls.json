@@ -1,6 +1,6 @@
 {
   "baseline": "b428c53b",
-  "scope": "VirtualSky camera navigation, immediate alignment preview and accessibility",
+  "scope": "VirtualSky camera navigation, immediate preview, accessibility, fullscreen and PNG export",
   "environment": "Disposable Flask fixture with Classic prohibited; synthetic frames; no production changes",
   "cases": [
     {
@@ -25,12 +25,19 @@
     },
     {
       "control": "Fullscreen entry/exit",
-      "result": "blocked",
-      "evidence": "Click entered image-only full-screen accessibility view; Escape did not demonstrate return to page controls through browser tool. Complete native round-trip remains open."
+      "result": "passed after correction",
+      "evidence": "Native click entered frame-only view containing Exit fullscreen. Clicking Exit restored page controls and focused Fullscreen.",
+      "before": "Fullscreen omitted page controls; Escape round-trip was not proven."
+    },
+    {
+      "control": "Download overlay PNG",
+      "result": "passed after correction",
+      "evidence": "Native download produced decoded 64x48 RGBA PNG for selected camera 2. Pixel comparison with synthetic JPEG preserved 1220 base pixels and changed 1852 overlay pixels. Visual inspection confirmed frame and sky map; removed non-interactive library help button from preview/export.",
+      "sha256": "cbd83aa4d78eca6751e1e628d03ebef4889a5b34e346a1e34c608a36d6c3fbbc"
     }
   ],
   "limits": [
-    "PNG download contents and remaining overlay toggles not natively accepted in this mission",
+    "Remaining overlay toggles and native administrator session not accepted in this mission",
     "No full celestial alignment or narrow-screen visual acceptance",
     "No production deployment or hardware effects",
     "Classic still present",
@@ -41,5 +48,6 @@
     "javascript_entrypoints": 33,
     "failures": []
   },
-  "cleanup": "Temporary browser tab closed; isolated fixture terminated with successful SSH exit"
+  "cleanup": "Temporary browser tab closed; isolated fixture terminated with successful SSH exit",
+  "followup_baseline": "21dd19c0"
 }
