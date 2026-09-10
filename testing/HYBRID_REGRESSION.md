@@ -31,15 +31,21 @@ seconds (default 240), not a deadline for the whole run.
 Use `--list` for the current entrypoint count, including the separate Library
 entrypoint and compilation. Discovery automatically
 includes new `modern_admin_*_test.py`, `hybrid_*_test.py` and `hybrid_*_test.js`
-entrypoints. `hybrid_ui_acceptance_test.py` remains a separate native acceptance
-workflow. Additional historical Book 2 entrypoints are listed in `EXTRA_TESTS`.
+entrypoints. `hybrid_ui_acceptance_test.py` remains a separate HTML discovery
+workflow, not native browser acceptance. Additional historical Book 2 entrypoints
+are listed in `EXTRA_TESTS`.
 
 Flows using `hybrid_runtime_fixture.isolated_app` run with Classic route imports
 blocked and a restrictive Jinja loader. Only `modern_admin/`, `shared/` and the
 standalone `login.html` are available. Loading a Classic template, including through
-inheritance or a fallback include, fails the test. This demonstrates template
-independence for executed flows; it does not establish asset independence, complete
-browser coverage or permission to remove unverified functionality.
+inheritance or a fallback include, fails the test. Static URLs generated with
+Flask also pass an explicit asset ownership guard: Hybrid assets, the shared
+VirtualSky library and the named shared files in `hybrid_asset_guard.py` are
+allowed. Classic tab CSS/JS and unclassified files fail the test. This demonstrates
+template and generated-URL independence for executed flows. Hardcoded URLs,
+CSS imports and JavaScript network requests still require separate inspection;
+these guards do not establish complete browser coverage or permit removal of
+unverified functionality.
 
 `results.json` records the exact plan, source hashes and each child exit code,
 duration and log path. It is updated atomically after each result. `running` or

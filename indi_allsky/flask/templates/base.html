@@ -1,5 +1,7 @@
 {% extends 'shared/document.html' %}
 {% set is_hybrid_shell_ui = false %}
+{% block legacy_stylesheet %}<link href="{{ url_for('indi_allsky.static', filename='css/style.css') }}" rel="stylesheet">{% endblock %}
+{% block legacy_script %}<script src="{{ url_for('indi_allsky.static', filename='js/indi-allsky-tabs.js') }}"></script>{% endblock %}
 {% macro admin_nav_url(classic_endpoint, modern_endpoint, modern_page=None) -%}
 {%- if session.get('admin_mode') == 'modern' -%}
     {%- if modern_page -%}

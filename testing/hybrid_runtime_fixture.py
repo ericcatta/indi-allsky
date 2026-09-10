@@ -44,6 +44,8 @@ def isolated_app(runtime_config='/etc/indi-allsky/flask.json', *, multi_camera=F
             app = create_app()
             from hybrid_template_guard import protect_templates
             protect_templates(app)
+            from hybrid_asset_guard import protect_assets
+            protect_assets(app)
             app.logger.setLevel('CRITICAL')
             with app.app_context():
                 db.create_all()

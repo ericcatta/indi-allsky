@@ -16,6 +16,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Shell Hybrid separata dagli asset dei tab Classic: `css/style.css` e
+  `js/indi-allsky-tabs.js` caricati soltanto dalla shell Classic, i cui fingerprint
+  restano identici. Il fixture blocca URL statici Flask verso asset Classic o
+  non classificati, mantenendo le librerie condivise esplicitamente censite.
+  Superati 133 entrypoint Python e 33 JavaScript; 500 contesti di rendering:
+  372 superati, 128 bloccati/protetti, nessun difetto. Richieste dinamiche browser
+  e rimozione fisica Classic restano aperte. Nessun deploy in questa missione.
+  Evidenze: `testing/evidence/hybrid-asset-isolation.json`.
+
 - VirtualSky: corretto il refresh al ritorno con la cronologia del browser
   (`pageshow` dopo `pagehide`). Test del controller con effetti simulati coprono
   controlli, resize/reset, richieste duplicate, fullscreen, esportazione PNG,

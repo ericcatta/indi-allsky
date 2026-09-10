@@ -1,0 +1,29 @@
+{
+  "baseline": "839802e9",
+  "scope": "Hybrid shell and generated Flask static URLs with explicit asset ownership",
+  "changes": [
+    "Classic tab script and its stylesheet are loaded only by the Classic shell",
+    "Hybrid/shared static URL generation is guarded in the isolated fixture"
+  ],
+  "preserved": [
+    "Classic shell fingerprints unchanged",
+    "Full Config semantics and fingerprints unchanged"
+  ],
+  "limits": [
+    "Hardcoded URLs, CSS imports and JavaScript network requests are not covered by the Flask URL guard",
+    "Native browser acceptance remains open",
+    "No deployment or Classic removal in this mission"
+  ],
+  "javascript_cases": 33,
+  "javascript_failures": [],
+  "python_cases": 133,
+  "python_failures": [],
+  "discovery": {
+    "routes": 98,
+    "contexts": 500,
+    "rendered": 372,
+    "blocked_or_protected": 128,
+    "render_defects": 0,
+    "clicks_promoted": 0
+  }
+}

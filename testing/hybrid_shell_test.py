@@ -81,6 +81,8 @@ def shell_contract(shell, modern, authenticated, original_source=None):
         html = html[:account.start()] + html[account.end():]
     parser = BodyContract()
     parser.feed(html)
+    for asset in ('css/style.css', 'js/indi-allsky-tabs.js'):
+        assert (asset in html) == (not modern), asset
     contract = json.dumps((parser.tokens, parser.assets), sort_keys=True)
     return hashlib.sha256(contract.encode()).hexdigest()
 
@@ -88,13 +90,14 @@ def shell_contract(shell, modern, authenticated, original_source=None):
 def test_shell_dom_parity():
     # Classic retains the pre-split 17c5a322 baselines. Hybrid's baseline
     # intentionally includes accessible navigation and role-aware recovery controls;
+    # Hybrid no longer loads Classic tab CSS/JS; Classic fingerprints stay unchanged.
     # CSS cache version 007 is included; account links are checked separately. Full Config fingerprints
     # are independent and unchanged.
     expected = {
         (False, False): 'da24764ffdc54509edae10c1475666dc2ebe6808599afddbbe9fa65426a46010',
         (False, True): '5231472cc413795e3f2b4c2a380db4bc0f7a8205a9e092569f76999d806383fc',
-        (True, False): 'd09716dc2fe6cefe86857a48e188713814d317595427e728a3583da26d5965a4',
-        (True, True): 'c5f89c397dcef41c5e05974586929bd76b239f87f54ec9ccfaacb660b6839eaa',
+        (True, False): 'b53972a1cf273bdf03c28b5a2b649a6163429dbe5227643045df0c93663cb322',
+        (True, True): 'eaca7c085a1ddc89be90b6c2f080d6695133a4cd880c9f054e0014024decae9b',
     }
     for (modern, authenticated), fingerprint in expected.items():
         shell = 'modern_admin/base.html' if modern else 'base.html'
