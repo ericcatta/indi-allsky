@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-10",
+  "baseline": "45112699",
+  "scope": "Focus preview request lifecycle and recovery",
+  "defect": "A preview request that never returned left every preview control disabled indefinitely.",
+  "changes": [
+    "Abort stalled preview requests after 15 seconds, release controls, stop automatic refresh and show retry guidance",
+    "Abort preview when leaving the page and restore controls after browser history navigation"
+  ],
+  "verification": {
+    "legacy_code_fails_new_timeout_case": true,
+    "javascript_entrypoints": 34,
+    "javascript_failures": [],
+    "controller_cases": [
+      "timeout releases controls",
+      "automatic refresh stops after timeout",
+      "explicit retry renders a new measurement",
+      "pagehide aborts pending request",
+      "restored page permits another preview"
+    ],
+    "python_regression": {
+      "entrypoints": 137,
+      "failures": [],
+      "environment": "Isolated Raspberry overlay; production unchanged"
+    },
+    "diff_check": "passed"
+  },
+  "limits": [
+    "Controller tests use a DOM stub, not a native browser",
+    "Not deployed",
+    "Hardware focuser effects unchanged and not tested live",
+    "Whole product acceptance and physical Classic removal remain open",
+    "24-hour observation excluded"
+  ]
+}

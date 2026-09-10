@@ -6,9 +6,9 @@ async function run(){
  ids['focus-tool'].dataset={camera:'2',previewUrl:'/preview',moveUrl:'/move',csrf:'token'};
  ids['focus-zoom'].value='5';ids['focus-x'].value='12';ids['focus-y'].value='-15';ids['focus-interval'].value='5';ids['focus-degrees'].value='24';
  const form=ids['focus-preview-form'];form.elements=[ids['focus-zoom'],ids['focus-x'],ids['focus-y'],ids['focus-auto']];
- const move=element();move.dataset.focusDirection='cw';let requests=[],resolveRequest;
+ const move=element();move.dataset.focusDirection='cw';let requests=[],resolveRequest;const timers=new Map(),windowEvents={};let timerId=0;
  const document={hidden:false,getElementById:id=>ids[id],querySelectorAll:()=>[move],createElement:()=>element(),addEventListener(){}};
- const context={document,location:{origin:'http://localhost'},URL,console,setTimeout:()=>1,clearTimeout(){},window:{addEventListener(){},confirm:()=>true},fetch:(url,options)=>{requests.push({url:String(url),options});return new Promise(resolve=>resolveRequest=resolve);}};
+ const context={document,location:{origin:'http://localhost'},URL,console,AbortController,setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),window:{addEventListener:(name,fn)=>windowEvents[name]=fn,confirm:()=>true},fetch:(url,options)=>{requests.push({url:String(url),options});return new Promise((resolve,reject)=>{resolveRequest=resolve;if(options.signal) options.signal.addEventListener('abort',()=>reject(Object.assign(new Error('aborted'),{name:'AbortError'})));});}};
  vm.runInNewContext(source,context);
  const submit=()=>form.listeners.submit({preventDefault(){}});
  submit();submit();assert.equal(requests.length,1);assert(ids['focus-zoom'].disabled);
@@ -25,6 +25,20 @@ async function run(){
  assert.deepEqual(JSON.parse(requests[3].options.body),{DIRECTION:'cw',STEP_DEGREES:24});assert.equal(requests[3].options.headers['X-CSRFToken'],'token');
  resolveRequest({ok:false,json:async()=>({focuser_error:['Movement completed. Release failed; inspect before retrying.']})});await pending;
  assert(ids['focus-move-message'].textContent.includes('Movement completed.'));assert.equal(ids['focus-movement'].disabled,false);
+ // A stalled preview must release controls and allow an explicit retry.
+ ids['focus-auto'].checked=true;submit();
+ const timeout=[...timers.values()].find(timer=>timer.ms===15000);assert(timeout);
+ timeout.fn();await new Promise(setImmediate);
+ assert(requests.at(-1).options.signal.aborted);
+ assert.equal(ids['focus-zoom'].disabled,false);assert.equal(ids['focus-auto'].checked,false);
+ assert(ids['focus-message'].textContent.includes('timed out'));assert.equal(timers.size,0);
+ submit();resolveRequest({ok:true,json:async()=>({image_b64:'jpeg',source:'Saved frame',camera_id:2,timestamp:'retry',age_seconds:1,blur_score:13,star_count:4})});await new Promise(setImmediate);
+ assert.equal(ids['focus-image'].hidden,false);assert(ids['focus-message'].textContent.includes('retry'));
+ submit();const count=requests.length;windowEvents.pagehide();await new Promise(setImmediate);
+ assert(requests.at(-1).options.signal.aborted);assert.equal(timers.size,0);
+ submit();assert.equal(requests.length,count);
+ windowEvents.pageshow({persisted:true});assert.equal(ids['focus-zoom'].disabled,false);
+ submit();assert.equal(requests.length,count+1);windowEvents.pagehide();await new Promise(setImmediate);
  console.log('Native Focus browser controller: target camera, duplicate prevention, decode, errors, expired session, permissions and movement feedback: PASS');
 }
 run().catch(error=>{console.error(error);process.exitCode=1;});
