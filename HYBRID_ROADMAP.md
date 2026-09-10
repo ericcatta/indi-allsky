@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Collaudo media HTTPS con Classic disabilitato: navigazione Now/Library/dettaglio
+  e ritorno ai risultati preservano camera 1 e 2. JPEG IMX708 scaricato, decodificato
+  e confrontato byte per byte con l'originale sul Pi: superato. Download ASI678MC
+  attivato ma ricezione del file non verificata: resta bloccato. Lo strumento
+  browser ha superato ampiamente il timeout richiesto; nessuna conclusione sulla
+  prestazione del server. Media invariati, nessun riavvio. Evidenze e limiti:
+  `testing/evidence/hybrid-image-download-live.json`.
+
 - Attivata in produzione la modalita' senza frontend Classic sulla versione
   `0291efd4`: solo `HYBRID_ENABLE_CLASSIC_UI=false`, configurazione originale
   protetta e ripristino predisposto. Web riavviato, acquisizione invariata e nuovi

@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-10",
+  "installed_release": "0291efd493a12a7b4eae204f33f4e193d12b7d90",
+  "classic_frontend_enabled": false,
+  "scope": "Native production image navigation and download acceptance",
+  "role": "authenticated administrator",
+  "cases": [
+    {
+      "control": "Now > Browse camera images > Image details",
+      "cameras": [
+        1,
+        2
+      ],
+      "result": "passed",
+      "evidence": "Library links and detail metadata retained the selected camera; dimensions matched the corresponding camera."
+    },
+    {
+      "control": "Download image",
+      "camera": 1,
+      "result": "passed",
+      "evidence": "Downloaded JPEG decoded at 4608x2592; SHA256 comparison with the database-selected original on the Pi matched. No image or private filename included in this report."
+    },
+    {
+      "control": "Download image",
+      "camera": 2,
+      "result": "blocked",
+      "evidence": "Native click returned, but expected JPEG was not found in the browser download destination. Receipt and integrity not verified."
+    },
+    {
+      "control": "Back to results",
+      "cameras": [
+        1,
+        2
+      ],
+      "result": "passed",
+      "evidence": "Returned to Library with kind=image and correct camera_id preserved."
+    }
+  ],
+  "limits": [
+    "Browser download-event tool exceeded its requested timeout by a large amount; no reliable timing conclusion about the product",
+    "No download performance claim",
+    "No ordinary/anonymous or mobile acceptance in this mission",
+    "No media were modified or deleted",
+    "No source changes or new regression run for these read-only production checks",
+    "Other media kinds and remaining controls stay open",
+    "Classic files remain present; 24-hour observation is deferred"
+  ]
+}
