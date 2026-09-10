@@ -14,11 +14,12 @@
     {% set modern_admin_heading = 'VirtualSky' %}
     {% set modern_admin_title_id = 'modern-admin-virtualsky-title' %}
     {% include 'modern_admin/_shell_header.html' %}
+    {% include 'modern_admin/_observatory_camera_navigation.html' %}
     <section class="modern-admin-table-panel" aria-label="Sky overlay">
         <p>Sky map aligned to the selected camera and the frame capture time.</p>
         <div id="virtualsky-wrapper" hidden>
             <img id="modern-admin-virtualsky-image" alt="Selected camera frame with sky overlay">
-            <div id="virtualsky-clip"><div id="hybrid-starmap"></div></div>
+            <div id="virtualsky-clip" aria-hidden="true"><div id="hybrid-starmap"></div></div>
         </div>
         <p id="modern-admin-virtualsky-message" role="status" aria-live="polite">Loading latest frame…</p>
         <div class="modern-admin-actions">

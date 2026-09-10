@@ -95,6 +95,7 @@
         }
     }
     form.addEventListener('submit', event => event.preventDefault());
+    form.addEventListener('input', draw);
     form.addEventListener('change', draw);
     form.addEventListener('reset', () => setTimeout(draw, 0));
     refresh.addEventListener('click', load);

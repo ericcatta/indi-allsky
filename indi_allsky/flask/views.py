@@ -10407,6 +10407,7 @@ class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, CameraScopedTemp
 
     def get_context(self):
         context = super(ModernAdminVirtualSkyView, self).get_context()
+        context['observatory_camera_choices'] = self.get_media_camera_filters()[1:]
         location_metadata = self.location_metadata_provider.get_location_metadata(
             camera=getattr(self, 'camera', None),
             config=self.indi_allsky_config,

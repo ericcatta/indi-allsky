@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- VirtualSky: aggiunto selettore camera/profilo condiviso e aggiornamento preview
+  durante l'inserimento dei valori. Overlay decorativo escluso dalla lettura
+  assistita per evitare etichette interne undefined; descrizione e controlli
+  restano accessibili. Prove native su fixture: cambio camera con file corretto,
+  geometria da tastiera e reset superati. Uscita fullscreen e contenuto PNG
+  restano aperti. Regressione 136 Python e 33 JavaScript superati; nessun deploy
+  o effetto hardware. Evidenze: `testing/evidence/hybrid-virtualsky-native-controls.json`.
+
 - Collaudo browser osservatorio su fixture isolato: provati cambi camera SQM,
   grafici e sensori, intervallo storico, refresh, visibilita' slot, accesso anonimo
   e ritorno dal login ordinario. Verificati anche ID camera nelle richieste reali

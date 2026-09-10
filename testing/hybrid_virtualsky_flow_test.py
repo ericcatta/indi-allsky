@@ -2,6 +2,8 @@
 """Interactive VirtualSky inputs/assets render independently of Classic."""
 import json
 import re
+from html import unescape
+from urllib.parse import urlsplit, parse_qs
 from hybrid_runtime_fixture import isolated_app, login_client
 
 
@@ -21,6 +23,20 @@ def run():
                 page = client.get('/indi-allsky/modern-admin/observatory/virtualsky?camera_id=' + str(cid))
                 assert page.status_code == 200, page.text[:500]
                 assert 'read-only here' not in page.text
+                assert 'id="virtualsky-clip" aria-hidden="true"' in page.text
+                assert 'alt="Selected camera frame with sky overlay"' in page.text
+                nav = re.search(r'<nav[^>]+aria-label="Observatory camera">(.*?)</nav>', page.text, re.S)[1]
+                assert nav.count('aria-current="page"') == 1
+                links = re.findall(r'<a[^>]+href="([^"]+)"([^>]*)>', nav)
+                assert len(links) == 2
+                for href, attributes in links:
+                    query = parse_qs(urlsplit(unescape(href)).query)
+                    target = int(query['camera_id'][0])
+                    assert query['profile_id'] == ['test-profile-' + str(target)]
+                    assert ('aria-current="page"' in attributes) == (target == cid)
+                    destination = client.get(unescape(href))
+                    target_config = json.loads(re.search(r'<script id="virtualsky-config" type="application/json">(.*?)</script>', destination.text, re.S)[1])
+                    assert int(target_config['cameraId']) == target
                 for control in ('AZIMUTH_ANGLE', 'LATITUDE_OFFSET', 'LONGITUDE_OFFSET', 'IMAGE_CIRCLE_DIAMETER',
                                 'OFFSET_X', 'OFFSET_Y', 'MAGNITUDE', 'CONSTELLATIONS', 'CONSTELLATIONLABELS',
                                 'SHOWSTARS', 'SHOWSTARLABELS', 'SHOWPLANETS', 'SHOWPLANETLABELS'):

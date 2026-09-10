@@ -58,6 +58,15 @@ function fixture() {
     await f.respond(0,{image_list:[f.frame]});
     assert.equal(f.created.length,1);assert.equal(f.image.src,'http://fixture.test/images/frame.jpg');
     assert.equal(f.byId('virtualsky-wrapper').hidden,false);
+    const offset=f.form.elements.find(x=>x.name==='OFFSET_X');
+    offset.value='24';f.form.events.input();
+    assert.equal(f.byId('hybrid-starmap').style.left,'22px');
+    assert.equal(f.requests.length,1,'Alignment preview must update without fetching another frame');
+    offset.value='';f.form.events.input();
+    assert.equal(f.byId('virtualsky-clip').hidden,true);
+    offset.value='0';f.form.events.input();
+    assert.equal(f.byId('hybrid-starmap').style.left,'10px');
+    assert.equal(f.byId('virtualsky-clip').hidden,false);
     for (const [name,key] of [['CONSTELLATIONS','lines'],['CONSTELLATIONLABELS','labels']]) {
         const input=f.form.elements.find(x=>x.name===name);input.checked=!input.checked;f.form.events.change();
         assert.equal(f.engine.constellation[key],input.checked);

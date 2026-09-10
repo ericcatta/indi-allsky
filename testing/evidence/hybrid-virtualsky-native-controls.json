@@ -1,0 +1,45 @@
+{
+  "baseline": "b428c53b",
+  "scope": "VirtualSky camera navigation, immediate alignment preview and accessibility",
+  "environment": "Disposable Flask fixture with Classic prohibited; synthetic frames; no production changes",
+  "cases": [
+    {
+      "control": "camera profile links",
+      "result": "passed",
+      "evidence": "Ordinary user selected profile 2; URL, aria-current, JSON cameraId=2 and generation-camera-2.jpg image source agreed. Flask tests cover both roles and both cameras."
+    },
+    {
+      "control": "diameter and X offset",
+      "result": "passed",
+      "evidence": "Native keyboard adjustment produced 48px canvas and left=18px for a 64px frame and X=10. Controller test proves input updates geometry without another frame request, handles empty input and recovers."
+    },
+    {
+      "control": "Reset preview",
+      "result": "passed",
+      "evidence": "Native click restored diameter=3500, X=0, canvas=3500 and left=-1718px."
+    },
+    {
+      "control": "overlay accessibility",
+      "result": "passed",
+      "evidence": "After aria-hidden on decorative overlay, accessible frame description remains and generated undefined labels are absent."
+    },
+    {
+      "control": "Fullscreen entry/exit",
+      "result": "blocked",
+      "evidence": "Click entered image-only full-screen accessibility view; Escape did not demonstrate return to page controls through browser tool. Complete native round-trip remains open."
+    }
+  ],
+  "limits": [
+    "PNG download contents and remaining overlay toggles not natively accepted in this mission",
+    "No full celestial alignment or narrow-screen visual acceptance",
+    "No production deployment or hardware effects",
+    "Classic still present",
+    "24-hour monitoring is a separate future activity after Classic removal"
+  ],
+  "regression": {
+    "python_entrypoints": 136,
+    "javascript_entrypoints": 33,
+    "failures": []
+  },
+  "cleanup": "Temporary browser tab closed; isolated fixture terminated with successful SSH exit"
+}
