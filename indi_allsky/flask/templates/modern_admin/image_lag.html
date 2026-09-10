@@ -3,6 +3,8 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.css') }}" rel="stylesheet">
+<script defer src="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.js') }}"></script>
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
@@ -22,8 +24,13 @@ var camera_id = {{ camera_id }};
             <h2 id="image-lag-table-title">Recent capture timing</h2>
         </div>
 
+        <nav class="modern-admin-link-grid" aria-label="Diagnostic camera">
+        {% for choice in diagnostic_camera_choices %}<a href="{{ url_for(request.endpoint, camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == camera_id|int %}aria-current="page"{% endif %}>{{ choice.label }}</a>{% endfor %}
+        </nav>
+        <label for="image-lag-table-search">Search table</label><input type="search" id="image-lag-table-search" autocomplete="off">
+        <p id="image-lag-count" role="status" aria-live="polite"></p>
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
+            <table class="modern-admin-data-table" id="image-lag-table">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -36,13 +43,13 @@ var camera_id = {{ camera_id }};
                 </thead>
                 <tbody>
                     {% for row in image_lag_q %}
-                    <tr>
+                    <tr data-search="">
                         <td>{{ row.createDate.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                         <td>{{ "%0.7f"|format(row.exposure) }}</td>
-                        <td>{{ "%0.2f"|format(row.exp_elapsed | float) }}</td>
-                        <td>{{ "%+0.3f"|format(row.delta | float) }}</td>
-                        <td>{{ row.lag_diff }}</td>
-                        <td>{{ "%0.2f"|format(row.process_elapsed | float) }}</td>
+                        <td>{{ "%0.2f"|format(row.exp_elapsed) if row.exp_elapsed is not none else '—' }}</td>
+                        <td>{{ "%+0.3f"|format(row.delta) if row.delta is not none else '—' }}</td>
+                        <td>{{ row.lag_diff if row.lag_diff is not none else '—' }}</td>
+                        <td>{{ "%0.2f"|format(row.process_elapsed) if row.process_elapsed is not none else '—' }}</td>
                     </tr>
                     {% else %}
                     <tr><td colspan="6">No image lag rows are available for the current time window.</td></tr>
@@ -52,4 +59,6 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 </main>
+<script id="hybrid-operations-table-config" type="application/json">{"table": "image-lag-table", "rowAttribute": "data-search", "count": "image-lag-count", "countSuffix": " shown", "emptyMessage": "No records are available in this view.", "order": [[0, "desc"]], "columnDefs": [], "exportColumns": [0, 1, 2, 3, 4, 5], "filters": [{"id": "image-lag-table-search", "text": true, "contains": true}], "csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}}</script>
+<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}"></script>
 {% endblock %}

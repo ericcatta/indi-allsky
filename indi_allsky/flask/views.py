@@ -1,3 +1,4 @@
+from .camera_scope import CameraScopedTemplateMixin
 from flask.views import View
 from ..loop_statistics import loop_sqm_summaries
 from ..modern_admin_media_cleanup import MediaCleanupIncomplete, flush_media_batches
@@ -9750,9 +9751,8 @@ class FileSpaceUsageView(TemplateView):
             func.count(IndiAllSkyDbThumbnailTable.id).label('thumbnail_count'),
         )\
             .join(table.camera)\
-            .join(IndiAllSkyDbThumbnailTable)\
+            .outerjoin(IndiAllSkyDbThumbnailTable, IndiAllSkyDbThumbnailTable.uuid == table.thumbnail_uuid)\
             .filter(IndiAllSkyDbCameraTable.id == camera_id)\
-            .filter(IndiAllSkyDbThumbnailTable.uuid == table.thumbnail_uuid)\
             .filter(table.fileSize != sa_null())\
             .group_by(table.dayDate, table.night)\
             .order_by(table.dayDate.desc())
@@ -9871,80 +9871,12 @@ class ModernAdminCameraToolView(ModernAdminContextMixin):
         )
 
 
-class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraLensView):
-    page_title = 'Modern Admin Camera Info'
-
-    def get_context(self):
-        context = TemplateView.get_context(self)
-        session['admin_mode'] = 'modern'
-        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
-        context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
-
-        camera = IndiAllSkyDbCameraTable.query\
-            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-            .one()
-        service = ModernAdminCameraInfoService(cfa_map=constants.CFA_MAP_STR)
-
-        context.update(service.build_context(
-            camera=camera,
-            privacy_mode=self.indi_allsky_config.get('PRIVACY_MODE'),
-        ))
-
-        return context
-
-
-class ModernAdminImageLagView(ModernAdminCameraToolView, ImageLagView):
-    page_title = 'Modern Admin Image Lag'
-
-    def get_context(self):
-        context = TemplateView.get_context(self)
-        session['admin_mode'] = 'modern'
-        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
-        context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
-        image_lag_policy = ModernAdminImageLagPolicy()
-
-        timestamp = int(request.args.get('timestamp', 0))
-        if not timestamp:
-            timestamp = int(datetime.timestamp(self.camera_now))
-
-        ts_dt = datetime.fromtimestamp(timestamp) + timedelta(seconds=self.camera_time_offset)
-
-        if db.engine.dialect.name == 'mysql':
-            createDate_s = func.date_format('%s', IndiAllSkyDbImageTable.createDate)  # mysql
-        elif db.engine.dialect.name == 'postgresql':
-            createDate_s = func.to_char(IndiAllSkyDbImageTable.createDate, '%s')  # postgres
-        else:
-            createDate_s = func.strftime('%s', IndiAllSkyDbImageTable.createDate)  # sqlite
-
-        context['image_lag_q'] = IndiAllSkyDbImageTable.query\
-            .add_columns(
-                IndiAllSkyDbImageTable.id,
-                IndiAllSkyDbImageTable.createDate,
-                IndiAllSkyDbImageTable.exposure,
-                IndiAllSkyDbImageTable.exp_elapsed,
-                (IndiAllSkyDbImageTable.exp_elapsed - IndiAllSkyDbImageTable.exposure).label('delta'),
-                IndiAllSkyDbImageTable.process_elapsed,
-                (cast(createDate_s, Integer) - func.lag(createDate_s).over(order_by=IndiAllSkyDbImageTable.createDate)).label('lag_diff'),
-            )\
-            .join(IndiAllSkyDbImageTable.camera)\
-            .filter(
-                and_(
-                    IndiAllSkyDbCameraTable.id == self.camera.id,
-                    IndiAllSkyDbImageTable.createDate < ts_dt,
-                    IndiAllSkyDbImageTable.createDate > image_lag_policy.window_start(ts_dt),
-                )
-            )\
-            .order_by(IndiAllSkyDbImageTable.createDate.desc())\
-            .limit(image_lag_policy.row_limit)
-
-        return context
 
 
 
 
-class ModernAdminFileSpaceUsageView(ModernAdminContextMixin, FileSpaceUsageView):
-    page_title = 'Modern Admin File Space Usage'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+
 
 
 class ModernAdminObservatoryToolView(ModernAdminContextMixin):
@@ -10368,18 +10300,90 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
         return ' '.join(formatted_parts)
 
 
-class ModernAdminAduHistoryView(ModernAdminCameraToolView, ModernAdminMediaBrowseView, RollingAduView):
+class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, CameraLensView):
+    page_title = 'Modern Admin Camera Info'
+
+    def get_context(self):
+        context = TemplateView.get_context(self)
+        session['admin_mode'] = 'modern'
+        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
+        context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
+
+        camera = IndiAllSkyDbCameraTable.query\
+            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+            .one()
+        service = ModernAdminCameraInfoService(cfa_map=constants.CFA_MAP_STR)
+
+        context.update(service.build_context(
+            camera=camera,
+            privacy_mode=self.indi_allsky_config.get('PRIVACY_MODE'),
+        ))
+
+        return context
+
+
+
+class ModernAdminImageLagView(ModernAdminCameraToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, ImageLagView):
+    page_title = 'Modern Admin Image Lag'
+
+    def get_context(self):
+        context = TemplateView.get_context(self)
+        session['admin_mode'] = 'modern'
+        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
+        context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
+        context['diagnostic_camera_choices'] = self.get_media_camera_filters()[1:]
+        image_lag_policy = ModernAdminImageLagPolicy()
+
+        timestamp = int(request.args.get('timestamp', 0))
+        ts_dt = image_lag_policy.window_end(timestamp, self.camera_now, self.camera_time_offset)
+
+        if db.engine.dialect.name == 'mysql':
+            createDate_s = func.date_format('%s', IndiAllSkyDbImageTable.createDate)  # mysql
+        elif db.engine.dialect.name == 'postgresql':
+            createDate_s = func.to_char(IndiAllSkyDbImageTable.createDate, '%s')  # postgres
+        else:
+            createDate_s = func.strftime('%s', IndiAllSkyDbImageTable.createDate)  # sqlite
+
+        context['image_lag_q'] = IndiAllSkyDbImageTable.query\
+            .add_columns(
+                IndiAllSkyDbImageTable.id,
+                IndiAllSkyDbImageTable.createDate,
+                IndiAllSkyDbImageTable.exposure,
+                IndiAllSkyDbImageTable.exp_elapsed,
+                (IndiAllSkyDbImageTable.exp_elapsed - IndiAllSkyDbImageTable.exposure).label('delta'),
+                IndiAllSkyDbImageTable.process_elapsed,
+                (cast(createDate_s, Integer) - func.lag(createDate_s).over(order_by=IndiAllSkyDbImageTable.createDate)).label('lag_diff'),
+            )\
+            .join(IndiAllSkyDbImageTable.camera)\
+            .filter(
+                and_(
+                    IndiAllSkyDbCameraTable.id == self.camera.id,
+                    IndiAllSkyDbImageTable.createDate < ts_dt,
+                    IndiAllSkyDbImageTable.createDate > image_lag_policy.window_start(ts_dt),
+                )
+            )\
+            .order_by(IndiAllSkyDbImageTable.createDate.desc())\
+            .limit(image_lag_policy.row_limit)
+
+        return context
+
+
+
+class ModernAdminFileSpaceUsageView(CameraScopedTemplateMixin, ModernAdminMediaBrowseView, FileSpaceUsageView):
+    page_title = 'Modern Admin File Space Usage'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+
+    def get_context(self):
+        context = super().get_context()
+        context['diagnostic_camera_choices'] = self.get_media_camera_filters()[1:]
+        return context
+
+
+
+class ModernAdminAduHistoryView(ModernAdminCameraToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, RollingAduView):
     page_title = 'Modern Admin ADU History'
 
-    def setupSession(self):
-        if request.args.get('camera_id') or request.args.get('profile_id'):
-            selected = self.get_selected_media_camera_filter()
-            self.camera = self.getCameraById(selected['camera_id'])
-            if self.camera.id != selected['camera_id']:
-                abort(404, description='Camera is unavailable.')
-            session['camera_id'] = self.camera.id
-            return
-        super().setupSession()
 
     def get_context(self):
         context = super().get_context()
@@ -10387,20 +10391,11 @@ class ModernAdminAduHistoryView(ModernAdminCameraToolView, ModernAdminMediaBrows
         return context
 
 
-class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, ModernAdminMediaBrowseView, VirtualSkyView):
+class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, VirtualSkyView):
     page_title = 'Modern Admin VirtualSky'
 
     location_metadata_provider = ModernAdminLocationMetadataProvider()
 
-    def setupSession(self):
-        if request.args.get('camera_id') or request.args.get('profile_id'):
-            selected = self.get_selected_media_camera_filter()
-            self.camera = self.getCameraById(selected['camera_id'])
-            if self.camera.id != selected['camera_id']:
-                abort(404, description='Camera is unavailable.')
-            session['camera_id'] = self.camera.id
-            return
-        super().setupSession()
 
     def get_context(self):
         context = super(ModernAdminVirtualSkyView, self).get_context()
@@ -10417,7 +10412,7 @@ class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, ModernAdminMedia
 
 
 
-class ModernAdminSystemInfoView(ModernAdminSystemToolView, ModernAdminMediaBrowseView, SystemInfoView):
+class ModernAdminSystemInfoView(ModernAdminSystemToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, SystemInfoView):
     page_title = 'Modern Admin System Info'
 
     summary_service = ModernAdminSystemInfoSummaryService()
@@ -10425,15 +10420,6 @@ class ModernAdminSystemInfoView(ModernAdminSystemToolView, ModernAdminMediaBrows
     def getCpuUsage(self):
         return ModernAdminCpuUsageProvider(psutil.cpu_percent).read()
 
-    def setupSession(self):
-        if request.args.get('camera_id') or request.args.get('profile_id'):
-            selected = self.get_selected_media_camera_filter()
-            self.camera = self.getCameraById(selected['camera_id'])
-            if self.camera.id != selected['camera_id']:
-                abort(404, description='Camera is unavailable.')
-            session['camera_id'] = self.camera.id
-            return
-        super().setupSession()
 
     def get_context(self):
         context = super(ModernAdminSystemInfoView, self).get_context()

@@ -1,0 +1,32 @@
+{
+  "baseline": "be611e46",
+  "scope": "Image Lag, File Space Usage and Settings history parity; shared camera scope",
+  "changes": [
+    "Restored search, sorting, pagination and copy/CSV/Excel controls in three tables",
+    "Restored panorama-video, startrail-video and thumbnail storage columns",
+    "Storage sums include image rows without thumbnails",
+    "Missing timing values render as unavailable instead of zero",
+    "Shared explicit camera/profile selection across Camera Info, Image Lag, File Space Usage, ADU, VirtualSky and System Info",
+    "Image Lag default window no longer applies the camera time offset twice"
+  ],
+  "automatic_evidence": [
+    "Both roles and both cameras across six views; mismatched and missing profiles rejected",
+    "Image-only and image-plus-thumbnail database sizes checked exactly",
+    "All restored storage column headers and export column selections checked",
+    "Recent camera-local frame preserved at both negative and positive offsets",
+    "Explicit timestamp conversion preserved by policy unit tests",
+    "Existing table-controller defaults and text search tested with simulated DataTables"
+  ],
+  "native_browser_status": "Blocked: Mac still locked when checked this mission",
+  "limits": [
+    "Native table interactions and output downloads require direct browser acceptance",
+    "No production deployment or Classic removal in this mission"
+  ],
+  "regression": {
+    "python_entrypoints": 135,
+    "javascript_entrypoints": 33,
+    "failures": [],
+    "environment": "Isolated Flask fixture on Raspberry; Node controller tests on Mac",
+    "native_browser": false
+  }
+}

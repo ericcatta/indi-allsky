@@ -3,6 +3,8 @@
 {% block title %}{{ website_title }}: {{ page_title }}{% endblock %}
 
 {% block head %}
+<link href="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.css') }}" rel="stylesheet">
+<script defer src="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.js') }}"></script>
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
@@ -22,8 +24,13 @@ var camera_id = {{ camera_id }};
             <h2 id="file-space-table-title">Media storage by day</h2>
         </div>
 
+        <nav class="modern-admin-link-grid" aria-label="Diagnostic camera">
+        {% for choice in diagnostic_camera_choices %}<a href="{{ url_for(request.endpoint, camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == camera_id|int %}aria-current="page"{% endif %}>{{ choice.label }}</a>{% endfor %}
+        </nav>
+        <label for="file-space-table-search">Search table</label><input type="search" id="file-space-table-search" autocomplete="off">
+        <p id="file-space-count" role="status" aria-live="polite"></p>
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
+            <table class="modern-admin-data-table" id="file-space-table">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -31,33 +38,36 @@ var camera_id = {{ camera_id }};
                         <th>Images</th>
                         <th>Panoramas</th>
                         <th>Timelapses</th>
+                        <th>Panorama Timelapses</th>
+                        <th>Star Trail Timelapses</th>
                         <th>FITS</th>
                         <th>Raw</th>
+                        <th>Thumbnails</th>
                         <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for day, day_data in days_fileSize_dict.items() %}
                     {% for tod, tod_data in day_data.items() %}
-                    <tr>
+                    <tr data-search="">
                         <td>{{ day }}</td>
                         <td>{{ tod }}</td>
-                        {% for asset in ['Images', 'Panoramas', 'Timelapses', 'FITS', 'Raw Images'] %}
+                        {% for asset in ['Images', 'Panoramas', 'Timelapses', 'Panorama Timelapses', 'Star Trail Timelapses', 'FITS', 'Raw Images', 'Thumbnails'] %}
                         {% if tod_data[asset]['fileSize'] < 805306368 %}
-                        <td>{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024) }} MB [{{ tod_data[asset]['count'] }}]</td>
+                        <td data-order="{{ tod_data[asset]['fileSize'] }}">{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024) }} MB [{{ tod_data[asset]['count'] }}]</td>
                         {% else %}
-                        <td>{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024 / 1024) }} GB [{{ tod_data[asset]['count'] }}]</td>
+                        <td data-order="{{ tod_data[asset]['fileSize'] }}">{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024 / 1024) }} GB [{{ tod_data[asset]['count'] }}]</td>
                         {% endif %}
                         {% endfor %}
                         {% if tod_data['tod_fileSize'] < 805306368 %}
-                        <td>{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024) }} MB</td>
+                        <td data-order="{{ tod_data['tod_fileSize'] }}">{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024) }} MB</td>
                         {% else %}
-                        <td>{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024 / 1024) }} GB</td>
+                        <td data-order="{{ tod_data['tod_fileSize'] }}">{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024 / 1024) }} GB</td>
                         {% endif %}
                     </tr>
                     {% endfor %}
                     {% else %}
-                    <tr><td colspan="8">No file usage rows are available yet.</td></tr>
+                    <tr><td colspan="11">No file usage rows are available yet.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -65,4 +75,6 @@ var camera_id = {{ camera_id }};
         <p class="modern-admin-note">Reported space is the sum of individual file sizes. Filesystems may allocate additional disk space.</p>
     </section>
 </main>
+<script id="hybrid-operations-table-config" type="application/json">{"table": "file-space-table", "rowAttribute": "data-search", "count": "file-space-count", "countSuffix": " shown", "emptyMessage": "No records are available in this view.", "order": [[0, "desc"]], "columnDefs": [], "exportColumns": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "filters": [{"id": "file-space-table-search", "text": true, "contains": true}], "csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}}</script>
+<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}"></script>
 {% endblock %}

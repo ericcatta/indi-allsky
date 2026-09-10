@@ -12,6 +12,7 @@ function fixture(overrides = {}) {
         {dataset: {search: 'Camera 1 generation', state: 'SUCCESS', queue: 'VIDEO'}},
     ];
     records.forEach(row => { row.hasAttribute = () => true; });
+    records.forEach(row => { row.textContent = row.dataset.search + ' measured value'; });
     const placeholder = {hasAttribute: () => false, remove() { this.removed = true; }};
     const inputs = Object.fromEntries(['search','state','queue'].map(id => [id,
         {value: '', handlers: {}, addEventListener(name, fn) { this.handlers[name] = fn; }}]));
@@ -84,4 +85,9 @@ assert.equal(JSON.stringify(history.options.lengthMenu),'[20,50,100,-1]');
 history.change('search','Camera 2');
 history.options.buttons[1].action(null,history.api);
 assert.equal(history.forms.length,1);
+const textSearch = fixture({filters:[{id:'search',text:true,contains:true}]});
+textSearch.change('search','measured value');
+assert.equal(textSearch.count.textContent,'3 shown');
+textSearch.change('search','absent');
+assert.equal(textSearch.count.textContent,'0 shown');
 console.log('Operations table controller: combined filters, counts, reset, empty rows, filtered export payload/CSRF and native attachment forms: PASS');

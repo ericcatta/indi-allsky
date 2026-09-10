@@ -106,6 +106,12 @@ def test_camera_info_service_has_no_flask_db_or_filesystem_dependency():
 
 
 def run_tests():
+    from datetime import datetime, timedelta
+    policy = ModernAdminImageLagPolicy()
+    camera_now = datetime(2026, 9, 10, 1, 0)
+    for offset in (-14400, 14400):
+        assert policy.window_end(0, camera_now, offset) == camera_now
+        assert policy.window_end(1700000000, camera_now, offset) == datetime.fromtimestamp(1700000000) + timedelta(seconds=offset)
     test_camera_info_service_preserves_camera_lens_context_shape()
     test_camera_info_service_preserves_privacy_owner()
     test_modern_camera_info_view_uses_camera_info_service()

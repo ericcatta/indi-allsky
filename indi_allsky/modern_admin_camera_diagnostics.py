@@ -1,5 +1,5 @@
 import math
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 
 IMAGE_LAG_LOOKBACK_HOURS = 3
@@ -77,3 +77,8 @@ class ModernAdminImageLagPolicy:
 
     def window_start(self, timestamp_datetime):
         return timestamp_datetime - timedelta(hours=self.lookback_hours)
+
+    def window_end(self, timestamp, camera_now, camera_time_offset):
+        if not timestamp:
+            return camera_now
+        return datetime.fromtimestamp(timestamp) + timedelta(seconds=camera_time_offset)

@@ -16,6 +16,17 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Tabelle diagnostiche Hybrid e cronologia Settings: ripristinati ricerca,
+  ordinamento, paginazione ed export copia/CSV/Excel. Ripristinate le colonne
+  storage panorama-video, startrail-video e thumbnail; corretto il conteggio
+  delle immagini senza thumbnail. Unificata la selezione esplicita camera/profilo
+  in sei viste diagnostiche; Image Lag non applica piu' due volte lo scarto
+  orario alla finestra corrente e distingue tempi mancanti da zero.
+  Regressione isolata: 135 entrypoint Python e 33 JavaScript superati, con
+  Classic non disponibile nel fixture. Interazioni browser native e download
+  restano da collaudare; nessun deploy o rimozione Classic in questa missione.
+  Evidenze: `testing/evidence/hybrid-diagnostic-tables.json`.
+
 - ADU History Hybrid: ripristinati ricerca, ordinamento, paginazione e export
   copia/CSV/Excel tramite il controller tabelle condiviso. Corretto l'ambito
   camera/profilo e gestite misure jSQM/stelle nulle. Preservate query storica,

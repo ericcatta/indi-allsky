@@ -49,7 +49,7 @@
         const row = table.row(index).node();
         return filters.every(filter => {
             const value = normalize(filter.element.value);
-            const actual = normalize(row.dataset[filter.attribute]);
+            const actual = normalize(filter.text ? row.textContent : row.dataset[filter.attribute]);
             return !value || (filter.contains ? actual.includes(value) : actual === value);
         });
     });
