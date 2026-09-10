@@ -3,6 +3,7 @@
     const configNode = document.getElementById('hybrid-operations-table-config');
     if (!configNode || typeof DataTable === 'undefined') return;
     const config = JSON.parse(configNode.textContent);
+    const exportColumns = config.exportColumns || ':not(:last-child)';
     const element = document.getElementById(config.table);
     // DataTables supplies an accessible empty state; colspan placeholder rows
     // cannot be treated as data records.
@@ -15,14 +16,14 @@
     const table = new DataTable(element, {
         pageLength: 20,
         lengthMenu: [20, 50, 100, -1],
-        order: [[1, 'desc']],
+        order: config.order || [[1, 'desc']],
         layout: {topStart: 'pageLength', topEnd: 'buttons'},
         buttons: [
-            {extend: 'copyHtml5', exportOptions: {columns: ':not(:last-child)', escapeExcelFormula: true}},
+            {extend: 'copyHtml5', exportOptions: {columns: exportColumns, escapeExcelFormula: true}},
             ...['csv', 'xlsx'].map(format => ({
                 text: format === 'csv' ? 'CSV' : 'Excel',
                 action: function (_event, table) {
-                    const data = table.buttons.exportData({columns: ':not(:last-child)'});
+                    const data = table.buttons.exportData({columns: exportColumns});
                     const form = document.createElement('form');
                     form.method = 'post';
                     form.action = config.exportUrl;
@@ -41,7 +42,7 @@
             })),
         ],
         language: {emptyTable: config.emptyMessage, zeroRecords: 'No records match the current filters.'},
-        columnDefs: [{targets: -1, orderable: false}],
+        columnDefs: config.columnDefs || [{targets: -1, orderable: false}],
     });
     function normalize(value) { return String(value || '').trim().toLowerCase(); }
     table.search.fixed('hybrid-filters', (_text, _data, index) => {

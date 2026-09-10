@@ -9940,8 +9940,6 @@ class ModernAdminImageLagView(ModernAdminCameraToolView, ImageLagView):
         return context
 
 
-class ModernAdminAduHistoryView(ModernAdminCameraToolView, RollingAduView):
-    page_title = 'Modern Admin ADU History'
 
 
 class ModernAdminFileSpaceUsageView(ModernAdminContextMixin, FileSpaceUsageView):
@@ -10368,6 +10366,25 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
                 formatted_parts.append(part.capitalize())
 
         return ' '.join(formatted_parts)
+
+
+class ModernAdminAduHistoryView(ModernAdminCameraToolView, ModernAdminMediaBrowseView, RollingAduView):
+    page_title = 'Modern Admin ADU History'
+
+    def setupSession(self):
+        if request.args.get('camera_id') or request.args.get('profile_id'):
+            selected = self.get_selected_media_camera_filter()
+            self.camera = self.getCameraById(selected['camera_id'])
+            if self.camera.id != selected['camera_id']:
+                abort(404, description='Camera is unavailable.')
+            session['camera_id'] = self.camera.id
+            return
+        super().setupSession()
+
+    def get_context(self):
+        context = super().get_context()
+        context['adu_camera_choices'] = self.get_media_camera_filters()[1:]
+        return context
 
 
 class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, ModernAdminMediaBrowseView, VirtualSkyView):

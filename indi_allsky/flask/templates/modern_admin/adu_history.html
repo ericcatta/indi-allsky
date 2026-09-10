@@ -4,6 +4,8 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.css') }}" rel="stylesheet">
+<script defer src="{{ url_for('indi_allsky.static', filename='DataTables/datatables.min.js') }}"></script>
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -21,9 +23,18 @@ var camera_id = {{ camera_id }};
             <p class="modern-admin-eyebrow">Cameras</p>
             <h2 id="adu-history-table-title">Image stats in 15 minute blocks</h2>
         </div>
+        <nav class="modern-admin-link-grid" aria-label="ADU history camera">
+        {% for choice in adu_camera_choices %}
+            <a href="{{ url_for('indi_allsky.modern_admin_adu_history_view', camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == camera_id|int %}aria-current="page"{% endif %}>{{ choice.label }}</a>
+        {% endfor %}
+        </nav>
+        <p>Last seven days, using the historical 22:00–04:59 time window. A dash means that a measurement is unavailable.</p>
+        <label for="adu-history-search">Search history</label>
+        <input id="adu-history-search" type="search" placeholder="Date or measurement" autocomplete="off">
+        <p id="adu-history-count" role="status" aria-live="polite"></p>
 
         <div class="modern-admin-table-scroll">
-            <table class="modern-admin-data-table">
+            <table class="modern-admin-data-table" id="adu-history-table">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -36,13 +47,13 @@ var camera_id = {{ camera_id }};
                 </thead>
                 <tbody>
                     {% for row in rolling_adu_q %}
-                    <tr>
+                    <tr data-search="{{ row.dt }} {{ row.i_count }} {{ row.exposure_avg }} {{ row.adu_avg }} {{ row.jsqm_avg }} {{ row.stars_avg }}">
                         <td>{{ row.dt.strftime('%Y-%m-%d %H:%M') }}</td>
                         <td>{{ row.i_count }}</td>
                         <td>{{ "%0.4f"|format(row.exposure_avg) }}</td>
                         <td>{{ "%0.2f"|format(row.adu_avg) }}</td>
-                        <td>{{ "%0.2f"|format(row.jsqm_avg) }}</td>
-                        <td>{{ "%0.1f"|format(row.stars_avg) }}</td>
+                        <td>{{ "%0.2f"|format(row.jsqm_avg) if row.jsqm_avg is not none else '—' }}</td>
+                        <td>{{ "%0.1f"|format(row.stars_avg) if row.stars_avg is not none else '—' }}</td>
                     </tr>
                     {% else %}
                     <tr><td colspan="6">No ADU history rows are available for the current time window.</td></tr>
@@ -52,4 +63,12 @@ var camera_id = {{ camera_id }};
         </div>
     </section>
 </main>
+<script id="hybrid-operations-table-config" type="application/json">{{ {
+    'table': 'adu-history-table', 'rowAttribute': 'data-search', 'count': 'adu-history-count',
+    'countSuffix': ' groups shown', 'emptyMessage': 'No ADU history is available in this time window.',
+    'csrfToken': csrf_token(), 'exportUrl': url_for('indi_allsky.modern_admin_table_export_view'),
+    'order': [[0, 'desc']], 'columnDefs': [], 'exportColumns': [0,1,2,3,4,5],
+    'filters': [{'id': 'adu-history-search', 'attribute': 'search', 'contains': true}]
+}|tojson }}</script>
+<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}"></script>
 {% endblock %}

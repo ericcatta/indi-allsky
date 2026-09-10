@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync(require('node:path').join(__dirname,
     '../indi_allsky/flask/static/modern_admin/operations-table.js'), 'utf8');
 
-function fixture() {
+function fixture(overrides = {}) {
     const records = [
         {dataset: {search: 'Camera 1 upload', state: 'SUCCESS', queue: 'UPLOAD'}},
         {dataset: {search: 'Camera 2 upload', state: 'FAILED', queue: 'UPLOAD'}},
@@ -22,7 +22,7 @@ function fixture() {
         emptyMessage: 'No records', filters: [
             {id: 'search', attribute: 'search', contains: true},
             {id: 'state', attribute: 'state'}, {id: 'queue', attribute: 'queue'},
-        ]};
+        ], ...overrides};
     let options, predicate = () => true, onDraw;
     const visible = () => records.filter((_row, index) => predicate('', [], index));
     const api = {
@@ -32,7 +32,7 @@ function fixture() {
         on: (_event, fn) => { onDraw = fn; },
         draw: () => onDraw(),
         buttons: {exportData: options => {
-            assert.equal(options.columns, ':not(:last-child)');
+            assert.deepEqual(JSON.parse(JSON.stringify(options.columns)), config.exportColumns || ':not(:last-child)');
             return {header: ['Record'], body: visible().map(row => [row.dataset.search])};
         }},
     };
@@ -76,4 +76,12 @@ app.change('queue', ''); app.change('state', '');
 assert.equal(app.count.textContent, '3 shown');
 assert.equal(app.options.buttons[0].extend, 'copyHtml5');
 assert.equal(app.options.buttons[0].exportOptions.escapeExcelFormula, true);
+const history = fixture({order:[[0,'desc']],columnDefs:[],exportColumns:[0,1,2,3,4,5]});
+assert.equal(JSON.stringify(history.options.order), '[[0,"desc"]]');
+assert.equal(history.options.columnDefs.length,0);
+assert.equal(JSON.stringify(history.options.buttons[0].exportOptions.columns),'[0,1,2,3,4,5]');
+assert.equal(JSON.stringify(history.options.lengthMenu),'[20,50,100,-1]');
+history.change('search','Camera 2');
+history.options.buttons[1].action(null,history.api);
+assert.equal(history.forms.length,1);
 console.log('Operations table controller: combined filters, counts, reset, empty rows, filtered export payload/CSRF and native attachment forms: PASS');

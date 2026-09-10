@@ -1,0 +1,30 @@
+{
+  "baseline": "be09183b",
+  "scope": "Operational ADU history with Classic disabled",
+  "changes": [
+    "Restored search, sorting, page size and filtered copy/CSV/Excel controls",
+    "Explicit camera/profile selection uses the shared Hybrid media selector",
+    "Unavailable jSQM and star measurements render as a dash"
+  ],
+  "preserved": [
+    "Existing seven-day and indexed night-hour query semantics",
+    "Existing aggregation and numeric formatting",
+    "Default task/user table behavior",
+    "Configuration and captured media"
+  ],
+  "automatic_evidence": [
+    "Two roles and two cameras with distinct nonempty ADU rows",
+    "Invalid camera and mismatched/unknown profile rejected",
+    "Null jSQM and stars render without an exception",
+    "CSV attachment contains all six headers and rendered values for both cameras and roles",
+    "Controller simulation verifies date sort, all-column export and unchanged defaults"
+  ],
+  "limits": [
+    "Native browser search, sorting, pagination, clipboard and downloads remain unverified while the Mac is locked",
+    "No deployment or Classic removal in this mission"
+  ],
+  "python_cases": 134,
+  "javascript_cases": 33,
+  "failures": [],
+  "additional_validation": "Extended ADU CSV attachment test also executed separately after adding the CSV assertions"
+}

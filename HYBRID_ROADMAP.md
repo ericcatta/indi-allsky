@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- ADU History Hybrid: ripristinati ricerca, ordinamento, paginazione e export
+  copia/CSV/Excel tramite il controller tabelle condiviso. Corretto l'ambito
+  camera/profilo e gestite misure jSQM/stelle nulle. Preservate query storica,
+  aggregazione e formattazione dei valori presenti. Test con righe non vuote
+  per due camere e ruoli, inclusa verifica del CSV effettivo: superati.
+  Regressione: 134 entrypoint Python e 33 JavaScript. Prova browser nativa e
+  deploy restano aperti; evidenze in `testing/evidence/hybrid-adu-history.json`.
+
 - Shell Hybrid separata dagli asset dei tab Classic: `css/style.css` e
   `js/indi-allsky-tabs.js` caricati soltanto dalla shell Classic, i cui fingerprint
   restano identici. Il fixture blocca URL statici Flask verso asset Classic o
