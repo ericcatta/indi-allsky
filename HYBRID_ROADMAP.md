@@ -16,6 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Verificato sul Pi il recupero dei provider dopo i fallimenti storici: tutti
+  i cinque componenti aurora disponibili su entrambe le camere; aggiornamento
+  satelliti successivo riuscito con tutti e tre i cataloghi presenti e conteggi
+  coerenti con l'esito del worker. Starlink aveva registrato HTTP 403 e risposte
+  TLE malformate; per aurora lo storico identifica solo il componente indisponibile.
+  Browser HTTPS AstroPanel: 157 righe e refresh completato con pulsante riabilitato.
+  Storico preservato, nessun riavvio o modifica
+  runtime necessaria. Verifica puntuale, non disponibilita' continua o validazione
+  delle posizioni nel cielo. Evidenze: `testing/evidence/hybrid-provider-recovery-live.json`.
+
 - Chiarito il significato dei valori SQM elevati: gli scatti normali salvano
   l'indice jSQM pesato con esposizione/gain, distinto dalla magnitudine prodotta
   dalle acquisizioni SQM dedicate. Corrette etichette di Now, Highlights, dettaglio

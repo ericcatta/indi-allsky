@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-10",
+  "repository_baseline": "ba54830c",
+  "installed_release": "0291efd493a12a7b4eae204f33f4e193d12b7d90",
+  "scope": "Read-only production provider recovery verification and native AstroPanel refresh",
+  "historical_failures": {
+    "aurora": {
+      "kpindex_unavailable": 1,
+      "mag_unavailable": 2,
+      "root_cause": "Not retained in the task result; no unsupported network diagnosis"
+    },
+    "satellite_starlink": {
+      "HTTP 403": 3,
+      "Malformed TLE record": 6
+    }
+  },
+  "current_evidence": {
+    "aurora": {
+      "cameras_checked": 2,
+      "available_components_per_camera": 5,
+      "successful_updates_after_failures": true
+    },
+    "satellites": {
+      "successful_update_after_failures": true,
+      "latest_update_failed_groups": [],
+      "saved_catalog_counts": {
+        "visual": 157,
+        "starlink": 10713,
+        "stations": 20
+      },
+      "saved_counts_match_worker_outcome": true
+    },
+    "browser": {
+      "surface": "Production HTTPS AstroPanel",
+      "role": "authenticated administrator",
+      "rendered_satellite_rows": 157,
+      "refresh_clicked": true,
+      "loading_state_observed": true,
+      "updated_status_observed": true,
+      "refresh_reenabled": true,
+      "returned_to_now": true
+    }
+  },
+  "decision": "Retain historical failures. Providers recovered through later successful updates; no restart, purge, forced refresh or code change required by this evidence.",
+  "limits": [
+    "Bounded current-state verification, not continuous provider availability",
+    "No physical observation verifying calculated satellite positions",
+    "Native ordinary/anonymous provider page flows not exercised in this mission",
+    "Aurora failure root causes unavailable in retained task summaries",
+    "No code changes and no regression rerun for this read-only acceptance mission",
+    "Classic removal and complete interaction matrix remain open",
+    "24-hour observation remains a separate future activity"
+  ]
+}
