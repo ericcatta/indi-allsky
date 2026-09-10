@@ -1,0 +1,61 @@
+{
+  "release": "0291efd493a12a7b4eae204f33f4e193d12b7d90",
+  "previous": "0733234875d6d12e6e07a1fa0db5de7943df3ecb",
+  "date": "2026-09-10",
+  "scope": "Production web deployment of verified observatory, diagnostics, table controls, camera scope and VirtualSky corrections",
+  "backup": {
+    "online_sqlite": true,
+    "integrity": "ok",
+    "code_and_flask_configuration_saved": true,
+    "details": "Protected deployment record on device; private backup contents and logs are not included"
+  },
+  "deployment": {
+    "web_only_restart": true,
+    "capture_process_unchanged": true,
+    "configuration_revision_unchanged": true,
+    "tracked_checkout_clean": true,
+    "untracked_user_files_preserved": true,
+    "web_active": true,
+    "web_automatic_restarts": 0
+  },
+  "acceptance": [
+    {
+      "case": "Both cameras after backup",
+      "result": "passed",
+      "evidence": "New image records for cameras 1 and 2; corresponding files present and nonempty."
+    },
+    {
+      "case": "HTTPS Now after deployment",
+      "result": "passed",
+      "evidence": "Authenticated browser loaded both camera images and Running capture summary."
+    },
+    {
+      "case": "SQM camera navigation",
+      "result": "passed",
+      "evidence": "Switch to second profile selected its link and changed displayed saved readings; does not validate physical calibration."
+    },
+    {
+      "case": "VirtualSky both cameras",
+      "result": "passed",
+      "evidence": "Selected profile, decoded frame and rendered canvas agreed for both cameras; current frame status updated."
+    },
+    {
+      "case": "VirtualSky fullscreen on production frame",
+      "result": "passed",
+      "evidence": "Enter and Exit fullscreen succeeded; focus returned to Fullscreen and page controls returned."
+    }
+  ],
+  "predeployment_regression": {
+    "python_entrypoints": 136,
+    "javascript_entrypoints": 33,
+    "failures": []
+  },
+  "limits": [
+    "This is bounded release acceptance, not the exhaustive per-control matrix",
+    "Remaining production actions, roles, narrow-screen checks and integrations remain open",
+    "Anomalous stored SQM values require a separate calibration/labeling review; no scientific algorithm changed",
+    "Rollback code path prepared but not drilled against the installed release",
+    "Classic still enabled and present",
+    "24-hour monitoring deferred to a separate activity after Classic removal"
+  ]
+}

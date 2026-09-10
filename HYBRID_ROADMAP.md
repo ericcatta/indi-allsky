@@ -16,6 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Distribuito sul Raspberry il rilascio web `0291efd4` (da `07332348`) con backup
+  online SQLite verificato, codice/configurazione salvati e rollback predisposto.
+  Riavviato solo il web; acquisizione e revisione config invariate, file utente
+  preservati. Verificati nuovi file di entrambe le camere e browser HTTPS: Now,
+  cambio camera SQM, VirtualSky su entrambe le camere e fullscreen con uscita.
+  Regressione pre-deploy: 136 Python e 33 JavaScript superati. Collaudo limitato,
+  Classic ancora presente; calibrazione dei valori SQM anomali resta da verificare.
+  Aggiornate istruzioni operative e separazione del futuro test 24 ore.
+  Evidenze: `testing/evidence/hybrid-observatory-ui-deployment.json`.
+
 - VirtualSky fullscreen/export: aggiunta uscita esplicita nel frame a schermo
   intero con ritorno del focus. Il pulsante e' escluso dal PNG; nascosto anche
   l'aiuto non interattivo della libreria che contaminava l'immagine esportata.

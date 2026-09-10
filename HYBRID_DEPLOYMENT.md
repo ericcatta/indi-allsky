@@ -1,76 +1,67 @@
 # Hybrid: deployment and rollback
 
-## Installed release, 7 September 2026
+## Installed release, 10 September 2026
 
-The Raspberry checkout `/home/eric/indi-allsky` runs
-`775a19d0e8a300fa24c10b47495720f6b4bcf0e4`, deployed at 10:09:50 CEST.
-The previous installed revision was `b65cd8560715b8878fbd44af7a8818f94cd67533`.
-Classic is still enabled; this release does not remove it.
+The Raspberry runs `0291efd493a12a7b4eae204f33f4e193d12b7d90`, upgraded from
+`0733234875d6d12e6e07a1fa0db5de7943df3ecb`. This release updates the web interface,
+observatory/diagnostic reads, camera navigation and VirtualSky. It does not change
+capture workers, scheduling, database schema or saved configuration.
 
-The new 24-hour observation starts at 10:09:50. A service restart or capture/
-scheduling correction requires a new observation period. Passing isolated tests
-and a fresh frame after deployment do not complete that requirement.
+Only the user web service and its activating socket were stopped and started.
+The capture process remained unchanged. Classic is still enabled and present.
 
-Release evidence: `testing/evidence/hybrid-release-775a19d0-2026-09-07.json`.
-On the Raspberry, detailed test logs are in
-`/home/eric/hybrid-release-evidence-775a19d0`.
+Release evidence: `testing/evidence/hybrid-observatory-ui-deployment.json`.
+The 136 Python and 33 JavaScript entrypoints passed before deployment. Direct
+HTTPS browser checks covered Now, both camera images, SQM camera navigation,
+VirtualSky on both cameras and its fullscreen round-trip. Newly saved image
+records had corresponding nonempty files for both cameras.
+
+These are bounded acceptance checks, not completion of the whole migration.
+The 24-hour day/night observation is a separate future activity, after migration
+and Classic removal, as requested. It is not a gate for this migration and must
+not be restarted automatically.
 
 ## Recovery assets
 
-Protected backup directory:
-`/home/eric/hybrid-backups/release-775a19d0-20260907-100344`.
-It contains the online SQLite backup, copied Flask configuration, manifest and
-the deployment record. SQLite integrity was checked. Backup size is
-828,977,152 bytes. These files may contain credentials; keep their existing
-restricted permissions and do not attach them to public reports.
+On the Raspberry, `~/hybrid-observatory-ui-release-state.json` records the exact
+previous/candidate revisions and protected backup directory. That directory
+contains an online SQLite backup with successful integrity check, the previous
+code archive, Flask configuration, deployment script and deployment record.
+Keep backup permissions restricted; do not publish their contents or private logs.
 
-Preserve untracked user files: `HYBRID_ROADMAP.local.md`,
-`ZWO CCD ASI678MC.CCD1.CCD1.fits`, `audit/`, and `indi-allsky.sqlite` in the checkout.
-Never use `git clean` for deployment. The runtime database remains at
-`/var/lib/indi-allsky/indi-allsky.sqlite`; the checkout copy is not the live DB.
+Preserve untracked user files in the checkout. Never use `git clean` for
+deployment. The checkout database copy is not the runtime database. This release
+preserved the untracked files and verified a clean tracked checkout.
 
-## Roll back code if this release fails
+## Roll back this web release
 
-Use an authenticated SSH terminal as `eric`. Check for tracked edits first and
-save any new work before rollback. Authenticate sudo **before** stopping services.
-Stop the timer as well as the capture service so it cannot restart during checkout.
-The following assumes the currently recorded timer/service were active; if that
-operational state has changed, preserve the actual state instead.
+Use an authenticated SSH terminal on the Raspberry under the deployment user.
+Inspect the current Git revision and tracked changes before proceeding. Save any
+new work first. The protected script requires the exact installed candidate and
+a clean tracked checkout; it refuses to discard tracked edits or roll back an
+unrelated release.
 
 ```sh
-cd /home/eric/indi-allsky
-(
-  set -e
-  git diff --exit-code
-  git diff --cached --exit-code
-  sudo -v
-  sudo -n true
-  trap 'sudo -n systemctl start apache2; systemctl --user start indi-allsky.service; systemctl --user start indi-allsky.timer' EXIT
-  systemctl --user stop indi-allsky.timer
-  systemctl --user stop indi-allsky.service
-  sudo -n systemctl stop apache2
-  git reset --hard b65cd8560715b8878fbd44af7a8818f94cd67533
-  /home/eric/indi-allsky/virtualenv/indi-allsky/bin/python -m compileall -q indi_allsky
-  sudo -n /usr/sbin/apache2ctl configtest
-)
+release_backup="$(python3 -c 'import json; from pathlib import Path; print(json.loads((Path.home()/"hybrid-observatory-ui-release-state.json").read_text())["backup"])')"
+python3 "$release_backup/deploy.py" --rollback "$release_backup"
 ```
 
-Then inspect `systemctl --user status indi-allsky.service`, timer and Apache state,
-check Now, and verify newly created image files for **both** cameras. Review the
-journal with `_SYSTEMD_USER_UNIT=indi-allsky.service`. Confirm the resulting Git
-revision and restart the observation baseline. A failed restart requires immediate
-manual recovery; do not infer success from the checkout command alone.
+The script stops the web socket and service, restores the previous code, starts
+the web service and previously active socket, and checks process readiness. It
+does not stop capture or restore the database. Then verify HTTPS Now, fresh files
+for both cameras, service state and the Git revision. Read the protected backup's
+`deployment.json` for the rollback result; do not infer success from a checkout
+command alone. The rollback path is prepared but has not been exercised by
+reverting this live release.
 
-This is a code rollback; it has not been drilled by reverting the live release.
-It does **not** restore the old database automatically, because doing so would
-remove records acquired since the backup. Restore database/configuration only
-for a diagnosed need, with all writers stopped and a fresh copy of current data
-saved first. No schema migration was part of this deployment.
+A database restore would discard records acquired after the backup. Perform one
+only for a diagnosed need, with all writers stopped and a fresh copy of current
+data saved first. No database restore is part of this web rollback.
 
-## Next acceptance checks
+## Remaining acceptance
 
-- Confirm completed automatic backup and a real readable compressed database file.
-- Confirm aurora/smoke/TLE/health task results; expired or empty queues are not success.
-- Complete the UI interaction matrix and real effects using dedicated test data.
-- Complete day/night stability and check recovery for both camera profiles.
-- Remove Classic only after parity, then repeat the essential checks.
+- Complete the page/control matrix, roles, camera/profile isolation and mobile checks.
+- Verify remaining effects and integrations using dedicated test data/destinations.
+- Review anomalous stored SQM values separately from UI data/selection correctness.
+- Demonstrate functional parity, remove Classic, and repeat essential checks.
+- Schedule the separate 24-hour observation only when the user starts that activity.
