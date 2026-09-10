@@ -177,7 +177,34 @@ def run(runtime_config):
             assert clear['FILETRANSFER']['PASSWORD'] == 'synthetic-snapshot-secret'
             assert db.session.get(IndiAllSkyDbConfigTable, 1).data == encrypted_before
             assert IndiAllSkyDbTaskQueueTable.query.count() == 0
-        print('Hybrid full Settings save/download/upload restore and internal snapshot restore: PASS')
+        # More than two pages, including identical timestamps, must remain reachable.
+        from datetime import datetime, timezone
+        with app.app_context():
+            timestamp = datetime.now(timezone.utc).replace(tzinfo=None)
+            for ident in range(6,57):
+                db.session.add(IndiAllSkyDbConfigTable(id=ident, createDate=timestamp,
+                    level='20260330.0', data=deepcopy(original), note='Page fixture', user_id=1))
+            db.session.commit()
+        for viewer in (client, ordinary):
+            for route in ('config-history', 'config-restore'):
+                ids = []
+                for page_number in (1,2,3):
+                    response = viewer.get('/indi-allsky/modern-admin/' + route,
+                        query_string={'page':page_number, 'camera_id':2, 'profile_id':'test-profile-2'})
+                    assert response.status_code == 200
+                    from html import unescape
+                    links = [unescape(x) for x in re.findall(r'href="([^"]+)"',response.text)]
+                    row_ids = [int(m.group(1)) for link in links if (m := re.fullmatch(r'/indi-allsky/modern-admin/config-restore/(\d+)',link))]
+                    assert len(row_ids) == (25 if page_number < 3 else 6), (route,page_number,row_ids)
+                    ids.extend(row_ids)
+                    if page_number < 3:
+                        assert any('page=' + str(page_number+1) in link and 'camera_id=2' in link and 'profile_id=test-profile-2' in link for link in links)
+                assert len(ids) == len(set(ids)) == 56
+                assert set(ids) == set(range(1,57))
+                assert viewer.get('/indi-allsky/modern-admin/' + route + '?page=4').status_code == 404
+                for bad_page in ('0','-1','bad','9999999999999999999999'):
+                    assert viewer.get('/indi-allsky/modern-admin/' + route + '?page=' + bad_page).status_code == 400
+        print('Hybrid Settings save/download/restore and complete paged history: PASS')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)

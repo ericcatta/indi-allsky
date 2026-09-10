@@ -8962,6 +8962,19 @@ class ModernAdminUserDetailView(ModernAdminUsersView):
 
 
 class ModernAdminConfigRevisionMetadataMixin:
+    def revision_page_context(self, kind):
+        try:
+            page = int(request.args.get('page', '1'))
+        except ValueError:
+            abort(400, description='A positive page number is required.')
+        if not 1 <= page <= 2147483647:
+            abort(400, description='A positive page number is required.')
+        service = self.settings_revision_metadata_service()
+        try:
+            return getattr(service, kind + '_context')(limit=self.config_display_limit, page=page)
+        except ValueError:
+            abort(404, description='Snapshot page does not exist.')
+
     def settings_revision_metadata_service(self):
         return ModernAdminSettingsRevisionMetadataService(
             query=IndiAllSkyDbConfigTable.query,
@@ -8979,9 +8992,7 @@ class ModernAdminConfigHistoryView(ModernAdminConfigRevisionMetadataMixin, Moder
 
     def get_context(self):
         context = super(ModernAdminConfigHistoryView, self).get_context()
-        context.update(self.settings_revision_metadata_service().history_context(
-            limit=self.config_display_limit,
-        ))
+        context.update(self.revision_page_context('history'))
 
         return context
 
@@ -8995,9 +9006,7 @@ class ModernAdminConfigRestoreView(ModernAdminConfigRevisionMetadataMixin, Moder
 
     def get_context(self):
         context = super(ModernAdminConfigRestoreView, self).get_context()
-        context.update(self.settings_revision_metadata_service().restore_context(
-            limit=self.config_display_limit,
-        ))
+        context.update(self.revision_page_context('restore'))
 
         context['form_config_restore'] = IndiAllskyConfigRestoreForm(
             indi_allsky_config=self.indi_allsky_config,

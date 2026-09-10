@@ -17,6 +17,16 @@ accettati sulla stessa revisione. Il comando ora riserva la scrittura prima
 del controllo: un processo salva, l'altro rileva la revisione cambiata.
 Deploy e collaudo in produzione rimangono aperti; Classic non e' ancora rimosso.
 
+## Cronologia completa Settings — candidato 10 settembre 2026
+
+History e Restore espongono ora tutte le revisioni con pagine server da 25 righe,
+conteggio totale e ordinamento deterministico anche a timestamp uguali. Hybrid
+possiede la pianificazione delle pagine; i link conservano camera e profilo.
+La tabella History non aggiunge una seconda paginazione interna. Filtri ed export
+si applicano alla pagina corrente, come indicato nella UI. Verificate 56 revisioni
+con entrambi i ruoli e navigazione browser fino allo snapshot iniziale. Deploy
+ancora aperto; la modifica non conclude il collaudo complessivo o la rimozione Classic.
+
 ## Obiettivo
 
 - Sistema AllSky multicamera stabile e realmente per-camera.

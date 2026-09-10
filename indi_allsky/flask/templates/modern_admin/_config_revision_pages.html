@@ -1,0 +1,8 @@
+{% if revision_pages %}
+<nav class="modern-admin-link-grid" aria-label="Snapshot pages">
+    {% if revision_pages.previous %}<a href="{{ url_for(request.endpoint, page=revision_pages.previous, camera_id=request.args.get('camera_id', ''), profile_id=request.args.get('profile_id', '')) }}">Newer snapshots</a>{% endif %}
+    <span>Page {{ revision_pages.page }} of {{ revision_pages.pages }} · {{ revision_pages.total }} snapshots</span>
+    {% if revision_pages.next %}<a href="{{ url_for(request.endpoint, page=revision_pages.next, camera_id=request.args.get('camera_id', ''), profile_id=request.args.get('profile_id', '')) }}">Older snapshots</a>{% endif %}
+</nav>
+<p class="modern-admin-note">Table filters and exports apply to this page of snapshots.</p>
+{% endif %}

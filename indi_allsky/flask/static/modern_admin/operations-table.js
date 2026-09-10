@@ -14,10 +14,12 @@
         ...filter, element: document.getElementById(filter.id),
     }));
     const table = new DataTable(element, {
+        paging: config.paging !== false,
+        lengthChange: config.paging !== false,
         pageLength: 20,
         lengthMenu: [20, 50, 100, -1],
         order: config.order || [[1, 'desc']],
-        layout: {topStart: 'pageLength', topEnd: 'buttons'},
+        layout: {topStart: config.paging === false ? null : 'pageLength', topEnd: 'buttons'},
         buttons: [
             {extend: 'copyHtml5', exportOptions: {columns: exportColumns, escapeExcelFormula: true}},
             ...['csv', 'xlsx'].map(format => ({

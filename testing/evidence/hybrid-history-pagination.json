@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-10",
+  "baseline": "8b72ef8b",
+  "scope": "Reach all saved Settings revisions through Hybrid History and Restore",
+  "changes": [
+    "Server pages of 25 with total count and stable timestamp/ID order",
+    "Newer/older links preserve camera/profile",
+    "Invalid page 400 and absent page 404",
+    "History client pagination disabled to avoid nesting pagination; filtering/sorting/export retained and scoped explicitly to current page"
+  ],
+  "automatic": {
+    "fixture_revisions": 56,
+    "roles": [
+      "administrator",
+      "ordinary"
+    ],
+    "pages_each_view": [
+      25,
+      25,
+      6
+    ],
+    "all_ids_once": true,
+    "python_entrypoints": 137,
+    "python_failures": [],
+    "javascript_entrypoints": 34,
+    "javascript_failures": [],
+    "final_template_followup": "Settings integration rerun passed after disabling nested client pagination",
+    "diff_check": "passed"
+  },
+  "native_browser": {
+    "environment": "Synthetic sandbox; Classic forbidden",
+    "cases": [
+      "History older links reached pages 2 and 3 and snapshot 1",
+      "Newer link returned to page 2",
+      "Restore older links reached page 3 with IDs 6 through 1",
+      "Final History had 25 snapshot links and no page-length/internal-pagination controls",
+      "Search reduced displayed count to 1; clearing and older navigation worked"
+    ],
+    "cleanup": "Temporary tab closed and sandbox stopped"
+  },
+  "limits": [
+    "Not deployed",
+    "Filters and exports cover the current server page, not a global history search",
+    "Production browser acceptance remains blocked by previously reported automatic security review",
+    "Full product acceptance and physical Classic removal incomplete",
+    "24-hour observation excluded"
+  ]
+}

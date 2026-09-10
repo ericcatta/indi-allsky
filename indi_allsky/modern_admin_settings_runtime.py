@@ -1251,9 +1251,10 @@ class ModernAdminSettingsRevisionMetadataService:
         self.created_field = created_field
 
 
-    def history_context(self, limit=25):
-        rows = self.list_revisions(limit=limit, include_restore_state=False)
+    def history_context(self, limit=25, page=None):
+        rows = self.list_revisions(limit=limit, include_restore_state=False, page=page)
         return {
+            'revision_pages': self.pagination_context(limit, page),
             'modern_admin_config_history_rows'             : rows,
             'modern_admin_config_history_count'            : len(rows),
             'modern_admin_config_history_display_limit'    : limit,
@@ -1265,9 +1266,10 @@ class ModernAdminSettingsRevisionMetadataService:
         }
 
 
-    def restore_context(self, limit=25):
-        rows = self.list_revisions(limit=limit, include_restore_state=True)
+    def restore_context(self, limit=25, page=None):
+        rows = self.list_revisions(limit=limit, include_restore_state=True, page=page)
         return {
+            'revision_pages': self.pagination_context(limit, page),
             'modern_admin_config_restore_rows'             : rows,
             'modern_admin_config_restore_count'            : len(rows),
             'modern_admin_config_restore_display_limit'    : limit,
@@ -1294,10 +1296,15 @@ class ModernAdminSettingsRevisionMetadataService:
         }
 
 
-    def list_revisions(self, limit=25, include_restore_state=False):
+    def list_revisions(self, limit=25, include_restore_state=False, page=None):
         query = self.query
         if self.created_field is not None and hasattr(query, 'order_by'):
             query = query.order_by(self.created_field.desc())
+
+        if page is not None:
+            if self.id_field is not None:
+                query = query.order_by(self.id_field.desc())
+            query = query.offset((page - 1) * limit)
 
         if hasattr(query, 'limit'):
             query = query.limit(limit)
@@ -1306,6 +1313,18 @@ class ModernAdminSettingsRevisionMetadataService:
             self.format_revision(entry, include_restore_state=include_restore_state)
             for entry in query
         ]
+
+
+    def pagination_context(self, limit, page):
+        if page is None:
+            return None
+        total = self.query.count()
+        pages = max(1, (total + limit - 1) // limit)
+        if page < 1 or page > pages:
+            raise ValueError('Snapshot page does not exist')
+        return {'page': page, 'pages': pages, 'total': total,
+                'previous': page - 1 if page > 1 else None,
+                'next': page + 1 if page < pages else None}
 
 
     def lookup_revision(self, config_id):

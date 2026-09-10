@@ -91,3 +91,9 @@ assert.equal(textSearch.count.textContent,'3 shown');
 textSearch.change('search','absent');
 assert.equal(textSearch.count.textContent,'0 shown');
 console.log('Operations table controller: combined filters, counts, reset, empty rows, filtered export payload/CSRF and native attachment forms: PASS');
+
+const pagedHistory = fixture({paging: false});
+assert.equal(pagedHistory.options.paging, false);
+assert.equal(pagedHistory.options.lengthChange, false);
+assert.equal(pagedHistory.options.layout.topStart, null);
+assert.equal(fixture().options.paging, true);
