@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-10",
+  "previous": "0291efd493a12a7b4eae204f33f4e193d12b7d90",
+  "installed": "aa0afeff43de388bb2c393518a545ff4482435a9",
+  "scope": "Hybrid saved-image previews and jSQM labels",
+  "backup": {
+    "online_sqlite_integrity": "ok",
+    "previous_code_archive": true,
+    "protected_config_copy": true,
+    "rollback_script": true
+  },
+  "verification": {
+    "web_only_restart": true,
+    "capture_process_unchanged": true,
+    "configuration_bytes_unchanged": true,
+    "classic_frontend_disabled": true,
+    "tracked_checkout_clean": true,
+    "untracked_files_preserved": true,
+    "fresh_nonempty_files_after_deployment_both_cameras": true,
+    "https_preview_camera_1": [
+      4608,
+      2592
+    ],
+    "https_preview_camera_2": [
+      3840,
+      2160
+    ],
+    "preview_loading_status_cleared": true
+  },
+  "limits": [
+    "Bounded acceptance only; complete control matrix remains open",
+    "Download receipt issue not retested or declared fixed",
+    "Rollback prepared, not drilled",
+    "Classic files not removed",
+    "24-hour observation excluded"
+  ]
+}

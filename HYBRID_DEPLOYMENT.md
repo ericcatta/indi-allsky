@@ -2,21 +2,21 @@
 
 ## Installed release, 10 September 2026
 
-The Raspberry runs `0291efd493a12a7b4eae204f33f4e193d12b7d90`, upgraded from
-`0733234875d6d12e6e07a1fa0db5de7943df3ecb`. This release updates the web interface,
-observatory/diagnostic reads, camera navigation and VirtualSky. It does not change
-capture workers, scheduling, database schema or saved configuration.
+The Raspberry runs `aa0afeff43de388bb2c393518a545ff4482435a9`, upgraded from
+`0291efd493a12a7b4eae204f33f4e193d12b7d90`. This release adds saved-image previews
+and clarifies jSQM index labels. Only Hybrid templates and preview assets changed
+in the application; capture, scheduling, schema and configuration are unchanged.
 
-Only the user web service and its activating socket were stopped and started.
-The capture process remained unchanged. Classic files remain present, but the
-frontend was disabled on 10 September with `HYBRID_ENABLE_CLASSIC_UI=false`.
-Hybrid-only production acceptance is now active; physical removal remains open.
+Only the user web service and its activating socket were restarted. Capture
+remained unchanged; both cameras produced fresh nonempty files after deployment.
+`HYBRID_ENABLE_CLASSIC_UI=false` is preserved byte-for-byte in Flask configuration.
+Classic files remain present; physical removal is still open.
 
-Release evidence: `testing/evidence/hybrid-observatory-ui-deployment.json`.
-The 136 Python and 33 JavaScript entrypoints passed before deployment. Direct
-HTTPS browser checks covered Now, both camera images, SQM camera navigation,
-VirtualSky on both cameras and its fullscreen round-trip. Newly saved image
-records had corresponding nonempty files for both cameras.
+Release evidence: `testing/evidence/hybrid-image-preview-deployment.json`.
+The 136 Python entrypoints passed (two source-scanning tests passed after removal
+of transferred AppleDouble metadata); all 34 JavaScript entrypoints passed.
+Native sandbox checks covered both previews, mobile layout, missing-file state
+and recovery. Production HTTPS previews decoded at 4608×2592 and 3840×2160.
 
 These are bounded acceptance checks, not completion of the whole migration.
 The 24-hour day/night observation is a separate future activity, after migration
@@ -25,7 +25,7 @@ not be restarted automatically.
 
 ## Recovery assets
 
-On the Raspberry, `~/hybrid-observatory-ui-release-state.json` records the exact
+On the Raspberry, `~/hybrid-image-preview-release-state.json` records the exact
 previous/candidate revisions and protected backup directory. That directory
 contains an online SQLite backup with successful integrity check, the previous
 code archive, Flask configuration, deployment script and deployment record.
@@ -41,8 +41,11 @@ The latest protected `~/hybrid-backups/classic-mode-*` directory contains the
 original Flask configuration, `mode.json` and `mode.py`. Only the Classic flag
 changed. Restoring it restarts only the web service/socket and preserves capture.
 The helper refuses to overwrite configuration modified since the mode change.
-If reverting both mode and code, restore the mode first while the recorded
-release is still installed.
+The mode helper is pinned to release `0291efd4`. From the current release, first
+use the web-release rollback below to return to `0291efd4`, preserving the disabled
+mode. Only then run the mode helper if restoring Classic is specifically needed.
+If subsequently reverting the older observatory release as well, restore its mode
+before that older code rollback. Never bypass either helper's revision guard.
 
 ```sh
 mode_backup="$(python3 -c 'from pathlib import Path; print(max((Path.home()/"hybrid-backups").glob("classic-mode-*"), key=lambda p: p.stat().st_mtime))')"
@@ -62,7 +65,7 @@ a clean tracked checkout; it refuses to discard tracked edits or roll back an
 unrelated release.
 
 ```sh
-release_backup="$(python3 -c 'import json; from pathlib import Path; print(json.loads((Path.home()/"hybrid-observatory-ui-release-state.json").read_text())["backup"])')"
+release_backup="$(python3 -c 'import json; from pathlib import Path; print(json.loads((Path.home()/"hybrid-image-preview-release-state.json").read_text())["backup"])')"
 python3 "$release_backup/deploy.py" --rollback "$release_backup"
 ```
 
@@ -82,6 +85,6 @@ data saved first. No database restore is part of this web rollback.
 
 - Complete the page/control matrix, roles, camera/profile isolation and mobile checks.
 - Verify remaining effects and integrations using dedicated test data/destinations.
-- Review anomalous stored SQM values separately from UI data/selection correctness.
+- Treat image jSQM as an uncalibrated index; dedicated magnitude measurements are separate.
 - Demonstrate functional parity, remove Classic, and repeat essential checks.
 - Schedule the separate 24-hour observation only when the user starts that activity.
