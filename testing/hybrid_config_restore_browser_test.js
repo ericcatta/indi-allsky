@@ -5,13 +5,13 @@ const path = require('node:path');
 const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '../indi_allsky/flask/static/modern_admin/config-restore.js'), 'utf8');
 
-async function run({checked = false, disabled = false, response, reject, twice = false} = {}) {
+async function run({snapshot = false, checked = false, disabled = false, response, reject, twice = false} = {}) {
     let handler, calls = 0, sent;
     const button = {disabled: false}, status = {textContent: ''};
     const form = {
         action: '/indi-allsky/ajax/config/restore',
         querySelector: selector => selector.startsWith('button') ? button : status,
-        elements: {namedItem: () => ({checked, disabled})},
+        elements: {namedItem: () => snapshot ? null : ({checked, disabled})},
         addEventListener: (name, callback) => {assert.equal(name, 'submit'); handler = callback;},
     };
     class Payload extends Map {
@@ -36,11 +36,12 @@ async function run({checked = false, disabled = false, response, reject, twice =
     assert.equal(calls, 1);
     assert.equal(button.disabled, false);
     for (const flag of ['RESET_KEYS', 'FLUSH_CONFIGS']) {
-        assert.equal(sent.body.get(flag), checked && !disabled ? 'true' : '');
+        assert.equal(sent.body.get(flag), snapshot ? undefined : (checked && !disabled ? 'true' : ''));
     }
     return status.textContent;
 }
 (async () => {
+    assert.equal(await run({snapshot: true, twice: true}), 'Restored Config');
     assert.equal(await run({twice: true}), 'Restored Config');
     assert.match(await run({checked: true}), /sign in again/);
     assert.equal(await run({checked: true, disabled: true}), 'Restored Config');

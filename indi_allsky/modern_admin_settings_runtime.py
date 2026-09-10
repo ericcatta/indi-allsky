@@ -1169,6 +1169,18 @@ class ModernAdminSettingsRestoreService:
         }
 
 
+    def restore_snapshot(self, snapshot, username, config_adapter, password_key_adapter):
+        # Decryption may mutate nested mappings; never alter the historical row.
+        from copy import deepcopy
+        config = deepcopy(snapshot.data)
+        self.validate_restore_target(config)
+        config = ModernAdminSettingsCredentialDecryptionService(
+            password_key_adapter=password_key_adapter,
+        ).decrypt_config(config)
+        return self.restore_config(config, username, config_adapter,
+                                   note='Restored internal snapshot {0}'.format(snapshot.id))
+
+
     def restore_config(self, config, username, config_adapter, note=None):
         self.validate_restore_target(config)
         config_adapter.config = config

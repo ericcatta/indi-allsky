@@ -80,6 +80,8 @@ def run(runtime_config, port, upgrade_fixture=None, maintenance_fixture=False):
                 return None
             if request.path == '/indi-allsky/ajax/generate' and isinstance(payload, dict) and payload.get('ACTION_SELECT') in ('generate_video', 'generate_k_st', 'generate_video_k_st', 'generate_panorama_video'):
                 return None
+            if re.fullmatch(r'/indi-allsky/modern-admin/config-restore/[1-9][0-9]*/apply', request.path):
+                return None  # Writes only a new in-memory config revision; no reload or key reset.
             notification_ack = re.fullmatch(r'/indi-allsky/modern-admin/notifications/[1-3]/acknowledge', request.path)
             if not notification_ack and request.path not in ('/indi-allsky/login', '/indi-allsky/ajax/config',
                                     '/indi-allsky/ajax/user', '/indi-allsky/ajax/config/restore', '/indi-allsky/modern-admin/operations/export'):

@@ -4,6 +4,7 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/config-restore.js', v='snapshot-1') }}"></script>
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -21,12 +22,12 @@ var camera_id = {{ camera_id }};
             <div class="modern-admin-card-label">Config ID</div>
             <h3>{{ modern_admin_config_restore_detail.id }}</h3>
             <p>{{ modern_admin_config_restore_detail.created }}</p>
-            <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
+            <span class="modern-admin-status-pill modern-admin-status-muted">Snapshot</span>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Restore status</div>
             <h3>{{ modern_admin_config_restore_detail.restore_state }}</h3>
-            <p>Metadata inspection only.</p>
+            <p>The snapshot is validated again before restoration.</p>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Encrypted</div>
@@ -57,7 +58,15 @@ var camera_id = {{ camera_id }};
         </dl>
 
         {% if current_user.is_authenticated and current_user.is_admin %}
-        <p><a href="{{ url_for('indi_allsky.config_download_view', id=modern_admin_config_restore_detail.id) }}">Download this snapshot</a> to restore it through Config Restore. The downloaded file may contain secrets; keep it private.</p>
+        <p><a href="{{ url_for('indi_allsky.config_download_view', id=modern_admin_config_restore_detail.id) }}">Download this snapshot</a> for an external backup or restore from file. The downloaded file may contain secrets; keep it private.</p>
+        <form id="hybrid-config-restore" method="post" action="{{ url_for('indi_allsky.modern_admin_snapshot_restore_view', config_id=modern_admin_config_restore_detail.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="EXPECTED_CONFIG_ID" value="{{ modern_admin_expected_config_id }}">
+            <p>This restores the whole configuration, including all camera profiles, as a new revision. History and security keys are retained. Capture is not restarted.</p>
+            <label><input type="checkbox" name="CONFIRM_RESTORE" value="yes" required> Restore snapshot {{ modern_admin_config_restore_detail.id }} as the active configuration</label>
+            <button type="submit">Restore this snapshot</button>
+            <p role="status" aria-live="polite" data-restore-status></p>
+        </form>
         {% endif %}
 
         <section class="modern-admin-link-grid">

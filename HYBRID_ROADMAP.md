@@ -3,6 +3,17 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Restore diretto snapshot Hybrid — candidato 10 settembre 2026
+
+Il dettaglio snapshot consente all'amministratore di ripristinare una revisione
+interna senza esportarla e ricaricarla. Il comando Hybrid usa la validazione e
+persistenza Settings condivisa, decifra le credenziali su una copia e conserva
+lo snapshot storico. Richiede CSRF, conferma esplicita e revisione corrente
+coerente con la pagina; conserva cronologia e chiavi e non riavvia capture.
+Download e restore da file restano disponibili. Il collaudo browser isolato
+verifica la nuova revisione e il rifiuto di un secondo invio dalla stessa pagina.
+Deploy e collaudo in produzione rimangono aperti; Classic non e' ancora rimosso.
+
 ## Obiettivo
 
 - Sistema AllSky multicamera stabile e realmente per-camera.

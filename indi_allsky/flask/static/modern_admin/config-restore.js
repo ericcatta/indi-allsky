@@ -12,6 +12,7 @@
         // The existing endpoint treats any nonempty string as true.
         ['RESET_KEYS', 'FLUSH_CONFIGS'].forEach(function (name) {
             const field = form.elements.namedItem(name);
+            if (!field) return;
             payload.set(name, field.checked && !field.disabled ? 'true' : '');
         });
         pending = true;

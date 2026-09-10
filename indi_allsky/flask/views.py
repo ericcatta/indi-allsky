@@ -191,6 +191,7 @@ from .forms import IndiAllskyIndiServerChangeForm
 
 from .notification_views import ModernAdminNotificationAcknowledgeView
 from .table_export_views import ModernAdminTableExportView
+from .snapshot_restore import ModernAdminSnapshotRestoreView
 from .public_media import PublicLatestMediaView, PublicMediaViewerView, PublicMediaOriginalView
 from .media_archive import ModernAdminMediaArchive, archive_parameters, KINDS as ARCHIVE_KINDS
 from .mini_generation import ModernAdminMiniPreviewView, queue_mini_generation
@@ -9021,6 +9022,7 @@ class ModernAdminConfigRestoreDetailView(ModernAdminConfigRestoreView):
 
         try:
             context.update(self.settings_revision_metadata_service().restore_detail_context(self.config_id))
+            context['modern_admin_expected_config_id'] = self._indi_allsky_config_obj.config_id
         except NoResultFound:
             abort(404)
 
@@ -18050,6 +18052,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/users/<int:user_id>', view_func=ModernAdminUserDetailView.as_view('modern_admin_user_detail_view', template_name='modern_admin/user_detail.html'))
     bp_allsky.add_url_rule('/modern-admin/config-history', view_func=ModernAdminConfigHistoryView.as_view('modern_admin_config_history_view', template_name='modern_admin/config_history.html'))
     bp_allsky.add_url_rule('/modern-admin/config-restore', view_func=ModernAdminConfigRestoreView.as_view('modern_admin_config_restore_view', template_name='modern_admin/config_restore.html'))
+    bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>/apply', view_func=ModernAdminSnapshotRestoreView.as_view('modern_admin_snapshot_restore_view'))
     bp_allsky.add_url_rule('/modern-admin/config-restore/<int:config_id>', view_func=ModernAdminConfigRestoreDetailView.as_view('modern_admin_config_restore_detail_view', template_name='modern_admin/config_restore_detail.html'))
     bp_allsky.add_url_rule('/modern-admin/notifications/<int:notification_id>/acknowledge', view_func=ModernAdminNotificationAcknowledgeView.as_view('modern_admin_notification_acknowledge_view'), methods=['POST'])
     bp_allsky.add_url_rule('/modern-admin/media/archive', view_func=ModernAdminMediaArchiveView.as_view('modern_admin_media_archive_view', template_name='modern_admin/media_archive.html'))

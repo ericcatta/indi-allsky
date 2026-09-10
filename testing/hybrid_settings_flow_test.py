@@ -129,7 +129,41 @@ def run(runtime_config):
             headers={'X-CSRFToken':ordinary_token}).status_code == 400
         with app.app_context():
             assert IndiAllSkyDbConfigTable.query.count() == 3
-        print('Hybrid full Settings save/download/restore with real isolated persistence: PASS')
+        snapshot_url = '/indi-allsky/modern-admin/config-restore/1/apply'
+        snapshot_payload = {'CONFIRM_RESTORE':'yes', 'EXPECTED_CONFIG_ID':'3'}
+        assert client.get(snapshot_url).status_code == 405
+        assert client.post(snapshot_url, data=snapshot_payload).status_code == 400
+        assert client.post(snapshot_url, data={'EXPECTED_CONFIG_ID':'3'}, headers=headers).status_code == 400
+        assert ordinary.post(snapshot_url, data=snapshot_payload, headers={'X-CSRFToken':ordinary_token}).status_code == 403
+        assert client.post(snapshot_url, data=dict(snapshot_payload, EXPECTED_CONFIG_ID='2'), headers=headers).status_code == 409
+        result = client.post(snapshot_url, data=snapshot_payload, headers=headers)
+        assert result.status_code == 200 and 'revision 4' in result.json['success-message'], result.json
+        assert client.post(snapshot_url, data=snapshot_payload, headers=headers).status_code == 409
+        with app.app_context():
+            restored = db.session.get(IndiAllSkyDbConfigTable, 4)
+            assert restored.data['MULTI_CAMERA'] == original['MULTI_CAMERA']
+            assert restored.data['OWNER'] == original['OWNER']
+            assert restored.note == 'Restored internal snapshot 1'
+            assert db.session.get(IndiAllSkyDbConfigTable, 1).data == original
+            assert IndiAllSkyDbTaskQueueTable.query.count() == 0
+            # Encrypted internal snapshots must retain secrets without mutating history.
+            from indi_allsky.modern_admin_settings_runtime import ModernAdminSettingsCredentialEncryptionService, ModernAdminSettingsCredentialDecryptionService
+            encrypted_source = deepcopy(original)
+            encrypted_source['ENCRYPT_PASSWORDS'] = True
+            encrypted_source['FILETRANSFER']['PASSWORD'] = 'synthetic-snapshot-secret'
+            encrypted, _ = ModernAdminSettingsCredentialEncryptionService(lambda: app.config['PASSWORD_KEY']).encrypt_config(encrypted_source)
+            db.session.get(IndiAllSkyDbConfigTable, 1).data = encrypted
+            db.session.commit()
+            encrypted_before = deepcopy(encrypted)
+        result = client.post(snapshot_url, data=dict(snapshot_payload, EXPECTED_CONFIG_ID='4'), headers=headers)
+        assert result.status_code == 200, result.json
+        with app.app_context():
+            saved = deepcopy(db.session.get(IndiAllSkyDbConfigTable, 5).data)
+            clear = ModernAdminSettingsCredentialDecryptionService(lambda: app.config['PASSWORD_KEY']).decrypt_config(saved)
+            assert clear['FILETRANSFER']['PASSWORD'] == 'synthetic-snapshot-secret'
+            assert db.session.get(IndiAllSkyDbConfigTable, 1).data == encrypted_before
+            assert IndiAllSkyDbTaskQueueTable.query.count() == 0
+        print('Hybrid full Settings save/download/upload restore and internal snapshot restore: PASS')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)

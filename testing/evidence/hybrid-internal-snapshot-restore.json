@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-10",
+  "baseline": "9ddfdd6f",
+  "scope": "Direct internal snapshot restore through Hybrid",
+  "behavior": [
+    "Admin POST with global CSRF validation and explicit confirmation",
+    "Reject stale expected revision, including repeat submission after successful restore",
+    "Deep-copy and decrypt snapshot credentials before existing validated save; preserve historical row",
+    "Create new active revision without history purge, security key reset or capture reload",
+    "Retain download and upload restore paths"
+  ],
+  "automatic": {
+    "python_entrypoints": 136,
+    "initial_passes": 135,
+    "initial_failure": "Route registry test had not yet classified the new endpoint",
+    "resolution": "Added explicit endpoint assertion while retaining historical fingerprint; test then passed on Mac and Pi",
+    "javascript_entrypoints": 34,
+    "javascript_failures": 0,
+    "focused_flask": [
+      "admin/ordinary permissions",
+      "CSRF rejection",
+      "confirmation required",
+      "GET rejected",
+      "stale revision and sequential duplicate rejected",
+      "new revision, original history and multicamera profiles retained",
+      "encrypted secret restored without mutating historical data",
+      "no tasks enqueued"
+    ],
+    "diff_check": "passed"
+  },
+  "native_browser": {
+    "environment": "Isolated Flask sandbox; Classic forbidden; synthetic configuration",
+    "result": "passed",
+    "evidence": [
+      "Confirmed snapshot 1, received revision 2 acknowledgement",
+      "Second submission rejected with changed-configuration message",
+      "History displayed exactly two rows, original and Restored internal snapshot 1"
+    ],
+    "cleanup": "Browser tab closed and sandbox stopped"
+  },
+  "limits": [
+    "Not deployed or exercised against production configuration",
+    "Concurrent submissions across multiple workers not exercised; current revision check is optimistic",
+    "File-download receipt and native upload restore remain separate open acceptance cases",
+    "Classic physical removal and complete product acceptance remain open",
+    "24-hour observation excluded"
+  ]
+}

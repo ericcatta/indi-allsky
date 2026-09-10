@@ -19,7 +19,7 @@ def test_route_contract_is_unchanged():
                 isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute)
                 and node.func.attr == 'add_url_rule'
-                and node.args[0].value not in ('/modern-admin/settings/timelapse', '/modern-admin/media/raw-loop', '/modern-admin/updates/start', '/modern-admin/tools/focus/preview', '/media/<kind>/<int:camera_id>/<int:media_id>/original', '/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
+                and node.args[0].value not in ('/modern-admin/config-restore/<int:config_id>/apply', '/modern-admin/settings/timelapse', '/modern-admin/media/raw-loop', '/modern-admin/updates/start', '/modern-admin/tools/focus/preview', '/media/<kind>/<int:camera_id>/<int:media_id>/original', '/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
             ):
                 if node.args[0].value in ('/modern-admin/settings/analytics', '/modern-admin/settings/storage', '/modern-admin/settings/notifications', '/modern-admin/settings/acquisition-save', '/modern-admin/settings/fits-source'):
                     # These entries are now redirects and must not carry template arguments.
@@ -67,6 +67,14 @@ def test_route_contract_is_unchanged():
         template = 'modern_admin/settings_' + path.replace('-', '_') + '.html'
         historical = "bp_allsky.add_url_rule('/modern-admin/settings/" + path + "', view_func=ModernAdmin" + class_part + "SettingsView.as_view('" + endpoint + "', template_name='" + template + "'))"
         calls.append(ast.dump(ast.parse(historical).body[0].value, include_attributes=False))
+    snapshot_calls = [n for n in ast.walk(ast.parse((FLASK / 'views.py').read_text()))
+                      if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                      and n.func.attr == 'add_url_rule' and n.args
+                      and isinstance(n.args[0], ast.Constant)
+                      and n.args[0].value == '/modern-admin/config-restore/<int:config_id>/apply']
+    assert len(snapshot_calls) == 1
+    snapshot_view = next(k.value for k in snapshot_calls[0].keywords if k.arg == 'view_func')
+    assert ast.unparse(snapshot_view) == "ModernAdminSnapshotRestoreView.as_view('modern_admin_snapshot_restore_view')"
     assert len(calls) == 224
     fingerprint = hashlib.sha256('\n'.join(sorted(calls)).encode()).hexdigest()
     assert fingerprint == '17514e70700d7f9d255e1026f2ffb42d6bdf96db13a97e65b9cdb4d9e8233d92'
