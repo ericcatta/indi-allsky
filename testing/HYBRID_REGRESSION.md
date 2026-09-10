@@ -28,11 +28,18 @@ existing directories are rejected to preserve previous evidence. Node must be
 available in the test environment. `--timeout` is a per-entrypoint timeout in
 seconds (default 240), not a deadline for the whole run.
 
-The current plan has 120 Python entries (including the separate Library entrypoint,
-compilation, CPU sampling and the runner test) and 31 JavaScript entries. Discovery automatically
+Use `--list` for the current entrypoint count, including the separate Library
+entrypoint and compilation. Discovery automatically
 includes new `modern_admin_*_test.py`, `hybrid_*_test.py` and `hybrid_*_test.js`
 entrypoints. `hybrid_ui_acceptance_test.py` remains a separate native acceptance
 workflow. Additional historical Book 2 entrypoints are listed in `EXTRA_TESTS`.
+
+Flows using `hybrid_runtime_fixture.isolated_app` run with Classic route imports
+blocked and a restrictive Jinja loader. Only `modern_admin/`, `shared/` and the
+standalone `login.html` are available. Loading a Classic template, including through
+inheritance or a fallback include, fails the test. This demonstrates template
+independence for executed flows; it does not establish asset independence, complete
+browser coverage or permission to remove unverified functionality.
 
 `results.json` records the exact plan, source hashes and each child exit code,
 duration and log path. It is updated atomically after each result. `running` or

@@ -1,0 +1,24 @@
+{
+  "baseline": "1b78f94d",
+  "scope": "Executed isolated Hybrid flows with Classic imports and templates blocked",
+  "allowed_templates": ["modern_admin/", "shared/", "login.html"],
+  "guard_self_test": "Rejects direct loads, inheritance, fallback includes and parent traversal",
+  "python_cases": 131,
+  "javascript_cases": 31,
+  "failures": [],
+  "discovery": {
+    "routes": 98,
+    "contexts": 500,
+    "rendered": 372,
+    "blocked_or_protected": 128,
+    "render_defects": 0,
+    "clicks_promoted": 0
+  },
+  "verification": "Compared SHA-256 of fixture, guard, guard test, both changed runtime modules and OAuth test against the isolated runtime",
+  "limits": [
+    "Only flows using the guarded fixture establish runtime template independence",
+    "Asset independence and complete browser interactions are not proved by rendering",
+    "No deployment or live hardware effects in this mission",
+    "Classic removal remains open"
+  ]
+}

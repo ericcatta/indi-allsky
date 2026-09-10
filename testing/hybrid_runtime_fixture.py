@@ -42,6 +42,8 @@ def isolated_app(runtime_config='/etc/indi-allsky/flask.json', *, multi_camera=F
             from indi_allsky.version import __config_level__
             from passlib.hash import argon2
             app = create_app()
+            from hybrid_template_guard import protect_templates
+            protect_templates(app)
             app.logger.setLevel('CRITICAL')
             with app.app_context():
                 db.create_all()

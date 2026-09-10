@@ -16,6 +16,14 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Collaudo senza template Classic: il fixture Flask consente soltanto template
+  Hybrid, condivisi e login; ereditarieta' e fallback verso Classic falliscono.
+  Superati 131 entrypoint Python e 31 JavaScript. Censimento ripetuto:
+  98 ingressi, 500 contesti, 372 rendering superati e 128 bloccati/protetti,
+  nessun difetto di rendering. Non equivale a 500 interazioni collaudate:
+  asset, browser ed effetti dal vivo restano gate separati prima della rimozione.
+  Evidenze: `testing/evidence/hybrid-template-isolation.json`.
+
 - Capture service e azioni YouTube: HEAD segue il percorso di sola lettura,
   senza invocare effetti o consumare lo stato OAuth del callback. Verificati
   ruoli, CSRF e POST autorizzati in ambiente isolato con effetti simulati.
