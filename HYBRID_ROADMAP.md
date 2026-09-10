@@ -16,6 +16,13 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- VirtualSky: corretto il refresh al ritorno con la cronologia del browser
+  (`pageshow` dopo `pagehide`). Test del controller con effetti simulati coprono
+  controlli, resize/reset, richieste duplicate, fullscreen, esportazione PNG,
+  errori HTTP/CORS/decodifica/libreria e recovery. Superati 132 entrypoint Python
+  e 33 JavaScript; rendering e download nativi restano da verificare sul Mac
+  sbloccato. Evidenze: `testing/evidence/hybrid-virtualsky-controller.json`.
+
 - VirtualSky Hybrid: sostituiti immagine di riferimento e pannello read-only
   con overlay astronomico, 13 controlli locali, reset, refresh, fullscreen e
   download PNG. Riutilizzata la libreria VirtualSky distribuita con il progetto;

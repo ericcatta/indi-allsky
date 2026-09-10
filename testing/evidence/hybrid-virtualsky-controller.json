@@ -1,0 +1,23 @@
+{
+  "baseline": "8346a5f1",
+  "scope": "VirtualSky controller with simulated DOM, network, canvas export and fullscreen effects",
+  "reproduced_defect": "After pagehide, no pageshow handler resumed frame polling on browser history restore",
+  "fix": "Resume polling once on pageshow when previously stopped",
+  "automatic_cases": [
+    "Camera scoped request and relative image URL",
+    "No duplicate frame requests or PNG exports",
+    "Object controls reuse the existing planetarium",
+    "Resize, invalid diameter and preview reset",
+    "Fullscreen enter and exit",
+    "PNG filename and successful export dispatch",
+    "Failed encoder and denied remote CORS do not dispatch a download",
+    "Missing frame, HTTP failure, decode failure, missing library and recovery",
+    "Page hide stops polling; history restoration resumes it"
+  ],
+  "native_browser_status": "bloccato: Mac locked; direct browser acceptance remains open",
+  "deployment": "Not deployed in this mission",
+  "javascript_cases": 33,
+  "javascript_failures": [],
+  "python_cases": 132,
+  "python_failures": []
+}

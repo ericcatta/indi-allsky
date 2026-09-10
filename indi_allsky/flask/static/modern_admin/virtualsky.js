@@ -125,5 +125,8 @@
         finally { clearTimeout(timeout); exporting = false; download.disabled = !frame || clip.hidden; }
     });
     window.addEventListener('pagehide', () => { stopped = true; clearTimeout(timer); });
+    window.addEventListener('pageshow', () => {
+        if (stopped) { stopped = false; load(); }
+    });
     load();
 }());
