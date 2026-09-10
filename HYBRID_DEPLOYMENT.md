@@ -100,6 +100,14 @@ A database restore would discard records acquired after the backup. Perform one
 only for a diagnosed need, with all writers stopped and a fresh copy of current
 data saved first. No database restore is part of this web rollback.
 
+## Prepared next worker release
+
+Mask Base per-camera publication and error recovery are published but not installed.
+The exact candidate, worker restart requirements, rollback and bounded acceptance
+are in [HYBRID_MASK_RELEASE_RUNBOOK.md](HYBRID_MASK_RELEASE_RUNBOOK.md).
+A new live acceptance window is required; the current installed release above
+remains unchanged.
+
 ## Remaining acceptance
 
 - Complete the page/control matrix, roles, camera/profile isolation and mobile checks.
