@@ -10298,14 +10298,11 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
         return ' '.join(formatted_parts)
 
 
-class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, CameraLensView):
+class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, TemplateView):
     page_title = 'Modern Admin Camera Info'
 
     def get_context(self):
-        context = TemplateView.get_context(self)
-        session['admin_mode'] = 'modern'
-        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
-        context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
+        context = super().get_context()
 
         camera = IndiAllSkyDbCameraTable.query\
             .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
@@ -10321,14 +10318,11 @@ class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraScopedTemplateM
 
 
 
-class ModernAdminImageLagView(ModernAdminCameraToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, ImageLagView):
+class ModernAdminImageLagView(ModernAdminCameraToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, TemplateView):
     page_title = 'Modern Admin Image Lag'
 
     def get_context(self):
-        context = TemplateView.get_context(self)
-        session['admin_mode'] = 'modern'
-        context['modern_admin_mode'] = session.get('admin_mode', 'modern')
-        context['modern_admin_nav'] = ModernAdminView.get_modern_admin_nav(self)
+        context = super().get_context()
         context['diagnostic_camera_choices'] = self.get_media_camera_filters()[1:]
         image_lag_policy = ModernAdminImageLagPolicy()
 

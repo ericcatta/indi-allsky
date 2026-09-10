@@ -16,6 +16,15 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Recovery diagnostica: Camera Info e Image Lag usano ora il contesto condiviso
+  Hybrid, ripristinando stato servizio, URL azioni e target camera/profilo nella
+  barra superiore. Eliminate le dipendenze per ereditarieta' da CameraLensView
+  e ImageLagView. Test su quattordici pagine e due ruoli, con chiamate alle vecchie
+  view vietate; 135 entrypoint Python e 33 JavaScript superati. Nel browser
+  Image Lag mostra i sei controlli abilitati; conferma/annullamento Restart resta
+  bloccato da timeout del controllo browser, senza effetti reali eseguiti.
+  Nessun deploy. Evidenze: `testing/evidence/hybrid-diagnostic-recovery.json`.
+
 - Cronologia ADU: corretta la finestra temporale camera-local. Lo scarto orario
   non viene applicato due volte e il limite inferiore segue il timestamp richiesto
   anche per navigazione storica. Preservati aggregazione, filtro notturno e ambito

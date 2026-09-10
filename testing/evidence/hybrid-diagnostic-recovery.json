@@ -1,0 +1,37 @@
+{
+  "baseline": "bc5ebc4f",
+  "scope": "Diagnostic page recovery context and legacy view independence",
+  "reproduced_before_fix": "Camera Info did not call runtime status provider; Image Lag browser showed unavailable recovery controls",
+  "changes": [
+    "Camera Info and Image Lag inherit shared TemplateView directly instead of CameraLensView/ImageLagView",
+    "Use cooperative Hybrid context for navigation, runtime status and action URLs"
+  ],
+  "verification": {
+    "python_entrypoints": 135,
+    "javascript_entrypoints": 33,
+    "failures": [],
+    "targeted_pages": 14,
+    "roles": [
+      "administrator",
+      "ordinary user"
+    ],
+    "checks": [
+      "Runtime provider called exactly once",
+      "Six recovery controls with role-appropriate enabled state",
+      "Abort targets preserve both camera/profile pairs",
+      "Legacy diagnostic get_context methods forbidden by mocks",
+      "No inheritance from old diagnostic views"
+    ]
+  },
+  "native_browser": {
+    "image_lag": "Six recovery buttons visible and enabled in synthetic fixture",
+    "restart_click": "Blocked by browser control timeout; not passed",
+    "fixture_shutdown": "SSH remote terminal exited after interrupt",
+    "tab_cleanup": "Close timed out; temporary tab may remain"
+  },
+  "limits": [
+    "Native restart confirmation/cancel and effects still require acceptance",
+    "No production deploy",
+    "Classic frontend still present"
+  ]
+}

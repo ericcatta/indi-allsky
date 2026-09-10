@@ -24,14 +24,20 @@ class Controls(HTMLParser):
 def run(runtime_config):
     with isolated_app(runtime_config, multi_camera=True) as app:
         from indi_allsky.flask import views
+        assert not issubclass(views.ModernAdminCameraInfoView, views.CameraLensView)
+        assert not issubclass(views.ModernAdminImageLagView, views.ImageLagView)
         pages = ('now', 'media/archive', 'tasks', 'notifications', 'account',
                  'tools/process-fits', 'tools/image-circle-helper',
-                 'tools/camera-simulator')
+                 'tools/camera-simulator', 'cameras/info', 'cameras/image-lag',
+                 'cameras/adu-history', 'storage/file-space-usage',
+                 'observatory/virtualsky', 'system/info')
         status = {'label': 'Capture: Running', 'tone': 'good', 'active': True}
         for uid in (1, 2):
             client = login_client(app, uid)
             for page in pages:
-                with patch.object(views, 'get_modern_admin_capture_service_status', return_value=status) as provider:
+                with patch.object(views, 'get_modern_admin_capture_service_status', return_value=status) as provider, \
+                     patch.object(views.CameraLensView, 'get_context', side_effect=AssertionError('Legacy camera context called')), \
+                     patch.object(views.ImageLagView, 'get_context', side_effect=AssertionError('Legacy timing context called')):
                     response = client.get('/indi-allsky/modern-admin/' + page)
                 assert response.status_code == 200, (page, response.status_code)
                 provider.assert_called_once_with()
@@ -49,7 +55,7 @@ def run(runtime_config):
             assert 'Capture: Unknown' in response.text
             assert not any('disabled' in c for c in Controls(response.text).controls)
         assert app.test_client().get('/indi-allsky/modern-admin/media/archive').status_code == 302
-        print('Hybrid runtime shell: eight pages, both roles, provider states and profile/camera recovery targets: PASS')
+        print('Hybrid runtime shell: fourteen pages, both roles, provider states and profile/camera recovery targets: PASS')
 
 
 if __name__ == '__main__':
