@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-10",
+  "baseline": "dc51e11f",
+  "scope": "Keep failed mask publication pending without interrupting the image pipeline",
+  "defect": "The worker cleared generate_mask_base before writing, and a write exception escaped into frame processing.",
+  "changes": [
+    "Clear generation flag only after successful publication",
+    "Log filesystem, path and encoder failures and leave generation pending",
+    "Retry only when the existing exposure-stability condition is true"
+  ],
+  "verification": {
+    "previous_worker_fails_new_case": true,
+    "new_worker_case_passed": true,
+    "cases": [
+      "First write fails without escaping",
+      "Next stable frame retries same camera",
+      "Success clears pending flag",
+      "Completed camera does not write again",
+      "Unstable exposure does not trigger publication"
+    ],
+    "python_entrypoints": 138,
+    "python_failures": [],
+    "javascript_entrypoints": 34,
+    "javascript_failures": [],
+    "diff_check": "passed",
+    "finished_before_20_zurich": true
+  },
+  "limits": [
+    "Isolated tests only; no real disk failure injected",
+    "No production deployment or capture restart",
+    "New live acceptance window required for worker deployment and both-camera publication",
+    "24-hour observation excluded"
+  ]
+}

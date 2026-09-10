@@ -2892,12 +2892,16 @@ class ImageWorker(Process):
             )
 
         if self.generate_mask_base and self.target_adu_found:
-            self.generate_mask_base = False
             if images_only_diag:
                 self._images_only_diag(profile_id, camera_id, 'IMAGE_STABLE_CHECK', action='write_mask_base_start')
-            self.write_mask_base_img(self.image_processor.image, camera_id)
-            if images_only_diag:
-                self._images_only_diag(profile_id, camera_id, 'IMAGE_STABLE_CHECK', action='write_mask_base_end')
+            try:
+                self.write_mask_base_img(self.image_processor.image, camera_id)
+            except (OSError, ValueError, cv2.error) as error:
+                logger.error('Unable to publish mask base for camera %s; will retry: %s', camera_id, error)
+            else:
+                self.generate_mask_base = False
+                if images_only_diag:
+                    self._images_only_diag(profile_id, camera_id, 'IMAGE_STABLE_CHECK', action='write_mask_base_end')
 
 
         # line detection

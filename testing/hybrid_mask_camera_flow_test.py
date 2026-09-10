@@ -12,7 +12,34 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from hybrid_runtime_fixture import isolated_app, login_client
 
 
+def test_generation_retry():
+    source=(Path(__file__).resolve().parents[1]/'indi_allsky/image.py').read_text()
+    tree=ast.parse(source)
+    blocks=[node for node in ast.walk(tree) if isinstance(node,ast.If)
+            and ast.unparse(node.test)=='self.generate_mask_base and self.target_adu_found']
+    assert len(blocks)==1
+    program=compile(ast.Module(body=[blocks[0]],type_ignores=[]),'<mask-generation>','exec')
+    attempts=[]
+    def write(data,camera):
+        attempts.append(camera)
+        if len(attempts)==1:raise OSError('disk temporarily unavailable')
+    worker=SimpleNamespace(generate_mask_base=True,target_adu_found=True,
+                           image_processor=SimpleNamespace(image=object()),write_mask_base_img=write)
+    context={'self':worker,'camera_id':2,'profile_id':'profile-2','images_only_diag':False,
+             'logger':logging.getLogger('mask-retry'),'cv2':SimpleNamespace(error=RuntimeError)}
+    exec(program,context)  # Failure must not escape into the remaining image pipeline.
+    assert worker.generate_mask_base and attempts==[2]
+    exec(program,context)
+    assert not worker.generate_mask_base and attempts==[2,2]
+    exec(program,context)
+    assert attempts==[2,2]
+    worker.generate_mask_base=True;worker.target_adu_found=False
+    exec(program,context)
+    assert attempts==[2,2] and worker.generate_mask_base
+
+
 def run(runtime_config):
+    test_generation_retry()
     import cv2
     import numpy as np
     from indi_allsky.mask_frames import publish_mask_base, mask_frame_path

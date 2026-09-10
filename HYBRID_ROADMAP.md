@@ -15,6 +15,11 @@ per camera saranno disponibili quando il worker le genera alla stabilizzazione
 dell'esposizione; una base storica senza ownership non viene attribuita a caso.
 Test e collaudo sono registrati in `testing/evidence/hybrid-mask-camera.json`.
 Deploy e verifica del worker reale rimangono aperti.
+La generazione viene confermata soltanto dopo una scrittura riuscita. Errori di
+filesystem, percorso o encoder vengono registrati senza interrompere il frame;
+il tentativo rimane pendente per il prossimo frame con esposizione stabile.
+La regressione completa di 138 entrypoint Python e 34 JavaScript passa; il
+collaudo isolato del 10 settembre si e' concluso prima delle 20:00.
 
 ## Restore diretto snapshot Hybrid — candidato 10 settembre 2026
 
