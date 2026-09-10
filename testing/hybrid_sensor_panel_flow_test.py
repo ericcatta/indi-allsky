@@ -23,6 +23,8 @@ def run():
             for cid in (1,2):
                 page=client.get('/indi-allsky/modern-admin/observatory/sensor-panel',query_string={'camera_id':cid})
                 assert page.status_code==200,page.text[:500]
+                assert f'data-camera="{cid}"' in page.text, 'Sensor page ignored selected camera'
+                assert 'Camera '+str(cid) in page.text
                 assert 'Recovery controls are unavailable on this page.' not in page.text
                 assert 'Unavailable' in page.text and '&lt;test reading&gt;' in page.text
                 assert 'sensor_user_59' in page.text and 'sensor_temp_59' in page.text

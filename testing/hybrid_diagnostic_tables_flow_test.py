@@ -30,7 +30,8 @@ def run():
             db.session.get(IndiAllSkyDbImageTable, 2).thumbnail_uuid = 'diagnostic-thumb'
             db.session.commit()
         paths = ['/cameras/image-lag', '/storage/file-space-usage', '/cameras/info',
-                 '/cameras/adu-history', '/observatory/virtualsky', '/system/info']
+                 '/cameras/adu-history', '/observatory/virtualsky', '/system/info',
+                 '/observatory/charts', '/observatory/sensor-panel', '/observatory/sqm']
         for uid in (1, 2):
             client = login_client(app, uid)
             for suffix in paths:
@@ -57,6 +58,12 @@ def run():
                         cfg = json.loads(re.search(r'id="hybrid-operations-table-config" type="application/json">(.*?)</script>',page.text,re.S)[1])
                         assert cfg['exportColumns'] == list(range(6 if suffix.endswith('image-lag') else 11))
                         assert cfg['filters'][0]['text'] is True
+                if suffix in ('/observatory/charts', '/observatory/sensor-panel', '/observatory/sqm'):
+                    selected = client.get(path + '?camera_id=1&timestamp=1700000000&all=1')
+                    nav = re.search(r'<nav[^>]+aria-label="Observatory camera">(.*?)</nav>', selected.text, re.S)[1]
+                    assert nav.count('aria-current="page"') == 1
+                    assert nav.count('timestamp=1700000000') == 2 and nav.count('all=1') == 2
+                    assert 'profile_id=test-profile-1' in nav and 'profile_id=test-profile-2' in nav
                 assert client.get(path + '?profile_id=test-profile-1').status_code == 200
                 assert int(contexts[-1]['camera_id']) == 1
                 for query in ('camera_id=bad', 'camera_id=1&profile_id=test-profile-2', 'profile_id=missing'):
@@ -77,7 +84,7 @@ def run():
         with app.app_context():
             assert db.session.query(IndiAllSkyDbConfigTable).count() == 1
             assert db.session.query(IndiAllSkyDbImageTable).count() == 2
-        print('Diagnostic tables: six camera-scoped views, nullable timing, all storage categories, thumbnail-free accounting and table controls: PASS')
+        print('Diagnostic tables: nine camera-scoped views, nullable timing, all storage categories, thumbnail-free accounting and table controls: PASS')
 
 
 if __name__ == '__main__':

@@ -13,6 +13,7 @@
     {% set modern_admin_heading = 'Sensor Panel' %}
     {% set modern_admin_title_id = 'modern-admin-sensor-title' %}
     {% include 'modern_admin/_shell_header.html' %}
+    {% include 'modern_admin/_observatory_camera_navigation.html' %}
 
     <p>Readings from the last captured image; updated every five seconds.</p>
     <p id="sensor-status" role="status">{% if last_update %}Last image: {{ last_update }}{% else %}No image metadata from the last 15 minutes.{% endif %}</p>

@@ -30,6 +30,7 @@ def run():
             for cid in (1, 2):
                 page = client.get('/indi-allsky/modern-admin/observatory/charts', query_string={'camera_id':cid})
                 assert page.status_code == 200, page.text[:500]
+                assert f'data-camera="{cid}"' in page.text, 'Chart page ignored selected camera'
                 assert re.findall('data-key="([^"]+)"', page.text) == keys + ['histogram']
                 assert 'modern_admin/charts.js' in page.text
                 query = {'camera_id':cid, 'timestamp':int(stamp.timestamp()), 'limit_s':900}

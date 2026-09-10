@@ -9889,65 +9889,6 @@ class ModernAdminObservatoryToolView(ModernAdminContextMixin):
         )
 
 
-class ModernAdminSqmView(ModernAdminObservatoryToolView, SqmView):
-    page_title = 'Modern Admin SQM'
-
-    sqm_summary_service = ModernAdminSqmSummaryService()
-
-    def get_context(self):
-        context = super(ModernAdminSqmView, self).get_context()
-        image_data = self.get_image_data()
-        camera_now_minus_30m = self.camera_now - timedelta(minutes=30)
-
-        sqm_summary = IndiAllSkyDbImageTable.query\
-            .with_entities(
-                func.max(IndiAllSkyDbImageTable.sqm).label('sqm_max'),
-                func.min(IndiAllSkyDbImageTable.sqm).label('sqm_min'),
-                func.avg(IndiAllSkyDbImageTable.sqm).label('sqm_avg'),
-                func.max(IndiAllSkyDbImageTable.stars).label('stars_max'),
-                func.min(IndiAllSkyDbImageTable.stars).label('stars_min'),
-                func.avg(IndiAllSkyDbImageTable.stars).label('stars_avg'),
-            )\
-            .join(IndiAllSkyDbImageTable.camera)\
-            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-            .filter(IndiAllSkyDbImageTable.createDate > camera_now_minus_30m)\
-            .first()
-
-        context.update(self.sqm_summary_service.build_context(image_data, sqm_summary))
-
-        return context
-
-
-class ModernAdminChartsView(ModernAdminObservatoryToolView, ChartView):
-    page_title = 'Modern Admin Charts'
-
-
-class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, SensorPanelView):
-    page_title = 'Modern Admin Sensor Panel'
-    configured_sensor_weather_provider = ModernAdminConfiguredSensorWeatherProvider()
-    sensor_weather_metadata_provider = ModernAdminSensorWeatherMetadataProvider()
-
-    def get_context(self):
-        context = super(ModernAdminSensorPanelView, self).get_context()
-        latest_image_entry = getattr(self, 'latest_image_entry', None)
-        latest_image_data = getattr(latest_image_entry, 'data', None)
-        latest_image_timestamp = getattr(latest_image_entry, 'createDate', None)
-
-        context['modern_admin_sensor_weather_metadata'] = self.sensor_weather_metadata_provider.get_sensor_weather_metadata(
-            latest_image_data=latest_image_data,
-            latest_image_timestamp=latest_image_timestamp,
-            now=getattr(self, 'camera_now', None),
-        )
-        context['modern_admin_configured_sensor_weather_metadata'] = self.configured_sensor_weather_provider.get_configured_provider_metadata(
-            config=getattr(self, 'indi_allsky_config', None),
-        )
-
-        context['sensor_rows'] = build_sensor_rows(self.camera.data, latest_image_data)
-        context['show_all'] = request.args.get('all') == '1'
-        context['last_update'] = latest_image_timestamp
-        return context
-
-
 class ModernAdminSystemToolView(ModernAdminContextMixin):
     decorators = [login_required]
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
@@ -10296,6 +10237,72 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
                 formatted_parts.append(part.capitalize())
 
         return ' '.join(formatted_parts)
+
+
+class ModernAdminSqmView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, SqmView):
+    page_title = 'Modern Admin SQM'
+
+    sqm_summary_service = ModernAdminSqmSummaryService()
+
+    def get_context(self):
+        context = super(ModernAdminSqmView, self).get_context()
+        context['observatory_camera_choices'] = self.get_media_camera_filters()[1:]
+        image_data = self.get_image_data()
+        camera_now_minus_30m = self.camera_now - timedelta(minutes=30)
+
+        sqm_summary = IndiAllSkyDbImageTable.query\
+            .with_entities(
+                func.max(IndiAllSkyDbImageTable.sqm).label('sqm_max'),
+                func.min(IndiAllSkyDbImageTable.sqm).label('sqm_min'),
+                func.avg(IndiAllSkyDbImageTable.sqm).label('sqm_avg'),
+                func.max(IndiAllSkyDbImageTable.stars).label('stars_max'),
+                func.min(IndiAllSkyDbImageTable.stars).label('stars_min'),
+                func.avg(IndiAllSkyDbImageTable.stars).label('stars_avg'),
+            )\
+            .join(IndiAllSkyDbImageTable.camera)\
+            .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
+            .filter(IndiAllSkyDbImageTable.createDate > camera_now_minus_30m)\
+            .first()
+
+        context.update(self.sqm_summary_service.build_context(image_data, sqm_summary))
+
+        return context
+
+
+class ModernAdminChartsView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, ChartView):
+    page_title = 'Modern Admin Charts'
+
+    def get_context(self):
+        context = super().get_context()
+        context['observatory_camera_choices'] = self.get_media_camera_filters()[1:]
+        return context
+
+
+class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, SensorPanelView):
+    page_title = 'Modern Admin Sensor Panel'
+    configured_sensor_weather_provider = ModernAdminConfiguredSensorWeatherProvider()
+    sensor_weather_metadata_provider = ModernAdminSensorWeatherMetadataProvider()
+
+    def get_context(self):
+        context = super(ModernAdminSensorPanelView, self).get_context()
+        context['observatory_camera_choices'] = self.get_media_camera_filters()[1:]
+        latest_image_entry = getattr(self, 'latest_image_entry', None)
+        latest_image_data = getattr(latest_image_entry, 'data', None)
+        latest_image_timestamp = getattr(latest_image_entry, 'createDate', None)
+
+        context['modern_admin_sensor_weather_metadata'] = self.sensor_weather_metadata_provider.get_sensor_weather_metadata(
+            latest_image_data=latest_image_data,
+            latest_image_timestamp=latest_image_timestamp,
+            now=getattr(self, 'camera_now', None),
+        )
+        context['modern_admin_configured_sensor_weather_metadata'] = self.configured_sensor_weather_provider.get_configured_provider_metadata(
+            config=getattr(self, 'indi_allsky_config', None),
+        )
+
+        context['sensor_rows'] = build_sensor_rows(self.camera.data, latest_image_data)
+        context['show_all'] = request.args.get('all') == '1'
+        context['last_update'] = latest_image_timestamp
+        return context
 
 
 class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, TemplateView):

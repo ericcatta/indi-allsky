@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import ast
 import inspect
 import sys
 from datetime import datetime
@@ -631,9 +632,9 @@ def test_sensor_weather_metadata_provider_handles_missing_metadata_safely():
 
 def test_modern_sensor_panel_uses_hybrid_sensor_weather_provider_static():
     views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
-    class_start = views_source.index('class ModernAdminSensorPanelView')
-    class_end = views_source.index('class ModernAdminSystemToolView', class_start)
-    class_source = views_source[class_start:class_end]
+    class_node = next(node for node in ast.parse(views_source).body
+                      if isinstance(node, ast.ClassDef) and node.name == 'ModernAdminSensorPanelView')
+    class_source = ast.get_source_segment(views_source, class_node)
 
     assert_true(
         'ModernAdminSensorWeatherMetadataProvider' in class_source,
@@ -728,9 +729,9 @@ def test_configured_sensor_weather_provider_reports_unknown_provider():
 
 def test_modern_sensor_panel_uses_hybrid_configured_sensor_weather_provider_static():
     views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
-    class_start = views_source.index('class ModernAdminSensorPanelView')
-    class_end = views_source.index('class ModernAdminSystemToolView', class_start)
-    class_source = views_source[class_start:class_end]
+    class_node = next(node for node in ast.parse(views_source).body
+                      if isinstance(node, ast.ClassDef) and node.name == 'ModernAdminSensorPanelView')
+    class_source = ast.get_source_segment(views_source, class_node)
 
     assert_true(
         'ModernAdminConfiguredSensorWeatherProvider' in class_source,

@@ -16,6 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Isolamento osservatorio: grafici, sensori e SQM rispettano ora camera/profilo
+  espliciti e offrono un selettore comune, preservando timestamp e vista di tutti
+  gli slot. Riprodotto il difetto in cui la pagina grafici impostava una camera
+  diversa dal parametro richiesto, nonostante le API fossero corrette. Test
+  HTML e API per due camere/ruoli e nove viste diagnostiche superati. Regressione
+  di 135 entrypoint Python: unico errore nel delimitatore testuale di un test
+  statico, sostituito con AST e rieseguito con successo; codice runtime invariato
+  dopo la regressione. Passati anche 33 JavaScript. Prova browser del selettore
+  e deploy restano aperti. Evidenze: `testing/evidence/hybrid-observatory-camera-scope.json`.
+
 - Recovery diagnostica: Camera Info e Image Lag usano ora il contesto condiviso
   Hybrid, ripristinando stato servizio, URL azioni e target camera/profilo nella
   barra superiore. Eliminate le dipendenze per ereditarieta' da CameraLensView

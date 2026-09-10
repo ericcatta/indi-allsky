@@ -1,0 +1,36 @@
+{
+  "baseline": "50e4f352",
+  "scope": "Charts, Sensor Panel and SQM camera/profile selection",
+  "reproduced_before_fix": "Charts HTML data-camera did not match requested camera; API-only tests had missed the wrong browser polling target",
+  "changes": [
+    "Resolve camera/profile before page context",
+    "Provide visible camera/profile links on all three pages",
+    "Preserve timestamp and all-slots selection across camera links"
+  ],
+  "targeted_evidence": [
+    "Chart HTML camera matches request and real API series/histograms remain camera-specific",
+    "Sensor HTML camera and labels match requested camera and recorded zero/null/stale readings stay correct",
+    "Nine diagnostic/observatory views validate camera/profile pairs",
+    "Selected navigation link and preserved query parameters checked on all three pages"
+  ],
+  "limits": [
+    "Native browser selection/polling acceptance pending",
+    "No production deploy",
+    "Classic remains present"
+  ],
+  "regression": {
+    "python_entrypoints": 135,
+    "initial_failures": [
+      "testing/modern_admin_runtime_providers_test.py"
+    ],
+    "followup": {
+      "case": "testing/modern_admin_runtime_providers_test.py",
+      "exit_code": 0,
+      "environment": "Local Python",
+      "change": "AST locates the Sensor Panel class independently of neighboring class order; assertions unchanged"
+    },
+    "runtime_changes_after_full_run": false,
+    "javascript_entrypoints": 33,
+    "javascript_failures": []
+  }
+}
