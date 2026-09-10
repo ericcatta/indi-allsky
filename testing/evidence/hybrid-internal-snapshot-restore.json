@@ -40,9 +40,10 @@
   },
   "limits": [
     "Not deployed or exercised against production configuration",
-    "Concurrent submissions across multiple workers not exercised; current revision check is optimistic",
     "File-download receipt and native upload restore remain separate open acceptance cases",
     "Classic physical removal and complete product acceptance remain open",
-    "24-hour observation excluded"
-  ]
+    "24-hour observation excluded",
+    "SQLite concurrent restore verified separately; other database engines not directly exercised"
+  ],
+  "sqlite_concurrency_evidence": "testing/evidence/hybrid-snapshot-concurrency.json"
 }

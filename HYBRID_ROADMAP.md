@@ -12,6 +12,9 @@ lo snapshot storico. Richiede CSRF, conferma esplicita e revisione corrente
 coerente con la pagina; conserva cronologia e chiavi e non riavvia capture.
 Download e restore da file restano disponibili. Il collaudo browser isolato
 verifica la nuova revisione e il rifiuto di un secondo invio dalla stessa pagina.
+Il test con due processi Flask e SQLite su file ha riprodotto due restore
+accettati sulla stessa revisione. Il comando ora riserva la scrittura prima
+del controllo: un processo salva, l'altro rileva la revisione cambiata.
 Deploy e collaudo in produzione rimangono aperti; Classic non e' ancora rimosso.
 
 ## Obiettivo

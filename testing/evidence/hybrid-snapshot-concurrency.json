@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-10",
+  "baseline": "227149d7",
+  "scope": "Serialize internal snapshot restore revision check and save on SQLite",
+  "reproduction": {
+    "environment": "Two Flask processes against one temporary on-disk SQLite database, synthetic identities and config, Classic forbidden",
+    "before_http_statuses": [
+      200,
+      200
+    ],
+    "defect": "Both processes accepted the same expected active revision"
+  },
+  "correction": "BEGIN IMMEDIATE reserves the SQLite writer before the revision query, held through adapter commit; early responses release transaction through Flask session teardown",
+  "verification": {
+    "after_http_statuses": [
+      200,
+      409
+    ],
+    "total_revisions_after": 2,
+    "original_history_retained": true,
+    "settings_flow_including_encrypted_credentials": "passed",
+    "python_entrypoints": 137,
+    "python_failures": [],
+    "javascript": "Unchanged from previous 34 passing entrypoints; not rerun",
+    "diff_check": "passed"
+  },
+  "limits": [
+    "No production deploy or restore performed",
+    "Other database engines remain unverified for concurrent restore",
+    "No full product acceptance or Classic removal claim",
+    "24-hour observation excluded"
+  ]
+}

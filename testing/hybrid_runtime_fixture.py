@@ -18,7 +18,7 @@ class ForbidClassicImport(importlib.abc.MetaPathFinder):
             raise AssertionError('Hybrid imported Classic views')
 
 @contextmanager
-def isolated_app(runtime_config='/etc/indi-allsky/flask.json', *, multi_camera=False):
+def isolated_app(runtime_config='/etc/indi-allsky/flask.json', *, multi_camera=False, file_database=False):
     sys.path.insert(0, str(ROOT))
     assert 'indi_allsky.flask' not in sys.modules, 'Run this fixture in a fresh process'
     guard = ForbidClassicImport()
@@ -27,7 +27,7 @@ def isolated_app(runtime_config='/etc/indi-allsky/flask.json', *, multi_camera=F
     with tempfile.TemporaryDirectory(prefix='hybrid-acceptance-') as directory:
         from cryptography.fernet import Fernet
         config = json.loads(Path(runtime_config).read_text())
-        config.update(HYBRID_ENABLE_CLASSIC_UI=False, SQLALCHEMY_DATABASE_URI='sqlite://',
+        config.update(HYBRID_ENABLE_CLASSIC_UI=False, SQLALCHEMY_DATABASE_URI=('sqlite:///' + str(Path(directory) / 'acceptance.sqlite')) if file_database else 'sqlite://',
                       SQLALCHEMY_ENGINE_OPTIONS={}, SQLALCHEMY_BINDS={}, TESTING=True,
                       LOGIN_DISABLED=False, WTF_CSRF_ENABLED=True,
                       SECRET_KEY='isolated-acceptance-session-key', PASSWORD_KEY=Fernet.generate_key().decode(),
