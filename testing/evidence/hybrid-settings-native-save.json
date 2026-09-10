@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-10",
+  "candidate": "aa0afeff",
+  "environment": "Native browser against isolated Flask with Classic forbidden; disposable in-memory persistence",
+  "cases": [
+    {
+      "control": "Admin sign in",
+      "result": "passed",
+      "evidence": "Synthetic admin login completed and admin controls became available."
+    },
+    {
+      "control": "Save Full Settings",
+      "result": "passed",
+      "evidence": "Submitted note with reload disabled; save button disabled while pending, then reenabled with Saved new config acknowledgement."
+    },
+    {
+      "control": "Config History",
+      "result": "passed",
+      "evidence": "Navigation displayed new snapshot 2 attributed to synthetic admin with exact submitted note; original snapshot 1 remained."
+    },
+    {
+      "control": "Snapshot details",
+      "result": "passed",
+      "evidence": "Original snapshot detail rendered expected ID and note with download link."
+    },
+    {
+      "control": "Download snapshot / browser restore",
+      "result": "blocked",
+      "evidence": "Dedicated browser download returned but no new file appeared in local download destination; upload/restore not attempted. No cause asserted."
+    }
+  ],
+  "limits": [
+    "Production configuration untouched",
+    "Automated save/download/restore suite already passes but does not replace native browser restore",
+    "No claim of complete Settings acceptance",
+    "Snapshot restore currently requires download and upload"
+  ],
+  "cleanup": "Temporary browser tab closed; sandbox exited"
+}
