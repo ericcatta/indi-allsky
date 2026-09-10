@@ -1,5 +1,5 @@
 <nav class="modern-admin-link-grid" aria-label="Observatory camera">
     {% for choice in observatory_camera_choices %}
-    <a href="{{ url_for(request.endpoint, camera_id=choice.camera_id, profile_id=choice.profile_id, timestamp=request.args.get('timestamp'), all=request.args.get('all')) }}" {% if choice.camera_id == camera_id|int %}aria-current="page"{% endif %}>{{ choice.label }}</a>
+    <a data-observatory-camera-link href="{{ url_for(request.endpoint, camera_id=choice.camera_id, profile_id=choice.profile_id, timestamp=request.args.get('timestamp'), all=request.args.get('all')) }}" {% if choice.camera_id == camera_id|int %}aria-current="page"{% endif %}>{{ choice.label }}</a>
     {% endfor %}
 </nav>

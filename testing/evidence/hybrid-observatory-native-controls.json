@@ -1,0 +1,119 @@
+{
+  "baseline": "9c7da6f6",
+  "scope": "Native Observatory control checks and sensor filter navigation fix",
+  "environment": "Disposable Flask browser fixture; Classic blocked; no production effects",
+  "cases": [
+    {
+      "page": "SQM",
+      "control": "camera profile links",
+      "roles": [
+        "admin",
+        "ordinary"
+      ],
+      "result": "passed",
+      "evidence": "Click changed camera/profile URL and aria-current to the selected profile"
+    },
+    {
+      "page": "SQM",
+      "control": "reading display",
+      "roles": [
+        "admin"
+      ],
+      "result": "passed",
+      "evidence": "Absent SQM/stars and aggregates rendered as dash; calculated lunar phase displayed independently"
+    },
+    {
+      "page": "Charts",
+      "control": "camera profile links",
+      "roles": [
+        "admin",
+        "ordinary"
+      ],
+      "result": "passed",
+      "evidence": "Camera changed in DOM and actual polling request; chart update completed"
+    },
+    {
+      "page": "Charts",
+      "control": "HISTORY_SELECT",
+      "roles": [
+        "admin"
+      ],
+      "result": "passed",
+      "evidence": "Selected 24 Hours; actual request changed from limit_s=900 to 86400 and update completed"
+    },
+    {
+      "page": "Sensor Panel",
+      "control": "camera profile links",
+      "roles": [
+        "admin",
+        "ordinary"
+      ],
+      "result": "passed",
+      "evidence": "Camera changed in DOM and actual polling requests"
+    },
+    {
+      "page": "Sensor Panel",
+      "control": "sensor-show-all",
+      "roles": [
+        "admin",
+        "ordinary"
+      ],
+      "result": "passed",
+      "evidence": "User and temperature tables expanded to 60 rows; reduced views restored when unchecked"
+    },
+    {
+      "page": "Sensor Panel",
+      "control": "sensor-refresh",
+      "roles": [
+        "admin",
+        "ordinary"
+      ],
+      "result": "passed",
+      "evidence": "Refresh requested selected camera and updated age/status"
+    },
+    {
+      "page": "Sensor Panel",
+      "control": "sensor-show-all followed by camera link",
+      "roles": [
+        "ordinary"
+      ],
+      "result": "passed after correction",
+      "before": "Camera change lost checked state and reduced user rows to 10",
+      "after": "Checked navigation retained all=1 and 60 rows; unchecked navigation omitted all and restored 10 rows"
+    },
+    {
+      "page": "Charts",
+      "control": "anonymous access and login return",
+      "roles": [
+        "anonymous",
+        "ordinary"
+      ],
+      "result": "passed",
+      "evidence": "Anonymous access redirected to login; synthetic ordinary login returned to requested camera charts"
+    },
+    {
+      "page": "Observatory pages",
+      "control": "runtime recovery permissions",
+      "roles": [
+        "ordinary"
+      ],
+      "result": "passed",
+      "evidence": "Recovery controls disabled with administrator-required explanation"
+    }
+  ],
+  "cleanup": "Temporary browser tabs closed and both fixture servers interrupted with successful SSH exit",
+  "limits": [
+    "No production deployment",
+    "No physical device effects tested",
+    "No narrow-screen visual acceptance in this session",
+    "No full plot/canvas visual verification",
+    "No stale/missing-image native fixture scenarios beyond null measurements",
+    "24-hour monitoring deferred until after Classic removal",
+    "Classic remains present"
+  ],
+  "regression": {
+    "python_entrypoints": 136,
+    "javascript_entrypoints": 33,
+    "failures": []
+  }
+}

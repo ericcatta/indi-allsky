@@ -4,7 +4,15 @@
     const refresh=document.getElementById('sensor-refresh'), showAll=document.getElementById('sensor-show-all');
     const bodies=['user','temp'].map(group=>document.getElementById('sensor-'+group+'-rows'));
     let active=null;
-    function filter() { bodies.forEach(body=>[...body.children].forEach(row=>{row.hidden=!showAll.checked && row.dataset.used!=='true';})); }
+    function filter() {
+        bodies.forEach(body=>[...body.children].forEach(row=>{row.hidden=!showAll.checked && row.dataset.used!=='true';}));
+        document.querySelectorAll('[data-observatory-camera-link]').forEach(link=>{
+            const url=new URL(link.href);
+            if(showAll.checked)url.searchParams.set('all','1');
+            else url.searchParams.delete('all');
+            link.href=url.href;
+        });
+    }
     function rows(values, group) {
         if(!Array.isArray(values) || values.length!==60) throw Error('invalid_response');
         return values.map((value,index)=>{

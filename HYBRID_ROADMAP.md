@@ -16,6 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Collaudo browser osservatorio su fixture isolato: provati cambi camera SQM,
+  grafici e sensori, intervallo storico, refresh, visibilita' slot, accesso anonimo
+  e ritorno dal login ordinario. Verificati anche ID camera nelle richieste reali
+  e controlli recovery disabilitati per utente ordinario. Trovata e corretta la
+  perdita di "Mostra tutti gli slot" cambiando camera; ripetuta la prova nativa
+  con attivazione e disattivazione, oltre al test del controller. Regressione:
+  136 entrypoint Python e 33 JavaScript superati. Nessun deploy o effetto hardware;
+  limiti visuali/mobile e casi non provati restano espliciti nella matrice
+  `testing/evidence/hybrid-observatory-native-controls.json`.
+
 - SQM: corretti gli zeri artificiali in assenza di misure e la fase lunare
   letta da metadati immagine che non la contengono. Valori mancanti mostrati
   come trattino; zeri registrati preservati. Ultima immagine con timestamp e
