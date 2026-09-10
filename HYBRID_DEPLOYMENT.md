@@ -2,11 +2,11 @@
 
 ## Installed release, 10 September 2026
 
-The Raspberry runs `2b7dea37332879e31530916a4f28707b52c190c5`, upgraded from
-`f9aeaf880dc4ba2e271a36b04323ee9f8c02eb61`. History and Restore now expose all
-saved snapshots through pages of 25, preserving camera/profile navigation.
-Invalid download snapshot identifiers return 400 and missing snapshots 404.
-Administrator-only downloads and snapshot redaction isolation remain in place.
+The Raspberry runs `3590a3ee4621e01b23043ac415de499d79f7c9e3`, upgraded from
+`2b7dea37332879e31530916a4f28707b52c190c5`. Focus preview requests now time out
+with retry guidance, release their controls and cancel when leaving the page.
+Focus expansion remains usable inside the window when native fullscreen is
+unavailable or does not remain active, with explicit exit and keyboard handling.
 Capture, scheduling, schema and saved configuration were not changed.
 
 Only the user web service and its activating socket were restarted. Capture
@@ -14,11 +14,11 @@ remained unchanged; both cameras produced fresh nonempty files after deployment.
 `HYBRID_ENABLE_CLASSIC_UI=false` is preserved byte-for-byte in Flask configuration.
 Classic files remain present; physical removal is still open.
 
-Release evidence: `testing/evidence/hybrid-history-pages-deployment.json`.
+Release evidence: `testing/evidence/hybrid-focus-controls-deployment.json`.
 All 137 Python entrypoints and 34 JavaScript entrypoints passed before deployment.
-The Settings integration test was rerun after the final pagination UI adjustment.
-Synthetic browser checks cover History/Restore navigation across 56 snapshots
-and filtering without nested pagination. Production
+Synthetic native browser checks cover both camera previews, timeout and retry,
+Reset, preview expansion and explicit exit. Final Tab handling is covered by
+controller tests rather than native keyboard input. Production
 browser acceptance remains **blocked** by automatic browser security review of
 the HTTPS origin. No bypass was attempted. Process readiness and capture files
 do not prove native download receipt or full product acceptance.
@@ -30,7 +30,7 @@ not be restarted automatically.
 
 ## Recovery assets
 
-On the Raspberry, `~/hybrid-history-pages-release-state.json` records the exact
+On the Raspberry, `~/hybrid-focus-controls-release-state.json` records the exact
 previous/candidate revisions and protected backup directory. That directory
 contains an online SQLite backup with successful integrity check, the previous
 code archive, Flask configuration, deployment script and deployment record.
@@ -52,6 +52,7 @@ backup/deploy.py rather than bypassing revision guards:
 
 | Installed candidate | Rollback target | State file under `~/` |
 | --- | --- | --- |
+| `3590a3ee` | `2b7dea37` | `hybrid-focus-controls-release-state.json` |
 | `2b7dea37` | `f9aeaf88` | `hybrid-history-pages-release-state.json` |
 | `f9aeaf88` | `ba6cbd3b` | `hybrid-config-download-release-state.json` |
 | `ba6cbd3b` | `aa0afeff` | `hybrid-snapshot-restore-release-state.json` |
@@ -72,8 +73,8 @@ fallback is prepared; it has not been drilled by reverting the current mode.
 
 ## Roll back this web release
 
-Rolling back this release removes complete history pagination and invalid snapshot
-error handling. Rolling back the earlier permission fix as well restores its
+Rolling back this release removes Focus timeout recovery and the usable in-window
+preview expansion. Rolling back the earlier permission fix as well restores its
 download authorization defect; account for that exposure before further rollback.
 
 Use an authenticated SSH terminal on the Raspberry under the deployment user.
@@ -83,7 +84,7 @@ a clean tracked checkout; it refuses to discard tracked edits or roll back an
 unrelated release.
 
 ```sh
-release_backup="$(python3 -c 'import json; from pathlib import Path; print(json.loads((Path.home()/"hybrid-history-pages-release-state.json").read_text())["backup"])')"
+release_backup="$(python3 -c 'import json; from pathlib import Path; print(json.loads((Path.home()/"hybrid-focus-controls-release-state.json").read_text())["backup"])')"
 python3 "$release_backup/deploy.py" --rollback "$release_backup"
 ```
 
