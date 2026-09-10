@@ -16,6 +16,17 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- VirtualSky Hybrid: sostituiti immagine di riferimento e pannello read-only
+  con overlay astronomico, 13 controlli locali, reset, refresh, fullscreen e
+  download PNG. Riutilizzata la libreria VirtualSky distribuita con il progetto;
+  geometria, orientamento e correzione temporale preservati. Corretto il selettore
+  camera/profilo: la query non viene piu' ignorata a favore della sessione.
+  Nessuna modifica a configurazione persistita o immagini originali.
+  Regressione: 132 entrypoint Python e 32 JavaScript superati. Prova browser
+  bloccata dal Mac non sbloccabile automaticamente: overlay visivo, fullscreen
+  e PNG non ancora accettati dal vivo; nessun deploy in questa missione.
+  Matrice dei controlli ed evidenze: `testing/evidence/hybrid-virtualsky.json`.
+
 - Collaudo senza template Classic: il fixture Flask consente soltanto template
   Hybrid, condivisi e login; ereditarieta' e fallback verso Classic falliscono.
   Superati 131 entrypoint Python e 31 JavaScript. Censimento ripetuto:

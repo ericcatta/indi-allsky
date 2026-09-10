@@ -543,9 +543,10 @@ def test_location_metadata_provider_handles_missing_location_safely():
 
 def test_modern_virtualsky_uses_hybrid_location_provider_static():
     views_source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
-    class_start = views_source.index('class ModernAdminVirtualSkyView')
-    class_end = views_source.index('class ModernAdminLogView', class_start)
-    class_source = views_source[class_start:class_end]
+    import ast
+    node = next(node for node in ast.parse(views_source).body
+                if isinstance(node, ast.ClassDef) and node.name == 'ModernAdminVirtualSkyView')
+    class_source = ast.get_source_segment(views_source, node)
 
     assert_true(
         'ModernAdminLocationMetadataProvider' in class_source,

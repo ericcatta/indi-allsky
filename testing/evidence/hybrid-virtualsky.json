@@ -1,0 +1,112 @@
+{
+  "baseline": "0072f0a8",
+  "scope": "Hybrid VirtualSky implementation and isolated acceptance",
+  "defects_fixed": [
+    "Hybrid showed only a frame and read-only settings, without the interactive sky map",
+    "VirtualSky ignored explicit camera selection and used the session camera"
+  ],
+  "controls": [
+    {
+      "identifier": "AZIMUTH_ANGLE",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "LATITUDE_OFFSET",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "LONGITUDE_OFFSET",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "IMAGE_CIRCLE_DIAMETER",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "OFFSET_X",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "OFFSET_Y",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "MAGNITUDE",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "CONSTELLATIONS",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "CONSTELLATIONLABELS",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "SHOWSTARS",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "SHOWSTARLABELS",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "SHOWPLANETS",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "SHOWPLANETLABELS",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "virtualsky-refresh",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "virtualsky-fullscreen",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "virtualsky-download",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    },
+    {
+      "identifier": "virtualsky-controls button[type=reset]",
+      "browser_status": "bloccato",
+      "reason": "Mac locked; native browser tool could not unlock it"
+    }
+  ],
+  "automatic_evidence": [
+    "Both roles and both cameras render all thirteen overlay fields and local library assets",
+    "Camera/profile mismatch and invalid selections rejected",
+    "Preview navigation leaves stored camera metadata and configuration unchanged",
+    "Overlay geometry, legacy azimuth mapping, capture-time offset, resizing and invalid values checked"
+  ],
+  "limits": [
+    "Sky rendering, native controls, fullscreen and PNG output require direct browser verification",
+    "No deployment or production effects performed",
+    "Classic removal remains open"
+  ],
+  "regression": {
+    "python_cases": 132,
+    "javascript_cases": 32,
+    "failures": [],
+    "note": "Python integration on isolated runtime; JavaScript contract tests on local Node. Native rendering and browser effects remain blocked."
+  }
+}

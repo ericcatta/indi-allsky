@@ -10029,23 +10029,6 @@ class ModernAdminAstroPanelView(ModernAdminObservatoryToolView, TemplateView):
     page_title = 'Modern Admin Astropanel'
 
 
-class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, VirtualSkyView):
-    page_title = 'Modern Admin VirtualSky'
-
-    location_metadata_provider = ModernAdminLocationMetadataProvider()
-
-    def get_context(self):
-        context = super(ModernAdminVirtualSkyView, self).get_context()
-        location_metadata = self.location_metadata_provider.get_location_metadata(
-            camera=getattr(self, 'camera', None),
-            config=self.indi_allsky_config,
-        )
-
-        context['modern_admin_location_metadata'] = location_metadata
-        context['camera_latitude'] = location_metadata['latitude']
-        context['camera_longitude'] = location_metadata['longitude']
-
-        return context
 
 
 class ModernAdminLogView(ModernAdminSystemToolView, LogView):
@@ -10385,6 +10368,36 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
                 formatted_parts.append(part.capitalize())
 
         return ' '.join(formatted_parts)
+
+
+class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, ModernAdminMediaBrowseView, VirtualSkyView):
+    page_title = 'Modern Admin VirtualSky'
+
+    location_metadata_provider = ModernAdminLocationMetadataProvider()
+
+    def setupSession(self):
+        if request.args.get('camera_id') or request.args.get('profile_id'):
+            selected = self.get_selected_media_camera_filter()
+            self.camera = self.getCameraById(selected['camera_id'])
+            if self.camera.id != selected['camera_id']:
+                abort(404, description='Camera is unavailable.')
+            session['camera_id'] = self.camera.id
+            return
+        super().setupSession()
+
+    def get_context(self):
+        context = super(ModernAdminVirtualSkyView, self).get_context()
+        location_metadata = self.location_metadata_provider.get_location_metadata(
+            camera=getattr(self, 'camera', None),
+            config=self.indi_allsky_config,
+        )
+
+        context['modern_admin_location_metadata'] = location_metadata
+        context['camera_latitude'] = location_metadata['latitude']
+        context['camera_longitude'] = location_metadata['longitude']
+
+        return context
+
 
 
 class ModernAdminSystemInfoView(ModernAdminSystemToolView, ModernAdminMediaBrowseView, SystemInfoView):
