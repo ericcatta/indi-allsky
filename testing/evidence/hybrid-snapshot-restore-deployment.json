@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-10",
+  "previous": "aa0afeff43de388bb2c393518a545ff4482435a9",
+  "installed": "ba6cbd3b42d54eeb46f93a1aa2a704815ae534b0",
+  "scope": "Internal snapshot restore and SQLite concurrency correction",
+  "backup": {
+    "online_sqlite_integrity": "ok",
+    "previous_code_archive": true,
+    "protected_config_copy": true,
+    "rollback_script": true
+  },
+  "verification": {
+    "web_only_restart": true,
+    "capture_process_unchanged": true,
+    "configuration_bytes_unchanged": true,
+    "classic_disabled": true,
+    "tracked_checkout_clean": true,
+    "untracked_files_preserved": true,
+    "fresh_nonempty_files_after_deploy_both_cameras": true
+  },
+  "browser_acceptance": {
+    "result": "blocked",
+    "reason": "Automatic browser security review denied normal HTTPS navigation due to a possible certificate bypass; no bypass attempted; user clarification requested"
+  },
+  "limits": [
+    "No production configuration restored",
+    "Production browser form acceptance remains open",
+    "Rollback prepared, not drilled",
+    "Classic files still present; overall acceptance incomplete",
+    "24-hour observation excluded"
+  ]
+}
