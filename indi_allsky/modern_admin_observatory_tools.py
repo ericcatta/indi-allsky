@@ -1,11 +1,22 @@
 class ModernAdminSqmSummaryService:
     def build_context(self, image_data, sqm_summary):
         return {
-            'modern_admin_sqm'        : image_data.get('sqm', 0.0),
-            'modern_admin_stars'      : image_data.get('stars', 0),
-            'modern_admin_moon_phase' : image_data.get('moon_phase', 0.0),
+            'modern_admin_sqm'        : image_data.get('sqm'),
+            'modern_admin_stars'      : image_data.get('stars'),
+            'modern_admin_moon_phase' : image_data.get('moon_phase'),
             'modern_admin_sqm_summary': sqm_summary,
         }
+
+
+    def reading_status(self, timestamp, now):
+        if timestamp is None:
+            return {'state': 'missing', 'message': 'No saved image is available for this camera.',
+                    'timestamp': None, 'age_seconds': None}
+        age = max(0, (now - timestamp).total_seconds())
+        return {'state': 'stale' if age > 900 else 'current',
+                'message': ('Latest saved image is older than 15 minutes.' if age > 900
+                            else 'Readings from the latest saved image.'),
+                'timestamp': timestamp, 'age_seconds': age}
 
 
 class ModernAdminLongTermKeogramDisplayService:

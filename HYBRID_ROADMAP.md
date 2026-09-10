@@ -16,6 +16,20 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- SQM: corretti gli zeri artificiali in assenza di misure e la fase lunare
+  letta da metadati immagine che non la contengono. Valori mancanti mostrati
+  come trattino; zeri registrati preservati. Ultima immagine con timestamp e
+  stato corrente/obsoleto, separata dal riepilogo di 30 minuti; record futuri
+  esclusi. Fase lunare dal provider astronomico esistente. Test due camere/ruoli,
+  null/zero/assenza/stale/futuro: superati; regressione 136 entrypoint Python
+  e 33 JavaScript senza errori. Nessun deploy; collaudo browser ancora aperto.
+  Evidenze: `testing/evidence/hybrid-sqm-readings.json`.
+
+- Ordine di consegna confermato dall'utente: completare migrazione, collaudi
+  funzionali e rimozione Classic; il test continuativo di 24 ore verra' svolto
+  successivamente, in un'attivita' separata. Non e' un requisito per chiudere
+  questa migrazione e non va riattivato automaticamente.
+
 - Isolamento osservatorio: grafici, sensori e SQM rispettano ora camera/profilo
   espliciti e offrono un selettore comune, preservando timestamp e vista di tutti
   gli slot. Riprodotto il difetto in cui la pagina grafici impostava una camera

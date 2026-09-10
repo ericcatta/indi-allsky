@@ -1,0 +1,35 @@
+{
+  "baseline": "1b76254d",
+  "scope": "SQM recorded readings and missing/stale presentation",
+  "reproduced_before_fix": "Empty image database rendered numeric defaults without an explicit missing state; lunar phase was read from image metadata that does not provide it",
+  "changes": [
+    "Missing measurements remain null and render as em dash",
+    "Recorded zero values remain visible as zero",
+    "Most recent non-future image carries capture timestamp and current/stale state",
+    "30-minute summary excludes future timestamps and other cameras",
+    "Moon illumination comes from the existing astronomical provider"
+  ],
+  "targeted_tests": [
+    "No images",
+    "Recorded zero",
+    "Null metrics",
+    "20-minute stale image still represented in 30-minute summary",
+    "40-minute stale image excluded from 30-minute summary",
+    "Future image excluded",
+    "Two cameras and both roles",
+    "Astronomical phase independent of image metadata",
+    "Freshness boundary at 900/901 seconds"
+  ],
+  "limits": [
+    "Native SQM browser acceptance pending",
+    "No production deploy",
+    "No acquisition/scientific algorithm change",
+    "Classic remains present"
+  ],
+  "regression": {
+    "python_entrypoints": 136,
+    "javascript_entrypoints": 33,
+    "failures": [],
+    "environment": "Isolated Raspberry Flask fixture and local Node tests"
+  }
+}

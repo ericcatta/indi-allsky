@@ -66,9 +66,9 @@ def test_sqm_summary_service_preserves_safe_defaults():
     context = service.build_context(image_data={}, sqm_summary=None)
 
     assert context == {
-        'modern_admin_sqm'        : 0.0,
-        'modern_admin_stars'      : 0,
-        'modern_admin_moon_phase' : 0.0,
+        'modern_admin_sqm'        : None,
+        'modern_admin_stars'      : None,
+        'modern_admin_moon_phase' : None,
         'modern_admin_sqm_summary': None,
     }
 
@@ -163,6 +163,13 @@ def test_observatory_tools_module_has_no_flask_db_or_filesystem_dependency():
 
 
 def run_tests():
+    from datetime import datetime, timedelta
+    service = ModernAdminSqmSummaryService()
+    now = datetime(2026, 9, 10, 10, 0)
+    assert service.reading_status(None, now)['state'] == 'missing'
+    for age, state in ((0, 'current'), (900, 'current'), (901, 'stale')):
+        status = service.reading_status(now - timedelta(seconds=age), now)
+        assert status['state'] == state and status['age_seconds'] == age
     test_sqm_summary_service_preserves_context_shape()
     test_sqm_summary_service_preserves_safe_defaults()
     test_longterm_keogram_display_service_preserves_age_format()

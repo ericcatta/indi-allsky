@@ -10247,7 +10247,15 @@ class ModernAdminSqmView(ModernAdminObservatoryToolView, CameraScopedTemplateMix
     def get_context(self):
         context = super(ModernAdminSqmView, self).get_context()
         context['observatory_camera_choices'] = self.get_media_camera_filters()[1:]
-        image_data = self.get_image_data()
+        latest = IndiAllSkyDbImageTable.query.filter(
+            IndiAllSkyDbImageTable.camera_id == self.camera.id,
+            IndiAllSkyDbImageTable.createDate <= self.camera_now,
+        ).order_by(IndiAllSkyDbImageTable.createDate.desc()).first()
+        image_data = {'sqm': latest.sqm, 'stars': latest.stars} if latest else {}
+        image_data['moon_phase'] = self.get_astrometric_info().get('moon_phase')
+        context['modern_admin_sqm_reading_status'] = self.sqm_summary_service.reading_status(
+            latest.createDate if latest else None, self.camera_now,
+        )
         camera_now_minus_30m = self.camera_now - timedelta(minutes=30)
 
         sqm_summary = IndiAllSkyDbImageTable.query\
@@ -10262,6 +10270,7 @@ class ModernAdminSqmView(ModernAdminObservatoryToolView, CameraScopedTemplateMix
             .join(IndiAllSkyDbImageTable.camera)\
             .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
             .filter(IndiAllSkyDbImageTable.createDate > camera_now_minus_30m)\
+            .filter(IndiAllSkyDbImageTable.createDate <= self.camera_now)\
             .first()
 
         context.update(self.sqm_summary_service.build_context(image_data, sqm_summary))

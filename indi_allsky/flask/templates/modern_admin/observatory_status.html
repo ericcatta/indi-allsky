@@ -17,23 +17,26 @@ var camera_id = {{ camera_id }};
     {% include 'modern_admin/_shell_header.html' %}
     {% include 'modern_admin/_observatory_camera_navigation.html' %}
 
+    <p role="status" data-sqm-state="{{ modern_admin_sqm_reading_status.state }}">{{ modern_admin_sqm_reading_status.message }}{% if modern_admin_sqm_reading_status.timestamp %} Captured: {{ modern_admin_sqm_reading_status.timestamp }}.{% endif %}</p>
+    <p>Unavailable measurements are shown as —. Zero is a recorded measurement.</p>
+
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Current sky quality">
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Sky Quality</div>
-            <h3>{{ "%0.2f"|format(modern_admin_sqm | float) }}</h3>
-            <p>Latest SQM value from the current image metadata.</p>
+            <h3>{{ "%0.2f"|format(modern_admin_sqm) if modern_admin_sqm is not none else "—" }}</h3>
+            <p>SQM from the saved image identified above.</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Stars</div>
-            <h3>{{ modern_admin_stars }}</h3>
-            <p>Latest detected star count from the existing image metadata source.</p>
+            <h3>{{ modern_admin_stars if modern_admin_stars is not none else "—" }}</h3>
+            <p>Detected star count from the same saved image.</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Moon Phase</div>
-            <h3>{{ "%0.1f"|format(modern_admin_moon_phase | float) }}%</h3>
-            <p>Current moon phase context from existing status helpers.</p>
+            <h3>{{ "%0.1f%%"|format(modern_admin_moon_phase) if modern_admin_moon_phase is not none else "—" }}</h3>
+            <p>Current calculated moon illumination; independent of image age.</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
     </section>
@@ -57,15 +60,15 @@ var camera_id = {{ camera_id }};
                 <tbody>
                     <tr>
                         <td>SQM</td>
-                        <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_min | float) }}</td>
-                        <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_avg | float) }}</td>
-                        <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_max | float) }}</td>
+                        <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_min) if modern_admin_sqm_summary.sqm_min is not none else "—" }}</td>
+                        <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_avg) if modern_admin_sqm_summary.sqm_avg is not none else "—" }}</td>
+                        <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_max) if modern_admin_sqm_summary.sqm_max is not none else "—" }}</td>
                     </tr>
                     <tr>
                         <td>Stars</td>
-                        <td>{{ "%0.0f"|format(modern_admin_sqm_summary.stars_min | float) }}</td>
-                        <td>{{ "%0.1f"|format(modern_admin_sqm_summary.stars_avg | float) }}</td>
-                        <td>{{ "%0.0f"|format(modern_admin_sqm_summary.stars_max | float) }}</td>
+                        <td>{{ "%0.0f"|format(modern_admin_sqm_summary.stars_min) if modern_admin_sqm_summary.stars_min is not none else "—" }}</td>
+                        <td>{{ "%0.1f"|format(modern_admin_sqm_summary.stars_avg) if modern_admin_sqm_summary.stars_avg is not none else "—" }}</td>
+                        <td>{{ "%0.0f"|format(modern_admin_sqm_summary.stars_max) if modern_admin_sqm_summary.stars_max is not none else "—" }}</td>
                     </tr>
                 </tbody>
             </table>
