@@ -26,10 +26,53 @@
     "diff_check": "passed"
   },
   "limits": [
-    "Controller tests use a DOM stub, not a native browser",
+    "Native browser covers the listed cases only; remaining controls and production acceptance are open",
     "Not deployed",
     "Hardware focuser effects unchanged and not tested live",
     "Whole product acceptance and physical Classic removal remain open",
     "24-hour observation excluded"
-  ]
+  ],
+  "native_browser": {
+    "environment": "Synthetic localhost fixture with Classic forbidden; no hardware effects",
+    "revision": "47f7a699",
+    "cases": [
+      {
+        "control": "Refresh preview",
+        "camera_id": 2,
+        "status": "superato",
+        "observed": "Decoded 64-pixel-wide image and one measurement row"
+      },
+      {
+        "control": "Reset view",
+        "camera_id": 2,
+        "status": "superato",
+        "observed": "Offsets reset; valid preview restored and history restarted at one row"
+      },
+      {
+        "control": "Preview camera / Choose camera / Refresh preview",
+        "camera_id": 1,
+        "status": "superato",
+        "observed": "Camera 1 selected; decoded image and Camera 1 measurement returned"
+      },
+      {
+        "control": "Refresh preview timeout",
+        "camera_id": 2,
+        "status": "superato",
+        "prerequisite": "Synthetic endpoint delayed 20 seconds",
+        "observed": "Preview request timed out. Refresh to retry.; controls enabled and image hidden after timeout"
+      },
+      {
+        "control": "Refresh preview retry",
+        "camera_id": 2,
+        "status": "superato",
+        "observed": "Valid region retry decoded image and added measurement"
+      },
+      {
+        "control": "Fullscreen preview / Exit fullscreen",
+        "status": "bloccato",
+        "observed": "No verified fullscreen state or accessible Exit control after invocation; cause unresolved"
+      }
+    ],
+    "cleanup": "Synthetic server terminated and both successful test tabs closed; closing the failed-navigation tab was blocked by browser URL policy"
+  }
 }
