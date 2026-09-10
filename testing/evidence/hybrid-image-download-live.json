@@ -24,7 +24,14 @@
       "control": "Download image",
       "camera": 2,
       "result": "blocked",
-      "evidence": "Native click returned, but expected JPEG was not found in the browser download destination. Receipt and integrity not verified."
+      "evidence": "Native click returned, but expected JPEG was not found in the browser download destination. Receipt and integrity not verified.",
+      "server_verification": {
+        "record_camera_correct": true,
+        "original_exists": true,
+        "original_readable": true,
+        "dimensions_match_detail": true
+      },
+      "followup": "Browser controller reinitialized; dedicated download and accessibility link activation did not produce the expected local file. No download-related console error observed. User asked to check for a save/blocked-download prompt when available; no cause asserted."
     },
     {
       "control": "Back to results",
