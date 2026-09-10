@@ -1,0 +1,36 @@
+{
+  "baseline": "9ed6c483",
+  "scope": "Disambiguate saved-image jSQM index from separate camera magnitude measurement",
+  "finding": {
+    "normal_image_path": "processing.ImageProcessor.calculateJankySqm assigns jSqm result to i_ref.sqm_value; image payload stores it as sqm",
+    "formula_source": "indi_allsky/sqm.py:IndiAllskySqm.jSqm",
+    "magnitude_path": "IndiAllskySqm.magnitudeSqm is consumed by the dedicated SQM exposure and sensor path",
+    "synthetic_example": {
+      "mean_adu": 14000,
+      "max_exposure": 60,
+      "exposure": 0.1,
+      "max_night_gain": 600,
+      "gain": 0,
+      "jsqm_index": 5969460,
+      "note": "Illustration using unchanged source method; not a physical calibration"
+    }
+  },
+  "changes": [
+    "Label saved-image values jSQM index in Now, image details, Highlights and sky-brightness page",
+    "Explain uncalibrated index and lack of comparability across camera settings",
+    "Preserve all values, payload keys, history, configuration and calculations"
+  ],
+  "verification": [
+    "Flask test covers both roles/cameras, missing/zero/stale/future readings and an index of 6000000 retained without clamping"
+  ],
+  "limits": [
+    "No scientific algorithm or calibration changed",
+    "No new production deployment in this mission",
+    "Native production values triggered the investigation; corrected labels tested in isolated Flask"
+  ],
+  "regression": {
+    "python_entrypoints": 136,
+    "javascript_entrypoints": 33,
+    "failures": []
+  }
+}

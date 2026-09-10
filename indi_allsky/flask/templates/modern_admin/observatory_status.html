@@ -12,7 +12,7 @@ var camera_id = {{ camera_id }};
 {% block content %}
 <main class="modern-admin-shell" aria-labelledby="modern-admin-sqm-title">
     {% set modern_admin_header_label = 'SQM header' %}
-    {% set modern_admin_heading = 'SQM' %}
+    {% set modern_admin_heading = 'Sky brightness' %}
     {% set modern_admin_title_id = 'modern-admin-sqm-title' %}
     {% include 'modern_admin/_shell_header.html' %}
     {% include 'modern_admin/_observatory_camera_navigation.html' %}
@@ -22,9 +22,9 @@ var camera_id = {{ camera_id }};
 
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Current sky quality">
         <article class="modern-admin-status-card">
-            <div class="modern-admin-card-label">Sky Quality</div>
+            <div class="modern-admin-card-label">Image brightness (jSQM)</div>
             <h3>{{ "%0.2f"|format(modern_admin_sqm) if modern_admin_sqm is not none else "—" }}</h3>
-            <p>SQM from the saved image identified above.</p>
+            <p>Uncalibrated brightness index from the saved image. Exposure, gain and camera settings affect this value; it is not a magnitude measurement and is not comparable across cameras.</p>
             <span class="modern-admin-status-pill modern-admin-status-muted">Read-only</span>
         </article>
         <article class="modern-admin-status-card">
@@ -44,7 +44,7 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-table-panel" aria-labelledby="sqm-summary-title">
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">Last 30 Minutes</p>
-            <h2 id="sqm-summary-title">Sky quality summary</h2>
+            <h2 id="sqm-summary-title">Image brightness summary</h2>
         </div>
 
         <div class="modern-admin-table-scroll">
@@ -59,7 +59,7 @@ var camera_id = {{ camera_id }};
                 </thead>
                 <tbody>
                     <tr>
-                        <td>SQM</td>
+                        <td>jSQM index</td>
                         <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_min) if modern_admin_sqm_summary.sqm_min is not none else "—" }}</td>
                         <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_avg) if modern_admin_sqm_summary.sqm_avg is not none else "—" }}</td>
                         <td>{{ "%0.2f"|format(modern_admin_sqm_summary.sqm_max) if modern_admin_sqm_summary.sqm_max is not none else "—" }}</td>

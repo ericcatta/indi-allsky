@@ -6,7 +6,7 @@
 {% block content %}
 <main class="modern-admin-shell"><section class="modern-admin-table-panel">
 <h1>Highlights</h1>
-<p>Up to eight saved images across the selected camera's history, ordered by recorded detections, star count, SQM and recency. These metadata identify images to inspect; they are not meteor identifications or AI classifications.</p>
+<p>Up to eight saved images across the selected camera's history, ordered by recorded detections, star count, jSQM index and recency. These metadata identify images to inspect; they are not meteor identifications or AI classifications.</p>
 {% include 'modern_admin/_media_camera_filter.html' %}
 <p>{{ modern_admin_media_selected_label }}</p>
 {% if highlight_error %}<p role="alert">{{ highlight_error }}</p>
@@ -19,7 +19,7 @@
 {% else %}<p>No browser preview is available for this image.</p>{% endif %}
 </div><div class="modern-admin-media-body">
 <h2>{{ item.filename }}</h2><p>Camera {{ item.camera_id }} · {{ item.created }} · {{ 'Night' if item.night else 'Day' }}</p>
-<p>Recorded detections: {{ item.detections if item.detections is not none else 'Not recorded' }} · Stars: {{ item.stars if item.stars is not none else 'Not recorded' }} · SQM: {{ item.sqm if item.sqm is not none else 'Not recorded' }}</p>
+<p>Recorded detections: {{ item.detections if item.detections is not none else 'Not recorded' }} · Stars: {{ item.stars if item.stars is not none else 'Not recorded' }} · jSQM index: {{ item.sqm if item.sqm is not none else 'Not recorded' }}</p>
 {% if item.excluded %}<p>Excluded from the viewer.</p>{% endif %}
 <p class="archive-preview-error" role="status" hidden>Preview could not be loaded. The original may be missing or unreachable.</p>
 <a href="{{ url_for('indi_allsky.modern_admin_moment_detail_view', id=item.id, camera_id=item.camera_id, profile_id=modern_admin_media_selected_filter.profile_id) }}">Inspect image</a>

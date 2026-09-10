@@ -16,6 +16,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Architettura e Decisioni
 
+- Chiarito il significato dei valori SQM elevati: gli scatti normali salvano
+  l'indice jSQM pesato con esposizione/gain, distinto dalla magnitudine prodotta
+  dalle acquisizioni SQM dedicate. Corrette etichette di Now, Highlights, dettaglio
+  immagine e pagina osservatorio; indice non calibrato e non confrontabile fra
+  camere dichiarato esplicitamente. Nessuna conversione dei dati storici, modifica
+  dei calcoli o delle chiavi. Test Flask su entrambi i ruoli e le camere conserva
+  anche un valore di sei milioni. Evidenze: `testing/evidence/hybrid-jsqm-labels.json`.
+  Regressione 136 Python e 33 JavaScript superati; etichette non ancora distribuite
+  in produzione.
+
 - Distribuito sul Raspberry il rilascio web `0291efd4` (da `07332348`) con backup
   online SQLite verificato, codice/configurazione salvati e rollback predisposto.
   Riavviato solo il web; acquisizione e revisione config invariate, file utente

@@ -32,7 +32,7 @@ def run():
         for uid in (1, 2):
             client = login_client(app, uid)
             for cid in (1, 2):
-                for minutes, value, expected_state in ((1, 0, 'current'), (1, None, 'current'),
+                for minutes, value, expected_state in ((1, 0, 'current'), (1, None, 'current'), (1, 6000000, 'current'),
                                                         (20, 12.5, 'stale'), (40, 12.5, 'stale'),
                                                         (-20, 99, 'missing')):
                     with app.app_context():
@@ -48,6 +48,9 @@ def run():
                     with patch.object(views.ModernAdminSqmView, 'get_astrometric_info', return_value={'moon_phase':37.5}):
                         page = client.get('/indi-allsky/modern-admin/observatory/sqm?camera_id=' + str(cid))
                     assert page.status_code == 200
+                    assert 'Image brightness (jSQM)' in page.text
+                    assert 'not a magnitude measurement' in page.text
+                    assert 'not comparable across cameras' in page.text
                     context = contexts[-1]
                     assert context['modern_admin_sqm_reading_status']['state'] == expected_state
                     assert context['modern_admin_sqm'] == (None if minutes < 0 else value)
@@ -56,6 +59,8 @@ def run():
                     assert '37.5%' in page.text
                     if value == 0:
                         assert '<h3>0.00</h3>' in page.text and '<h3>0</h3>' in page.text
+                    if value == 6000000:
+                        assert '<h3>6000000.00</h3>' in page.text, 'Preserve the saved relative index without clamping or conversion'
                     if value is None or minutes < 0:
                         assert page.text.count('—') >= 8
         assert app.test_client().get('/indi-allsky/modern-admin/observatory/sqm').status_code == 302
