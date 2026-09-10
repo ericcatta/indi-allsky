@@ -100,7 +100,18 @@ def run(runtime_config):
             assert saved.data['MULTI_CAMERA'] == original['MULTI_CAMERA']
             assert db.session.get(IndiAllSkyDbConfigTable, 1).data == original
             saved_id = saved.id
-        downloaded = client.get('/indi-allsky/config/download?id='+str(saved_id))
+        download_url = '/indi-allsky/config/download?id=' + str(saved_id)
+        assert app.test_client().get(download_url).status_code == 302
+        assert login_client(app, 2).get(download_url).status_code == 403
+        assert login_client(app, 2).get(download_url + '&redact=1').status_code == 403
+        with app.app_context():
+            source_entry = db.session.get(IndiAllSkyDbConfigTable, saved_id)
+            before_redaction = deepcopy(source_entry.data)
+            redacted = client.get(download_url + '&redact=1')
+            assert redacted.status_code == 200
+            assert json.loads(redacted.data)['FILETRANSFER']['PASSWORD'] == 'REDACTED'
+            assert source_entry.data == before_redaction
+        downloaded = client.get(download_url)
         assert downloaded.status_code == 200
         for content in (b'', b'invalid JSON', b'{}', b' ' * 100001):
             invalid_restore = client.post('/indi-allsky/ajax/config/restore', headers=headers, data={

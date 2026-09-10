@@ -9100,6 +9100,9 @@ class ConfigDownloadView(BaseView):
 
 
     def dispatch_request(self):
+        if not current_user.is_admin:
+            abort(403)
+
         config_id = int(request.args.get('id', -1))
         redact = bool(request.args.get('redact', 0))
 
@@ -9109,7 +9112,8 @@ class ConfigDownloadView(BaseView):
             .one()
 
 
-        config = dict(config_entry.data)
+        from copy import deepcopy
+        config = deepcopy(config_entry.data)
 
 
         if redact:

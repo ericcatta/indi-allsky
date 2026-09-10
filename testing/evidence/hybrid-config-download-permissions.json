@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-10",
+  "baseline": "c52a388f",
+  "scope": "Configuration download authorization and redaction isolation",
+  "finding": "Download link was admin-only in Hybrid, but the handler required login without enforcing admin permission. The new ordinary-user denial assertion failed before the correction.",
+  "changes": [
+    "Require administrator permission at the handler, before configuration lookup",
+    "Deep-copy configuration before nested redaction to avoid mutating the loaded snapshot"
+  ],
+  "verification": {
+    "environment": "Isolated Flask with Classic forbidden; synthetic configuration only",
+    "cases": [
+      "Anonymous request redirects to login",
+      "Ordinary user receives 403 for full and redacted download",
+      "Admin download and subsequent upload restore pass",
+      "Redacted response contains REDACTED fields and the loaded snapshot remains unchanged",
+      "Internal snapshot restore and encrypted credentials still pass"
+    ],
+    "python_entrypoints": 137,
+    "python_failures": [],
+    "javascript": "Unchanged; previous 34 passing entrypoints retained, not rerun",
+    "diff_check": "passed"
+  },
+  "limits": [
+    "Not deployed",
+    "Native browser download receipt remains unverified",
+    "Production browser access is pending automatic-security-review clarification",
+    "Overall control matrix and Classic removal incomplete"
+  ]
+}
