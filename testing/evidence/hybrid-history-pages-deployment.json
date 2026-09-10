@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-10",
+  "previous": "f9aeaf880dc4ba2e271a36b04323ee9f8c02eb61",
+  "installed": "2b7dea37332879e31530916a4f28707b52c190c5",
+  "scope": "Complete History/Restore pagination and invalid configuration download errors",
+  "backup": {
+    "online_sqlite_integrity": "ok",
+    "previous_code_archive": true,
+    "protected_config_copy": true,
+    "rollback_script": true
+  },
+  "verification": {
+    "web_only_restart": true,
+    "capture_process_unchanged": true,
+    "configuration_bytes_unchanged": true,
+    "classic_disabled": true,
+    "tracked_checkout_clean": true,
+    "untracked_files_preserved": true,
+    "fresh_nonempty_files_after_deploy_both_cameras": true,
+    "predeploy_python_entrypoints": 137,
+    "predeploy_failures": [],
+    "predeploy_javascript_entrypoints": 34,
+    "final_settings_integration_followup": "passed"
+  },
+  "limits": [
+    "Production browser acceptance remains blocked by previously reported automatic security review; no bypass attempted",
+    "Native download receipt unverified",
+    "Rollback prepared, not drilled; restores prior history limitation and download error handling",
+    "Classic physically present; whole product acceptance incomplete",
+    "24-hour observation excluded"
+  ]
+}
