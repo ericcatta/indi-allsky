@@ -1,0 +1,32 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const path = require('node:path');
+const source = fs.readFileSync(path.join(__dirname, '../indi_allsky/flask/static/modern_admin/image-detail.js'), 'utf8');
+function fixture(complete, naturalWidth) {
+    const events = {};
+    const image = {complete, naturalWidth, hidden: false, addEventListener: (event, fn) => {events[event] = fn;}};
+    const status = {hidden: true, textContent: ''};
+    vm.runInNewContext(source, {document: {getElementById: id => id === 'image-detail-preview' ? image : status}});
+    return {image, status, events};
+}
+let state = fixture(false, 0);
+assert.equal(state.status.textContent, 'Loading image…');
+state.events.load();
+assert.equal(state.image.hidden, false);
+assert.equal(state.status.hidden, true);
+state.events.error();
+assert.equal(state.image.hidden, true);
+assert.equal(state.status.hidden, false);
+assert.match(state.status.textContent, /Preview unavailable/);
+state.events.load();
+assert.equal(state.image.hidden, false);
+assert.equal(state.status.textContent, '');
+state = fixture(true, 64);
+assert.equal(state.status.hidden, true);
+state = fixture(true, 0);
+assert.equal(state.image.hidden, true);
+assert.match(state.status.textContent, /metadata is still available/);
+vm.runInNewContext(source, {document: {getElementById: () => null}});
+console.log('PASS image detail preview loading, cached success, failure and recovery');

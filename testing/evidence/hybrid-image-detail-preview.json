@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-10",
+  "baseline": "8ca32f45",
+  "scope": "Hybrid image detail saved-image preview",
+  "implementation": [
+    "Reuse public original handler with camera ID and media ID; existing storage and access policy unchanged",
+    "Responsive contain layout preserves aspect ratio without modifying pixels",
+    "Accessible loading and unavailable states; cached success and failure handled"
+  ],
+  "verification": {
+    "flask": "Passed in isolated runtime with Classic forbidden, admin and ordinary user, both cameras; rendered preview URL returns inline JPEG; mismatched camera returns 404",
+    "javascript": {
+      "entrypoints": 34,
+      "failures": 0
+    },
+    "python": {
+      "entrypoints": 136,
+      "initial_passes": 134,
+      "initial_failures": [
+        "hybrid_shell_test.py",
+        "modern_safe_action_test.py"
+      ],
+      "cause": "Transferred AppleDouble sidecar beside HTML template was decoded as UTF-8 by source-scanning tests",
+      "resolution": "Verified five sidecars matched the transfer archive before removing them from isolated checkout; candidate files also matched archive; both affected tests then passed"
+    },
+    "diff_check": "passed"
+  },
+  "limits": [
+    "Native browser visual acceptance pending",
+    "Not deployed to production",
+    "No claim of full control-matrix completion or Classic physical removal",
+    "24-hour observation excluded"
+  ]
+}

@@ -4,6 +4,8 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-topbar-v1') }}" rel="stylesheet">
+<link href="{{ url_for('indi_allsky.static', filename='modern_admin/image-detail.css', v='1') }}" rel="stylesheet">
+<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/image-detail.js', v='1') }}"></script>
 <script type="text/javascript">
 var camera_id = {{ camera_id }};
 </script>
@@ -15,6 +17,18 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_heading = 'Image Detail' %}
     {% set modern_admin_title_id = 'modern-admin-image-detail-title' %}
     {% include 'modern_admin/_shell_header.html' %}
+
+    <section class="modern-admin-table-panel" aria-labelledby="image-preview-heading">
+        <div class="modern-admin-section-heading">
+            <h2 id="image-preview-heading">Image preview</h2>
+            <p>Camera {{ modern_admin_image_detail.camera_id }} · {{ modern_admin_image_detail.created }}</p>
+        </div>
+        <img id="image-detail-preview" class="hybrid-image-detail-preview"
+             src="{{ url_for('indi_allsky.public_media_original_view', kind='image', camera_id=modern_admin_image_detail.camera_id, media_id=modern_admin_image_detail.id) }}"
+             alt="Capture from camera {{ modern_admin_image_detail.camera_id }} at {{ modern_admin_image_detail.created }}"
+             decoding="async">
+        <p id="image-detail-preview-status" role="status" aria-live="polite" hidden></p>
+    </section>
 
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Image detail summary">
         <article class="modern-admin-status-card">
@@ -31,7 +45,7 @@ var camera_id = {{ camera_id }};
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Source</div>
             <h3>{{ modern_admin_image_detail.source }}</h3>
-            <p>No file contents are opened or inspected.</p>
+            <p>Preview of the saved image; capture settings are unchanged.</p>
         </article>
     </section>
 

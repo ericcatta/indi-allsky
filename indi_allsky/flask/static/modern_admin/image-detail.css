@@ -1,0 +1,8 @@
+.hybrid-image-detail-preview {
+    display: block;
+    width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    background: #080b0d;
+}
+.hybrid-image-detail-preview[hidden] { display: none; }

@@ -38,6 +38,24 @@ def run(runtime_config, output=None):
             for client in clients[1:]:
                 for cid in (1, 2):
                     scope = {'camera_id': cid, 'profile_id': 'test-profile-' + str(cid)}
+                    # Follow the detail's rendered preview with Classic forbidden.
+                    detail = client.get('/indi-allsky/modern-admin/media/images/' + str(cid), query_string=scope)
+                    assert detail.status_code == 200
+                    from html.parser import HTMLParser
+                    class Preview(HTMLParser):
+                        src = None
+                        def handle_starttag(self, tag, attrs):
+                            attrs = dict(attrs)
+                            if tag == 'img' and attrs.get('id') == 'image-detail-preview':
+                                self.src = attrs['src']
+                    preview = Preview(); preview.feed(detail.text)
+                    assert preview.src == '/indi-allsky/media/image/' + str(cid) + '/' + str(cid) + '/original'
+                    rendered = client.get(preview.src)
+                    assert rendered.status_code == 200 and rendered.mimetype == 'image/jpeg'
+                    assert 'attachment' not in rendered.headers.get('Content-Disposition', '')
+                    assert client.get('/indi-allsky/modern-admin/media/images/' + str(cid),
+                                      query_string={'camera_id': 3-cid}).status_code == 404
+
                     directory = client.get('/indi-allsky/modern-admin/media/public-endpoints', query_string=scope)
                     assert directory.status_code == 200
                     parser = Controls(); parser.feed(directory.text)
