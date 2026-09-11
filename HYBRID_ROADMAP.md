@@ -3,6 +3,20 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Full Config: preparazione form Hybrid — 11 settembre 2026
+
+Hybrid possiede ora la preparazione deterministica dei 684 valori iniziali del
+form completo, il formato di ROI/colori/tag e la codifica di header FITS e JSON.
+Le deleghe conservano ordine, default, eccezioni e mutazioni parziali, compresa
+la posizione delle chiamate OAuth tra i due gruppi. Il contratto di salvataggio
+a 719 campi rimane invariato. `ConfigView` conserva ancora contesto runtime e
+costruzione WTForms: questa dipendenza non e' dichiarata eliminata.
+Passano 7.668 casi di parita', 138 entrypoint Python, compileall e 34 JavaScript. Nel browser
+isolato con Classic disabilitato, lettura e salvataggio Full Settings producono
+una nuova revisione visibile nella cronologia, conservando quella precedente.
+Evidenze: `testing/evidence/hybrid-full-config-form-candidate.json`.
+Deploy e collaudo in produzione restano aperti; osservazione di 24 ore rimandata.
+
 ## Mask Base per camera — candidato 10 settembre 2026
 
 La pubblicazione della base maschera mantiene ora un PNG distinto per camera,
