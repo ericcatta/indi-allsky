@@ -139,11 +139,7 @@ def test_modern_longterm_keogram_view_uses_display_service():
 
 
 def test_virtualsky_view_uses_context_service():
-    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text()
-    start = source.index('class VirtualSkyView')
-    end = source.index('class RealtimeKeogramView', start)
-    source = source[start:end]
-
+    source = (REPO_ROOT / 'indi_allsky/flask/observatory_context_views.py').read_text()
     assert 'ModernAdminVirtualSkyContextService' in source
     assert 'build_form_data' in source
     assert "'IMAGE_CIRCLE_DIAMETER' : self.camera.data.get" not in source

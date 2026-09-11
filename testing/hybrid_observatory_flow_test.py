@@ -11,6 +11,16 @@ from hybrid_source_media_fixture import seed_source_media
 
 def run():
     with isolated_app(multi_camera=True) as app:
+        from indi_allsky.flask import views
+        from indi_allsky.flask import observatory_context_views as contexts
+        for name, parent in (('ModernAdminSqmView', 'HybridSqmContextView'),
+                             ('ModernAdminChartsView', 'HybridChartContextView'),
+                             ('ModernAdminSensorPanelView', 'HybridSensorPanelContextView'),
+                             ('ModernAdminVirtualSkyView', 'HybridVirtualSkyContextView')):
+            mro = getattr(views, name).__mro__
+            assert getattr(contexts, parent) in mro
+            assert not any(base.__name__ in ('SqmView','ChartView','SensorPanelView','VirtualSkyView')
+                           or base.__module__.endswith('.classic_views') for base in mro)
         seed_generation(app); seed_source_media(app)
         from indi_allsky.flask import db
         from indi_allsky.flask.models import (IndiAllSkyDbImageTable as Image,

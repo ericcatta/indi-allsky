@@ -35,7 +35,7 @@ from .base_views import TemplateView
 from .base_views import FormView
 from .views import CameraLensView
 from .views import CameraSimulatorView
-from .views import ChartView
+from .observatory_context_views import HybridChartContextView
 from .settings_form_view import HybridSettingsFormView
 from .views import DriveManagerView
 from .views import FileSpaceUsageView
@@ -50,12 +50,28 @@ from .views import MaskView
 from .views import NetworkManagerView
 from .views import RealtimeKeogramView
 from .views import RollingAduView
-from .views import SensorPanelView
-from .views import SqmView
+from .observatory_context_views import HybridSensorPanelContextView
+from .observatory_context_views import HybridSqmContextView
 from .views import SupportInfoView
 from .views import SystemInfoView
 from .views import TimelapseGeneratorView
-from .views import VirtualSkyView
+from .observatory_context_views import HybridVirtualSkyContextView
+
+
+class VirtualSkyView(HybridVirtualSkyContextView):
+    """Compatibility page for the optional Classic frontend."""
+
+
+class SqmView(HybridSqmContextView):
+    """Compatibility page for the optional Classic frontend."""
+
+
+class ChartView(HybridChartContextView):
+    """Compatibility page for the optional Classic frontend."""
+
+
+class SensorPanelView(HybridSensorPanelContextView):
+    """Compatibility page for the optional Classic frontend."""
 
 
 class ConfigView(HybridSettingsFormView):

@@ -1,3 +1,9 @@
+from .observatory_context_views import (
+    HybridVirtualSkyContextView,
+    HybridSqmContextView,
+    HybridChartContextView,
+    HybridSensorPanelContextView,
+)
 from .settings_form_view import HybridSettingsFormView
 from .camera_scope import CameraScopedTemplateMixin
 from flask.views import View
@@ -72,7 +78,6 @@ from ..modern_admin_camera_diagnostics import ModernAdminImageLagPolicy
 from ..modern_admin_camera_diagnostics import ModernAdminAduHistoryPolicy
 from ..modern_admin_observatory_tools import ModernAdminLongTermKeogramDisplayService
 from ..modern_admin_observatory_tools import ModernAdminSqmSummaryService
-from ..modern_admin_observatory_tools import ModernAdminVirtualSkyContextService
 from ..modern_admin_settings_runtime import ModernAdminFullConfigPayloadPreparationService
 from ..modern_admin_settings_runtime import ModernAdminSettingsReloadCommandService
 from ..modern_admin_settings_runtime import ModernAdminSettingsRevisionMetadataService
@@ -170,7 +175,6 @@ from .forms import IndiAllskyMiniVideoViewer
 from .forms import IndiAllskyMiniVideoViewerPreload
 from .forms import IndiAllskySystemInfoForm
 from .forms import IndiAllskyLoopHistoryForm
-from .forms import IndiAllskyChartHistoryForm
 from .forms import IndiAllskySetDateTimeForm
 from .forms import IndiAllskySetTimezoneForm
 from .forms import IndiAllskyTimelapseGeneratorForm
@@ -186,7 +190,6 @@ from .forms import IndiAllskyLongTermKeogramForm
 from .forms import IndiAllskyNetworkManagerForm
 from .forms import IndiAllskyDriveManagerForm
 from .forms import IndiAllskyImageCircleHelperForm
-from .forms import IndiAllskyVirtualSkyHelperForm
 from .forms import IndiAllskyConfigRestoreForm
 from .forms import IndiAllskyIndiServerChangeForm
 
@@ -443,46 +446,6 @@ class JsonLatestImageView(JsonView):
 
 
 
-class VirtualSkyView(TemplateView):
-    page_title = 'VirtualSky'
-    image_loop_view = 'indi_allsky.js_image_loop_view'
-    context_service = ModernAdminVirtualSkyContextService()
-
-
-    def get_context(self):
-        context = super(VirtualSkyView, self).get_context()
-
-        context['image_loop_view'] = self.image_loop_view
-
-
-        timestamp = int(request.args.get('timestamp', 0))
-        context['timestamp'] = timestamp
-
-
-        context['form_virtualsky'] = IndiAllskyVirtualSkyHelperForm(
-            data=self.context_service.build_form_data(self.camera),
-        )
-
-
-        refreshInterval_ms = math.ceil(self.indi_allsky_config.get('CCD_EXPOSURE_MAX', 15.0)) * 1000
-        context['refreshInterval'] = refreshInterval_ms + 1000  # additional time for exposures to download
-
-
-        ### Camera DB settings
-        if self.indi_allsky_config.get('PRIVACY_MODE'):
-            # reduce precision for privacy
-            context['camera_latitude'] = float(round(self.camera.latitude))
-            context['camera_longitude'] = float(round(self.camera.longitude))
-        else:
-            context['camera_latitude'] = self.camera.latitude
-            context['camera_longitude'] = self.camera.longitude
-
-
-        ### Calculate time offset
-        context['time_offset'] = self.camera.utc_offset - datetime.now().astimezone().utcoffset().total_seconds()
-
-
-        return context
 
 
 class RealtimeKeogramView(TemplateView):
@@ -769,16 +732,6 @@ class RollingAduView(TemplateView):
         return context
 
 
-class SqmView(TemplateView):
-    page_title = 'SQM'
-
-    def get_context(self):
-        context = super(SqmView, self).get_context()
-
-        refreshInterval_ms = math.ceil(self.indi_allsky_config.get('CCD_EXPOSURE_MAX', 15.0)) * 1000
-        context['refreshInterval'] = refreshInterval_ms + 1000  # additional time for exposures to download
-
-        return context
 
 
 
@@ -1055,58 +1008,6 @@ class JsonRawImageLoopView(JsonImageLoopView):
         return stars_data
 
 
-class ChartView(TemplateView):
-    page_title = 'Charts'
-
-    def get_context(self):
-        context = super(ChartView, self).get_context()
-
-        context['timestamp'] = int(request.args.get('timestamp', 0))
-
-        refreshInterval_ms = math.ceil(self.indi_allsky_config.get('CCD_EXPOSURE_MAX', 15.0)) * 1000
-        context['refreshInterval'] = refreshInterval_ms + 1000  # additional time for exposures to download
-
-        context['form_history'] = IndiAllskyChartHistoryForm()
-
-
-        if self.camera.data:
-            camera_data = dict(self.camera.data)
-        else:
-            camera_data = dict()
-
-
-        custom_chart_1_key = camera_data.get('custom_chart_1_key', 'sensor_user_10')
-        custom_chart_2_key = camera_data.get('custom_chart_2_key', 'sensor_user_11')
-        custom_chart_3_key = camera_data.get('custom_chart_3_key', 'sensor_user_12')
-        custom_chart_4_key = camera_data.get('custom_chart_4_key', 'sensor_user_13')
-        custom_chart_5_key = camera_data.get('custom_chart_5_key', 'sensor_user_14')
-        custom_chart_6_key = camera_data.get('custom_chart_6_key', 'sensor_user_15')
-        custom_chart_7_key = camera_data.get('custom_chart_7_key', 'sensor_user_16')
-        custom_chart_8_key = camera_data.get('custom_chart_8_key', 'sensor_user_17')
-        custom_chart_9_key = camera_data.get('custom_chart_9_key', 'sensor_user_18')
-
-
-        context['label_custom_chart_1'] = camera_data.get(custom_chart_1_key, 'Unset')
-        context['min_custom_chart_1'] = camera_data.get('custom_chart_1_min', 0.0)
-        context['label_custom_chart_2'] = camera_data.get(custom_chart_2_key, 'Unset')
-        context['min_custom_chart_2'] = camera_data.get('custom_chart_2_min', 0.0)
-        context['label_custom_chart_3'] = camera_data.get(custom_chart_3_key, 'Unset')
-        context['min_custom_chart_3'] = camera_data.get('custom_chart_3_min', 0.0)
-        context['label_custom_chart_4'] = camera_data.get(custom_chart_4_key, 'Unset')
-        context['min_custom_chart_4'] = camera_data.get('custom_chart_4_min', 0.0)
-        context['label_custom_chart_5'] = camera_data.get(custom_chart_5_key, 'Unset')
-        context['min_custom_chart_5'] = camera_data.get('custom_chart_5_min', 0.0)
-        context['label_custom_chart_6'] = camera_data.get(custom_chart_6_key, 'Unset')
-        context['min_custom_chart_6'] = camera_data.get('custom_chart_6_min', 0.0)
-        context['label_custom_chart_7'] = camera_data.get(custom_chart_7_key, 'Unset')
-        context['min_custom_chart_7'] = camera_data.get('custom_chart_7_min', 0.0)
-        context['label_custom_chart_8'] = camera_data.get(custom_chart_8_key, 'Unset')
-        context['min_custom_chart_8'] = camera_data.get('custom_chart_8_min', 0.0)
-        context['label_custom_chart_9'] = camera_data.get(custom_chart_9_key, 'Unset')
-        context['min_custom_chart_9'] = camera_data.get('custom_chart_9_min', 0.0)
-
-
-        return context
 
 
 class JsonChartView(JsonView):
@@ -1581,35 +1482,6 @@ class JsonSensorPanelView(JsonView):
         }
 
 
-class SensorPanelView(TemplateView):
-    page_title = 'Sensor Panel'
-
-    def get_context(self):
-        context = super(SensorPanelView, self).get_context()
-
-        image_data = self.latest_image_entry.data if self.latest_image_entry else None
-        rows = build_sensor_rows(self.camera.data, image_data)
-        show_all = request.args.get('all') == '1'
-        user_rows = [row for row in rows['user'] if show_all or row['used']]
-        temp_rows = [row for row in rows['temp'] if show_all or row['used']]
-        for group in (user_rows, temp_rows):
-            for row in group:
-                row['index'] = int(row['slot'].rsplit('_', 1)[1])
-
-        # Age of the "current" values
-        if self.latest_image_entry:
-            context['last_update'] = self.latest_image_entry.createDate
-            context['last_update_age_s'] = int((self.camera_now - self.latest_image_entry.createDate).total_seconds())
-        else:
-            context['last_update'] = None
-            context['last_update_age_s'] = None
-
-        context['show_all'] = bool(show_all)
-        context['refreshInterval'] = 5000  # ms
-        context['user_rows'] = user_rows
-        context['temp_rows'] = temp_rows
-
-        return context
 
 
 
@@ -9094,7 +8966,7 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
         return ' '.join(formatted_parts)
 
 
-class ModernAdminSqmView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, SqmView):
+class ModernAdminSqmView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, HybridSqmContextView):
     page_title = 'Modern Admin SQM'
 
     sqm_summary_service = ModernAdminSqmSummaryService()
@@ -9133,7 +9005,7 @@ class ModernAdminSqmView(ModernAdminObservatoryToolView, CameraScopedTemplateMix
         return context
 
 
-class ModernAdminChartsView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, ChartView):
+class ModernAdminChartsView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, HybridChartContextView):
     page_title = 'Modern Admin Charts'
 
     def get_context(self):
@@ -9142,7 +9014,7 @@ class ModernAdminChartsView(ModernAdminObservatoryToolView, CameraScopedTemplate
         return context
 
 
-class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, SensorPanelView):
+class ModernAdminSensorPanelView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, HybridSensorPanelContextView):
     page_title = 'Modern Admin Sensor Panel'
     configured_sensor_weather_provider = ModernAdminConfiguredSensorWeatherProvider()
     sensor_weather_metadata_provider = ModernAdminSensorWeatherMetadataProvider()
@@ -9254,7 +9126,7 @@ class ModernAdminAduHistoryView(ModernAdminCameraToolView, CameraScopedTemplateM
         return context
 
 
-class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, VirtualSkyView):
+class ModernAdminVirtualSkyView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, HybridVirtualSkyContextView):
     page_title = 'Modern Admin VirtualSky'
 
     location_metadata_provider = ModernAdminLocationMetadataProvider()

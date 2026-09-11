@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Osservatorio: contesti indipendenti da Classic — candidato 11 settembre 2026
+
+SQM, grafici, pannello sensori e VirtualSky usano ora contesti Hybrid dedicati.
+Le quattro classi conservano l'AST precedente normalizzando soltanto i nomi:
+restano invariati form, conversioni, refresh, metadati camera, privacy e offset
+orario. Le pagine Classic riusano questi componenti tramite wrapper senza
+comportamento nel modulo opzionale. Hybrid non eredita piu' le quattro view
+Classic; non cambiano algoritmi scientifici o accesso ai sensori.
+Guardrail e 34 test JavaScript passano. Nel browser sintetico sono verificati
+filtro sensori (60/10 righe), cambio camera, intervallo grafici, stati SQM assenti,
+frame VirtualSky e modifica/reset del diametro overlay. Passano tutti i 139
+entrypoint Python piu' compileall; deploy, verifica live e controlli non inclusi
+nel campione restano aperti.
+Evidenze: `testing/evidence/hybrid-observatory-context-independence.json`.
+
 ## Settings: contesto form indipendente da Classic — candidato 11 settembre 2026
 
 `ModernAdminSettingsInventoryView` eredita ora `HybridSettingsFormView` da un

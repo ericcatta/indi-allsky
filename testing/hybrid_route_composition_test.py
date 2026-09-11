@@ -132,12 +132,14 @@ def test_source_download_is_hybrid_owned():
 def test_classic_class_bodies_are_preserved_and_isolated():
     tree = ast.parse((FLASK / 'classic_views.py').read_text())
     classes = [node for node in tree.body if isinstance(node, ast.ClassDef)]
-    assert len(classes) == 28
-    compatibility = next(node for node in classes if node.name == 'ConfigView')
-    assert [ast.unparse(base) for base in compatibility.bases] == ['HybridSettingsFormView']
-    assert len(compatibility.body) == 1 and isinstance(compatibility.body[0], ast.Expr)
-    assert isinstance(compatibility.body[0].value, ast.Constant)  # docstring only
-    original_classes = [node for node in classes if node.name != 'ConfigView']
+    wrappers = {'ConfigView': 'HybridSettingsFormView', 'VirtualSkyView': 'HybridVirtualSkyContextView', 'SqmView': 'HybridSqmContextView', 'ChartView': 'HybridChartContextView', 'SensorPanelView': 'HybridSensorPanelContextView'}
+    assert len(classes) == 27 + len(wrappers)
+    for name, base in wrappers.items():
+        compatibility = next(node for node in classes if node.name == name)
+        assert [ast.unparse(parent) for parent in compatibility.bases] == [base]
+        assert len(compatibility.body) == 1 and isinstance(compatibility.body[0], ast.Expr)
+        assert isinstance(compatibility.body[0].value, ast.Constant)  # docstring only
+    original_classes = [node for node in classes if node.name not in wrappers]
     assert len(original_classes) == 27
     fingerprint = hashlib.sha256('\n'.join(
         ast.dump(node, include_attributes=False) for node in original_classes
