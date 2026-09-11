@@ -66,8 +66,8 @@ def run():
         for key in path[:-1]:container=container.setdefault(key,{})
         container.setdefault(path[-1],1)
     compare(populated)
-    view_tree=ast.parse((ROOT/'indi_allsky/flask/views.py').read_text())
-    view=next(n for n in view_tree.body if isinstance(n,ast.ClassDef) and n.name=='ConfigView')
+    view_tree=ast.parse((ROOT/'indi_allsky/flask/settings_form_view.py').read_text())
+    view=next(n for n in view_tree.body if isinstance(n,ast.ClassDef) and n.name=='HybridSettingsFormView')
     method=next(n for n in view.body if isinstance(n,ast.FunctionDef) and n.name=='get_context')
     assignment=next(n for n in method.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='form_data' for t in n.targets))
     assert ast.unparse(assignment.value)=='build_full_config_form_defaults(self.indi_allsky_config)'
@@ -111,7 +111,19 @@ def test_display_and_encoded_fields():
                 assert dict(config)==payload
                 outcomes.append((outcome,data,trace))
             assert outcomes[0]==outcomes[1],payload
-    view=next(n for n in ast.parse((ROOT/'indi_allsky/flask/views.py').read_text()).body if isinstance(n,ast.ClassDef) and n.name=='ConfigView')
+    view=next(n for n in ast.parse((ROOT/'indi_allsky/flask/settings_form_view.py').read_text()).body if isinstance(n,ast.ClassDef) and n.name=='HybridSettingsFormView')
+    method = next(n for n in view.body if isinstance(n, ast.FunctionDef))
+    # Frozen caad7bb2 ConfigView method, with only its class name normalized.
+    assert hashlib.sha256(ast.dump(method, include_attributes=False).encode()).hexdigest() == '94d03b1a04c133a4e89f32ff8a466c20f69aa7ac04276d6cd02e129346029963'
+    imports = [n.module for n in ast.walk(ast.parse((ROOT/'indi_allsky/flask/settings_form_view.py').read_text())) if isinstance(n, ast.ImportFrom)]
+    assert 'views' not in imports and 'classic_views' not in imports
+    shared = ast.parse((ROOT/'indi_allsky/flask/views.py').read_text())
+    assert not any(isinstance(n, ast.ClassDef) and n.name == 'ConfigView' for n in shared.body)
+    inventory = next(n for n in shared.body if isinstance(n, ast.ClassDef) and n.name == 'ModernAdminSettingsInventoryView')
+    assert [ast.unparse(n) for n in inventory.bases] == ['ModernAdminContextMixin', 'HybridSettingsFormView']
+    classic = ast.parse((ROOT/'indi_allsky/flask/classic_views.py').read_text())
+    compatibility = next(n for n in classic.body if isinstance(n, ast.ClassDef) and n.name == 'ConfigView')
+    assert [ast.unparse(n) for n in compatibility.bases] == ['HybridSettingsFormView']
     text=ast.unparse(view)
     assert text.index('build_full_config_form_defaults(')<text.index('apply_full_config_form_display_fields(')<text.index("url_for('indi_allsky.youtube_oauth2callback_view'")<text.index('apply_full_config_form_encoded_fields(')<text.index('psutil.net_if_addrs(')
     assert 'ADU_ROI_X1' not in text and 'FITSHEADERS__0__KEY' not in text

@@ -132,9 +132,15 @@ def test_source_download_is_hybrid_owned():
 def test_classic_class_bodies_are_preserved_and_isolated():
     tree = ast.parse((FLASK / 'classic_views.py').read_text())
     classes = [node for node in tree.body if isinstance(node, ast.ClassDef)]
-    assert len(classes) == 27
+    assert len(classes) == 28
+    compatibility = next(node for node in classes if node.name == 'ConfigView')
+    assert [ast.unparse(base) for base in compatibility.bases] == ['HybridSettingsFormView']
+    assert len(compatibility.body) == 1 and isinstance(compatibility.body[0], ast.Expr)
+    assert isinstance(compatibility.body[0].value, ast.Constant)  # docstring only
+    original_classes = [node for node in classes if node.name != 'ConfigView']
+    assert len(original_classes) == 27
     fingerprint = hashlib.sha256('\n'.join(
-        ast.dump(node, include_attributes=False) for node in classes
+        ast.dump(node, include_attributes=False) for node in original_classes
     ).encode()).hexdigest()
     assert fingerprint == 'b65f733a214c77f48be79d5d174e7e71882a55cfeec1425de0d4540fba575614'
     classic_names = {node.name for node in classes}

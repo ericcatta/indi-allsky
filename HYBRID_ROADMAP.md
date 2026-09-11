@@ -3,6 +3,24 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Settings: contesto form indipendente da Classic — candidato 11 settembre 2026
+
+`ModernAdminSettingsInventoryView` eredita ora `HybridSettingsFormView` da un
+modulo dedicato. Hybrid possiede contesto camera, stato OAuth, metadati di rete
+e costruzione WTForms; non importa ne' eredita `ConfigView`. La pagina Classic
+rimane un wrapper senza override nel modulo opzionale `classic_views` e riusa
+il componente Hybrid. Il metodo di costruzione mantiene l'AST precedente,
+normalizzato soltanto nel nome della classe; i fingerprint dei valori form e
+delle 27 classi Classic precedenti rimangono invariati.
+Parita' (7.668 casi), browser sintetico read/save/history e 34 test JavaScript
+passano. La suite di 138 entrypoint Python piu' compileall ha rilevato soltanto
+il vecchio conteggio delle classi Classic; il guardrail aggiornato passa anche
+sul Raspberry, mantenendo il fingerprint originale. Codice applicativo
+invariato durante la suite. Deploy e verifica live restano aperti.
+Evidenze: `testing/evidence/hybrid-settings-view-independence.json`.
+Questo elimina la dipendenza Settings dalla view Classic, non le altre
+responsabilita' ancora presenti nel modulo condiviso `views.py`.
+
 ## Full Config: preparazione form Hybrid — 11 settembre 2026
 
 Hybrid possiede ora la preparazione deterministica dei 684 valori iniziali del

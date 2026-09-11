@@ -56,6 +56,11 @@ def payload_from_page(html):
 
 def run(runtime_config):
     with isolated_app(runtime_config, multi_camera=True) as app:
+        from indi_allsky.flask.views import ModernAdminSettingsInventoryView
+        from indi_allsky.flask.settings_form_view import HybridSettingsFormView
+        assert HybridSettingsFormView in ModernAdminSettingsInventoryView.__mro__
+        assert all(base.__name__ != 'ConfigView' and not base.__module__.endswith('.classic_views')
+                   for base in ModernAdminSettingsInventoryView.__mro__)
         client = login_client(app, 1)
         page = client.get('/indi-allsky/modern-admin/settings/full')
         assert page.status_code == 200

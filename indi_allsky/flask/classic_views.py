@@ -36,7 +36,7 @@ from .base_views import FormView
 from .views import CameraLensView
 from .views import CameraSimulatorView
 from .views import ChartView
-from .views import ConfigView
+from .settings_form_view import HybridSettingsFormView
 from .views import DriveManagerView
 from .views import FileSpaceUsageView
 from .views import FocusView
@@ -56,6 +56,10 @@ from .views import SupportInfoView
 from .views import SystemInfoView
 from .views import TimelapseGeneratorView
 from .views import VirtualSkyView
+
+
+class ConfigView(HybridSettingsFormView):
+    """Compatibility form for the optional Classic template."""
 
 
 class IndexCanvasView(TemplateView):
