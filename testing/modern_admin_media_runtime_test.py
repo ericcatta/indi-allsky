@@ -624,9 +624,9 @@ def test_safe_control_image_circle_preview_delegates_display_url_to_media_access
 
 
 def test_classic_image_circle_preview_preserves_default_url_hook():
-    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'classic_views.py').read_text(encoding='utf-8')
     start = source.index('class ImageCircleHelperView')
-    end = source.index('class ModernAdminSafeControlsMixin', start)
+    end = source.index('\nclass ', start + 1)
     body = source[start:end]
 
     assert_true('self.resolve_latest_image_url(latest_image, local=local)' in body, 'Image Circle base view should call the overridable URL boundary')
@@ -715,7 +715,7 @@ def test_modern_mask_delegates_file_metadata_to_media_access_adapter():
 
 
 def test_classic_mask_preserves_default_file_metadata_hook():
-    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
+    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'classic_views.py').read_text(encoding='utf-8')
     start = source.index('class MaskView')
     end = source.index('class ImageLagView', start)
     body = source[start:end]

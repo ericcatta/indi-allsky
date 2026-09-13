@@ -49,6 +49,12 @@ def check_startup(config_path, classic_enabled):
         assert app.blueprints['indi_allsky'] is not second.blueprints['indi_allsky']
         routes = {rule.endpoint: rule.rule for rule in app.url_map.iter_rules()}
         assert ('indi_allsky.flask.classic_views' in sys.modules) == classic_enabled
+        from indi_allsky.flask import views
+        classic_only = ('RealtimeKeogramView', 'MaskView', 'ImageLagView', 'RollingAduView', 'ImageLoopImgView', 'TimelapseGeneratorView', 'FocusView', 'ManualGpioView', 'ImageProcessingView', 'CameraLensView', 'CameraSimulatorView', 'FileSpaceUsageView', 'NetworkManagerView', 'DriveManagerView', 'ImageCircleHelperView')
+        for name in classic_only:
+            assert not hasattr(views, name), name
+            if classic_enabled:
+                assert hasattr(sys.modules['indi_allsky.flask.classic_views'], name), name
         assert ('indi_allsky.config_view' in routes) == classic_enabled
         assert ('indi_allsky.index_view' in routes) == classic_enabled
         for name in ('modern_admin_now_view', 'modern_admin_library_view', 'ajax_config_view',

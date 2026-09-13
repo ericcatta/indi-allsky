@@ -32,8 +32,8 @@ def run(runtime_config):
             assert getattr(contexts, parent) in mro
             assert not any(base.__name__ in ('SystemInfoView','LogView','SupportInfoView')
                            or base.__module__.endswith('.classic_views') for base in mro)
-        assert not issubclass(views.ModernAdminCameraInfoView, views.CameraLensView)
-        assert not issubclass(views.ModernAdminImageLagView, views.ImageLagView)
+        assert not hasattr(views, 'CameraLensView')
+        assert not hasattr(views, 'ImageLagView')
         pages = ('now', 'media/archive', 'tasks', 'notifications', 'account',
                  'tools/process-fits', 'tools/image-circle-helper',
                  'tools/camera-simulator', 'cameras/info', 'cameras/image-lag',
@@ -43,9 +43,7 @@ def run(runtime_config):
         for uid in (1, 2):
             client = login_client(app, uid)
             for page in pages:
-                with patch.object(views, 'get_modern_admin_capture_service_status', return_value=status) as provider, \
-                     patch.object(views.CameraLensView, 'get_context', side_effect=AssertionError('Legacy camera context called')), \
-                     patch.object(views.ImageLagView, 'get_context', side_effect=AssertionError('Legacy timing context called')):
+                with patch.object(views, 'get_modern_admin_capture_service_status', return_value=status) as provider:
                     response = client.get('/indi-allsky/modern-admin/' + page)
                 assert response.status_code == 200, (page, response.status_code)
                 provider.assert_called_once_with()

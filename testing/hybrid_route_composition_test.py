@@ -143,13 +143,15 @@ def test_classic_class_bodies_are_preserved_and_isolated():
     tree = ast.parse((FLASK / 'classic_views.py').read_text())
     classes = [node for node in tree.body if isinstance(node, ast.ClassDef)]
     wrappers = {'ConfigView': 'HybridSettingsFormView', 'VirtualSkyView': 'HybridVirtualSkyContextView', 'SqmView': 'HybridSqmContextView', 'ChartView': 'HybridChartContextView', 'SensorPanelView': 'HybridSensorPanelContextView', 'SystemInfoView': 'HybridSystemInfoContextView', 'LogView': 'HybridLogContextView', 'SupportInfoView': 'HybridSupportContextView'}
-    assert len(classes) == 27 + len(wrappers)
+    from modern_admin_classic_page_isolation_test import FINGERPRINTS, run
+    run()  # Additional classes have their own pre-move fingerprints.
+    assert len(classes) == 27 + len(wrappers) + len(FINGERPRINTS)
     for name, base in wrappers.items():
         compatibility = next(node for node in classes if node.name == name)
         assert [ast.unparse(parent) for parent in compatibility.bases] == [base]
         assert len(compatibility.body) == 1 and isinstance(compatibility.body[0], ast.Expr)
         assert isinstance(compatibility.body[0].value, ast.Constant)  # docstring only
-    original_classes = [node for node in classes if node.name not in wrappers]
+    original_classes = [node for node in classes if node.name not in wrappers and node.name not in FINGERPRINTS]
     assert len(original_classes) == 27
     fingerprint = hashlib.sha256('\n'.join(
         ast.dump(node, include_attributes=False) for node in original_classes

@@ -72,8 +72,10 @@ def run(runtime_config):
     with isolated_app(runtime_config,multi_camera=True) as app:
         from indi_allsky.flask import db
         from indi_allsky.flask.models import IndiAllSkyDbCameraTable
-        from indi_allsky.flask.views import ModernAdminMaskView, MaskView
-        assert not issubclass(ModernAdminMaskView,MaskView)
+        from indi_allsky.flask import views
+        assert not hasattr(views, 'MaskView')
+        assert not any(base.__module__.endswith('.classic_views')
+                       for base in views.ModernAdminMaskView.__mro__)
         root=Path(app.config['INDI_ALLSKY_IMAGE_FOLDER'])
         publish_mask_base(a,root,1,1);publish_mask_base(b,root,2,1)
         page='/indi-allsky/modern-admin/cameras/mask-base'

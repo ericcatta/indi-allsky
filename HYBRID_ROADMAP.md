@@ -3,6 +3,19 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Classi pagina esclusivamente Classic — candidato successivo a f85027a2
+
+Quindici classi pagina/alias senza consumatori Hybrid passano da `views.py` a
+`classic_views.py`; il modulo opzionale non importa piu' classi dal modulo
+condiviso. Il codice delle classi e' identico ai fingerprint acquisiti prima
+dello spostamento. Le route pubbliche e operative restano dove sono.
+Il test di avvio verifica anche che i nomi Classic siano assenti da `views`
+in entrambe le modalita', e presenti nel modulo opzionale soltanto quando attivo.
+Passano 150 verifiche Python e 34 test JavaScript, manifest di 821 file
+invariato. Evidenze in `testing/evidence/hybrid-classic-page-isolation.json`.
+Nessuna distribuzione o cancellazione di funzioni.
+Il candidato preparato dcaa481c non cambia.
+
 ## Contesti media indipendenti — candidato successivo a 5692e45f
 
 Loop, storico ADU e riepilogo spazio media ora ereditano contesti Hybrid in
