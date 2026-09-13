@@ -3,6 +3,16 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Rilascio combinato preparato — 13 settembre 2026
+
+Candidato esatto `dcaa481c`, baseline installata `3590a3ee`: bundle e manifest
+verificati sul Pi, backup online SQLite integro, archivio codice e configurazione
+protetti. Preparazione terminata senza cambiare servizi, configurazione, HEAD
+o file utente. Installazione e prove dopo restart attendono una nuova finestra
+concordata; quella precedente fino alle 20 e' terminata. Procedura in
+`HYBRID_STORAGE_RELEASE_RUNBOOK.md`. Avvio automatico riconfermato con linger,
+timer capture/INDI e socket web abilitati; prova cold boot ancora aperta.
+
 ## Pubblicazione upload e retention — candidato successivo a 8638f64b
 
 `media_task_guard.py` serializza la pubblicazione dei task rispetto alla
@@ -54,8 +64,7 @@ al manifest, fingerprint storico route invariato. Passano 34 test JavaScript.
 Browser nativo: errore target incoerente, salva/disabilita/riapri/riabilita,
 redirect anonimo, controlli read-only utente ordinario e layout 390px senza
 overflow. Passano anche stato numerico della stima e tastiera (Space/Tab/Invio) nel
-browser con dati sintetici deterministici. Restano revisione finale
-accodamento upload, deploy e collaudo live. Non e' ancora attivo sul Pi.
+browser con dati sintetici deterministici. La revisione accodamento upload e' completata nel candidato dcaa481c; restano deploy e collaudo live. Non e' ancora attivo sul Pi.
 La pulizia manuale autorizzata e' completata sul Pi, limitata a ID e date dello
 snapshot iniziale: 68.287 record media eliminati, 61,6% del disco libero.
 Evidenze: `testing/evidence/hybrid-storage-recovery-20260913.json`. Lo stop/start per recuperare /tmp capture e' stato autorizzato esplicitamente

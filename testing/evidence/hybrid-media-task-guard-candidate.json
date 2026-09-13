@@ -751,9 +751,9 @@
     }
   ],
   "release_preparation": {
-    "status": "local script draft; not executed on production",
+    "status": "prepared on Raspberry; no service changes",
     "expected_installed": "3590a3ee4621e01b23043ac415de499d79f7c9e3",
-    "candidate": "must be pinned after regression and commit",
+    "candidate": "dcaa481cb8a257b1d08f31727feb575a2e9e52fa",
     "checks": [
       "separate prepare-only mode",
       "coordinated capture/web and activator stop/start",
@@ -764,12 +764,20 @@
     ],
     "verification": [
       "Python compilation",
-      "CLI help"
+      "CLI help",
+      "Production prepare-only completed with exit code 0",
+      "Installed revision remains the expected baseline"
     ],
     "limits": [
-      "No backup created for this candidate yet",
-      "No installation or restart performed",
-      "Script still requires final commit/path manifest and operational review"
-    ]
+      "Installation and restart pending a new user-agreed maintenance window",
+      "Both-camera acceptance after installation remains open",
+      "Production browser security review remains unresolved"
+    ],
+    "changed_paths": 59,
+    "backup_integrity": "ok",
+    "tracked_clean": true,
+    "untracked_preserved": true,
+    "flask_unchanged": true,
+    "services_unchanged": true
   }
 }

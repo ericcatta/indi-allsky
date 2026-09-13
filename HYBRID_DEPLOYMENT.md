@@ -61,7 +61,9 @@ started with explicit authorization to recover its full private temporary
 filesystem; both cameras then produced new files. Settings, accounts,
 calibrations and backups were preserved. A consistent database backup preserves
 metadata but cannot restore the deleted media themselves. Automatic storage
-protection remains a separate unfinished feature, not an installed safeguard.
+protection is implemented and tested in candidate `dcaa481c`, but is not an
+installed safeguard. The combined release backup is ready; see
+`HYBRID_STORAGE_RELEASE_RUNBOOK.md`.
 Evidence: `testing/evidence/hybrid-storage-recovery-20260913.json`.
 
 ## Recovery assets

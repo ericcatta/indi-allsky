@@ -1,4 +1,9 @@
-# Mask Base: next worker release
+# Mask Base: worker acceptance reference
+
+The exact installation candidate below is superseded by
+`HYBRID_STORAGE_RELEASE_RUNBOOK.md` (candidate `dcaa481c`). Do not deploy the
+older standalone candidate. The Mask Base acceptance requirements below remain
+required for the combined release.
 
 Status: prepared locally, **not deployed**. The live acceptance window ended on
 10 September 2026 before 20:00 Europe/Zurich. Wait for the user's next window;
