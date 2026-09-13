@@ -3,6 +3,23 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Endpoint Astropanel indipendente — candidato successivo a e27fa1bb
+
+L'endpoint pubblico `/ajax/astropanel` e' implementato nel modulo condiviso
+`flask/astropanel_views.py`, senza importare view Hybrid o Classic. Il modulo
+monolitico conserva soltanto l'import per la registrazione della route.
+I cinque metodi di calcolo/serializzazione sono identici alla baseline, con
+fingerprint AST; anche propagazione TLE e ordinamento restano invariati.
+
+Corretto l'ingresso: identificatori camera non validi restituiscono JSON 400,
+camere inesistenti 404, errori SQL 503 senza dettagli interni e con rollback della
+sessione. Un nuovo tentativo dopo errore viene verificato. Restano invariati
+URL, accesso pubblico e payload validi; nessun algoritmo scientifico modificato.
+Passano 153 verifiche Python e 34 JavaScript, manifest di 826 file invariato,
+piu' `git diff --check`. Evidenze in
+`testing/evidence/hybrid-astropanel-independence.json`.
+Nessun deploy o collaudo browser nativo in questa missione (Mac bloccato).
+
 ## Collaudo esportazioni giornaliere — successivo a ec501174
 
 Aggiunta una prova di integrazione che confronta cella per cella CSV/XLSX con

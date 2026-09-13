@@ -1,10 +1,26 @@
 #!/usr/bin/env python3
 """Real ephemeris response and Hybrid detail contract, without Classic imports."""
 import re
+import ast
+import hashlib
+from pathlib import Path
+from unittest.mock import patch
+from sqlalchemy.exc import SQLAlchemyError
 from hybrid_runtime_fixture import isolated_app, login_client
 
 
+FINGERPRINTS = {'get': '8f3119781c7c11630a26fdd3aaf4aba3506aa4af802e7e91597b4a1407cca17b', 'astropanel_get_moon_phase': 'ff79bfbca7b8a5a69fcbccc5b9c739ecf3d750d4a56deeb384fa3ca36be3d88e', 'astropanel_get_body_positions': '608db8d84a6231cb5a2aa3ece9ccb6aaf028dfeef3d2cec03e6aa3806a31794f', 'astropanel_get_sun_twilights': 'f25590f74f5eeedc3215927c70bac59b7bad10ab4a0238bcfcd706836f7b23d9', 'astropanel_get_polaris_data': '7856057c333d21a87f17202bbb9dc770e906be09a64280aa170f96a91f3b03eb'}
+
+
 def run():
+    # Five calculation methods captured before extraction from e27fa1bb.
+    path=Path(__file__).resolve().parents[1]/"indi_allsky/flask/astropanel_views.py"
+    tree=ast.parse(path.read_text())
+    owner=next(n for n in tree.body if isinstance(n,ast.ClassDef))
+    for method in owner.body:
+        if isinstance(method,ast.FunctionDef) and method.name in FINGERPRINTS:
+            assert hashlib.sha256(ast.dump(method,include_attributes=False).encode()).hexdigest()==FINGERPRINTS[method.name]
+    assert not any(isinstance(n,ast.ImportFrom) and n.module in ("views","classic_views") for n in ast.walk(tree))
     with isolated_app(multi_camera=True) as app:
         for uid in (1, 2):
             client = login_client(app, uid)
@@ -23,6 +39,18 @@ def run():
                 for planet in ('mercury','venus','mars','jupiter','saturn','uranus','neptune'):
                     for suffix in ('rise','transit','set','alt','az'):
                         assert planet+'_'+suffix in data
+        from indi_allsky.flask.astropanel_views import AjaxAstroPanelView
+        for client in (app.test_client(),login_client(app,1),login_client(app,2)):
+            endpoint='/indi-allsky/ajax/astropanel'
+            for value in (None,'','bad','0','-1','1.5',str(2**63)):
+                response=client.get(endpoint,query_string={} if value is None else {'camera_id':value})
+                assert response.status_code==400 and response.json['message']=='A valid camera_id is required.'
+            response=client.get(endpoint,query_string={'camera_id':999999})
+            assert response.status_code==404 and response.json['message']=='Camera not found.'
+            with patch.object(AjaxAstroPanelView,'get',side_effect=SQLAlchemyError('private provider details')):
+                response=client.get(endpoint,query_string={'camera_id':1})
+                assert response.status_code==503 and 'private provider details' not in response.text
+            assert client.get(endpoint,query_string={'camera_id':1}).status_code==200
         assert app.test_client().get('/indi-allsky/modern-admin/observatory/astropanel').status_code == 302
         print('Astropanel: actual ephemerides, all new detail fields, both cameras/roles, no satellites and Classic disabled: PASS')
 

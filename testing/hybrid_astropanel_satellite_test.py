@@ -36,7 +36,7 @@ def run():
             camera.longitude = 151.0
             db.session.commit()
         positions = {}
-        with patch('indi_allsky.flask.views.datetime', FixedClock):
+        with patch('indi_allsky.flask.astropanel_views.datetime', FixedClock):
             for uid in (1, 2):
                 client = login_client(app, uid)
                 for cid in (1, 2):

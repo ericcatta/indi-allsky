@@ -1,0 +1,59 @@
+{
+  "baseline": "e27fa1bb",
+  "date": "2026-09-14",
+  "scope": "Shared public Astropanel endpoint; no production changes",
+  "status": "Targeted and full isolated regression passed; not deployed",
+  "ownership": {
+    "module": "indi_allsky/flask/astropanel_views.py",
+    "independent_of_frontend_views": true,
+    "registration_alias_retained": true,
+    "public_url": "/indi-allsky/ajax/astropanel"
+  },
+  "preserved_method_fingerprints": {
+    "get": "8f3119781c7c11630a26fdd3aaf4aba3506aa4af802e7e91597b4a1407cca17b",
+    "astropanel_get_moon_phase": "ff79bfbca7b8a5a69fcbccc5b9c739ecf3d750d4a56deeb384fa3ca36be3d88e",
+    "astropanel_get_body_positions": "608db8d84a6231cb5a2aa3ece9ccb6aaf028dfeef3d2cec03e6aa3806a31794f",
+    "astropanel_get_sun_twilights": "f25590f74f5eeedc3215927c70bac59b7bad10ab4a0238bcfcd706836f7b23d9",
+    "astropanel_get_polaris_data": "7856057c333d21a87f17202bbb9dc770e906be09a64280aa170f96a91f3b03eb"
+  },
+  "fixes": [
+    "Malformed, nonpositive and out-of-range camera identifiers return JSON 400",
+    "Missing camera returns JSON 404 instead of unhandled lookup failure",
+    "SQL read failure returns generic JSON 503, rolls back session and permits subsequent successful retry"
+  ],
+  "verified_targeted": [
+    "Real ephemeris fields for both cameras and both roles",
+    "Public anonymous API still responds without a login requirement",
+    "Malformed/unknown camera responses for anonymous, administrator and ordinary user",
+    "Injected SQL failure with no internal message disclosure and successful retry",
+    "Five complete calculation/serialization method ASTs unchanged",
+    "Real PyEphem propagation with twenty synthetic satellites, invalid and expired TLE handling, coordinate isolation and ordering"
+  ],
+  "regression": {
+    "status": "passed",
+    "discovery_entrypoint": "testing/run_hybrid_regression.py",
+    "python_cases": 153,
+    "javascript_cases": 34,
+    "all_exit_codes_zero": true,
+    "manifest_files": 826,
+    "source_changed": false,
+    "manifest_sha256": "f9e80839e1dcb5cdd1a7054100bcfe934a26a48da1787840ac321c42587c7e2d",
+    "includes": [
+      "Full Config parity",
+      "Settings contracts",
+      "Safe Actions",
+      "Product View Models",
+      "Product Spine",
+      "Flask without Classic",
+      "compileall",
+      "Daily rendered table exports"
+    ],
+    "diff_check": "passed"
+  },
+  "limits": [
+    "No native browser acceptance in this mission: Mac locked",
+    "Synthetic orbital fixtures are not live satellite observations",
+    "No deployment, service restart or physical Classic removal",
+    "Whole-product acceptance remains open"
+  ]
+}
