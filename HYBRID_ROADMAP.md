@@ -3,6 +3,18 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Contesti media indipendenti — candidato successivo a 5692e45f
+
+Loop, storico ADU e riepilogo spazio media ora ereditano contesti Hybrid in
+`flask/media_context_views.py`, senza passare dalle classi pagina Classic.
+Query, form, conversioni e ordine restano identici: tre fingerprint AST completi
+acquisiti prima dell'estrazione; le pagine Classic riusano alias di compatibilita'.
+Passano 149 verifiche Python e 34 test JavaScript, con manifest di 820 file
+invariato. Inclusi avvio senza Classic, ADU multicamera, conteggi spazio e Loop
+RAW. Evidenze in `testing/evidence/hybrid-media-context-independence.json`.
+Nessuna distribuzione.
+Il rilascio gia' preparato dcaa481c resta immutato e non include questa estrazione.
+
 ## Rilascio combinato preparato — 13 settembre 2026
 
 Candidato esatto `dcaa481c`, baseline installata `3590a3ee`: bundle e manifest
