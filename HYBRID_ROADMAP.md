@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Collaudo esportazioni giornaliere — successivo a ec501174
+
+Aggiunta una prova di integrazione che confronta cella per cella CSV/XLSX con
+le quattordici colonne renderizzate: entrambe le camere/profili e i ruoli,
+insieme completo, filtro Night, risultato vuoto e dimensioni sconosciute.
+Verificati attachment/MIME, autenticazione, CSRF, metodo e formato. Passano
+il nuovo entrypoint e i test esistenti del serializzatore/controller.
+Gli 824 sorgenti della precedente regressione completa sono byte-identici;
+nessuna modifica runtime e nessuna nuova esecuzione dichiarata dell'intera suite.
+
+Browser: il click CSV ha prodotto POST 200 nel server isolato, ma la ricezione
+resta **bloccata**, non superata: CUA segnala Mac bloccato. Anche Excel e Copy
+restano aperti per il collaudo nativo. Server sintetico arrestato, nessun deploy.
+Evidenze: `testing/evidence/hybrid-daily-export-acceptance.json`.
+
 ## Spazio giornaliero e avvio automatico — candidato successivo a c44b0bbd
 
 Il prospetto File Space Usage ora usa query Hybrid dedicate: comprende tutte le

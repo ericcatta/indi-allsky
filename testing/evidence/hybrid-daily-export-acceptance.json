@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-14",
+  "baseline": "ec501174",
+  "scope": "Daily table CSV/XLSX exports; no production deployment or runtime changes",
+  "automatic": {
+    "status": "superato",
+    "entrypoint": "testing/hybrid_daily_export_flow_test.py",
+    "environment": "Isolated Flask without Classic; temporary synthetic database",
+    "cases": [
+      "CSV and XLSX cell content exactly equals rendered fourteen-column table",
+      "Admin and ordinary user; both camera/profile selections",
+      "All rows, Night-filtered payload and header-only empty result",
+      "Unknown-size annotation preserved",
+      "Attachment filename and MIME type",
+      "GET rejected; CSRF required; unsupported format rejected; anonymous authenticated-route redirect"
+    ],
+    "additional_checks": [
+      "testing/hybrid_table_export_test.py",
+      "testing/hybrid_operations_table_browser_test.js",
+      "git diff --check"
+    ]
+  },
+  "native": [
+    {
+      "control": "CSV from Night-filtered camera 2 daily table",
+      "status": "bloccato",
+      "observed": "Click issued; isolated server recorded POST /modern-admin/operations/export with HTTP 200",
+      "missing": "Browser download receipt and file inspection",
+      "reason": "CUA reported Mac locked and automatic unlock unavailable"
+    },
+    {
+      "control": "Excel download and Copy receipt",
+      "status": "bloccato",
+      "reason": "Mac locked before these native checks could be performed"
+    }
+  ],
+  "regression": {
+    "previous_full_suite": "testing/evidence/hybrid-daily-media-usage.json",
+    "previous_python_cases": 152,
+    "previous_javascript_cases": 34,
+    "previous_manifest_files": 824,
+    "existing_source_hashes_unchanged": true,
+    "only_new_source": "testing/hybrid_daily_export_flow_test.py",
+    "new_entrypoint_exit_code": 0,
+    "note": "Previous full suite not rerun: all 824 covered sources are byte-identical; new integration test and two focused existing entrypoints passed. This is not a claim of a new full 153-case run."
+  },
+  "limits": [
+    "Native reception remains open; HTTP 200 is insufficient to pass a download control",
+    "No narrow-viewport or native ordinary-user export verification",
+    "Synthetic server stopped; no production effects",
+    "Whole-product migration and physical Classic removal remain incomplete"
+  ]
+}
