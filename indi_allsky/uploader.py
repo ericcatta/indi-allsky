@@ -20,6 +20,7 @@ from .flask import models
 
 from . import filetransfer
 from .task_claim import claim_upload_task
+from .media_task_guard import persist_upload_task
 
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -692,8 +693,7 @@ class FileUploader(Thread):
             state=models.TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         # MULTI_CAMERA_PREP: passive route id; upload worker still loads task.
         self._queue_upload_task(upload_task)

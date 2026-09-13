@@ -3,8 +3,8 @@ from datetime import datetime
 import logging
 
 from . import constants
+from .media_task_guard import persist_upload_task
 
-from .flask import db
 
 from .flask.models import TaskQueueState
 from .flask.models import TaskQueueQueue
@@ -133,8 +133,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -158,8 +157,7 @@ class miscUpload(object):
                 state=TaskQueueState.QUEUED,
                 data=latest_jobdata,
             )
-            db.session.add(latest_upload_task)
-            db.session.commit()
+            persist_upload_task(latest_upload_task)
 
             self._queue_upload_task(latest_upload_task)
 
@@ -211,8 +209,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -236,8 +233,7 @@ class miscUpload(object):
                 state=TaskQueueState.QUEUED,
                 data=latest_jobdata,
             )
-            db.session.add(latest_upload_task)
-            db.session.commit()
+            persist_upload_task(latest_upload_task)
 
             self._queue_upload_task(latest_upload_task)
 
@@ -289,8 +285,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -342,8 +337,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -367,8 +361,7 @@ class miscUpload(object):
                 state=TaskQueueState.QUEUED,
                 data=latest_jobdata,
             )
-            db.session.add(latest_upload_task)
-            db.session.commit()
+            persist_upload_task(latest_upload_task)
 
             self._queue_upload_task(latest_upload_task)
 
@@ -420,8 +413,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -445,8 +437,7 @@ class miscUpload(object):
                 state=TaskQueueState.QUEUED,
                 data=latest_jobdata,
             )
-            db.session.add(latest_upload_task)
-            db.session.commit()
+            persist_upload_task(latest_upload_task)
 
             self._queue_upload_task(latest_upload_task)
 
@@ -498,8 +489,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -523,8 +513,7 @@ class miscUpload(object):
                 state=TaskQueueState.QUEUED,
                 data=latest_jobdata,
             )
-            db.session.add(latest_upload_task)
-            db.session.commit()
+            persist_upload_task(latest_upload_task)
 
             self._queue_upload_task(latest_upload_task)
 
@@ -576,8 +565,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -601,8 +589,7 @@ class miscUpload(object):
                 state=TaskQueueState.QUEUED,
                 data=latest_jobdata,
             )
-            db.session.add(latest_upload_task)
-            db.session.commit()
+            persist_upload_task(latest_upload_task)
 
             self._queue_upload_task(latest_upload_task)
 
@@ -668,8 +655,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -693,8 +679,7 @@ class miscUpload(object):
                 state=TaskQueueState.QUEUED,
                 data=latest_jobdata,
             )
-            db.session.add(latest_upload_task)
-            db.session.commit()
+            persist_upload_task(latest_upload_task)
 
             self._queue_upload_task(latest_upload_task)
 
@@ -757,8 +742,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -810,8 +794,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -835,8 +818,7 @@ class miscUpload(object):
                 state=TaskQueueState.QUEUED,
                 data=latest_jobdata,
             )
-            db.session.add(latest_upload_task)
-            db.session.commit()
+            persist_upload_task(latest_upload_task)
 
             self._queue_upload_task(latest_upload_task)
 
@@ -888,8 +870,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -940,8 +921,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -964,8 +944,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(mqtt_task)
-        db.session.commit()
+        persist_upload_task(mqtt_task)
 
         self._queue_upload_task(mqtt_task)
 
@@ -994,8 +973,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(s3_task)
-        db.session.commit()
+        persist_upload_task(s3_task)
 
         self._queue_upload_task(s3_task)
 
@@ -1103,8 +1081,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -1138,8 +1115,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -1215,8 +1191,7 @@ class miscUpload(object):
             state=TaskQueueState.QUEUED,
             data=jobdata,
         )
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 
@@ -1240,8 +1215,7 @@ class miscUpload(object):
             data=jobdata,
         )
 
-        db.session.add(upload_task)
-        db.session.commit()
+        persist_upload_task(upload_task)
 
         self._queue_upload_task(upload_task)
 

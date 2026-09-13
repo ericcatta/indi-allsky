@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import shutil
 
+from .media_task_guard import media_task_lock
 from .storage_pressure import GIB, StoragePressureOptions, reclaim_old_images
 
 IMAGE_FAMILIES = ('Image', 'FitsImage', 'RawImage', 'PanoramaImage')
@@ -108,22 +109,25 @@ class StoragePressureRuntime:
                            key=lambda item: (item.created, item.table.__name__, item.identity))
 
     def delete(self, candidate):
-        entry = self.session.get(candidate.table, candidate.identity)
-        if entry is None:
-            raise RuntimeError('An image changed during storage cleanup; retry on the next check.')
-        pending = self.pending_tasks()
-        if any((task.data or {}).get('action') in GENERATION_ACTIONS for task in pending):
-            raise RuntimeError('A generation was queued during storage cleanup; retry later.')
-        if self.protected(entry, pending):
-            raise RuntimeError('An image was queued for transfer during storage cleanup; retry later.')
-        path = self.path(entry)
-        if entry.thumbnail_uuid:
-            thumbnail = self.models.IndiAllSkyDbThumbnailTable.query.filter_by(uuid=entry.thumbnail_uuid).first()
-            if thumbnail:
-                self.path(thumbnail)
-        entry.deleteAsset()
-        self.session.delete(entry)
-        self.session.commit()
+        with media_task_lock(exclusive=True):
+            # End the candidate scan snapshot before checking newly published tasks.
+            self.session.commit()
+            entry = self.session.get(candidate.table, candidate.identity, populate_existing=True)
+            if entry is None:
+                raise RuntimeError('An image changed during storage cleanup; retry on the next check.')
+            pending = self.pending_tasks()
+            if any((task.data or {}).get('action') in GENERATION_ACTIONS for task in pending):
+                raise RuntimeError('A generation was queued during storage cleanup; retry later.')
+            if self.protected(entry, pending):
+                raise RuntimeError('An image was queued for transfer during storage cleanup; retry later.')
+            path = self.path(entry)
+            if entry.thumbnail_uuid:
+                thumbnail = self.models.IndiAllSkyDbThumbnailTable.query.filter_by(uuid=entry.thumbnail_uuid).first()
+                if thumbnail:
+                    self.path(thumbnail)
+            entry.deleteAsset()
+            self.session.delete(entry)
+            self.session.commit()
 
     @contextmanager
     def lock(self):

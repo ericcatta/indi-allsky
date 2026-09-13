@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Pubblicazione upload e retention — candidato successivo a 8638f64b
+
+`media_task_guard.py` serializza la pubblicazione dei task rispetto alla
+cancellazione per pressione disco. I 26 punti dell'helper upload e l'handoff
+S3 -> Sync API usano il boundary; i payload e il dispatch restano invariati.
+Un lock condiviso copre verifica del riferimento e commit del task; la pulizia
+prende il lock esclusivo per una sola immagine e rilegge task e record dopo
+aver chiuso la precedente snapshot DB. Nessun lock copre il trasferimento rete.
+Se la cancellazione ha gia' vinto, non viene pubblicato un task orfano.
+Il test con sessioni SQLite separate e file reali verifica entrambi gli ordini.
+Passano anche pulizia, pubblicazione panorama e storia keogram realtime.
+Passano tutte le 148 verifiche Python (compilazione inclusa) e 34 test
+JavaScript, con manifest di 818 file invariato. Distribuzione ancora aperta. Le prove live e la finestra di manutenzione restano
+separate dalle prove automatiche nel sandbox.
+
 ## Protezione spazio e stima autonomia — candidato verificato 13 settembre 2026
 
 L'utente autorizza la pulizia di tutti i media di prova, chiede almeno meta'
