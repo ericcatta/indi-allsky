@@ -41,6 +41,11 @@ def run():
                 assert db.session.get(IndiAllSkyDbUserTable, uid).loginDate is None
             assert anonymous.get('/indi-allsky/modern-admin/account').status_code == 302
             client = login_client(app, uid)
+            identity = client.get('/indi-allsky/modern-admin/account').text
+            assert '<dt>Username</dt><dd>test-user-' + str(uid) + '</dd>' in identity
+            assert '<dt>Email</dt><dd>test@example.invalid</dd>' in identity
+            assert '<dt>Account role</dt><dd>' + ('Administrator' if uid == 1 else 'User') + '</dd>' in identity
+            assert 'name="USERNAME"' not in identity and 'name="EMAIL"' not in identity
             token = csrf(client, '/indi-allsky/modern-admin/account')
             payload = {'NAME': 'Updated User', 'CURRENT_PASSWORD': PASSWORD, 'NEW_PASSWORD': '', 'NEW_PASSWORD2': ''}
             with app.app_context():

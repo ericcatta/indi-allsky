@@ -10,11 +10,11 @@
     <section class="modern-admin-table-panel">
         <form id="hybrid-account-form" action="{{ url_for('indi_allsky.ajax_user_view') }}" method="post">
             {{ form_userinfo.csrf_token }}
-            <div class="modern-admin-filter-row">
-                <label>Username {{ form_userinfo.USERNAME() }}</label>
-                <label>Email {{ form_userinfo.EMAIL() }}</label>
-                <label>Account role <input value="{{ 'Administrator' if current_user.is_admin else 'User' }}" readonly disabled></label>
-            </div>
+            <dl class="modern-admin-detail-list" aria-label="Account identity">
+                <div><dt>Username</dt><dd>{{ current_user.username }}</dd></div>
+                <div><dt>Email</dt><dd>{{ current_user.email }}</dd></div>
+                <div><dt>Account role</dt><dd>{{ 'Administrator' if current_user.is_admin else 'User' }}</dd></div>
+            </dl>
             <div class="modern-admin-filter-row">
                 <label>Name {{ form_userinfo.NAME(required=true, autocomplete='name') }}</label>
                 <label>Current password {{ form_userinfo.CURRENT_PASSWORD(required=true, autocomplete='current-password') }}</label>

@@ -3,6 +3,19 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Account: collaudo browser e identita' leggibile — 14 settembre 2026
+
+Nel sandbox nativo sono verificati modifica nome e persistenza per admin/utente,
+errori password, cambio password admin, rifiuto credenziale precedente, nuovo
+login, logout, sessione scaduta e salvataggio da tastiera utente ordinario.
+Username/email erano presenti nell'HTML Flask ma vuoti nei campi disabilitati
+osservati nel browser; la causa della discrepanza non e' attribuita al backend.
+L'identita' e il ruolo ora sono dati informativi semantici, leggibili nel browser
+per entrambi i ruoli. Nessuna modifica alle credenziali o ai permessi runtime.
+Evidenze per controllo e limiti in `testing/evidence/hybrid-account-native-20260914.json`.
+Passano 150 verifiche Python e 34 test JavaScript, manifest di 821 file invariato.
+Produzione invariata, nessun account reale modificato.
+
 ## Classi pagina esclusivamente Classic — candidato successivo a f85027a2
 
 Quindici classi pagina/alias senza consumatori Hybrid passano da `views.py` a

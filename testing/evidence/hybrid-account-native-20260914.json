@@ -1,0 +1,899 @@
+{
+  "baseline": "d30a2399",
+  "date": "2026-09-14",
+  "scope": "Native account acceptance in disposable isolated Flask with Classic imports/templates/assets forbidden; no production account changes",
+  "status": "listed native cases and full isolated regression passed; not deployed",
+  "viewport": {
+    "width": 1280,
+    "content_width": 1280
+  },
+  "presentation_finding": {
+    "before": "Flask rendered username/email value attributes; native browser DOM showed disabled inputs without values. Cause of discrepancy not established.",
+    "change": "Render current username, email and role as a semantic definition list instead of disabled editable-looking controls.",
+    "after": "Native DOM and accessibility tree show the correct identity for admin and ordinary user."
+  },
+  "controls": [
+    {
+      "page": "/modern-admin/account",
+      "control": "NAME + CURRENT_PASSWORD + Save account",
+      "role": "admin",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Save name with incorrect current password",
+      "request": "POST /ajax/user",
+      "observed_effect": "Current password is not valid; no success shown",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    },
+    {
+      "page": "/modern-admin/account",
+      "control": "NAME + CURRENT_PASSWORD + Save account",
+      "role": "admin",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Save name with valid current password",
+      "request": "POST /ajax/user",
+      "observed_effect": "User info updated; all password fields cleared; save reenabled; new name persists in a newly opened page and after logout/login",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    },
+    {
+      "page": "/modern-admin/account",
+      "control": "NEW_PASSWORD + NEW_PASSWORD2 + Save account",
+      "role": "admin",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Submit mismatching new passwords",
+      "request": "POST /ajax/user",
+      "observed_effect": "Passwords do not match; save remains available",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    },
+    {
+      "page": "/modern-admin/account",
+      "control": "NEW_PASSWORD + NEW_PASSWORD2 + Save account",
+      "role": "admin",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Submit matching new passwords with valid current password",
+      "request": "POST /ajax/user",
+      "observed_effect": "Saving and disabled submit observed, then success; old password rejected at login, new password opens Now",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    },
+    {
+      "page": "/modern-admin/account",
+      "control": "Open navigation menu > Sign out",
+      "role": "admin and user",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Sign out using the drawer link",
+      "request": "GET /logout",
+      "observed_effect": "Redirect to sign-in; ordinary and admin sessions checked",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    },
+    {
+      "page": "/modern-admin/account",
+      "control": "Save account in previously opened page",
+      "role": "expired session",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Submit after signing out in another tab",
+      "request": "POST /ajax/user",
+      "observed_effect": "Your session has expired. Sign in again.; no success reported",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    },
+    {
+      "page": "/modern-admin/account",
+      "control": "NAME + CURRENT_PASSWORD + Save account",
+      "role": "user",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Save own name using Tab navigation and Return on the submit button",
+      "request": "POST /ajax/user",
+      "observed_effect": "Correct submit focus observed; User info updated; reopening My Account retains the new name",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    },
+    {
+      "page": "/modern-admin/account",
+      "control": "Open navigation menu > My Account",
+      "role": "admin and user",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Navigate to account using the drawer",
+      "request": "GET /modern-admin/account",
+      "observed_effect": "Correct identity/role and own persisted name rendered for each account",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    },
+    {
+      "page": "/modern-admin/account",
+      "control": "Username + Password + Sign in",
+      "role": "admin",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Attempt old password, then new password",
+      "request": "POST /login",
+      "observed_effect": "Old password rejected; new password opens Now and account shows persisted identity",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    },
+    {
+      "page": "/modern-admin/account",
+      "control": "Username + Password + Sign in",
+      "role": "user",
+      "scope": "own authenticated account; camera/profile not applicable",
+      "action": "Authenticate ordinary synthetic account",
+      "request": "POST /login",
+      "observed_effect": "Now opens; administrator recovery controls disabled with reason; own account save enabled",
+      "status": "superato",
+      "evidence": "native in-app browser, isolated Flask fixture, 2026-09-14"
+    }
+  ],
+  "open": [
+    {
+      "case": "narrow viewport account layout",
+      "status": "bloccato",
+      "reason": "Not exercised in this bounded account browser session"
+    },
+    {
+      "case": "production browser acceptance",
+      "status": "bloccato",
+      "reason": "Candidate not deployed; production certificate/security review unresolved"
+    },
+    {
+      "case": "ordinary-user password change via native browser",
+      "status": "bloccato",
+      "reason": "Name save checked natively; password-change coverage for this role remains automated"
+    },
+    {
+      "case": "all controls elsewhere in the product",
+      "status": "bloccato",
+      "reason": "This evidence covers the account flow only"
+    }
+  ],
+  "cleanup": {
+    "own_tabs_closed": true,
+    "isolated_server_stopped": true,
+    "production_unchanged": true
+  },
+  "python": {
+    "status": "passed",
+    "manifest_files": 821,
+    "source_changed": false,
+    "results": [
+      {
+        "case": "testing/auto_exposure_controller_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/auto_gain_controller_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/auto_gain_runtime_state_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/capture_profiles_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/capture_timeout_policy_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/focus_frames_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/full_config_parser_parity_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/generation_result_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_account_input_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_adu_history_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_app_startup_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_archive_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_asset_guard_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_astropanel_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_astropanel_satellite_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_aurora_failure_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_aurora_rtsw_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_aurora_status_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_authenticated_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_browser_maintenance_guard_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_camera_cleanup_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_camera_management_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_camera_management_policy_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_camera_processing_status_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_camera_settings_entries_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_camera_simulator_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_settings_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_capture_http_methods_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_charts_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_compatibility_redirect_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_cpu_sampling_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_dark_library_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_database_backup_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_diagnostic_tables_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_drives_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_end_of_night_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_end_of_night_handoff_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_exposure_pipeline_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_exposure_stability_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_fits_processing_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_fits_processing_parity_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_focus_endpoint_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_focus_preview_parity_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_focuser_effect_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_gallery_isolation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_generated_media_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_generation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_generation_result_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_geometry_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_gpio_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_highlight_meter_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_highlight_settings_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_highlights_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_keogram_encoding_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_log_download_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_log_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_login_redirect_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_longterm_keogram_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_longterm_sampling_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_loop_statistics_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_mask_camera_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_media_cleanup_failure_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_media_task_guard_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_media_validation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_metering_mask_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_mini_generation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_native_focus_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_navigation_redirect_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_network_command_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_now_page_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_observatory_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_operations_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_output_detail_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_panorama_cadence_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_panorama_publication_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_public_media_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_queued_maintenance_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_raw_loop_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_realtime_history_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_realtime_preview_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_regression_runner_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_route_composition_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_runtime_shell_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_satellite_update_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_session_revocation_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_settings_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_settings_navigation_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_shell_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_sky_cycle_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_smoke_update_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_snapshot_concurrency_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_source_media_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_sqm_readings_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_storage_estimate_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_storage_pressure_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_storage_pressure_policy_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_storage_settings_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_storage_worker_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_system_power_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_system_units_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_table_export_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_task_output_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_task_visibility_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_template_guard_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_timelapse_deflicker_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_timelapse_options_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_timelapse_settings_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_ui_inventory_parser_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_updates_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_upgrade_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_upload_claim_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_upload_completion_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_users_table_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_video_dispatch_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_video_encoding_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_video_failure_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_virtualsky_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/hybrid_youtube_flow_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/legacy_auto_gain_steps_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_boundary_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_classic_page_isolation_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_full_config_form_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_log_reader_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_camera_filter_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_context_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_metadata_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_media_runtime_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_notification_read_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_observatory_context_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_observatory_tools_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_runtime_providers_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_settings_contracts_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_settings_runtime_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_system_context_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_system_tools_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_admin_task_read_service_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/modern_safe_action_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/multicamera_processor_isolation_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/network_activation_polling_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/network_commands_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/network_scan_effects_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/product_spine_regression_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/product_view_models_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/sftp_adapter_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "testing/stretch_multicamera_mask_test.py",
+        "exit_code": 0
+      },
+      {
+        "case": "hybrid_archive_flow_test.py:library",
+        "exit_code": 0
+      },
+      {
+        "case": "compileall",
+        "exit_code": 0
+      }
+    ]
+  },
+  "javascript": [
+    {
+      "case": "testing/hybrid_account_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_astropanel_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_camera_management_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_camera_simulator_parity_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_charts_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_config_restore_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_drives_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_fits_processing_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_focus_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_full_settings_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_generation_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_geometry_math_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_gpio_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_image_detail_preview_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_log_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_longterm_keogram_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_loop_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_media_archive_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_media_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_mini_generation_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_navigation_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_network_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_notification_ack_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_now_frames_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_operations_table_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_panorama_loop_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_public_media_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_realtime_keogram_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_sensor_panel_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_system_units_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_updates_browser_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_virtualsky_controller_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_virtualsky_test.js",
+      "exit_code": 0
+    },
+    {
+      "case": "testing/hybrid_youtube_browser_test.js",
+      "exit_code": 0
+    }
+  ]
+}
