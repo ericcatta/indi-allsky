@@ -3,6 +3,26 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Riepiloghi Storage e Uploads — candidato successivo a c2da9ae9
+
+Corretti i conteggi: Storage include undici famiglie di media/miniature e risolve
+camera/profilo prima della lettura; Uploads conta soltanto la coda UPLOAD, con
+ambito globale dichiarato. Errori SQL mostrano indisponibilita', non zeri o falsa
+assenza di notifiche. I collegamenti Storage conservano l'ambito esplicito e
+includono Storage Protection; Uploads collega Library, Tasks e gestione YouTube.
+Le query read-only sono in `flask/overview_queries.py`. Misurati nel test SQLite
+4->1 accessi per l'inventario e 6->1 per la coda; nessuna affermazione di latenza
+end-to-end. Il test copre tutte le famiglie, due camere/ruoli e ripresa da errore.
+Browser sintetico: inventari 123/13, passaggio al dettaglio con camera/profilo,
+due task upload separati da 205 task video, filtro notifiche 2->1->0, ingressi
+Library/Tasks/Storage Protection. Passano 151 verifiche Python e 34 JavaScript,
+manifest di 823 file invariato. Evidenze in `testing/evidence/hybrid-overview-summaries.json`.
+Nessun deploy.
+Resta un difetto distinto nel prospetto giornaliero File Space Usage: omette
+mini timelapse, keogram e startrail dal computo. La correzione del riepilogo non
+chiude questo difetto; affrontarlo nella prossima missione senza alterare i
+fingerprint dei contesti Classic conservati per compatibilita'.
+
 ## Account: collaudo browser e identita' leggibile — 14 settembre 2026
 
 Nel sandbox nativo sono verificati modifica nome e persistenza per admin/utente,

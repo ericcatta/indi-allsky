@@ -24,13 +24,13 @@ var camera_id = {{ camera_id }};
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Recent messages</div>
-            <h3>{{ modern_admin_upload_notification_count }}</h3>
+            <h3>{{ modern_admin_upload_notification_count if modern_admin_upload_notification_count is not none else 'Unavailable' }}</h3>
             <p>Read-only upload notifications.</p>
         </article>
         <article class="modern-admin-status-card">
             <div class="modern-admin-card-label">Mode</div>
-            <h3>Inspection</h3>
-            <p>No upload action is available here.</p>
+            <h3>Upload workflows</h3>
+            <p><a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Choose media</a> · <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">View tasks</a></p>
         </article>
     </section>
 
@@ -43,7 +43,7 @@ var camera_id = {{ camera_id }};
             <span class="modern-admin-status-pill {{ target.tone }}">Read-only</span>
             <p><a href="{{ url_for('indi_allsky.modern_admin_upload_detail_view', provider_slug=target.slug) }}">Details</a></p>
             {% if target.slug == 'youtube' %}
-            <p><a href="{{ url_for('indi_allsky.modern_admin_youtube_view') }}">OAuth status audit</a></p>
+            <p><a href="{{ url_for('indi_allsky.modern_admin_youtube_view') }}">Manage YouTube</a></p>
             {% endif %}
         </article>
         {% endfor %}
@@ -53,7 +53,8 @@ var camera_id = {{ camera_id }};
         <article class="modern-admin-table-panel">
             <div class="modern-admin-section-heading">
                 <p class="modern-admin-eyebrow">Task Queue</p>
-                <h2>Queue state</h2>
+                <h2>Upload queue state</h2>
+                <p>Upload tasks across all cameras. Capture and video-generation queues are excluded.</p>
             </div>
             <div class="modern-admin-table-scroll">
                 <table class="modern-admin-data-table">
@@ -61,6 +62,8 @@ var camera_id = {{ camera_id }};
                     <tbody>
                         {% for row in modern_admin_upload_tasks %}
                         <tr><td>{{ row.label }}</td><td><span class="modern-admin-status-pill {% if row.count %}modern-admin-status-warning{% else %}modern-admin-status-muted{% endif %}">{{ row.count }}</span></td></tr>
+                        {% else %}
+                        <tr><td colspan="2" role="status">Upload queue could not be read. Refresh to retry.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -75,18 +78,18 @@ var camera_id = {{ camera_id }};
             <div class="modern-admin-filter-bar" aria-label="Upload notification filters">
                 <label>
                     Search
-                    <input id="modern-upload-search" type="search" placeholder="item or message" autocomplete="off">
+                    <input id="modern-upload-search" type="search"{% if modern_admin_upload_notifications is none %} disabled{% endif %} placeholder="item or message" autocomplete="off">
                 </label>
-                <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-upload-filter-count">{{ modern_admin_upload_notification_count }} shown</span>
+                <span class="modern-admin-status-pill modern-admin-status-muted" id="modern-upload-filter-count">{{ modern_admin_upload_notification_count if modern_admin_upload_notification_count is not none else 'Unavailable' }}{% if modern_admin_upload_notification_count is not none %} shown{% endif %}</span>
             </div>
             <div class="modern-admin-table-scroll">
                 <table class="modern-admin-data-table" id="modern-upload-notifications-table">
                     <thead><tr><th>Date</th><th>Item</th><th>Message</th></tr></thead>
                     <tbody>
-                        {% for note in modern_admin_upload_notifications %}
+                        {% for note in modern_admin_upload_notifications or [] %}
                         <tr data-search="{{ (note.item ~ ' ' ~ note.notification)|lower }}"><td>{{ note.createDate.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{ note.item }}</td><td>{{ note.notification }}</td></tr>
                         {% else %}
-                        <tr><td colspan="3">No recent upload notifications.</td></tr>
+                        <tr><td colspan="3">{% if modern_admin_upload_notifications is none %}Upload notifications could not be read. Refresh to retry.{% else %}No recent upload notifications.{% endif %}</td></tr>
                         {% endfor %}
                         <tr id="modern-upload-filter-empty-row" hidden>
                             <td colspan="3">No upload notifications match the current filter.</td>

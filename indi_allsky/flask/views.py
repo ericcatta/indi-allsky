@@ -4600,51 +4600,7 @@ class ModernAdminSkyCycleView(ModernAdminProductView):
         context.update(capture_cycles=cycles, capture_cycles_error=error)
         return context
 
-class ModernAdminStorageView(ModernAdminView):
-    page_title = 'Modern Admin Storage'
-    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
 
-    def get_context(self):
-        context = super(ModernAdminStorageView, self).get_context()
-        context.update(self.get_storage_context())
-
-        context['modern_admin_section_links'] = (
-            ('File Space Usage', 'indi_allsky.modern_admin_file_space_usage_view'),
-            ('Drives', 'indi_allsky.modern_admin_drive_manager_view'),
-            ('Gallery', 'indi_allsky.modern_admin_media_gallery_view'),
-            ('Images', 'indi_allsky.modern_admin_media_images_view'),
-            ('FITS Inspection', 'indi_allsky.modern_admin_fits_view'),
-            ('FITS Viewer', 'indi_allsky.modern_admin_media_fits_view'),
-            ('Generate', 'indi_allsky.modern_admin_generate_view'),
-            ('Process FITS', 'indi_allsky.modern_admin_image_processing_view'),
-        )
-        context['modern_admin_storage_counts'] = self.get_media_count_summary()
-
-        return context
-
-
-    def get_media_count_summary(self):
-        count_models = (
-            ('Images', IndiAllSkyDbImageTable),
-            ('Panoramas', IndiAllSkyDbPanoramaImageTable),
-            ('FITS', IndiAllSkyDbFitsImageTable),
-            ('Timelapses', IndiAllSkyDbVideoTable),
-        )
-
-        summary = list()
-        for label, model in count_models:
-            try:
-                count = model.query\
-                    .join(model.camera)\
-                    .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
-                    .count()
-            except Exception as e:
-                app.logger.error('Error counting modern admin storage rows for %s: %s', label, str(e))
-                count = 0
-
-            summary.append({'label' : label, 'count' : count})
-
-        return summary
 
 
 class ModernAdminUploadsView(ModernAdminView):
@@ -4690,37 +4646,40 @@ class ModernAdminUploadsView(ModernAdminView):
             target for target in context['modern_admin_upload_targets']
             if target['status'] in ('Configured', 'Enabled')
         ])
-        context['modern_admin_upload_notification_count'] = len(context['modern_admin_upload_notifications'])
+        context['modern_admin_upload_notification_count'] = (len(context['modern_admin_upload_notifications'])
+            if context['modern_admin_upload_notifications'] is not None else None)
 
         return context
 
 
     def get_task_queue_summary(self):
-        state_counts = dict()
-        for state in TaskQueueState:
-            try:
-                count = IndiAllSkyDbTaskQueueTable.query\
-                    .filter(IndiAllSkyDbTaskQueueTable.state == state)\
-                    .count()
-            except Exception as e:
-                app.logger.error('Error counting modern admin upload task queue rows: %s', str(e))
-                count = 0
-
-            state_counts[state.value] = count
-
-        return self.task_backlog_summary_provider.get_task_backlog_summary(state_counts=state_counts)
+        from .overview_queries import upload_state_counts
+        from sqlalchemy.exc import SQLAlchemyError
+        try:
+            summary = self.task_backlog_summary_provider.get_task_backlog_summary(
+                state_counts=upload_state_counts())
+            summary['available'] = True
+            return summary
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception('Upload queue summary query failed')
+            return {'available': False, 'rows': [], 'status': 'unavailable',
+                    'status_label': 'Unavailable', 'tone': 'muted',
+                    'metadata_source': 'taskqueue_state_counts', 'total_count': None, 'active_count': None, 'attention_count': None}
 
 
     def get_upload_notifications(self):
+        from sqlalchemy.exc import SQLAlchemyError
         try:
             return IndiAllSkyDbNotificationTable.query\
                 .filter(IndiAllSkyDbNotificationTable.category == NotificationCategory.UPLOAD)\
                 .order_by(IndiAllSkyDbNotificationTable.createDate.desc())\
                 .limit(6)\
                 .all()
-        except Exception as e:
-            app.logger.error('Error loading modern admin upload notifications: %s', str(e))
-            return list()
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception('Upload notification query failed')
+            return None
 
 
 class ModernAdminUploadDetailView(ModernAdminUploadsView):
@@ -7843,6 +7802,43 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
                 formatted_parts.append(part.capitalize())
 
         return ' '.join(formatted_parts)
+
+
+class ModernAdminStorageView(CameraScopedTemplateMixin, ModernAdminMediaBrowseView, ModernAdminView):
+    page_title = 'Modern Admin Storage'
+    modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
+
+    def get_context(self):
+        context = ModernAdminView.get_context(self)
+        context.update(self.get_storage_context())
+
+        context['modern_admin_section_links'] = (
+            ('Storage Protection', 'indi_allsky.modern_admin_storage_protection_settings_view'),
+            ('File Space Usage', 'indi_allsky.modern_admin_file_space_usage_view'),
+            ('Drives', 'indi_allsky.modern_admin_drive_manager_view'),
+            ('Gallery', 'indi_allsky.modern_admin_media_gallery_view'),
+            ('Images', 'indi_allsky.modern_admin_media_images_view'),
+            ('FITS Inspection', 'indi_allsky.modern_admin_fits_view'),
+            ('FITS Viewer', 'indi_allsky.modern_admin_media_fits_view'),
+            ('Generate', 'indi_allsky.modern_admin_generate_view'),
+            ('Process FITS', 'indi_allsky.modern_admin_image_processing_view'),
+        )
+        context['modern_admin_storage_counts'] = self.get_media_count_summary()
+        context['storage_camera_choices'] = self.get_media_camera_filters()[1:]
+        context['storage_profile_id'] = request.args.get('profile_id', '')
+
+        return context
+
+
+    def get_media_count_summary(self):
+        from .overview_queries import media_counts
+        from sqlalchemy.exc import SQLAlchemyError
+        try:
+            return media_counts(self.camera.id)
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception('Storage inventory query failed')
+            return None
 
 
 class ModernAdminSqmView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, HybridSqmContextView):
