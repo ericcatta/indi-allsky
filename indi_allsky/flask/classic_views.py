@@ -44,7 +44,7 @@ from .views import ImageCircleHelperView
 from .views import ImageLagView
 from .views import ImageLoopImgView
 from .views import ImageProcessingView
-from .views import LogView
+from .system_context_views import HybridLogContextView
 from .views import ManualGpioView
 from .views import MaskView
 from .views import NetworkManagerView
@@ -52,8 +52,8 @@ from .views import RealtimeKeogramView
 from .views import RollingAduView
 from .observatory_context_views import HybridSensorPanelContextView
 from .observatory_context_views import HybridSqmContextView
-from .views import SupportInfoView
-from .views import SystemInfoView
+from .system_context_views import HybridSupportContextView
+from .system_context_views import HybridSystemInfoContextView
 from .views import TimelapseGeneratorView
 from .observatory_context_views import HybridVirtualSkyContextView
 
@@ -71,6 +71,18 @@ class ChartView(HybridChartContextView):
 
 
 class SensorPanelView(HybridSensorPanelContextView):
+    """Compatibility page for the optional Classic frontend."""
+
+
+class SystemInfoView(HybridSystemInfoContextView):
+    """Compatibility page for the optional Classic frontend."""
+
+
+class LogView(HybridLogContextView):
+    """Compatibility page for the optional Classic frontend."""
+
+
+class SupportInfoView(HybridSupportContextView):
     """Compatibility page for the optional Classic frontend."""
 
 

@@ -2147,7 +2147,7 @@ def get_safe_action_dry_run_view_source():
 def get_capture_service_action_view_source():
     source = (Path(__file__).resolve().parents[1] / 'indi_allsky' / 'flask' / 'views.py').read_text()
     class_start = source.index('class ModernAdminCaptureServiceActionView')
-    class_end = source.index('class SystemInfoView')
+    class_end = source.index('class ModernAdminTaskStatusView', class_start)
     return source[class_start:class_end], source
 
 

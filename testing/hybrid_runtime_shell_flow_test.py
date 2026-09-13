@@ -24,6 +24,14 @@ class Controls(HTMLParser):
 def run(runtime_config):
     with isolated_app(runtime_config, multi_camera=True) as app:
         from indi_allsky.flask import views
+        from indi_allsky.flask import system_context_views as contexts
+        for name, parent in (('ModernAdminSystemInfoView','HybridSystemInfoContextView'),
+                             ('ModernAdminLogView','HybridLogContextView'),
+                             ('ModernAdminSupportInfoView','HybridSupportContextView')):
+            mro = getattr(views, name).__mro__
+            assert getattr(contexts, parent) in mro
+            assert not any(base.__name__ in ('SystemInfoView','LogView','SupportInfoView')
+                           or base.__module__.endswith('.classic_views') for base in mro)
         assert not issubclass(views.ModernAdminCameraInfoView, views.CameraLensView)
         assert not issubclass(views.ModernAdminImageLagView, views.ImageLagView)
         pages = ('now', 'media/archive', 'tasks', 'notifications', 'account',

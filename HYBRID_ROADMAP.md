@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Sistema: contesti indipendenti da Classic — regressione 13 settembre 2026
+
+System Info, Log e Support sono separati in `system_context_views.py`; Hybrid
+usa questi componenti senza ereditare le vecchie classi, che restano wrapper
+opzionali in Classic. Le tre classi mantengono l'AST della baseline normalizzando
+soltanto i nomi. Letture diagnostiche, eccezioni, form e permessi non cambiano.
+Passano i guardrail locali, Safe Actions, System Tools, compilazione e 34 test
+JavaScript. Il 13 settembre passano tutti i 140 entrypoint Python e compileall
+nel sandbox isolato, dopo verifica dei 1071 file del manifest. Inclusi avvio
+senza Classic, parita' Full Config e integrazione Flask. Il tentativo precedente
+era bloccato dalla rete; la regressione conclusa include una pausa per il
+recupero spazio, quindi i tempi non misurano prestazioni. Restano aperti
+browser nativo e deploy/collaudo live di questa estrazione.
+Evidenze: `testing/evidence/hybrid-system-context-independence.json`.
+
 ## Osservatorio: contesti indipendenti da Classic — candidato 11 settembre 2026
 
 SQM, grafici, pannello sensori e VirtualSky usano ora contesti Hybrid dedicati.

@@ -132,7 +132,7 @@ def test_source_download_is_hybrid_owned():
 def test_classic_class_bodies_are_preserved_and_isolated():
     tree = ast.parse((FLASK / 'classic_views.py').read_text())
     classes = [node for node in tree.body if isinstance(node, ast.ClassDef)]
-    wrappers = {'ConfigView': 'HybridSettingsFormView', 'VirtualSkyView': 'HybridVirtualSkyContextView', 'SqmView': 'HybridSqmContextView', 'ChartView': 'HybridChartContextView', 'SensorPanelView': 'HybridSensorPanelContextView'}
+    wrappers = {'ConfigView': 'HybridSettingsFormView', 'VirtualSkyView': 'HybridVirtualSkyContextView', 'SqmView': 'HybridSqmContextView', 'ChartView': 'HybridChartContextView', 'SensorPanelView': 'HybridSensorPanelContextView', 'SystemInfoView': 'HybridSystemInfoContextView', 'LogView': 'HybridLogContextView', 'SupportInfoView': 'HybridSupportContextView'}
     assert len(classes) == 27 + len(wrappers)
     for name, base in wrappers.items():
         compatibility = next(node for node in classes if node.name == name)
