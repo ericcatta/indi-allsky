@@ -30,7 +30,7 @@ not be restarted automatically.
 
 ## Automatic startup and storage recovery, 13 September 2026
 
-Read-only production verification confirms user lingering is enabled, so login
+Read-only production verification, repeated on 14 September, confirms user lingering is enabled, so login
 is not required. `indi-allsky.timer` is enabled and starts capture two minutes
 after boot; `indiserver.timer` starts the generic server after thirty seconds.
 The dedicated ASI driver service is enabled and ordered before capture. Apache

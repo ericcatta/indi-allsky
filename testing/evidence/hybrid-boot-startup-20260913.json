@@ -38,5 +38,13 @@
     "No cold boot performed in this verification",
     "Capture, generic INDI and web service currently have Restart=no; boot activation does not imply automatic recovery from every runtime crash",
     "Sudden power removal cannot guarantee filesystem or SD-card integrity"
-  ]
+  ],
+  "reverified": "2026-09-14",
+  "reverification": {
+    "method": "Read-only SSH systemd unit contents, enablement, active states and failed units",
+    "same_boot_configuration": true,
+    "failed_user_units": 0,
+    "capture_result": "success",
+    "cold_boot_performed": false
+  }
 }

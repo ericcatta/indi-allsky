@@ -17,7 +17,7 @@ def run():
         assert hashlib.sha256(ast.dump(classes[name], include_attributes=False).encode()).hexdigest() == fingerprint, name
     assert not any(isinstance(n, ast.ImportFrom) and n.module in ('views', 'classic_views') for n in ast.walk(tree))
     handlers = ast.parse((ROOT/'indi_allsky/flask/views.py').read_text())
-    wrappers = {'ModernAdminAduHistoryView': 'HybridAduHistoryContextView', 'ModernAdminLoopView': 'HybridLoopContextView', 'ModernAdminFileSpaceUsageView': 'HybridFileSpaceContextView'}
+    wrappers = {'ModernAdminAduHistoryView': 'HybridAduHistoryContextView', 'ModernAdminLoopView': 'HybridLoopContextView', 'ModernAdminFileSpaceUsageView': 'ModernAdminView'}
     for node in handlers.body:
         if isinstance(node, ast.ClassDef) and node.name in wrappers:
             assert ast.unparse(node.bases[-1]) == wrappers[node.name]

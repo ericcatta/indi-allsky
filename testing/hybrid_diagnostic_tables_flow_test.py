@@ -56,7 +56,7 @@ def run():
                             assert '<th>' + label + '</th>' in page.text
                     if suffix in ('/cameras/image-lag', '/storage/file-space-usage'):
                         cfg = json.loads(re.search(r'id="hybrid-operations-table-config" type="application/json">(.*?)</script>',page.text,re.S)[1])
-                        assert cfg['exportColumns'] == list(range(6 if suffix.endswith('image-lag') else 11))
+                        assert cfg['exportColumns'] == list(range(6 if suffix.endswith('image-lag') else 14))
                         assert cfg['filters'][0]['text'] is True
                 if suffix in ('/observatory/charts', '/observatory/sensor-panel', '/observatory/sqm'):
                     selected = client.get(path + '?camera_id=1&timestamp=1700000000&all=1')

@@ -1,5 +1,5 @@
 from .media_context_views import (
-    HybridAduHistoryContextView, HybridLoopContextView, HybridFileSpaceContextView,
+    HybridAduHistoryContextView, HybridLoopContextView,
 )
 from .system_context_views import (
     HybridSystemInfoContextView,
@@ -7979,13 +7979,21 @@ class ModernAdminImageLagView(ModernAdminCameraToolView, CameraScopedTemplateMix
 
 
 
-class ModernAdminFileSpaceUsageView(CameraScopedTemplateMixin, ModernAdminMediaBrowseView, HybridFileSpaceContextView):
+class ModernAdminFileSpaceUsageView(CameraScopedTemplateMixin, ModernAdminMediaBrowseView, ModernAdminView):
     page_title = 'Modern Admin File Space Usage'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_storage_view'
 
 
     def get_context(self):
-        context = super().get_context()
+        from .overview_queries import daily_media_usage, DAILY_LABELS
+        context = ModernAdminView.get_context(self)
+        context['file_space_labels'] = DAILY_LABELS
+        try:
+            context['days_fileSize_dict'] = daily_media_usage(self.camera.id)
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception('Daily media usage could not be read')
+            context['days_fileSize_dict'] = None
         context['diagnostic_camera_choices'] = self.get_media_camera_filters()[1:]
         return context
 

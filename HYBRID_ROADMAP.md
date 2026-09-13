@@ -3,6 +3,27 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Spazio giornaliero e avvio automatico — candidato successivo a c44b0bbd
+
+Il prospetto File Space Usage ora usa query Hybrid dedicate: comprende tutte le
+undici famiglie, incluse mini timelapse, keogram e startrail. Le dimensioni ignote
+restano esplicite e non scompaiono dai conteggi. Le miniature condivise vengono
+contate una volta; riferimenti assenti o discordanti vanno in un gruppo senza
+data assegnata. Il dato e' metadata registrato, non una scansione del filesystem.
+Il contesto storico resta invariato per compatibilita', con i fingerprint
+esistenti conservati. La tabella e l'export includono tutte le quattordici colonne.
+Errori SQL mostrano indisponibilita' invece di una falsa tabella vuota.
+Passano 152 verifiche Python e 34 JavaScript, manifest di 824 file invariato.
+Browser sintetico: categorie mancanti presenti, filtri, cancellazione da tastiera,
+ordinamento e cambio camera/profilo verificati. Le prove e i limiti sono in
+`testing/evidence/hybrid-daily-media-usage.json`.
+Nessun deploy; il candidato di manutenzione gia' preparato non viene sostituito.
+
+Ripetuta il 14 settembre la verifica SSH dell'avvio: linger, timer capture/INDI,
+driver ASI, socket web e Apache risultano correttamente abilitati; servizi attivi,
+nessuna unita' utente fallita. Non servono modifiche. La prova dopo riaccensione
+fisica resta aperta; vedere `HYBRID_DEPLOYMENT.md`.
+
 ## Riepiloghi Storage e Uploads — candidato successivo a c2da9ae9
 
 Corretti i conteggi: Storage include undici famiglie di media/miniature e risolve
@@ -18,10 +39,8 @@ due task upload separati da 205 task video, filtro notifiche 2->1->0, ingressi
 Library/Tasks/Storage Protection. Passano 151 verifiche Python e 34 JavaScript,
 manifest di 823 file invariato. Evidenze in `testing/evidence/hybrid-overview-summaries.json`.
 Nessun deploy.
-Resta un difetto distinto nel prospetto giornaliero File Space Usage: omette
-mini timelapse, keogram e startrail dal computo. La correzione del riepilogo non
-chiude questo difetto; affrontarlo nella prossima missione senza alterare i
-fingerprint dei contesti Classic conservati per compatibilita'.
+Il difetto distinto del prospetto giornaliero e' corretto nella missione
+successiva descritta sopra; queste evidenze del riepilogo restano separate.
 
 ## Account: collaudo browser e identita' leggibile — 14 settembre 2026
 

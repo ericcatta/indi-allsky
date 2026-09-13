@@ -27,6 +27,9 @@ var camera_id = {{ camera_id }};
         <nav class="modern-admin-link-grid" aria-label="Diagnostic camera">
         {% for choice in diagnostic_camera_choices %}<a href="{{ url_for(request.endpoint, camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == camera_id|int %}aria-current="page"{% endif %}>{{ choice.label }}</a>{% endfor %}
         </nav>
+        {% if days_fileSize_dict is none %}
+        <p role="status">Daily media usage could not be read. Try again shortly.</p>
+        {% else %}
         <label for="file-space-table-search">Search table</label><input type="search" id="file-space-table-search" autocomplete="off">
         <p id="file-space-count" role="status" aria-live="polite"></p>
         <div class="modern-admin-table-scroll">
@@ -35,14 +38,7 @@ var camera_id = {{ camera_id }};
                     <tr>
                         <th>Date</th>
                         <th>Time</th>
-                        <th>Images</th>
-                        <th>Panoramas</th>
-                        <th>Timelapses</th>
-                        <th>Panorama Timelapses</th>
-                        <th>Star Trail Timelapses</th>
-                        <th>FITS</th>
-                        <th>Raw</th>
-                        <th>Thumbnails</th>
+                        {% for asset in file_space_labels %}<th>{{ asset }}</th>{% endfor %}
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -52,29 +48,33 @@ var camera_id = {{ camera_id }};
                     <tr data-search="">
                         <td>{{ day }}</td>
                         <td>{{ tod }}</td>
-                        {% for asset in ['Images', 'Panoramas', 'Timelapses', 'Panorama Timelapses', 'Star Trail Timelapses', 'FITS', 'Raw Images', 'Thumbnails'] %}
+                        {% for asset in file_space_labels %}
                         {% if tod_data[asset]['fileSize'] < 805306368 %}
-                        <td data-order="{{ tod_data[asset]['fileSize'] }}">{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024) }} MB [{{ tod_data[asset]['count'] }}]</td>
+                        <td data-order="{{ tod_data[asset]['fileSize'] }}">{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024) }} MiB [{{ tod_data[asset]['count'] }}]{% if tod_data[asset]['unknown'] %} · {{ tod_data[asset]['unknown'] }} size unknown{% endif %}</td>
                         {% else %}
-                        <td data-order="{{ tod_data[asset]['fileSize'] }}">{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024 / 1024) }} GB [{{ tod_data[asset]['count'] }}]</td>
+                        <td data-order="{{ tod_data[asset]['fileSize'] }}">{{ "%0.1f"|format(tod_data[asset]['fileSize'] / 1024 / 1024 / 1024) }} GiB [{{ tod_data[asset]['count'] }}]{% if tod_data[asset]['unknown'] %} · {{ tod_data[asset]['unknown'] }} size unknown{% endif %}</td>
                         {% endif %}
                         {% endfor %}
                         {% if tod_data['tod_fileSize'] < 805306368 %}
-                        <td data-order="{{ tod_data['tod_fileSize'] }}">{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024) }} MB</td>
+                        <td data-order="{{ tod_data['tod_fileSize'] }}">{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024) }} MiB{% if tod_data['tod_unknown'] %} + {{ tod_data['tod_unknown'] }} size unknown{% endif %}</td>
                         {% else %}
-                        <td data-order="{{ tod_data['tod_fileSize'] }}">{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024 / 1024) }} GB</td>
+                        <td data-order="{{ tod_data['tod_fileSize'] }}">{{ "%0.1f"|format(tod_data['tod_fileSize'] / 1024 / 1024 / 1024) }} GiB{% if tod_data['tod_unknown'] %} + {{ tod_data['tod_unknown'] }} size unknown{% endif %}</td>
                         {% endif %}
                     </tr>
                     {% endfor %}
                     {% else %}
-                    <tr><td colspan="11">No file usage rows are available yet.</td></tr>
+                    <tr><td colspan="14">No file usage rows are available yet.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <p class="modern-admin-note">Reported space is the sum of individual file sizes. Filesystems may allocate additional disk space.</p>
+        {% endif %}
+        <p class="modern-admin-note">Known sizes in the media database, in MiB/GiB; counts appear in brackets. Unknown sizes are excluded from byte totals. These records do not prove that files are still present locally, and filesystem allocation may differ. Calibration files are separate.</p>
+        <p class="modern-admin-note">Thumbnails are counted once. Unassigned thumbnails have no matching media or references with conflicting capture dates or day/night periods.</p>
     </section>
 </main>
-<script id="hybrid-operations-table-config" type="application/json">{"table": "file-space-table", "rowAttribute": "data-search", "count": "file-space-count", "countSuffix": " shown", "emptyMessage": "No records are available in this view.", "order": [[0, "desc"]], "columnDefs": [], "exportColumns": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "filters": [{"id": "file-space-table-search", "text": true, "contains": true}], "csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}}</script>
+{% if days_fileSize_dict is not none %}
+<script id="hybrid-operations-table-config" type="application/json">{"table": "file-space-table", "rowAttribute": "data-search", "count": "file-space-count", "countSuffix": " shown", "emptyMessage": "No records are available in this view.", "order": [[0, "desc"]], "columnDefs": [], "exportColumns": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], "filters": [{"id": "file-space-table-search", "text": true, "contains": true}], "csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}}</script>
 <script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}"></script>
+{% endif %}
 {% endblock %}
