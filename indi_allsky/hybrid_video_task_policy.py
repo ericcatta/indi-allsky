@@ -3,7 +3,7 @@ CAMERA_ACTIONS = frozenset({
     'generateVideo', 'generateMiniVideo', 'generateKeogramStarTrails', 'generatePanoramaVideo',
     'updateAuroraData', 'updateSmokeData', 'uploadAllskyEndOfNight', 'expireData',
 })
-GLOBAL_ACTIONS = frozenset({'updateSatelliteTleData', 'backupDatabase', 'systemHealthCheck'})
+GLOBAL_ACTIONS = frozenset({'updateSatelliteTleData', 'backupDatabase', 'systemHealthCheck', 'storagePressureCleanup'})
 
 
 def multicamera_rejection(action, camera_id):

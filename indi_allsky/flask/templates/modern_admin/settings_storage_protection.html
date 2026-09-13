@@ -1,0 +1,39 @@
+{% extends 'modern_admin/base.html' %}
+{% block title %}Storage Protection{% endblock %}
+{% block head %}<link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css') }}" rel="stylesheet">{% endblock %}
+{% block content %}
+<main class="modern-admin-shell">
+<section class="modern-admin-table-panel" aria-labelledby="storage-title">
+<h1 id="storage-title">Storage Protection</h1>
+<p>Automatically free space by deleting the oldest eligible images across all cameras. Check runs every five minutes while capture is running.</p>
+{% if storage_error %}<p role="alert">{{ storage_error }}</p>{% endif %}
+{% if storage_saved %}<p role="status">Settings saved. The next storage check and queued cleanup will use this policy; no capture restart is needed.</p>{% endif %}
+<section aria-labelledby="storage-estimate-title">
+<h2 id="storage-estimate-title">Estimated storage time</h2>
+{% if storage_forecast.free_gib is defined %}<p>{{ storage_forecast.free_gib }} GiB free of {{ storage_forecast.total_gib }} GiB.</p>{% endif %}
+{% if storage_forecast.status == 'estimated' %}
+<dl><dt>Time until cleanup threshold</dt><dd>{{ storage_forecast.until_threshold }}</dd>
+<dt>Estimated retained capacity</dt><dd>{{ storage_forecast.retained_capacity }}</dd>
+<dt>Recent consumption</dt><dd>{{ storage_forecast.gib_per_day }} GiB/day, observed over {{ storage_forecast.observed_period }}</dd></dl>
+{% if not storage_forecast.retention_fits %}<p role="status">The selected retention period may exceed available capacity. Consider a shorter period or additional storage.</p>{% endif %}
+<p>Estimate from recorded local media sizes with the loaded capture settings. Day/night changes, compression, missing files and future video generation can change it. Logs, backups and external files are not included in the consumption rate.</p>
+{% else %}<p role="status">{{ storage_forecast.reason }}</p>{% endif %}
+</section>
+<form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<input type="hidden" name="revision" value="{{ storage_revision }}">
+<fieldset {% if not login_disabled and not current_user.is_admin %}disabled{% endif %}>
+<legend>Automatic cleanup</legend>
+<p><label><input type="checkbox" name="enabled" {% if storage_values.ENABLE %}checked{% endif %}> Enable storage protection (on by default)</label></p>
+<p><label for="storage-minimum">Start cleanup below (GiB free)</label> <input id="storage-minimum" name="minimum" type="number" min="0.1" step="0.1" required value="{{ storage_values.MIN_FREE_GIB }}"></p>
+<p><label for="storage-target">Recover toward (GiB free)</label> <input id="storage-target" name="target" type="number" min="0.1" step="0.1" required value="{{ storage_values.TARGET_FREE_GIB }}"></p>
+<p><label for="storage-days">Always keep the most recent days</label> <input id="storage-days" name="days" type="number" min="1" step="1" required value="{{ storage_values.KEEP_DAYS }}"></p>
+<p>Deletes older images, FITS, RAW, panoramas and their thumbnails. Keeps recent images, calibration files, configuration and generated videos. Pending uploads and generations can postpone cleanup. If eligible images cannot free enough space, a notification warns you; the retention limit is never shortened automatically.</p>
+<button type="submit">Save storage protection</button>
+</fieldset>
+</form>
+{% if not login_disabled and not current_user.is_admin %}<p>Administrator access is required to change these settings.</p>{% endif %}
+<p><a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">All settings</a> · <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Tasks</a></p>
+</section>
+</main>
+{% endblock %}

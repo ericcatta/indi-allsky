@@ -204,6 +204,7 @@ from .public_media import PublicLatestMediaView, PublicMediaViewerView, PublicMe
 from .media_archive import ModernAdminMediaArchive, archive_parameters, KINDS as ARCHIVE_KINDS
 from .mini_generation import ModernAdminMiniPreviewView, queue_mini_generation
 from .timelapse_settings import TimelapseSettingsMixin
+from .storage_settings import StorageSettingsMixin
 from .source_media_views import ModernAdminSourceDownloadView, Fits2JpegView, local_source_allowed, source_file_path
 from .base_views import BaseView
 from .base_views import TemplateView
@@ -15488,6 +15489,10 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         return 'unknown'
 
 
+class ModernAdminStorageProtectionSettingsView(StorageSettingsMixin, ModernAdminContextMixin, TemplateView):
+    pass
+
+
 class ModernAdminTimelapseSettingsView(TimelapseSettingsMixin, ModernAdminContextMixin, TemplateView):
     pass
 
@@ -16372,6 +16377,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/settings/fits-source', view_func=ModernAdminFitsSourceSettingsView.as_view('modern_admin_fits_source_settings_view'))
     bp_allsky.add_url_rule('/modern-admin/settings/full', view_func=ModernAdminFullSettingsView.as_view('modern_admin_full_settings_view', template_name='modern_admin/settings_full.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/capture', view_func=ModernAdminCaptureSettingsView.as_view('modern_admin_capture_settings_view', template_name='modern_admin/settings_capture.html'))
+    bp_allsky.add_url_rule('/modern-admin/settings/storage-protection', view_func=ModernAdminStorageProtectionSettingsView.as_view('modern_admin_storage_protection_settings_view', template_name='modern_admin/settings_storage_protection.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/timelapse', view_func=ModernAdminTimelapseSettingsView.as_view('modern_admin_timelapse_settings_view', template_name='modern_admin/settings_timelapse.html'))
     bp_allsky.add_url_rule('/modern-admin/settings/cameras', view_func=ModernAdminCameraSettingsView.as_view('modern_admin_camera_settings_view', template_name='modern_admin/settings_cameras.html'))
     bp_allsky.add_url_rule('/modern-admin/system/config', view_func=ModernAdminConfigView.as_view('modern_admin_config_view', template_name='modern_admin/safe_controls.html'))

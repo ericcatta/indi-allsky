@@ -3,6 +3,51 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Protezione spazio e stima autonomia — candidato verificato 13 settembre 2026
+
+L'utente autorizza la pulizia di tutti i media di prova, chiede almeno meta'
+del disco libera (anche oltre) e una protezione
+automatica abilitata di default e modificabile da Settings: soglia 5 GiB,
+recupero fino a 8 GiB, sole immagini piu' vecchie di 3 giorni. Calibrazioni,
+account e configurazioni restano esclusi. Se lo storico eliminabile non basta,
+mostrare un avviso senza violare i giorni minimi da conservare.
+Richiesta anche stima in giorni/ore del tempo prima della soglia e dello storico
+contenibile, basata sul consumo misurato delle camere con impostazioni correnti;
+mostrare periodo campionato, limiti e dati insufficienti. Non simulare capacita'.
+Policy e calcolo puro sono candidati locali in `storage_pressure.py`, con test.
+L'adapter locale supera una prova isolata con file/SQLite: due camere, oltre
+2000 record mancanti, paginazione durante le cancellazioni, upload/generazioni
+protetti e lock esclusivo. Il candidato collega controllo ogni cinque minuti,
+accodamento senza duplicati e worker, rileggendo la policy globale prima degli
+effetti. Passano nel sandbox accodamento, fallimento dispatch e dispatch
+multicamera. Aggiunta pagina Settings dedicata con CSRF, ruoli e revisione.
+Passano anche continuazione verso il target tra batch/restart del runtime,
+reset dopo modifica policy e metodo reale worker (disable aggiornato, notifiche,
+risultati task e contesa del lock). Evidenze del candidato in
+`testing/evidence/hybrid-storage-protection-candidate.json`.
+La protezione include anche task MANUAL e upload thumbnail; la conclusione
+upload resta RUNNING fino a metadati, handoff Sync API e cleanup locale.
+Passano i test mirati e la regressione claim concorrente.
+Provider e pagina ora mostrano autonomia/capacita' da dimensioni registrate
+dei media locali (massimo 24 ore di osservazione, minimo un'ora dopo la
+configurazione caricata). Mancanza di conferma runtime, frame obsoleti o
+dimensioni mancanti sospendono la stima. Test provider e Settings passano nel
+sandbox; log, backup e file esterni non sono inclusi nel consumo previsto.
+Passano 146 verifiche iniziali della suite Python e il guardrail route corretto
+separatamente (147 esiti coperti incluso compileall); runtime invariato rispetto
+al manifest, fingerprint storico route invariato. Passano 34 test JavaScript.
+Browser nativo: errore target incoerente, salva/disabilita/riapri/riabilita,
+redirect anonimo, controlli read-only utente ordinario e layout 390px senza
+overflow. Restano revisione finale accodamento upload, stato numerico della
+stima e tastiera nel browser, deploy e collaudo live. Non e' ancora attivo sul Pi.
+La pulizia manuale autorizzata e' completata sul Pi, limitata a ID e date dello
+snapshot iniziale: 68.287 record media eliminati, 61,6% del disco libero.
+Evidenze: `testing/evidence/hybrid-storage-recovery-20260913.json`. Lo stop/start per recuperare /tmp capture e' stato autorizzato esplicitamente
+il 13 settembre. Entrambe le camere hanno prodotto nuovi file non vuoti dopo
+il riavvio; verifica finale con frame di 12/16 secondi e file non vuoti.
+Il controllo SQLite passa; backup del database conservato, media eliminati
+non recuperabili dal solo backup dei metadati.
+
 ## Sistema: contesti indipendenti da Classic — regressione 13 settembre 2026
 
 System Info, Log e Support sono separati in `system_context_views.py`; Hybrid

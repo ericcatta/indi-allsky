@@ -1105,6 +1105,27 @@ class IndiAllSky(object):
         self._miscDb.setState('CONFIG_ID', self._config_obj.config_id)
 
 
+    def _storagePressureCheck(self):
+        from .storage_pressure_runtime import StoragePressureRuntime
+        from .flask import models
+        try:
+            # Read the latest global policy, so disabling cleanup in Settings also
+            # applies before capture has reloaded its other configuration.
+            config = IndiAllSkyConfig().config
+            runtime = StoragePressureRuntime(config, db.session, models, self.image_dir)
+            runtime.enqueue(self._queue_video_task)
+        except BlockingIOError:
+            logger.info('Storage cleanup is already being checked or executed')
+        except Exception:
+            db.session.rollback()
+            logger.exception('Storage pressure check failed')
+            self._miscDb.addNotification(
+                NotificationCategory.DISK, 'storage_pressure_check',
+                'Automatic storage protection could not run; check storage settings and service logs.',
+                expire=timedelta(minutes=15),
+            )
+
+
     def _systemHealthCheck(self, task_state=TaskQueueState.QUEUED):
         # This will delete old images from the filesystem and DB
         jobdata = {
@@ -1735,6 +1756,7 @@ class IndiAllSky(object):
         self.periodic_tasks_time = now_time + self.periodic_tasks_offset
 
         logger.warning('Periodic tasks triggered')
+        self._storagePressureCheck()
 
 
         # cleanup data

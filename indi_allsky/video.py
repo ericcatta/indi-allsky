@@ -1901,6 +1901,34 @@ class VideoWorker(Process):
         )
 
 
+    def storagePressureCleanup(self, task, **kwargs):
+        from .config import IndiAllSkyConfig
+        from .flask import models
+        from .storage_pressure_runtime import StoragePressureRuntime
+        from .storage_pressure import GIB
+        # A queued cleanup must honor a later disable/retention edit. Never use
+        # the camera profile's stale config snapshot for this global policy.
+        runtime = StoragePressureRuntime(IndiAllSkyConfig().config, db.session,
+                                         models, self.image_dir)
+        try:
+            result = runtime.run()
+        except BlockingIOError:
+            task.setFailed('Storage cleanup deferred: another cleanup holds the lock.')
+            return
+        state = result['status']
+        message = 'Storage cleanup: {0}; deleted {1} images; {2:.2f} GiB free.'.format(
+            state.replace('_', ' '), result['deleted'], result['free_bytes'] / GIB)
+        if state in ('insufficient_old_images', 'generation_pending'):
+            self._miscDb.addNotification(
+                NotificationCategory.DISK, 'storage_pressure',
+                message + ' Recent images and files needed by pending tasks are protected.',
+                expire=timedelta(minutes=15),
+            )
+            task.setFailed(message)
+        else:
+            task.setSuccess(message)
+
+
     def systemHealthCheck(self, task, **kwargs):
         task.setRunning()
 
