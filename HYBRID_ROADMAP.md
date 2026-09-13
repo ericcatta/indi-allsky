@@ -38,8 +38,9 @@ separatamente (147 esiti coperti incluso compileall); runtime invariato rispetto
 al manifest, fingerprint storico route invariato. Passano 34 test JavaScript.
 Browser nativo: errore target incoerente, salva/disabilita/riapri/riabilita,
 redirect anonimo, controlli read-only utente ordinario e layout 390px senza
-overflow. Restano revisione finale accodamento upload, stato numerico della
-stima e tastiera nel browser, deploy e collaudo live. Non e' ancora attivo sul Pi.
+overflow. Passano anche stato numerico della stima e tastiera (Space/Tab/Invio) nel
+browser con dati sintetici deterministici. Restano revisione finale
+accodamento upload, deploy e collaudo live. Non e' ancora attivo sul Pi.
 La pulizia manuale autorizzata e' completata sul Pi, limitata a ID e date dello
 snapshot iniziale: 68.287 record media eliminati, 61,6% del disco libero.
 Evidenze: `testing/evidence/hybrid-storage-recovery-20260913.json`. Lo stop/start per recuperare /tmp capture e' stato autorizzato esplicitamente

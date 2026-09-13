@@ -20,8 +20,7 @@
   ],
   "pending": [
     "final concurrency review of upload creation paths before release",
-    "deployment and live acceptance",
-    "native numeric forecast state and keyboard navigation coverage"
+    "deployment and live acceptance"
   ],
   "limits": [
     "Tests do not prove cold-boot acceptance",
@@ -39,11 +38,14 @@
       "reenable and restore defaults",
       "anonymous redirect to login",
       "ordinary-user login returns read-only controls with explanation",
-      "390px viewport: content width equals viewport, no horizontal overflow"
+      "390px viewport: content width equals viewport, no horizontal overflow",
+      "numeric forecast: 10/30 GiB, 6 GiB/day, 20 hours until threshold and 23 hours retained capacity in deterministic synthetic dataset",
+      "capacity warning displayed when 3-day retention exceeds estimate",
+      "keyboard Space toggles checkbox, Tab visits threshold/target/days/save, Return saves",
+      "storage-only save preserves the numeric forecast without capture reload"
     ],
     "limits": [
-      "Estimated numeric result covered by provider test, not seeded in this native browser session",
-      "Browser fixture explicitly allowed only the new settings POST into synthetic DB"
+      "Native numeric forecast used explicitly synthetic recorded sizes and disk capacity; not a measurement of the Raspberry."
     ]
   },
   "javascript_results": [
