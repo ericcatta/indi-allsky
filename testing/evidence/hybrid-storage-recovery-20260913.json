@@ -1,0 +1,55 @@
+{
+  "date": "2026-09-13",
+  "authorization": "User explicitly authorized deletion of all current test media and controlled capture stop/start; requested at least half of disk free.",
+  "scope": "Original database snapshot media only; newer IDs and creation dates preserved. Configurations, accounts, calibration assets and existing backups excluded.",
+  "before": {
+    "root_free_bytes": 0,
+    "tmp_free_bytes": 0,
+    "latest_frames_stale": true
+  },
+  "cleanup": {
+    "original_snapshot_rows_removed": {
+      "image": 50680,
+      "fitsimage": 491,
+      "rawimage": 0,
+      "panoramaimage": 17019,
+      "video": 26,
+      "minivideo": 0,
+      "keogram": 28,
+      "startrail": 14,
+      "startrailvideo": 11,
+      "panoramavideo": 18
+    },
+    "database_snapshot_integrity": "ok",
+    "database_after_quick_check": "ok",
+    "backup": "Consistent database snapshot retained in Raspberry hybrid-backups; deleted media are not recoverable from this metadata backup.",
+    "outcome": "completed"
+  },
+  "recovery": {
+    "capture_stop_start": "authorized and completed",
+    "private_capture_tmp": "Released by service shutdown; no manual deletion of another service namespace.",
+    "new_frames": [
+      {
+        "camera_id": 1,
+        "age_seconds": 12,
+        "file_bytes": 997837
+      },
+      {
+        "camera_id": 2,
+        "age_seconds": 16,
+        "file_bytes": 622435
+      }
+    ]
+  },
+  "after": {
+    "root_free_bytes": 77151715328,
+    "root_free_percent": 61.6,
+    "tmp_free_bytes": 3774021632,
+    "tmp_free_percent": 89.3,
+    "at_least_half_disk_free": true
+  },
+  "limits": [
+    "Point-in-time operational recovery, not a 24-hour stability test.",
+    "Automatic storage protection and retention estimate remain in development and are not deployed."
+  ]
+}

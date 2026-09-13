@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-13",
+  "scope": "Read-only production systemd verification; no reboot or power interruption",
+  "result": "Automatic boot activation is configured; end-to-end reboot acceptance remains open",
+  "observed": {
+    "user_linger": true,
+    "capture_timer": {
+      "enabled": true,
+      "OnBootSec": "2min",
+      "service_active": true
+    },
+    "indiserver_timer": {
+      "enabled": true,
+      "OnBootSec": "30sec",
+      "service_active": true
+    },
+    "asi_driver": {
+      "enabled": true,
+      "active": true,
+      "restart": "on-failure",
+      "ordering": "Before capture"
+    },
+    "web_socket": {
+      "enabled": true,
+      "active": true
+    },
+    "web_backend": {
+      "active": true,
+      "activation": "socket"
+    },
+    "apache": {
+      "enabled": true,
+      "active": true
+    }
+  },
+  "changes": "None required for boot activation",
+  "limits": [
+    "No cold boot performed in this verification",
+    "Capture, generic INDI and web service currently have Restart=no; boot activation does not imply automatic recovery from every runtime crash",
+    "Sudden power removal cannot guarantee filesystem or SD-card integrity"
+  ]
+}

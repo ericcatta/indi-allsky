@@ -28,6 +28,42 @@ The 24-hour day/night observation is a separate future activity, after migration
 and Classic removal, as requested. It is not a gate for this migration and must
 not be restarted automatically.
 
+## Automatic startup and storage recovery, 13 September 2026
+
+Read-only production verification confirms user lingering is enabled, so login
+is not required. `indi-allsky.timer` is enabled and starts capture two minutes
+after boot; `indiserver.timer` starts the generic server after thirty seconds.
+The dedicated ASI driver service is enabled and ordered before capture. Apache
+and the Gunicorn socket are enabled. The Gunicorn service is socket-activated.
+The capture and web service units being `disabled` is normal in this arrangement:
+their enabled timer/socket activates them. Do not enable duplicate immediate
+startup paths merely because the service unit itself says disabled.
+
+Verify as the deployment user:
+
+```sh
+loginctl show-user "$USER" -p Linger
+systemctl --user is-enabled indi-allsky.timer indiserver.timer indiserver-asi678mc.service gunicorn-indi-allsky.socket
+systemctl --user is-active indi-allsky.service indiserver-asi678mc.service gunicorn-indi-allsky.socket
+systemctl is-enabled apache2
+```
+
+A cold boot was not performed in this verification. After an agreed reboot,
+verify both cameras publish new nonempty frames and the UI is usable without
+logging in over SSH first. Enabled units alone do not prove this full sequence.
+Capture, generic INDI and Gunicorn currently have no automatic restart policy;
+boot activation is distinct from recovery after a process failure.
+Evidence: `testing/evidence/hybrid-boot-startup-20260913.json`.
+
+The user-authorized test-media cleanup removed 68,287 media records within the
+initial snapshot and recovered 61.6% free disk space. Capture was stopped and
+started with explicit authorization to recover its full private temporary
+filesystem; both cameras then produced new files. Settings, accounts,
+calibrations and backups were preserved. A consistent database backup preserves
+metadata but cannot restore the deleted media themselves. Automatic storage
+protection remains a separate unfinished feature, not an installed safeguard.
+Evidence: `testing/evidence/hybrid-storage-recovery-20260913.json`.
+
 ## Recovery assets
 
 On the Raspberry, `~/hybrid-focus-controls-release-state.json` records the exact
