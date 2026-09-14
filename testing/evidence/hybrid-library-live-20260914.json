@@ -1,0 +1,195 @@
+{
+  "date": "2026-09-14",
+  "installed": "29c75ffb",
+  "status": "partial-native-media-acceptance",
+  "classic_disabled": true,
+  "role": "authenticated administrator",
+  "type_selection": [
+    {
+      "camera_id": 1,
+      "kind": "Images",
+      "rows_on_page": 48,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 1,
+      "kind": "Timelapses",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 1,
+      "kind": "Mini timelapses",
+      "rows_on_page": 0,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 1,
+      "kind": "Keograms",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 1,
+      "kind": "Startrails",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 1,
+      "kind": "Startrail videos",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 1,
+      "kind": "Panorama images",
+      "rows_on_page": 48,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 1,
+      "kind": "Panorama videos",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 1,
+      "kind": "FITS",
+      "rows_on_page": 12,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 1,
+      "kind": "RAW",
+      "rows_on_page": 0,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "Images",
+      "rows_on_page": 48,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "Timelapses",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "Mini timelapses",
+      "rows_on_page": 0,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "Keograms",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "Startrails",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "Startrail videos",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "Panorama images",
+      "rows_on_page": 48,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "Panorama videos",
+      "rows_on_page": 1,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "FITS",
+      "rows_on_page": 12,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    },
+    {
+      "camera_id": 2,
+      "kind": "RAW",
+      "rows_on_page": 0,
+      "result": "superato",
+      "scope": "Type selector and list rendering; explicit empty state when zero; not all item actions"
+    }
+  ],
+  "interactions": [
+    {
+      "control": "Camera IMX708 + Order oldest",
+      "result": "superato",
+      "evidence": "48 rendered rows all camera 1, dates ascending, IDs 50681 through 50776."
+    },
+    {
+      "control": "Next page",
+      "result": "superato",
+      "evidence": "Next 48 rows all camera 1 and ordered, first ID 50778; no IDs overlap preceding page."
+    },
+    {
+      "control": "Image details / Back to results / Previous page",
+      "result": "superato",
+      "evidence": "Image 50778 opens camera 1 detail, preview decoded 4608x2592; Back restores second-page results and Previous returns to first ID 50681."
+    },
+    {
+      "control": "ASI + Day + Not uploaded + Newest",
+      "result": "superato",
+      "evidence": "48 rendered rows all camera 2/day; every Uploaded definition is No; first four preview images decoded successfully."
+    },
+    {
+      "control": "Filename search and Reset filters",
+      "result": "superato",
+      "evidence": "Nonexistent filename yields 0 results and explicit no-match state; Reset returns 48 results, clears Day/Uploaded constraints and preserves selected camera."
+    },
+    {
+      "control": "Timelapse Play/Pause camera 1",
+      "result": "superato",
+      "evidence": "26-second video decoded at 4608x2592, currentTime advances 0.198 to 10.035 seconds without error; Pause leaves paused=true at 10.056."
+    },
+    {
+      "control": "Timelapse Play/Pause camera 2",
+      "result": "superato",
+      "evidence": "26.04-second video decoded at 3840x2160, currentTime advances 0.275 to 12.600 seconds without error; Pause leaves paused=true at 12.643."
+    }
+  ],
+  "limits": [
+    "Each type was selected and its result state verified; this does not prove every control in every media detail page",
+    "Downloads and native file receipt, FITS/RAW processing and generated-output playback beyond the two timelapses remain separate checks",
+    "Mini timelapses and RAW empty on both cameras; generation/import not exercised here",
+    "Date filters, mobile layout, ordinary/anonymous sessions and error cases not exercised live in this mission",
+    "No media deletion, configuration mutation or acquisition restart",
+    "Whole-product acceptance and physical Classic removal remain open; 24-hour observation deferred"
+  ],
+  "regression_reference": "hybrid-astropanel-camera-regression.json"
+}

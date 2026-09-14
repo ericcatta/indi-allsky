@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Library e riproduzione video verificati dal vivo — 14 settembre 2026
+
+Verificati i dieci tipi Library su entrambe le camere: liste reali o stato vuoto
+esplicito per mini timelapse/RAW. Filtro camera, ordinamento, Next/Previous,
+ricerca senza risultati e Reset provati. Due pagine IMX708: 48 righe ciascuna,
+ordinate e senza sovrapposizioni. Dettaglio 50778 carica la preview 4608x2592;
+il ritorno conserva i risultati. Filtri combinati ASI/giorno/non caricati validi.
+
+Play/Pause dei due timelapse reali verificati: tempo avanzato oltre 10 secondi,
+nessun errore video, risoluzioni rispettivamente 4608x2592 e 3840x2160.
+Queste sono prove dei controlli indicati, non di ogni azione su ogni tipo media.
+Download, altri player, elaborazione sorgenti e generazione restano separati.
+Nessun codice o servizio modificato; regressione precedente ancora applicabile.
+Evidenze: `testing/evidence/hybrid-library-live-20260914.json`.
+
 ## Full Settings salvato e ripristinato dal vivo — 14 settembre 2026
 
 Save Full Settings con nota dedicata e Reload disabilitato ha creato la revisione
