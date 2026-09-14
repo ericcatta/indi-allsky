@@ -1,44 +1,48 @@
 # Combined Hybrid product release
 
-Candidate prepared on 14 September 2026; **not installed**. This supersedes the
-13 September worker candidate and the standalone Mask Base candidate. Their
-private artifacts and backups remain available for recovery. The previous acceptance window ended at 20:00;
-installation needs a new user-agreed window with an end time. No 24-hour
-observation is included.
+Candidate staged and verified on 14 September 2026; **not installed**. This
+supersedes the earlier `fc926129` bundle and older standalone candidates.
+Their artifacts and valid backups remain preserved. The previous acceptance
+window ended at 20:00; installation needs a new user-agreed window with an end
+time. No 24-hour observation is included.
 
-The later Action API credential-shape correction is **not included** in this
-pinned bundle. Prepare and verify an updated candidate before attempting to
-release that correction; do not assume the helper deploys the latest `main`.
-
-## Exact candidate and preparation
+## Exact candidate and staging
 
 - Installed baseline: `3590a3ee4621e01b23043ac415de499d79f7c9e3`.
-- Tested candidate: `fc926129a2a1c79c9f5dcb3fd37e103a6b17c94d`.
-- Verified release delta: 84 paths, including Mask Base, Settings, Observatory,
-  System/media contexts, storage policy/forecast, upload publication locking,
-  account identity, complete storage summaries/daily exports and the independent
-  Astropanel endpoint. No schema, installer or dependency-file changes.
-- Regression: 153 Python results including compilation, 34 JavaScript tests;
-  all passed with the 826-file source manifest unchanged.
+- Tested candidate: `8a15ae1e13fccef258cd21755d945311741542a3`.
+- Verified release delta: 92 paths, 29 application paths, including Mask Base,
+  Settings, Observatory, System/media contexts, storage policy/forecast, upload
+  publication locking, account identity, storage summaries/daily exports,
+  independent Astropanel and Action API credential validation. No schema,
+  installer or dependency-file changes.
+- Regression: 155 Python results including compilation, 34 JavaScript tests;
+  all passed with the 828-file source manifest unchanged.
 
-The Raspberry has the pinned bundle, path manifest and
-`~/hybrid-product-deploy.py`. Its `--prepare-only` execution finished
-successfully: online SQLite backup passed integrity checking, previous code and
-Flask configuration were preserved in a protected backup directory. The private
-`~/hybrid-product-release-state.json` identifies the backup and revisions.
-Post-preparation checks confirmed unchanged service identities, installed code
-and Flask bytes, a clean tracked checkout and all untracked user files preserved.
-Never publish the private state, database or configuration contents. The backup
-directory has mode 0700 and its database, configuration and state files 0600.
-The helper rejects combining preparation and rollback, and rejects installation
-without a user-agreed maintenance deadline. Artifact checksums and preparation
-evidence are in `testing/evidence/hybrid-product-release-preparation.json`.
+The Raspberry has `~/hybrid-product-8a15ae1e-release.bundle`,
+`~/hybrid-product-8a15ae1e-paths.json` and
+`~/hybrid-product-8a15ae1e-deploy.py`. Checksums match the local artifacts;
+bundle prerequisites, candidate ref and complete path list were verified.
+The helper preserves the previous deployment logic with a new pinned revision
+and versioned filenames. It has not been executed for this candidate.
+
+This is artifact staging, not a completed pre-deploy backup. The earlier
+`fc926129` preparation produced a valid protected backup, retained with its own
+helper and state. The new helper must acquire a fresh consistent SQLite/code/
+configuration backup before stopping services; its state will be recorded in
+`~/hybrid-product-8a15ae1e-release-state.json`. Never substitute the old state
+for the new candidate. Backup directories are private, and database,
+configuration and state must not be published.
+
+Staging preserved production HEAD, tracked work, untracked files, configuration
+bytes and service identities/states. Evidence and checksums:
+`testing/evidence/hybrid-product-8a15ae1e-staging.json`. Historical backup
+evidence remains in `testing/evidence/hybrid-product-release-preparation.json`.
 
 ## Installation and bounded acceptance
 
 1. Confirm the maintenance window and recovery access. Recheck the installed
    revision, tracked work, disk headroom, camera freshness and task backlog.
-2. Execute the prepared helper with `--maintenance-until` set to the agreed
+2. Execute `~/hybrid-product-8a15ae1e-deploy.py` with `--maintenance-until` set to the agreed
    ISO timestamp including timezone. It creates a fresh consistent backup before
    stopping capture/web and their activating timer/socket. It refuses a stale
    baseline, unexpected release paths or an expired/insufficient window.

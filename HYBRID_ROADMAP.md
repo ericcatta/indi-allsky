@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Candidato aggiornato pronto come artefatti — 14 settembre 2026
+
+Depositato e verificato sul Raspberry il candidato `8a15ae1e`: 92 percorsi,
+29 applicativi, regressione 155 Python/34 JavaScript. Il prefisso versionato
+`hybrid-product-8a15ae1e` preserva il precedente bundle `fc926129` e i backup.
+Checksum, prerequisiti Git e lista completa dei percorsi verificati; helper
+invariato nella logica, aggiornati soltanto revisione e nomi degli artefatti.
+
+Nessuna installazione o esecuzione del deploy helper. Confermata produzione
+ancora a `3590a3ee`, con codice, configurazione, file untracked e identita'/stato
+dei servizi invariati prima/dopo. Il backup fresco sara' acquisito dal helper
+nella nuova finestra concordata: staging non equivale a backup o collaudo live.
+Runbook corrente: `HYBRID_STORAGE_RELEASE_RUNBOOK.md`; evidenze:
+`testing/evidence/hybrid-product-8a15ae1e-staging.json`.
+
 ## Validazione degli input Action API — 14 settembre 2026
 
 Riprodotto su Flask isolato un errore interno con JSON `null` su `/action/pause`:
