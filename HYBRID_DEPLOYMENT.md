@@ -74,6 +74,26 @@ The 24-hour day/night observation is a separate future activity, after migration
 and Classic removal, as requested. It is not a gate for this migration and must
 not be restarted automatically.
 
+## FITS dimensions repair, 14 September 2026
+
+The twelve existing IMX708 FITS records 492 through 514 (even IDs) had planar
+RGB dimensions recorded as 2592x3. Original FITS headers confirm 4608x2592 with
+three channels. A coherent SQLite backup with successful integrity check was
+created under the private `~/hybrid-backups/fits-dimensions-*` directory before
+repair. `metadata-before.json` records the exact old/new dimensions and IDs.
+One transaction updated only matching ID/camera/old-dimension rows. Comparing
+every column against the backup confirms only width and height changed.
+Original media files were not changed; both JPEG preview endpoints decode at
+the correct camera dimensions.
+
+This is a completed metadata repair, separate from deploying the capture writer
+fix. Do not restore the entire database to undo metadata while capture is active:
+that would discard subsequent acquisition records. If an unexpected issue
+requires reversing this repair, use its saved per-record dimensions with exact
+ID/camera/current-dimension checks in one transaction. No reversal is needed for
+an ordinary code rollback. The writer fix still needs deployment and a newly
+captured FITS verification; existing previews do not prove that step.
+
 ## Automatic startup and storage recovery, 13 September 2026
 
 Read-only production verification, repeated on 14 September, confirms user lingering is enabled, so login

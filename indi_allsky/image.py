@@ -3749,7 +3749,8 @@ class ImageWorker(Process):
 
 
         data = i_ref.hdulist[0].data
-        image_height, image_width = data.shape[:2]
+        # FITS RGB data is planar (channels, height, width), unlike OpenCV HWC.
+        image_height, image_width = data.shape[-2:]
 
 
         if self.config.get('IMAGE_SAVE_FITS_COMPRESSED'):

@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-14",
+  "installed_during_live_checks": "29c75ffb",
+  "classic_disabled": true,
+  "role": "authenticated administrator",
+  "defect": {
+    "page": "/modern-admin/media/fits",
+    "camera_id": 1,
+    "example_id": 494,
+    "stored_width_height_before": [2592, 3],
+    "fits_header_axes": [4608, 2592, 3],
+    "cause": "write_fit used the first two NumPy axes for planar FITS RGB data (channels, height, width)",
+    "fix": "Use the last two spatial axes for width/height metadata; leave FITS data and encoding untouched",
+    "new_capture_writer_deployed": false
+  },
+  "existing_metadata_repair": {
+    "result": "superato",
+    "ids": [492, 494, 496, 498, 500, 502, 504, 506, 508, 510, 512, 514],
+    "camera_id": 1,
+    "corrected_width_height": [4608, 2592],
+    "method": "Read each original FITS header; require NAXIS=3 and exact correspondence between the old dimensions and the mistaken channel/spatial axes. After a coherent SQLite backup with integrity_check=ok, update only width and height in one transaction, requiring original ID/camera/dimensions still match.",
+    "verification": "Compare all columns of all 12 records with the backup: only width/height differ. Native browser shows all 12 IMX708 source cards as 4608 x 2592.",
+    "files_modified": false,
+    "runtime_restarted": false
+  },
+  "native_controls": [
+    {
+      "page": "/modern-admin/media/fits",
+      "control": "Camera buttons and Details",
+      "result": "superato",
+      "evidence": "ASI button lists camera 2 files and profile-aware detail links; source 495 opens camera 2 detail. IMX708 return lists its 12 files with corrected dimensions."
+    },
+    {
+      "page": "/modern-admin/fits/494",
+      "control": "Preview JPEG",
+      "result": "superato",
+      "evidence": "Opens /fits2jpeg?id=494 in a new browser tab; image is complete and decoded at 4608x2592."
+    },
+    {
+      "page": "/modern-admin/fits/495",
+      "control": "Preview JPEG / Open FITS Media Viewer",
+      "result": "superato",
+      "evidence": "JPEG preview opens in a new tab and decodes at 3840x2160; viewer return preserves camera 2/profile asi678mc."
+    },
+    {
+      "page": "/modern-admin/media/fits",
+      "control": "Open source / Next image / Escape",
+      "result": "superato",
+      "evidence": "Lightbox opens source 514, decoded at 4608x2592; Next shows source 512 with its different capture time and decoded image. Escape removes the dialog and returns focus to the source opener."
+    }
+  ],
+  "regression_case": {
+    "entrypoint": "testing/hybrid_fits_dimensions_test.py",
+    "legacy_result": "Fails for RGB shape (3, 48, 64), uncompressed, at persisted dimensions assertion",
+    "corrected_result": "Passes mono/RGB, plain/gzip, persisted dimensions, upload metadata, pixel-for-pixel array equality and Hybrid Library rendering"
+  },
+  "limits": [
+    "Writer fix still requires deployment and verification of a newly captured FITS file",
+    "Other FITS processing options, source downloads and batch-download receipt remain separate checks",
+    "No full-product or Classic-removal completion claimed; 24-hour observation deferred"
+  ]
+}

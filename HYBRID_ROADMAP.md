@@ -3,6 +3,26 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Dimensioni FITS RGB corrette — 14 settembre 2026
+
+Il collaudo nativo ha trovato metadati FITS IMX708 `2592 x 3`, mentre gli header
+contengono `4608 x 2592` pixel e tre canali. `write_fit` ora usa gli ultimi due
+assi spaziali del FITS planare, invece dei primi due: nessuna modifica dei pixel,
+della codifica, dei tempi o delle impostazioni scientifiche. Il test reale salva
+mono/RGB, plain/gzip e verifica DB, metadata upload, pixel e rendering Hybrid;
+fallisce sul codice precedente per il caso RGB. Regressione completa superata:
+158 verifiche Python e 34 JavaScript; tutti gli 831 hash dei sorgenti coincidono
+con il candidato locale. `testing/evidence/hybrid-fits-dimensions-regression.json`.
+
+Riparati in produzione i dodici record preesistenti, dopo backup SQLite integro,
+con confronto degli header e aggiornamento atomico dei soli campi width/height.
+Tutte le altre colonne sono invariate; i file non sono stati modificati. Il
+browser mostra ora le dimensioni corrette. Preview JPEG di entrambe le camere,
+avanzamento del lightbox e chiusura Escape con ripristino focus verificati.
+La correzione del writer richiede ancora deploy e verifica di nuove acquisizioni;
+capture resta attivo mentre terminano le generazioni gia' in coda.
+Evidenze: `testing/evidence/hybrid-fits-dimensions-live-20260914.json`.
+
 ## Task e acknowledge notifiche verificati dal vivo — 14 settembre 2026
 
 In produzione con Classic disabilitato, verificati filtri combinati, ricerca,
