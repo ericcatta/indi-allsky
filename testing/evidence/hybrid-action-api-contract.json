@@ -1,0 +1,373 @@
+{
+  "date": "2026-09-14",
+  "baseline": "c866e039",
+  "entrypoint": "testing/hybrid_action_api_flow_test.py",
+  "status": "passed",
+  "environment": "Raspberry isolated Flask fixture, synthetic credentials, in-memory database, Classic disabled; no production effects",
+  "checks": [
+    "Both public pause/unpause POST routes preserve response status and messages",
+    "Actual password verification; missing, unknown and incorrect credentials rejected",
+    "Ordinary users and clients outside admin network denied without task insertion",
+    "GET rejected; valid API credentials work without browser session or CSRF token",
+    "Actual MAIN/MANUAL queue rows, priority 100 and setpaused payload verified",
+    "Already-applied pause state creates no task"
+  ],
+  "physical_absence_repeat": {
+    "mode": "all-flows",
+    "removed": {
+      "modules": 1,
+      "templates": 45,
+      "assets": 68
+    },
+    "results": [
+      {
+        "flow": "hybrid_action_api_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.69
+      },
+      {
+        "flow": "hybrid_adu_history_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.19
+      },
+      {
+        "flow": "hybrid_archive_flow_test.py",
+        "exit_code": 0,
+        "seconds": 13.55
+      },
+      {
+        "flow": "hybrid_astropanel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.56
+      },
+      {
+        "flow": "hybrid_authenticated_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.81
+      },
+      {
+        "flow": "hybrid_camera_cleanup_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.33
+      },
+      {
+        "flow": "hybrid_camera_management_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.44
+      },
+      {
+        "flow": "hybrid_camera_settings_entries_flow_test.py",
+        "exit_code": 0,
+        "seconds": 6.46
+      },
+      {
+        "flow": "hybrid_camera_simulator_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.85
+      },
+      {
+        "flow": "hybrid_charts_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.58
+      },
+      {
+        "flow": "hybrid_daily_export_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.17
+      },
+      {
+        "flow": "hybrid_dark_library_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.36
+      },
+      {
+        "flow": "hybrid_diagnostic_tables_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.95
+      },
+      {
+        "flow": "hybrid_drives_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.89
+      },
+      {
+        "flow": "hybrid_end_of_night_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.77
+      },
+      {
+        "flow": "hybrid_fits_processing_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.3
+      },
+      {
+        "flow": "hybrid_focus_endpoint_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.87
+      },
+      {
+        "flow": "hybrid_focuser_effect_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.26
+      },
+      {
+        "flow": "hybrid_gallery_isolation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.82
+      },
+      {
+        "flow": "hybrid_generated_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.74
+      },
+      {
+        "flow": "hybrid_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.56
+      },
+      {
+        "flow": "hybrid_generation_result_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.45
+      },
+      {
+        "flow": "hybrid_geometry_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.85
+      },
+      {
+        "flow": "hybrid_gpio_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.78
+      },
+      {
+        "flow": "hybrid_highlight_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.0
+      },
+      {
+        "flow": "hybrid_highlights_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.71
+      },
+      {
+        "flow": "hybrid_keogram_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.28
+      },
+      {
+        "flow": "hybrid_log_download_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.35
+      },
+      {
+        "flow": "hybrid_log_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.88
+      },
+      {
+        "flow": "hybrid_longterm_keogram_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.17
+      },
+      {
+        "flow": "hybrid_longterm_sampling_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.61
+      },
+      {
+        "flow": "hybrid_mask_camera_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.91
+      },
+      {
+        "flow": "hybrid_media_validation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.92
+      },
+      {
+        "flow": "hybrid_mini_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.99
+      },
+      {
+        "flow": "hybrid_native_focus_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.21
+      },
+      {
+        "flow": "hybrid_network_command_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.49
+      },
+      {
+        "flow": "hybrid_now_page_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.57
+      },
+      {
+        "flow": "hybrid_observatory_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.44
+      },
+      {
+        "flow": "hybrid_operations_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.42
+      },
+      {
+        "flow": "hybrid_output_detail_flow_test.py",
+        "exit_code": 0,
+        "seconds": 6.14
+      },
+      {
+        "flow": "hybrid_panorama_publication_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.25
+      },
+      {
+        "flow": "hybrid_public_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.73
+      },
+      {
+        "flow": "hybrid_queued_maintenance_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.56
+      },
+      {
+        "flow": "hybrid_raw_loop_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.12
+      },
+      {
+        "flow": "hybrid_realtime_history_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.36
+      },
+      {
+        "flow": "hybrid_realtime_preview_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.41
+      },
+      {
+        "flow": "hybrid_runtime_shell_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.6
+      },
+      {
+        "flow": "hybrid_satellite_update_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.12
+      },
+      {
+        "flow": "hybrid_sensor_panel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.01
+      },
+      {
+        "flow": "hybrid_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.92
+      },
+      {
+        "flow": "hybrid_settings_navigation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.7
+      },
+      {
+        "flow": "hybrid_sky_cycle_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.4
+      },
+      {
+        "flow": "hybrid_smoke_update_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.01
+      },
+      {
+        "flow": "hybrid_source_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.54
+      },
+      {
+        "flow": "hybrid_sqm_readings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.02
+      },
+      {
+        "flow": "hybrid_storage_pressure_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.95
+      },
+      {
+        "flow": "hybrid_storage_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.74
+      },
+      {
+        "flow": "hybrid_system_power_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.72
+      },
+      {
+        "flow": "hybrid_system_units_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.03
+      },
+      {
+        "flow": "hybrid_timelapse_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.96
+      },
+      {
+        "flow": "hybrid_updates_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.99
+      },
+      {
+        "flow": "hybrid_upgrade_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.98
+      },
+      {
+        "flow": "hybrid_users_table_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.23
+      },
+      {
+        "flow": "hybrid_video_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 7.34
+      },
+      {
+        "flow": "hybrid_virtualsky_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.99
+      },
+      {
+        "flow": "hybrid_youtube_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.35
+      }
+    ],
+    "status": "passed",
+    "temporary_copy_removed": true
+  },
+  "previous_full_regression": {
+    "source_manifest_count": 826,
+    "unchanged": true,
+    "python": 153,
+    "javascript": 34,
+    "reference": "testing/evidence/hybrid-astropanel-independence.json",
+    "note": "Prior full regression, not a fresh full-suite run. Current repeat covers all 66 discovered integration flows with files physically absent."
+  },
+  "limits": [
+    "Network membership determination mocked; authorization decision exercised",
+    "No worker execution or live capture effect",
+    "Pending-task duplicate submissions not covered",
+    "Malformed JSON shapes and provider failures not covered",
+    "Sync API full contract remains separate",
+    "No deployment, native browser acceptance or 24-hour observation"
+  ]
+}

@@ -3,6 +3,22 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Contratti pubblici Action API — 14 settembre 2026
+
+Aggiunta la prova Flask `hybrid_action_api_flow_test.py` per gli ingressi pubblici
+`/action/pause` e `/action/unpause`, indipendenti dal frontend Classic.
+Verificati password reali delle identita' sintetiche, rifiuto di credenziali
+errate e utenti ordinari, vincolo rete amministrativa, metodo HTTP e accesso
+senza sessione browser/CSRF (contratto API esistente). Le richieste autorizzate
+scrivono realmente nel database isolato i task MAIN/MANUAL con priorita' 100 e
+payload `setpaused`; lo stato gia' applicato non aggiunge task.
+Nessun worker o servizio di produzione viene eseguito. La prova non certifica
+l'effetto finale di capture, i doppi invii mentre un task e' ancora pendente o
+l'intero contratto Sync API. Nessuna modifica applicativa in questa missione.
+Ripetizione con assenza fisica Classic: **66/66 flussi superati**, copia
+temporanea eliminata; 826 sorgenti della precedente regressione invariati.
+Evidenze: `testing/evidence/hybrid-action-api-contract.json`.
+
 ## Prova di assenza fisica Classic — 14 settembre 2026
 
 Estensione verificata con `--all-flows`: **65/65 flussi di integrazione**
