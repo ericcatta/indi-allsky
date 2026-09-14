@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Navigazione Classic: documentazione riallineata — 14 settembre 2026
+
+Sostituita la proposta obsoleta in
+`docs/modern-admin-classic-navigation-inventory.md`, che indicava ancora come
+Classic-only Settings, generazione e strumenti gia' implementati in Hybrid.
+La mappa corrente associa tutte le 56 registrazioni UI Classic a 44 destinazioni
+Hybrid risolte contro il codice. Rieseguito con successo il test dei redirect:
+GET/HEAD, tre ruoli, conservazione camera/profilo e query ripetute, destinazioni
+locali e separazione dalle API pubbliche. I 826 sorgenti dell'ultima regressione
+restano identici; questa missione modifica soltanto documentazione.
+
+La copertura degli ingressi non equivale al collaudo di tutti i controlli:
+il documento distingue i due livelli e mantiene esplicite le condizioni ancora
+aperte per la rimozione. Il candidato di deploy resta `fc926129`, non installato.
+
 ## Candidato completo preparato — 14 settembre 2026
 
 Il candidato di rilascio corrente e' `fc926129`, baseline installata confermata
