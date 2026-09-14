@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-14",
+  "baseline": "0285a041",
+  "status": "passed",
+  "entrypoint": "testing/hybrid_sync_api_flow_test.py",
+  "scope": "All 12 registered Sync v1 read routes; synthetic users, cameras, database and media only",
+  "routes": [
+    "camera",
+    "image",
+    "video",
+    "minivideo",
+    "keogram",
+    "startrail",
+    "startrailvideo",
+    "rawimage",
+    "fitsimage",
+    "panoramaimage",
+    "panoramavideo",
+    "thumbnail"
+  ],
+  "checks": [
+    "Route list equals actual registered Sync v1 routes",
+    "Successful signed multipart GET for both API users and both cameras",
+    "Returned ID and camera-specific media URL verified",
+    "Cross-camera record IDs and missing camera UUIDs rejected",
+    "Missing/malformed credentials, invalid signatures and altered signed metadata rejected",
+    "Existing time-bucket tolerance preserved: -4 through +1 accepted, -5 and +2 rejected",
+    "Media/config file hash snapshot unchanged and no tasks inserted",
+    "Classic import/template/asset guards enabled"
+  ],
+  "physical_absence": {
+    "status": "passed",
+    "flows_run": [
+      "hybrid_sync_api_flow_test.py"
+    ],
+    "invocation": "Import hybrid_classic_absence_test; restrict FLOWS to the new Sync test; call run()",
+    "modules_removed": 1,
+    "templates_removed": 45,
+    "assets_removed": 68,
+    "temporary_copy_removed": true,
+    "original_checkout_untouched": true
+  },
+  "regression": {
+    "prior_full_reference": "testing/evidence/hybrid-action-api-validation.json",
+    "prior_828_sources_unchanged": true,
+    "application_changes": false,
+    "note": "Only the new test rerun, including physical Classic absence; no new full-suite or all-67-flow run claimed."
+  },
+  "limits": [
+    "POST/PUT transfers, DELETE and remote integrations not covered by this read-contract test",
+    "URL association verified; native download receipt remains separate",
+    "No deployment or production effects",
+    "Classic not physically removed from main",
+    "24-hour observation remains deferred"
+  ]
+}

@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Contratti di lettura Sync API — 14 settembre 2026
+
+Verificati tutti i 12 ingressi registrati Sync v1 con richieste multipart firmate,
+entrambe le camere e identita' API amministratore/utente. ID e URL corrispondono
+alla camera; ID dell'altra camera, camera assente, firme errate, metadata alterati
+e firme fuori dalla finestra temporale vengono respinti. Nessun task aggiunto
+e file invariati. La prova non modifica i permessi storici Sync API.
+
+Il nuovo `hybrid_sync_api_flow_test.py` passa anche eseguito da solo nella copia
+priva di modulo, template e asset Classic. I 828 sorgenti della precedente
+regressione completa restano invariati; nessun nuovo giro completo dichiarato.
+POST/PUT/DELETE e integrazione con un server remoto restano fuori da questa
+prova di lettura. Candidato applicativo invariato: `8a15ae1e`, non installato.
+Evidenze: `testing/evidence/hybrid-sync-api-read-contract.json`.
+
 ## Candidato aggiornato pronto come artefatti — 14 settembre 2026
 
 Depositato e verificato sul Raspberry il candidato `8a15ae1e`: 92 percorsi,
