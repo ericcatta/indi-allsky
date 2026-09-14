@@ -1,5 +1,15 @@
 # Hybrid acceptance status
 
+## Settings restore live — 2026-09-14
+
+The administrator restored active snapshot 114 as revision 115 through the
+production UI. SQL confirms identical configuration and preserved source history;
+systemd confirms capture unchanged and both cameras produced fresh files.
+Required confirmation, progress/receipt, history search and all five history
+pages passed the bounded native checks. Evidence and limits:
+`testing/evidence/hybrid-settings-live-restore-20260914.json`. This does not
+close Full Settings save, file restore or whole-product acceptance.
+
 ## Current live acceptance — 2026-09-14
 
 Production deployment and camera recovery are recorded in

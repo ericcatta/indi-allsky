@@ -1,0 +1,73 @@
+{
+  "source_revision": 114,
+  "new_revision": 115,
+  "configuration_equal": true,
+  "source_history_unchanged": true,
+  "top_level_keys": 252,
+  "capture_unchanged": true,
+  "frames": [
+    {
+      "camera_id": 1,
+      "timestamp": "2026-09-14 19:49:49.000000",
+      "bytes": 950427,
+      "age_seconds": 11.4
+    },
+    {
+      "camera_id": 2,
+      "timestamp": "2026-09-14 19:49:56.000000",
+      "bytes": 546371,
+      "age_seconds": 4.0
+    }
+  ],
+  "date": "2026-09-14",
+  "installed": "29c75ffb016a6d9841ed00b274993ebab1c5bc63",
+  "status": "scoped-live-acceptance-passed",
+  "classic_disabled": true,
+  "role": "authenticated administrator",
+  "native_checks": [
+    {
+      "control": "Snapshot 114 details",
+      "result": "superato",
+      "evidence": "Opened actual latest snapshot from Config History; full-configuration scope and retention of history/security keys displayed."
+    },
+    {
+      "control": "Restore without checkbox",
+      "result": "superato",
+      "evidence": "Browser validation blocked submission and focused the required checkbox."
+    },
+    {
+      "control": "Restore confirmed",
+      "result": "superato",
+      "evidence": "Button disabled and Restoring shown; then Restored snapshot 114 as revision 115. Capture was not restarted. SQL and systemd independently verified this."
+    },
+    {
+      "control": "Open Config History",
+      "result": "superato",
+      "evidence": "115 total revisions and the new Snapshot 115 link with Restored internal snapshot 114 note displayed."
+    },
+    {
+      "control": "Search",
+      "result": "superato",
+      "evidence": "Exact restore note gives 1 row; nonexistent text 0; clearing restores 25 rows."
+    },
+    {
+      "control": "Older/Newer snapshots",
+      "result": "superato",
+      "evidence": "Visited all 5 pages: starts 115,90,65,40,15; last page includes snapshot 1 and 15 rows. Newer returns page 5 to page 4."
+    },
+    {
+      "control": "Search and Tab at width 390",
+      "result": "superato",
+      "evidence": "Modern Admin filter yields 11 of 25 rows on page 4. Tab moves search focus to Type/Level. DOM viewport/body/document width all 390; override reset."
+    }
+  ],
+  "regression_reference": "hybrid-astropanel-camera-regression.json",
+  "limits": [
+    "Restore to identical active values verifies persistence/history but not switching hardware to different settings",
+    "Full Settings save, external config download/file restore and all table export receipts still require native acceptance",
+    "Only administrator exercised live; ordinary/anonymous authorization verified in isolated tests",
+    "Responsive check covers this page/filter, not all supported pages",
+    "Classic physical removal and whole-product acceptance remain open",
+    "24-hour observation remains deferred"
+  ]
+}

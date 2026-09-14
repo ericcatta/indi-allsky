@@ -3,6 +3,22 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Restore Settings e cronologia verificati dal vivo — 14 settembre 2026
+
+Nell'installazione `29c75ffb`, ripristinato lo snapshot attivo 114 tramite UI:
+creata revisione 115 con dati identici (252 chiavi principali), storia originale
+invariata e nessun riavvio capture. File freschi da entrambe le camere verificati.
+Invio senza conferma bloccato; caricamento e ricevuta visibili; nuova revisione
+presente in cronologia. Ricerca con uno/zero risultati e reset verificati.
+Percorse tutte le cinque pagine fino alla revisione 1 e ritorno tramite Newer.
+Filtro e passaggio Tab verificati a 390px; nessun overflow orizzontale globale.
+
+Nessuna modifica di codice in questa missione: resta applicabile la regressione
+157 Python/34 JavaScript del candidato distribuito. Il restore identico non prova
+il cambio effettivo delle impostazioni hardware. Save Full Settings, download e
+restore da file, esportazioni e collaudo completo restano aperti.
+Evidenze: `testing/evidence/hybrid-settings-live-restore-20260914.json`.
+
 ## Collaudo Observatory e selezione Astropanel — 14 settembre 2026
 
 Il collaudo reale ha evidenziato l'assenza del selettore camera in Astropanel.
