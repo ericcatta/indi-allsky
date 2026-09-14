@@ -49,5 +49,25 @@
     "No narrow-viewport or native ordinary-user export verification",
     "Synthetic server stopped; no production effects",
     "Whole-product migration and physical Classic removal remain incomplete"
-  ]
+  ],
+  "latest_native_attempt": {
+    "date": "2026-09-14",
+    "environment": "Isolated synthetic server; Mac initially accessible",
+    "csv": {
+      "status": "bloccato",
+      "observed": "Filtered Night row rendered and CSV click produced POST 200 in isolated server",
+      "receipt": "No new matching download observed in the inspected Downloads directory; not a complete search of all download destinations",
+      "tool_limit": "Controlling the Codex native app for a possible save dialog was denied by the computer-use tool"
+    },
+    "copy": {
+      "status": "bloccato",
+      "observed": "Copy was clicked; browser paste failed because its virtual clipboard had no data",
+      "interpretation": "This does not prove the system clipboard was empty or that the application Copy action failed"
+    },
+    "alternative_browser": {
+      "status": "bloccato",
+      "observed": "Attempt to select Safari returned Mac locked; no Safari export executed"
+    },
+    "cleanup": "Synthetic server stopped and process exit confirmed; production unchanged"
+  }
 }
