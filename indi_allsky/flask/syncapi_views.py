@@ -102,30 +102,33 @@ class SyncApiBaseView(BaseView):
         tmp_media_file_p = self.saveMedia(request.files['media'])
 
 
-        media_file_size = tmp_media_file_p.stat().st_size
-        if media_file_size != metadata.get('file_size', -1):
-            tmp_media_file_p.unlink()
-            raise AuthenticationFailure('Media file size does not match')
-
-
         try:
-            camera = self.getCamera(metadata)
-        except NoResultFound:
-            app.logger.error('Camera not found: %s', metadata['camera_uuid'])
-            return jsonify({'error' : 'camera not found'}), 400
+            media_file_size = tmp_media_file_p.stat().st_size
+            if media_file_size != metadata.get('file_size', -1):
+                tmp_media_file_p.unlink()
+                raise AuthenticationFailure('Media file size does not match')
 
 
-        try:
-            file_entry = self.processPost(camera, metadata, tmp_media_file_p, overwrite=overwrite)
-        except EntryExists as e:
-            app.logger.error('Transfer skipped: %s', str(e))
-            return jsonify({'error' : 'file_exists'}), 400
+            try:
+                camera = self.getCamera(metadata)
+            except NoResultFound:
+                app.logger.error('Camera not found: %s', metadata['camera_uuid'])
+                return jsonify({'error' : 'camera not found'}), 400
 
 
-        return jsonify({
-            'id'   : file_entry.id,
-            'url'  : str(file_entry.getUrl(local=True)),
-        })
+            try:
+                file_entry = self.processPost(camera, metadata, tmp_media_file_p, overwrite=overwrite)
+            except EntryExists as e:
+                app.logger.error('Transfer skipped: %s', str(e))
+                return jsonify({'error' : 'file_exists'}), 400
+
+
+            return jsonify({
+                'id'   : file_entry.id,
+                'url'  : str(file_entry.getUrl(local=True)),
+            })
+        finally:
+            tmp_media_file_p.unlink(missing_ok=True)
 
 
     def put(self, overwrite=True):
@@ -323,7 +326,11 @@ class SyncApiBaseView(BaseView):
 
         tmp_media_p = Path(f_tmp_media.name)
 
-        media_file.save(str(tmp_media_p))
+        try:
+            media_file.save(str(tmp_media_p))
+        except BaseException:
+            tmp_media_p.unlink(missing_ok=True)
+            raise
 
         return tmp_media_p
 

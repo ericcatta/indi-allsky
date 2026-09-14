@@ -6,6 +6,10 @@ Their artifacts and valid backups remain preserved. The previous acceptance
 window ended at 20:00; installation needs a new user-agreed window with an end
 time. No 24-hour observation is included.
 
+The later Sync API temporary-upload cleanup is not included in this staged
+candidate. Update and verify the package before deploying that correction;
+the pinned helper does not install the latest `main` automatically.
+
 ## Exact candidate and staging
 
 - Installed baseline: `3590a3ee4621e01b23043ac415de499d79f7c9e3`.

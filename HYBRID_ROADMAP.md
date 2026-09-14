@@ -3,6 +3,25 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Pulizia dei temporanei Sync API — 14 settembre 2026
+
+Riprodotta una perdita di spazio nel percorso di upload: una richiesta respinta
+con `file_exists` lasciava il media temporaneo. Il boundary condiviso Sync ora
+rimuove il proprio file temporaneo in `finally`, anche per camera assente,
+fallimento di elaborazione e ritorni anticipati. Una scrittura multipart fallita
+ripulisce il file gia' creato prima di propagare l'errore. Risposte e metadati
+validi restano invariati; nessun cleanup di dati preesistenti.
+
+Nuova prova `hybrid_sync_transfer_flow_test.py`: POST/PUT/DELETE reali su video
+sintetici, byte prodotti e sostituiti, righe DB, ambito camera, duplicati,
+dimensione errata, camera assente ed errori di scrittura/elaborazione. Non e'
+una verifica di codec o del trasferimento tra due installazioni reali.
+Il candidato gia' depositato `8a15ae1e` non contiene questa correzione; serve un
+aggiornamento del pacchetto prima di distribuirla. Nessun deploy in questa missione.
+Regressione completa: **157 Python e 34 JavaScript superati**, manifest di
+830 sorgenti invariato prima/dopo e corrispondente al checkout locale.
+Evidenze: `testing/evidence/hybrid-sync-upload-cleanup.json`.
+
 ## Contratti di lettura Sync API — 14 settembre 2026
 
 Verificati tutti i 12 ingressi registrati Sync v1 con richieste multipart firmate,
