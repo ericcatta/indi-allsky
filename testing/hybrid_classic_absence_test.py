@@ -4,7 +4,10 @@
 This proves the listed automatic flows run without Classic files. It does not
 replace native browser, hardware acceptance or the final production removal.
 """
+import argparse
+import json
 import os
+import time
 from pathlib import Path
 import shutil
 import subprocess
@@ -29,7 +32,10 @@ FLOWS = (
 )
 
 
-def run():
+def run(*, all_flows=False, oauth_python=None, report_path=None):
+    flows = tuple(sorted(p.name for p in (ROOT / "testing").glob("hybrid_*_flow_test.py"))) if all_flows else FLOWS
+    assert flows and set(FLOWS) <= set(flows)
+    results = []
     with TemporaryDirectory(prefix='hybrid-without-classic-') as directory:
         stage = Path(directory)
         ignore = shutil.ignore_patterns('__pycache__', '*.pyc', 'evidence')
@@ -71,19 +77,42 @@ for name,module in list(sys.modules.items()):
             assert Path(filename).resolve().is_relative_to(root), name
 assert 'indi_allsky.flask.classic_views' not in sys.modules
 '''
-        env = {**os.environ, 'PYTHONPATH': str(stage), 'PYTHONNOUSERSITE': '1',
+        # Keep the interpreter's dependency configuration (the OAuth venv also
+        # uses user-site dependencies). Application origins are checked above.
+        env = {**os.environ, 'PYTHONPATH': str(stage),
                'PYTHONDONTWRITEBYTECODE': '1'}
         print('PHYSICAL REMOVAL', removed, flush=True)
-        for flow in FLOWS:
-            result = subprocess.run([sys.executable, '-c', bootstrap, str(stage), flow],
-                                    cwd=stage, env=env, capture_output=True, text=True, timeout=90)
-            if result.returncode:
-                print(result.stdout, result.stderr, flush=True)
-                raise AssertionError('Classic-absent flow failed: ' + flow)
-            print('CLASSIC ABSENT PASS', flow, flush=True)
+        for flow in flows:
+            python = str(oauth_python or sys.executable) if flow == 'hybrid_youtube_flow_test.py' else sys.executable
+            started = time.monotonic()
+            try:
+                result = subprocess.run([python, '-c', bootstrap, str(stage), flow],
+                                        cwd=stage, env=env, capture_output=True, text=True, timeout=90)
+                code = result.returncode
+                if code:
+                    print(result.stdout, result.stderr, flush=True)
+            except subprocess.TimeoutExpired:
+                code = -1
+                print('Flow exceeded 90 seconds:', flow, flush=True)
+            results.append({'flow': flow, 'exit_code': code, 'seconds': round(time.monotonic()-started, 2)})
+            if report_path:
+                report_path.write_text(json.dumps({'mode': 'all-flows' if all_flows else 'core',
+                    'removed': removed, 'results': results, 'status': 'running'}, indent=2) + '\n')
+            print('CLASSIC ABSENT', 'PASS' if code == 0 else 'FAIL', flow, flush=True)
         assert not classic.exists()
-    print('Classic absence rehearsal PASS: disposable tree removed; original checkout untouched', flush=True)
+    passed = all(result['exit_code'] == 0 for result in results)
+    if report_path:
+        report_path.write_text(json.dumps({'mode': 'all-flows' if all_flows else 'core',
+            'removed': removed, 'results': results, 'status': 'passed' if passed else 'failed',
+            'temporary_copy_removed': not stage.exists()}, indent=2) + '\n')
+    assert passed, 'Classic-absent integration failures; inspect listed results'
+    print('Classic absence rehearsal PASS:', len(results), 'flows; disposable tree removed; original checkout untouched', flush=True)
 
 
 if __name__ == '__main__':
-    run()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--all-flows', action='store_true', help='Discover every hybrid_*_flow_test.py instead of the twelve core flows')
+    parser.add_argument('--oauth-python', type=Path, help='Interpreter with optional Google OAuth dependencies for its integration test')
+    parser.add_argument('--report', type=Path, help='Write per-flow outcomes outside the disposable tree')
+    args = parser.parse_args()
+    run(all_flows=args.all_flows, oauth_python=args.oauth_python, report_path=args.report)

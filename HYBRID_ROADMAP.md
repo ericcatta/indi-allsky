@@ -5,6 +5,16 @@ Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando
 
 ## Prova di assenza fisica Classic — 14 settembre 2026
 
+Estensione verificata con `--all-flows`: **65/65 flussi di integrazione**
+scoperti automaticamente passano nella copia priva dei file Classic. Il primo
+tentativo aveva 64 successi e un errore del banco di prova: l'interprete OAuth
+non vedeva le proprie dipendenze user-site. Corretta soltanto la configurazione
+del runner, conservando la verifica dell'origine di tutti i moduli applicativi;
+nessuna dipendenza installata. Ripetizione completa superata e copia eliminata.
+Il report registra esito e durata di ogni flusso. Senza argomenti rimangono i
+dodici casi principali, per non duplicare tutta la regressione ordinaria.
+I 826 sorgenti della precedente regressione completa restano identici.
+
 Nuovo entrypoint `testing/hybrid_classic_absence_test.py`: crea una copia
 provvisoria del sorgente, elimina il modulo `classic_views.py`, 45 template e
 68 asset esterni all'allowlist Hybrid/condivisa, quindi esegue dodici flussi
