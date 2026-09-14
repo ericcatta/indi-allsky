@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-14",
+  "installed_release": "0e6f445ca0312acb14100cf36ddc992d8635df47",
+  "scope": "Production warm reboot and automatic startup; no new SSH login until native browser showed both cameras acquiring",
+  "before": {
+    "boot_id": "77aa86c8-f2b1-43f8-af70-75621eb49939",
+    "queue_active_tasks": 0,
+    "capture_active": true,
+    "linger": true
+  },
+  "after": {
+    "boot_id": "22c3d83f-b38f-4262-846f-88077f9eb654",
+    "boot_time": "2026-09-14 21:34:41 CEST",
+    "services": {
+      "indiserver": "2026-09-14 21:35:40 CEST",
+      "gunicorn-indi-allsky": "2026-09-14 21:35:40 CEST",
+      "indi-allsky": "2026-09-14 21:36:51 CEST"
+    },
+    "enabled": [
+      "indi-allsky.timer",
+      "indiserver.timer",
+      "gunicorn-indi-allsky.socket"
+    ],
+    "linger": true,
+    "native_browser_before_ssh": {
+      "capture": "Running",
+      "camera_1_frame": "2026-09-14 21:37:49",
+      "camera_2_frame": "2026-09-14 21:37:14"
+    }
+  },
+  "result": "Automatic startup after warm reboot passed for web, INDI and acquisition on both cameras",
+  "limitations": [
+    "Reboot Pi click produced a CDP timeout and its confirmation was not observable: the initiating interaction is not certified as passed",
+    "Cold power removal was not performed",
+    "24h observation remains deferred by user",
+    "Systemd journal is unavailable; timestamps read directly from systemctl show",
+    "Classic physical removal candidate has not been deployed"
+  ]
+}

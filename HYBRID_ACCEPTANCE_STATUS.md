@@ -1,5 +1,18 @@
 # Hybrid acceptance status
 
+## Warm reboot and automatic startup — 2026-09-14
+
+Production `0e6f445c` rebooted at 21:34:41 CEST. INDI and the web service
+were active at 21:35:40; capture started automatically at 21:36:51. The
+native browser showed new frames from both cameras before any new SSH login.
+The enabled capture/INDI timers, web socket and `Linger=yes` were confirmed.
+Evidence: `testing/evidence/hybrid-reboot-autostart-20260914.json`.
+
+This passes automatic startup after a warm reboot. The initiating browser
+click timed out and its confirmation was not observable, so that interaction
+is not certified. Cold power loss and the deferred 24-hour test were not run.
+Classic removal remains an isolated candidate, not a production change.
+
 ## FITS deployment and completed mini generation — 2026-09-14
 
 Production `0e6f445c` includes the FITS spatial-dimension correction. Fresh
