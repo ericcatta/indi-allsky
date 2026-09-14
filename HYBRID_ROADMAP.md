@@ -3,6 +3,27 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Candidato completo preparato — 14 settembre 2026
+
+Il candidato di rilascio corrente e' `fc926129`, baseline installata confermata
+`3590a3ee`: 84 percorsi nel bundle, ultima regressione 153 Python/34 JavaScript.
+Sostituisce come candidato scelto `dcaa481c`; gli artefatti precedenti restano
+conservati. Nuovo helper e stato privato usano il prefisso `hybrid-product`.
+
+Preparazione completata senza cambi di servizi: backup SQLite online con
+integrita' ok, archivio codice e configurazione protetti, checksum degli artefatti
+corrispondenti tra Mac e Pi. Confronto prima/dopo: HEAD, tracked checkout,
+percorsi untracked, bytes Flask e identita'/stato dei servizi invariati.
+Il primo tentativo era scaduto e aveva lasciato un backup incompleto; solo il
+backup puntato dallo stato di successo e' utilizzabile. Il residuo incompleto
+e' stato rimosso dopo la verifica, recuperando circa 581 MiB. Aggiunti avanzamento e
+limite esplicito alla copia online e verifiche sugli argomenti dell'helper.
+
+Nessun deploy: serve ancora la nuova finestra di manutenzione con scadenza.
+Al momento dell'installazione si acquisisce un altro backup coerente.
+Procedura: `HYBRID_STORAGE_RELEASE_RUNBOOK.md`; evidenze:
+`testing/evidence/hybrid-product-release-preparation.json`.
+
 ## Endpoint Astropanel indipendente — candidato successivo a e27fa1bb
 
 L'endpoint pubblico `/ajax/astropanel` e' implementato nel modulo condiviso

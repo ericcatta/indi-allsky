@@ -1,7 +1,7 @@
 # Mask Base: worker acceptance reference
 
 The exact installation candidate below is superseded by
-`HYBRID_STORAGE_RELEASE_RUNBOOK.md` (candidate `dcaa481c`). Do not deploy the
+`HYBRID_STORAGE_RELEASE_RUNBOOK.md` (candidate `fc926129`). Do not deploy the
 older standalone candidate. The Mask Base acceptance requirements below remain
 required for the combined release.
 

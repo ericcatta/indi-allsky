@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-14",
+  "status": "prepared-no-service-changes",
+  "installed_baseline": "3590a3ee4621e01b23043ac415de499d79f7c9e3",
+  "candidate": "fc926129a2a1c79c9f5dcb3fd37e103a6b17c94d",
+  "release_paths": 84,
+  "bundle_verified": true,
+  "artifacts_sha256": {
+    "hybrid-product-release.bundle": "3943ccf66367edf3b93969f063ce2c5fff119639b25a7096ef03b8f8dbb2cb80",
+    "hybrid-product-paths.json": "fe42453588adba48c817fdb8987a557610db9a15c310f92ec92fbeb901c1eb64",
+    "hybrid-product-deploy.py": "36c12281af97654ad487e0c9253c1ee985dd8c5960bfcc8cccf00064df8197ea"
+  },
+  "backup": {
+    "online_sqlite_integrity": "ok",
+    "code_archive": true,
+    "flask_configuration": true,
+    "directory_mode": "0700",
+    "private_files_mode": "0600",
+    "state_pointer": "~/hybrid-product-release-state.json",
+    "previous_failed_attempt": "First preparation exceeded wrapper timeout at 240 seconds and left an incomplete backup with no success state. Process termination was verified before retry. The successful backup is identified only by the state pointer; never select a backup solely by its directory name.",
+    "incomplete_backup_removed_after_success": true,
+    "incomplete_bytes_removed": 609676189
+  },
+  "before_after": {
+    "installed_head_unchanged": true,
+    "tracked_checkout_clean": true,
+    "untracked_paths_preserved": true,
+    "flask_bytes_unchanged": true,
+    "capture_and_web_service_identities_states_unchanged": true,
+    "activators_unchanged": true
+  },
+  "helper_guards": [
+    "Preparation and rollback mutually exclusive",
+    "Installation requires a future user-agreed maintenance deadline",
+    "Online backup progress and ten-minute bound",
+    "Maintenance deadline checked during backup",
+    "Private default umask"
+  ],
+  "regression": {
+    "source_evidence": "testing/evidence/hybrid-astropanel-independence.json",
+    "python_cases": 153,
+    "javascript_cases": 34,
+    "runtime_changes_in_this_mission": false,
+    "helper_checks": "Syntax, exclusive-mode, missing-deadline, expired-deadline checks and actual prepare-only execution",
+    "all_826_source_hashes_unchanged": true
+  },
+  "limits": [
+    "No deployment or rollback executed",
+    "Live functional acceptance and cold boot remain open",
+    "Native browser blocked by Mac lock; production certificate security restriction remains unresolved",
+    "Fresh backup required at installation",
+    "Classic still physically present; full migration not complete"
+  ]
+}
