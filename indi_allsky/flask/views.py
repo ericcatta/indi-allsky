@@ -7475,8 +7475,6 @@ class ModernAdminSystemToolView(ModernAdminContextMixin):
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_system_view'
 
 
-class ModernAdminAstroPanelView(ModernAdminObservatoryToolView, TemplateView):
-    page_title = 'Modern Admin Astropanel'
 
 
 
@@ -7802,6 +7800,16 @@ class ModernAdminMediaBrowseView(ModernAdminContextMixin):
                 formatted_parts.append(part.capitalize())
 
         return ' '.join(formatted_parts)
+
+
+class ModernAdminAstroPanelView(ModernAdminObservatoryToolView, CameraScopedTemplateMixin, ModernAdminMediaBrowseView, TemplateView):
+    page_title = 'Modern Admin Astropanel'
+
+    def get_context(self):
+        context = super().get_context()
+        context['astropanel_camera_choices'] = self.get_media_camera_filters()[1:]
+        return context
+
 
 
 class ModernAdminStorageView(CameraScopedTemplateMixin, ModernAdminMediaBrowseView, ModernAdminView):

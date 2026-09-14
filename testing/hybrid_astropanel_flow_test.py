@@ -29,6 +29,31 @@ def run():
                 assert page.status_code == 200
                 assert 'modern_admin/astropanel.js' in page.text
                 assert 'id="astropanel-refresh"' in page.text
+                assert 'aria-label="Astropanel camera"' in page.text
+                from html.parser import HTMLParser
+                class CameraLinks(HTMLParser):
+                    active = False
+                    links = []
+                    def handle_starttag(self, tag, attrs):
+                        attrs = dict(attrs)
+                        if tag == 'nav':
+                            self.active = attrs.get('aria-label') == 'Astropanel camera'
+                        elif tag == 'a' and self.active:
+                            self.links.append(attrs)
+                    def handle_endtag(self, tag):
+                        if tag == 'nav':
+                            self.active = False
+                choices = CameraLinks(); choices.links = []; choices.feed(page.text)
+                assert len(choices.links) == 2
+                for other, link in enumerate(choices.links, 1):
+                    assert 'camera_id=' + str(other) in link['href']
+                    assert 'profile_id=test-profile-' + str(other) in link['href']
+                    assert (link.get('aria-current') == 'page') == (other == cid)
+                    selected = client.get(link['href'])
+                    assert selected.status_code == 200 and 'data-camera="' + str(other) + '"' in selected.text
+                for bad in ({'camera_id':'bad'}, {'camera_id':cid,'profile_id':'test-profile-'+str(3-cid)}, {'profile_id':'missing'}):
+                    assert client.get('/indi-allsky/modern-admin/observatory/astropanel',query_string=bad).status_code == 400
+
                 response = client.get('/indi-allsky/ajax/astropanel', query_string={'camera_id':cid})
                 assert response.status_code == 200, response.text[:500]
                 data = response.json

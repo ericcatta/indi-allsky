@@ -14,6 +14,12 @@
     {% set modern_admin_title_id = 'modern-admin-astropanel-title' %}
     {% include 'modern_admin/_shell_header.html' %}
 
+    <nav class="modern-admin-link-grid" aria-label="Astropanel camera">
+        {% for choice in astropanel_camera_choices %}
+        <a href="{{ url_for(request.endpoint, camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == camera_id|int %}aria-current="page"{% endif %}>{{ choice.label }}</a>
+        {% endfor %}
+    </nav>
+
     <p id="astropanel-status" role="status">Loading astropanel data...</p>
     <button type="button" id="astropanel-refresh" class="modern-admin-button">Refresh</button>
     <section class="modern-admin-status-grid modern-admin-status-grid-three" aria-label="Astropanel overview">

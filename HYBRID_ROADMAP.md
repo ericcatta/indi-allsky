@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Collaudo Observatory e selezione Astropanel — 14 settembre 2026
+
+Il collaudo reale ha evidenziato l'assenza del selettore camera in Astropanel.
+Aggiunti ingressi camera/profilo e validazione dello scope nella pagina Hybrid,
+senza modificare i calcoli astronomici o il contratto dell'API pubblica.
+Test mirato su entrambe le camere e ruoli, link renderizzati e profili incoerenti.
+Regressione completa: 157 Python e 34 JavaScript superati; 830 sorgenti invariati.
+`testing/evidence/hybrid-astropanel-camera-regression.json`. Deploy successivo al commit.
+
+SQM cambia letture e profilo correttamente. Realtime Keogram aggiorna preview
+separate per camera. Long-term Keogram ha generato due JPEG effettivi distinti
+con etichette IMX708 e ordine invertito ASI; Reset ripristina le opzioni.
+Download, varianti dei selettori, tastiera e mobile restano prove separate aperte.
+Evidenze: `testing/evidence/hybrid-observatory-live-20260914.json`.
+
 ## Deploy effettuato e primo collaudo live — 14 settembre 2026
 
 Dopo il rientro dell'utente e l'autorizzazione a procedere finche' necessario,

@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-14",
+  "production": "eb023b1c",
+  "status": "partial-native-acceptance",
+  "classic_disabled": true,
+  "checks": [
+    {
+      "page": "observatory/sqm",
+      "control": "camera links",
+      "result": "superato",
+      "evidence": "IMX708 to ASI678MC to IMX708 changes camera/profile URL and actual reading: 1644.45, 4246892.42, 1641.78 respectively; timestamps update."
+    },
+    {
+      "page": "observatory/realtime-keogram",
+      "control": "camera links and realtime-refresh",
+      "result": "superato",
+      "evidence": "Camera-specific image URLs and labels; IMX update 19:33:51 to 19:34:06 and ASI to 19:34:27. Refresh disabled while loading and re-enabled. Status is set only after image decode in deployed controller."
+    },
+    {
+      "page": "observatory/long-term-keogram",
+      "control": "LABEL and Generate, camera 1",
+      "result": "superato",
+      "evidence": "Checkbox checked; controls disabled while generating; decoded preview and Generated in 0.399 seconds displayed; resulting JPEG 18837 bytes, mtime 19:34:49."
+    },
+    {
+      "page": "observatory/long-term-keogram",
+      "control": "camera 2, REVERSE and Generate",
+      "result": "superato",
+      "evidence": "Camera/profile link reaches ASI data; reverse checked; decoded preview and Generated in 0.33 seconds displayed; separate JPEG 15891 bytes, mtime 19:35:12."
+    },
+    {
+      "page": "observatory/long-term-keogram",
+      "control": "Reset options",
+      "result": "superato",
+      "evidence": "After successful ASI generation, reverse returns from checked to unchecked and generation status clears."
+    },
+    {
+      "page": "observatory/virtualsky",
+      "control": "virtualsky-refresh and Reset preview",
+      "result": "superato",
+      "evidence": "IMX frame capture timestamp changes 19:36:21 to 19:36:51 with Overlay preview updated; Refresh/download disabled while loading then enabled. Constellation labels checkbox toggles on, Reset returns it off. Pixel-level alignment and correctness of the drawn labels remain unverified."
+    },
+    {
+      "page": "observatory/virtualsky",
+      "control": "virtualsky-fullscreen and virtualsky-exit-fullscreen",
+      "result": "superato",
+      "evidence": "ASI frame 19:37:39 loaded. Fullscreen reduces rendered AX tree to overlay image and Exit fullscreen; Exit restores shell and controls with focus returned to Fullscreen."
+    }
+  ],
+  "open": [
+    "Keogram download file receipt and content inspection",
+    "All select variants and keyboard/mobile coverage",
+    "Remaining whole-product control matrix",
+    "Physical Classic removal",
+    "24-hour observation deferred by user",
+    "VirtualSky overlay alignment, all object controls and PNG file receipt"
+  ],
+  "limitations": [
+    "Native administrator session only in these checks; roles/error cases covered separately by isolated tests",
+    "Readonly DOM image-dimension probe timed out; no image-dimension assertion from that probe",
+    "Reported generation timings are observed operations, not performance benchmarks"
+  ],
+  "role": "authenticated administrator",
+  "prerequisites": "Live saved images and long-term samples available for camera 1 / imx708-wide and camera 2 / asi678mc"
+}

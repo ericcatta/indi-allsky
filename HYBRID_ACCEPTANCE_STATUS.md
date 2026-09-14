@@ -1,5 +1,16 @@
 # Hybrid acceptance status
 
+## Current live acceptance — 2026-09-14
+
+Production deployment and camera recovery are recorded in
+`testing/evidence/hybrid-product-deployment-20260914.json`. The resumed
+Observatory checks, generated files and remaining control-level limits are in
+`testing/evidence/hybrid-observatory-live-20260914.json`. See `HYBRID_ROADMAP.md`
+for the current release state. Older entries below describe their historical
+mission state; their expired maintenance windows do not apply to the renewed
+user authorization. Classic removal and whole-product acceptance remain open;
+the 24-hour observation remains deferred.
+
 ## FITS preview handler extracted — local candidate, 2026-09-09
 
 The complete Fits2JpegView now lives in source_media_views beside source download
