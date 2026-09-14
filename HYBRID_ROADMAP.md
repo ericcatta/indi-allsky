@@ -3,6 +3,25 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Validazione degli input Action API — 14 settembre 2026
+
+Riprodotto su Flask isolato un errore interno con JSON `null` su `/action/pause`:
+`authorize()` presumeva un oggetto e chiamava `.get()` senza validarne il tipo.
+La validazione condivisa ora rifiuta oggetti non dizionario e credenziali non
+stringa con il contratto JSON esistente `authentication failed`, HTTP 400.
+Estesa la prova a entrambe le route, quindici forme JSON non valide, JSON
+sintatticamente malformato e controllo che i rifiuti non creino task. I percorsi
+validi, i permessi, il controllo rete e i task restano invariati.
+Regressione completa: **155 Python e 34 JavaScript superati**, inclusa parita'
+Full Config, Settings contracts, Safe Actions, Product View Models/Spine e
+prova di assenza fisica Classic. Manifest di 828 sorgenti invariato prima/dopo
+e corrispondente al checkout locale. Evidenze:
+`testing/evidence/hybrid-action-api-validation.json`.
+
+Questa correzione non e' nel bundle preparato `fc926129`: prima di distribuirla
+occorre aggiornare e verificare il candidato. Nessun deploy o restart in questa
+missione. Il collaudo diretto e la rimozione definitiva Classic restano aperti.
+
 ## Contratti pubblici Action API — 14 settembre 2026
 
 Aggiunta la prova Flask `hybrid_action_api_flow_test.py` per gli ingressi pubblici

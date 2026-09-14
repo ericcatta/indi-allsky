@@ -6,6 +6,10 @@ private artifacts and backups remain available for recovery. The previous accept
 installation needs a new user-agreed window with an end time. No 24-hour
 observation is included.
 
+The later Action API credential-shape correction is **not included** in this
+pinned bundle. Prepare and verify an updated candidate before attempting to
+release that correction; do not assume the helper deploys the latest `main`.
+
 ## Exact candidate and preparation
 
 - Installed baseline: `3590a3ee4621e01b23043ac415de499d79f7c9e3`.

@@ -53,8 +53,14 @@ class ActionApiBaseView(BaseView):
         time.sleep(random_sleep)
 
 
+        if not isinstance(data, dict):
+            raise AuthenticationFailure('Invalid credential object')
+
         username = data.get('username', '')
         password = data.get('password', '')
+
+        if not isinstance(username, str) or not isinstance(password, str):
+            raise AuthenticationFailure('Invalid credential types')
 
 
         user = IndiAllSkyDbUserTable.query\

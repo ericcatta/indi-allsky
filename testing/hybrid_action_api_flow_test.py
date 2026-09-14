@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Public pause/unpause contracts survive without the optional Classic frontend."""
+import json
 from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app, PASSWORD
 
@@ -38,6 +39,24 @@ def run():
                                 {**credentials, 'password': 'incorrect'}):
                     result = client.post(route, json=invalid)
                     assert result.status_code == 400 and result.json == {'error': 'authentication failed'}
+                    assert tasks() == before
+                # JSON may be syntactically valid without being a credential object.
+                for invalid in (None, [], [credentials], True, 7, 'credentials',
+                                {'username': [], 'password': PASSWORD},
+                                {'username': {}, 'password': PASSWORD},
+                                {'username': 1, 'password': PASSWORD},
+                                {'username': None, 'password': PASSWORD},
+                                {**credentials, 'password': None},
+                                {**credentials, 'password': []},
+                                {**credentials, 'password': {}},
+                                {**credentials, 'password': 1},
+                                {**credentials, 'password': True}):
+                    result = client.post(route, data=json.dumps(invalid), content_type='application/json')
+                    assert result.status_code == 400 and result.json == {'error': 'authentication failed'}, invalid
+                    assert tasks() == before
+                # Flask continues to own malformed JSON and wrong media types.
+                for raw in ('{', ''):
+                    assert client.post(route, data=raw, content_type='application/json').status_code == 400
                     assert tasks() == before
                 result = client.post(route, json={'username': 'test-user-2', 'password': PASSWORD})
                 assert result.status_code == 400 and result.json == {'error': 'permission denied'}
