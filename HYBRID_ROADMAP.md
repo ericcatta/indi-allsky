@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Candidato aggiornato con pulizia Sync — 14 settembre 2026
+
+Il candidato corrente depositato e verificato e' `eb023b1c`: include le ultime
+correzioni Action/Sync API, 98 percorsi rispetto alla produzione, 30 applicativi.
+Regressione di riferimento: 157 Python/34 JavaScript, 830 sorgenti verificati.
+Artefatti versionati `hybrid-product-eb023b1c`, bundle e checksum verificati sul
+Raspberry; i candidati precedenti e i backup validi sono preservati.
+
+Il deploy helper non e' stato eseguito. Produzione confermata a `3590a3ee`,
+con configurazione, stato/identita' servizi, tracked e untracked invariati.
+Backup fresco obbligatorio al deploy, nella nuova finestra concordata.
+Nessuna installazione, collaudo live o rimozione Classic dichiarata.
+Evidenze: `testing/evidence/hybrid-product-eb023b1c-staging.json`;
+procedura corrente: `HYBRID_STORAGE_RELEASE_RUNBOOK.md`.
+
 ## Pulizia dei temporanei Sync API — 14 settembre 2026
 
 Riprodotta una perdita di spazio nel percorso di upload: una richiesta respinta

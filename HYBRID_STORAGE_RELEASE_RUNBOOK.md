@@ -1,30 +1,27 @@
 # Combined Hybrid product release
 
 Candidate staged and verified on 14 September 2026; **not installed**. This
-supersedes the earlier `fc926129` bundle and older standalone candidates.
+supersedes the earlier `8a15ae1e` and `fc926129` bundles and older standalone candidates.
 Their artifacts and valid backups remain preserved. The previous acceptance
 window ended at 20:00; installation needs a new user-agreed window with an end
 time. No 24-hour observation is included.
 
-The later Sync API temporary-upload cleanup is not included in this staged
-candidate. Update and verify the package before deploying that correction;
-the pinned helper does not install the latest `main` automatically.
-
 ## Exact candidate and staging
 
 - Installed baseline: `3590a3ee4621e01b23043ac415de499d79f7c9e3`.
-- Tested candidate: `8a15ae1e13fccef258cd21755d945311741542a3`.
-- Verified release delta: 92 paths, 29 application paths, including Mask Base,
+- Tested candidate: `eb023b1c21a32c0371c829062d5ae3d53fbe2643`.
+- Verified release delta: 98 paths, 30 application paths, including Mask Base,
   Settings, Observatory, System/media contexts, storage policy/forecast, upload
   publication locking, account identity, storage summaries/daily exports,
-  independent Astropanel and Action API credential validation. No schema,
+  independent Astropanel, Action API credential validation and Sync temporary
+  upload cleanup. No schema,
   installer or dependency-file changes.
-- Regression: 155 Python results including compilation, 34 JavaScript tests;
-  all passed with the 828-file source manifest unchanged.
+- Regression: 157 Python results including compilation, 34 JavaScript tests;
+  all passed with the 830-file source manifest unchanged.
 
-The Raspberry has `~/hybrid-product-8a15ae1e-release.bundle`,
-`~/hybrid-product-8a15ae1e-paths.json` and
-`~/hybrid-product-8a15ae1e-deploy.py`. Checksums match the local artifacts;
+The Raspberry has `~/hybrid-product-eb023b1c-release.bundle`,
+`~/hybrid-product-eb023b1c-paths.json` and
+`~/hybrid-product-eb023b1c-deploy.py`. Checksums match the local artifacts;
 bundle prerequisites, candidate ref and complete path list were verified.
 The helper preserves the previous deployment logic with a new pinned revision
 and versioned filenames. It has not been executed for this candidate.
@@ -33,20 +30,20 @@ This is artifact staging, not a completed pre-deploy backup. The earlier
 `fc926129` preparation produced a valid protected backup, retained with its own
 helper and state. The new helper must acquire a fresh consistent SQLite/code/
 configuration backup before stopping services; its state will be recorded in
-`~/hybrid-product-8a15ae1e-release-state.json`. Never substitute the old state
+`~/hybrid-product-eb023b1c-release-state.json`. Never substitute the old state
 for the new candidate. Backup directories are private, and database,
 configuration and state must not be published.
 
 Staging preserved production HEAD, tracked work, untracked files, configuration
 bytes and service identities/states. Evidence and checksums:
-`testing/evidence/hybrid-product-8a15ae1e-staging.json`. Historical backup
+`testing/evidence/hybrid-product-eb023b1c-staging.json`. Historical backup
 evidence remains in `testing/evidence/hybrid-product-release-preparation.json`.
 
 ## Installation and bounded acceptance
 
 1. Confirm the maintenance window and recovery access. Recheck the installed
    revision, tracked work, disk headroom, camera freshness and task backlog.
-2. Execute `~/hybrid-product-8a15ae1e-deploy.py` with `--maintenance-until` set to the agreed
+2. Execute `~/hybrid-product-eb023b1c-deploy.py` with `--maintenance-until` set to the agreed
    ISO timestamp including timezone. It creates a fresh consistent backup before
    stopping capture/web and their activating timer/socket. It refuses a stale
    baseline, unexpected release paths or an expired/insufficient window.

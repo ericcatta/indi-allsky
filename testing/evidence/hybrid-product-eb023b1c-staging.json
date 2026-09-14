@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-14",
+  "status": "staged-not-installed",
+  "candidate": "eb023b1c21a32c0371c829062d5ae3d53fbe2643",
+  "installed": "3590a3ee4621e01b23043ac415de499d79f7c9e3",
+  "paths": 98,
+  "runtime_paths": 30,
+  "artifact_prefix": "hybrid-product-eb023b1c",
+  "artifact_sha256": {
+    "release.bundle": "fd1522ede44ebda4d2704748e4fa339df6bf89d767fd3b6c1e79514fe80d5f53",
+    "paths.json": "dfbec0432a04094aa9da70fa7f34e71e859ed511f82cd12da2d4aa8bd7d02bd1",
+    "deploy.py": "de39a1e8b46df30cc27ac2fd4f47f27b4ca7f1f2988b1b9285a0193358f13455"
+  },
+  "checks": [
+    "Bundle verified locally and against production prerequisites",
+    "Candidate ref and all 92 release paths verified in isolated checkout",
+    "Local and remote artifact checksums match",
+    "Helper differs only in pinned revision and versioned artifact/backup names",
+    "Helper compiles; not executed",
+    "Production HEAD, tracked changes, untracked paths, config bytes and service identity/state unchanged",
+    "Classic remains disabled in production configuration"
+  ],
+  "regression": "testing/evidence/hybrid-sync-upload-cleanup.json",
+  "backup": "Prior valid backups preserved. No new backup made during staging; install helper must acquire a fresh consistent backup before stopping services.",
+  "limits": [
+    "No installation or restart",
+    "Requires new agreed maintenance window and direct acceptance",
+    "Classic files still present",
+    "24-hour observation deferred"
+  ],
+  "supersedes": "8a15ae1e"
+}
