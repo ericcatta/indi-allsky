@@ -1,5 +1,30 @@
 # Hybrid: deployment and rollback
 
+## Installed release, 14 September 2026
+
+Production now runs `eb023b1c21a32c0371c829062d5ae3d53fbe2643`, installed from
+`3590a3ee` after the user authorized maintenance for as long as necessary.
+A fresh online SQLite backup passed integrity checks, with protected code and
+Flask configuration copies. The versioned helper supports code-only rollback;
+private state is `~/hybrid-product-eb023b1c-release-state.json`.
+
+Capture/web and their timer/socket restarted successfully. Both cameras produced
+new nonempty files after restart. A later 12-frame sample for each camera showed
+15-second median cadence (IMX708 15–15 seconds, ASI 15–16 seconds).
+Flask configuration bytes and untracked files were preserved; tracked checkout
+was clean. Classic is disabled but its files remain present.
+
+Native production browsing now works without bypassing a security interstitial.
+Now, navigation, Storage inventory and daily table rendered. Storage Protection
+save was verified through UI feedback and database readback: only
+`STORAGE_PRESSURE` changed, enabled with 5/8 GiB thresholds and three-day retention.
+The forecast displayed real consumption-based estimates. CSV download emitted
+a browser event; file inspection and clipboard receipt remain unverified.
+
+This is partial live acceptance, not completion of every page/control or Classic
+removal. The 24-hour observation remains explicitly deferred. Evidence:
+`testing/evidence/hybrid-product-deployment-20260914.json`.
+
 ## Installed release, 10 September 2026
 
 The Raspberry runs `3590a3ee4621e01b23043ac415de499d79f7c9e3`, upgraded from

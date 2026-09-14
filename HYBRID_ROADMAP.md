@@ -3,6 +3,24 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Deploy effettuato e primo collaudo live — 14 settembre 2026
+
+Dopo il rientro dell'utente e l'autorizzazione a procedere finche' necessario,
+installato `eb023b1c` in produzione con backup fresco verificato e rollback
+predisposto. Capture/web ripartiti; nuovi file non vuoti da entrambe le camere.
+Verifica successiva: mediana 15 secondi su 12 frame per camera (IMX708 15–15,
+ASI 15–16). Configurazione Flask e file utente preservati.
+
+Il browser accede ora all'origine HTTPS senza bypass. Now, menu, Storage e
+tabella giornaliera verificati dal vivo. Salvataggio Storage Protection
+confermato da UI e DB: unica chiave modificata STORAGE_PRESSURE, policy attiva
+5/8 GiB e conservazione tre giorni. Stima visibile basata sui consumi reali.
+CSV: evento download osservato, contenuto del file ancora da ispezionare;
+Copy: ricezione clipboard non verificata. Nessuna parita' completa dichiarata.
+Classic resta disabilitato ma presente; proseguire il collaudo e poi rimuoverlo.
+Le 24 ore restano escluse. Evidenze:
+`testing/evidence/hybrid-product-deployment-20260914.json`.
+
 ## Candidato aggiornato con pulizia Sync — 14 settembre 2026
 
 Il candidato corrente depositato e verificato e' `eb023b1c`: include le ultime

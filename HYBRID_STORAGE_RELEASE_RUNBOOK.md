@@ -1,15 +1,16 @@
 # Combined Hybrid product release
 
-Candidate staged and verified on 14 September 2026; **not installed**. This
-supersedes the earlier `8a15ae1e` and `fc926129` bundles and older standalone candidates.
-Their artifacts and valid backups remain preserved. The previous acceptance
-window ended at 20:00; installation needs a new user-agreed window with an end
-time. No 24-hour observation is included.
+Installed on 14 September 2026 after the user returned and authorized maintenance
+for as long as necessary. Fresh backup and deployment passed; live acceptance is
+partial. Both cameras resumed and Storage settings save/readback passed. See
+`testing/evidence/hybrid-product-deployment-20260914.json` for exact evidence and
+open checks. The 24-hour observation is deferred. The staging and recovery details
+below identify the pinned artifacts and procedure used.
 
 ## Exact candidate and staging
 
-- Installed baseline: `3590a3ee4621e01b23043ac415de499d79f7c9e3`.
-- Tested candidate: `eb023b1c21a32c0371c829062d5ae3d53fbe2643`.
+- Previous installed baseline: `3590a3ee4621e01b23043ac415de499d79f7c9e3`.
+- Installed tested candidate: `eb023b1c21a32c0371c829062d5ae3d53fbe2643`.
 - Verified release delta: 98 paths, 30 application paths, including Mask Base,
   Settings, Observatory, System/media contexts, storage policy/forecast, upload
   publication locking, account identity, storage summaries/daily exports,
@@ -24,9 +25,11 @@ The Raspberry has `~/hybrid-product-eb023b1c-release.bundle`,
 `~/hybrid-product-eb023b1c-deploy.py`. Checksums match the local artifacts;
 bundle prerequisites, candidate ref and complete path list were verified.
 The helper preserves the previous deployment logic with a new pinned revision
-and versioned filenames. It has not been executed for this candidate.
+and versioned filenames. It was executed successfully for this candidate; the fresh backup passed integrity
+checks and the private state records the installed revision.
 
-This is artifact staging, not a completed pre-deploy backup. The earlier
+The original staging did not include a new backup; installation subsequently
+created and verified one. The earlier
 `fc926129` preparation produced a valid protected backup, retained with its own
 helper and state. The new helper must acquire a fresh consistent SQLite/code/
 configuration backup before stopping services; its state will be recorded in

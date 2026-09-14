@@ -1,0 +1,87 @@
+{
+  "date": "2026-09-14",
+  "status": "installed-partial-live-acceptance",
+  "previous": "3590a3ee4621e01b23043ac415de499d79f7c9e3",
+  "installed": "eb023b1c21a32c0371c829062d5ae3d53fbe2643",
+  "authorization": "User returned home and authorized maintenance for as long as necessary; 24-hour observation remains deferred",
+  "backup": {
+    "fresh_online_sqlite": true,
+    "integrity": "ok",
+    "private_permissions_verified": true,
+    "code_and_flask_config_preserved": true,
+    "rollback": "Versioned deploy helper and private release state identify code-only rollback to 3590a3ee"
+  },
+  "deployment": {
+    "fast_forward": true,
+    "compile_passed": true,
+    "configuration_bytes_unchanged": true,
+    "tracked_clean": true,
+    "untracked_preserved": true,
+    "capture_web_socket_timer_active": true,
+    "classic_disabled": true,
+    "classic_files_present": true
+  },
+  "post_restart_files": [
+    {
+      "camera_id": 1,
+      "timestamp": "2026-09-14 19:07:31",
+      "bytes": 762121,
+      "age_seconds_at_check": 12.8,
+      "created_after_capture_restart": true
+    },
+    {
+      "camera_id": 2,
+      "timestamp": "2026-09-14 19:07:34",
+      "bytes": 551974,
+      "age_seconds_at_check": 9.7,
+      "created_after_capture_restart": true
+    }
+  ],
+  "native_browser": {
+    "origin": "https://allsky-pi.local",
+    "access": "Page loaded normally; no security interstitial bypass",
+    "now": "Running and new frames from both cameras displayed after reload",
+    "navigation": "Drawer opens and Storage link reaches live inventory",
+    "storage": "Disk usage, current camera inventory and daily table displayed with real data",
+    "csv": "Browser download event resolved; exported file contents not yet inspected",
+    "copy": "Control clicked; browser clipboard read returned empty, so receipt remains unverified",
+    "storage_save": "Saved message shown; SQL readback confirms only STORAGE_PRESSURE changed",
+    "storage_policy": {
+      "ENABLE": true,
+      "MIN_FREE_GIB": 5.0,
+      "TARGET_FREE_GIB": 8.0,
+      "KEEP_DAYS": 3
+    },
+    "forecast_snapshot": {
+      "until_threshold": "5 days, 19 hours",
+      "retained_capacity": "6 days, 16 hours",
+      "observed_gib_per_day": 9.6,
+      "measurement_duration": "21 hours"
+    }
+  },
+  "continued_capture": [
+    {
+      "camera_id": 1,
+      "latest": "2026-09-14 19:22:48",
+      "frames": 12,
+      "median_interval_seconds": 15.0,
+      "min_interval_seconds": 15.0,
+      "max_interval_seconds": 15.0
+    },
+    {
+      "camera_id": 2,
+      "latest": "2026-09-14 19:22:52",
+      "frames": 12,
+      "median_interval_seconds": 15.0,
+      "min_interval_seconds": 15.0,
+      "max_interval_seconds": 16.0
+    }
+  ],
+  "regression_reference": "testing/evidence/hybrid-sync-upload-cleanup.json",
+  "open": [
+    "Complete all-control native acceptance including downloads/clipboard",
+    "Exercise remaining scoped hardware and integration effects",
+    "Remove Classic physically only after acceptance gates; repeat essential checks",
+    "24-hour observation excluded and deferred"
+  ]
+}
