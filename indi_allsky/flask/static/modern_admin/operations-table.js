@@ -13,6 +13,37 @@
     const filters = config.filters.map(filter => ({
         ...filter, element: document.getElementById(filter.id),
     }));
+    let copyPanel;
+    async function copyRecords(_event, api) {
+        const data = api.buttons.exportData({columns: exportColumns, escapeExcelFormula: true});
+        const text = [data.header, ...data.body].map(row => row.join('\t')).join('\n');
+        if (!copyPanel) {
+            const panel = document.createElement('div');
+            const status = document.createElement('p');
+            status.setAttribute('role', 'status');
+            const fallback = document.createElement('textarea');
+            fallback.setAttribute('aria-label', 'Table data to copy');
+            fallback.readOnly = true;
+            fallback.rows = 6;
+            fallback.style.width = '100%';
+            panel.appendChild(status);
+            panel.appendChild(fallback);
+            document.getElementById(config.count).after(panel);
+            copyPanel = {status, fallback};
+        }
+        copyPanel.fallback.hidden = true;
+        copyPanel.status.textContent = 'Copying filtered records…';
+        try {
+            await navigator.clipboard.writeText(text);
+            copyPanel.status.textContent = `Copied ${data.body.length} ${data.body.length === 1 ? 'record' : 'records'}.`;
+        } catch (_) {
+            copyPanel.fallback.value = text;
+            copyPanel.fallback.hidden = false;
+            copyPanel.status.textContent = 'Automatic copy is unavailable. Press Ctrl+C or Command+C to copy the selected records.';
+            copyPanel.fallback.focus();
+            copyPanel.fallback.select();
+        }
+    }
     const table = new DataTable(element, {
         paging: config.paging !== false,
         lengthChange: config.paging !== false,
@@ -21,7 +52,7 @@
         order: config.order || [[1, 'desc']],
         layout: {topStart: config.paging === false ? null : 'pageLength', topEnd: 'buttons'},
         buttons: [
-            {extend: 'copyHtml5', exportOptions: {columns: exportColumns, escapeExcelFormula: true}},
+            {text: 'Copy', action: copyRecords},
             ...['csv', 'xlsx'].map(format => ({
                 text: format === 'csv' ? 'CSV' : 'Excel',
                 action: function (_event, table) {

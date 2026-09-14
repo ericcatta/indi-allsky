@@ -123,5 +123,5 @@ var camera_id = {{ camera_id }};
 
 </main>
 <script type="application/json" id="hybrid-operations-table-config">{"csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}, "table": "modern-notifications-table", "rowAttribute": "data-search", "count": "modern-notifications-filter-count", "countSuffix": " shown", "emptyMessage": "No notifications are available.", "filters": [{"id": "modern-notifications-search", "attribute": "search", "contains": true}, {"id": "modern-notifications-category-filter", "attribute": "category"}, {"id": "modern-notifications-item-filter", "attribute": "item"}, {"id": "modern-notifications-ack-filter", "attribute": "ack"}]}</script>
-<script src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}" defer></script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js', v='clipboard-2') }}" defer></script>
 {% endblock %}

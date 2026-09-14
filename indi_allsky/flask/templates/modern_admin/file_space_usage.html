@@ -75,6 +75,6 @@ var camera_id = {{ camera_id }};
 </main>
 {% if days_fileSize_dict is not none %}
 <script id="hybrid-operations-table-config" type="application/json">{"table": "file-space-table", "rowAttribute": "data-search", "count": "file-space-count", "countSuffix": " shown", "emptyMessage": "No records are available in this view.", "order": [[0, "desc"]], "columnDefs": [], "exportColumns": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], "filters": [{"id": "file-space-table-search", "text": true, "contains": true}], "csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}}</script>
-<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}"></script>
+<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js', v='clipboard-2') }}"></script>
 {% endif %}
 {% endblock %}

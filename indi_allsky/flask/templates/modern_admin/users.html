@@ -98,5 +98,5 @@ var camera_id = {{ camera_id }};
 
 </main>
 <script type="application/json" id="hybrid-operations-table-config">{"csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}, "table": "modern-users-table", "rowAttribute": "data-search", "count": "modern-users-filter-count", "countSuffix": " shown", "emptyMessage": "No user accounts are available.", "filters": [{"id": "modern-users-search", "attribute": "search", "contains": true}, {"id": "modern-users-active-filter", "attribute": "active", "contains": false}, {"id": "modern-users-staff-filter", "attribute": "staff", "contains": false}, {"id": "modern-users-admin-filter", "attribute": "admin", "contains": false}]}</script>
-<script src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js') }}" defer></script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js', v='clipboard-2') }}" defer></script>
 {% endblock %}

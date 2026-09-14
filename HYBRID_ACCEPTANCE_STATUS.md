@@ -1,5 +1,17 @@
 # Hybrid acceptance status
 
+## Operations Copy feedback — 2026-09-14
+
+The operations-table Copy action now uses the Clipboard API and reports success
+or offers selected read-only text when clipboard access is unavailable. It
+preserves filtered rows, configured export columns and formula escaping.
+Native isolated acceptance copied 102 failed tasks from profile 2, excluding
+profile 1. Controller tests cover denied-clipboard fallback. All 158 Python
+and 34 JavaScript regression entries passed; source hashes remained unchanged.
+Evidence: `testing/evidence/hybrid-operations-copy-fix-20260914.json`.
+This fix has not yet been deployed. Public-navigation policy and final Classic
+retirement remain open.
+
 ## Warm reboot and automatic startup — 2026-09-14
 
 Production `0e6f445c` rebooted at 21:34:41 CEST. INDI and the web service

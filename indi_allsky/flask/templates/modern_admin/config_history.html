@@ -121,5 +121,5 @@ var camera_id = {{ camera_id }};
 </main>
 
 <script id="hybrid-operations-table-config" type="application/json">{"paging": false, "table": "modern-config-history-table", "rowAttribute": "data-search", "count": "modern-config-history-filter-count", "countSuffix": " shown", "emptyMessage": "No records are available in this view.", "order": [[0, "desc"]], "columnDefs": [], "exportColumns": [0, 1, 2, 3, 4, 5, 6, 7, 8], "filters": [{"id": "modern-config-history-search", "attribute": "search", "contains": true}, {"id": "modern-config-history-level", "attribute": "level"}, {"id": "modern-config-history-encrypted", "attribute": "encrypted"}], "csrfToken": {{ csrf_token()|tojson }}, "exportUrl": {{ url_for('indi_allsky.modern_admin_table_export_view')|tojson }}}</script>
-<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js', v='history-pages-1') }}"></script>
+<script defer src="{{ url_for('indi_allsky.static', filename='modern_admin/operations-table.js', v='clipboard-2') }}"></script>
 {% endblock %}
