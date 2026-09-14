@@ -13,7 +13,7 @@
   },
   "checks": [
     "Bundle verified locally and against production prerequisites",
-    "Candidate ref and all 92 release paths verified in isolated checkout",
+    "Candidate ref and all 98 release paths verified in isolated checkout",
     "Local and remote artifact checksums match",
     "Helper differs only in pinned revision and versioned artifact/backup names",
     "Helper compiles; not executed",
