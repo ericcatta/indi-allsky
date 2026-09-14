@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-14",
+  "baseline": "8c6124da",
+  "runtime_candidate": "fc926129",
+  "status": "passed",
+  "entrypoint": "testing/hybrid_classic_absence_test.py",
+  "environment": "Disposable source copy on Raspberry using synthetic Flask fixtures; not production",
+  "physical_absence": {
+    "modules_removed": 1,
+    "templates_removed": 45,
+    "assets_removed": 68,
+    "module": "indi_allsky/flask/classic_views.py",
+    "retained_templates": [
+      "login.html",
+      "modern_admin/",
+      "shared/"
+    ],
+    "retained_assets": "testing/hybrid_asset_guard.py SHARED_FILES plus modern_admin/ and virtualsky/",
+    "classification_limit": "Removed assets/templates include anything outside the current allowlist; this is not a declaration that every removed file is globally unused"
+  },
+  "passed_flows": [
+    "hybrid_authenticated_flow_test.py",
+    "hybrid_settings_flow_test.py",
+    "hybrid_operations_flow_test.py",
+    "hybrid_gallery_isolation_flow_test.py",
+    "hybrid_generated_media_flow_test.py",
+    "hybrid_public_media_flow_test.py",
+    "hybrid_camera_management_flow_test.py",
+    "hybrid_fits_processing_flow_test.py",
+    "hybrid_geometry_flow_test.py",
+    "hybrid_queued_maintenance_flow_test.py",
+    "hybrid_system_units_flow_test.py",
+    "hybrid_astropanel_flow_test.py"
+  ],
+  "checks": [
+    "Every indi_allsky module loaded from the disposable copy, not an installed/original checkout",
+    "Classic module absent from filesystem and imported modules",
+    "Shared authentication retained",
+    "Existing template and asset ownership guards active",
+    "Temporary source copy cleaned up after success",
+    "Original checkout retains Classic"
+  ],
+  "regression": {
+    "previous_full": "testing/evidence/hybrid-astropanel-independence.json",
+    "previous_python": 153,
+    "previous_javascript": 34,
+    "previous_826_source_hashes_unchanged": true,
+    "new_entrypoint_passed": true,
+    "note": "No new application changes; reran twelve flows with actual file absence. This does not claim a new full 154-case suite run."
+  },
+  "limits": [
+    "Native browser, downloads and external hardware effects not exercised",
+    "The temporary feature flag remains false in this rehearsal; removing the flag is a later change",
+    "Not an exhaustive all-controls acceptance test",
+    "Classic remains in main and in the prepared production release",
+    "No deployment, production restart or 24-hour observation"
+  ]
+}

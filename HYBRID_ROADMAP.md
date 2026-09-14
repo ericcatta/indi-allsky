@@ -3,6 +3,24 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Prova di assenza fisica Classic — 14 settembre 2026
+
+Nuovo entrypoint `testing/hybrid_classic_absence_test.py`: crea una copia
+provvisoria del sorgente, elimina il modulo `classic_views.py`, 45 template e
+68 asset esterni all'allowlist Hybrid/condivisa, quindi esegue dodici flussi
+Flask con fixture sintetiche. Tutti passano: autenticazione, Settings
+save/download/restore, task/notifiche, gallery, media generati/pubblici, camere,
+FITS, geometria, manutenzione accodata, servizi simulati e Astropanel.
+Ogni modulo applicativo deve provenire dalla copia; non puo' usare il checkout
+originale come fallback. La copia temporanea viene eliminata al termine.
+
+Questa prova rafforza l'indipendenza tecnica, ma non certifica tutti i controlli
+browser o gli effetti hardware. I file rimossi dall'allowlist non sono per questo
+classificati come globalmente inutili. Nessuna cancellazione nel repository
+principale, nessun deploy: il flag transitorio e Classic restano presenti.
+I 826 sorgenti gia' coperti dalla regressione sono immutati; aggiunto solo il
+nuovo test. Evidenze in `testing/evidence/hybrid-classic-physical-absence.json`.
+
 ## Navigazione Classic: documentazione riallineata — 14 settembre 2026
 
 Sostituita la proposta obsoleta in
