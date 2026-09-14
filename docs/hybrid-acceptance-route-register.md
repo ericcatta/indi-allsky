@@ -1,13 +1,15 @@
 # Registro delle evidenze per route Hybrid
 
-Baseline del codice: `4122b122`. Questo registro collega prove storiche con pagina e controllo espliciti alle route letterali di `register_hybrid_routes`. Non certifica il prodotto attuale e non sostituisce il censimento completo del DOM.
+Route rilevate dalla `url_map` Flask del candidato `0e6f445c`, avviato in ambiente isolato con Classic disabilitato: **107 ingressi Hybrid e 151 route con altri percorsi (autenticazione, API, asset e compatibilita')**. Il JSON include anche queste ultime. La registrazione di una route non prova il suo funzionamento.
 
-Gli esiti dei singoli controlli, con il riferimento preciso al record originale, sono conservati in [hybrid-acceptance-route-register.json](hybrid-acceptance-route-register.json). Le evidenze con schemi diversi restano da associare; nessuna assenza di corrispondenza equivale a una funzione mancante.
+Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisione, ambiente, ruolo, camera/profilo e limiti quando verificati. I record storici restano storici. Il numero di record non e' una percentuale di copertura e non certifica tutti i controlli della pagina.
 
-| Route nel codice attuale | Record storici associati | Fonti |
+[Registro completo con riferimenti ai singoli controlli](hybrid-acceptance-route-register.json).
+
+| Route Hybrid attuale | Record associati | Fonti |
 | --- | ---: | --- |
 | `/modern-admin` | 0 | Da associare o collaudare |
-| `/modern-admin/account` | 7 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-native-users-2026-09-08](../testing/evidence/hybrid-native-users-2026-09-08.json) |
+| `/modern-admin/account` | 17 | [hybrid-account-native-20260914](../testing/evidence/hybrid-account-native-20260914.json), [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-native-users-2026-09-08](../testing/evidence/hybrid-native-users-2026-09-08.json) |
 | `/modern-admin/cameras` | 0 | Da associare o collaudare |
 | `/modern-admin/cameras/add` | 0 | Da associare o collaudare |
 | `/modern-admin/cameras/adu-history` | 0 | Da associare o collaudare |
@@ -25,13 +27,13 @@ Gli esiti dei singoli controlli, con il riferimento preciso al record originale,
 | `/modern-admin/config-restore/<int:config_id>` | 2 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json) |
 | `/modern-admin/config-restore/<int:config_id>/apply` | 0 | Da associare o collaudare |
 | `/modern-admin/fits` | 2 | [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
-| `/modern-admin/fits/<int:fits_id>` | 2 | [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
+| `/modern-admin/fits/<int:fits_id>` | 4 | [hybrid-fits-dimensions-live-20260914](../testing/evidence/hybrid-fits-dimensions-live-20260914.json), [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/highlights` | 0 | Da associare o collaudare |
-| `/modern-admin/library` | 3 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json) |
+| `/modern-admin/library` | 31 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-library-live-20260914](../testing/evidence/hybrid-library-live-20260914.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json) |
 | `/modern-admin/loop` | 0 | Da associare o collaudare |
 | `/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download` | 0 | Da associare o collaudare |
 | `/modern-admin/media/archive` | 15 | [hybrid-archive-2026-09-06](../testing/evidence/hybrid-archive-2026-09-06.json) |
-| `/modern-admin/media/fits` | 4 | [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
+| `/modern-admin/media/fits` | 6 | [hybrid-fits-dimensions-live-20260914](../testing/evidence/hybrid-fits-dimensions-live-20260914.json), [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/media/gallery` | 0 | Da associare o collaudare |
 | `/modern-admin/media/gallery/page` | 0 | Da associare o collaudare |
 | `/modern-admin/media/images` | 0 | Da associare o collaudare |
@@ -49,34 +51,40 @@ Gli esiti dei singoli controlli, con il riferimento preciso al record originale,
 | `/modern-admin/media/timelapses/<int:video_id>` | 0 | Da associare o collaudare |
 | `/modern-admin/mode/<mode>` | 0 | Da associare o collaudare |
 | `/modern-admin/moment` | 0 | Da associare o collaudare |
-| `/modern-admin/notifications` | 4 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json) |
-| `/modern-admin/notifications/<int:notification_id>` | 3 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json) |
+| `/modern-admin/notifications` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
+| `/modern-admin/notifications/<int:notification_id>` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/notifications/<int:notification_id>/acknowledge` | 0 | Da associare o collaudare |
 | `/modern-admin/now` | 2 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json) |
 | `/modern-admin/observatory` | 0 | Da associare o collaudare |
 | `/modern-admin/observatory/astropanel` | 0 | Da associare o collaudare |
 | `/modern-admin/observatory/charts` | 0 | Da associare o collaudare |
-| `/modern-admin/observatory/long-term-keogram` | 0 | Da associare o collaudare |
-| `/modern-admin/observatory/realtime-keogram` | 0 | Da associare o collaudare |
+| `/modern-admin/observatory/long-term-keogram` | 3 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
+| `/modern-admin/observatory/realtime-keogram` | 1 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
 | `/modern-admin/observatory/sensor-panel` | 0 | Da associare o collaudare |
-| `/modern-admin/observatory/sqm` | 0 | Da associare o collaudare |
-| `/modern-admin/observatory/virtualsky` | 0 | Da associare o collaudare |
+| `/modern-admin/observatory/sqm` | 1 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
+| `/modern-admin/observatory/virtualsky` | 2 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
 | `/modern-admin/operations/export` | 0 | Da associare o collaudare |
-| `/modern-admin/output` | 0 | Da associare o collaudare |
+| `/modern-admin/output` | 1 | [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json) |
 | `/modern-admin/safe-action/dry-run` | 0 | Da associare o collaudare |
 | `/modern-admin/settings` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/acquisition-save` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/advanced` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/analytics` | 0 | Da associare o collaudare |
+| `/modern-admin/settings/auto-exposure-gain` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/basic` | 0 | Da associare o collaudare |
+| `/modern-admin/settings/camera-connection` | 0 | Da associare o collaudare |
+| `/modern-admin/settings/camera-profile` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/cameras` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/capture` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/developer` | 0 | Da associare o collaudare |
+| `/modern-admin/settings/exposure-gain` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/fits-source` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/full` | 4 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json) |
+| `/modern-admin/settings/hybrid-awb` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/notifications` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/ready` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/storage` | 0 | Da associare o collaudare |
+| `/modern-admin/settings/storage-protection` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/timelapse` | 0 | Da associare o collaudare |
 | `/modern-admin/sky-cycle` | 0 | Da associare o collaudare |
 | `/modern-admin/storage` | 0 | Da associare o collaudare |
@@ -90,14 +98,14 @@ Gli esiti dei singoli controlli, con il riferimento preciso al record originale,
 | `/modern-admin/system/log/<log_name>` | 0 | Da associare o collaudare |
 | `/modern-admin/system/network` | 0 | Da associare o collaudare |
 | `/modern-admin/system/support` | 0 | Da associare o collaudare |
-| `/modern-admin/tasks` | 11 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json) |
+| `/modern-admin/tasks` | 15 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/tasks/<int:task_id>` | 1 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json) |
 | `/modern-admin/tools/camera-simulator` | 7 | [hybrid-simulator-2026-09-06](../testing/evidence/hybrid-simulator-2026-09-06.json) |
 | `/modern-admin/tools/focus` | 0 | Da associare o collaudare |
 | `/modern-admin/tools/focus/preview` | 0 | Da associare o collaudare |
 | `/modern-admin/tools/generate` | 22 | [hybrid-end-of-night-pipeline-2026-09-08](../testing/evidence/hybrid-end-of-night-pipeline-2026-09-08.json), [hybrid-generation-2026-09-06](../testing/evidence/hybrid-generation-2026-09-06.json), [hybrid-keogram-encoding-2026-09-08](../testing/evidence/hybrid-keogram-encoding-2026-09-08.json), [hybrid-real-encoding-2026-09-08](../testing/evidence/hybrid-real-encoding-2026-09-08.json), [hybrid-startrail-empty-2026-09-08](../testing/evidence/hybrid-startrail-empty-2026-09-08.json) |
 | `/modern-admin/tools/image-circle-helper` | 13 | [hybrid-geometry-2026-09-06](../testing/evidence/hybrid-geometry-2026-09-06.json) |
-| `/modern-admin/tools/mini-generate` | 11 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json), [hybrid-real-encoding-2026-09-08](../testing/evidence/hybrid-real-encoding-2026-09-08.json) |
+| `/modern-admin/tools/mini-generate` | 14 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-real-encoding-2026-09-08](../testing/evidence/hybrid-real-encoding-2026-09-08.json) |
 | `/modern-admin/tools/mini-preview` | 0 | Da associare o collaudare |
 | `/modern-admin/tools/process-fits` | 10 | [hybrid-fits-processing-2026-09-06](../testing/evidence/hybrid-fits-processing-2026-09-06.json) |
 | `/modern-admin/updates` | 0 | Da associare o collaudare |
@@ -110,8 +118,7 @@ Gli esiti dei singoli controlli, con il riferimento preciso al record originale,
 
 ## Passaggi ancora necessari
 
-- Rigenerare il censimento sul codice corrente nella prossima finestra: gli inventari locali disponibili riportano 90–91 pagine di revisioni precedenti.
-- Includere le route registrate negli altri moduli, i contratti pubblici e i controlli creati dinamicamente.
-- Per ogni controllo, collegare ruolo, camera/profilo, prerequisiti, richiesta ed effetto osservato; ricontrollare le prove invalidate da modifiche successive.
-- Mantenere separati esito storico, prova automatica, browser sintetico e produzione. I casi bloccati restano aperti.
-- Completare il collaudo con Classic disabilitato prima della rimozione fisica. Il test di 24 ore resta rinviato.
+- Completare le associazioni delle evidenze con schemi annidati e dei contratti pubblici; la presenza nel registro non sostituisce una prova funzionale.
+- Censire i controlli generati nel DOM, modalita' mobili, ruoli, prerequisiti, richieste ed effetti osservabili ancora mancanti.
+- Ricontrollare le prove invalidate da modifiche successive; mantenere separati test automatici, browser isolato e produzione.
+- I controlli bloccati restano aperti. Completare il collaudo senza Classic prima della rimozione fisica; le 24 ore restano rinviate.

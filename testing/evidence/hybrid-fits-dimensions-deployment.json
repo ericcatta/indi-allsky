@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-14",
+  "previous": "29c75ffb016a6d9841ed00b274993ebab1c5bc63",
+  "installed": "0e6f445ca0312acb14100cf36ddc992d8635df47",
+  "status": "installed-verified-fits-and-mini-media",
+  "classic_disabled": true,
+  "backup": {
+    "method": "Fresh online SQLite backup plus code archive and protected Flask configuration copy",
+    "integrity_check": "ok",
+    "private_state": "~/hybrid-fits-dimensions-release-state.json"
+  },
+  "deployment": {
+    "video_queue_empty_before_restart": true,
+    "capture_and_web_restarted": true,
+    "configuration_revision_before_and_after": 117,
+    "flask_configuration_bytes_preserved": true,
+    "untracked_files_preserved": true,
+    "tracked_checkout_clean": true,
+    "tested_source_hashes_matched_on_production": 831
+  },
+  "new_fits_files": [
+    {
+      "camera_id": 1,
+      "id": 516,
+      "captured_local": "2026-09-14 20:53:24",
+      "database_width_height": [4608, 2592],
+      "header_naxis1_naxis2": [4608, 2592],
+      "bytes": 35835840,
+      "native_browser": "Reloaded source viewer shows the new capture and 4608 x 2592 dimensions"
+    },
+    {
+      "camera_id": 2,
+      "id": 517,
+      "captured_local": "2026-09-14 20:53:35",
+      "database_width_height": [3840, 2160],
+      "header_naxis1_naxis2": [3840, 2160],
+      "bytes": 16594560
+    }
+  ],
+  "release_artifact_sha256": {
+    "bundle": "a19aee81ce26884ccd0ada41e4a9509c3a013b3a49ed214d29760772f7c70f02",
+    "allowed_paths": "cc4a1580f68a7547b561adc4ef253468daaf48c831c3f030521eeb4870779cb2",
+    "helper": "fbd29485ef31f8adb846cef99a8c1625f76cf11d070400a0e05ec4e9e32895ca"
+  },
+  "regression_reference": "hybrid-fits-dimensions-regression.json",
+  "limits": [
+    "This verifies the new FITS dimensions and bounded post-deploy media flow; it does not prove every control or scientific processing option",
+    "No reboot/cold-start acceptance in this deployment",
+    "Classic is physically present; complete acceptance/removal remain open; 24-hour observation deferred"
+  ]
+}

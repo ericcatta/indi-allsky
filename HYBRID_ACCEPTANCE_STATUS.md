@@ -1,5 +1,19 @@
 # Hybrid acceptance status
 
+## FITS deployment and completed mini generation — 2026-09-14
+
+Production `0e6f445c` includes the FITS spatial-dimension correction. Fresh
+camera 1/2 FITS headers match persisted dimensions; configuration remains 117.
+Mini tasks 11744/11753 completed with valid eight-frame/eight-second files.
+Both played to completion in the native browser after deployment. Evidence:
+`testing/evidence/hybrid-fits-dimensions-deployment.json` and
+`testing/evidence/hybrid-mini-generation-live-20260914.json`.
+
+The route register now reflects the actual isolated Flask url_map without
+Classic and links 60 additional recent control records. It is still not a
+complete DOM/control acceptance matrix. Classic physical removal, remaining
+live checks and full acceptance remain open; the 24-hour test remains deferred.
+
 ## Settings restore live — 2026-09-14
 
 The administrator restored active snapshot 114 as revision 115 through the

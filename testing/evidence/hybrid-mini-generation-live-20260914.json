@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-14",
+  "submission_release": "29c75ffb",
+  "playback_release": "0e6f445c",
+  "classic_disabled": true,
+  "role": "authenticated administrator",
+  "request_parameters": {"pre_seconds": 240, "post_seconds": 120, "framerate": 1.0},
+  "controls": [
+    {
+      "page": "/modern-admin/tools/mini-generate",
+      "control": "Preview FPS / Refresh / Play / Pause / Fullscreen / Exit fullscreen",
+      "result": "superato",
+      "evidence": "Camera 1 source image 50778: 8 saved frames; setting 1 FPS and refreshing changes preview duration from approximately 0.8 to 8 seconds. Play changes to Pause and advances from frame 1 to frame 8; pause and fullscreen/exit controls respond."
+    },
+    {
+      "page": "/modern-admin/tools/mini-generate",
+      "control": "Image ID / Load image / camera selection",
+      "result": "superato",
+      "evidence": "Camera 2/profile asi678mc selects source 50777 and loads its 8-frame interval independently of camera 1/profile imx708-wide."
+    },
+    {
+      "page": "/modern-admin/tools/mini-generate",
+      "control": "Note / confirmation checkbox / Queue",
+      "result": "superato",
+      "evidence": "One confirmed submission per camera, with dedicated acceptance note. UI returns inspect-task links for 11744 and 11753; database states progress through QUEUED to SUCCESS. No duplicate submission or restart while queued."
+    },
+    {
+      "page": "/modern-admin/library",
+      "control": "Mini timelapses type / Apply filters / native Play and Pause",
+      "result": "superato",
+      "evidence": "Two results show correct camera, acceptance note, 8 frames and Successful. Both native players decode at the camera dimensions and reach ended=true/currentTime=8 without errors. Replayed and paused at 7.636 seconds for ASI and 7.701 seconds for IMX708."
+    },
+    {
+      "page": "/modern-admin/output",
+      "control": "Output details / Back to results",
+      "result": "superato",
+      "evidence": "ASI output detail shows camera 2/ID 2, 8 frames, 1 FPS and 15767380 bytes. Loaded preview supplies 3840 x 2160 dimensions; Back preserves the mini-video archive query."
+    }
+  ],
+  "outputs": [
+    {
+      "camera_id": 1, "source_image_id": 50778, "task_id": 11744,
+      "task_state": "SUCCESS", "mini_video_id": 1, "bytes": 24260453,
+      "ffprobe_exit": 0, "codec": "h264", "width": 4608, "height": 2592,
+      "frames": 8, "duration_seconds": 8
+    },
+    {
+      "camera_id": 2, "source_image_id": 50777, "task_id": 11753,
+      "task_state": "SUCCESS", "mini_video_id": 2, "bytes": 15767380,
+      "ffprobe_exit": 0, "codec": "h264", "width": 3840, "height": 2160,
+      "frames": 8, "duration_seconds": 8
+    }
+  ],
+  "queue_wait": "Normal daily keogram/timelapse/panorama work ran ahead of the requests. Worker/process progress was verified; both requests completed without intervention.",
+  "limits": [
+    "No assertion that task list camera query filters the global queue",
+    "Original download receipt, all preview variants, failure injection and non-admin sessions remain separate checks",
+    "No destructive cleanup or external upload; generated acceptance media retained",
+    "Whole-product acceptance and Classic physical removal remain open; 24-hour observation deferred"
+  ]
+}

@@ -1,8 +1,30 @@
 # Hybrid: deployment and rollback
 
-## Astropanel camera navigation installed, 14 September 2026
+## FITS writer correction installed, 14 September 2026
 
-Production now runs `29c75ffb016a6d9841ed00b274993ebab1c5bc63`, fast-forwarded
+Production runs `0e6f445ca0312acb14100cf36ddc992d8635df47`. The existing video
+queue completed before the guarded capture/web restart. A fresh online SQLite
+backup passed integrity checks; configuration revision 117, Flask configuration
+bytes and untracked files were preserved. All 831 tested source hashes match
+production. Full regression: 158 Python and 34 JavaScript checks passed.
+
+New FITS 516 (IMX708) and 517 (ASI) have matching database/header dimensions of
+4608x2592 and 3840x2160. The source viewer shows the new IMX708 capture correctly.
+Both mini videos from tasks 11744/11753 completed, passed ffprobe and played to
+the end in the native browser after deployment. Evidence and bounded limits:
+`testing/evidence/hybrid-fits-dimensions-deployment.json` and
+`testing/evidence/hybrid-mini-generation-live-20260914.json`.
+
+Current code rollback uses `~/hybrid-fits-dimensions-deploy.py --rollback` with
+the exact backup in `~/hybrid-fits-dimensions-release-state.json` and a fresh
+technical `--maintenance-until` deadline. It restores `29c75ffb` and restarts
+capture/web; it does not restore the database or undo the corrected historical
+FITS metadata. Use this pinned helper for the current release, not older helpers.
+Classic remains disabled but present; complete acceptance/removal remain open.
+
+## Previous Astropanel deployment, 14 September 2026
+
+At this earlier step, production ran `29c75ffb016a6d9841ed00b274993ebab1c5bc63`, fast-forwarded
 from `eb023b1c`. Fresh online SQLite backup integrity and private permissions
 passed. Only the web service/socket restarted; capture PID/state/restart count,
 Flask configuration and user files were preserved. Both cameras produced fresh
@@ -23,7 +45,7 @@ Classic remains disabled and physically present; full acceptance remains open.
 
 ## Previous installed release, 14 September 2026
 
-Production now runs `eb023b1c21a32c0371c829062d5ae3d53fbe2643`, installed from
+At this earlier step, production ran `eb023b1c21a32c0371c829062d5ae3d53fbe2643`, installed from
 `3590a3ee` after the user authorized maintenance for as long as necessary.
 A fresh online SQLite backup passed integrity checks, with protected code and
 Flask configuration copies. The versioned helper supports code-only rollback;
@@ -86,13 +108,13 @@ every column against the backup confirms only width and height changed.
 Original media files were not changed; both JPEG preview endpoints decode at
 the correct camera dimensions.
 
-This is a completed metadata repair, separate from deploying the capture writer
-fix. Do not restore the entire database to undo metadata while capture is active:
+This metadata repair preceded the capture writer deployment recorded above.
+Do not restore the entire database to undo metadata while capture is active:
 that would discard subsequent acquisition records. If an unexpected issue
 requires reversing this repair, use its saved per-record dimensions with exact
 ID/camera/current-dimension checks in one transaction. No reversal is needed for
-an ordinary code rollback. The writer fix still needs deployment and a newly
-captured FITS verification; existing previews do not prove that step.
+an ordinary code rollback. Newly captured FITS 516/517 verify the deployed writer;
+the earlier previews alone did not prove that step.
 
 ## Automatic startup and storage recovery, 13 September 2026
 
@@ -156,6 +178,9 @@ backup/deploy.py rather than bypassing revision guards:
 
 | Installed candidate | Rollback target | State file under `~/` |
 | --- | --- | --- |
+| `0e6f445c` | `29c75ffb` | `hybrid-fits-dimensions-release-state.json` |
+| `29c75ffb` | `eb023b1c` | `hybrid-astropanel-camera-release-state.json` |
+| `eb023b1c` | `3590a3ee` | `hybrid-product-eb023b1c-release-state.json` |
 | `3590a3ee` | `2b7dea37` | `hybrid-focus-controls-release-state.json` |
 | `2b7dea37` | `f9aeaf88` | `hybrid-history-pages-release-state.json` |
 | `f9aeaf88` | `ba6cbd3b` | `hybrid-config-download-release-state.json` |

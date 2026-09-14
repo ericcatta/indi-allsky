@@ -3,6 +3,25 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Deploy FITS e generazioni mini verificate — 14 settembre 2026
+
+Distribuito `0e6f445c` dopo la conclusione della coda video, con backup integro,
+riavvio capture/web e configurazione 117 preservata. Tutti gli 831 hash sorgente
+corrispondono al candidato testato. Nuovi FITS 516/517 da entrambe le camere:
+dimensioni DB/header coincidenti, rispettivamente 4608x2592 e 3840x2160.
+
+I task mini 11744/11753 sono SUCCESS: file H.264 da otto frame a 1 FPS,
+otto secondi, 24.3/15.8 MB. Entrambi riprodotti fino alla fine nel browser dopo
+il deploy; pausa, dettaglio ASI e ritorno ai risultati verificati. L'attesa era
+dovuta alle generazioni giornaliere, concluse senza riavvii o reinvii dei task.
+Evidenze: `testing/evidence/hybrid-fits-dimensions-deployment.json` e
+`testing/evidence/hybrid-mini-generation-live-20260914.json`.
+
+Aggiornato il registro dalla url_map Flask senza Classic: 107 route modern-admin
+e 151 altri percorsi registrati, con 60 associazioni esplicite aggiunte alle
+prove recenti. Sono conteggi di route/record, non percentuali di collaudo;
+varianti DOM, ruoli ed effetti ancora mancanti restano aperti nel registro.
+
 ## Dimensioni FITS RGB corrette — 14 settembre 2026
 
 Il collaudo nativo ha trovato metadati FITS IMX708 `2592 x 3`, mentre gli header
@@ -19,8 +38,7 @@ con confronto degli header e aggiornamento atomico dei soli campi width/height.
 Tutte le altre colonne sono invariate; i file non sono stati modificati. Il
 browser mostra ora le dimensioni corrette. Preview JPEG di entrambe le camere,
 avanzamento del lightbox e chiusura Escape con ripristino focus verificati.
-La correzione del writer richiede ancora deploy e verifica di nuove acquisizioni;
-capture resta attivo mentre terminano le generazioni gia' in coda.
+Il successivo deploy e le nuove acquisizioni sono verificati nella voce sopra.
 Evidenze: `testing/evidence/hybrid-fits-dimensions-live-20260914.json`.
 
 ## Task e acknowledge notifiche verificati dal vivo — 14 settembre 2026
@@ -32,8 +50,8 @@ conservato e notifica adiacente invariata. Reload e ritorno alla lista mostrano
 lo stato persistito; filtri Worker/ImageWorker/Acked coerenti prima e dopo.
 
 Le due generazioni mini timelapse 11744/11753 sono state inviate una sola volta,
-con otto frame per camera e 1 FPS. All'ultima osservazione sono ancora in coda
-dietro le generazioni giornaliere: esito e file restano da verificare. Nessun
+con otto frame per camera e 1 FPS. Erano in coda dietro le generazioni giornaliere;
+il successivo completamento e i file sono verificati nella voce sopra. Nessun
 riavvio o alterazione della coda per anticiparle. Nessuna modifica runtime;
 regressione precedente applicabile. Evidenze dei controlli completati:
 `testing/evidence/hybrid-operations-live-20260914.json`.

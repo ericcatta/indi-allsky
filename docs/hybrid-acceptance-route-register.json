@@ -1,25 +1,35 @@
 {
-  "baseline": "4122b122",
-  "scope": "Literal routes in register_hybrid_routes only; explicit page/control records from existing evidence",
+  "baseline": "0e6f445c",
+  "previous_route_baseline": "4122b122",
+  "scope": "Actual Flask url_map with Classic disabled; Hybrid routes indexed with explicit historical and recent control evidence",
   "not_a_complete_control_inventory": true,
   "limitations": [
-    "Other registration modules and external/public compatibility endpoints are not included here",
-    "Historical recorded outcomes are preserved, not re-certified against current code",
-    "No success inferred from route rendering, HTTP status, test name or file name",
-    "Records without explicit page/control association and nested evidence schemas require manual mapping",
-    "Dynamic DOM, roles, camera/profile prerequisites, effects and production validation still require the complete acceptance matrix"
+    "Route registration is not a passed functional test; counts refer to evidence records, never page/control coverage percentages",
+    "Historical outcomes are preserved, not re-certified against the current code; source files identify revision, isolated/live environment, roles and limits",
+    "A control record can cover a partial flow or a specific option; other variants, roles, camera/profile scopes and failure cases remain separate",
+    "Records with no unambiguous page/control association require manual mapping; an empty evidence list does not imply missing functionality",
+    "Dynamic DOM controls and complete acceptance remain open; Classic physical removal is not certified by this index",
+    "Other registered URL paths include authentication, shared/public contracts, assets and navigation redirects; URL naming does not determine ownership or justify deletion"
   ],
   "routes": [
     {
       "route": "/modern-admin",
       "endpoint": "modern_admin_view",
-      "line": 18042,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminView",
       "evidence": []
     },
     {
       "route": "/modern-admin/account",
       "endpoint": "modern_admin_account_view",
-      "line": 18079,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminAccountView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-browser-2026-09-06.json",
@@ -62,85 +72,210 @@
           "record": "cases[18]",
           "control": "Successful account save/password change",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[0]",
+          "control": "NAME + CURRENT_PASSWORD + Save account",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[1]",
+          "control": "NAME + CURRENT_PASSWORD + Save account",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[2]",
+          "control": "NEW_PASSWORD + NEW_PASSWORD2 + Save account",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[3]",
+          "control": "NEW_PASSWORD + NEW_PASSWORD2 + Save account",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[4]",
+          "control": "Open navigation menu > Sign out",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[5]",
+          "control": "Save account in previously opened page",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[6]",
+          "control": "NAME + CURRENT_PASSWORD + Save account",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[7]",
+          "control": "Open navigation menu > My Account",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[8]",
+          "control": "Username + Password + Sign in",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-account-native-20260914.json",
+          "record": "controls[9]",
+          "control": "Username + Password + Sign in",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
         }
       ]
     },
     {
       "route": "/modern-admin/cameras",
       "endpoint": "modern_admin_cameras_view",
-      "line": 18052,
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminCamerasView",
       "evidence": []
     },
     {
       "route": "/modern-admin/cameras/add",
       "endpoint": "modern_admin_camera_add_view",
-      "line": 18053,
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminCameraAddView",
       "evidence": []
     },
     {
       "route": "/modern-admin/cameras/adu-history",
       "endpoint": "modern_admin_adu_history_view",
-      "line": 18058,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminAduHistoryView",
       "evidence": []
     },
     {
       "route": "/modern-admin/cameras/dark-library",
       "endpoint": "modern_admin_dark_library_view",
-      "line": 18094,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminDarkLibraryView",
       "evidence": []
     },
     {
       "route": "/modern-admin/cameras/detect-indi",
       "endpoint": "modern_admin_camera_detect_indi_view",
-      "line": 18054,
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminIndiCameraDetectView",
       "evidence": []
     },
     {
       "route": "/modern-admin/cameras/image-lag",
       "endpoint": "modern_admin_image_lag_view",
-      "line": 18057,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminImageLagView",
       "evidence": []
     },
     {
       "route": "/modern-admin/cameras/info",
       "endpoint": "modern_admin_camera_info_view",
-      "line": 18056,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminCameraInfoView",
       "evidence": []
     },
     {
       "route": "/modern-admin/cameras/mask-base",
       "endpoint": "modern_admin_mask_view",
-      "line": 18095,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMaskView",
       "evidence": []
     },
     {
       "route": "/modern-admin/cameras/start-indi",
       "endpoint": "modern_admin_start_indi_view",
-      "line": 18055,
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminIndiServerStartView",
       "evidence": []
     },
     {
       "route": "/modern-admin/capture/abort-exposure",
       "endpoint": "modern_admin_abort_exposure_action_view",
-      "line": 18051,
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminAbortExposureActionView",
       "evidence": []
     },
     {
       "route": "/modern-admin/capture/service",
       "endpoint": "modern_admin_capture_service_action_view",
-      "line": 18050,
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminCaptureServiceActionView",
       "evidence": []
     },
     {
       "route": "/modern-admin/classic/<classic_page>",
       "endpoint": "modern_admin_classic_placeholder_view",
-      "line": 18124,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminCompatibilityRedirectView",
       "evidence": []
     },
     {
       "route": "/modern-admin/config-history",
       "endpoint": "modern_admin_config_history_view",
-      "line": 18082,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminConfigHistoryView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-browser-2026-09-06.json",
@@ -165,7 +300,11 @@
     {
       "route": "/modern-admin/config-restore",
       "endpoint": "modern_admin_config_restore_view",
-      "line": 18083,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminConfigRestoreView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-browser-2026-09-06.json",
@@ -190,7 +329,11 @@
     {
       "route": "/modern-admin/config-restore/<int:config_id>",
       "endpoint": "modern_admin_config_restore_detail_view",
-      "line": 18085,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminConfigRestoreDetailView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-browser-2026-09-06.json",
@@ -209,13 +352,21 @@
     {
       "route": "/modern-admin/config-restore/<int:config_id>/apply",
       "endpoint": "modern_admin_snapshot_restore_view",
-      "line": 18084,
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.snapshot_restore",
+      "handler": "ModernAdminSnapshotRestoreView",
       "evidence": []
     },
     {
       "route": "/modern-admin/fits",
       "endpoint": "modern_admin_fits_view",
-      "line": 18040,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminFitsView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
@@ -234,7 +385,11 @@
     {
       "route": "/modern-admin/fits/<int:fits_id>",
       "endpoint": "modern_admin_fits_detail_view",
-      "line": 18041,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminFitsDetailView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
@@ -247,19 +402,41 @@
           "record": "controls[3]",
           "control": "Download original",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-dimensions-live-20260914.json",
+          "record": "native_controls[1]",
+          "control": "Preview JPEG",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/fits/494"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-dimensions-live-20260914.json",
+          "record": "native_controls[2]",
+          "control": "Preview JPEG / Open FITS Media Viewer",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/fits/495"
         }
       ]
     },
     {
       "route": "/modern-admin/highlights",
       "endpoint": "modern_admin_highlights_view",
-      "line": 18044,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminHighlightsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/library",
       "endpoint": "modern_admin_library_view",
-      "line": 18047,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminLibraryView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-browser-media-2026-09-08.json",
@@ -278,25 +455,233 @@
           "record": "controls[4]",
           "control": "Apply filters",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "interactions[0]",
+          "control": "Camera IMX708 + Order oldest",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "interactions[1]",
+          "control": "Next page",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "interactions[2]",
+          "control": "Image details / Back to results / Previous page",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "interactions[3]",
+          "control": "ASI + Day + Not uploaded + Newest",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "interactions[4]",
+          "control": "Filename search and Reset filters",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "interactions[5]",
+          "control": "Timelapse Play/Pause camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "interactions[6]",
+          "control": "Timelapse Play/Pause camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[0]",
+          "control": "Type Images, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[1]",
+          "control": "Type Timelapses, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[2]",
+          "control": "Type Mini timelapses, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[3]",
+          "control": "Type Keograms, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[4]",
+          "control": "Type Startrails, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[5]",
+          "control": "Type Startrail videos, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[6]",
+          "control": "Type Panorama images, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[7]",
+          "control": "Type Panorama videos, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[8]",
+          "control": "Type FITS, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[9]",
+          "control": "Type RAW, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[10]",
+          "control": "Type Images, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[11]",
+          "control": "Type Timelapses, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[12]",
+          "control": "Type Mini timelapses, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[13]",
+          "control": "Type Keograms, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[14]",
+          "control": "Type Startrails, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[15]",
+          "control": "Type Startrail videos, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[16]",
+          "control": "Type Panorama images, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[17]",
+          "control": "Type Panorama videos, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[18]",
+          "control": "Type FITS, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-library-live-20260914.json",
+          "record": "type_selection[19]",
+          "control": "Type RAW, camera 2",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-live-20260914.json",
+          "record": "controls[3]",
+          "control": "Mini timelapses type / Apply filters / native Play and Pause",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
         }
       ]
     },
     {
       "route": "/modern-admin/loop",
       "endpoint": "modern_admin_loop_view",
-      "line": 18120,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminLoopView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download",
       "endpoint": "modern_admin_source_download_view",
-      "line": 18090,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.source_media_views",
+      "handler": "ModernAdminSourceDownloadView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/archive",
       "endpoint": "modern_admin_media_archive_view",
-      "line": 18087,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaArchiveView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-archive-2026-09-06.json",
@@ -393,7 +778,11 @@
     {
       "route": "/modern-admin/media/fits",
       "endpoint": "modern_admin_media_fits_view",
-      "line": 18039,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaFitsView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
@@ -418,37 +807,71 @@
           "record": "controls[10]",
           "control": "Mobile lightbox",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-dimensions-live-20260914.json",
+          "record": "native_controls[0]",
+          "control": "Camera buttons and Details",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/fits"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-dimensions-live-20260914.json",
+          "record": "native_controls[3]",
+          "control": "Open source / Next image / Escape",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/fits"
         }
       ]
     },
     {
       "route": "/modern-admin/media/gallery",
       "endpoint": "modern_admin_media_gallery_view",
-      "line": 18025,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaGalleryView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/gallery/page",
       "endpoint": "modern_admin_media_gallery_page_view",
-      "line": 18026,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaGalleryPageView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/images",
       "endpoint": "modern_admin_media_images_view",
-      "line": 18027,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaImagesView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/images/<int:image_id>",
       "endpoint": "modern_admin_media_image_detail_view",
-      "line": 18028,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaImageDetailView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/keograms",
       "endpoint": "modern_admin_media_keograms_view",
-      "line": 18031,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaKeogramsView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
@@ -509,7 +932,11 @@
     {
       "route": "/modern-admin/media/mini-timelapses",
       "endpoint": "modern_admin_media_mini_timelapses_view",
-      "line": 18034,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaMiniTimelapsesView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
@@ -570,7 +997,11 @@
     {
       "route": "/modern-admin/media/panorama",
       "endpoint": "modern_admin_media_panorama_view",
-      "line": 18035,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaPanoramaView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
@@ -631,19 +1062,31 @@
     {
       "route": "/modern-admin/media/panorama-loop",
       "endpoint": "modern_admin_media_panorama_loop_view",
-      "line": 18036,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaPanoramaLoopView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/public-endpoints",
       "endpoint": "modern_admin_public_media_endpoints_view",
-      "line": 18038,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminPublicMediaEndpointsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/raw",
       "endpoint": "modern_admin_media_raw_images_view",
-      "line": 18037,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaRawImagesView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-source-media-2026-09-06.json",
@@ -668,13 +1111,21 @@
     {
       "route": "/modern-admin/media/raw-loop",
       "endpoint": "modern_admin_raw_loop_view",
-      "line": 18121,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminRawLoopView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/startrail-videos",
       "endpoint": "modern_admin_media_startrail_videos_view",
-      "line": 18033,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaStartrailVideosView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
@@ -735,7 +1186,11 @@
     {
       "route": "/modern-admin/media/startrails",
       "endpoint": "modern_admin_media_startrails_view",
-      "line": 18032,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaStartrailsView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
@@ -796,31 +1251,51 @@
     {
       "route": "/modern-admin/media/timelapses",
       "endpoint": "modern_admin_media_timelapses_view",
-      "line": 18029,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaTimelapsesView",
       "evidence": []
     },
     {
       "route": "/modern-admin/media/timelapses/<int:video_id>",
       "endpoint": "modern_admin_media_video_detail_view",
-      "line": 18030,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMediaVideoDetailView",
       "evidence": []
     },
     {
       "route": "/modern-admin/mode/<mode>",
       "endpoint": "modern_admin_mode_view",
-      "line": 18125,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminModeView",
       "evidence": []
     },
     {
       "route": "/modern-admin/moment",
       "endpoint": "modern_admin_moment_detail_view",
-      "line": 18045,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMomentDetailView",
       "evidence": []
     },
     {
       "route": "/modern-admin/notifications",
       "endpoint": "modern_admin_notifications_view",
-      "line": 18092,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminNotificationsView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-operations-2026-09-06.json",
@@ -845,13 +1320,24 @@
           "record": "controls[5]",
           "control": "Copy",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-live-20260914.json",
+          "record": "controls[4]",
+          "control": "Category / Item / Acked / Search",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/notifications"
         }
       ]
     },
     {
       "route": "/modern-admin/notifications/<int:notification_id>",
       "endpoint": "modern_admin_notification_detail_view",
-      "line": 18093,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminNotificationDetailView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-operations-2026-09-06.json",
@@ -870,19 +1356,41 @@
           "record": "controls[18]",
           "control": "ordinary-user acknowledgement",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-live-20260914.json",
+          "record": "controls[5]",
+          "control": "Acknowledge notification",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/notifications/170"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-live-20260914.json",
+          "record": "controls[6]",
+          "control": "Reload / Back to Notifications",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/notifications/170"
         }
       ]
     },
     {
       "route": "/modern-admin/notifications/<int:notification_id>/acknowledge",
       "endpoint": "modern_admin_notification_acknowledge_view",
-      "line": 18086,
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.notification_views",
+      "handler": "ModernAdminNotificationAcknowledgeView",
       "evidence": []
     },
     {
       "route": "/modern-admin/now",
       "endpoint": "modern_admin_now_view",
-      "line": 18043,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminNowView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-browser-media-2026-09-08.json",
@@ -901,127 +1409,313 @@
     {
       "route": "/modern-admin/observatory",
       "endpoint": "modern_admin_observatory_view",
-      "line": 18064,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminObservatoryView",
       "evidence": []
     },
     {
       "route": "/modern-admin/observatory/astropanel",
       "endpoint": "modern_admin_astropanel_view",
-      "line": 18068,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminAstroPanelView",
       "evidence": []
     },
     {
       "route": "/modern-admin/observatory/charts",
       "endpoint": "modern_admin_charts_view",
-      "line": 18066,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminChartsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/observatory/long-term-keogram",
       "endpoint": "modern_admin_longterm_keogram_view",
-      "line": 18071,
-      "evidence": []
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminLongTermKeogramView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-observatory-live-20260914.json",
+          "record": "checks[2]",
+          "control": "LABEL and Generate, camera 1",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/long-term-keogram"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-live-20260914.json",
+          "record": "checks[3]",
+          "control": "camera 2, REVERSE and Generate",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/long-term-keogram"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-live-20260914.json",
+          "record": "checks[4]",
+          "control": "Reset options",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/long-term-keogram"
+        }
+      ]
     },
     {
       "route": "/modern-admin/observatory/realtime-keogram",
       "endpoint": "modern_admin_realtime_keogram_view",
-      "line": 18070,
-      "evidence": []
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminRealtimeKeogramView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-observatory-live-20260914.json",
+          "record": "checks[1]",
+          "control": "camera links and realtime-refresh",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/realtime-keogram"
+        }
+      ]
     },
     {
       "route": "/modern-admin/observatory/sensor-panel",
       "endpoint": "modern_admin_sensor_panel_view",
-      "line": 18067,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminSensorPanelView",
       "evidence": []
     },
     {
       "route": "/modern-admin/observatory/sqm",
       "endpoint": "modern_admin_sqm_view",
-      "line": 18065,
-      "evidence": []
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminSqmView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-observatory-live-20260914.json",
+          "record": "checks[0]",
+          "control": "camera links",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/sqm"
+        }
+      ]
     },
     {
       "route": "/modern-admin/observatory/virtualsky",
       "endpoint": "modern_admin_virtualsky_view",
-      "line": 18069,
-      "evidence": []
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminVirtualSkyView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-observatory-live-20260914.json",
+          "record": "checks[5]",
+          "control": "virtualsky-refresh and Reset preview",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/virtualsky"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-live-20260914.json",
+          "record": "checks[6]",
+          "control": "virtualsky-fullscreen and virtualsky-exit-fullscreen",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/virtualsky"
+        }
+      ]
     },
     {
       "route": "/modern-admin/operations/export",
       "endpoint": "modern_admin_table_export_view",
-      "line": 18091,
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.table_export_views",
+      "handler": "ModernAdminTableExportView",
       "evidence": []
     },
     {
       "route": "/modern-admin/output",
       "endpoint": "modern_admin_output_detail_view",
-      "line": 18046,
-      "evidence": []
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminOutputDetailView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-mini-generation-live-20260914.json",
+          "record": "controls[4]",
+          "control": "Output details / Back to results",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/output"
+        }
+      ]
     },
     {
       "route": "/modern-admin/safe-action/dry-run",
       "endpoint": "modern_admin_safe_action_dry_run_view",
-      "line": 18049,
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminSafeActionDryRunView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings",
       "endpoint": "modern_admin_settings_view",
-      "line": 18102,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminSettingsInventoryView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/acquisition-save",
       "endpoint": "modern_admin_acquisition_save_settings_view",
-      "line": 18110,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminAcquisitionSaveSettingsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/advanced",
       "endpoint": "modern_admin_advanced_settings_view",
-      "line": 18104,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminAdvancedSettingsPreviewView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/analytics",
       "endpoint": "modern_admin_analytics_settings_view",
-      "line": 18107,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminAnalyticsSettingsView",
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/auto-exposure-gain",
+      "endpoint": "modern_admin_auto_exposure_gain_settings_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.settings_entries",
+      "handler": "navigate",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/basic",
       "endpoint": "modern_admin_basic_settings_view",
-      "line": 18103,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminBasicSettingsPreviewView",
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/camera-connection",
+      "endpoint": "modern_admin_camera_connection_settings_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.settings_entries",
+      "handler": "navigate",
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/camera-profile",
+      "endpoint": "modern_admin_camera_profile_settings_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.settings_entries",
+      "handler": "navigate",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/cameras",
       "endpoint": "modern_admin_camera_settings_view",
-      "line": 18115,
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminCameraSettingsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/capture",
       "endpoint": "modern_admin_capture_settings_view",
-      "line": 18113,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminCaptureSettingsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/developer",
       "endpoint": "modern_admin_developer_settings_view",
-      "line": 18105,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminDeveloperSettingsPreviewView",
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/exposure-gain",
+      "endpoint": "modern_admin_exposure_gain_settings_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.settings_entries",
+      "handler": "navigate",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/fits-source",
       "endpoint": "modern_admin_fits_source_settings_view",
-      "line": 18111,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminFitsSourceSettingsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/full",
       "endpoint": "modern_admin_full_settings_view",
-      "line": 18112,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminFullSettingsView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-browser-2026-09-06.json",
@@ -1050,105 +1744,195 @@
       ]
     },
     {
+      "route": "/modern-admin/settings/hybrid-awb",
+      "endpoint": "modern_admin_hybrid_awb_settings_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.settings_entries",
+      "handler": "navigate",
+      "evidence": []
+    },
+    {
       "route": "/modern-admin/settings/notifications",
       "endpoint": "modern_admin_notifications_settings_view",
-      "line": 18109,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminNotificationsSettingsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/ready",
       "endpoint": "modern_admin_ready_settings_view",
-      "line": 18106,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminReadySettingsPreviewView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/storage",
       "endpoint": "modern_admin_storage_settings_view",
-      "line": 18108,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminStorageSettingsView",
+      "evidence": []
+    },
+    {
+      "route": "/modern-admin/settings/storage-protection",
+      "endpoint": "modern_admin_storage_protection_settings_view",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminStorageProtectionSettingsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/settings/timelapse",
       "endpoint": "modern_admin_timelapse_settings_view",
-      "line": 18114,
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminTimelapseSettingsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/sky-cycle",
       "endpoint": "modern_admin_sky_cycle_view",
-      "line": 18048,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminSkyCycleView",
       "evidence": []
     },
     {
       "route": "/modern-admin/storage",
       "endpoint": "modern_admin_storage_view",
-      "line": 18059,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminStorageView",
       "evidence": []
     },
     {
       "route": "/modern-admin/storage/drives",
       "endpoint": "modern_admin_drive_manager_view",
-      "line": 18118,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminDriveManagerView",
       "evidence": []
     },
     {
       "route": "/modern-admin/storage/file-space-usage",
       "endpoint": "modern_admin_file_space_usage_view",
-      "line": 18060,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminFileSpaceUsageView",
       "evidence": []
     },
     {
       "route": "/modern-admin/system",
       "endpoint": "modern_admin_system_view",
-      "line": 18072,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminSystemView",
       "evidence": []
     },
     {
       "route": "/modern-admin/system/config",
       "endpoint": "modern_admin_config_view",
-      "line": 18116,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminConfigView",
       "evidence": []
     },
     {
       "route": "/modern-admin/system/gpio-control",
       "endpoint": "modern_admin_manual_gpio_view",
-      "line": 18119,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminManualGpioView",
       "evidence": []
     },
     {
       "route": "/modern-admin/system/info",
       "endpoint": "modern_admin_system_info_view",
-      "line": 18073,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminSystemInfoView",
       "evidence": []
     },
     {
       "route": "/modern-admin/system/log",
       "endpoint": "modern_admin_log_view",
-      "line": 18075,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminLogView",
       "evidence": []
     },
     {
       "route": "/modern-admin/system/log/<log_name>",
       "endpoint": "modern_admin_log_detail_view",
-      "line": 18076,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminLogDetailView",
       "evidence": []
     },
     {
       "route": "/modern-admin/system/network",
       "endpoint": "modern_admin_network_view",
-      "line": 18117,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminNetworkView",
       "evidence": []
     },
     {
       "route": "/modern-admin/system/support",
       "endpoint": "modern_admin_support_info_view",
-      "line": 18074,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminSupportInfoView",
       "evidence": []
     },
     {
       "route": "/modern-admin/tasks",
       "endpoint": "modern_admin_taskqueue_view",
-      "line": 18077,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminTaskQueueView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-operations-2026-09-06.json",
@@ -1215,13 +1999,45 @@
           "record": "controls[17]",
           "control": "mobile filters",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-live-20260914.json",
+          "record": "controls[0]",
+          "control": "State + Action filters",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tasks"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-live-20260914.json",
+          "record": "controls[1]",
+          "control": "Search",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tasks"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-live-20260914.json",
+          "record": "controls[2]",
+          "control": "Details / Back to Task Queue",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tasks"
+        },
+        {
+          "source": "testing/evidence/hybrid-operations-live-20260914.json",
+          "record": "controls[3]",
+          "control": "entries per page / Next / Previous / ID sort",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tasks"
         }
       ]
     },
     {
       "route": "/modern-admin/tasks/<int:task_id>",
       "endpoint": "modern_admin_task_detail_view",
-      "line": 18078,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminTaskDetailView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-operations-2026-09-06.json",
@@ -1234,7 +2050,11 @@
     {
       "route": "/modern-admin/tools/camera-simulator",
       "endpoint": "modern_admin_camera_simulator_view",
-      "line": 18096,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminCameraSimulatorView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-simulator-2026-09-06.json",
@@ -1283,19 +2103,31 @@
     {
       "route": "/modern-admin/tools/focus",
       "endpoint": "modern_admin_focus_view",
-      "line": 18099,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminFocusView",
       "evidence": []
     },
     {
       "route": "/modern-admin/tools/focus/preview",
       "endpoint": "modern_admin_focus_preview_view",
-      "line": 18098,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminFocusPreviewView",
       "evidence": []
     },
     {
       "route": "/modern-admin/tools/generate",
       "endpoint": "modern_admin_generate_view",
-      "line": 18097,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminGenerateView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-end-of-night-pipeline-2026-09-08.json",
@@ -1434,7 +2266,11 @@
     {
       "route": "/modern-admin/tools/image-circle-helper",
       "endpoint": "modern_admin_image_circle_helper_view",
-      "line": 18101,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminImageCircleHelperView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
@@ -1519,7 +2355,11 @@
     {
       "route": "/modern-admin/tools/mini-generate",
       "endpoint": "modern_admin_mini_generate_view",
-      "line": 18088,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminMiniGenerateView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
@@ -1586,19 +2426,48 @@
           "record": "controls[3]",
           "control": "Generate mini timelapse",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-live-20260914.json",
+          "record": "controls[0]",
+          "control": "Preview FPS / Refresh / Play / Pause / Fullscreen / Exit fullscreen",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tools/mini-generate"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-live-20260914.json",
+          "record": "controls[1]",
+          "control": "Image ID / Load image / camera selection",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tools/mini-generate"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-live-20260914.json",
+          "record": "controls[2]",
+          "control": "Note / confirmation checkbox / Queue",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tools/mini-generate"
         }
       ]
     },
     {
       "route": "/modern-admin/tools/mini-preview",
       "endpoint": "modern_admin_mini_preview_view",
-      "line": 18089,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.mini_generation",
+      "handler": "ModernAdminMiniPreviewView",
       "evidence": []
     },
     {
       "route": "/modern-admin/tools/process-fits",
       "endpoint": "modern_admin_image_processing_view",
-      "line": 18100,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminImageProcessingView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
@@ -1665,31 +2534,51 @@
     {
       "route": "/modern-admin/updates",
       "endpoint": "modern_admin_updates_view",
-      "line": 18123,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminUpdatesView",
       "evidence": []
     },
     {
       "route": "/modern-admin/updates/start",
       "endpoint": "modern_admin_upgrade_start_view",
-      "line": 18122,
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminUpgradeStartView",
       "evidence": []
     },
     {
       "route": "/modern-admin/uploads",
       "endpoint": "modern_admin_uploads_view",
-      "line": 18061,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminUploadsView",
       "evidence": []
     },
     {
       "route": "/modern-admin/uploads/<provider_slug>",
       "endpoint": "modern_admin_upload_detail_view",
-      "line": 18062,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminUploadDetailView",
       "evidence": []
     },
     {
       "route": "/modern-admin/users",
       "endpoint": "modern_admin_users_view",
-      "line": 18080,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminUsersView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
@@ -1798,13 +2687,21 @@
     {
       "route": "/modern-admin/users/<int:user_id>",
       "endpoint": "modern_admin_user_detail_view",
-      "line": 18081,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminUserDetailView",
       "evidence": []
     },
     {
       "route": "/modern-admin/youtube",
       "endpoint": "modern_admin_youtube_view",
-      "line": 18063,
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ModernAdminYoutubeView",
       "evidence": [
         {
           "source": "testing/evidence/hybrid-youtube-2026-09-06.json",
@@ -2180,6 +3077,1409 @@
       "record": "controls[15]",
       "control": "remote integrations and live dataset",
       "recorded_status": "bloccato"
+    }
+  ],
+  "other_registered_routes": [
+    {
+      "route": "/",
+      "endpoint": "hybrid_navigation_modern_admin_now_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/action/pause",
+      "endpoint": "actionapi_indi_allsky.actionapi_pause_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.actionapi_views",
+      "handler": "PauseActionApiView"
+    },
+    {
+      "route": "/action/unpause",
+      "endpoint": "actionapi_indi_allsky.actionapi_unpause_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.actionapi_views",
+      "handler": "UnpauseActionApiView"
+    },
+    {
+      "route": "/adu",
+      "endpoint": "hybrid_navigation_modern_admin_adu_history_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/ajax/astropanel",
+      "endpoint": "ajax_astropanel_view",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.astropanel_views",
+      "handler": "AjaxAstroPanelView"
+    },
+    {
+      "route": "/ajax/config",
+      "endpoint": "ajax_config_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxConfigView"
+    },
+    {
+      "route": "/ajax/config/restore",
+      "endpoint": "ajax_config_restore_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxConfigRestoreView"
+    },
+    {
+      "route": "/ajax/drives",
+      "endpoint": "ajax_drive_manager_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxDriveManagerView"
+    },
+    {
+      "route": "/ajax/exclude",
+      "endpoint": "ajax_image_exclude_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxImageExcludeView"
+    },
+    {
+      "route": "/ajax/fitsimageviewer",
+      "endpoint": "ajax_fitsimageviewer_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxFitsImageViewerView"
+    },
+    {
+      "route": "/ajax/focuscontroller",
+      "endpoint": "focus_controller_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxFocusControllerView"
+    },
+    {
+      "route": "/ajax/gallery",
+      "endpoint": "ajax_gallery_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxGalleryViewerView"
+    },
+    {
+      "route": "/ajax/generate",
+      "endpoint": "ajax_generate_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxTimelapseGeneratorView"
+    },
+    {
+      "route": "/ajax/imageviewer",
+      "endpoint": "ajax_imageviewer_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxImageViewerView"
+    },
+    {
+      "route": "/ajax/indiserver",
+      "endpoint": "ajax_indiserver_change_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxIndiServerChangeView"
+    },
+    {
+      "route": "/ajax/manual_gpio",
+      "endpoint": "ajax_manual_gpio_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxManualGpioView"
+    },
+    {
+      "route": "/ajax/minigenerate",
+      "endpoint": "ajax_mini_generate_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxMiniTimelapseGeneratorView"
+    },
+    {
+      "route": "/ajax/minivideoviewer",
+      "endpoint": "ajax_mini_videoviewer_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxMiniVideoViewerView"
+    },
+    {
+      "route": "/ajax/network",
+      "endpoint": "ajax_network_manager_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxNetworkManagerView"
+    },
+    {
+      "route": "/ajax/notification",
+      "endpoint": "ajax_notification_view",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxNotificationView"
+    },
+    {
+      "route": "/ajax/selectcamera",
+      "endpoint": "ajax_select_camera_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxSelectCameraView"
+    },
+    {
+      "route": "/ajax/settime",
+      "endpoint": "ajax_settime_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxSetTimeView"
+    },
+    {
+      "route": "/ajax/settimezone",
+      "endpoint": "ajax_settimezone_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxSetTimezoneView"
+    },
+    {
+      "route": "/ajax/status_update",
+      "endpoint": "ajax_status_update_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxStatusUpdateView"
+    },
+    {
+      "route": "/ajax/system",
+      "endpoint": "ajax_system_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxSystemInfoView"
+    },
+    {
+      "route": "/ajax/uploadyoutube",
+      "endpoint": "ajax_upload_youtube_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxUploadYoutubeView"
+    },
+    {
+      "route": "/ajax/user",
+      "endpoint": "ajax_user_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxUserInfoView"
+    },
+    {
+      "route": "/ajax/videoviewer",
+      "endpoint": "ajax_videoviewer_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "AjaxVideoViewerView"
+    },
+    {
+      "route": "/astropanel",
+      "endpoint": "hybrid_navigation_modern_admin_astropanel_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/camera",
+      "endpoint": "hybrid_navigation_modern_admin_camera_info_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/cameras",
+      "endpoint": "hybrid_navigation_modern_admin_cameras_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/camerasimulator",
+      "endpoint": "hybrid_navigation_modern_admin_camera_simulator_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/charts",
+      "endpoint": "hybrid_navigation_modern_admin_charts_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/config",
+      "endpoint": "hybrid_navigation_modern_admin_full_settings_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/config/download",
+      "endpoint": "config_download_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "ConfigDownloadView"
+    },
+    {
+      "route": "/config/list",
+      "endpoint": "hybrid_navigation_modern_admin_config_history_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/config/restore",
+      "endpoint": "hybrid_navigation_modern_admin_config_restore_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/darks",
+      "endpoint": "hybrid_navigation_modern_admin_dark_library_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/drives",
+      "endpoint": "hybrid_navigation_modern_admin_drive_manager_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/filespaceusage",
+      "endpoint": "hybrid_navigation_modern_admin_file_space_usage_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/fits2jpeg",
+      "endpoint": "fits2jpeg_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.source_media_views",
+      "handler": "Fits2JpegView"
+    },
+    {
+      "route": "/fitsimageviewer",
+      "endpoint": "hybrid_navigation_modern_admin_fits_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/focus",
+      "endpoint": "hybrid_navigation_modern_admin_focus_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/gallery",
+      "endpoint": "hybrid_navigation_modern_admin_media_gallery_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/generate",
+      "endpoint": "hybrid_navigation_modern_admin_generate_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/imagecirclehelper",
+      "endpoint": "hybrid_navigation_modern_admin_image_circle_helper_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/images/<path:path>",
+      "endpoint": "images_folder",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "images_folder"
+    },
+    {
+      "route": "/imageviewer",
+      "endpoint": "hybrid_navigation_modern_admin_media_images_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/index_canvas",
+      "endpoint": "hybrid_navigation_modern_admin_now_view_1",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/index_img",
+      "endpoint": "hybrid_navigation_modern_admin_now_view_2",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/js/charts",
+      "endpoint": "js_chart_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonChartView"
+    },
+    {
+      "route": "/js/focus",
+      "endpoint": "js_focus_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonFocusView"
+    },
+    {
+      "route": "/js/latest",
+      "endpoint": "js_latest_image_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonLatestImageView"
+    },
+    {
+      "route": "/js/latest_panorama",
+      "endpoint": "js_latest_panorama_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonLatestPanoramaView"
+    },
+    {
+      "route": "/js/latest_rawimage",
+      "endpoint": "js_latest_rawimage_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonLatestRawImageView"
+    },
+    {
+      "route": "/js/log",
+      "endpoint": "js_log_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonLogView"
+    },
+    {
+      "route": "/js/longtermkeogram",
+      "endpoint": "js_longterm_keogram_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonLongTermKeogramView"
+    },
+    {
+      "route": "/js/loop",
+      "endpoint": "js_image_loop_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonImageLoopView"
+    },
+    {
+      "route": "/js/looppanorama",
+      "endpoint": "js_panorama_loop_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonPanoramaLoopView"
+    },
+    {
+      "route": "/js/loopraw",
+      "endpoint": "js_rawimage_loop_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonRawImageLoopView"
+    },
+    {
+      "route": "/js/processing",
+      "endpoint": "js_image_processing_view",
+      "methods": [
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.image_processing_views",
+      "handler": "JsonImageProcessingView"
+    },
+    {
+      "route": "/js/sensor_panel",
+      "endpoint": "js_sensor_panel_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonSensorPanelView"
+    },
+    {
+      "route": "/js/support",
+      "endpoint": "js_support_info_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "JsonSupportInfoView"
+    },
+    {
+      "route": "/lag",
+      "endpoint": "hybrid_navigation_modern_admin_image_lag_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/latestimage",
+      "endpoint": "latest_image_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestImageRedirect"
+    },
+    {
+      "route": "/latestimageview",
+      "endpoint": "latest_image_view_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestImageViewRedirect"
+    },
+    {
+      "route": "/latestkeogram",
+      "endpoint": "latest_keogram_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestKeogramRedirect"
+    },
+    {
+      "route": "/latestkeogramview",
+      "endpoint": "latest_keogram_view_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestKeogramViewRedirect"
+    },
+    {
+      "route": "/latestpanorama",
+      "endpoint": "latest_panorama_image_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestPanoramaImageRedirect"
+    },
+    {
+      "route": "/latestpanoramavideo",
+      "endpoint": "latest_panorama_video_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestPanoramaVideoRedirect"
+    },
+    {
+      "route": "/latestpanoramavideowatch",
+      "endpoint": "latest_panorama_video_watch_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestPanoramaVideoWatchRedirect"
+    },
+    {
+      "route": "/latestpanoramaview",
+      "endpoint": "latest_panorama_image_view_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestPanoramaImageViewRedirect"
+    },
+    {
+      "route": "/latestraw",
+      "endpoint": "latest_raw_image_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestRawImageRedirect"
+    },
+    {
+      "route": "/latestrawview",
+      "endpoint": "latest_raw_image_view_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestRawImageViewRedirect"
+    },
+    {
+      "route": "/lateststartrail",
+      "endpoint": "latest_startrail_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestStartrailRedirect"
+    },
+    {
+      "route": "/lateststartrailvideo",
+      "endpoint": "latest_startrail_video_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestStartrailVideoRedirect"
+    },
+    {
+      "route": "/lateststartrailvideowatch",
+      "endpoint": "latest_startrail_video_watch_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestStartrailVideoWatchRedirect"
+    },
+    {
+      "route": "/lateststartrailview",
+      "endpoint": "latest_startrail_view_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestStartrailViewRedirect"
+    },
+    {
+      "route": "/latestthumbnail",
+      "endpoint": "latest_thumbnail_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestThumbnailRedirect"
+    },
+    {
+      "route": "/latesttimelapse",
+      "endpoint": "latest_timelapse_video_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestTimelapseVideoRedirect"
+    },
+    {
+      "route": "/latesttimelapsewatch",
+      "endpoint": "latest_timelapse_video_watch_redirect_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LatestTimelapseVideoWatchRedirect"
+    },
+    {
+      "route": "/log",
+      "endpoint": "hybrid_navigation_modern_admin_log_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/log/download",
+      "endpoint": "log_download_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LogDownloadView"
+    },
+    {
+      "route": "/log/kern_download",
+      "endpoint": "log_kern_download_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LogKernDownloadView"
+    },
+    {
+      "route": "/log/syslog_download",
+      "endpoint": "log_syslog_download_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LogSyslogDownloadView"
+    },
+    {
+      "route": "/log/webapp_download",
+      "endpoint": "log_webapp_download_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "LogWebappDownloadView"
+    },
+    {
+      "route": "/login",
+      "endpoint": "auth_indi_allsky.login_view",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.auth_views",
+      "handler": "LoginView"
+    },
+    {
+      "route": "/logout",
+      "endpoint": "auth_indi_allsky.logout_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.auth_views",
+      "handler": "LogoutView"
+    },
+    {
+      "route": "/longtermkeogram",
+      "endpoint": "hybrid_navigation_modern_admin_longterm_keogram_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/loop",
+      "endpoint": "hybrid_navigation_modern_admin_loop_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/loop_canvas",
+      "endpoint": "hybrid_navigation_modern_admin_loop_view_1",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/loop_img",
+      "endpoint": "hybrid_navigation_modern_admin_loop_view_2",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/looppanorama",
+      "endpoint": "hybrid_navigation_modern_admin_media_panorama_loop_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/looppanorama_canvas",
+      "endpoint": "hybrid_navigation_modern_admin_media_panorama_loop_view_1",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/looppanorama_img",
+      "endpoint": "hybrid_navigation_modern_admin_media_panorama_loop_view_2",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/loopraw",
+      "endpoint": "hybrid_navigation_modern_admin_raw_loop_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/loopraw_canvas",
+      "endpoint": "hybrid_navigation_modern_admin_raw_loop_view_1",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/loopraw_img",
+      "endpoint": "hybrid_navigation_modern_admin_raw_loop_view_2",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/manual_gpio",
+      "endpoint": "hybrid_navigation_modern_admin_manual_gpio_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/mask",
+      "endpoint": "hybrid_navigation_modern_admin_mask_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/media/<kind>/<int:camera_id>/<int:media_id>/original",
+      "endpoint": "public_media_original_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.public_media",
+      "handler": "PublicMediaOriginalView"
+    },
+    {
+      "route": "/minigenerate",
+      "endpoint": "hybrid_navigation_modern_admin_mini_generate_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/minivideoviewer",
+      "endpoint": "hybrid_navigation_modern_admin_media_mini_timelapses_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/network",
+      "endpoint": "hybrid_navigation_modern_admin_network_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/notifications",
+      "endpoint": "hybrid_navigation_modern_admin_notifications_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/panorama",
+      "endpoint": "hybrid_navigation_modern_admin_media_panorama_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/panorama_canvas",
+      "endpoint": "hybrid_navigation_modern_admin_media_panorama_view_1",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/panorama_img",
+      "endpoint": "hybrid_navigation_modern_admin_media_panorama_view_2",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/processing",
+      "endpoint": "hybrid_navigation_modern_admin_image_processing_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/public",
+      "endpoint": "public_index_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "PublicIndexView"
+    },
+    {
+      "route": "/raw",
+      "endpoint": "hybrid_navigation_modern_admin_media_raw_images_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/raw_canvas",
+      "endpoint": "hybrid_navigation_modern_admin_media_raw_images_view_1",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/raw_img",
+      "endpoint": "hybrid_navigation_modern_admin_media_raw_images_view_2",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/realtime_keogram",
+      "endpoint": "hybrid_navigation_modern_admin_realtime_keogram_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/sensor_panel",
+      "endpoint": "hybrid_navigation_modern_admin_sensor_panel_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/sqm",
+      "endpoint": "hybrid_navigation_modern_admin_sqm_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/static/<path:filename>",
+      "endpoint": "static",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "flask.blueprints",
+      "handler": "send_static_file"
+    },
+    {
+      "route": "/static/<path:filename>",
+      "endpoint": "auth_indi_allsky.static",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "flask.blueprints",
+      "handler": "send_static_file"
+    },
+    {
+      "route": "/support",
+      "endpoint": "hybrid_navigation_modern_admin_support_info_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/sync/v1/camera",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_camera_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiCameraView"
+    },
+    {
+      "route": "/sync/v1/fitsimage",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_fitsimage_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiFitsImageView"
+    },
+    {
+      "route": "/sync/v1/image",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_image_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiImageView"
+    },
+    {
+      "route": "/sync/v1/keogram",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_keogram_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiKeogramView"
+    },
+    {
+      "route": "/sync/v1/minivideo",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_min_video_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiMiniVideoView"
+    },
+    {
+      "route": "/sync/v1/panoramaimage",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_panoramaimage_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiPanoramaImageView"
+    },
+    {
+      "route": "/sync/v1/panoramavideo",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_panorama_video_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiPanoramaVideoView"
+    },
+    {
+      "route": "/sync/v1/rawimage",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_rawimage_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiRawImageView"
+    },
+    {
+      "route": "/sync/v1/startrail",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_startrail_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiStartrailView"
+    },
+    {
+      "route": "/sync/v1/startrailvideo",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_startrail_video_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiStartrailVideoView"
+    },
+    {
+      "route": "/sync/v1/thumbnail",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_thumbnail_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiThumbnailView"
+    },
+    {
+      "route": "/sync/v1/video",
+      "endpoint": "syncapi_indi_allsky.syncapi_v1_video_view",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "handler_module": "indi_allsky.flask.syncapi_views",
+      "handler": "SyncApiVideoView"
+    },
+    {
+      "route": "/system",
+      "endpoint": "hybrid_navigation_modern_admin_system_info_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/tasks",
+      "endpoint": "hybrid_navigation_modern_admin_taskqueue_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/user",
+      "endpoint": "hybrid_navigation_modern_admin_account_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/users",
+      "endpoint": "hybrid_navigation_modern_admin_users_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/videoviewer",
+      "endpoint": "hybrid_navigation_modern_admin_media_timelapses_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/view_image",
+      "endpoint": "timelapse_image_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "TimelapseImageView"
+    },
+    {
+      "route": "/view_keogram",
+      "endpoint": "keogram_image_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "KeogramImageView"
+    },
+    {
+      "route": "/view_panorama",
+      "endpoint": "panorama_image_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "PanoramaImageView"
+    },
+    {
+      "route": "/view_raw",
+      "endpoint": "raw_image_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "RawImageView"
+    },
+    {
+      "route": "/view_startrail",
+      "endpoint": "startrail_image_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "StartrailImageView"
+    },
+    {
+      "route": "/virtualsky",
+      "endpoint": "hybrid_navigation_modern_admin_virtualsky_view_0",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "navigate"
+    },
+    {
+      "route": "/watch_mini_timelapse",
+      "endpoint": "mini_timelapse_video_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "MiniTimelapseVideoView"
+    },
+    {
+      "route": "/watch_panorama",
+      "endpoint": "panorama_video_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "PanoramaVideoView"
+    },
+    {
+      "route": "/watch_startrail",
+      "endpoint": "startrail_video_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "StartrailVideoView"
+    },
+    {
+      "route": "/watch_timelapse",
+      "endpoint": "timelapse_video_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.views",
+      "handler": "TimelapseVideoView"
+    },
+    {
+      "route": "/youtube/authorize",
+      "endpoint": "youtube_authorize_view",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.youtube_views",
+      "handler": "YoutubeAuthorizeView"
+    },
+    {
+      "route": "/youtube/oauth2callback",
+      "endpoint": "youtube_oauth2callback_view",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "indi_allsky.flask.youtube_views",
+      "handler": "YoutubeCallbackView"
+    },
+    {
+      "route": "/youtube/oauth2refresh",
+      "endpoint": "youtube_oauth2refresh_view",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.youtube_views",
+      "handler": "YoutubeRefreshAuthView"
+    },
+    {
+      "route": "/youtube/oauth2revoke",
+      "endpoint": "youtube_oauth2revoke_view",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "handler_module": "indi_allsky.flask.youtube_views",
+      "handler": "YoutubeRevokeAuthView"
+    },
+    {
+      "route": "/static/<path:filename>",
+      "endpoint": "static",
+      "methods": [
+        "GET"
+      ],
+      "handler_module": "flask.app",
+      "handler": "<lambda>"
     }
   ]
 }
