@@ -10,7 +10,11 @@ Aggiunti ingressi camera/profilo e validazione dello scope nella pagina Hybrid,
 senza modificare i calcoli astronomici o il contratto dell'API pubblica.
 Test mirato su entrambe le camere e ruoli, link renderizzati e profili incoerenti.
 Regressione completa: 157 Python e 34 JavaScript superati; 830 sorgenti invariati.
-`testing/evidence/hybrid-astropanel-camera-regression.json`. Deploy successivo al commit.
+`testing/evidence/hybrid-astropanel-camera-regression.json`.
+Distribuito `29c75ffb` con backup integro e riavvio del solo web; capture invariato.
+Entrambi i nuovi link camera/profilo verificati dal vivo con pannelli popolati.
+File freschi da entrambe le camere dopo il deploy. Evidenze e rollback aggiornato:
+`testing/evidence/hybrid-astropanel-camera-deployment.json`, `HYBRID_DEPLOYMENT.md`.
 
 SQM cambia letture e profilo correttamente. Realtime Keogram aggiorna preview
 separate per camera. Long-term Keogram ha generato due JPEG effettivi distinti

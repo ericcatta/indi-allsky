@@ -1,3 +1,7 @@
+> Current production is now `29c75ffb` after the Astropanel web-only update.
+> Follow `HYBRID_DEPLOYMENT.md` for its current pinned rollback helper; the
+> eb023b1c installation procedure below is historical and must not be rerun.
+
 # Combined Hybrid product release
 
 Installed on 14 September 2026 after the user returned and authorized maintenance

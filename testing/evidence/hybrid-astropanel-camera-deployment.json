@@ -1,0 +1,59 @@
+{
+  "candidate": "29c75ffb016a6d9841ed00b274993ebab1c5bc63",
+  "backup_integrity": "ok",
+  "private_backup_permissions": true,
+  "configuration_unchanged": true,
+  "capture_restarted": false,
+  "tracked_clean": true,
+  "frames": [
+    {
+      "camera_id": 1,
+      "image_id": 58297,
+      "timestamp": "2026-09-14 19:45:03.000000",
+      "bytes": 910297,
+      "age_seconds": 2.5
+    },
+    {
+      "camera_id": 2,
+      "image_id": 58296,
+      "timestamp": "2026-09-14 19:44:56.000000",
+      "bytes": 555272,
+      "age_seconds": 10.1
+    }
+  ],
+  "services": [
+    "active",
+    "active",
+    "active",
+    "active"
+  ],
+  "date": "2026-09-14",
+  "status": "deployed-and-scoped-native-checks-passed",
+  "previous": "eb023b1c21a32c0371c829062d5ae3d53fbe2643",
+  "classic_disabled": true,
+  "classic_files_present": true,
+  "regression": "hybrid-astropanel-camera-regression.json",
+  "rollback": "Private hybrid-astropanel-camera-release-state.json and versioned deploy helper identify code-only rollback to eb023b1c; do not reuse earlier pinned helpers",
+  "native": [
+    {
+      "control": "Astropanel camera ASI678MC",
+      "result": "superato",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "evidence": "Rendered link clicked; URL scoped to camera/profile; Updated 19:45:14, Sun -2.14 deg, seven planet rows and satellite table populated."
+    },
+    {
+      "control": "Astropanel camera IMX708 Wide",
+      "result": "superato",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "evidence": "Rendered return link clicked; URL scoped to camera/profile; Updated 19:45:35, Sun -2.2 deg, seven planet rows and satellite table populated."
+    }
+  ],
+  "limits": [
+    "Native administrator checks only; ordinary role and invalid scopes verified by isolated tests",
+    "Not a full astronomical accuracy or satellite visibility validation",
+    "Whole-product control acceptance and physical Classic removal remain open",
+    "24-hour observation remains deferred"
+  ]
+}

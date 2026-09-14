@@ -1,6 +1,27 @@
 # Hybrid: deployment and rollback
 
-## Installed release, 14 September 2026
+## Astropanel camera navigation installed, 14 September 2026
+
+Production now runs `29c75ffb016a6d9841ed00b274993ebab1c5bc63`, fast-forwarded
+from `eb023b1c`. Fresh online SQLite backup integrity and private permissions
+passed. Only the web service/socket restarted; capture PID/state/restart count,
+Flask configuration and user files were preserved. Both cameras produced fresh
+nonempty files after this web-only deployment.
+
+Both new camera/profile links were clicked in the production Astropanel; each
+loaded ephemerides, seven planet rows and the satellite table. The full isolated
+regression passed 157 Python and 34 JavaScript entrypoints on matching sources.
+Evidence: `testing/evidence/hybrid-astropanel-camera-deployment.json`.
+
+For rollback, use `~/hybrid-astropanel-camera-deploy.py --rollback` with the exact
+backup recorded in `~/hybrid-astropanel-camera-release-state.json`, and a fresh
+`--maintenance-until` deadline within the user's authorized maintenance. This
+restores code to `eb023b1c` and restarts only web. Earlier release helpers have
+different pinned baselines and must not be used for this release. Configuration
+and database restoration is not part of this code-only rollback.
+Classic remains disabled and physically present; full acceptance remains open.
+
+## Previous installed release, 14 September 2026
 
 Production now runs `eb023b1c21a32c0371c829062d5ae3d53fbe2643`, installed from
 `3590a3ee` after the user authorized maintenance for as long as necessary.
