@@ -1,5 +1,16 @@
 # Hybrid acceptance status
 
+## Accessible page headings — 2026-09-14
+
+The shared Hybrid header now supplies the missing H1 and resolves the main
+region label. YouTube retains its visible heading; Settings identifies the
+selected level without a duplicate ID. All 159 Python and 34 JavaScript
+regression entries passed with 832 source hashes unchanged. Native isolated
+checks passed for Tasks, Users, User Detail, YouTube and Basic Settings.
+The new test covers heading declarations for 53 pages, not every interaction.
+Evidence: `testing/evidence/hybrid-page-heading-fix-20260914.json`.
+Deployment and final Classic retirement are separate acceptance steps.
+
 ## Operations Copy feedback — 2026-09-14
 
 The operations-table Copy action now uses the Clipboard API and reports success

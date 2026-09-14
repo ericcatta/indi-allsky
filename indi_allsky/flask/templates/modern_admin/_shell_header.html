@@ -203,6 +203,9 @@
 })();
 </script>
 {% else %}
+{% if not modern_admin_heading_rendered_separately|default(false) %}
+<h1 class="modern-admin-visually-hidden" id="{{ modern_admin_title_id }}">{{ modern_admin_heading }}</h1>
+{% endif %}
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 <div class="modern-admin-flash-list" aria-live="polite">

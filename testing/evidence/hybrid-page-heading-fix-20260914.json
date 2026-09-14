@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-14",
+  "baseline": "1944551bc1d089f2f1f36d9ca7f261b102eeb123",
+  "scope": "Shared Hybrid page heading semantics; no capture or settings behavior changes",
+  "regression": {
+    "python_passed": 159,
+    "javascript_passed": 34,
+    "source_files": 832,
+    "source_changed": false,
+    "linux_report": "/home/eric/hybrid-heading-fix-regression-20260914/results.json",
+    "linux_report_sha256": "55c8f0d49b4b5ce6f52af5f7f85af79bbd1c100321fe9e6ae921a7f767ca6de6"
+  },
+  "heading_test": {
+    "page_declarations": 53,
+    "old_header_negative_control": "Fails: missing H1",
+    "checks": [
+      "unique nonempty H1",
+      "resolved main aria-labelledby",
+      "flash preserved"
+    ],
+    "scope_limit": "Renders actual page declarations and shared partial, not 53 full browser pages"
+  },
+  "native_isolated": {
+    "tab": "17",
+    "origin": "http://localhost:18112",
+    "passed": [
+      "Task Queue has accessible main title",
+      "Users has unique H1",
+      "User Detail aria-labelledby resolves to one heading",
+      "YouTube preserves one visible H1",
+      "Basic Settings unique level-specific H1 and resolved main label; visible H2 retained"
+    ],
+    "role": "ordinary test-user-2",
+    "server_pid": 27304,
+    "tunnel_session": 24308
+  },
+  "production": "Not deployed in this commit",
+  "limits": [
+    "Full control acceptance remains open",
+    "Public navigation policy remains pending",
+    "Physical Classic removal remains isolated",
+    "24-hour observation deferred by user"
+  ]
+}

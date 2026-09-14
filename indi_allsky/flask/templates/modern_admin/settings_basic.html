@@ -7,11 +7,11 @@
 {% block content %}
 <main class="modern-admin-shell" aria-labelledby="settings-level-title">
     {% set modern_admin_header_label = settings_level_title ~ ' Settings header' %}
-    {% set modern_admin_heading = 'Settings' %}
+    {% set modern_admin_heading = settings_level_title ~ ' Settings' %}
     {% set modern_admin_title_id = 'settings-level-title' %}
     {% include 'modern_admin/_shell_header.html' %}
     <section class="modern-admin-table-panel">
-        <h2 id="settings-level-title">{{ settings_level_title }} Settings</h2>
+        <h2>{{ settings_level_title }} Settings</h2>
         <p>Open a section to inspect its current values or use its controls. Administrator access is required for configuration changes.</p>
         <div class="modern-admin-settings-action-grid" data-settings-level-links>
             {% for endpoint, label, description in settings_navigation %}
