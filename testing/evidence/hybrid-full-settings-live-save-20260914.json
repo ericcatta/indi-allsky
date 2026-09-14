@@ -1,0 +1,67 @@
+{
+  "date": "2026-09-14",
+  "installed": "29c75ffb",
+  "status": "scoped-live-acceptance-passed",
+  "role": "authenticated administrator",
+  "classic_disabled": true,
+  "save": {
+    "latest_id": 116,
+    "note_matches": true,
+    "before_id": 115,
+    "configuration_equal": false,
+    "differences": [
+      {
+        "path": "YOUTUBE.TAGS",
+        "kind": "changed",
+        "before_type": "list",
+        "after_type": "list"
+      }
+    ],
+    "youtube_tag_sets_equal": true,
+    "youtube_tag_counts_equal": true,
+    "capture_unchanged": true
+  },
+  "recovery": {
+    "source_revision": 114,
+    "new_revision": 117,
+    "configuration_equal": true,
+    "source_history_unchanged": true,
+    "top_level_keys": 252,
+    "capture_unchanged": true,
+    "frames": [
+      {
+        "camera_id": 1,
+        "timestamp": "2026-09-14 19:58:51.000000",
+        "bytes": 950616,
+        "age_seconds": 4.5
+      },
+      {
+        "camera_id": 2,
+        "timestamp": "2026-09-14 19:58:43.000000",
+        "bytes": 542135,
+        "age_seconds": 12.4
+      }
+    ]
+  },
+  "native_checks": [
+    {
+      "control": "Config Note and Save Full Settings",
+      "result": "superato",
+      "evidence": "Entered acceptance note, kept Reload on Save unchecked, submitted form. Button disabled with Saving then returned enabled and Saved new config displayed. SQL confirms revision 116 with exact note."
+    },
+    {
+      "control": "Restore snapshot 115",
+      "result": "superato",
+      "evidence": "Selected explicit confirmation and Restore. UI reports revision 117 and no capture restart; SQL confirms complete equality to pre-test configuration and retained history."
+    }
+  ],
+  "interpretation": "Full Config historically converts YouTube tags through a set; save changed only list order, not count or contents. Existing fingerprint test intentionally ignores this ordering. No runtime change was made; restore recovered exact original order.",
+  "regression_reference": "hybrid-astropanel-camera-regression.json",
+  "limits": [
+    "Reload-on-save hardware effect not exercised in this check",
+    "This validates an unchanged populated Full Settings submission, not every possible field value",
+    "External snapshot download/file restore and all table export receipts remain open native checks",
+    "Whole-product acceptance and physical Classic removal remain incomplete",
+    "24-hour observation remains deferred"
+  ]
+}

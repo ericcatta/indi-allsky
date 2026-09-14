@@ -3,6 +3,20 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Full Settings salvato e ripristinato dal vivo — 14 settembre 2026
+
+Save Full Settings con nota dedicata e Reload disabilitato ha creato la revisione
+116; pulsante e conferma UI corrispondono al risultato DB. Unica differenza:
+ordine di YOUTUBE.TAGS, con insieme e numero invariati (comportamento storico
+protetto dal fingerprint normalizzato). Nessun cambiamento di codice o capture.
+Ripristinato poi lo snapshot 115 via UI come revisione 117: uguaglianza completa
+con configurazione iniziale, storia preservata e nuovi file da entrambe le camere.
+
+La prova riguarda il form popolato senza modificare impostazioni operative;
+restano separati reload effettivo, download/restore da file e tutte le varianti
+dei singoli campi. Regressione 157 Python/34 JS ancora applicabile agli stessi
+830 sorgenti. Evidenze: `testing/evidence/hybrid-full-settings-live-save-20260914.json`.
+
 ## Restore Settings e cronologia verificati dal vivo — 14 settembre 2026
 
 Nell'installazione `29c75ffb`, ripristinato lo snapshot attivo 114 tramite UI:
