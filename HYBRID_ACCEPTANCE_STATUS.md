@@ -9,8 +9,12 @@ Native isolated acceptance copied 102 failed tasks from profile 2, excluding
 profile 1. Controller tests cover denied-clipboard fallback. All 158 Python
 and 34 JavaScript regression entries passed; source hashes remained unchanged.
 Evidence: `testing/evidence/hybrid-operations-copy-fix-20260914.json`.
-This fix has not yet been deployed. Public-navigation policy and final Classic
-retirement remain open.
+Production `b34b97d5` now passes native single-task clipboard export. The web-only
+deploy preserved capture PID 1566 and config revision 117. A deployment umask
+issue initially made the public JS inaccessible; permissions and the rollback
+helper were corrected, then the browser check passed. Evidence:
+`testing/evidence/hybrid-copy-fix-deployment.json`. Public-navigation policy and
+final Classic retirement remain open.
 
 ## Warm reboot and automatic startup — 2026-09-14
 

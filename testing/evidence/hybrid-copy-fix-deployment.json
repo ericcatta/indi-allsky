@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-14",
+  "previous": "0e6f445ca0312acb14100cf36ddc992d8635df47",
+  "installed": "b34b97d556c587f016bbf03e06e6a306d0155b66",
+  "backup": "/home/eric/hybrid-backups/hybrid-copy-fix-20260914-221720",
+  "backup_integrity": "ok",
+  "configuration_revision": 117,
+  "flask_config_bytes_preserved": true,
+  "untracked_files_preserved": true,
+  "capture_restarted": false,
+  "capture_pid": 1566,
+  "capture_nrestarts": 0,
+  "source_hashes_matched": 831,
+  "native_browser": {
+    "url": "https://allsky-pi.local/indi-allsky/modern-admin/tasks",
+    "filter": "11772",
+    "receipt": "Copied 1 record.",
+    "clipboard_lines": 2,
+    "task_11772_present": true,
+    "task_11773_absent": true,
+    "expected_result_present": true,
+    "fresh_camera_frames": {
+      "1": "2026-09-14 22:19:05",
+      "2": "2026-09-14 22:19:14"
+    }
+  },
+  "deployment_issue": {
+    "cause": "Private backup umask 077 was inherited by git checkout, producing an Apache-inaccessible 0600 public JS file",
+    "observed": "HTTP 403 for operations-table.js; table controls not initialized",
+    "repair": "Public JS mode changed to 0644; git merge/reset in corrected helper use child umask 022",
+    "verified": "Production table initialized, filter and clipboard export passed",
+    "rollback_helper_updated_in_backup": true,
+    "helper_validation": "Extracted actual run function applies umask 022 to merge/reset only; subprocess file-mode check confirms public 0644 and backup 0600"
+  },
+  "rollback": {
+    "helper": "/home/eric/hybrid-copy-fix-deploy.py",
+    "sha256": "fd86435fa9bdc6f159c7e1a11ba4174b9b84bfd1fac95945fbb1c750a532eddc",
+    "code_only_to_previous": true,
+    "service_scope": "gunicorn service/socket only; preserve capture and user DB/config"
+  },
+  "limits": [
+    "Classic remains disabled but physically present",
+    "Public navigation choice remains pending",
+    "24h observation deferred",
+    "CSV browser download receipt not certified by Copy test"
+  ]
+}

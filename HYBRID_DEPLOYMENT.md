@@ -1,8 +1,28 @@
 # Hybrid: deployment and rollback
 
-## FITS writer correction installed, 14 September 2026
+## Operations Copy installed, 14 September 2026
 
-Production runs `0e6f445ca0312acb14100cf36ddc992d8635df47`. The existing video
+Production is `b34b97d556c587f016bbf03e06e6a306d0155b66`. Web-only deployment
+preserved capture PID 1566, configuration revision 117 and Flask configuration
+bytes. The online SQLite backup passed integrity checks. All 831 tested source
+hashes match production. Native Copy exported only task 11772 and confirmed
+“Copied 1 record.” Evidence: `testing/evidence/hybrid-copy-fix-deployment.json`.
+
+Code rollback uses `~/hybrid-copy-fix-deploy.py --rollback` with the exact
+`backup` path in `~/hybrid-copy-fix-release-state.json` and a fresh timezone-aware
+`--maintenance-until` deadline. It restores `0e6f445c` and restarts only the web
+service/socket; database, configuration and capture are retained. The corrected
+helper is also saved as `deploy.py` inside that backup.
+
+Keep backup files private, but run git checkout/merge/reset with child umask 022
+so Apache can read public assets. The original private umask produced a 403 for
+the new JS; its mode is repaired to 0644 and the helper now separates the two.
+Verify actual asset loading and controls after deployment, not only HTTP pages.
+Classic remains disabled and present; final retirement is not certified.
+
+## Previous FITS writer correction, 14 September 2026
+
+That deployment installed `0e6f445ca0312acb14100cf36ddc992d8635df47`. The existing video
 queue completed before the guarded capture/web restart. A fresh online SQLite
 backup passed integrity checks; configuration revision 117, Flask configuration
 bytes and untracked files were preserved. All 831 tested source hashes match
@@ -15,11 +35,11 @@ the end in the native browser after deployment. Evidence and bounded limits:
 `testing/evidence/hybrid-fits-dimensions-deployment.json` and
 `testing/evidence/hybrid-mini-generation-live-20260914.json`.
 
-Current code rollback uses `~/hybrid-fits-dimensions-deploy.py --rollback` with
+That release’s rollback uses `~/hybrid-fits-dimensions-deploy.py --rollback` with
 the exact backup in `~/hybrid-fits-dimensions-release-state.json` and a fresh
 technical `--maintenance-until` deadline. It restores `29c75ffb` and restarts
 capture/web; it does not restore the database or undo the corrected historical
-FITS metadata. Use this pinned helper for the current release, not older helpers.
+FITS metadata. This historical helper is not the rollback command for the current Copy release.
 Classic remains disabled but present; complete acceptance/removal remain open.
 
 ## Previous Astropanel deployment, 14 September 2026
