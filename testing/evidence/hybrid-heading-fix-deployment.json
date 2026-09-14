@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-14",
+  "previous": "b34b97d556c587f016bbf03e06e6a306d0155b66",
+  "installed": "6784d3d51c9888a159e3fb488609c110f93a1586",
+  "backup": "/home/eric/hybrid-backups/hybrid-heading-fix-20260914-223943",
+  "backup_integrity": "ok",
+  "backup_bytes": 828977152,
+  "configuration_revision": 117,
+  "configuration_unchanged": true,
+  "capture_restarted": false,
+  "source_hashes_matched": 832,
+  "native_acceptance": {
+    "tasks": "unique H1; main aria-labelledby resolves once",
+    "basic_settings": "Basic Settings H1 with unique settings-level-title",
+    "capture": "Running",
+    "frames": {
+      "IMX708": "2026-09-14 22:40:06, decoded 4608x2592",
+      "ASI678MC": "2026-09-14 22:40:15, decoded 3840x2160"
+    }
+  },
+  "rollback_helper": "/home/eric/hybrid-heading-fix-deploy.py",
+  "limits": [
+    "Classic disabled but not physically removed in production",
+    "Full control matrix and public-navigation policy remain open",
+    "24-hour observation deferred"
+  ]
+}

@@ -9,7 +9,11 @@ regression entries passed with 832 source hashes unchanged. Native isolated
 checks passed for Tasks, Users, User Detail, YouTube and Basic Settings.
 The new test covers heading declarations for 53 pages, not every interaction.
 Evidence: `testing/evidence/hybrid-page-heading-fix-20260914.json`.
-Deployment and final Classic retirement are separate acceptance steps.
+Production `6784d3d5` passes native Tasks and Basic Settings heading checks.
+Both cameras supplied decoded frames after this web-only deployment, with
+capture and configuration preserved. Evidence:
+`testing/evidence/hybrid-heading-fix-deployment.json`. Final Classic retirement
+remains a separate acceptance step.
 
 ## Operations Copy feedback — 2026-09-14
 

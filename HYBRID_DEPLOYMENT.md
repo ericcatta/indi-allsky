@@ -1,8 +1,22 @@
 # Hybrid: deployment and rollback
 
-## Operations Copy installed, 14 September 2026
+## Accessible headings installed, 14 September 2026
 
-Production is `b34b97d556c587f016bbf03e06e6a306d0155b66`. Web-only deployment
+Production is `6784d3d51c9888a159e3fb488609c110f93a1586`. This web-only
+update preserved capture and configuration revision 117. All 832 source hashes
+match the tested release. Native Tasks and Basic Settings headings passed;
+both cameras supplied decoded frames after deployment. Evidence:
+`testing/evidence/hybrid-heading-fix-deployment.json`.
+
+Rollback uses `~/hybrid-heading-fix-deploy.py --rollback` with the exact backup
+path in `~/hybrid-heading-fix-release-state.json` and a fresh timezone-aware
+`--maintenance-until` deadline. It returns code to `b34b97d5` and restarts only
+the web service/socket, retaining database, configuration and capture.
+
+
+## Previous Operations Copy deployment, 14 September 2026
+
+That deployment installed `b34b97d556c587f016bbf03e06e6a306d0155b66`. Web-only deployment
 preserved capture PID 1566, configuration revision 117 and Flask configuration
 bytes. The online SQLite backup passed integrity checks. All 831 tested source
 hashes match production. Native Copy exported only task 11772 and confirmed
