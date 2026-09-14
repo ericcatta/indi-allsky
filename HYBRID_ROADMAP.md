@@ -3,6 +3,21 @@
 Questo e' il documento operativo principale del progetto Hybrid AllSky.
 Ogni task futuro deve leggere questo file prima di iniziare e aggiornarlo quando introduce decisioni, modifiche, nuove evidenze o nuovi rischi.
 
+## Task e acknowledge notifiche verificati dal vivo — 14 settembre 2026
+
+In produzione con Classic disabilitato, verificati filtri combinati, ricerca,
+dettaglio, paginazione e ordinamento ID della coda task. Acknowledge della
+notifica storica 170 confermato da UI e confronto DB: cambia solo `ack`, record
+conservato e notifica adiacente invariata. Reload e ritorno alla lista mostrano
+lo stato persistito; filtri Worker/ImageWorker/Acked coerenti prima e dopo.
+
+Le due generazioni mini timelapse 11744/11753 sono state inviate una sola volta,
+con otto frame per camera e 1 FPS. All'ultima osservazione sono ancora in coda
+dietro le generazioni giornaliere: esito e file restano da verificare. Nessun
+riavvio o alterazione della coda per anticiparle. Nessuna modifica runtime;
+regressione precedente applicabile. Evidenze dei controlli completati:
+`testing/evidence/hybrid-operations-live-20260914.json`.
+
 ## Library e riproduzione video verificati dal vivo — 14 settembre 2026
 
 Verificati i dieci tipi Library su entrambe le camere: liste reali o stato vuoto

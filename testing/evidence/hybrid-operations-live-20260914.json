@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-14",
+  "installed": "29c75ffb",
+  "classic_disabled": true,
+  "scope": "Native production browser controls and read-only database verification",
+  "role": "authenticated administrator",
+  "status": "partial-native-operations-acceptance",
+  "controls": [
+    {
+      "page": "/modern-admin/tasks",
+      "control": "State + Action filters",
+      "result": "superato",
+      "evidence": "RUNNING isolates task 11747 generateVideo; QUEUED + generateMiniVideo isolates tasks 11744 camera 1 and 11753 camera 2. Task list is global, including when entered with camera context."
+    },
+    {
+      "page": "/modern-admin/tasks",
+      "control": "Search",
+      "result": "superato",
+      "evidence": "Search 11744 returns one matching task; hybrid-no-such-task returns zero with explicit empty state; replacing the query restores the matching task."
+    },
+    {
+      "page": "/modern-admin/tasks",
+      "control": "Details / Back to Task Queue",
+      "result": "superato",
+      "evidence": "Task 11744 detail shows generateMiniVideo, QUEUED, camera 1 and requested source image 50778, 1 FPS, pre 240/post 120 seconds. Back opens the queue. Completion is not inferred from this detail."
+    },
+    {
+      "page": "/modern-admin/tasks",
+      "control": "entries per page / Next / Previous / ID sort",
+      "result": "superato",
+      "evidence": "50 entries selected: 1-50 of 412; Next: 51-100; Previous returns first page. ID ascending begins 11344, 11345, 11346."
+    },
+    {
+      "page": "/modern-admin/notifications",
+      "control": "Category / Item / Acked / Search",
+      "result": "superato",
+      "evidence": "Worker + ImageWorker + Acked initially isolates notification 169. Unacknowledged + text restarted returns 34 matching notifications including 170. Search operates on category/item/message, not the displayed ID."
+    },
+    {
+      "page": "/modern-admin/notifications/170",
+      "control": "Acknowledge notification",
+      "result": "superato",
+      "prerequisite": "Existing historical ImageWorker notification from 6 September, ack=false; acknowledgement is global and retains the record",
+      "expected_request": "POST /modern-admin/notifications/170/acknowledge with CSRF, from the rendered form",
+      "evidence": "Button disables while Acknowledging notification is displayed, then summary and metadata become Yes, receipt says Notification acknowledged and button remains disabled as Acknowledged. Read-only before/after DB comparison: notification 170 changes only ack from 0 to 1; adjacent notification 169 is unchanged; both records remain."
+    },
+    {
+      "page": "/modern-admin/notifications/170",
+      "control": "Reload / Back to Notifications",
+      "result": "superato",
+      "evidence": "Reload preserves Yes and replaces the form with already acknowledged text. Back opens the list; Worker + ImageWorker + Acked now shows both 170 and 169."
+    }
+  ],
+  "limits": [
+    "No runtime or template changes in this mission",
+    "Observed disabled submission is not a concurrent duplicate-request test",
+    "Ordinary/anonymous sessions, expired CSRF and injected effect failure remain separate live checks",
+    "Copy, CSV, Excel and every sorting/filter combination are not certified here",
+    "Mini generation tasks 11744 and 11753 remain queued behind normal daily generation at the latest observation; no success claimed and no duplicate jobs submitted",
+    "Classic physical removal and full product acceptance remain open; 24-hour observation deferred"
+  ],
+  "regression_reference": "hybrid-astropanel-camera-regression.json"
+}
