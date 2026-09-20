@@ -1339,26 +1339,18 @@ class AjaxConfigView(BaseView):
 
 
     def log_config_validation_errors(self, form_config):
+        # JSON/text fields and validator messages can contain credentials too.
+        # Detailed errors are returned to the authorized caller, not persisted.
         for field_name, errors in form_config.errors.items():
             field = getattr(form_config, field_name, None)
-            if field is None:
-                app.logger.warning(
-                    'Config save validation failed: field=%s errors=%s value=<missing> validators=<unknown>',
-                    field_name,
-                    errors,
-                )
-                continue
-
-            field_type = field.__class__.__name__
-            validators = [validator.__class__.__name__ for validator in getattr(field, 'validators', [])]
-            value = '<redacted>' if field_type == 'PasswordField' else field.data
+            field_type = type(field).__name__ if field is not None else '<missing>'
+            validators = [type(validator).__name__ for validator in getattr(field, 'validators', [])]
             app.logger.warning(
-                'Config save validation failed: field=%s type=%s validators=%s value=%r errors=%s',
+                'Config save validation failed: field=%s type=%s validators=%s error_count=%s',
                 field_name,
                 field_type,
                 validators,
-                value,
-                errors,
+                len(errors),
             )
 
     def dispatch_request(self):

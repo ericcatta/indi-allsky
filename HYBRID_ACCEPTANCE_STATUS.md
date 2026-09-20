@@ -1,5 +1,18 @@
 # Hybrid acceptance status
 
+## Settings validation log privacy — 2026-09-20
+
+Full Config errors no longer persist submitted field values or reflected
+validator text in application logs. Field/type/validator/count diagnostics
+remain, as do authorized HTTP error details and existing save semantics.
+A synthetic credential in invalid driver JSON reproduced the leak before
+the change; the regression now verifies redaction and unchanged rejection
+without creating a revision. All 162 Python entries pass on unchanged
+837-file source hashes. The 34 JavaScript entries passed on unchanged JS
+sources in the preceding usability mission. Evidence:
+`testing/evidence/hybrid-settings-validation-logging-20260920.json`.
+Not yet deployed; this does not certify every application logging path.
+
 ## Settings search and complete document landmarks — 2026-09-20
 
 Full Settings now uses distinct page/summary heading IDs. Integration checks
