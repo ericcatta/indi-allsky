@@ -38,6 +38,19 @@ class Headings(HTMLParser):
             self.headings[-1][1] += text
 
 
+def assert_document_landmarks(html):
+    """Check a complete rendered response, including IDs below the header."""
+    from collections import Counter
+    parser = Headings()
+    parser.feed(html)
+    duplicates = [value for value, count in Counter(parser.ids).items() if count > 1]
+    assert not duplicates, ('Duplicate document IDs', duplicates)
+    assert len(parser.headings) == 1, parser.headings
+    heading_id, text = parser.headings[0]
+    assert text.strip() and heading_id in parser.labels, (heading_id, parser.labels)
+    assert all(label in parser.ids for label in parser.labels), parser.labels
+
+
 def run():
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True,
                       undefined=ChainableUndefined)

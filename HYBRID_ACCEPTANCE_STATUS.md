@@ -1,5 +1,17 @@
 # Hybrid acceptance status
 
+## Settings search and complete document landmarks — 2026-09-20
+
+Full Settings now uses distinct page/summary heading IDs. Integration checks
+inspect the complete form HTML and four focused domain entries, closing the
+blind spot in the earlier header-only test. Search now announces matching
+counts and explains empty results; save feedback is also a live status.
+Native ordinary-user checks cover Storage focus, empty/single results and
+keyboard clearing while the form remains read-only. All 161 Python and
+34 JavaScript entries pass with unchanged source hashes during the run.
+Evidence: `testing/evidence/hybrid-settings-usability-20260920.json`; linked
+control records are added to the route register. This change is not yet deployed.
+
 ## Settings credential privacy — 2026-09-20
 
 Ordinary authenticated users no longer receive credential values in Settings
@@ -14,7 +26,7 @@ tested source hashes matching. Configuration117 and capture PID 1566 were
 preserved. Maintenance frame delays were observed; both cameras recovered
 45-second night cadence in the final four-frame sample. Evidence:
 `testing/evidence/hybrid-settings-privacy-deployment.json`. A duplicate Full
-Settings heading ID remains recorded for a separate correction.
+Settings heading ID is corrected by the subsequent usability change above.
 
 ## Mandatory Hybrid login — 2026-09-20
 

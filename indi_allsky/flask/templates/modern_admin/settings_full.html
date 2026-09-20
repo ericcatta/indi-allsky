@@ -21,7 +21,7 @@ var camera_id = {{ camera_id }};
         <div class="modern-admin-section-heading">
             <div>
                 <p class="modern-admin-eyebrow">Modern editor</p>
-                <h2 id="modern-admin-full-settings-title">{{ settings_domain_title or 'Full Settings' }}</h2>
+                <h2 id="modern-admin-full-settings-summary-title">{{ settings_domain_title or 'Full Settings' }}</h2>
             </div>
             <span class="modern-admin-status-pill modern-admin-status-warning">Global config</span>
         </div>
@@ -74,7 +74,8 @@ var camera_id = {{ camera_id }};
 
     <section class="modern-admin-settings-toolbar" aria-label="Full settings filter">
         <label for="modern-admin-full-settings-filter">Search settings</label>
-        <input id="modern-admin-full-settings-filter" class="modern-admin-settings-filter" type="search" placeholder="Filter by label, field, value, type, risk, or scope" autocomplete="off">
+        <input aria-describedby="modern-admin-full-settings-filter-status" id="modern-admin-full-settings-filter" class="modern-admin-settings-filter" type="search" placeholder="Filter by label, field, value, type, risk, or scope" autocomplete="off">
+        <p id="modern-admin-full-settings-filter-status" role="status" aria-live="polite" aria-atomic="true"></p>
     </section>
 
     {% if not login_disabled and not current_user.is_admin %}
@@ -156,7 +157,7 @@ var camera_id = {{ camera_id }};
         </fieldset>
     </form>
 
-    <section class="modern-admin-table-panel" id="modern-admin-full-settings-message" hidden></section>
+    <section class="modern-admin-table-panel" id="modern-admin-full-settings-message" role="status" aria-live="polite" aria-atomic="true" hidden></section>
 </main>
 
 <script type="application/json" id="hybrid-full-settings-config">{{ {
@@ -167,5 +168,5 @@ var camera_id = {{ camera_id }};
     'csrfToken': csrf_token(),
     'canSave': (login_disabled or current_user.is_admin)|default(false)
 }|tojson }}</script>
-<script src="{{ url_for('indi_allsky.static', filename='modern_admin/full-settings.js') }}" defer></script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/full-settings.js', v='settings-filter-feedback-v2') }}" defer></script>
 {% endblock %}

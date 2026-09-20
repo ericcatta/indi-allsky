@@ -66,7 +66,7 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/operations/export` | 0 | Da associare o collaudare |
 | `/modern-admin/output` | 1 | [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json) |
 | `/modern-admin/safe-action/dry-run` | 0 | Da associare o collaudare |
-| `/modern-admin/settings` | 0 | Da associare o collaudare |
+| `/modern-admin/settings` | 1 | [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json) |
 | `/modern-admin/settings/acquisition-save` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/advanced` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/analytics` | 0 | Da associare o collaudare |
@@ -79,7 +79,7 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/settings/developer` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/exposure-gain` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/fits-source` | 0 | Da associare o collaudare |
-| `/modern-admin/settings/full` | 4 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json) |
+| `/modern-admin/settings/full` | 15 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-settings-privacy-native-20260920](../testing/evidence/hybrid-settings-privacy-native-20260920.json), [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json) |
 | `/modern-admin/settings/hybrid-awb` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/notifications` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/ready` | 0 | Da associare o collaudare |

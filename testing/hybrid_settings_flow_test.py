@@ -6,6 +6,7 @@ import io
 import json
 import re
 from hybrid_runtime_fixture import isolated_app, login_client
+from hybrid_page_heading_test import assert_document_landmarks
 
 class BrowserValues(HTMLParser):
     def __init__(self, html):
@@ -64,6 +65,7 @@ def run(runtime_config):
         client = login_client(app, 1)
         page = client.get('/indi-allsky/modern-admin/settings/full')
         assert page.status_code == 200
+        assert_document_landmarks(page.text)
         payload, token = payload_from_page(page.text)
         from urllib.parse import urlsplit, parse_qs
         for slug, sample in (('storage','HEALTHCHECK__DISK_USAGE'), ('analytics','CHARTS__CUSTOM_SLOT_1'), ('acquisition-save','IMAGE_FILE_TYPE'), ('fits-source','IMAGE_SAVE_FITS')):
@@ -73,6 +75,7 @@ def run(runtime_config):
             assert parse_qs(target.query) == {'camera_id':['2'], 'profile_id':['test-profile-2'], 'domain':[slug]}
             scoped = client.get(entry.location)
             assert scoped.status_code == 200 and 'settings-domain-only' in scoped.text
+            assert_document_landmarks(scoped.text)
             scoped_payload, scoped_token = payload_from_page(scoped.text)
             assert scoped_payload.keys() == payload.keys(), slug
             # Flask-WTF signs a fresh timestamp; compare configuration, not the CSRF signature.
