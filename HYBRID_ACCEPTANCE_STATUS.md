@@ -11,7 +11,9 @@ retirement gate. All 160 Python and 34 JavaScript regression entries pass.
 Evidence: `testing/evidence/hybrid-private-ui-policy-20260920.json`.
 
 Native task-table filtering, keyboard pagination/sorting and filtered Copy
-also pass; CSV/XLSX download receipt remains unverified. Evidence:
+also pass. Unfiltered CSV receipt is now verified on disk: 205 data rows,
+10 columns and both camera/profile identities. Empty-table CSV and filtered
+XLSX receipt remain unverified. Evidence:
 `testing/evidence/hybrid-task-table-native-20260920.json`. The full control
 matrix, final cleanup and production acceptance after removal remain open.
 
