@@ -1156,5 +1156,17 @@
     "current_candidate_files": 777,
     "current_manifest_canonical_sha256": "30e5bc632fbc37d3f238b180fcda7896c38bc55aabda949dba8d605b14dd7f78",
     "scope": "Focused new policy and historical-gate tests passed on physically absent Classic; runtime sources unchanged from prior candidate full regression. Prior full regression above certifies the earlier 776-file snapshot."
+  },
+  "settings_privacy_integration": {
+    "date": "2026-09-20",
+    "main_commit": "68f35d76",
+    "current_candidate_files": 779,
+    "current_manifest_canonical_sha256": "8ca4d4846b017cddf933e200044c230ab5938d64180fbd092ee1a032a00bb0d1",
+    "focused_checks_passed": [
+      "hybrid_settings_privacy_flow_test.py",
+      "modern_admin_full_config_form_test.py",
+      "hybrid_app_startup_test.py"
+    ],
+    "scope": "Classic physically absent; current Linux/local source hashes match. Full main regression passed before integration; full candidate regression above still certifies its earlier snapshot."
   }
 }

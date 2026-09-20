@@ -46,10 +46,34 @@
       "expected": "Receive workbook with 102 filtered rows",
       "observed": "Button clicked; no new hybrid-records file observed in Downloads",
       "status": "bloccato"
+    },
+    {
+      "control": "CSV unfiltered table",
+      "expected": "Receive CSV with all 205 task rows, configured columns and camera/profile identities",
+      "observed": "Browser download event received; local CSV has 205 data rows plus header, 10 columns, IDs 1..205; camera1 103 rows and camera2 102; no Details column or synthetic secret",
+      "status": "superato",
+      "evidence": {
+        "file": "/Users/ericcattaneo/Downloads/hybrid-records (3).csv",
+        "sha256": "24f723dc2f506b1986c8081bdee2fc2ab123c506a3dc7739b7825490e2b6a1d8",
+        "bytes": 22506
+      }
+    },
+    {
+      "control": "Failed task Details",
+      "expected": "Show matching task identity, result, scope and redacted sensitive payload",
+      "observed": "Task2 FAILED; camera2 test-profile-2; Synthetic result2; token redacted",
+      "status": "superato"
+    },
+    {
+      "control": "Back to Task Queue",
+      "expected": "Return from detail to task list",
+      "observed": "Task Queue heading;20 visible rows;205 total",
+      "status": "superato"
     }
   ],
   "limits": [
-    "CSV/XLSX receipt remains unverified; no HTTP response or click alone is treated as passed",
+    "CSV empty-table and filtered XLSX receipt remain unverified; the new passing case is specifically the unfiltered CSV",
+    "Browser download wait unexpectedly took 959 seconds despite an 8-second requested timeout; do not repeat that blocking observation pattern",
     "This covers task-table interactions listed here, not the complete product matrix"
   ]
 }

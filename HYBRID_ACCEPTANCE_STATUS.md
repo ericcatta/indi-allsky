@@ -14,6 +14,18 @@ verified on main. The complete control/effect matrix, remaining cleanup and
 post-removal deployment checks remain open. The 24-hour observation remains deferred. Main and installed
 production retain Classic files until those gates are addressed.
 
+## Settings credential privacy — 2026-09-20
+
+Ordinary authenticated users no longer receive credential values in Settings
+form/context HTML, including nested driver/profile JSON. Administrators retain
+their configuration access; the read projection never changes persisted values.
+On main, all 161 Python and 34 JavaScript entries pass; existing form/parser fingerprints
+remain unchanged. Native synthetic checks cover both roles, rejected invalid
+input, a valid full save, its history revision and reopening after save.
+Evidence: `testing/evidence/hybrid-settings-privacy-native-20260920.json`.
+Production deployment remains pending. A duplicate Full Settings heading ID
+found during this check is recorded for a separate correction.
+
 ## Mandatory Hybrid login — 2026-09-20
 
 The user selected mandatory login for Hybrid. All 107 Hybrid entrances pass
@@ -25,7 +37,9 @@ retirement gate. All 160 Python and 34 JavaScript regression entries pass.
 Evidence: `testing/evidence/hybrid-private-ui-policy-20260920.json`.
 
 Native task-table filtering, keyboard pagination/sorting and filtered Copy
-also pass; CSV/XLSX download receipt remains unverified. Evidence:
+also pass. Unfiltered CSV receipt is now verified on disk: 205 data rows,
+10 columns and both camera/profile identities. Empty-table CSV and filtered
+XLSX receipt remain unverified. Evidence:
 `testing/evidence/hybrid-task-table-native-20260920.json`. The full control
 matrix, final cleanup and production acceptance after removal remain open.
 

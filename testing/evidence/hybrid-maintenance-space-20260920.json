@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-20",
+  "scope": "Authorized cleanup of old test images to provide deployment backup headroom",
+  "before_free_bytes": 5541965824,
+  "after_free_bytes": 8590405632,
+  "deleted_images": 4783,
+  "keep_days": 3,
+  "target_free_gib": 8,
+  "method": "Existing StoragePressureRuntime candidates/delete, cleanup lock and task protection; reclaim_old_images continuing=True; two bounded runs",
+  "configuration_changed": false,
+  "capture_service": {
+    "MainPID": 1566,
+    "NRestarts": 0,
+    "ActiveState": "active"
+  },
+  "live_check_during_cleanup": {
+    "local_time": "2026-09-20T19:31:54.909437",
+    "latest_frames": {
+      "1": "2026-09-20 19:31:29",
+      "2": "2026-09-20 19:31:42"
+    }
+  },
+  "remote_reports": [
+    "/home/eric/hybrid-maintenance-space-20260920.json",
+    "/home/eric/hybrid-maintenance-space-final-20260920.json"
+  ],
+  "limitations": [
+    "This is a bounded maintenance check, not 24-hour acceptance.",
+    "No timelapse deletion was needed."
+  ]
+}
