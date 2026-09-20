@@ -57,6 +57,18 @@
         "sha256": "24f723dc2f506b1986c8081bdee2fc2ab123c506a3dc7739b7825490e2b6a1d8",
         "bytes": 22506
       }
+    },
+    {
+      "control": "Failed task Details",
+      "expected": "Show matching task identity, result, scope and redacted sensitive payload",
+      "observed": "Task2 FAILED; camera2 test-profile-2; Synthetic result2; token redacted",
+      "status": "superato"
+    },
+    {
+      "control": "Back to Task Queue",
+      "expected": "Return from detail to task list",
+      "observed": "Task Queue heading;20 visible rows;205 total",
+      "status": "superato"
     }
   ],
   "limits": [
