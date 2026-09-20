@@ -10,14 +10,26 @@ import socket
 import psutil
 from cryptography.fernet import InvalidToken
 from flask import current_app as app, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from sqlalchemy.orm.exc import NoResultFound
 
 from .base_views import FormView
 from .forms import IndiAllskyConfigForm
 
 
-class HybridSettingsFormView(FormView):
+class SettingsPrivacyContextMixin:
+    """Apply the reader's credential policy before constructing form context."""
+
+    def get_context(self):
+        if not app.config.get('LOGIN_DISABLED') and not current_user.is_admin:
+            from ..modern_admin_settings_privacy import redact_settings
+            # Persistence retains its original config object; only this view's
+            # read projection is passed to form and profile context builders.
+            self.indi_allsky_config = redact_settings(self.indi_allsky_config)
+        return super().get_context()
+
+
+class HybridSettingsFormView(SettingsPrivacyContextMixin, FormView):
     page_title = 'Config'
     decorators = [login_required]
 

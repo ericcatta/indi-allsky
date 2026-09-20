@@ -1,5 +1,17 @@
 # Hybrid acceptance status
 
+## Settings credential privacy — 2026-09-20
+
+Ordinary authenticated users no longer receive credential values in Settings
+form/context HTML, including nested driver/profile JSON. Administrators retain
+their configuration access; the read projection never changes persisted values.
+All 161 Python and 34 JavaScript entries pass; existing form/parser fingerprints
+remain unchanged. Native synthetic checks cover both roles, rejected invalid
+input, a valid full save, its history revision and reopening after save.
+Evidence: `testing/evidence/hybrid-settings-privacy-native-20260920.json`.
+Production deployment remains pending. A duplicate Full Settings heading ID
+found during this check is recorded for a separate correction.
+
 ## Mandatory Hybrid login — 2026-09-20
 
 The user selected mandatory login for Hybrid. All 107 Hybrid entrances pass

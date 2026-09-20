@@ -78,7 +78,7 @@ var camera_id = {{ camera_id }};
     </section>
 
     {% if not login_disabled and not current_user.is_admin %}
-    <p class="modern-admin-note">You can inspect these settings. An administrator account is required to save changes.</p>
+    <p class="modern-admin-note">You can inspect these settings. Credential values are hidden. An administrator account is required to save changes.</p>
     {% endif %}
     <form id="modern-admin-full-settings-form" class="modern-admin-settings-form" autocomplete="off" novalidate>
         <fieldset style="border:0;padding:0;min-width:0" {% if not login_disabled and not current_user.is_admin %}disabled{% endif %}>

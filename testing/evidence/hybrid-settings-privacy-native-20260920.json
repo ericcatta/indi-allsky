@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-20",
+  "scope": "Native browser on localhost:18112; isolated memory database, synthetic credentials, external effects blocked; Classic imports forbidden",
+  "source_manifest": "db445a83a8de775991763b34050d61b0a1abd39bfbc06b2c2852398263c6fa99",
+  "checks": [
+    {
+      "role": "ordinary test-user-2",
+      "page": "/indi-allsky/modern-admin/settings/full?camera_id=2",
+      "status": "superato",
+      "observed": "Read-only credential notice visible; fields disabled; no synthetic MQTT/driver credential in DOM; JSON driver password redacted. Password inputs are cleared by the existing client controller."
+    },
+    {
+      "role": "admin test-user-1",
+      "page": "/indi-allsky/modern-admin/settings/full?camera_id=2",
+      "status": "superato",
+      "observed": "Successful synthetic login; form enabled; driver synthetic credential retained in JSON field; read-only notice absent."
+    },
+    {
+      "role": "admin test-user-1",
+      "control": "Save Full Settings with invalid synthetic driver block",
+      "status": "superato",
+      "observed": "Validation rejected fixture-only TEXTS key; inline error identifies allowed PROPERTIES/TEXT/SWITCHES; save button reenabled."
+    },
+    {
+      "role": "admin test-user-1",
+      "control": "Search settings + valid Full Settings save + Config History + reopen",
+      "status": "superato",
+      "observed": "Search isolated INDI_CONFIG_DEFAULTS; corrected synthetic block to TEXT; saved without Reload on Save; received Saved new config; history contains exactly revisions1/2 with supplied note; reopening retains driver sentinel and two profiles."
+    },
+    {
+      "role": "ordinary test-user-2",
+      "control": "Reopen Full Settings after administrator save",
+      "status": "superato",
+      "observed": "Newly persisted valid driver block is redacted; synthetic MQTT/driver credentials absent from DOM; form disabled and privacy notice visible."
+    }
+  ],
+  "limitations": [
+    "No production credentials inspected",
+    "Native save was confined to synthetic memory DB; no production save or capture reload."
+  ],
+  "open_defects": [
+    "Full Settings renders duplicate modern-admin-full-settings-title IDs on H1/H2; separate fix required."
+  ],
+  "regression": {
+    "python_cases": 161,
+    "javascript_cases": 34,
+    "status": "passed",
+    "source_files": 836,
+    "source_changed": false,
+    "source_manifest": "db445a83a8de775991763b34050d61b0a1abd39bfbc06b2c2852398263c6fa99",
+    "python_report": "/home/eric/hybrid-settings-privacy-final-regression-20260920/results.json",
+    "python_report_sha256": "f863f4bae9da439c572b35d5fe5088130045c6dc6da19da24597dcfaf67e18e1",
+    "javascript_report": "/tmp/hybrid-settings-privacy-js-20260920.json",
+    "existing_fingerprints": "unchanged"
+  },
+  "correction_history": "Initial regression detected frozen get_context fingerprint change; credential policy moved to SettingsPrivacyContextMixin and entire Python suite repeated successfully."
+}
