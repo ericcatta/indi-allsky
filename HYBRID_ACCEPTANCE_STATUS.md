@@ -9,8 +9,12 @@ All 161 Python and 34 JavaScript entries pass; existing form/parser fingerprints
 remain unchanged. Native synthetic checks cover both roles, rejected invalid
 input, a valid full save, its history revision and reopening after save.
 Evidence: `testing/evidence/hybrid-settings-privacy-native-20260920.json`.
-Production deployment remains pending. A duplicate Full Settings heading ID
-found during this check is recorded for a separate correction.
+Production `68f35d76` now passes bounded Settings/Now checks with all 836
+tested source hashes matching. Configuration117 and capture PID 1566 were
+preserved. Maintenance frame delays were observed; both cameras recovered
+45-second night cadence in the final four-frame sample. Evidence:
+`testing/evidence/hybrid-settings-privacy-deployment.json`. A duplicate Full
+Settings heading ID remains recorded for a separate correction.
 
 ## Mandatory Hybrid login — 2026-09-20
 
