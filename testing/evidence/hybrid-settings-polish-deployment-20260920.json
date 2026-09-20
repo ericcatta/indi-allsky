@@ -1,0 +1,93 @@
+{
+  "date": "2026-09-20",
+  "status": "bounded production acceptance passed",
+  "previous": "68f35d76b987877d1d7c1cba6132c5666a92a6c1",
+  "installed": "cb51d7b417ce6b24b4fece6eb042346ea6730b3e",
+  "source_files": 837,
+  "source_manifest_canonical_sha256": "df27fccaca2cdd6f63f69865712ab635f78beb01471454d1825f9c9ec46e49a8",
+  "backup": {
+    "path": "/home/eric/hybrid-backups/hybrid-settings-polish-20260920-204903",
+    "integrity": "ok",
+    "strategy": "pinned WAL read snapshot",
+    "seconds": 227.58,
+    "rollback": "deploy.py --rollback EXACT_BACKUP_PATH --maintenance-until FRESH_TIMEZONE_AWARE_DEADLINE; code-only return to previous release"
+  },
+  "preserved": {
+    "configuration_revision": 117,
+    "flask_configuration_bytes": true,
+    "capture_pid": 1566,
+    "capture_restarted": false,
+    "untracked_files": true
+  },
+  "web_pid": 631359,
+  "browser": {
+    "role": "authenticated administrator",
+    "before": {
+      "duplicate_id": "modern-admin-full-settings-title",
+      "search_result_status": false
+    },
+    "after": {
+      "duplicate_ids": [],
+      "h1": "Full Settings",
+      "main_label": "modern-admin-full-settings-title",
+      "search_status_role": "status",
+      "controls": [
+        {
+          "id": "modern-admin-full-settings-filter",
+          "input": "HEALTHCHECK__DISK_USAGE",
+          "observed": "1 setting matches.",
+          "status": "superato"
+        },
+        {
+          "id": "modern-admin-full-settings-filter",
+          "input": "hybrid-no-matching-setting-20260920",
+          "observed": "No settings match. Change or clear your search.",
+          "status": "superato"
+        },
+        {
+          "id": "modern-admin-full-settings-filter",
+          "input": "Meta+A then Backspace",
+          "observed": "679 settings match.",
+          "status": "superato"
+        }
+      ]
+    },
+    "now_frames": [
+      {
+        "camera": "libcamera_imx708",
+        "loaded": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera": "ZWO CCD ASI678MC",
+        "loaded": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ],
+    "now_alerts": []
+  },
+  "capture": {
+    "report": "/home/eric/hybrid-settings-polish-capture-check.json",
+    "last_observed": "2026-09-20T20:56:32+02:00",
+    "camera1_intervals_seconds": [
+      45,
+      45,
+      45
+    ],
+    "camera2_intervals_seconds": [
+      45,
+      45,
+      46
+    ],
+    "recent_files_present_nonempty": true,
+    "maintenance_delay_observed_seconds": 67
+  },
+  "limitations": [
+    "No production configuration save was performed; save semantics and credential logging are certified by isolated tests against identical installed sources",
+    "The slow backup coincided with an extended frame interval; this is not a claim of uninterrupted exact cadence",
+    "Classic remains disabled and physically present in production",
+    "Full product control/effect matrix and post-removal acceptance remain open; 24-hour observation is deferred"
+  ]
+}

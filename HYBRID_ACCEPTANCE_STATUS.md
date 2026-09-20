@@ -11,7 +11,10 @@ without creating a revision. All 162 Python entries pass on unchanged
 837-file source hashes. The 34 JavaScript entries passed on unchanged JS
 sources in the preceding usability mission. Evidence:
 `testing/evidence/hybrid-settings-validation-logging-20260920.json`.
-Not yet deployed; this does not certify every application logging path.
+Installed as `cb51d7b4` with the tested source hashes matched. Bounded native
+Settings/Now checks pass; see
+`testing/evidence/hybrid-settings-polish-deployment-20260920.json`.
+This does not certify every application logging path.
 
 ## Settings search and complete document landmarks — 2026-09-20
 
@@ -23,7 +26,9 @@ Native ordinary-user checks cover Storage focus, empty/single results and
 keyboard clearing while the form remains read-only. All 161 Python and
 34 JavaScript entries pass with unchanged source hashes during the run.
 Evidence: `testing/evidence/hybrid-settings-usability-20260920.json`; linked
-control records are added to the route register. This change is not yet deployed.
+control records are added to the route register. Installed in `cb51d7b4`;
+native production search, empty results and keyboard recovery also pass.
+Deployment evidence is linked above.
 
 ## Settings credential privacy — 2026-09-20
 

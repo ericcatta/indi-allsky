@@ -1,8 +1,28 @@
 # Hybrid: deployment and rollback
 
-## Settings privacy installed, 20 September 2026
+## Settings usability and validation logs installed, 20 September 2026
 
-Production is `68f35d76b987877d1d7c1cba6132c5666a92a6c1`. All 836
+Production is `cb51d7b417ce6b24b4fece6eb042346ea6730b3e`. All 837 tested
+source hashes match. Native Full Settings checks confirm unique IDs, matching
+counts, empty-search recovery and keyboard clearing. Both Now images decode.
+Configuration 117, Flask configuration, capture PID 1566 and untracked files
+were preserved. The backup passed integrity validation in 227.58 seconds.
+An extended 67-second frame interval occurred during maintenance; the final
+samples were 45 seconds on IMX708 and 45–46 seconds on ASI. Evidence:
+`testing/evidence/hybrid-settings-polish-deployment-20260920.json`.
+
+For this release, use the exact backup
+`/home/eric/hybrid-backups/hybrid-settings-polish-20260920-204903` and its
+`deploy.py --rollback EXACT_BACKUP_PATH --maintenance-until FRESH_DEADLINE`.
+The deadline must include a timezone and leave at least three minutes.
+The guarded code-only rollback returns to `68f35d76`, restarting web/socket
+while retaining capture, the database and current configuration. It is prepared
+but has not been exercised by reverting this live release. Classic remains
+disabled and physically present; final retirement acceptance is still open.
+
+## Previous Settings privacy deployment, 20 September 2026
+
+That deployment installed `68f35d76b987877d1d7c1cba6132c5666a92a6c1`. All 836
 tested source hashes match. Web-only deployment preserved configuration 117
 and capture PID 1566. Native Settings/Now checks pass. Frame delays occurred
 during maintenance; the final sample returned to 45-second cadence on both
