@@ -15,8 +15,8 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/cameras/adu-history` | 0 | Da associare o collaudare |
 | `/modern-admin/cameras/dark-library` | 0 | Da associare o collaudare |
 | `/modern-admin/cameras/detect-indi` | 0 | Da associare o collaudare |
-| `/modern-admin/cameras/image-lag` | 0 | Da associare o collaudare |
-| `/modern-admin/cameras/info` | 0 | Da associare o collaudare |
+| `/modern-admin/cameras/image-lag` | 12 | [hybrid-image-lag-native-20260920](../testing/evidence/hybrid-image-lag-native-20260920.json) |
+| `/modern-admin/cameras/info` | 2 | [hybrid-camera-info-navigation-20260920](../testing/evidence/hybrid-camera-info-navigation-20260920.json) |
 | `/modern-admin/cameras/mask-base` | 0 | Da associare o collaudare |
 | `/modern-admin/cameras/start-indi` | 0 | Da associare o collaudare |
 | `/modern-admin/capture/abort-exposure` | 0 | Da associare o collaudare |

@@ -1,0 +1,157 @@
+{
+  "date": "2026-09-20",
+  "installed": "cb51d7b417ce6b24b4fece6eb042346ea6730b3e",
+  "scope": "Native production browser; listed read-only diagnostic controls",
+  "controls": [
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "Next",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Page 2",
+      "observed": "Showing 21 to 40 of 50 entries; first timestamp 2026-09-20 20:54:39",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "Last",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Final page",
+      "observed": "Showing 41 to 50 of 50 entries; 10 rows",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "Previous",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Previous page",
+      "observed": "Showing 21 to 40 of 50 entries",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "First",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Initial page",
+      "observed": "Showing 1 to 20 of 50 entries",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "dt-length-0",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Show 50 rows",
+      "observed": "After opening the menu, ArrowDown and Enter selected 50; 50 rows rendered",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "image-lag-table-search: match",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Filter exact observed timestamp",
+      "observed": "Search 21:09:39 displayed one matching row and 1 shown",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "image-lag-table-search: empty",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Explain no match",
+      "observed": "Search no-matching-capture displayed 0 shown and No records match the current filters.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "image-lag-table-search: clear",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Restore rows",
+      "observed": "Meta+A then Backspace restored 50 shown",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "Processing: ascending",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Numeric ascending order",
+      "observed": "All 50 values nondecreasing, 1.79 to 17.12; aria-sort=ascending",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "Processing: descending",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "No network mutation; local table interaction",
+      "expected": "Keyboard descending order",
+      "observed": "Enter reversed all 50 values, 17.12 to 1.79; aria-sort=descending",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "Diagnostic camera > ASI678MC",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "/indi-allsky/modern-admin/cameras/image-lag?camera_id=2&profile_id=asi678mc",
+      "expected": "Display camera2 and matching profile",
+      "observed": "Selected ASI678MC, camera_id=2&profile_id=asi678mc; first row exposure 0.0262617 at 21:11:10",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/cameras/image-lag",
+      "identifier": "Diagnostic camera > IMX708 Wide",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "prerequisites": "Production capture running, populated 50-row diagnostic view; table starts at 20 rows",
+      "request": "/indi-allsky/modern-admin/cameras/image-lag?camera_id=1&profile_id=imx708-wide",
+      "expected": "Keyboard return to camera1",
+      "observed": "Enter selected IMX708 Wide, camera_id=1&profile_id=imx708-wide; first row exposure 0.3457751 at 21:12:39",
+      "status": "superato"
+    }
+  ],
+  "limitations": [
+    "Copy, CSV and Excel receipt are not certified by this record",
+    "Global shell recovery controls and other roles are not part of this native run",
+    "The first keyboard attempt on the closed row-count menu did not change its selection; opening the menu before keyboard selection did work",
+    "Live rows change with capture; timestamps document this observed run, not fixed test data"
+  ]
+}

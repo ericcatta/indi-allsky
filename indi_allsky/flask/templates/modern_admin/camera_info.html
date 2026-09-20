@@ -22,9 +22,13 @@ var camera_id = {{ camera_id }};
             <h2 id="camera-overview-title">{{ camera.friendlyName or camera.name or 'Camera' }}</h2>
         </div>
 
+        <nav class="modern-admin-link-grid" aria-label="Diagnostic camera">
+        {% for choice in diagnostic_camera_choices %}<a href="{{ url_for(request.endpoint, camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == camera_id|int %}aria-current="page"{% endif %}>{{ choice.label }}</a>{% endfor %}
+        </nav>
+
         <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
             <div><dt>Name</dt><dd>{{ camera.name }}</dd></div>
-            <div><dt>Friendly Name</dt><dd>{{ camera.friendlyName }}</dd></div>
+            <div><dt>Friendly Name</dt><dd>{{ camera.friendlyName or '—' }}</dd></div>
             <div><dt>Driver</dt><dd>{{ camera.driver }}</dd></div>
             <div><dt>Resolution</dt><dd>{{ camera.width }} x {{ camera.height }}</dd></div>
             <div><dt>Sensor Size</dt><dd>{{ "%0.1f"|format(camera_width_mm | float) }}mm x {{ "%0.1f"|format(camera_height_mm | float) }}mm</dd></div>

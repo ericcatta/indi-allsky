@@ -205,7 +205,92 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminImageLagView",
-      "evidence": []
+      "evidence": [
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[0]",
+          "control": "Next",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[1]",
+          "control": "Last",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[2]",
+          "control": "Previous",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[3]",
+          "control": "First",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[4]",
+          "control": "dt-length-0",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[5]",
+          "control": "image-lag-table-search: match",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[6]",
+          "control": "image-lag-table-search: empty",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[7]",
+          "control": "image-lag-table-search: clear",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[8]",
+          "control": "Processing: ascending",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[9]",
+          "control": "Processing: descending",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[10]",
+          "control": "Diagnostic camera > ASI678MC",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/image-lag",
+          "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
+          "record": "controls[11]",
+          "control": "Diagnostic camera > IMX708 Wide",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/cameras/info",
@@ -215,7 +300,22 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminCameraInfoView",
-      "evidence": []
+      "evidence": [
+        {
+          "page": "/modern-admin/cameras/info",
+          "source": "testing/evidence/hybrid-camera-info-navigation-20260920.json",
+          "record": "after.controls[0]",
+          "control": "Diagnostic camera > Test Profile 2",
+          "recorded_status": "superato"
+        },
+        {
+          "page": "/modern-admin/cameras/info",
+          "source": "testing/evidence/hybrid-camera-info-navigation-20260920.json",
+          "record": "after.controls[1]",
+          "control": "Diagnostic camera > Test Profile 1",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/cameras/mask-base",

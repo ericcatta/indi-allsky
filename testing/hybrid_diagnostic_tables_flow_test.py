@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 import json
 import re
+from html import unescape
 from flask import template_rendered
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_generation_fixture import seed_generation
@@ -40,6 +41,22 @@ def run():
                     page = client.get(path + '?camera_id=' + str(cid))
                     assert page.status_code == 200, (path, page.status_code, page.text[:200])
                     assert int(contexts[-1]['camera_id']) == cid, path
+                    if suffix == '/cameras/info':
+                        navigation = re.search(r'<nav[^>]+aria-label="Diagnostic camera">(.*?)</nav>', page.text, re.S)
+                        assert navigation is not None, 'Camera Info cannot switch cameras'
+                        nav = navigation[1]
+                        assert nav.count('aria-current="page"') == 1
+                        links = [unescape(href) for href in re.findall(r'href="([^"]+)"', nav)]
+                        assert len(links) == 2
+                        for target, href in enumerate(links, 1):
+                            assert 'camera_id=' + str(target) in href
+                            assert 'profile_id=test-profile-' + str(target) in href
+                            switched = client.get(href)
+                            assert switched.status_code == 200
+                            assert int(contexts[-1]['camera_id']) == target
+                            assert contexts[-1]['camera'].id == target
+                        # Restore the original context for the checks below.
+                        page = client.get(path + '?camera_id=' + str(cid))
                     if suffix.endswith('image-lag'):
                         body = page.text.split('<tbody>')[1].split('</tbody>')[0]
                         assert ('4.40' in body) == (cid == 2)

@@ -1,5 +1,22 @@
 # Hybrid acceptance status
 
+## Camera diagnostics navigation — 2026-09-20
+
+Camera Info now provides camera/profile links using the existing diagnostic
+selection contract. A native production check reproduced the missing controls;
+isolated browser checks verify both selections and the current-camera marker.
+Integration checks follow the links for administrator and ordinary users,
+retaining existing malformed/mismatched scope checks. All 162 Python entries
+pass on unchanged 837-file source hashes. JavaScript sources are unchanged
+from the prior 34-entry passing suite. Not yet deployed. Evidence:
+`testing/evidence/hybrid-camera-info-navigation-20260920.json`.
+
+Separately, 12 native production Image Lag controls pass: pagination, row count,
+matching/empty/cleared search, numeric sorting and camera/profile navigation,
+including keyboard actions. Copy and downloaded exports are not certified by
+this record. Evidence: `testing/evidence/hybrid-image-lag-native-20260920.json`.
+All 14 control references are linked and checked in the route evidence register.
+
 ## Settings validation log privacy — 2026-09-20
 
 Full Config errors no longer persist submitted field values or reflected

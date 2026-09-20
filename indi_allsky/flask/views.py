@@ -7921,6 +7921,7 @@ class ModernAdminCameraInfoView(ModernAdminCameraToolView, CameraScopedTemplateM
 
     def get_context(self):
         context = super().get_context()
+        context['diagnostic_camera_choices'] = self.get_media_camera_filters()[1:]
 
         camera = IndiAllSkyDbCameraTable.query\
             .filter(IndiAllSkyDbCameraTable.id == self.camera.id)\
