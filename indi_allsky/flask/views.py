@@ -4979,18 +4979,14 @@ class ModernAdminCompatibilityRedirectView(BaseView):
 
 
 class ModernAdminModeView(BaseView):
-    # Keep bookmarked shell switches valid when Classic is not registered.
+    # Preserve bookmarked shell switches after retiring the Classic frontend.
     decorators = [login_required]
 
     def dispatch_request(self, mode):
         from urllib.parse import urlencode
-        if mode == 'classic' and 'indi_allsky.config_view' in app.view_functions:
-            session['admin_mode'] = 'classic'
-            endpoint = 'indi_allsky.config_view'
-        else:
-            session['admin_mode'] = 'modern'
-            endpoint = ('indi_allsky.modern_admin_full_settings_view' if mode == 'classic'
-                        else 'indi_allsky.modern_admin_now_view')
+        session['admin_mode'] = 'modern'
+        endpoint = ('indi_allsky.modern_admin_full_settings_view' if mode == 'classic'
+                    else 'indi_allsky.modern_admin_now_view')
         destination = url_for(endpoint)
         query = urlencode(list(request.args.items(multi=True)))
         return redirect(destination + ('?' + query if query else ''))

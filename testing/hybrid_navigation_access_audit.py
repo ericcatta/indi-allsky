@@ -5,7 +5,7 @@ This executes the real authentication decorators against an isolated Flask app.
 It does not claim to render every page or verify the sensitivity of its payload.
 """
 import argparse
-import ast
+import hashlib
 from collections import Counter
 import json
 from pathlib import Path
@@ -15,32 +15,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def classic_gates():
-    classes = {}
-    for file in ('base_views.py', 'views.py', 'classic_views.py'):
-        tree = ast.parse((ROOT/'indi_allsky/flask'/file).read_text())
-        classes.update({node.name: node for node in tree.body if isinstance(node, ast.ClassDef)})
-    cache = {'object': object}
-    def skeleton(name):
-        if name in cache:
-            return cache[name]
-        node = classes.get(name)
-        bases = tuple(skeleton(base.id) for base in node.bases if isinstance(base, ast.Name)) if node else ()
-        attrs = {}
-        for statement in node.body if node else []:
-            if isinstance(statement, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'decorators' for target in statement.targets):
-                assert isinstance(statement.value, ast.List)
-                attrs['decorators'] = [value.id for value in statement.value.elts]
-        cache[name] = type(name, bases or (object,), attrs)
-        return cache[name]
-    tree = ast.parse((ROOT/'indi_allsky/flask/classic_views.py').read_text())
-    result = {}
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == 'add_url_rule':
-            view = next(value.value for value in node.keywords if value.arg == 'view_func').func.value.id
-            gates = skeleton(view).decorators
-            assert len(gates) == 1
-            result[node.args[0].value] = {'class': view, 'gate': gates[0]}
-    return result
+    path = ROOT/'testing/classic_navigation_auth_contract.json'
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == '385d12c2a4a95464ae0333dce595e6a16801a3960650afa2f50fed783960e1c7'
+    contract = json.loads(path.read_text())
+    assert len(contract['gates']) == 56
+    return contract['gates']
 
 
 def collect():
@@ -76,7 +55,7 @@ def collect():
                              'hybrid_gate': decorators[0].__name__,
                              'different_gate': legacy[path]['gate'] != decorators[0].__name__})
         assert len(rows) == len(legacy) == 56
-        return {'scope': 'Authentication gates only: actual decorators in isolated Flask, Classic inheritance read via AST; no Classic import or live effect.',
+        return {'scope': 'Authentication gates only: actual decorators in isolated Flask, historical Classic inheritance preserved in the frozen authentication contract; no Classic import or live effect.',
                 'legacy_gate_counts': dict(Counter(row['legacy_gate'] for row in rows)),
                 'hybrid_gate_counts': dict(Counter(row['hybrid_gate'] for row in rows)),
                 'different_gate_count': sum(row['different_gate'] for row in rows),

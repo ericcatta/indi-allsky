@@ -2,6 +2,8 @@
 SHARED_FILES = frozenset({
     'images/favicon_32.png', 'images/favicon_128.png',
     'bootstrap/bootstrap.min.css', 'bootstrap/bootstrap.bundle.min.js',
+    'bootstrap/bootstrap.min.css.map', 'bootstrap/bootstrap.bundle.min.js.map',
+    'js/chart.umd.js.map',
     'js/jquery-3.7.1.min.js', 'js/chart.umd.js', 'js/clipboard.min.js',
     'DataTables/datatables.min.css', 'DataTables/datatables.min.js',
     'html2canvas/html2canvas.min.js',

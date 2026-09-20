@@ -43,9 +43,10 @@ def run(*, all_flows=False, oauth_python=None, report_path=None):
             shutil.copytree(ROOT / name, stage / name, ignore=ignore)
         flask = stage / 'indi_allsky/flask'
         classic = flask / 'classic_views.py'
-        assert classic.is_file(), 'Expected optional frontend module before rehearsal'
-        classic.unlink()
-        removed = {'modules': 1, 'templates': 0, 'assets': 0}
+        removed = {'modules': 0, 'templates': 0, 'assets': 0}
+        if classic.is_file():
+            classic.unlink()
+            removed['modules'] = 1
         for path in (flask / 'templates').rglob('*'):
             if not path.is_file():
                 continue
@@ -58,7 +59,6 @@ def run(*, all_flows=False, oauth_python=None, report_path=None):
             name = path.relative_to(flask / 'static').as_posix()
             if name not in SHARED_FILES and not name.startswith(('modern_admin/', 'virtualsky/')):
                 path.unlink(); removed['assets'] += 1
-        assert removed['templates'] > 0 and removed['assets'] > 0
         assert not classic.exists() and not (flask / 'templates/base.html').exists()
         # Every child imports its copied fixtures/package. Prevent an installed
         # or editable source checkout from silently supplying the missing files.

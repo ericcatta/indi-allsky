@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Shutdown network policy and login1 effects without touching real hardware."""
 import re
+import sys
 from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app, login_client
 
@@ -10,7 +11,7 @@ def run():
         from indi_allsky.flask.views import AjaxSystemInfoView, ModernAdminSystemInfoView
         from indi_allsky.modern_safe_action import ModernAdminPowerOffCommandBoundary
         from indi_allsky.modern_admin_runtime_effects import ModernAdminLogin1PowerEffects
-        assert not app.config['HYBRID_ENABLE_CLASSIC_UI']
+        assert 'indi_allsky.flask.classic_views' not in sys.modules
         admin, ordinary, anonymous = login_client(app, 1), login_client(app, 2), app.test_client()
         def headers(client, page='/indi-allsky/modern-admin/account'):
             return {'X-CSRFToken': re.search(r'name="csrf_token"[^>]*value="([^"]+)"', client.get(page).text)[1]}

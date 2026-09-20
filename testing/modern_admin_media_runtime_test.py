@@ -623,16 +623,6 @@ def test_safe_control_image_circle_preview_delegates_display_url_to_media_access
     assert_true('.normalize_media_url(' not in view_body, 'Image Circle helper must not own direct URL normalization')
 
 
-def test_classic_image_circle_preview_preserves_default_url_hook():
-    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'classic_views.py').read_text(encoding='utf-8')
-    start = source.index('class ImageCircleHelperView')
-    end = source.index('\nclass ', start + 1)
-    body = source[start:end]
-
-    assert_true('self.resolve_latest_image_url(latest_image, local=local)' in body, 'Image Circle base view should call the overridable URL boundary')
-    assert_true('return latest_image.getUrl(s3_prefix=self.s3_prefix, local=local)' in body, 'Classic Image Circle behavior should preserve the existing getUrl call')
-
-
 def test_images_folder_route_delegates_serving_to_media_serve_adapter():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'views.py').read_text(encoding='utf-8')
     start = source.index('def images_folder(path):')
@@ -712,17 +702,6 @@ def test_modern_mask_delegates_file_metadata_to_media_access_adapter():
     assert_true('.resolve_existing_path_mtime(mask_image_p)' in body, 'Modern Mask mtime lookup should go through Hybrid media access adapter')
     assert_true('mask_image_p.exists()' not in body, 'Modern Mask must not own direct path availability checks')
     assert_true('mask_image_p.stat()' not in body, 'Modern Mask must not own direct file metadata reads')
-
-
-def test_classic_mask_preserves_default_file_metadata_hook():
-    source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'classic_views.py').read_text(encoding='utf-8')
-    start = source.index('class MaskView')
-    end = source.index('class ImageLagView', start)
-    body = source[start:end]
-
-    assert_true('self.resolve_mask_mtime(mask_image_p)' in body, 'Mask base view should call the overridable filesystem metadata boundary')
-    assert_true('if not mask_image_p.exists():' in body, 'Classic Mask should preserve its existing path availability check')
-    assert_true('return mask_image_p.stat().st_mtime' in body, 'Classic Mask should preserve its existing mtime read')
 
 
 def test_preview_metadata_lookup_shapes_thumbnail_url():
@@ -958,7 +937,6 @@ def run_tests():
     test_generated_media_metadata_delegates_media_access_to_runtime_adapter()
     test_observatory_keogram_views_delegate_display_urls_to_media_access_adapter()
     test_safe_control_image_circle_preview_delegates_display_url_to_media_access_adapter()
-    test_classic_image_circle_preview_preserves_default_url_hook()
     test_images_folder_route_delegates_serving_to_media_serve_adapter()
     test_fits_preview_route_delegates_path_resolution_to_media_access_adapter()
     test_fits_preview_extraction_preserves_class_and_shared_handler_boundary()
@@ -966,7 +944,6 @@ def run_tests():
     test_fits_preview_route_delegates_file_mtime_to_media_access_adapter()
     test_dark_library_delegates_read_only_media_access_to_adapter()
     test_modern_mask_delegates_file_metadata_to_media_access_adapter()
-    test_classic_mask_preserves_default_file_metadata_hook()
     test_preview_metadata_lookup_shapes_thumbnail_url()
     test_preview_metadata_lookup_falls_back_when_thumbnail_missing()
     test_preview_metadata_lookup_falls_back_without_thumbnail_uuid()

@@ -2,6 +2,7 @@
 """Classic-only page definitions must not be loaded through shared views."""
 import ast
 import hashlib
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,17 +12,18 @@ FINGERPRINTS = {'RealtimeKeogramView': 'd92f8df33ad80cf30c79c2633f9857b1ebf0782e
 
 def run():
     shared = ast.parse((ROOT/'indi_allsky/flask/views.py').read_text())
-    classic = ast.parse((ROOT/'indi_allsky/flask/classic_views.py').read_text())
-    classes = {n.name:n for n in classic.body if isinstance(n, ast.ClassDef)}
+    assert not (ROOT/'indi_allsky/flask/classic_views.py').exists()
+    classes = json.loads((ROOT/'testing/classic_frontend_contract.json').read_text())['classes']
     for name, fingerprint in FINGERPRINTS.items():
-        assert hashlib.sha256(ast.dump(classes[name], include_attributes=False).encode()).hexdigest() == fingerprint, name
-    assert not any(isinstance(n, ast.Name) and n.id in FINGERPRINTS
-                   or isinstance(n, ast.ClassDef) and n.name in FINGERPRINTS
-                   or isinstance(n, ast.alias) and n.name in FINGERPRINTS
+        assert classes[name] == fingerprint, name
+    assert not any(isinstance(n, ast.Name) and n.id in classes
+                   or isinstance(n, ast.ClassDef) and n.name in classes
+                   or isinstance(n, ast.alias) and n.name in classes
                    for n in ast.walk(shared))
-    assert not any(isinstance(n, ast.ImportFrom) and n.module == 'views'
-                   for n in ast.walk(classic))
-    print('Classic-only isolation: 15 unchanged classes absent from shared views PASS')
+    for path in (ROOT/'indi_allsky/flask').glob('*.py'):
+        assert not any(isinstance(n, ast.ImportFrom) and n.module == 'classic_views'
+                       for n in ast.walk(ast.parse(path.read_text()))), path
+    print('Classic frontend absent: retired fingerprints retained and view names cannot reappear in shared handlers PASS')
 
 
 if __name__ == '__main__':

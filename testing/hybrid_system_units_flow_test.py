@@ -3,6 +3,7 @@
 import ast
 import re
 from pathlib import Path
+import sys
 from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app, login_client
 
@@ -11,7 +12,7 @@ def run():
     with isolated_app(multi_camera=True) as app:
         from indi_allsky.flask.views import AjaxSystemInfoView
         from indi_allsky.modern_admin_system_units import ModernAdminSystemUnits
-        assert not app.config['HYBRID_ENABLE_CLASSIC_UI']
+        assert 'indi_allsky.flask.classic_views' not in sys.modules
         admin, ordinary = login_client(app, 1), login_client(app, 2)
         def headers(client):
             page = client.get('/indi-allsky/modern-admin/account')

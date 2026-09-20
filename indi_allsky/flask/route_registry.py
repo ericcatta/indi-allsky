@@ -1,9 +1,9 @@
-"""Application route composition, with an optional Classic frontend."""
+"""Application route composition for Hybrid and shared/public compatibility."""
 
 from flask import Blueprint
 
 
-def create_allsky_blueprint(*, enable_classic_ui=True):
+def create_allsky_blueprint():
     # Importing the Hybrid/shared handlers must never import Classic pages.
     from .views import register_hybrid_routes
     from .views import register_compatibility_routes
@@ -14,10 +14,6 @@ def create_allsky_blueprint(*, enable_classic_ui=True):
     )
     register_hybrid_routes(bp_allsky)
     register_compatibility_routes(bp_allsky)
-    if enable_classic_ui:
-        from .classic_views import register_classic_routes
-        register_classic_routes(bp_allsky)
-    else:
-        from .navigation_redirects import register_navigation_redirects
-        register_navigation_redirects(bp_allsky)
+    from .navigation_redirects import register_navigation_redirects
+    register_navigation_redirects(bp_allsky)
     return bp_allsky

@@ -1,5 +1,19 @@
 # Hybrid acceptance status
 
+## Classic retirement candidate — 2026-09-20
+
+This branch removes 111 Classic-only frontend files and the transient startup
+flag, retaining shared/public handlers and 56 navigation redirects. All 159
+Python entrypoints passed against 776 source files with Classic physically
+absent; recovered sources match that manifest and 34 JavaScript checks pass.
+The candidate is preserved in Git rather than relying on a temporary worktree.
+Evidence: `testing/evidence/hybrid-classic-retirement-candidate.json`.
+
+This is not production acceptance. Anonymous read-page policy, the complete
+control/effect matrix, remaining cleanup and post-removal deployment checks
+are still open. The 24-hour observation remains deferred. Main and installed
+production retain Classic files until those gates are addressed.
+
 ## Accessible page headings — 2026-09-14
 
 The shared Hybrid header now supplies the missing H1 and resolves the main

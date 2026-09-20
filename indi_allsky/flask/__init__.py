@@ -97,11 +97,7 @@ def create_app():
 
     csrf.init_app(app)
 
-    # Default stays compatible until all Hybrid flows pass without Classic.
-    app.config.setdefault('HYBRID_ENABLE_CLASSIC_UI', True)
-    app.register_blueprint(create_allsky_blueprint(
-        enable_classic_ui=app.config['HYBRID_ENABLE_CLASSIC_UI'],
-    ))
+    app.register_blueprint(create_allsky_blueprint())
     from .archive_navigation import archive_return_url
     app.add_template_filter(archive_return_url)
     app.add_template_filter(basename)

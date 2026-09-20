@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the independent shells and guard their pre-split DOM contracts."""
+"""Guard the sole Hybrid shell DOM contract and retired frontend absence."""
 
 import hashlib
 from html.parser import HTMLParser
@@ -88,19 +88,19 @@ def shell_contract(shell, modern, authenticated, original_source=None):
 
 
 def test_shell_dom_parity():
-    # Classic retains the pre-split 17c5a322 baselines. Hybrid's baseline
-    # intentionally includes accessible navigation and role-aware recovery controls;
-    # Hybrid no longer loads Classic tab CSS/JS; Classic fingerprints stay unchanged.
-    # CSS cache version 007 is included; account links are checked separately. Full Config fingerprints
-    # are independent and unchanged.
+    # Hybrid fingerprints remain unchanged after physical Classic removal.
     expected = {
         (False, False): 'da24764ffdc54509edae10c1475666dc2ebe6808599afddbbe9fa65426a46010',
         (False, True): '5231472cc413795e3f2b4c2a380db4bc0f7a8205a9e092569f76999d806383fc',
         (True, False): 'b53972a1cf273bdf03c28b5a2b649a6163429dbe5227643045df0c93663cb322',
         (True, True): 'eaca7c085a1ddc89be90b6c2f080d6695133a4cd880c9f054e0014024decae9b',
     }
+    assert not (TEMPLATES / 'base.html').exists()
     for (modern, authenticated), fingerprint in expected.items():
-        shell = 'modern_admin/base.html' if modern else 'base.html'
+        if not modern:
+            # Historical fingerprints of the intentionally retired shell.
+            continue
+        shell = 'modern_admin/base.html'
         assert shell_contract(shell, modern, authenticated) == fingerprint, (modern, authenticated)
 
 
@@ -123,6 +123,10 @@ def test_hybrid_templates_never_load_classic_shell():
     shell = (TEMPLATES / 'modern_admin/base.html').read_text()
     assert 'admin-mode-switch-classic' not in shell
     assert 'admin_nav_url' not in shell
+    partial = (TEMPLATES / 'modern_admin/_shell_header.html').read_text()
+    assert 'modern_admin_mode_view' not in partial
+    assert 'data-modern-admin-system-command' not in partial
+    assert 'get_flashed_messages' in partial
 
 
 if __name__ == '__main__':

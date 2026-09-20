@@ -121,9 +121,7 @@ def test_display_and_encoded_fields():
     assert not any(isinstance(n, ast.ClassDef) and n.name == 'ConfigView' for n in shared.body)
     inventory = next(n for n in shared.body if isinstance(n, ast.ClassDef) and n.name == 'ModernAdminSettingsInventoryView')
     assert [ast.unparse(n) for n in inventory.bases] == ['ModernAdminContextMixin', 'HybridSettingsFormView']
-    classic = ast.parse((ROOT/'indi_allsky/flask/classic_views.py').read_text())
-    compatibility = next(n for n in classic.body if isinstance(n, ast.ClassDef) and n.name == 'ConfigView')
-    assert [ast.unparse(n) for n in compatibility.bases] == ['HybridSettingsFormView']
+    assert not (ROOT/'indi_allsky/flask/classic_views.py').exists()
     text=ast.unparse(view)
     assert text.index('build_full_config_form_defaults(')<text.index('apply_full_config_form_display_fields(')<text.index("url_for('indi_allsky.youtube_oauth2callback_view'")<text.index('apply_full_config_form_encoded_fields(')<text.index('psutil.net_if_addrs(')
     assert 'ADU_ROI_X1' not in text and 'FITSHEADERS__0__KEY' not in text

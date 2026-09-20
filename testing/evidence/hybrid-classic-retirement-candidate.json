@@ -1,0 +1,1151 @@
+{
+  "status": "candidate-only; not merged to main or deployed",
+  "recovered_on": "2026-09-20",
+  "base": "28cdec65",
+  "original_candidate_base": "6ec4ce9e",
+  "deleted_frontend_files": 111,
+  "source_manifest_files": 776,
+  "source_manifest_sha256": "6d7340aedb663cf911c9c174f348f174b13e46ed6714e8a551508deb31246b0a",
+  "python_regression": {
+    "scope": "Isolated Python regression; production untouched",
+    "status": "passed",
+    "manifest_files": 776,
+    "results": [
+      {
+        "case": "testing/auto_exposure_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "000.log"
+      },
+      {
+        "case": "testing/auto_gain_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "001.log"
+      },
+      {
+        "case": "testing/auto_gain_runtime_state_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "002.log"
+      },
+      {
+        "case": "testing/capture_profiles_test.py",
+        "exit_code": 0,
+        "seconds": 0.32,
+        "log": "003.log"
+      },
+      {
+        "case": "testing/capture_timeout_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "004.log"
+      },
+      {
+        "case": "testing/focus_frames_test.py",
+        "exit_code": 0,
+        "seconds": 0.37,
+        "log": "005.log"
+      },
+      {
+        "case": "testing/full_config_parser_parity_test.py",
+        "exit_code": 0,
+        "seconds": 13.04,
+        "log": "006.log"
+      },
+      {
+        "case": "testing/generation_result_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "007.log"
+      },
+      {
+        "case": "testing/hybrid_account_input_test.py",
+        "exit_code": 0,
+        "seconds": 9.44,
+        "log": "008.log"
+      },
+      {
+        "case": "testing/hybrid_action_api_flow_test.py",
+        "exit_code": 0,
+        "seconds": 7.39,
+        "log": "009.log"
+      },
+      {
+        "case": "testing/hybrid_adu_history_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.53,
+        "log": "010.log"
+      },
+      {
+        "case": "testing/hybrid_app_startup_test.py",
+        "exit_code": 0,
+        "seconds": 4.22,
+        "log": "011.log"
+      },
+      {
+        "case": "testing/hybrid_archive_flow_test.py",
+        "exit_code": 0,
+        "seconds": 13.17,
+        "log": "012.log"
+      },
+      {
+        "case": "testing/hybrid_asset_guard_test.py",
+        "exit_code": 0,
+        "seconds": 0.03,
+        "log": "013.log"
+      },
+      {
+        "case": "testing/hybrid_astropanel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.69,
+        "log": "014.log"
+      },
+      {
+        "case": "testing/hybrid_astropanel_satellite_test.py",
+        "exit_code": 0,
+        "seconds": 3.73,
+        "log": "015.log"
+      },
+      {
+        "case": "testing/hybrid_aurora_failure_test.py",
+        "exit_code": 0,
+        "seconds": 2.03,
+        "log": "016.log"
+      },
+      {
+        "case": "testing/hybrid_aurora_rtsw_test.py",
+        "exit_code": 0,
+        "seconds": 1.77,
+        "log": "017.log"
+      },
+      {
+        "case": "testing/hybrid_aurora_status_test.py",
+        "exit_code": 0,
+        "seconds": 2.52,
+        "log": "018.log"
+      },
+      {
+        "case": "testing/hybrid_authenticated_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.84,
+        "log": "019.log"
+      },
+      {
+        "case": "testing/hybrid_browser_maintenance_guard_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "020.log"
+      },
+      {
+        "case": "testing/hybrid_camera_cleanup_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.48,
+        "log": "021.log"
+      },
+      {
+        "case": "testing/hybrid_camera_management_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.13,
+        "log": "022.log"
+      },
+      {
+        "case": "testing/hybrid_camera_management_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "log": "023.log"
+      },
+      {
+        "case": "testing/hybrid_camera_processing_status_test.py",
+        "exit_code": 0,
+        "seconds": 3.48,
+        "log": "024.log"
+      },
+      {
+        "case": "testing/hybrid_camera_settings_entries_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.68,
+        "log": "025.log"
+      },
+      {
+        "case": "testing/hybrid_camera_simulator_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.73,
+        "log": "026.log"
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_settings_test.py",
+        "exit_code": 0,
+        "seconds": 4.08,
+        "log": "027.log"
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_test.py",
+        "exit_code": 0,
+        "seconds": 0.32,
+        "log": "028.log"
+      },
+      {
+        "case": "testing/hybrid_capture_http_methods_test.py",
+        "exit_code": 0,
+        "seconds": 2.68,
+        "log": "029.log"
+      },
+      {
+        "case": "testing/hybrid_charts_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.47,
+        "log": "030.log"
+      },
+      {
+        "case": "testing/hybrid_classic_absence_test.py",
+        "exit_code": 0,
+        "seconds": 53.82,
+        "log": "031.log"
+      },
+      {
+        "case": "testing/hybrid_compatibility_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 3.48,
+        "log": "032.log"
+      },
+      {
+        "case": "testing/hybrid_cpu_sampling_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "log": "033.log"
+      },
+      {
+        "case": "testing/hybrid_daily_export_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.68,
+        "log": "034.log"
+      },
+      {
+        "case": "testing/hybrid_daily_media_usage_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "log": "035.log"
+      },
+      {
+        "case": "testing/hybrid_dark_library_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.53,
+        "log": "036.log"
+      },
+      {
+        "case": "testing/hybrid_database_backup_test.py",
+        "exit_code": 0,
+        "seconds": 2.98,
+        "log": "037.log"
+      },
+      {
+        "case": "testing/hybrid_diagnostic_tables_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.03,
+        "log": "038.log"
+      },
+      {
+        "case": "testing/hybrid_drives_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "log": "039.log"
+      },
+      {
+        "case": "testing/hybrid_end_of_night_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.42,
+        "log": "040.log"
+      },
+      {
+        "case": "testing/hybrid_end_of_night_handoff_test.py",
+        "exit_code": 0,
+        "seconds": 1.82,
+        "log": "041.log"
+      },
+      {
+        "case": "testing/hybrid_exposure_pipeline_test.py",
+        "exit_code": 0,
+        "seconds": 0.46,
+        "log": "042.log"
+      },
+      {
+        "case": "testing/hybrid_exposure_stability_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "043.log"
+      },
+      {
+        "case": "testing/hybrid_fits_dimensions_test.py",
+        "exit_code": 0,
+        "seconds": 3.18,
+        "log": "044.log"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.53,
+        "log": "045.log"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_parity_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "046.log"
+      },
+      {
+        "case": "testing/hybrid_focus_endpoint_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.18,
+        "log": "047.log"
+      },
+      {
+        "case": "testing/hybrid_focus_preview_parity_test.py",
+        "exit_code": 0,
+        "seconds": 2.93,
+        "log": "048.log"
+      },
+      {
+        "case": "testing/hybrid_focuser_effect_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.48,
+        "log": "049.log"
+      },
+      {
+        "case": "testing/hybrid_gallery_isolation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.28,
+        "log": "050.log"
+      },
+      {
+        "case": "testing/hybrid_generated_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.03,
+        "log": "051.log"
+      },
+      {
+        "case": "testing/hybrid_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.78,
+        "log": "052.log"
+      },
+      {
+        "case": "testing/hybrid_generation_result_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.73,
+        "log": "053.log"
+      },
+      {
+        "case": "testing/hybrid_geometry_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.23,
+        "log": "054.log"
+      },
+      {
+        "case": "testing/hybrid_gpio_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.83,
+        "log": "055.log"
+      },
+      {
+        "case": "testing/hybrid_highlight_meter_test.py",
+        "exit_code": 0,
+        "seconds": 0.37,
+        "log": "056.log"
+      },
+      {
+        "case": "testing/hybrid_highlight_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.42,
+        "log": "057.log"
+      },
+      {
+        "case": "testing/hybrid_highlights_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.08,
+        "log": "058.log"
+      },
+      {
+        "case": "testing/hybrid_keogram_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.48,
+        "log": "059.log"
+      },
+      {
+        "case": "testing/hybrid_log_download_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.35,
+        "log": "060.log"
+      },
+      {
+        "case": "testing/hybrid_log_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.43,
+        "log": "061.log"
+      },
+      {
+        "case": "testing/hybrid_login_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 7.2,
+        "log": "062.log"
+      },
+      {
+        "case": "testing/hybrid_longterm_keogram_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.78,
+        "log": "063.log"
+      },
+      {
+        "case": "testing/hybrid_longterm_sampling_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.03,
+        "log": "064.log"
+      },
+      {
+        "case": "testing/hybrid_loop_statistics_test.py",
+        "exit_code": 0,
+        "seconds": 2.43,
+        "log": "065.log"
+      },
+      {
+        "case": "testing/hybrid_mask_camera_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "log": "066.log"
+      },
+      {
+        "case": "testing/hybrid_media_cleanup_failure_test.py",
+        "exit_code": 0,
+        "seconds": 10.07,
+        "log": "067.log"
+      },
+      {
+        "case": "testing/hybrid_media_task_guard_test.py",
+        "exit_code": 0,
+        "seconds": 1.83,
+        "log": "068.log"
+      },
+      {
+        "case": "testing/hybrid_media_validation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.18,
+        "log": "069.log"
+      },
+      {
+        "case": "testing/hybrid_metering_mask_test.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "log": "070.log"
+      },
+      {
+        "case": "testing/hybrid_mini_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.73,
+        "log": "071.log"
+      },
+      {
+        "case": "testing/hybrid_native_focus_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "log": "072.log"
+      },
+      {
+        "case": "testing/hybrid_navigation_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 4.0,
+        "log": "073.log"
+      },
+      {
+        "case": "testing/hybrid_network_command_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.32,
+        "log": "074.log"
+      },
+      {
+        "case": "testing/hybrid_now_page_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.23,
+        "log": "075.log"
+      },
+      {
+        "case": "testing/hybrid_observatory_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.69,
+        "log": "076.log"
+      },
+      {
+        "case": "testing/hybrid_operations_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.07,
+        "log": "077.log"
+      },
+      {
+        "case": "testing/hybrid_output_detail_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.23,
+        "log": "078.log"
+      },
+      {
+        "case": "testing/hybrid_overview_summaries_test.py",
+        "exit_code": 0,
+        "seconds": 2.72,
+        "log": "079.log"
+      },
+      {
+        "case": "testing/hybrid_page_heading_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "080.log"
+      },
+      {
+        "case": "testing/hybrid_panorama_cadence_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "081.log"
+      },
+      {
+        "case": "testing/hybrid_panorama_publication_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.02,
+        "log": "082.log"
+      },
+      {
+        "case": "testing/hybrid_public_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.49,
+        "log": "083.log"
+      },
+      {
+        "case": "testing/hybrid_queued_maintenance_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.63,
+        "log": "084.log"
+      },
+      {
+        "case": "testing/hybrid_raw_loop_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.83,
+        "log": "085.log"
+      },
+      {
+        "case": "testing/hybrid_realtime_history_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.68,
+        "log": "086.log"
+      },
+      {
+        "case": "testing/hybrid_realtime_preview_flow_test.py",
+        "exit_code": 0,
+        "seconds": 1.97,
+        "log": "087.log"
+      },
+      {
+        "case": "testing/hybrid_regression_runner_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "088.log"
+      },
+      {
+        "case": "testing/hybrid_route_composition_test.py",
+        "exit_code": 0,
+        "seconds": 3.07,
+        "log": "089.log"
+      },
+      {
+        "case": "testing/hybrid_runtime_shell_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.89,
+        "log": "090.log"
+      },
+      {
+        "case": "testing/hybrid_satellite_update_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.89,
+        "log": "091.log"
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.14,
+        "log": "092.log"
+      },
+      {
+        "case": "testing/hybrid_session_revocation_test.py",
+        "exit_code": 0,
+        "seconds": 5.15,
+        "log": "093.log"
+      },
+      {
+        "case": "testing/hybrid_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.28,
+        "log": "094.log"
+      },
+      {
+        "case": "testing/hybrid_settings_navigation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.73,
+        "log": "095.log"
+      },
+      {
+        "case": "testing/hybrid_shell_test.py",
+        "exit_code": 0,
+        "seconds": 0.51,
+        "log": "096.log"
+      },
+      {
+        "case": "testing/hybrid_sky_cycle_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.03,
+        "log": "097.log"
+      },
+      {
+        "case": "testing/hybrid_smoke_update_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "log": "098.log"
+      },
+      {
+        "case": "testing/hybrid_snapshot_concurrency_test.py",
+        "exit_code": 0,
+        "seconds": 3.43,
+        "log": "099.log"
+      },
+      {
+        "case": "testing/hybrid_source_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.08,
+        "log": "100.log"
+      },
+      {
+        "case": "testing/hybrid_sqm_readings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.18,
+        "log": "101.log"
+      },
+      {
+        "case": "testing/hybrid_storage_estimate_test.py",
+        "exit_code": 0,
+        "seconds": 2.08,
+        "log": "102.log"
+      },
+      {
+        "case": "testing/hybrid_storage_pressure_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.19,
+        "log": "103.log"
+      },
+      {
+        "case": "testing/hybrid_storage_pressure_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "104.log"
+      },
+      {
+        "case": "testing/hybrid_storage_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.52,
+        "log": "105.log"
+      },
+      {
+        "case": "testing/hybrid_storage_worker_test.py",
+        "exit_code": 0,
+        "seconds": 2.18,
+        "log": "106.log"
+      },
+      {
+        "case": "testing/hybrid_sync_api_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.63,
+        "log": "107.log"
+      },
+      {
+        "case": "testing/hybrid_sync_transfer_flow_test.py",
+        "exit_code": 0,
+        "seconds": 1.87,
+        "log": "108.log"
+      },
+      {
+        "case": "testing/hybrid_system_power_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.48,
+        "log": "109.log"
+      },
+      {
+        "case": "testing/hybrid_system_units_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.13,
+        "log": "110.log"
+      },
+      {
+        "case": "testing/hybrid_table_export_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "111.log"
+      },
+      {
+        "case": "testing/hybrid_task_output_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "112.log"
+      },
+      {
+        "case": "testing/hybrid_task_visibility_test.py",
+        "exit_code": 0,
+        "seconds": 4.38,
+        "log": "113.log"
+      },
+      {
+        "case": "testing/hybrid_template_guard_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "114.log"
+      },
+      {
+        "case": "testing/hybrid_timelapse_deflicker_test.py",
+        "exit_code": 0,
+        "seconds": 0.77,
+        "log": "115.log"
+      },
+      {
+        "case": "testing/hybrid_timelapse_options_test.py",
+        "exit_code": 0,
+        "seconds": 0.03,
+        "log": "116.log"
+      },
+      {
+        "case": "testing/hybrid_timelapse_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "log": "117.log"
+      },
+      {
+        "case": "testing/hybrid_ui_inventory_parser_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "log": "118.log"
+      },
+      {
+        "case": "testing/hybrid_updates_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.48,
+        "log": "119.log"
+      },
+      {
+        "case": "testing/hybrid_upgrade_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.38,
+        "log": "120.log"
+      },
+      {
+        "case": "testing/hybrid_upload_claim_test.py",
+        "exit_code": 0,
+        "seconds": 1.87,
+        "log": "121.log"
+      },
+      {
+        "case": "testing/hybrid_upload_completion_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "122.log"
+      },
+      {
+        "case": "testing/hybrid_users_table_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.88,
+        "log": "123.log"
+      },
+      {
+        "case": "testing/hybrid_video_dispatch_test.py",
+        "exit_code": 0,
+        "seconds": 1.83,
+        "log": "124.log"
+      },
+      {
+        "case": "testing/hybrid_video_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 7.34,
+        "log": "125.log"
+      },
+      {
+        "case": "testing/hybrid_video_failure_test.py",
+        "exit_code": 0,
+        "seconds": 1.77,
+        "log": "126.log"
+      },
+      {
+        "case": "testing/hybrid_virtualsky_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.73,
+        "log": "127.log"
+      },
+      {
+        "case": "testing/hybrid_youtube_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.79,
+        "log": "128.log"
+      },
+      {
+        "case": "testing/legacy_auto_gain_steps_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "129.log"
+      },
+      {
+        "case": "testing/modern_admin_boundary_test.py",
+        "exit_code": 0,
+        "seconds": 0.36,
+        "log": "130.log"
+      },
+      {
+        "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "131.log"
+      },
+      {
+        "case": "testing/modern_admin_classic_page_isolation_test.py",
+        "exit_code": 0,
+        "seconds": 0.91,
+        "log": "132.log"
+      },
+      {
+        "case": "testing/modern_admin_full_config_form_test.py",
+        "exit_code": 0,
+        "seconds": 11.98,
+        "log": "133.log"
+      },
+      {
+        "case": "testing/modern_admin_log_reader_test.py",
+        "exit_code": 0,
+        "seconds": 0.41,
+        "log": "134.log"
+      },
+      {
+        "case": "testing/modern_admin_media_camera_filter_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "135.log"
+      },
+      {
+        "case": "testing/modern_admin_media_context_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "136.log"
+      },
+      {
+        "case": "testing/modern_admin_media_metadata_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "137.log"
+      },
+      {
+        "case": "testing/modern_admin_media_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "138.log"
+      },
+      {
+        "case": "testing/modern_admin_notification_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "139.log"
+      },
+      {
+        "case": "testing/modern_admin_observatory_context_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "140.log"
+      },
+      {
+        "case": "testing/modern_admin_observatory_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "141.log"
+      },
+      {
+        "case": "testing/modern_admin_runtime_providers_test.py",
+        "exit_code": 0,
+        "seconds": 0.61,
+        "log": "142.log"
+      },
+      {
+        "case": "testing/modern_admin_settings_contracts_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "143.log"
+      },
+      {
+        "case": "testing/modern_admin_settings_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "144.log"
+      },
+      {
+        "case": "testing/modern_admin_system_context_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "145.log"
+      },
+      {
+        "case": "testing/modern_admin_system_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "146.log"
+      },
+      {
+        "case": "testing/modern_admin_task_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "147.log"
+      },
+      {
+        "case": "testing/modern_safe_action_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "log": "148.log"
+      },
+      {
+        "case": "testing/multicamera_processor_isolation_test.py",
+        "exit_code": 0,
+        "seconds": 1.98,
+        "log": "149.log"
+      },
+      {
+        "case": "testing/network_activation_polling_test.py",
+        "exit_code": 0,
+        "seconds": 0.26,
+        "log": "150.log"
+      },
+      {
+        "case": "testing/network_commands_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "151.log"
+      },
+      {
+        "case": "testing/network_scan_effects_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "152.log"
+      },
+      {
+        "case": "testing/product_spine_regression_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "153.log"
+      },
+      {
+        "case": "testing/product_view_models_test.py",
+        "exit_code": 0,
+        "seconds": 0.36,
+        "log": "154.log"
+      },
+      {
+        "case": "testing/sftp_adapter_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "log": "155.log"
+      },
+      {
+        "case": "testing/stretch_multicamera_mask_test.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "log": "156.log"
+      },
+      {
+        "case": "hybrid_archive_flow_test.py:library",
+        "exit_code": 0,
+        "seconds": 12.09,
+        "log": "157.log"
+      },
+      {
+        "case": "compileall",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "158.log"
+      }
+    ],
+    "source_changed": false
+  },
+  "javascript_regression": [
+    {
+      "case": "testing/hybrid_account_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid account browser controller: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_astropanel_browser_test.js",
+      "exit_code": 0,
+      "output": "Astropanel controller: all detail fields, 20 satellites, literal text, unavailable/stale/session states, refresh and polling: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_camera_management_browser_test.js",
+      "exit_code": 0,
+      "output": "Camera form guard: native first submit, duplicate/cross-form prevention and back-navigation permission state: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_camera_simulator_parity_test.js",
+      "exit_code": 0,
+      "output": "Hybrid simulator catalog and canvas parity: PASS (3000 scenarios)\n"
+    },
+    {
+      "case": "testing/hybrid_charts_browser_test.js",
+      "exit_code": 0,
+      "output": "Charts: all 15 series and histogram, empty/null data, atomic validation, history, stale responses, polling, HTTP/session/network errors and teardown: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_config_restore_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid restore browser controller: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_drives_browser_test.js",
+      "exit_code": 0,
+      "output": "Drive controller: metadata as text, duplicates, confirmation/cancel, target/CSRF and fresh-inventory requirement: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_fits_processing_browser_test.js",
+      "exit_code": 0,
+      "output": "FITS controller: duplicate prevention, output identity, search/reset, visible validation and failed-session recovery: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_focus_browser_test.js",
+      "exit_code": 0,
+      "output": "Native Focus browser controller: target camera, duplicate prevention, decode, errors, expired session, permissions and movement feedback: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_full_settings_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid full Settings controller: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_generation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid generation confirmation, role gate, duplicate submission, failure and scope changes: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_geometry_math_test.js",
+      "exit_code": 0,
+      "output": "Image geometry circle/offset parity and finite keogram lines: PASS (480 cases)\n"
+    },
+    {
+      "case": "testing/hybrid_gpio_browser_test.js",
+      "exit_code": 0,
+      "output": "GPIO controller: confirmation/cancel, explicit Off, CSRF, duplicate prevention, errors and retained disabled controls: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_image_detail_preview_test.js",
+      "exit_code": 0,
+      "output": "PASS image detail preview loading, cached success, failure and recovery\n"
+    },
+    {
+      "case": "testing/hybrid_log_browser_test.js",
+      "exit_code": 0,
+      "output": "Log controller CSRF, plain text, expired session and failed/malformed responses: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_longterm_keogram_browser_test.js",
+      "exit_code": 0,
+      "output": "Long-term keogram controls: scoped payload, CSRF, duplicate prevention, preview/download, reset and errors preserve prior result: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_loop_browser_test.js",
+      "exit_code": 0,
+      "output": "Loop controls: history, speed, bounce, camera isolation, stale responses, image errors and recovery PASS\nLoop controls: history, speed, bounce, camera isolation, stale responses, image errors and recovery PASS\n"
+    },
+    {
+      "case": "testing/hybrid_media_archive_browser_test.js",
+      "exit_code": 0,
+      "output": "Archive dimensions: cached/delayed metadata, resize, missing/error, camera isolation and saved values: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_media_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid media camera navigation and source preview behavior: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_mini_generation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid mini controls: role, confirmation, duplicate submissions, failure recovery and task result: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_navigation_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid navigation controller: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_network_browser_test.js",
+      "exit_code": 0,
+      "output": "Network controller: all intents, scan results/empty state, target binding, security boolean, CSRF, pending/refresh guards, cancellation, permissions and errors: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_notification_ack_browser_test.js",
+      "exit_code": 0,
+      "output": "Hybrid notification acknowledgement controller: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_now_frames_test.js",
+      "exit_code": 0,
+      "output": "Now frames: cached failure, load recovery, error and missing image: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_operations_table_browser_test.js",
+      "exit_code": 0,
+      "output": "Operations table controller: combined filters, counts, reset, empty rows, filtered export payload/CSRF and native attachment forms: PASS\nCopy: filtered payload, column selection, formula escaping option, success feedback and accessible denied-clipboard fallback PASS\n"
+    },
+    {
+      "case": "testing/hybrid_panorama_loop_browser_test.js",
+      "exit_code": 0,
+      "output": "Panorama loop: playback, frame/detail/lightbox identity, pause, navigation, keyboard, timeout, failed frame recovery, hidden page and teardown: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_public_media_browser_test.js",
+      "exit_code": 0,
+      "output": "Public media clipboard fallback, fullscreen capability errors and failed preview feedback: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_realtime_keogram_browser_test.js",
+      "exit_code": 0,
+      "output": "Realtime preview: camera URL, success, stale/missing/session/network/decode errors, retained image, hidden tab, duplicate prevention and teardown: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_sensor_panel_browser_test.js",
+      "exit_code": 0,
+      "output": "Sensor controller: camera scope, 120 slots, real zero, absent values, filter, atomic errors, expired session, refresh and teardown: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_system_units_browser_test.js",
+      "exit_code": 0,
+      "output": "System controls: confirmations, roles, CSRF, payloads, duplicate suppression, failure/expiry/lost responses, safe task receipts and links: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_updates_browser_test.js",
+      "exit_code": 0,
+      "output": "Updates controller: confirmations, permissions, CSRF, duplicate suppression, accepted/failed/expired/lost responses and explicit refresh: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_virtualsky_controller_test.js",
+      "exit_code": 0,
+      "output": "VirtualSky controller: scope, flags, reuse, resize, reset, export, duplicate requests, errors and recovery: PASS (effects simulated)\n"
+    },
+    {
+      "case": "testing/hybrid_virtualsky_test.js",
+      "exit_code": 0,
+      "output": "VirtualSky geometry, capture time, legacy azimuth parity, flags, resize and invalid values: PASS\n"
+    },
+    {
+      "case": "testing/hybrid_youtube_browser_test.js",
+      "exit_code": 0,
+      "output": "YouTube revoke cancellation, action feedback and duplicate form prevention: PASS\n"
+    }
+  ],
+  "recovery": "Original candidate archive plus final tested overlay; all 776 recovered source hashes equal the Linux regression manifest. Later main documentation retained.",
+  "open_gates": [
+    "Resolve configurable anonymous read-page access against Hybrid login requirements",
+    "Complete per-control browser/effect matrix; rendering is not a click pass",
+    "Review remaining dynamic references, installer/scripts and documentation cleanup",
+    "Production deployment acceptance after physical removal; hardware unavailable tests remain explicit"
+  ],
+  "deferred": "24-hour observation per user instruction"
+}

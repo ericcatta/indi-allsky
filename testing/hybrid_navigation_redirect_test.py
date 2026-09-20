@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """All Classic UI entrances remain resolvable with Classic import forbidden."""
-import ast
+import json
 from pathlib import Path
 from urllib.parse import parse_qsl, urlsplit
 from unittest.mock import patch
@@ -11,10 +11,8 @@ def run():
     with isolated_app(multi_camera=True) as app:
         from flask import url_for
         from indi_allsky.flask.navigation_redirects import NAVIGATION_GROUPS
-        source = ast.parse((Path(__file__).resolve().parents[1]/'indi_allsky/flask/classic_views.py').read_text())
-        legacy = {node.args[0].value for node in ast.walk(source)
-                  if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-                  and node.func.attr == 'add_url_rule'}
+        contract = json.loads((Path(__file__).with_name('classic_frontend_contract.json')).read_text())
+        legacy = {entry['route'] for entry in contract['registrations']}
         paths = [path for group in NAVIGATION_GROUPS.values() for path in group]
         assert len(paths) == len(set(paths)) == 56 and set(paths) == legacy
         query = 'camera_id=2&profile_id=test-profile-2&timestamp=1700000000&tag=a&tag=b&_external=1&_scheme=https&next=https%3A%2F%2Fexample.invalid'

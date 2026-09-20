@@ -1,0 +1,282 @@
+{
+  "origin": "6ec4ce9e",
+  "purpose": "Retired frontend registration signatures for unchanged route fingerprints and redirect coverage; no executable Classic views retained",
+  "registrations": [
+    {
+      "route": "/sensor_panel",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/sensor_panel')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='SensorPanelView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='sensor_panel_view')], keywords=[keyword(arg='template_name', value=Constant(value='sensor_panel.html'))]))])"
+    },
+    {
+      "route": "/",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='IndexImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='index_view')], keywords=[keyword(arg='template_name', value=Constant(value='index_img.html'))]))])"
+    },
+    {
+      "route": "/index_canvas",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/index_canvas')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='IndexCanvasView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='index_canvas_view')], keywords=[keyword(arg='template_name', value=Constant(value='index_canvas.html'))]))])"
+    },
+    {
+      "route": "/index_img",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/index_img')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='IndexImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='index_img_view')], keywords=[keyword(arg='template_name', value=Constant(value='index_img.html'))]))])"
+    },
+    {
+      "route": "/panorama",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/panorama')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='LatestPanoramaImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='latest_panorama_view')], keywords=[keyword(arg='template_name', value=Constant(value='index_img.html'))]))])"
+    },
+    {
+      "route": "/panorama_canvas",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/panorama_canvas')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='LatestPanoramaCanvasView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='latest_panorama_canvas_view')], keywords=[keyword(arg='template_name', value=Constant(value='index_canvas.html'))]))])"
+    },
+    {
+      "route": "/panorama_img",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/panorama_img')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='LatestPanoramaImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='latest_panorama_img_view')], keywords=[keyword(arg='template_name', value=Constant(value='index_img.html'))]))])"
+    },
+    {
+      "route": "/raw",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/raw')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='LatestRawImageImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='latest_rawimage_view')], keywords=[keyword(arg='template_name', value=Constant(value='index_img.html'))]))])"
+    },
+    {
+      "route": "/raw_canvas",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/raw_canvas')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='LatestRawImageCanvasView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='latest_rawimage_canvas_view')], keywords=[keyword(arg='template_name', value=Constant(value='index_canvas.html'))]))])"
+    },
+    {
+      "route": "/raw_img",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/raw_img')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='LatestRawImageImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='latest_rawimage_img_view')], keywords=[keyword(arg='template_name', value=Constant(value='index_img.html'))]))])"
+    },
+    {
+      "route": "/realtime_keogram",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/realtime_keogram')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='RealtimeKeogramView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='realtime_keogram_view')], keywords=[keyword(arg='template_name', value=Constant(value='realtime_keogram.html'))]))])"
+    },
+    {
+      "route": "/loop",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/loop')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ImageLoopImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='image_loop_view')], keywords=[keyword(arg='template_name', value=Constant(value='loop_img.html'))]))])"
+    },
+    {
+      "route": "/loop_canvas",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/loop_canvas')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ImageLoopCanvasView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='image_loop_canvas_view')], keywords=[keyword(arg='template_name', value=Constant(value='loop_canvas.html'))]))])"
+    },
+    {
+      "route": "/loop_img",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/loop_img')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ImageLoopImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='image_loop_img_view')], keywords=[keyword(arg='template_name', value=Constant(value='loop_img.html'))]))])"
+    },
+    {
+      "route": "/looppanorama",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/looppanorama')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='PanoramaLoopImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='panorama_loop_view')], keywords=[keyword(arg='template_name', value=Constant(value='loop_img.html'))]))])"
+    },
+    {
+      "route": "/looppanorama_canvas",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/looppanorama_canvas')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='PanoramaLoopCanvasView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='panorama_loop_canvas_view')], keywords=[keyword(arg='template_name', value=Constant(value='loop_canvas.html'))]))])"
+    },
+    {
+      "route": "/looppanorama_img",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/looppanorama_img')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='PanoramaLoopImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='panorama_loop_img_view')], keywords=[keyword(arg='template_name', value=Constant(value='loop_img.html'))]))])"
+    },
+    {
+      "route": "/loopraw",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/loopraw')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='RawImageLoopImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='rawimage_loop_view')], keywords=[keyword(arg='template_name', value=Constant(value='loop_img.html'))]))])"
+    },
+    {
+      "route": "/loopraw_canvas",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/loopraw_canvas')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='RawImageLoopCanvasView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='rawimage_loop_canvas_view')], keywords=[keyword(arg='template_name', value=Constant(value='loop_canvas.html'))]))])"
+    },
+    {
+      "route": "/loopraw_img",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/loopraw_img')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='RawImageLoopImgView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='rawimage_loop_img_view')], keywords=[keyword(arg='template_name', value=Constant(value='loop_img.html'))]))])"
+    },
+    {
+      "route": "/sqm",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/sqm')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='SqmView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='sqm_view')], keywords=[keyword(arg='template_name', value=Constant(value='sqm.html'))]))])"
+    },
+    {
+      "route": "/charts",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/charts')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ChartView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='chart_view')], keywords=[keyword(arg='template_name', value=Constant(value='chart.html'))]))])"
+    },
+    {
+      "route": "/imageviewer",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/imageviewer')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ImageViewerView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='imageviewer_view')], keywords=[keyword(arg='template_name', value=Constant(value='imageviewer.html'))]))])"
+    },
+    {
+      "route": "/fitsimageviewer",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/fitsimageviewer')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='FitsImageViewerView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='fitsimageviewer_view')], keywords=[keyword(arg='template_name', value=Constant(value='fitsimageviewer.html'))]))])"
+    },
+    {
+      "route": "/gallery",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/gallery')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='GalleryViewerView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='gallery_view')], keywords=[keyword(arg='template_name', value=Constant(value='gallery.html'))]))])"
+    },
+    {
+      "route": "/videoviewer",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/videoviewer')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='VideoViewerView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='videoviewer_view')], keywords=[keyword(arg='template_name', value=Constant(value='videoviewer.html'))]))])"
+    },
+    {
+      "route": "/minivideoviewer",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/minivideoviewer')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='MiniVideoViewerView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='mini_videoviewer_view')], keywords=[keyword(arg='template_name', value=Constant(value='minivideoviewer.html'))]))])"
+    },
+    {
+      "route": "/generate",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/generate')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='TimelapseGeneratorView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='generate_view')], keywords=[keyword(arg='template_name', value=Constant(value='generate.html'))]))])"
+    },
+    {
+      "route": "/minigenerate",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/minigenerate')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='MiniTimelapseGeneratorView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='mini_generate_view')], keywords=[keyword(arg='template_name', value=Constant(value='mini_generate.html'))]))])"
+    },
+    {
+      "route": "/config",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/config')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ConfigView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='config_view')], keywords=[keyword(arg='template_name', value=Constant(value='config.html'))]))])"
+    },
+    {
+      "route": "/config/list",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/config/list')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ConfigListView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='config_list_view')], keywords=[keyword(arg='template_name', value=Constant(value='config_list.html'))]))])"
+    },
+    {
+      "route": "/config/restore",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/config/restore')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ConfigRestoreView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='config_restore_view')], keywords=[keyword(arg='template_name', value=Constant(value='config_restore.html'))]))])"
+    },
+    {
+      "route": "/system",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/system')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='SystemInfoView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='system_view')], keywords=[keyword(arg='template_name', value=Constant(value='system.html'))]))])"
+    },
+    {
+      "route": "/focus",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/focus')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='FocusView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='focus_view')], keywords=[keyword(arg='template_name', value=Constant(value='focus.html'))]))])"
+    },
+    {
+      "route": "/manual_gpio",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/manual_gpio')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ManualGpioView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='manual_gpio_view')], keywords=[keyword(arg='template_name', value=Constant(value='manual_gpio.html'))]))])"
+    },
+    {
+      "route": "/log",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/log')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='LogView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='log_view')], keywords=[keyword(arg='template_name', value=Constant(value='log.html'))]))])"
+    },
+    {
+      "route": "/support",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/support')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='SupportInfoView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='support_info_view')], keywords=[keyword(arg='template_name', value=Constant(value='support_info.html'))]))])"
+    },
+    {
+      "route": "/user",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/user')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='UserInfoView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='user_view')], keywords=[keyword(arg='template_name', value=Constant(value='user.html'))]))])"
+    },
+    {
+      "route": "/astropanel",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/astropanel')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='AstroPanelView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='astropanel_view')], keywords=[keyword(arg='template_name', value=Constant(value='astropanel.html'))]))])"
+    },
+    {
+      "route": "/processing",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/processing')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ImageProcessingView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='image_processing_view')], keywords=[keyword(arg='template_name', value=Constant(value='imageprocessing.html'))]))])"
+    },
+    {
+      "route": "/longtermkeogram",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/longtermkeogram')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='LongTermKeogramView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='longterm_keogram_view')], keywords=[keyword(arg='template_name', value=Constant(value='longterm_keogram.html'))]))])"
+    },
+    {
+      "route": "/camera",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/camera')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='CameraLensView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='camera_lens_view')], keywords=[keyword(arg='template_name', value=Constant(value='cameraLens.html'))]))])"
+    },
+    {
+      "route": "/lag",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/lag')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ImageLagView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='image_lag_view')], keywords=[keyword(arg='template_name', value=Constant(value='lag.html'))]))])"
+    },
+    {
+      "route": "/adu",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/adu')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='RollingAduView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='rolling_adu_view')], keywords=[keyword(arg='template_name', value=Constant(value='adu.html'))]))])"
+    },
+    {
+      "route": "/darks",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/darks')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='DarkFramesView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='darks_view')], keywords=[keyword(arg='template_name', value=Constant(value='darks.html'))]))])"
+    },
+    {
+      "route": "/mask",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/mask')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='MaskView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='mask_view')], keywords=[keyword(arg='template_name', value=Constant(value='mask.html'))]))])"
+    },
+    {
+      "route": "/camerasimulator",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/camerasimulator')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='CameraSimulatorView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='camera_simulator_view')], keywords=[keyword(arg='template_name', value=Constant(value='camera_simulator.html'))]))])"
+    },
+    {
+      "route": "/imagecirclehelper",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/imagecirclehelper')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='ImageCircleHelperView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='image_circle_helper_view')], keywords=[keyword(arg='template_name', value=Constant(value='imagecirclehelper.html'))]))])"
+    },
+    {
+      "route": "/filespaceusage",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/filespaceusage')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='FileSpaceUsageView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='filespaceusage_view')], keywords=[keyword(arg='template_name', value=Constant(value='filespaceusage.html'))]))])"
+    },
+    {
+      "route": "/network",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/network')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='NetworkManagerView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='network_manager_view')], keywords=[keyword(arg='template_name', value=Constant(value='network.html'))]))])"
+    },
+    {
+      "route": "/drives",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/drives')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='DriveManagerView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='drive_manager_view')], keywords=[keyword(arg='template_name', value=Constant(value='drive_manager.html'))]))])"
+    },
+    {
+      "route": "/virtualsky",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/virtualsky')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='VirtualSkyView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='virtualsky_view')], keywords=[keyword(arg='template_name', value=Constant(value='virtualsky.html'))]))])"
+    },
+    {
+      "route": "/cameras",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/cameras')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='CamerasView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='cameras_view')], keywords=[keyword(arg='template_name', value=Constant(value='cameras.html'))]))])"
+    },
+    {
+      "route": "/tasks",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/tasks')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='TaskQueueView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='taskqueue_view')], keywords=[keyword(arg='template_name', value=Constant(value='taskqueue.html'))]))])"
+    },
+    {
+      "route": "/notifications",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/notifications')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='NotificationsView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='notifications_view')], keywords=[keyword(arg='template_name', value=Constant(value='notifications.html'))]))])"
+    },
+    {
+      "route": "/users",
+      "ast": "Call(func=Attribute(value=Name(id='bp_allsky', ctx=Load()), attr='add_url_rule', ctx=Load()), args=[Constant(value='/users')], keywords=[keyword(arg='view_func', value=Call(func=Attribute(value=Name(id='UsersView', ctx=Load()), attr='as_view', ctx=Load()), args=[Constant(value='users_view')], keywords=[keyword(arg='template_name', value=Constant(value='users.html'))]))])"
+    }
+  ],
+  "classes": {
+    "RealtimeKeogramView": "d92f8df33ad80cf30c79c2633f9857b1ebf0782e936a295462d214810705ec64",
+    "MaskView": "5c8f77d0250e5e542d7b5526caf3be7194731f96b4e47acb049923d78ec73be5",
+    "ImageLagView": "9388708d20e33db70c505914029f59921904cad83d575ebbd678fcf1476e1ba3",
+    "RollingAduView": "92f2229bf915f3c3fe79a6d94b7b268a5d0199221f40ebb64a7e1f78c2e80798",
+    "ImageLoopImgView": "71dfa7ef4f3eb4b4d511da93c319961d99fd3fa87c78b93bf009a23ac12aec32",
+    "TimelapseGeneratorView": "533960839d051760489209283a77f2e686490b813ae325b613333a6bd85c8a1e",
+    "FocusView": "a663627f55e82e71bdcf00156a68983cdcfd37490188b4bdb4836226b3c1bd9a",
+    "ManualGpioView": "75cf66edb983492fe06dc9ee73c027569694f60be1f69c2c5becf06f17a37342",
+    "ImageProcessingView": "1cbc9b4b551ba1c09db201322df6799ec8eee417b1a03eabdf7cc3469b6ba461",
+    "CameraLensView": "6a2ca10488d3e6f6850182a7077b0dc1b86a5eff5f2ae1f84c9b5ddab7a5de51",
+    "CameraSimulatorView": "223c20334c2b26be9e93e5e0da24f8683ad3643bd015bb37b568dccf6a5eb0d8",
+    "FileSpaceUsageView": "15995f6fd4aa24155338f277528df2ece0cceb3bfc6d3ef53eabab24d06b0127",
+    "NetworkManagerView": "689746138231cb1cbac84706db7d085ec4c4f83b9a7c575fb1e7096ad59cfbf6",
+    "DriveManagerView": "19a108f27bcf23031d60f981afeeb50cac7855a329570e71ba3f89724d763242",
+    "ImageCircleHelperView": "a730dd96b2972ae3d7b74acd7385f48cc22cf50b9ff4dbb7ac0e4cbc3b528630",
+    "VirtualSkyView": "f7dec69a1810d940b9a77eeb2e27e75c2067b91ad04aeaec6bd9036bdd502517",
+    "SqmView": "ab9f930f8a8428691d15a2ffcbd8015dcf28c76d327b2927cbda4d9057f1c0ec",
+    "ChartView": "6a4c069ca7796dd314f13663e507b7c4feb3d1bd2b307efa9cdeb3d9f0a3e343",
+    "SensorPanelView": "10a3e47d93b75a590bb6a9eedfc9823be3f40c65f6381a671c71ff6b9dae14c4",
+    "SystemInfoView": "c78fc9648614db320133eef5713ff8ce71bea859df494fb566ab40b187704f69",
+    "LogView": "6d93d8ce1ca3b5bc2a051fd8cfeba32f6fe28f9c62773011d935c1bb2f903aee",
+    "SupportInfoView": "35ab67ddb642224ad7eed6fc059303c2cd0fb344c66d77f7ca3276390a712ee2",
+    "ConfigView": "b1635a21b2efef2d0b0ae7e2967c361e8683d2fa015e1cc2a8741b13b3e71cd7",
+    "IndexCanvasView": "8496d160c2a78fefa38d89870b55009e0e81420ece06a9ee9b037bf27c0d6949",
+    "IndexImgView": "a572a2db7b4287dcb0a5eccab2fbeb47c730531c449708526cf16aaee9961a1b",
+    "LatestPanoramaCanvasView": "cd40dbfd734970ff7c28433d705ec81d453d288a3b94e38c954e51446ecb28b0",
+    "LatestPanoramaImgView": "81f0d8c254f1d3bc493b55617c536a6ac685386391080de01485c4ece51a6c22",
+    "LatestRawImageCanvasView": "a00b78b19cc36446ac3c109ef76af7308c6fe517cf9554b41420a1c1da80c602",
+    "LatestRawImageImgView": "23b154385ec6cfc1aa1d832f4e8c574ae247b322a1c6c49a3c42477f42aad381",
+    "CamerasView": "46e7a9c703a30535e5c6e7b4789aeff47c41df28b6ccd6d4e11ec3f218480cfd",
+    "DarkFramesView": "22da14c33b0a863e417b99c86757e81faebdccbbeee90c0ba260d70d887c147b",
+    "ImageLoopCanvasView": "87ddfcde6a704f4879843b00ef538f1866c1c529d0204f658902d65edf57d32b",
+    "PanoramaLoopCanvasView": "a08f01fefcd37356aa49213c45644963c54b1d5ec4e106859298489b3de434c7",
+    "PanoramaLoopImgView": "9278c058b39742afd12550aa47dd3fe78938c449f8f122c3825eb77902865472",
+    "RawImageLoopCanvasView": "c9374dd664732425a1a2eb466805b02abbd959d7a7854ed24351a3adf37e013a",
+    "RawImageLoopImgView": "886a61afbc1b9160f1ae4c5c680a7d9ec2c2bd26ed4602299f89b691e026f9f8",
+    "ImageViewerView": "00b12bb17b3f916e1f3d941e09cf94e16db0b2c10c0abaa5972ecfb857221c9e",
+    "FitsImageViewerView": "7e6a174520943c51064cd77e1e10f7a83c09cfe80a8a1516651cd6774209ae7f",
+    "GalleryViewerView": "6ffbafe4bee5a83d3bd71c9906c344d70a08a6c5e77d592cb6e39c89203bb3ff",
+    "VideoViewerView": "3c04c803edb6827351630e2d88bc48e5004e22a8c161a14c21bad317f892041e",
+    "MiniVideoViewerView": "6fc7601063bc2e36854c718b485d4f994bcf15c7994ba2d8a5781e6857c64630",
+    "TaskQueueView": "1eedf94533953c8478539c9442dd247056f47f1f73a6d31efcf471b4fe627de4",
+    "NotificationsView": "0f5c70bb4ef4fd3d53e3465de3fff18ac43c09d107a64e4a01afdd44852d4ab2",
+    "UserInfoView": "a133d4732e5a70c75dd785201868b4e49bced14062746fbe00da5480995269d1",
+    "UsersView": "45a28a8968d357b8963a96d6ab4d3e1441c0d4021f74a898f8000739cca6d375",
+    "ConfigListView": "4dc3e8d27045624978ddd2ec97b6b9d5d02443639856a0d4d95f72dfd8bb2a01",
+    "ConfigRestoreView": "e028dfc6cffa4c20ed32e536be0d9f13b905c688ed5f0a897cda74decf88025d",
+    "MiniTimelapseGeneratorView": "7f1538eebbeb33c8090d19c29843aadefa658674764d8b86b9f46e2bc5c5db5f",
+    "LongTermKeogramView": "b18629566837ec88a8da4efb50d7d18bee27634ebf68e1d0a37f2367f611ad30",
+    "AstroPanelView": "faa4db4925205aa462033a417fdd73d07ef7bce8a526e5403981cee73eb91fa0"
+  }
+}
