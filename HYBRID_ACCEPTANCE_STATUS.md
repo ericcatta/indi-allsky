@@ -9,10 +9,25 @@ absent; recovered sources match that manifest and 34 JavaScript checks pass.
 The candidate is preserved in Git rather than relying on a temporary worktree.
 Evidence: `testing/evidence/hybrid-classic-retirement-candidate.json`.
 
-This is not production acceptance. Anonymous read-page policy, the complete
-control/effect matrix, remaining cleanup and post-removal deployment checks
-are still open. The 24-hour observation remains deferred. Main and installed
+This is not production acceptance. The user selected mandatory login on 2026-09-20; that decision is now
+verified on main. The complete control/effect matrix, remaining cleanup and
+post-removal deployment checks remain open. The 24-hour observation remains deferred. Main and installed
 production retain Classic files until those gates are addressed.
+
+## Mandatory Hybrid login — 2026-09-20
+
+The user selected mandatory login for Hybrid. All 107 Hybrid entrances pass
+452 anonymous requests with valid CSRF across the four public-auth flag
+combinations. Native isolated checks confirm that public media remains
+viewable while entering Hybrid requires login. The historical difference in
+31 navigation gates is now an explicit product decision, not an unresolved
+retirement gate. All 160 Python and 34 JavaScript regression entries pass.
+Evidence: `testing/evidence/hybrid-private-ui-policy-20260920.json`.
+
+Native task-table filtering, keyboard pagination/sorting and filtered Copy
+also pass; CSV/XLSX download receipt remains unverified. Evidence:
+`testing/evidence/hybrid-task-table-native-20260920.json`. The full control
+matrix, final cleanup and production acceptance after removal remain open.
 
 ## Accessible page headings — 2026-09-14
 
@@ -678,7 +693,7 @@ No deployment or capture restart occurred. The read-only 23:56:47 check found
 both cameras at a 45-second median saved-frame interval, no missing/empty files,
 no pending tasks and no recorded errors. This is not 24-hour acceptance.
 
-## Anonymous navigation policy — 2026-09-08 (decision open)
+## Anonymous navigation policy — resolved 2026-09-20 (historical audit below)
 
 The navigation review found a real access-policy difference that must be resolved
 before Classic retirement: 27 Classic entrances use `login_optional`, four use
@@ -686,8 +701,8 @@ before Classic retirement: 27 Classic entrances use `login_optional`, four use
 entrances currently use `login_required`. The 31 differing paths are listed in
 `testing/evidence/hybrid-navigation-access-2026-09-08.json`.
 
-`testing/hybrid_navigation_access_audit.py` reconstructs the Classic decorator
-inheritance without importing its views, then executes the actual authentication
+`testing/hybrid_navigation_access_audit.py` preserves the pre-removal Classic
+decorator inheritance in a hash-pinned fixture, then executes the actual authentication
 decorators in isolated Flask for all four AUTH_ALL/AUTH_MEDIA combinations and
 anonymous/user/admin roles. All 36 gate checks passed. This is a gate comparison,
 not proof that a page's additional Hybrid payload is safe to publish.
@@ -698,11 +713,12 @@ Loop redirected to login. `/latestimageview?camera_id=1` still redirected to the
 public image viewer, while `/config` correctly required login. No production
 configuration, session, service or file was changed by those six read-only probes.
 
-The user has been asked whether to retain configurable anonymous read pages or
-make Hybrid private while retaining the configured public media/API contracts.
-The existing runtime is unchanged and its 112-entry regression remains the
-baseline. Do not claim complete public-navigation parity or disable Classic on
-the strength of the navigation-redirect tests alone.
+On 2026-09-20 the user selected mandatory login for Hybrid. The 31 historical
+optional-navigation gates are intentionally superseded; public media/API
+contracts remain separate. `hybrid_private_ui_policy_test.py` exercises every
+registered Hybrid entrance anonymously with valid CSRF under all four public
+auth flag combinations. This resolves the policy decision, not the remaining
+control/effect and deployment acceptance requirements.
 
 ## Navigation without Classic — 2026-09-08 (candidate, not deployed)
 

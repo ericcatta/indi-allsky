@@ -1142,10 +1142,19 @@
   ],
   "recovery": "Original candidate archive plus final tested overlay; all 776 recovered source hashes equal the Linux regression manifest. Later main documentation retained.",
   "open_gates": [
-    "Resolve configurable anonymous read-page access against Hybrid login requirements",
     "Complete per-control browser/effect matrix; rendering is not a click pass",
     "Review remaining dynamic references, installer/scripts and documentation cleanup",
     "Production deployment acceptance after physical removal; hardware unavailable tests remain explicit"
   ],
-  "deferred": "24-hour observation per user instruction"
+  "deferred": "24-hour observation per user instruction",
+  "private_policy_integration": {
+    "date": "2026-09-20",
+    "user_decision": "Require login throughout Hybrid, preserving separate public media/API contracts",
+    "candidate_requests_passed": 452,
+    "candidate_routes": 107,
+    "historical_optional_gates_intentionally_superseded": 31,
+    "current_candidate_files": 777,
+    "current_manifest_canonical_sha256": "30e5bc632fbc37d3f238b180fcda7896c38bc55aabda949dba8d605b14dd7f78",
+    "scope": "Focused new policy and historical-gate tests passed on physically absent Classic; runtime sources unchanged from prior candidate full regression. Prior full regression above certifies the earlier 776-file snapshot."
+  }
 }

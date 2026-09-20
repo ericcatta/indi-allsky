@@ -55,12 +55,14 @@ def collect():
                              'hybrid_gate': decorators[0].__name__,
                              'different_gate': legacy[path]['gate'] != decorators[0].__name__})
         assert len(rows) == len(legacy) == 56
+        assert all(row['hybrid_gate'] == 'login_required' for row in rows)
         return {'scope': 'Authentication gates only: actual decorators in isolated Flask, historical Classic inheritance preserved in the frozen authentication contract; no Classic import or live effect.',
                 'legacy_gate_counts': dict(Counter(row['legacy_gate'] for row in rows)),
                 'hybrid_gate_counts': dict(Counter(row['hybrid_gate'] for row in rows)),
                 'different_gate_count': sum(row['different_gate'] for row in rows),
                 'gate_results': gate_results, 'routes': rows,
-                'open': 'Choose public navigation policy before Classic retirement; public media/API handlers are separate. This audit does not validate page payload disclosure or every authorization inside a view.'}
+                'policy': 'User selected login-required Hybrid UI on 2026-09-20. Historical optional navigation gates are intentionally superseded; public media/API handlers retain their separate contracts.',
+                'limits': 'This audit does not verify every authorization inside a view or public media/API behavior.'}
 
 
 if __name__ == '__main__':
