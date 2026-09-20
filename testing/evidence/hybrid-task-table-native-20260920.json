@@ -1,0 +1,55 @@
+{
+  "date": "2026-09-20",
+  "scope": "Native in-app browser, isolated Classic-free candidate on localhost:18112; synthetic data only",
+  "role": "ordinary test-user-2",
+  "page": "/indi-allsky/modern-admin/tasks",
+  "prerequisites": "Sandbox reset intentionally after fixture tasks aged beyond three-day list; reseeded 205 tasks across two cameras/profiles",
+  "controls": [
+    {
+      "control": "State + Search",
+      "expected": "Only FAILED task rows in test-profile-2",
+      "observed": "102 filtered rows; visible IDs 2..40, all failed and profile 2",
+      "status": "superato"
+    },
+    {
+      "control": "Next (Enter)",
+      "expected": "Keyboard pagination retains filters",
+      "observed": "IDs 42..80; showing 21 to 40 of 102",
+      "status": "superato"
+    },
+    {
+      "control": "entries per page: 50",
+      "expected": "Display 50 matching rows",
+      "observed": "50 DOM rows; showing 1 to 50 of 102",
+      "status": "superato"
+    },
+    {
+      "control": "ID sort (Enter twice)",
+      "expected": "Numeric ascending then descending order",
+      "observed": "ascending starts 2; descending visible 204..106",
+      "status": "superato"
+    },
+    {
+      "control": "Copy",
+      "expected": "Copy all filtered rows in selected sort order",
+      "observed": "103 clipboard lines: header plus 102 records; first ID204 last ID2; all profile2 and none profile1",
+      "status": "superato"
+    },
+    {
+      "control": "CSV empty table",
+      "expected": "Receive an export containing headers and no data rows",
+      "observed": "Button clicked; no new hybrid-records file observed in Downloads",
+      "status": "bloccato"
+    },
+    {
+      "control": "Excel filtered table",
+      "expected": "Receive workbook with 102 filtered rows",
+      "observed": "Button clicked; no new hybrid-records file observed in Downloads",
+      "status": "bloccato"
+    }
+  ],
+  "limits": [
+    "CSV/XLSX receipt remains unverified; no HTTP response or click alone is treated as passed",
+    "This covers task-table interactions listed here, not the complete product matrix"
+  ]
+}

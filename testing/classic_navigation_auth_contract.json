@@ -1,0 +1,230 @@
+{
+  "origin": "6ec4ce9e",
+  "scope": "Historical decorators extracted through AST including inherited shared context classes",
+  "gates": {
+    "/sensor_panel": {
+      "class": "SensorPanelView",
+      "gate": "login_optional"
+    },
+    "/": {
+      "class": "IndexImgView",
+      "gate": "login_optional"
+    },
+    "/index_canvas": {
+      "class": "IndexCanvasView",
+      "gate": "login_optional"
+    },
+    "/index_img": {
+      "class": "IndexImgView",
+      "gate": "login_optional"
+    },
+    "/panorama": {
+      "class": "LatestPanoramaImgView",
+      "gate": "login_optional"
+    },
+    "/panorama_canvas": {
+      "class": "LatestPanoramaCanvasView",
+      "gate": "login_optional"
+    },
+    "/panorama_img": {
+      "class": "LatestPanoramaImgView",
+      "gate": "login_optional"
+    },
+    "/raw": {
+      "class": "LatestRawImageImgView",
+      "gate": "login_optional"
+    },
+    "/raw_canvas": {
+      "class": "LatestRawImageCanvasView",
+      "gate": "login_optional"
+    },
+    "/raw_img": {
+      "class": "LatestRawImageImgView",
+      "gate": "login_optional"
+    },
+    "/realtime_keogram": {
+      "class": "RealtimeKeogramView",
+      "gate": "login_optional"
+    },
+    "/loop": {
+      "class": "ImageLoopImgView",
+      "gate": "login_optional"
+    },
+    "/loop_canvas": {
+      "class": "ImageLoopCanvasView",
+      "gate": "login_optional"
+    },
+    "/loop_img": {
+      "class": "ImageLoopImgView",
+      "gate": "login_optional"
+    },
+    "/looppanorama": {
+      "class": "PanoramaLoopImgView",
+      "gate": "login_optional"
+    },
+    "/looppanorama_canvas": {
+      "class": "PanoramaLoopCanvasView",
+      "gate": "login_optional"
+    },
+    "/looppanorama_img": {
+      "class": "PanoramaLoopImgView",
+      "gate": "login_optional"
+    },
+    "/loopraw": {
+      "class": "RawImageLoopImgView",
+      "gate": "login_optional"
+    },
+    "/loopraw_canvas": {
+      "class": "RawImageLoopCanvasView",
+      "gate": "login_optional"
+    },
+    "/loopraw_img": {
+      "class": "RawImageLoopImgView",
+      "gate": "login_optional"
+    },
+    "/sqm": {
+      "class": "SqmView",
+      "gate": "login_optional"
+    },
+    "/charts": {
+      "class": "ChartView",
+      "gate": "login_optional"
+    },
+    "/imageviewer": {
+      "class": "ImageViewerView",
+      "gate": "login_optional_media"
+    },
+    "/fitsimageviewer": {
+      "class": "FitsImageViewerView",
+      "gate": "login_required"
+    },
+    "/gallery": {
+      "class": "GalleryViewerView",
+      "gate": "login_optional_media"
+    },
+    "/videoviewer": {
+      "class": "VideoViewerView",
+      "gate": "login_optional_media"
+    },
+    "/minivideoviewer": {
+      "class": "MiniVideoViewerView",
+      "gate": "login_optional_media"
+    },
+    "/generate": {
+      "class": "TimelapseGeneratorView",
+      "gate": "login_required"
+    },
+    "/minigenerate": {
+      "class": "MiniTimelapseGeneratorView",
+      "gate": "login_required"
+    },
+    "/config": {
+      "class": "ConfigView",
+      "gate": "login_required"
+    },
+    "/config/list": {
+      "class": "ConfigListView",
+      "gate": "login_required"
+    },
+    "/config/restore": {
+      "class": "ConfigRestoreView",
+      "gate": "login_required"
+    },
+    "/system": {
+      "class": "SystemInfoView",
+      "gate": "login_required"
+    },
+    "/focus": {
+      "class": "FocusView",
+      "gate": "login_required"
+    },
+    "/manual_gpio": {
+      "class": "ManualGpioView",
+      "gate": "login_required"
+    },
+    "/log": {
+      "class": "LogView",
+      "gate": "login_required"
+    },
+    "/support": {
+      "class": "SupportInfoView",
+      "gate": "login_required"
+    },
+    "/user": {
+      "class": "UserInfoView",
+      "gate": "login_required"
+    },
+    "/astropanel": {
+      "class": "AstroPanelView",
+      "gate": "login_optional"
+    },
+    "/processing": {
+      "class": "ImageProcessingView",
+      "gate": "login_required"
+    },
+    "/longtermkeogram": {
+      "class": "LongTermKeogramView",
+      "gate": "login_optional"
+    },
+    "/camera": {
+      "class": "CameraLensView",
+      "gate": "login_optional"
+    },
+    "/lag": {
+      "class": "ImageLagView",
+      "gate": "login_required"
+    },
+    "/adu": {
+      "class": "RollingAduView",
+      "gate": "login_required"
+    },
+    "/darks": {
+      "class": "DarkFramesView",
+      "gate": "login_required"
+    },
+    "/mask": {
+      "class": "MaskView",
+      "gate": "login_required"
+    },
+    "/camerasimulator": {
+      "class": "CameraSimulatorView",
+      "gate": "login_optional"
+    },
+    "/imagecirclehelper": {
+      "class": "ImageCircleHelperView",
+      "gate": "login_required"
+    },
+    "/filespaceusage": {
+      "class": "FileSpaceUsageView",
+      "gate": "login_required"
+    },
+    "/network": {
+      "class": "NetworkManagerView",
+      "gate": "login_required"
+    },
+    "/drives": {
+      "class": "DriveManagerView",
+      "gate": "login_required"
+    },
+    "/virtualsky": {
+      "class": "VirtualSkyView",
+      "gate": "login_optional"
+    },
+    "/cameras": {
+      "class": "CamerasView",
+      "gate": "login_required"
+    },
+    "/tasks": {
+      "class": "TaskQueueView",
+      "gate": "login_required"
+    },
+    "/notifications": {
+      "class": "NotificationsView",
+      "gate": "login_required"
+    },
+    "/users": {
+      "class": "UsersView",
+      "gate": "login_required"
+    }
+  }
+}

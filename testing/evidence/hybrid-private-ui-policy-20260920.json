@@ -1,0 +1,1559 @@
+{
+  "date": "2026-09-20",
+  "decision": "User explicitly selected mandatory login for Hybrid. Public media/API handlers retain their existing authentication configuration.",
+  "runtime_change": "None: existing Hybrid login requirements are now the accepted product policy.",
+  "gate_test": {
+    "routes": 107,
+    "anonymous_requests_with_valid_csrf": 452,
+    "public_flag_combinations": 4,
+    "result": "passed"
+  },
+  "native_isolated": {
+    "logout": "Sign in to Hybrid displayed",
+    "public_view_image_id1": "Anonymous preview decoded 64x48; sign-in link present",
+    "public_to_hybrid": "Hybrid link returns to login"
+  },
+  "python_regression": {
+    "scope": "Isolated Python regression; production untouched",
+    "status": "passed",
+    "manifest_files": 834,
+    "results": [
+      {
+        "case": "testing/auto_exposure_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.17,
+        "log": "000.log"
+      },
+      {
+        "case": "testing/auto_gain_controller_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "001.log"
+      },
+      {
+        "case": "testing/auto_gain_runtime_state_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "002.log"
+      },
+      {
+        "case": "testing/capture_profiles_test.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "log": "003.log"
+      },
+      {
+        "case": "testing/capture_timeout_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.03,
+        "log": "004.log"
+      },
+      {
+        "case": "testing/focus_frames_test.py",
+        "exit_code": 0,
+        "seconds": 0.56,
+        "log": "005.log"
+      },
+      {
+        "case": "testing/full_config_parser_parity_test.py",
+        "exit_code": 0,
+        "seconds": 13.11,
+        "log": "006.log"
+      },
+      {
+        "case": "testing/generation_result_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "007.log"
+      },
+      {
+        "case": "testing/hybrid_account_input_test.py",
+        "exit_code": 0,
+        "seconds": 9.31,
+        "log": "008.log"
+      },
+      {
+        "case": "testing/hybrid_action_api_flow_test.py",
+        "exit_code": 0,
+        "seconds": 10.16,
+        "log": "009.log"
+      },
+      {
+        "case": "testing/hybrid_adu_history_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.94,
+        "log": "010.log"
+      },
+      {
+        "case": "testing/hybrid_app_startup_test.py",
+        "exit_code": 0,
+        "seconds": 2.92,
+        "log": "011.log"
+      },
+      {
+        "case": "testing/hybrid_archive_flow_test.py",
+        "exit_code": 0,
+        "seconds": 14.06,
+        "log": "012.log"
+      },
+      {
+        "case": "testing/hybrid_asset_guard_test.py",
+        "exit_code": 0,
+        "seconds": 0.02,
+        "log": "013.log"
+      },
+      {
+        "case": "testing/hybrid_astropanel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.88,
+        "log": "014.log"
+      },
+      {
+        "case": "testing/hybrid_astropanel_satellite_test.py",
+        "exit_code": 0,
+        "seconds": 2.98,
+        "log": "015.log"
+      },
+      {
+        "case": "testing/hybrid_aurora_failure_test.py",
+        "exit_code": 0,
+        "seconds": 2.71,
+        "log": "016.log"
+      },
+      {
+        "case": "testing/hybrid_aurora_rtsw_test.py",
+        "exit_code": 0,
+        "seconds": 1.77,
+        "log": "017.log"
+      },
+      {
+        "case": "testing/hybrid_aurora_status_test.py",
+        "exit_code": 0,
+        "seconds": 2.57,
+        "log": "018.log"
+      },
+      {
+        "case": "testing/hybrid_authenticated_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.45,
+        "log": "019.log"
+      },
+      {
+        "case": "testing/hybrid_browser_maintenance_guard_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "020.log"
+      },
+      {
+        "case": "testing/hybrid_camera_cleanup_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.77,
+        "log": "021.log"
+      },
+      {
+        "case": "testing/hybrid_camera_management_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.08,
+        "log": "022.log"
+      },
+      {
+        "case": "testing/hybrid_camera_management_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "log": "023.log"
+      },
+      {
+        "case": "testing/hybrid_camera_processing_status_test.py",
+        "exit_code": 0,
+        "seconds": 3.33,
+        "log": "024.log"
+      },
+      {
+        "case": "testing/hybrid_camera_settings_entries_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.93,
+        "log": "025.log"
+      },
+      {
+        "case": "testing/hybrid_camera_simulator_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.44,
+        "log": "026.log"
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_settings_test.py",
+        "exit_code": 0,
+        "seconds": 3.68,
+        "log": "027.log"
+      },
+      {
+        "case": "testing/hybrid_capture_cadence_test.py",
+        "exit_code": 0,
+        "seconds": 0.27,
+        "log": "028.log"
+      },
+      {
+        "case": "testing/hybrid_capture_http_methods_test.py",
+        "exit_code": 0,
+        "seconds": 2.43,
+        "log": "029.log"
+      },
+      {
+        "case": "testing/hybrid_charts_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.77,
+        "log": "030.log"
+      },
+      {
+        "case": "testing/hybrid_classic_absence_test.py",
+        "exit_code": 0,
+        "seconds": 62.16,
+        "log": "031.log"
+      },
+      {
+        "case": "testing/hybrid_compatibility_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 4.4,
+        "log": "032.log"
+      },
+      {
+        "case": "testing/hybrid_cpu_sampling_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "log": "033.log"
+      },
+      {
+        "case": "testing/hybrid_daily_export_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.09,
+        "log": "034.log"
+      },
+      {
+        "case": "testing/hybrid_daily_media_usage_test.py",
+        "exit_code": 0,
+        "seconds": 2.88,
+        "log": "035.log"
+      },
+      {
+        "case": "testing/hybrid_dark_library_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.24,
+        "log": "036.log"
+      },
+      {
+        "case": "testing/hybrid_database_backup_test.py",
+        "exit_code": 0,
+        "seconds": 7.26,
+        "log": "037.log"
+      },
+      {
+        "case": "testing/hybrid_diagnostic_tables_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.93,
+        "log": "038.log"
+      },
+      {
+        "case": "testing/hybrid_drives_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.45,
+        "log": "039.log"
+      },
+      {
+        "case": "testing/hybrid_end_of_night_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.63,
+        "log": "040.log"
+      },
+      {
+        "case": "testing/hybrid_end_of_night_handoff_test.py",
+        "exit_code": 0,
+        "seconds": 1.82,
+        "log": "041.log"
+      },
+      {
+        "case": "testing/hybrid_exposure_pipeline_test.py",
+        "exit_code": 0,
+        "seconds": 0.46,
+        "log": "042.log"
+      },
+      {
+        "case": "testing/hybrid_exposure_stability_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "043.log"
+      },
+      {
+        "case": "testing/hybrid_fits_dimensions_test.py",
+        "exit_code": 0,
+        "seconds": 2.48,
+        "log": "044.log"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.48,
+        "log": "045.log"
+      },
+      {
+        "case": "testing/hybrid_fits_processing_parity_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "046.log"
+      },
+      {
+        "case": "testing/hybrid_focus_endpoint_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.13,
+        "log": "047.log"
+      },
+      {
+        "case": "testing/hybrid_focus_preview_parity_test.py",
+        "exit_code": 0,
+        "seconds": 2.57,
+        "log": "048.log"
+      },
+      {
+        "case": "testing/hybrid_focuser_effect_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.38,
+        "log": "049.log"
+      },
+      {
+        "case": "testing/hybrid_gallery_isolation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.68,
+        "log": "050.log"
+      },
+      {
+        "case": "testing/hybrid_generated_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.83,
+        "log": "051.log"
+      },
+      {
+        "case": "testing/hybrid_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.88,
+        "log": "052.log"
+      },
+      {
+        "case": "testing/hybrid_generation_result_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.83,
+        "log": "053.log"
+      },
+      {
+        "case": "testing/hybrid_geometry_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.33,
+        "log": "054.log"
+      },
+      {
+        "case": "testing/hybrid_gpio_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.73,
+        "log": "055.log"
+      },
+      {
+        "case": "testing/hybrid_highlight_meter_test.py",
+        "exit_code": 0,
+        "seconds": 0.37,
+        "log": "056.log"
+      },
+      {
+        "case": "testing/hybrid_highlight_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.19,
+        "log": "057.log"
+      },
+      {
+        "case": "testing/hybrid_highlights_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.24,
+        "log": "058.log"
+      },
+      {
+        "case": "testing/hybrid_keogram_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.78,
+        "log": "059.log"
+      },
+      {
+        "case": "testing/hybrid_log_download_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.58,
+        "log": "060.log"
+      },
+      {
+        "case": "testing/hybrid_log_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.09,
+        "log": "061.log"
+      },
+      {
+        "case": "testing/hybrid_login_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 6.13,
+        "log": "062.log"
+      },
+      {
+        "case": "testing/hybrid_longterm_keogram_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.68,
+        "log": "063.log"
+      },
+      {
+        "case": "testing/hybrid_longterm_sampling_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.08,
+        "log": "064.log"
+      },
+      {
+        "case": "testing/hybrid_loop_statistics_test.py",
+        "exit_code": 0,
+        "seconds": 3.1,
+        "log": "065.log"
+      },
+      {
+        "case": "testing/hybrid_mask_camera_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.03,
+        "log": "066.log"
+      },
+      {
+        "case": "testing/hybrid_media_cleanup_failure_test.py",
+        "exit_code": 0,
+        "seconds": 10.03,
+        "log": "067.log"
+      },
+      {
+        "case": "testing/hybrid_media_task_guard_test.py",
+        "exit_code": 0,
+        "seconds": 2.63,
+        "log": "068.log"
+      },
+      {
+        "case": "testing/hybrid_media_validation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.63,
+        "log": "069.log"
+      },
+      {
+        "case": "testing/hybrid_metering_mask_test.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "log": "070.log"
+      },
+      {
+        "case": "testing/hybrid_mini_generation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.88,
+        "log": "071.log"
+      },
+      {
+        "case": "testing/hybrid_native_focus_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.82,
+        "log": "072.log"
+      },
+      {
+        "case": "testing/hybrid_navigation_redirect_test.py",
+        "exit_code": 0,
+        "seconds": 3.53,
+        "log": "073.log"
+      },
+      {
+        "case": "testing/hybrid_network_command_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.35,
+        "log": "074.log"
+      },
+      {
+        "case": "testing/hybrid_now_page_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.08,
+        "log": "075.log"
+      },
+      {
+        "case": "testing/hybrid_observatory_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.19,
+        "log": "076.log"
+      },
+      {
+        "case": "testing/hybrid_operations_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.17,
+        "log": "077.log"
+      },
+      {
+        "case": "testing/hybrid_output_detail_flow_test.py",
+        "exit_code": 0,
+        "seconds": 6.19,
+        "log": "078.log"
+      },
+      {
+        "case": "testing/hybrid_overview_summaries_test.py",
+        "exit_code": 0,
+        "seconds": 2.83,
+        "log": "079.log"
+      },
+      {
+        "case": "testing/hybrid_page_heading_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "080.log"
+      },
+      {
+        "case": "testing/hybrid_panorama_cadence_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "081.log"
+      },
+      {
+        "case": "testing/hybrid_panorama_publication_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.34,
+        "log": "082.log"
+      },
+      {
+        "case": "testing/hybrid_private_ui_policy_test.py",
+        "exit_code": 0,
+        "seconds": 2.47,
+        "log": "083.log"
+      },
+      {
+        "case": "testing/hybrid_public_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 6.94,
+        "log": "084.log"
+      },
+      {
+        "case": "testing/hybrid_queued_maintenance_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.73,
+        "log": "085.log"
+      },
+      {
+        "case": "testing/hybrid_raw_loop_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.18,
+        "log": "086.log"
+      },
+      {
+        "case": "testing/hybrid_realtime_history_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.93,
+        "log": "087.log"
+      },
+      {
+        "case": "testing/hybrid_realtime_preview_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.42,
+        "log": "088.log"
+      },
+      {
+        "case": "testing/hybrid_regression_runner_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "089.log"
+      },
+      {
+        "case": "testing/hybrid_route_composition_test.py",
+        "exit_code": 0,
+        "seconds": 2.17,
+        "log": "090.log"
+      },
+      {
+        "case": "testing/hybrid_runtime_shell_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.73,
+        "log": "091.log"
+      },
+      {
+        "case": "testing/hybrid_satellite_update_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.63,
+        "log": "092.log"
+      },
+      {
+        "case": "testing/hybrid_sensor_panel_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.63,
+        "log": "093.log"
+      },
+      {
+        "case": "testing/hybrid_session_revocation_test.py",
+        "exit_code": 0,
+        "seconds": 6.08,
+        "log": "094.log"
+      },
+      {
+        "case": "testing/hybrid_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.34,
+        "log": "095.log"
+      },
+      {
+        "case": "testing/hybrid_settings_navigation_flow_test.py",
+        "exit_code": 0,
+        "seconds": 5.29,
+        "log": "096.log"
+      },
+      {
+        "case": "testing/hybrid_shell_test.py",
+        "exit_code": 0,
+        "seconds": 0.77,
+        "log": "097.log"
+      },
+      {
+        "case": "testing/hybrid_sky_cycle_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.88,
+        "log": "098.log"
+      },
+      {
+        "case": "testing/hybrid_smoke_update_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.58,
+        "log": "099.log"
+      },
+      {
+        "case": "testing/hybrid_snapshot_concurrency_test.py",
+        "exit_code": 0,
+        "seconds": 3.48,
+        "log": "100.log"
+      },
+      {
+        "case": "testing/hybrid_source_media_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.07,
+        "log": "101.log"
+      },
+      {
+        "case": "testing/hybrid_sqm_readings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.27,
+        "log": "102.log"
+      },
+      {
+        "case": "testing/hybrid_storage_estimate_test.py",
+        "exit_code": 0,
+        "seconds": 1.88,
+        "log": "103.log"
+      },
+      {
+        "case": "testing/hybrid_storage_pressure_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.48,
+        "log": "104.log"
+      },
+      {
+        "case": "testing/hybrid_storage_pressure_policy_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "105.log"
+      },
+      {
+        "case": "testing/hybrid_storage_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.48,
+        "log": "106.log"
+      },
+      {
+        "case": "testing/hybrid_storage_worker_test.py",
+        "exit_code": 0,
+        "seconds": 1.92,
+        "log": "107.log"
+      },
+      {
+        "case": "testing/hybrid_sync_api_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.93,
+        "log": "108.log"
+      },
+      {
+        "case": "testing/hybrid_sync_transfer_flow_test.py",
+        "exit_code": 0,
+        "seconds": 1.93,
+        "log": "109.log"
+      },
+      {
+        "case": "testing/hybrid_system_power_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.33,
+        "log": "110.log"
+      },
+      {
+        "case": "testing/hybrid_system_units_flow_test.py",
+        "exit_code": 0,
+        "seconds": 3.08,
+        "log": "111.log"
+      },
+      {
+        "case": "testing/hybrid_table_export_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "112.log"
+      },
+      {
+        "case": "testing/hybrid_task_output_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "113.log"
+      },
+      {
+        "case": "testing/hybrid_task_visibility_test.py",
+        "exit_code": 0,
+        "seconds": 4.44,
+        "log": "114.log"
+      },
+      {
+        "case": "testing/hybrid_template_guard_test.py",
+        "exit_code": 0,
+        "seconds": 0.17,
+        "log": "115.log"
+      },
+      {
+        "case": "testing/hybrid_timelapse_deflicker_test.py",
+        "exit_code": 0,
+        "seconds": 1.32,
+        "log": "116.log"
+      },
+      {
+        "case": "testing/hybrid_timelapse_options_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "117.log"
+      },
+      {
+        "case": "testing/hybrid_timelapse_settings_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.84,
+        "log": "118.log"
+      },
+      {
+        "case": "testing/hybrid_ui_inventory_parser_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "log": "119.log"
+      },
+      {
+        "case": "testing/hybrid_updates_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.53,
+        "log": "120.log"
+      },
+      {
+        "case": "testing/hybrid_upgrade_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.38,
+        "log": "121.log"
+      },
+      {
+        "case": "testing/hybrid_upload_claim_test.py",
+        "exit_code": 0,
+        "seconds": 1.97,
+        "log": "122.log"
+      },
+      {
+        "case": "testing/hybrid_upload_completion_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "123.log"
+      },
+      {
+        "case": "testing/hybrid_users_table_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.83,
+        "log": "124.log"
+      },
+      {
+        "case": "testing/hybrid_video_dispatch_test.py",
+        "exit_code": 0,
+        "seconds": 2.7,
+        "log": "125.log"
+      },
+      {
+        "case": "testing/hybrid_video_encoding_flow_test.py",
+        "exit_code": 0,
+        "seconds": 6.39,
+        "log": "126.log"
+      },
+      {
+        "case": "testing/hybrid_video_failure_test.py",
+        "exit_code": 0,
+        "seconds": 1.87,
+        "log": "127.log"
+      },
+      {
+        "case": "testing/hybrid_virtualsky_flow_test.py",
+        "exit_code": 0,
+        "seconds": 2.78,
+        "log": "128.log"
+      },
+      {
+        "case": "testing/hybrid_youtube_flow_test.py",
+        "exit_code": 0,
+        "seconds": 4.05,
+        "log": "129.log"
+      },
+      {
+        "case": "testing/legacy_auto_gain_steps_test.py",
+        "exit_code": 0,
+        "seconds": 0.27,
+        "log": "130.log"
+      },
+      {
+        "case": "testing/modern_admin_boundary_test.py",
+        "exit_code": 0,
+        "seconds": 0.36,
+        "log": "131.log"
+      },
+      {
+        "case": "testing/modern_admin_camera_diagnostics_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.13,
+        "log": "132.log"
+      },
+      {
+        "case": "testing/modern_admin_classic_page_isolation_test.py",
+        "exit_code": 0,
+        "seconds": 0.47,
+        "log": "133.log"
+      },
+      {
+        "case": "testing/modern_admin_full_config_form_test.py",
+        "exit_code": 0,
+        "seconds": 12.03,
+        "log": "134.log"
+      },
+      {
+        "case": "testing/modern_admin_log_reader_test.py",
+        "exit_code": 0,
+        "seconds": 0.62,
+        "log": "135.log"
+      },
+      {
+        "case": "testing/modern_admin_media_camera_filter_test.py",
+        "exit_code": 0,
+        "seconds": 0.17,
+        "log": "136.log"
+      },
+      {
+        "case": "testing/modern_admin_media_context_test.py",
+        "exit_code": 0,
+        "seconds": 0.37,
+        "log": "137.log"
+      },
+      {
+        "case": "testing/modern_admin_media_metadata_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "138.log"
+      },
+      {
+        "case": "testing/modern_admin_media_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.12,
+        "log": "139.log"
+      },
+      {
+        "case": "testing/modern_admin_notification_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "140.log"
+      },
+      {
+        "case": "testing/modern_admin_observatory_context_test.py",
+        "exit_code": 0,
+        "seconds": 0.31,
+        "log": "141.log"
+      },
+      {
+        "case": "testing/modern_admin_observatory_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "142.log"
+      },
+      {
+        "case": "testing/modern_admin_runtime_providers_test.py",
+        "exit_code": 0,
+        "seconds": 0.67,
+        "log": "143.log"
+      },
+      {
+        "case": "testing/modern_admin_settings_contracts_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "144.log"
+      },
+      {
+        "case": "testing/modern_admin_settings_runtime_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "145.log"
+      },
+      {
+        "case": "testing/modern_admin_system_context_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "146.log"
+      },
+      {
+        "case": "testing/modern_admin_system_tools_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "147.log"
+      },
+      {
+        "case": "testing/modern_admin_task_read_service_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "148.log"
+      },
+      {
+        "case": "testing/modern_safe_action_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "log": "149.log"
+      },
+      {
+        "case": "testing/multicamera_processor_isolation_test.py",
+        "exit_code": 0,
+        "seconds": 1.97,
+        "log": "150.log"
+      },
+      {
+        "case": "testing/network_activation_polling_test.py",
+        "exit_code": 0,
+        "seconds": 0.26,
+        "log": "151.log"
+      },
+      {
+        "case": "testing/network_commands_test.py",
+        "exit_code": 0,
+        "seconds": 0.06,
+        "log": "152.log"
+      },
+      {
+        "case": "testing/network_scan_effects_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "153.log"
+      },
+      {
+        "case": "testing/product_spine_regression_test.py",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "154.log"
+      },
+      {
+        "case": "testing/product_view_models_test.py",
+        "exit_code": 0,
+        "seconds": 0.36,
+        "log": "155.log"
+      },
+      {
+        "case": "testing/sftp_adapter_test.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "log": "156.log"
+      },
+      {
+        "case": "testing/stretch_multicamera_mask_test.py",
+        "exit_code": 0,
+        "seconds": 0.21,
+        "log": "157.log"
+      },
+      {
+        "case": "hybrid_archive_flow_test.py:library",
+        "exit_code": 0,
+        "seconds": 14.25,
+        "log": "158.log"
+      },
+      {
+        "case": "compileall",
+        "exit_code": 0,
+        "seconds": 0.11,
+        "log": "159.log"
+      }
+    ],
+    "source_changed": false
+  },
+  "javascript_regression": "34 passed; runtime JavaScript unchanged from tested candidate",
+  "historical_gate_audit": {
+    "scope": "Authentication gates only: actual decorators in isolated Flask, historical Classic inheritance preserved in the frozen authentication contract; no Classic import or live effect.",
+    "legacy_gate_counts": {
+      "login_optional": 27,
+      "login_optional_media": 4,
+      "login_required": 25
+    },
+    "hybrid_gate_counts": {
+      "login_required": 56
+    },
+    "different_gate_count": 31,
+    "gate_results": {
+      "all=False,media=False": {
+        "login_required": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional": {
+          "anonymous": 200,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional_media": {
+          "anonymous": 200,
+          "user": 200,
+          "admin": 200
+        }
+      },
+      "all=False,media=True": {
+        "login_required": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional": {
+          "anonymous": 200,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional_media": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        }
+      },
+      "all=True,media=False": {
+        "login_required": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional_media": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        }
+      },
+      "all=True,media=True": {
+        "login_required": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        },
+        "login_optional_media": {
+          "anonymous": 302,
+          "user": 200,
+          "admin": 200
+        }
+      }
+    },
+    "routes": [
+      {
+        "path": "/",
+        "legacy_class": "IndexImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_now_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/index_canvas",
+        "legacy_class": "IndexCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_now_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/index_img",
+        "legacy_class": "IndexImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_now_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/panorama",
+        "legacy_class": "LatestPanoramaImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/panorama_canvas",
+        "legacy_class": "LatestPanoramaCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/panorama_img",
+        "legacy_class": "LatestPanoramaImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/raw",
+        "legacy_class": "LatestRawImageImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_raw_images_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/raw_canvas",
+        "legacy_class": "LatestRawImageCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_raw_images_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/raw_img",
+        "legacy_class": "LatestRawImageImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_raw_images_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loop",
+        "legacy_class": "ImageLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loop_canvas",
+        "legacy_class": "ImageLoopCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loop_img",
+        "legacy_class": "ImageLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/looppanorama",
+        "legacy_class": "PanoramaLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/looppanorama_canvas",
+        "legacy_class": "PanoramaLoopCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/looppanorama_img",
+        "legacy_class": "PanoramaLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_media_panorama_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loopraw",
+        "legacy_class": "RawImageLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_raw_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loopraw_canvas",
+        "legacy_class": "RawImageLoopCanvasView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_raw_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/loopraw_img",
+        "legacy_class": "RawImageLoopImgView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_raw_loop_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/sensor_panel",
+        "legacy_class": "SensorPanelView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_sensor_panel_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/realtime_keogram",
+        "legacy_class": "RealtimeKeogramView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_realtime_keogram_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/sqm",
+        "legacy_class": "SqmView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_sqm_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/charts",
+        "legacy_class": "ChartView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_charts_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/imageviewer",
+        "legacy_class": "ImageViewerView",
+        "legacy_gate": "login_optional_media",
+        "hybrid_endpoint": "modern_admin_media_images_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/fitsimageviewer",
+        "legacy_class": "FitsImageViewerView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_fits_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/gallery",
+        "legacy_class": "GalleryViewerView",
+        "legacy_gate": "login_optional_media",
+        "hybrid_endpoint": "modern_admin_media_gallery_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/videoviewer",
+        "legacy_class": "VideoViewerView",
+        "legacy_gate": "login_optional_media",
+        "hybrid_endpoint": "modern_admin_media_timelapses_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/minivideoviewer",
+        "legacy_class": "MiniVideoViewerView",
+        "legacy_gate": "login_optional_media",
+        "hybrid_endpoint": "modern_admin_media_mini_timelapses_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/generate",
+        "legacy_class": "TimelapseGeneratorView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_generate_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/minigenerate",
+        "legacy_class": "MiniTimelapseGeneratorView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_mini_generate_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/config",
+        "legacy_class": "ConfigView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_full_settings_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/config/list",
+        "legacy_class": "ConfigListView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_config_history_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/config/restore",
+        "legacy_class": "ConfigRestoreView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_config_restore_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/system",
+        "legacy_class": "SystemInfoView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_system_info_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/focus",
+        "legacy_class": "FocusView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_focus_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/manual_gpio",
+        "legacy_class": "ManualGpioView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_manual_gpio_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/log",
+        "legacy_class": "LogView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_log_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/support",
+        "legacy_class": "SupportInfoView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_support_info_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/user",
+        "legacy_class": "UserInfoView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_account_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/astropanel",
+        "legacy_class": "AstroPanelView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_astropanel_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/processing",
+        "legacy_class": "ImageProcessingView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_image_processing_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/longtermkeogram",
+        "legacy_class": "LongTermKeogramView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_longterm_keogram_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/camera",
+        "legacy_class": "CameraLensView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_camera_info_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/lag",
+        "legacy_class": "ImageLagView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_image_lag_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/adu",
+        "legacy_class": "RollingAduView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_adu_history_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/darks",
+        "legacy_class": "DarkFramesView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_dark_library_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/mask",
+        "legacy_class": "MaskView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_mask_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/camerasimulator",
+        "legacy_class": "CameraSimulatorView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_camera_simulator_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/imagecirclehelper",
+        "legacy_class": "ImageCircleHelperView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_image_circle_helper_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/filespaceusage",
+        "legacy_class": "FileSpaceUsageView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_file_space_usage_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/network",
+        "legacy_class": "NetworkManagerView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_network_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/drives",
+        "legacy_class": "DriveManagerView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_drive_manager_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/virtualsky",
+        "legacy_class": "VirtualSkyView",
+        "legacy_gate": "login_optional",
+        "hybrid_endpoint": "modern_admin_virtualsky_view",
+        "hybrid_gate": "login_required",
+        "different_gate": true
+      },
+      {
+        "path": "/cameras",
+        "legacy_class": "CamerasView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_cameras_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/tasks",
+        "legacy_class": "TaskQueueView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_taskqueue_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/notifications",
+        "legacy_class": "NotificationsView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_notifications_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      },
+      {
+        "path": "/users",
+        "legacy_class": "UsersView",
+        "legacy_gate": "login_required",
+        "hybrid_endpoint": "modern_admin_users_view",
+        "hybrid_gate": "login_required",
+        "different_gate": false
+      }
+    ],
+    "policy": "User selected login-required Hybrid UI on 2026-09-20. Historical optional navigation gates are intentionally superseded; public media/API handlers retain their separate contracts.",
+    "limits": "This audit does not verify every authorization inside a view or public media/API behavior."
+  },
+  "recent_production_samples": {
+    "scope": "Read-only recent saved-frame samples, not 24-hour acceptance",
+    "cameras": {
+      "1": {
+        "count": 20,
+        "newest": "2026-09-20 18:46:40.000000",
+        "oldest": "2026-09-20 18:41:54.000000",
+        "interval_seconds": {
+          "min": 15.0,
+          "median": 15.0,
+          "max": 16.0
+        },
+        "missing_or_empty": 0
+      },
+      "2": {
+        "count": 20,
+        "newest": "2026-09-20 18:46:41.000000",
+        "oldest": "2026-09-20 18:41:56.000000",
+        "interval_seconds": {
+          "min": 14.0,
+          "median": 15.0,
+          "max": 16.0
+        },
+        "missing_or_empty": 0
+      }
+    }
+  },
+  "storage_read_only": {
+    "minimum_free_gib": 5,
+    "target_free_gib": 8,
+    "keep_days": 3,
+    "enabled": true,
+    "needs_work": false,
+    "free_gib_observed": 5.43
+  },
+  "limits": [
+    "Public policy decision closed; complete control/effect matrix and final removal/deployment still open",
+    "Recent camera samples do not certify 24-hour operation",
+    "No deployment, capture restart or media deletion in this policy mission"
+  ]
+}
