@@ -1,5 +1,10 @@
 # Hybrid Product Consolidation Audit
 
+> Historical migration record. Its inventory counts and commands refer to the
+> pre-retirement frontend. Use [the current acceptance workflow](../HYBRID_ACCEPTANCE_WORKFLOW.md) for
+> new work. The removed static UI inventory/map/report remain available in Git
+> at `8f5c954b`; they are not runtime dependencies or current coverage evidence.
+
 ## Executive Summary
 
 Hybrid AllSky has moved beyond a Classic-to-Modern port. The repository now contains a distinct product direction built around:

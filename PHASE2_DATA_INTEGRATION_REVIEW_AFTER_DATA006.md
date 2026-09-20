@@ -1,5 +1,10 @@
 # Phase 2 Data Integration Review after DATA006
 
+> Historical migration record. Its inventory counts and commands refer to the
+> pre-retirement frontend. Use [the current acceptance workflow](docs/HYBRID_ACCEPTANCE_WORKFLOW.md) for
+> new work. The removed static UI inventory/map/report remain available in Git
+> at `8f5c954b`; they are not runtime dependencies or current coverage evidence.
+
 This review evaluates the Product UI after DATA001 through DATA006.
 
 It is a product and safety decision point, not an implementation plan.

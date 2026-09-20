@@ -1168,5 +1168,15 @@
       "hybrid_app_startup_test.py"
     ],
     "scope": "Classic physically absent; current Linux/local source hashes match. Full main regression passed before integration; full candidate regression above still certifies its earlier snapshot."
+  },
+  "obsolete_inventory_cleanup": {
+    "date": "2026-09-20",
+    "removed_files": [
+      "tools/hybrid_ui_inventory.py",
+      "tools/hybrid_ui_ownership_map.json",
+      "HYBRID_UI_INVENTORY_REPORT.md"
+    ],
+    "evidence": "testing/evidence/hybrid-classic-inventory-retirement-20260920.json",
+    "runtime_settings_map_preserved": true
   }
 }

@@ -1,0 +1,36 @@
+{
+  "scope": "Classic retirement candidate only; no production or main runtime changes",
+  "baseline": "8f5c954b",
+  "removed_obsolete_inventory": [
+    {
+      "path": "tools/hybrid_ui_inventory.py",
+      "bytes": 46044,
+      "lines": 1185
+    },
+    {
+      "path": "tools/hybrid_ui_ownership_map.json",
+      "bytes": 94664,
+      "lines": 3227
+    },
+    {
+      "path": "HYBRID_UI_INVENTORY_REPORT.md",
+      "bytes": 189043,
+      "lines": 1525
+    }
+  ],
+  "replacement": "docs/HYBRID_ACCEPTANCE_WORKFLOW.md",
+  "preserved_runtime_settings_map": "tools/hybrid_settings_ownership_map.json",
+  "verification": [
+    "No runtime consumers of the removed UI ownership map/generator found; references are historical process docs.",
+    "Exact quoted deleted frontend paths outside tests/documents resolved only to the retired tool/map; shared template paths remain separate.",
+    "hybrid_ui_inventory_parser_test.py passed",
+    "hybrid_asset_guard_test.py passed",
+    "hybrid_regression_runner_test.py passed",
+    "git diff --check passed"
+  ],
+  "limitations": [
+    "Static reference searches alone do not certify complete dynamic dependency coverage.",
+    "Native full control/effect acceptance and post-removal production checks remain open.",
+    "No new full candidate regression claimed for this documentation/tool cleanup."
+  ]
+}

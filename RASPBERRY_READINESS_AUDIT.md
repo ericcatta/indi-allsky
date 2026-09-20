@@ -1,5 +1,10 @@
 # Raspberry Readiness Audit
 
+> Historical migration record. Its inventory counts and commands refer to the
+> pre-retirement frontend. Use [the current acceptance workflow](docs/HYBRID_ACCEPTANCE_WORKFLOW.md) for
+> new work. The removed static UI inventory/map/report remain available in Git
+> at `8f5c954b`; they are not runtime dependencies or current coverage evidence.
+
 This audit evaluates whether the repository is ready for a first controlled pull
 and test on Raspberry Pi 5 after Product UI v1, DATA001-DATA006, Release
 Candidate cleanup audit, and conservative cleanup.

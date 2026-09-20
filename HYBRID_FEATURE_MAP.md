@@ -1,5 +1,10 @@
 # HYBRID FEATURE MAP
 
+> Historical migration record. Its inventory counts and commands refer to the
+> pre-retirement frontend. Use [the current acceptance workflow](docs/HYBRID_ACCEPTANCE_WORKFLOW.md) for
+> new work. The removed static UI inventory/map/report remain available in Git
+> at `8f5c954b`; they are not runtime dependencies or current coverage evidence.
+
 Audit date: 2026-06-26
 
 Scope: semantic feature ownership map for future Classic UI to Modern UI

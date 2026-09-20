@@ -1,5 +1,10 @@
 # Hybrid Product Consolidation Next Microsteps
 
+> Historical migration record. Its inventory counts and commands refer to the
+> pre-retirement frontend. Use [the current acceptance workflow](../HYBRID_ACCEPTANCE_WORKFLOW.md) for
+> new work. The removed static UI inventory/map/report remain available in Git
+> at `8f5c954b`; they are not runtime dependencies or current coverage evidence.
+
 This is the living backlog for Hybrid Product Consolidation.
 
 The source of truth for the current consolidation baseline is
