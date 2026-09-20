@@ -1,5 +1,16 @@
 # Hybrid acceptance status
 
+## Integrated retirement candidate regression — 2026-09-20
+
+The physically removed Classic candidate now incorporates main `132fec7d`.
+All 161 Python and 34 JavaScript entries pass on the same 779-file source
+snapshot, unchanged during execution. This covers mandatory Hybrid login,
+Settings privacy and search feedback together with the retired frontend.
+Evidence: `testing/evidence/hybrid-classic-retirement-candidate.json`,
+`integrated_regression_20260920`. Production removal and the complete native
+control/effect matrix remain open. The subsequent main validation-log fix
+is not included in this snapshot.
+
 ## Classic retirement candidate — 2026-09-20
 
 This branch removes 111 Classic-only frontend files and the transient startup
@@ -14,6 +25,18 @@ verified on main. The complete control/effect matrix, remaining cleanup and
 post-removal deployment checks remain open. The 24-hour observation remains deferred. Main and installed
 production retain Classic files until those gates are addressed.
 
+## Settings search and complete document landmarks — 2026-09-20
+
+Full Settings now uses distinct page/summary heading IDs. Integration checks
+inspect the complete form HTML and four focused domain entries, closing the
+blind spot in the earlier header-only test. Search now announces matching
+counts and explains empty results; save feedback is also a live status.
+Native ordinary-user checks cover Storage focus, empty/single results and
+keyboard clearing while the form remains read-only. On main, all 161 Python and
+34 JavaScript entries pass with unchanged source hashes during the run.
+Evidence: `testing/evidence/hybrid-settings-usability-20260920.json`; linked
+control records are added to the route register. This change is not yet deployed.
+
 ## Settings credential privacy — 2026-09-20
 
 Ordinary authenticated users no longer receive credential values in Settings
@@ -23,8 +46,12 @@ On main, all 161 Python and 34 JavaScript entries pass; existing form/parser fin
 remain unchanged. Native synthetic checks cover both roles, rejected invalid
 input, a valid full save, its history revision and reopening after save.
 Evidence: `testing/evidence/hybrid-settings-privacy-native-20260920.json`.
-Production deployment remains pending. A duplicate Full Settings heading ID
-found during this check is recorded for a separate correction.
+Production `68f35d76` now passes bounded Settings/Now checks with all 836
+tested source hashes matching. Configuration117 and capture PID 1566 were
+preserved. Maintenance frame delays were observed; both cameras recovered
+45-second night cadence in the final four-frame sample. Evidence:
+`testing/evidence/hybrid-settings-privacy-deployment.json`. A duplicate Full
+Settings heading ID is corrected by the subsequent usability change above.
 
 ## Mandatory Hybrid login — 2026-09-20
 

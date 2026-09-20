@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-20",
+  "status": "installed-verified",
+  "previous": "6784d3d51c9888a159e3fb488609c110f93a1586",
+  "installed": "68f35d76b987877d1d7c1cba6132c5666a92a6c1",
+  "backup": "/home/eric/hybrid-backups/hybrid-settings-privacy-20260920-200001",
+  "backup_strategy": "Pinned WAL read snapshot",
+  "backup_seconds": 85.59,
+  "database_bytes": 828977152,
+  "integrity": "ok",
+  "configuration_revision": 117,
+  "configuration_unchanged": true,
+  "capture_restarted": false,
+  "capture_pid": 1566,
+  "web_pid_after": 534391,
+  "source_files": 836,
+  "source_manifest": "db445a83a8de775991763b34050d61b0a1abd39bfbc06b2c2852398263c6fa99",
+  "native_checks": {
+    "admin_full_settings": "Form enabled, 727 named fields,Save Full Settings button; no production save",
+    "now": "Running, decoded IMX708 4608x2592 and ASI 3840x2160 frames"
+  },
+  "capture_sample": {
+    "checked_at": "2026-09-20T20:04:46.759027",
+    "camera1_timestamps": [
+      "20:04:21",
+      "20:03:36",
+      "20:02:51",
+      "20:02:06"
+    ],
+    "camera2_timestamps": [
+      "20:04:00",
+      "20:03:15",
+      "20:02:30",
+      "20:01:45"
+    ],
+    "intervals_each_seconds": [
+      45,
+      45,
+      45
+    ],
+    "all_files_present_nonempty": true
+  },
+  "limits": [
+    "Initial incremental backup timed out after 10 minutes; services were untouched.",
+    "Maintenance coincided with frame delays up to153 seconds in the sampled images; final sample recovered configured 45-second night cadence.",
+    "Read-only secret masking and saves were validated with synthetic users/data; no production credentials printed or configuration saved.",
+    "Classic remains disabled but present; 24-hour observation deferred."
+  ],
+  "backup_reference": "https://www.sqlite.org/wal.html",
+  "rollback_helper": "/home/eric/hybrid-settings-privacy-snapshot-deploy.py"
+}

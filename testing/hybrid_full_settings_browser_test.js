@@ -19,11 +19,12 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
     const section = {hidden:false,open:false,querySelectorAll:()=>[row],querySelector:()=>count};
     const button = {disabled:!canSave, textContent:'Save Full Settings'};
     const message = {hidden:true, textContent:'', className:''};
+    const filterStatus = {textContent:''};
     const form = {noValidate:true,addEventListener:(name,callback)=>{submit=callback;},querySelectorAll:()=>[]};
     const filter = {value:filterText,addEventListener:(name,callback)=>{filterHandler=callback;}};
     const config = {focusFields:[],fieldNames:['OWNER','CONFIG_NOTE','RELOAD_ON_SAVE','FOCUS_MODE'],checkboxNames:['RELOAD_ON_SAVE','FOCUS_MODE'],ajaxUrl:'/indi-allsky/ajax/config',csrfToken:'test-token',canSave};
     const elements = {...fields,'modern-admin-full-settings-form':form,'modern-admin-full-settings-save':button,
-        'modern-admin-full-settings-message':message,'modern-admin-full-settings-filter':filter,
+        'modern-admin-full-settings-filter-status':filterStatus,'modern-admin-full-settings-message':message,'modern-admin-full-settings-filter':filter,
         'hybrid-full-settings-config':{textContent:JSON.stringify(config)}};
     if (focused) elements['settings-domain-only'] = domainOnly;
     vm.runInNewContext(source, {URL, window:{location:{href:'https://test.invalid/indi-allsky/modern-admin/settings/full?search='+encodeURIComponent(initialSearch)}},
@@ -45,11 +46,14 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
     assert.equal(calls,canSave ? 1 : 0);
     assert.equal(button.disabled,!canSave);
     if(canSave) assert.deepEqual(sent,{OWNER:'Test observer',CONFIG_NOTE:'Keep this until saved',RELOAD_ON_SAVE:true,FOCUS_MODE:false});
-    return {message:message.textContent,fields,row,domainOnly};
+    return {message:message.textContent,fields,row,domainOnly,filterStatus,search(value) { filter.value=value;filterHandler(); }};
 }
 (async()=>{
     await run({initialSearch:'owner'});
-    await run({focused:true});
+    const focused = await run({focused:true});
+    assert.match(focused.filterStatus.textContent,/turn off the group filter/);
+    focused.domainOnly.checked=false;focused.search('owner');
+    assert.equal(focused.filterStatus.textContent,'1 setting matches.');
     const hiddenError=await run({focused:true,response:{ok:false,status:400,text:async()=>JSON.stringify({OWNER:['Invalid owner']})}});
     assert.equal(hiddenError.domainOnly.checked,false);
     assert.equal(hiddenError.row.hidden,false);
@@ -57,7 +61,10 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
     assert.equal(success.message,'Saved');
     assert.equal(success.fields.CONFIG_NOTE.value,'');
     assert.equal(success.fields.RELOAD_ON_SAVE.checked,false);
-    await run({canSave:false,filterText:'missing'});
+    const empty = await run({canSave:false,filterText:'missing'});
+    assert.equal(empty.filterStatus.textContent,'No settings match. Change or clear your search.');
+    empty.search('');
+    assert.equal(empty.filterStatus.textContent,'1 setting matches.');
     const rejected=await run({response:{ok:false,status:400,text:async()=>JSON.stringify({OWNER:['Invalid owner']})}});
     assert.equal(rejected.fields['OWNER-error'].textContent,'Invalid owner');
     assert.equal(rejected.fields.CONFIG_NOTE.value,'Keep this until saved');

@@ -1,8 +1,30 @@
 # Hybrid: deployment and rollback
 
-## Accessible headings installed, 14 September 2026
+## Settings privacy installed, 20 September 2026
 
-Production is `6784d3d51c9888a159e3fb488609c110f93a1586`. This web-only
+Production is `68f35d76b987877d1d7c1cba6132c5666a92a6c1`. All 836
+tested source hashes match. Web-only deployment preserved configuration 117
+and capture PID 1566. Native Settings/Now checks pass. Frame delays occurred
+during maintenance; the final sample returned to 45-second cadence on both
+cameras. Evidence: `testing/evidence/hybrid-settings-privacy-deployment.json`.
+
+The first incremental online backup timed out without changing services.
+The successful backup pinned a WAL read transaction, allowing concurrent
+writers while preserving one snapshot, and passed integrity validation.
+Keep this transaction bounded: it delays WAL checkpoint completion; monitor
+space and close it immediately after copying. See [SQLite WAL concurrency](https://www.sqlite.org/wal.html).
+
+Rollback uses `~/hybrid-settings-privacy-snapshot-deploy.py --rollback` with
+`~/hybrid-backups/hybrid-settings-privacy-20260920-200001` and a fresh
+timezone-aware `--maintenance-until` deadline. It returns code to `6784d3d5`,
+restarting only web/socket while retaining database, configuration and capture.
+The exact helper is also retained as `deploy.py` in that backup. Private backup
+umask 077 and child git umask 022 remain separate. Classic is still disabled
+and physically present; final retirement acceptance remains open.
+
+## Previous accessible headings deployment, 14 September 2026
+
+That deployment installed `6784d3d51c9888a159e3fb488609c110f93a1586`. This web-only
 update preserved capture and configuration revision 117. All 832 source hashes
 match the tested release. Native Tasks and Basic Settings headings passed;
 both cameras supplied decoded frames after deployment. Evidence:

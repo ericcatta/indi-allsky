@@ -1,0 +1,115 @@
+{
+  "date": "2026-09-20",
+  "scope": "Isolated native browser, synthetic data, ordinary test-user-2, camera2; Classic imports forbidden",
+  "source_manifest": "26e9308ddb1140335bc59e579adba728e5583fbd75fd8421922d75cefd9c35ae",
+  "controls": [
+    {
+      "page": "/modern-admin/settings/full",
+      "control": "Complete document headings and labels",
+      "expected": "One H1, unique IDs and resolvable main label",
+      "observed": "No duplicate IDs across complete DOM; main label resolves to Full Settings H1",
+      "status": "superato",
+      "identifier": "modern-admin-full-settings-title",
+      "role": "ordinary authenticated user",
+      "camera_id": 2,
+      "profile_query": null,
+      "prerequisites": "Synthetic two-camera fixture; shared Settings configuration; Classic import guard active",
+      "request": "GET /indi-allsky/modern-admin/settings/full?camera_id=2"
+    },
+    {
+      "page": "/modern-admin/settings",
+      "control": "Technical reference disclosure > Storage / Drives",
+      "expected": "Open focused Storage view while retaining camera2",
+      "observed": "Focused form, camera2 retained, group checkbox enabled for read-only user",
+      "status": "superato",
+      "identifier": "Settings > Technical reference > Storage / Drives",
+      "role": "ordinary authenticated user",
+      "camera_id": 2,
+      "profile_query": null,
+      "prerequisites": "Synthetic two-camera fixture; shared Settings configuration; Classic import guard active",
+      "request": "GET /indi-allsky/modern-admin/settings/storage?camera_id=2 then scoped Full Settings redirect"
+    },
+    {
+      "page": "/modern-admin/settings/full",
+      "control": "Show only Storage fields",
+      "expected": "Toggle between group and global settings without editing values",
+      "observed": "Group view contains9 matching rows; unchecking permits global view; ordinary form stays disabled",
+      "status": "superato",
+      "identifier": "settings-domain-only",
+      "role": "ordinary authenticated user",
+      "camera_id": 2,
+      "profile_query": null,
+      "prerequisites": "Synthetic two-camera fixture; shared Settings configuration; Classic import guard active",
+      "request": "No network request; local filter only"
+    },
+    {
+      "page": "/modern-admin/settings/full",
+      "control": "Search HEALTHCHECK__DISK_USAGE",
+      "expected": "Show matching setting and count",
+      "observed": "Disk Usage Percentage90.0, disabled field, live status1 setting matches",
+      "status": "superato",
+      "identifier": "modern-admin-full-settings-filter",
+      "role": "ordinary authenticated user",
+      "camera_id": 2,
+      "profile_query": null,
+      "prerequisites": "Synthetic two-camera fixture; shared Settings configuration; Classic import guard active",
+      "request": "No network request; local filter only"
+    },
+    {
+      "page": "/modern-admin/settings/full",
+      "control": "Search absent key with group filter",
+      "expected": "Explain no matching results and available recovery",
+      "observed": "No settings match. Change your search or turn off the group filter.",
+      "status": "superato",
+      "identifier": "modern-admin-full-settings-filter",
+      "role": "ordinary authenticated user",
+      "camera_id": 2,
+      "profile_query": null,
+      "prerequisites": "Synthetic two-camera fixture; shared Settings configuration; Classic import guard active",
+      "request": "No network request; local filter only"
+    },
+    {
+      "page": "/modern-admin/settings/full",
+      "control": "Search absent key without group filter",
+      "expected": "Explain empty results in global scope",
+      "observed": "No settings match. Change or clear your search.",
+      "status": "superato",
+      "identifier": "modern-admin-full-settings-filter",
+      "role": "ordinary authenticated user",
+      "camera_id": 2,
+      "profile_query": null,
+      "prerequisites": "Synthetic two-camera fixture; shared Settings configuration; Classic import guard active",
+      "request": "No network request; local filter only"
+    },
+    {
+      "page": "/modern-admin/settings/full",
+      "control": "Clear search via Meta+A / Backspace",
+      "expected": "Restore all matching rows with accessible feedback",
+      "observed": "Search empty;679 matching rows;679 settings match. status",
+      "status": "superato",
+      "identifier": "modern-admin-full-settings-filter",
+      "role": "ordinary authenticated user",
+      "camera_id": 2,
+      "profile_query": null,
+      "prerequisites": "Synthetic two-camera fixture; shared Settings configuration; Classic import guard active",
+      "request": "No network request; local filter only"
+    }
+  ],
+  "automated_scope": "Full rendered Settings response and four focused redirects are checked for duplicate IDs and resolved labels; original53 heading declaration checks retained. Controller tests cover empty results/group change/recovery and existing save paths.",
+  "regression_status": "passed",
+  "limitations": [
+    "Not deployed; no production setting change",
+    "Browser automation fill with an empty string did not clear the field; keyboard clearing was used and verified",
+    "This certifies listed controls, not the entire product matrix"
+  ],
+  "regression": {
+    "python_entries": 161,
+    "javascript_entries": 34,
+    "source_files": 836,
+    "source_changed": false,
+    "python_report": "/home/eric/hybrid-settings-usability-regression-20260920/results.json",
+    "python_report_sha256": "43a7fa0dce922bfee5824bcff143c80e9416e06b16036b49ff2eacc4ea41026e",
+    "javascript_report": "/tmp/hybrid-settings-usability-js-20260920.json",
+    "scope": "Final source snapshot; earlier landmark-only run intentionally cancelled before final source update"
+  }
+}

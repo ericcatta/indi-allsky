@@ -1585,7 +1585,15 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminSettingsInventoryView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-usability-20260920.json",
+          "record": "controls[1]",
+          "control": "Technical reference disclosure > Storage / Drives",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/acquisition-save",
@@ -1740,6 +1748,83 @@
           "record": "controls[11]",
           "control": "Config History",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-privacy-native-20260920.json",
+          "record": "checks[0]",
+          "control": "Settings credentials and role projection",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-privacy-native-20260920.json",
+          "record": "checks[1]",
+          "control": "Settings credentials and role projection",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-privacy-native-20260920.json",
+          "record": "checks[2]",
+          "control": "Save Full Settings with invalid synthetic driver block",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-privacy-native-20260920.json",
+          "record": "checks[3]",
+          "control": "Search settings + valid Full Settings save + Config History + reopen",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-privacy-native-20260920.json",
+          "record": "checks[4]",
+          "control": "Reopen Full Settings after administrator save",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-usability-20260920.json",
+          "record": "controls[0]",
+          "control": "Complete document headings and labels",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-usability-20260920.json",
+          "record": "controls[2]",
+          "control": "Show only Storage fields",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-usability-20260920.json",
+          "record": "controls[3]",
+          "control": "Search HEALTHCHECK__DISK_USAGE",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-usability-20260920.json",
+          "record": "controls[4]",
+          "control": "Search absent key with group filter",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-usability-20260920.json",
+          "record": "controls[5]",
+          "control": "Search absent key without group filter",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-usability-20260920.json",
+          "record": "controls[6]",
+          "control": "Clear search via Meta+A / Backspace",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/full"
         }
       ]
     },

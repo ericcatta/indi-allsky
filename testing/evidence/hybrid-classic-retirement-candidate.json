@@ -1178,5 +1178,19 @@
     ],
     "evidence": "testing/evidence/hybrid-classic-inventory-retirement-20260920.json",
     "runtime_settings_map_preserved": true
+  },
+  "integrated_regression_20260920": {
+    "status": "passed",
+    "main_integrated": "132fec7d35146bc4b13a64ff704ec56b2488538c",
+    "candidate_parent": "a85147ce",
+    "source_files": 779,
+    "source_manifest_canonical_sha256": "eed59c7243b0ccd3b47cddda008579e16d212f5050af2b6614fc16b870e59d4e",
+    "source_changed": false,
+    "python_entries": 161,
+    "python_report": "/home/eric/hybrid-classic-integrated-regression-20260920/results.json",
+    "python_report_sha256": "10ffd34bb03dfa17efa9a397ce47a282068b7eecc6c9892bd8dec8dad66a76ca",
+    "javascript_entries": 34,
+    "javascript_report_sha256": "df2040ed6601fcd41afee00148132334d22fe9cb182950c90f1861c02525abf5",
+    "scope": "Classic physically removed; mandatory-login policy, Settings credential privacy and usability changes integrated. Synthetic Linux regression and JavaScript controller tests; production deployment and full native control/effect matrix remain open. New uncommitted main validation-logging change is not part of this snapshot."
   }
 }

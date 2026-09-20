@@ -3,6 +3,7 @@
     const saveButton = document.getElementById('modern-admin-full-settings-save');
     const message = document.getElementById('modern-admin-full-settings-message');
     const filter = document.getElementById('modern-admin-full-settings-filter');
+    const filterStatus = document.getElementById('modern-admin-full-settings-filter-status');
     const sections = Array.from(document.querySelectorAll('[data-full-settings-section]'));
     const config = JSON.parse(document.getElementById('hybrid-full-settings-config').textContent);
     const fieldNames = config.fieldNames;
@@ -128,6 +129,7 @@
 
     function filterSettings() {
         const query = filter.value.trim().toLowerCase();
+        let totalMatches = 0;
         sections.forEach((section) => {
             const rows = Array.from(section.querySelectorAll('[data-full-settings-row]'));
             let visibleCount = 0;
@@ -145,11 +147,19 @@
                 count.textContent = visibleCount;
             }
 
+            totalMatches += visibleCount;
             section.hidden = visibleCount === 0;
             if ((query || (domainOnly && domainOnly.checked)) && visibleCount > 0) {
                 section.open = true;
             }
         });
+        if (filterStatus) {
+            filterStatus.textContent = totalMatches
+                ? (totalMatches === 1 ? '1 setting matches.' : totalMatches + ' settings match.')
+                : (domainOnly && domainOnly.checked
+                    ? 'No settings match. Change your search or turn off the group filter.'
+                    : 'No settings match. Change or clear your search.');
+        }
     }
 
     if (domainOnly) domainOnly.addEventListener('change', filterSettings);
