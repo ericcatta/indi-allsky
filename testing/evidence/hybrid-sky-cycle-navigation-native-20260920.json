@@ -1,0 +1,70 @@
+{
+  "date": "2026-09-20",
+  "installed": "cb51d7b417ce6b24b4fece6eb042346ea6730b3e",
+  "scope": "Native production Sky Cycle entry paths through image selection, detail and return",
+  "controls": [
+    {
+      "page": "/modern-admin/sky-cycle",
+      "identifier": "Output detail",
+      "role": "administrator",
+      "camera_profile": "All Cameras selection; selected image belongs to camera2",
+      "prerequisites": "Production capture active and current media present; image timestamps newer than cleanup cutoff",
+      "request": "GET /indi-allsky/modern-admin/output",
+      "expected": "Open the output chooser",
+      "observed": "Chooser offered Timelapses, Mini timelapses, Keograms, Startrails, Startrail videos and panorama categories.",
+      "status": "superato",
+      "camera_id": null,
+      "profile_id": null
+    },
+    {
+      "page": "/modern-admin/sky-cycle",
+      "identifier": "Moment detail",
+      "role": "administrator",
+      "camera_profile": "All Cameras selection; selected image belongs to camera2",
+      "prerequisites": "Production capture active and current media present; image timestamps newer than cleanup cutoff",
+      "request": "GET /indi-allsky/modern-admin/moment, redirect to Library",
+      "expected": "Open image selection",
+      "observed": "Library showed real images from both cameras with Images / All Cameras selected.",
+      "status": "superato",
+      "camera_id": null,
+      "profile_id": null
+    },
+    {
+      "page": "/modern-admin/library",
+      "identifier": "Image details:107323",
+      "role": "administrator",
+      "camera_profile": "All Cameras selection; selected image belongs to camera2",
+      "prerequisites": "Production capture active and current media present; image timestamps newer than cleanup cutoff",
+      "request": "GET /indi-allsky/modern-admin/media/images/107323?camera_id=2&archive_return=/indi-allsky/modern-admin/library?kind%3Dimage%26profile_id%3D",
+      "expected": "Open the chosen image with matching camera and preview",
+      "observed": "Camera2, image107323, ccd2_20260920_212141.jpg, timestamp21:21:41 and decoded3840x2160 preview matched the chosen Library card.",
+      "status": "superato",
+      "camera_id": 2,
+      "profile_id": null
+    },
+    {
+      "page": "/modern-admin/media/images/<int:image_id>",
+      "identifier": "Back to results",
+      "role": "administrator",
+      "camera_profile": "All Cameras selection; selected image belongs to camera2",
+      "prerequisites": "Production capture active and current media present; image timestamps newer than cleanup cutoff",
+      "request": "GET /indi-allsky/modern-admin/library?kind=image&profile_id=",
+      "expected": "Return to the original Library selection",
+      "observed": "Images, All Cameras, All periods/uploads and Newest first were preserved; image107323 remained in results.",
+      "status": "superato",
+      "camera_id": 2,
+      "profile_id": null
+    }
+  ],
+  "observed_summary": {
+    "camera1_latest": "2026-09-20 21:21:39",
+    "camera2_latest": "2026-09-20 21:21:41",
+    "capture_date": "2026-09-20",
+    "interpretation": "UI states that day/night are recorded modes and counts do not prove uninterrupted coverage, file availability or AI classification"
+  },
+  "limitations": [
+    "Not a certification of every Sky Cycle control, all roles or all media categories",
+    "Output chooser destination was verified; playback/download of each offered category was not repeated",
+    "Events/sky-condition analysis is explicitly not evaluated by this report; no simulated result was presented"
+  ]
+}
