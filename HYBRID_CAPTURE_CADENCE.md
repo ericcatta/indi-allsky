@@ -1,22 +1,9 @@
-> User decision: live acceptance ends 2026-09-09 at 20:00 Europe/Zurich.
-> The 24-hour day/night test is deferred to a future objective, not passed.
-> Acquisition continues; only automatic acceptance monitoring ends.
-
-> Current web checkout (2026-09-09): 6072fae4, web-only restart 12:40:37 CEST.
-> Capture baseline remains cd45148f, capture start 12:12:35 CEST,
-> PID 188464. Earlier observation periods are interrupted and cannot be added.
-> Earliest possible 24-hour completion: 2026-09-10 12:12:35 CEST. See
-> testing/evidence/hybrid-maintenance-deployment-2026-09-09.json.
-
 # Shared capture cadence and independent exposure control
 
-Historical observation baseline (superseded): production release `498ba959`, capture PID 4112458,
-started **2026-09-08 23:21:17 Europe/Zurich**. The earlier 21:15:41 window ended
-at the controlled release restart. Configuration revision 110 and cadence
-settings are unchanged. Initial post-release images pass; 24-hour day/night
-acceptance is still open, earliest September 9 at 23:21:17. See
-`testing/evidence/hybrid-release-deployment-2026-09-08.json` and the latest
-production-release section of `HYBRID_ACCEPTANCE_STATUS.md` for backup/rollback.
+For the installed release, current acceptance limits and rollback, see
+[deployment instructions](HYBRID_DEPLOYMENT.md) and
+[acceptance status](HYBRID_ACCEPTANCE_STATUS.md). The user deferred the
+24-hour observation; no historical deadline below constitutes a completed test.
 
 With `MULTI_CAMERA_CAPTURE_ENABLE`, `EXPOSURE_PERIOD_DAY` and
 `EXPOSURE_PERIOD` are the shared day and night start-to-start intervals.
@@ -60,7 +47,11 @@ configuration uses these minima independently. IMX708 gain can rise to 16;
 ZWO retains maxima 200 day and 300 night/moonmode. The covered IMX708 can remain
 underexposed even at its limits; that is distinct from missing captures.
 
-## Verification and rollback
+## Historical cadence verification and rollback (7–9 September 2026)
+
+The following records describe the original cadence mission. Their release IDs,
+counts and rollback target are historical; use the current deployment instructions
+above for production recovery.
 
 All 92 source-bound Python/compile checks pass; results are recorded in
 `testing/evidence/hybrid-capture-cadence-2026-09-07.json`. The regression includes
