@@ -1,0 +1,136 @@
+{
+  "date": "2026-09-21",
+  "installed_runtime": "cfe2c40d7017a4aab7827f0e2d373766a9bd3bca",
+  "environment": "Production Raspberry; authenticated administrator; native in-app browser; dedicated short generated outputs; no source deletion or upload",
+  "scope": "Mini generation after generation/storage lock fix and permanent moon asset relocation",
+  "probe_report": "/home/eric/hybrid-generation-guard-live-20260921.json",
+  "probe_sha256": "c3e58a9dac046c7c12312a57a3ce2954a112c401dc1ececc6ec9bd75e3cc6f05",
+  "controls": [
+    {
+      "route": "/modern-admin/tools/mini-generate",
+      "camera_id": 1,
+      "control": "Camera selection, Load image, interval/FPS selectors, Refresh preview, description, confirmation and Queue mini timelapse",
+      "status": "superato",
+      "image_id": 115487,
+      "request": {
+        "endpoint": "/indi-allsky/ajax/minigenerate",
+        "method": "POST",
+        "pre_seconds": 120,
+        "post_seconds": 120,
+        "framerate": 2
+      },
+      "preview": {
+        "frames": 5,
+        "duration": 2.5,
+        "start": "2026-09-21 22:02:01",
+        "end": "2026-09-21 22:06:01"
+      },
+      "task_id": 12747,
+      "observed": "Success receipt links to the submitted task; read-only DB check finds exactly one matching task for this camera/anchor."
+    },
+    {
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "camera_id": 1,
+      "control": "Task detail reload and Open Mini timelapse",
+      "status": "superato",
+      "task_id": 12747,
+      "task_state": "SUCCESS",
+      "output_id": 5,
+      "observed": "Recorded output opens correct camera and generated mini-video record."
+    },
+    {
+      "route": "/modern-admin/output",
+      "camera_id": 1,
+      "control": "Native video playback to natural end and preview dimensions",
+      "status": "superato",
+      "output_id": 5,
+      "file": {
+        "bytes": 14657629,
+        "sha256": "2e97fbb29a627ede7161cfe7dad57a3cc6f0b63c384d2f24917b6a07d352b09f",
+        "codec": "h264",
+        "frames": 5,
+        "fps": 2,
+        "duration": 2.5,
+        "width": 4608,
+        "height": 2592
+      },
+      "browser": {
+        "currentTime": 2.5,
+        "duration": 2.5,
+        "ended": true,
+        "readyState": 4,
+        "error": null
+      },
+      "observed": "Database fileSize/frames/framerate/success agree with actual file and ffprobe; native playback completed without seek."
+    },
+    {
+      "route": "/modern-admin/tools/mini-generate",
+      "camera_id": 2,
+      "control": "Camera selection, Load image, interval/FPS selectors, Refresh preview, description, confirmation and Queue mini timelapse",
+      "status": "superato",
+      "image_id": 115488,
+      "request": {
+        "endpoint": "/indi-allsky/ajax/minigenerate",
+        "method": "POST",
+        "pre_seconds": 120,
+        "post_seconds": 120,
+        "framerate": 2
+      },
+      "preview": {
+        "frames": 5,
+        "duration": 2.5,
+        "start": "2026-09-21 22:02:09",
+        "end": "2026-09-21 22:06:09"
+      },
+      "task_id": 12748,
+      "observed": "Success receipt links to the submitted task; read-only DB check finds exactly one matching task for this camera/anchor."
+    },
+    {
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "camera_id": 2,
+      "control": "Task detail reload and Open Mini timelapse",
+      "status": "superato",
+      "task_id": 12748,
+      "task_state": "SUCCESS",
+      "output_id": 6,
+      "observed": "Recorded output opens correct camera and generated mini-video record."
+    },
+    {
+      "route": "/modern-admin/output",
+      "camera_id": 2,
+      "control": "Native video playback to natural end and preview dimensions",
+      "status": "superato",
+      "output_id": 6,
+      "file": {
+        "bytes": 5737521,
+        "sha256": "a6b352d66fd1601b02b291678b78753f8c9ef600a23f2f55df07c8e87cb5ecf4",
+        "codec": "h264",
+        "frames": 5,
+        "fps": 2,
+        "duration": 2.5,
+        "width": 3840,
+        "height": 2160
+      },
+      "browser": {
+        "currentTime": 2.5,
+        "duration": 2.5,
+        "ended": true,
+        "readyState": 4,
+        "error": null
+      },
+      "observed": "Database fileSize/frames/framerate/success agree with actual file and ffprobe; native playback completed without seek."
+    }
+  ],
+  "limitations": [
+    "Native Mac download delivery remains unverified.",
+    "No deliberate concurrent production deletion, hardware interruption or upload was performed. Concurrency/failure handling has separate isolated tests.",
+    "These short clips do not replace the deferred 24-hour test or scientific flicker/quality assessment."
+  ],
+  "tool_note": "Locator-scoped video state reads timed out. Fresh DOM and read-only page-scoped video state succeeded; native clicks played both videos to natural end without seeking.",
+  "capture_after": {
+    "camera_1": "2026-09-21 22:16:57",
+    "camera_2": "2026-09-21 22:17:05",
+    "capture_pid": 921907,
+    "status": "active"
+  }
+}

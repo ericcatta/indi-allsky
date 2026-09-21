@@ -2490,6 +2490,18 @@
           "record": "controls[7]",
           "control": "Play complete panorama-video 32 for camera 2",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-guard-live-20260921.json",
+          "record": "controls[2]",
+          "control": "Native video playback to natural end and preview dimensions",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-guard-live-20260921.json",
+          "record": "controls[5]",
+          "control": "Native video playback to natural end and preview dimensions",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -3219,6 +3231,18 @@
           "record": "controls[6]",
           "control": "Task 12729: open recorded output",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-guard-live-20260921.json",
+          "record": "controls[1]",
+          "control": "Task detail reload and Open Mini timelapse",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-guard-live-20260921.json",
+          "record": "controls[4]",
+          "control": "Task detail reload and Open Mini timelapse",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -3683,6 +3707,18 @@
           "source": "testing/evidence/hybrid-mini-generation-post-classic-20260921.json",
           "record": "controls[3]",
           "control": "Time before / Time after / Frame rate / Description / Refresh preview / Confirm / Queue mini timelapse / camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-guard-live-20260921.json",
+          "record": "controls[0]",
+          "control": "Camera selection, Load image, interval/FPS selectors, Refresh preview, description, confirmation and Queue mini timelapse",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-generation-guard-live-20260921.json",
+          "record": "controls[3]",
+          "control": "Camera selection, Load image, interval/FPS selectors, Refresh preview, description, confirmation and Queue mini timelapse",
           "recorded_status": "superato"
         }
       ]
