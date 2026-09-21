@@ -1,0 +1,28 @@
+{
+  "defect": "Unrepresentable media identifiers reached SQLite and raised OverflowError in FITS preview, Hybrid source download and public original handlers.",
+  "baseline_runtime": "cfe2c40d7017a4aab7827f0e2d373766a9bd3bca",
+  "before_log": "/home/eric/hybrid-source-id-boundary-20260921.log",
+  "isolated_checkout": "/home/eric/hybrid-media-id-boundary-20260921",
+  "focused_tests": {
+    "hybrid_source_media_flow_test.py": "passed",
+    "hybrid_public_media_flow_test.py": "passed"
+  },
+  "source_hashes": {
+    "indi_allsky/flask/source_media_views.py": "8c3825fb0cfc4b6bd5103f86c80da0893455aebf7009db5cdcfd35201273d3b1",
+    "indi_allsky/flask/public_media.py": "a3e669233eeea8903ac562d9d9f92d74e85dc8e890794b53635072199d429dba",
+    "testing/hybrid_source_media_flow_test.py": "d4733004af0036c49e214dabb860849f7f838160b27d99e7436e948fb013594b",
+    "testing/hybrid_public_media_flow_test.py": "f9244b8b5f617dbdda94dc6f7a0e1ce76d3e9a0a504fa5c96615b81f83ac008e",
+    "testing/modern_admin_media_runtime_test.py": "695c5a5d3464956a34c0cc9444b7bf60c6ab87683caf32619628be69745c014a"
+  },
+  "regression_report": "/home/eric/hybrid-media-id-boundary-regression-20260921/resolved-results.json",
+  "regression_status": "passed after test-only guardrail correction",
+  "deployment": "not deployed",
+  "rollback_helper": "/home/eric/hybrid-media-id-boundary-deploy.py",
+  "report_sha256": "84c86ac1cfdcd55b9c3c5acc023c093d5911652f2ef301700b61582c2faa1be7",
+  "manifest_sha256": "b0509a1bcf4668988acde55116d1861b3258783e59b06b4e8435bdc4cf6e39b0",
+  "manifest_serialization": "sha256(json.dumps(source_hashes, sort_keys=True).encode())",
+  "manifest_files": 822,
+  "regression_resolution": "Initial full run: 164 passes and one class-fingerprint guardrail failure. Only that test was amended to check the exact added validation and retain the original fingerprint for all remaining code. Successful rerun of the affected entrypoint; other 164 results reused with unchanged implementation hashes. Initial results.json retained.",
+  "javascript": "34 previous passes reused; no JS/template/CSS changes",
+  "scope": "Out-of-range IDs: 400 for FITS query parameter, 404 for media/camera URL components; existing downloads, FITS JPEG generation and role/camera policy tested in isolated fixtures. Production verification pending."
+}

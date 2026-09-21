@@ -34,6 +34,15 @@ contains no image-worker exception after restart. See [recovery evidence](testin
 No Classic frontend was restored. This closes the specific cold-start defect,
 not the remaining whole-product acceptance gates below.
 
+## Tested media identifier correction pending deployment
+
+Oversized media identifiers could reach SQLite and raise OverflowError in FITS
+preview, Hybrid downloads and public originals. Bounds are now validated before
+querying. The original FITS class fingerprint is retained around the exact added
+guard. All 165 Python entrypoints passed after a test-only guardrail correction;
+the unchanged JavaScript results remain applicable. This change is not installed
+yet. See [identifier validation evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
+
 ## Post-removal evidence
 
 | Scope | Verified result | Evidence |

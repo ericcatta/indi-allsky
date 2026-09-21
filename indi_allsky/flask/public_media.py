@@ -7,7 +7,7 @@ from . import db
 from .base_views import BaseView
 from .misc import login_optional_media
 from .models import IndiAllSkyDbCameraTable, IndiAllSkyDbImageTable, IndiAllSkyDbThumbnailTable
-from .source_media_views import MEDIA_DOWNLOAD_MODELS, local_source_allowed, source_file_path
+from .source_media_views import MEDIA_DOWNLOAD_MODELS, local_source_allowed, source_file_path, validate_media_identifiers
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 
 PUBLIC_MEDIA_MODELS = {key: model for key, model in MEDIA_DOWNLOAD_MODELS.items() if key != 'fits'}
@@ -137,6 +137,7 @@ class PublicMediaOriginalView(BaseView):
     decorators = [login_optional_media]
 
     def dispatch_request(self, kind, camera_id, media_id):
+        validate_media_identifiers(camera_id, media_id)
         model = PUBLIC_MEDIA_MODELS.get(kind)
         if model is None:
             abort(404)

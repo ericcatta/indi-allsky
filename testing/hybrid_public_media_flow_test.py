@@ -30,6 +30,11 @@ def run(runtime_config, output=None):
             ('startrailvideo','startrail-video','watch_startrail'),('panoramavideo','panorama-video','watch_panorama')]
         anonymous=app.test_client()
         clients=(anonymous,login_client(app,2),login_client(app,1))
+        for client in clients:
+            for bad in (2**63, 10**100):
+                for camera, media in ((1, bad), (bad, 1), (bad, bad)):
+                    assert client.get(f'/indi-allsky/media/image/{camera}/{media}/original').status_code == 404
+            assert client.get('/indi-allsky/media/image/1/9223372036854775807/original').status_code == 404
         with patch.object(app.jinja_env.loader,'get_source',side_effect=source):
             # Follow the actual links rendered by the Hybrid directory, not URLs
             # reconstructed from expected route names. Each must reach its camera.

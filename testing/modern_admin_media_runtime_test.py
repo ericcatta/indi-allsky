@@ -649,6 +649,16 @@ def test_fits_preview_extraction_preserves_class_and_shared_handler_boundary():
     tree = ast.parse(source)
     handler = next(node for node in tree.body if isinstance(node, ast.ClassDef)
                    and node.name == 'Fits2JpegView')
+    # The sole post-extraction change rejects IDs SQLite cannot represent.
+    # Check that exact guard and its position, then retain the original class
+    # fingerprint for every remaining statement, including image processing.
+    dispatch = next(node for node in handler.body if isinstance(node, ast.FunctionDef)
+                    and node.name == 'dispatch_request')
+    parse_try = next(node for node in dispatch.body if isinstance(node, ast.Try))
+    expected = ast.parse("fits_id = int(request.args['id'])\nif not -(2**63) <= fits_id < 2**63:\n    raise ValueError()")
+    assert len(parse_try.body) == 2
+    assert ast.dump(ast.Module(body=parse_try.body, type_ignores=[]), include_attributes=False) == ast.dump(expected, include_attributes=False)
+    parse_try.body.pop(1)
     # Snapshot captured from the complete pre-extraction class. This checks
     # statement/order parity, not a claim of hardware or image-output acceptance.
     canonical = ast.dump(ast.Module(body=[handler], type_ignores=[]), include_attributes=False)

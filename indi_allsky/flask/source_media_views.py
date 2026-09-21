@@ -26,6 +26,12 @@ MEDIA_DOWNLOAD_MODELS = {
 }
 
 
+def validate_media_identifiers(camera_id, media_id):
+    """Reject unrepresentable URL identifiers before binding a database query."""
+    if not all(0 <= value < 2**63 for value in (camera_id, media_id)):
+        abort(404, description='The requested media record is unavailable.')
+
+
 def local_source_allowed(camera, verify_admin_network):
     return not camera.web_nonlocal_images or (
         camera.web_local_images_admin and verify_admin_network())
@@ -48,6 +54,7 @@ class ModernAdminSourceDownloadView(BaseView):
     decorators = [login_required]
 
     def dispatch_request(self, kind, camera_id, media_id):
+        validate_media_identifiers(camera_id, media_id)
         model = MEDIA_DOWNLOAD_MODELS.get(kind)
         if model is None:
             abort(404)
@@ -92,6 +99,8 @@ class Fits2JpegView(BaseView):
 
         try:
             fits_id = int(request.args['id'])
+            if not -(2**63) <= fits_id < 2**63:
+                raise ValueError()
         except (KeyError, ValueError):
             abort(400, description='A valid FITS identifier is required.')
 

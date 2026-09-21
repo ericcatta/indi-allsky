@@ -21,6 +21,13 @@ def run(runtime_config):
         root = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER'])
         for uid in (1, 2):
             client = login_client(app, uid)
+            # Both URL components and FITS query IDs must fit the database integer.
+            for bad in (2**63, 10**100):
+                for camera, media in ((1, bad), (bad, 1), (bad, bad)):
+                    assert client.get(f'/indi-allsky/modern-admin/media/fits/{camera}/{media}/download').status_code == 404
+                for value in (bad, -bad-1):
+                    assert client.get('/indi-allsky/fits2jpeg', query_string={'id': value}).status_code == 400
+            assert client.get('/indi-allsky/fits2jpeg?id=9223372036854775807').status_code == 404
             for cid in (1, 2):
                 context = '?camera_id='+str(cid)+'&profile_id=test-profile-'+str(cid)
                 for page in ('fits','fits/'+str(cid),'media/fits','media/raw'):
