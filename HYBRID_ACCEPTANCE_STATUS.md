@@ -1,5 +1,18 @@
 # Hybrid acceptance status
 
+## Classic removed from main — 2026-09-21
+
+Commit `f6975d5f` removes the Classic frontend and includes the latest Settings
+privacy and camera diagnostics fixes. All 162 Python and 34 JavaScript tests
+pass on the same unchanged 780-file snapshot. Native isolated browser checks
+verify login, both camera previews, image detail, Settings save and snapshot
+restore with values checked after reload. Evidence:
+`testing/evidence/hybrid-retirement-final-native-20260921.json`.
+Installed on the Raspberry with matching source hashes, intact configuration and
+fresh decoded frames from both cameras. Bounded production Settings search passes; older
+sections below describe historical snapshots. The complete control/effect matrix
+is not certified by these bounded checks. The 24-hour test remains deferred.
+
 ## Integrated retirement candidate regression — 2026-09-20
 
 The physically removed Classic candidate now incorporates main `132fec7d`.

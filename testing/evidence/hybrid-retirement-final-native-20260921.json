@@ -1,0 +1,68 @@
+{
+  "date": "2026-09-21",
+  "commit": "f6975d5f5501b00aa3407dd5da7442b73f793952",
+  "environment": "Isolated Raspberry browser sandbox on localhost:18113; synthetic database and media; production unchanged",
+  "source_manifest_sha256": "5a7a89f36f27062b391f17e4fd59cbe491b5d0e38c2f0992f407c8604d08e851",
+  "controls": [
+    {
+      "id": "logout-login",
+      "status": "passed",
+      "observed": "Ordinary session signed out; redirected to login with next=Now. Administrator login returned to Now with admin recovery controls available."
+    },
+    {
+      "id": "now-two-camera-images",
+      "status": "passed",
+      "observed": "Both Test Camera 1 and 2 images complete with nonzero natural dimensions."
+    },
+    {
+      "id": "camera-library-detail",
+      "status": "passed",
+      "observed": "Browse camera 2 opened Library filtered to Test Profile 2, three camera 2 images. Image detail ID2 matched camera2 and preview decoded 64x48."
+    },
+    {
+      "id": "settings-full-save",
+      "status": "passed",
+      "observed": "Search CAMERA_SQM__MAGNITUDE_OFFSET matched one setting. Changed synthetic value25.0 to0.25; Saved new config; reloaded page showed0.25. Revision2 appeared in restore listing."
+    },
+    {
+      "id": "settings-snapshot-restore",
+      "status": "passed",
+      "observed": "Selected snapshot1; checked confirmation; Restore this snapshot returned Restored snapshot1 as revision3. Capture was not restarted. History retained revisions1,2,3. Reopened FullSettings showed original25.0."
+    }
+  ],
+  "limits": [
+    "Synthetic effects only; not live hardware acceptance",
+    "These listed controls do not represent the complete application control matrix",
+    "24-hour observation deferred by user"
+  ],
+  "regression": {
+    "python": 162,
+    "javascript": 34,
+    "status": "passed",
+    "source_changed": false,
+    "python_report": "/home/eric/hybrid-retirement-final-regression-20260921/results.json",
+    "python_report_sha256": "b683e1c7ca29a9ace7d8c68736e89a3cb7471b2d0ae9d8ccac1d154c48e7181c",
+    "javascript_report_sha256": "e65ec7b43a32e98c1b25d3cb1f70b76d0a8dfbb8ba723883807bd1d8ec5db5c1"
+  },
+  "production": {
+    "commit": "f6975d5f5501b00aa3407dd5da7442b73f793952",
+    "status": "installed-bounded-acceptance-passed",
+    "source_manifest_files": 780,
+    "source_manifest_sha256": "5a7a89f36f27062b391f17e4fd59cbe491b5d0e38c2f0992f407c8604d08e851",
+    "backup": "/home/eric/hybrid-backups/hybrid-retirement-final-20260921-185835",
+    "backup_integrity": "ok",
+    "backup_seconds": 36.51,
+    "configuration_revision": 117,
+    "configuration_unchanged": true,
+    "capture_restarted": false,
+    "capture_pid": 1566,
+    "web_pid": 740426,
+    "native_checks": [
+      "Now libcamera_imx708 image decoded4608x2592, timestamp2026-09-21 18:59:55",
+      "Now ZWO CCD ASI678MC image decoded3840x2160, timestamp2026-09-21 18:59:59",
+      "Settings navigation to FullSettings; search CAMERA_SQM__MAGNITUDE_OFFSET returned one match; Save FullSettings enabled; no live values changed"
+    ],
+    "classic_files_present": false,
+    "all_controls_certified": false
+  }
+}
