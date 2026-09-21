@@ -9,6 +9,8 @@ Censimento aggiornato del commit installato `7d9e49f9`: 99 ingressi GET, 505 con
 
 Indice statico: 7.351 identità con tutti i 43.978 riferimenti originali conservati. Non rappresenta un conteggio di funzionalità né certifica automaticamente le interazioni. Sei ingressi API/redirect sono collegati alle [prove isolate già superate sulla versione installata](../testing/evidence/hybrid-current-discovery-20260921.json); download nativi ed effetti hardware restano fuori da queste prove.
 
+[Verifica HTTPS anonima sul Raspberry](../testing/evidence/hybrid-live-auth-boundary-20260921.json): tutti i 99 ingressi GET Hybrid, 396 casi GET/HEAD nelle due camere/profili, arrivano al login. Sono verificati anche i passaggi degli alias Settings. Questo risultato riguarda il confine di autenticazione, non certifica i controlli dopo il login.
+
 | Route Hybrid attuale | Record associati | Fonti |
 | --- | ---: | --- |
 | `/modern-admin` | 0 | Da associare o collaudare |

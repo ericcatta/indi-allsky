@@ -1,0 +1,310 @@
+{
+  "date": "2026-09-21",
+  "installed_runtime": "cfe2c40d7017a4aab7827f0e2d373766a9bd3bca",
+  "environment": "Production HTTPS with system certificate validation; requests contain no Cookie or Authorization header; browser session untouched",
+  "sources": {
+    "hybrid": {
+      "path": "/home/eric/hybrid-live-anonymous-check-20260921.json",
+      "sha256": "954cb18c04d1e706002aec4e0a02d028e4fbb8dd0e1aca330bfb01fab4a73ef7"
+    },
+    "public_images": {
+      "path": "/home/eric/hybrid-live-public-images-20260921.json",
+      "sha256": "8952c615e5278181714b51f46072de8418f127d38530dd2550abb12fc360a9b8"
+    },
+    "apis": {
+      "path": "/home/eric/hybrid-live-api-auth-20260921.json",
+      "sha256": "df844d2fb21a242aa828813088a29eff742f7f8ea16986ceafe7818a05d15650"
+    }
+  },
+  "hybrid_boundary": {
+    "status": "superato",
+    "routes": 99,
+    "cases": 396,
+    "methods": [
+      "GET",
+      "HEAD"
+    ],
+    "camera_profiles": {
+      "1": "imx708-wide",
+      "2": "asi678mc"
+    },
+    "direct_login": 352,
+    "alias_chains": 44,
+    "supplemental_redirect_requests": 88,
+    "failure_count": 0,
+    "head_bodies_empty": true,
+    "registered_get_routes": [
+      "/indi-allsky/modern-admin",
+      "/indi-allsky/modern-admin/account",
+      "/indi-allsky/modern-admin/cameras",
+      "/indi-allsky/modern-admin/cameras/add",
+      "/indi-allsky/modern-admin/cameras/adu-history",
+      "/indi-allsky/modern-admin/cameras/dark-library",
+      "/indi-allsky/modern-admin/cameras/image-lag",
+      "/indi-allsky/modern-admin/cameras/info",
+      "/indi-allsky/modern-admin/cameras/mask-base",
+      "/indi-allsky/modern-admin/capture/service",
+      "/indi-allsky/modern-admin/classic/<classic_page>",
+      "/indi-allsky/modern-admin/config-history",
+      "/indi-allsky/modern-admin/config-restore",
+      "/indi-allsky/modern-admin/config-restore/<int:config_id>",
+      "/indi-allsky/modern-admin/fits",
+      "/indi-allsky/modern-admin/fits/<int:fits_id>",
+      "/indi-allsky/modern-admin/highlights",
+      "/indi-allsky/modern-admin/library",
+      "/indi-allsky/modern-admin/loop",
+      "/indi-allsky/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download",
+      "/indi-allsky/modern-admin/media/archive",
+      "/indi-allsky/modern-admin/media/fits",
+      "/indi-allsky/modern-admin/media/gallery",
+      "/indi-allsky/modern-admin/media/gallery/page",
+      "/indi-allsky/modern-admin/media/images",
+      "/indi-allsky/modern-admin/media/images/<int:image_id>",
+      "/indi-allsky/modern-admin/media/keograms",
+      "/indi-allsky/modern-admin/media/mini-timelapses",
+      "/indi-allsky/modern-admin/media/panorama",
+      "/indi-allsky/modern-admin/media/panorama-loop",
+      "/indi-allsky/modern-admin/media/public-endpoints",
+      "/indi-allsky/modern-admin/media/raw",
+      "/indi-allsky/modern-admin/media/raw-loop",
+      "/indi-allsky/modern-admin/media/startrail-videos",
+      "/indi-allsky/modern-admin/media/startrails",
+      "/indi-allsky/modern-admin/media/timelapses",
+      "/indi-allsky/modern-admin/media/timelapses/<int:video_id>",
+      "/indi-allsky/modern-admin/mode/<mode>",
+      "/indi-allsky/modern-admin/moment",
+      "/indi-allsky/modern-admin/notifications",
+      "/indi-allsky/modern-admin/notifications/<int:notification_id>",
+      "/indi-allsky/modern-admin/now",
+      "/indi-allsky/modern-admin/observatory",
+      "/indi-allsky/modern-admin/observatory/astropanel",
+      "/indi-allsky/modern-admin/observatory/charts",
+      "/indi-allsky/modern-admin/observatory/long-term-keogram",
+      "/indi-allsky/modern-admin/observatory/realtime-keogram",
+      "/indi-allsky/modern-admin/observatory/sensor-panel",
+      "/indi-allsky/modern-admin/observatory/sqm",
+      "/indi-allsky/modern-admin/observatory/virtualsky",
+      "/indi-allsky/modern-admin/output",
+      "/indi-allsky/modern-admin/settings",
+      "/indi-allsky/modern-admin/settings/acquisition-save",
+      "/indi-allsky/modern-admin/settings/advanced",
+      "/indi-allsky/modern-admin/settings/analytics",
+      "/indi-allsky/modern-admin/settings/auto-exposure-gain",
+      "/indi-allsky/modern-admin/settings/basic",
+      "/indi-allsky/modern-admin/settings/camera-connection",
+      "/indi-allsky/modern-admin/settings/camera-profile",
+      "/indi-allsky/modern-admin/settings/cameras",
+      "/indi-allsky/modern-admin/settings/capture",
+      "/indi-allsky/modern-admin/settings/developer",
+      "/indi-allsky/modern-admin/settings/exposure-gain",
+      "/indi-allsky/modern-admin/settings/fits-source",
+      "/indi-allsky/modern-admin/settings/full",
+      "/indi-allsky/modern-admin/settings/hybrid-awb",
+      "/indi-allsky/modern-admin/settings/notifications",
+      "/indi-allsky/modern-admin/settings/ready",
+      "/indi-allsky/modern-admin/settings/storage",
+      "/indi-allsky/modern-admin/settings/storage-protection",
+      "/indi-allsky/modern-admin/settings/timelapse",
+      "/indi-allsky/modern-admin/sky-cycle",
+      "/indi-allsky/modern-admin/storage",
+      "/indi-allsky/modern-admin/storage/drives",
+      "/indi-allsky/modern-admin/storage/file-space-usage",
+      "/indi-allsky/modern-admin/system",
+      "/indi-allsky/modern-admin/system/config",
+      "/indi-allsky/modern-admin/system/gpio-control",
+      "/indi-allsky/modern-admin/system/info",
+      "/indi-allsky/modern-admin/system/log",
+      "/indi-allsky/modern-admin/system/log/<log_name>",
+      "/indi-allsky/modern-admin/system/network",
+      "/indi-allsky/modern-admin/system/support",
+      "/indi-allsky/modern-admin/tasks",
+      "/indi-allsky/modern-admin/tasks/<int:task_id>",
+      "/indi-allsky/modern-admin/tools/camera-simulator",
+      "/indi-allsky/modern-admin/tools/focus",
+      "/indi-allsky/modern-admin/tools/focus/preview",
+      "/indi-allsky/modern-admin/tools/generate",
+      "/indi-allsky/modern-admin/tools/image-circle-helper",
+      "/indi-allsky/modern-admin/tools/mini-generate",
+      "/indi-allsky/modern-admin/tools/mini-preview",
+      "/indi-allsky/modern-admin/tools/process-fits",
+      "/indi-allsky/modern-admin/updates",
+      "/indi-allsky/modern-admin/uploads",
+      "/indi-allsky/modern-admin/uploads/<provider_slug>",
+      "/indi-allsky/modern-admin/users",
+      "/indi-allsky/modern-admin/users/<int:user_id>",
+      "/indi-allsky/modern-admin/youtube"
+    ]
+  },
+  "public_images": [
+    {
+      "camera_id": 1,
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestimage?camera_id=1",
+          "status": 302,
+          "location": "images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/ccd1_20260921_222343.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/ccd1_20260921_222343.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/1132614"
+        }
+      ],
+      "prefix_bytes_match": 32,
+      "file_bytes": 1132614,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/ccd1_20260921_222343.jpg"
+    },
+    {
+      "camera_id": 2,
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestimage?camera_id=2",
+          "status": 302,
+          "location": "images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/ccd2_20260921_222350.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/ccd2_20260921_222350.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/449271"
+        }
+      ],
+      "prefix_bytes_match": 32,
+      "file_bytes": 449271,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/ccd2_20260921_222350.jpg"
+    }
+  ],
+  "api_authentication": {
+    "status": "superato",
+    "cases": [
+      {
+        "path": "/indi-allsky/sync/v1/camera",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/image",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/video",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/minivideo",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/keogram",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/startrail",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/startrailvideo",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/rawimage",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/fitsimage",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/panoramaimage",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/panoramavideo",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/sync/v1/thumbnail",
+        "method": "GET",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/action/pause",
+        "method": "POST",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      },
+      {
+        "path": "/indi-allsky/action/unpause",
+        "method": "POST",
+        "status": 400,
+        "error": "authentication failed",
+        "outcome": "superato"
+      }
+    ],
+    "scope": "12 Sync API GET requests with empty multipart metadata and no Authorization; two Action API POST requests with intentionally invalid credential types. All reject before authorized operations."
+  },
+  "postcheck": {
+    "configuration_revision": 117,
+    "latest_frames": [
+      [
+        1,
+        "2026-09-21 22:25:13.000000"
+      ],
+      [
+        2,
+        "2026-09-21 22:25:20.000000"
+      ]
+    ],
+    "capture": "MainPID=921907\nNRestarts=0\nActiveState=active"
+  },
+  "limitations": [
+    "Authentication boundary checks do not certify authenticated controls or effects.",
+    "Only latest image public media serving was checked live here; other families have separate evidence.",
+    "Range 0-31 matched the actual camera file prefix; this is not a complete-file download or native Mac delivery test.",
+    "Valid Sync/Action API credentials and effects were not exercised in this live check; isolated regression covers those cases."
+  ]
+}

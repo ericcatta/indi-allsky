@@ -5652,5 +5652,17 @@
       "Static HTML only; JavaScript-generated controls require the separate browser evidence",
       "Rendering and absence of selected placeholder phrases do not prove functional completion"
     ]
+  },
+  "current_authentication_boundary": {
+    "source": "testing/evidence/hybrid-live-auth-boundary-20260921.json",
+    "installed_runtime": "cfe2c40d7017a4aab7827f0e2d373766a9bd3bca",
+    "get_routes": 99,
+    "anonymous_get_head_cases": 396,
+    "camera_profiles": {
+      "1": "imx708-wide",
+      "2": "asi678mc"
+    },
+    "scope": "All current Hybrid GET routes reach login anonymously, including internal Settings aliases. Public latest-image range serving and API rejection cases have separately stated scope in the evidence.",
+    "does_not_certify_authenticated_controls": true
   }
 }
