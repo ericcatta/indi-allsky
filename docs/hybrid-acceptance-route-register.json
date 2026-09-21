@@ -527,7 +527,110 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminHighlightsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[0]",
+          "control": "Inspect image 107935",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[1]",
+          "control": "Inspect image 107955",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[2]",
+          "control": "Inspect image 107947",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[3]",
+          "control": "Inspect image 107915",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[4]",
+          "control": "Inspect image 107917",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[5]",
+          "control": "Inspect image 107973",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[6]",
+          "control": "Inspect image 108737",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[7]",
+          "control": "Inspect image 107961",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[8]",
+          "control": "Inspect image 115166",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[9]",
+          "control": "Inspect image 108498",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[10]",
+          "control": "Inspect image 108224",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[11]",
+          "control": "Inspect image 107255",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[12]",
+          "control": "Inspect image 107940",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[13]",
+          "control": "Inspect image 108744",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[14]",
+          "control": "Inspect image 108494",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[15]",
+          "control": "Inspect image 108218",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[33]",
+          "control": "Download original delivery",
+          "recorded_status": "bloccato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/library",
@@ -757,6 +860,90 @@
           "source": "testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json",
           "record": "controls[2]",
           "control": "Image details:107323",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[16]",
+          "control": "Choose output type: Timelapses, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[17]",
+          "control": "Choose output type: Mini timelapses, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[18]",
+          "control": "Choose output type: Keograms, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[19]",
+          "control": "Choose output type: Startrails, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[20]",
+          "control": "Choose output type: Startrail videos, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[21]",
+          "control": "Choose output type: Panorama images, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[22]",
+          "control": "Choose output type: Panorama videos, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[23]",
+          "control": "Choose output type: Timelapses, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[24]",
+          "control": "Choose output type: Mini timelapses, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[25]",
+          "control": "Choose output type: Keograms, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[26]",
+          "control": "Choose output type: Startrails, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[27]",
+          "control": "Choose output type: Startrail videos, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[28]",
+          "control": "Choose output type: Panorama images, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[29]",
+          "control": "Choose output type: Panorama videos, camera 2",
           "recorded_status": "superato"
         }
       ]
@@ -1537,7 +1724,116 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminMomentDetailView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[0]",
+          "control": "Inspect image 107935",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[1]",
+          "control": "Inspect image 107955",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[2]",
+          "control": "Inspect image 107947",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[3]",
+          "control": "Inspect image 107915",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[4]",
+          "control": "Inspect image 107917",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[5]",
+          "control": "Inspect image 107973",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[6]",
+          "control": "Inspect image 108737",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[7]",
+          "control": "Inspect image 107961",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[8]",
+          "control": "Inspect image 115166",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[9]",
+          "control": "Inspect image 108498",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[10]",
+          "control": "Inspect image 108224",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[11]",
+          "control": "Inspect image 107255",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[12]",
+          "control": "Inspect image 107940",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[13]",
+          "control": "Inspect image 108744",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[14]",
+          "control": "Inspect image 108494",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[15]",
+          "control": "Inspect image 108218",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[30]",
+          "control": "Menu Moment without selected image",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[31]",
+          "control": "Create mini timelapse around image 115166",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/notifications",
@@ -1951,6 +2247,96 @@
           "record": "controls[0]",
           "control": "Download original",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[16]",
+          "control": "Choose output type: Timelapses, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[17]",
+          "control": "Choose output type: Mini timelapses, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[18]",
+          "control": "Choose output type: Keograms, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[19]",
+          "control": "Choose output type: Startrails, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[20]",
+          "control": "Choose output type: Startrail videos, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[21]",
+          "control": "Choose output type: Panorama images, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[22]",
+          "control": "Choose output type: Panorama videos, camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[23]",
+          "control": "Choose output type: Timelapses, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[24]",
+          "control": "Choose output type: Mini timelapses, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[25]",
+          "control": "Choose output type: Keograms, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[26]",
+          "control": "Choose output type: Startrails, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[27]",
+          "control": "Choose output type: Startrail videos, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[28]",
+          "control": "Choose output type: Panorama images, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[29]",
+          "control": "Choose output type: Panorama videos, camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
+          "record": "controls[32]",
+          "control": "Keogram details and Back to results",
+          "recorded_status": "superato"
         }
       ]
     },

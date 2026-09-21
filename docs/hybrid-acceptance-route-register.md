@@ -30,8 +30,8 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/config-restore/<int:config_id>/apply` | 0 | Da associare o collaudare |
 | `/modern-admin/fits` | 2 | [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/fits/<int:fits_id>` | 4 | [hybrid-fits-dimensions-live-20260914](../testing/evidence/hybrid-fits-dimensions-live-20260914.json), [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
-| `/modern-admin/highlights` | 0 | Da associare o collaudare |
-| `/modern-admin/library` | 32 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-library-live-20260914](../testing/evidence/hybrid-library-live-20260914.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
+| `/modern-admin/highlights` | 17 | [hybrid-product-media-navigation-20260921](../testing/evidence/hybrid-product-media-navigation-20260921.json) |
+| `/modern-admin/library` | 46 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-library-live-20260914](../testing/evidence/hybrid-library-live-20260914.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-product-media-navigation-20260921](../testing/evidence/hybrid-product-media-navigation-20260921.json), [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
 | `/modern-admin/loop` | 6 | [hybrid-loop-post-classic-20260921](../testing/evidence/hybrid-loop-post-classic-20260921.json), [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json) |
 | `/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download` | 0 | Da associare o collaudare |
 | `/modern-admin/media/archive` | 15 | [hybrid-archive-2026-09-06](../testing/evidence/hybrid-archive-2026-09-06.json) |
@@ -52,7 +52,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/media/timelapses` | 0 | Da associare o collaudare |
 | `/modern-admin/media/timelapses/<int:video_id>` | 0 | Da associare o collaudare |
 | `/modern-admin/mode/<mode>` | 0 | Da associare o collaudare |
-| `/modern-admin/moment` | 0 | Da associare o collaudare |
+| `/modern-admin/moment` | 18 | [hybrid-product-media-navigation-20260921](../testing/evidence/hybrid-product-media-navigation-20260921.json) |
 | `/modern-admin/notifications` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/notifications/<int:notification_id>` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/notifications/<int:notification_id>/acknowledge` | 0 | Da associare o collaudare |
@@ -66,7 +66,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/observatory/sqm` | 3 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json), [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json) |
 | `/modern-admin/observatory/virtualsky` | 2 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
 | `/modern-admin/operations/export` | 0 | Da associare o collaudare |
-| `/modern-admin/output` | 6 | [hybrid-download-delivery-post-classic-20260921](../testing/evidence/hybrid-download-delivery-post-classic-20260921.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json) |
+| `/modern-admin/output` | 21 | [hybrid-download-delivery-post-classic-20260921](../testing/evidence/hybrid-download-delivery-post-classic-20260921.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json), [hybrid-product-media-navigation-20260921](../testing/evidence/hybrid-product-media-navigation-20260921.json) |
 | `/modern-admin/safe-action/dry-run` | 0 | Da associare o collaudare |
 | `/modern-admin/settings` | 4 | [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json), [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json) |
 | `/modern-admin/settings/acquisition-save` | 0 | Da associare o collaudare |
