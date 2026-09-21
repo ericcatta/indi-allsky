@@ -160,6 +160,12 @@
           "record": "controls[0]",
           "control": "Profile Gallery links",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-detection-release-20260921.json",
+          "record": "controls[1]",
+          "control": "Back to Cameras after detection",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -178,6 +184,12 @@
           "record": "controls[9]",
           "control": "Detect cameras",
           "recorded_status": "difetto"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-detection-release-20260921.json",
+          "record": "controls[0]",
+          "control": "Detect cameras after capability fix",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -2053,6 +2065,12 @@
           "source": "testing/evidence/hybrid-settings-navigation-context-20260921.json",
           "record": "controls[2]",
           "control": "Home after Settings navigation",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-detection-release-20260921.json",
+          "record": "controls[2]",
+          "control": "Now after web restart",
           "recorded_status": "superato"
         }
       ]

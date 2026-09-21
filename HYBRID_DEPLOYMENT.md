@@ -2,16 +2,16 @@
 
 ## Installed version
 
-Production runs `e19acee9ae629d43ea5b70d123126d458a311d80` (21 September
+Production runs `7d9e49f993bcbeb4a373d3940a072892b7f95128` (21 September
 2026). Classic frontend files are physically removed; Hybrid is the only UI.
-All 775 installed source hashes match the snapshot that passed a complete run
-of 162 Python entrypoints with unchanged source and 34 JavaScript tests. Native isolated Settings save/restore recovered the original
+All 776 installed source hashes match the snapshot that passed a complete run
+of 163 Python entrypoints with unchanged source and 34 JavaScript tests. Native isolated Settings save/restore recovered the original
 value; production Now decoded current images from both cameras and Full Settings
 search returned the expected field. These are bounded acceptance checks.
 
-The database backup passed integrity validation in 63.21 seconds. Configuration
+The database backup passed integrity validation in 30.7 seconds. Configuration
 117, Flask configuration, capture PID 1566 and untracked files were preserved.
-The web service stayed active as PID 802610; neither web nor capture restarted. A complete control/effect matrix and
+Only web restarted (PID 862109); capture remained active. A complete control/effect matrix and
 unavailable hardware checks remain open; the 24-hour observation is deferred.
 
 Both camera/profile round trips through the Settings index and Exposure/Gain
@@ -21,6 +21,11 @@ The latest static cleanup also passed native VirtualSky rendering on both camera
 fullscreen and preview reset: [cleanup evidence](testing/evidence/hybrid-static-cleanup-20260921.json).
 
 Evidence: [Classic removal acceptance](testing/evidence/hybrid-retirement-final-native-20260921.json).
+
+The camera-detection fix passed native discovery against real devices: the telescope
+is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
+Both Now images decoded after deployment; configuration117 is unchanged.
+Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
 ## Roll back the installed web release
 
@@ -34,18 +39,19 @@ git -C /home/eric/indi-allsky rev-parse HEAD
 
 The protected helper requires exactly the installed revision above and refuses
 to discard tracked edits. Its backup is:
-`/home/eric/hybrid-backups/hybrid-static-cleanup-20260921-203940`.
+`/home/eric/hybrid-backups/hybrid-camera-detection-20260921-211908`.
 Run on the Raspberry:
 
 ```sh
-release_backup=/home/eric/hybrid-backups/hybrid-static-cleanup-20260921-203940
+release_backup=/home/eric/hybrid-backups/hybrid-camera-detection-20260921-211908
 maintenance_deadline="$(date --date='+15 minutes' --iso-8601=seconds)"
 python3 "$release_backup/deploy.py" --rollback "$release_backup" \
   --maintenance-until "$maintenance_deadline"
 ```
 
-This static-only rollback returns to `6a3dfc8f` and restores the five vendor
-demo assets without restarting services or changing database/configuration.
+This code-only rollback returns to `e19acee9` and restarts only the web service,
+without changing the database/configuration or restarting capture. It restores
+the prior camera-detection behavior; it does not restore Classic.
 Classic remains removed and both Settings context fixes remain installed.
 The helper is prepared; this live release has not been deliberately reverted.
 Read the backup's `deployment.json`, confirm the revision and services, then
@@ -84,7 +90,7 @@ one-off authorized test-media cleanup does not change that saved policy.
 Some older snapshots are archived as `indi-allsky.sqlite.gz` to recover space.
 Their `compressed-storage.json` records the original byte length and SHA-256;
 complete decompression is verified before removing the uncompressed copy.
-The current static cleanup and recent Settings/Classic retirement backups remain
+The current detection and recent static cleanup/Settings/Classic backups remain
 uncompressed, with configuration and code archives preserved.
 
 Before using an archived database snapshot, ensure space for `original_bytes`,

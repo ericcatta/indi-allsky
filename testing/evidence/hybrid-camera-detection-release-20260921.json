@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-21",
+  "installed_commit": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
+  "previous": "e19acee9ae629d43ea5b70d123126d458a311d80",
+  "environment": "Native production browser after web-only deployment; real INDI devices; Classic absent",
+  "backup": "/home/eric/hybrid-backups/hybrid-camera-detection-20260921-211908",
+  "backup_integrity": "ok",
+  "backup_seconds": 30.7,
+  "configuration_revision_before": 117,
+  "configuration_revision_after": 117,
+  "capture_restarted": false,
+  "web_pid_before": 802610,
+  "web_pid_after": 862109,
+  "source_manifest_files": 776,
+  "source_manifest_sha256": "8afa58896e66419724265b748e5f917a7893ee5c1ed8166609420eaa9692f509",
+  "regression": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+  "controls": [
+    {
+      "route": "/modern-admin/cameras/add",
+      "control": "Detect cameras after capability fix",
+      "role": "administrator",
+      "status": "superato",
+      "request": "POST /indi-allsky/modern-admin/cameras/detect-indi",
+      "observed": "Native click returns two Use this camera buttons for IMX708 and ASI678MC. Telescope Simulator displays Not a camera, indi_simulator_telescope and no selection action. No config saved."
+    },
+    {
+      "route": "/modern-admin/cameras",
+      "control": "Back to Cameras after detection",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Both profiles Running; latest images37s and22s old. Shared mode remains enabled."
+    },
+    {
+      "route": "/modern-admin/now",
+      "control": "Now after web restart",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Native navigation displays complete decoded IMX708 frame21:20:18 4608x2592 and ASI678MC frame21:20:33 3840x2160, both acquired after deployment."
+    }
+  ],
+  "limits": [
+    "Bounded post-deploy checks only, not complete product acceptance.",
+    "No24-hour observation; no camera config save or capture restart.",
+    "Code-only rollback to e19acee9 prepared in backup deploy.py, not exercised.",
+    "Original defect remains recorded with its original installed revision; this separate evidence verifies correction."
+  ]
+}

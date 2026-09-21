@@ -12,8 +12,8 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | --- | ---: | --- |
 | `/modern-admin` | 0 | Da associare o collaudare |
 | `/modern-admin/account` | 17 | [hybrid-account-native-20260914](../testing/evidence/hybrid-account-native-20260914.json), [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-native-users-2026-09-08](../testing/evidence/hybrid-native-users-2026-09-08.json) |
-| `/modern-admin/cameras` | 1 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
-| `/modern-admin/cameras/add` | 1 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
+| `/modern-admin/cameras` | 2 | [hybrid-camera-detection-release-20260921](../testing/evidence/hybrid-camera-detection-release-20260921.json), [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
+| `/modern-admin/cameras/add` | 2 | [hybrid-camera-detection-release-20260921](../testing/evidence/hybrid-camera-detection-release-20260921.json), [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
 | `/modern-admin/cameras/adu-history` | 5 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
 | `/modern-admin/cameras/dark-library` | 2 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
 | `/modern-admin/cameras/detect-indi` | 0 | Da associare o collaudare |
@@ -56,7 +56,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/notifications` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/notifications/<int:notification_id>` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/notifications/<int:notification_id>/acknowledge` | 0 | Da associare o collaudare |
-| `/modern-admin/now` | 8 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json) |
+| `/modern-admin/now` | 9 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-camera-detection-release-20260921](../testing/evidence/hybrid-camera-detection-release-20260921.json), [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json) |
 | `/modern-admin/observatory` | 0 | Da associare o collaudare |
 | `/modern-admin/observatory/astropanel` | 0 | Da associare o collaudare |
 | `/modern-admin/observatory/charts` | 3 | [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json) |

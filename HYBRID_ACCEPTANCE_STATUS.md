@@ -5,20 +5,20 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `e19acee9ae629d43ea5b70d123126d458a311d80`.
+The Raspberry runs `7d9e49f993bcbeb4a373d3940a072892b7f95128`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
-The 775-file installed source manifest matches the tested snapshot:
-`0eb43629f31133e40c2285e97e67231c77a34d6b219af9485005436c47c1f325`.
-All 162 Python entrypoints passed in one complete run with unchanged source, and all 34 JavaScript tests passed. Details: [static cleanup validation](testing/evidence/hybrid-static-cleanup-20260921.json).
+The 776-file installed source manifest matches the tested snapshot:
+`8afa58896e66419724265b748e5f917a7893ee5c1ed8166609420eaa9692f509`.
+All 163 Python entrypoints passed in one complete run with unchanged source, and all 34 JavaScript tests passed. Details: [camera detection validation](testing/evidence/hybrid-camera-diagnostics-native-20260921.json).
 This automated result does not certify every native control or hardware effect.
 
 The deployment preserved configuration revision 117, Flask configuration,
-user files and capture PID 1566. Neither service restarted; web PID 802610 was preserved.
-The database backup passed integrity checking in 63.21 seconds.
+user files and capture PID 1566. Only web restarted (PID 862109); capture remained running.
+The database backup passed integrity checking in 30.7 seconds.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not commands from historical mission reports.
 
 ## Post-removal evidence
@@ -37,6 +37,7 @@ Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not co
 | Static cleanup and VirtualSky | Five unused vendor demo assets removed (78,384 bytes); both camera overlays, fullscreen and preview reset verified; services preserved | [Static cleanup](testing/evidence/hybrid-static-cleanup-20260921.json) |
 | Complete day outputs | Four automatic tasks succeeded: both camera timelapses (3,165 frames each) and panoramas (1,581 each). Original files/probes match; all four played to natural end in the browser | [Day output playback](testing/evidence/hybrid-day-output-playback-20260921.json) |
 | System tools and Focus | Native network/drive refresh, SD metadata, complete support output and GPIO disabled-state checks; Focus crop/reset/fullscreen and both-camera preview with automatic refresh. Physical device effects remain open | [System and Focus](testing/evidence/hybrid-system-focus-native-20260921.json) |
+| Camera detection correction | Real INDI capabilities exclude Telescope Simulator from camera selection; actual driver preserved. Both cameras still acquire and decode after web-only deploy | [Detection release](testing/evidence/hybrid-camera-detection-release-20260921.json) |
 | Browser downloads | Video and empty CSV clicks returned, but no matching file was found in Mac Downloads; delivery remains unverified | [Open download checks](testing/evidence/hybrid-download-delivery-post-classic-20260921.json) |
 
 Earlier evidence remains useful for its stated revision, role, camera and environment.
