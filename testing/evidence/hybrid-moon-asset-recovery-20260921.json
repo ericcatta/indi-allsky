@@ -1,6 +1,6 @@
 {
   "date": "2026-09-21",
-  "status": "temporary-production-recovery-permanent-fix-tested",
+  "status": "deployed-bounded-acceptance-passed",
   "defect": "Classic retirement removed the moon bitmap used by the image worker. Warm cached workers concealed the missing disk asset until capture restarted.",
   "historical_asset": "7d24bc7f^:indi_allsky/flask/static/astropanel/img/moon_rot.png",
   "asset_sha256": "856ba0960823bb52177fbfde1502db01f474d693fb2a0e40fdd1ff1966a2feed",
@@ -25,8 +25,8 @@
     "sha256": "caf8728eec9cba3e4b9a98336b5352d64955eae8e87ffdd6e6d60406db152ec3"
   },
   "limitations": [
-    "Permanent relocation not deployed. Keep temporary original-path bitmap until deployment.",
-    "Not a full scientific rendering calibration or 24-hour capture test."
+    "Bounded cold-start recovery and rendering verification; not full scientific calibration or 24-hour capture acceptance.",
+    "Whole-product control/effect matrix remains open."
   ],
   "continued_recovery": {
     "observed_at": "2026-09-21T22:04:12 CEST",
@@ -49,5 +49,46 @@
       "indi_allsky/overlay/moonOverlay.py -> moon_rot.png (relocated)"
     ],
     "limitation": "Literal basename scan of assets deleted by 7d24bc7f; not proof against all dynamically configured paths."
+  },
+  "installed_runtime": "cfe2c40d7017a4aab7827f0e2d373766a9bd3bca",
+  "deployment": {
+    "state": "/home/eric/hybrid-moon-asset-release-state.json",
+    "backup": "/home/eric/hybrid-backups/hybrid-moon-asset-20260921-220855",
+    "backup_integrity": "ok",
+    "backup_seconds": 45.46,
+    "configuration_revision": 117,
+    "flask_configuration_unchanged": true,
+    "web_pid": 921906,
+    "capture_pid": 921907,
+    "capture_started_at": "2026-09-21 22:09:58 CEST",
+    "activation_units_preserved": [
+      "gunicorn-indi-allsky.socket",
+      "indi-allsky.timer"
+    ],
+    "legacy_bitmap_absent": true,
+    "installed_cold_overlay_test": "passed",
+    "native_now": [
+      {
+        "camera_id": 1,
+        "timestamp": "2026-09-21 22:10:12",
+        "width": 4608,
+        "height": 2592,
+        "decoded": true
+      },
+      {
+        "camera_id": 2,
+        "timestamp": "2026-09-21 22:10:21",
+        "width": 3840,
+        "height": 2160,
+        "decoded": true
+      }
+    ],
+    "log_sample": {
+      "from": "2026-09-21T22:09:58 CEST",
+      "lines": 388,
+      "image_worker_exceptions": 0,
+      "scope": "timestamp-filtered last 2 MiB"
+    },
+    "rollback": "Helper restores 9b984cb5 and the backed-up original-path bitmap before restarting services; not deliberately executed."
   }
 }

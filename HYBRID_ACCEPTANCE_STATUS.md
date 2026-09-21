@@ -5,35 +5,34 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `9b984cb53ee0ab98aba90e4205e2c13da8399ba0`.
+The Raspberry runs `cfe2c40d7017a4aab7827f0e2d373766a9bd3bca`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
-The 777-file installed code/template manifest matches the tested snapshot:
-`a60e9a444fb7bb85ea47a75ba3912037350df8aaf5d801efd6ead264dba53fb9`.
-All 164 Python entrypoints passed with unchanged source. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Details: [generation/storage guard](testing/evidence/hybrid-generation-storage-guard-20260921.json).
+The 822-file installed source/asset manifest matches the tested snapshot:
+`7f22bdeb38c17ab09e78b49feee32d7bc02732ff3c43d6bf88d7fbaca1fc8559`.
+All 165 Python entrypoints passed with unchanged source. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Details: [cold-start asset recovery](testing/evidence/hybrid-moon-asset-recovery-20260921.json).
 This automated result does not certify every native control or hardware effect.
 
 The deployment preserved configuration revision 117, Flask configuration and user files.
-Web and capture restarted (PIDs 892509 and 892510). The backup passed integrity checking in 32.94 seconds.
+Web and capture restarted (PIDs 921906 and 921907). The backup passed integrity checking in 45.46 seconds.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
-## Cold-start defect recovered; permanent asset correction pending
+## Cold-start defect corrected and deployed
 
-The restart exposed a backend dependency missed by Classic asset removal:
-`moonOverlay.py` still loaded `static/astropanel/img/moon_rot.png`. The previous
-worker cached that image; new workers failed before saving frames.
-The exact historical bitmap was restored temporarily at its old path. Both cameras
-resumed and their 21:58:46 / 21:58:53 frames decoded in the production browser.
-No Classic page, class or navigation was restored.
+Capture restart exposed a backend moon bitmap removed during Classic retirement.
+The bitmap now belongs to `indi_allsky/overlay/assets/`; the temporary old-path
+copy is removed. The installed cold/cached overlay test passes for four phases,
+and the release manifest now includes raster images, SVG, icons and fonts.
+The image algorithms and original bitmap bytes are unchanged.
 
-The permanent correction moves the bitmap into backend overlay assets, adds a
-four-phase cold/cached rendering test and includes binary assets in the regression
-manifest. All 165 isolated Python entrypoints pass with unchanged sources; it is not yet deployed. Do not remove
-the temporary production bitmap before the permanent correction is installed.
-The earlier 777-file manifest did not include binary assets and does not prove their completeness.
+After the 22:09:58 restart both cameras saved new frames: IMX708 at 22:10:12 and
+ASI678MC at 22:10:21. Both decoded in the production browser. A bounded log sample
+contains no image-worker exception after restart. See [recovery evidence](testing/evidence/hybrid-moon-asset-recovery-20260921.json).
+No Classic frontend was restored. This closes the specific cold-start defect,
+not the remaining whole-product acceptance gates below.
 
 ## Post-removal evidence
 

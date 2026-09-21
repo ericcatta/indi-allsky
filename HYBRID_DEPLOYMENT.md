@@ -2,19 +2,18 @@
 
 ## Installed version
 
-Production runs `9b984cb53ee0ab98aba90e4205e2c13da8399ba0` (21 September 2026).
-Classic frontend is removed; Hybrid is the only UI. The generation/storage lock
-correction passed 164 Python entrypoints; previous 34 JavaScript results apply to
-unchanged JS/templates/CSS. The 777-file code/template manifest matches the test snapshot.
+Production runs `cfe2c40d7017a4aab7827f0e2d373766a9bd3bca` (21 September 2026).
+Classic frontend is removed; Hybrid is the only UI. All 165 Python entrypoints
+passed with unchanged sources. The 34 prior JavaScript passes apply to unchanged
+JS/templates/CSS. The 822-file manifest includes image/font assets and matches
+the installed snapshot.
 
-Backup integrity passed in 32.94 seconds. Configuration 117 and Flask settings were
-preserved; web and capture restarted (PIDs 892509 and 892510).
-Cold start exposed a missing backend moon bitmap removed with Classic assets.
-The exact historical `indi_allsky/flask/static/astropanel/img/moon_rot.png` was
-restored temporarily, SHA-256 `856ba0960823bb52177fbfde1502db01f474d693fb2a0e40fdd1ff1966a2feed`.
-Both cameras then saved new frames and both previews decoded. Preserve this
-untracked recovery file until the permanent backend asset relocation is deployed.
-The prior manifest excluded binary assets; expanded coverage has passed 165 Python entrypoints and awaits deployment.
+Backup integrity passed in 45.46 seconds. Configuration 117 and Flask settings
+were preserved; web and capture restarted (PIDs 921906 and 921907).
+The previously missing moon bitmap now lives in `indi_allsky/overlay/assets/`.
+The temporary original-path copy was removed. The installed four-phase cold
+rendering test passes, and both cameras' new frames after the 22:09:58 restart
+decoded in the native browser. See [recovery evidence](testing/evidence/hybrid-moon-asset-recovery-20260921.json).
 
 Both camera/profile round trips through the Settings index and Exposure/Gain
 passed in the native production browser. See [Settings navigation evidence](testing/evidence/hybrid-settings-navigation-context-20260921.json).
@@ -29,7 +28,7 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed generation release
+## Roll back the installed backend asset release
 
 Use an authenticated SSH terminal on the Raspberry as `eric`, during a maintenance
 window. Check the installed revision and preserve any tracked edits first:
@@ -41,20 +40,21 @@ git -C /home/eric/indi-allsky rev-parse HEAD
 
 The protected helper requires exactly the installed revision above and refuses
 to discard tracked edits. Its backup is:
-`/home/eric/hybrid-backups/hybrid-generation-guard-20260921-215526`.
+`/home/eric/hybrid-backups/hybrid-moon-asset-20260921-220855`.
 Run on the Raspberry:
 
 ```sh
-release_backup=/home/eric/hybrid-backups/hybrid-generation-guard-20260921-215526
+release_backup=/home/eric/hybrid-backups/hybrid-moon-asset-20260921-220855
 maintenance_deadline="$(date --date='+15 minutes' --iso-8601=seconds)"
 python3 "$release_backup/deploy.py" --rollback "$release_backup" \
   --maintenance-until "$maintenance_deadline"
 ```
 
-This code-only rollback returns to `7d9e49f9` and restarts web and capture,
+This code-only rollback returns to `9b984cb5` and restarts web and capture,
 including their socket/timer activation state, without restoring the database or
-configuration. It removes the generation publication guard; it does not restore Classic.
-Keep the temporarily restored moon bitmap: the rollback revision needs it too.
+configuration. The helper restores the backed-up moon bitmap at its original
+path before restarting, because that revision still requires it. The generation
+publication guard remains installed; Classic frontend stays removed.
 The helper is prepared; this live release has not been deliberately reverted.
 Read the backup's `deployment.json`, confirm the revision and services, then
 verify HTTPS Now and new nonempty files from both cameras. Process readiness
