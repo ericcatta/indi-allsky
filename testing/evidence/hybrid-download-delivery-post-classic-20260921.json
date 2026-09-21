@@ -35,5 +35,19 @@
     "production_web_pid": 740426,
     "production_services": "active"
   },
-  "user_input": "Requested whether a Save dialog is pending or a different download directory is configured. No answer received at recording time."
+  "user_input": "Requested whether a Save dialog is pending or a different download directory is configured. No answer received at recording time.",
+  "latest_native_recheck": {
+    "installed_commit": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
+    "route": "/modern-admin/tasks",
+    "control": "CSV after Search12729",
+    "status": "bloccato",
+    "observations": [
+      "Search12729 displays exactly the successful camera2 panorama generation task.",
+      "Native CSV click completes; browser dev logs contain no errors/warnings and no JavaScript dialog exists.",
+      "No new hybrid-records CSV appears in Mac Downloads; newest matching file remains September20 19:10:21.",
+      "Tool explicitly denies access to the Codex native app, preventing inspection of a possible host save dialog. No workaround attempted."
+    ],
+    "handoff": "User asked to check for a save dialog/download and provide the saved path. Browser tab retained for this check.",
+    "limits": "No assertion that the application server failed; no replacement direct HTTP download treated as native delivery."
+  }
 }
