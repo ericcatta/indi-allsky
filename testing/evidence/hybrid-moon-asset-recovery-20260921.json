@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-21",
+  "status": "temporary-production-recovery-permanent-fix-tested",
+  "defect": "Classic retirement removed the moon bitmap used by the image worker. Warm cached workers concealed the missing disk asset until capture restarted.",
+  "historical_asset": "7d24bc7f^:indi_allsky/flask/static/astropanel/img/moon_rot.png",
+  "asset_sha256": "856ba0960823bb52177fbfde1502db01f474d693fb2a0e40fdd1ff1966a2feed",
+  "bytes": 127362,
+  "permanent_path": "indi_allsky/overlay/assets/moon_rot.png",
+  "production_recovery": "Exact original bytes temporarily restored at old path; no config changes. IMX frame 21:58:46 and ASI frame 21:58:53 decoded in native browser.",
+  "targeted_test": {
+    "path": "testing/hybrid_moon_overlay_asset_test.py",
+    "status": "superato",
+    "log": "/tmp/hybrid-moon-asset-test.log",
+    "scope": "Four cold-start and cached phase renders; actual retained bitmap fingerprint; manifest inclusion; no Classic view import."
+  },
+  "regression": {
+    "status": "passed",
+    "root": "/home/eric/hybrid-moon-asset-20260921",
+    "report": "/home/eric/hybrid-moon-asset-regression-20260921/results.json",
+    "source_manifest_files": 822,
+    "source_manifest_sha256": "7f22bdeb38c17ab09e78b49feee32d7bc02732ff3c43d6bf88d7fbaca1fc8559",
+    "cases": 165,
+    "failed": 0,
+    "source_changed": false,
+    "sha256": "caf8728eec9cba3e4b9a98336b5352d64955eae8e87ffdd6e6d60406db152ec3"
+  },
+  "limitations": [
+    "Permanent relocation not deployed. Keep temporary original-path bitmap until deployment.",
+    "Not a full scientific rendering calibration or 24-hour capture test."
+  ],
+  "continued_recovery": {
+    "observed_at": "2026-09-21T22:04:12 CEST",
+    "latest_frames": {
+      "1": "2026-09-21 22:04:01",
+      "2": "2026-09-21 22:04:09"
+    },
+    "log_sample": {
+      "from": "2026-09-21T22:00:00 CEST",
+      "lines": 612,
+      "image_worker_exceptions": 0,
+      "moon_none_copy_errors": 0,
+      "scope": "Last 2 MiB of runtime log filtered by timestamp, not an exhaustive historical log audit"
+    }
+  },
+  "reference_review": {
+    "removed_assets": 65,
+    "retained_non_flask_python_files": 245,
+    "matching_basename_references": [
+      "indi_allsky/overlay/moonOverlay.py -> moon_rot.png (relocated)"
+    ],
+    "limitation": "Literal basename scan of assets deleted by 7d24bc7f; not proof against all dynamically configured paths."
+  }
+}

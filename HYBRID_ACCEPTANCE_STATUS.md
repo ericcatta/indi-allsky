@@ -5,31 +5,35 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `7d9e49f993bcbeb4a373d3940a072892b7f95128`.
+The Raspberry runs `9b984cb53ee0ab98aba90e4205e2c13da8399ba0`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
-The 776-file installed source manifest matches the tested snapshot:
-`8afa58896e66419724265b748e5f917a7893ee5c1ed8166609420eaa9692f509`.
-All 163 Python entrypoints passed in one complete run with unchanged source, and all 34 JavaScript tests passed. Details: [camera detection validation](testing/evidence/hybrid-camera-diagnostics-native-20260921.json).
+The 777-file installed code/template manifest matches the tested snapshot:
+`a60e9a444fb7bb85ea47a75ba3912037350df8aaf5d801efd6ead264dba53fb9`.
+All 164 Python entrypoints passed with unchanged source. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Details: [generation/storage guard](testing/evidence/hybrid-generation-storage-guard-20260921.json).
 This automated result does not certify every native control or hardware effect.
 
-The deployment preserved configuration revision 117, Flask configuration,
-user files and capture PID 1566. Only web restarted (PID 862109); capture remained running.
-The database backup passed integrity checking in 30.7 seconds.
-Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not commands from historical mission reports.
+The deployment preserved configuration revision 117, Flask configuration and user files.
+Web and capture restarted (PIDs 892509 and 892510). The backup passed integrity checking in 32.94 seconds.
+Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
-## Tested correction awaiting deployment
+## Cold-start defect recovered; permanent asset correction pending
 
-Generation publication now shares the storage cleanup lock, including automatic
-capture tasks, combined generation and mini-timelapse anchor validation.
-A reproducible missing-lock test fails on the installed runtime and passes on the candidate.
-All 164 Python entrypoints pass with unchanged candidate sources; the 34 existing
-JavaScript results are reused because JS, templates and CSS are unchanged.
-See [generation/storage guard evidence](testing/evidence/hybrid-generation-storage-guard-20260921.json).
-This candidate is not yet installed and requires a controlled capture/web restart.
+The restart exposed a backend dependency missed by Classic asset removal:
+`moonOverlay.py` still loaded `static/astropanel/img/moon_rot.png`. The previous
+worker cached that image; new workers failed before saving frames.
+The exact historical bitmap was restored temporarily at its old path. Both cameras
+resumed and their 21:58:46 / 21:58:53 frames decoded in the production browser.
+No Classic page, class or navigation was restored.
+
+The permanent correction moves the bitmap into backend overlay assets, adds a
+four-phase cold/cached rendering test and includes binary assets in the regression
+manifest. All 165 isolated Python entrypoints pass with unchanged sources; it is not yet deployed. Do not remove
+the temporary production bitmap before the permanent correction is installed.
+The earlier 777-file manifest did not include binary assets and does not prove their completeness.
 
 ## Post-removal evidence
 

@@ -1,7 +1,7 @@
 {
   "date": "2026-09-21",
-  "status": "candidate-tested-not-deployed",
-  "production_runtime": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
+  "status": "deployed-with-emergency-backend-asset-recovery",
+  "production_runtime": "9b984cb53ee0ab98aba90e4205e2c13da8399ba0",
   "defect": "Generation publishers could commit a new task while pressure cleanup held its exclusive deletion lock, after the pending-generation check. Upload publication already used the lock; generation publication did not.",
   "before": {
     "environment": "Isolated temporary SQLite/files on Pi, production source imported without modification",
@@ -42,8 +42,8 @@
     "reason": "All 34 results exit 0; no JS/templates/CSS changes since tested runtime 7d9e49f9."
   },
   "limitations": [
-    "Not deployed; installed capture/web remain unchanged.",
-    "Thread-coordinated separate DB sessions exercise real flock, SQLite and files; this is not a live production cleanup or full cross-process stress test."
+    "Thread-coordinated separate DB sessions exercise real flock, SQLite and files; this is not a live production cleanup or full cross-process stress test.",
+    "The 777-file manifest excluded binary assets; it did not catch the missing moon bitmap."
   ],
   "reviewed_publication_paths": {
     "automatic_capture": [
@@ -56,6 +56,33 @@
       "Hybrid task effect adapter: generateVideo, generateMiniVideo, generateKeogramStarTrails, generatePanoramaVideo",
       "Combined generation: keogram/startrails before video, optional panorama in same commit",
       "Mini generation: validate anchor under shared lock"
+    ]
+  },
+  "deployment": {
+    "backup": "/home/eric/hybrid-backups/hybrid-generation-guard-20260921-215526",
+    "integrity": "ok",
+    "backup_seconds": 32.94,
+    "configuration_revision": 117,
+    "web_pid": 892509,
+    "capture_pid": 892510,
+    "capture_restarted_at": "2026-09-21 21:56:17 CEST",
+    "state": "/home/eric/hybrid-generation-guard-release-state.json",
+    "cold_start_defect": "Backend moon bitmap removed in Classic retirement. Exact historical bytes restored at temporary original path; permanent backend relocation under test.",
+    "recovered_frames": [
+      {
+        "camera_id": 1,
+        "timestamp": "2026-09-21 21:58:46",
+        "decoded": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "timestamp": "2026-09-21 21:58:53",
+        "decoded": true,
+        "width": 3840,
+        "height": 2160
+      }
     ]
   }
 }

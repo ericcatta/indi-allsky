@@ -63,7 +63,7 @@ def source_hashes(root):
         for folder in ('indi_allsky', 'testing')
         for p in sorted((root / folder).rglob('*'))
         if p.is_file() and '__pycache__' not in p.parts
-        and p.suffix in ('.py', '.js', '.html', '.css', '.json')
+        and p.suffix in ('.py', '.js', '.html', '.css', '.json', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf')
         and 'evidence' not in p.relative_to(root).parts
     }
 
