@@ -1,0 +1,93 @@
+{
+  "date": "2026-09-21",
+  "installed_runtime": "cfe2c40d7017a4aab7827f0e2d373766a9bd3bca",
+  "environment": "Authenticated administrator, native in-app browser, production Raspberry",
+  "controls": [
+    {
+      "route": "/modern-admin/media/public-endpoints",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "control": "Latest image viewer link",
+      "status": "superato",
+      "href": "/indi-allsky/latestimageview?camera_id=1&profile_id=imx708-wide",
+      "destination": "https://allsky-pi.local/indi-allsky/view_image?id=115551&camera_id=1",
+      "proof": "Actual link click opens correct camera image ccd1_20260921_222813.jpg; image decodes 4608\u00d72592."
+    },
+    {
+      "route": "/view_image",
+      "camera_id": 1,
+      "control": "Copy link",
+      "status": "superato",
+      "expected": "https://allsky-pi.local/indi-allsky/view_image?id=115551&camera_id=1",
+      "observed_paste": "https://allsky-pi.local/indi-allsky/view_image?id=115551&camera_id=1",
+      "proof": "Clicked Copy link, received success feedback, then pasted via Meta+V into an unsubmitted Hybrid search field and read its actual value."
+    },
+    {
+      "route": "/view_image",
+      "camera_id": 1,
+      "control": "Fullscreen / Exit fullscreen",
+      "status": "superato",
+      "proof": "Fullscreen click reveals Exit fullscreen; clicking Exit fullscreen hides it. Correct-camera image remains decoded."
+    },
+    {
+      "route": "/view_image",
+      "camera_id": 1,
+      "control": "Browse this camera in Hybrid",
+      "status": "superato",
+      "destination": "/indi-allsky/modern-admin/media/archive?kind=image&camera_id=1",
+      "proof": "Actual link click opens archive with kind=image and selected camera equal to source camera."
+    },
+    {
+      "route": "/modern-admin/media/public-endpoints",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "control": "Latest image viewer link",
+      "status": "superato",
+      "href": "/indi-allsky/latestimageview?camera_id=2&profile_id=asi678mc",
+      "destination": "https://allsky-pi.local/indi-allsky/view_image?id=115560&camera_id=2",
+      "proof": "Actual link click opens correct camera image ccd2_20260921_223121.jpg; image decodes 3840\u00d72160."
+    },
+    {
+      "route": "/view_image",
+      "camera_id": 2,
+      "control": "Copy link",
+      "status": "superato",
+      "expected": "https://allsky-pi.local/indi-allsky/view_image?id=115560&camera_id=2",
+      "observed_paste": "https://allsky-pi.local/indi-allsky/view_image?id=115560&camera_id=2",
+      "proof": "Clicked Copy link, received success feedback, then pasted via Meta+V into an unsubmitted Hybrid search field and read its actual value."
+    },
+    {
+      "route": "/view_image",
+      "camera_id": 2,
+      "control": "Fullscreen / Exit fullscreen",
+      "status": "superato",
+      "proof": "Fullscreen click reveals Exit fullscreen; clicking Exit fullscreen hides it. Correct-camera image remains decoded."
+    },
+    {
+      "route": "/view_image",
+      "camera_id": 2,
+      "control": "Browse this camera in Hybrid",
+      "status": "superato",
+      "destination": "/indi-allsky/modern-admin/media/archive?kind=image&camera_id=2",
+      "proof": "Actual link click opens archive with kind=image and selected camera equal to source camera."
+    }
+  ],
+  "directory_observations": {
+    "cameras": {
+      "1": "imx708-wide",
+      "2": "asi678mc"
+    },
+    "links_per_camera": 16,
+    "proof": "All rendered hrefs inspected; each retains selected camera/profile. No copy button or camera selector exists on the directory itself. Camera scope selected by its supported URL.",
+    "not_certified": "Destinations of the other 15 links per camera were not clicked in this check."
+  },
+  "tool_limits": [
+    "Browser clipboard.readText returned a stale previous value. Actual Meta+V into an unsubmitted search field verified the copied permalink for both cameras.",
+    "Some locator-scoped evaluations timed out; page-scoped read-only DOM inspection succeeded.",
+    "Fullscreen entered/exited visibly via the Exit fullscreen control; document.fullscreenElement was not usable as a tool observation."
+  ],
+  "limitations": [
+    "Download original delivery on the Mac remains open.",
+    "Image viewers were checked here; other media viewer families have separate evidence."
+  ]
+}

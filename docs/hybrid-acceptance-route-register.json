@@ -1606,7 +1606,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminPublicMediaEndpointsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-viewer-native-20260921.json",
+          "record": "controls[0]",
+          "control": "Latest image viewer link",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-viewer-native-20260921.json",
+          "record": "controls[4]",
+          "control": "Latest image viewer link",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/media/raw",
@@ -5461,6 +5474,42 @@
           "control": "Fullscreen / Exit fullscreen",
           "recorded_status": "superato",
           "original_page": "/view_image"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-viewer-native-20260921.json",
+          "record": "controls[1]",
+          "control": "Copy link",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-viewer-native-20260921.json",
+          "record": "controls[2]",
+          "control": "Fullscreen / Exit fullscreen",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-viewer-native-20260921.json",
+          "record": "controls[3]",
+          "control": "Browse this camera in Hybrid",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-viewer-native-20260921.json",
+          "record": "controls[5]",
+          "control": "Copy link",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-viewer-native-20260921.json",
+          "record": "controls[6]",
+          "control": "Fullscreen / Exit fullscreen",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-viewer-native-20260921.json",
+          "record": "controls[7]",
+          "control": "Browse this camera in Hybrid",
+          "recorded_status": "superato"
         }
       ]
     },

@@ -47,7 +47,7 @@ Indice statico: 7.351 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/media/mini-timelapses` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
 | `/modern-admin/media/panorama` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
 | `/modern-admin/media/panorama-loop` | 13 | [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json) |
-| `/modern-admin/media/public-endpoints` | 0 | Da associare o collaudare |
+| `/modern-admin/media/public-endpoints` | 2 | [Native public image viewer](../testing/evidence/hybrid-public-viewer-native-20260921.json) |
 | `/modern-admin/media/raw` | 3 | [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/media/raw-loop` | 1 | [hybrid-loop-post-classic-20260921](../testing/evidence/hybrid-loop-post-classic-20260921.json) |
 | `/modern-admin/media/startrail-videos` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
