@@ -1,4 +1,11 @@
 # indi-allsky
+
+This fork uses **Hybrid as its only web interface**, at
+`/indi-allsky/modern-admin/now`, with login required. The Classic frontend has
+been removed; useful indi-allsky backend components and public integration
+contracts remain. See [Hybrid operating and development documentation](docs/HYBRID_GUIDE.md)
+for the installed release, rollback and the still-open acceptance checks.
+
 indi-allsky is software used to manage a Linux-based All Sky Camera using the INDI framework.  Theoretically, any INDI supported CCD/CMOS camera can be functional.
 
 ![](./content/20210930_224951.jpg)

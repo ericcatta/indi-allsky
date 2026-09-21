@@ -1,15 +1,13 @@
 # Classic navigation replacement map
 
-Verified against candidate `fc926129` on 14 September 2026. This replaces the
-obsolete read-only migration proposal previously stored here. Settings writes,
-media generation, camera tools and operational actions now have Hybrid entries;
-they must not be redirected back to Classic based on that old proposal.
-
-The optional Classic frontend registers **56 navigation URLs**, mapped below to
-**44 Hybrid destinations**. The `/indi-allsky` prefix applies to every URL.
-The source of truth is `flask/navigation_redirects.py`, checked against all
-registrations in `flask/classic_views.py`. Public media/latest, AJAX/JSON, Sync API,
-Action API and integration callbacks are separate contracts, not obsolete UI.
+Classic frontend files have been removed. The remaining **56 navigation URLs**
+redirect to **44 Hybrid destinations**, preserving bookmarks and query scope.
+The `/indi-allsky` prefix applies to every URL. Current source is
+[`navigation_redirects.py`](../indi_allsky/flask/navigation_redirects.py); the
+frozen prior registrations are in
+[`classic_frontend_contract.json`](../testing/classic_frontend_contract.json).
+Public media/latest, AJAX/JSON, Sync API, Action API and integration callbacks
+retain independent handlers and must not be deleted as obsolete navigation.
 
 ## Navigation coverage
 
@@ -71,25 +69,14 @@ parameters. Public endpoint handlers remain independent of navigation redirects.
 Selected followed routes also exercise the destination authentication behavior.
 
 These checks prove navigation continuity, **not that every control or hardware
-effect on each destination has passed acceptance**. The full automatic regression
-for the candidate is recorded in
-[Astropanel independence evidence](../testing/evidence/hybrid-astropanel-independence.json).
-Per-control historical evidence is linked from
-[the acceptance route register](hybrid-acceptance-route-register.md); its baseline
-and coverage limits remain explicit and it is not a completion certificate.
+effect on each destination has passed acceptance**. Current installed version,
+regression evidence and rollback are in [the deployment runbook](../HYBRID_DEPLOYMENT.md).
+Per-control evidence is linked from [the route register](hybrid-acceptance-route-register.md).
 
-## Remaining removal gates
+## Remaining acceptance
 
-- Install and accept the prepared candidate in a newly agreed maintenance window;
-  see [the release runbook](../HYBRID_STORAGE_RELEASE_RUNBOOK.md).
-- Finish the page/control matrix and direct acceptance of real effects. Native
-  browser checks currently require an unlocked Mac; production certificate
-  approval remains unresolved. Hardware actions require the agreed physical
-  recovery arrangements. Blocked checks are not passes.
-- Remove Classic-only classes, templates/assets and the temporary flag in
-  separate commits after parity and live acceptance, then repeat essential tests.
-- Keep these navigation redirects and independent public/API contracts when
-  removing Classic. Retain useful shared workers, drivers and backend services.
-
-Classic is still physically present. The deferred 24-hour observation is a
-separate future activity and is not restarted by this map.
+Classic removal is complete; product acceptance is not. See
+[the current status](../HYBRID_ACCEPTANCE_STATUS.md) for the remaining control,
+effect, download and hardware checks. The 24-hour observation is deferred.
+Do not reintroduce Classic or remove shared backend/API handlers to close these
+checks artificially.

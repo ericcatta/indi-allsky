@@ -1,6 +1,6 @@
 # Hybrid acceptance and maintenance workflow
 
-This is the current workflow for the Classic retirement candidate. Historical
+This is the current workflow for Hybrid after Classic frontend removal. Historical
 porting documents explain earlier decisions; their counts, dependency maps and
 commands do not certify the current application.
 
@@ -54,7 +54,7 @@ absence from a static text search alone is not deletion evidence. Keep physical
 Classic removal separate from functional migrations for simple rollback.
 
 Old static UI inventory output, its hand-maintained map and generator were
-removed in this candidate because they classify current shared/public handlers
+removed because they classify current shared/public handlers
 and deleted templates using historical Classic assumptions. They have no
 runtime consumers; current discovery and evidence replace that workflow.
 Historical source is available with `git show 8f5c954b:<path>`.
