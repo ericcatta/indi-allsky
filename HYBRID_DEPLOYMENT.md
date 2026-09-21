@@ -74,6 +74,21 @@ alone do not prove successful acquisition or recovery after a process failure.
 Storage Protection settings control the installed automatic cleanup policy;
 one-off authorized test-media cleanup does not change that saved policy.
 
+## Historical backup storage
+
+Some older snapshots are archived as `indi-allsky.sqlite.gz` to recover space.
+Their `compressed-storage.json` records the original byte length and SHA-256;
+complete decompression is verified before removing the uncompressed copy.
+The current Settings polish and preceding Settings privacy backups remain
+uncompressed, with configuration and code archives preserved.
+
+Before using an archived database snapshot, ensure space for `original_bytes`,
+run `gzip -dk indi-allsky.sqlite.gz` in its backup directory, then compare
+`sha256sum indi-allsky.sqlite` with `original_sha256` in the marker file.
+This reconstructs a backup file; it does not restore the live database.
+The same instructions are retained privately on the Raspberry in
+`/home/eric/hybrid-backups/COMPRESSED_BACKUPS.md`.
+
 ## Before the next deployment
 
 Pin the tested commit and exact changed-file list. Check space, active tasks,
