@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-21",
+  "removed": [
+    "extra/highlight.css",
+    "extra/highlight.pack.js",
+    "extra/qunit-1.12.0.css",
+    "extra/qunit-1.12.0.js",
+    "formatexamples.js"
+  ],
+  "removed_root": "indi_allsky/flask/static/virtualsky",
+  "bytes_removed": 78384,
+  "reason": "QUnit runner assets and syntax/example formatter from the upstream demonstration site. Runtime/templates/installers/scripts/tests have no consumers by filename or QUnit/hljs/example-code globals; dynamic VirtualSky loaders were inspected and load astronomical catalogs, language JSON and the planet plugin, not these files.",
+  "retained": "VirtualSky/stuquery runtime and readable sources, astronomical catalogs, translations and translation authoring resources, html2canvas, Hybrid overlay controller, licensing. Python dependencies are not changed.",
+  "python": {
+    "status": "passed",
+    "entries": 162,
+    "source_changed": false,
+    "report": "/home/eric/hybrid-static-cleanup-regression-20260921/results.json",
+    "sha256": "cf9b0f676cb009b1c707b891d90da57fa5049ee28f1b82472e8ecf55f46bb71c"
+  },
+  "javascript": {
+    "status": "passed",
+    "entries": 34,
+    "report": "/tmp/hybrid-static-cleanup-js-20260921.json"
+  },
+  "source_manifest": {
+    "files": 775,
+    "sha256": "0eb43629f31133e40c2285e97e67231c77a34d6b219af9485005436c47c1f325"
+  },
+  "native_baseline": "Production VirtualSky camera 2 decoded 3840x2160 frame; screenshot showed stars, constellation lines, names and planets on the image.",
+  "deployment": "Pending; static-only deployment guard permits exactly these five deletions and no service restart."
+}
