@@ -46,16 +46,21 @@ The [route evidence register](docs/hybrid-acceptance-route-register.md) links ea
 
 ## Inventory and coverage limits
 
-The isolated discovery of `f6975d5f` covers all 99 registered Hybrid GET entries in
+The isolated discovery of installed `7d9e49f9` covers all 99 registered Hybrid GET entries in
 505 role/camera/detail contexts: 376 rendered and 129 blocked or redirected,
 with no rendering defects and no matches for the selected placeholder phrases.
 It records 43,978 control occurrences, including repetition across roles,
 cameras, aliases and shared navigation. This is not a count of unique features.
 
-The full report is `/home/eric/hybrid-post-classic-controls-20260921.json`, SHA-256
-`58ad27d871ee1a648bcef25d3d7b518b4aa8a5ac795849486bd92ddf56670ee4`.
+The full report is `/home/eric/hybrid-current-controls-20260921.json`, SHA-256
+`6bd756f13a3a34a7e139a6372e0372b777ba0daff1ccb2764c162fa43ccf912b`.
 Its source manifest and limitations are recorded in `current_control_discovery`
 in the [JSON register](docs/hybrid-acceptance-route-register.json).
+
+The static identity index preserves all 43,978 references in 7,351 exact page/control groups.
+Six non-page GET families now link to their passing isolated API/redirect tests on this source manifest;
+see [current discovery evidence](testing/evidence/hybrid-current-discovery-20260921.json).
+This does not certify native download receipt or hardware effects.
 
 Discovery does not mark clicks passed. JavaScript-generated controls, keyboard/mobile behavior,
 mutating requests and observable effects require their own evidence.

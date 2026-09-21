@@ -1,0 +1,102 @@
+{
+  "date": "2026-09-21",
+  "installed_runtime": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
+  "environment": "Isolated synthetic Flask with Classic physically absent",
+  "discovery": {
+    "commit": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
+    "date": "2026-09-21",
+    "environment": "isolated synthetic Flask; Classic physically absent",
+    "source_manifest_sha256": "8afa58896e66419724265b748e5f917a7893ee5c1ed8166609420eaa9692f509",
+    "report": "/home/eric/hybrid-current-controls-20260921.json",
+    "report_sha256": "6bd756f13a3a34a7e139a6372e0372b777ba0daff1ccb2764c162fa43ccf912b",
+    "get_entries": 99,
+    "contexts": 505,
+    "rendered_contexts": 376,
+    "blocked_contexts": 129,
+    "render_defects": 0,
+    "searched_placeholder_signals": 0,
+    "control_occurrences": 43978,
+    "controls_certified_by_discovery": 0,
+    "limitations": [
+      "Includes repeated controls across roles, camera scopes, aliases and shared navigation; count is not unique features or percentage",
+      "Static HTML only; JavaScript-generated controls require the separate browser evidence",
+      "Rendering and absence of selected placeholder phrases do not prove functional completion"
+    ],
+    "identity_index": {
+      "path": "/home/eric/hybrid-current-control-index-20260921.json",
+      "sha256": "74408981c430ee52d88f18ff7e099ba3796c73208c600e690b20fbf96376574c",
+      "identities": 7351,
+      "references": 43978,
+      "rule": "Resolved page path plus exact collector control ID suffix; every source page/context/control index is retained. No semantic merging.",
+      "limitation": "Static identities are not unique product features. Existing functional evidence is not automatically assigned to each identity."
+    }
+  },
+  "regression": {
+    "report": "/home/eric/hybrid-camera-detection-regression-20260921/results.json",
+    "sha256": "15a354c050f9ef344a2ac540ab632b1ce54ae774ddf58a80148c468a7d22b9cf",
+    "verification": "All six referenced entrypoints exit 0. Installed source_hashes rechecked equal to regression source_hashes. No regression rerun for these documentation changes."
+  },
+  "controls": [
+    {
+      "route": "/modern-admin/capture/service",
+      "control": "API/redirect contract",
+      "status": "superato",
+      "tests": [
+        "testing/hybrid_capture_http_methods_test.py"
+      ],
+      "observed": "GET/HEAD cannot mutate services; anonymous login, CSRF, roles, invalid methods/commands and POST delegation checked.",
+      "limitation": "Service effects mocked; not actual start/stop/restart acceptance."
+    },
+    {
+      "route": "/modern-admin/classic/<classic_page>",
+      "control": "API/redirect contract",
+      "status": "superato",
+      "tests": [
+        "testing/hybrid_compatibility_redirect_test.py"
+      ],
+      "observed": "24 compatibility destinations preserve query parameters for both roles; unknown routes and anonymous access checked.",
+      "limitation": "Redirect handler acceptance; not complete interaction coverage of destination pages."
+    },
+    {
+      "route": "/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download",
+      "control": "API/redirect contract",
+      "status": "superato",
+      "tests": [
+        "testing/hybrid_source_media_flow_test.py",
+        "testing/hybrid_generated_media_flow_test.py"
+      ],
+      "observed": "Both roles/cameras: FITS/RAW and seven generated media kinds return fixture file bytes, attachment/private headers and Range responses; wrong-camera access rejected.",
+      "limitation": "Isolated response/file test. Native Mac download receipt remains open."
+    },
+    {
+      "route": "/modern-admin/mode/<mode>",
+      "control": "API/redirect contract",
+      "status": "superato",
+      "tests": [
+        "testing/hybrid_compatibility_redirect_test.py"
+      ],
+      "observed": "Classic mode redirects to Hybrid Full Settings; modern mode to Now; query and login requirements checked.",
+      "limitation": "Compatibility redirect only; does not restore Classic frontend."
+    },
+    {
+      "route": "/modern-admin/tools/focus/preview",
+      "control": "API/redirect contract",
+      "status": "superato",
+      "tests": [
+        "testing/hybrid_native_focus_flow_test.py"
+      ],
+      "observed": "Both roles/cameras: saved-frame preview, invalid camera/profile/zoom, anonymous access and camera isolation checked.",
+      "limitation": "Isolated preview fixture; live focuser motion is not covered."
+    },
+    {
+      "route": "/modern-admin/tools/mini-preview",
+      "control": "API/redirect contract",
+      "status": "superato",
+      "tests": [
+        "testing/hybrid_mini_generation_flow_test.py"
+      ],
+      "observed": "Camera-scoped frame preview/count, invalid FPS and wrong-camera rejection checked.",
+      "limitation": "Isolated preview; live generation has separate task/file/playback evidence."
+    }
+  ]
+}

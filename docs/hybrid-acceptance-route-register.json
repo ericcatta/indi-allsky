@@ -433,7 +433,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminCaptureServiceActionView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-current-discovery-20260921.json",
+          "record": "controls[0]",
+          "control": "Isolated API/redirect contract",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/classic/<classic_page>",
@@ -443,7 +450,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminCompatibilityRedirectView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-current-discovery-20260921.json",
+          "record": "controls[1]",
+          "control": "Isolated API/redirect contract",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/config-history",
@@ -1080,7 +1094,14 @@
       ],
       "handler_module": "indi_allsky.flask.source_media_views",
       "handler": "ModernAdminSourceDownloadView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-current-discovery-20260921.json",
+          "record": "controls[2]",
+          "control": "Isolated API/redirect contract",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/media/archive",
@@ -1791,7 +1812,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminModeView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-current-discovery-20260921.json",
+          "record": "controls[3]",
+          "control": "Isolated API/redirect contract",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/moment",
@@ -3308,7 +3336,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminFocusPreviewView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-current-discovery-20260921.json",
+          "record": "controls[4]",
+          "control": "Isolated API/redirect contract",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/tools/generate",
@@ -3660,7 +3695,14 @@
       ],
       "handler_module": "indi_allsky.flask.mini_generation",
       "handler": "ModernAdminMiniPreviewView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-current-discovery-20260921.json",
+          "record": "controls[5]",
+          "control": "Isolated API/redirect contract",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/tools/process-fits",
@@ -5526,6 +5568,35 @@
     }
   ],
   "current_control_discovery": {
+    "commit": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
+    "date": "2026-09-21",
+    "environment": "isolated synthetic Flask; Classic physically absent",
+    "source_manifest_sha256": "8afa58896e66419724265b748e5f917a7893ee5c1ed8166609420eaa9692f509",
+    "report": "/home/eric/hybrid-current-controls-20260921.json",
+    "report_sha256": "6bd756f13a3a34a7e139a6372e0372b777ba0daff1ccb2764c162fa43ccf912b",
+    "get_entries": 99,
+    "contexts": 505,
+    "rendered_contexts": 376,
+    "blocked_contexts": 129,
+    "render_defects": 0,
+    "searched_placeholder_signals": 0,
+    "control_occurrences": 43978,
+    "controls_certified_by_discovery": 0,
+    "limitations": [
+      "Includes repeated controls across roles, camera scopes, aliases and shared navigation; count is not unique features or percentage",
+      "Static HTML only; JavaScript-generated controls require the separate browser evidence",
+      "Rendering and absence of selected placeholder phrases do not prove functional completion"
+    ],
+    "identity_index": {
+      "path": "/home/eric/hybrid-current-control-index-20260921.json",
+      "sha256": "74408981c430ee52d88f18ff7e099ba3796c73208c600e690b20fbf96376574c",
+      "identities": 7351,
+      "references": 43978,
+      "rule": "Resolved page path plus exact collector control ID suffix; every source page/context/control index is retained. No semantic merging.",
+      "limitation": "Static identities are not unique product features. Existing functional evidence is not automatically assigned to each identity."
+    }
+  },
+  "previous_control_discovery": {
     "commit": "f6975d5f5501b00aa3407dd5da7442b73f793952",
     "date": "2026-09-21",
     "environment": "isolated synthetic Flask; Classic physically absent",
