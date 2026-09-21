@@ -2525,6 +2525,12 @@
           "record": "controls[4]",
           "control": "Inspect submitted task / Open Mini timelapse / camera 2",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-satellite-recheck-20260921.json",
+          "record": "controls[0]",
+          "control": "Satellite update result panel",
+          "recorded_status": "superato"
         }
       ]
     },

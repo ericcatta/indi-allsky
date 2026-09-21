@@ -101,7 +101,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/system/network` | 0 | Da associare o collaudare |
 | `/modern-admin/system/support` | 0 | Da associare o collaudare |
 | `/modern-admin/tasks` | 16 | [hybrid-download-delivery-post-classic-20260921](../testing/evidence/hybrid-download-delivery-post-classic-20260921.json), [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
-| `/modern-admin/tasks/<int:task_id>` | 3 | [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json) |
+| `/modern-admin/tasks/<int:task_id>` | 4 | [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-satellite-recheck-20260921](../testing/evidence/hybrid-satellite-recheck-20260921.json) |
 | `/modern-admin/tools/camera-simulator` | 7 | [hybrid-simulator-2026-09-06](../testing/evidence/hybrid-simulator-2026-09-06.json) |
 | `/modern-admin/tools/focus` | 0 | Da associare o collaudare |
 | `/modern-admin/tools/focus/preview` | 0 | Da associare o collaudare |

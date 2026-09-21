@@ -29,6 +29,7 @@ Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not co
 | Real mini timelapses | Tasks 12718/12719 succeeded for cameras 1/2. Each output has 9 frames at 2 fps, verified with ffprobe and complete browser playback | [Live generation](testing/evidence/hybrid-mini-generation-post-classic-20260921.json) |
 | Loop | Both cameras, individual filters, history, speed selection, native forward/reverse playback and return to forward playback | [Loop acceptance](testing/evidence/hybrid-loop-post-classic-20260921.json) |
 | RAW Loop with absent data | Correct empty state on both cameras and navigation back to processed Loop; the live RAW table is empty | [Loop acceptance](testing/evidence/hybrid-loop-post-classic-20260921.json) |
+| Satellite provider | Real requests validated 156 visual, 10,695 Starlink and 20 station entries; production catalog unchanged; real task outcomes visible in Hybrid. Historical 403 not reproduced | [Provider recheck](testing/evidence/hybrid-satellite-recheck-20260921.json) |
 | Browser downloads | Video and empty CSV clicks returned, but no matching file was found in Mac Downloads; delivery remains unverified | [Open download checks](testing/evidence/hybrid-download-delivery-post-classic-20260921.json) |
 
 Earlier evidence remains useful for its stated revision, role, camera and environment.
@@ -59,7 +60,6 @@ Absence of selected placeholder phrases is not proof that every function is impl
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.
 - Complete live effects beyond the two short mini timelapses, including dedicated-data cleanup/deletion and test-destination uploads. Previous automatic and isolated tests remain separately labeled.
 - Identify devices and arrange recovery/physical presence before interrupting networking, disks or GPIO. Current user clarification is pending. Do not claim unavailable hardware as tested.
-- Recheck unresolved external-provider failures, including the previously reported Starlink catalog HTTP 403, when the integration is available. Historical failures are not resolved merely because the local regression passes.
 - Complete the required repository/dependency review and operational cleanup. Retain useful shared backend, public contracts, user data, migrations and supported functions.
 - Cold power-loss recovery has not been directly tested. The earlier warm reboot/startup evidence is in [reboot acceptance](testing/evidence/hybrid-reboot-autostart-20260914.json).
 
