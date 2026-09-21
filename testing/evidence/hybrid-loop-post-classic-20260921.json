@@ -1,0 +1,116 @@
+{
+  "date": "2026-09-21",
+  "installed_commit": "f6975d5f5501b00aa3407dd5da7442b73f793952",
+  "environment": "Native production browser, Classic physically absent",
+  "controls": [
+    {
+      "route": "/modern-admin/loop",
+      "control": "All Cameras / IMX708 Wide / ASI678MC",
+      "status": "superato",
+      "observed": "All Cameras displayed two decoded images (4608x2592 and3840x2160). IMX708 selected only camera-1; ASI selected only camera-2. Returning All Cameras restored both cards.",
+      "role": "administrator",
+      "camera_ids": [
+        1,
+        2
+      ],
+      "profile_ids": [
+        "imx708-wide",
+        "asi678mc"
+      ]
+    },
+    {
+      "route": "/modern-admin/loop",
+      "control": "HISTORY_SELECT",
+      "status": "superato",
+      "observed": "Changed15 Minutes to30 Minutes; DOM selected1800; old frames cleared during loading, then both cameras decoded older18:53 frames.",
+      "role": "administrator",
+      "camera_ids": [
+        1,
+        2
+      ],
+      "profile_ids": [
+        "imx708-wide",
+        "asi678mc"
+      ]
+    },
+    {
+      "route": "/modern-admin/loop",
+      "control": "FRAMEDELAY_SELECT",
+      "status": "superato",
+      "observed": "Selected5 FPS (value200) and playback continued. Exact200ms post-load scheduling is verified by the real-script JavaScript regression, not wall-clock native FPS measurement.",
+      "role": "administrator",
+      "camera_ids": [
+        1,
+        2
+      ],
+      "profile_ids": [
+        "imx708-wide",
+        "asi678mc"
+      ]
+    },
+    {
+      "route": "/modern-admin/loop",
+      "control": "ROCK_CHECKBOX",
+      "status": "bloccato",
+      "observed": "Checkbox accepted native input; full live reversal sequence was not observed. Existing real-script regression passes oldest-middle-newest-middle-oldest without duplicate endpoints.",
+      "reason": "Native endpoint reversal remains unobserved; automated behavior is verified.",
+      "role": "administrator",
+      "camera_ids": [
+        1,
+        2
+      ],
+      "profile_ids": [
+        "imx708-wide",
+        "asi678mc"
+      ]
+    },
+    {
+      "route": "/modern-admin/loop",
+      "control": "RAW image loop",
+      "status": "superato",
+      "observed": "Opened RAW Loop with All Cameras retained.",
+      "role": "administrator",
+      "camera_ids": [
+        1,
+        2
+      ],
+      "profile_ids": [
+        "imx708-wide",
+        "asi678mc"
+      ]
+    },
+    {
+      "route": "/modern-admin/media/raw-loop",
+      "control": "Empty state / Processed image loop",
+      "status": "superato",
+      "observed": "Both cards displayed No frames in this time range, images hidden with no src. Read-only database query confirmed no rawimage rows. Processed image loop returned to Loop.",
+      "role": "administrator",
+      "camera_ids": [
+        1,
+        2
+      ],
+      "profile_ids": [
+        "imx708-wide",
+        "asi678mc"
+      ]
+    }
+  ],
+  "automatic_evidence": {
+    "case": "testing/hybrid_loop_browser_test.js",
+    "report_sha256": "e65ec7b43a32e98c1b25d3cb1f70b76d0a8dfbb8ba723883807bd1d8ec5db5c1",
+    "status": "passed",
+    "covers": [
+      "history requests",
+      "post-load frame delay",
+      "bounce ordering",
+      "stale responses",
+      "camera isolation",
+      "load errors and recovery"
+    ]
+  },
+  "limits": [
+    "No live RAW playback with existing data because RAW table is empty",
+    "Native bounce reversal remains open",
+    "No capture or saved configuration changes"
+  ]
+}

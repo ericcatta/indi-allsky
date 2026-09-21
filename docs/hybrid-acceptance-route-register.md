@@ -32,7 +32,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/fits/<int:fits_id>` | 4 | [hybrid-fits-dimensions-live-20260914](../testing/evidence/hybrid-fits-dimensions-live-20260914.json), [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/highlights` | 0 | Da associare o collaudare |
 | `/modern-admin/library` | 32 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-library-live-20260914](../testing/evidence/hybrid-library-live-20260914.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
-| `/modern-admin/loop` | 0 | Da associare o collaudare |
+| `/modern-admin/loop` | 5 | [hybrid-loop-post-classic-20260921](../testing/evidence/hybrid-loop-post-classic-20260921.json) |
 | `/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download` | 0 | Da associare o collaudare |
 | `/modern-admin/media/archive` | 15 | [hybrid-archive-2026-09-06](../testing/evidence/hybrid-archive-2026-09-06.json) |
 | `/modern-admin/media/fits` | 6 | [hybrid-fits-dimensions-live-20260914](../testing/evidence/hybrid-fits-dimensions-live-20260914.json), [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
@@ -46,7 +46,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/media/panorama-loop` | 13 | [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json) |
 | `/modern-admin/media/public-endpoints` | 0 | Da associare o collaudare |
 | `/modern-admin/media/raw` | 3 | [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
-| `/modern-admin/media/raw-loop` | 0 | Da associare o collaudare |
+| `/modern-admin/media/raw-loop` | 1 | [hybrid-loop-post-classic-20260921](../testing/evidence/hybrid-loop-post-classic-20260921.json) |
 | `/modern-admin/media/startrail-videos` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
 | `/modern-admin/media/startrails` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
 | `/modern-admin/media/timelapses` | 0 | Da associare o collaudare |
