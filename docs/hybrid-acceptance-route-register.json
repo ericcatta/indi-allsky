@@ -2355,6 +2355,30 @@
           "record": "controls[32]",
           "control": "Keogram details and Back to results",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-day-output-playback-20260921.json",
+          "record": "controls[1]",
+          "control": "Play complete video 31 for camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-day-output-playback-20260921.json",
+          "record": "controls[3]",
+          "control": "Play complete panorama-video 31 for camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-day-output-playback-20260921.json",
+          "record": "controls[5]",
+          "control": "Play complete video 32 for camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-day-output-playback-20260921.json",
+          "record": "controls[7]",
+          "control": "Play complete panorama-video 32 for camera 2",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -3001,6 +3025,30 @@
           "source": "testing/evidence/hybrid-satellite-recheck-20260921.json",
           "record": "controls[0]",
           "control": "Satellite update result panel",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-day-output-playback-20260921.json",
+          "record": "controls[0]",
+          "control": "Task 12724: open recorded output",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-day-output-playback-20260921.json",
+          "record": "controls[2]",
+          "control": "Task 12725: open recorded output",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-day-output-playback-20260921.json",
+          "record": "controls[4]",
+          "control": "Task 12728: open recorded output",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-day-output-playback-20260921.json",
+          "record": "controls[6]",
+          "control": "Task 12729: open recorded output",
           "recorded_status": "superato"
         }
       ]

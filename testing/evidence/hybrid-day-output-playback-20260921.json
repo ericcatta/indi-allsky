@@ -1,0 +1,210 @@
+{
+  "date": "2026-09-21",
+  "installed_commit": "e19acee9ae629d43ea5b70d123126d458a311d80",
+  "environment": "Native production browser and read-only Raspberry DB/filesystem checks; Classic absent.",
+  "trigger": "These tasks were created automatically by the capture runtime at the day/night transition, after Classic removal. This verification submitted no generation, configuration, upload or deletion commands.",
+  "probe_report": "/home/eric/hybrid-day-output-probe-20260921.json",
+  "outputs": [
+    {
+      "task_id": 12724,
+      "task_state": "SUCCESS",
+      "camera_id": 1,
+      "kind": "video",
+      "output_id": 31,
+      "capture_day": "2026-09-21",
+      "night": false,
+      "file": "ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-timelapse_ccd1_20260921_day_1790013701.mp4",
+      "file_bytes": 78999074,
+      "sha256": "6dbf5de69983c3a5868780bdbd8f89ee8eebeb1908ef4bbc85318212fae823bb",
+      "probe": {
+        "codec": "h264",
+        "fps": "25/1",
+        "frames": 3165,
+        "duration": 126.6,
+        "width": 4608,
+        "height": 2592
+      },
+      "browser": {
+        "currentSrc": "https://allsky-pi.local/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-timelapse_ccd1_20260921_day_1790013701.mp4",
+        "currentTime": 126.6,
+        "duration": 126.6,
+        "ended": true,
+        "paused": true,
+        "readyState": 4,
+        "media_error": null,
+        "videoWidth": 4608,
+        "videoHeight": 2592
+      }
+    },
+    {
+      "task_id": 12725,
+      "task_state": "SUCCESS",
+      "camera_id": 1,
+      "kind": "panorama-video",
+      "output_id": 31,
+      "capture_day": "2026-09-21",
+      "night": false,
+      "file": "ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-panorama_timelapse_ccd1_20260921_day_1790014522.mp4",
+      "file_bytes": 39300870,
+      "sha256": "f4c763cd36e2b84d096c308a79649d0ad904a776a5d5cf2e2cb9023e874c6b85",
+      "probe": {
+        "codec": "h264",
+        "fps": "25/1",
+        "frames": 1581,
+        "duration": 63.24,
+        "width": 4712,
+        "height": 750
+      },
+      "browser": {
+        "currentSrc": "https://allsky-pi.local/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-panorama_timelapse_ccd1_20260921_day_1790014522.mp4",
+        "currentTime": 63.24,
+        "duration": 63.24,
+        "ended": true,
+        "paused": true,
+        "readyState": 4,
+        "media_error": null,
+        "videoWidth": 4712,
+        "videoHeight": 750
+      }
+    },
+    {
+      "task_id": 12728,
+      "task_state": "SUCCESS",
+      "camera_id": 2,
+      "kind": "video",
+      "output_id": 32,
+      "capture_day": "2026-09-21",
+      "night": false,
+      "file": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-timelapse_ccd2_20260921_day_1790014941.mp4",
+      "file_bytes": 78850085,
+      "sha256": "fd31a8cfae3863a1d460357fc1d84f487be0a3721d954ae37fb073d28fa9762b",
+      "probe": {
+        "codec": "h264",
+        "fps": "25/1",
+        "frames": 3165,
+        "duration": 126.6,
+        "width": 3840,
+        "height": 2160
+      },
+      "browser": {
+        "currentSrc": "https://allsky-pi.local/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-timelapse_ccd2_20260921_day_1790014941.mp4",
+        "currentTime": 126.6,
+        "duration": 126.6,
+        "ended": true,
+        "paused": true,
+        "readyState": 4,
+        "media_error": null,
+        "videoWidth": 3840,
+        "videoHeight": 2160
+      }
+    },
+    {
+      "task_id": 12729,
+      "task_state": "SUCCESS",
+      "camera_id": 2,
+      "kind": "panorama-video",
+      "output_id": 32,
+      "capture_day": "2026-09-21",
+      "night": false,
+      "file": "ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-panorama_timelapse_ccd2_20260921_day_1790015554.mp4",
+      "file_bytes": 39379658,
+      "sha256": "c98fb43ea4f34a56da701835b7457194fe32c88bff9c99472c47fa2a304f9ee3",
+      "probe": {
+        "codec": "h264",
+        "fps": "25/1",
+        "frames": 1581,
+        "duration": 63.24,
+        "width": 4712,
+        "height": 750
+      },
+      "browser": {
+        "currentSrc": "https://allsky-pi.local/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-panorama_timelapse_ccd2_20260921_day_1790015554.mp4",
+        "currentTime": 63.24,
+        "duration": 63.24,
+        "ended": true,
+        "paused": true,
+        "readyState": 4,
+        "media_error": null,
+        "videoWidth": 4712,
+        "videoHeight": 750
+      }
+    }
+  ],
+  "controls": [
+    {
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "control": "Task 12724: open recorded output",
+      "role": "administrator",
+      "camera_id": 1,
+      "status": "superato",
+      "request": "GET /indi-allsky/modern-admin/output?kind=video&id=31&camera_id=1&profile_id=",
+      "observed": "Task detail displayed SUCCESS and a single recorded-output link. Native click opened output 31, kind video, camera 1, with matching filename and saved frame count."
+    },
+    {
+      "route": "/modern-admin/output",
+      "control": "Play complete video 31 for camera 1",
+      "role": "administrator",
+      "camera_id": 1,
+      "status": "superato",
+      "observed": "Native Space key started video playback. Intermediate progress and natural completion were observed, with no seeks. Final currentTime=duration=126.6, ended=true, readyState=4, no media error, dimensions 4608x2592. currentSrc matches the independently probed original file."
+    },
+    {
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "control": "Task 12725: open recorded output",
+      "role": "administrator",
+      "camera_id": 1,
+      "status": "superato",
+      "request": "GET /indi-allsky/modern-admin/output?kind=panorama-video&id=31&camera_id=1&profile_id=",
+      "observed": "Task detail displayed SUCCESS and a single recorded-output link. Native click opened output 31, kind panorama-video, camera 1, with matching filename and saved frame count."
+    },
+    {
+      "route": "/modern-admin/output",
+      "control": "Play complete panorama-video 31 for camera 1",
+      "role": "administrator",
+      "camera_id": 1,
+      "status": "superato",
+      "observed": "Native Space key started video playback. Intermediate progress and natural completion were observed, with no seeks. Final currentTime=duration=63.24, ended=true, readyState=4, no media error, dimensions 4712x750. currentSrc matches the independently probed original file."
+    },
+    {
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "control": "Task 12728: open recorded output",
+      "role": "administrator",
+      "camera_id": 2,
+      "status": "superato",
+      "request": "GET /indi-allsky/modern-admin/output?kind=video&id=32&camera_id=2&profile_id=",
+      "observed": "Task detail displayed SUCCESS and a single recorded-output link. Native click opened output 32, kind video, camera 2, with matching filename and saved frame count."
+    },
+    {
+      "route": "/modern-admin/output",
+      "control": "Play complete video 32 for camera 2",
+      "role": "administrator",
+      "camera_id": 2,
+      "status": "superato",
+      "observed": "Native Space key started video playback. Intermediate progress and natural completion were observed, with no seeks. Final currentTime=duration=126.6, ended=true, readyState=4, no media error, dimensions 3840x2160. currentSrc matches the independently probed original file."
+    },
+    {
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "control": "Task 12729: open recorded output",
+      "role": "administrator",
+      "camera_id": 2,
+      "status": "superato",
+      "request": "GET /indi-allsky/modern-admin/output?kind=panorama-video&id=32&camera_id=2&profile_id=",
+      "observed": "Task detail displayed SUCCESS and a single recorded-output link. Native click opened output 32, kind panorama-video, camera 2, with matching filename and saved frame count."
+    },
+    {
+      "route": "/modern-admin/output",
+      "control": "Play complete panorama-video 32 for camera 2",
+      "role": "administrator",
+      "camera_id": 2,
+      "status": "superato",
+      "observed": "Native Space key started video playback. Intermediate progress and natural completion were observed, with no seeks. Final currentTime=duration=63.24, ended=true, readyState=4, no media error, dimensions 4712x750. currentSrc matches the independently probed original file."
+    }
+  ],
+  "limits": [
+    "No 24-hour observation performed.",
+    "This proves task-to-file-to-browser playback for these four day outputs, not every generation mode or native queue-submission control.",
+    "File SHA-256 and ffprobe frame counts were checked; playback was observed from start to natural end, not a frame-by-frame scientific image-quality analysis.",
+    "Streaming the original in the browser does not resolve the separate download-to-Mac delivery blocker.",
+    "No runtime source changed and no regression rerun was needed for this evidence-only update."
+  ]
+}
