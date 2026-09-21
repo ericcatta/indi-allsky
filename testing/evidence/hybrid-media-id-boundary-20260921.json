@@ -16,7 +16,32 @@
   },
   "regression_report": "/home/eric/hybrid-media-id-boundary-regression-20260921/resolved-results.json",
   "regression_status": "passed after test-only guardrail correction",
-  "deployment": "not deployed",
+  "deployment": {
+    "previous": "cfe2c40d7017a4aab7827f0e2d373766a9bd3bca",
+    "candidate": "7ddd7378d73353d8a58082c42f2d848dc3319375",
+    "backup": "/home/eric/hybrid-backups/hybrid-media-id-boundary-20260921-225523",
+    "integrity": "ok",
+    "configuration_revision": 117,
+    "backup_seconds": 53.73,
+    "services_before": {
+      "gunicorn-indi-allsky.service": "MainPID=921906\nNRestarts=0\nActiveState=active"
+    },
+    "services_after": {
+      "gunicorn-indi-allsky.service": "MainPID=952707\nNRestarts=0\nActiveState=active"
+    },
+    "capture_restarted": false,
+    "configuration_unchanged": true,
+    "status": "installed-bounded-acceptance-passed",
+    "native_acceptance": {
+      "fits_oversized_id": 400,
+      "hybrid_download_oversized_id": 404,
+      "public_original_oversized_id": 404,
+      "now_frames_decoded": {
+        "1": "2026-09-21 22:56:47; 4608x2592",
+        "2": "2026-09-21 22:56:58; 3840x2160"
+      }
+    }
+  },
   "rollback_helper": "/home/eric/hybrid-media-id-boundary-deploy.py",
   "report_sha256": "84c86ac1cfdcd55b9c3c5acc023c093d5911652f2ef301700b61582c2faa1be7",
   "manifest_sha256": "b0509a1bcf4668988acde55116d1861b3258783e59b06b4e8435bdc4cf6e39b0",
@@ -24,5 +49,5 @@
   "manifest_files": 822,
   "regression_resolution": "Initial full run: 164 passes and one class-fingerprint guardrail failure. Only that test was amended to check the exact added validation and retain the original fingerprint for all remaining code. Successful rerun of the affected entrypoint; other 164 results reused with unchanged implementation hashes. Initial results.json retained.",
   "javascript": "34 previous passes reused; no JS/template/CSS changes",
-  "scope": "Out-of-range IDs: 400 for FITS query parameter, 404 for media/camera URL components; existing downloads, FITS JPEG generation and role/camera policy tested in isolated fixtures. Production verification pending."
+  "scope": "Out-of-range IDs: 400 for FITS query parameter, 404 for media/camera URL components; existing downloads, FITS JPEG generation and role/camera policy tested in isolated fixtures. Production browser returned the expected errors on all three corrected handlers; both Now frames decoded after web-only deploy."
 }

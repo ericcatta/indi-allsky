@@ -5,19 +5,20 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `cfe2c40d7017a4aab7827f0e2d373766a9bd3bca`.
+The Raspberry runs `7ddd7378d73353d8a58082c42f2d848dc3319375`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
 The 822-file installed source/asset manifest matches the tested snapshot:
-`7f22bdeb38c17ab09e78b49feee32d7bc02732ff3c43d6bf88d7fbaca1fc8559`.
-All 165 Python entrypoints passed with unchanged source. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Details: [cold-start asset recovery](testing/evidence/hybrid-moon-asset-recovery-20260921.json).
+`b0509a1bcf4668988acde55116d1861b3258783e59b06b4e8435bdc4cf6e39b0`.
+All 165 Python entrypoints passed: 164 in the full run and one after a test-only
+guardrail correction, with all implementation hashes unchanged. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Current regression: [identifier validation evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
 This automated result does not certify every native control or hardware effect.
 
 The deployment preserved configuration revision 117, Flask configuration and user files.
-Web and capture restarted (PIDs 921906 and 921907). The backup passed integrity checking in 45.46 seconds.
+Only web restarted (PID 952707); capture was preserved. The latest backup passed integrity checking in 53.73 seconds.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
 ## Cold-start defect corrected and deployed
@@ -34,14 +35,15 @@ contains no image-worker exception after restart. See [recovery evidence](testin
 No Classic frontend was restored. This closes the specific cold-start defect,
 not the remaining whole-product acceptance gates below.
 
-## Tested media identifier correction pending deployment
+## Media identifier correction deployed
 
 Oversized media identifiers could reach SQLite and raise OverflowError in FITS
 preview, Hybrid downloads and public originals. Bounds are now validated before
 querying. The original FITS class fingerprint is retained around the exact added
 guard. All 165 Python entrypoints passed after a test-only guardrail correction;
-the unchanged JavaScript results remain applicable. This change is not installed
-yet. See [identifier validation evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
+the unchanged JavaScript results remain applicable. Native production checks now
+return controlled 400/404 errors on all three corrected routes. Both Now images
+decoded (22:56:47 IMX708 and 22:56:58 ASI678MC). See [identifier validation evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
 
 ## Post-removal evidence
 

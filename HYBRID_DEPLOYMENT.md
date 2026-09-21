@@ -2,18 +2,20 @@
 
 ## Installed version
 
-Production runs `cfe2c40d7017a4aab7827f0e2d373766a9bd3bca` (21 September 2026).
-Classic frontend is removed; Hybrid is the only UI. All 165 Python entrypoints
-passed with unchanged sources. The 34 prior JavaScript passes apply to unchanged
-JS/templates/CSS. The 822-file manifest includes image/font assets and matches
-the installed snapshot.
+Production runs `7ddd7378d73353d8a58082c42f2d848dc3319375` (21 September 2026).
+Classic frontend is removed; Hybrid is the only UI. The media identifier fix rejects
+values outside the database integer range. All 165 Python entrypoints passed:
+164 in the full run and the remaining test after checking the added validation
+separately while retaining the original FITS class fingerprint. Implementation
+hashes stayed unchanged during that test-only correction. Prior 34 JavaScript
+passes remain applicable; the 822-file manifest matches the installed snapshot.
 
-Backup integrity passed in 45.46 seconds. Configuration 117 and Flask settings
-were preserved; web and capture restarted (PIDs 921906 and 921907).
-The previously missing moon bitmap now lives in `indi_allsky/overlay/assets/`.
-The temporary original-path copy was removed. The installed four-phase cold
-rendering test passes, and both cameras' new frames after the 22:09:58 restart
-decoded in the native browser. See [recovery evidence](testing/evidence/hybrid-moon-asset-recovery-20260921.json).
+Backup integrity passed in 53.73 seconds. Configuration 117 and Flask settings
+were preserved. Only web restarted (PID 952707); capture was not interrupted.
+Native checks returned controlled errors for oversized IDs on all three corrected
+handlers. Both Now images decoded at 22:56:47 and 22:56:58.
+See [release evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
+The retained backend moon bitmap remains in `indi_allsky/overlay/assets/`.
 
 Both camera/profile round trips through the Settings index and Exposure/Gain
 passed in the native production browser. See [Settings navigation evidence](testing/evidence/hybrid-settings-navigation-context-20260921.json).
@@ -28,7 +30,7 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed backend asset release
+## Roll back the installed media identifier release
 
 Use an authenticated SSH terminal on the Raspberry as `eric`, during a maintenance
 window. Check the installed revision and preserve any tracked edits first:
@@ -40,21 +42,20 @@ git -C /home/eric/indi-allsky rev-parse HEAD
 
 The protected helper requires exactly the installed revision above and refuses
 to discard tracked edits. Its backup is:
-`/home/eric/hybrid-backups/hybrid-moon-asset-20260921-220855`.
+`/home/eric/hybrid-backups/hybrid-media-id-boundary-20260921-225523`.
 Run on the Raspberry:
 
 ```sh
-release_backup=/home/eric/hybrid-backups/hybrid-moon-asset-20260921-220855
+release_backup=/home/eric/hybrid-backups/hybrid-media-id-boundary-20260921-225523
 maintenance_deadline="$(date --date='+15 minutes' --iso-8601=seconds)"
 python3 "$release_backup/deploy.py" --rollback "$release_backup" \
   --maintenance-until "$maintenance_deadline"
 ```
 
-This code-only rollback returns to `9b984cb5` and restarts web and capture,
-including their socket/timer activation state, without restoring the database or
-configuration. The helper restores the backed-up moon bitmap at its original
-path before restarting, because that revision still requires it. The generation
-publication guard remains installed; Classic frontend stays removed.
+This code-only rollback returns to `cfe2c40d` and restarts only web,
+including its previous socket activation state. It restores neither the database
+nor configuration and does not stop capture. Classic remains removed and the
+retained backend moon bitmap remains available.
 The helper is prepared; this live release has not been deliberately reverted.
 Read the backup's `deployment.json`, confirm the revision and services, then
 verify HTTPS Now and new nonempty files from both cameras. Process readiness
