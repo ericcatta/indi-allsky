@@ -64,7 +64,7 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/observatory/sqm` | 1 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
 | `/modern-admin/observatory/virtualsky` | 2 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
 | `/modern-admin/operations/export` | 0 | Da associare o collaudare |
-| `/modern-admin/output` | 1 | [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json) |
+| `/modern-admin/output` | 3 | [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json) |
 | `/modern-admin/safe-action/dry-run` | 0 | Da associare o collaudare |
 | `/modern-admin/settings` | 1 | [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json) |
 | `/modern-admin/settings/acquisition-save` | 0 | Da associare o collaudare |
@@ -99,13 +99,13 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/system/network` | 0 | Da associare o collaudare |
 | `/modern-admin/system/support` | 0 | Da associare o collaudare |
 | `/modern-admin/tasks` | 15 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
-| `/modern-admin/tasks/<int:task_id>` | 1 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json) |
+| `/modern-admin/tasks/<int:task_id>` | 3 | [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json) |
 | `/modern-admin/tools/camera-simulator` | 7 | [hybrid-simulator-2026-09-06](../testing/evidence/hybrid-simulator-2026-09-06.json) |
 | `/modern-admin/tools/focus` | 0 | Da associare o collaudare |
 | `/modern-admin/tools/focus/preview` | 0 | Da associare o collaudare |
 | `/modern-admin/tools/generate` | 22 | [hybrid-end-of-night-pipeline-2026-09-08](../testing/evidence/hybrid-end-of-night-pipeline-2026-09-08.json), [hybrid-generation-2026-09-06](../testing/evidence/hybrid-generation-2026-09-06.json), [hybrid-keogram-encoding-2026-09-08](../testing/evidence/hybrid-keogram-encoding-2026-09-08.json), [hybrid-real-encoding-2026-09-08](../testing/evidence/hybrid-real-encoding-2026-09-08.json), [hybrid-startrail-empty-2026-09-08](../testing/evidence/hybrid-startrail-empty-2026-09-08.json) |
 | `/modern-admin/tools/image-circle-helper` | 13 | [hybrid-geometry-2026-09-06](../testing/evidence/hybrid-geometry-2026-09-06.json) |
-| `/modern-admin/tools/mini-generate` | 14 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-real-encoding-2026-09-08](../testing/evidence/hybrid-real-encoding-2026-09-08.json) |
+| `/modern-admin/tools/mini-generate` | 16 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-real-encoding-2026-09-08](../testing/evidence/hybrid-real-encoding-2026-09-08.json) |
 | `/modern-admin/tools/mini-preview` | 0 | Da associare o collaudare |
 | `/modern-admin/tools/process-fits` | 10 | [hybrid-fits-processing-2026-09-06](../testing/evidence/hybrid-fits-processing-2026-09-06.json) |
 | `/modern-admin/updates` | 0 | Da associare o collaudare |

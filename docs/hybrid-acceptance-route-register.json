@@ -1679,6 +1679,18 @@
           "control": "Output details / Back to results",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/output"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-post-classic-20260921.json",
+          "record": "controls[2]",
+          "control": "Video loading / keyboard playback / playback completion / camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-post-classic-20260921.json",
+          "record": "controls[5]",
+          "control": "Video loading / keyboard playback / playback completion / camera 2",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -2259,6 +2271,18 @@
           "record": "controls[12]",
           "control": "Back to Task Queue",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-post-classic-20260921.json",
+          "record": "controls[1]",
+          "control": "Inspect submitted task / Open Mini timelapse / camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-post-classic-20260921.json",
+          "record": "controls[4]",
+          "control": "Inspect submitted task / Open Mini timelapse / camera 2",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -2662,6 +2686,18 @@
           "control": "Note / confirmation checkbox / Queue",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/tools/mini-generate"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-post-classic-20260921.json",
+          "record": "controls[0]",
+          "control": "Time before / Time after / Frame rate / Description / Refresh preview / Confirm / Queue mini timelapse / camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-mini-generation-post-classic-20260921.json",
+          "record": "controls[3]",
+          "control": "Time before / Time after / Frame rate / Description / Refresh preview / Confirm / Queue mini timelapse / camera 2",
+          "recorded_status": "superato"
         }
       ]
     },

@@ -1,5 +1,15 @@
 # Hybrid acceptance status
 
+## Post-removal generation on both cameras — 2026-09-21
+
+Native production mini-timelapse runs completed as tasks 12718/12719, outputs 3/4,
+for IMX708/ASI678MC respectively. Each output has 9 frames at 2 fps (4.5 seconds),
+verified by ffprobe and browser playback to completion. Preview, confirmation,
+submission, task/result navigation and camera association passed. Uploads were
+disabled by existing configuration. Evidence:
+`testing/evidence/hybrid-mini-generation-post-classic-20260921.json`.
+These short daytime runs do not certify full-night generation or uploads.
+
 ## Classic removed from main — 2026-09-21
 
 Commit `f6975d5f` removes the Classic frontend and includes the latest Settings

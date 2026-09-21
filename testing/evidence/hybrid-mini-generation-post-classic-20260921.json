@@ -1,0 +1,99 @@
+{
+  "date": "2026-09-21",
+  "installed_commit": "f6975d5f5501b00aa3407dd5da7442b73f793952",
+  "environment": "Raspberry production after physical Classic removal",
+  "controls": [
+    {
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "status": "superato",
+      "image_id": 114743,
+      "task_id": 12718,
+      "output_id": 3,
+      "route": "/modern-admin/tools/mini-generate",
+      "control": "Time before / Time after / Frame rate / Description / Refresh preview / Confirm / Queue mini timelapse",
+      "request": "POST /indi-allsky/ajax/minigenerate",
+      "observed": "Selected60s before and60s after,2fps; preview9 frames; note retained; submission disabled controls while pending and returned Inspect submitted task."
+    },
+    {
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "status": "superato",
+      "image_id": 114743,
+      "task_id": 12718,
+      "output_id": 3,
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "control": "Inspect submitted task / Open Mini timelapse",
+      "observed": "Task SUCCESS; generateMiniVideo kwargs and output link retained the selected camera; correct selected source image and intervals."
+    },
+    {
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "status": "superato",
+      "image_id": 114743,
+      "task_id": 12718,
+      "output_id": 3,
+      "route": "/modern-admin/output",
+      "control": "Video loading / keyboard playback / playback completion",
+      "observed": "Video loaded readyState4; click then Space started playback; reached currentTime4.5 and ended=true without media error. ffprobe independently confirmed H.264,9frames,2fps,4.5s.",
+      "filename": "allsky-minitimelapse_ccd1_20260921_day_1790010347.mp4",
+      "width": 4608,
+      "height": 2592,
+      "size_bytes": 11629521
+    },
+    {
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "image_id": 114762,
+      "task_id": 12719,
+      "output_id": 4,
+      "route": "/modern-admin/tools/mini-generate",
+      "control": "Time before / Time after / Frame rate / Description / Refresh preview / Confirm / Queue mini timelapse",
+      "request": "POST /indi-allsky/ajax/minigenerate",
+      "observed": "Selected60s before and60s after,2fps; preview9 frames; note retained; submission disabled controls while pending and returned Inspect submitted task."
+    },
+    {
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "image_id": 114762,
+      "task_id": 12719,
+      "output_id": 4,
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "control": "Inspect submitted task / Open Mini timelapse",
+      "observed": "Task SUCCESS; generateMiniVideo kwargs and output link retained the selected camera; correct selected source image and intervals."
+    },
+    {
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "image_id": 114762,
+      "task_id": 12719,
+      "output_id": 4,
+      "route": "/modern-admin/output",
+      "control": "Video loading / keyboard playback / playback completion",
+      "observed": "Video loaded readyState4; click then Space started playback; reached currentTime4.5 and ended=true without media error. ffprobe independently confirmed H.264,9frames,2fps,4.5s.",
+      "filename": "allsky-minitimelapse_ccd2_20260921_day_1790010477.mp4",
+      "width": 3840,
+      "height": 2160,
+      "size_bytes": 14341369
+    }
+  ],
+  "upload_preflight": {
+    "filetransfer_mini_video": false,
+    "s3_enabled": false,
+    "youtube_enabled": false
+  },
+  "limits": [
+    "Two short daytime mini timelapses; not long-duration or full-night generation acceptance",
+    "Upload and destructive actions were not executed",
+    "Other page controls and unavailable hardware remain separate acceptance items"
+  ]
+}
