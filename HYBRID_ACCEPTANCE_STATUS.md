@@ -21,6 +21,16 @@ user files and capture PID 1566. Only web restarted (PID 862109); capture remain
 The database backup passed integrity checking in 30.7 seconds.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not commands from historical mission reports.
 
+## Tested correction awaiting deployment
+
+Generation publication now shares the storage cleanup lock, including automatic
+capture tasks, combined generation and mini-timelapse anchor validation.
+A reproducible missing-lock test fails on the installed runtime and passes on the candidate.
+All 164 Python entrypoints pass with unchanged candidate sources; the 34 existing
+JavaScript results are reused because JS, templates and CSS are unchanged.
+See [generation/storage guard evidence](testing/evidence/hybrid-generation-storage-guard-20260921.json).
+This candidate is not yet installed and requires a controlled capture/web restart.
+
 ## Post-removal evidence
 
 | Scope | Verified result | Evidence |

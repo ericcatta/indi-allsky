@@ -1991,6 +1991,7 @@ def test_task_enqueue_effect_adapter_materializes_plan_without_changing_payload(
         db_session=session,
         queue_enum={'VIDEO': 'video-enum'},
         state_enum={'MANUAL': 'manual-enum'},
+        generation_lock=lambda **kwargs: __import__('contextlib').nullcontext(),
     )
 
     result = adapter.enqueue_from_plan({

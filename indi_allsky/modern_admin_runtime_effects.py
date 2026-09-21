@@ -21,11 +21,12 @@ class ModernAdminTaskEnqueueEffectAdapter:
     Flask/Classic persistence adapter.
     """
 
-    def __init__(self, task_model, db_session, queue_enum, state_enum):
+    def __init__(self, task_model, db_session, queue_enum, state_enum, generation_lock=None):
         self.task_model = task_model
         self.db_session = db_session
         self.queue_enum = queue_enum
         self.state_enum = state_enum
+        self.generation_lock = generation_lock
 
 
     def enqueue_from_plan(self, plan_details):
@@ -48,8 +49,13 @@ class ModernAdminTaskEnqueueEffectAdapter:
             data=jobdata,
         )
 
-        self.db_session.add(task)
-        self.db_session.commit()
+        from .media_task_guard import GENERATION_ACTIONS
+        if jobdata.get('action') in GENERATION_ACTIONS:
+            from .media_task_guard import persist_generation_tasks
+            persist_generation_tasks(self.db_session, [task], lock_factory=self.generation_lock)
+        else:
+            self.db_session.add(task)
+            self.db_session.commit()
 
         return ModernAdminTaskEnqueueResult(
             task=task,

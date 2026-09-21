@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-21",
+  "status": "candidate-tested-not-deployed",
+  "production_runtime": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
+  "defect": "Generation publishers could commit a new task while pressure cleanup held its exclusive deletion lock, after the pending-generation check. Upload publication already used the lock; generation publication did not.",
+  "before": {
+    "environment": "Isolated temporary SQLite/files on Pi, production source imported without modification",
+    "log": "/tmp/hybrid-generation-race-before.log",
+    "result": "AssertionError: Generation publication bypassed the media lock"
+  },
+  "change": [
+    "Share the existing media lock when publishing generation tasks through the Hybrid adapter, combined generation request and all six automatic capture publication sites.",
+    "Preserve generation task ordering, payloads and commit boundaries.",
+    "Validate the mini-timelapse anchor inside the lock so a completed deletion cannot leave an orphan request."
+  ],
+  "targeted_verification": {
+    "environment": "/home/eric/hybrid-generation-guard-20260921; isolated DB/files; no live effects",
+    "test": "testing/hybrid_generation_task_guard_test.py",
+    "log": "/tmp/hybrid-generation-race-after.log",
+    "status": "superato",
+    "checks": [
+      "Four generation actions, separate SQLite sessions: cleanup waits for publication and then preserves the image/file.",
+      "Deletion wins before mini request: HTTP 404, no new task, other fixture files/rows preserved.",
+      "Modern Safe Actions unit entrypoint passed with injected lock for fake persistence."
+    ]
+  },
+  "full_regression": {
+    "status": "passed",
+    "report": "/home/eric/hybrid-generation-guard-regression-20260921/results.json",
+    "source_manifest_files": 777,
+    "source_manifest_sha256": "a60e9a444fb7bb85ea47a75ba3912037350df8aaf5d801efd6ead264dba53fb9",
+    "cases": 164,
+    "failed": 0,
+    "source_changed": false,
+    "sha256": "1e771d8ab50e9d223b08e4636b8bdc589c7a913af62bcde7f3a491b0cd27e649"
+  },
+  "javascript": {
+    "status": "previous-results-reused",
+    "tests": 34,
+    "report": "/tmp/hybrid-camera-detection-js-20260921.json",
+    "sha256": "9c546ec23fdd9f4923a941ccd82a85a1274c50e47aca8900f3e47d5529bc619d",
+    "reason": "All 34 results exit 0; no JS/templates/CSS changes since tested runtime 7d9e49f9."
+  },
+  "limitations": [
+    "Not deployed; installed capture/web remain unchanged.",
+    "Thread-coordinated separate DB sessions exercise real flock, SQLite and files; this is not a live production cleanup or full cross-process stress test."
+  ],
+  "reviewed_publication_paths": {
+    "automatic_capture": [
+      "_generateDayTimelapse (video and optional panorama)",
+      "_generateNightTimelapse (video and optional panorama)",
+      "_generateDayKeogram",
+      "_generateNightKeogram"
+    ],
+    "http": [
+      "Hybrid task effect adapter: generateVideo, generateMiniVideo, generateKeogramStarTrails, generatePanoramaVideo",
+      "Combined generation: keogram/startrails before video, optional panorama in same commit",
+      "Mini generation: validate anchor under shared lock"
+    ]
+  }
+}

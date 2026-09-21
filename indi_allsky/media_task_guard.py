@@ -1,4 +1,4 @@
-"""Serialize media-task publication with storage-pressure deletion.
+"""Serialize upload/generation task publication with storage-pressure deletion.
 
 The lock covers database publication only, never network transfer. Multiple
 producers may publish concurrently; deletion takes an exclusive lock per image.
@@ -7,6 +7,9 @@ from contextlib import contextmanager
 import fcntl
 import os
 from pathlib import Path
+
+GENERATION_ACTIONS = frozenset(('generateVideo', 'generateMiniVideo',
+                              'generateKeogramStarTrails', 'generatePanoramaVideo'))
 
 PROTECTED_MODELS = frozenset('IndiAllSkyDb' + family + 'Table' for family in
                             ('Image', 'FitsImage', 'RawImage', 'PanoramaImage', 'Thumbnail'))
@@ -55,3 +58,15 @@ def persist_upload_task(task):
             raise FileNotFoundError('Media file was removed before the upload could be queued.')
         db.session.add(task)
         db.session.commit()
+
+
+def persist_generation_tasks(session, tasks, *, lock_factory=None):
+    """Publish generation tasks atomically with respect to pressure cleanup.
+
+    Acquire before adding rows: autoflush must not publish them before the lock.
+    The existing task ordering and one-commit semantics are preserved.
+    """
+    with (lock_factory or media_task_lock)(exclusive=False):
+        for task in tasks:
+            session.add(task)
+        session.commit()

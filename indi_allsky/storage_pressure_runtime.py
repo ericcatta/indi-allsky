@@ -10,12 +10,10 @@ import os
 from pathlib import Path
 import shutil
 
-from .media_task_guard import media_task_lock
+from .media_task_guard import GENERATION_ACTIONS, media_task_lock
 from .storage_pressure import GIB, StoragePressureOptions, reclaim_old_images
 
 IMAGE_FAMILIES = ('Image', 'FitsImage', 'RawImage', 'PanoramaImage')
-GENERATION_ACTIONS = frozenset(('generateVideo', 'generateMiniVideo',
-                              'generateKeogramStarTrails', 'generatePanoramaVideo'))
 ACTION = 'storagePressureCleanup'
 
 

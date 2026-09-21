@@ -8,6 +8,7 @@ from . import db
 from .base_views import BaseView
 from .models import IndiAllSkyDbImageTable, IndiAllSkyDbTaskQueueTable, TaskQueueQueue, TaskQueueState
 from .source_media_views import local_source_allowed
+from ..media_task_guard import media_task_lock
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 
 
@@ -44,13 +45,16 @@ def queue_mini_generation():
         values = mini_parameters(request.get_json(silent=True))
     except ValueError as error:
         return jsonify({'failure-message': str(error)}), 400
-    mini_image(values)
     task = IndiAllSkyDbTaskQueueTable(queue=TaskQueueQueue.VIDEO, state=TaskQueueState.MANUAL,
         priority=100, data={'action': 'generateMiniVideo', 'kwargs': {
             key.lower(): values[key] for key in ('IMAGE_ID', 'CAMERA_ID', 'PRE_SECONDS', 'POST_SECONDS', 'FRAMERATE', 'NOTE')}})
     try:
-        db.session.add(task)
-        db.session.commit()
+        with media_task_lock(exclusive=False):
+            # Recheck the anchor under the lock: cleanup may have removed it
+            # while the request was being validated.
+            mini_image(values)
+            db.session.add(task)
+            db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()
         current_app.logger.exception('Unable to queue mini timelapse')

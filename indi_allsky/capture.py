@@ -1,4 +1,5 @@
 from .capture_cadence import exposure_budget
+from .media_task_guard import persist_generation_tasks
 import os
 import time
 import io
@@ -2874,8 +2875,7 @@ class CaptureWorker(Process):
             state=task_state,
             data=video_jobdata,
         )
-        db.session.add(video_task)
-        db.session.commit()
+        persist_generation_tasks(db.session, [video_task])
 
         self._queue_video_task(video_task, camera_id=camera.id)
 
@@ -2895,8 +2895,7 @@ class CaptureWorker(Process):
                 state=task_state,
                 data=panorama_video_jobdata,
             )
-            db.session.add(panorama_video_task)
-            db.session.commit()
+            persist_generation_tasks(db.session, [panorama_video_task])
 
             self._queue_video_task(panorama_video_task, camera_id=camera.id)
 
@@ -2928,8 +2927,7 @@ class CaptureWorker(Process):
             state=task_state,
             data=video_jobdata,
         )
-        db.session.add(video_task)
-        db.session.commit()
+        persist_generation_tasks(db.session, [video_task])
 
         self._queue_video_task(video_task, camera_id=camera.id)
 
@@ -2949,8 +2947,7 @@ class CaptureWorker(Process):
                 state=task_state,
                 data=panorama_video_jobdata,
             )
-            db.session.add(panorama_video_task)
-            db.session.commit()
+            persist_generation_tasks(db.session, [panorama_video_task])
 
             self._queue_video_task(panorama_video_task, camera_id=camera.id)
 
@@ -2982,8 +2979,7 @@ class CaptureWorker(Process):
             state=task_state,
             data=jobdata,
         )
-        db.session.add(task)
-        db.session.commit()
+        persist_generation_tasks(db.session, [task])
 
         self._queue_video_task(task, camera_id=camera.id)
 
@@ -3019,8 +3015,7 @@ class CaptureWorker(Process):
             state=task_state,
             data=jobdata,
         )
-        db.session.add(task)
-        db.session.commit()
+        persist_generation_tasks(db.session, [task])
 
         self._queue_video_task(task, camera_id=camera.id)
 

@@ -17,6 +17,7 @@ from .settings_form_view import HybridSettingsFormView
 from .camera_scope import CameraScopedTemplateMixin, SettingsCameraScopedTemplateMixin
 from flask.views import View
 from ..loop_statistics import loop_sqm_summaries
+from ..media_task_guard import persist_generation_tasks
 from ..modern_admin_media_cleanup import MediaCleanupIncomplete, flush_media_batches
 from ..modern_admin_sensor_panel import build_sensor_rows
 from ..modern_admin_full_config import ModernAdminFullConfigParser
@@ -6008,8 +6009,7 @@ class AjaxTimelapseGeneratorView(BaseView):
             )
 
 
-            db.session.add(task_kst)  # keogram/st first
-            db.session.add(task_video)
+            generation_tasks = [task_kst, task_video]  # keogram/st first
 
 
             if self.indi_allsky_config.get('FISH2PANO', {}).get('ENABLE'):
@@ -6029,10 +6029,10 @@ class AjaxTimelapseGeneratorView(BaseView):
                     data=jobdata_panorama_video,
                 )
 
-                db.session.add(task_panorama_video)
+                generation_tasks.append(task_panorama_video)
 
 
-            db.session.commit()
+            persist_generation_tasks(db.session, generation_tasks)
 
             message = {
                 'success-message' : 'Job submitted',
