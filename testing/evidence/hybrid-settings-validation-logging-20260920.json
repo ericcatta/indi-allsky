@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-20",
+  "status": "automated regression passed; not deployed",
+  "defect": "Full Config validation diagnostics persisted non-PasswordField values, including credential-bearing driver JSON, and potentially reflected validator messages.",
+  "correction": "Persist field identifier, field type, validator class names and error count only. Keep authorized HTTP validation errors and save semantics unchanged.",
+  "focused_evidence": {
+    "test": "testing/hybrid_settings_validation_logging_test.py",
+    "before": "/home/eric/hybrid-settings-validation-logging-before.log",
+    "before_result": "failed: Submitted data leaked into validation logs",
+    "after": "/home/eric/hybrid-settings-validation-logging-after.log",
+    "after_result": "passed",
+    "scope": "Synthetic administrator POST with CSRF; invalid driver JSON returns 400 with existing validation text; config revision count unchanged; embedded secret and reflected unknown-field message absent from captured logs."
+  },
+  "source_manifest": {
+    "files": 837,
+    "canonical_sha256": "df27fccaca2cdd6f63f69865712ab635f78beb01471454d1825f9c9ec46e49a8"
+  },
+  "full_regression": {
+    "status": "passed",
+    "report": "/home/eric/hybrid-settings-logging-regression-20260920/results.json",
+    "python_entries": 162,
+    "source_changed": false,
+    "report_sha256": "49d14134f3d734b8e7d082b753c9a97768ff0e83078ea9ad8800c9d86001987f"
+  },
+  "limitations": [
+    "Synthetic tests only; no live credential was used",
+    "Production deployment pending",
+    "Does not certify every application logging path"
+  ],
+  "javascript_regression": {
+    "entries": 34,
+    "status": "passed on unchanged JavaScript sources in preceding usability mission",
+    "report": "/tmp/hybrid-settings-usability-js-20260920.json",
+    "report_sha256": "df2040ed6601fcd41afee00148132334d22fe9cb182950c90f1861c02525abf5"
+  }
+}

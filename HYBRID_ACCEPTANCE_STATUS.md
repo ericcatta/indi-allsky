@@ -24,6 +24,38 @@ This is not production acceptance. The user selected mandatory login on 2026-09-
 verified on main. The complete control/effect matrix, remaining cleanup and
 post-removal deployment checks remain open. The 24-hour observation remains deferred. Main and installed
 production retain Classic files until those gates are addressed.
+## Camera diagnostics navigation — 2026-09-20
+
+Camera Info now provides camera/profile links using the existing diagnostic
+selection contract. A native production check reproduced the missing controls;
+isolated browser checks verify both selections and the current-camera marker.
+Integration checks follow the links for administrator and ordinary users,
+retaining existing malformed/mismatched scope checks. All 162 Python entries
+pass on unchanged 837-file source hashes. JavaScript sources are unchanged
+from the prior 34-entry passing suite. Not yet deployed. Evidence:
+`testing/evidence/hybrid-camera-info-navigation-20260920.json`.
+
+Separately, 12 native production Image Lag controls pass: pagination, row count,
+matching/empty/cleared search, numeric sorting and camera/profile navigation,
+including keyboard actions. Copy and downloaded exports are not certified by
+this record. Evidence: `testing/evidence/hybrid-image-lag-native-20260920.json`.
+All 14 control references are linked and checked in the route evidence register.
+
+## Settings validation log privacy — 2026-09-20
+
+Full Config errors no longer persist submitted field values or reflected
+validator text in application logs. Field/type/validator/count diagnostics
+remain, as do authorized HTTP error details and existing save semantics.
+A synthetic credential in invalid driver JSON reproduced the leak before
+the change; the regression now verifies redaction and unchanged rejection
+without creating a revision. All 162 Python entries pass on unchanged
+837-file source hashes. The 34 JavaScript entries passed on unchanged JS
+sources in the preceding usability mission. Evidence:
+`testing/evidence/hybrid-settings-validation-logging-20260920.json`.
+Installed as `cb51d7b4` with the tested source hashes matched. Bounded native
+Settings/Now checks pass; see
+`testing/evidence/hybrid-settings-polish-deployment-20260920.json`.
+This does not certify every application logging path.
 
 ## Settings search and complete document landmarks — 2026-09-20
 
@@ -35,7 +67,9 @@ Native ordinary-user checks cover Storage focus, empty/single results and
 keyboard clearing while the form remains read-only. On main, all 161 Python and
 34 JavaScript entries pass with unchanged source hashes during the run.
 Evidence: `testing/evidence/hybrid-settings-usability-20260920.json`; linked
-control records are added to the route register. This change is not yet deployed.
+control records are added to the route register. Installed in `cb51d7b4`;
+native production search, empty results and keyboard recovery also pass.
+Deployment evidence is linked above.
 
 ## Settings credential privacy — 2026-09-20
 

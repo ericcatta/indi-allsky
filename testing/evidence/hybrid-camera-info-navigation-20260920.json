@@ -1,0 +1,60 @@
+{
+  "date": "2026-09-20",
+  "status": "focused integration, native isolated browser and full Python regression passed; not deployed",
+  "source_manifest": {
+    "files": 837,
+    "canonical_sha256": "99178bcd586936a0780aa4932966d700aadbedc140a3717bceb7b5a340dd2e8c"
+  },
+  "before": {
+    "environment": "Production cb51d7b4, administrator, camera1",
+    "page": "/modern-admin/cameras/info?camera_id=1",
+    "heading": "libcamera_imx708",
+    "page_body_controls": 0,
+    "diagnostic_camera_navigation": false,
+    "focused_test": "failed: Camera Info cannot switch cameras"
+  },
+  "after": {
+    "integration": "hybrid_diagnostic_tables_flow_test.py passed for administrator and ordinary user, both camera/profile links and existing invalid/mismatched scope checks; no saved configuration changes",
+    "native_environment": "Isolated synthetic fixture with Classic imports/templates/assets forbidden; ordinary authenticated user",
+    "controls": [
+      {
+        "page": "/modern-admin/cameras/info",
+        "identifier": "Diagnostic camera > Test Profile 2",
+        "role": "ordinary user",
+        "prerequisite": "Camera1 selected; two synthetic cameras and profiles",
+        "request": "GET /indi-allsky/modern-admin/cameras/info?camera_id=2&profile_id=test-profile-2",
+        "expected": "Second camera data and a single current-camera link",
+        "observed": "Test Camera 2 heading; Test Profile 2 has aria-current and matching camera/profile URL",
+        "status": "superato"
+      },
+      {
+        "page": "/modern-admin/cameras/info",
+        "identifier": "Diagnostic camera > Test Profile 1",
+        "role": "ordinary user",
+        "prerequisite": "Camera2 selected",
+        "request": "GET /indi-allsky/modern-admin/cameras/info?camera_id=1&profile_id=test-profile-1",
+        "expected": "Return to first camera and selected profile",
+        "observed": "Test Camera 1 heading; Test Profile 1 has aria-current and matching camera/profile URL",
+        "status": "superato"
+      }
+    ]
+  },
+  "full_regression": {
+    "status": "passed",
+    "report": "/home/eric/hybrid-camera-info-navigation-regression-20260920/results.json",
+    "python_entries": 162,
+    "source_changed": false,
+    "report_sha256": "26cb73254ff1516e7c9bb70d7ba9c1ba1df14c9856878baa563019d276908726"
+  },
+  "limitations": [
+    "Not deployed to production",
+    "Global shell recovery controls are outside this navigation check",
+    "Missing friendly name now renders an em dash rather than None; no stored metadata is changed"
+  ],
+  "javascript_regression": {
+    "entries": 34,
+    "status": "passed on unchanged JavaScript sources in prior usability mission",
+    "report": "/tmp/hybrid-settings-usability-js-20260920.json",
+    "unchanged_since": "132fec7d"
+  }
+}

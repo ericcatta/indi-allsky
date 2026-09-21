@@ -15,8 +15,8 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/cameras/adu-history` | 0 | Da associare o collaudare |
 | `/modern-admin/cameras/dark-library` | 0 | Da associare o collaudare |
 | `/modern-admin/cameras/detect-indi` | 0 | Da associare o collaudare |
-| `/modern-admin/cameras/image-lag` | 0 | Da associare o collaudare |
-| `/modern-admin/cameras/info` | 0 | Da associare o collaudare |
+| `/modern-admin/cameras/image-lag` | 12 | [hybrid-image-lag-native-20260920](../testing/evidence/hybrid-image-lag-native-20260920.json) |
+| `/modern-admin/cameras/info` | 2 | [hybrid-camera-info-navigation-20260920](../testing/evidence/hybrid-camera-info-navigation-20260920.json) |
 | `/modern-admin/cameras/mask-base` | 0 | Da associare o collaudare |
 | `/modern-admin/cameras/start-indi` | 0 | Da associare o collaudare |
 | `/modern-admin/capture/abort-exposure` | 0 | Da associare o collaudare |
@@ -29,7 +29,7 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/fits` | 2 | [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/fits/<int:fits_id>` | 4 | [hybrid-fits-dimensions-live-20260914](../testing/evidence/hybrid-fits-dimensions-live-20260914.json), [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/highlights` | 0 | Da associare o collaudare |
-| `/modern-admin/library` | 31 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-library-live-20260914](../testing/evidence/hybrid-library-live-20260914.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json) |
+| `/modern-admin/library` | 32 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-library-live-20260914](../testing/evidence/hybrid-library-live-20260914.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
 | `/modern-admin/loop` | 0 | Da associare o collaudare |
 | `/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download` | 0 | Da associare o collaudare |
 | `/modern-admin/media/archive` | 15 | [hybrid-archive-2026-09-06](../testing/evidence/hybrid-archive-2026-09-06.json) |
@@ -37,7 +37,7 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/media/gallery` | 0 | Da associare o collaudare |
 | `/modern-admin/media/gallery/page` | 0 | Da associare o collaudare |
 | `/modern-admin/media/images` | 0 | Da associare o collaudare |
-| `/modern-admin/media/images/<int:image_id>` | 0 | Da associare o collaudare |
+| `/modern-admin/media/images/<int:image_id>` | 1 | [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
 | `/modern-admin/media/keograms` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
 | `/modern-admin/media/mini-timelapses` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
 | `/modern-admin/media/panorama` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
@@ -86,7 +86,7 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/settings/storage` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/storage-protection` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/timelapse` | 0 | Da associare o collaudare |
-| `/modern-admin/sky-cycle` | 0 | Da associare o collaudare |
+| `/modern-admin/sky-cycle` | 2 | [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
 | `/modern-admin/storage` | 0 | Da associare o collaudare |
 | `/modern-admin/storage/drives` | 0 | Da associare o collaudare |
 | `/modern-admin/storage/file-space-usage` | 0 | Da associare o collaudare |
