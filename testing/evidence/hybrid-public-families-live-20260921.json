@@ -1,0 +1,1210 @@
+{
+  "installed_runtime": "cfe2c40d7017a4aab7827f0e2d373766a9bd3bca",
+  "transport": "Verified HTTPS without Cookie/Authorization; bounded range GET, no native download",
+  "routes": 17,
+  "cases": [
+    {
+      "route": "/indi-allsky/latestimage",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "image",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestimage?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/ccd1_20260921_223612.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/ccd1_20260921_223612.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/858879"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 115572,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/ccd1_20260921_223612.jpg",
+      "file_bytes": 858879,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestimage",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "image",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestimage?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/ccd2_20260921_223555.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/ccd2_20260921_223555.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/504119"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 115571,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/ccd2_20260921_223555.jpg",
+      "file_bytes": 504119,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestimageview",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "image",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestimageview?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "/indi-allsky/view_image?id=115582&camera_id=1",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/view_image?id=115582&camera_id=1",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2189"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/view_image?id=115582&camera_id=1",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/image/1/115582/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/ccd1_20260921_224011.jpg",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/image/1/115582/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/833477"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 115582,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/ccd1_20260921_224011.jpg",
+      "file_bytes": 833477,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestimageview",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "image",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestimageview?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "/indi-allsky/view_image?id=115583&camera_id=2",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/view_image?id=115583&camera_id=2",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2189"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/view_image?id=115583&camera_id=2",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/image/2/115583/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/ccd2_20260921_224027.jpg",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/image/2/115583/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/576201"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 115583,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/ccd2_20260921_224027.jpg",
+      "file_bytes": 576201,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestkeogram",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "keogram",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestkeogram?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-keogram_ccd1_20260921_day_1790013230.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-keogram_ccd1_20260921_day_1790013230.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/182919"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 31,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-keogram_ccd1_20260921_day_1790013230.jpg",
+      "file_bytes": 182919,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestkeogram",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "keogram",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestkeogram?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-keogram_ccd2_20260921_day_1790014664.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-keogram_ccd2_20260921_day_1790014664.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/299242"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 32,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-keogram_ccd2_20260921_day_1790014664.jpg",
+      "file_bytes": 299242,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestkeogramview",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "keogram",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestkeogramview?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "/indi-allsky/view_keogram?id=31&camera_id=1",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/view_keogram?id=31&camera_id=1",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2224"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/view_keogram?id=31&camera_id=1",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/keogram/1/31/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-keogram_ccd1_20260921_day_1790013230.jpg",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/keogram/1/31/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/182919"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 31,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-keogram_ccd1_20260921_day_1790013230.jpg",
+      "file_bytes": 182919,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestkeogramview",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "keogram",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestkeogramview?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "/indi-allsky/view_keogram?id=32&camera_id=2",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/view_keogram?id=32&camera_id=2",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2224"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/view_keogram?id=32&camera_id=2",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/keogram/2/32/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-keogram_ccd2_20260921_day_1790014664.jpg",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/keogram/2/32/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/299242"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 32,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-keogram_ccd2_20260921_day_1790014664.jpg",
+      "file_bytes": 299242,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestpanorama",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "panoramaimage",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestpanorama?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "images/ccd_825ea4df-f761-444f-97c2-387b78ace935/panoramas/20260921/night/21_22/panorama_ccd1_20260921_223519.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/panoramas/20260921/night/21_22/panorama_ccd1_20260921_223519.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/125268"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 49461,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/panoramas/20260921/night/21_22/panorama_ccd1_20260921_223519.jpg",
+      "file_bytes": 125268,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestpanorama",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "panoramaimage",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestpanorama?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/panoramas/20260921/night/21_22/panorama_ccd2_20260921_223510.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/panoramas/20260921/night/21_22/panorama_ccd2_20260921_223510.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/193332"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 49460,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/panoramas/20260921/night/21_22/panorama_ccd2_20260921_223510.jpg",
+      "file_bytes": 193332,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestpanoramavideo",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "panoramavideo",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestpanoramavideo?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-panorama_timelapse_ccd1_20260921_day_1790014522.mp4",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-panorama_timelapse_ccd1_20260921_day_1790014522.mp4",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/39300870"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 31,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-panorama_timelapse_ccd1_20260921_day_1790014522.mp4",
+      "file_bytes": 39300870,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestpanoramavideo",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "panoramavideo",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestpanoramavideo?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-panorama_timelapse_ccd2_20260921_day_1790015554.mp4",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-panorama_timelapse_ccd2_20260921_day_1790015554.mp4",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/39379658"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 32,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-panorama_timelapse_ccd2_20260921_day_1790015554.mp4",
+      "file_bytes": 39379658,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestpanoramavideowatch",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "panoramavideo",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestpanoramavideowatch?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "/indi-allsky/watch_panorama?id=31&camera_id=1",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/watch_panorama?id=31&camera_id=1",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2335"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/watch_panorama?id=31&camera_id=1",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/panorama-video/1/31/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-panorama_timelapse_ccd1_20260921_day_1790014522.mp4",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/panorama-video/1/31/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/39300870"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 31,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-panorama_timelapse_ccd1_20260921_day_1790014522.mp4",
+      "file_bytes": 39300870,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestpanoramavideowatch",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "panoramavideo",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestpanoramavideowatch?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "/indi-allsky/watch_panorama?id=32&camera_id=2",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/watch_panorama?id=32&camera_id=2",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2335"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/watch_panorama?id=32&camera_id=2",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/panorama-video/2/32/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-panorama_timelapse_ccd2_20260921_day_1790015554.mp4",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/panorama-video/2/32/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/39379658"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 32,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-panorama_timelapse_ccd2_20260921_day_1790015554.mp4",
+      "file_bytes": 39379658,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestpanoramaview",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "panoramaimage",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestpanoramaview?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "/indi-allsky/view_panorama?id=49467&camera_id=1",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/view_panorama?id=49467&camera_id=1",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2218"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/view_panorama?id=49467&camera_id=1",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/panorama/1/49467/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/panoramas/20260921/night/21_22/panorama_ccd1_20260921_224011.jpg",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/panorama/1/49467/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/158602"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 49467,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/panoramas/20260921/night/21_22/panorama_ccd1_20260921_224011.jpg",
+      "file_bytes": 158602,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestpanoramaview",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "panoramaimage",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestpanoramaview?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "/indi-allsky/view_panorama?id=49466&camera_id=2",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/view_panorama?id=49466&camera_id=2",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2218"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/view_panorama?id=49466&camera_id=2",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/panorama/2/49466/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/panoramas/20260921/night/21_22/panorama_ccd2_20260921_223942.jpg",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/panorama/2/49466/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/247491"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 49466,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/panoramas/20260921/night/21_22/panorama_ccd2_20260921_223942.jpg",
+      "file_bytes": 247491,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestraw",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "rawimage",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestraw?camera_id=1&profile_id=imx708-wide",
+          "status": 404,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "scope": "empty-state only",
+      "reason": "No records for this camera/media family; correct explicit 404. Content delivery cannot be tested with absent data."
+    },
+    {
+      "route": "/indi-allsky/latestraw",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "rawimage",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestraw?camera_id=2&profile_id=asi678mc",
+          "status": 404,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "scope": "empty-state only",
+      "reason": "No records for this camera/media family; correct explicit 404. Content delivery cannot be tested with absent data."
+    },
+    {
+      "route": "/indi-allsky/latestrawview",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "rawimage",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestrawview?camera_id=1&profile_id=imx708-wide",
+          "status": 404,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "scope": "empty-state only",
+      "reason": "No records for this camera/media family; correct explicit 404. Content delivery cannot be tested with absent data."
+    },
+    {
+      "route": "/indi-allsky/latestrawview",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "rawimage",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestrawview?camera_id=2&profile_id=asi678mc",
+          "status": 404,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "scope": "empty-state only",
+      "reason": "No records for this camera/media family; correct explicit 404. Content delivery cannot be tested with absent data."
+    },
+    {
+      "route": "/indi-allsky/lateststartrail",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "startrail",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/lateststartrail?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_ccd1_20260920_night_1789965565.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_ccd1_20260920_night_1789965565.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/2672693"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 15,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_ccd1_20260920_night_1789965565.jpg",
+      "file_bytes": 2672693,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/lateststartrail",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "startrail",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/lateststartrail?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260920/allsky-startrail_ccd2_20260920_night_1789966189.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260920/allsky-startrail_ccd2_20260920_night_1789966189.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/1880582"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 16,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260920/allsky-startrail_ccd2_20260920_night_1789966189.jpg",
+      "file_bytes": 1880582,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/lateststartrailvideo",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "startrailvideo",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/lateststartrailvideo?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_timelapse_ccd1_20260920_night_1789965565.mp4",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_timelapse_ccd1_20260920_night_1789965565.mp4",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/8379472"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 15,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_timelapse_ccd1_20260920_night_1789965565.mp4",
+      "file_bytes": 8379472,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/lateststartrailvideo",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "startrailvideo",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/lateststartrailvideo?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260919/allsky-startrail_timelapse_ccd2_20260919_night_1789879978.mp4",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260919/allsky-startrail_timelapse_ccd2_20260919_night_1789879978.mp4",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/9201259"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 14,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260919/allsky-startrail_timelapse_ccd2_20260919_night_1789879978.mp4",
+      "file_bytes": 9201259,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/lateststartrailvideowatch",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "startrailvideo",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/lateststartrailvideowatch?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "/indi-allsky/watch_startrail?id=15&camera_id=1",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/watch_startrail?id=15&camera_id=1",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2350"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/watch_startrail?id=15&camera_id=1",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/startrail-video/1/15/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_timelapse_ccd1_20260920_night_1789965565.mp4",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/startrail-video/1/15/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/8379472"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 15,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_timelapse_ccd1_20260920_night_1789965565.mp4",
+      "file_bytes": 8379472,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/lateststartrailvideowatch",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "startrailvideo",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/lateststartrailvideowatch?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "/indi-allsky/watch_startrail?id=14&camera_id=2",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/watch_startrail?id=14&camera_id=2",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2350"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/watch_startrail?id=14&camera_id=2",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/startrail-video/2/14/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260919/allsky-startrail_timelapse_ccd2_20260919_night_1789879978.mp4",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/startrail-video/2/14/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/9201259"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 14,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260919/allsky-startrail_timelapse_ccd2_20260919_night_1789879978.mp4",
+      "file_bytes": 9201259,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/lateststartrailview",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "startrail",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/lateststartrailview?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "/indi-allsky/view_startrail?id=15&camera_id=1",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/view_startrail?id=15&camera_id=1",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2258"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/view_startrail?id=15&camera_id=1",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/startrail/1/15/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_ccd1_20260920_night_1789965565.jpg",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/startrail/1/15/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/2672693"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 15,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260920/allsky-startrail_ccd1_20260920_night_1789965565.jpg",
+      "file_bytes": 2672693,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/lateststartrailview",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "startrail",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/lateststartrailview?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "/indi-allsky/view_startrail?id=16&camera_id=2",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/view_startrail?id=16&camera_id=2",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2258"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/view_startrail?id=16&camera_id=2",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/startrail/2/16/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260920/allsky-startrail_ccd2_20260920_night_1789966189.jpg",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/startrail/2/16/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/1880582"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 16,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260920/allsky-startrail_ccd2_20260920_night_1789966189.jpg",
+      "file_bytes": 1880582,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestthumbnail",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "thumbnail",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestthumbnail?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/thumbnails/6ece8adf-7f24-4737-94d1-cb6b04880a6a.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/thumbnails/6ece8adf-7f24-4737-94d1-cb6b04880a6a.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/3725"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 115674,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/exposures/20260921/night/21_22/thumbnails/6ece8adf-7f24-4737-94d1-cb6b04880a6a.jpg",
+      "file_bytes": 3725,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latestthumbnail",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "thumbnail",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latestthumbnail?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/thumbnails/02c3a6bd-d59d-4768-b789-32170d1475f6.jpg",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/thumbnails/02c3a6bd-d59d-4768-b789-32170d1475f6.jpg",
+          "status": 206,
+          "location": null,
+          "content_type": "image/jpeg",
+          "content_range": "bytes 0-31/3220"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 115675,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/exposures/20260921/night/21_22/thumbnails/02c3a6bd-d59d-4768-b789-32170d1475f6.jpg",
+      "file_bytes": 3220,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latesttimelapse",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "video",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latesttimelapse?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-timelapse_ccd1_20260921_day_1790013701.mp4",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-timelapse_ccd1_20260921_day_1790013701.mp4",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/78999074"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 31,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-timelapse_ccd1_20260921_day_1790013701.mp4",
+      "file_bytes": 78999074,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latesttimelapse",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "video",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latesttimelapse?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-timelapse_ccd2_20260921_day_1790014941.mp4",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-timelapse_ccd2_20260921_day_1790014941.mp4",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/78850085"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 32,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-timelapse_ccd2_20260921_day_1790014941.mp4",
+      "file_bytes": 78850085,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latesttimelapsewatch",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "model": "video",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latesttimelapsewatch?camera_id=1&profile_id=imx708-wide",
+          "status": 302,
+          "location": "/indi-allsky/watch_timelapse?id=31&camera_id=1",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/watch_timelapse?id=31&camera_id=1",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2302"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/watch_timelapse?id=31&camera_id=1",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/video/1/31/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-timelapse_ccd1_20260921_day_1790013701.mp4",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/video/1/31/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/78999074"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 31,
+      "file": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20260921/allsky-timelapse_ccd1_20260921_day_1790013701.mp4",
+      "file_bytes": 78999074,
+      "prefix_bytes_match": 32
+    },
+    {
+      "route": "/indi-allsky/latesttimelapsewatch",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "model": "video",
+      "outcome": "superato",
+      "chain": [
+        {
+          "path": "/indi-allsky/latesttimelapsewatch?camera_id=2&profile_id=asi678mc",
+          "status": 302,
+          "location": "/indi-allsky/watch_timelapse?id=32&camera_id=2",
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        },
+        {
+          "path": "/indi-allsky/watch_timelapse?id=32&camera_id=2",
+          "status": 206,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": "bytes 0-31/2302"
+        }
+      ],
+      "html_chain": [
+        {
+          "path": "/indi-allsky/watch_timelapse?id=32&camera_id=2",
+          "status": 200,
+          "location": null,
+          "content_type": "text/html; charset=utf-8",
+          "content_range": null
+        }
+      ],
+      "viewer_original": "/indi-allsky/media/video/2/32/original?download=1",
+      "viewer_preview": "/indi-allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-timelapse_ccd2_20260921_day_1790014941.mp4",
+      "original_chain": [
+        {
+          "path": "/indi-allsky/media/video/2/32/original?download=1",
+          "status": 206,
+          "location": null,
+          "content_type": "video/mp4",
+          "content_range": "bytes 0-31/78850085"
+        }
+      ],
+      "scope": "viewer/redirect and ranged original response",
+      "record_id": 32,
+      "file": "/var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20260921/allsky-timelapse_ccd2_20260921_day_1790014941.mp4",
+      "file_bytes": 78850085,
+      "prefix_bytes_match": 32
+    }
+  ],
+  "limits": [
+    "Read-only HTTP acceptance, not native click/full playback/download delivery.",
+    "Empty-state cases do not prove delivery of unavailable data.",
+    "Only same-host local media followed; external destinations remain separate."
+  ],
+  "observed_runtime": "cfe2c40d7017a4aab7827f0e2d373766a9bd3bca",
+  "verifier_correction": "Initial verifier applied Range to HTML and used image table for thumbnails. Initial observations retained in .initial.json; only 16 affected cases rerun; other 18 retained.",
+  "source_report": {
+    "path": "/home/eric/hybrid-public-family-check-20260921.json",
+    "sha256": "b85a0bb897693f841757d5207f0bbaec5df9c63db68e95cdec49a2a3999495ae"
+  }
+}

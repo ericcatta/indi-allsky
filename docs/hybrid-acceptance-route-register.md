@@ -127,3 +127,7 @@ Indice statico: 7.351 identità con tutti i 43.978 riferimenti originali conserv
 - Censire i controlli generati nel DOM, modalita' mobili, ruoli, prerequisiti, richieste ed effetti osservabili ancora mancanti.
 - Ricontrollare le prove invalidate da modifiche successive; mantenere separati test automatici, browser isolato e produzione.
 - I controlli bloccati restano aperti. Completare il collaudo senza Classic prima della rimozione fisica; le 24 ore restano rinviate.
+
+## Public media HTTP acceptance, 21 September 2026
+
+[Production evidence](../testing/evidence/hybrid-public-families-live-20260921.json) covers all 17 latest-media routes on both cameras: 30 ranged responses matched recorded files and four RAW requests returned the explicit empty state. Individual cases are linked in the JSON route register. This does not certify full-file or native Mac download delivery, nor delivery of absent RAW data. The verifier corrected its HTML range handling and thumbnail model lookup; the original observations remain on the Pi. No runtime change was necessary.

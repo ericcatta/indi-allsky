@@ -4651,6 +4651,18 @@
           "control": "invalid camera parameter",
           "recorded_status": "superato",
           "original_page": "/latestimage"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[0]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[1]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4669,6 +4681,18 @@
           "control": "redirect and image preview",
           "recorded_status": "superato",
           "original_page": "/latestimageview"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[2]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[3]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4679,7 +4703,21 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestKeogramRedirect"
+      "handler": "LatestKeogramRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[4]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[5]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/latestkeogramview",
@@ -4696,6 +4734,18 @@
           "control": "redirect / viewer",
           "recorded_status": "superato",
           "original_page": "/latestkeogramview"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[6]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[7]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4714,6 +4764,18 @@
           "control": "night selection without data",
           "recorded_status": "superato",
           "original_page": "/latestpanorama"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[8]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[9]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4724,7 +4786,21 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestPanoramaVideoRedirect"
+      "handler": "LatestPanoramaVideoRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[10]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[11]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/latestpanoramavideowatch",
@@ -4741,6 +4817,18 @@
           "control": "redirect / viewer",
           "recorded_status": "superato",
           "original_page": "/latestpanoramavideowatch"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[12]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[13]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4759,6 +4847,18 @@
           "control": "redirect / viewer",
           "recorded_status": "superato",
           "original_page": "/latestpanoramaview"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[14]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[15]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4769,7 +4869,21 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestRawImageRedirect"
+      "handler": "LatestRawImageRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[16]",
+          "control": "Public media HTTP camera 1: empty-state only",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[17]",
+          "control": "Public media HTTP camera 2: empty-state only",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/latestrawview",
@@ -4786,6 +4900,18 @@
           "control": "redirect / viewer",
           "recorded_status": "superato",
           "original_page": "/latestrawview"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[18]",
+          "control": "Public media HTTP camera 1: empty-state only",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[19]",
+          "control": "Public media HTTP camera 2: empty-state only",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4796,7 +4922,21 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestStartrailRedirect"
+      "handler": "LatestStartrailRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[20]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[21]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/lateststartrailvideo",
@@ -4805,7 +4945,21 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestStartrailVideoRedirect"
+      "handler": "LatestStartrailVideoRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[22]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[23]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/lateststartrailvideowatch",
@@ -4822,6 +4976,18 @@
           "control": "redirect / viewer",
           "recorded_status": "superato",
           "original_page": "/lateststartrailvideowatch"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[24]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[25]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4840,6 +5006,18 @@
           "control": "redirect / viewer",
           "recorded_status": "superato",
           "original_page": "/lateststartrailview"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[26]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[27]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4858,6 +5036,18 @@
           "control": "thumbnail redirect",
           "recorded_status": "superato",
           "original_page": "/latestthumbnail"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[28]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[29]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4868,7 +5058,21 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestTimelapseVideoRedirect"
+      "handler": "LatestTimelapseVideoRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[30]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[31]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/latesttimelapsewatch",
@@ -4885,6 +5089,18 @@
           "control": "video playback",
           "recorded_status": "superato",
           "original_page": "/latesttimelapsewatch"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[32]",
+          "control": "Public media HTTP camera 1: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+          "record": "cases[33]",
+          "control": "Public media HTTP camera 2: viewer/redirect and ranged original response",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -5713,5 +5929,13 @@
     },
     "scope": "All current Hybrid GET routes reach login anonymously, including internal Settings aliases. Public latest-image range serving and API rejection cases have separately stated scope in the evidence.",
     "does_not_certify_authenticated_controls": true
+  },
+  "current_public_media_boundary": {
+    "source": "testing/evidence/hybrid-public-families-live-20260921.json",
+    "routes": 17,
+    "cases": 34,
+    "ranged_file_matches": 30,
+    "raw_empty_states": 4,
+    "does_not_certify_native_downloads": true
   }
 }
