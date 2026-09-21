@@ -1,0 +1,658 @@
+{
+  "date": "2026-09-21",
+  "source_commit": "a9e41451",
+  "installed_runtime": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
+  "scope": "47 active core requirements, actual Python imports, selected installed dependency metadata/source, installer requirement paths and shell syntax; not a fresh-platform installation test",
+  "packages": [
+    {
+      "package": "astropy",
+      "module": "astropy",
+      "consumers": [
+        "indi_allsky/camera/indi.py",
+        "indi_allsky/camera/indi_accumulator.py",
+        "indi_allsky/camera/test_cameras.py",
+        "indi_allsky/darks.py",
+        "indi_allsky/flask/image_processing_pipeline.py",
+        "indi_allsky/flask/image_processing_views.py",
+        "indi_allsky/flask/source_media_views.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/focus_preview.py",
+        "indi_allsky/image.py",
+        "indi_allsky/processing.py",
+        "indi_allsky/protection_masks.py",
+        "indi_allsky/scientific_source_report.py",
+        "misc/import_darks_frames.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "photutils",
+      "module": "photutils",
+      "consumers": [
+        "indi_allsky/protection_masks.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "pyerfa",
+      "module": "erfa",
+      "consumers": [],
+      "category": "indirect",
+      "reason": "Installed astropy declares pyerfa>=2.0.1.1."
+    },
+    {
+      "package": "numpy",
+      "module": "numpy",
+      "consumers": [
+        "examples/DENOISE PR TEST ENVIRONMENT/benchmark.py",
+        "examples/DENOISE PR TEST ENVIRONMENT/test_mask_respect.py",
+        "examples/DENOISE PR TEST ENVIRONMENT/test_pr_real_image.py",
+        "indi_allsky/aurora.py",
+        "indi_allsky/auto_meter.py",
+        "indi_allsky/camera/indi_accumulator.py",
+        "indi_allsky/camera/test_cameras.py",
+        "indi_allsky/darks.py",
+        "indi_allsky/denoise.py",
+        "indi_allsky/detectLines.py",
+        "indi_allsky/devices/sensors/tempSensorMlx90640.py",
+        "indi_allsky/flask/forms.py",
+        "indi_allsky/flask/miscDb.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/focus_preview.py",
+        "indi_allsky/image.py",
+        "indi_allsky/keogram.py",
+        "indi_allsky/longTermKeogram.py",
+        "indi_allsky/overlay/cardinalDirsLabel.py",
+        "indi_allsky/overlay/imageOverlay.py",
+        "indi_allsky/overlay/lightgraphOverlay.py",
+        "indi_allsky/overlay/moonOverlay.py",
+        "indi_allsky/processing.py",
+        "indi_allsky/protection_masks.py",
+        "indi_allsky/realtime_keogram_history.py",
+        "indi_allsky/scnr.py",
+        "indi_allsky/sqm.py",
+        "indi_allsky/stack.py",
+        "indi_allsky/starTrails.py",
+        "indi_allsky/stars.py",
+        "indi_allsky/stretch/mode1_stddev_cutoff.py",
+        "indi_allsky/stretch/mode2_mtf.py",
+        "indi_allsky/stretch/mode3_adaptive_mtf.py",
+        "indi_allsky/timelapse_preprocessor/preProcessorWrapKeogram.py",
+        "indi_allsky/video.py",
+        "misc/import_darks_frames.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "opencv-python-headless",
+      "module": "cv2",
+      "consumers": [
+        "examples/DENOISE PR TEST ENVIRONMENT/benchmark.py",
+        "examples/DENOISE PR TEST ENVIRONMENT/test_mask_respect.py",
+        "examples/DENOISE PR TEST ENVIRONMENT/test_pr_real_image.py",
+        "indi_allsky/auto_meter.py",
+        "indi_allsky/camera/test_cameras.py",
+        "indi_allsky/darks.py",
+        "indi_allsky/denoise.py",
+        "indi_allsky/detectLines.py",
+        "indi_allsky/draw.py",
+        "indi_allsky/flask/base_views.py",
+        "indi_allsky/flask/forms.py",
+        "indi_allsky/flask/image_processing_views.py",
+        "indi_allsky/flask/miscDb.py",
+        "indi_allsky/flask/source_media_views.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/focus_preview.py",
+        "indi_allsky/image.py",
+        "indi_allsky/keogram.py",
+        "indi_allsky/longTermKeogram.py",
+        "indi_allsky/maskProcessing.py",
+        "indi_allsky/mask_frames.py",
+        "indi_allsky/overlay/cardinalDirsLabel.py",
+        "indi_allsky/overlay/imageOverlay.py",
+        "indi_allsky/overlay/lightgraphOverlay.py",
+        "indi_allsky/overlay/moonOverlay.py",
+        "indi_allsky/overlay/orb.py",
+        "indi_allsky/panorama_publication.py",
+        "indi_allsky/processing.py",
+        "indi_allsky/protection_masks.py",
+        "indi_allsky/realtime_keogram_preview.py",
+        "indi_allsky/scnr.py",
+        "indi_allsky/sqm.py",
+        "indi_allsky/stack.py",
+        "indi_allsky/starTrails.py",
+        "indi_allsky/stars.py",
+        "indi_allsky/timelapse_preprocessor/preProcessorWrapKeogram.py",
+        "indi_allsky/video.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "scipy",
+      "module": "scipy",
+      "consumers": [
+        "examples/DENOISE PR TEST ENVIRONMENT/test_pr_real_image.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "ccdproc",
+      "module": "ccdproc",
+      "consumers": [
+        "indi_allsky/darks.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "scikit-image",
+      "module": "skimage",
+      "consumers": [],
+      "category": "indirect",
+      "reason": "Installed ccdproc and astroalign require scikit-image."
+    },
+    {
+      "package": "astroalign",
+      "module": "astroalign",
+      "consumers": [
+        "indi_allsky/stack.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "bottleneck",
+      "module": "bottleneck",
+      "consumers": [],
+      "category": "indirect",
+      "reason": "Installed astropy/stats/nanfunctions.py and ccdproc/combiner.py import bottleneck."
+    },
+    {
+      "package": "python-dateutil",
+      "module": "dateutil",
+      "consumers": [
+        "indi_allsky/camera/indi.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "ephem",
+      "module": "ephem",
+      "consumers": [
+        "indi_allsky/capture.py",
+        "indi_allsky/flask/astropanel_views.py",
+        "indi_allsky/flask/base_views.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/overlay/lightgraphOverlay.py",
+        "indi_allsky/overlay/orb.py",
+        "indi_allsky/processing.py",
+        "indi_allsky/starTrails.py",
+        "indi_allsky/utils.py",
+        "indi_allsky/video.py",
+        "misc/mqtt_remote_sensor.py",
+        "misc/sensor_test.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "skyfield",
+      "module": "skyfield",
+      "consumers": [
+        "indi_allsky/flask/system_context_views.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "paramiko",
+      "module": "paramiko",
+      "consumers": [
+        "indi_allsky/filetransfer/paramiko_sftp.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "pycurl",
+      "module": "pycurl",
+      "consumers": [
+        "indi_allsky/camera/pycurl_camera.py",
+        "indi_allsky/filetransfer/pycurl_ftp.py",
+        "indi_allsky/filetransfer/pycurl_ftpes.py",
+        "indi_allsky/filetransfer/pycurl_ftps.py",
+        "indi_allsky/filetransfer/pycurl_sftp.py",
+        "indi_allsky/filetransfer/pycurl_syncapi_v1.py",
+        "indi_allsky/filetransfer/pycurl_webdav_https.py",
+        "indi_allsky/flask/forms.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/overlay/imageOverlay.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "Pillow",
+      "module": "PIL",
+      "consumers": [
+        "examples/DENOISE PR TEST ENVIRONMENT/test_mask_respect.py",
+        "indi_allsky/flask/forms.py",
+        "indi_allsky/flask/miscDb.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/focus_preview.py",
+        "indi_allsky/image.py",
+        "indi_allsky/keogram.py",
+        "indi_allsky/longTermKeogram.py",
+        "indi_allsky/overlay/cardinalDirsLabel.py",
+        "indi_allsky/overlay/lightgraphOverlay.py",
+        "indi_allsky/panorama_publication.py",
+        "indi_allsky/processing.py",
+        "indi_allsky/realtime_keogram_preview.py",
+        "indi_allsky/starTrails.py",
+        "indi_allsky/timelapse_preprocessor/preProcessorWrapKeogram.py",
+        "indi_allsky/video.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "piexif",
+      "module": "piexif",
+      "consumers": [
+        "indi_allsky/image.py",
+        "indi_allsky/keogram.py",
+        "indi_allsky/starTrails.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "imageio",
+      "module": "imageio",
+      "consumers": [],
+      "category": "tool and indirect",
+      "reason": "testing/image/gif.py and testing/libcamera/fake_libcamera-still; installed scikit-image also requires it."
+    },
+    {
+      "package": "imageio-ffmpeg",
+      "module": "imageio_ffmpeg",
+      "consumers": [],
+      "category": "plugin",
+      "reason": "Installed imageio/plugins/ffmpeg.py imports imageio_ffmpeg; retain supported imageio video I/O."
+    },
+    {
+      "package": "simplejpeg",
+      "module": "simplejpeg",
+      "consumers": [
+        "indi_allsky/darks.py",
+        "indi_allsky/flask/miscDb.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/focus_preview.py",
+        "indi_allsky/overlay/imageOverlay.py",
+        "indi_allsky/processing.py",
+        "indi_allsky/timelapse_preprocessor/preProcessorWrapKeogram.py",
+        "indi_allsky/video.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "cython",
+      "module": "cython",
+      "consumers": [],
+      "category": "build compatibility retained",
+      "reason": "Declared build tool in platform manifests. No application import; fresh builds across supported architectures were not tested, so removal is not justified by frontend retirement."
+    },
+    {
+      "package": "rawpy",
+      "module": "rawpy",
+      "consumers": [
+        "indi_allsky/darks.py",
+        "indi_allsky/processing.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "pygifsicle",
+      "module": "pygifsicle",
+      "consumers": [],
+      "category": "tool",
+      "reason": "testing/image/gif.py uses pygifsicle.optimize for the optional GIF optimization function."
+    },
+    {
+      "package": "gunicorn",
+      "module": "gunicorn",
+      "consumers": [
+        "indi_allsky/flask/system_context_views.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "inotify",
+      "module": "inotify",
+      "consumers": [],
+      "category": "service",
+      "reason": "service/gunicorn.conf.py explicitly sets reload_engine=inotify."
+    },
+    {
+      "package": "psutil",
+      "module": "psutil",
+      "consumers": [
+        "indi_allsky/allsky.py",
+        "indi_allsky/backup.py",
+        "indi_allsky/camera/libcamera.py",
+        "indi_allsky/camera/pycurl_camera.py",
+        "indi_allsky/capture.py",
+        "indi_allsky/darks.py",
+        "indi_allsky/flask/base_views.py",
+        "indi_allsky/flask/forms.py",
+        "indi_allsky/flask/settings_form_view.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/image.py",
+        "indi_allsky/processing.py",
+        "indi_allsky/upgrade_runtime.py",
+        "indi_allsky/video.py",
+        "misc/camera_test.py",
+        "misc/home_assistant_auto_discovery.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "Flask",
+      "module": "flask",
+      "consumers": [
+        "indi_allsky/flask/__init__.py",
+        "indi_allsky/flask/actionapi_views.py",
+        "indi_allsky/flask/archive_navigation.py",
+        "indi_allsky/flask/astropanel_views.py",
+        "indi_allsky/flask/auth_views.py",
+        "indi_allsky/flask/base_views.py",
+        "indi_allsky/flask/camera_scope.py",
+        "indi_allsky/flask/forms.py",
+        "indi_allsky/flask/image_geometry.py",
+        "indi_allsky/flask/image_processing_views.py",
+        "indi_allsky/flask/media_archive.py",
+        "indi_allsky/flask/media_context_views.py",
+        "indi_allsky/flask/mini_generation.py",
+        "indi_allsky/flask/misc.py",
+        "indi_allsky/flask/miscDb.py",
+        "indi_allsky/flask/models.py",
+        "indi_allsky/flask/navigation_redirects.py",
+        "indi_allsky/flask/notification_views.py",
+        "indi_allsky/flask/observatory_context_views.py",
+        "indi_allsky/flask/public_media.py",
+        "indi_allsky/flask/route_registry.py",
+        "indi_allsky/flask/settings_entries.py",
+        "indi_allsky/flask/settings_form_view.py",
+        "indi_allsky/flask/snapshot_restore.py",
+        "indi_allsky/flask/source_media_views.py",
+        "indi_allsky/flask/storage_settings.py",
+        "indi_allsky/flask/syncapi_views.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/flask/table_export_views.py",
+        "indi_allsky/flask/timelapse_settings.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/flask/youtube_views.py",
+        "indi_allsky/media_task_guard.py",
+        "migrations/env.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "Flask-SQLAlchemy",
+      "module": "flask_sqlalchemy",
+      "consumers": [
+        "indi_allsky/flask/__init__.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "Flask-Migrate",
+      "module": "flask_migrate",
+      "consumers": [
+        "indi_allsky/flask/__init__.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "Flask-WTF",
+      "module": "flask_wtf",
+      "consumers": [
+        "indi_allsky/flask/__init__.py",
+        "indi_allsky/flask/forms.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "Flask-Login",
+      "module": "flask_login",
+      "consumers": [
+        "indi_allsky/flask/__init__.py",
+        "indi_allsky/flask/auth_views.py",
+        "indi_allsky/flask/base_views.py",
+        "indi_allsky/flask/image_processing_views.py",
+        "indi_allsky/flask/media_context_views.py",
+        "indi_allsky/flask/mini_generation.py",
+        "indi_allsky/flask/misc.py",
+        "indi_allsky/flask/notification_views.py",
+        "indi_allsky/flask/settings_form_view.py",
+        "indi_allsky/flask/snapshot_restore.py",
+        "indi_allsky/flask/source_media_views.py",
+        "indi_allsky/flask/storage_settings.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/flask/table_export_views.py",
+        "indi_allsky/flask/timelapse_settings.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/flask/youtube_views.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "werkzeug",
+      "module": "werkzeug",
+      "consumers": [
+        "indi_allsky/flask/image_processing_views.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/network_manager_effects.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "is-safe-url",
+      "module": "is_safe_url",
+      "consumers": [
+        "indi_allsky/flask/auth_views.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "certifi",
+      "module": "certifi",
+      "consumers": [],
+      "category": "indirect",
+      "reason": "Installed requests and skyfield declare certifi as a dependency."
+    },
+    {
+      "package": "cryptography",
+      "module": "cryptography",
+      "consumers": [
+        "indi_allsky/config.py",
+        "indi_allsky/flask/miscDb.py",
+        "indi_allsky/flask/models.py",
+        "indi_allsky/flask/settings_form_view.py",
+        "indi_allsky/flask/snapshot_restore.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/flask/youtube_views.py",
+        "indi_allsky/modern_admin_settings_runtime.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "dbus-python",
+      "module": "dbus",
+      "consumers": [
+        "indi_allsky/capture.py",
+        "indi_allsky/drive_manager.py",
+        "indi_allsky/flask/base_views.py",
+        "indi_allsky/flask/forms.py",
+        "indi_allsky/flask/system_context_views.py",
+        "indi_allsky/flask/views.py",
+        "indi_allsky/modern_admin_runtime_effects.py",
+        "indi_allsky/network_manager_effects.py",
+        "indi_allsky/upgrade_runtime.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "paho-mqtt",
+      "module": "paho",
+      "consumers": [
+        "indi_allsky/camera/libcamera_mqtt.py",
+        "indi_allsky/devices/dew_heaters/dewHeaterMqtt.py",
+        "indi_allsky/devices/fans/fanMqtt.py",
+        "indi_allsky/devices/sensors/mqttBrokerSensor.py",
+        "indi_allsky/filetransfer/paho_mqtt.py",
+        "indi_allsky/flask/system_context_views.py",
+        "misc/home_assistant_auto_discovery.py",
+        "misc/mqtt_remote_dew_heater_fan.py",
+        "misc/mqtt_remote_libcamera.py",
+        "misc/mqtt_remote_sensor.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "setuptools-rust",
+      "module": "setuptools_rust",
+      "consumers": [],
+      "category": "build compatibility retained",
+      "reason": "Declared build tool in platform manifests. No application import; fresh source builds were not tested, so removal is not justified by frontend retirement."
+    },
+    {
+      "package": "bcrypt",
+      "module": "bcrypt",
+      "consumers": [],
+      "category": "indirect and benchmark",
+      "reason": "Installed paramiko requires bcrypt>=3.2; testing/benchmark/hash_bench.py also uses it."
+    },
+    {
+      "package": "passlib",
+      "module": "passlib",
+      "consumers": [
+        "indi_allsky/flask/actionapi_views.py",
+        "indi_allsky/flask/auth_views.py",
+        "indi_allsky/flask/forms.py",
+        "indi_allsky/flask/views.py",
+        "misc/usertool.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "prettytable",
+      "module": "prettytable",
+      "consumers": [
+        "indi_allsky/config.py",
+        "misc/indi_list_cameras.py",
+        "misc/upload_sync.py",
+        "misc/usertool.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "lxml",
+      "module": "lxml",
+      "consumers": [
+        "indi_allsky/smoke.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "shapely",
+      "module": "shapely",
+      "consumers": [
+        "indi_allsky/smoke.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "requests-toolbelt",
+      "module": "requests_toolbelt",
+      "consumers": [
+        "indi_allsky/filetransfer/requests_syncapi_v1.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    },
+    {
+      "package": "pytz",
+      "module": "pytz",
+      "consumers": [],
+      "category": "indirect",
+      "reason": "Installed skyfield/timelib.py imports pytz.timezone."
+    },
+    {
+      "package": "mysql-connector-python",
+      "module": "mysql",
+      "consumers": [],
+      "category": "dynamic database driver",
+      "reason": "docker/start_gunicorn.sh and docker/start_indi_allsky.sh select mysql+mysqlconnector SQLAlchemy URIs; misc/convert_db.py also supports it."
+    },
+    {
+      "package": "PyWavelets",
+      "module": "pywt",
+      "consumers": [
+        "indi_allsky/denoise.py"
+      ],
+      "category": "direct",
+      "reason": "Tracked Python imports; function remains useful without Classic."
+    }
+  ],
+  "installer_checks": {
+    "requirement_paths_resolved": 11,
+    "shell_syntax_passed": [
+      "setup.sh",
+      "misc/unattended_upgrade.sh",
+      "misc/web_only_setup.sh",
+      "docker/start_gunicorn.sh",
+      "docker/start_indi_allsky.sh"
+    ]
+  },
+  "installed_pip_check": {
+    "exit_code": 1,
+    "message": "adafruit-blinka 9.1.0 requires rpi-gpio, which is not installed.",
+    "resolution": "Explained metadata mismatch, not silently marked passed. rpi-lgpio0.6 supplies importable RPi.GPIO; setup.sh and misc/unattended_upgrade.sh explicitly replace RPi.GPIO with rpi.lgpio on this Debian/aarch64 platform. No hardware initialization performed and no packages changed."
+  },
+  "limits": [
+    "No clean installation/build verification on all supported platforms.",
+    "Optional cloud and hardware dependencies remain supported; this core review does not certify live optional integrations.",
+    "No package removed or upgraded; no performance improvement claimed.",
+    "Cython and setuptools-rust retained pending fresh-build validation; absence of direct imports alone is insufficient deletion evidence."
+  ]
+}

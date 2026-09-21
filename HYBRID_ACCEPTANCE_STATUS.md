@@ -69,7 +69,7 @@ Absence of selected placeholder phrases is not proof that every function is impl
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.
 - Complete remaining live effects, including dedicated-data cleanup/deletion and test-destination uploads. Short mini timelapses and both cameras’ automatic day timelapse/panorama outputs are verified; other automatic/isolated tests remain separately labeled.
 - Identify devices and arrange recovery/physical presence before interrupting networking, disks or GPIO. Current user clarification is pending. Do not claim unavailable hardware as tested.
-- Complete the required repository/dependency review and operational cleanup. Retain useful shared backend, public contracts, user data, migrations and supported functions.
+- Complete remaining repository/backend review and operational cleanup. The [47 core dependency review](docs/HYBRID_DEPENDENCIES.md) and installer path/syntax checks are recorded; clean platform builds and optional integration acceptance are not implied. Retain useful shared backend, public contracts, user data, migrations and supported functions.
 - Cold power-loss recovery has not been directly tested. The earlier warm reboot/startup evidence is in [reboot acceptance](testing/evidence/hybrid-reboot-autostart-20260914.json).
 
 The 24-hour observation is explicitly excluded from this run and is not passed.

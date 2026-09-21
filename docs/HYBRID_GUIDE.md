@@ -11,6 +11,7 @@ observation are not part of the current completed work.
 | Passed checks and outstanding gates | [Acceptance status](../HYBRID_ACCEPTANCE_STATUS.md) |
 | Test procedure and evidence rules | [Acceptance workflow](HYBRID_ACCEPTANCE_WORKFLOW.md) |
 | Per-route evidence and its limits | [Control register](hybrid-acceptance-route-register.md) |
+| Retained core dependencies and installer checks | [Dependency review](HYBRID_DEPENDENCIES.md) |
 | Automated regression commands | [Regression](../testing/HYBRID_REGRESSION.md) |
 | Isolated browser development | [UI development](local-ui-dev.md) |
 | Old navigation URL compatibility | [Redirect map](modern-admin-classic-navigation-inventory.md) |
