@@ -5,6 +5,8 @@ Route rilevate dalla `url_map` Flask del candidato `0e6f445c`, avviato in ambien
 Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisione, ambiente, ruolo, camera/profilo e limiti quando verificati. I record storici restano storici. Il numero di record non e' una percentuale di copertura e non certifica tutti i controlli della pagina.
 
 [Registro completo con riferimenti ai singoli controlli](hybrid-acceptance-route-register.json).
+Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 contesti, 376 rendering riusciti, 129 contesti bloccati e nessun errore di rendering. Il report contiene 43.978 occorrenze di controlli, comprese ripetizioni fra ruoli e camere; nessun click viene certificato dal solo censimento. Percorso, hash e limiti sono nel campo `current_control_discovery` del JSON.
+
 
 | Route Hybrid attuale | Record associati | Fonti |
 | --- | ---: | --- |
@@ -41,7 +43,7 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/media/keograms` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
 | `/modern-admin/media/mini-timelapses` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
 | `/modern-admin/media/panorama` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |
-| `/modern-admin/media/panorama-loop` | 0 | Da associare o collaudare |
+| `/modern-admin/media/panorama-loop` | 13 | [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json) |
 | `/modern-admin/media/public-endpoints` | 0 | Da associare o collaudare |
 | `/modern-admin/media/raw` | 3 | [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/media/raw-loop` | 0 | Da associare o collaudare |
@@ -54,17 +56,17 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 | `/modern-admin/notifications` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/notifications/<int:notification_id>` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/notifications/<int:notification_id>/acknowledge` | 0 | Da associare o collaudare |
-| `/modern-admin/now` | 2 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json) |
+| `/modern-admin/now` | 5 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json) |
 | `/modern-admin/observatory` | 0 | Da associare o collaudare |
 | `/modern-admin/observatory/astropanel` | 0 | Da associare o collaudare |
-| `/modern-admin/observatory/charts` | 0 | Da associare o collaudare |
+| `/modern-admin/observatory/charts` | 3 | [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json) |
 | `/modern-admin/observatory/long-term-keogram` | 3 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
 | `/modern-admin/observatory/realtime-keogram` | 1 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
-| `/modern-admin/observatory/sensor-panel` | 0 | Da associare o collaudare |
-| `/modern-admin/observatory/sqm` | 1 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
+| `/modern-admin/observatory/sensor-panel` | 4 | [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json) |
+| `/modern-admin/observatory/sqm` | 3 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json), [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json) |
 | `/modern-admin/observatory/virtualsky` | 2 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
 | `/modern-admin/operations/export` | 0 | Da associare o collaudare |
-| `/modern-admin/output` | 3 | [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json) |
+| `/modern-admin/output` | 5 | [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json) |
 | `/modern-admin/safe-action/dry-run` | 0 | Da associare o collaudare |
 | `/modern-admin/settings` | 1 | [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json) |
 | `/modern-admin/settings/acquisition-save` | 0 | Da associare o collaudare |

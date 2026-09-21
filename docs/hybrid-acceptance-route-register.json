@@ -1182,7 +1182,99 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminMediaPanoramaLoopView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[3]",
+          "control": "panorama-loop-toggle",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[4]",
+          "control": "panorama-loop-next",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[5]",
+          "control": "modern-admin-media-featured-image",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[6]",
+          "control": "ArrowRight",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[7]",
+          "control": "Escape",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[8]",
+          "control": "IMX708 Wide",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[9]",
+          "control": "panorama-loop-speed",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[10]",
+          "control": "panorama-loop-prev",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[11]",
+          "control": "ASI678MC",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[12]",
+          "control": "First visible Details link",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[15]",
+          "control": "390px viewport",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[16]",
+          "control": "ArrowLeft on Next button",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[17]",
+          "control": "First visible media checkbox",
+          "recorded_status": "superato",
+          "original_page": "Panorama Loop"
+        }
+      ]
     },
     {
       "route": "/modern-admin/media/public-endpoints",
@@ -1518,6 +1610,27 @@
           "record": "controls[1]",
           "control": "Browse camera images",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[0]",
+          "control": "Refresh status",
+          "recorded_status": "superato",
+          "original_page": "Now"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[1]",
+          "control": "hybrid-menu-button",
+          "recorded_status": "superato",
+          "original_page": "Now"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[2]",
+          "control": "Panorama Loop link",
+          "recorded_status": "superato",
+          "original_page": "Now"
         }
       ]
     },
@@ -1549,7 +1662,29 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminChartsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-observatory-native-controls.json",
+          "record": "cases[2]",
+          "control": "camera profile links",
+          "recorded_status": "passed",
+          "original_page": "Charts"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-native-controls.json",
+          "record": "cases[3]",
+          "control": "HISTORY_SELECT",
+          "recorded_status": "passed",
+          "original_page": "Charts"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-native-controls.json",
+          "record": "cases[8]",
+          "control": "anonymous access and login return",
+          "recorded_status": "passed",
+          "original_page": "Charts"
+        }
+      ]
     },
     {
       "route": "/modern-admin/observatory/long-term-keogram",
@@ -1609,7 +1744,36 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminSensorPanelView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-observatory-native-controls.json",
+          "record": "cases[4]",
+          "control": "camera profile links",
+          "recorded_status": "passed",
+          "original_page": "Sensor Panel"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-native-controls.json",
+          "record": "cases[5]",
+          "control": "sensor-show-all",
+          "recorded_status": "passed",
+          "original_page": "Sensor Panel"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-native-controls.json",
+          "record": "cases[6]",
+          "control": "sensor-refresh",
+          "recorded_status": "passed",
+          "original_page": "Sensor Panel"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-native-controls.json",
+          "record": "cases[7]",
+          "control": "sensor-show-all followed by camera link",
+          "recorded_status": "passed after correction",
+          "original_page": "Sensor Panel"
+        }
+      ]
     },
     {
       "route": "/modern-admin/observatory/sqm",
@@ -1626,6 +1790,20 @@
           "control": "camera links",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/observatory/sqm"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-native-controls.json",
+          "record": "cases[0]",
+          "control": "camera profile links",
+          "recorded_status": "passed",
+          "original_page": "SQM"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-native-controls.json",
+          "record": "cases[1]",
+          "control": "reading display",
+          "recorded_status": "passed",
+          "original_page": "SQM"
         }
       ]
     },
@@ -1691,6 +1869,20 @@
           "record": "controls[5]",
           "control": "Video loading / keyboard playback / playback completion / camera 2",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[13]",
+          "control": "390px viewport",
+          "recorded_status": "superato",
+          "original_page": "Output detail"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
+          "record": "cases[14]",
+          "control": "Browser Back",
+          "recorded_status": "superato",
+          "original_page": "Output detail"
         }
       ]
     },
@@ -3001,326 +3193,11 @@
   ],
   "unmatched_explicit_records": [
     {
-      "page": "/indi-allsky/login",
-      "source": "testing/evidence/hybrid-browser-2026-09-06.json",
-      "record": "controls[0]",
-      "control": "form-login/submit",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/indi-allsky/logout",
-      "source": "testing/evidence/hybrid-browser-2026-09-06.json",
-      "record": "controls[1]",
-      "control": "account/sign-out",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/indi-allsky/login",
-      "source": "testing/evidence/hybrid-browser-2026-09-06.json",
-      "record": "controls[6]",
-      "control": "mobile form",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Now",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[0]",
-      "control": "Refresh status",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Now",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[1]",
-      "control": "hybrid-menu-button",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Now",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[2]",
-      "control": "Panorama Loop link",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[3]",
-      "control": "panorama-loop-toggle",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[4]",
-      "control": "panorama-loop-next",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[5]",
-      "control": "modern-admin-media-featured-image",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[6]",
-      "control": "ArrowRight",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[7]",
-      "control": "Escape",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[8]",
-      "control": "IMX708 Wide",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[9]",
-      "control": "panorama-loop-speed",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[10]",
-      "control": "panorama-loop-prev",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[11]",
-      "control": "ASI678MC",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[12]",
-      "control": "First visible Details link",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Output detail",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[13]",
-      "control": "390px viewport",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Output detail",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[14]",
-      "control": "Browser Back",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[15]",
-      "control": "390px viewport",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[16]",
-      "control": "ArrowLeft on Next button",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "Panorama Loop",
-      "source": "testing/evidence/hybrid-native-panorama-2026-09-08.json",
-      "record": "cases[17]",
-      "control": "First visible media checkbox",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "SQM",
-      "source": "testing/evidence/hybrid-observatory-native-controls.json",
-      "record": "cases[0]",
-      "control": "camera profile links",
-      "recorded_status": "passed"
-    },
-    {
-      "page": "SQM",
-      "source": "testing/evidence/hybrid-observatory-native-controls.json",
-      "record": "cases[1]",
-      "control": "reading display",
-      "recorded_status": "passed"
-    },
-    {
-      "page": "Charts",
-      "source": "testing/evidence/hybrid-observatory-native-controls.json",
-      "record": "cases[2]",
-      "control": "camera profile links",
-      "recorded_status": "passed"
-    },
-    {
-      "page": "Charts",
-      "source": "testing/evidence/hybrid-observatory-native-controls.json",
-      "record": "cases[3]",
-      "control": "HISTORY_SELECT",
-      "recorded_status": "passed"
-    },
-    {
-      "page": "Sensor Panel",
-      "source": "testing/evidence/hybrid-observatory-native-controls.json",
-      "record": "cases[4]",
-      "control": "camera profile links",
-      "recorded_status": "passed"
-    },
-    {
-      "page": "Sensor Panel",
-      "source": "testing/evidence/hybrid-observatory-native-controls.json",
-      "record": "cases[5]",
-      "control": "sensor-show-all",
-      "recorded_status": "passed"
-    },
-    {
-      "page": "Sensor Panel",
-      "source": "testing/evidence/hybrid-observatory-native-controls.json",
-      "record": "cases[6]",
-      "control": "sensor-refresh",
-      "recorded_status": "passed"
-    },
-    {
-      "page": "Sensor Panel",
-      "source": "testing/evidence/hybrid-observatory-native-controls.json",
-      "record": "cases[7]",
-      "control": "sensor-show-all followed by camera link",
-      "recorded_status": "passed after correction"
-    },
-    {
-      "page": "Charts",
-      "source": "testing/evidence/hybrid-observatory-native-controls.json",
-      "record": "cases[8]",
-      "control": "anonymous access and login return",
-      "recorded_status": "passed"
-    },
-    {
       "page": "Observatory pages",
       "source": "testing/evidence/hybrid-observatory-native-controls.json",
       "record": "cases[9]",
       "control": "runtime recovery permissions",
       "recorded_status": "passed"
-    },
-    {
-      "page": "/latestimageview",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[0]",
-      "control": "redirect and image preview",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/view_image",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[1]",
-      "control": "Copy link",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/view_image",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[2]",
-      "control": "Download original",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/view_image",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[3]",
-      "control": "Fullscreen / Exit fullscreen",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/latesttimelapsewatch",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[4]",
-      "control": "video playback",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/watch_timelapse",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[5]",
-      "control": "Download original",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/latestkeogramview",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[6]",
-      "control": "redirect / viewer",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/lateststartrailview",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[7]",
-      "control": "redirect / viewer",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/latestpanoramaview",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[8]",
-      "control": "redirect / viewer",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/latestrawview",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[9]",
-      "control": "redirect / viewer",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/lateststartrailvideowatch",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[10]",
-      "control": "redirect / viewer",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/latestpanoramavideowatch",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[11]",
-      "control": "redirect / viewer",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/latestthumbnail",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[12]",
-      "control": "thumbnail redirect",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/latestpanorama",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[13]",
-      "control": "night selection without data",
-      "recorded_status": "superato"
-    },
-    {
-      "page": "/latestimage",
-      "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
-      "record": "controls[14]",
-      "control": "invalid camera parameter",
-      "recorded_status": "superato"
     },
     {
       "page": "/public media",
@@ -3916,7 +3793,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestImageRedirect"
+      "handler": "LatestImageRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[14]",
+          "control": "invalid camera parameter",
+          "recorded_status": "superato",
+          "original_page": "/latestimage"
+        }
+      ]
     },
     {
       "route": "/latestimageview",
@@ -3925,7 +3811,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestImageViewRedirect"
+      "handler": "LatestImageViewRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "redirect and image preview",
+          "recorded_status": "superato",
+          "original_page": "/latestimageview"
+        }
+      ]
     },
     {
       "route": "/latestkeogram",
@@ -3943,7 +3838,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestKeogramViewRedirect"
+      "handler": "LatestKeogramViewRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "redirect / viewer",
+          "recorded_status": "superato",
+          "original_page": "/latestkeogramview"
+        }
+      ]
     },
     {
       "route": "/latestpanorama",
@@ -3952,7 +3856,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestPanoramaImageRedirect"
+      "handler": "LatestPanoramaImageRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[13]",
+          "control": "night selection without data",
+          "recorded_status": "superato",
+          "original_page": "/latestpanorama"
+        }
+      ]
     },
     {
       "route": "/latestpanoramavideo",
@@ -3970,7 +3883,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestPanoramaVideoWatchRedirect"
+      "handler": "LatestPanoramaVideoWatchRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[11]",
+          "control": "redirect / viewer",
+          "recorded_status": "superato",
+          "original_page": "/latestpanoramavideowatch"
+        }
+      ]
     },
     {
       "route": "/latestpanoramaview",
@@ -3979,7 +3901,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestPanoramaImageViewRedirect"
+      "handler": "LatestPanoramaImageViewRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[8]",
+          "control": "redirect / viewer",
+          "recorded_status": "superato",
+          "original_page": "/latestpanoramaview"
+        }
+      ]
     },
     {
       "route": "/latestraw",
@@ -3997,7 +3928,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestRawImageViewRedirect"
+      "handler": "LatestRawImageViewRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[9]",
+          "control": "redirect / viewer",
+          "recorded_status": "superato",
+          "original_page": "/latestrawview"
+        }
+      ]
     },
     {
       "route": "/lateststartrail",
@@ -4024,7 +3964,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestStartrailVideoWatchRedirect"
+      "handler": "LatestStartrailVideoWatchRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[10]",
+          "control": "redirect / viewer",
+          "recorded_status": "superato",
+          "original_page": "/lateststartrailvideowatch"
+        }
+      ]
     },
     {
       "route": "/lateststartrailview",
@@ -4033,7 +3982,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestStartrailViewRedirect"
+      "handler": "LatestStartrailViewRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[7]",
+          "control": "redirect / viewer",
+          "recorded_status": "superato",
+          "original_page": "/lateststartrailview"
+        }
+      ]
     },
     {
       "route": "/latestthumbnail",
@@ -4042,7 +4000,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestThumbnailRedirect"
+      "handler": "LatestThumbnailRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[12]",
+          "control": "thumbnail redirect",
+          "recorded_status": "superato",
+          "original_page": "/latestthumbnail"
+        }
+      ]
     },
     {
       "route": "/latesttimelapse",
@@ -4060,7 +4027,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "LatestTimelapseVideoWatchRedirect"
+      "handler": "LatestTimelapseVideoWatchRedirect",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[4]",
+          "control": "video playback",
+          "recorded_status": "superato",
+          "original_page": "/latesttimelapsewatch"
+        }
+      ]
     },
     {
       "route": "/log",
@@ -4115,7 +4091,23 @@
         "POST"
       ],
       "handler_module": "indi_allsky.flask.auth_views",
-      "handler": "LoginView"
+      "handler": "LoginView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[0]",
+          "control": "form-login/submit",
+          "recorded_status": "superato",
+          "original_page": "/indi-allsky/login"
+        },
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[6]",
+          "control": "mobile form",
+          "recorded_status": "superato",
+          "original_page": "/indi-allsky/login"
+        }
+      ]
     },
     {
       "route": "/logout",
@@ -4124,7 +4116,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.auth_views",
-      "handler": "LogoutView"
+      "handler": "LogoutView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-browser-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "account/sign-out",
+          "recorded_status": "superato",
+          "original_page": "/indi-allsky/logout"
+        }
+      ]
     },
     {
       "route": "/longtermkeogram",
@@ -4601,7 +4602,30 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "TimelapseImageView"
+      "handler": "TimelapseImageView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[1]",
+          "control": "Copy link",
+          "recorded_status": "superato",
+          "original_page": "/view_image"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[2]",
+          "control": "Download original",
+          "recorded_status": "superato",
+          "original_page": "/view_image"
+        },
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[3]",
+          "control": "Fullscreen / Exit fullscreen",
+          "recorded_status": "superato",
+          "original_page": "/view_image"
+        }
+      ]
     },
     {
       "route": "/view_keogram",
@@ -4682,7 +4706,16 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "TimelapseVideoView"
+      "handler": "TimelapseVideoView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-public-media-2026-09-06.json",
+          "record": "controls[5]",
+          "control": "Download original",
+          "recorded_status": "superato",
+          "original_page": "/watch_timelapse"
+        }
+      ]
     },
     {
       "route": "/youtube/authorize",
@@ -4732,5 +4765,26 @@
       "handler_module": "flask.app",
       "handler": "<lambda>"
     }
-  ]
+  ],
+  "current_control_discovery": {
+    "commit": "f6975d5f5501b00aa3407dd5da7442b73f793952",
+    "date": "2026-09-21",
+    "environment": "isolated synthetic Flask; Classic physically absent",
+    "source_manifest_sha256": "5a7a89f36f27062b391f17e4fd59cbe491b5d0e38c2f0992f407c8604d08e851",
+    "report": "/home/eric/hybrid-post-classic-controls-20260921.json",
+    "report_sha256": "58ad27d871ee1a648bcef25d3d7b518b4aa8a5ac795849486bd92ddf56670ee4",
+    "get_entries": 99,
+    "contexts": 505,
+    "rendered_contexts": 376,
+    "blocked_contexts": 129,
+    "render_defects": 0,
+    "searched_placeholder_signals": 0,
+    "control_occurrences": 43978,
+    "controls_certified_by_discovery": 0,
+    "limitations": [
+      "Includes repeated controls across roles, camera scopes, aliases and shared navigation; count is not unique features or percentage",
+      "Static HTML only; JavaScript-generated controls require the separate browser evidence",
+      "Rendering and absence of selected placeholder phrases do not prove functional completion"
+    ]
+  }
 }
