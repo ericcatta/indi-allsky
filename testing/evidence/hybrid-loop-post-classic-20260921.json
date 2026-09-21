@@ -51,9 +51,8 @@
     {
       "route": "/modern-admin/loop",
       "control": "ROCK_CHECKBOX",
-      "status": "bloccato",
-      "observed": "Checkbox accepted native input; full live reversal sequence was not observed. Existing real-script regression passes oldest-middle-newest-middle-oldest without duplicate endpoints.",
-      "reason": "Native endpoint reversal remains unobserved; automated behavior is verified.",
+      "status": "superato",
+      "observed": "Native checkbox enabled reversal on both cameras. DOM samples of decoded images contain consecutive increasing and decreasing capture timestamps, with transitions in both directions. Unchecking on ASI restored advancing sequences with wrap/refresh resets.",
       "role": "administrator",
       "camera_ids": [
         1,
@@ -62,7 +61,64 @@
       "profile_ids": [
         "imx708-wide",
         "asi678mc"
-      ]
+      ],
+      "native_samples": {
+        "method": "Read displayed image src and decoded state every150ms through browser DOM; no app state or network injection. Sampled timestamps omit intermediate frames.",
+        "camera1_bounce": [
+          "190928",
+          "190727",
+          "190526",
+          "190341",
+          "190541",
+          "190727",
+          "190913",
+          "191058",
+          "191244",
+          "191429",
+          "191614",
+          "191800",
+          "191644",
+          "191459",
+          "191314",
+          "191129"
+        ],
+        "camera2_bounce": [
+          "191201",
+          "191016",
+          "190816",
+          "190615",
+          "190415",
+          "190600",
+          "190801",
+          "191001",
+          "191146",
+          "191332",
+          "191532",
+          "191717",
+          "191832",
+          "191632",
+          "191447",
+          "191302",
+          "191116"
+        ],
+        "camera2_forward": [
+          "190700",
+          "190901",
+          "191046",
+          "191231",
+          "191417",
+          "191602",
+          "191747",
+          "190445",
+          "190615",
+          "190801",
+          "190500",
+          "190645",
+          "190831",
+          "191016"
+        ],
+        "date": "2026-09-21"
+      }
     },
     {
       "route": "/modern-admin/loop",
@@ -110,7 +166,7 @@
   },
   "limits": [
     "No live RAW playback with existing data because RAW table is empty",
-    "Native bounce reversal remains open",
-    "No capture or saved configuration changes"
+    "No capture or saved configuration changes",
+    "Native sampling verifies direction changes, not every endpoint or exact wall-clock FPS; deterministic endpoint tests remain separate."
   ]
 }

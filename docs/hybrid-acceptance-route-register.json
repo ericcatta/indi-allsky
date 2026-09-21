@@ -792,7 +792,7 @@
           "source": "testing/evidence/hybrid-loop-post-classic-20260921.json",
           "record": "controls[3]",
           "control": "ROCK_CHECKBOX",
-          "recorded_status": "bloccato"
+          "recorded_status": "superato"
         },
         {
           "source": "testing/evidence/hybrid-loop-post-classic-20260921.json",
