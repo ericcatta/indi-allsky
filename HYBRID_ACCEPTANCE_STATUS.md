@@ -36,6 +36,7 @@ Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not co
 | Highlights, Moment and Output | 16 image-detail links and previews verified; seven output-type links per camera preserve filters; both completed day keograms display real files. Download delivery remains open | [Product media navigation](testing/evidence/hybrid-product-media-navigation-20260921.json) |
 | Static cleanup and VirtualSky | Five unused vendor demo assets removed (78,384 bytes); both camera overlays, fullscreen and preview reset verified; services preserved | [Static cleanup](testing/evidence/hybrid-static-cleanup-20260921.json) |
 | Complete day outputs | Four automatic tasks succeeded: both camera timelapses (3,165 frames each) and panoramas (1,581 each). Original files/probes match; all four played to natural end in the browser | [Day output playback](testing/evidence/hybrid-day-output-playback-20260921.json) |
+| System tools and Focus | Native network/drive refresh, SD metadata, complete support output and GPIO disabled-state checks; Focus crop/reset/fullscreen and both-camera preview with automatic refresh. Physical device effects remain open | [System and Focus](testing/evidence/hybrid-system-focus-native-20260921.json) |
 | Browser downloads | Video and empty CSV clicks returned, but no matching file was found in Mac Downloads; delivery remains unverified | [Open download checks](testing/evidence/hybrid-download-delivery-post-classic-20260921.json) |
 
 Earlier evidence remains useful for its stated revision, role, camera and environment.

@@ -2417,13 +2417,13 @@
         {
           "source": "testing/evidence/hybrid-settings-navigation-context-20260921.json",
           "record": "controls[0]",
-          "control": "Profile tab → Settings index → Exposure / Gain",
+          "control": "Profile tab \u2192 Settings index \u2192 Exposure / Gain",
           "recorded_status": "superato"
         },
         {
           "source": "testing/evidence/hybrid-settings-navigation-context-20260921.json",
           "record": "controls[1]",
-          "control": "Profile tab → Settings index → Exposure / Gain",
+          "control": "Profile tab \u2192 Settings index \u2192 Exposure / Gain",
           "recorded_status": "superato"
         }
       ]
@@ -2523,13 +2523,13 @@
         {
           "source": "testing/evidence/hybrid-settings-navigation-context-20260921.json",
           "record": "controls[0]",
-          "control": "Profile tab → Settings index → Exposure / Gain",
+          "control": "Profile tab \u2192 Settings index \u2192 Exposure / Gain",
           "recorded_status": "superato"
         },
         {
           "source": "testing/evidence/hybrid-settings-navigation-context-20260921.json",
           "record": "controls[1]",
-          "control": "Profile tab → Settings index → Exposure / Gain",
+          "control": "Profile tab \u2192 Settings index \u2192 Exposure / Gain",
           "recorded_status": "superato"
         }
       ]
@@ -2791,7 +2791,32 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminDriveManagerView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[1]",
+          "control": "Show metadata",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[2]",
+          "control": "Refresh devices",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[3]",
+          "control": "Protected-drive action availability",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[15]",
+          "control": "Removable-drive mount/unmount/power effects",
+          "recorded_status": "bloccato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/storage/file-space-usage",
@@ -2831,7 +2856,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminManualGpioView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[5]",
+          "control": "Refresh pin states",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[6]",
+          "control": "Physical GPIO output verification",
+          "recorded_status": "bloccato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/system/info",
@@ -2871,7 +2909,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminNetworkView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[0]",
+          "control": "Refresh connections",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[14]",
+          "control": "Network-changing commands",
+          "recorded_status": "bloccato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/system/support",
@@ -2881,7 +2932,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminSupportInfoView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[4]",
+          "control": "modern-admin-load-support",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/tasks",
@@ -3114,7 +3172,50 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminFocusView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[7]",
+          "control": "Refresh preview: IMX708",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[8]",
+          "control": "Fullscreen preview and Exit fullscreen",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[9]",
+          "control": "Zoom Low, horizontal offset100, Refresh preview",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[10]",
+          "control": "Reset view",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[11]",
+          "control": "Preview camera ASI678MC + Choose camera + Refresh preview",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[12]",
+          "control": "Automatic refresh with interval2s",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
+          "record": "controls[13]",
+          "control": "Physical focuser movement",
+          "recorded_status": "bloccato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/tools/focus/preview",

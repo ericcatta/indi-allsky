@@ -90,20 +90,20 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/settings/timelapse` | 0 | Da associare o collaudare |
 | `/modern-admin/sky-cycle` | 2 | [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
 | `/modern-admin/storage` | 0 | Da associare o collaudare |
-| `/modern-admin/storage/drives` | 0 | Da associare o collaudare |
+| `/modern-admin/storage/drives` | 4 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |
 | `/modern-admin/storage/file-space-usage` | 0 | Da associare o collaudare |
 | `/modern-admin/system` | 0 | Da associare o collaudare |
 | `/modern-admin/system/config` | 0 | Da associare o collaudare |
-| `/modern-admin/system/gpio-control` | 0 | Da associare o collaudare |
+| `/modern-admin/system/gpio-control` | 2 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |
 | `/modern-admin/system/info` | 0 | Da associare o collaudare |
 | `/modern-admin/system/log` | 0 | Da associare o collaudare |
 | `/modern-admin/system/log/<log_name>` | 0 | Da associare o collaudare |
-| `/modern-admin/system/network` | 0 | Da associare o collaudare |
-| `/modern-admin/system/support` | 0 | Da associare o collaudare |
+| `/modern-admin/system/network` | 2 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |
+| `/modern-admin/system/support` | 1 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |
 | `/modern-admin/tasks` | 16 | [hybrid-download-delivery-post-classic-20260921](../testing/evidence/hybrid-download-delivery-post-classic-20260921.json), [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/tasks/<int:task_id>` | 8 | [hybrid-day-output-playback-20260921](../testing/evidence/hybrid-day-output-playback-20260921.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-satellite-recheck-20260921](../testing/evidence/hybrid-satellite-recheck-20260921.json) |
 | `/modern-admin/tools/camera-simulator` | 7 | [hybrid-simulator-2026-09-06](../testing/evidence/hybrid-simulator-2026-09-06.json) |
-| `/modern-admin/tools/focus` | 0 | Da associare o collaudare |
+| `/modern-admin/tools/focus` | 7 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |
 | `/modern-admin/tools/focus/preview` | 0 | Da associare o collaudare |
 | `/modern-admin/tools/generate` | 22 | [hybrid-end-of-night-pipeline-2026-09-08](../testing/evidence/hybrid-end-of-night-pipeline-2026-09-08.json), [hybrid-generation-2026-09-06](../testing/evidence/hybrid-generation-2026-09-06.json), [hybrid-keogram-encoding-2026-09-08](../testing/evidence/hybrid-keogram-encoding-2026-09-08.json), [hybrid-real-encoding-2026-09-08](../testing/evidence/hybrid-real-encoding-2026-09-08.json), [hybrid-startrail-empty-2026-09-08](../testing/evidence/hybrid-startrail-empty-2026-09-08.json) |
 | `/modern-admin/tools/image-circle-helper` | 13 | [hybrid-geometry-2026-09-06](../testing/evidence/hybrid-geometry-2026-09-06.json) |

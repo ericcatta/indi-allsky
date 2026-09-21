@@ -1,0 +1,141 @@
+{
+  "date": "2026-09-21",
+  "installed_commit": "e19acee9ae629d43ea5b70d123126d458a311d80",
+  "environment": "Native production browser, administrator; read-only SSH cross-check; Classic frontend absent",
+  "controls": [
+    {
+      "route": "/modern-admin/system/network",
+      "control": "Refresh connections",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "superato",
+      "observed": "Native refresh retains live wlan0 connection active, Ethernet down and loopback active. Independent nmcli confirms wlan0 and lo active."
+    },
+    {
+      "route": "/modern-admin/storage/drives",
+      "control": "Show metadata",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "superato",
+      "observed": "Native button loads SD metadata: SN128, sdio, flash_sd, CanPowerOff=false. Independent lsblk reports mmcblk0 127865454592 bytes, root and /boot/firmware partitions."
+    },
+    {
+      "route": "/modern-admin/storage/drives",
+      "control": "Refresh devices",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "superato",
+      "observed": "Native refresh returns the same actual SD device and protected root/boot filesystems."
+    },
+    {
+      "route": "/modern-admin/storage/drives",
+      "control": "Protected-drive action availability",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "superato",
+      "observed": "Power-off disabled because device lacks support; both Unmount buttons disabled with protected-system/configured-media explanation. No mount/unmount or power action submitted."
+    },
+    {
+      "route": "/modern-admin/system/support",
+      "control": "modern-admin-load-support",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "superato",
+      "observed": "Native click GET /indi-allsky/js/support progresses from Loading to 85717 characters of diagnostic output, identifying Debian 13, aarch64, Raspberry Pi 5, and ending with end support info. Raw output not committed because it includes private operational logs."
+    },
+    {
+      "route": "/modern-admin/system/gpio-control",
+      "control": "Refresh pin states",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "superato",
+      "observed": "Native refresh reports no supported manual GPIO interface, unknown states for BCM 21,25,16. All six action buttons match :disabled through their disabled fieldsets. No GPIO effect submitted."
+    },
+    {
+      "route": "/modern-admin/system/gpio-control",
+      "control": "Physical GPIO output verification",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "bloccato",
+      "observed": "No supported manual interface configured and attached devices not identified. Live effects not tested."
+    },
+    {
+      "route": "/modern-admin/tools/focus",
+      "control": "Refresh preview: IMX708",
+      "role": "administrator",
+      "camera_id": 1,
+      "status": "superato",
+      "observed": "Native request displays saved camera 1 frame 2026-09-21T20:57:03; decoded image 4608x2592, sharpness65.77, stars338, history zoom2 x0 y0."
+    },
+    {
+      "route": "/modern-admin/tools/focus",
+      "control": "Fullscreen preview and Exit fullscreen",
+      "role": "administrator",
+      "camera_id": 1,
+      "status": "superato",
+      "observed": "Native expansion makes Exit fullscreen visible; native exit hides it again."
+    },
+    {
+      "route": "/modern-admin/tools/focus",
+      "control": "Zoom Low, horizontal offset100, Refresh preview",
+      "role": "administrator",
+      "camera_id": 1,
+      "status": "superato",
+      "observed": "Native selection and submit display decoded crop1843x1037, history zoom5 x100 y0, sharpness4.74; original history row retained."
+    },
+    {
+      "route": "/modern-admin/tools/focus",
+      "control": "Reset view",
+      "role": "administrator",
+      "camera_id": 1,
+      "status": "superato",
+      "observed": "Native reset restores zoom2 and offsets0, clears history and records the new default preview with sharpness65.77."
+    },
+    {
+      "route": "/modern-admin/tools/focus",
+      "control": "Preview camera ASI678MC + Choose camera + Refresh preview",
+      "role": "administrator",
+      "camera_id": 2,
+      "status": "superato",
+      "observed": "Native selection navigates to ?camera_id=2. Visible preview and history identify camera2 frame2026-09-21T20:57:17 sharpness47.13 stars90. Direct image-dimension inspection timed out in browser tooling; no dimensions claimed for this preview."
+    },
+    {
+      "route": "/modern-admin/tools/focus",
+      "control": "Automatic refresh with interval2s",
+      "role": "administrator",
+      "camera_id": 2,
+      "status": "superato",
+      "observed": "Native enable adds four measurements and advances source frame to20:58:02, sharpness47.17 stars91. Unchecked afterwards; final DOM checkbox has no checked state. Test tab closed."
+    },
+    {
+      "route": "/modern-admin/tools/focus",
+      "control": "Physical focuser movement",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "bloccato",
+      "observed": "No focuser configured; both direction buttons and movement angle disabled. Physical movement not tested."
+    },
+    {
+      "route": "/modern-admin/system/network",
+      "control": "Network-changing commands",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "bloccato",
+      "observed": "Not submitted: connected devices/recovery presence not established. Refresh proof does not certify activation/deactivation/deletion/hotspot/scan effects."
+    },
+    {
+      "route": "/modern-admin/storage/drives",
+      "control": "Removable-drive mount/unmount/power effects",
+      "role": "administrator",
+      "camera_id": null,
+      "status": "bloccato",
+      "observed": "Only protected system SD found. No dedicated removable test device identified; effects remain unverified."
+    }
+  ],
+  "limits": [
+    "No production configuration or hardware state changed.",
+    "No 24-hour observation.",
+    "No coverage claim for other roles, failure variants or untested controls.",
+    "Evidence-only change: existing runtime regression is unchanged; not rerun."
+  ]
+}
