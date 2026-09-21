@@ -5,20 +5,20 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `6a3dfc8f6e541ae75ad14b507f5e85d6c8587ec2`.
+The Raspberry runs `e19acee9ae629d43ea5b70d123126d458a311d80`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
-The 780-file installed source manifest matches the tested snapshot:
-`5a9e5b170accaffdde61909152f50a0d680ed4e52ea7819aed654fbbd083689d`.
-All 162 Python entrypoints are verified: 161 passed in the complete run and the remaining inheritance guard passed after updating its expected class bases. Only that test changed; runtime and other tests were byte-identical. All 34 JavaScript tests passed. Details and original reports: [Settings navigation validation](testing/evidence/hybrid-settings-navigation-context-20260921.json).
+The 775-file installed source manifest matches the tested snapshot:
+`0eb43629f31133e40c2285e97e67231c77a34d6b219af9485005436c47c1f325`.
+All 162 Python entrypoints passed in one complete run with unchanged source, and all 34 JavaScript tests passed. Details: [static cleanup validation](testing/evidence/hybrid-static-cleanup-20260921.json).
 This automated result does not certify every native control or hardware effect.
 
 The deployment preserved configuration revision 117, Flask configuration,
-user files and capture PID 1566. Only the web service restarted (PID 802610).
-The database backup passed integrity checking in 57.73 seconds.
+user files and capture PID 1566. Neither service restarted; web PID 802610 was preserved.
+The database backup passed integrity checking in 63.21 seconds.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not commands from historical mission reports.
 
 ## Post-removal evidence
@@ -34,6 +34,7 @@ Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not co
 | Mobile navigation | At 390 px, drawer focus/Escape/Enter, Settings navigation, profile search and Loop filters verified; Loop also fits 320 px with both images decoded. Profile-tab context defect found in this historical run was corrected and verified in the Settings navigation entry below | [Mobile acceptance](testing/evidence/hybrid-mobile-navigation-20260921.json) |
 | Settings camera/profile round trip | Both native profile → Settings → Exposure/Gain paths preserve the correct camera ID and profile; Now images decoded after web-only update | [Settings navigation](testing/evidence/hybrid-settings-navigation-context-20260921.json) |
 | Highlights, Moment and Output | 16 image-detail links and previews verified; seven output-type links per camera preserve filters; both completed day keograms display real files. Download delivery remains open | [Product media navigation](testing/evidence/hybrid-product-media-navigation-20260921.json) |
+| Static cleanup and VirtualSky | Five unused vendor demo assets removed (78,384 bytes); both camera overlays, fullscreen and preview reset verified; services preserved | [Static cleanup](testing/evidence/hybrid-static-cleanup-20260921.json) |
 | Browser downloads | Video and empty CSV clicks returned, but no matching file was found in Mac Downloads; delivery remains unverified | [Open download checks](testing/evidence/hybrid-download-delivery-post-classic-20260921.json) |
 
 Earlier evidence remains useful for its stated revision, role, camera and environment.

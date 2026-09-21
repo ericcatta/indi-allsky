@@ -2,21 +2,23 @@
 
 ## Installed version
 
-Production runs `6a3dfc8f6e541ae75ad14b507f5e85d6c8587ec2` (21 September
+Production runs `e19acee9ae629d43ea5b70d123126d458a311d80` (21 September
 2026). Classic frontend files are physically removed; Hybrid is the only UI.
-All 780 installed source hashes match the validated snapshot: 161 Python tests
-passed in the full run, the updated inheritance guard passed its targeted retest,
-and 34 JavaScript tests passed. Runtime source was unchanged between those runs. Native isolated Settings save/restore recovered the original
+All 775 installed source hashes match the snapshot that passed a complete run
+of 162 Python entrypoints with unchanged source and 34 JavaScript tests. Native isolated Settings save/restore recovered the original
 value; production Now decoded current images from both cameras and Full Settings
 search returned the expected field. These are bounded acceptance checks.
 
-The database backup passed integrity validation in 57.73 seconds. Configuration
+The database backup passed integrity validation in 63.21 seconds. Configuration
 117, Flask configuration, capture PID 1566 and untracked files were preserved.
-The web service restarted as PID 802610. A complete control/effect matrix and
+The web service stayed active as PID 802610; neither web nor capture restarted. A complete control/effect matrix and
 unavailable hardware checks remain open; the 24-hour observation is deferred.
 
 Both camera/profile round trips through the Settings index and Exposure/Gain
 passed in the native production browser. See [Settings navigation evidence](testing/evidence/hybrid-settings-navigation-context-20260921.json).
+
+The latest static cleanup also passed native VirtualSky rendering on both cameras,
+fullscreen and preview reset: [cleanup evidence](testing/evidence/hybrid-static-cleanup-20260921.json).
 
 Evidence: [Classic removal acceptance](testing/evidence/hybrid-retirement-final-native-20260921.json).
 
@@ -32,19 +34,19 @@ git -C /home/eric/indi-allsky rev-parse HEAD
 
 The protected helper requires exactly the installed revision above and refuses
 to discard tracked edits. Its backup is:
-`/home/eric/hybrid-backups/hybrid-settings-navigation-20260921-201054`.
+`/home/eric/hybrid-backups/hybrid-static-cleanup-20260921-203940`.
 Run on the Raspberry:
 
 ```sh
-release_backup=/home/eric/hybrid-backups/hybrid-settings-navigation-20260921-201054
+release_backup=/home/eric/hybrid-backups/hybrid-static-cleanup-20260921-203940
 maintenance_deadline="$(date --date='+15 minutes' --iso-8601=seconds)"
 python3 "$release_backup/deploy.py" --rollback "$release_backup" \
   --maintenance-until "$maintenance_deadline"
 ```
 
-This code-only rollback returns to `fe2640c8`, restarts the web service and its
-previously active socket, and retains capture, database and current configuration.
-Classic remains removed after this rollback; it reverts the Settings index context correction while retaining device-identity matching.
+This static-only rollback returns to `6a3dfc8f` and restores the five vendor
+demo assets without restarting services or changing database/configuration.
+Classic remains removed and both Settings context fixes remain installed.
 The helper is prepared; this live release has not been deliberately reverted.
 Read the backup's `deployment.json`, confirm the revision and services, then
 verify HTTPS Now and new nonempty files from both cameras. Process readiness
@@ -82,7 +84,7 @@ one-off authorized test-media cleanup does not change that saved policy.
 Some older snapshots are archived as `indi-allsky.sqlite.gz` to recover space.
 Their `compressed-storage.json` records the original byte length and SHA-256;
 complete decompression is verified before removing the uncompressed copy.
-The current Settings navigation, Settings scope, Classic retirement and preceding Settings polish backups remain
+The current static cleanup and recent Settings/Classic retirement backups remain
 uncompressed, with configuration and code archives preserved.
 
 Before using an archived database snapshot, ensure space for `original_bytes`,

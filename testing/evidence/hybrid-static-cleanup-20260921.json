@@ -28,5 +28,42 @@
     "sha256": "0eb43629f31133e40c2285e97e67231c77a34d6b219af9485005436c47c1f325"
   },
   "native_baseline": "Production VirtualSky camera 2 decoded 3840x2160 frame; screenshot showed stars, constellation lines, names and planets on the image.",
-  "deployment": "Pending; static-only deployment guard permits exactly these five deletions and no service restart."
+  "deployment": {
+    "commit": "e19acee9ae629d43ea5b70d123126d458a311d80",
+    "backup": "/home/eric/hybrid-backups/hybrid-static-cleanup-20260921-203940",
+    "integrity": "ok",
+    "backup_seconds": 63.21,
+    "configuration_revision": 117,
+    "configuration_unchanged": true,
+    "web_pid_before_and_after": 802610,
+    "capture_restarted": false,
+    "status": "installed-bounded-acceptance-passed",
+    "deleted_files_absent": true
+  },
+  "controls": [
+    {
+      "route": "/modern-admin/observatory/virtualsky",
+      "control": "Camera selection and sky overlay",
+      "status": "superato",
+      "role": "administrator",
+      "observed": "After deployment, ASI frame at 20:40:46 decoded 3840x2160; IMX708 at 20:41:17 decoded 4608x2592. Screenshot confirmed stars, constellation lines/names and planets over the IMX708 image. Active script tags use retained stuquery, virtualsky, html2canvas and Hybrid controller. This is rendering verification, not a scientific alignment/calibration measurement."
+    },
+    {
+      "route": "/modern-admin/observatory/virtualsky",
+      "control": "Fullscreen / Exit fullscreen",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 2,
+      "observed": "Fullscreen made Exit fullscreen visible; clicking it returned to normal mode and hid the exit control."
+    },
+    {
+      "route": "/modern-admin/observatory/virtualsky",
+      "control": "Azimuth Angle / Reset preview",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 2,
+      "observed": "Changed the preview azimuth field from 0.0 to 10, then Reset preview restored 0.0. No camera settings were saved. This checks field/reset behavior, not numeric sky-position accuracy."
+    }
+  ],
+  "limits": "Download overlay PNG delivery remains under the existing client-download acceptance blocker. No unsupported dependency was removed and no speed improvement is claimed from deleting assets that were not loaded."
 }

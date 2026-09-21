@@ -2187,6 +2187,24 @@
           "control": "virtualsky-fullscreen and virtualsky-exit-fullscreen",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/observatory/virtualsky"
+        },
+        {
+          "source": "testing/evidence/hybrid-static-cleanup-20260921.json",
+          "record": "controls[0]",
+          "control": "Camera selection and sky overlay",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-static-cleanup-20260921.json",
+          "record": "controls[1]",
+          "control": "Fullscreen / Exit fullscreen",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-static-cleanup-20260921.json",
+          "record": "controls[2]",
+          "control": "Azimuth Angle / Reset preview",
+          "recorded_status": "superato"
         }
       ]
     },

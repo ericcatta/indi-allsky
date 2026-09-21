@@ -64,7 +64,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/observatory/realtime-keogram` | 1 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
 | `/modern-admin/observatory/sensor-panel` | 4 | [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json) |
 | `/modern-admin/observatory/sqm` | 3 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json), [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json) |
-| `/modern-admin/observatory/virtualsky` | 2 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json) |
+| `/modern-admin/observatory/virtualsky` | 5 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json), [hybrid-static-cleanup-20260921](../testing/evidence/hybrid-static-cleanup-20260921.json) |
 | `/modern-admin/operations/export` | 0 | Da associare o collaudare |
 | `/modern-admin/output` | 21 | [hybrid-download-delivery-post-classic-20260921](../testing/evidence/hybrid-download-delivery-post-classic-20260921.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json), [hybrid-product-media-navigation-20260921](../testing/evidence/hybrid-product-media-navigation-20260921.json) |
 | `/modern-admin/safe-action/dry-run` | 0 | Da associare o collaudare |
