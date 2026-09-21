@@ -56,7 +56,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/notifications` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/notifications/<int:notification_id>` | 5 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json) |
 | `/modern-admin/notifications/<int:notification_id>/acknowledge` | 0 | Da associare o collaudare |
-| `/modern-admin/now` | 7 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json) |
+| `/modern-admin/now` | 8 | [hybrid-browser-media-2026-09-08](../testing/evidence/hybrid-browser-media-2026-09-08.json), [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json) |
 | `/modern-admin/observatory` | 0 | Da associare o collaudare |
 | `/modern-admin/observatory/astropanel` | 0 | Da associare o collaudare |
 | `/modern-admin/observatory/charts` | 3 | [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json) |
@@ -68,7 +68,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/operations/export` | 0 | Da associare o collaudare |
 | `/modern-admin/output` | 6 | [hybrid-download-delivery-post-classic-20260921](../testing/evidence/hybrid-download-delivery-post-classic-20260921.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json) |
 | `/modern-admin/safe-action/dry-run` | 0 | Da associare o collaudare |
-| `/modern-admin/settings` | 2 | [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json) |
+| `/modern-admin/settings` | 4 | [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json), [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json) |
 | `/modern-admin/settings/acquisition-save` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/advanced` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/analytics` | 0 | Da associare o collaudare |
@@ -76,7 +76,7 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | `/modern-admin/settings/basic` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/camera-connection` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/camera-profile` | 0 | Da associare o collaudare |
-| `/modern-admin/settings/cameras` | 2 | [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json) |
+| `/modern-admin/settings/cameras` | 4 | [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json) |
 | `/modern-admin/settings/capture` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/developer` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/exposure-gain` | 0 | Da associare o collaudare |

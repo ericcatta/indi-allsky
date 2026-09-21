@@ -5,20 +5,20 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `fe2640c831f08cc464953b2189df3503946a5219`.
-The latest Settings identity correction is installed; its tested index-link follow-up awaits deployment.
+The Raspberry runs `6a3dfc8f6e541ae75ad14b507f5e85d6c8587ec2`.
+Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
 The 780-file installed source manifest matches the tested snapshot:
-`cab1c6a2fa3dceddba27df2befd8cdc09b8c61a410cefd6c616c336494517cc6`.
-All 162 Python entrypoints and 34 JavaScript tests passed, including startup and flows without Classic, Full Config parity, Settings, Safe Actions and Product Spine.
+`5a9e5b170accaffdde61909152f50a0d680ed4e52ea7819aed654fbbd083689d`.
+All 162 Python entrypoints are verified: 161 passed in the complete run and the remaining inheritance guard passed after updating its expected class bases. Only that test changed; runtime and other tests were byte-identical. All 34 JavaScript tests passed. Details and original reports: [Settings navigation validation](testing/evidence/hybrid-settings-navigation-context-20260921.json).
 This automated result does not certify every native control or hardware effect.
 
 The deployment preserved configuration revision 117, Flask configuration,
-user files and capture PID 1566. Only the web service restarted (PID 773072).
-The database backup passed integrity checking in 31.87 seconds.
+user files and capture PID 1566. Only the web service restarted (PID 802610).
+The database backup passed integrity checking in 57.73 seconds.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not commands from historical mission reports.
 
 ## Post-removal evidence
@@ -31,7 +31,8 @@ Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not co
 | Loop | Both cameras, individual filters, history, speed selection, native forward/reverse playback and return to forward playback | [Loop acceptance](testing/evidence/hybrid-loop-post-classic-20260921.json) |
 | RAW Loop with absent data | Correct empty state on both cameras and navigation back to processed Loop; the live RAW table is empty | [Loop acceptance](testing/evidence/hybrid-loop-post-classic-20260921.json) |
 | Satellite provider | Real requests validated 156 visual, 10,695 Starlink and 20 station entries; production catalog unchanged; real task outcomes visible in Hybrid. Historical 403 not reproduced | [Provider recheck](testing/evidence/hybrid-satellite-recheck-20260921.json) |
-| Mobile navigation | At 390 px, drawer focus/Escape/Enter, Settings navigation, profile search and Loop filters verified; Loop also fits 320 px with both images decoded. Profile-tab return camera context is defective, recorded separately | [Mobile acceptance](testing/evidence/hybrid-mobile-navigation-20260921.json) |
+| Mobile navigation | At 390 px, drawer focus/Escape/Enter, Settings navigation, profile search and Loop filters verified; Loop also fits 320 px with both images decoded. Profile-tab context defect found in this historical run was corrected and verified in the Settings navigation entry below | [Mobile acceptance](testing/evidence/hybrid-mobile-navigation-20260921.json) |
+| Settings camera/profile round trip | Both native profile → Settings → Exposure/Gain paths preserve the correct camera ID and profile; Now images decoded after web-only update | [Settings navigation](testing/evidence/hybrid-settings-navigation-context-20260921.json) |
 | Browser downloads | Video and empty CSV clicks returned, but no matching file was found in Mac Downloads; delivery remains unverified | [Open download checks](testing/evidence/hybrid-download-delivery-post-classic-20260921.json) |
 
 Earlier evidence remains useful for its stated revision, role, camera and environment.
@@ -40,7 +41,7 @@ The [route evidence register](docs/hybrid-acceptance-route-register.md) links ea
 
 ## Inventory and coverage limits
 
-The current isolated discovery covers all 99 registered Hybrid GET entries in
+The isolated discovery of `f6975d5f` covers all 99 registered Hybrid GET entries in
 505 role/camera/detail contexts: 376 rendered and 129 blocked or redirected,
 with no rendering defects and no matches for the selected placeholder phrases.
 It records 43,978 control occurrences, including repetition across roles,
@@ -58,7 +59,6 @@ Absence of selected placeholder phrases is not proof that every function is impl
 
 ## Remaining acceptance gates
 
-- Finish the Settings index-link follow-up: profile identity and the first return link are corrected in production, but the index still rebuilds the ASI shortcut using camera 1 from the session. The follow-up passed validation (161 full-run passes plus the updated inheritance guard retest; runtime unchanged between them, and 34 JavaScript passes). See [Settings camera scope](testing/evidence/hybrid-settings-camera-scope-20260921.json).
 
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.

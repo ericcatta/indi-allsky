@@ -21,5 +21,43 @@
     "javascript_report": "/tmp/hybrid-settings-navigation-js-20260921.json",
     "fingerprints": "Existing parser/form fingerprints unchanged."
   },
-  "live_acceptance": "Pending deployment; first correction fe2640c8 fixed profile binding but not the downstream index link."
+  "live_acceptance": "Passed for the selected profile \u2192 Settings index \u2192 Exposure/Gain round trip on both cameras, with administrator in native production browser. No configuration saved by browser.",
+  "deployment": {
+    "commit": "6a3dfc8f6e541ae75ad14b507f5e85d6c8587ec2",
+    "backup": "/home/eric/hybrid-backups/hybrid-settings-navigation-20260921-201054",
+    "integrity": "ok",
+    "backup_seconds": 57.73,
+    "configuration_revision_before_and_after": 117,
+    "capture_restarted": false,
+    "configuration_unchanged": true,
+    "web_pid": 802610,
+    "status": "installed-bounded-acceptance-passed"
+  },
+  "controls": [
+    {
+      "route": "/modern-admin/settings/cameras",
+      "control": "Profile tab \u2192 Settings index \u2192 Exposure / Gain",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "observed": "Profile summary identifies libcamera_imx708; both the Back to Settings Inventory link and subsequent Exposure / Gain shortcut carry camera_id=1 and profile_id=imx708-wide; following the shortcut preserves the selected profile."
+    },
+    {
+      "route": "/modern-admin/settings/cameras",
+      "control": "Profile tab \u2192 Settings index \u2192 Exposure / Gain",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "observed": "Profile summary identifies ZWO CCD ASI678MC; both the Back to Settings Inventory link and subsequent Exposure / Gain shortcut carry camera_id=2 and profile_id=asi678mc; following the shortcut preserves the selected profile."
+    },
+    {
+      "route": "/modern-admin/now",
+      "control": "Home after Settings navigation",
+      "status": "superato",
+      "role": "administrator",
+      "observed": "Now decoded IMX708 4608x2592 and ASI 3840x2160. At page load latest timestamps were 20:12:46 (6 seconds old) and 20:12:15 (37 seconds old), respectively. No 24-hour test or long-term cadence claim."
+    }
+  ]
 }
