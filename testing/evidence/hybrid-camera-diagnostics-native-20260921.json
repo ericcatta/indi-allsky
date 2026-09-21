@@ -1,0 +1,96 @@
+{
+  "date": "2026-09-21",
+  "installed_commit": "e19acee9ae629d43ea5b70d123126d458a311d80",
+  "environment": "Native production browser plus independent read-only Pi database/filesystem/INDI checks",
+  "controls": [
+    {
+      "route": "/modern-admin/cameras",
+      "control": "Profile Gallery links",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Both profile Gallery links open the matching camera filter. IMX708 page loads and decodes72 thumbnails under its camera UUID; ASI link shows ASI678MC and its distinct frame timestamps. No ASI thumbnail-decoding claim in this check."
+    },
+    {
+      "route": "/modern-admin/cameras/adu-history",
+      "control": "Next / First / entries per page All",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Native Next shows entries21\u201328 of28 with older dates; First returns first page; All shows1\u201328."
+    },
+    {
+      "route": "/modern-admin/cameras/adu-history",
+      "control": "ADU Avg sort",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Native header click orders ascending, first values17.75,17.85,17.95."
+    },
+    {
+      "route": "/modern-admin/cameras/adu-history",
+      "control": "Search history and Copy",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Search2026-09-21 04:45 yields one IMX708 row. Copy places six headers and matching row in actual browser clipboard."
+    },
+    {
+      "route": "/modern-admin/cameras/adu-history",
+      "control": "Empty search",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Search no-matching-acceptance-row displays No records match the current filters."
+    },
+    {
+      "route": "/modern-admin/cameras/adu-history",
+      "control": "ASI678MC camera link",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Native link shows camera2 aggregates. Independent read-only SQLite interval04:45\u201305:00 agrees with displayed count20, exposure39, ADU71.35, jSQM145869.27, stars20. IMX708 same interval independently matches count20, exposure39, ADU18, jSQM20.07, stars1069.4. This checks faithful display, not calibration/scientific validity of stored jSQM."
+    },
+    {
+      "route": "/modern-admin/cameras/dark-library",
+      "control": "Camera links and empty calibration state",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Native camera links show respective camera names and empty library. Independent read-only DB queries confirm darkframe and badpixelmap tables have no rows."
+    },
+    {
+      "route": "/modern-admin/cameras/dark-library",
+      "control": "Type Bad pixel maps / Active Inactive",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Native filters select correctly and retain explicit empty state. Filtering populated records remains covered only by separate isolated tests, not this production check."
+    },
+    {
+      "route": "/modern-admin/cameras/mask-base",
+      "control": "Both camera previews",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Native camera links display their own mask files. ASI decodes3840x2160, IMX7084608x2592; both complete=true. Files independently exist at7028809 and5280704 bytes. September14 generation dates are shown; no regeneration or client download claimed."
+    },
+    {
+      "route": "/modern-admin/cameras/add",
+      "control": "Detect cameras",
+      "role": "administrator",
+      "status": "difetto",
+      "observed": "Native detection identifies IMX708 and ASI678MC, but also incorrectly offers Telescope Simulator as New camera with driver indi_asi_ccd. Independent indi_getprop shows telescope DRIVER_INTERFACE=5 and DRIVER_EXEC=indi_simulator_telescope; ASI interface6 and driverindi_asi_ccd. Installed PyIndi CCD_INTERFACE=2. Defect triggers capability-based parser correction."
+    }
+  ],
+  "limits": [
+    "No camera config saved and no capture/service restart during these checks.",
+    "Calibration data absent; populated calibration effects not live-tested.",
+    "CSV/Excel/mask download delivery is not certified.",
+    "Existing prior checks are not re-certified; this is not full-page coverage."
+  ],
+  "correction_regression": {
+    "scope": "Capability-based camera detection fix; production still on recorded installed_commit at this stage",
+    "python_report": "/home/eric/hybrid-camera-detection-regression-20260921/results.json",
+    "python_entrypoints_passed": 163,
+    "source_changed": false,
+    "python_report_sha256": "15a354c050f9ef344a2ac540ab632b1ce54ae774ddf58a80148c468a7d22b9cf",
+    "source_files": 776,
+    "source_manifest_sha256": "8afa58896e66419724265b748e5f917a7893ee5c1ed8166609420eaa9692f509",
+    "javascript_cases_passed": 34,
+    "javascript_report": "/tmp/hybrid-camera-detection-js-20260921.json",
+    "javascript_report_sha256": "9c546ec23fdd9f4923a941ccd82a85a1274c50e47aca8900f3e47d5529bc619d",
+    "execution_note": "Initial combined runner exited before tests because node is unavailable on Pi. Python-only suite ran once; encoder terminal stop resumed the same live process in foreground. All163 passed. JS ran separately on Mac."
+  }
+}

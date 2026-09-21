@@ -12,14 +12,14 @@ Censimento aggiornato del commit installato `f6975d5f`: 99 ingressi GET, 505 con
 | --- | ---: | --- |
 | `/modern-admin` | 0 | Da associare o collaudare |
 | `/modern-admin/account` | 17 | [hybrid-account-native-20260914](../testing/evidence/hybrid-account-native-20260914.json), [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-native-users-2026-09-08](../testing/evidence/hybrid-native-users-2026-09-08.json) |
-| `/modern-admin/cameras` | 0 | Da associare o collaudare |
-| `/modern-admin/cameras/add` | 0 | Da associare o collaudare |
-| `/modern-admin/cameras/adu-history` | 0 | Da associare o collaudare |
-| `/modern-admin/cameras/dark-library` | 0 | Da associare o collaudare |
+| `/modern-admin/cameras` | 1 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
+| `/modern-admin/cameras/add` | 1 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
+| `/modern-admin/cameras/adu-history` | 5 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
+| `/modern-admin/cameras/dark-library` | 2 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
 | `/modern-admin/cameras/detect-indi` | 0 | Da associare o collaudare |
 | `/modern-admin/cameras/image-lag` | 12 | [hybrid-image-lag-native-20260920](../testing/evidence/hybrid-image-lag-native-20260920.json) |
 | `/modern-admin/cameras/info` | 2 | [hybrid-camera-info-navigation-20260920](../testing/evidence/hybrid-camera-info-navigation-20260920.json) |
-| `/modern-admin/cameras/mask-base` | 0 | Da associare o collaudare |
+| `/modern-admin/cameras/mask-base` | 1 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
 | `/modern-admin/cameras/start-indi` | 0 | Da associare o collaudare |
 | `/modern-admin/capture/abort-exposure` | 0 | Da associare o collaudare |
 | `/modern-admin/capture/service` | 0 | Da associare o collaudare |

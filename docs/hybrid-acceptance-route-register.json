@@ -154,7 +154,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminCamerasView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[0]",
+          "control": "Profile Gallery links",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/cameras/add",
@@ -165,7 +172,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminCameraAddView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[9]",
+          "control": "Detect cameras",
+          "recorded_status": "difetto"
+        }
+      ]
     },
     {
       "route": "/modern-admin/cameras/adu-history",
@@ -175,7 +189,38 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminAduHistoryView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[1]",
+          "control": "Next / First / entries per page All",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[2]",
+          "control": "ADU Avg sort",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[3]",
+          "control": "Search history and Copy",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[4]",
+          "control": "Empty search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[5]",
+          "control": "ASI678MC camera link",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/cameras/dark-library",
@@ -185,7 +230,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminDarkLibraryView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[6]",
+          "control": "Camera links and empty calibration state",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[7]",
+          "control": "Type Bad pixel maps / Active Inactive",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/cameras/detect-indi",
@@ -325,7 +383,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminMaskView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
+          "record": "controls[8]",
+          "control": "Both camera previews",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/cameras/start-indi",

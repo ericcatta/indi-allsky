@@ -3686,6 +3686,13 @@ def annotate_modern_admin_detected_cameras(detected_cameras, active_config, acti
         camera['status_warning'] = ''
         camera['action_label'] = 'Add camera'
 
+        if camera.get('type') == 'indi' and camera.get('candidate') is False:
+            camera['status'] = 'Not a camera'
+            camera['status_warning'] = 'This INDI device does not report camera capabilities.'
+            camera['action_label'] = ''
+            camera['selectable'] = False
+            continue
+
         if not camera.get('selectable', True):
             camera['status'] = 'Ambiguous match'
             camera['status_warning'] = 'This camera type is not supported by the current Modern Admin detection flow.'
@@ -4167,49 +4174,44 @@ class ModernAdminIndiCameraDetectView(BaseView):
 
     def parse_indi_getprop_devices(self, output, driver_hint=''):
         device_map = OrderedDict()
-
         for line in output.splitlines():
-            line = line.strip()
-            if not line or line.startswith('#') or '.' not in line:
+            key, separator, value = line.strip().partition('=')
+            parts = key.rsplit('.', 2)
+            if not separator or len(parts) != 3 or key.startswith('#'):
                 continue
-
-            prop_key, _, prop_value = line.partition('=')
-            device_name, _, property_name = prop_key.partition('.')
-            device_name = device_name.strip()
-            property_name = property_name.strip()
-
-            if not device_name or not property_name:
+            name, vector, member = (part.strip() for part in parts)
+            if not name or not vector or not member:
                 continue
+            device = device_map.setdefault(name, {
+                'name': name, 'type': 'indi', 'interface': 'indi', 'camera_id': '',
+                'driver': '', 'properties': [], '_interface': None, '_ccd': False,
+            })
+            value = value.strip()
+            if len(device['properties']) < 8:
+                device['properties'].append(vector + '.' + member + '=' + value)
+            if vector == 'DRIVER_INFO' and member == 'DRIVER_EXEC':
+                device['driver'] = value
+            elif vector == 'DRIVER_INFO' and member == 'DRIVER_INTERFACE':
+                try:
+                    device['_interface'] = int(value)
+                except ValueError:
+                    pass
+            if vector in ('CCD_EXPOSURE', 'CCD_INFO', 'CCD_FRAME', 'CCD1'):
+                device['_ccd'] = True
 
-            if device_name not in device_map:
-                device_map[device_name] = {
-                    'name'       : device_name,
-                    'type'       : 'indi',
-                    'driver'     : driver_hint or '',
-                    'interface'  : 'indi',
-                    'camera_id'  : '',
-                    'device_id'  : 'indi:{0:s}:{1:s}'.format(driver_hint or 'unknown', device_name),
-                    'properties' : list(),
-                    'selectable' : True,
-                    'score'      : 0,
-                }
-
-            device_entry = device_map[device_name]
-            if len(device_entry['properties']) < 8:
-                device_entry['properties'].append('{0:s}={1:s}'.format(property_name, prop_value.strip()))
-
-            score_text = '{0:s}.{1:s}'.format(device_name, property_name).upper()
-            if any(token in score_text for token in ('ASI', 'ZWO', 'CCD_EXPOSURE', 'CCD_INFO', 'CCD_FRAME', 'CCD1')):
-                device_entry['score'] += 1
-
-        device_list = list(device_map.values())
-        device_list.sort(key=lambda d: (d['score'] == 0, d['name'].lower()))
-
-        for device in device_list:
-            device['candidate'] = device['score'] > 0
-            del device['score']
-
-        return device_list
+        devices = list(device_map.values())
+        for device in devices:
+            interface = device.pop('_interface')
+            ccd_properties = device.pop('_ccd')
+            # INDI BaseDevice.CCD_INTERFACE is bit 2. Names and a USB driver
+            # hint do not establish capabilities of another device on the server.
+            candidate = bool(interface & 2) if interface is not None and interface >= 0 else ccd_properties
+            device['candidate'] = candidate
+            device['selectable'] = candidate
+            if not device['driver'] and candidate:
+                device['driver'] = driver_hint
+            device['device_id'] = 'indi:{0}:{1}'.format(device['driver'] or 'unknown', device['name'])
+        return sorted(devices, key=lambda device: (not device['candidate'], device['name'].lower()))
 
 
 class ModernAdminIndiServerStartView(ModernAdminIndiCameraDetectView):
