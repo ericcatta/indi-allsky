@@ -25,6 +25,35 @@ def settings_profile_camera_id(profile, cameras):
     return matches[0] if len(matches) == 1 else None
 
 
+class SettingsCameraScopedTemplateMixin:
+    """Build Settings context from navigation before reading camera metadata."""
+    def setupSession(self):
+        camera_id = request.args.get('camera_id', type=int)
+        if request.args.get('camera_id') and (camera_id is None or camera_id <= 0):
+            abort(400, description='Invalid camera selection.')
+        profile_id = request.args.get('profile_id')
+        if profile_id:
+            from .models import IndiAllSkyDbCameraTable
+            profiles = (self.indi_allsky_config.get('MULTI_CAMERA') or {}).get('profiles') or []
+            if isinstance(profiles, list):
+                profile = next((p for i, p in enumerate(profiles, 1) if isinstance(p, dict)
+                                and str(p.get('profile_id') or p.get('id') or 'profile-{0:d}'.format(i)) == profile_id), None)
+                if profile is not None:
+                    resolved = settings_profile_camera_id(profile, IndiAllSkyDbCameraTable.query.filter(
+                        IndiAllSkyDbCameraTable.local == True).all())
+                    if resolved is not None:
+                        if camera_id is not None and camera_id != resolved:
+                            abort(400, description='Camera and profile do not match.')
+                        camera_id = resolved
+        if camera_id is not None:
+            self.camera = self.getCameraById(camera_id)
+            if self.camera.id != camera_id:
+                abort(404, description='Camera is unavailable.')
+            session['camera_id'] = camera_id
+            return
+        super().setupSession()
+
+
 class CameraScopedTemplateMixin:
     def setupSession(self):
         if request.args.get('camera_id') or request.args.get('profile_id'):

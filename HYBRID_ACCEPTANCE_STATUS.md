@@ -5,19 +5,20 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `f6975d5f5501b00aa3407dd5da7442b73f793952`.
+The Raspberry runs `fe2640c831f08cc464953b2189df3503946a5219`.
+The latest Settings identity correction is installed; its tested index-link follow-up awaits deployment.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
 The 780-file installed source manifest matches the tested snapshot:
-`5a7a89f36f27062b391f17e4fd59cbe491b5d0e38c2f0992f407c8604d08e851`.
+`cab1c6a2fa3dceddba27df2befd8cdc09b8c61a410cefd6c616c336494517cc6`.
 All 162 Python entrypoints and 34 JavaScript tests passed, including startup and flows without Classic, Full Config parity, Settings, Safe Actions and Product Spine.
 This automated result does not certify every native control or hardware effect.
 
 The deployment preserved configuration revision 117, Flask configuration,
-user files and capture PID 1566. Only the web service restarted (PID 740426).
-The database backup passed integrity checking in 36.51 seconds.
+user files and capture PID 1566. Only the web service restarted (PID 773072).
+The database backup passed integrity checking in 31.87 seconds.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md), not commands from historical mission reports.
 
 ## Post-removal evidence
@@ -57,7 +58,7 @@ Absence of selected placeholder phrases is not proof that every function is impl
 
 ## Remaining acceptance gates
 
-- Deploy and verify the camera-context correction for profiles without explicit DB IDs. Candidate regression is complete (162 Python + 34 JavaScript); see [Settings camera scope](testing/evidence/hybrid-settings-camera-scope-20260921.json). The installed ASI return-link defect remains open until native acceptance.
+- Finish the Settings index-link follow-up: profile identity and the first return link are corrected in production, but the index still rebuilds the ASI shortcut using camera 1 from the session. The follow-up passed validation (161 full-run passes plus the updated inheritance guard retest; runtime unchanged between them, and 34 JavaScript passes). See [Settings camera scope](testing/evidence/hybrid-settings-camera-scope-20260921.json).
 
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.

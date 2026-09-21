@@ -120,7 +120,8 @@ def test_display_and_encoded_fields():
     shared = ast.parse((ROOT/'indi_allsky/flask/views.py').read_text())
     assert not any(isinstance(n, ast.ClassDef) and n.name == 'ConfigView' for n in shared.body)
     inventory = next(n for n in shared.body if isinstance(n, ast.ClassDef) and n.name == 'ModernAdminSettingsInventoryView')
-    assert [ast.unparse(n) for n in inventory.bases] == ['ModernAdminContextMixin', 'HybridSettingsFormView']
+    assert [ast.unparse(n) for n in inventory.bases] == [
+        'SettingsCameraScopedTemplateMixin', 'ModernAdminContextMixin', 'HybridSettingsFormView']
     assert not (ROOT/'indi_allsky/flask/classic_views.py').exists()
     text=ast.unparse(view)
     assert text.index('build_full_config_form_defaults(')<text.index('apply_full_config_form_display_fields(')<text.index("url_for('indi_allsky.youtube_oauth2callback_view'")<text.index('apply_full_config_form_encoded_fields(')<text.index('psutil.net_if_addrs(')

@@ -2,17 +2,20 @@
 
 ## Installed version
 
-Production runs `f6975d5f5501b00aa3407dd5da7442b73f793952` (21 September
+Production runs `fe2640c831f08cc464953b2189df3503946a5219` (21 September
 2026). Classic frontend files are physically removed; Hybrid is the only UI.
 All 780 installed source hashes match the snapshot that passed 162 Python and
 34 JavaScript tests. Native isolated Settings save/restore recovered the original
 value; production Now decoded current images from both cameras and Full Settings
 search returned the expected field. These are bounded acceptance checks.
 
-The database backup passed integrity validation in 36.51 seconds. Configuration
+The database backup passed integrity validation in 31.87 seconds. Configuration
 117, Flask configuration, capture PID 1566 and untracked files were preserved.
-The web service restarted as PID 740426. A complete control/effect matrix and
+The web service restarted as PID 773072. A complete control/effect matrix and
 unavailable hardware checks remain open; the 24-hour observation is deferred.
+
+Settings identity binding is corrected, but the subsequent index shortcut still needs
+the camera-context follow-up. See [Settings scope evidence](testing/evidence/hybrid-settings-camera-scope-20260921.json).
 
 Evidence: [Classic removal acceptance](testing/evidence/hybrid-retirement-final-native-20260921.json).
 
@@ -28,19 +31,19 @@ git -C /home/eric/indi-allsky rev-parse HEAD
 
 The protected helper requires exactly the installed revision above and refuses
 to discard tracked edits. Its backup is:
-`/home/eric/hybrid-backups/hybrid-retirement-final-20260921-185835`.
+`/home/eric/hybrid-backups/hybrid-settings-scope-20260921-195310`.
 Run on the Raspberry:
 
 ```sh
-release_backup=/home/eric/hybrid-backups/hybrid-retirement-final-20260921-185835
+release_backup=/home/eric/hybrid-backups/hybrid-settings-scope-20260921-195310
 maintenance_deadline="$(date --date='+15 minutes' --iso-8601=seconds)"
 python3 "$release_backup/deploy.py" --rollback "$release_backup" \
   --maintenance-until "$maintenance_deadline"
 ```
 
-This code-only rollback returns to `cb51d7b4`, restarts the web service and its
+This code-only rollback returns to `f6975d5f`, restarts the web service and its
 previously active socket, and retains capture, database and current configuration.
-It restores the previous frontend files and removes the Camera Info navigation update.
+Classic remains removed after this rollback; it reverts the Settings device-identity correction.
 The helper is prepared; this live release has not been deliberately reverted.
 Read the backup's `deployment.json`, confirm the revision and services, then
 verify HTTPS Now and new nonempty files from both cameras. Process readiness
@@ -78,7 +81,7 @@ one-off authorized test-media cleanup does not change that saved policy.
 Some older snapshots are archived as `indi-allsky.sqlite.gz` to recover space.
 Their `compressed-storage.json` records the original byte length and SHA-256;
 complete decompression is verified before removing the uncompressed copy.
-The current Classic retirement and preceding Settings polish backups remain
+The current Settings scope, Classic retirement and preceding Settings polish backups remain
 uncompressed, with configuration and code archives preserved.
 
 Before using an archived database snapshot, ensure space for `original_bytes`,

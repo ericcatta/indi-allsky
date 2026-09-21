@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-21",
+  "change": "Resolve camera/profile navigation before Settings metadata and links are built; reject invalid and mismatched explicit camera selections.",
+  "source_manifest": {
+    "files": 780,
+    "sha256": "5a9e5b170accaffdde61909152f50a0d680ed4e52ea7819aed654fbbd083689d"
+  },
+  "validation": {
+    "full_run": "/home/eric/hybrid-settings-navigation-regression-20260921/results.json",
+    "full_run_sha256": "b66b70f7ad9a2d428b1bccce0c75d27efe3fbf554054593a9d0b6bbd5fdc6e37",
+    "full_run_results": "161 passed; one failed because the inheritance guard still expected the previous exact class bases.",
+    "retest": "/home/eric/hybrid-settings-navigation-guard-retest.json",
+    "retest_status": "passed",
+    "changed_since_full_run": [
+      "testing/modern_admin_full_config_form_test.py"
+    ],
+    "runtime_and_other_tests_unchanged": true,
+    "source_changed_during_runs": false,
+    "python_entries_verified": 162,
+    "javascript_entries_passed": 34,
+    "javascript_report": "/tmp/hybrid-settings-navigation-js-20260921.json",
+    "fingerprints": "Existing parser/form fingerprints unchanged."
+  },
+  "live_acceptance": "Pending deployment; first correction fe2640c8 fixed profile binding but not the downstream index link."
+}

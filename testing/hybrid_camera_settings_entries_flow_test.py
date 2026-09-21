@@ -77,10 +77,13 @@ def run():
                 index = client.get(back)
                 link = next(unescape(href) for href in re.findall(r'href="([^"]+)"', index.text)
                             if '/settings/exposure-gain' in href)
+                assert parse_qs(urlsplit(link).query) == {'camera_id':[str(cid)], 'profile_id':[profile_id]}
                 arrived = client.get(link, follow_redirects=True)
                 assert BrowserValues(arrived.text).values['camera-driver-profile_id'] == profile_id
                 camera_only = client.get('/indi-allsky/modern-admin/settings/cameras?camera_id=' + str(cid))
                 assert BrowserValues(camera_only.text).values['camera-driver-profile_id'] == profile_id
+            assert client.get('/indi-allsky/modern-admin/settings?camera_id=1&profile_id=test-profile-2').status_code == 400
+            assert client.get('/indi-allsky/modern-admin/settings?camera_id=invalid').status_code == 400
         with app.app_context():
             assert Config.query.count() == 1
             assert Config.query.one().data == unbound

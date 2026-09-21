@@ -14,7 +14,7 @@ from .observatory_context_views import (
     HybridSensorPanelContextView,
 )
 from .settings_form_view import HybridSettingsFormView
-from .camera_scope import CameraScopedTemplateMixin
+from .camera_scope import CameraScopedTemplateMixin, SettingsCameraScopedTemplateMixin
 from flask.views import View
 from ..loop_statistics import loop_sqm_summaries
 from ..modern_admin_media_cleanup import MediaCleanupIncomplete, flush_media_batches
@@ -10220,7 +10220,7 @@ class ModernAdminConfigView(ModernAdminContextMixin, TemplateView):
         ))
 
 
-class ModernAdminSettingsInventoryView(ModernAdminContextMixin, HybridSettingsFormView):
+class ModernAdminSettingsInventoryView(SettingsCameraScopedTemplateMixin, ModernAdminContextMixin, HybridSettingsFormView):
     page_title = 'Modern Admin Settings'
     modern_admin_active_endpoint = 'indi_allsky.modern_admin_settings_view'
     SETTINGS_OWNERSHIP_MAP_PATH = Path(__file__).resolve().parents[2] / 'tools' / 'hybrid_settings_ownership_map.json'

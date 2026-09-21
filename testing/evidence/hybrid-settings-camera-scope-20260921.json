@@ -23,5 +23,15 @@
     "imx708-wide": 1,
     "asi678mc": 2
   },
-  "live_browser_status": "Pending deployment; the original native defect record remains historical evidence."
+  "live_browser_status": "Partial: ASI identifies ZWO CCD ASI678MC and returns camera_id=2; IMX708 identifies libcamera_imx708 and returns camera_id=1. The Settings index still generates camera_id=1 for ASI from session state. Do not mark the full round trip passed. Follow-up moves selection before camera metadata/context construction and adds an assertion on the index link.",
+  "deployment": {
+    "commit": "fe2640c831f08cc464953b2189df3503946a5219",
+    "backup": "/home/eric/hybrid-backups/hybrid-settings-scope-20260921-195310",
+    "integrity": "ok",
+    "backup_seconds": 31.87,
+    "configuration_revision": 117,
+    "capture_restarted": false,
+    "configuration_unchanged": true,
+    "web_pid": 773072
+  }
 }
