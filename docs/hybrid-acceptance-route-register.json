@@ -1921,6 +1921,12 @@
           "control": "Browser Back",
           "recorded_status": "superato",
           "original_page": "Output detail"
+        },
+        {
+          "source": "testing/evidence/hybrid-download-delivery-post-classic-20260921.json",
+          "record": "controls[0]",
+          "control": "Download original",
+          "recorded_status": "bloccato"
         }
       ]
     },
@@ -2484,6 +2490,12 @@
           "control": "entries per page / Next / Previous / ID sort",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/tasks"
+        },
+        {
+          "source": "testing/evidence/hybrid-download-delivery-post-classic-20260921.json",
+          "record": "controls[1]",
+          "control": "CSV with zero filtered results",
+          "recorded_status": "bloccato"
         }
       ]
     },

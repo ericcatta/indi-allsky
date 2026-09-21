@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-21",
+  "installed_commit": "f6975d5f5501b00aa3407dd5da7442b73f793952",
+  "environment": "Native production browser on Mac",
+  "controls": [
+    {
+      "route": "/modern-admin/output",
+      "control": "Download original",
+      "role": "administrator",
+      "camera_id": 1,
+      "output_id": 3,
+      "status": "bloccato",
+      "observed": "Both the supported download action and a direct link click returned to Output detail. No matching file appeared in the Mac Downloads directory. No claim that the server download failed.",
+      "expected_file": "allsky-minitimelapse_ccd1_20260921_day_1790010347.mp4",
+      "server_size": 11629521,
+      "server_sha256": "bd0da57bccb415586714c01dbf8d482968df2312e47c127cdbdc09fb7c5cedf3",
+      "reason": "Client artifact destination or pending save dialog requires user clarification."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "CSV with zero filtered results",
+      "role": "administrator",
+      "status": "bloccato",
+      "observed": "Filter showed zero entries out of427; CSV click completed but no recent file appeared in Downloads. Clearing the filter restored1\u201320 of427.",
+      "reason": "Client artifact delivery unverified; no download wait loop or substitute direct HTTP download was used."
+    }
+  ],
+  "cleanup": {
+    "temporary_sandbox_pids_stopped": [
+      632153,
+      717042
+    ],
+    "tunnel_port_closed": 18113,
+    "production_capture_pid": 1566,
+    "production_web_pid": 740426,
+    "production_services": "active"
+  },
+  "user_input": "Requested whether a Save dialog is pending or a different download directory is configured. No answer received at recording time."
+}
