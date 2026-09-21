@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-21",
+  "change": "Resolve camera Settings profiles by explicit DB binding or a unique exact device identity; preserve the selected camera on return to Settings. No positional or substring matching.",
+  "source_manifest": {
+    "files": 780,
+    "sha256": "cab1c6a2fa3dceddba27df2befd8cdc09b8c61a410cefd6c616c336494517cc6"
+  },
+  "python": {
+    "status": "passed",
+    "entries": 162,
+    "source_changed": false,
+    "report": "/home/eric/hybrid-settings-scope-regression-20260921/results.json",
+    "sha256": "8bf30b0943d56add595d10a1a797ca45f4ba8cb4c87a2c5f8f2ee93e4c34a2a6"
+  },
+  "javascript": {
+    "status": "passed",
+    "entries": 34,
+    "report": "/tmp/hybrid-settings-scope-js-20260921.json",
+    "sha256": "e65ec7b43a32e98c1b25d3cb1f70b76d0a8dfbb8ba723883807bd1d8ec5db5c1"
+  },
+  "focused_test": "hybrid_camera_settings_entries_flow_test.py: both roles, both profiles, missing explicit DB IDs, return links, editor reopening, camera-only selection, unchanged config, exact nested INDI/libcamera identities, explicit-ID precedence and ambiguous/missing matches. PASS",
+  "production_readonly_probe": {
+    "imx708-wide": 1,
+    "asi678mc": 2
+  },
+  "live_browser_status": "Pending deployment; the original native defect record remains historical evidence."
+}

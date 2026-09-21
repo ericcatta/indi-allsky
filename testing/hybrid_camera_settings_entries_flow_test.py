@@ -3,6 +3,8 @@
 from urllib.parse import urlsplit, parse_qs
 from html import unescape
 import re
+from copy import deepcopy
+from types import SimpleNamespace
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_settings_flow_test import BrowserValues
 
@@ -56,6 +58,42 @@ def run():
         assert 'USERNAME' in response.text or '/login' in response.request.path
         with app.app_context():
             assert Config.query.count() == 1
+            from indi_allsky.flask import db
+            config = Config.query.one()
+            unbound = deepcopy(config.data)
+            for profile in unbound['MULTI_CAMERA']['profiles']:
+                del profile['db_camera_id']
+            config.data = unbound
+            db.session.commit()
+        # Real deployments may identify hardware by device name, with no DB ID.
+        for client in clients:
+            for cid in (2, 1):
+                profile_id = 'test-profile-' + str(cid)
+                page = client.get('/indi-allsky/modern-admin/settings/cameras?profile_id=' + profile_id)
+                assert page.status_code == 200
+                assert 'Not linked' not in page.text
+                back = unescape(re.search(r'href="([^"]+)"[^>]*>Back to Settings Inventory</a>', page.text)[1])
+                assert parse_qs(urlsplit(back).query) == {'camera_id':[str(cid)], 'profile_id':[profile_id]}
+                index = client.get(back)
+                link = next(unescape(href) for href in re.findall(r'href="([^"]+)"', index.text)
+                            if '/settings/exposure-gain' in href)
+                arrived = client.get(link, follow_redirects=True)
+                assert BrowserValues(arrived.text).values['camera-driver-profile_id'] == profile_id
+                camera_only = client.get('/indi-allsky/modern-admin/settings/cameras?camera_id=' + str(cid))
+                assert BrowserValues(camera_only.text).values['camera-driver-profile_id'] == profile_id
+        with app.app_context():
+            assert Config.query.count() == 1
+            assert Config.query.one().data == unbound
+        from indi_allsky.flask.camera_scope import settings_profile_camera_id
+        cameras = [SimpleNamespace(id=1, name='libcamera_imx708'),
+                   SimpleNamespace(id=2, name='ZWO CCD ASI678MC')]
+        assert settings_profile_camera_id({'camera_interface':'libcamera_imx708'}, cameras) == 1
+        assert settings_profile_camera_id({'indi':{'camera_name':'ZWO CCD ASI678MC'}}, cameras) == 2
+        assert settings_profile_camera_id({'indi_camera_name':'ASI678'}, cameras) is None
+        assert settings_profile_camera_id({'camera_interface':'indi'}, cameras) is None
+        assert settings_profile_camera_id({'camera_id':99, 'indi_camera_name':'ZWO CCD ASI678MC'}, cameras) == 99
+        assert settings_profile_camera_id({'camera_interface':'libcamera_imx708'}, cameras +
+                                         [SimpleNamespace(id=3,name='libcamera_imx708')]) is None
         print('Camera Settings entries: actual editors, both roles/profiles, fixed anchors, auth and no mutation: PASS')
 
 

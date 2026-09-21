@@ -12224,6 +12224,8 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         context['modern_admin_camera_settings_profiles'] = profiles
         context['modern_admin_camera_settings_profile'] = selected_profile
         context['modern_admin_camera_settings_camera'] = selected_camera
+        if selected_camera is not None:
+            context['camera_id'] = selected_camera.id
         context['modern_admin_camera_settings_sections'] = self.get_camera_settings_sections(selected_profile, selected_camera)
         context['modern_admin_camera_settings_profile_count'] = len(profiles)
         context['modern_admin_camera_settings_uses_multi_camera'] = bool(selected_profile.get('from_multi_camera'))
@@ -12271,6 +12273,15 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
                 normalized_profiles.append(profile_copy)
 
         if normalized_profiles:
+            from .camera_scope import settings_profile_camera_id
+            try:
+                cameras = IndiAllSkyDbCameraTable.query.filter(
+                    IndiAllSkyDbCameraTable.local == True).all()
+            except Exception as error:
+                app.logger.error('Error resolving Settings camera identities: %s', error)
+                cameras = []
+            for profile in normalized_profiles:
+                profile['_fallback_camera_id'] = settings_profile_camera_id(profile, cameras)
             return tuple(normalized_profiles)
 
         camera_name = 'Current config'

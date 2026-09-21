@@ -57,7 +57,7 @@ Absence of selected placeholder phrases is not proof that every function is impl
 
 ## Remaining acceptance gates
 
-- Correct camera context after selecting a profile without an explicit DB binding: the ASI profile tab currently returns to Settings with camera_id=1. Add coverage using the actual unbound-profile configuration shape; keep profile save isolation intact.
+- Deploy and verify the camera-context correction for profiles without explicit DB IDs. Candidate regression is complete (162 Python + 34 JavaScript); see [Settings camera scope](testing/evidence/hybrid-settings-camera-scope-20260921.json). The installed ASI return-link defect remains open until native acceptance.
 
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.
