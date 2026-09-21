@@ -799,6 +799,12 @@
           "record": "controls[4]",
           "control": "RAW image loop",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-mobile-navigation-20260921.json",
+          "record": "controls[4]",
+          "control": "Mobile camera filters and responsive layout",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -1669,6 +1675,18 @@
           "control": "Panorama Loop link",
           "recorded_status": "superato",
           "original_page": "Now"
+        },
+        {
+          "source": "testing/evidence/hybrid-mobile-navigation-20260921.json",
+          "record": "controls[0]",
+          "control": "Navigation drawer: click, Escape, Enter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-mobile-navigation-20260921.json",
+          "record": "controls[5]",
+          "control": "Home from mobile Loop",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -1955,6 +1973,12 @@
           "control": "Technical reference disclosure > Storage / Drives",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/settings"
+        },
+        {
+          "source": "testing/evidence/hybrid-mobile-navigation-20260921.json",
+          "record": "controls[1]",
+          "control": "Navigation drawer Settings link",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -2037,7 +2061,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminCameraSettingsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-mobile-navigation-20260921.json",
+          "record": "controls[2]",
+          "control": "Profile tabs and Search camera settings",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-mobile-navigation-20260921.json",
+          "record": "controls[3]",
+          "control": "Selected profile camera context",
+          "recorded_status": "difetto"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/capture",

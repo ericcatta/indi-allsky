@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-21",
+  "installed_commit": "f6975d5f5501b00aa3407dd5da7442b73f793952",
+  "environment": "Native production browser; installed HEAD rechecked over SSH",
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844
+    },
+    {
+      "width": 320,
+      "height": 740
+    }
+  ],
+  "controls": [
+    {
+      "route": "/modern-admin/now",
+      "control": "Navigation drawer: click, Escape, Enter",
+      "status": "superato",
+      "observed": "At 390x844, clicking Open navigation menu expanded the drawer and focused My Account. Escape closed it and returned focus to Open navigation menu. Enter reopened it and focused My Account.",
+      "role": "administrator"
+    },
+    {
+      "route": "/modern-admin/settings",
+      "control": "Navigation drawer Settings link",
+      "status": "superato",
+      "observed": "Settings opened from the drawer; drawer closed. Rendered page body clientWidth and scrollWidth both 390.",
+      "role": "administrator"
+    },
+    {
+      "route": "/modern-admin/settings/cameras",
+      "control": "Profile tabs and Search camera settings",
+      "status": "superato",
+      "observed": "Camera Profile Settings opened from Settings; switched imx708-wide to asi678mc, searched exposure and observed ASI Day Gain 0, Day Gain Max 200 and acquisition controls; cleared search and returned to imx708-wide. Body clientWidth and scrollWidth both 390. No editor value was changed or saved.",
+      "role": "administrator"
+    },
+    {
+      "route": "/modern-admin/settings/cameras",
+      "control": "Selected profile camera context",
+      "status": "difetto",
+      "observed": "After selecting asi678mc through its profile tab, the selected profile was asi678mc but Back to Settings Inventory linked camera_id=1&profile_id=asi678mc. Both profile summaries showed DB camera Not linked. Live ASI media belong to camera 2. Camera/profile context requires correction and an acceptance test without explicit db_camera_id in profile configuration. Save effects were not exercised in this check.",
+      "role": "administrator"
+    },
+    {
+      "route": "/modern-admin/loop",
+      "control": "Mobile camera filters and responsive layout",
+      "status": "superato",
+      "observed": "Opened Loop through the drawer at 390x844. All Cameras decoded IMX708 4608x2592 and ASI 3840x2160. ASI and IMX filters each displayed only their respective card; All Cameras restored both. At 320x740 both images were decoded and body clientWidth/scrollWidth were both 320. At 390 both were 390. Exact frame cadence and each individual-filter load were not measured.",
+      "role": "administrator"
+    },
+    {
+      "route": "/modern-admin/now",
+      "control": "Home from mobile Loop",
+      "status": "superato",
+      "observed": "Clicked the Home link at 320x740; Now heading and latest-camera-frame region rendered. Reset the temporary viewport override to the original browser sizing.",
+      "role": "administrator"
+    }
+  ],
+  "limits": [
+    "Administrator only; not all pages or controls.",
+    "No capture, configuration, hardware, upload or deletion effects invoked.",
+    "Existing source regression remains unchanged; this is new native acceptance evidence only.",
+    "Profile identity changed correctly, but the camera context issue is not certified or corrected by this record."
+  ]
+}
