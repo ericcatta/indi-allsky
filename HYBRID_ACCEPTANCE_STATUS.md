@@ -108,9 +108,21 @@ mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
 
+## Capture latency finding — 29 September
+
+A read-only six-hour retrospective sample found transient queue backpressure,
+one IMX708 timeout during the backup window, and saved-image gaps up to 67/61
+seconds. Both cameras recovered; the last five saved frames for each were again
+15 seconds apart. Typical processing times are low, but log boundaries show
+23.9-second compression/save and 38.9-second DB/metadata gaps outside the reported
+processing metric. The cause is not established and steady cadence is not yet
+certified. [Measured evidence](testing/evidence/hybrid-capture-queue-review-20260929.json).
+This is not the deferred 24-hour acceptance. No capture settings were changed.
+
 ## Remaining acceptance gates
 
 
+- Resolve the observed transient worker/save stalls and verify end-to-end cadence under the identified load.
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.
 - Complete remaining live effects, including dedicated-data cleanup/deletion and test-destination uploads. Short mini timelapses and both cameras’ automatic day timelapse/panorama outputs are verified; other automatic/isolated tests remain separately labeled.

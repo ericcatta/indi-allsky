@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-29",
+  "status": "difetto",
+  "scope": "Read-only retrospective six-hour capture/worker review, not the deferred 24-hour acceptance",
+  "runtime_reference": "30708b3142ee279eb86d12c81ef1a4ce42ee5a96 per current deployment record",
+  "remote_evidence": "/home/eric/hybrid-capture-queue-review-20260929.json",
+  "remote_sha256": "a4906728fa40d9a74b191caa01526c4f88fb16ca88d478477f3db3b94270e67b",
+  "window_local": [
+    "2026-09-29T05:08:31.976929",
+    "2026-09-29T11:08:31.976929"
+  ],
+  "cameras": {
+    "1": {
+      "saved_frames": 1154,
+      "processing_seconds": {
+        "median": 1.426,
+        "p95": 3.108,
+        "maximum": 29.599
+      },
+      "maximum_same_mode_interval_seconds": 67
+    },
+    "2": {
+      "saved_frames": 1156,
+      "processing_seconds": {
+        "median": 1.047,
+        "p95": 3.53,
+        "maximum": 42.087
+      },
+      "maximum_same_mode_interval_seconds": 61
+    }
+  },
+  "observations": [
+    "20 queue maximum log records and 11 queue recovery records in the sampled log window; these are records, not counts of independent incidents.",
+    "Latest recorded queue recovery at 10:54:47/48 for both capture workers.",
+    "One rpicam timeout at 10:52:02 during the deployment backup window; temporal association is not proof of causation.",
+    "At 07:04:16 to 07:04:40, 23.885 seconds elapsed between Image processed and Compressed image file size logs.",
+    "At 07:04:57 to 07:05:36, 38.873 seconds elapsed between Adding image to DB and FRAME_METADATA logs.",
+    "These timings show processing_seconds alone omits material save/post-processing stalls.",
+    "Root filesystem 95% used, 5.6 GiB available; /tmp 5% used. No kernel warnings returned since 05:00.",
+    "At 11:09, the latest five saved images for each camera were exactly 15 seconds apart; camera1 latest 11:09:20, camera2 11:09:21."
+  ],
+  "conclusion": "Capture recovers, but transient stalls violate the desired steady cadence. Source of stalls is unresolved; do not attribute solely to the exposure controller, SD card or backup without further measurement.",
+  "next_action": "Measure end-to-end worker stages and resource contention during a stall; preserve queue backpressure and exposure policy until the cause is established.",
+  "changes": "No runtime/configuration changes, restarts or media deletions."
+}

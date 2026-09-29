@@ -118,6 +118,12 @@ private; run code checkout/merge/reset with child umask 022 so Apache can read
 public assets. Restart only services affected by the change, then verify
 installed hashes, real UI controls, effects and camera recovery.
 
+The 29 September backup window coincided with queue growth and one recovered
+IMX708 timeout. A running capture service alone does not prove uninterrupted
+cadence: inspect frame intervals and queue recovery before accepting maintenance.
+The [latency review](testing/evidence/hybrid-capture-queue-review-20260929.json)
+also found earlier stalls, so backup causation remains unproven.
+
 ## Remaining acceptance and history
 
 - Complete the page/control matrix, roles, camera/profile isolation and mobile checks.
