@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "validated-awaiting-deploy",
+  "status": "deployed-live-verified",
   "defect": "The Telegraf JSON snapshot was truncated in place and an OSError during its publication propagated out of ImageWorker.write_status_json before the image was saved.",
   "change": "Serialize before touching disk, write a sibling temporary file, close/chmod and atomically replace. Diagnostic OSError is logged and returns normally to image processing.",
   "preserved": [
@@ -29,8 +29,7 @@
   },
   "limitations": [
     "This is correctness/error-isolation work, not a measured disk-latency improvement.",
-    "External Telegraf service integration is not claimed; the documented file contract is tested.",
-    "Production acceptance pending."
+    "External Telegraf service integration is not claimed; the documented file contract is tested."
   ],
   "python": {
     "cases": 172,
@@ -38,5 +37,48 @@
     "source_changed": false,
     "report": "/home/eric/hybrid-status-publication-regression-20260929/results.json",
     "sha256": "c3906abd99d68f0fe086a842fcb5a9192368f0b2be5b229d026974e22f0ddea2"
+  },
+  "deployment": {
+    "commit": "80b150d625c206e77d9fc5e5a3575b8b0d5463a4",
+    "backup": "/home/eric/hybrid-backups/hybrid-status-publication-20260929-192332",
+    "maintenance": [
+      "2026-09-29T19:23:32.849629",
+      "2026-09-29T19:23:46.356494"
+    ],
+    "configuration_revision": 118,
+    "capture_pid": 2015141,
+    "web_pid": 1512518,
+    "automatic_restarts": 0
+  },
+  "live_status_reader": {
+    "report": "/home/eric/hybrid-status-reader-20260929.json",
+    "sha256": "0e6bd4a5b838fc9a41a3ea9ed1c537ceb3191181f10d8753db9e9c7f017ba94f",
+    "window": [
+      "19:24:17.445856",
+      "19:26:17.498476"
+    ],
+    "samples": 1197,
+    "parse_or_read_errors": 0,
+    "distinct_snapshots": 7,
+    "device": "libcamera_imx708",
+    "mode": "0644",
+    "terminal": true
+  },
+  "native_now": {
+    "new_frames": [
+      "ccd1_20260929_192429.jpg",
+      "ccd2_20260929_192422.jpg"
+    ],
+    "decoded_dimensions": [
+      [
+        4608,
+        2592
+      ],
+      [
+        3840,
+        2160
+      ]
+    ],
+    "tab_closed": true
   }
 }

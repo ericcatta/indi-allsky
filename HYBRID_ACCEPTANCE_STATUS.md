@@ -5,29 +5,30 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `666817fc94c40845fc05d8fc4b20251ee779a70a`.
+The Raspberry runs `80b150d625c206e77d9fc5e5a3575b8b0d5463a4`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
-The 833-file source/asset manifest (including the capture entrypoint) is
-`dc8adbde54f63ef5c4c3c3ff8a68ab6275bd8df06b99446b4ea4ddc5f76efb6d`.
-171 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
+The 835-file source/asset manifest (including the capture entrypoint) is
+`afaeac3ce66de7f770d2e92c4d8dcaf627aa769c74365993ad234097713667d6`.
+172 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
 The bounded asynchronous syslog handler is deployed. Both camera files decode
 after the restart. The live 171-entrypoint replay passes. Trace confirms system-log sends and
-diagnostic writes stay off capture. Cadence acceptance remains open: saved-frame
-maxima are 19/25 seconds under load despite a 15-second median.
-[Current evidence](testing/evidence/hybrid-async-syslog-20260929.json).
+diagnostic log writes stay off capture. The earlier syslog load test reached
+19/25-second capture gaps; subsequent bounded observations show 15-second median
+and 16-second maximum intervals, with publication latency still varying under I/O
+load. [Latest comparison](testing/evidence/hybrid-publication-comparison-20260929.json).
 
 A private SQLite 3.51.3 runtime is loaded by capture, web and commands in the
 Hybrid virtualenv; OS packages remain unchanged. Capture supervises background
 checkpoints with automatic fallback. Config revision 118 is unchanged. Capture
-PID 1862836 and web PID 1512518 have zero automatic restarts; capture was
-restarted for the preview release at 17:43. The web workers were reloaded.
+PID 2015141 and web PID 1512518 have zero automatic restarts; capture was
+restarted for status publication at 19:23. The web workers were reloaded.
 The coherent backup passed integrity_check. Now, Settings/history and Library
 passed bounded native checks; latest files from both cameras decode.
 
-In the first 29 frames per camera, median spacing is 15 seconds and maximum 16,
+In the earlier checkpoint release’s first 29 frames per camera, median spacing is 15 seconds and maximum 16,
 with no interval above 17 seconds. A 180-second trace confirms the database
 checkpoint executes in the helper; the image worker still has a short WAL sync.
 This is positive short-run evidence, not a guarantee of steady cadence under
@@ -434,3 +435,13 @@ maxima were 9.45/5.45 seconds. Both cameras produced new, decoded native Now
 frames after Refresh. These short sequential observations do not prove causation
 or close intermittent storage-latency acceptance. No runtime/config changed.
 [Comparison evidence](testing/evidence/hybrid-publication-comparison-20260929.json).
+
+## Status snapshot publication — deployed
+
+The shared Telegraf status snapshot is now replaced atomically. Failed diagnostic
+I/O retains the previous complete snapshot and no longer rejects the image frame.
+Payload, formatting, primary-profile scope and permissions are preserved. All
+172 Python and 34 JavaScript entrypoints pass. Native Now decodes new frames from
+both cameras after the controlled restart; 1,197 live status reads spanning seven
+updates report no parse/read errors. This is not a disk-speed improvement or
+continuous freshness proof. [Evidence](testing/evidence/hybrid-status-publication-20260929.json).

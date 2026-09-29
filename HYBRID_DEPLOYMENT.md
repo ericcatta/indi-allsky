@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `666817fc94c40845fc05d8fc4b20251ee779a70a` (29 September 2026).
+Production runs `80b150d625c206e77d9fc5e5a3575b8b0d5463a4` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -424,3 +424,18 @@ verified at the saved progress checkpoint, reclaiming 6,359,911,873 bytes. No
 new archival starts after 19:50 local time; the current file finishes verification
 before its original is removed. Follow the live report and process, not this
 checkpoint, to establish completion. [Progress evidence](testing/evidence/hybrid-backup-remaining-20260929.json).
+
+## Atomic status publication rollback
+
+Runtime `80b150d625c206e77d9fc5e5a3575b8b0d5463a4` passed 172 Python/compile
+entrypoints and 34 JavaScript tests with an unchanged 835-file manifest:
+`afaeac3ce66de7f770d2e92c4d8dcaf627aa769c74365993ad234097713667d6`.
+Capture was restarted 19:23:32–19:23:46; configuration 118 and database were
+preserved. Both new camera images decode; repeated live JSON reads pass.
+[Evidence](testing/evidence/hybrid-status-publication-20260929.json).
+
+Backup: `/home/eric/hybrid-backups/hybrid-status-publication-20260929-192332`.
+At exactly that runtime HEAD, run
+`/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python /home/eric/hybrid-status-publication-deploy.py --rollback /home/eric/hybrid-backups/hybrid-status-publication-20260929-192332`.
+This restores `666817fc`, restarts capture and reloads web without restoring the
+database. Check the helper’s HEAD guard before rollback from a later release.
