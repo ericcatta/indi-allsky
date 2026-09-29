@@ -5,13 +5,13 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `a3402d2ed54a1de9c45e787731f2f3f38b9b6d36`.
+The Raspberry runs `1c25a82334483aad134d9a75db3fd2c764d2ba8f`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
 The 829-file source/asset manifest is
-`5eab826f5f5b81462ebbf76c44ddc2b241b0a6823c84ec49e786c89771e8712d`.
+`37c752641717a50d8eda1b8bf3cddc661d4258581351870da033a90ee904a8e6`.
 Validation combines 166 existing Python entrypoints, two new checkpoint tests,
 and the runtime installer test; 34 JavaScript tests pass. The evidence preserves
 the first test-harness failure and corrected reruns, rather than claiming an
@@ -278,7 +278,8 @@ returned the real diagnostic collector output through its completion marker.
 These checks do not certify each destination effect or unavailable hardware.
 The index CPU card now reuses the existing measured-interval provider, including
 an explicit unavailable state; 169 Python and 34 JavaScript checks pass.
-Deployment of this CPU correction is pending.
+The CPU correction is deployed; the refreshed native page retains the metric
+cards and all 15 links. Capture was not restarted.
 [Evidence](testing/evidence/hybrid-system-index-20260929.json).
 
 ## Remaining acceptance gates

@@ -1,7 +1,7 @@
 {
   "date": "2026-09-29",
   "baseline": "a3402d2ed54a1de9c45e787731f2f3f38b9b6d36",
-  "status": "validated-awaiting-deployment",
+  "status": "deployed-native-verified",
   "scope": "System index CPU measurement and native index navigation; read-only Support Info collector",
   "source_manifest_sha256": "37c752641717a50d8eda1b8bf3cddc661d4258581351870da033a90ee904a8e6",
   "defect": {
@@ -168,5 +168,13 @@
     "No unavailable GPIO hardware reported passed.",
     "Support collector ordinary-user, timeout and error native acceptance remain open.",
     "No configuration or acquisition changes."
-  ]
+  ],
+  "deployment": {
+    "revision": "1c25a82334483aad134d9a75db3fd2c764d2ba8f",
+    "backup": "/home/eric/hybrid-backups/hybrid-system-index-20260929-152712",
+    "capture_pid": 1512517,
+    "capture_restarts": 0,
+    "native": "Reloaded System index: CPU numeric 0.0%, memory 25.3%, current version, all 15 navigation links retained. Numeric zero itself is not proof of sampling; deployed source manifest and regression establish use of the measured provider.",
+    "rollback": "python3 /home/eric/hybrid-system-index-deploy.py --rollback /home/eric/hybrid-backups/hybrid-system-index-20260929-152712"
+  }
 }

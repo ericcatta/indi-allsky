@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `a3402d2ed54a1de9c45e787731f2f3f38b9b6d36` (29 September 2026).
+Production runs `1c25a82334483aad134d9a75db3fd2c764d2ba8f` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -40,6 +40,20 @@ The camera-detection fix passed native discovery against real devices: the teles
 is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
+
+## System index rollback
+
+The index uses the same sampled CPU provider as System Info; failed counters
+show Unavailable. 169 Python and 34 JavaScript checks pass. Native index and
+support navigation evidence is recorded separately from hardware effects.
+[Evidence](testing/evidence/hybrid-system-index-20260929.json).
+
+```sh
+python3 /home/eric/hybrid-system-index-deploy.py --rollback /home/eric/hybrid-backups/hybrid-system-index-20260929-152712
+```
+
+Requires clean tracked HEAD `1c25a823`; restores `a3402d2e` and reloads web only.
+Capture remains running. No database restore. Prepared, not exercised.
 
 ## Log controller rollback
 
