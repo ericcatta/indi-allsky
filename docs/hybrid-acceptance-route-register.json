@@ -3773,6 +3773,36 @@
           "record": "controls[5]",
           "control": "Restore Config",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-full-settings-filter-native-20260929.json",
+          "record": "records[0]",
+          "control": "modern-admin-full-settings-filter / initial-state",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-full-settings-filter-native-20260929.json",
+          "record": "records[1]",
+          "control": "modern-admin-full-settings-filter / panorama-search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-full-settings-filter-native-20260929.json",
+          "record": "records[2]",
+          "control": "modern-admin-full-settings-filter / no-results",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-full-settings-filter-native-20260929.json",
+          "record": "records[3]",
+          "control": "modern-admin-full-settings-filter / keyboard-clear",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-full-settings-filter-native-20260929.json",
+          "record": "records[4]",
+          "control": "modern-admin-full-settings-filter / case-and-whitespace",
+          "recorded_status": "superato"
         }
       ]
     },

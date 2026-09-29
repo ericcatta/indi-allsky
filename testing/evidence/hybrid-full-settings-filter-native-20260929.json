@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-29",
+  "source_revision": "3b1a11c3",
+  "environment": "Production Raspberry, native in-app browser, administrator session",
+  "route": "/modern-admin/settings/full",
+  "camera_id": 1,
+  "profile_id": "not explicitly supplied",
+  "control": "modern-admin-full-settings-filter",
+  "scope": "Search and presentation only; no configuration fields edited and no save submitted. No request interception or simulated page results.",
+  "records": [
+    {
+      "id": "initial-state",
+      "input": "",
+      "matched_rows": 679,
+      "visible_sections": 11,
+      "observed_feedback": "679 settings match.",
+      "status": "superato"
+    },
+    {
+      "id": "panorama-search",
+      "input": "FISH2PANO",
+      "matched_rows": 12,
+      "visible_sections": 1,
+      "observed_feedback": "12 settings match.",
+      "status": "superato"
+    },
+    {
+      "id": "no-results",
+      "input": "hybrid-no-such-field-audit",
+      "matched_rows": 0,
+      "visible_sections": 0,
+      "observed_feedback": "No settings match. Change or clear your search.",
+      "status": "superato"
+    },
+    {
+      "id": "keyboard-clear",
+      "input": "Meta+A then Backspace",
+      "matched_rows": 679,
+      "visible_sections": 11,
+      "observed_feedback": "679 settings match.",
+      "status": "superato"
+    },
+    {
+      "id": "case-and-whitespace",
+      "input": "  fish2pano__diameter  ",
+      "matched_rows": 1,
+      "observed_feedback": "1 setting matches.",
+      "status": "superato"
+    }
+  ],
+  "additional_observations": [
+    "Panorama search returned the 12 FISH2PANO fields and opened the matching section.",
+    "Single-match search returned FISH2PANO__DIAMETER.",
+    "Keyboard clearing restored 679 rows across 11 sections.",
+    "Agent-created browser tab closed after testing."
+  ],
+  "limitations": [
+    "Does not certify all settings save/restore effects or every individual field.",
+    "Ordinary-user, anonymous and narrow viewport variants not exercised in this session.",
+    "No application source changed; existing regression results are not represented as a newly executed regression."
+  ]
+}

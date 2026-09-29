@@ -84,7 +84,7 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/settings/developer` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/exposure-gain` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/fits-source` | 0 | Da associare o collaudare |
-| `/modern-admin/settings/full` | 15 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-settings-privacy-native-20260920](../testing/evidence/hybrid-settings-privacy-native-20260920.json), [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json) |
+| `/modern-admin/settings/full` | 62 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-settings-privacy-native-20260920](../testing/evidence/hybrid-settings-privacy-native-20260920.json), [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json), [Ricerca Settings nel browser](../testing/evidence/hybrid-full-settings-filter-native-20260929.json) |
 | `/modern-admin/settings/hybrid-awb` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/notifications` | 0 | Da associare o collaudare |
 | `/modern-admin/settings/ready` | 0 | Da associare o collaudare |
