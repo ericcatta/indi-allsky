@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-29",
+  "status": "complete",
+  "operation": "Lossless compression of four historical database backups; no live database or media deletion",
+  "remote_report": "/home/eric/hybrid-archive-old-backups-20260929.json",
+  "remote_sha256": "46bf29719c311685e8b9aeeacab3c63e25fe2ee517fd2c702d90d720ea1fd2b1",
+  "directories": [
+    "cadence-clock-20260907-140555",
+    "capture-cadence-20260907-134506",
+    "config-download-20260910-181649",
+    "effects-20260908-174316"
+  ],
+  "verification": "For each immutable source, stream SHA256; compress; fully decompress and compare byte count and SHA256; check original inode/size/mtime unchanged; publish archive and recovery metadata before unlinking uncompressed source.",
+  "priority": {
+    "nice": 19,
+    "io_class": "idle",
+    "input_limit_mib_s": 8
+  },
+  "bytes_reclaimed": 3219880401,
+  "free_bytes_after": 9154498560,
+  "current_backup_preserved": "hybrid-storage-estimate-20260929-105107/indi-allsky.sqlite",
+  "capture": {
+    "main_pid": 921907,
+    "state": "active",
+    "restarts": 0,
+    "window": [
+      "2026-09-29 11:12:00",
+      "2026-09-29 11:19:28.474835"
+    ],
+    "camera_1": {
+      "frames": 30,
+      "minimum_interval_seconds": 11,
+      "maximum_interval_seconds": 19,
+      "intervals_over_16_seconds": 1
+    },
+    "camera_2": {
+      "frames": 30,
+      "minimum_interval_seconds": 15,
+      "maximum_interval_seconds": 16,
+      "intervals_over_16_seconds": 0
+    }
+  },
+  "limitations": [
+    "Does not resolve the earlier capture latency defect.",
+    "Does not meet the historical half-disk-free target. No new media were deleted.",
+    "No runtime source/configuration change; automated suite was not rerun for this operational archival."
+  ]
+}

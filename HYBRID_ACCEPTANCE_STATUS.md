@@ -108,6 +108,14 @@ mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
 
+## Backup space recovery — 29 September
+
+Four historical database snapshots were losslessly archived and verified, reclaiming
+approximately 3 GiB without removing media. Free space reached 8.53 GiB. The current
+release backup remains directly usable; capture was not restarted. Both cameras
+saved 30 frames in the bounded check, with one 19-second IMX708 interval. This is
+not a resolution of the latency finding below. [Evidence](testing/evidence/hybrid-backup-archival-20260929.json).
+
 ## Capture latency finding — 29 September
 
 A read-only six-hour retrospective sample found transient queue backpressure,

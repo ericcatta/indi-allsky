@@ -93,8 +93,10 @@ one-off authorized test-media cleanup does not change that saved policy.
 Some older snapshots are archived as `indi-allsky.sqlite.gz` to recover space.
 Their `compressed-storage.json` records the original byte length and SHA-256;
 complete decompression is verified before removing the uncompressed copy.
-The current detection and recent static cleanup/Settings/Classic backups remain
-uncompressed, with configuration and code archives preserved.
+The current storage-estimate release backup remains uncompressed, with configuration
+and code archives preserved. On 29 September four older database snapshots were
+compressed and fully verified, reclaiming 3,219,880,401 bytes; free space was
+8.53 GiB afterward. See [archival evidence](testing/evidence/hybrid-backup-archival-20260929.json).
 
 Before using an archived database snapshot, ensure space for `original_bytes`,
 run `gzip -dk indi-allsky.sqlite.gz` in its backup directory, then compare
