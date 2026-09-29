@@ -1,0 +1,137 @@
+{
+  "date": "2026-09-29",
+  "status": "documentation-only-cleanup",
+  "recovery_commit": "72215d78a12e780af7c005c1dde0fc47c6fdb4f4",
+  "removed": [
+    {
+      "path": "DATA001_LATEST_FRAME_ADAPTER.md",
+      "bytes": 4072,
+      "sha256": "9cda10ddc4725b54023fb18278e6934592a331af03928fe687d1212a3f985886"
+    },
+    {
+      "path": "DATA001_LATEST_FRAME_AUDIT.md",
+      "bytes": 12245,
+      "sha256": "9f5985f65f04c58b507ff961252f878d970cf3028fb732554bbe17acef48096e"
+    },
+    {
+      "path": "DATA001_LATEST_FRAME_DISCOVERY.md",
+      "bytes": 8919,
+      "sha256": "a6d75837cb0a7e39559eb581701b7e1a0b8e8a0989380819268c97c53e5ad090"
+    },
+    {
+      "path": "DATA001_LATEST_FRAME_INTEGRATION.md",
+      "bytes": 4068,
+      "sha256": "b540aa124156a32e39559a5c4043411ac15d9ec291c0beabaa4ddb5f04734050"
+    },
+    {
+      "path": "DATA001_LATEST_FRAME_REVIEW.md",
+      "bytes": 6182,
+      "sha256": "aa7d948cf80fca952f06aa4071114e72f1b0a46befaaf0ac70e97d691fb3bc84"
+    },
+    {
+      "path": "DATA002_LATEST_OUTPUT_ADAPTER.md",
+      "bytes": 4080,
+      "sha256": "273496d0830cd72dc8fdd1fb2763d7883056b35a8e68883ce552c89003b3cf5b"
+    },
+    {
+      "path": "DATA002_LATEST_OUTPUT_AUDIT.md",
+      "bytes": 10389,
+      "sha256": "265607513c116eb1e1646bb522b70d5840afc2e28993c3ca106d5fd6be8e8413"
+    },
+    {
+      "path": "DATA002_LATEST_OUTPUT_DISCOVERY.md",
+      "bytes": 13684,
+      "sha256": "dbebbed6faef294d7c7cefc226386b9c9a544f37137efa1d3938c7b4b32e6a6b"
+    },
+    {
+      "path": "DATA002_LATEST_OUTPUT_INTEGRATION.md",
+      "bytes": 4218,
+      "sha256": "83def9f2266f92150a5c55c6562e603df632da96bb3fdb598da4ab9c49b4eff7"
+    },
+    {
+      "path": "DATA002_LATEST_OUTPUT_REVIEW.md",
+      "bytes": 6184,
+      "sha256": "5d379509bc9fc9e243de85d02a9ebd54d63a23c5a9048f9e7cbcf2cc46e6f6ce"
+    },
+    {
+      "path": "DATA003_CURRENT_CAPTURE_AUDIT.md",
+      "bytes": 4230,
+      "sha256": "721535b88f2a02cba44dd44a042ac5533ed8be561a362afc3dbba9b546c7650e"
+    },
+    {
+      "path": "DATA003_CURRENT_CAPTURE_DISCOVERY.md",
+      "bytes": 13141,
+      "sha256": "624d3f347add55e9df3a1116f80d4e84aa588a7a6edce514b7bd05897ec73dd6"
+    },
+    {
+      "path": "DATA003_CURRENT_CAPTURE_INTEGRATION.md",
+      "bytes": 3848,
+      "sha256": "beabeb7ada74eba2f6b4b2beb500a5d25fe7776aa87ca5709575b02682c6fba9"
+    },
+    {
+      "path": "DATA003_CURRENT_CAPTURE_REVIEW.md",
+      "bytes": 4111,
+      "sha256": "6d658a561e5561ee2222a0f82e80b73bdfdbe5071da4bbe477960b53ae4649db"
+    },
+    {
+      "path": "DATA004_SOURCE_TRUST_AUDIT.md",
+      "bytes": 3885,
+      "sha256": "ee09c014707f3b0fe79f1569184d34bf5a2c606b154e69cecb02390f42e876fc"
+    },
+    {
+      "path": "DATA004_SOURCE_TRUST_INTEGRATION.md",
+      "bytes": 3033,
+      "sha256": "174f2aaf1c1986e17e290532cc3df83c1760ca60e9fb175952bf2c57c01c5ff6"
+    },
+    {
+      "path": "DATA004_SOURCE_TRUST_REVIEW.md",
+      "bytes": 3635,
+      "sha256": "eedd81aa7772f1d0c032ab819dfe0f885c99989395c19fda16ac7bc7ca2fe136"
+    },
+    {
+      "path": "DATA005_HIGHLIGHTS_METADATA_AUDIT.md",
+      "bytes": 3452,
+      "sha256": "1ba732562917962b2a2fae5ec4a786d7ec029ff476350b221d554e829c78e4af"
+    },
+    {
+      "path": "DATA005_HIGHLIGHTS_METADATA_INTEGRATION.md",
+      "bytes": 2555,
+      "sha256": "02e974652a2446c3f845c2f67a3006c49902b7341d1b161ec2fefb652bb94f5e"
+    },
+    {
+      "path": "DATA005_HIGHLIGHTS_METADATA_REVIEW.md",
+      "bytes": 2809,
+      "sha256": "5b5e5941ababcacc539e8b750bcaddea7baea089fab671684f192b1d2469db72"
+    },
+    {
+      "path": "DATA006_SKY_CYCLE_SUMMARY_AUDIT.md",
+      "bytes": 3052,
+      "sha256": "a70ddffc37879324b750f8f1ca92f4916c759ef03181f87c353cba7c1340bfdc"
+    },
+    {
+      "path": "DATA006_SKY_CYCLE_SUMMARY_INTEGRATION.md",
+      "bytes": 2433,
+      "sha256": "cf66333d0411097386eb7f75dc81726f11f92225877c13cc596ccca8abf753cc"
+    },
+    {
+      "path": "DATA006_SKY_CYCLE_SUMMARY_REVIEW.md",
+      "bytes": 2668,
+      "sha256": "618bc60f075e2c403cdfc8df41601284a06703029b5b45046a0a363f40ceba9c"
+    }
+  ],
+  "bytes_removed": 126893,
+  "scope": "Historical DATA stage reports only. No runtime, templates, assets, tests, user configuration or media removed.",
+  "checks": [
+    "Every removed file matches the recoverable Git version byte for byte.",
+    "No tracked references to each filename or stem outside the removed report family."
+  ],
+  "verification": {
+    "source_count": 835,
+    "source_manifest_sha256": "afaeac3ce66de7f770d2e92c4d8dcaf627aa769c74365993ad234097713667d6",
+    "same_as_passed_172_python_34_javascript_release": true,
+    "product_view_model_tests": 165,
+    "product_spine_entrypoint": "passed",
+    "guide_local_links": "all resolve",
+    "diff_check": "passed"
+  }
+}

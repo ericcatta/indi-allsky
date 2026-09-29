@@ -34,3 +34,24 @@ Other dated audits and porting reports remain historical unless a current
 runbook explicitly cites a still-applicable contract. Their percentages and
 past test outcomes do not certify today's product. Follow the current status
 and installed-source evidence rather than restarting old migration plans.
+
+### DATA001–DATA006 stage reports
+
+The 23 discovery, audit, adapter, integration and review reports from the first
+metadata-only stages were removed from the current tree. Their statements about
+unwired adapters, static pages and future media access describe those early
+stages, not the installed product. No runtime or test references require these
+files; implementation and behavioral tests remain unchanged.
+
+Recover any report from commit `72215d78a12e780af7c005c1dde0fc47c6fdb4f4`, for example:
+
+```sh
+git show 72215d78a12e780af7c005c1dde0fc47c6fdb4f4:DATA001_LATEST_FRAME_REVIEW.md
+```
+
+For maintained behavior use [product view models](../indi_allsky/product_view_models.py),
+[runtime providers](../indi_allsky/modern_admin_runtime_providers.py),
+[Sky Cycle runtime](../indi_allsky/sky_cycle_runtime.py),
+[product model tests](../testing/product_view_models_test.py) and
+[product spine tests](../testing/product_spine_regression_test.py).
+Current deployment and acceptance remain the sources linked above.
