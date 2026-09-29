@@ -36,7 +36,13 @@
         const controller = new AbortController();
         active = controller;
         const current = ++generation;
-        message.textContent = 'Loading chart data...';
+        let timedOut = false;
+        const deadline = window.setTimeout(() => {
+            timedOut = true;
+            controller.abort();
+        }, 15000);
+        // Background retries must not hide an error before new data arrives.
+        if (force || current === 1) message.textContent = 'Loading chart data...';
         try {
             const query = new URLSearchParams({camera_id: root.dataset.camera,
                 limit_s: history.value || '900', timestamp: root.dataset.timestamp});
@@ -57,11 +63,14 @@
             });
             message.textContent = data.message || 'Charts updated.';
         } catch (error) {
-            if (current !== generation || error.name === 'AbortError') return;
-            message.textContent = error.message === 'session_expired'
+            if (current !== generation || (error.name === 'AbortError' && !timedOut)) return;
+            message.textContent = timedOut
+                ? 'Timed out loading charts. Choose a range or wait for the next update. Previously displayed values may be out of date.'
+                : error.message === 'session_expired'
                 ? 'Session expired. Sign in and reload this page.'
                 : 'Could not load charts. Previously displayed values may be out of date.';
         } finally {
+            window.clearTimeout(deadline);
             if (current === generation) active = null;
         }
     }

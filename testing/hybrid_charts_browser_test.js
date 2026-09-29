@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require('node:path').join(__dirname, '../indi_allsky/flask/static/modern_admin/charts.js'), 'utf8');
 const keys = ['jsqm','stars','temp','exp','gain','detection', ...Array.from({length:9}, (_,i)=>`custom_${i+1}`)];
-const requests=[], charts=[], events={}, statuses=[];
+const requests=[], charts=[], events={}, statuses=[], deadlines=new Map();
 const canvases=[...keys,'histogram'].map(key=>{
     const status={textContent:''}; statuses.push(status);
     return {dataset:{key,label:key},closest:()=>({querySelector:()=>status})};
@@ -18,7 +18,8 @@ vm.runInNewContext(source, {
     document:{getElementById:id=>id==='chart-tool'?root:id==='HISTORY_SELECT'?history:message},
     Chart:function(canvas,config){this.data=config.data;this.update=()=>{};charts.push(this);},
     AbortController, URLSearchParams,
-    window:{setInterval:fn=>{poll=fn;return 7;},clearInterval:id=>{assert.equal(id,7);cleared=true;},addEventListener:(name,fn)=>events[name]=fn},
+    window:{setInterval:fn=>{poll=fn;return 7;},clearInterval:id=>{assert.equal(id,7);cleared=true;},addEventListener:(name,fn)=>events[name]=fn,
+        setTimeout(fn,ms){assert.equal(ms,15000);const id=Symbol();deadlines.set(id,fn);return id;},clearTimeout:id=>deadlines.delete(id)},
     fetch:(url,options)=>new Promise((resolve,reject)=>requests.push({url,options,resolve,reject}))
 });
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
@@ -48,6 +49,20 @@ const respond=(index,data,extra={})=>requests[index].resolve({ok:true,json:async
     poll();respond(6,null,{redirected:true});await tick();assert(message.textContent.includes('Session expired'));
     poll();respond(7,null,{ok:false});await tick();assert(message.textContent.includes('Could not load'));
     poll();requests[8].reject(Error('offline'));await tick();assert(message.textContent.includes('Could not load'));
-    poll();events.pagehide();assert(cleared&&requests[9].options.signal.aborted);
+    poll();respond(9,payload(61));await tick();
+    const beforeTimeout=JSON.stringify(charts.map(chart=>chart.data));
+    // A request that never responds must release polling without replacing data.
+    poll();assert.equal(deadlines.size,1);[...deadlines.values()][0]();
+    assert(requests[10].options.signal.aborted);
+    requests[10].reject(Object.assign(Error('aborted'),{name:'AbortError'}));await tick();
+    assert(message.textContent.includes('Timed out'));assert.equal(deadlines.size,0);
+    assert.equal(JSON.stringify(charts.map(chart=>chart.data)),beforeTimeout);
+    poll();assert(message.textContent.includes('Timed out'),'Background retry must retain the stale-data warning');
+    respond(11,payload(73));await tick();
+    assert.equal(charts[0].data.datasets[0].data[0].y,73);
+    assert.equal(message.textContent,'Charts updated.');
+    poll();events.pagehide();assert(cleared&&requests[12].options.signal.aborted);
+    requests[12].reject(Object.assign(Error('aborted'),{name:'AbortError'}));await tick();
+    assert.equal(deadlines.size,0);assert(!message.textContent.includes('Timed out'));
     console.log('Charts: all 15 series and histogram, empty/null data, atomic validation, history, stale responses, polling, HTTP/session/network errors and teardown: PASS');
 })().catch(error=>{console.error(error);process.exitCode=1;});

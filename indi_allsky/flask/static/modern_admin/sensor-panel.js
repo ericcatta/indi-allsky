@@ -26,9 +26,11 @@
     }
     async function load() {
         if(active)return;
-        active=new AbortController();refresh.disabled=true;
+        const controller=new AbortController();active=controller;refresh.disabled=true;
+        let timedOut=false;
+        const deadline=window.setTimeout(()=>{timedOut=true;controller.abort();},15000);
         try {
-            const response=await fetch(root.dataset.url+'?'+new URLSearchParams({camera_id:root.dataset.camera}),{signal:active.signal});
+            const response=await fetch(root.dataset.url+'?'+new URLSearchParams({camera_id:root.dataset.camera}),{signal:controller.signal});
             if(response.redirected)throw Error('session_expired');
             if(!response.ok)throw Error('request_failed');
             const data=await response.json();
@@ -37,8 +39,8 @@
             updates.forEach((values,index)=>bodies[index].replaceChildren(...values));filter();
             status.textContent=data.last_update===null?'No image metadata from the last 15 minutes.':`Last image: ${data.last_update} · age ${data.last_update_age_s} s`;
         } catch(error) {
-            if(error.name!=='AbortError')status.textContent=(error.message==='session_expired'?'Session expired. Sign in and reload.':'Could not update sensors. Try Refresh.')+' Displayed readings may be out of date.';
-        } finally {active=null;refresh.disabled=false;}
+            if(error.name!=='AbortError'||timedOut)status.textContent=(timedOut?'Timed out updating sensors. Try Refresh.':error.message==='session_expired'?'Session expired. Sign in and reload.':'Could not update sensors. Try Refresh.')+' Displayed readings may be out of date.';
+        } finally {window.clearTimeout(deadline);active=null;refresh.disabled=false;}
     }
     showAll.addEventListener('change',filter);refresh.addEventListener('click',load);
     const timer=window.setInterval(load,5000);

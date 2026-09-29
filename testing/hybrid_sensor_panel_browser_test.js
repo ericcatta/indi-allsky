@@ -5,11 +5,12 @@ function element(){return {dataset:{},children:[],textContent:'',checked:false,a
 const nodes=Object.fromEntries(['sensor-tool','sensor-status','sensor-refresh','sensor-show-all','sensor-user-rows','sensor-temp-rows'].map(id=>[id,element()]));
 nodes['sensor-tool'].dataset={url:'/js/sensor_panel',camera:'2'};
 const links=[1,2].map(id=>({href:`https://test.invalid/sensors?camera_id=${id}&profile_id=p${id}&timestamp=123`}));
-const requests=[],events={};let poll;
+const requests=[],events={},deadlines=new Map();let poll;
 vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../indi_allsky/flask/static/modern_admin/sensor-panel.js'),'utf8'),{
  document:{getElementById:id=>nodes[id],createElement:element,querySelectorAll:selector=>{assert.equal(selector,'[data-observatory-camera-link]');return links;}},AbortController,URLSearchParams,URL,
- window:{setInterval:fn=>{poll=fn;return 1;},clearInterval(){},addEventListener:(key,fn)=>events[key]=fn},
- fetch:(url,options)=>new Promise(resolve=>requests.push({url,options,resolve}))});
+ window:{setInterval:fn=>{poll=fn;return 1;},clearInterval(){},addEventListener:(key,fn)=>events[key]=fn,
+ setTimeout(fn,ms){assert.equal(ms,15000);const id=Symbol();deadlines.set(id,fn);return id;},clearTimeout:id=>deadlines.delete(id)},
+ fetch:(url,options)=>new Promise((resolve,reject)=>requests.push({url,options,resolve,reject}))});
 const data={last_update:'2026-09-07 09:00:00',last_update_age_s:5,readings:Object.fromEntries(['user','temp'].map(group=>[group,Array.from({length:60},(_,i)=>({slot:`sensor_${group}_${i}`,label:'<sensor>',value:i===0?0:null,used:i===0}))]))};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 const respond=(i,value,extra={})=>requests[i].resolve({ok:true,json:async()=>value,...extra});
@@ -30,6 +31,17 @@ const respond=(i,value,extra={})=>requests[i].resolve({ok:true,json:async()=>val
  assert(nodes['sensor-status'].textContent.includes('out of date'));assert.equal(nodes['sensor-user-rows'].children[0],rows[0]);
  poll();respond(2,null,{redirected:true});await tick();assert(nodes['sensor-status'].textContent.includes('Session expired'));
  poll();respond(3,{...data,last_update:null});await tick();assert(nodes['sensor-status'].textContent.includes('No image metadata'));
- poll();events.pagehide();assert(requests[4].options.signal.aborted);
+ const prior=nodes['sensor-user-rows'].children[0];
+ poll();assert.equal(deadlines.size,1);[...deadlines.values()][0]();
+ assert(requests[4].options.signal.aborted);
+ requests[4].reject(Object.assign(Error('aborted'),{name:'AbortError'}));await tick();
+ assert(nodes['sensor-status'].textContent.includes('Timed out'));
+ assert.equal(nodes['sensor-user-rows'].children[0],prior);
+ assert.equal(nodes['sensor-refresh'].disabled,false);assert.equal(deadlines.size,0);
+ nodes['sensor-refresh'].click();respond(5,data);await tick();
+ assert(nodes['sensor-status'].textContent.startsWith('Last image:'));
+ poll();events.pagehide();assert(requests[6].options.signal.aborted);
+ requests[6].reject(Object.assign(Error('aborted'),{name:'AbortError'}));await tick();
+ assert.equal(deadlines.size,0);assert(!nodes['sensor-status'].textContent.includes('Timed out'));
  console.log('Sensor controller: camera scope, 120 slots, real zero, absent values, filter, atomic errors, expired session, refresh and teardown: PASS');
 })().catch(error=>{console.error(error);process.exitCode=1;});

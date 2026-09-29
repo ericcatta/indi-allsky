@@ -1,0 +1,96 @@
+{
+  "date": "2026-09-29",
+  "status": "candidate-tested-not-yet-deployed",
+  "change": "15-second deadlines for Charts and Sensor Panel read requests. Timeout preserves readings and releases active polling/Refresh. Background chart retry retains warnings until a successful update; explicit range changes show loading. Page exit and superseded requests remain silent.",
+  "source_manifest": {
+    "files": 824,
+    "sha256": "c658eed40a313af6994862d3817da74ada29cbb5a714b4a046c7059c5e350388"
+  },
+  "validation": {
+    "javascript_entrypoints": 34,
+    "javascript_report": "/tmp/hybrid-observatory-timeout-js-20260929.json",
+    "javascript_sha256": "df2040ed6601fcd41afee00148132334d22fe9cb182950c90f1861c02525abf5",
+    "python_logs": {
+      "/home/eric/hybrid-charts-timeout-flow.log": "aa546b7f2a084c511606e10d32aef40991966cb4be2ea1028711c32897c2a500",
+      "/home/eric/hybrid-sensor-timeout-flow.log": "aa55941ce5477250efa92293b9f54ff73ba0a9f271e68def263df69907c92dc3"
+    },
+    "scope": "All JS and the two affected Python flows pass. No Python source changed; retained166-entrypoint backend regression is not represented as a new full run.",
+    "red_green": "Both old controllers fail deadline assertions. The first Charts fix also failed warning-persistence assertion; final version passes.",
+    "node_checks": [
+      "timeout abort",
+      "retained values",
+      "background retry keeps warning",
+      "successful retry",
+      "range supersession and late-response protection",
+      "pagehide teardown and timer cleanup"
+    ]
+  },
+  "native_report": {
+    "path": "/home/eric/hybrid-observatory-timeout-native.json",
+    "sha256": "bfaa28e65a6c04b141cd6d3c1de83a9c1ed1a252dea82c060efab1084b355099",
+    "scope": "Isolated Flask; Classic forbidden; actual browser requests. Only synthetic data, external effects blocked.",
+    "requests": 16,
+    "slow_charts": 3,
+    "normal_charts": 3,
+    "slow_sensors": 3,
+    "normal_sensors": 7,
+    "injected_delay_seconds": 20
+  },
+  "controls": [
+    {
+      "route": "/modern-admin/observatory/charts",
+      "control": "Stalled polling",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "environment": "isolated native browser",
+      "observed": "Timeout warning remains visible through automatic background retry."
+    },
+    {
+      "route": "/modern-admin/observatory/charts",
+      "control": "History24 Hours after timeout",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "environment": "isolated native browser",
+      "observed": "Selecting24 Hours shows Loading, then Charts updated; selected interval remains24 Hours."
+    },
+    {
+      "route": "/modern-admin/observatory/sensor-panel",
+      "control": "Stalled reading request",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated native browser",
+      "observed": "Timeout and stale-readings warning displayed. During the observed automatic retry Refresh is disabled only while a new request is active."
+    },
+    {
+      "route": "/modern-admin/observatory/sensor-panel",
+      "control": "Automatic recovery",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated native browser",
+      "observed": "Last image status resumes with age168s and Refresh enabled after switching the fixture to normal responses."
+    },
+    {
+      "route": "/modern-admin/observatory/sensor-panel",
+      "control": "Refresh after recovery",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated native browser",
+      "observed": "Manual Refresh updates age187s; subsequent polling shows193s and Refresh enabled."
+    }
+  ],
+  "limits": [
+    "Client abort does not cancel server computation.",
+    "Mutating requests and scientific algorithms unchanged.",
+    "Capture latency and24-hour observation remain separate."
+  ]
+}
