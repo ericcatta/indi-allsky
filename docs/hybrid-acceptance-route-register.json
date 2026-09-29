@@ -2282,6 +2282,12 @@
           "record": "controls[2]",
           "control": "Now after web restart",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-estimate-fix-20260929.json",
+          "record": "controls[5]",
+          "control": "Both latest frame previews",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -3040,7 +3046,38 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminStorageProtectionSettingsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-storage-estimate-fix-20260929.json",
+          "record": "controls[0]",
+          "control": "Estimated storage time",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-estimate-fix-20260929.json",
+          "record": "controls[1]",
+          "control": "Save invalid thresholds",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-estimate-fix-20260929.json",
+          "record": "controls[2]",
+          "control": "All settings and return",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-estimate-fix-20260929.json",
+          "record": "controls[3]",
+          "control": "Save storage protection",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-estimate-fix-20260929.json",
+          "record": "controls[4]",
+          "control": "Tasks",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/timelapse",

@@ -5,20 +5,20 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `7ddd7378d73353d8a58082c42f2d848dc3319375`.
+The Raspberry runs `30708b3142ee279eb86d12c81ef1a4ce42ee5a96`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
 The 822-file installed source/asset manifest matches the tested snapshot:
-`b0509a1bcf4668988acde55116d1861b3258783e59b06b4e8435bdc4cf6e39b0`.
-All 165 Python entrypoints passed: 164 in the full run and one after a test-only
-guardrail correction, with all implementation hashes unchanged. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Current regression: [identifier validation evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
+`92c475dfdb96a86769dd0e277489fc468f602dc25c7ca408ecafe765fde55e09`.
+All 165 Python entrypoints passed in the complete 29 September run with unchanged source. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Current regression: [storage estimate evidence](testing/evidence/hybrid-storage-estimate-fix-20260929.json).
 This automated result does not certify every native control or hardware effect.
 
 The deployment preserved configuration revision 117, Flask configuration and user files.
-Only web restarted (PID 952707); capture was preserved. The latest backup passed integrity checking in 53.73 seconds.
+The subsequent native same-value Storage Protection save created revision 118; all saved values equal revision 117.
+Only web restarted (PID 1384014); capture PID 921907 was preserved. The latest backup passed integrity checking in 202.75 seconds.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
 ## Cold-start defect corrected and deployed
@@ -45,14 +45,16 @@ the unchanged JavaScript results remain applicable. Native production checks now
 return controlled 400/404 errors on all three corrected routes. Both Now images
 decoded (22:56:47 IMX708 and 22:56:58 ASI678MC). See [identifier validation evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
 
-## Tested storage estimate correction pending deployment
+## Storage estimate correction deployed
 
 Failed Startrail attempts without an output file were suppressing the capacity
 estimate. The corrected query excludes unsuccessful generated-output rows with
 no recorded size, retaining all known bytes and the checks for genuinely unknown
 sizes. All 165 Python entrypoints pass. A read-only production-data comparison
 restores the estimate (8.51 GiB/day, approximately six days capacity at observation).
-The cleanup policy is unchanged. [Evidence](testing/evidence/hybrid-storage-estimate-fix-20260929.json).
+The installed page now shows the estimate. A native same-value save persisted revision 118,
+with the original 5 GiB / 8 GiB / 3-day policy and all other settings unchanged.
+Both latest frames decoded after deployment. [Evidence](testing/evidence/hybrid-storage-estimate-fix-20260929.json).
 
 ## Post-removal evidence
 

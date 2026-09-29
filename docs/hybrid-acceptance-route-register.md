@@ -135,3 +135,7 @@ Indice statico: 7.351 identità con tutti i 43.978 riferimenti originali conserv
 ## Notification acceptance recorded 29 September 2026
 
 [Native production evidence](../testing/evidence/hybrid-notification-live-20260921.json) records the 21 September administrator flow: dedicated expired notice 199 acknowledged, persistence verified, 198 pre-existing acknowledgement states preserved. Filters, search, paging, seven-column sorting, copy and keyboard detail are recorded individually in the JSON register. CSV/Excel receipt remains blocked; ordinary/anonymous role checks are separately identified as isolated tests. The report hash, installed revision and retained acknowledgement were rechecked on 29 September; this is not continuous observation.
+
+## Storage estimate and Settings acceptance, 29 September 2026
+
+[Release evidence](../testing/evidence/hybrid-storage-estimate-fix-20260929.json) records the corrected live capacity estimate, invalid-threshold rejection, Settings navigation, same-value save to revision 118 and Tasks navigation. All persisted values equal revision 117. Both current camera images decoded after web-only deploy. No cleanup was invoked; native field toggling and live deletion are not implied by the same-value save.

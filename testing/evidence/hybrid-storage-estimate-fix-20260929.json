@@ -46,10 +46,79 @@
     "invalid_save": "minimum=9,target=8 rejected with explanation; All settings and Storage Protection navigation return saved values 5.0/8.0/3",
     "stored_policy": "enabled; minimum 5 GiB, recovery 8 GiB, keep 3 days"
   },
-  "deployment": "pending",
+  "deployment": {
+    "previous": "7ddd7378d73353d8a58082c42f2d848dc3319375",
+    "candidate": "30708b3142ee279eb86d12c81ef1a4ce42ee5a96",
+    "backup": "/home/eric/hybrid-backups/hybrid-storage-estimate-20260929-105107",
+    "integrity": "ok",
+    "configuration_revision": 117,
+    "backup_seconds": 202.75,
+    "services_after": {
+      "gunicorn-indi-allsky.service": "MainPID=1384014\nNRestarts=0\nActiveState=active"
+    },
+    "capture_restarted": false,
+    "configuration_unchanged": true,
+    "status": "installed-bounded-acceptance-passed",
+    "native_acceptance": {
+      "storage_page_estimated": true,
+      "displayed_free_gib": 5.67,
+      "gib_per_day": 8.51,
+      "retained_capacity": "5 days, 22 hours",
+      "until_threshold": "0 days, 1 hours",
+      "same_value_save_revision": 118,
+      "all_saved_values_equal_revision_117": true,
+      "both_now_frames_decoded": "2026-09-29 10:56:49; camera1 4608x2592; camera2 3840x2160"
+    }
+  },
   "limits": [
     "Estimate uses observed recorded media rate, not a guarantee of future sizes or unrelated disk usage.",
     "No cleanup triggered and no media removed by this mission.",
     "24-hour acceptance remains deferred."
-  ]
+  ],
+  "native_navigation": {
+    "tasks": "Scoped link opens /modern-admin/tasks; Task Queue shows 465 records and real actions including storagePressureCleanup. Earlier timeout came from the unscoped verification; no product fault inferred."
+  },
+  "controls": [
+    {
+      "page": "/modern-admin/settings/storage-protection",
+      "control": "Estimated storage time",
+      "status": "superato",
+      "proof": "After deploy: 8.51 GiB/day, 5 days 22 hours retained capacity, 1 hour to threshold at observation; no fabricated values."
+    },
+    {
+      "page": "/modern-admin/settings/storage-protection",
+      "control": "Save invalid thresholds",
+      "status": "superato",
+      "proof": "Before deploy, minimum 9 above target 8 rejected; no revision created. This unchanged form validates cross-field policy."
+    },
+    {
+      "page": "/modern-admin/settings/storage-protection",
+      "control": "All settings and return",
+      "status": "superato",
+      "proof": "Settings index opens and Storage Protection returns saved 5/8/3 values."
+    },
+    {
+      "page": "/modern-admin/settings/storage-protection",
+      "control": "Save storage protection",
+      "status": "superato",
+      "proof": "After deploy, same-value save redirects to saved=1; revision 118 created, all persisted values equal revision 117; estimate remains available without capture restart."
+    },
+    {
+      "page": "/modern-admin/settings/storage-protection",
+      "control": "Tasks",
+      "status": "superato",
+      "proof": "Scoped link opens /modern-admin/tasks; Task Queue shows 465 records and real actions including storagePressureCleanup. Earlier timeout came from the unscoped verification; no product fault inferred."
+    },
+    {
+      "page": "/modern-admin/now",
+      "control": "Both latest frame previews",
+      "status": "superato",
+      "proof": "Both 2026-09-29 10:56:49 images complete and decode to 4608x2592 and 3840x2160."
+    }
+  ],
+  "control_scope": {
+    "role": "production administrator",
+    "camera_profile": "storage policy is global; Now checked cameras 1 and 2",
+    "limits": "Checkbox and individual numeric edits are covered by isolated storage settings tests; native save used identical values. No live cleanup initiated."
+  }
 }

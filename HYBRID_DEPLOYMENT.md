@@ -2,19 +2,19 @@
 
 ## Installed version
 
-Production runs `7ddd7378d73353d8a58082c42f2d848dc3319375` (21 September 2026).
-Classic frontend is removed; Hybrid is the only UI. The media identifier fix rejects
-values outside the database integer range. All 165 Python entrypoints passed:
-164 in the full run and the remaining test after checking the added validation
-separately while retaining the original FITS class fingerprint. Implementation
-hashes stayed unchanged during that test-only correction. Prior 34 JavaScript
-passes remain applicable; the 822-file manifest matches the installed snapshot.
+Production runs `30708b3142ee279eb86d12c81ef1a4ce42ee5a96` (29 September 2026).
+Classic frontend is removed; Hybrid is the only UI. Failed output attempts without
+files no longer suppress the storage forecast. All 165 Python entrypoints passed
+in a full run with unchanged source; the 34 prior JavaScript passes apply to
+unchanged JS/templates/CSS. The tested 822-file manifest matches production.
 
-Backup integrity passed in 53.73 seconds. Configuration 117 and Flask settings
-were preserved. Only web restarted (PID 952707); capture was not interrupted.
-Native checks returned controlled errors for oversized IDs on all three corrected
-handlers. Both Now images decoded at 22:56:47 and 22:56:58.
-See [release evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
+Backup integrity passed in 202.75 seconds. Deployment preserved configuration 117
+and Flask settings. Only web restarted (PID 1384014); capture PID 921907 continued.
+Native Storage Protection now displays the estimate. Saving the same values created
+revision 118, with every persisted configuration value equal to revision 117.
+Both 10:56:49 Now frames decoded on 29 September. The cleanup policy is unchanged;
+this mission did not trigger cleanup or remove media.
+See [release evidence](testing/evidence/hybrid-storage-estimate-fix-20260929.json).
 The retained backend moon bitmap remains in `indi_allsky/overlay/assets/`.
 
 Both camera/profile round trips through the Settings index and Exposure/Gain
@@ -30,7 +30,7 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed media identifier release
+## Roll back the installed storage estimate release
 
 Use an authenticated SSH terminal on the Raspberry as `eric`, during a maintenance
 window. Check the installed revision and preserve any tracked edits first:
@@ -42,17 +42,17 @@ git -C /home/eric/indi-allsky rev-parse HEAD
 
 The protected helper requires exactly the installed revision above and refuses
 to discard tracked edits. Its backup is:
-`/home/eric/hybrid-backups/hybrid-media-id-boundary-20260921-225523`.
+`/home/eric/hybrid-backups/hybrid-storage-estimate-20260929-105107`.
 Run on the Raspberry:
 
 ```sh
-release_backup=/home/eric/hybrid-backups/hybrid-media-id-boundary-20260921-225523
+release_backup=/home/eric/hybrid-backups/hybrid-storage-estimate-20260929-105107
 maintenance_deadline="$(date --date='+15 minutes' --iso-8601=seconds)"
 python3 "$release_backup/deploy.py" --rollback "$release_backup" \
   --maintenance-until "$maintenance_deadline"
 ```
 
-This code-only rollback returns to `cfe2c40d` and restarts only web,
+This code-only rollback returns to `7ddd7378` and restarts only web,
 including its previous socket activation state. It restores neither the database
 nor configuration and does not stop capture. Classic remains removed and the
 retained backend moon bitmap remains available.
