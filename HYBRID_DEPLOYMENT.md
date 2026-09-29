@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `4ebd6a418a12e76adc0207e3eaffd7ff907bbd43` (29 September 2026).
+Production runs `34a2c2eab7ce73299da019e5c1cec3cef71b2186` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -41,7 +41,27 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Current Support Info release rollback
+## Current realtime preview release rollback
+
+Capture restarted during 17:43:28–17:43:34 on 29 September. Both cameras resumed
+with valid full-resolution frames; configuration revision 118 is unchanged.
+171 Python checks passed. The tested manifest is
+`87b12ee079398908c0bb2c21dd53d5dd6478c251735600080be3fb9a35f1c99a` (833 files).
+The 10-minute load replay passed all 171 checks; both cameras saved 40 frames
+with 15-second median and 16-second maximum intervals. This matches the before
+sample. Preview flush is eliminated, but other filesystem stalls remain open.
+
+From exactly `34a2c2eab7ce73299da019e5c1cec3cef71b2186`:
+
+```sh
+/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python /home/eric/hybrid-preview-flush-deploy.py --rollback /home/eric/hybrid-backups/hybrid-preview-flush-20260929-174327
+```
+
+This restores `4ebd6a41`, restarts capture and reloads web workers. It preserves
+the database, configuration and media. Only then does the older rollback apply.
+[Evidence](testing/evidence/hybrid-preview-flush-20260929.json).
+
+## Support Info release rollback
 
 Production Support Info passed native collection and 171 Python checks.
 Web workers reloaded; capture PID 1739126 and configuration stayed unchanged.

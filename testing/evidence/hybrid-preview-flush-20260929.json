@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "validated-awaiting-deployment",
+  "status": "deployed-native-verified-storage-stalls-open",
   "baseline": "4ebd6a418a12e76adc0207e3eaffd7ff907bbd43",
   "trigger": "Measured realtime preview fsync stalls up to 10.334322 seconds in image worker; see hybrid-image-publication-stall-20260929.json.",
   "change": "Remove synchronous disk flush for regenerable realtime preview only. Encoder closes before atomic same-filesystem replace; original frames, panoramas and persisted realtime history unchanged.",
@@ -16,7 +16,97 @@
   "source_count": 833,
   "manifest_sha256": "87b12ee079398908c0bb2c21dd53d5dd6478c251735600080be3fb9a35f1c99a",
   "limits": [
-    "Live performance comparison remains to run.",
-    "Other observed filesystem stalls are not removed by this change."
-  ]
+    "Filesystem stalls still affect panorama persistence and preview file creation.",
+    "Frame capture timestamps do not measure publication latency or prove continuous UI freshness.",
+    "Bounded sample only; 24-hour acceptance remains deferred."
+  ],
+  "deployment": {
+    "commit": "34a2c2eab7ce73299da019e5c1cec3cef71b2186",
+    "backup": "/home/eric/hybrid-backups/hybrid-preview-flush-20260929-174327",
+    "maintenance_start": "2026-09-29T17:43:28.191562",
+    "maintenance_end": "2026-09-29T17:43:34.143126",
+    "capture_pid": 1862836,
+    "image_worker_pid": 1862876,
+    "web_pid_unchanged": 1512518,
+    "configuration_revision": 118,
+    "resumed_files": [
+      {
+        "camera_id": 1,
+        "image_id": 177875,
+        "time": "17:45:02",
+        "decoded_size": [
+          4608,
+          2592
+        ]
+      },
+      {
+        "camera_id": 2,
+        "image_id": 177874,
+        "time": "17:44:55",
+        "decoded_size": [
+          3840,
+          2160
+        ]
+      }
+    ]
+  },
+  "native_realtime": {
+    "role": "administrator",
+    "camera_1": {
+      "decoded_size": [
+        1000,
+        843
+      ],
+      "manual_refresh": "17:46:34 to 17:46:49"
+    },
+    "camera_2": {
+      "decoded_size": [
+        1000,
+        700
+      ],
+      "manual_refresh": "17:45:42 to 17:45:57"
+    },
+    "camera_switch": "IMX708 Wide selected the correct camera/profile route and heading.",
+    "cleanup": "Temporary test tab closed."
+  },
+  "live_comparison": {
+    "window": [
+      "2026-09-29T17:44:45.775166",
+      "2026-09-29T17:54:45.802787"
+    ],
+    "report": "/home/eric/hybrid-preview-flush-observation-20260929.json",
+    "report_sha256": "5724b531ccc481f22b150800af9b3963d1683b7e375dee527afbcc9f3bebab00",
+    "regression_cases": 171,
+    "regression_passed": true,
+    "source_changed": false,
+    "regression_sha256": "c437cb3721840cecc6e4cf32cd5eeb8854aee916d2234729d1a8aad872024763",
+    "trace_sha256": "02c157254cbd54a951742a58561fff5f0cf8c8ecf12cf2b90439d8b9e56f18f3",
+    "locks_sha256": "308edaf58da38af8f6454cae9ec4b3a8710926b0d8685df4c189de0add11e366",
+    "preview_fsync_calls": 0,
+    "frames_per_camera": 40,
+    "median_seconds_both": 15,
+    "max_seconds_both": 16,
+    "intervals_above_17_seconds": 0,
+    "capture_pid": 1862836,
+    "automatic_restarts": 0,
+    "pending_tasks": 0,
+    "config_revision": 118,
+    "remaining_stalls_seconds": {
+      "archived_panorama_fsync": 22.504545,
+      "preview_file_create": 11.255783
+    },
+    "completion": "Runner and sampler terminal; strace detached after bounded 600 seconds."
+  },
+  "before_comparison": {
+    "window": [
+      "2026-09-29T17:20:03.549594",
+      "2026-09-29T17:30:03.562826"
+    ],
+    "frames_per_camera": 40,
+    "median_seconds_both": 15,
+    "max_seconds_both": 16,
+    "intervals_above_17_seconds": 0,
+    "preview_fsync_max_seconds": 10.334322,
+    "interpretation": "Both before and after samples maintained the same frame cadence. This change removes the measured synchronous preview flush, but does not establish an overall cadence speedup or remove general storage latency."
+  }
 }

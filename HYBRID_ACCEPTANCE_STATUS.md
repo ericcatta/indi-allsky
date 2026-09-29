@@ -5,13 +5,13 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `4ebd6a418a12e76adc0207e3eaffd7ff907bbd43`.
+The Raspberry runs `34a2c2eab7ce73299da019e5c1cec3cef71b2186`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
 The 833-file source/asset manifest (including the capture entrypoint) is
-`914bae53e523d77257512908fefe8a097c70315ba2cc175c190df41b65b6b8f9`.
+`87b12ee079398908c0bb2c21dd53d5dd6478c251735600080be3fb9a35f1c99a`.
 171 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
 The bounded asynchronous syslog handler is deployed. Both camera files decode
 after the restart. The live 171-entrypoint replay passes. Trace confirms system-log sends and
@@ -22,8 +22,8 @@ maxima are 19/25 seconds under load despite a 15-second median.
 A private SQLite 3.51.3 runtime is loaded by capture, web and commands in the
 Hybrid virtualenv; OS packages remain unchanged. Capture supervises background
 checkpoints with automatic fallback. Config revision 118 is unchanged. Capture
-PID 1739126 and web PID 1512518 have zero automatic restarts; capture was
-restarted for the syslog release at 16:21. The web workers were reloaded.
+PID 1862836 and web PID 1512518 have zero automatic restarts; capture was
+restarted for the preview release at 17:43. The web workers were reloaded.
 The coherent backup passed integrity_check. Now, Settings/history and Library
 passed bounded native checks; latest files from both cameras decode.
 
@@ -389,3 +389,17 @@ The simultaneous image-worker trace captured a 10.334-second preview fsync,
 5.322-second status-file open and 4.111-second preview-file creation. This is
 now direct evidence of filesystem stalls, not merely gaps in receiver logs.
 [Trace evidence](testing/evidence/hybrid-image-publication-stall-20260929.json).
+
+## Realtime preview flush — deployed and measured
+
+Removed the synchronous flush of the regenerable preview while preserving
+atomic replacement, encoded pixels and failure recovery. Archived media and
+keogram history persistence are unchanged. After abrupt power loss a preview
+may need the next frame to regenerate. All 171 checks passed; both cameras
+produced decodable new frames after six seconds of controlled maintenance.
+The 10-minute load replay passed all 171 checks. Both cameras saved 40 frames
+with a 15-second median and 16-second maximum interval, as in the matching
+before sample. No preview fsync remains. Other filesystem calls still stalled
+(up to 22.5 seconds on panorama fsync and 11.3 seconds on preview creation);
+publication latency and overall storage stability remain open.
+[Evidence](testing/evidence/hybrid-preview-flush-20260929.json).
