@@ -1,7 +1,7 @@
 {
   "date": "2026-09-29",
   "scope": "Encoded capture image publication; not full product acceptance",
-  "status": "automated-tests-passed-awaiting-deployment",
+  "status": "deployed-bounded-acceptance-passed",
   "defect": "write_img removed the previous latest frame before copy2; copy failures also leaked encoded temporary files and could expose partial archive files.",
   "change": "Stage complete files on destination filesystem, publish latest with replace and archives with non-overwriting link; always remove encoded temporary file.",
   "tests": {
@@ -33,5 +33,54 @@
     "Atomic namespace publication does not guarantee durability across sudden power loss.",
     "Archive publication requires filesystem hard-link support, also used by panorama publication; production media is on the Linux ext filesystem.",
     "24-hour observation remains deferred."
-  ]
+  ],
+  "deployment": {
+    "commit": "07b2098dd24e1992b0f4f418d066a4672ec6f594",
+    "previous": "52eb6b23607fff2cd961b0f8890b8311d8a391d1",
+    "backup": "/home/eric/hybrid-backups/hybrid-image-publication-20260929-121700",
+    "state": "/home/eric/hybrid-image-publication-release-state.json",
+    "state_sha256": "b459c574b74b9dff839adbd3f5bc15c5a2cb04b9d900b425751f4d9a818ec830",
+    "maintenance_start": "2026-09-29T12:17:01.378461",
+    "maintenance_end": "2026-09-29T12:17:12.989355",
+    "capture_pid": 1447332,
+    "web_pid_unchanged": 1415309,
+    "service_restarts": 0,
+    "configuration_revision_unchanged": 118,
+    "database_migration": false,
+    "code_rollback_prepared_not_exercised": true,
+    "files_decoded_after_restart": {
+      "1": [
+        175306,
+        175308,
+        175310
+      ],
+      "2": [
+        175305,
+        175307,
+        175309
+      ]
+    },
+    "native_now": {
+      "1": {
+        "timestamp": "2026-09-29 12:17:41",
+        "complete": true,
+        "dimensions": [
+          4608,
+          2592
+        ]
+      },
+      "2": {
+        "timestamp": "2026-09-29 12:17:49",
+        "complete": true,
+        "dimensions": [
+          3840,
+          2160
+        ]
+      }
+    },
+    "last_two_intervals_per_camera_seconds": [
+      15,
+      15
+    ]
+  }
 }

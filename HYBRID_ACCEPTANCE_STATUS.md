@@ -5,26 +5,24 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `52eb6b23607fff2cd961b0f8890b8311d8a391d1`.
+The Raspberry runs `07b2098dd24e1992b0f4f418d066a4672ec6f594`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
-The 823-file installed source/asset manifest matches the frontend candidate:
-`ceaeed9c0841046d239877a64988fe3affd384b7162232cd0c2c257e887895e4`.
-The baseline full encoder regression passed 166 Python entrypoints. This latest
-CSS/template-only change passed all 34 JavaScript entrypoints and three affected
-Python flow tests, plus native isolated and production browser layout checks.
-The baseline is not presented as a new full-suite run for the changed frontend.
-[Current evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
+The 824-file installed source/asset manifest matches the tested candidate:
+`49a1245fe01b4244ae020e822f1d97905318a3e1dca7778d3794d66bb0a7294f`.
+Validation covers 166 Python entrypoints (165 full-run passes plus the corrected
+focus harness rerun) and all 34 JavaScript entrypoints.
+[Current evidence](testing/evidence/hybrid-image-publication-20260929.json).
 This does not certify every native control or hardware effect.
 
-Configuration revision 118 remains current. The frontend deployment reloaded
-web only and preserved capture PID 1415308 with zero restarts. Code and Flask
+Configuration revision 118 remains current. Capture restarted with PID 1447332;
+web PID 1415309 remained unchanged. Both report zero restarts. Code and Flask
 configuration were backed up; no database copy or migration was needed. The
 previous coherent database backup from the encoder release remains available.
-Both current Now images decoded after the web reload.
+Three new files per camera and both Now previews decoded after deployment.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
 ## Cold-start defect corrected and deployed
@@ -113,6 +111,18 @@ Discovery does not mark clicks passed. JavaScript-generated controls, keyboard/m
 mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
+
+## Capture image publication deployed
+
+Release `07b2098d` preserves the previous latest preview if copying or publication
+fails, publishes complete archive files, and removes encoded temporary files on
+all exits. The 166 Python entrypoints pass using the full run plus one corrected
+focus test harness rerun; all 34 JavaScript tests pass. The 824-file source manifest
+matches production. Capture restarted in a bounded 12-second maintenance window;
+web PID and configuration 118 remained unchanged. Three new saved files per camera
+decoded successfully; both Now previews decoded in the native browser. The last two
+intervals per camera were 15 seconds, which does not close the separate latency
+finding. [Evidence](testing/evidence/hybrid-image-publication-20260929.json).
 
 ## Mobile management-grid correction deployed
 

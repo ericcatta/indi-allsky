@@ -2,20 +2,20 @@
 
 ## Installed version
 
-Production runs `52eb6b23607fff2cd961b0f8890b8311d8a391d1` (29 September 2026).
-Classic frontend is removed; Hybrid is the only UI. The latest CSS/template-only
-release contains the mobile management-grid correction. Uploads, YouTube and
-Sensor Panel all fit 320px in production. The stylesheet query version changed
-to invalidate the previous one-day cache. All 34 JavaScript entrypoints and three
-affected Python flows passed; the earlier 166-entrypoint backend regression is
-retained with its original scope. The 823-file candidate manifest matches production.
+Production runs `07b2098dd24e1992b0f4f418d066a4672ec6f594` (29 September 2026).
+Classic frontend is removed; Hybrid is the only UI. The latest release protects
+capture previews and archives from partial copy failures. The 824-file tested
+manifest matches production. Validation covers 166 Python entrypoints (full run
+plus the corrected focus harness rerun) and 34 JavaScript entrypoints.
 
-Web was reloaded, preserving capture PID 1415308 and configuration revision 118.
-Code and Flask configuration were backed up; no database migration or copy was
-performed for this frontend-only change. The coherent encoder-release database
-snapshot remains available at `hybrid-image-encoder-20260929-113656`.
-Native Now images from 11:53:18 (IMX708) and 11:53:11 (ASI678MC) both decoded.
-See [release evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
+Capture was restarted between 12:17:01 and 12:17:13; capture PID is 1447332,
+web PID 1415309 was preserved, and configuration revision 118 is unchanged.
+Three newly saved images per camera decoded from disk and both Now previews decoded
+in the native browser. This bounded check does not certify steady cadence or
+power-loss durability. [Release evidence](testing/evidence/hybrid-image-publication-20260929.json).
+
+The mobile management-grid correction remains installed: Uploads, YouTube and
+Sensor Panel fit 320px. [Layout evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
 The retained backend moon bitmap remains in `indi_allsky/overlay/assets/`.
 
 Both camera/profile round trips through the Settings index and Exposure/Gain
@@ -31,7 +31,26 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed mobile layout release
+## Roll back the installed image publication release
+
+From an authenticated Raspberry SSH terminal as `eric`, the protected helper
+requires exactly `07b2098dd24e1992b0f4f418d066a4672ec6f594` and a clean tracked
+checkout. It restores code to 52eb6b23 with a controlled capture restart, preserving
+the running web service, database, configuration and media. It has not been
+exercised in production.
+
+```sh
+python3 /home/eric/hybrid-image-publication-deploy.py --rollback /home/eric/hybrid-backups/hybrid-image-publication-20260929-121700
+```
+
+This release backed up code and Flask configuration. It did not migrate or copy
+the database; the coherent snapshot at
+`/home/eric/hybrid-backups/hybrid-image-encoder-20260929-113656/indi-allsky.sqlite`
+remains available. Code rollback does not restore that older database.
+
+## Historical mobile layout rollback
+
+Use this only after rolling the current image publication release back to 52eb6b23.
 
 Use an authenticated SSH terminal on the Raspberry as `eric`, during a maintenance
 window. Check the installed revision and preserve any tracked edits first:
@@ -41,7 +60,7 @@ git -C /home/eric/indi-allsky status --short
 git -C /home/eric/indi-allsky rev-parse HEAD
 ```
 
-The protected helper requires exactly the installed revision above and refuses
+The protected helper requires exactly revision 52eb6b23607fff2cd961b0f8890b8311d8a391d1 and refuses
 to discard tracked edits. Its backup is:
 `/home/eric/hybrid-backups/hybrid-management-grid-20260929-115230`.
 Run on the Raspberry:
