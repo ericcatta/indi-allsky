@@ -45,6 +45,15 @@ the unchanged JavaScript results remain applicable. Native production checks now
 return controlled 400/404 errors on all three corrected routes. Both Now images
 decoded (22:56:47 IMX708 and 22:56:58 ASI678MC). See [identifier validation evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
 
+## Tested storage estimate correction pending deployment
+
+Failed Startrail attempts without an output file were suppressing the capacity
+estimate. The corrected query excludes unsuccessful generated-output rows with
+no recorded size, retaining all known bytes and the checks for genuinely unknown
+sizes. All 165 Python entrypoints pass. A read-only production-data comparison
+restores the estimate (8.51 GiB/day, approximately six days capacity at observation).
+The cleanup policy is unchanged. [Evidence](testing/evidence/hybrid-storage-estimate-fix-20260929.json).
+
 ## Post-removal evidence
 
 | Scope | Verified result | Evidence |

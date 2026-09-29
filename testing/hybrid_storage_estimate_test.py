@@ -34,6 +34,30 @@ def run():
         assert result['sample_seconds']==7200 and result['samples']==4
         assert result['gib_per_day']==6 and result['until_threshold']=='0 days, 20 hours'
         assert not result['retention_fits']
+        # Worker rows exist before an output is created. Failed/pending outputs
+        # with no size are not evidence of an unknown-sized captured file.
+        for family in ('Video', 'MiniVideo', 'Keogram', 'StarTrails', 'StarTrailsVideo', 'PanoramaVideo'):
+            table = getattr(models, 'IndiAllSkyDb'+family+'Table')
+            entry = table(camera_id=1, filename=str(root/(family+'.test')),
+                          createDate=now, dayDate=now.date(), night=True,
+                          success=False, fileSize=None, data={})
+            if family == 'MiniVideo':
+                entry.note = 'Dedicated estimate fixture'
+                entry.targetDate = now
+                entry.startDate = now-timedelta(minutes=1)
+                entry.endDate = now
+                entry.frames = 1
+                entry.framerate = 1
+            db.session.add(entry); db.session.commit()
+            assert storage_forecast(**args) == result, family
+            entry.success = True; db.session.commit()
+            assert 'recorded size' in storage_forecast(**args)['reason'], family
+            # Even an unsuccessful output with known bytes contributes to rate.
+            entry.success = False; entry.fileSize = GIB//8; db.session.commit()
+            measured = storage_forecast(**args)
+            assert measured['status'] == 'estimated' and measured['samples'] == 5, family
+            assert measured['gib_per_day'] == 7.5, family
+            db.session.delete(entry); db.session.commit()
         assert duration_label(1)=='less than 1 hour' and duration_label(90000)=='1 days, 1 hours'
         state.value = 'invalid';db.session.commit()
         assert 'confirmed' in storage_forecast(**args)['reason']

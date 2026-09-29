@@ -1,0 +1,55 @@
+{
+  "date": "2026-09-29",
+  "baseline_runtime": "7ddd7378d73353d8a58082c42f2d848dc3319375",
+  "defect": "Failed Startrail rows 31 and 32 had NULL fileSize and no on-disk file; forecast treated them as unknown-sized acquired media and suppressed the requested capacity estimate.",
+  "change": "Ignore unsuccessful/pending generated-output records without a recorded size. Continue counting known bytes regardless of success, and continue rejecting missing sizes for successful outputs and acquired media. Cleanup policy and effects unchanged.",
+  "red_green": {
+    "before": {
+      "path": "/home/eric/hybrid-storage-estimate-before-20260929.log",
+      "sha256": "ac6e05c73db603a9b98d5af084d838401489cbc49f5c11c24db5aef58345da40",
+      "outcome": "Expected failure on the first generated-output family"
+    },
+    "after": {
+      "path": "/home/eric/hybrid-storage-estimate-after-20260929.log",
+      "sha256": "96e033fd0c6a1a9e27bebb9ed4cfb1b89a94cb4ce051870379a4c015d882e11a",
+      "outcome": "Passed across six generated-output families, retaining acquired-media unknown-size checks"
+    }
+  },
+  "regression": {
+    "path": "/home/eric/hybrid-storage-estimate-regression-20260929/results.json",
+    "sha256": "f38c6001dd7e0e7ed0c381f6aea0329ec35e29c4b71e5d6fc3138e1f9378b0fd",
+    "python_entrypoints": 165,
+    "failed": 0,
+    "source_changed": false,
+    "manifest_files": 822,
+    "manifest_sha256": "92c475dfdb96a86769dd0e277489fc468f602dc25c7ca408ecafe765fde55e09",
+    "manifest_serialization": "sha256(json.dumps(source_hashes,sort_keys=True).encode())",
+    "local_matches_tested_manifest": true,
+    "javascript": "34 prior passes reused; no changes to JS/templates/CSS"
+  },
+  "live_read_only_probe": {
+    "path": "/home/eric/hybrid-storage-estimate-probe-20260929.json",
+    "sha256": "1aa7774a42063146a41a7a7b6442c447a286cb35abf8a53b7f7643ccbab763f2",
+    "before_status": "insufficient_data",
+    "after_status": "estimated",
+    "config_id": 117,
+    "free_gib": 6.61,
+    "gib_per_day": 8.51,
+    "until_threshold": "0 days, 4 hours",
+    "retained_capacity": "6 days, 0 hours",
+    "samples": 19773,
+    "before_seconds": 0.252,
+    "after_seconds": 0.259,
+    "limits": "Single read-only comparison, not a performance improvement claim or continuous stability test."
+  },
+  "native_before_deploy": {
+    "invalid_save": "minimum=9,target=8 rejected with explanation; All settings and Storage Protection navigation return saved values 5.0/8.0/3",
+    "stored_policy": "enabled; minimum 5 GiB, recovery 8 GiB, keep 3 days"
+  },
+  "deployment": "pending",
+  "limits": [
+    "Estimate uses observed recorded media rate, not a guarantee of future sizes or unrelated disk usage.",
+    "No cleanup triggered and no media removed by this mission.",
+    "24-hour acceptance remains deferred."
+  ]
+}

@@ -68,6 +68,12 @@ def storage_forecast(config, config_id, root, *, now=None, disk_usage=shutil.dis
         local_path = or_(table.filename.startswith(str(root)+'/'),
                          ~table.filename.startswith('/'))
         scope = (table.camera_id.in_(ids), local_path)
+        if name in OUTPUT_FAMILIES:
+            # Workers register outputs before creating files. A failed/pending
+            # row without a size is not an unknown-sized acquired file.
+            # Keep known bytes even on unsuccessful output rows, and still
+            # reject successful outputs whose size is unexpectedly missing.
+            scope += (or_(table.success.is_(True), table.fileSize.isnot(None)),)
         if name in IMAGE_FAMILIES:
             recorded += db.session.query(func.coalesce(func.sum(table.fileSize), 0)).filter(*scope).scalar()
         total, count, known = db.session.query(func.coalesce(func.sum(table.fileSize), 0),
