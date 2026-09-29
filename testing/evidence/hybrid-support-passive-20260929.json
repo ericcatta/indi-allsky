@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "validated-awaiting-deployment",
+  "status": "deployed-native-verified",
   "defect": "Support Info invoked i2cdetect -y 1 while described as read-only; that probes attached devices and assumes bus 1.",
   "change": "Use i2cdetect -l to list adapters without device probing; remove obsolete Classic wording. Explicit hardware diagnostics remain separate.",
   "reference": "https://kernel.googlesource.com/pub/scm/utils/i2c-tools/i2c-tools/+/refs/tags/v4.3/tools/i2cdetect.8",
@@ -22,7 +22,14 @@
     "additional_script_sha256": "1836c469e93656ffd75072133be2d1804331ce0530247baba21257a6ffe8ad53"
   },
   "limits": [
-    "Native corrected support collector remains to verify.",
-    "Capture cadence is a separate open issue."
-  ]
+    "This closes automatic I2C probing in Support Info, not the remaining hardware acceptance.",
+    "Capture cadence remains open."
+  ],
+  "deployment": {
+    "commit": "4ebd6a418a12e76adc0207e3eaffd7ff907bbd43",
+    "backup": "/home/eric/hybrid-backups/hybrid-support-passive-20260929-173042",
+    "capture_pid_unchanged": 1739126,
+    "automatic_restarts": 0,
+    "native": "Load support info completed (83875 characters), reported adapters 11/13/14 under no-device-probing heading; no error. Temporary tab closed."
+  }
 }

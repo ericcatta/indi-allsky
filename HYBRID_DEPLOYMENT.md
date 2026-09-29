@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `4ca063a6a8da0ec116c0963a51f83fd594602b53` (29 September 2026).
+Production runs `4ebd6a418a12e76adc0207e3eaffd7ff907bbd43` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -41,7 +41,25 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Current task sorting release rollback
+## Current Support Info release rollback
+
+Production Support Info passed native collection and 171 Python checks.
+Web workers reloaded; capture PID 1739126 and configuration stayed unchanged.
+The 833-file manifest is `914bae53e523d77257512908fefe8a097c70315ba2cc175c190df41b65b6b8f9`.
+The separately verified `misc/support_info.sh` hash is
+`1836c469e93656ffd75072133be2d1804331ce0530247baba21257a6ffe8ad53`.
+
+From exactly `4ebd6a418a12e76adc0207e3eaffd7ff907bbd43`:
+
+```sh
+/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python /home/eric/hybrid-support-passive-deploy.py --rollback /home/eric/hybrid-backups/hybrid-support-passive-20260929-173042
+```
+
+This restores `4ca063a6` with web reload only. It also restores the old automatic
+I2C scan; avoid invoking Support Info after rollback until corrected again.
+[Evidence](testing/evidence/hybrid-support-passive-20260929.json).
+
+## Task sorting release rollback
 
 The task age correction passed 171 Python checks and native sorting on all 501
 production rows in both directions. Only web workers were reloaded; capture

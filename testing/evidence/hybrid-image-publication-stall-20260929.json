@@ -40,7 +40,7 @@
     "completion": "Timeout 124 as expected; process detached.",
     "result": "Long stall not reproduced; cannot attribute previous delay to fsync."
   },
-  "next_step": "Do not repeat the same replay without a new hypothesis. Longer full-regression load previously reproduced delays, while selected cases did not. Capture transaction/file timing during the next necessary regression; retain hardware recovery and external integration acceptance gates.",
+  "next_step": "Evaluate removal or isolation of synchronous persistence for regenerable previews, preserving complete-file atomic publication, retained frame semantics, and bounded resources. Measure benefit under comparable load.",
   "runtime_changes": "None; capture stayed active.",
   "targeted_replay": {
     "window": "2026-09-29T17:16:01.790562 to 17:17:31.850848 Europe/Zurich",
@@ -81,5 +81,21 @@
     },
     "completion": "Tests exited zero, sampler terminal, strace timeout 124 and confirmed detached.",
     "conclusion": "The selected tests alone do not reproduce the stall. This bounded sample does not close cadence acceptance."
+  },
+  "full_regression_trace": {
+    "report": "/home/eric/hybrid-support-load-image-trace-20260929.log",
+    "sha256": "2714065acf5d0b19d0fb354d2c21d53cc47efe1c2712c0de6f5a628adaaef5b5",
+    "completed_calls": 18140,
+    "slow_calls_seconds": {
+      "realtime_preview_fsync": 10.334322,
+      "status_json_open_truncate": 5.322279,
+      "realtime_preview_create": 4.110813,
+      "event_runtime_rename": 1.088615
+    },
+    "locks_report": "/home/eric/hybrid-support-load-locks-20260929.jsonl",
+    "locks_sha256": "90a82122d54be219c70f25529bb459075159b138ce37c8271023e55754bfb75f",
+    "completion": "600-second trace and sampler completed; strace detached.",
+    "kernel": "No warning/error lines returned by dmesg at inspection; not proof of storage health.",
+    "result": "Measured filesystem calls block image worker for multiple seconds. This supports addressing preview/status publication separately from persistence of archived frames; it does not explain every prior SQLite lock."
   }
 }

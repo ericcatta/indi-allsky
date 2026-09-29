@@ -5,13 +5,13 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `4ca063a6a8da0ec116c0963a51f83fd594602b53`.
+The Raspberry runs `4ebd6a418a12e76adc0207e3eaffd7ff907bbd43`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
 The 833-file source/asset manifest (including the capture entrypoint) is
-`16d12f76aa538f61abc8eb24235640888043e8501847d06535e012410c938964`.
+`914bae53e523d77257512908fefe8a097c70315ba2cc175c190df41b65b6b8f9`.
 171 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
 The bounded asynchronous syslog handler is deployed. Both camera files decode
 after the restart. The live 171-entrypoint replay passes. Trace confirms system-log sends and
@@ -376,3 +376,16 @@ A bounded 60-second syscall trace during normal capture did not reproduce the
 stall (maximum observed call 110 ms); no pipeline or durability change is justified
 by that sample. Queue backpressure remains enabled and cadence acceptance open.
 [Investigation evidence](testing/evidence/hybrid-image-publication-stall-20260929.json).
+
+## Passive Support Info — deployed
+
+Support Info now lists I2C adapters without automatically probing bus 1.
+All 171 Python checks passed; shell syntax and the script hash were verified
+separately from the 833-file manifest. Native production collection completed
+and listed all three adapters. Capture was not restarted.
+[Evidence](testing/evidence/hybrid-support-passive-20260929.json).
+
+The simultaneous image-worker trace captured a 10.334-second preview fsync,
+5.322-second status-file open and 4.111-second preview-file creation. This is
+now direct evidence of filesystem stalls, not merely gaps in receiver logs.
+[Trace evidence](testing/evidence/hybrid-image-publication-stall-20260929.json).
