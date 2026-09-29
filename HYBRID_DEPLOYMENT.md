@@ -2,17 +2,21 @@
 
 ## Installed version
 
-Production runs `07b2098dd24e1992b0f4f418d066a4672ec6f594` (29 September 2026).
-Classic frontend is removed; Hybrid is the only UI. The latest release protects
-capture previews and archives from partial copy failures. The 824-file tested
-manifest matches production. Validation covers 166 Python entrypoints (full run
-plus the corrected focus harness rerun) and 34 JavaScript entrypoints.
+Production runs `35c1ba6682dc5f0a0b264fd0798089a0ecde31b8` (29 September 2026).
+Classic frontend is removed; Hybrid is the only UI. Astropanel now times out
+stalled requests after 15 seconds and restores Refresh, retaining previous values
+with a stale-data warning. Its script URL version invalidates browser caching.
+The 824-file source manifest matches the candidate.
 
-Capture was restarted between 12:17:01 and 12:17:13; capture PID is 1447332,
-web PID 1415309 was preserved, and configuration revision 118 is unchanged.
-Three newly saved images per camera decoded from disk and both Now previews decoded
-in the native browser. This bounded check does not certify steady cadence or
-power-loss durability. [Release evidence](testing/evidence/hybrid-image-publication-20260929.json).
+All 34 JavaScript tests and both affected Python Astropanel flows pass; the
+unchanged backend retains its 166-entrypoint image-publication regression.
+Native isolated delayed responses prove timeout/recovery. Production loads,
+Refresh and camera selection passed. Web was reloaded; capture PID 1447332 and
+configuration 118 remain unchanged. Both cameras saved frames at 12:47.
+[Release evidence](testing/evidence/hybrid-astropanel-timeout-20260929.json).
+
+The prior atomic image publication correction remains installed.
+[Image publication evidence](testing/evidence/hybrid-image-publication-20260929.json).
 
 The mobile management-grid correction remains installed: Uploads, YouTube and
 Sensor Panel fit 320px. [Layout evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
@@ -31,7 +35,24 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed image publication release
+## Roll back the installed Astropanel release
+
+The protected helper requires the exact installed revision above and a clean
+tracked checkout. It returns code to 07b2098d and reloads web, preserving capture,
+database, configuration and media. This rollback is prepared, not live exercised.
+Code/config backup:
+`/home/eric/hybrid-backups/hybrid-astropanel-timeout-20260929-124538`.
+
+```sh
+python3 /home/eric/hybrid-astropanel-timeout-deploy.py --rollback /home/eric/hybrid-backups/hybrid-astropanel-timeout-20260929-124538
+```
+
+No database copy or migration was performed for this JS/template change. The
+coherent encoder-release database backup remains available.
+
+## Historical image publication rollback
+
+Use this only after rolling Astropanel back to 07b2098d.
 
 From an authenticated Raspberry SSH terminal as `eric`, the protected helper
 requires exactly `07b2098dd24e1992b0f4f418d066a4672ec6f594` and a clean tracked

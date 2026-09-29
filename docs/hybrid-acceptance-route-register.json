@@ -2345,7 +2345,56 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminAstroPanelView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-astropanel-timeout-20260929.json",
+          "record": "controls[0]",
+          "control": "Initial stalled request; test-profile-1; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-astropanel-timeout-20260929.json",
+          "record": "controls[1]",
+          "control": "Refresh after initial timeout; test-profile-1; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-astropanel-timeout-20260929.json",
+          "record": "controls[2]",
+          "control": "Refresh stalls after successful data; test-profile-1; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-astropanel-timeout-20260929.json",
+          "record": "controls[3]",
+          "control": "Camera2 link; test-profile-2; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-astropanel-timeout-20260929.json",
+          "record": "controls[4]",
+          "control": "Camera1 link after timeout recovery; test-profile-1; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-astropanel-timeout-20260929.json",
+          "record": "controls[5]",
+          "control": "Initial load; imx708-wide; production native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-astropanel-timeout-20260929.json",
+          "record": "controls[6]",
+          "control": "Refresh; imx708-wide; production native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-astropanel-timeout-20260929.json",
+          "record": "controls[7]",
+          "control": "Camera link; asi678mc; production native browser",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/observatory/charts",
@@ -3816,6 +3865,12 @@
           "source": "testing/evidence/hybrid-download-delivery-post-classic-20260921.json",
           "record": "controls[1]",
           "control": "CSV with zero filtered results",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-download-delivery-post-classic-20260921.json",
+          "record": "latest_native_recheck",
+          "control": "CSV after Search12729",
           "recorded_status": "bloccato"
         }
       ]

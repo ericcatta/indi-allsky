@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "candidate-tested-not-yet-deployed",
+  "status": "deployed-bounded-acceptance-passed",
   "change": "Bound Astropanel requests, including response body parsing, to15 seconds; preserve stale data with a warning and re-enable Refresh. Page exit abort remains silent. Cache query version updated.",
   "regression": {
     "javascript_entrypoints": 34,
@@ -40,7 +40,8 @@
       "camera_id": 1,
       "profile_id": "test-profile-1",
       "status": "superato",
-      "observed": "Timeout message shown; Sun becomes Unavailable; Refresh enabled."
+      "observed": "Timeout message shown; Sun becomes Unavailable; Refresh enabled.",
+      "environment": "isolated native browser"
     },
     {
       "route": "/modern-admin/observatory/astropanel",
@@ -49,7 +50,8 @@
       "camera_id": 1,
       "profile_id": "test-profile-1",
       "status": "superato",
-      "observed": "Updated status at12:43:08 and computed Sun40.87 degrees."
+      "observed": "Updated status at12:43:08 and computed Sun40.87 degrees.",
+      "environment": "isolated native browser"
     },
     {
       "route": "/modern-admin/observatory/astropanel",
@@ -58,7 +60,8 @@
       "camera_id": 1,
       "profile_id": "test-profile-1",
       "status": "superato",
-      "observed": "Timeout and out-of-date warning shown; Sun remains40.87 degrees; Refresh enabled."
+      "observed": "Timeout and out-of-date warning shown; Sun remains40.87 degrees; Refresh enabled.",
+      "environment": "isolated native browser"
     },
     {
       "route": "/modern-admin/observatory/astropanel",
@@ -67,7 +70,8 @@
       "camera_id": 2,
       "profile_id": "test-profile-2",
       "status": "superato",
-      "observed": "Camera2/profile2 selected; Updated12:43:55, Sun40.9 degrees, Refresh enabled."
+      "observed": "Camera2/profile2 selected; Updated12:43:55, Sun40.9 degrees, Refresh enabled.",
+      "environment": "isolated native browser"
     },
     {
       "route": "/modern-admin/observatory/astropanel",
@@ -76,12 +80,64 @@
       "camera_id": 1,
       "profile_id": "test-profile-1",
       "status": "superato",
-      "observed": "Camera1/profile1 selected; Updated12:44:06, Refresh enabled."
+      "observed": "Camera1/profile1 selected; Updated12:44:06, Refresh enabled.",
+      "environment": "isolated native browser"
+    },
+    {
+      "route": "/modern-admin/observatory/astropanel",
+      "control": "Initial load",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "status": "superato",
+      "observed": "Updated12:46:06, Sun40.83deg, Refresh enabled.",
+      "environment": "production native browser"
+    },
+    {
+      "route": "/modern-admin/observatory/astropanel",
+      "control": "Refresh",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "status": "superato",
+      "observed": "Loading changed to Updated12:46:21 and Refresh enabled.",
+      "environment": "production native browser"
+    },
+    {
+      "route": "/modern-admin/observatory/astropanel",
+      "control": "Camera link",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "observed": "URL carries camera2/profileasi678mc; Updated12:46:48, Sun40.84deg, Refresh enabled.",
+      "environment": "production native browser"
     }
   ],
   "limits": [
     "Client timeout does not cancel server-side computation.",
     "No scientific algorithms changed.",
     "Not whole-product or24-hour acceptance."
-  ]
+  ],
+  "deployment": {
+    "commit": "35c1ba6682dc5f0a0b264fd0798089a0ecde31b8",
+    "previous": "07b2098dd24e1992b0f4f418d066a4672ec6f594",
+    "backup": "/home/eric/hybrid-backups/hybrid-astropanel-timeout-20260929-124538",
+    "state": "/home/eric/hybrid-astropanel-timeout-release-state.json",
+    "sha256": "022d32b9a4d40ff5d3bd99a15ff117083e86d60e5e8d9c74fe4d375647150476",
+    "capture_pid_unchanged": 1447332,
+    "configuration_revision_unchanged": 118,
+    "latest_frames": {
+      "1": [
+        175537,
+        "2026-09-29 12:47:08"
+      ],
+      "2": [
+        175538,
+        "2026-09-29 12:47:09"
+      ]
+    },
+    "free_gib": 6.68,
+    "rollback_prepared_not_exercised": true
+  }
 }

@@ -5,24 +5,24 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `07b2098dd24e1992b0f4f418d066a4672ec6f594`.
+The Raspberry runs `35c1ba6682dc5f0a0b264fd0798089a0ecde31b8`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
 The 824-file installed source/asset manifest matches the tested candidate:
-`49a1245fe01b4244ae020e822f1d97905318a3e1dca7778d3794d66bb0a7294f`.
-Validation covers 166 Python entrypoints (165 full-run passes plus the corrected
-focus harness rerun) and all 34 JavaScript entrypoints.
-[Current evidence](testing/evidence/hybrid-image-publication-20260929.json).
+`9a474c07613015cb03a8f528951c16a200a463640ee7b83d6e618d1ca3eabab3`.
+The backend retains the 166-entrypoint image-publication regression. This
+JS/template-only release reran all 34 JavaScript tests and both affected Python
+Astropanel flows, preserving the ephemeris fingerprints. It is not a new full
+Python suite run. [Current evidence](testing/evidence/hybrid-astropanel-timeout-20260929.json).
 This does not certify every native control or hardware effect.
 
-Configuration revision 118 remains current. Capture restarted with PID 1447332;
-web PID 1415309 remained unchanged. Both report zero restarts. Code and Flask
-configuration were backed up; no database copy or migration was needed. The
-previous coherent database backup from the encoder release remains available.
-Three new files per camera and both Now previews decoded after deployment.
+Configuration revision 118 and capture PID 1447332 remain unchanged; web was
+reloaded. Code/config backup and rollback are prepared. Native Astropanel loads
+and refreshes real data for both cameras. Newly saved frames were observed at
+12:47:08 and 12:47:09; this is not the deferred 24-hour acceptance.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
 ## Cold-start defect corrected and deployed
@@ -111,6 +111,15 @@ Discovery does not mark clicks passed. JavaScript-generated controls, keyboard/m
 mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
+
+## Astropanel timeout recovery deployed
+
+A stalled request could leave Refresh disabled indefinitely. A 15-second client
+deadline now restores the control, distinguishes unavailable data from retained
+stale values, and permits retry. Native isolated 20-second delays verified initial
+failure and stale-data preservation; retry and camera switching recovered.
+Production refresh/camera selection passed without restarting capture.
+[Evidence](testing/evidence/hybrid-astropanel-timeout-20260929.json).
 
 ## Users table acceptance extended
 
