@@ -2,18 +2,24 @@
 
 ## Installed version
 
-Production runs `3577fa82aa53808195687635f71e8197e7faf82f` (29 September 2026).
-Classic frontend is removed; Hybrid is the only UI. Charts and Sensor Panel now
-recover after a 15-second request deadline, preserving readings and warning text
-until recovery. The prior Astropanel timeout correction remains installed.
-The 824-file source manifest matches the candidate.
+Production runs `f0d502fb2088ab32c8d8850a609d605178e3eb60` (29 September 2026).
+Classic frontend remains removed. Background SQLite checkpoint maintenance is
+active for capture; failed/stale maintenance restores automatic checkpoints.
+All capture/web SQLite processes and the dedicated virtualenv CLI load verified
+SQLite 3.51.3. The OS library is unchanged.
 
-All 34 JavaScript tests and both affected Python Charts/Sensor Panel flows pass;
-the unchanged backend retains its 166-entrypoint image-publication regression.
-Native isolated delayed responses prove timeout/recovery. Production loads on
-both cameras, Charts range selection and Sensor Refresh passed. Web was reloaded;
-capture PID 1447332 and configuration 118 remain unchanged. Both cameras saved
-frames at 13:08. [Release evidence](testing/evidence/hybrid-observatory-timeout-20260929.json).
+The 829-file manifest matches the delivered candidate. Tests cover 166 existing
+Python entrypoints plus checkpoint lifecycle, Flask checkout and installer
+checks, and 34 JavaScript tests. The original new-test harness failure and its
+correction are retained in the evidence. Native Now, Settings/history and
+Library checks pass. Both cameras resumed; 29 frames each show 15-second median
+and 16-second maximum spacing. This short sample does not close all cadence or
+whole-product acceptance gates.
+[Release evidence](testing/evidence/hybrid-sqlite-checkpoint-20260929.json).
+
+Capture/web were stopped for a coherent database backup (integrity_check: ok),
+then restarted; configuration 118 is unchanged. Maintenance 13:51:57–13:54:13.
+Backup: `/home/eric/hybrid-backups/hybrid-checkpoint-20260929-135156`.
 
 The prior atomic image publication correction remains installed.
 [Image publication evidence](testing/evidence/hybrid-image-publication-20260929.json).
@@ -35,7 +41,26 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed Charts/Sensor release
+## Roll back the installed checkpoint release
+
+Use an authenticated SSH terminal as eric. The protected helper requires exactly
+`f0d502fb` and a clean tracked checkout. It stops capture/web/socket activation,
+removes the managed runtime bootstrap and checkpoint drop-in, returns code to
+`3577fa82`, and restarts services. It does not restore the database or delete media.
+The full production rollback is prepared, not exercised; isolated runtime removal
+has been verified. Run with system Python, which the private runtime does not alter.
+
+```sh
+python3 /home/eric/hybrid-checkpoint-deploy.py --rollback /home/eric/hybrid-backups/hybrid-checkpoint-20260929-135156
+```
+
+Verify both camera frames, service status and the virtualenv SQLite version after
+rollback. Do not merely reset Git: the bootstrap/drop-in must also be removed.
+See [runtime installation details](HYBRID_CAPTURE_CADENCE.md).
+
+## Historical Charts/Sensor rollback
+
+Use only after checkpoint rollback has returned code to 3577fa82.
 
 The protected helper requires exactly `3577fa82` and a clean tracked checkout.
 It returns code to `35c1ba66` and reloads web without restarting capture or

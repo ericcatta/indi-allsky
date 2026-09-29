@@ -204,7 +204,7 @@ and [acceptance status](HYBRID_ACCEPTANCE_STATUS.md).
 ## Background SQLite checkpoint candidate — 2026-09-29
 
 The measured image-worker `fdatasync` stall is addressed by a supervised
-checkpoint process, currently **opt-in and not deployed**. This does not change
+checkpoint process, now **enabled on the Raspberry**. This does not change
 exposure/gain, queue backpressure, media algorithms or the requested cadence.
 
 `INDI_ALLSKY_BACKGROUND_CHECKPOINT=1` on the capture service enables maintenance
@@ -219,7 +219,8 @@ checkpoint only while a database-specific heartbeat is fresh. Every connection
 checkout re-evaluates that decision: missing, malformed, mismatched or 30-second
 stale state restores the 1000-page automatic fallback, including pooled
 connections. Web and unrelated processes keep their existing checkpoint policy.
-No installer or production environment enables this candidate yet.
+The Raspberry capture service enables it through its managed systemd drop-in.
+Other installations remain opt-in.
 
 `synchronous=NORMAL` remains unchanged. Checkpointing moves work off frame
 commits; it cannot eliminate shared-disk contention or guarantee all commits

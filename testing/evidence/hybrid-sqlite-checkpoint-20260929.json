@@ -1,12 +1,12 @@
 {
   "date": "2026-09-29",
-  "status": "candidate-tested-not-deployed",
+  "status": "deployed-bounded-live-checks-passed",
   "change": "Supervised passive SQLite checkpoints outside capture/image commits, opt-in. Fresh database-specific heartbeat disables per-connection autocheckpoint; stale/missing/malformed/mismatched heartbeat restores1000-page fallback on checkout.",
   "source_manifest": {
     "files": 828,
     "sha256": "5c360b68be2fcf2befe22710b083dd043103c93a78398ce8e4a3b779bf642f0c"
   },
-  "runtime": "SQLite3.51.3 isolated build; production remains3.46.1 and unchanged",
+  "runtime": "SQLite3.51.3 private virtualenv library verified in9 running capture/web/helper processes and CLI; OS library unchanged",
   "validation": {
     "python_entrypoints": 168,
     "scope": "166 existing entrypoints pass in full run; corrected new lifecycle test plus new Flask flow pass separately. Application sources unchanged between runs.",
@@ -37,21 +37,115 @@
     "Before/after end-to-end frame and checkpoint measurements"
   ],
   "limits": [
-    "Opt-in flag is not enabled in production or installer",
-    "Does not eliminate shared storage contention",
-    "NORMAL persistence semantics unchanged; not a power-loss durability guarantee",
-    "Long readers can prevent WAL recycling;16384-page backlog warning is not a hard size cap",
-    "No claim that cadence defect or overall acceptance is closed"
+    "Activated only in capture service; web retains automatic checkpoint policy but uses patched library.",
+    "Shared storage contention remains possible.",
+    "NORMAL semantics unchanged; not a power-loss durability guarantee.",
+    "Long readers can prevent WAL recycling; backlog warning is not a hard size cap.",
+    "Short live results do not certify all cadence conditions or whole-product acceptance;24h remains deferred."
   ],
   "runtime_installer": {
     "file": "misc/hybrid_sqlite_runtime.py",
-    "status": "isolated-install-remove-passed-not-deployed",
+    "status": "deployed-after-isolated-install-remove-checks",
     "scope": "Private library and startup bootstrap in dedicated virtualenv; system library unchanged. All commands in this virtualenv load candidate without LD_LIBRARY_PATH.",
     "probe": "/home/eric/hybrid-sqlite-bootstrap-probe.json",
     "probe_sha256": "e152dd47ee1997574fabfbf2b16949bfeb3fefdb7d6898bf7c8e43033231237e",
     "native_outcome": "Temporary virtualenv loads3.51.3;400 exact synthetic rows and3 concurrent checkpoints pass integrity; removal restores3.46.1.",
     "unit_test": "testing/hybrid_sqlite_runtime_installer_test.py",
     "unit_outcome": "Checksum mismatch, existing managed files, modified bootstrap, activation failure, removal and outside-prefix rejection pass.",
-    "limits": "Not installed in production. Commands outside the dedicated virtualenv require separate runtime verification. Rebuilding the virtualenv requires reinstallation."
-  }
+    "limits": "Commands outside the dedicated virtualenv require separate runtime verification. Rebuilding the virtualenv requires reinstallation."
+  },
+  "deployment": {
+    "revision": "f0d502fb2088ab32c8d8850a609d605178e3eb60",
+    "source_files": 829,
+    "source_manifest": "5517292da5a96fa8117e97bcafed4b6d4ede299c6ffb099ec31e701f3d7f494c",
+    "backup": "/home/eric/hybrid-backups/hybrid-checkpoint-20260929-135156",
+    "database_backup_integrity": "ok",
+    "backup_seconds": 115.18,
+    "maintenance_start": "2026-09-29T13:51:57.132747",
+    "maintenance_end": "2026-09-29T13:54:13.160945",
+    "config_revision": 118,
+    "capture_pid": 1512517,
+    "web_pid": 1512518,
+    "checkpoint_pid": 1512546,
+    "state": "/home/eric/hybrid-checkpoint-release-state.json",
+    "state_sha256": "f5e53f016ef09c046ffdb130dbd71a484d5097c3dde6bc6bc43c6b7fb968e803",
+    "rollback": "Prepared code/runtime rollback; production rollback not exercised. Private runtime removal tested in isolated virtualenv."
+  },
+  "live_observation": {
+    "report": "/home/eric/hybrid-checkpoint-live-20260929.json",
+    "sha256": "8242c1b376abee376dfb94c53f5d86bc358aef83ff6b85da6b908463fdd32934",
+    "before_minutes": 30,
+    "before_frames_each": 120,
+    "before_max_seconds": {
+      "1": 21,
+      "2": 20
+    },
+    "before_intervals_over17": {
+      "1": 2,
+      "2": 1
+    },
+    "after_frames_each": 29,
+    "after_window": "13:54:26\u201314:01:35 local",
+    "after_median_seconds_each": 15,
+    "after_max_seconds_each": 16,
+    "after_intervals_over17_each": 0,
+    "latest_files_decoded": [
+      176111,
+      176112
+    ],
+    "services_restarts": 0,
+    "trace_seconds": 180,
+    "trace_sha256": "faf0699c1e8fe98d3c181a7d132d6aee8428a667627f924b19e6cf8a9c214eb9",
+    "helper_main_database_sync_seconds": 0.855061,
+    "image_worker_main_database_syncs": 0,
+    "image_worker_wal_sync_seconds": 0.011801,
+    "limit": "Unequal short observation windows; demonstrates checkpoint moved, not statistically conclusive elimination of all I/O stalls."
+  },
+  "controls": [
+    {
+      "route": "/modern-admin/now",
+      "control": "Refresh status and latest images",
+      "camera_id": 1,
+      "role": "administrator",
+      "status": "superato",
+      "environment": "production native browser",
+      "observed": "Frame13:55:26 decoded4608x2592; capture Running."
+    },
+    {
+      "route": "/modern-admin/now",
+      "control": "Refresh status and latest images",
+      "camera_id": 2,
+      "role": "administrator",
+      "status": "superato",
+      "environment": "production native browser",
+      "observed": "Frame13:55:34 decoded3840x2160; capture Running."
+    },
+    {
+      "route": "/modern-admin/settings",
+      "control": "Open menu and Settings",
+      "camera_id": 1,
+      "role": "administrator",
+      "status": "superato",
+      "environment": "production native browser",
+      "observed": "Settings index displays configuration domains and Config History link."
+    },
+    {
+      "route": "/modern-admin/config-history",
+      "control": "Config History link",
+      "camera_id": 1,
+      "role": "administrator",
+      "status": "superato",
+      "environment": "production native browser",
+      "observed": "118 snapshots; latest row118 with existing storage protection note."
+    },
+    {
+      "route": "/modern-admin/library",
+      "control": "Camera2 image listing",
+      "camera_id": 2,
+      "role": "administrator",
+      "status": "superato",
+      "environment": "production native browser",
+      "observed": "ASI678MC selected;48 results including13:57:19; preview images visually rendered."
+    }
+  ]
 }

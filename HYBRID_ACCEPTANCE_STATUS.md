@@ -5,25 +5,31 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `3577fa82aa53808195687635f71e8197e7faf82f`.
-Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
+The Raspberry runs `f0d502fb2088ab32c8d8850a609d605178e3eb60`.
 Classic frontend classes, templates and exclusive assets are physically removed.
-Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
-Later main commits document acceptance; they do not change the installed runtime.
+Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
+Later documentation commits do not change the installed runtime.
 
-The 824-file installed source/asset manifest matches the tested candidate:
-`c658eed40a313af6994862d3817da74ada29cbb5a714b4a046c7059c5e350388`.
-The backend retains the 166-entrypoint image-publication regression. This
-JS/template-only release reran all 34 JavaScript tests and both affected Python
-Charts/Sensor Panel flows. It is not a new full
-Python suite run. [Current evidence](testing/evidence/hybrid-observatory-timeout-20260929.json).
-This does not certify every native control or hardware effect.
+The 829-file source/asset manifest is
+`5517292da5a96fa8117e97bcafed4b6d4ede299c6ffb099ec31e701f3d7f494c`.
+Validation combines 166 existing Python entrypoints, two new checkpoint tests,
+and the runtime installer test; 34 JavaScript tests pass. The evidence preserves
+the first test-harness failure and corrected reruns, rather than claiming an
+entirely green first run. [Release evidence](testing/evidence/hybrid-sqlite-checkpoint-20260929.json).
 
-Configuration revision 118 and capture PID 1447332 remain unchanged; web was
-reloaded. Code/config backup and rollback are prepared. Native Charts and Sensor Panel load
-real data for both cameras; range selection and manual Refresh pass. Newly saved frames were observed at
-13:08:41 and 13:08:42; this is not the deferred 24-hour acceptance.
-Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
+A private SQLite 3.51.3 runtime is loaded by capture, web and commands in the
+Hybrid virtualenv; OS packages remain unchanged. Capture supervises background
+checkpoints with automatic fallback. Config revision 118 is unchanged. Capture
+PID 1512517 and web PID 1512518 have zero restarts after controlled maintenance.
+The coherent backup passed integrity_check. Now, Settings/history and Library
+passed bounded native checks; latest files from both cameras decode.
+
+In the first 29 frames per camera, median spacing is 15 seconds and maximum 16,
+with no interval above 17 seconds. A 180-second trace confirms the database
+checkpoint executes in the helper; the image worker still has a short WAL sync.
+This is positive short-run evidence, not a guarantee of steady cadence under
+all loads or the deferred 24-hour acceptance.
+Use [deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
 ## Cold-start defect corrected and deployed
 
@@ -191,21 +197,23 @@ processing metric. The cause is not established and steady cadence is not yet
 certified. [Measured evidence](testing/evidence/hybrid-capture-queue-review-20260929.json).
 A later 60-second syscall trace measured a 16.483467-second database fdatasync
 in the image worker. This identifies a blocking persistence stage, consistent
-with checkpoint work; the physical cause and correction remain open. In the
+with checkpoint work. The physical storage cause remains unproven; the checkpoint
+mitigation is now deployed as described above. In the
 12:18–13:10 sample, IMX708 had one 38-second gap and ASI678MC had no gap over
 17 seconds. This is not the deferred 24-hour acceptance. No capture settings
 were changed.
-The installed SQLite 3.46.1 predates the upstream WAL-reset correction. A private
+The previously installed SQLite 3.46.1 predates the upstream WAL-reset correction. A private
 3.51.3 library passed a synthetic concurrency/integrity and old-library readback
 probe and all 166 Python/compile regression entrypoints with unchanged sources;
-it is not deployed. Checkpoint lifecycle/failure tests and measured performance
-remain prerequisites to the proposed background checkpoint change.
+it is now deployed with tested checkpoint lifecycle/failure handling.
+The first live measurements are recorded above; they do not establish all-load stability.
 
 The [background checkpoint candidate](testing/evidence/hybrid-sqlite-checkpoint-20260929.json)
-is implemented and tested but not deployed or enabled. Validation covers the166
-existing Python entrypoints plus two new checkpoint tests and34 JavaScript tests;
+is deployed and enabled after compatibility and rollback preparation. Validation covers the 166
+existing Python entrypoints plus two new checkpoint tests and 34 JavaScript tests;
 the report preserves the initial test-harness failure and corrected reruns.
-Fixed runtimes for all database writers and before/after live measurements remain open.
+Capture/web/CLI runtime loading is verified. The short before/after measurements
+are recorded above; broader cadence validation remains open.
 
 ## Remaining acceptance gates
 
