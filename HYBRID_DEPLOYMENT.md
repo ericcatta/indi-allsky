@@ -2,18 +2,18 @@
 
 ## Installed version
 
-Production runs `35c1ba6682dc5f0a0b264fd0798089a0ecde31b8` (29 September 2026).
-Classic frontend is removed; Hybrid is the only UI. Astropanel now times out
-stalled requests after 15 seconds and restores Refresh, retaining previous values
-with a stale-data warning. Its script URL version invalidates browser caching.
+Production runs `3577fa82aa53808195687635f71e8197e7faf82f` (29 September 2026).
+Classic frontend is removed; Hybrid is the only UI. Charts and Sensor Panel now
+recover after a 15-second request deadline, preserving readings and warning text
+until recovery. The prior Astropanel timeout correction remains installed.
 The 824-file source manifest matches the candidate.
 
-All 34 JavaScript tests and both affected Python Astropanel flows pass; the
-unchanged backend retains its 166-entrypoint image-publication regression.
-Native isolated delayed responses prove timeout/recovery. Production loads,
-Refresh and camera selection passed. Web was reloaded; capture PID 1447332 and
-configuration 118 remain unchanged. Both cameras saved frames at 12:47.
-[Release evidence](testing/evidence/hybrid-astropanel-timeout-20260929.json).
+All 34 JavaScript tests and both affected Python Charts/Sensor Panel flows pass;
+the unchanged backend retains its 166-entrypoint image-publication regression.
+Native isolated delayed responses prove timeout/recovery. Production loads on
+both cameras, Charts range selection and Sensor Refresh passed. Web was reloaded;
+capture PID 1447332 and configuration 118 remain unchanged. Both cameras saved
+frames at 13:08. [Release evidence](testing/evidence/hybrid-observatory-timeout-20260929.json).
 
 The prior atomic image publication correction remains installed.
 [Image publication evidence](testing/evidence/hybrid-image-publication-20260929.json).
@@ -35,9 +35,24 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed Astropanel release
+## Roll back the installed Charts/Sensor release
 
-The protected helper requires the exact installed revision above and a clean
+The protected helper requires exactly `3577fa82` and a clean tracked checkout.
+It returns code to `35c1ba66` and reloads web without restarting capture or
+restoring database/configuration/media. Prepared, not live exercised.
+
+```sh
+python3 /home/eric/hybrid-observatory-timeout-deploy.py --rollback /home/eric/hybrid-backups/hybrid-observatory-timeout-20260929-130159
+```
+
+Code/config backup only; no database migration. The coherent encoder-release
+backup remains available.
+
+## Historical Astropanel rollback
+
+Use only after rolling Charts/Sensor back to `35c1ba66`.
+
+The protected helper requires exactly `35c1ba66` and a clean
 tracked checkout. It returns code to 07b2098d and reloads web, preserving capture,
 database, configuration and media. This rollback is prepared, not live exercised.
 Code/config backup:

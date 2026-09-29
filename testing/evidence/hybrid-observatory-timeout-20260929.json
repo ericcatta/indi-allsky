@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "candidate-tested-not-yet-deployed",
+  "status": "deployed-bounded-browser-acceptance-passed",
   "change": "15-second deadlines for Charts and Sensor Panel read requests. Timeout preserves readings and releases active polling/Refresh. Background chart retry retains warnings until a successful update; explicit range changes show loading. Page exit and superseded requests remain silent.",
   "source_manifest": {
     "files": 824,
@@ -86,11 +86,65 @@
       "profile_id": "test-profile-2",
       "environment": "isolated native browser",
       "observed": "Manual Refresh updates age187s; subsequent polling shows193s and Refresh enabled."
+    },
+    {
+      "route": "/modern-admin/observatory/charts",
+      "control": "Load and History24 Hours",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "environment": "production native browser",
+      "observed": "Charts updated, 16 canvases; range change Loading then updated, selected24 Hours."
+    },
+    {
+      "route": "/modern-admin/observatory/charts",
+      "control": "Camera selection",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "environment": "production native browser",
+      "observed": "Charts updated and16 canvases for ASI678MC."
+    },
+    {
+      "route": "/modern-admin/observatory/sensor-panel",
+      "control": "Load and Refresh",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "environment": "production native browser",
+      "observed": "Last image13:07:57 age3s then11s after Refresh; Refresh enabled; request-timeout-v1 asset."
+    },
+    {
+      "route": "/modern-admin/observatory/sensor-panel",
+      "control": "Camera selection and Refresh",
+      "status": "superato",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "environment": "production native browser",
+      "observed": "Correct imx708-wide URL; last image13:08:11 then13:08:26 age3s; Refresh enabled."
     }
   ],
   "limits": [
     "Client abort does not cancel server computation.",
     "Mutating requests and scientific algorithms unchanged.",
     "Capture latency and24-hour observation remain separate."
-  ]
+  ],
+  "deployment": {
+    "revision": "3577fa82aa53808195687635f71e8197e7faf82f",
+    "backup": "/home/eric/hybrid-backups/hybrid-observatory-timeout-20260929-130159",
+    "state": "/home/eric/hybrid-observatory-timeout-release-state.json",
+    "state_sha256": "cf5f2a4424363dc97b2b47698db9cb1d0c7e7b22084ed264ff877f377b43a698",
+    "capture_pid": 1447332,
+    "capture_restarts": 0,
+    "config_revision": 118,
+    "latest_frames": {
+      "1": "2026-09-29 13:08:41",
+      "2": "2026-09-29 13:08:42"
+    },
+    "rollback": "Prepared, not exercised; web-only reload; capture unchanged."
+  }
 }

@@ -2425,6 +2425,30 @@
           "control": "anonymous access and login return",
           "recorded_status": "passed",
           "original_page": "Charts"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-timeout-20260929.json",
+          "record": "controls[0]",
+          "control": "Stalled polling; test-profile-1; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-timeout-20260929.json",
+          "record": "controls[1]",
+          "control": "History24 Hours after timeout; test-profile-1; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-timeout-20260929.json",
+          "record": "controls[5]",
+          "control": "Load and History24 Hours; imx708-wide; production native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-timeout-20260929.json",
+          "record": "controls[6]",
+          "control": "Camera selection; asi678mc; production native browser",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -2514,6 +2538,36 @@
           "control": "sensor-show-all followed by camera link",
           "recorded_status": "passed after correction",
           "original_page": "Sensor Panel"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-timeout-20260929.json",
+          "record": "controls[2]",
+          "control": "Stalled reading request; test-profile-2; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-timeout-20260929.json",
+          "record": "controls[3]",
+          "control": "Automatic recovery; test-profile-2; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-timeout-20260929.json",
+          "record": "controls[4]",
+          "control": "Refresh after recovery; test-profile-2; isolated native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-timeout-20260929.json",
+          "record": "controls[7]",
+          "control": "Load and Refresh; asi678mc; production native browser",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-timeout-20260929.json",
+          "record": "controls[8]",
+          "control": "Camera selection and Refresh; imx708-wide; production native browser",
+          "recorded_status": "superato"
         }
       ]
     },

@@ -5,24 +5,24 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `35c1ba6682dc5f0a0b264fd0798089a0ecde31b8`.
+The Raspberry runs `3577fa82aa53808195687635f71e8197e7faf82f`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
 The 824-file installed source/asset manifest matches the tested candidate:
-`9a474c07613015cb03a8f528951c16a200a463640ee7b83d6e618d1ca3eabab3`.
+`c658eed40a313af6994862d3817da74ada29cbb5a714b4a046c7059c5e350388`.
 The backend retains the 166-entrypoint image-publication regression. This
 JS/template-only release reran all 34 JavaScript tests and both affected Python
-Astropanel flows, preserving the ephemeris fingerprints. It is not a new full
-Python suite run. [Current evidence](testing/evidence/hybrid-astropanel-timeout-20260929.json).
+Charts/Sensor Panel flows. It is not a new full
+Python suite run. [Current evidence](testing/evidence/hybrid-observatory-timeout-20260929.json).
 This does not certify every native control or hardware effect.
 
 Configuration revision 118 and capture PID 1447332 remain unchanged; web was
-reloaded. Code/config backup and rollback are prepared. Native Astropanel loads
-and refreshes real data for both cameras. Newly saved frames were observed at
-12:47:08 and 12:47:09; this is not the deferred 24-hour acceptance.
+reloaded. Code/config backup and rollback are prepared. Native Charts and Sensor Panel load
+real data for both cameras; range selection and manual Refresh pass. Newly saved frames were observed at
+13:08:41 and 13:08:42; this is not the deferred 24-hour acceptance.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
 ## Cold-start defect corrected and deployed
