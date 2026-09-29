@@ -5,13 +5,13 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `9a526bc9c5200a6819d2d2997a3a63113a13e943`.
+The Raspberry runs `a3402d2ed54a1de9c45e787731f2f3f38b9b6d36`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
 The 829-file source/asset manifest is
-`2c16f64cd2a5aae0132b3a3a8822497ab27487f4acc13a265ac7077ea99788e5`.
+`5eab826f5f5b81462ebbf76c44ddc2b241b0a6823c84ec49e786c89771e8712d`.
 Validation combines 166 existing Python entrypoints, two new checkpoint tests,
 and the runtime installer test; 34 JavaScript tests pass. The evidence preserves
 the first test-harness failure and corrected reruns, rather than claiming an
@@ -266,7 +266,8 @@ overlapping automatic polls. A 15-second deadline covers response decoding;
 failed refreshes retain prior rows with a visible warning until recovery.
 The final candidate passes 169 Python entrypoints and 34 JavaScript tests.
 Native isolated checks cover delayed responses, filter recovery, empty results
-and session expiry; production deployment remains pending.
+and session expiry. Production admin filter/line-count/refresh checks pass after
+web-only deployment; capture PID and config 118 remain unchanged.
 [Evidence](testing/evidence/hybrid-log-controller-20260929.json).
 
 ## Remaining acceptance gates

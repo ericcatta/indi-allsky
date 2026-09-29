@@ -1,7 +1,7 @@
 {
   "date": "2026-09-29",
   "baseline": "9a526bc9c5200a6819d2d2997a3a63113a13e943",
-  "status": "validated-awaiting-deployment",
+  "status": "deployed-native-verified",
   "source_manifest_sha256": "5eab826f5f5b81462ebbf76c44ddc2b241b0a6823c84ec49e786c89771e8712d",
   "defect": "Concurrent log requests allowed stale responses to overwrite current filters; fetch/body had no deadline.",
   "fix": "Abort superseded selection requests, ignore superseded responses, skip overlapping polls, enforce 15s fetch/body deadline, validate response shape and distinguish source errors; retain previous same-query data with explicit warning until success.",
@@ -105,10 +105,22 @@
     }
   ],
   "limits": [
-    "Candidate not yet deployed.",
     "No native download receipt claimed; the four download links were not exercised.",
     "Known-source details are unchanged by this candidate; their native checks were performed against deployed baseline.",
     "No configuration, capture or log contents modified in production.",
     "Delay injection applies only to the isolated fixture endpoint; production providers unchanged."
-  ]
+  ],
+  "deployment": {
+    "revision": "a3402d2ed54a1de9c45e787731f2f3f38b9b6d36",
+    "backup": "/home/eric/hybrid-backups/hybrid-log-controller-20260929-151121",
+    "capture_pid": 1512517,
+    "capture_restarts": 0,
+    "config_revision": 118,
+    "latest_records": {
+      "1": "176677 at 15:13:04",
+      "2": "176678 at 15:13:08"
+    },
+    "native": "Production admin: initial current rows; Lines 100, Refresh 5s, unmatched filter -> No matching lines; clear filter and Refresh 15s -> current rows and Updated status.",
+    "rollback": "python3 /home/eric/hybrid-log-controller-deploy.py --rollback /home/eric/hybrid-backups/hybrid-log-controller-20260929-151121"
+  }
 }

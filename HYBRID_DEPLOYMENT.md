@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `9a526bc9c5200a6819d2d2997a3a63113a13e943` (29 September 2026).
+Production runs `a3402d2ed54a1de9c45e787731f2f3f38b9b6d36` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -40,6 +40,21 @@ The camera-detection fix passed native discovery against real devices: the teles
 is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
+
+## Log controller rollback
+
+The Log request-ordering and timeout fix passes 169 Python entrypoints and
+34 JavaScript tests, plus isolated failure/recovery and production browser checks.
+Web reload left capture PID 1512517 and config 118 unchanged.
+[Evidence](testing/evidence/hybrid-log-controller-20260929.json).
+
+```sh
+python3 /home/eric/hybrid-log-controller-deploy.py --rollback /home/eric/hybrid-backups/hybrid-log-controller-20260929-151121
+```
+
+Requires clean tracked HEAD `a3402d2e`; returns to `9a526bc9` and reloads only
+web. No database restore. Rollback is prepared, not exercised. Older rollbacks
+below apply only after returning to their exact revision.
 
 ## Roll back the Settings/history/restore navigation update
 
