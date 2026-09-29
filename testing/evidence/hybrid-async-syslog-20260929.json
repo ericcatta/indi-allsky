@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-29",
+  "baseline": "96c2049de650f46a39b7ac3663332c7fc71c6a0a",
+  "status": "validated-awaiting-deployment",
+  "source_manifest_sha256": "f8fbfd1cc2ec8acda5bbb71f9469757e6503eb2a1799ce84b48965df01090d79",
+  "source_count": 833,
+  "trigger": "Previous capture trace has a main-thread sendto still blocked at detach; saved-frame intervals reach 28/30s under regression load.",
+  "baseline_evidence": "testing/evidence/hybrid-async-diagnostics-20260929.json",
+  "implementation": {
+    "scope": "Capture local6 and web local7 handlers; stderr selection stays unchanged.",
+    "preserved": "Facility, severity, formatter output, originating process/thread metadata, UTF-8 and null-terminated Unix syslog wire messages.",
+    "bounds": "2048 pending byte payloads per handler; 16384-byte message cap with explicit truncation marker. Warning/error/critical can evict lower-severity queued records. Saturation counts are emitted on recovery, including warning-or-higher losses.",
+    "transport": "Per-process daemon sender, 0.2s socket timeout and retry, Unix datagram with stream fallback; fork closes only inherited socket copy and creates independent sender/locks. Shutdown drain is bounded.",
+    "manifest": "Regression now hashes allsky.py, which selects the capture handler. Runner fixture includes and verifies mutation detection for that entrypoint."
+  },
+  "tests": {
+    "native_socket": "macOS real Unix receiver saturation: 200 messages enqueued without waiting for receiver, later all 200 received in order; byte-for-byte standard SysLogHandler parity.",
+    "additional": "Missing destination recovery; frozen mutable args; UTF-8 truncation; priority overflow and loss notice; fork with parent logging/initialization locks held and stalled sender; parent socket preservation; bounded shutdown.",
+    "initial_failures": "Sandbox blocked Unix socket bind; test rerun with approved local socket access. Native macOS message-size limit exposed permanent oversize retry; corrected via explicit progressively shorter transport payload.",
+    "python_report": "/home/eric/hybrid-async-syslog-regression-final-20260929/results.json",
+    "earlier_run": "First regression intentionally interrupted to update runner self-test fixture for the newly hashed allsky.py; not claimed passed.",
+    "javascript_report": "/tmp/hybrid-async-syslog-js.json",
+    "python_result": {
+      "status": "passed",
+      "cases": 171,
+      "source_changed": false,
+      "report_sha256": "34695757da343cdaa5899148a42daf9f827e749a14439f8317fde97b2db3de4f"
+    },
+    "javascript_result": {
+      "status": "passed",
+      "cases": 34,
+      "report_sha256": "f67ca06162e8765db52ff64c0b0661ad0673e0f16049b56e468d863f6ab17a5c"
+    }
+  },
+  "limits": [
+    "Not deployed yet; live cadence under load remains unverified for this candidate.",
+    "Bounded logs are best effort under prolonged outage/saturation or shutdown. No logging queue can guarantee retaining unlimited messages without blocking capture.",
+    "Asynchronous delivery means syslog receiver timestamps can lag message creation; saved-frame times and caller-computed cadence warnings are needed for cadence acceptance.",
+    "24-hour day/night test deferred."
+  ]
+}

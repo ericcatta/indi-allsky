@@ -47,7 +47,8 @@ CSS imports and JavaScript network requests still require separate inspection;
 these guards do not establish complete browser coverage or permit removal of
 unverified functionality.
 
-`results.json` records the exact plan, source hashes and each child exit code,
+`results.json` records the exact plan, source hashes (including the capture
+entrypoint `allsky.py`) and each child exit code,
 duration and log path. It is updated atomically after each result. `running` or
 `interrupted` is incomplete, never passed. `source_changed` means the run cannot
 validate one stable candidate. A missing dependency is a failed execution, not a

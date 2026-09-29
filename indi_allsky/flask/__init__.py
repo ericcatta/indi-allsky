@@ -45,7 +45,7 @@ dictConfig({
         #    'facility'  : 'local6',
         #},
         'syslog_local7' : {
-            'class'     : 'logging.handlers.SysLogHandler',
+            'class'     : 'indi_allsky.async_syslog.AsyncUnixSysLogHandler',
             'formatter' : 'syslog',
             'address'   : '/dev/log',
             'facility'  : 'local7',

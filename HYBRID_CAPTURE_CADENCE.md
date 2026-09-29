@@ -287,3 +287,23 @@ and writer, rather than inheriting a stopped thread or held lock.
 [Before/after evidence](testing/evidence/hybrid-async-diagnostics-20260929.json)
 records the deployment and live-verification status. This does not change
 exposure, gain, the scheduler or scientific timestamps.
+
+### System log backpressure
+
+Capture local6 and web local7 now use `AsyncUnixSysLogHandler`. Caller threads
+format immutable messages; a per-process sender performs Unix socket I/O with
+0.2-second socket timeouts/retry. The normal facility, severity, formatted text
+and originating process/thread metadata are preserved. Standard stderr logging
+remains available and unchanged.
+
+Each handler buffers at most 2048 pending messages, capped at 16384 bytes each.
+Warning/error/critical messages can replace lower-priority queued messages when
+full. Recovery emits `[ASYNC_SYSLOG]` loss counts, including warning-or-higher
+losses. Oversized messages carry truncation markers. Shutdown waits only a
+bounded interval; unavailable transport or abrupt termination may lose the tail.
+These limits prevent log congestion from indefinitely stopping acquisition.
+
+The syslog receiver timestamp records delivery, which may be delayed by a
+backlog. Use actual saved-frame timestamps and the caller-computed monotonic
+`CAPTURE_CADENCE_LATE` interval for cadence analysis, not only delivery spacing.
+[Candidate and live evidence](testing/evidence/hybrid-async-syslog-20260929.json).

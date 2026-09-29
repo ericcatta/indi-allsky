@@ -13,7 +13,7 @@ import run_hybrid_regression as runner
 
 
 def run():
-    for scenario in ('passed', 'failed', 'source_changed', 'interrupted'):
+    for scenario in ('passed', 'failed', 'source_changed', 'entrypoint_changed', 'interrupted'):
         with tempfile.TemporaryDirectory() as folder:
             base = Path(folder)
             root = base / 'source'
@@ -21,11 +21,14 @@ def run():
             (root / 'testing').mkdir()
             source = root / 'indi_allsky/module.py'
             source.write_text('value = 1\n')
+            (root / 'allsky.py').write_text('value = 1\n')
             command = 'print("child ran")'
             if scenario == 'failed':
                 command += '; raise SystemExit(7)'
             elif scenario == 'source_changed':
                 command += '; from pathlib import Path; Path("indi_allsky/module.py").write_text("value = 2")'
+            elif scenario == 'entrypoint_changed':
+                command += '; from pathlib import Path; Path("allsky.py").write_text("value = 2")'
             cases = [{'case': 'child', 'command': [sys.executable, '-c', command]}]
             argv = ['runner', '--root', str(root), '--output', str(base / 'results')]
             with patch.object(sys, 'argv', argv), patch.object(runner, 'discover', return_value=cases), contextlib.redirect_stdout(io.StringIO()):
@@ -35,7 +38,7 @@ def run():
                 else:
                     code = runner.main()
             report = json.loads((base / 'results/results.json').read_text())
-            assert report['status'] == scenario, report
+            assert report['status'] == ('source_changed' if scenario == 'entrypoint_changed' else scenario), report
             assert (code == 0) == (scenario == 'passed')
             assert report['planned'] == cases
             if scenario != 'interrupted':
