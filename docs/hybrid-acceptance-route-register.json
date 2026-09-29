@@ -1992,6 +1992,156 @@
           "control": "Category / Item / Acked / Search",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/notifications"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[0]",
+          "control": "Refresh Notifications",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[1]",
+          "control": "#modern-notifications-category-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[2]",
+          "control": "#modern-notifications-item-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[3]",
+          "control": "#modern-notifications-search",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[4]",
+          "control": "#modern-notifications-ack-filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[5]",
+          "control": "Pagination Next",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[6]",
+          "control": "Pagination Last",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[7]",
+          "control": "Pagination Previous",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[8]",
+          "control": "Pagination First",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[9]",
+          "control": "Pagination 3",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[10]",
+          "control": "#dt-length-0: 50",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[11]",
+          "control": "#dt-length-0: 100",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[12]",
+          "control": "#dt-length-0: All",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[13]",
+          "control": "Column sort ID",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[14]",
+          "control": "Column sort Created",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[15]",
+          "control": "Column sort Expires",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[16]",
+          "control": "Column sort Category",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[17]",
+          "control": "Column sort Item",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[18]",
+          "control": "Column sort Acked",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[19]",
+          "control": "Column sort Notification",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[20]",
+          "control": "Details",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[24]",
+          "control": "Copy",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[25]",
+          "control": "Details: Enter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[26]",
+          "control": "CSV",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[27]",
+          "control": "Excel",
+          "recorded_status": "bloccato"
         }
       ]
     },
@@ -2035,6 +2185,18 @@
           "control": "Reload / Back to Notifications",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/notifications/170"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[22]",
+          "control": "Reload detail",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[23]",
+          "control": "Back to Notifications",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -2046,7 +2208,14 @@
       ],
       "handler_module": "indi_allsky.flask.notification_views",
       "handler": "ModernAdminNotificationAcknowledgeView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-notification-live-20260921.json",
+          "record": "controls[21]",
+          "control": "Acknowledge notification",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/now",

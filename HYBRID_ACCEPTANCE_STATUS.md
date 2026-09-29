@@ -1,6 +1,6 @@
 # Hybrid acceptance status
 
-Updated 21 September 2026. **Classic removal is deployed; whole-product acceptance remains open.**
+Updated 29 September 2026. **Classic removal is deployed; whole-product acceptance remains open.**
 The separate 24-hour day/night observation is deferred by the user. Detector and AI implementation are outside this release.
 
 ## Installed product
@@ -51,6 +51,7 @@ decoded (22:56:47 IMX708 and 22:56:58 ASI678MC). See [identifier validation evid
 | --- | --- | --- |
 | Settings, isolated browser | Login, both camera previews, edit/save, value after reload, snapshot restore and original value recovered | [Release acceptance](testing/evidence/hybrid-retirement-final-native-20260921.json) |
 | Production UI and capture | Both Now images decoded; Full Settings search works; source manifest matches; configuration and capture process preserved | [Release acceptance](testing/evidence/hybrid-retirement-final-native-20260921.json) |
+| Notifications, production administrator | Dedicated expired notice acknowledged and retained; 198 existing acknowledgement values unchanged. Search, filters, paging, seven sort columns, copy and keyboard detail verified. Native export receipt remains open | [Native notifications](testing/evidence/hybrid-notification-live-20260921.json) |
 | Public media families | All 17 latest-media routes checked for both cameras: 30 ranged responses match on-disk camera/model files, four RAW requests show the correct empty state. Native download receipt remains open | [Live public families](testing/evidence/hybrid-public-families-live-20260921.json) |
 | Public image viewer controls | Both camera directory links open decoded images; Copy link verified by actual paste, fullscreen enter/exit and return to correctly filtered Hybrid archive | [Native public viewers](testing/evidence/hybrid-public-viewer-native-20260921.json) |
 | Production authentication boundary | All 99 Hybrid GET entries reach login for anonymous GET/HEAD on both camera/profile contexts (396 cases, including alias chains). Public latest-image range bytes match each camera file; 14 invalid API authentication requests rejected | [Live HTTPS boundary](testing/evidence/hybrid-live-auth-boundary-20260921.json) |
