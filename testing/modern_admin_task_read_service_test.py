@@ -159,6 +159,7 @@ def test_queue_rows_preserve_modern_context_shape():
         'details_url': '/modern-admin/tasks/1',
         'created'    : '2026-01-02 03:04:05',
         'age'        : '2h ago',
+        'age_seconds': 7200,
         'updated'    : '2026-01-02 04:05:06',
         'queue'      : 'VIDEO',
         'action'     : 'generate',
@@ -260,7 +261,23 @@ def test_task_read_service_has_no_flask_or_db_dependency():
     assert 'open(' not in source
 
 
+def test_age_sort_values_across_units():
+    now = datetime(2026, 1, 2, 12)
+    service = build_service(now=now)
+    seconds = [45, 120, 3600, 36000, 86400, 172800]
+    rows = service.build_queue_rows(
+        [{'id': i, 'createDate': now - timedelta(seconds=value)}
+         for i, value in enumerate(seconds)], str)
+    assert [row['age_seconds'] for row in rows] == seconds
+    assert [row['age'] for row in rows] == ['45s ago', '2m ago', '1h ago', '10h ago', '1d ago', '2d ago']
+    assert service.task_age_seconds(now + timedelta(seconds=30)) == 0
+    for value in (None, 'invalid'):
+        assert service.task_age_seconds(value) is None
+        assert service.format_task_age(value) == 'Unknown age'
+
+
 def run_tests():
+    test_age_sort_values_across_units()
     test_task_list_preserves_classic_task_entry_shape()
     test_queue_rows_preserve_modern_context_shape()
     test_task_detail_redacts_sensitive_payload()

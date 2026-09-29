@@ -126,6 +126,7 @@ class ModernAdminTaskReadService:
                 'details_url': details_url_builder(task_id),
                 'created'    : self.format_task_datetime(created_date),
                 'age'        : self.format_task_age(created_date),
+                'age_seconds': self.task_age_seconds(created_date),
                 'updated'    : self.format_task_datetime(task.get('updateDate'), default='Not tracked'),
                 'queue'      : task.get('queue') or 'Unknown',
                 'action'     : task.get('action') or 'Unknown',
@@ -214,13 +215,18 @@ class ModernAdminTaskReadService:
         return str(value)
 
 
-    def format_task_age(self, value):
+    def task_age_seconds(self, value):
         if not value:
-            return 'Unknown age'
-
+            return None
         try:
-            age_s = max(0, int((self.now - value).total_seconds()))
+            return max(0, int((self.now - value).total_seconds()))
         except TypeError:
+            return None
+
+
+    def format_task_age(self, value):
+        age_s = self.task_age_seconds(value)
+        if age_s is None:
             return 'Unknown age'
 
         if age_s < 60:

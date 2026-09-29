@@ -35,6 +35,9 @@ def run(runtime_config):
             assert client.post('/indi-allsky/modern-admin/settings/notifications').status_code in (400, 405)
             tasks = client.get('/indi-allsky/modern-admin/tasks')
             assert tasks.text.count('class="modern-admin-task-row"') == 205
+            age_cells = re.findall(r'<td data-order="(-?\d+)">([^<]+)</td>', tasks.text)
+            assert len(age_cells) == 205
+            assert all(int(seconds) >= 0 and label.endswith(' ago') for seconds, label in age_cells)
             assert '/modern-admin/tasks/205' in tasks.text
             detail = client.get('/indi-allsky/modern-admin/tasks/205')
             assert 'test-profile-1' in detail.text and '&lt;redacted&gt;' in detail.text

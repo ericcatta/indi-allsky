@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-29",
+  "status": "validated-awaiting-deployment",
+  "baseline": "970d179941dd3dbfc76da76965cee1d7f40cadb9",
+  "defect": "Native production Age ascending sorts labels lexically:10h ago before1h ago, then24m ago after23h ago.",
+  "fix": "Add numeric age_seconds using the same existing age calculation and render DataTables data-order; retain human-readable text and unknown/future behavior. Unknown age sorts with sentinel -1.",
+  "tests": {
+    "unit": "Age units seconds/minutes/hours/days, missing/invalid and future timestamps passed.",
+    "flask": "Operations flow passed for administrator and ordinary user;205 numeric age cells each.",
+    "full_report": "/home/eric/hybrid-task-age-regression-20260929/results.json",
+    "native_isolated": {
+      "roles": [
+        "administrator",
+        "ordinary user"
+      ],
+      "rows_per_role": 205,
+      "ascending": "passed across minute/hour/day groups",
+      "descending": "passed across all205 rows",
+      "fixture": "Synthetic task ages45,120,3600,36000,86400,172800 seconds at startup; independent in-memory DB",
+      "tool_limit": "Two locator DOM evaluations timed out after actions. Actual page DOM inspection confirmed state and both orders; no application error inferred.",
+      "cleanup": "Browser tab closed; fixture server stopped and tunnel closed."
+    },
+    "full_result": {
+      "status": "passed",
+      "cases": 171,
+      "source_changed": false,
+      "sha256": "bea1e5ac26285cab7990a43709309f3a7d64987ef45389c6aaa8e9c0b494c64b"
+    },
+    "javascript": "JavaScript is unchanged; previous34-check result retained. Real browser DataTables sorting checked with both roles."
+  },
+  "limits": [
+    "Not deployed. Native corrected sort remains to verify.",
+    "Other Task table controls planned for this pass remain open."
+  ],
+  "source_manifest_sha256": "16d12f76aa538f61abc8eb24235640888043e8501847d06535e012410c938964",
+  "source_count": 833
+}

@@ -100,7 +100,7 @@ var camera_id = {{ camera_id }};
                     <tr class="modern-admin-task-row" data-task-state="{{ task.state|lower }}" data-task-queue="{{ task.queue|lower }}" data-task-action="{{ task.action|lower }}" data-task-search="{{ task.id }} {{ task.created }} {{ task.age }} {{ task.updated }} {{ task.queue }} {{ task.action }} {{ task.state }} {{ task.camera_id }} {{ task.profile_id }} {{ task.message }}">
                         <td>{{ task.id }}</td>
                         <td>{{ task.created }}</td>
-                        <td>{{ task.age }}</td>
+                        <td data-order="{{ task.age_seconds if task.age_seconds is not none else -1 }}">{{ task.age }}</td>
                         <td>{{ task.updated }}</td>
                         <td>{{ task.queue }}</td>
                         <td>{{ task.action }}</td>
