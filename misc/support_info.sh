@@ -277,8 +277,9 @@ lsmod | grep imx || true
 
 
 echo
-echo "I2C info"
-i2cdetect -y 1 || true
+echo "I2C adapters (no device probing)"
+# Listing adapters does not send SMBus probe commands to attached devices.
+i2cdetect -l || true
 
 
 echo

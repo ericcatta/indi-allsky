@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-29",
+  "status": "validated-awaiting-deployment",
+  "defect": "Support Info invoked i2cdetect -y 1 while described as read-only; that probes attached devices and assumes bus 1.",
+  "change": "Use i2cdetect -l to list adapters without device probing; remove obsolete Classic wording. Explicit hardware diagnostics remain separate.",
+  "reference": "https://kernel.googlesource.com/pub/scm/utils/i2c-tools/i2c-tools/+/refs/tags/v4.3/tools/i2cdetect.8",
+  "checks": {
+    "shell_syntax": "bash -n passed",
+    "live_list": "i2cdetect -l returned adapters 11, 13 and 14 on this Pi.",
+    "regression": {
+      "report": "/home/eric/hybrid-support-passive-regression-20260929/results.json",
+      "sha256": "33f6cf9d806f15ccab570667293fb285afd4ec98c743355fc658f2adeaa666bb",
+      "passed": 171,
+      "source_changed": false
+    },
+    "javascript": "Unchanged; previous 34-check result retained."
+  },
+  "manifest": {
+    "files": 833,
+    "sha256": "914bae53e523d77257512908fefe8a097c70315ba2cc175c190df41b65b6b8f9",
+    "additional_script": "misc/support_info.sh",
+    "additional_script_sha256": "1836c469e93656ffd75072133be2d1804331ce0530247baba21257a6ffe8ad53"
+  },
+  "limits": [
+    "Native corrected support collector remains to verify.",
+    "Capture cadence is a separate open issue."
+  ]
+}
