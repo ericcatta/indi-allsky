@@ -25,7 +25,7 @@
       </fieldset>
     </form>
     {% if not login_disabled and not current_user.is_admin %}<p>Administrator access is required to change these settings.</p>{% endif %}
-    <p><a href="{{ url_for('indi_allsky.modern_admin_full_settings_view', search='FFMPEG') }}">Encoding, frame rate and video size</a> · <a href="{{ url_for('indi_allsky.modern_admin_generate_view') }}">Generate videos</a> · <a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">All settings</a></p>
+    <p><a href="{{ url_for('indi_allsky.modern_admin_full_settings_view', search='FFMPEG', camera_id=request.args.get('camera_id', camera_id), profile_id=request.args.get('profile_id')) }}">Encoding, frame rate and video size</a> · <a href="{{ url_for('indi_allsky.modern_admin_generate_view', camera_id=request.args.get('camera_id', camera_id), profile_id=request.args.get('profile_id')) }}">Generate videos</a> · <a href="{{ url_for('indi_allsky.modern_admin_settings_view', camera_id=request.args.get('camera_id', camera_id), profile_id=request.args.get('profile_id')) }}">All settings</a></p>
   </section>
 </main>
 {% endblock %}

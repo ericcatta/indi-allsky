@@ -3635,6 +3635,24 @@
           "record": "controls[4]",
           "control": "Tasks",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-shared-settings-context-20260929.json",
+          "record": "controls[4]",
+          "control": "Save storage protection",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-shared-settings-context-20260929.json",
+          "record": "controls[5]",
+          "control": "Tasks",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-shared-settings-context-20260929.json",
+          "record": "controls[6]",
+          "control": "All settings",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -3647,7 +3665,32 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminTimelapseSettingsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-shared-settings-context-20260929.json",
+          "record": "controls[0]",
+          "control": "Save timelapse settings",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-shared-settings-context-20260929.json",
+          "record": "controls[1]",
+          "control": "Generate videos",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-shared-settings-context-20260929.json",
+          "record": "controls[2]",
+          "control": "All settings",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-shared-settings-context-20260929.json",
+          "record": "controls[3]",
+          "control": "Encoding, frame rate and video size",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/sky-cycle",

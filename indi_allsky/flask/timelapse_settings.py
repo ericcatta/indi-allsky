@@ -36,7 +36,8 @@ class TimelapseSettingsMixin:
                     username = 'system' if current_app.config['LOGIN_DISABLED'] else current_user.username
                     ModernAdminSettingsRuntimeService().save_config_revision(
                         config, username, 'Hybrid timelapse settings')
-                    return redirect(url_for('indi_allsky.modern_admin_timelapse_settings_view', saved='1'), code=303)
+                    return redirect(url_for('indi_allsky.modern_admin_timelapse_settings_view', saved='1',
+                        camera_id=request.args.get('camera_id', self.camera.id), profile_id=request.args.get('profile_id')), code=303)
             except (ValueError, TypeError):
                 error = 'Choose a smoothing window of 3, 5 or 9 frames.'
                 status = 400

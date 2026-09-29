@@ -2,6 +2,8 @@
 """Exercise storage protection settings with real isolated persistence and CSRF."""
 import argparse
 import re
+from html import unescape
+from urllib.parse import parse_qs, urlsplit
 from hybrid_runtime_fixture import isolated_app, login_client
 
 
@@ -10,6 +12,23 @@ def run(runtime_config):
         from indi_allsky.flask.models import IndiAllSkyDbConfigTable as Config
         admin = login_client(app, 1)
         url = '/indi-allsky/modern-admin/settings/storage-protection'
+
+        base_url = url
+        url += '?camera_id=2&profile_id=test-profile-2'
+
+        def assert_context(location, camera=2):
+            query = parse_qs(urlsplit(unescape(location)).query)
+            assert query.get('camera_id') == [str(camera)], location
+            assert query.get('profile_id') == [f'test-profile-{camera}'], location
+
+        for camera in (1, 2):
+            page = admin.get(base_url + f'?camera_id={camera}&profile_id=test-profile-{camera}')
+            assert page.status_code == 200
+            for label in ['All settings', 'Tasks']:
+                links = re.findall(r'<a href="([^"]+)">' + re.escape(label) + r'</a>', page.text)
+                assert links, label
+                # Footer links follow the shared navigation.
+                assert_context(links[-1], camera)
 
         def form(client):
             page = client.get(url)
@@ -27,7 +46,9 @@ def run(runtime_config):
         data.update(minimum='5', target='4', days='3')
         assert admin.post(url, data=data).status_code == 400
         data['target'] = '8'
-        assert admin.post(url, data=data).status_code == 303
+        response = admin.post(url, data=data)
+        assert response.status_code == 303
+        assert_context(response.headers['Location'])
         with app.app_context():
             saved = Config.query.order_by(Config.id.desc()).first().data
             assert saved['STORAGE_PRESSURE'] == dict(ENABLE=False, MIN_FREE_GIB=5., TARGET_FREE_GIB=8., KEEP_DAYS=3)
@@ -36,7 +57,9 @@ def run(runtime_config):
         page, data = form(admin)
         assert not re.search(r'name="enabled" checked', page.text)
         data.update(minimum='6', target='10', days='2', enabled='on')
-        assert admin.post(url, data=data).status_code == 303
+        response = admin.post(url, data=data)
+        assert response.status_code == 303
+        assert_context(response.headers['Location'])
         with app.app_context():
             saved = Config.query.order_by(Config.id.desc()).first().data
             assert saved['STORAGE_PRESSURE'] == dict(ENABLE=True, MIN_FREE_GIB=6., TARGET_FREE_GIB=10., KEEP_DAYS=2)

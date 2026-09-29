@@ -31,6 +31,20 @@ This is positive short-run evidence, not a guarantee of steady cadence under
 all loads or the deferred 24-hour acceptance.
 Use [deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
+## Shared Settings navigation correction — candidate
+
+Timelapse and Storage Protection footer links and save redirects now retain the
+explicit camera/profile query instead of dropping it or substituting the session
+camera. Both isolated persistence/CSRF/permission flow tests pass; both camera
+pairs are covered for links. Native administrator checks on camera 2 verify two
+saves, database values, all five footer links and the correctly selected generation
+camera. Only the two intended global config domains changed in the fixture.
+All 169 Python entrypoints and 34 JavaScript tests pass with unchanged tested
+sources. This candidate is not deployed yet.
+[Evidence](testing/evidence/hybrid-shared-settings-context-20260929.json).
+The Full Settings page's own profile/history/restore links still omit context;
+that separate navigation finding remains open.
+
 ## Cold-start defect corrected and deployed
 
 Capture restart exposed a backend moon bitmap removed during Classic retirement.

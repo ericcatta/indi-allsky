@@ -33,7 +33,7 @@
 </fieldset>
 </form>
 {% if not login_disabled and not current_user.is_admin %}<p>Administrator access is required to change these settings.</p>{% endif %}
-<p><a href="{{ url_for('indi_allsky.modern_admin_settings_view') }}">All settings</a> · <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Tasks</a></p>
+<p><a href="{{ url_for('indi_allsky.modern_admin_settings_view', camera_id=request.args.get('camera_id', camera_id), profile_id=request.args.get('profile_id')) }}">All settings</a> · <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view', camera_id=request.args.get('camera_id', camera_id), profile_id=request.args.get('profile_id')) }}">Tasks</a></p>
 </section>
 </main>
 {% endblock %}

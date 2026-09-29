@@ -40,7 +40,8 @@ class StorageSettingsMixin:
                     username = 'system' if current_app.config['LOGIN_DISABLED'] else current_user.username
                     ModernAdminSettingsRuntimeService().save_config_revision(
                         config, username, 'Hybrid storage protection settings')
-                    return redirect(url_for('indi_allsky.modern_admin_storage_protection_settings_view', saved='1'), code=303)
+                    return redirect(url_for('indi_allsky.modern_admin_storage_protection_settings_view', saved='1',
+                        camera_id=request.args.get('camera_id', self.camera.id), profile_id=request.args.get('profile_id')), code=303)
                 except (ValueError, TypeError):
                     error, status = 'Use positive thresholds, a recovery target above the threshold and at least one whole day of retention.', 400
                 except Exception:

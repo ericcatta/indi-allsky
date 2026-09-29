@@ -1,0 +1,112 @@
+{
+  "date": "2026-09-29",
+  "status": "candidate-validated-awaiting-deployment",
+  "baseline": "f0d502fb2088ab32c8d8850a609d605178e3eb60",
+  "source_manifest_sha256": "283002aa90fa40726e8bee27cf3365e7cbbc2a64d78da194f4ce645aa65fd70a",
+  "defect": "Shared Settings footer links and POST redirects dropped camera/profile selection; session camera can differ from explicit query.",
+  "scope": "Navigation only. Existing shared/global save semantics unchanged.",
+  "automated": {
+    "targeted": "Both real Flask persistence/CSRF/role tests pass; footer links checked for both camera/profile pairs and save redirects for camera 2.",
+    "red": "Initial test failed on missing camera query. Subsequent run exposed session-camera substitution; corrected. Storage test selector also required scoping to the footer instead of the shared Tasks link.",
+    "javascript": "34 passed; /tmp/hybrid-settings-context-js.json",
+    "full_python_report": "/home/eric/hybrid-settings-context-regression-final-20260929/results.json",
+    "full_python": {
+      "status": "passed",
+      "count": 169,
+      "source_changed": false,
+      "report_sha256": "a281f1c1fbf11811f1215aa54deb7748fa3a88486c2fcd4c327b07035c473433"
+    },
+    "javascript_report_sha256": "9c546ec23fdd9f4923a941ccd82a85a1274c50e47aca8900f3e47d5529bc619d"
+  },
+  "controls": [
+    {
+      "page": "/modern-admin/settings/timelapse",
+      "control": "Save timelapse settings",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated localhost:18116",
+      "status": "superato",
+      "result": "Unchecked deflicker and selected 3 frames; success redirect retained camera=2/profile=test-profile-2; fixture config revision 2 persisted both values."
+    },
+    {
+      "page": "/modern-admin/settings/timelapse",
+      "control": "Generate videos",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated localhost:18116",
+      "status": "superato",
+      "result": "Opened Generate media with heading Test Camera 2 and correct no-images empty state."
+    },
+    {
+      "page": "/modern-admin/settings/timelapse",
+      "control": "All settings",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated localhost:18116",
+      "status": "superato",
+      "result": "Opened Settings with camera/profile retained in domain links."
+    },
+    {
+      "page": "/modern-admin/settings/timelapse",
+      "control": "Encoding, frame rate and video size",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated localhost:18116",
+      "status": "superato",
+      "result": "Opened Full Settings with FFMPEG search and 11 matching settings; camera/profile query retained."
+    },
+    {
+      "page": "/modern-admin/settings/storage-protection",
+      "control": "Save storage protection",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated localhost:18116",
+      "status": "superato",
+      "result": "Disabled protection and set retention=4; success redirect retained camera/profile; fixture revision 3 persisted values."
+    },
+    {
+      "page": "/modern-admin/settings/storage-protection",
+      "control": "Tasks",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated localhost:18116",
+      "status": "superato",
+      "result": "Opened Task Queue retaining camera/profile query; fixture had no tasks."
+    },
+    {
+      "page": "/modern-admin/settings/storage-protection",
+      "control": "All settings",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated localhost:18116",
+      "status": "superato",
+      "result": "Opened Settings with camera/profile retained."
+    }
+  ],
+  "limits": [
+    "Not yet deployed.",
+    "Native checks use isolated administrator, camera 2. Both camera pairs and ordinary-user rejection checked automatically.",
+    "No live capture, generation, cleanup or production config changes performed.",
+    "Full Settings own links to profiles/history/restore still omit context; separately open navigation finding."
+  ],
+  "isolated_database": {
+    "path": "/tmp/hybrid-acceptance-t4sv527a/acceptance.sqlite",
+    "config_revisions": [
+      1,
+      2,
+      3
+    ],
+    "changed_domains": [
+      "TIMELAPSE",
+      "STORAGE_PRESSURE"
+    ],
+    "all_other_config_keys_unchanged": true
+  }
+}
