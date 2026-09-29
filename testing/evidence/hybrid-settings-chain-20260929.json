@@ -1,7 +1,7 @@
 {
   "date": "2026-09-29",
   "baseline": "fa85a221478774a005d729496a2dd3af0d72ad40",
-  "status": "candidate-validated-awaiting-deployment",
+  "status": "deployed-native-navigation-verified",
   "scope": "Preserve camera/profile through Full Settings, history, snapshot details and restore navigation. Save/restore/download handlers unchanged.",
   "controls": [
     {
@@ -119,9 +119,45 @@
     "observed": "Actual clipboard text matched both DOM account rows; Details column excluded; previous clipboard restored."
   },
   "limits": [
-    "Candidate not deployed yet.",
+    "Native production acceptance covers administrator/camera 2; isolated native checks cover administrator/camera 1 and ordinary-user/camera 2; automated navigation covers both roles and both cameras.",
     "No production or isolated restore/save action performed in these native navigation checks.",
     "Native clipboard acceptance does not prove CSV/Excel download delivery."
   ],
-  "source_manifest_sha256": "2c16f64cd2a5aae0132b3a3a8822497ab27487f4acc13a265ac7077ea99788e5"
+  "source_manifest_sha256": "2c16f64cd2a5aae0132b3a3a8822497ab27487f4acc13a265ac7077ea99788e5",
+  "deployed_commit": "9a526bc9c5200a6819d2d2997a3a63113a13e943",
+  "deployment": {
+    "backup": "/home/eric/hybrid-backups/hybrid-settings-chain-20260929-144810",
+    "web_only_reload": true,
+    "capture_pid_before_and_after": 1512517,
+    "capture_restarts": 0,
+    "config_revision_before_and_after": 118,
+    "latest_verified_images": {
+      "1": {
+        "id": 176493,
+        "time": "2026-09-29 14:49:50",
+        "dimensions": [
+          4608,
+          2592
+        ]
+      },
+      "2": {
+        "id": 176492,
+        "time": "2026-09-29 14:49:50",
+        "dimensions": [
+          3840,
+          2160
+        ]
+      }
+    },
+    "rollback": "python3 /home/eric/hybrid-settings-chain-deploy.py --rollback /home/eric/hybrid-backups/hybrid-settings-chain-20260929-144810",
+    "rollback_exercised": false
+  },
+  "production_native": {
+    "role": "administrator",
+    "camera_id": 2,
+    "profile_id": "asi678mc",
+    "scope": "Full Settings -> Config History -> older page 2 -> newer page 1 -> snapshot 118 -> Config Restore -> Config History -> Full Settings. All query contexts retained; expected headings and snapshot metadata observed.",
+    "initial_load": "First Full Settings navigation exceeded browser wait timeout; same tab subsequently showed complete page. No duplicate navigation issued. Return to Full Settings completed normally.",
+    "mutations": false
+  }
 }

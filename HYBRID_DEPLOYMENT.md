@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `fa85a221478774a005d729496a2dd3af0d72ad40` (29 September 2026).
+Production runs `9a526bc9c5200a6819d2d2997a3a63113a13e943` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -40,6 +40,25 @@ The camera-detection fix passed native discovery against real devices: the teles
 is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
+
+## Roll back the Settings/history/restore navigation update
+
+This template-only update retains camera/profile selection through Full Settings,
+history, detail and restore navigation. The complete 169-entrypoint regression
+and two corrected pagination-assertion reruns pass; all 34 JavaScript tests pass.
+The production camera-2 round trip, pagination and snapshot detail pass. Capture
+PID 1512517 and configuration 118 are preserved; both latest images decode.
+[Evidence](testing/evidence/hybrid-settings-chain-20260929.json).
+
+```sh
+python3 /home/eric/hybrid-settings-chain-deploy.py --rollback /home/eric/hybrid-backups/hybrid-settings-chain-20260929-144810
+```
+
+Requires clean tracked HEAD `9a526bc9`. Restores `fa85a221` and reloads web only;
+no database/configuration restore or capture restart. Code/configuration backup
+is retained; the earlier coherent checkpoint database backup remains available.
+Rollback is prepared, not exercised. Only after this rollback can the older
+shared-Settings rollback below apply. Verify navigation and fresh camera frames.
 
 ## Roll back the shared Settings navigation update
 

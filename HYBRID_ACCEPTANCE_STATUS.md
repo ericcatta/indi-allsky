@@ -5,13 +5,13 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `fa85a221478774a005d729496a2dd3af0d72ad40`.
+The Raspberry runs `9a526bc9c5200a6819d2d2997a3a63113a13e943`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
 The 829-file source/asset manifest is
-`283002aa90fa40726e8bee27cf3365e7cbbc2a64d78da194f4ce645aa65fd70a`.
+`2c16f64cd2a5aae0132b3a3a8822497ab27487f4acc13a265ac7077ea99788e5`.
 Validation combines 166 existing Python entrypoints, two new checkpoint tests,
 and the runtime installer test; 34 JavaScript tests pass. The evidence preserves
 the first test-harness failure and corrected reruns, rather than claiming an
@@ -44,11 +44,13 @@ sources. The web-only deployment preserves capture PID 1512517 and configuration
 118. Production camera-2 navigation to generation, Settings, Storage Protection
 and Tasks passes; no live settings were changed.
 [Evidence](testing/evidence/hybrid-shared-settings-context-20260929.json).
-A follow-up candidate now preserves context through Full Settings, history,
+The deployed follow-up preserves context through Full Settings, history,
 restore details and return links. Isolated native administrator/camera-1 and
 ordinary-user/camera-2 round trips pass. The 169-entrypoint regression passes
 with two corrected pagination-test reruns, and all 34 JavaScript tests pass.
-Deployment is pending. [Evidence](testing/evidence/hybrid-settings-chain-20260929.json).
+Production camera-2 round trip, pagination and snapshot-118 detail pass.
+Capture remains PID 1512517, configuration 118 unchanged; both latest image files
+decode at 14:49:50. [Evidence](testing/evidence/hybrid-settings-chain-20260929.json).
 
 ## Cold-start defect corrected and deployed
 
