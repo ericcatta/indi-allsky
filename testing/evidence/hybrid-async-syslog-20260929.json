@@ -238,5 +238,19 @@
       "capture_status": "Running"
     },
     "temporary_tab": "closed"
+  },
+  "focused_reproduction": {
+    "test": "hybrid_highlights_flow_test.py",
+    "result": "passed",
+    "window": [
+      "2026-09-29T16:46:24.038814",
+      "2026-09-29T16:47:54.050826"
+    ],
+    "camera1_frames": 6,
+    "camera2_frames": 6,
+    "max_interval_both_s": 15,
+    "lock_report_sha256": "cb9b6cb0298e0e5696471461546dc38cba4844e25e81f8d82a671dcaf50347b7",
+    "result_limit": "The earlier lock error and cadence defect were not reproduced; this does not disprove the under-load failure.",
+    "processes": "Test and90s lock sampler completed."
   }
 }

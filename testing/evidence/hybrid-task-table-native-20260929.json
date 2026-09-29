@@ -1,0 +1,100 @@
+{
+  "date": "2026-09-29",
+  "runtime": "970d179941dd3dbfc76da76965cee1d7f40cadb9",
+  "environment": "Native production browser, existing administrator session",
+  "scope": "Read-only task navigation, filters and table controls; no task effects submitted",
+  "controls": [
+    {
+      "route": "/modern-admin/tasks",
+      "control": "State FAILED",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Only task13868 remains, FAILED updateSatelliteTleData; filtered count1/499."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "Action generateVideo with FAILED",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Zero matching rows and count0; no stale rows."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "State SUCCESS with generateVideo",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "12 successful generateVideo records across cameras1/2 appear."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "Search 13812",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Exactly task13812 remains."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "Details: keyboard Enter",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Opens task13812 with SUCCESS, generateVideo, camera2 and recorded result."
+    },
+    {
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "control": "Open Timelapse",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Opens Output video62 for camera2; browser video readyState4,3840x2160,duration35.56s,error null. Playback was not exercised."
+    },
+    {
+      "route": "/modern-admin/tasks/<int:task_id>",
+      "control": "Back to Task Queue",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Returns to499 rows and default20-row page."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "ID ascending",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Visible IDs13406..13425 are ascending."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "Next page",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Showing21 to40 of499."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "Entries per page50",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Showing1 to50 of499."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "ID descending",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "50 rows, leading IDs13904,13903,13902,13901."
+    },
+    {
+      "route": "/modern-admin/tasks",
+      "control": "Queue VIDEO",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "499 matching rows; all available records in this snapshot belong to VIDEO."
+    }
+  ],
+  "limits": [
+    "No ordinary-user or narrow-viewport claim for this check.",
+    "Copy/CSV/Excel and native download receipt are not covered.",
+    "Remaining sort columns and pagination edge controls are not covered here.",
+    "Opening task output verifies camera association and loaded metadata, not full playback or generation.",
+    "Initial exact uppercase label locator failed because source label is State; selecting observed DOM ID worked. No label defect inferred."
+  ],
+  "cleanup": "Temporary browser tab closed."
+}

@@ -319,6 +319,17 @@ At normal load, 20 frames per camera have a 15-second median and maxima of
 frame timestamps. These bounded checks do not close the under-load defect.
 [Measured evidence](testing/evidence/hybrid-async-syslog-20260929.json).
 
+## Task table — native checks extended
+
+Twelve scoped administrator checks verify state/action/queue filters, empty
+results, ID search, keyboard detail opening, output camera association and loaded
+video metadata, return navigation, both ID sort directions, Next and50-row page
+size. Exports, other roles, other sort columns and full playback are outside
+this check. [Evidence](testing/evidence/hybrid-task-table-native-20260929.json).
+The focused Highlights test did not reproduce the earlier SQLite stall; both
+cameras saved six frames at15-second intervals during that90-second sample.
+The previous under-load cadence defect remains open.
+
 ## Remaining acceptance gates
 
 
