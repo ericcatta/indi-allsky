@@ -356,8 +356,9 @@ one-off authorized test-media cleanup does not change that saved policy.
 Some older snapshots are archived as `indi-allsky.sqlite.gz` to recover space.
 Their `compressed-storage.json` records the original byte length and SHA-256;
 complete decompression is verified before removing the uncompressed copy.
-The current storage-estimate release backup remains uncompressed, with configuration
-and code archives preserved. On 29 September four older database snapshots were
+The current coherent checkpoint backup (`hybrid-checkpoint-20260929-135156`)
+remains uncompressed; configuration and code archives are preserved. Older
+release database snapshots, including storage-estimate, may now be compressed. On 29 September four older database snapshots were
 compressed and fully verified, reclaiming 3,219,880,401 bytes; free space was
 8.53 GiB afterward. See [archival evidence](testing/evidence/hybrid-backup-archival-20260929.json).
 
@@ -417,3 +418,9 @@ For rollback while HEAD is exactly `666817fc94c40845fc05d8fc4b20251ee779a70a`, r
 `python3 /home/eric/hybrid-gallery-state-deploy.py --rollback /home/eric/hybrid-backups/hybrid-gallery-state-20260929-184453`.
 This restores runtime `5d877e6d` and reloads only web; no database restore.
 Later documentation-only commits require checking the HEAD guard before rollback.
+
+The second historical archival batch is in progress: eight of 33 snapshots
+verified at the saved progress checkpoint, reclaiming 6,359,911,873 bytes. No
+new archival starts after 19:50 local time; the current file finishes verification
+before its original is removed. Follow the live report and process, not this
+checkpoint, to establish completion. [Progress evidence](testing/evidence/hybrid-backup-remaining-20260929.json).

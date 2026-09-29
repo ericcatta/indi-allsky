@@ -423,3 +423,14 @@ All 171 Python and 34 JavaScript entrypoints pass. Isolated browser checks cover
 ordinary and administrator roles. Production checks verify keyboard Load more
 (72 to 144 unique images), All Cameras and IMX708 filters. Capture PID 1862836
 remained active without restart. [Evidence](testing/evidence/hybrid-gallery-state-20260929.json).
+
+## Capture versus publication latency — bounded comparison
+
+On 29 September, 18:50–19:00 with historical-backup compression active, both
+cameras retained 15-second median/16-second maximum capture intervals. Observed
+publication maxima were 24.45/22.45 seconds. In the following five-minute window
+with compression suspended, capture intervals were unchanged and publication
+maxima were 9.45/5.45 seconds. Both cameras produced new, decoded native Now
+frames after Refresh. These short sequential observations do not prove causation
+or close intermittent storage-latency acceptance. No runtime/config changed.
+[Comparison evidence](testing/evidence/hybrid-publication-comparison-20260929.json).

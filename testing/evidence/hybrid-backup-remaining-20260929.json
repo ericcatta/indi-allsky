@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-29",
+  "status": "running",
+  "pid": 1984029,
+  "report": "/home/eric/hybrid-archive-remaining-backups-20260929.json",
+  "immutable_progress_snapshot": "/home/eric/hybrid-archive-remaining-backups-progress-20260929-1907.json",
+  "snapshot_sha256": "4e182b7033ef7c2fd0d51456089b06352fe799ae5b2e597518ab0650eba4c7c5",
+  "planned_snapshots": 33,
+  "verified_snapshots": 8,
+  "bytes_reclaimed_at_snapshot": 6359911873,
+  "free_bytes_observed": 11265085440,
+  "preserved_uncompressed": "/home/eric/hybrid-backups/hybrid-checkpoint-20260929-135156/indi-allsky.sqlite",
+  "verification": "SHA256 and byte count of full decompression must equal immutable original; compressed file and recovery marker are fsynced before unlinking uncompressed original. Code/config archives and all acquired media retained.",
+  "load_control": {
+    "nice": 19,
+    "io_class": "idle",
+    "input_mib_per_second": 8,
+    "stop_starting_new_archives_after_local_time": "19:50",
+    "comparison_pause": "Resumed automatically after terminal quiet observation; PID/command checked before signals."
+  },
+  "scope": "Operational lossless archival; no production source or configuration change.",
+  "limitations": [
+    "Operation remains live; the snapshot is progress, not completion.",
+    "Does not yet satisfy the historical half-disk-free target.",
+    "New acquired media were not deleted."
+  ]
+}

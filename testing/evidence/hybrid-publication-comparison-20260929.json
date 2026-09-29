@@ -1,0 +1,82 @@
+{
+  "date": "2026-09-29",
+  "status": "bounded-comparison-complete-storage-acceptance-open",
+  "runtime": "666817fc94c40845fc05d8fc4b20251ee779a70a",
+  "report": "/home/eric/hybrid-publication-comparison-20260929.json",
+  "sha256": "1b41cf7e2552090c9bba05778c38f244a723c9bb71ea604b50b67c6a6ace5935",
+  "with_backup_compression": {
+    "window": [
+      "18:50:28",
+      "19:00:28"
+    ],
+    "camera_1": {
+      "captured_and_observed": 39,
+      "capture_interval_median": 15,
+      "capture_interval_max": 16,
+      "publication_median": 3.45,
+      "publication_max": 24.45
+    },
+    "camera_2": {
+      "captured_and_observed": 40,
+      "capture_interval_median": 15,
+      "capture_interval_max": 16,
+      "publication_median": 3.45,
+      "publication_max": 22.45
+    }
+  },
+  "compression_suspended": {
+    "window": [
+      "19:00:59",
+      "19:05:59"
+    ],
+    "camera_1": {
+      "captured_and_observed": 19,
+      "capture_interval_median": 15,
+      "capture_interval_max": 16,
+      "publication_median": 3.45,
+      "publication_max": 9.45
+    },
+    "camera_2": {
+      "captured_and_observed": 20,
+      "capture_interval_median": 15,
+      "capture_interval_max": 16,
+      "publication_median": 2.46,
+      "publication_max": 5.45
+    }
+  },
+  "read_errors": 0,
+  "native_now": {
+    "first_frames": [
+      "ccd1_20260929_185313.jpg",
+      "ccd2_20260929_185322.jpg"
+    ],
+    "after_refresh": [
+      "ccd1_20260929_190445.jpg",
+      "ccd2_20260929_190440.jpg"
+    ],
+    "both_snapshots_decoded": true,
+    "dimensions": [
+      [
+        4608,
+        2592
+      ],
+      [
+        3840,
+        2160
+      ]
+    ],
+    "tab_closed": true
+  },
+  "capture": {
+    "pid": 1862836,
+    "state": "active",
+    "restarts": 0
+  },
+  "limitations": [
+    "Two short sequential windows do not prove causation or exclude intermittent storage stalls.",
+    "Publication was observed by polling newest DB rows and file presence; this is not HTTP latency or continuous browser freshness.",
+    "Nominal two-second polling can itself be delayed; capture timestamps have one-second resolution.",
+    "No runtime/configuration change; no automatic regression rerun needed for read-only observation and lossless archival.",
+    "24-hour test remains deferred."
+  ]
+}
