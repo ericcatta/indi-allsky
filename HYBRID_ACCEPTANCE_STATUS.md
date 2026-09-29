@@ -112,6 +112,17 @@ mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
 
+## Users table acceptance extended
+
+A native isolated 28-account fixture verifies pagination, all ascending sort
+columns, ID reverse sorting, page sizes, combined filters, account details and
+self-account navigation. Administrator, ordinary-user and anonymous behavior
+were observed. At 320px the table scrolls horizontally without page overflow;
+Details opens after its column is made visible. Compared account fields remain
+unchanged apart from expected login metadata excluded from that comparison.
+Copy still lacks verified clipboard delivery; native CSV/Excel receipt remains
+open. [Evidence](testing/evidence/hybrid-users-native-controls-20260929.json).
+
 ## Focused Settings controls verified on both profiles
 
 Production administrator paths through Basic/Advanced to Storage, Analytics,

@@ -1,0 +1,276 @@
+{
+  "date": "2026-09-29",
+  "runtime_source": "07b2098dd24e1992b0f4f418d066a4672ec6f594",
+  "source_manifest_sha256": "49a1245fe01b4244ae020e822f1d97905318a3e1dca7778d3794d66bb0a7294f",
+  "environment": "Native browser, localhost18115 tunnel to isolated Flask with Classic imports/templates/assets forbidden. In-memory DB, synthetic users and media; external effects blocked.",
+  "fixture": "28 users; IDs1/2 are baseline admin/ordinary identities, IDs3..28 use active=id%2==0,staff=id%3==0,admin=id%7==0. Existing hybrid_users_table_flow_test.py supplies the corresponding automated checks.",
+  "prerequisites": "Synthetic account login; no production accounts or data modified. Camera/profile is not applicable to account identity or table controls.",
+  "server_evidence": {
+    "path": "/home/eric/hybrid-users-native-20260929.json",
+    "sha256": "11397643a1608782ab7e3ae43767bdecddd2398a115d37cd32e9b9933da9469c",
+    "requests": 9,
+    "observed_roles": [
+      1,
+      2,
+      null
+    ],
+    "core_account_fields_unchanged": true,
+    "compared_fields": [
+      "id",
+      "username",
+      "name",
+      "password",
+      "email",
+      "apikey",
+      "active",
+      "staff",
+      "admin",
+      "data"
+    ],
+    "excluded_expected_login_metadata": [
+      "loginDate",
+      "loginIp"
+    ]
+  },
+  "controls": [
+    {
+      "route": "/modern-admin/users",
+      "control": "Next",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Second page contains IDs10,9,8,7,6,5,4,3; eight rows."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Last",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Second page contains IDs10,9,8,7,6,5,4,3; eight rows."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Previous",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "First page restored: IDs2,1,28 through11; twenty rows."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "First",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "First page restored: IDs2,1,28 through11; twenty rows."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "ID ascending",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "First page contains IDs1 through20 in numeric order."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Sort Created",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "All28 rendered values verified in nondecreasing order; aria-sort=ascending."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Sort Username",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "All28 rendered values verified in nondecreasing order; aria-sort=ascending."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Sort Name",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "All28 rendered values verified in nondecreasing order; aria-sort=ascending."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Sort Active",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "All28 rendered values verified in nondecreasing order; aria-sort=ascending."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Sort Staff",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "All28 rendered values verified in nondecreasing order; aria-sort=ascending."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Sort Admin",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "All28 rendered values verified in nondecreasing order; aria-sort=ascending."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Sort Last Login",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "All28 rendered values verified in nondecreasing order; aria-sort=ascending. All Last Login values were Never, so this checks the equal-value case only."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "entries per page All",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "All28 records visible."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Active filter",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "15 records: even IDs4 through28 plus1 and2."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Active + Admin filters",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Exactly IDs14,28,1 remain."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Active + Admin + Non-staff filters",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Exactly IDs14 and28 remain."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Copy filtered records",
+      "role": "administrator",
+      "status": "bloccato",
+      "observed": "UI reports Copied2 records; clipboard read still returned previously copied notification data. An attempted keyboard paste did not yield verifiable new content. Native clipboard completion remains unverified; not classified as an application defect."
+    },
+    {
+      "route": "/modern-admin/users/<int:user_id>",
+      "control": "Details via Enter",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "User14 detail identifies fixture-user-14, Active Yes, Staff No, Admin Yes,0 snapshots. Password explanation says only a one-way hash is stored."
+    },
+    {
+      "route": "/modern-admin/users/<int:user_id>",
+      "control": "Back to Users via Enter",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Returned to Users with the first20 rows; table filters reset."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Home via Enter",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "URL becomes /modern-admin/now and Now heading is present."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Navigation menu \u2192 Users",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "Users table opens for test-user-2; recovery controls remain disabled with administrator-required explanation."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Next, First",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "Next shows IDs10 through3; First restores the initial20 rows."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "entries per page 50",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "28 rows displayed."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "entries per page 100",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "28 rows displayed."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "entries per page All",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "28 rows displayed."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "entries per page 20",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "20 rows displayed."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "ID ascending then descending",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "First20 IDs are1 through20, then28 through9."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Search fixture-user-14",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "Only ID14 remains."
+    },
+    {
+      "route": "/modern-admin/users/<int:user_id>",
+      "control": "Details via Enter",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "User14 metadata matches selected row. Administrator-only password explanation is absent. No account mutation controls shown."
+    },
+    {
+      "route": "/modern-admin/users/<int:user_id>",
+      "control": "My Account via Enter",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "Account page identifies test-user-2, role User; does not switch to selected account14. No account changes submitted."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Mobile horizontal scroll",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "At320\u00d7740, document width320, table width892, scroller width238. Native rightward scroll moves scrollLeft from0 to640 while document stays320."
+    },
+    {
+      "route": "/modern-admin/users/<int:user_id>",
+      "control": "Details mouse click after horizontal scroll",
+      "role": "ordinary user",
+      "status": "superato",
+      "observed": "Visible Details link opens /modern-admin/users/2; detail identifies test-user-2 and fits320px. Earlier clicks while the column was outside the visible scroller did not navigate; keyboard activation and visible-column mouse activation both succeeded."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Anonymous Users request",
+      "role": "anonymous",
+      "status": "superato",
+      "observed": "After logout, Users redirects to login with next=/indi-allsky/modern-admin/users; Sign in heading present, no table."
+    }
+  ],
+  "limits": [
+    "CSV/Excel native download receipt remains open; not retried in this run.",
+    "Copy completion remains blocked despite the UI success message.",
+    "No passwords or roles changed.",
+    "Each record describes its observed role and scope; not all table controls were tested under every role.",
+    "Not whole-product acceptance;24-hour observation deferred."
+  ],
+  "cleanup": "Browser tab and tunnel closed; dedicated server terminated; production capture was not restarted."
+}

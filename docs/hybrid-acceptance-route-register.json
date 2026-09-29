@@ -4674,6 +4674,174 @@
           "record": "cases[16]",
           "control": "Ordinary and anonymous sessions",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[0]",
+          "control": "Next; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[1]",
+          "control": "Last; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[2]",
+          "control": "Previous; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[3]",
+          "control": "First; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[4]",
+          "control": "ID ascending; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[5]",
+          "control": "Sort Created; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[6]",
+          "control": "Sort Username; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[7]",
+          "control": "Sort Name; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[8]",
+          "control": "Sort Active; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[9]",
+          "control": "Sort Staff; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[10]",
+          "control": "Sort Admin; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[11]",
+          "control": "Sort Last Login; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[12]",
+          "control": "entries per page All; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[13]",
+          "control": "Active filter; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[14]",
+          "control": "Active + Admin filters; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[15]",
+          "control": "Active + Admin + Non-staff filters; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[16]",
+          "control": "Copy filtered records; administrator",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[19]",
+          "control": "Home via Enter; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[20]",
+          "control": "Navigation menu \u2192 Users; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[21]",
+          "control": "Next, First; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[22]",
+          "control": "entries per page 50; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[23]",
+          "control": "entries per page 100; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[24]",
+          "control": "entries per page All; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[25]",
+          "control": "entries per page 20; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[26]",
+          "control": "ID ascending then descending; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[27]",
+          "control": "Search fixture-user-14; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[30]",
+          "control": "Mobile horizontal scroll; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[32]",
+          "control": "Anonymous Users request; anonymous",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4685,7 +4853,38 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminUserDetailView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[17]",
+          "control": "Details via Enter; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[18]",
+          "control": "Back to Users via Enter; administrator",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[28]",
+          "control": "Details via Enter; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[29]",
+          "control": "My Account via Enter; ordinary user",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
+          "record": "controls[31]",
+          "control": "Details mouse click after horizontal scroll; ordinary user",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/youtube",
