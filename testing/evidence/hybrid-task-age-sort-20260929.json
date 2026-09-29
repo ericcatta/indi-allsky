@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "validated-awaiting-deployment",
+  "status": "deployed-native-verified",
   "baseline": "970d179941dd3dbfc76da76965cee1d7f40cadb9",
   "defect": "Native production Age ascending sorts labels lexically:10h ago before1h ago, then24m ago after23h ago.",
   "fix": "Add numeric age_seconds using the same existing age calculation and render DataTables data-order; retain human-readable text and unknown/future behavior. Unknown age sorts with sentinel -1.",
@@ -26,12 +26,51 @@
       "source_changed": false,
       "sha256": "bea1e5ac26285cab7990a43709309f3a7d64987ef45389c6aaa8e9c0b494c64b"
     },
-    "javascript": "JavaScript is unchanged; previous34-check result retained. Real browser DataTables sorting checked with both roles."
+    "javascript": "JavaScript is unchanged; previous34-check result retained. Real browser DataTables sorting checked with both roles.",
+    "native_production": {
+      "role": "administrator",
+      "rows": 501,
+      "age_ascending": "passed numeric monotonic order across all rows",
+      "age_descending": "passed numeric monotonic order across all rows",
+      "other_sorting": {
+        "both_directions_passed": [
+          "Created",
+          "Action",
+          "State",
+          "Camera"
+        ],
+        "constant_value_columns_only": [
+          "Updated",
+          "Queue",
+          "Profile"
+        ],
+        "message": "Initial lexical comparison flagged 72 before 137. DOM inspection confirms expected numeric-aware ordering, not a defect; full natural comparator parity was not asserted."
+      },
+      "pagination": {
+        "100": "Showing 1 to 100 of 501 entries",
+        "Last": "Showing 501 to 501 of 501 entries",
+        "Previous": "Showing 401 to 500 of 501 entries",
+        "First": "Showing 1 to 100 of 501 entries"
+      },
+      "copy": "Search 13868 yielded one row; Copy produced two lines including task 13868; original clipboard restored.",
+      "refresh": "Cleared client filter and returned Showing 1 to 20 of 501 entries.",
+      "cleanup": "Temporary browser tabs closed; original user tabs retained."
+    }
   },
   "limits": [
-    "Not deployed. Native corrected sort remains to verify.",
-    "Other Task table controls planned for this pass remain open."
+    "CSV/Excel native download receipt remains unverified.",
+    "This production pass covers administrator desktop; isolated age sorting covers both roles.",
+    "Constant-value columns do not demonstrate ordering across distinct values.",
+    "Whole-product acceptance and capture cadence defect remain open."
   ],
   "source_manifest_sha256": "16d12f76aa538f61abc8eb24235640888043e8501847d06535e012410c938964",
-  "source_count": 833
+  "source_count": 833,
+  "deployment": {
+    "commit": "4ca063a6a8da0ec116c0963a51f83fd594602b53",
+    "backup": "/home/eric/hybrid-backups/hybrid-task-age-20260929-170404",
+    "capture_pid": 1739126,
+    "capture_restarts": 0,
+    "capture_state": "active",
+    "method": "Web workers reloaded; capture process unchanged."
+  }
 }

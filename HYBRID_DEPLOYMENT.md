@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `970d179941dd3dbfc76da76965cee1d7f40cadb9` (29 September 2026).
+Production runs `4ca063a6a8da0ec116c0963a51f83fd594602b53` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -41,7 +41,24 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Current syslog release rollback
+## Current task sorting release rollback
+
+The task age correction passed 171 Python checks and native sorting on all 501
+production rows in both directions. Only web workers were reloaded; capture
+PID 1739126 remained active with zero automatic restarts. The tested 833-file
+manifest is `16d12f76aa538f61abc8eb24235640888043e8501847d06535e012410c938964`.
+[Release evidence](testing/evidence/hybrid-task-age-sort-20260929.json).
+
+From exactly `4ca063a6a8da0ec116c0963a51f83fd594602b53`:
+
+```sh
+/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python /home/eric/hybrid-task-age-deploy.py --rollback /home/eric/hybrid-backups/hybrid-task-age-20260929-170404
+```
+
+This restores `970d1799` and reloads web workers without restarting capture or
+restoring the database. The following older rollback then applies.
+
+## Syslog release rollback
 
 The syslog release passed 171 Python/compile entrypoints and 34 JavaScript tests.
 Its 833-file manifest includes `allsky.py`; deployment verifies the tested hashes.

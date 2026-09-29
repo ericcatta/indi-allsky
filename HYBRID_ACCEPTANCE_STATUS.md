@@ -5,13 +5,13 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `970d179941dd3dbfc76da76965cee1d7f40cadb9`.
+The Raspberry runs `4ca063a6a8da0ec116c0963a51f83fd594602b53`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
 The 833-file source/asset manifest (including the capture entrypoint) is
-`f8fbfd1cc2ec8acda5bbb71f9469757e6503eb2a1799ce84b48965df01090d79`.
+`16d12f76aa538f61abc8eb24235640888043e8501847d06535e012410c938964`.
 171 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
 The bounded asynchronous syslog handler is deployed. Both camera files decode
 after the restart. The live 171-entrypoint replay passes. Trace confirms system-log sends and
@@ -356,3 +356,13 @@ The former 4,412-line chronological status log is preserved in Git at `ad41d847`
 All individual evidence JSON files remain in `testing/evidence/`.
 Those historical entries include superseded candidates, counts, deadlines and rollback targets;
 they must not be read as the current installation state.
+
+## Task age sorting — deployed
+
+Task ages now sort numerically across minutes, hours and days. All 171 Python
+checks passed on unchanged sources; JavaScript was unchanged. Native isolated
+checks cover administrator and ordinary user (205 rows each); production
+administrator checks cover 501 rows in both directions. Pagination, filtered
+clipboard copy and refresh also passed. Capture stayed active with the same PID.
+CSV/Excel download receipt and broader role/device coverage remain open.
+[Release evidence](testing/evidence/hybrid-task-age-sort-20260929.json).
