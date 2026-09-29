@@ -5,13 +5,13 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `f0d502fb2088ab32c8d8850a609d605178e3eb60`.
+The Raspberry runs `fa85a221478774a005d729496a2dd3af0d72ad40`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
 The 829-file source/asset manifest is
-`5517292da5a96fa8117e97bcafed4b6d4ede299c6ffb099ec31e701f3d7f494c`.
+`283002aa90fa40726e8bee27cf3365e7cbbc2a64d78da194f4ce645aa65fd70a`.
 Validation combines 166 existing Python entrypoints, two new checkpoint tests,
 and the runtime installer test; 34 JavaScript tests pass. The evidence preserves
 the first test-harness failure and corrected reruns, rather than claiming an
@@ -31,7 +31,7 @@ This is positive short-run evidence, not a guarantee of steady cadence under
 all loads or the deferred 24-hour acceptance.
 Use [deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
-## Shared Settings navigation correction — candidate
+## Shared Settings navigation correction — deployed
 
 Timelapse and Storage Protection footer links and save redirects now retain the
 explicit camera/profile query instead of dropping it or substituting the session
@@ -40,7 +40,9 @@ pairs are covered for links. Native administrator checks on camera 2 verify two
 saves, database values, all five footer links and the correctly selected generation
 camera. Only the two intended global config domains changed in the fixture.
 All 169 Python entrypoints and 34 JavaScript tests pass with unchanged tested
-sources. This candidate is not deployed yet.
+sources. The web-only deployment preserves capture PID 1512517 and configuration
+118. Production camera-2 navigation to generation, Settings, Storage Protection
+and Tasks passes; no live settings were changed.
 [Evidence](testing/evidence/hybrid-shared-settings-context-20260929.json).
 The Full Settings page's own profile/history/restore links still omit context;
 that separate navigation finding remains open.

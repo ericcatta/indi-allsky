@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `f0d502fb2088ab32c8d8850a609d605178e3eb60` (29 September 2026).
+Production runs `fa85a221478774a005d729496a2dd3af0d72ad40` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -41,7 +41,25 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed checkpoint release
+## Roll back the shared Settings navigation update
+
+The web-only update retains camera/profile context through Timelapse and Storage
+Protection links and save redirects. All 169 Python and 34 JavaScript tests pass;
+production camera-2 navigation passes. Capture PID 1512517 and config revision 118
+remain unchanged. Code/configuration backup and the exact-revision rollback are
+prepared; no schema or persistence changes require a new database copy.
+[Evidence](testing/evidence/hybrid-shared-settings-context-20260929.json).
+
+```sh
+python3 /home/eric/hybrid-shared-settings-context-deploy.py --rollback /home/eric/hybrid-backups/hybrid-shared-settings-context-20260929-142434
+```
+
+This requires clean tracked HEAD `fa85a221`, restores `f0d502fb` and reloads only
+web. It does not restore the database, change configuration or restart capture.
+The rollback is prepared, not exercised. Verify Settings navigation and both
+camera frames afterward. Only then can the older checkpoint rollback below apply.
+
+## Roll back the earlier checkpoint release
 
 Use an authenticated SSH terminal as eric. The protected helper requires exactly
 `f0d502fb` and a clean tracked checkout. It stops capture/web/socket activation,

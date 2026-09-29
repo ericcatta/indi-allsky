@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "candidate-validated-awaiting-deployment",
+  "status": "deployed-native-navigation-verified",
   "baseline": "f0d502fb2088ab32c8d8850a609d605178e3eb60",
   "source_manifest_sha256": "283002aa90fa40726e8bee27cf3365e7cbbc2a64d78da194f4ce645aa65fd70a",
   "defect": "Shared Settings footer links and POST redirects dropped camera/profile selection; session camera can differ from explicit query.",
@@ -91,7 +91,7 @@
     }
   ],
   "limits": [
-    "Not yet deployed.",
+    "Production native checks are read-only. Save behavior verified in the isolated fixture.",
     "Native checks use isolated administrator, camera 2. Both camera pairs and ordinary-user rejection checked automatically.",
     "No live capture, generation, cleanup or production config changes performed.",
     "Full Settings own links to profiles/history/restore still omit context; separately open navigation finding."
@@ -108,5 +108,37 @@
       "STORAGE_PRESSURE"
     ],
     "all_other_config_keys_unchanged": true
+  },
+  "deployed_commit": "fa85a221478774a005d729496a2dd3af0d72ad40",
+  "deployment": {
+    "backup": "/home/eric/hybrid-backups/hybrid-shared-settings-context-20260929-142434",
+    "capture_pid_before_and_after": 1512517,
+    "capture_restarts": 0,
+    "config_revision_before_and_after": 118,
+    "web_only_reload": true,
+    "tracked_checkout_clean": true,
+    "latest_image_records": {
+      "1": {
+        "id": 176301,
+        "time": "2026-09-29 14:25:15"
+      },
+      "2": {
+        "id": 176302,
+        "time": "2026-09-29 14:25:23"
+      }
+    },
+    "rollback": "python3 /home/eric/hybrid-shared-settings-context-deploy.py --rollback /home/eric/hybrid-backups/hybrid-shared-settings-context-20260929-142434",
+    "rollback_exercised": false
+  },
+  "production_native": {
+    "role": "administrator",
+    "camera_id": 2,
+    "profile_id": "asi678mc",
+    "checks": [
+      "Timelapse -> Generate media: heading ZWO CCD ASI678MC, context retained.",
+      "Timelapse -> All settings: domain links retain camera/profile.",
+      "Settings -> Storage Protection -> Tasks: context retained, task table rendered."
+    ],
+    "production_saves": false
   }
 }
