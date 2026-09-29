@@ -7193,6 +7193,36 @@
     }
   ],
   "current_control_discovery": {
+    "commit": "970d179941dd3dbfc76da76965cee1d7f40cadb9",
+    "date": "2026-09-29",
+    "environment": "isolated synthetic Flask; Classic physically absent",
+    "source_manifest_sha256": "f8fbfd1cc2ec8acda5bbb71f9469757e6503eb2a1799ce84b48965df01090d79",
+    "report": "/home/eric/hybrid-current-controls-20260929.json",
+    "report_sha256": "7975995c8dbf32c52b99b90e9fdf55ad7291c450dc29f2b00c3a5328ff000dfa",
+    "get_entries": 99,
+    "contexts": 505,
+    "rendered_contexts": 376,
+    "blocked_contexts": 129,
+    "render_defects": 0,
+    "searched_placeholder_signals": 0,
+    "control_occurrences": 43978,
+    "controls_certified_by_discovery": 0,
+    "limitations": [
+      "Includes repeated controls across roles, camera scopes, aliases and shared navigation; count is not unique features or percentage",
+      "Static HTML only; JavaScript-generated controls require the separate browser evidence",
+      "Rendering and absence of selected placeholder phrases do not prove functional completion"
+    ],
+    "identity_index": {
+      "path": "/home/eric/hybrid-current-control-index-20260929.json",
+      "sha256": "1ae91b31a025285f70cdeb65c85c22329e35d95aaca2ae5b0e60a1b38fbee725",
+      "identities": 7368,
+      "references": 43978,
+      "rule": "Resolved page path plus exact collector control ID suffix; every source page/context/control index is retained. No semantic merging.",
+      "limitation": "Static identities are not unique product features. Functional evidence is not automatically assigned to each identity."
+    },
+    "changed_identity_contexts_since_previous": 40
+  },
+  "previous_control_discovery": {
     "commit": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
     "date": "2026-09-21",
     "environment": "isolated synthetic Flask; Classic physically absent",
@@ -7220,27 +7250,6 @@
       "rule": "Resolved page path plus exact collector control ID suffix; every source page/context/control index is retained. No semantic merging.",
       "limitation": "Static identities are not unique product features. Existing functional evidence is not automatically assigned to each identity."
     }
-  },
-  "previous_control_discovery": {
-    "commit": "f6975d5f5501b00aa3407dd5da7442b73f793952",
-    "date": "2026-09-21",
-    "environment": "isolated synthetic Flask; Classic physically absent",
-    "source_manifest_sha256": "5a7a89f36f27062b391f17e4fd59cbe491b5d0e38c2f0992f407c8604d08e851",
-    "report": "/home/eric/hybrid-post-classic-controls-20260921.json",
-    "report_sha256": "58ad27d871ee1a648bcef25d3d7b518b4aa8a5ac795849486bd92ddf56670ee4",
-    "get_entries": 99,
-    "contexts": 505,
-    "rendered_contexts": 376,
-    "blocked_contexts": 129,
-    "render_defects": 0,
-    "searched_placeholder_signals": 0,
-    "control_occurrences": 43978,
-    "controls_certified_by_discovery": 0,
-    "limitations": [
-      "Includes repeated controls across roles, camera scopes, aliases and shared navigation; count is not unique features or percentage",
-      "Static HTML only; JavaScript-generated controls require the separate browser evidence",
-      "Rendering and absence of selected placeholder phrases do not prove functional completion"
-    ]
   },
   "current_authentication_boundary": {
     "source": "testing/evidence/hybrid-live-auth-boundary-20260921.json",

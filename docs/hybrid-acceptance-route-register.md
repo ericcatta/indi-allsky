@@ -143,3 +143,5 @@ Indice statico: 7.351 identità con tutti i 43.978 riferimenti originali conserv
 ## Notifications mobile acceptance — 29 September 2026
 
 [Six scoped records](../testing/evidence/hybrid-notifications-mobile-20260929.json) cover administrator search, acknowledgement filtering, keyboard detail navigation, return navigation and measured layout at 390/320 px. The JSON register links each record to its route. No mutation was submitted; export receipt, touchscreen scrolling and other roles remain outside this check.
+
+Discovery aggiornata il 29 settembre sul runtime `970d1799`: 99 ingressi GET, 505 contesti, 376 rendering riusciti e 129 bloccati/reindirizzati; nessun difetto di rendering o segnale delle frasi placeholder cercate. Il nuovo indice comprende 7.368 identità statiche e conserva tutti i 43.978 riferimenti. Quaranta contesti hanno identità diverse dopo le correzioni ai link. Conteggi e fingerprint aggiornati sono nel JSON; nessuna interazione viene dichiarata superata da questa discovery. Le prove del 29 settembre erano già associate e non sono duplicate.
