@@ -1,7 +1,7 @@
 {
   "date": "2026-09-29",
   "baseline": "1c25a82334483aad134d9a75db3fd2c764d2ba8f",
-  "status": "validated-awaiting-deployment",
+  "status": "deployed-diagnostic-isolation-verified-cadence-open",
   "source_manifest_sha256": "dbd095e1fb95cd5ed2c9975fb8e0f9d83d024b23605599782ed24990afeed9d4",
   "defect_evidence": "testing/evidence/hybrid-diagnostic-write-stall-20260929.json",
   "before": {
@@ -41,9 +41,68 @@
     "python_report_sha256": "a7105d3df9713b79d08e39040bf3aeb79bc51f128d856a1a51ae3bc2eb9100c4"
   },
   "limits": [
-    "Not deployed yet.",
     "Bounded best-effort diagnostics may drop records during prolonged sink failure, queue saturation or abrupt shutdown; core capture data is not queued here.",
-    "Live cadence and syscall comparison pending.",
-    "24-hour test deferred."
-  ]
+    "24-hour test deferred.",
+    "Saved-frame counts and timestamp intervals are not hardware shutter measurements; observation spans different live storage conditions from baseline."
+  ],
+  "deployment": {
+    "revision": "96c2049de650f46a39b7ac3663332c7fc71c6a0a",
+    "backup": "/home/eric/hybrid-backups/hybrid-async-diag-20260929-154115",
+    "maintenance": [
+      "2026-09-29T15:41:15.728577",
+      "2026-09-29T15:41:24.778495"
+    ],
+    "capture_pid": 1676128,
+    "capture_restarts": 0,
+    "web_pid": 1512518,
+    "config_revision": 118,
+    "native": "Now refreshed: IMX708 15:44:12 and ZWO 15:44:08, both fully loaded at 4608x2592 and 3840x2160."
+  },
+  "after": {
+    "window": [
+      "2026-09-29T15:42:16.345460",
+      "2026-09-29T15:51:56.298939"
+    ],
+    "load": "Same isolated regression workload; 170 entrypoints passed again with unchanged source",
+    "load_report_sha256": "3f441b00dc6c95f2848a7ef1212251d923915cc827e33a7b424e828b7af49c42",
+    "private_report": "/home/eric/hybrid-async-diag-observation.json",
+    "private_report_sha256": "77f60a2525643b467f575063705ee0f884b562e25c9fff37902e6f1b65494626",
+    "camera_1": {
+      "frames": 37,
+      "median_saved_interval_s": 15,
+      "max_saved_interval_s": 28,
+      "gaps_over_17s": [
+        28,
+        25
+      ],
+      "command_count": 37,
+      "max_command_interval_s": 27.548708,
+      "latest_id": 176981
+    },
+    "camera_2": {
+      "frames": 36,
+      "median_saved_interval_s": 15,
+      "max_saved_interval_s": 30,
+      "gaps_over_17s": [
+        23,
+        30
+      ],
+      "command_count": 37,
+      "max_command_interval_s": 30.043601,
+      "latest_id": 176980
+    },
+    "pending_tasks": 0,
+    "latest_files_decoded": true,
+    "trace": {
+      "sha256": "26f43a85eb2d98bfa5b43c0c4ebb14b010db83084080aa69b09ad4f76dc28233",
+      "duration_s": 180,
+      "diagnostic_open_count": 126,
+      "diagnostic_thread": 1676160,
+      "main_capture_thread": 1676159,
+      "main_diagnostic_opens": 0,
+      "all_threads_detached": true,
+      "residual": "Main-thread sendto(fd=4,length=338) started 15:46:56.716498 and remained blocked when tracing detached. Completed syscall maximum 0.000874s excludes that unfinished call; exact blocked duration unmeasured."
+    }
+  },
+  "conclusion": "File diagnostics no longer execute on the capture thread. Overall cadence is NOT passed: additional system-logging socket backpressure and late frames remain. No claim of end-to-end improvement from this limited correction."
 }

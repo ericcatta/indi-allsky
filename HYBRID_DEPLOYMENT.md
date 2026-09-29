@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `1c25a82334483aad134d9a75db3fd2c764d2ba8f` (29 September 2026).
+Production runs `96c2049de650f46a39b7ac3663332c7fc71c6a0a` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -40,6 +40,26 @@ The camera-detection fix passed native discovery against real devices: the teles
 is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
+
+## Diagnostic writer rollout and rollback
+
+Capture was stopped and restarted from 15:41:15 to 15:41:24 to load the bounded
+asynchronous file writer. Configuration 118, database schema and SQLite runtime
+were unchanged. Code/config backup is below; the coherent database backup at
+`hybrid-checkpoint-20260929-135156` remains retained. Source manifest has 830 files.
+170 Python/compile entrypoints and 34 JavaScript tests pass; replaying regression
+as live load also passes. Both camera files decode. The writer isolation is
+verified, but overall cadence still fails under load (28/30-second maxima).
+[Evidence and remaining system-logging block](testing/evidence/hybrid-async-diagnostics-20260929.json).
+
+```sh
+python3 /home/eric/hybrid-async-diag-deploy.py --rollback /home/eric/hybrid-backups/hybrid-async-diag-20260929-154115
+```
+
+Requires clean tracked HEAD `96c2049d`; stops capture/timer, restores `1c25a823`
+and restarts them. It does not restore the database or remove the SQLite
+bootstrap/checkpoint settings. Prepared, not exercised; verify both cameras
+following rollback. Earlier procedures apply only at their exact revision.
 
 ## System index rollback
 

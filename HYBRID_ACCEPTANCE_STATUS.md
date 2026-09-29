@@ -5,22 +5,24 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `1c25a82334483aad134d9a75db3fd2c764d2ba8f`.
+The Raspberry runs `96c2049de650f46a39b7ac3663332c7fc71c6a0a`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
-The 829-file source/asset manifest is
-`37c752641717a50d8eda1b8bf3cddc661d4258581351870da033a90ee904a8e6`.
-Validation combines 166 existing Python entrypoints, two new checkpoint tests,
-and the runtime installer test; 34 JavaScript tests pass. The evidence preserves
-the first test-harness failure and corrected reruns, rather than claiming an
-entirely green first run. [Release evidence](testing/evidence/hybrid-sqlite-checkpoint-20260929.json).
+The 830-file source/asset manifest is
+`dbd095e1fb95cd5ed2c9975fb8e0f9d83d024b23605599782ed24990afeed9d4`.
+The latest candidate passes 170 Python/compile entrypoints and 34 JavaScript
+tests. The same isolated regression was replayed after deployment to measure
+capture under load. [Current evidence](testing/evidence/hybrid-async-diagnostics-20260929.json).
+Historical checkpoint test-harness failures and corrected reruns remain recorded
+in their original evidence; they are not claims about this latest full run.
 
 A private SQLite 3.51.3 runtime is loaded by capture, web and commands in the
 Hybrid virtualenv; OS packages remain unchanged. Capture supervises background
 checkpoints with automatic fallback. Config revision 118 is unchanged. Capture
-PID 1512517 and web PID 1512518 have zero restarts after controlled maintenance.
+PID 1676128 and web PID 1512518 have zero automatic restarts; capture was
+restarted for the diagnostic-writer release at 15:41.
 The coherent backup passed integrity_check. Now, Settings/history and Library
 passed bounded native checks; latest files from both cameras decode.
 
@@ -282,10 +284,24 @@ The CPU correction is deployed; the refreshed native page retains the metric
 cards and all 15 links. Capture was not restarted.
 [Evidence](testing/evidence/hybrid-system-index-20260929.json).
 
+## Capture diagnostic file isolation — deployed
+
+A bounded per-process writer now handles diagnostic file I/O. A 180-second
+trace confirms all 126 diagnostic opens occur on the writer thread, none on
+capture. Both latest files decode, config 118 is unchanged, and the repeated
+170-entrypoint regression workload passes; 34 JavaScript checks also pass.
+
+**Cadence remains open.** During the 9m40s observation, both cameras had a
+15-second median but maxima of 28/30 seconds. The capture thread also has an
+unfinished `sendto` to the system logger at trace detach. Do not interpret the
+small completed-syscall maxima as proof of no blocking. Next, isolate the
+remaining synchronous system-logging backpressure without removing useful logs.
+[Complete measured evidence](testing/evidence/hybrid-async-diagnostics-20260929.json).
+
 ## Remaining acceptance gates
 
 
-- Resolve the diagnostic append stall measured on 29 September: IMX708 capture blocked 5.82 seconds writing `/var/lib/indi-allsky/multicamera-diag.log`. [Syscall evidence](testing/evidence/hybrid-diagnostic-write-stall-20260929.json). Verify end-to-end cadence after moving diagnostic writes off the capture thread; other historical stalls are not all attributed to this cause.
+- Resolve residual capture system-logging backpressure and verify end-to-end cadence under load. Diagnostic file writes are isolated, but post-deploy intervals still reach 28/30 seconds; see the measured evidence above.
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.
 - Complete remaining live effects, including dedicated-data cleanup/deletion and test-destination uploads. Short mini timelapses and both cameras’ automatic day timelapse/panorama outputs are verified; other automatic/isolated tests remain separately labeled.
