@@ -151,8 +151,10 @@ self-account navigation. Administrator, ordinary-user and anonymous behavior
 were observed. At 320px the table scrolls horizontally without page overflow;
 Details opens after its column is made visible. Compared account fields remain
 unchanged apart from expected login metadata excluded from that comparison.
-Copy still lacks verified clipboard delivery; native CSV/Excel receipt remains
-open. [Evidence](testing/evidence/hybrid-users-native-controls-20260929.json).
+A later production administrator check verifies exact clipboard receipt for all
+rows, one filtered row and an empty result; previous clipboard contents were restored.
+[Clipboard evidence](testing/evidence/hybrid-users-clipboard-live-20260929.json).
+Native CSV/Excel receipt and ordinary-user clipboard acceptance remain open. [Evidence](testing/evidence/hybrid-users-native-controls-20260929.json).
 
 ## Focused Settings controls verified on both profiles
 

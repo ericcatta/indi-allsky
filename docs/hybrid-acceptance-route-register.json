@@ -5024,6 +5024,24 @@
           "record": "controls[32]",
           "control": "Anonymous Users request; anonymous",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-clipboard-live-20260929.json",
+          "record": "controls[0]",
+          "control": "Copy all rows",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-clipboard-live-20260929.json",
+          "record": "controls[1]",
+          "control": "Copy filtered row",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-users-clipboard-live-20260929.json",
+          "record": "controls[2]",
+          "control": "Copy empty result",
+          "recorded_status": "superato"
         }
       ]
     },

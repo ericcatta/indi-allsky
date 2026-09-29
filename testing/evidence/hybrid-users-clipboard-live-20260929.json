@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-29",
+  "deployed_commit": "fa85a221478774a005d729496a2dd3af0d72ad40",
+  "scope": "Native Users clipboard delivery, observed directly using browser clipboard API; no product code changes.",
+  "controls": [
+    {
+      "route": "/modern-admin/users",
+      "control": "Copy all rows",
+      "role": "administrator",
+      "environment": "production HTTPS browser",
+      "status": "superato",
+      "observed": "Both displayed account rows matched the clipboard exactly as tab-separated text, excluding the Details action column. Two records and eight data columns; 197 characters."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Copy filtered row",
+      "role": "administrator",
+      "environment": "production HTTPS browser",
+      "status": "superato",
+      "observed": "Searching the selected username displayed one row. Clipboard contained that exact row and excluded the other account."
+    },
+    {
+      "route": "/modern-admin/users",
+      "control": "Copy empty result",
+      "role": "administrator",
+      "environment": "production HTTPS browser",
+      "status": "superato",
+      "observed": "A deliberately unmatched search displayed zero rows. Clipboard retained the column header, contained neither account row, and measured 54 characters."
+    }
+  ],
+  "verification": "Copied text compared with DOM cell text for each account row; comparisons recorded as booleans, no private row payload retained.",
+  "clipboard_restored": true,
+  "previous_evidence": "testing/evidence/hybrid-users-native-controls-20260929.json",
+  "limits": [
+    "This closes the administrator production Copy receipt check; earlier isolated ordinary-user Copy coverage is not implied.",
+    "CSV and Excel downloads remain unverified; clipboard success does not establish file delivery.",
+    "No account, configuration, or capture changes."
+  ]
+}
