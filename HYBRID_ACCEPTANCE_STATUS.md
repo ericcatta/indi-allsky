@@ -108,6 +108,14 @@ mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
 
+## Tested candidate: encoder failure handling
+
+The worker could overwrite a valid latest PNG preview with an empty file when
+the encoder returned false. The candidate rejects that failure and removes
+partial encoder files on exceptions. All 166 Python entrypoints pass; the
+823-file tested manifest matches the local candidate. **Deployment is still
+pending**; the installed version above is unchanged. [Evidence](testing/evidence/hybrid-image-encoder-failure-20260929.json).
+
 ## Backup space recovery — 29 September
 
 Four historical database snapshots were losslessly archived and verified, reclaiming

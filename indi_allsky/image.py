@@ -4156,28 +4156,33 @@ class ImageWorker(Process):
 
         #write_img_start = time.time()
 
-        # write to temporary file
-        if self.config['IMAGE_FILE_TYPE'] in ('jpg', 'jpeg'):
-            # opencv is faster but we have exif data
-            img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
-            img_rgb.save(str(tmpfile_name), quality=self.config['IMAGE_FILE_COMPRESSION']['jpg'], exif=jpeg_exif)
-        elif self.config['IMAGE_FILE_TYPE'] in ('png',):
-            # exif does not appear to work with png
-            #img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
-            #img_rgb.save(str(tmpfile_name), compress_level=self.config['IMAGE_FILE_COMPRESSION']['png'])
+        try:
+            # write to temporary file
+            if self.config['IMAGE_FILE_TYPE'] in ('jpg', 'jpeg'):
+                # opencv is faster but we have exif data
+                img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
+                img_rgb.save(str(tmpfile_name), quality=self.config['IMAGE_FILE_COMPRESSION']['jpg'], exif=jpeg_exif)
+            elif self.config['IMAGE_FILE_TYPE'] in ('png',):
+                # exif does not appear to work with png
+                #img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
+                #img_rgb.save(str(tmpfile_name), compress_level=self.config['IMAGE_FILE_COMPRESSION']['png'])
 
-            # opencv is faster than Pillow with PNG
-            cv2.imwrite(str(tmpfile_name), data, [cv2.IMWRITE_PNG_COMPRESSION, self.config['IMAGE_FILE_COMPRESSION']['png']])
-        elif self.config['IMAGE_FILE_TYPE'] in ('webp',):
-            img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
-            img_rgb.save(str(tmpfile_name), quality=90, lossless=False, exif=jpeg_exif)
-        elif self.config['IMAGE_FILE_TYPE'] in ('tif', 'tiff'):
-            # exif does not appear to work with tiff
-            img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
-            img_rgb.save(str(tmpfile_name), compression='tiff_lzw')
-        else:
-            tmpfile_name.unlink()
-            raise Exception('Unknown file type: %s', self.config['IMAGE_FILE_TYPE'])
+                # opencv is faster than Pillow with PNG
+                if not cv2.imwrite(str(tmpfile_name), data, [cv2.IMWRITE_PNG_COMPRESSION, self.config['IMAGE_FILE_COMPRESSION']['png']]):
+                    raise OSError('PNG encoder failed to write the image')
+            elif self.config['IMAGE_FILE_TYPE'] in ('webp',):
+                img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
+                img_rgb.save(str(tmpfile_name), quality=90, lossless=False, exif=jpeg_exif)
+            elif self.config['IMAGE_FILE_TYPE'] in ('tif', 'tiff'):
+                # exif does not appear to work with tiff
+                img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
+                img_rgb.save(str(tmpfile_name), compression='tiff_lzw')
+            else:
+                tmpfile_name.unlink()
+                raise Exception('Unknown file type: %s', self.config['IMAGE_FILE_TYPE'])
+        except Exception:
+            tmpfile_name.unlink(missing_ok=True)
+            raise
 
         #write_img_elapsed_s = time.time() - write_img_start
         #logger.info('Image compressed in %0.4f s', write_img_elapsed_s)

@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-29",
+  "status": "tested-not-deployed",
+  "defect": "PNG encoder False was ignored, allowing a zero-byte temporary file to replace a valid latest preview. Encoder exceptions also left partial temporary files.",
+  "fix": "Reject a false PNG encoder result before publication; remove partial encoder temporary files on exceptions and re-raise the original error. Successful encoding options and image algorithms unchanged.",
+  "baseline": "New regression test fails against 4788ffc4 with Encoder failure reported as a saved image. A separate filesystem reproduction observed a valid preview replaced by zero bytes.",
+  "test": "testing/hybrid_image_encoder_failure_test.py",
+  "cases": [
+    "PNG False",
+    "PNG partial write then exception",
+    "JPEG partial write then exception"
+  ],
+  "assertions": [
+    "Existing preview bytes preserved",
+    "Original raised exception identity preserved",
+    "No partial temporary file remains"
+  ],
+  "regression": {
+    "report": "/home/eric/hybrid-image-encoder-regression-20260929/results.json",
+    "report_sha256": "e0c6b249d82c20f7acdf0385b3532555fb3fe474a0f5c4c44e0d64cae8aa6f32",
+    "python_entrypoints_passed": 166,
+    "failures": 0,
+    "source_changed": false,
+    "source_files": 823,
+    "manifest_sha256": "cef4217c280a26ecd79ac98acffe7f4c249abc6af721ddb21e0c18f81f51f14a",
+    "local_manifest_matches": true,
+    "javascript": "Previous 34 passes apply to unchanged JS/templates/CSS; not rerun."
+  },
+  "limits": [
+    "Not yet deployed.",
+    "Does not claim to resolve MMC I/O stalls or capture cadence.",
+    "No real camera encoder failure induced."
+  ]
+}
