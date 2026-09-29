@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "validated-awaiting-deploy",
+  "status": "deployed-native-verified",
   "defects": [
     "Loaded count remained 72 after production gallery grew to 360 unique images.",
     "Camera label and aria-pressed remained on ASI678MC after All Cameras showed both cameras.",
@@ -51,7 +51,6 @@
   },
   "limits": [
     "Fetch failure/retry is covered by the JavaScript harness, not a native induced network failure.",
-    "Production rollout and post-deploy verification pending.",
     "This evidence does not certify the whole product."
   ],
   "python": {
@@ -60,5 +59,17 @@
     "source_changed": false,
     "report": "/home/eric/hybrid-gallery-state-regression-20260929/results.json",
     "sha256": "e5d296a329dace1f90f4fcc636c138d52f948ef6724bcc8e5e07c80b1c33cffb"
+  },
+  "deployment": {
+    "commit": "666817fc94c40845fc05d8fc4b20251ee779a70a",
+    "backup": "/home/eric/hybrid-backups/hybrid-gallery-state-20260929-184453",
+    "capture_pid_unchanged": 1862836,
+    "automatic_restarts": 0
+  },
+  "native_production": {
+    "asi678mc": "Initial 72 cards/count. Enter on Load more produced 144 unique cards/count; loading completed.",
+    "all_cameras": "144 cards/count, correct label, only All Cameras aria-pressed=true; first four thumbnails decoded and included both camera UUIDs.",
+    "imx708": "144 cards/count, correct label, only IMX708 aria-pressed=true; no thumbnail with another camera UUID.",
+    "cleanup": "Agent-created production tab closed."
   }
 }

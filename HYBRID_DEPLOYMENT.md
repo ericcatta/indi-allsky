@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `5d877e6dc4e45cef485c5abaa1e2af05890b8095` (29 September 2026).
+Production runs `666817fc94c40845fc05d8fc4b20251ee779a70a` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -47,7 +47,7 @@ The filter correction and versioned script references passed 171 Python and
 34 JavaScript checks, isolated browser checks for both roles, and production
 first-click pagination for both camera/profile pairs. Capture PID 1862836 stayed
 active without restarting. Current 833-file manifest:
-`563746f9a2b03ab736484581335fc2240f7736f34f665eaa84ff6ad771cc12bf`.
+`dc8adbde54f63ef5c4c3c3ff8a68ab6275bd8df06b99446b4ea4ddc5f76efb6d`.
 
 From exactly `5d877e6dc4e45cef485c5abaa1e2af05890b8095`:
 
@@ -402,3 +402,18 @@ See [acceptance status](HYBRID_ACCEPTANCE_STATUS.md) and the
 release descriptions and rollback chains are preserved in Git at `503833b1`:
 `git show 503833b1:HYBRID_DEPLOYMENT.md`. Their commands target older releases
 and must not be used as the rollback for the current production revision.
+
+## Gallery state correction — deployed
+
+Gallery loaded counts, camera labels and accessible filter states now follow
+batch loading and camera changes. Failed older-page loading shows retry guidance.
+All 171 Python and 34 JavaScript entrypoints pass. Isolated browser checks cover
+ordinary and administrator roles. Production checks verify keyboard Load more
+(72 to 144 unique images), All Cameras and IMX708 filters. Capture PID 1862836
+remained active without restart. [Evidence](testing/evidence/hybrid-gallery-state-20260929.json).
+
+Code/config backup: `/home/eric/hybrid-backups/hybrid-gallery-state-20260929-184453`.
+For rollback while HEAD is exactly `666817fc94c40845fc05d8fc4b20251ee779a70a`, run
+`python3 /home/eric/hybrid-gallery-state-deploy.py --rollback /home/eric/hybrid-backups/hybrid-gallery-state-20260929-184453`.
+This restores runtime `5d877e6d` and reloads only web; no database restore.
+Later documentation-only commits require checking the HEAD guard before rollback.

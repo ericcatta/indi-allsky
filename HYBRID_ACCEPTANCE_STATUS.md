@@ -5,13 +5,13 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `5d877e6dc4e45cef485c5abaa1e2af05890b8095`.
+The Raspberry runs `666817fc94c40845fc05d8fc4b20251ee779a70a`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
 The 833-file source/asset manifest (including the capture entrypoint) is
-`563746f9a2b03ab736484581335fc2240f7736f34f665eaa84ff6ad771cc12bf`.
+`dc8adbde54f63ef5c4c3c3ff8a68ab6275bd8df06b99446b4ea4ddc5f76efb6d`.
 171 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
 The bounded asynchronous syslog handler is deployed. Both camera files decode
 after the restart. The live 171-entrypoint replay passes. Trace confirms system-log sends and
@@ -414,3 +414,12 @@ were versioned after the initial production check exposed a stale asset.
 for both roles; production File Space Usage passes for both camera/profile pairs,
 including Previous and camera switching. Capture was not restarted.
 [Evidence](testing/evidence/hybrid-table-blur-20260929.json).
+
+## Gallery state correction — deployed
+
+Gallery loaded counts, camera labels and accessible filter states now follow
+batch loading and camera changes. Failed older-page loading shows retry guidance.
+All 171 Python and 34 JavaScript entrypoints pass. Isolated browser checks cover
+ordinary and administrator roles. Production checks verify keyboard Load more
+(72 to 144 unique images), All Cameras and IMX708 filters. Capture PID 1862836
+remained active without restart. [Evidence](testing/evidence/hybrid-gallery-state-20260929.json).
