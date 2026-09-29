@@ -44,8 +44,11 @@ sources. The web-only deployment preserves capture PID 1512517 and configuration
 118. Production camera-2 navigation to generation, Settings, Storage Protection
 and Tasks passes; no live settings were changed.
 [Evidence](testing/evidence/hybrid-shared-settings-context-20260929.json).
-The Full Settings page's own profile/history/restore links still omit context;
-that separate navigation finding remains open.
+A follow-up candidate now preserves context through Full Settings, history,
+restore details and return links. Isolated native administrator/camera-1 and
+ordinary-user/camera-2 round trips pass. The 169-entrypoint regression passes
+with two corrected pagination-test reruns, and all 34 JavaScript tests pass.
+Deployment is pending. [Evidence](testing/evidence/hybrid-settings-chain-20260929.json).
 
 ## Cold-start defect corrected and deployed
 
@@ -154,7 +157,10 @@ unchanged apart from expected login metadata excluded from that comparison.
 A later production administrator check verifies exact clipboard receipt for all
 rows, one filtered row and an empty result; previous clipboard contents were restored.
 [Clipboard evidence](testing/evidence/hybrid-users-clipboard-live-20260929.json).
-Native CSV/Excel receipt and ordinary-user clipboard acceptance remain open. [Evidence](testing/evidence/hybrid-users-native-controls-20260929.json).
+A later isolated ordinary-user check also confirms exact delivery of both account
+rows with the Details column excluded and the original clipboard restored.
+[Ordinary-user evidence](testing/evidence/hybrid-settings-chain-20260929.json).
+Native CSV/Excel receipt remains open. [Evidence](testing/evidence/hybrid-users-native-controls-20260929.json).
 
 ## Focused Settings controls verified on both profiles
 

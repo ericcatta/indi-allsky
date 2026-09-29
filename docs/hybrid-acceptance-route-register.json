@@ -491,6 +491,24 @@
           "record": "controls[3]",
           "control": "Config History link; camera 1; production native browser",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "controls[1]",
+          "control": "Snapshot 1 details",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "controls[4]",
+          "control": "Open Full Settings",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "controls[8]",
+          "control": "Open Full Settings",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -520,6 +538,18 @@
           "record": "controls[19]",
           "control": "RESET_KEYS/FLUSH_CONFIGS",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "controls[3]",
+          "control": "Open Config History",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "controls[6]",
+          "control": "Details",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -542,6 +572,18 @@
           "source": "testing/evidence/hybrid-browser-2026-09-06.json",
           "record": "controls[17]",
           "control": "Back to Config Restore",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "controls[2]",
+          "control": "Back to Config Restore",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "controls[7]",
+          "control": "Open Config History",
           "recorded_status": "superato"
         }
       ]
@@ -3540,6 +3582,18 @@
           "record": "controls[55]",
           "control": "All settings link; asi678mc; storage",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "controls[0]",
+          "control": "Config History",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "controls[5]",
+          "control": "Restore Config",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -5041,6 +5095,12 @@
           "source": "testing/evidence/hybrid-users-clipboard-live-20260929.json",
           "record": "controls[2]",
           "control": "Copy empty result",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-chain-20260929.json",
+          "record": "ordinary_users_copy",
+          "control": "Copy ordinary user clipboard delivery",
           "recorded_status": "superato"
         }
       ]

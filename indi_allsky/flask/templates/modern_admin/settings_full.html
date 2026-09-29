@@ -26,10 +26,10 @@ var camera_id = {{ camera_id }};
             <span class="modern-admin-status-pill modern-admin-status-warning">Global config</span>
         </div>
         <p class="modern-admin-note">Use Camera Profile Settings for acquisition, gain, exposure, target ADU, binning, and AWB controls. Those fields are intentionally hidden from this global editor so there is one operational path for both single-camera and multi-camera systems.</p>
-        <p class="modern-admin-note"><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">Open Camera Profiles</a></p>
+        <p class="modern-admin-note"><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_cameras_view', camera_id=request.args.get('camera_id'), profile_id=request.args.get('profile_id')) }}">Open Camera Profiles</a></p>
         <p class="modern-admin-note">
-            <a href="{{ url_for('indi_allsky.modern_admin_config_history_view') }}">Config History</a>
-            · <a href="{{ url_for('indi_allsky.modern_admin_config_restore_view') }}">Restore Config</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_config_history_view', camera_id=request.args.get('camera_id'), profile_id=request.args.get('profile_id')) }}">Config History</a>
+            · <a href="{{ url_for('indi_allsky.modern_admin_config_restore_view', camera_id=request.args.get('camera_id'), profile_id=request.args.get('profile_id')) }}">Restore Config</a>
         </p>
         <div class="modern-admin-settings-summary-grid">
             <div class="modern-admin-settings-summary-card">
@@ -51,7 +51,7 @@ var camera_id = {{ camera_id }};
     <section class="modern-admin-table-panel" aria-label="Settings group">
         <label><input id="settings-domain-only" type="checkbox" checked> Show only {{ settings_domain_title }} fields</label>
         <p>This is the full editor with a focused view. Hidden fields retain their values and are included when saving. Uncheck to inspect all shared settings.</p>
-        <p><a href="{{ url_for('indi_allsky.modern_admin_camera_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">Camera exposure, cadence, bit depth and binning</a> · <a href="{{ url_for('indi_allsky.modern_admin_drive_manager_view') }}">Drive Manager</a> · <a href="{{ url_for('indi_allsky.modern_admin_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">All settings</a></p>
+        <p><a href="{{ url_for('indi_allsky.modern_admin_camera_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">Camera exposure, cadence, bit depth and binning</a> · <a href="{{ url_for('indi_allsky.modern_admin_drive_manager_view', camera_id=request.args.get('camera_id'), profile_id=request.args.get('profile_id')) }}">Drive Manager</a> · <a href="{{ url_for('indi_allsky.modern_admin_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">All settings</a></p>
     </section>
     {% endif %}
     {% if longitude_validation_message %}

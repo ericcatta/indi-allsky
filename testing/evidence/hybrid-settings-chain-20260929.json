@@ -1,0 +1,127 @@
+{
+  "date": "2026-09-29",
+  "baseline": "fa85a221478774a005d729496a2dd3af0d72ad40",
+  "status": "candidate-validated-awaiting-deployment",
+  "scope": "Preserve camera/profile through Full Settings, history, snapshot details and restore navigation. Save/restore/download handlers unchanged.",
+  "controls": [
+    {
+      "route": "/modern-admin/settings/full",
+      "control": "Config History",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "environment": "isolated browser localhost:18117",
+      "status": "superato",
+      "observed": "Config History; camera/profile query retained."
+    },
+    {
+      "route": "/modern-admin/config-history",
+      "control": "Snapshot 1 details",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "environment": "isolated browser localhost:18117",
+      "status": "superato",
+      "observed": "Config Restore Detail; camera/profile query retained."
+    },
+    {
+      "route": "/modern-admin/config-restore/1",
+      "control": "Back to Config Restore",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "environment": "isolated browser localhost:18117",
+      "status": "superato",
+      "observed": "Config Restore; camera/profile query retained."
+    },
+    {
+      "route": "/modern-admin/config-restore",
+      "control": "Open Config History",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "environment": "isolated browser localhost:18117",
+      "status": "superato",
+      "observed": "Config History; camera/profile query retained."
+    },
+    {
+      "route": "/modern-admin/config-history",
+      "control": "Open Full Settings",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "environment": "isolated browser localhost:18117",
+      "status": "superato",
+      "observed": "Full Settings; camera/profile query retained."
+    },
+    {
+      "route": "/modern-admin/settings/full",
+      "control": "Restore Config",
+      "role": "ordinary user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated browser localhost:18117",
+      "status": "superato",
+      "observed": "Config Restore with administrator-required message; camera/profile query retained."
+    },
+    {
+      "route": "/modern-admin/config-restore",
+      "control": "Details",
+      "role": "ordinary user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated browser localhost:18117",
+      "status": "superato",
+      "observed": "Snapshot metadata with no download or restore controls; camera/profile query retained."
+    },
+    {
+      "route": "/modern-admin/config-restore/1",
+      "control": "Open Config History",
+      "role": "ordinary user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated browser localhost:18117",
+      "status": "superato",
+      "observed": "Config History; camera/profile query retained."
+    },
+    {
+      "route": "/modern-admin/config-history",
+      "control": "Open Full Settings",
+      "role": "ordinary user",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated browser localhost:18117",
+      "status": "superato",
+      "observed": "Full Settings; camera/profile query retained."
+    }
+  ],
+  "automated": {
+    "targeted_navigation": "PASS for administrator and ordinary user, both camera/profile pairs, four entry pages, all navigation hrefs and one followed destination per route family; 27 snapshots retained after GETs.",
+    "regression_report": "/home/eric/hybrid-settings-chain-regression-20260929/results.json",
+    "test_correction": "Existing pagination test matched only URLs without query strings. Change parses URL path, keeps complete 56-snapshot uniqueness/coverage checks and verifies camera/profile query.",
+    "javascript": "34 passed; /tmp/hybrid-settings-chain-js.json",
+    "final_regression": {
+      "report": "/home/eric/hybrid-settings-chain-regression-final.json",
+      "sha256": "a8f7c9567e73131ccb5eb391dfeca85f5fa45abb7a1a3f038672f37e40f871f9",
+      "status": "passed",
+      "scope": "169 entrypoints in full run, with the two expected pagination-assertion failures corrected and rerun. Only testing/hybrid_settings_flow_test.py changed between runs; product sources unchanged.",
+      "reruns": [
+        "hybrid_classic_absence_test.py",
+        "hybrid_settings_flow_test.py"
+      ]
+    },
+    "javascript_sha256": "9c546ec23fdd9f4923a941ccd82a85a1274c50e47aca8900f3e47d5529bc619d"
+  },
+  "ordinary_users_copy": {
+    "environment": "same isolated browser, ordinary user",
+    "status": "superato",
+    "rows": 2,
+    "observed": "Actual clipboard text matched both DOM account rows; Details column excluded; previous clipboard restored."
+  },
+  "limits": [
+    "Candidate not deployed yet.",
+    "No production or isolated restore/save action performed in these native navigation checks.",
+    "Native clipboard acceptance does not prove CSV/Excel download delivery."
+  ],
+  "source_manifest_sha256": "2c16f64cd2a5aae0132b3a3a8822497ab27487f4acc13a265ac7077ea99788e5"
+}

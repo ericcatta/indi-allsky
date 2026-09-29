@@ -126,7 +126,7 @@ var camera_id = {{ camera_id }};
                         <td>{{ config.data_size }}</td>
                         <td>{{ config.restore_state }}</td>
                         <td>{{ config.note }}</td>
-                        <td><a href="{{ url_for('indi_allsky.modern_admin_config_restore_detail_view', config_id=config.id) }}">Details</a></td>
+                        <td><a href="{{ url_for('indi_allsky.modern_admin_config_restore_detail_view', config_id=config.id, camera_id=request.args.get('camera_id'), profile_id=request.args.get('profile_id')) }}">Details</a></td>
                     </tr>
                     {% else %}
                     <tr id="modern-config-restore-empty-row">
@@ -141,7 +141,7 @@ var camera_id = {{ camera_id }};
         </div>
 
         <section class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_config_history_view') }}">Open Config History</a>
+            <a href="{{ url_for('indi_allsky.modern_admin_config_history_view', camera_id=request.args.get('camera_id'), profile_id=request.args.get('profile_id')) }}">Open Config History</a>
         </section>
 
         <p class="modern-admin-note">Snapshot values are hidden here because they may contain secrets.</p>

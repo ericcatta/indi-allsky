@@ -5,6 +5,7 @@ from html.parser import HTMLParser
 import io
 import json
 import re
+from urllib.parse import urlsplit, parse_qs
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_page_heading_test import assert_document_landmarks
 
@@ -202,7 +203,14 @@ def run(runtime_config):
                     assert response.status_code == 200
                     from html import unescape
                     links = [unescape(x) for x in re.findall(r'href="([^"]+)"',response.text)]
-                    row_ids = [int(m.group(1)) for link in links if (m := re.fullmatch(r'/indi-allsky/modern-admin/config-restore/(\d+)',link))]
+                    row_ids = []
+                    for link in links:
+                        match = re.fullmatch(r'/indi-allsky/modern-admin/config-restore/(\d+)', urlsplit(link).path)
+                        if match:
+                            row_ids.append(int(match.group(1)))
+                            params = parse_qs(urlsplit(link).query)
+                            assert params.get('camera_id') == ['2'], link
+                            assert params.get('profile_id') == ['test-profile-2'], link
                     assert len(row_ids) == (25 if page_number < 3 else 6), (route,page_number,row_ids)
                     ids.extend(row_ids)
                     if page_number < 3:
