@@ -40,6 +40,46 @@
     "completion": "Timeout 124 as expected; process detached.",
     "result": "Long stall not reproduced; cannot attribute previous delay to fsync."
   },
-  "next_step": "If reproducing the overlapping isolated regression cases, trace the image worker and database locks together to distinguish file publication stalls from SQLite contention. Do not remove queue backpressure or weaken persistence based only on message gaps.",
-  "runtime_changes": "None; capture stayed active."
+  "next_step": "Do not repeat the same replay without a new hypothesis. Longer full-regression load previously reproduced delays, while selected cases did not. Capture transaction/file timing during the next necessary regression; retain hardware recovery and external integration acceptance gates.",
+  "runtime_changes": "None; capture stayed active.",
+  "targeted_replay": {
+    "window": "2026-09-29T17:16:01.790562 to 17:17:31.850848 Europe/Zurich",
+    "cases": {
+      "hybrid_daily_media_usage_test.py": 0,
+      "hybrid_dark_library_flow_test.py": 0,
+      "hybrid_database_backup_test.py": 0
+    },
+    "report": "/home/eric/hybrid-publication-replay-20260929.json",
+    "report_sha256": "6e2dcdf5e4fbfac08b499a84905b611c9bc20eabba1aa24a5eeccbd14b78939f",
+    "trace": "/home/eric/hybrid-publication-replay-trace-20260929.log",
+    "trace_sha256": "f1ede58461cc715db7424fc5cd35dde73ead2848dcac32ac1ed2826595e2b051",
+    "completed_syscalls": 770,
+    "maximum_seconds": 0.124582,
+    "maximum_target": "camera 1 realtime preview fsync",
+    "locks": "/home/eric/hybrid-publication-locks-20260929.jsonl",
+    "locks_sha256": "d849433e2ea4d61d1478ed158cb92697bd2f6879ad6c1542960c7032dd2ce362",
+    "locks_result": "No write locks sampled at 200 ms; short locks may fall between samples.",
+    "camera_1": {
+      "saved_frames": 6,
+      "intervals_seconds": [
+        15,
+        15,
+        15,
+        15,
+        15
+      ]
+    },
+    "camera_2": {
+      "saved_frames": 6,
+      "intervals_seconds": [
+        15,
+        15,
+        15,
+        15,
+        15
+      ]
+    },
+    "completion": "Tests exited zero, sampler terminal, strace timeout 124 and confirmed detached.",
+    "conclusion": "The selected tests alone do not reproduce the stall. This bounded sample does not close cadence acceptance."
+  }
 }
