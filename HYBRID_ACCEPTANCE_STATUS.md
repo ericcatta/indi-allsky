@@ -5,24 +5,24 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `96c2049de650f46a39b7ac3663332c7fc71c6a0a`.
+The Raspberry runs `970d179941dd3dbfc76da76965cee1d7f40cadb9`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
-The 830-file source/asset manifest is
-`dbd095e1fb95cd5ed2c9975fb8e0f9d83d024b23605599782ed24990afeed9d4`.
-The latest candidate passes 170 Python/compile entrypoints and 34 JavaScript
-tests. The same isolated regression was replayed after deployment to measure
-capture under load. [Current evidence](testing/evidence/hybrid-async-diagnostics-20260929.json).
-Historical checkpoint test-harness failures and corrected reruns remain recorded
-in their original evidence; they are not claims about this latest full run.
+The 833-file source/asset manifest (including the capture entrypoint) is
+`f8fbfd1cc2ec8acda5bbb71f9469757e6503eb2a1799ce84b48965df01090d79`.
+171 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
+The bounded asynchronous syslog handler is deployed. Both camera files decode
+after the restart. The live regression-load replay and capture-thread trace are
+running; cadence acceptance remains open.
+[Current evidence](testing/evidence/hybrid-async-syslog-20260929.json).
 
 A private SQLite 3.51.3 runtime is loaded by capture, web and commands in the
 Hybrid virtualenv; OS packages remain unchanged. Capture supervises background
 checkpoints with automatic fallback. Config revision 118 is unchanged. Capture
-PID 1676128 and web PID 1512518 have zero automatic restarts; capture was
-restarted for the diagnostic-writer release at 15:41.
+PID 1739126 and web PID 1512518 have zero automatic restarts; capture was
+restarted for the syslog release at 16:21. The web workers were reloaded.
 The coherent backup passed integrity_check. Now, Settings/history and Library
 passed bounded native checks; latest files from both cameras decode.
 

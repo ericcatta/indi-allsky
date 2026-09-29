@@ -1,7 +1,7 @@
 {
   "date": "2026-09-29",
   "baseline": "96c2049de650f46a39b7ac3663332c7fc71c6a0a",
-  "status": "validated-awaiting-deployment",
+  "status": "deployed-live-load-observation-running",
   "source_manifest_sha256": "f8fbfd1cc2ec8acda5bbb71f9469757e6503eb2a1799ce84b48965df01090d79",
   "source_count": 833,
   "trigger": "Previous capture trace has a main-thread sendto still blocked at detach; saved-frame intervals reach 28/30s under regression load.",
@@ -33,9 +33,41 @@
     }
   },
   "limits": [
-    "Not deployed yet; live cadence under load remains unverified for this candidate.",
+    "Deployed and both camera files decode; live cadence under regression load remains under observation.",
     "Bounded logs are best effort under prolonged outage/saturation or shutdown. No logging queue can guarantee retaining unlimited messages without blocking capture.",
     "Asynchronous delivery means syslog receiver timestamps can lag message creation; saved-frame times and caller-computed cadence warnings are needed for cadence acceptance.",
     "24-hour day/night test deferred."
-  ]
+  ],
+  "deployment": {
+    "commit": "970d179941dd3dbfc76da76965cee1d7f40cadb9",
+    "backup": "/home/eric/hybrid-backups/hybrid-async-syslog-20260929-162142",
+    "maintenance_start": "2026-09-29T16:21:42.621668",
+    "maintenance_end": "2026-09-29T16:21:57.157051",
+    "configuration_revision": 118,
+    "capture_pid": 1739126,
+    "web_pid": 1512518,
+    "automatic_restarts": 0,
+    "recovery": {
+      "camera1": {
+        "id": 177229,
+        "time": "2026-09-29 16:23:25",
+        "decoded_size": [
+          4608,
+          2592
+        ]
+      },
+      "camera2": {
+        "id": 177228,
+        "time": "2026-09-29 16:23:19",
+        "decoded_size": [
+          3840,
+          2160
+        ]
+      }
+    },
+    "load_runner_pid": 1739257,
+    "load_report": "/home/eric/hybrid-async-syslog-load-20260929/results.json",
+    "observation_start": "2026-09-29T16:23:33.110979",
+    "trace_pid": 1740042
+  }
 }

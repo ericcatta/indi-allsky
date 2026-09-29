@@ -2,13 +2,13 @@
 
 ## Installed version
 
-Production runs `96c2049de650f46a39b7ac3663332c7fc71c6a0a` (29 September 2026).
+Production runs `970d179941dd3dbfc76da76965cee1d7f40cadb9` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
 SQLite 3.51.3. The OS library is unchanged.
 
-The 829-file manifest matches the delivered candidate. Tests cover 166 existing
+Historical checkpoint release: its 829-file manifest matched that candidate. Tests cover 166 existing
 Python entrypoints plus checkpoint lifecycle, Flask checkout and installer
 checks, and 34 JavaScript tests. The original new-test harness failure and its
 correction are retained in the evidence. Native Now, Settings/history and
@@ -40,6 +40,24 @@ The camera-detection fix passed native discovery against real devices: the teles
 is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
+
+## Current syslog release rollback
+
+The syslog release passed 171 Python/compile entrypoints and 34 JavaScript tests.
+Its 833-file manifest includes `allsky.py`; deployment verifies the tested hashes.
+Maintenance ran 16:21:42–16:21:57. Capture restarted and web workers reloaded;
+configuration 118 is unchanged. Both camera files decode. Live cadence under
+regression load is still being checked; this is not whole-product acceptance.
+
+For rollback from exactly `970d179941dd3dbfc76da76965cee1d7f40cadb9`:
+
+```sh
+/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python /home/eric/hybrid-async-syslog-deploy.py --rollback /home/eric/hybrid-backups/hybrid-async-syslog-20260929-162142
+```
+
+This returns to `96c2049d`, restarts capture and reloads web. It preserves the
+SQLite bootstrap, database, configurations and media. The older rollback below
+applies only after returning to that exact revision.
 
 ## Diagnostic writer rollout and rollback
 
