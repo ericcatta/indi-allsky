@@ -1,0 +1,444 @@
+{
+  "date": "2026-09-29",
+  "runtime": "80b150d625c206e77d9fc5e5a3575b8b0d5463a4",
+  "scope": "41 unique navigation-drawer module links, desktop administrator session on the Raspberry. Navigation only; not acceptance of every control/effect within each page.",
+  "records": [
+    {
+      "control": "Navigation drawer / My Account",
+      "route": "/modern-admin/account",
+      "destination": "/indi-allsky/modern-admin/account",
+      "observed_page_heading": "My Account",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Now",
+      "route": "/modern-admin/now",
+      "destination": "/indi-allsky/modern-admin/now",
+      "observed_page_heading": "Now",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Highlights",
+      "route": "/modern-admin/highlights",
+      "destination": "/indi-allsky/modern-admin/highlights",
+      "observed_page_heading": "Highlights",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Moment",
+      "route": "/modern-admin/moment",
+      "destination": "/indi-allsky/modern-admin/library?kind=image&profile_id=",
+      "observed_page_heading": "Library",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Output",
+      "route": "/modern-admin/output",
+      "destination": "/indi-allsky/modern-admin/output",
+      "observed_page_heading": "Output detail",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Sky Cycle",
+      "route": "/modern-admin/sky-cycle",
+      "destination": "/indi-allsky/modern-admin/sky-cycle",
+      "observed_page_heading": "Sky Cycle",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Library",
+      "route": "/modern-admin/library",
+      "destination": "/indi-allsky/modern-admin/library",
+      "observed_page_heading": "Library",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Observatory",
+      "route": "/modern-admin/observatory",
+      "destination": "/indi-allsky/modern-admin/observatory",
+      "observed_page_heading": "Observatory",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Cameras",
+      "route": "/modern-admin/cameras",
+      "destination": "/indi-allsky/modern-admin/cameras",
+      "observed_page_heading": "Camera Management",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Gallery",
+      "route": "/modern-admin/media/gallery",
+      "destination": "/indi-allsky/modern-admin/media/gallery",
+      "observed_page_heading": "Gallery",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Images",
+      "route": "/modern-admin/media/images",
+      "destination": "/indi-allsky/modern-admin/media/images",
+      "observed_page_heading": "Images",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Loop",
+      "route": "/modern-admin/loop",
+      "destination": "/indi-allsky/modern-admin/loop",
+      "observed_page_heading": "Loop",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Timelapses",
+      "route": "/modern-admin/media/timelapses",
+      "destination": "/indi-allsky/modern-admin/media/timelapses",
+      "observed_page_heading": "Timelapses",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Mini Timelapses",
+      "route": "/modern-admin/media/mini-timelapses",
+      "destination": "/indi-allsky/modern-admin/media/mini-timelapses",
+      "observed_page_heading": "Mini Timelapses",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Keograms",
+      "route": "/modern-admin/media/keograms",
+      "destination": "/indi-allsky/modern-admin/media/keograms",
+      "observed_page_heading": "Keograms",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Startrails",
+      "route": "/modern-admin/media/startrails",
+      "destination": "/indi-allsky/modern-admin/media/startrails",
+      "observed_page_heading": "Startrails",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Startrail Videos",
+      "route": "/modern-admin/media/startrail-videos",
+      "destination": "/indi-allsky/modern-admin/media/startrail-videos",
+      "observed_page_heading": "Startrail Videos",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Panoramas",
+      "route": "/modern-admin/media/panorama",
+      "destination": "/indi-allsky/modern-admin/media/panorama",
+      "observed_page_heading": "Panoramas",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Panorama Loop",
+      "route": "/modern-admin/media/panorama-loop",
+      "destination": "/indi-allsky/modern-admin/media/panorama-loop",
+      "observed_page_heading": "Panorama Loop",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / RAW Source",
+      "route": "/modern-admin/media/raw",
+      "destination": "/indi-allsky/modern-admin/media/raw",
+      "observed_page_heading": "Raw Images",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / FITS Source",
+      "route": "/modern-admin/media/fits",
+      "destination": "/indi-allsky/modern-admin/media/fits",
+      "observed_page_heading": "FITS Viewer",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Sky Quality",
+      "route": "/modern-admin/observatory/sqm",
+      "destination": "/indi-allsky/modern-admin/observatory/sqm",
+      "observed_page_heading": "Sky brightness",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Charts",
+      "route": "/modern-admin/observatory/charts",
+      "destination": "/indi-allsky/modern-admin/observatory/charts",
+      "observed_page_heading": "Charts",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Sensor Panel",
+      "route": "/modern-admin/observatory/sensor-panel",
+      "destination": "/indi-allsky/modern-admin/observatory/sensor-panel",
+      "observed_page_heading": "Sensor Panel",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Astropanel",
+      "route": "/modern-admin/observatory/astropanel",
+      "destination": "/indi-allsky/modern-admin/observatory/astropanel",
+      "observed_page_heading": "Astropanel",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / VirtualSky",
+      "route": "/modern-admin/observatory/virtualsky",
+      "destination": "/indi-allsky/modern-admin/observatory/virtualsky",
+      "observed_page_heading": "VirtualSky",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Focus",
+      "route": "/modern-admin/tools/focus",
+      "destination": "/indi-allsky/modern-admin/tools/focus",
+      "observed_page_heading": "Focus",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Camera Simulator",
+      "route": "/modern-admin/tools/camera-simulator",
+      "destination": "/indi-allsky/modern-admin/tools/camera-simulator?lens=zwo_f1.2_2.5mm_1-2&sensor=imx477&offset_x=0&offset_y=0",
+      "observed_page_heading": "Camera Simulator",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Storage",
+      "route": "/modern-admin/storage",
+      "destination": "/indi-allsky/modern-admin/storage",
+      "observed_page_heading": "Storage",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Uploads",
+      "route": "/modern-admin/uploads",
+      "destination": "/indi-allsky/modern-admin/uploads",
+      "observed_page_heading": "Uploads",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / YouTube",
+      "route": "/modern-admin/youtube",
+      "destination": "/indi-allsky/modern-admin/youtube",
+      "observed_page_heading": "YouTube",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Drives",
+      "route": "/modern-admin/storage/drives",
+      "destination": "/indi-allsky/modern-admin/storage/drives",
+      "observed_page_heading": "Drives",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Logs",
+      "route": "/modern-admin/system/log",
+      "destination": "/indi-allsky/modern-admin/system/log",
+      "observed_page_heading": "Log",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Tasks",
+      "route": "/modern-admin/tasks",
+      "destination": "/indi-allsky/modern-admin/tasks",
+      "observed_page_heading": "Task Queue",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Users",
+      "route": "/modern-admin/users",
+      "destination": "/indi-allsky/modern-admin/users",
+      "observed_page_heading": "Users",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Notifications",
+      "route": "/modern-admin/notifications",
+      "destination": "/indi-allsky/modern-admin/notifications",
+      "observed_page_heading": "Notifications",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / System Info",
+      "route": "/modern-admin/system/info",
+      "destination": "/indi-allsky/modern-admin/system/info",
+      "observed_page_heading": "System Info",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / System Index",
+      "route": "/modern-admin/system",
+      "destination": "/indi-allsky/modern-admin/system",
+      "observed_page_heading": "System",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Settings",
+      "route": "/modern-admin/settings",
+      "destination": "/indi-allsky/modern-admin/settings",
+      "observed_page_heading": "Settings",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Timelapse Settings",
+      "route": "/modern-admin/settings/timelapse",
+      "destination": "/indi-allsky/modern-admin/settings/timelapse",
+      "observed_page_heading": "Timelapse Settings",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    },
+    {
+      "control": "Navigation drawer / Updates",
+      "route": "/modern-admin/updates",
+      "destination": "/indi-allsky/modern-admin/updates",
+      "observed_page_heading": "Updates",
+      "role": "administrator",
+      "camera_profile": "Default/session context; no explicit scope query supplied",
+      "status": "superato",
+      "expected_result": "Native click opens the corresponding module or documented default redirect; page content and heading are present, without an error page."
+    }
+  ],
+  "redirects": {
+    "Moment": "No-ID request intentionally redirects to image Library; verified against view code and populated image cards.",
+    "Camera Simulator": "Default lens/sensor/offset query added; simulator heading rendered."
+  },
+  "settings_reference_check": {
+    "technical_details_open": false,
+    "historical_preview_heading_visible": false,
+    "operational_editors": [
+      "Camera Profile Settings",
+      "Storage Protection",
+      "Timelapse Settings",
+      "Full Settings",
+      "Config History",
+      "Restore Config"
+    ],
+    "conclusion": "Initial concern came from inspecting hidden DOM headings. No user-facing placeholder defect was established; no UI change made."
+  },
+  "tool_limits": [
+    "Keograms navigation succeeded but CDP observation timed out; native accessibility confirmed populated metadata rows and the subsequent DOM read succeeded.",
+    "Menu opener timed out on Panorama Loop before RAW navigation; inspected collapsed state and opened it through native accessibility, then completed RAW navigation."
+  ],
+  "excluded": [
+    "Sign out was not clicked in the production session.",
+    "No save, upload, download, hardware or destructive effects executed.",
+    "Ordinary/anonymous roles and mobile viewport are outside this navigation pass."
+  ],
+  "cleanup": "Agent-created tab closed; user tabs retained."
+}

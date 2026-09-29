@@ -142,6 +142,12 @@
           "control": "Username + Password + Sign in",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/account"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / My Account",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/account"
         }
       ]
     },
@@ -166,6 +172,12 @@
           "record": "controls[1]",
           "control": "Back to Cameras after detection",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Cameras",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/cameras"
         }
       ]
     },
@@ -768,6 +780,12 @@
           "record": "controls[33]",
           "control": "Download original delivery",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Highlights",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/highlights"
         }
       ]
     },
@@ -1090,6 +1108,12 @@
           "record": "controls[4]",
           "control": "Camera2 image listing; camera 2; production native browser",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Library",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library"
         }
       ]
     },
@@ -1137,6 +1161,12 @@
           "record": "controls[4]",
           "control": "Mobile camera filters and responsive layout",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Loop",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/loop"
         }
       ]
     },
@@ -1304,6 +1334,12 @@
           "control": "Open source / Next image / Escape",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/media/fits"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / FITS Source",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/fits"
         }
       ]
     },
@@ -1319,6 +1355,12 @@
         {
           "source": "testing/evidence/hybrid-gallery-state-20260929.json",
           "control": "Automatic batches, camera filters, loaded summary and selection reset (isolated native browser)",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/gallery"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Gallery",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/media/gallery"
         }
@@ -1349,7 +1391,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminMediaImagesView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Images",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/images"
+        }
+      ]
     },
     {
       "route": "/modern-admin/media/images/<int:image_id>",
@@ -1431,6 +1480,12 @@
           "record": "controls[8]",
           "control": "Generate media",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Keograms",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/keograms"
         }
       ]
     },
@@ -1496,6 +1551,12 @@
           "record": "controls[35]",
           "control": "Create mini timelapse",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Mini Timelapses",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/mini-timelapses"
         }
       ]
     },
@@ -1561,6 +1622,12 @@
           "record": "controls[44]",
           "control": "Generate media",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Panoramas",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/panorama"
         }
       ]
     },
@@ -1663,6 +1730,12 @@
           "control": "First visible media checkbox",
           "recorded_status": "superato",
           "original_page": "Panorama Loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Panorama Loop",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/panorama-loop"
         }
       ]
     },
@@ -1715,6 +1788,12 @@
           "record": "controls[9]",
           "control": "Test Profile 2 + Inspect FITS files",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / RAW Source",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/raw"
         }
       ]
     },
@@ -1797,6 +1876,12 @@
           "record": "controls[26]",
           "control": "Generate media",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Startrail Videos",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/startrail-videos"
         }
       ]
     },
@@ -1862,6 +1947,12 @@
           "record": "controls[17]",
           "control": "Generate media",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Startrails",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/startrails"
         }
       ]
     },
@@ -1873,7 +1964,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminMediaTimelapsesView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Timelapses",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/timelapses"
+        }
+      ]
     },
     {
       "route": "/modern-admin/media/timelapses/<int:video_id>",
@@ -2018,6 +2116,12 @@
           "record": "controls[31]",
           "control": "Create mini timelapse around image 115166",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Moment",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/library?kind=image&profile_id="
         }
       ]
     },
@@ -2234,6 +2338,12 @@
           "record": "controls[4]",
           "control": "Responsive filter layout",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Notifications",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/notifications"
         }
       ]
     },
@@ -2404,6 +2514,12 @@
           "record": "controls[1]",
           "control": "Refresh status and latest images; camera 2; production native browser",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Now",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/now"
         }
       ]
     },
@@ -2415,7 +2531,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminObservatoryView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Observatory",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory"
+        }
+      ]
     },
     {
       "route": "/modern-admin/observatory/astropanel",
@@ -2473,6 +2596,12 @@
           "record": "controls[7]",
           "control": "Camera link; asi678mc; production native browser",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Astropanel",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/astropanel"
         }
       ]
     },
@@ -2529,6 +2658,12 @@
           "record": "controls[6]",
           "control": "Camera selection; asi678mc; production native browser",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Charts",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/charts"
         }
       ]
     },
@@ -2648,6 +2783,12 @@
           "record": "controls[8]",
           "control": "Camera selection and Refresh; imx708-wide; production native browser",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Sensor Panel",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/sensor-panel"
         }
       ]
     },
@@ -2680,6 +2821,12 @@
           "control": "reading display",
           "recorded_status": "passed",
           "original_page": "SQM"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Sky Quality",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/sqm"
         }
       ]
     },
@@ -2723,6 +2870,12 @@
           "record": "controls[2]",
           "control": "Azimuth Angle / Reset preview",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / VirtualSky",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/observatory/virtualsky"
         }
       ]
     },
@@ -2909,6 +3062,12 @@
           "record": "controls[5]",
           "control": "Native video playback to natural end and preview dimensions",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Output",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/output"
         }
       ]
     },
@@ -3009,6 +3168,12 @@
           "record": "controls[2]",
           "control": "Open menu and Settings; camera 1; production native browser",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Settings",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings"
         }
       ]
     },
@@ -3757,6 +3922,12 @@
           "record": "controls[3]",
           "control": "Encoding, frame rate and video size",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Timelapse Settings",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/settings/timelapse"
         }
       ]
     },
@@ -3782,6 +3953,12 @@
           "record": "controls[1]",
           "control": "Moment detail",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Sky Cycle",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/sky-cycle"
         }
       ]
     },
@@ -3793,7 +3970,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminStorageView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Storage",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage"
+        }
+      ]
     },
     {
       "route": "/modern-admin/storage/drives",
@@ -3827,6 +4011,12 @@
           "record": "controls[15]",
           "control": "Removable-drive mount/unmount/power effects",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Drives",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/drives"
         }
       ]
     },
@@ -4065,6 +4255,12 @@
           "record": "controls[14]",
           "control": "Updates",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / System Index",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/system"
         }
       ]
     },
@@ -4109,7 +4305,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminSystemInfoView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / System Info",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/system/info"
+        }
+      ]
     },
     {
       "route": "/modern-admin/system/log",
@@ -4155,6 +4358,12 @@
           "record": "controls[10]",
           "control": "Refresh after session logout",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Logs",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/system/log"
         }
       ]
     },
@@ -4429,6 +4638,12 @@
           "control": "Queue VIDEO",
           "recorded_status": "superato",
           "role": "administrator"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Tasks",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tasks"
         }
       ]
     },
@@ -4567,6 +4782,12 @@
           "record": "controls[6]",
           "control": "mobile canvas + controls",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Camera Simulator",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tools/camera-simulator?lens=zwo_f1.2_2.5mm_1-2&sensor=imx477&offset_x=0&offset_y=0"
         }
       ]
     },
@@ -4620,6 +4841,12 @@
           "record": "controls[13]",
           "control": "Physical focuser movement",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Focus",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/tools/focus"
         }
       ]
     },
@@ -5090,7 +5317,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminUpdatesView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Updates",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/updates"
+        }
+      ]
     },
     {
       "route": "/modern-admin/updates/start",
@@ -5152,6 +5386,12 @@
           "record": "controls[9]",
           "control": "#modern-upload-search: empty dataset",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Uploads",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/uploads"
         }
       ]
     },
@@ -5492,6 +5732,12 @@
           "record": "ordinary_users_copy",
           "control": "Copy ordinary user clipboard delivery",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / Users",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/users"
         }
       ]
     },
@@ -5586,6 +5832,12 @@
           "record": "controls[6]",
           "control": "Live OAuth connect / refresh / revoke / upload",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
+          "control": "Navigation drawer / YouTube",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/youtube"
         }
       ]
     }
