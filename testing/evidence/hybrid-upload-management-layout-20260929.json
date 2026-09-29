@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "tested-candidate-not-deployed",
+  "status": "deployed-bounded-acceptance-passed",
   "production_observed_commit": "2142968de05290d965f6368b630c0e3201420e98",
   "role": "administrator",
   "scope": "System-wide provider inspection; no uploads, OAuth changes or production mutations",
@@ -119,9 +119,45 @@
   },
   "cleanup": "Viewport restored, temporary browser tabs closed, isolated server PID1415730 stopped and SSH tunnel closed.",
   "open": [
-    "Production deployment of layout fix",
     "Real external destination upload",
     "Positive notification search with real upload messages",
     "Other roles native checks; isolated permission tests remain separately scoped"
-  ]
+  ],
+  "deployment": {
+    "installed_commit": "52eb6b23607fff2cd961b0f8890b8311d8a391d1",
+    "state": "/home/eric/hybrid-management-grid-release-state.json",
+    "state_sha256": "d7821fb2e51c258f4d439f774ab02897250bd29b172203741ef4c2750dc1097c",
+    "backup": "/home/eric/hybrid-backups/hybrid-management-grid-20260929-115230",
+    "backup_scope": "Code and Flask configuration; frontend-only change, no database copy/migration/restore. Previous coherent database snapshot retained.",
+    "capture_pid_preserved": 1415308,
+    "capture_restarts": 0,
+    "web_reload_only": true,
+    "configuration_revision": 118,
+    "production_mobile": {
+      "viewport": 320,
+      "Uploads": 320,
+      "YouTube": 320,
+      "Sensor Panel": 320,
+      "stylesheet_version": "modern-management-grid-v2"
+    },
+    "decoded_frames": [
+      {
+        "camera_id": 1,
+        "time": "2026-09-29 11:53:18",
+        "size": [
+          4608,
+          2592
+        ]
+      },
+      {
+        "camera_id": 2,
+        "time": "2026-09-29 11:53:11",
+        "size": [
+          3840,
+          2160
+        ]
+      }
+    ],
+    "rollback": "Code-only to 2142968d, reload web, preserve capture. Prepared, not exercised live."
+  }
 }

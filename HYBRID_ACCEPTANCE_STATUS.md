@@ -5,21 +5,26 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `2142968de05290d965f6368b630c0e3201420e98`.
+The Raspberry runs `52eb6b23607fff2cd961b0f8890b8311d8a391d1`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
-The 823-file installed source/asset manifest matches the tested snapshot:
-`cef4217c280a26ecd79ac98acffe7f4c249abc6af721ddb21e0c18f81f51f14a`.
-All 166 Python entrypoints passed in the complete 29 September run with unchanged source. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Current regression: [encoder failure evidence](testing/evidence/hybrid-image-encoder-failure-20260929.json).
-This automated result does not certify every native control or hardware effect.
+The 823-file installed source/asset manifest matches the frontend candidate:
+`ceaeed9c0841046d239877a64988fe3affd384b7162232cd0c2c257e887895e4`.
+The baseline full encoder regression passed 166 Python entrypoints. This latest
+CSS/template-only change passed all 34 JavaScript entrypoints and three affected
+Python flow tests, plus native isolated and production browser layout checks.
+The baseline is not presented as a new full-suite run for the changed frontend.
+[Current evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
+This does not certify every native control or hardware effect.
 
-The latest deployment preserved configuration revision 118, Flask configuration and user files.
-Capture and web were paused for a coherent backup (integrity ok, 97.43 seconds),
-then restarted as PIDs 1415308 and 1415309. The capture timer was restored.
-Both new Now images decoded in the native browser after restart.
+Configuration revision 118 remains current. The frontend deployment reloaded
+web only and preserved capture PID 1415308 with zero restarts. Code and Flask
+configuration were backed up; no database copy or migration was needed. The
+previous coherent database backup from the encoder release remains available.
+Both current Now images decoded after the web reload.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
 ## Cold-start defect corrected and deployed
@@ -109,21 +114,21 @@ mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
 
-## Tested mobile management-grid candidate
+## Mobile management-grid correction deployed
 
 Uploads overflowed a 320px screen to 785px because of the intrinsic grid minimum.
-The CSS correction and cache version updates are tested but not yet deployed.
-Native isolated checks fit Uploads, YouTube and Sensor Panel at 320px; desktop
-retains two columns. All 34 JavaScript tests and three affected Python flow tests
-pass. Production provider navigation and empty states were also verified against
-the database. External transfers remain open. [Evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
+The CSS correction and cache version updates are installed. Native isolated and
+production checks fit Uploads, YouTube and Sensor Panel at 320px; desktop retains
+two columns. All 34 JavaScript tests and three affected Python flow tests pass.
+Production provider navigation and empty states were verified against the database.
+External transfers remain open. [Evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
 
 ## Encoder failure handling deployed
 
 The worker could overwrite a valid latest PNG preview with an empty file when
 the encoder returned false. The installed fix rejects that failure and removes
 partial encoder files on exceptions. All 166 Python entrypoints pass; the
-823-file tested manifest matches production. Both cameras saved new frames and
+823-file tested manifest matched that release. Both cameras saved new frames and
 their Now images decoded after the controlled restart. This does not resolve
 the separate latency finding. [Evidence](testing/evidence/hybrid-image-encoder-failure-20260929.json).
 

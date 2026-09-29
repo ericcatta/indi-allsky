@@ -2,17 +2,20 @@
 
 ## Installed version
 
-Production runs `2142968de05290d965f6368b630c0e3201420e98` (29 September 2026).
-Classic frontend is removed; Hybrid is the only UI. Encoder failures now preserve
-the existing latest preview and remove partial encoder temporary files. All 166
-Python entrypoints passed; 34 prior JavaScript passes apply to unchanged frontend
-code. The tested 823-file manifest matches production.
+Production runs `52eb6b23607fff2cd961b0f8890b8311d8a391d1` (29 September 2026).
+Classic frontend is removed; Hybrid is the only UI. The latest CSS/template-only
+release contains the mobile management-grid correction. Uploads, YouTube and
+Sensor Panel all fit 320px in production. The stylesheet query version changed
+to invalidate the previous one-day cache. All 34 JavaScript entrypoints and three
+affected Python flows passed; the earlier 166-entrypoint backend regression is
+retained with its original scope. The 823-file candidate manifest matches production.
 
-Capture and web were paused for a coherent backup (integrity ok, 97.43 seconds).
-Configuration 118 and Flask settings are unchanged. Capture PID 1415308 and web
-PID 1415309 are active; the capture timer was restored. Native Now images from
-11:39:46 (IMX708) and 11:39:54 (ASI678MC) both decoded after restart.
-See [release evidence](testing/evidence/hybrid-image-encoder-failure-20260929.json).
+Web was reloaded, preserving capture PID 1415308 and configuration revision 118.
+Code and Flask configuration were backed up; no database migration or copy was
+performed for this frontend-only change. The coherent encoder-release database
+snapshot remains available at `hybrid-image-encoder-20260929-113656`.
+Native Now images from 11:53:18 (IMX708) and 11:53:11 (ASI678MC) both decoded.
+See [release evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
 The retained backend moon bitmap remains in `indi_allsky/overlay/assets/`.
 
 Both camera/profile round trips through the Settings index and Exposure/Gain
@@ -28,7 +31,7 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed encoder failure release
+## Roll back the installed mobile layout release
 
 Use an authenticated SSH terminal on the Raspberry as `eric`, during a maintenance
 window. Check the installed revision and preserve any tracked edits first:
@@ -40,18 +43,17 @@ git -C /home/eric/indi-allsky rev-parse HEAD
 
 The protected helper requires exactly the installed revision above and refuses
 to discard tracked edits. Its backup is:
-`/home/eric/hybrid-backups/hybrid-image-encoder-20260929-113656`.
+`/home/eric/hybrid-backups/hybrid-management-grid-20260929-115230`.
 Run on the Raspberry:
 
 ```sh
-release_backup=/home/eric/hybrid-backups/hybrid-image-encoder-20260929-113656
+release_backup=/home/eric/hybrid-backups/hybrid-management-grid-20260929-115230
 python3 "$release_backup/deploy.py" --rollback "$release_backup"
 ```
 
-This code-only rollback returns to `30708b31` and restarts capture and web,
-restoring the capture timer and previous web socket activation state. It restores
-neither database nor configuration. Classic remains removed and the retained
-backend moon bitmap remains available.
+This code-only rollback returns to `2142968d` and reloads web. Capture keeps
+running. It restores neither database nor configuration. Classic remains removed,
+and encoder failure protection and the retained backend moon bitmap remain available.
 The helper is prepared; this live release has not been deliberately reverted.
 Read the backup's `deployment.json`, confirm the revision and services, then
 verify HTTPS Now and new nonempty files from both cameras. Process readiness
@@ -109,9 +111,10 @@ files; do not use `git clean`. The checkout database copy is not the runtime
 database at `/var/lib/indi-allsky/indi-allsky.sqlite`.
 
 Prepare an integrity-checked backup and a rollback for that exact release.
-The current helper pauses capture and web, including timer/socket activation,
-before the consistent database copy, then restores services. Earlier online WAL
-backups coincided with acquisition stalls. Monitor space and actual frame recovery. Keep backups
+The current frontend-only helper backs up code/configuration and reloads web,
+preserving capture. Backend or schema changes require a suitable coherent database
+backup; earlier online WAL backups coincided with acquisition stalls, while the
+encoder release used a controlled pause. Monitor space and actual frame recovery. Keep backups
 private; run code checkout/merge/reset with child umask 022 so Apache can read
 public assets. Restart only services affected by the change, then verify
 installed hashes, real UI controls, effects and camera recovery.
