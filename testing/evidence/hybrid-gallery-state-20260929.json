@@ -1,0 +1,64 @@
+{
+  "date": "2026-09-29",
+  "status": "validated-awaiting-deploy",
+  "defects": [
+    "Loaded count remained 72 after production gallery grew to 360 unique images.",
+    "Camera label and aria-pressed remained on ASI678MC after All Cameras showed both cameras.",
+    "Older-page fetch failure had no visible explanation."
+  ],
+  "change": "Update count and camera label after batch/filter changes; synchronize aria-pressed; clear selection on camera switch; show retry guidance after older-page failure.",
+  "manifest_sha256": "dc8adbde54f63ef5c4c3c3ff8a68ab6275bd8df06b99446b4ea4ddc5f76efb6d",
+  "source_count": 833,
+  "javascript": {
+    "cases": 34,
+    "failed": 0,
+    "report": "/tmp/hybrid-gallery-state-js.json",
+    "sha256": "73b5f1ebbf11969be5e5f9979b364cef89290d6799d1d4609839696ac0036f49"
+  },
+  "native_isolated": {
+    "roles": [
+      "ordinary user",
+      "administrator"
+    ],
+    "all_cameras": {
+      "cards": 116,
+      "displayed_count": 116,
+      "end_reached": true
+    },
+    "ordinary_camera_checks": [
+      {
+        "label": "Test Profile 1",
+        "cards": 113,
+        "displayed_count": 113
+      },
+      {
+        "label": "Test Profile 2",
+        "cards": 3,
+        "displayed_count": 3
+      }
+    ],
+    "admin_camera_checks": [
+      {
+        "label": "Test Profile 2",
+        "cards": 3,
+        "displayed_count": 3
+      }
+    ],
+    "accessible_state": "Only selected camera filter has aria-pressed=true.",
+    "selection": "Ordinary user selected one item: download enabled. Camera switch cleared selection and disabled download immediately. No download triggered.",
+    "tool_limit": "Load more click found no button because automatic loading had already reached the end; this verifies automatic batch loading, not an explicit Load more click.",
+    "cleanup": "Synthetic server stopped after PID/command verification; tab and tunnel closed."
+  },
+  "limits": [
+    "Fetch failure/retry is covered by the JavaScript harness, not a native induced network failure.",
+    "Production rollout and post-deploy verification pending.",
+    "This evidence does not certify the whole product."
+  ],
+  "python": {
+    "cases": 171,
+    "status": "passed",
+    "source_changed": false,
+    "report": "/home/eric/hybrid-gallery-state-regression-20260929/results.json",
+    "sha256": "e5d296a329dace1f90f4fcc636c138d52f948ef6724bcc8e5e07c80b1c33cffb"
+  }
+}

@@ -333,7 +333,7 @@ The previous under-load cadence defect remains open.
 ## Remaining acceptance gates
 
 
-- Identify remaining capture delays and verify end-to-end cadence under load. File and syslog I/O are now isolated, but the latest saved-frame intervals still reach 19/25 seconds.
+- Resolve remaining storage/publication delays and verify end-to-end frame freshness under load. The latest bounded preview-flush regression recorded 15-second median and 16-second maximum capture intervals for both cameras, but traced archive fsync and preview creation still stalled for 22.5 and 11.3 seconds. Capture timestamps alone do not establish publication latency. See [measured evidence](testing/evidence/hybrid-preview-flush-20260929.json).
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.
 - Complete remaining live effects, including dedicated-data cleanup/deletion and test-destination uploads. Short mini timelapses and both cameras’ automatic day timelapse/panorama outputs are verified; other automatic/isolated tests remain separately labeled.

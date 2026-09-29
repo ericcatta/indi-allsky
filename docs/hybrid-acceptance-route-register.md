@@ -39,8 +39,8 @@ Indice statico: 7.351 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download` | 1 | [Contratto API/redirect isolato](../testing/evidence/hybrid-current-discovery-20260921.json) |
 | `/modern-admin/media/archive` | 15 | [hybrid-archive-2026-09-06](../testing/evidence/hybrid-archive-2026-09-06.json) |
 | `/modern-admin/media/fits` | 6 | [hybrid-fits-dimensions-live-20260914](../testing/evidence/hybrid-fits-dimensions-live-20260914.json), [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
-| `/modern-admin/media/gallery` | 0 | Da associare o collaudare |
-| `/modern-admin/media/gallery/page` | 0 | Da associare o collaudare |
+| `/modern-admin/media/gallery` | 1 | Galleria isolata: caricamento automatico, filtri e riepilogo; produzione da verificare |
+| `/modern-admin/media/gallery/page` | 1 | Galleria isolata: caricamento automatico, filtri e riepilogo; produzione da verificare |
 | `/modern-admin/media/images` | 0 | Da associare o collaudare |
 | `/modern-admin/media/images/<int:image_id>` | 1 | [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
 | `/modern-admin/media/keograms` | 9 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json) |

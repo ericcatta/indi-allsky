@@ -1315,7 +1315,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminMediaGalleryView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-gallery-state-20260929.json",
+          "control": "Automatic batches, camera filters, loaded summary and selection reset (isolated native browser)",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/gallery"
+        }
+      ]
     },
     {
       "route": "/modern-admin/media/gallery/page",
@@ -1325,7 +1332,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminMediaGalleryPageView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-gallery-state-20260929.json",
+          "control": "Automatic batches, camera filters, loaded summary and selection reset (isolated native browser)",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/gallery"
+        }
+      ]
     },
     {
       "route": "/modern-admin/media/images",
