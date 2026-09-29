@@ -269,3 +269,21 @@ Commands using system Python or a different virtualenv do **not** inherit this
 runtime; use the dedicated virtualenv for every command that writes Hybrid data.
 The source release/checksum/build and isolated activation/rollback evidence are
 in [the checkpoint report](testing/evidence/hybrid-sqlite-checkpoint-20260929.json).
+
+### Bounded asynchronous multicamera diagnostics
+
+A measured 5.82-second append to the persistent diagnostic file blocked the
+IMX708 capture thread and coincided with a 21-second saved-frame interval.
+The diagnostic sink now runs on a daemon thread per process; file paths and
+record metadata remain available. Capture only formats and queues each record.
+
+The queue holds at most 256 pending records. Oversized messages are truncated
+after 16384 characters, with a marker. Overflow drops diagnostic records and
+reports the count once writing resumes. Shutdown attempts a 0.2-second drain;
+abrupt termination or a blocked sink may lose the tail. These are diagnostic
+records, not images, tasks or configuration. Forked workers get their own queue
+and writer, rather than inheriting a stopped thread or held lock.
+
+[Before/after evidence](testing/evidence/hybrid-async-diagnostics-20260929.json)
+records the deployment and live-verification status. This does not change
+exposure, gain, the scheduler or scientific timestamps.

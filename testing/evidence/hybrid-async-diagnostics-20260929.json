@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-29",
+  "baseline": "1c25a82334483aad134d9a75db3fd2c764d2ba8f",
+  "status": "validated-awaiting-deployment",
+  "source_manifest_sha256": "dbd095e1fb95cd5ed2c9975fb8e0f9d83d024b23605599782ed24990afeed9d4",
+  "defect_evidence": "testing/evidence/hybrid-diagnostic-write-stall-20260929.json",
+  "before": {
+    "window": [
+      "2026-09-29 15:19:30",
+      "2026-09-29 15:23:00"
+    ],
+    "camera_1": {
+      "frames": 14,
+      "median_saved_interval_s": 15,
+      "max_saved_interval_s": 21,
+      "gap": [
+        "15:22:03",
+        "15:22:24"
+      ]
+    },
+    "camera_2": {
+      "frames": 14,
+      "median_saved_interval_s": 15,
+      "max_saved_interval_s": 15
+    },
+    "interpretation": "Saved timestamps are not exact shutter times; the IMX708 21s gap spans the measured diagnostic write stall."
+  },
+  "implementation": {
+    "sink": "One daemon writer per process handles both existing files and diagnostic logger; caller formats and enqueues only.",
+    "bounds": "256 pending records plus one active; input messages truncated after 16384 characters with explicit marker. Overflow is counted and reported when the writer resumes; diagnostics remain best effort.",
+    "lifetime": "Fork resets writer and initialization lock. atexit and multiprocessing finalization attempt a bounded 0.2s drain; blocked storage cannot delay process exit indefinitely.",
+    "unchanged": "Camera algorithms, scheduling, exposure/gain, config keys, media publication and SQLite policy."
+  },
+  "tests": {
+    "red": "Slow diagnostic file-open held the caller before the fix; same proof returns while the sink remains stalled afterward.",
+    "focused": "Real temporary files, output format, exception recovery, bounded queue and shutdown, overflow notice, fork while parent lock/sink blocked, multiprocessing exit drain.",
+    "python_report": "/home/eric/hybrid-async-diag-regression-20260929/results.json",
+    "javascript": "34 passed",
+    "javascript_report_sha256": "f67ca06162e8765db52ff64c0b0661ad0673e0f16049b56e468d863f6ab17a5c",
+    "python": "170 passed; source_changed false",
+    "python_report_sha256": "a7105d3df9713b79d08e39040bf3aeb79bc51f128d856a1a51ae3bc2eb9100c4"
+  },
+  "limits": [
+    "Not deployed yet.",
+    "Bounded best-effort diagnostics may drop records during prolonged sink failure, queue saturation or abrupt shutdown; core capture data is not queued here.",
+    "Live cadence and syscall comparison pending.",
+    "24-hour test deferred."
+  ]
+}
