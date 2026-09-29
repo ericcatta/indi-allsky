@@ -1,12 +1,12 @@
 {
   "date": "2026-09-29",
-  "status": "running",
+  "status": "complete",
   "pid": 1984029,
   "report": "/home/eric/hybrid-archive-remaining-backups-20260929.json",
   "immutable_progress_snapshot": "/home/eric/hybrid-archive-remaining-backups-progress-20260929-1907.json",
   "snapshot_sha256": "4e182b7033ef7c2fd0d51456089b06352fe799ae5b2e597518ab0650eba4c7c5",
   "planned_snapshots": 33,
-  "verified_snapshots": 8,
+  "verified_snapshots": 33,
   "bytes_reclaimed_at_snapshot": 6359911873,
   "free_bytes_observed": 11265085440,
   "preserved_uncompressed": "/home/eric/hybrid-backups/hybrid-checkpoint-20260929-135156/indi-allsky.sqlite",
@@ -20,8 +20,64 @@
   },
   "scope": "Operational lossless archival; no production source or configuration change.",
   "limitations": [
-    "Operation remains live; the snapshot is progress, not completion.",
     "Does not yet satisfy the historical half-disk-free target.",
     "New acquired media were not deleted."
-  ]
+  ],
+  "completion": {
+    "report_sha256": "2f16ca9051e7a3acc2e7ec52bf944d4ac5278a2c5d918cf9179f3f0c307d6c94",
+    "bytes_reclaimed": 25530284948,
+    "free_bytes_after": 29916065792,
+    "process_terminal": true,
+    "verification": "All 33 compressed files and recovery markers present, sizes and original SHA256 metadata match the completed report; uncompressed originals and partial files absent. Current coherent backup remains uncompressed.",
+    "capture_check": {
+      "pid": 2015141,
+      "state": "active",
+      "automatic_restarts": 0,
+      "configuration_revision": 118,
+      "verified_files": [
+        {
+          "camera": 1,
+          "image_id": 178795,
+          "captured": "2026-09-29 19:48:02",
+          "dimensions": [
+            4608,
+            2592
+          ]
+        },
+        {
+          "camera": 2,
+          "image_id": 178794,
+          "captured": "2026-09-29 19:47:57",
+          "dimensions": [
+            3840,
+            2160
+          ]
+        }
+      ],
+      "subsequent_records": [
+        {
+          "camera": 1,
+          "image_id": 178797,
+          "captured": "2026-09-29 19:48:47",
+          "night": true,
+          "previous_interval_seconds": 45
+        },
+        {
+          "camera": 2,
+          "image_id": 178796,
+          "captured": "2026-09-29 19:48:42",
+          "night": true,
+          "previous_interval_seconds": 45
+        }
+      ],
+      "pending_video_tasks": 6,
+      "pending_actions": [
+        "generateVideo",
+        "generatePanoramaVideo",
+        "generateKeogramStarTrails",
+        "expireData"
+      ],
+      "scope": "Files decode and both cameras advance during configured night cadence. Single interval observation, not 24-hour or complete under-load acceptance."
+    }
+  }
 }

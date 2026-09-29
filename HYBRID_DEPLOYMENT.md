@@ -419,11 +419,13 @@ For rollback while HEAD is exactly `666817fc94c40845fc05d8fc4b20251ee779a70a`, r
 This restores runtime `5d877e6d` and reloads only web; no database restore.
 Later documentation-only commits require checking the HEAD guard before rollback.
 
-The second historical archival batch is in progress: eight of 33 snapshots
-verified at the saved progress checkpoint, reclaiming 6,359,911,873 bytes. No
-new archival starts after 19:50 local time; the current file finishes verification
-before its original is removed. Follow the live report and process, not this
-checkpoint, to establish completion. [Progress evidence](testing/evidence/hybrid-backup-remaining-20260929.json).
+The second historical archival batch is complete: all 33 snapshots passed full
+decompression/hash verification before their uncompressed copies were removed.
+It reclaimed 25,530,284,948 bytes; 29,916,065,792 bytes were free at completion.
+Recovery markers and compressed sizes were checked; no partial files remain.
+The current coherent backup remains uncompressed. This does not meet the earlier
+half-disk-free target, and no new acquired media were deleted.
+[Completion evidence](testing/evidence/hybrid-backup-remaining-20260929.json).
 
 ## Atomic status publication rollback
 
