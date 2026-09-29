@@ -189,7 +189,12 @@ seconds. Both cameras recovered; the last five saved frames for each were again
 23.9-second compression/save and 38.9-second DB/metadata gaps outside the reported
 processing metric. The cause is not established and steady cadence is not yet
 certified. [Measured evidence](testing/evidence/hybrid-capture-queue-review-20260929.json).
-This is not the deferred 24-hour acceptance. No capture settings were changed.
+A later 60-second syscall trace measured a 16.483467-second database fdatasync
+in the image worker. This identifies a blocking persistence stage, consistent
+with checkpoint work; the physical cause and correction remain open. In the
+12:18–13:10 sample, IMX708 had one 38-second gap and ASI678MC had no gap over
+17 seconds. This is not the deferred 24-hour acceptance. No capture settings
+were changed.
 
 ## Remaining acceptance gates
 

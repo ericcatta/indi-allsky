@@ -39,7 +39,39 @@
     "Root filesystem 95% used, 5.6 GiB available; /tmp 5% used. No kernel warnings returned since 05:00.",
     "At 11:09, the latest five saved images for each camera were exactly 15 seconds apart; camera1 latest 11:09:20, camera2 11:09:21."
   ],
-  "conclusion": "Capture recovers, but transient stalls violate the desired steady cadence. Source of stalls is unresolved; do not attribute solely to the exposure controller, SD card or backup without further measurement.",
-  "next_action": "Measure end-to-end worker stages and resource contention during a stall; preserve queue backpressure and exposure policy until the cause is established.",
-  "changes": "No runtime/configuration changes, restarts or media deletions."
+  "conclusion": "Transient delays persist after image publication fixes. A bounded syscall trace directly measured16.483467s in image-worker fdatasync on the database descriptor, consistent with WAL checkpoint cost. This identifies a blocking persistence stage; it does not establish the physical storage cause or prove all cadence incidents share it.",
+  "next_action": "Verify WAL checkpoint ownership and move expensive checkpoint work out of the frame processing path with bounded background execution and recovery tests. Preserve synchronous=NORMAL and watchdog semantics; do not claim a fix before before/after measurement.",
+  "changes": "No runtime/configuration changes, restarts or media deletions.",
+  "followup": {
+    "runtime": "3577fa82 (capture unchanged from07b2098d)",
+    "window": "2026-09-29 12:18:00\u201313:10:12 local",
+    "camera1": {
+      "frames": 207,
+      "gaps_over_17_seconds": 1,
+      "gap_seconds": 38,
+      "gap_start": "12:37:13",
+      "gap_end": "12:37:51"
+    },
+    "camera2": {
+      "frames": 209,
+      "gaps_over_17_seconds": 0
+    },
+    "periodic_log_gap_seconds": 35.4545,
+    "periodic_log_gap_limit": "Gap between log records, not a direct duration measurement of setState; code identifies synchronous WATCHDOG commit on primary profile only.",
+    "parallel_worker_processing_seconds": 36.9352,
+    "syscall_sample": {
+      "seconds": 60,
+      "worker_pid": 1447359,
+      "fdatasync_seconds": 16.483467,
+      "fd": 42,
+      "fd_target_after_sample": "/var/lib/indi-allsky/indi-allsky.sqlite",
+      "start": "13:12:20.587522",
+      "end": "13:12:37.071019",
+      "report": "/home/eric/hybrid-capture-db-syscalls-20260929.log",
+      "sha256": "6ae722859c70d3320f8123a5928f436b6006d289fc6fe45e647990cbfa0a7c70",
+      "limitations": "Different incident from12:37. Descriptor mapping observed after sample; only lock/sync syscalls traced, no buffers. Tracer detached after60seconds."
+    },
+    "report": "/home/eric/hybrid-capture-periodic-review-20260929.json",
+    "sha256": "f8996549f095e75170eb5f9f68b5d1d43e109d1ddadeba279d2cd949de5ba17f"
+  }
 }
