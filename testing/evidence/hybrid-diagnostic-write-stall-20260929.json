@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-29",
+  "runtime": "a3402d2ed54a1de9c45e787731f2f3f38b9b6d36",
+  "capture_pid": 1512547,
+  "scope": "180-second strace of IMX708 capture main thread during real regression load; no capture changes",
+  "trace_sha256": "a9c574b60bb50bbe04035e149b44a663b0f2ea64e29c9b59ab28215ad183dd41",
+  "private_trace": "/home/eric/hybrid-imx-metadata-trace-20260929.log",
+  "private_summary": "/home/eric/hybrid-imx-metadata-trace-summary-20260929.json",
+  "finding": {
+    "time": "15:22:14.423698+02:00",
+    "syscall": "write(fd=39, length=200)",
+    "duration_seconds": 5.822069,
+    "file": "/var/lib/indi-allsky/multicamera-diag.log",
+    "fd_evidence": "Preceding openat at 15:22:14.423603 returns fd 39; immediate write blocks until 15:22:20.245767; close follows.",
+    "comparison": "The immediately preceding append to /tmp/indi-allsky-multicamera-diag.log took 0.000011 seconds."
+  },
+  "cause_scope": "Synchronous diagnostic-file append blocks the capture thread. Does not prove every prior metadata/save delay has this cause or identify physical storage cause.",
+  "trace_scope": {
+    "lines": 864,
+    "syscalls_over_100ms": 1,
+    "trace_detached": true,
+    "buffers": "Raw pointers only for read/write/sendto/sendmsg; no payload recorded"
+  },
+  "next_action": "Move diagnostic file effects off the capture thread with bounded memory and fork-safe lifetime, preserve useful logs, test stalled sink/overflow and verify actual cadence after deployment.",
+  "limits": [
+    "Tracing may affect timing; this measures blocking in the real diagnostic write, not an uninstrumented baseline.",
+    "No algorithm, exposure, scheduler or configuration changed.",
+    "24-hour test remains deferred."
+  ]
+}

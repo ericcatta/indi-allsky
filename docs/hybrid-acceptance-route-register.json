@@ -3834,7 +3834,98 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminSystemView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[0]",
+          "control": "System Info",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[1]",
+          "control": "Support Info",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[2]",
+          "control": "Log",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[3]",
+          "control": "Task Queue",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[4]",
+          "control": "Users",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[5]",
+          "control": "Notifications",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[6]",
+          "control": "Settings Index",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[7]",
+          "control": "Global Capture Defaults",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[8]",
+          "control": "Camera Settings",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[9]",
+          "control": "Config",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[10]",
+          "control": "Config History",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[11]",
+          "control": "Config Restore",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[12]",
+          "control": "Network",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[13]",
+          "control": "GPIO Control",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "controls[14]",
+          "control": "Updates",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/system/config",
@@ -4003,6 +4094,12 @@
           "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
           "record": "controls[4]",
           "control": "modern-admin-load-support",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-system-index-20260929.json",
+          "record": "support",
+          "control": "Load support info",
           "recorded_status": "superato"
         }
       ]

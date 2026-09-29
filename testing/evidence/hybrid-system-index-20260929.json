@@ -1,0 +1,172 @@
+{
+  "date": "2026-09-29",
+  "baseline": "a3402d2ed54a1de9c45e787731f2f3f38b9b6d36",
+  "status": "validated-awaiting-deployment",
+  "scope": "System index CPU measurement and native index navigation; read-only Support Info collector",
+  "source_manifest_sha256": "37c752641717a50d8eda1b8bf3cddc661d4258581351870da033a90ee904a8e6",
+  "defect": {
+    "observed": "System index rendered CPU 0.0%; source used interval=None unlike the System Info provider. A zero alone is not proof of idle CPU.",
+    "red": "Actual get_context method with first-sample stub returned 0.0 instead of measured 23.4; new assertion failed before fix.",
+    "fix": "Reuse existing 100ms CPU provider and formatter; unavailable counters show Unavailable; true measured zero stays valid."
+  },
+  "tests": {
+    "focused": "modern_admin_system_tools_test.py passed after red-to-green correction",
+    "javascript": "34 passed",
+    "javascript_report_sha256": "f67ca06162e8765db52ff64c0b0661ad0673e0f16049b56e468d863f6ab17a5c",
+    "python_report": "/home/eric/hybrid-system-index-regression-20260929/results.json",
+    "python": "169 passed; source_changed false",
+    "python_report_sha256": "08ea7d1a59c1fc748f7ef024ff8b2b8cec37ffff01b58d292f06d44afc2b2c76"
+  },
+  "controls": [
+    {
+      "route": "/modern-admin/system",
+      "control": "System Info",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Actual Pi model, service states and service control forms"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Support Info",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Collector button and initial unloaded state"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Log",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Refresh/Lines/Filter controls; data behavior verified in previous Log release"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Task Queue",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "489 recent tasks and state/queue/action filters"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Users",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Two accounts and account filtering/export controls"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Notifications",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "100 notifications and category/item controls"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Settings Index",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Operational editor links"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Global Capture Defaults",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Explicit read-only fallback values and profile-editor link"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Camera Settings",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Both configured camera profiles and selected profile editor"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Config",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Redirect to Full Settings with global editor/search"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Config History",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "118 snapshots and pagination"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Config Restore",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Restore controls and snapshot candidates"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Network",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Actual saved connections and separate recovery warning"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "GPIO Control",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Six output buttons disabled because no supported interface configured"
+    },
+    {
+      "route": "/modern-admin/system",
+      "control": "Updates",
+      "role": "admin",
+      "environment": "production baseline before CPU fix",
+      "status": "superato",
+      "expected": "Navigate to corresponding supported Hybrid entry",
+      "observed": "Installed version, idle upgrade service, confirmations and recovery links"
+    }
+  ],
+  "support": {
+    "route": "/modern-admin/system/support",
+    "control": "Load support info",
+    "role": "admin",
+    "environment": "production",
+    "status": "superato",
+    "observed": "Loading state followed by plain-text diagnostic output: Debian 13, aarch64, Raspberry Pi 5, current time and final end-support-info marker. Region text length 82780 including labels. Raw diagnostics deliberately not stored in repository."
+  },
+  "limits": [
+    "Navigation results only verify index links, not every destination control or effect.",
+    "No network, GPIO, upgrade, shutdown, restore or cleanup action submitted.",
+    "No unavailable GPIO hardware reported passed.",
+    "Support collector ordinary-user, timeout and error native acceptance remain open.",
+    "No configuration or acquisition changes."
+  ]
+}

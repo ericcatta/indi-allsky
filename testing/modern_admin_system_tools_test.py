@@ -50,6 +50,41 @@ def test_cpu_first_sample_and_view_dispatch():
     assert service.format_cpu(ModernAdminCpuUsageProvider(unavailable).read()) == 'Unavailable'
 
 
+def test_system_index_samples_cpu_and_handles_unavailable():
+    tree = ast.parse((REPO_ROOT / 'indi_allsky/flask/views.py').read_text())
+    view = next(n for n in tree.body if isinstance(n, ast.ClassDef)
+                and n.name == 'ModernAdminSystemView')
+    method = next(n for n in view.body if isinstance(n, ast.FunctionDef)
+                  and n.name == 'get_context')
+    calls = []
+    def sample(interval=None):
+        calls.append(interval)
+        return 23.4 if interval == 0.1 else 0.0
+    scope = {'ModernAdminCpuUsageProvider': ModernAdminCpuUsageProvider,
+             'ModernAdminSystemInfoSummaryService': ModernAdminSystemInfoSummaryService,
+             'psutil': SimpleNamespace(cpu_percent=sample,
+                                       virtual_memory=lambda: SimpleNamespace(percent=31.2)),
+             '__version__': 'fixture-version'}
+    exec(compile(ast.Module(body=[method], type_ignores=[]), '<system-index>', 'exec'), scope)
+    base = type('Base', (), {'get_context': lambda self: {'preserved': True}})
+    cls = type('ModernAdminSystemView', (base,), {'get_context': scope['get_context']})
+    scope['ModernAdminSystemView'] = cls
+    for _ in range(2):
+        context = cls().get_context()
+        assert context['preserved'] is True
+        assert context['modern_admin_system_metrics'] == (
+            {'label': 'CPU', 'value': '23.4%'},
+            {'label': 'Memory', 'value': '31.2%'},
+            {'label': 'Version', 'value': 'fixture-version'},
+        )
+        assert len(context['modern_admin_section_links']) == 15
+    assert calls == [0.1, 0.1]
+    def unavailable(**kwargs):
+        raise OSError('CPU counters unavailable')
+    scope['psutil'].cpu_percent = unavailable
+    assert cls().get_context()['modern_admin_system_metrics'][0]['value'] == 'Unavailable'
+
+
 def test_system_info_summary_service_preserves_card_shape():
     service = ModernAdminSystemInfoSummaryService()
 
@@ -206,6 +241,7 @@ def test_system_tools_module_has_no_flask_db_or_file_read_dependency():
 
 def run_tests():
     test_cpu_first_sample_and_view_dispatch()
+    test_system_index_samples_cpu_and_handles_unavailable()
     test_system_info_summary_service_preserves_card_shape()
     test_system_info_summary_service_formats_numeric_values()
     test_log_display_policy_preserves_line_limits()

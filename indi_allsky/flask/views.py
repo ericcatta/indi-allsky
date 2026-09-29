@@ -4888,7 +4888,8 @@ class ModernAdminSystemView(ModernAdminView):
             ('Updates', 'indi_allsky.modern_admin_updates_view'),
         )
         context['modern_admin_system_metrics'] = (
-            {'label' : 'CPU', 'value' : '{0:0.1f}%'.format(psutil.cpu_percent(interval=None))},
+            {'label' : 'CPU', 'value' : ModernAdminSystemInfoSummaryService().format_cpu(
+                ModernAdminCpuUsageProvider(psutil.cpu_percent).read())},
             {'label' : 'Memory', 'value' : '{0:0.1f}%'.format(psutil.virtual_memory().percent)},
             {'label' : 'Version', 'value' : __version__},
         )

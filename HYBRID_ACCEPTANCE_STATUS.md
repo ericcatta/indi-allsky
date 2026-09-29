@@ -270,10 +270,21 @@ and session expiry. Production admin filter/line-count/refresh checks pass after
 web-only deployment; capture PID and config 118 remain unchanged.
 [Evidence](testing/evidence/hybrid-log-controller-20260929.json).
 
+## System index and support verification
+
+All 15 System index links were exercised in the production administrator
+browser, verifying their destination and operational content. Support Info
+returned the real diagnostic collector output through its completion marker.
+These checks do not certify each destination effect or unavailable hardware.
+The index CPU card now reuses the existing measured-interval provider, including
+an explicit unavailable state; 169 Python and 34 JavaScript checks pass.
+Deployment of this CPU correction is pending.
+[Evidence](testing/evidence/hybrid-system-index-20260929.json).
+
 ## Remaining acceptance gates
 
 
-- Resolve the observed transient worker/save stalls and verify end-to-end cadence under the identified load.
+- Resolve the diagnostic append stall measured on 29 September: IMX708 capture blocked 5.82 seconds writing `/var/lib/indi-allsky/multicamera-diag.log`. [Syscall evidence](testing/evidence/hybrid-diagnostic-write-stall-20260929.json). Verify end-to-end cadence after moving diagnostic writes off the capture thread; other historical stalls are not all attributed to this cause.
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.
 - Complete remaining live effects, including dedicated-data cleanup/deletion and test-destination uploads. Short mini timelapses and both cameras’ automatic day timelapse/panorama outputs are verified; other automatic/isolated tests remain separately labeled.
