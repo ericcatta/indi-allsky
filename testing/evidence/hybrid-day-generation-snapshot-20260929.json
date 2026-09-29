@@ -1,0 +1,75 @@
+{
+  "date": "2026-09-29",
+  "observation": "After 20:02 CEST; one read-only snapshot of already-running day/night transition tasks, no new test or maintenance started.",
+  "source_revision": "12ad046f",
+  "scope": "Production task results and ffprobe inspection of existing outputs. Not a browser playback test or whole-day stability certification.",
+  "records": [
+    {
+      "task_id": 13929,
+      "camera_id": 1,
+      "action": "generateVideo",
+      "state": "SUCCESS",
+      "file_exists": true,
+      "bytes": 75295622,
+      "codec": "h264",
+      "width": 4608,
+      "height": 2592,
+      "frames": 3013,
+      "duration_seconds": 120.52,
+      "ffprobe_returncode": 0,
+      "verification": "Task completed, file exists and MP4 stream metadata readable."
+    },
+    {
+      "task_id": 13930,
+      "camera_id": 1,
+      "action": "generatePanoramaVideo",
+      "state": "SUCCESS",
+      "file_exists": true,
+      "bytes": 37758070,
+      "codec": "h264",
+      "width": 4712,
+      "height": 750,
+      "frames": 1505,
+      "duration_seconds": 60.2,
+      "ffprobe_returncode": 0,
+      "verification": "Task completed, file exists and MP4 stream metadata readable."
+    },
+    {
+      "task_id": 13931,
+      "camera_id": 2,
+      "action": "expireData",
+      "state": "SUCCESS",
+      "deleted_count": 0,
+      "failed_count": 0,
+      "directory_errors": 0,
+      "verification": "No-op cleanup completed; does not prove real deletion."
+    },
+    {
+      "task_id": 13932,
+      "camera_id": 2,
+      "action": "generateKeogramStarTrails",
+      "state": "RUNNING",
+      "verification": "Not terminal at snapshot; acceptance open."
+    },
+    {
+      "task_id": 13933,
+      "camera_id": 2,
+      "action": "generateVideo",
+      "state": "QUEUED",
+      "verification": "Not terminal at snapshot; acceptance open."
+    },
+    {
+      "task_id": 13934,
+      "camera_id": 2,
+      "action": "generatePanoramaVideo",
+      "state": "QUEUED",
+      "verification": "Not terminal at snapshot; acceptance open."
+    }
+  ],
+  "limitations": [
+    "No complete decode or browser playback of these two files was performed.",
+    "No deletion, upload, new task submission, configuration change or service restart occurred.",
+    "Queued/running camera-2 jobs were left undisturbed; no completion claimed.",
+    "Continuous observation and the separate 24-hour trial were not started."
+  ]
+}

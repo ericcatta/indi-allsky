@@ -91,6 +91,17 @@ The installed page now shows the estimate. A native same-value save persisted re
 with the original 5 GiB / 8 GiB / 3-day policy and all other settings unchanged.
 Both latest frames decoded after deployment. [Evidence](testing/evidence/hybrid-storage-estimate-fix-20260929.json).
 
+## Latest scheduled generation snapshot
+
+The 29 September day/night transition completed camera-1 timelapse task 13929
+and panorama task 13930. Both output files exist and ffprobe reads their H.264
+streams: 3,013 frames at 4608×2592 and 1,505 frames at 4712×750, respectively.
+This checks output metadata, not complete decoding or browser playback.
+Camera-2 cleanup 13931 completed without deleting any assets; task 13932 was
+still running and 13933/13934 queued at the read-only snapshot. These remaining
+jobs are not marked accepted and were left running normally.
+[Task and output evidence](testing/evidence/hybrid-day-generation-snapshot-20260929.json).
+
 ## Post-removal evidence
 
 | Scope | Verified result | Evidence |
