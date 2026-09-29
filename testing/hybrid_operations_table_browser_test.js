@@ -25,14 +25,14 @@ function fixture(overrides = {}, clipboardFailure = false) {
             {id: 'search', attribute: 'search', contains: true},
             {id: 'state', attribute: 'state'}, {id: 'queue', attribute: 'queue'},
         ], ...overrides};
-    let options, predicate = () => true, onDraw;
+    let options, predicate = () => true, onDraw, draws = 0;
     const visible = () => records.filter((_row, index) => predicate('', [], index));
     const api = {
         row: index => ({node: () => records[index]}),
         rows: options => { assert.equal(options.search, 'applied'); return {count: () => visible().length}; },
         search: {fixed: (_name, fn) => { predicate = fn; }},
         on: (_event, fn) => { onDraw = fn; },
-        draw: () => onDraw(),
+        draw: () => { draws += 1; onDraw(); },
         buttons: {exportData: options => {
             assert.deepEqual(JSON.parse(JSON.stringify(options.columns)), config.exportColumns || ':not(:last-child)');
             if (options.escapeExcelFormula !== undefined) assert.equal(options.escapeExcelFormula, true);
@@ -57,8 +57,23 @@ function fixture(overrides = {}, clipboardFailure = false) {
         copied.push(text);
     }}}});
     return {records, inputs, count, forms, options, api, placeholder, panels, copied,
+        get draws() { return draws; },
         change(id, value, event = 'change') { inputs[id].value = value; inputs[id].handlers[event](); }};
 }
+
+const blur = fixture();
+blur.change('search', 'camera', 'input');
+const afterInput = blur.draws;
+blur.change('search', 'camera', 'change');
+assert.equal(blur.draws, afterInput, 'Blur must not redraw and discard a pagination click');
+blur.change('search', ' CAMERA ', 'change');
+assert.equal(blur.draws, afterInput, 'Equivalent normalized filters must retain the table state');
+blur.change('search', '', 'input');
+assert.equal(blur.draws, afterInput + 1, 'Clearing must apply the new filter');
+blur.change('search', '', 'change');
+assert.equal(blur.draws, afterInput + 1, 'Blur after clearing must not redraw again');
+blur.change('state', 'FAILED', 'change');
+assert.equal(blur.count.textContent, '1 shown');
 
 const app = fixture();
 assert(app.placeholder.removed);

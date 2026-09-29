@@ -92,8 +92,17 @@
     }
     table.on('draw', updateCount);
     filters.forEach(filter => {
-        filter.element.addEventListener('input', () => table.draw());
-        filter.element.addEventListener('change', () => table.draw());
+        let appliedValue = normalize(filter.element.value);
+        function applyFilter() {
+            const value = normalize(filter.element.value);
+            // A text input also emits change on blur. Redrawing for the same
+            // value can replace the pagination button being clicked.
+            if (value === appliedValue) return;
+            appliedValue = value;
+            table.draw();
+        }
+        filter.element.addEventListener('input', applyFilter);
+        filter.element.addEventListener('change', applyFilter);
     });
     table.draw();
 })();

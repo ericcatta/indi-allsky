@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-29",
+  "status": "validated-awaiting-deployment",
+  "defect": "First pagination click after editing/clearing a text search could be discarded by the redundant change-on-blur redraw. Observed on production File Space Usage.",
+  "change": "Compare normalized filter value with last applied value before redraw; keep both input and change support for text/select filters.",
+  "javascript": {
+    "cases": 34,
+    "failed": 0,
+    "report": "/tmp/hybrid-table-blur-js.json",
+    "sha256": "f67ca06162e8765db52ff64c0b0661ad0673e0f16049b56e468d863f6ab17a5c"
+  },
+  "native_isolated": {
+    "roles": [
+      "administrator",
+      "ordinary user"
+    ],
+    "task_rows": 205,
+    "sequence": "Search missing-task-fixture; clear using Command+A/Backspace; click Next once.",
+    "result": "Both roles show 21 to 40 of 205 on first click.",
+    "cleanup": "Synthetic server stopped after PID/command verification, browser tab and SSH tunnel closed.",
+    "tool_limit": "One navigation was aborted when requested before login redirect completed; waiting for the final URL resolved it."
+  },
+  "manifest_sha256": "7e4fc9a03e71e2601b9a4bbde9caa089535c1f22f9f0e66e347755cc2f51453d",
+  "source_count": 833,
+  "python": {
+    "cases": 171,
+    "status": "passed",
+    "source_changed": false,
+    "report": "/home/eric/hybrid-table-blur-regression-20260929/results.json",
+    "sha256": "a350c8e63c465d9d5f43e9f50b9d256bb06fbc649cca76b9c41bd58d283a486c"
+  }
+}
