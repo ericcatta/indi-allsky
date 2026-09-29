@@ -42,5 +42,16 @@
     "NORMAL persistence semantics unchanged; not a power-loss durability guarantee",
     "Long readers can prevent WAL recycling;16384-page backlog warning is not a hard size cap",
     "No claim that cadence defect or overall acceptance is closed"
-  ]
+  ],
+  "runtime_installer": {
+    "file": "misc/hybrid_sqlite_runtime.py",
+    "status": "isolated-install-remove-passed-not-deployed",
+    "scope": "Private library and startup bootstrap in dedicated virtualenv; system library unchanged. All commands in this virtualenv load candidate without LD_LIBRARY_PATH.",
+    "probe": "/home/eric/hybrid-sqlite-bootstrap-probe.json",
+    "probe_sha256": "e152dd47ee1997574fabfbf2b16949bfeb3fefdb7d6898bf7c8e43033231237e",
+    "native_outcome": "Temporary virtualenv loads3.51.3;400 exact synthetic rows and3 concurrent checkpoints pass integrity; removal restores3.46.1.",
+    "unit_test": "testing/hybrid_sqlite_runtime_installer_test.py",
+    "unit_outcome": "Checksum mismatch, existing managed files, modified bootstrap, activation failure, removal and outside-prefix rejection pass.",
+    "limits": "Not installed in production. Commands outside the dedicated virtualenv require separate runtime verification. Rebuilding the virtualenv requires reinstallation."
+  }
 }

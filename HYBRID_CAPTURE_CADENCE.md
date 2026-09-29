@@ -234,3 +234,37 @@ Hybrid database writers (capture, web and maintenance commands), not just the
 checkpoint helper. Verify loaded versions in each runtime and complete the candidate regression, and compare end-to-end frame intervals and
 checkpoint timings under the same workload. Do not claim the cadence defect
 resolved from unit tests or a successful helper startup.
+
+### Private runtime installation and rollback
+
+`misc/hybrid_sqlite_runtime.py` installs a prebuilt, checksum-verified library
+inside the dedicated Hybrid virtualenv. It creates an early `.pth` bootstrap,
+so capture, web and maintenance commands using that virtualenv load the same
+library. It does not replace operating-system packages. The bootstrap checks
+library bytes and the loaded SQLite version; a mismatch fails process startup
+rather than silently loading another library. Run the installer/remover with
+**system Python**, which remains unaffected if the bootstrap fails.
+
+After backing up and stopping capture/web (including socket activation):
+
+```sh
+python3 misc/hybrid_sqlite_runtime.py --venv /path/to/virtualenv \
+  --library /path/to/verified/libsqlite3.so.0 --sha256 VERIFIED_SHA256 --version 3.51.3
+/path/to/virtualenv/bin/python -c 'import sqlite3; print(sqlite3.sqlite_version)'
+```
+
+Start services only after the version check. For rollback, stop the same
+services, disable the background-checkpoint environment flag, and run:
+
+```sh
+python3 misc/hybrid_sqlite_runtime.py --venv /path/to/virtualenv --remove
+```
+
+Then verify the previous version and restart. No database restore is performed.
+Existing managed files are not overwritten; removal preserves changed artifacts
+and rejects a modified bootstrap. Recreating the virtualenv removes this private
+runtime: repeat installation before enabling background checkpoints again.
+Commands using system Python or a different virtualenv do **not** inherit this
+runtime; use the dedicated virtualenv for every command that writes Hybrid data.
+The source release/checksum/build and isolated activation/rollback evidence are
+in [the checkpoint report](testing/evidence/hybrid-sqlite-checkpoint-20260929.json).
