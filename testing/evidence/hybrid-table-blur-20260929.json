@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "cache-refresh-validated-awaiting-deployment",
+  "status": "deployed-native-verified",
   "defect": "First pagination click after editing/clearing a text search could be discarded by the redundant change-on-blur redraw. Observed on production File Space Usage.",
   "change": "Compare normalized filter value with last applied value before redraw; keep both input and change support for text/select filters.",
   "javascript": {
@@ -46,5 +46,18 @@
     "manifest_sha256": "563746f9a2b03ab736484581335fc2240f7736f34f665eaa84ff6ad771cc12bf",
     "javascript": "Same tested controller; 34 JS results unchanged.",
     "consumers_updated": 9
+  },
+  "final_deployment": {
+    "commit": "5d877e6dc4e45cef485c5abaa1e2af05890b8095",
+    "backup": "/home/eric/hybrid-backups/hybrid-table-cache-20260929-182319",
+    "capture_pid_unchanged": 1862836,
+    "automatic_restarts": 0,
+    "native": {
+      "asset": "operations-table.js?v=filter-blur-3",
+      "camera_2": "Search empty result, clear via keyboard, first Next click: rows 21\u201333 of 33. Previous returns 1\u201320.",
+      "camera_1": "Switch retained camera_id=1/profile_id=imx708-wide. Search empty result, clear via keyboard, first Next: rows 21\u201332 of 32.",
+      "role": "administrator",
+      "cleanup": "Temporary tab closed."
+    }
   }
 }

@@ -5,13 +5,13 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `34a2c2eab7ce73299da019e5c1cec3cef71b2186`.
+The Raspberry runs `5d877e6dc4e45cef485c5abaa1e2af05890b8095`.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
 The 833-file source/asset manifest (including the capture entrypoint) is
-`87b12ee079398908c0bb2c21dd53d5dd6478c251735600080be3fb9a35f1c99a`.
+`563746f9a2b03ab736484581335fc2240f7736f34f665eaa84ff6ad771cc12bf`.
 171 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
 The bounded asynchronous syslog handler is deployed. Both camera files decode
 after the restart. The live 171-entrypoint replay passes. Trace confirms system-log sends and
@@ -403,3 +403,14 @@ before sample. No preview fsync remains. Other filesystem calls still stalled
 (up to 22.5 seconds on panorama fsync and 11.3 seconds on preview creation);
 publication latency and overall storage stability remain open.
 [Evidence](testing/evidence/hybrid-preview-flush-20260929.json).
+
+## Table filter blur correction — deployed
+
+The first pagination click after editing/clearing a search was lost because
+the unchanged filter triggered another redraw on blur. The shared controller
+now redraws only when the normalized value changes. All nine script references
+were versioned after the initial production check exposed a stale asset.
+171 Python and 34 JavaScript checks pass. The native isolated sequence passes
+for both roles; production File Space Usage passes for both camera/profile pairs,
+including Previous and camera switching. Capture was not restarted.
+[Evidence](testing/evidence/hybrid-table-blur-20260929.json).

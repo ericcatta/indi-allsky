@@ -222,13 +222,19 @@
       "request": "Client-side table operation; no mutation request",
       "effect": "User data unchanged",
       "observed": "First click retained rows 1\u201320; second click advanced. Shared controller redraws on both input and blur/change.",
-      "status": "difetto"
+      "status": "difetto",
+      "resolution": {
+        "status": "superato",
+        "source": "testing/evidence/hybrid-table-blur-20260929.json",
+        "record": "final_deployment.native",
+        "scope": "Production administrator, both camera/profile pairs; first Next click and Previous tested."
+      }
     }
   ],
   "limits": [
     "RAW column contains only zero sizes; distinct RAW ordering not observed.",
     "CSV/Excel native delivery, ordinary user and narrow viewport not covered in this pass.",
-    "First-click pagination correction is being validated separately."
+    "Historical first-click defect fixed and verified; see resolution record."
   ],
   "cleanup": "Temporary browser tab closed."
 }

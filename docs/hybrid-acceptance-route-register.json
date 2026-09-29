@@ -3943,6 +3943,13 @@
           "control": "Next immediately after search clear",
           "recorded_status": "difetto",
           "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-table-blur-20260929.json",
+          "record": "final_deployment.native",
+          "control": "First Next after clearing search, Previous, camera/profile switch",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
         }
       ]
     },

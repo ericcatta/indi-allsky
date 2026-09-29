@@ -2,7 +2,7 @@
 
 ## Installed version
 
-Production runs `34a2c2eab7ce73299da019e5c1cec3cef71b2186` (29 September 2026).
+Production runs `5d877e6dc4e45cef485c5abaa1e2af05890b8095` (29 September 2026).
 Classic frontend remains removed. Background SQLite checkpoint maintenance is
 active for capture; failed/stale maintenance restores automatic checkpoints.
 All capture/web SQLite processes and the dedicated virtualenv CLI load verified
@@ -41,7 +41,32 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Current realtime preview release rollback
+## Current table filter release rollback
+
+The filter correction and versioned script references passed 171 Python and
+34 JavaScript checks, isolated browser checks for both roles, and production
+first-click pagination for both camera/profile pairs. Capture PID 1862836 stayed
+active without restarting. Current 833-file manifest:
+`563746f9a2b03ab736484581335fc2240f7736f34f665eaa84ff6ad771cc12bf`.
+
+From exactly `5d877e6dc4e45cef485c5abaa1e2af05890b8095`:
+
+```sh
+/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python /home/eric/hybrid-table-cache-deploy.py --rollback /home/eric/hybrid-backups/hybrid-table-cache-20260929-182319
+```
+
+This returns to `c427c5c3` with web reload only. That revision has the corrected
+script but old asset references, so existing browser caches may show the old bug.
+To undo the controller correction too, from exactly that revision:
+
+```sh
+/home/eric/indi-allsky/virtualenv/indi-allsky/bin/python /home/eric/hybrid-table-blur-deploy.py --rollback /home/eric/hybrid-backups/hybrid-table-blur-20260929-181116
+```
+
+This returns to `34a2c2ea`. Both rollbacks preserve database, configuration and
+media. [Evidence](testing/evidence/hybrid-table-blur-20260929.json).
+
+## Realtime preview release rollback
 
 Capture restarted during 17:43:28–17:43:34 on 29 September. Both cameras resumed
 with valid full-resolution frames; configuration revision 118 is unchanged.
