@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-29",
+  "scope": "Encoded capture image publication; not full product acceptance",
+  "status": "automated-tests-passed-awaiting-deployment",
+  "defect": "write_img removed the previous latest frame before copy2; copy failures also leaked encoded temporary files and could expose partial archive files.",
+  "change": "Stage complete files on destination filesystem, publish latest with replace and archives with non-overwriting link; always remove encoded temporary file.",
+  "tests": {
+    "red": "Expanded worker test fails against d8a18f69 when the old preview disappears before copying.",
+    "targeted": [
+      "PNG encoder false and exception",
+      "JPEG encoder exception",
+      "partial latest copy failure",
+      "latest replace failure",
+      "partial archive copy failure",
+      "archive link failure",
+      "success bytes and mode",
+      "existing archive preservation",
+      "real PNG focus publication for both cameras"
+    ],
+    "python_entrypoints": 166,
+    "python_scope": "165 passes from unchanged full run, plus the corrected focus AST harness rerun. Only focus_frames_test.py differs between full-run and final manifests.",
+    "report": "/home/eric/hybrid-image-publication-regression-final.json",
+    "report_sha256": "c2daaa1d2bb7f2b14a801f8e03d376ec937359ec1a00459a5641ad1fe801ef53",
+    "initial_report_sha256": "a2830502af1776d2ef7086ea5e47802f5f4b3d649ecb00588afc81272051fbda",
+    "javascript_entrypoints": 34,
+    "javascript_report": "/tmp/hybrid-image-publication-js-20260929.json",
+    "javascript_report_sha256": "af4febda379007950f1eb89e4f514aa79a1e80c1849028e9594c6c8a2a28942e",
+    "source_files": 824,
+    "source_manifest_sha256": "49a1245fe01b4244ae020e822f1d97905318a3e1dca7778d3794d66bb0a7294f"
+  },
+  "limitations": [
+    "Not a fix for observed worker latency.",
+    "Atomic namespace publication does not guarantee durability across sudden power loss.",
+    "Archive publication requires filesystem hard-link support, also used by panorama publication; production media is on the Linux ext filesystem.",
+    "24-hour observation remains deferred."
+  ]
+}

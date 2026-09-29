@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from indi_allsky.focus_frames import focus_frame_path, publish_focus_frame
+from indi_allsky.image_publication import publish_image_file
 
 
 def run():
@@ -20,6 +21,7 @@ def run():
     cls=next(n for n in tree.body if isinstance(n,ast.ClassDef) and n.name=='ImageWorker')
     method=next(n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name=='write_img')
     ns={'__package__':'indi_allsky','tempfile':tempfile,'Path':Path,'cv2':cv2,'shutil':shutil,'logger':logging.getLogger('test')}
+    ns['publish_image_file'] = publish_image_file
     exec(compile(ast.Module(body=[method],type_ignores=[]),'<worker-write-img>','exec'),ns)
     with tempfile.TemporaryDirectory() as folder:
         directory=Path(folder)

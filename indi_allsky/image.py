@@ -51,6 +51,7 @@ from .event_candidate import persist_event_candidates_shadow
 from .multicamera_diag import write_multicamera_diag
 from .sky_condition import compute_sky_condition_from_frame
 
+from .image_publication import publish_image_file
 from .processing import ImageProcessor
 from .miscUpload import miscUpload
 from .adsb import AdsbAircraftHttpWorker
@@ -4154,9 +4155,9 @@ class ImageWorker(Process):
         tmpfile_name = Path(f_tmpfile.name)
 
 
-        #write_img_start = time.time()
-
         try:
+            #write_img_start = time.time()
+
             # write to temporary file
             if self.config['IMAGE_FILE_TYPE'] in ('jpg', 'jpeg'):
                 # opencv is faster but we have exif data
@@ -4178,111 +4179,96 @@ class ImageWorker(Process):
                 img_rgb = Image.fromarray(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
                 img_rgb.save(str(tmpfile_name), compression='tiff_lzw')
             else:
-                tmpfile_name.unlink()
                 raise Exception('Unknown file type: %s', self.config['IMAGE_FILE_TYPE'])
-        except Exception:
+
+            #write_img_elapsed_s = time.time() - write_img_start
+            #logger.info('Image compressed in %0.4f s', write_img_elapsed_s)
+
+
+            file_size_bytes = tmpfile_name.stat().st_size
+            if file_size_bytes < 1024000:
+                logger.info('Compressed image file size: %0.2f KB', file_size_bytes / 1024)
+            else:
+                logger.info('Compressed image file size: %0.2f MB', file_size_bytes / 1024 / 1024)
+
+
+            latest_file = None
+            if write_latest:
+                ### Always write the latest file for web access
+                latest_file = self.image_dir.joinpath('latest.{0:s}'.format(self.config['IMAGE_FILE_TYPE']))
+
+                publish_image_file(tmpfile_name, latest_file)
+
+            ### disable timelapse images in focus mode
+            if self.config.get('FOCUS_MODE', False):
+                from .focus_frames import publish_focus_frame
+                try:
+                    publish_focus_frame(tmpfile_name, self.image_dir, camera.id, self.config['IMAGE_FILE_TYPE'])
+                except (OSError, ValueError):
+                    logger.exception('Unable to publish focus preview for camera %s', camera.id)
+                logger.warning('Focus mode enabled, not saving timelapse image')
+                if diag_enabled:
+                    self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='focus_mode')
+                #self.write_focus_fit(data)
+                #self.write_focus_png(data)
+                return None, None
+
+
+            ### Do not write daytime image files if daytime capture is disabled
+            if diag_enabled:
+                self._images_only_diag(
+                    diag_profile_id,
+                    diag_camera_id,
+                    'IMAGE_DAYTIME_SAVE_CHECK',
+                    daytime_capture=self.config['DAYTIME_CAPTURE'],
+                    daytime_capture_save=self.config.get('DAYTIME_CAPTURE_SAVE', True),
+                    night=bool(self.night_av[constants.NIGHT_NIGHT]),
+                )
+
+            if not self.night_av[constants.NIGHT_NIGHT] and self.config['DAYTIME_CAPTURE'] and not self.config.get('DAYTIME_CAPTURE_SAVE', True):
+                logger.info('Daytime image save is disabled')
+                if diag_enabled:
+                    self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='daytime_save_disabled')
+                return latest_file, None
+
+
+            ### Write the timelapse file
+            folder = self._getImageFolder(i_ref.exp_date, i_ref.day_date, camera, 'exposures')
+
+            date_str = i_ref.exp_date.strftime('%Y%m%d_%H%M%S')
+            filename = folder.joinpath(self.filename_t.format(i_ref.camera_id, date_str, self.config['IMAGE_FILE_TYPE']))
+
+            #logger.info('Image filename: %s', filename)
+
+            if diag_enabled:
+                self._images_only_diag(
+                    diag_profile_id,
+                    diag_camera_id,
+                    'IMAGE_DUPLICATE_CHECK',
+                    exists=filename.exists(),
+                    final_filename=str(filename),
+                )
+
+            if filename.exists():
+                logger.error('File exists: %s (skipping)', filename)
+                if diag_enabled:
+                    self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='final_filename_exists', final_filename=str(filename))
+                return latest_file, None
+
+
+            if not publish_image_file(tmpfile_name, filename, overwrite=False):
+                logger.error('File exists: %s (skipping)', filename)
+                return latest_file, None
+
+
+            # set mtime to original exposure time
+            #os.utime(str(filename), (i_ref.exp_date.timestamp(), i_ref.exp_date.timestamp()))
+
+            #logger.info('Finished writing files')
+
+            return latest_file, filename
+        finally:
             tmpfile_name.unlink(missing_ok=True)
-            raise
-
-        #write_img_elapsed_s = time.time() - write_img_start
-        #logger.info('Image compressed in %0.4f s', write_img_elapsed_s)
-
-
-        file_size_bytes = tmpfile_name.stat().st_size
-        if file_size_bytes < 1024000:
-            logger.info('Compressed image file size: %0.2f KB', file_size_bytes / 1024)
-        else:
-            logger.info('Compressed image file size: %0.2f MB', file_size_bytes / 1024 / 1024)
-
-
-        latest_file = None
-        if write_latest:
-            ### Always write the latest file for web access
-            latest_file = self.image_dir.joinpath('latest.{0:s}'.format(self.config['IMAGE_FILE_TYPE']))
-
-            try:
-                latest_file.unlink()
-            except FileNotFoundError:
-                pass
-
-
-            shutil.copy2(str(tmpfile_name), str(latest_file))
-            latest_file.chmod(0o644)
-
-
-        ### disable timelapse images in focus mode
-        if self.config.get('FOCUS_MODE', False):
-            from .focus_frames import publish_focus_frame
-            try:
-                publish_focus_frame(tmpfile_name, self.image_dir, camera.id, self.config['IMAGE_FILE_TYPE'])
-            except (OSError, ValueError):
-                logger.exception('Unable to publish focus preview for camera %s', camera.id)
-            logger.warning('Focus mode enabled, not saving timelapse image')
-            if diag_enabled:
-                self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='focus_mode')
-            #self.write_focus_fit(data)
-            #self.write_focus_png(data)
-            tmpfile_name.unlink()
-            return None, None
-
-
-        ### Do not write daytime image files if daytime capture is disabled
-        if diag_enabled:
-            self._images_only_diag(
-                diag_profile_id,
-                diag_camera_id,
-                'IMAGE_DAYTIME_SAVE_CHECK',
-                daytime_capture=self.config['DAYTIME_CAPTURE'],
-                daytime_capture_save=self.config.get('DAYTIME_CAPTURE_SAVE', True),
-                night=bool(self.night_av[constants.NIGHT_NIGHT]),
-            )
-
-        if not self.night_av[constants.NIGHT_NIGHT] and self.config['DAYTIME_CAPTURE'] and not self.config.get('DAYTIME_CAPTURE_SAVE', True):
-            logger.info('Daytime image save is disabled')
-            if diag_enabled:
-                self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='daytime_save_disabled')
-            tmpfile_name.unlink()
-            return latest_file, None
-
-
-        ### Write the timelapse file
-        folder = self._getImageFolder(i_ref.exp_date, i_ref.day_date, camera, 'exposures')
-
-        date_str = i_ref.exp_date.strftime('%Y%m%d_%H%M%S')
-        filename = folder.joinpath(self.filename_t.format(i_ref.camera_id, date_str, self.config['IMAGE_FILE_TYPE']))
-
-        #logger.info('Image filename: %s', filename)
-
-        if diag_enabled:
-            self._images_only_diag(
-                diag_profile_id,
-                diag_camera_id,
-                'IMAGE_DUPLICATE_CHECK',
-                exists=filename.exists(),
-                final_filename=str(filename),
-            )
-
-        if filename.exists():
-            logger.error('File exists: %s (skipping)', filename)
-            if diag_enabled:
-                self._images_only_diag(diag_profile_id, diag_camera_id, 'IMAGE_WRITE_IMG_SKIP_REASON', reason='final_filename_exists', final_filename=str(filename))
-            tmpfile_name.unlink()
-            return latest_file, None
-
-
-        shutil.copy2(str(tmpfile_name), str(filename))
-        filename.chmod(0o644)
-
-        tmpfile_name.unlink()
-
-
-        # set mtime to original exposure time
-        #os.utime(str(filename), (i_ref.exp_date.timestamp(), i_ref.exp_date.timestamp()))
-
-        #logger.info('Finished writing files')
-
-        return latest_file, filename
-
 
     def write_status_json(self, i_ref, adu, adu_average):
         status = {
