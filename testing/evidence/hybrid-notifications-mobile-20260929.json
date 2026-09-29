@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-29",
+  "environment": "Production, native Codex in-app browser",
+  "runtime_reference": "30708b3142ee279eb86d12c81ef1a4ce42ee5a96, per current deployment record; no independent source attestation in this browser check",
+  "controls": [
+    {
+      "route": "/modern-admin/notifications",
+      "control": "#modern-notifications-search",
+      "role": "administrator",
+      "scope": "System-wide; dedicated existing notification 199",
+      "viewport_widths": [
+        390,
+        320
+      ],
+      "status": "superato",
+      "observed": "Searching hybrid_acceptance_20260921 shows exactly notification 199; status shows 1 of 1 filtered from 100."
+    },
+    {
+      "route": "/modern-admin/notifications",
+      "control": "#modern-notifications-ack-filter",
+      "role": "administrator",
+      "scope": "System-wide; dedicated existing notification 199",
+      "viewport_widths": [
+        320
+      ],
+      "status": "superato",
+      "observed": "Acked shows notification 199; Unacknowledged shows zero entries; returning to Acked restores the detail link."
+    },
+    {
+      "route": "/modern-admin/notifications",
+      "control": "Details: Enter",
+      "role": "administrator",
+      "scope": "System-wide; dedicated existing notification 199",
+      "viewport_widths": [
+        390,
+        320
+      ],
+      "status": "superato",
+      "observed": "Keyboard Enter opens /modern-admin/notifications/199; detail visibly reports already acknowledged."
+    },
+    {
+      "route": "/modern-admin/notifications/<int:notification_id>",
+      "control": "Back to Notifications",
+      "role": "administrator",
+      "scope": "System-wide; dedicated existing notification 199",
+      "viewport_widths": [
+        320
+      ],
+      "status": "superato",
+      "observed": "Link returns to the list; search and acknowledgement filters remain operable."
+    },
+    {
+      "route": "/modern-admin/notifications",
+      "control": "Responsive filter layout",
+      "role": "administrator",
+      "scope": "System-wide; dedicated existing notification 199",
+      "viewport_widths": [
+        390,
+        320
+      ],
+      "status": "superato",
+      "observed": "Document scrollWidth equals viewport width. Measured search and all three select bounds lie within viewport. Wide table remains wider than viewport; no claim of testing touch scrolling."
+    },
+    {
+      "route": "/modern-admin/notifications/<int:notification_id>",
+      "control": "Responsive detail layout",
+      "role": "administrator",
+      "scope": "System-wide; dedicated existing notification 199",
+      "viewport_widths": [
+        320
+      ],
+      "status": "superato",
+      "observed": "Document scrollWidth and viewport are both 320 pixels; existing acknowledgement and notification text are visible in the accessibility tree."
+    }
+  ],
+  "mutations": "No acknowledgement, configuration or runtime action submitted. Only client-side filtering and GET navigation.",
+  "cleanup": "Temporary viewport override reset and agent-created tab closed.",
+  "limits": [
+    "Administrator session only; no new ordinary-user or anonymous certification.",
+    "CSV/Excel delivery remains blocked as recorded previously.",
+    "No touchscreen, horizontal table scrolling, pagination or sorting acceptance added by this run."
+  ]
+}

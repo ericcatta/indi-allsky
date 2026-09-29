@@ -139,3 +139,7 @@ Indice statico: 7.351 identità con tutti i 43.978 riferimenti originali conserv
 ## Storage estimate and Settings acceptance, 29 September 2026
 
 [Release evidence](../testing/evidence/hybrid-storage-estimate-fix-20260929.json) records the corrected live capacity estimate, invalid-threshold rejection, Settings navigation, same-value save to revision 118 and Tasks navigation. All persisted values equal revision 117. Both current camera images decoded after web-only deploy. No cleanup was invoked; native field toggling and live deletion are not implied by the same-value save.
+
+## Notifications mobile acceptance — 29 September 2026
+
+[Six scoped records](../testing/evidence/hybrid-notifications-mobile-20260929.json) cover administrator search, acknowledgement filtering, keyboard detail navigation, return navigation and measured layout at 390/320 px. The JSON register links each record to its route. No mutation was submitted; export receipt, touchscreen scrolling and other roles remain outside this check.
