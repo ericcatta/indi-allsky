@@ -40,7 +40,9 @@ def run():
             config['IMAGE_FILE_TYPE']=extension
             old(worker,data,camera)
             previous=uploaded[-1][0]
-            target=publish_realtime_keogram(root/'new',camera.uuid,data,config,lambda x:x)
+            # Regenerable previews must not wait for synchronous disk flushes.
+            with patch('indi_allsky.realtime_keogram_preview.os.fsync', side_effect=AssertionError('Preview forced disk flush')):
+                target=publish_realtime_keogram(root/'new',camera.uuid,data,config,lambda x:x)
             with Image.open(previous) as a,Image.open(target) as b:
                 assert a.size==b.size and np.array_equal(np.array(a),np.array(b)),extension
             formats.append(extension)

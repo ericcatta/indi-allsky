@@ -36,8 +36,10 @@ def publish_realtime_keogram(root, camera_uuid, data, config, apply_labels):
                 image.save(str(temporary), quality=90, lossless=False)
             else:
                 image.save(str(temporary), compression='tiff_lzw')
-        with temporary.open('rb') as stream:
-            os.fsync(stream.fileno())
+        # This preview is regenerated from the separately persisted keogram
+        # history. Closing the encoder and replacing on the same filesystem
+        # exposes a complete file without forcing capture to wait for a disk
+        # flush. A power loss may lose this preview until the next frame.
         temporary.chmod(0o644)
         os.replace(temporary, target)
     finally:
