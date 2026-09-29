@@ -1703,7 +1703,7 @@ body.modern-admin-lightbox-open {
   }
 
   .modern-admin-management-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .modern-admin-media-viewer {

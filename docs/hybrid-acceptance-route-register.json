@@ -4094,7 +4094,50 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminUploadsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[0]",
+          "control": "Details filetransfer",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[2]",
+          "control": "Details s3",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[4]",
+          "control": "Details youtube",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[6]",
+          "control": "Choose media",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[7]",
+          "control": "View tasks",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[8]",
+          "control": "Manage YouTube",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[9]",
+          "control": "#modern-upload-search: empty dataset",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/uploads/<provider_slug>",
@@ -4104,7 +4147,32 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminUploadDetailView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[1]",
+          "control": "Back to Uploads filetransfer",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[3]",
+          "control": "Back to Uploads s3",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[5]",
+          "control": "Back to Uploads youtube",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-upload-management-layout-20260929.json",
+          "record": "controls[10]",
+          "control": "File Transfer detail and Back: Enter at 320px",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/users",

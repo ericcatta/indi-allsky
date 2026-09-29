@@ -115,8 +115,8 @@ Indice statico: 7.351 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/tools/process-fits` | 10 | [hybrid-fits-processing-2026-09-06](../testing/evidence/hybrid-fits-processing-2026-09-06.json) |
 | `/modern-admin/updates` | 0 | Da associare o collaudare |
 | `/modern-admin/updates/start` | 0 | Da associare o collaudare |
-| `/modern-admin/uploads` | 0 | Da associare o collaudare |
-| `/modern-admin/uploads/<provider_slug>` | 0 | Da associare o collaudare |
+| `/modern-admin/uploads` | 7 | [Upload inspection](../testing/evidence/hybrid-upload-management-layout-20260929.json) |
+| `/modern-admin/uploads/<provider_slug>` | 4 | [Upload inspection](../testing/evidence/hybrid-upload-management-layout-20260929.json) |
 | `/modern-admin/users` | 17 | [hybrid-native-users-2026-09-08](../testing/evidence/hybrid-native-users-2026-09-08.json) |
 | `/modern-admin/users/<int:user_id>` | 0 | Da associare o collaudare |
 | `/modern-admin/youtube` | 7 | [hybrid-youtube-2026-09-06](../testing/evidence/hybrid-youtube-2026-09-06.json) |

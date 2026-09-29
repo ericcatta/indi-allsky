@@ -1,0 +1,127 @@
+{
+  "date": "2026-09-29",
+  "status": "tested-candidate-not-deployed",
+  "production_observed_commit": "2142968de05290d965f6368b630c0e3201420e98",
+  "role": "administrator",
+  "scope": "System-wide provider inspection; no uploads, OAuth changes or production mutations",
+  "controls": [
+    {
+      "route": "/modern-admin/uploads",
+      "control": "Details filetransfer",
+      "status": "superato",
+      "observed": "Opened File Transfer; 25 allowlisted fields rendered.",
+      "resolved_path": "/modern-admin/uploads/filetransfer"
+    },
+    {
+      "route": "/modern-admin/uploads/<provider_slug>",
+      "control": "Back to Uploads filetransfer",
+      "status": "superato",
+      "observed": "Returned to Uploads heading."
+    },
+    {
+      "route": "/modern-admin/uploads",
+      "control": "Details s3",
+      "status": "superato",
+      "observed": "Opened S3 Upload; 16 allowlisted fields rendered.",
+      "resolved_path": "/modern-admin/uploads/s3"
+    },
+    {
+      "route": "/modern-admin/uploads/<provider_slug>",
+      "control": "Back to Uploads s3",
+      "status": "superato",
+      "observed": "Returned to Uploads heading."
+    },
+    {
+      "route": "/modern-admin/uploads",
+      "control": "Details youtube",
+      "status": "superato",
+      "observed": "Opened YouTube; 5 allowlisted fields rendered.",
+      "resolved_path": "/modern-admin/uploads/youtube"
+    },
+    {
+      "route": "/modern-admin/uploads/<provider_slug>",
+      "control": "Back to Uploads youtube",
+      "status": "superato",
+      "observed": "Returned to Uploads heading."
+    },
+    {
+      "route": "/modern-admin/uploads",
+      "control": "Choose media",
+      "status": "superato",
+      "observed": "Library with saved image entries",
+      "destination": "/modern-admin/library"
+    },
+    {
+      "route": "/modern-admin/uploads",
+      "control": "View tasks",
+      "status": "superato",
+      "observed": "Task Queue, 469 records",
+      "destination": "/modern-admin/tasks"
+    },
+    {
+      "route": "/modern-admin/uploads",
+      "control": "Manage YouTube",
+      "status": "superato",
+      "observed": "YouTube, not connected",
+      "destination": "/modern-admin/youtube"
+    },
+    {
+      "route": "/modern-admin/uploads",
+      "control": "#modern-upload-search: empty dataset",
+      "status": "superato",
+      "observed": "Search and clearing preserve No recent upload notifications; database confirms no UPLOAD tasks/notifications and all three destinations unconfigured/disabled."
+    },
+    {
+      "route": "/modern-admin/uploads/<provider_slug>",
+      "control": "File Transfer detail and Back: Enter at 320px",
+      "status": "superato",
+      "observed": "Both keyboard navigations succeed; detail document width equals 320px."
+    }
+  ],
+  "defect": {
+    "route": "/modern-admin/uploads",
+    "viewport_width": 320,
+    "document_width_before": 785,
+    "cause": "Mobile grid uses an automatic intrinsic minimum, expanded by 720px tables."
+  },
+  "fix": "Use minmax(0,1fr) for the single mobile management-grid column. Bump stylesheet query version in all three consumers because production static responses cache for 86400 seconds.",
+  "candidate_native_checks": {
+    "environment": "Isolated Raspberry Flask fixture via localhost:18114, Classic absent, synthetic data, external effects blocked",
+    "width_320": {
+      "uploads_document": 320,
+      "uploads_panels": 286,
+      "uploads_table_scroller": 238,
+      "uploads_table_content": 720,
+      "youtube_document": 320,
+      "sensor_panel_document": 320
+    },
+    "width_1280": {
+      "sensor_panel_document": 1280,
+      "grid_columns": [
+        707.25,
+        522.75
+      ]
+    },
+    "limitation": "Measured containment; touchscreen horizontal scrolling not exercised."
+  },
+  "tests": {
+    "javascript_passed": 34,
+    "javascript_failed": 0,
+    "javascript_report": "/tmp/hybrid-management-grid-js-20260929.json",
+    "javascript_report_sha256": "9c546ec23fdd9f4923a941ccd82a85a1274c50e47aca8900f3e47d5529bc619d",
+    "python_rerun_passed": [
+      "hybrid_overview_summaries_test.py",
+      "hybrid_sensor_panel_flow_test.py",
+      "hybrid_youtube_flow_test.py"
+    ],
+    "baseline": "The 166-pass encoder regression remains evidence for unchanged Python; not described as a new full-suite run for this CSS/template-only candidate.",
+    "manifest_sha256": "ceaeed9c0841046d239877a64988fe3affd384b7162232cd0c2c257e887895e4"
+  },
+  "cleanup": "Viewport restored, temporary browser tabs closed, isolated server PID1415730 stopped and SSH tunnel closed.",
+  "open": [
+    "Production deployment of layout fix",
+    "Real external destination upload",
+    "Positive notification search with real upload messages",
+    "Other roles native checks; isolated permission tests remain separately scoped"
+  ]
+}

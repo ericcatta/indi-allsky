@@ -109,6 +109,15 @@ mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
 
+## Tested mobile management-grid candidate
+
+Uploads overflowed a 320px screen to 785px because of the intrinsic grid minimum.
+The CSS correction and cache version updates are tested but not yet deployed.
+Native isolated checks fit Uploads, YouTube and Sensor Panel at 320px; desktop
+retains two columns. All 34 JavaScript tests and three affected Python flow tests
+pass. Production provider navigation and empty states were also verified against
+the database. External transfers remain open. [Evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
+
 ## Encoder failure handling deployed
 
 The worker could overwrite a valid latest PNG preview with an empty file when
