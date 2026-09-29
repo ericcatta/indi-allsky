@@ -3887,7 +3887,44 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminLogView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[0]",
+          "control": "Initial load",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[1]",
+          "control": "Refresh 5s with 20s delay",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[2]",
+          "control": "Filter after timeout",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[3]",
+          "control": "Lines 100",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[4]",
+          "control": "Unmatched filter",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[10]",
+          "control": "Refresh after session logout",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/system/log/<log_name>",
@@ -3897,7 +3934,38 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminLogDetailView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[5]",
+          "control": "Capture Log",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[6]",
+          "control": "Webapp Log",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[7]",
+          "control": "OS System Log",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[8]",
+          "control": "Kernel Log",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-log-controller-20260929.json",
+          "record": "controls[9]",
+          "control": "Back to Log",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/system/network",

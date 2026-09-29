@@ -30,7 +30,8 @@ var camera_id = {{ camera_id }};
             <label>Filter {{ form_logviewer.FILTER() }}</label>
         </div>
         <p class="modern-admin-note">Newest entries first. The filter searches only the selected recent lines.</p>
-        <pre class="modern-admin-log-output" id="modern-admin-log-output">Loading log...</pre>
+        <p id="modern-admin-log-status" role="status">Loading log...</p>
+        <pre class="modern-admin-log-output" id="modern-admin-log-output"></pre>
         <div class="modern-admin-link-grid" aria-label="Log details">
             <a href="{{ url_for('indi_allsky.modern_admin_log_detail_view', log_name='capture') }}">Capture Log Detail</a>
             <a href="{{ url_for('indi_allsky.modern_admin_log_detail_view', log_name='webapp') }}">Webapp Log Detail</a>
@@ -51,35 +52,70 @@ function modernAdminLogRefreshMs() {
     return Number(document.getElementById('REFRESH_SELECT').value || 15) * 1000;
 }
 
-function modernAdminLoadLog() {
-    fetch('{{ url_for('indi_allsky.js_log_view') }}', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': {{ csrf_token()|tojson }}},
-        body: JSON.stringify({
-            lines: document.getElementById('LINES_SELECT').value,
-            filter: document.getElementById('FILTER').value
-        })
-    })
-        .then((response) => {
-            if (response.redirected) throw new Error('session_expired');
-            if (!response.ok) throw new Error('request_failed');
-            return response.json();
-        })
-        .then((data) => {
-            document.getElementById('modern-admin-log-output').textContent = data.log || '[No log data]';
-        })
-        .catch((error) => {
-            document.getElementById('modern-admin-log-output').textContent = error.message === 'session_expired'
-                ? 'Session expired. Sign in and reload the log page.'
-                : 'Error loading log data. Check access and refresh the page.';
+let modernAdminLogRequest = null;
+let modernAdminLogLoadedQuery = null;
+let modernAdminLogFailed = false;
+
+async function modernAdminLoadLog(supersede = true) {
+    if (modernAdminLogRequest && !supersede) return;
+    if (modernAdminLogRequest) modernAdminLogRequest.abort();
+    const controller = new AbortController();
+    modernAdminLogRequest = controller;
+    const output = document.getElementById('modern-admin-log-output');
+    const status = document.getElementById('modern-admin-log-status');
+    const body = JSON.stringify({
+        lines: document.getElementById('LINES_SELECT').value,
+        filter: document.getElementById('FILTER').value
+    });
+    if (modernAdminLogLoadedQuery !== body) {
+        output.textContent = '';
+        modernAdminLogLoadedQuery = null;
+    }
+    if (supersede || !modernAdminLogFailed) {
+        status.textContent = modernAdminLogLoadedQuery === body
+            ? 'Refreshing; showing previous log data.' : 'Loading log...';
+    }
+    let timedOut = false;
+    const deadline = window.setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+    }, 15000);
+    try {
+        const response = await fetch('{{ url_for('indi_allsky.js_log_view') }}', {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': {{ csrf_token()|tojson }}},
+            body: body
         });
+        if (response.redirected) throw new Error('session_expired');
+        if (!response.ok) throw new Error('request_failed');
+        const data = await response.json();
+        if (modernAdminLogRequest !== controller) return;
+        if (!data || Array.isArray(data) || typeof data.log !== 'string') throw new Error('invalid_response');
+        if (data.log.startsWith('ERROR:')) throw new Error(data.log);
+        output.textContent = data.log || '[No log data]';
+        modernAdminLogLoadedQuery = body;
+        modernAdminLogFailed = false;
+        status.textContent = 'Updated. Newest entries first.';
+    } catch (error) {
+        if (modernAdminLogRequest !== controller) return;
+        modernAdminLogFailed = true;
+        const message = timedOut ? 'Log request timed out. The next refresh will retry.'
+            : error.message === 'session_expired' ? 'Session expired. Sign in and reload the log page.'
+            : error.message.startsWith('ERROR:') ? error.message
+            : 'Error loading log data. Check access and refresh the page.';
+        status.textContent = (modernAdminLogLoadedQuery === body ? 'Showing previous log data. ' : '') + message;
+    } finally {
+        window.clearTimeout(deadline);
+        if (modernAdminLogRequest === controller) modernAdminLogRequest = null;
+    }
 }
 
 let modernAdminLogTimer;
 function modernAdminRestartLogTimer() {
     window.clearInterval(modernAdminLogTimer);
     modernAdminLoadLog();
-    modernAdminLogTimer = window.setInterval(modernAdminLoadLog, modernAdminLogRefreshMs());
+    modernAdminLogTimer = window.setInterval(() => modernAdminLoadLog(false), modernAdminLogRefreshMs());
 }
 
 document.getElementById('REFRESH_SELECT').addEventListener('change', modernAdminRestartLogTimer);

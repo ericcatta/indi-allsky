@@ -259,6 +259,16 @@ HTTP 403 also recurred, with the previous catalog retained.
 No acquisition settings or scheduler behavior were changed. The 24-hour test
 remains deferred.
 
+## Log viewer request ordering and recovery
+
+The viewer now aborts superseded requests, ignores late responses and prevents
+overlapping automatic polls. A 15-second deadline covers response decoding;
+failed refreshes retain prior rows with a visible warning until recovery.
+The final candidate passes 169 Python entrypoints and 34 JavaScript tests.
+Native isolated checks cover delayed responses, filter recovery, empty results
+and session expiry; production deployment remains pending.
+[Evidence](testing/evidence/hybrid-log-controller-20260929.json).
+
 ## Remaining acceptance gates
 
 

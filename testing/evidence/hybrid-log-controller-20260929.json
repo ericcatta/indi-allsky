@@ -1,0 +1,114 @@
+{
+  "date": "2026-09-29",
+  "baseline": "9a526bc9c5200a6819d2d2997a3a63113a13e943",
+  "status": "validated-awaiting-deployment",
+  "source_manifest_sha256": "5eab826f5f5b81462ebbf76c44ddc2b241b0a6823c84ec49e786c89771e8712d",
+  "defect": "Concurrent log requests allowed stale responses to overwrite current filters; fetch/body had no deadline.",
+  "fix": "Abort superseded selection requests, ignore superseded responses, skip overlapping polls, enforce 15s fetch/body deadline, validate response shape and distinguish source errors; retain previous same-query data with explicit warning until success.",
+  "tests": {
+    "red": "Deferred old response overwrote new result before fix. Added retry-status assertion also failed before final warning-persistence correction.",
+    "javascript": "34 passed on final source",
+    "javascript_report_sha256": "f67ca06162e8765db52ff64c0b0661ad0673e0f16049b56e468d863f6ab17a5c",
+    "python_report": "/home/eric/hybrid-log-controller-regression-final-20260929/results.json",
+    "earlier_run": "Interrupted intentionally after native testing found retry warning disappeared. Not claimed passed.",
+    "python": "169 passed; source_changed false",
+    "python_report_sha256": "e8f930d4fc253284a943fc8da40346150e5e392d52ff0166e4d4675a14f8854d"
+  },
+  "controls": [
+    {
+      "route": "/modern-admin/system/log",
+      "control": "Initial load",
+      "role": "ordinary user",
+      "environment": "isolated localhost:18118",
+      "status": "superato",
+      "observed": "Synthetic log rendered newest first; explicit Updated status."
+    },
+    {
+      "route": "/modern-admin/system/log",
+      "control": "Refresh 5s with 20s delay",
+      "role": "ordinary user",
+      "environment": "isolated localhost:18118",
+      "status": "superato",
+      "observed": "Existing rows retained; 15-second timeout visibly reported and remains visible through automatic retry."
+    },
+    {
+      "route": "/modern-admin/system/log",
+      "control": "Filter after timeout",
+      "role": "ordinary user",
+      "environment": "isolated localhost:18118",
+      "status": "superato",
+      "observed": "After removing fixture delay, Camera 2 filter returns only Camera 2 ready; controller recovers."
+    },
+    {
+      "route": "/modern-admin/system/log",
+      "control": "Lines 100",
+      "role": "ordinary user",
+      "environment": "isolated localhost:18118",
+      "status": "superato",
+      "observed": "Selection changed to 100; filtered Camera 2 result recovered."
+    },
+    {
+      "route": "/modern-admin/system/log",
+      "control": "Unmatched filter",
+      "role": "ordinary user",
+      "environment": "isolated localhost:18118",
+      "status": "superato",
+      "observed": "No matching lines shown as a valid empty result, separate from errors."
+    },
+    {
+      "route": "/modern-admin/system/log/<log_name>",
+      "control": "Capture Log",
+      "role": "administrator",
+      "environment": "production before deployment, unchanged detail template",
+      "status": "superato",
+      "observed": "Selected source capture; correct label/source, Available status, size 48.5 MB, 200-line limit. Capture preview includes current timestamp; web preview contains actual web-worker log entries."
+    },
+    {
+      "route": "/modern-admin/system/log/<log_name>",
+      "control": "Webapp Log",
+      "role": "administrator",
+      "environment": "production before deployment, unchanged detail template",
+      "status": "superato",
+      "observed": "Selected source webapp; correct label/source, Available status, size 20.1 KB, 200-line limit. Capture preview includes current timestamp; web preview contains actual web-worker log entries."
+    },
+    {
+      "route": "/modern-admin/system/log/<log_name>",
+      "control": "OS System Log",
+      "role": "administrator",
+      "environment": "production before deployment, unchanged detail template",
+      "status": "superato",
+      "observed": "Selected source syslog; correct label/source, Available status, size 2.5 MB, 200-line limit."
+    },
+    {
+      "route": "/modern-admin/system/log/<log_name>",
+      "control": "Kernel Log",
+      "role": "administrator",
+      "environment": "production before deployment, unchanged detail template",
+      "status": "superato",
+      "observed": "Selected source kernel; correct label/source, Available status, size 2.4 MB, 200-line limit."
+    },
+    {
+      "route": "/modern-admin/system/log/<log_name>",
+      "control": "Back to Log",
+      "role": "administrator",
+      "environment": "production before deployment",
+      "status": "superato",
+      "observed": "Returns to Application log with Refresh, Lines and Filter controls."
+    },
+    {
+      "route": "/modern-admin/system/log",
+      "control": "Refresh after session logout",
+      "role": "ordinary user session -> anonymous",
+      "environment": "isolated localhost:18118",
+      "status": "superato",
+      "observed": "Logout in a second tab reached Sign in. Refresh in existing viewer reports Session expired, asks sign-in/reload and explicitly labels already displayed rows as previous log data."
+    }
+  ],
+  "limits": [
+    "Candidate not yet deployed.",
+    "No native download receipt claimed; the four download links were not exercised.",
+    "Known-source details are unchanged by this candidate; their native checks were performed against deployed baseline.",
+    "No configuration, capture or log contents modified in production.",
+    "Delay injection applies only to the isolated fixture endpoint; production providers unchanged."
+  ]
+}
