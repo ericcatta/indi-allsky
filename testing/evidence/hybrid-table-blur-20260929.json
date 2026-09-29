@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "validated-awaiting-deployment",
+  "status": "cache-refresh-validated-awaiting-deployment",
   "defect": "First pagination click after editing/clearing a text search could be discarded by the redundant change-on-blur redraw. Observed on production File Space Usage.",
   "change": "Compare normalized filter value with last applied value before redraw; keep both input and change support for text/select filters.",
   "javascript": {
@@ -28,5 +28,23 @@
     "source_changed": false,
     "report": "/home/eric/hybrid-table-blur-regression-20260929/results.json",
     "sha256": "a350c8e63c465d9d5f43e9f50b9d256bb06fbc649cca76b9c41bd58d283a486c"
+  },
+  "initial_deployment": {
+    "commit": "c427c5c3e4b807d694411610adc847d8ede3eb05",
+    "backup": "/home/eric/hybrid-backups/hybrid-table-blur-20260929-181116",
+    "capture_pid_unchanged": 1862836,
+    "native_result": "First-click failure persisted on production page referencing operations-table.js?v=clipboard-2, while isolated fixture passed both roles.",
+    "follow_up": "Bump shared script URL version across all nine consumers to invalidate stale browser assets. Apache template caches JavaScript for one day. Verify native result after rollout; no success claimed yet."
+  },
+  "cache_validation": {
+    "cases": 171,
+    "status": "passed",
+    "source_changed": false,
+    "report": "/home/eric/hybrid-table-cache-regression-20260929/results.json",
+    "sha256": "42baad181ff9176e1f227da8c2e3b7bade4c816892996c758506e61ea84515a9",
+    "source_count": 833,
+    "manifest_sha256": "563746f9a2b03ab736484581335fc2240f7736f34f665eaa84ff6ad771cc12bf",
+    "javascript": "Same tested controller; 34 JS results unchanged.",
+    "consumers_updated": 9
   }
 }

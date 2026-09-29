@@ -3824,7 +3824,127 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminFileSpaceUsageView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[0]",
+          "control": "Images ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[1]",
+          "control": "Panoramas ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[2]",
+          "control": "FITS ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[3]",
+          "control": "Raw Images ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[4]",
+          "control": "Timelapses ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[5]",
+          "control": "Mini Timelapses ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[6]",
+          "control": "Keograms ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[7]",
+          "control": "Star Trails ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[8]",
+          "control": "Star Trail Timelapses ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[9]",
+          "control": "Panorama Timelapses ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[10]",
+          "control": "Thumbnails ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[11]",
+          "control": "Total ascending/descending",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[12]",
+          "control": "Search 2026-09-29",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[13]",
+          "control": "Copy filtered table",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[14]",
+          "control": "Search nonexistent date",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[15]",
+          "control": "Search clear via keyboard",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-file-space-native-20260929.json",
+          "record": "controls[16]",
+          "control": "Next immediately after search clear",
+          "recorded_status": "difetto",
+          "observed_page": "/modern-admin/storage/file-space-usage"
+        }
+      ]
     },
     {
       "route": "/modern-admin/system",

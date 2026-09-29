@@ -94,7 +94,7 @@ Indice statico: 7.351 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/sky-cycle` | 2 | [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
 | `/modern-admin/storage` | 0 | Da associare o collaudare |
 | `/modern-admin/storage/drives` | 4 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |
-| `/modern-admin/storage/file-space-usage` | 0 | Da associare o collaudare |
+| `/modern-admin/storage/file-space-usage` | 17 | [hybrid-file-space-native-20260929](../testing/evidence/hybrid-file-space-native-20260929.json) |
 | `/modern-admin/system` | 0 | Da associare o collaudare |
 | `/modern-admin/system/config` | 0 | Da associare o collaudare |
 | `/modern-admin/system/gpio-control` | 2 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |
