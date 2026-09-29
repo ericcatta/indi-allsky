@@ -233,6 +233,24 @@ the report preserves the initial test-harness failure and corrected reruns.
 Capture/web/CLI runtime loading is verified. The short before/after measurements
 are recorded above; broader cadence validation remains open.
 
+## Checkpoint follow-up under actual test load
+
+A 35-minute day-mode observation includes the eight-minute 169-entrypoint
+regression. Each camera received 140 exposure commands; median command spacing
+was 15.03 seconds, maximum 16.39 seconds for IMX708 and 15.25 for ZWO. No command
+interval exceeded 17 seconds. During regression, saved-image timestamp intervals
+were at most 15/16 seconds. Capture PID 1512517 had no restarts.
+
+Two IMX708 saved-record gaps of 18/19 seconds occurred before that regression.
+The libcamera path assigns the image timestamp after metadata processing, and
+logs show a 7.08-second interval between process exit and the gain metadata log.
+This distinguishes submission cadence from delayed metadata; it does not locate
+the blocking syscall or prove latency is fully resolved. An external Starlink
+HTTP 403 also recurred, with the previous catalog retained.
+[Measured evidence](testing/evidence/hybrid-checkpoint-load-observation-20260929.json).
+No acquisition settings or scheduler behavior were changed. The 24-hour test
+remains deferred.
+
 ## Remaining acceptance gates
 
 

@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-29",
+  "scope": "Read-only post-checkpoint observation including the real 169-entrypoint regression workload; no additional stress process or camera changes.",
+  "capture_runtime_commit": "f0d502fb2088ab32c8d8850a609d605178e3eb60",
+  "web_runtime_commit": "fa85a221478774a005d729496a2dd3af0d72ad40",
+  "private_report": "/home/eric/hybrid-checkpoint-load-observation-20260929.json",
+  "private_report_sha256": "25b64466fc6aa70037a953adc8806a758ed16610ef860430bd45d6c5700a589f",
+  "observation_window": [
+    "2026-09-29T13:54:25+02:00",
+    "2026-09-29T14:29:25+02:00"
+  ],
+  "regression_load_window": [
+    "2026-09-29T14:15:37.078092+02:00",
+    "2026-09-29T14:23:47.991888+02:00"
+  ],
+  "capture_pid": 1512517,
+  "capture_restarts": 0,
+  "cameras": {
+    "1": {
+      "command_count": 140,
+      "command_interval_median_s": 15.032708,
+      "command_interval_max_s": 16.39412,
+      "saved_frames": 140,
+      "saved_timestamp_interval_max_s": 19,
+      "saved_gaps_over_17_s": [
+        19,
+        18
+      ],
+      "regression_frames": 33,
+      "regression_saved_interval_max_s": 15
+    },
+    "2": {
+      "command_count": 140,
+      "command_interval_median_s": 15.033181,
+      "command_interval_max_s": 15.249409,
+      "saved_frames": 139,
+      "saved_timestamp_interval_max_s": 16,
+      "saved_gaps_over_17_s": [],
+      "regression_frames": 32,
+      "regression_saved_interval_max_s": 16
+    }
+  },
+  "interpretation": [
+    "140 submission commands per camera in the window; the final camera-2 submission is at the observation boundary and its saved record is not counted in the earlier DB snapshot.",
+    "No command interval exceeded 17 seconds. Hardware shutter timing is not measured by application logs.",
+    "libcamera._queueImage assigns exp_time after _processMetadata. Saved createDate intervals are not direct shutter-start intervals.",
+    "At 14:13:13.685815 rpicam exit is logged; gain metadata log follows at 14:13:20.761071. The intervening 7.075256-second delay is observed, not localized to a syscall.",
+    "Recorded queue depths were 1 or 2; no maximum-depth entry was observed."
+  ],
+  "provider_error": {
+    "time": "2026-09-29T13:59:45.812402+02:00",
+    "group": "starlink",
+    "status": 403,
+    "behavior": "Previous satellite catalog retained. External-provider failure reappeared; earlier successful fetch evidence does not imply continuous availability."
+  },
+  "limits": [
+    "35-minute day-mode window, including eight minutes of known load; not 24-hour acceptance.",
+    "No proof of all-load latency or physical SD/storage cause.",
+    "Metadata-stage delay remains an open diagnosis; no speculative capture change.",
+    "Initial unbounded log read was interrupted; final analysis used a bounded 8 MiB tail that covered the stated window."
+  ]
+}
