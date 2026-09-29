@@ -40,7 +40,7 @@
     "At 11:09, the latest five saved images for each camera were exactly 15 seconds apart; camera1 latest 11:09:20, camera2 11:09:21."
   ],
   "conclusion": "Transient delays persist after image publication fixes. A bounded syscall trace directly measured16.483467s in image-worker fdatasync on the database descriptor, consistent with WAL checkpoint cost. This identifies a blocking persistence stage; it does not establish the physical storage cause or prove all cadence incidents share it.",
-  "next_action": "Verify WAL checkpoint ownership and move expensive checkpoint work out of the frame processing path with bounded background execution and recovery tests. Preserve synchronous=NORMAL and watchdog semantics; do not claim a fix before before/after measurement.",
+  "next_action": "Validate the patched SQLite candidate against the isolated application regression before introducing background checkpoints. Then verify checkpoint ownership/lifecycle, failure fallback and measured cadence; preserve synchronous=NORMAL and watchdog semantics.",
   "changes": "No runtime/configuration changes, restarts or media deletions.",
   "followup": {
     "runtime": "3577fa82 (capture unchanged from07b2098d)",
@@ -73,5 +73,23 @@
     },
     "report": "/home/eric/hybrid-capture-periodic-review-20260929.json",
     "sha256": "f8996549f095e75170eb5f9f68b5d1d43e109d1ddadeba279d2cd949de5ba17f"
+  },
+  "checkpoint_prerequisite": {
+    "status": "isolated-smoke-passed-not-deployed",
+    "installed_sqlite": "3.46.1",
+    "debian_package": "3.46.1-7+deb13u1",
+    "upstream_issue": "https://sqlite.org/wal.html#walreset",
+    "release": "https://sqlite.org/releaselog/3_51_3.html",
+    "candidate": "3.51.3",
+    "source": "https://sqlite.org/2026/sqlite-amalgamation-3510300.zip",
+    "sqlite3_c_sha3_256": "32d5424f97e0a7fc5ed2f6335afbb58be4e0298bd7117a34e39d345ff13d859e",
+    "candidate_directory": "/home/eric/hybrid-sqlite-3510300-isolated",
+    "compile_command": "cc -O2 -fPIC -shared -DSQLITE_THREADSAFE=1 -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_LOAD_EXTENSION -Wl,-soname,libsqlite3.so.0 -o libsqlite3.so.0 sqlite3.c -lm -ldl -lpthread",
+    "library_sha256": "1d2d5565943394a5e87bb8cabdf49b64b74e610eae2527958bc4b8f46f7fc2d7",
+    "result": "/home/eric/hybrid-sqlite-3510300-isolated/result.json",
+    "result_sha256": "d01d435dfc453c86aaf0f9838ff74a80fed57051f4c864142d7b12043d5874ee",
+    "probe": "testing/sqlite_runtime_probe.py",
+    "outcome": "400 exact payloads;3 passive checkpoints; integrity_check ok; system3.46.1 readback has identical row hash. LD_LIBRARY_PATH applied only to probe process. No system package, production database or service changed.",
+    "limits": "Not a race reproducer, full library compatibility suite, performance comparison, deployment or cadence fix."
   }
 }

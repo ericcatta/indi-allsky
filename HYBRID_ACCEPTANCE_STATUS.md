@@ -195,6 +195,10 @@ with checkpoint work; the physical cause and correction remain open. In the
 12:18–13:10 sample, IMX708 had one 38-second gap and ASI678MC had no gap over
 17 seconds. This is not the deferred 24-hour acceptance. No capture settings
 were changed.
+The installed SQLite 3.46.1 predates the upstream WAL-reset correction. A private
+3.51.3 library passed a synthetic concurrency/integrity and old-library readback
+probe; it is not deployed. Full application compatibility and checkpoint lifecycle
+verification are prerequisites to the proposed background checkpoint change.
 
 ## Remaining acceptance gates
 
