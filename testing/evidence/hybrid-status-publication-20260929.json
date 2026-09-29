@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-29",
+  "status": "validated-awaiting-deploy",
+  "defect": "The Telegraf JSON snapshot was truncated in place and an OSError during its publication propagated out of ImageWorker.write_status_json before the image was saved.",
+  "change": "Serialize before touching disk, write a sibling temporary file, close/chmod and atomically replace. Diagnostic OSError is logged and returns normally to image processing.",
+  "preserved": [
+    "JSON keys and sensor values",
+    "JSON byte formatting and Unicode",
+    "Path and 0644 permissions",
+    "Primary-profile-only publication",
+    "Metadata serialization errors still propagate",
+    "No fsync added to regenerable snapshot"
+  ],
+  "targeted_tests": [
+    "Reader sees previous complete JSON while replacement is held",
+    "Byte parity with legacy json.dump formatting",
+    "Failed replacement and partial write preserve previous contents and clean temporary file",
+    "Actual ImageWorker method continues after diagnostic OSError",
+    "Invalid metadata preserves previous snapshot and raises TypeError"
+  ],
+  "installer_check": "setup.sh creates VARLIB_FOLDER with mode 775 and capture-user ownership; production directory is eric:eric 775.",
+  "source_count": 835,
+  "manifest_sha256": "afaeac3ce66de7f770d2e92c4d8dcaf627aa769c74365993ad234097713667d6",
+  "javascript": {
+    "cases": 34,
+    "failed": 0,
+    "report": "/tmp/hybrid-status-publication-js.json",
+    "sha256": "73b5f1ebbf11969be5e5f9979b364cef89290d6799d1d4609839696ac0036f49"
+  },
+  "limitations": [
+    "This is correctness/error-isolation work, not a measured disk-latency improvement.",
+    "External Telegraf service integration is not claimed; the documented file contract is tested.",
+    "Production acceptance pending."
+  ],
+  "python": {
+    "cases": 172,
+    "status": "passed",
+    "source_changed": false,
+    "report": "/home/eric/hybrid-status-publication-regression-20260929/results.json",
+    "sha256": "c3906abd99d68f0fe086a842fcb5a9192368f0b2be5b229d026974e22f0ddea2"
+  }
+}

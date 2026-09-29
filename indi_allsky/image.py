@@ -4271,6 +4271,8 @@ class ImageWorker(Process):
             tmpfile_name.unlink(missing_ok=True)
 
     def write_status_json(self, i_ref, adu, adu_average):
+        from .status_publication import publish_status_json
+
         status = {
             'name'                : 'indi_json',
             'class'               : 'ccd',
@@ -4334,15 +4336,11 @@ class ImageWorker(Process):
 
         indi_allsky_status_p = self.varlib_folder_p.joinpath('indi_allsky_status.json')
 
-        with io.open(str(indi_allsky_status_p), 'w', encoding='utf-8') as f_indi_status:
-            json.dump(
-                status,
-                f_indi_status,
-                indent=4,
-                ensure_ascii=False,
-            )
-
-        indi_allsky_status_p.chmod(0o644)
+        try:
+            publish_status_json(indi_allsky_status_p, status)
+        except OSError:
+            # The Telegraf snapshot must not discard an otherwise valid frame.
+            logger.exception('[STATUS_JSON_PUBLISH_FAILED] Continuing image processing')
 
 
     def _getImageFolder(self, exp_date, day_date, camera, type_folder):
