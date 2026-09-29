@@ -2772,6 +2772,54 @@
           "record": "controls[1]",
           "control": "Profile tab \u2192 Settings index \u2192 Exposure / Gain",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[0]",
+          "control": "Advanced level link; imx708-wide; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[7]",
+          "control": "Advanced level link; imx708-wide; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[14]",
+          "control": "Advanced level link; imx708-wide; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[21]",
+          "control": "Basic level link; imx708-wide; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[28]",
+          "control": "Advanced level link; asi678mc; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[35]",
+          "control": "Advanced level link; asi678mc; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[42]",
+          "control": "Advanced level link; asi678mc; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[49]",
+          "control": "Basic level link; asi678mc; storage",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -2783,7 +2831,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminAcquisitionSaveSettingsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[15]",
+          "control": "Acquisition and save editor link; imx708-wide; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[43]",
+          "control": "Acquisition and save editor link; asi678mc; acquisition-save",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/advanced",
@@ -2793,7 +2854,44 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminAdvancedSettingsPreviewView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[1]",
+          "control": "FITS and source editor link; imx708-wide; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[8]",
+          "control": "Analytics editor link; imx708-wide; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[15]",
+          "control": "Acquisition and save editor link; imx708-wide; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[29]",
+          "control": "FITS and source editor link; asi678mc; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[36]",
+          "control": "Analytics editor link; asi678mc; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[43]",
+          "control": "Acquisition and save editor link; asi678mc; acquisition-save",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/analytics",
@@ -2803,7 +2901,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminAnalyticsSettingsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[8]",
+          "control": "Analytics editor link; imx708-wide; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[36]",
+          "control": "Analytics editor link; asi678mc; analytics",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/auto-exposure-gain",
@@ -2823,7 +2934,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminBasicSettingsPreviewView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[22]",
+          "control": "Storage editor link; imx708-wide; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[50]",
+          "control": "Storage editor link; asi678mc; storage",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/camera-connection",
@@ -2919,7 +3043,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminFitsSourceSettingsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[1]",
+          "control": "FITS and source editor link; imx708-wide; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[29]",
+          "control": "FITS and source editor link; asi678mc; fits-source",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/full",
@@ -3030,6 +3167,246 @@
           "control": "Clear search via Meta+A / Backspace",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/settings/full"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[2]",
+          "control": "#modern-admin-full-settings-filter: search IMAGE_SAVE_FITS_COMPRESSED; imx708-wide; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[3]",
+          "control": "#modern-admin-full-settings-filter: clear with keyboard; imx708-wide; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[4]",
+          "control": "#settings-domain-only: uncheck; imx708-wide; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[5]",
+          "control": "#settings-domain-only: check; imx708-wide; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[6]",
+          "control": "All settings link; imx708-wide; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[9]",
+          "control": "#modern-admin-full-settings-filter: search CHARTS__CUSTOM_SLOT_1; imx708-wide; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[10]",
+          "control": "#modern-admin-full-settings-filter: clear with keyboard; imx708-wide; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[11]",
+          "control": "#settings-domain-only: uncheck; imx708-wide; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[12]",
+          "control": "#settings-domain-only: check; imx708-wide; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[13]",
+          "control": "All settings link; imx708-wide; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[16]",
+          "control": "#modern-admin-full-settings-filter: search IMAGE_FILE_TYPE; imx708-wide; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[17]",
+          "control": "#modern-admin-full-settings-filter: clear with keyboard; imx708-wide; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[18]",
+          "control": "#settings-domain-only: uncheck; imx708-wide; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[19]",
+          "control": "#settings-domain-only: check; imx708-wide; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[20]",
+          "control": "All settings link; imx708-wide; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[23]",
+          "control": "#modern-admin-full-settings-filter: search HEALTHCHECK__DISK_USAGE; imx708-wide; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[24]",
+          "control": "#modern-admin-full-settings-filter: clear with keyboard; imx708-wide; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[25]",
+          "control": "#settings-domain-only: uncheck; imx708-wide; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[26]",
+          "control": "#settings-domain-only: check; imx708-wide; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[27]",
+          "control": "All settings link; imx708-wide; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[30]",
+          "control": "#modern-admin-full-settings-filter: search IMAGE_SAVE_FITS_COMPRESSED; asi678mc; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[31]",
+          "control": "#modern-admin-full-settings-filter: clear with keyboard; asi678mc; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[32]",
+          "control": "#settings-domain-only: uncheck; asi678mc; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[33]",
+          "control": "#settings-domain-only: check; asi678mc; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[34]",
+          "control": "All settings link; asi678mc; fits-source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[37]",
+          "control": "#modern-admin-full-settings-filter: search CHARTS__CUSTOM_SLOT_1; asi678mc; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[38]",
+          "control": "#modern-admin-full-settings-filter: clear with keyboard; asi678mc; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[39]",
+          "control": "#settings-domain-only: uncheck; asi678mc; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[40]",
+          "control": "#settings-domain-only: check; asi678mc; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[41]",
+          "control": "All settings link; asi678mc; analytics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[44]",
+          "control": "#modern-admin-full-settings-filter: search IMAGE_FILE_TYPE; asi678mc; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[45]",
+          "control": "#modern-admin-full-settings-filter: clear with keyboard; asi678mc; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[46]",
+          "control": "#settings-domain-only: uncheck; asi678mc; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[47]",
+          "control": "#settings-domain-only: check; asi678mc; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[48]",
+          "control": "All settings link; asi678mc; acquisition-save",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[51]",
+          "control": "#modern-admin-full-settings-filter: search HEALTHCHECK__DISK_USAGE; asi678mc; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[52]",
+          "control": "#modern-admin-full-settings-filter: clear with keyboard; asi678mc; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[53]",
+          "control": "#settings-domain-only: uncheck; asi678mc; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[54]",
+          "control": "#settings-domain-only: check; asi678mc; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[55]",
+          "control": "All settings link; asi678mc; storage",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -3071,7 +3448,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminStorageSettingsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[22]",
+          "control": "Storage editor link; imx708-wide; storage",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-settings-domain-controls-20260929.json",
+          "record": "controls[50]",
+          "control": "Storage editor link; asi678mc; storage",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/storage-protection",

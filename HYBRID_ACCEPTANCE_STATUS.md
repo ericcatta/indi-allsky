@@ -112,6 +112,16 @@ mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
 
+## Focused Settings controls verified on both profiles
+
+Production administrator paths through Basic/Advanced to Storage, Analytics,
+Acquisition/Save and FITS/Source were exercised for both cameras. Search,
+keyboard clear, focus checkbox off/on and return navigation produced the expected
+visible results and retained camera/profile context. The eight round trips record
+56 control occurrences; this is not whole-product coverage. Configuration 118
+remained unchanged; save/restore/download are outside this particular check.
+[Evidence](testing/evidence/hybrid-settings-domain-controls-20260929.json).
+
 ## Capture image publication deployed
 
 Release `07b2098d` preserves the previous latest preview if copying or publication
