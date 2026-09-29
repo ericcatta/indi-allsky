@@ -53,6 +53,11 @@
     async function load() {
         if (active) return;
         const controller = new AbortController(); active = controller;
+        let timedOut = false;
+        const deadline = window.setTimeout(() => {
+            timedOut = true;
+            controller.abort();
+        }, 15000);
         refresh.disabled = true; status.textContent = 'Loading astropanel data...';
         try {
             const response = await fetch(root.dataset.url + '?' + new URLSearchParams({camera_id:root.dataset.camera}), {signal:controller.signal});
@@ -76,7 +81,7 @@
             node('satellite-rows').replaceChildren(...(satelliteRows.length ? satelliteRows : [emptyRow('No satellite data available.', 8)]));
             loaded = true; status.textContent = 'Updated ' + new Date().toLocaleTimeString() + ' · refreshes every minute.';
         } catch (error) {
-            if (error.name === 'AbortError') return;
+            if (error.name === 'AbortError' && !timedOut) return;
             if (!loaded) {
                 polarFinder(null);
                 node('satellite-status').textContent = 'Satellite predictions unavailable.';
@@ -85,9 +90,10 @@
                 node('planet-rows').replaceChildren(emptyRow('Astropanel data unavailable.', 6));
                 node('satellite-rows').replaceChildren(emptyRow('Satellite data unavailable.', 8));
             }
-            status.textContent = (error.message === 'session_expired' ? 'Session expired. Sign in and reload this page.' : 'Could not update astropanel. Try Refresh.')
+            status.textContent = (timedOut ? 'Timed out updating astropanel. Try Refresh.'
+                : error.message === 'session_expired' ? 'Session expired. Sign in and reload this page.' : 'Could not update astropanel. Try Refresh.')
                 + (loaded ? ' Displayed values are from the last successful update and may be out of date.' : '');
-        } finally { active = null; refresh.disabled = false; }
+        } finally { window.clearTimeout(deadline); active = null; refresh.disabled = false; }
     }
     refresh.addEventListener('click', load);
     const timer = window.setInterval(load, 60000);

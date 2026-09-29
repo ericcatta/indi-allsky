@@ -1,0 +1,87 @@
+{
+  "date": "2026-09-29",
+  "status": "candidate-tested-not-yet-deployed",
+  "change": "Bound Astropanel requests, including response body parsing, to15 seconds; preserve stale data with a warning and re-enable Refresh. Page exit abort remains silent. Cache query version updated.",
+  "regression": {
+    "javascript_entrypoints": 34,
+    "javascript_report": "/tmp/hybrid-astropanel-timeout-js-20260929.json",
+    "javascript_sha256": "df2040ed6601fcd41afee00148132334d22fe9cb182950c90f1861c02525abf5",
+    "python_tests": {
+      "hybrid_astropanel_flow_test.py": "0d92b4d20a7cc4bc11440f2b24de88105fa4b5bec02643cef8ebcf65aeb82940",
+      "hybrid_astropanel_satellite_test.py": "782dbf6ce6378f04570cb630063875f4c2e449acfb9c9d57db5fd2418ec2e206"
+    },
+    "scope": "All JS tests and both affected Python flows rerun. Backend Python unchanged from the166-entrypoint image publication regression; no new full166 run claimed. Existing ephemeris fingerprints pass unchanged.",
+    "red": "Expanded deadline test fails against previous controller because no deadline is armed.",
+    "unit_cases": [
+      "initial timeout",
+      "stalled JSON body after successful headers",
+      "stale state preservation",
+      "retry succeeds",
+      "pagehide abort silent",
+      "deadline cleanup"
+    ]
+  },
+  "source_manifest": {
+    "files": 824,
+    "sha256": "9a474c07613015cb03a8f528951c16a200a463640ee7b83d6e618d1ca3eabab3"
+  },
+  "native_fixture": {
+    "environment": "localhost18116, isolated Flask, Classic forbidden, no production effects",
+    "report": "/home/eric/hybrid-astropanel-timeout-native.json",
+    "sha256": "0cffa0ffa6cf80a2047124d34d199ceb524bd0b69b9f1e5d15c4db2092d98ea3",
+    "requests": 6,
+    "injected_delay_seconds": 20
+  },
+  "controls": [
+    {
+      "route": "/modern-admin/observatory/astropanel",
+      "control": "Initial stalled request",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "status": "superato",
+      "observed": "Timeout message shown; Sun becomes Unavailable; Refresh enabled."
+    },
+    {
+      "route": "/modern-admin/observatory/astropanel",
+      "control": "Refresh after initial timeout",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "status": "superato",
+      "observed": "Updated status at12:43:08 and computed Sun40.87 degrees."
+    },
+    {
+      "route": "/modern-admin/observatory/astropanel",
+      "control": "Refresh stalls after successful data",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "status": "superato",
+      "observed": "Timeout and out-of-date warning shown; Sun remains40.87 degrees; Refresh enabled."
+    },
+    {
+      "route": "/modern-admin/observatory/astropanel",
+      "control": "Camera2 link",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "status": "superato",
+      "observed": "Camera2/profile2 selected; Updated12:43:55, Sun40.9 degrees, Refresh enabled."
+    },
+    {
+      "route": "/modern-admin/observatory/astropanel",
+      "control": "Camera1 link after timeout recovery",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "status": "superato",
+      "observed": "Camera1/profile1 selected; Updated12:44:06, Refresh enabled."
+    }
+  ],
+  "limits": [
+    "Client timeout does not cancel server-side computation.",
+    "No scientific algorithms changed.",
+    "Not whole-product or24-hour acceptance."
+  ]
+}

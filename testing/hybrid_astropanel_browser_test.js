@@ -9,10 +9,15 @@ const nodes={};for(const id of [...template.matchAll(/id="([^"]+)"/g)].map(m=>m[
 const fields=[...template.matchAll(/data-astro-field="([^"]+)"/g)].map(m=>Object.assign(element(),{dataset:{astroField:m[1]}}));
 nodes['astropanel-tool'].dataset={url:'/ajax/astropanel',camera:'2'};
 nodes['astropanel-tool'].querySelectorAll=()=>fields;
-const pending=[],events={};let poll;
+const pending=[],events={},deadlines=new Map();let poll;
 vm.runInNewContext(source,{document:{getElementById:id=>nodes[id],createElement:element},AbortController,URLSearchParams,
- window:{setInterval:fn=>{poll=fn;return 1;},clearInterval(){},addEventListener:(key,fn)=>events[key]=fn},
- fetch:(url,options)=>new Promise((resolve,reject)=>pending.push({url,options,resolve,reject}))});
+ window:{setInterval:fn=>{poll=fn;return 1;},clearInterval(){},addEventListener:(key,fn)=>events[key]=fn,
+ setTimeout(fn,ms){assert.equal(ms,15000);const id=Symbol();deadlines.set(id,fn);return id;},
+ clearTimeout(id){deadlines.delete(id);}},
+ fetch:(url,options)=>new Promise((resolve,reject)=>{
+  options.signal.addEventListener('abort',()=>reject(Object.assign(new Error('aborted'),{name:'AbortError'})));
+  pending.push({url,options,resolve,reject});
+ })});
 const data={};for(const field of fields)data[field.dataset.astroField]='12:00';
 for(const key of ['moon_phase','moon_light','moon_rise','moon_set','sun_alt','sun_rise','sun_set','polaris_hour_angle','polaris_alt'])data[key]=1;
 for(const planet of ['mercury','venus','mars','jupiter','saturn','uranus','neptune'])for(const key of ['rise','transit','set','alt','az'])data[planet+'_'+key]=1;
@@ -20,9 +25,14 @@ data.satellite_errors=[{name:'old satellite',reason:'Orbital data unavailable fo
 data.satellite_list=Array.from({length:20},(_,i)=>({name:i===0?'<script>test</script>':'sat'+i,alt:1,az:2,rise:['1'],transit:['2'],set:['3'],duration:['10'],elevation:400}));
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 const respond=(i,value,extra={})=>pending[i].resolve({ok:true,json:async()=>value,...extra});
+const expire=()=>{assert.equal(deadlines.size,1,'One request deadline must be armed');[...deadlines.values()][0]();};
 (async()=>{
  assert(pending[0].url.endsWith('camera_id=2'));poll();assert.equal(pending.length,1);
- respond(0,null,{ok:false});await tick();
+ expire();await tick();
+ assert(pending[0].options.signal.aborted);
+ assert(nodes['astropanel-status'].textContent.includes('Timed out'));
+ assert.equal(nodes['astropanel-refresh'].disabled,false);
+ assert.equal(deadlines.size,0);
  assert.equal(nodes['modern-admin-moon-phase'].textContent,'Unavailable');
  assert.equal(nodes['modern-admin-satellite-rows'].children[0].firstChild.colSpan,8);
  nodes['astropanel-refresh'].click();respond(1,data);await tick();
@@ -53,6 +63,22 @@ const respond=(i,value,extra={})=>pending[i].resolve({ok:true,json:async()=>valu
  poll();respond(pending.length-1,{...data,polaris_hour_angle:null,polaris_next_transit:'None'});await tick();
  assert.equal(nodes['modern-admin-polar-marker'].attributes.visibility,'hidden');
  assert.equal(nodes['modern-admin-polar-clock'].textContent,'Unavailable');
- poll();events.pagehide();assert(pending.at(-1).options.signal.aborted);
+ poll();respond(pending.length-1,null,{ok:false});await tick();
+ assert(nodes['astropanel-status'].textContent.includes('out of date'));
+ // A timeout also covers a response whose body stalls after successful headers.
+ poll();const stalled=pending.at(-1);
+ stalled.resolve({ok:true,json:()=>new Promise((_resolve,reject)=>
+  stalled.options.signal.addEventListener('abort',()=>reject(Object.assign(new Error('aborted'),{name:'AbortError'}))))});
+ await tick();expire();await tick();
+ assert(nodes['astropanel-status'].textContent.includes('Timed out'));
+ assert(nodes['astropanel-status'].textContent.includes('out of date'));
+ assert.equal(nodes['astropanel-refresh'].disabled,false);
+ assert.equal(deadlines.size,0);
+ nodes['astropanel-refresh'].click();respond(pending.length-1,data);await tick();
+ assert(nodes['astropanel-status'].textContent.startsWith('Updated'));
+ assert.equal(nodes['modern-admin-sun-alt'].textContent,'1 deg');
+ poll();events.pagehide();assert(pending.at(-1).options.signal.aborted);await tick();
+ assert(!nodes['astropanel-status'].textContent.includes('Timed out'));
+ assert.equal(deadlines.size,0);
  console.log('Astropanel controller: all detail fields, 20 satellites, literal text, unavailable/stale/session states, refresh and polling: PASS');
 })().catch(error=>{console.error(error);process.exitCode=1;});
