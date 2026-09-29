@@ -308,6 +308,10 @@ The 180-second trace shows 181 syslog sends exclusively on the sender thread;
 136 diagnostic file opens occur exclusively on the diagnostic writer. No traced
 call remains unresolved. A later trace did not overlap the long intervals and
 therefore does not explain their cause. **Cadence acceptance remains open.**
+The residual command delays match the existing queue protection: depths 3/4
+add 7.5/10 seconds to the 15-second target. A preceding long-term keogram INSERT
+failed with `database is locked`. The lock holder is not identified yet; the
+queue protection remains enabled. A bounded read-only lock observation is running.
 [Measured evidence](testing/evidence/hybrid-async-syslog-20260929.json).
 
 ## Remaining acceptance gates

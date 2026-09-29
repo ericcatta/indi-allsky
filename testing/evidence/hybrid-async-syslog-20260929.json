@@ -142,5 +142,33 @@
     "unresolved_at_detach": "Both main threads were in clock_nanosleep; no completion duration claimed.",
     "limit": "This trace occurred after the observed long intervals and does not identify their cause.",
     "all_detached": true
+  },
+  "residual_diagnosis": {
+    "observed_log_sequence": [
+      {
+        "time": "16:28:02.195628",
+        "event": "Image worker 1739167 LONGTERM_SAMPLE_FAILED camera 1: sqlite3.OperationalError database is locked during longtermkeogram INSERT/commit"
+      },
+      {
+        "time": "16:28:10.143545",
+        "event": "Camera 1 shared image queue depth 3; adds 7.500s delay"
+      },
+      {
+        "time": "16:28:18.855230",
+        "event": "Camera 2 shared image queue depth 4; adds 10.000s delay"
+      },
+      {
+        "time": "16:28:32.682818",
+        "event": "Camera 1 queue depth 0; removes delay"
+      },
+      {
+        "time": "16:28:43.892669",
+        "event": "Camera 2 queue depth 0; removes delay"
+      }
+    ],
+    "source": "indi_allsky/capture.py queue backoff and next_frame_time; flask/__init__.py busy_timeout=20000",
+    "conclusion": "Configured queue protection accounts for 22.540/25.039s command intervals (15s target plus 7.5/10s). SQLite lock error precedes queue growth; lock holder and underlying stall cause are not yet identified.",
+    "preserved": "Queue protection remains enabled; no exposure/gain or scheduling changes made.",
+    "next_observation": "Read-only /proc/locks sampler for current runtime database, 300s at 200ms interval, PID 1769205; no replay workload started."
   }
 }
