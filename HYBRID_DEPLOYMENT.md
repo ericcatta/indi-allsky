@@ -46,8 +46,9 @@ Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-releas
 The syslog release passed 171 Python/compile entrypoints and 34 JavaScript tests.
 Its 833-file manifest includes `allsky.py`; deployment verifies the tested hashes.
 Maintenance ran 16:21:42–16:21:57. Capture restarted and web workers reloaded;
-configuration 118 is unchanged. Both camera files decode. Live cadence under
-regression load is still being checked; this is not whole-product acceptance.
+configuration 118 is unchanged. Both camera files decode. The 171-case load replay passes, but cadence remains open: frame maxima are
+19/25 seconds. System-log isolation is traced and verified; this is not
+whole-product acceptance.
 
 For rollback from exactly `970d179941dd3dbfc76da76965cee1d7f40cadb9`:
 

@@ -1,7 +1,7 @@
 {
   "date": "2026-09-29",
   "baseline": "96c2049de650f46a39b7ac3663332c7fc71c6a0a",
-  "status": "deployed-live-load-observation-running",
+  "status": "deployed-log-isolation-verified-cadence-open",
   "source_manifest_sha256": "f8fbfd1cc2ec8acda5bbb71f9469757e6503eb2a1799ce84b48965df01090d79",
   "source_count": 833,
   "trigger": "Previous capture trace has a main-thread sendto still blocked at detach; saved-frame intervals reach 28/30s under regression load.",
@@ -33,7 +33,7 @@
     }
   },
   "limits": [
-    "Deployed and both camera files decode; live cadence under regression load remains under observation.",
+    "Logging isolation is verified, but cadence remains open: saved-frame maxima 19/25 seconds and monotonic command warnings 22.540/25.039 seconds under load.",
     "Bounded logs are best effort under prolonged outage/saturation or shutdown. No logging queue can guarantee retaining unlimited messages without blocking capture.",
     "Asynchronous delivery means syslog receiver timestamps can lag message creation; saved-frame times and caller-computed cadence warnings are needed for cadence acceptance.",
     "24-hour day/night test deferred."
@@ -69,5 +69,78 @@
     "load_report": "/home/eric/hybrid-async-syslog-load-20260929/results.json",
     "observation_start": "2026-09-29T16:23:33.110979",
     "trace_pid": 1740042
+  },
+  "live_observation": {
+    "start": "2026-09-29T16:23:33.110979",
+    "end": "2026-09-29T16:33:18.005849",
+    "report": "/home/eric/hybrid-async-syslog-observation.json",
+    "sha256": "d336781fe11d4a70205a208cfa04ac346c7b8e1ef4a18a4ca141f8a6d3f03aa6",
+    "load_result": {
+      "status": "passed",
+      "cases": 171,
+      "source_changed": false,
+      "sha256": "2a04015545c66b57d4c0280b62cede510e21baf4c0356c2ead2a2fca74562f39"
+    },
+    "camera1": {
+      "frames": 38,
+      "median_s": 15,
+      "max_s": 19,
+      "gaps_over_17_s": [
+        18,
+        19
+      ],
+      "latest_id": 177305,
+      "decoded_size": [
+        4608,
+        2592
+      ]
+    },
+    "camera2": {
+      "frames": 39,
+      "median_s": 15,
+      "max_s": 25,
+      "gaps_over_17_s": [
+        25
+      ],
+      "latest_id": 177306,
+      "decoded_size": [
+        3840,
+        2160
+      ]
+    },
+    "monotonic_cadence_warning_intervals_s": {
+      "camera1": 22.54,
+      "camera2": 25.039
+    },
+    "config_revision": 118,
+    "pending_tasks": 0,
+    "capture_pid": 1739126,
+    "automatic_restarts": 0
+  },
+  "trace": {
+    "sha256": "35781fad32f816b6807efbadcb1cbeb6ffb97b9528775fb5bd3286a3e81e07a0",
+    "duration_s": 180,
+    "lines": 825,
+    "syslog_send_count": 181,
+    "syslog_send_threads": [
+      1739161
+    ],
+    "capture_main_thread": 1739159,
+    "diagnostic_opens": 136,
+    "diagnostic_thread": 1739160,
+    "main_thread_diagnostic_opens": 0,
+    "unresolved_calls": [],
+    "all_detached": true,
+    "max_completed_syscall_s": 0.004292
+  },
+  "residual_trace": {
+    "sha256": "d78f560fefbdab7278f1f205a85999f78ad9f498a81a289fe36503fd03ebeaa0",
+    "duration_s": 180,
+    "lines": 16410,
+    "max_completed_syscall_s": 0.254826,
+    "max_call": "clock_nanosleep",
+    "unresolved_at_detach": "Both main threads were in clock_nanosleep; no completion duration claimed.",
+    "limit": "This trace occurred after the observed long intervals and does not identify their cause.",
+    "all_detached": true
   }
 }

@@ -14,8 +14,9 @@ The 833-file source/asset manifest (including the capture entrypoint) is
 `f8fbfd1cc2ec8acda5bbb71f9469757e6503eb2a1799ce84b48965df01090d79`.
 171 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
 The bounded asynchronous syslog handler is deployed. Both camera files decode
-after the restart. The live regression-load replay and capture-thread trace are
-running; cadence acceptance remains open.
+after the restart. The live 171-entrypoint replay passes. Trace confirms system-log sends and
+diagnostic writes stay off capture. Cadence acceptance remains open: saved-frame
+maxima are 19/25 seconds under load despite a 15-second median.
 [Current evidence](testing/evidence/hybrid-async-syslog-20260929.json).
 
 A private SQLite 3.51.3 runtime is loaded by capture, web and commands in the
@@ -294,14 +295,25 @@ capture. Both latest files decode, config 118 is unchanged, and the repeated
 **Cadence remains open.** During the 9m40s observation, both cameras had a
 15-second median but maxima of 28/30 seconds. The capture thread also has an
 unfinished `sendto` to the system logger at trace detach. Do not interpret the
-small completed-syscall maxima as proof of no blocking. Next, isolate the
-remaining synchronous system-logging backpressure without removing useful logs.
+small completed-syscall maxima as proof of no blocking. The subsequent syslog release below isolates that logging path.
 [Complete measured evidence](testing/evidence/hybrid-async-diagnostics-20260929.json).
+
+## System-log isolation — deployed and measured
+
+The asynchronous syslog release passes all 171 Python entrypoints again under
+live load. During 9m45s, cameras save 38/39 frames, median 15 seconds each,
+maxima 19/25 seconds. Both final images decode, configuration 118 is unchanged,
+and task backlog is zero. Capture has no automatic restart.
+The 180-second trace shows 181 syslog sends exclusively on the sender thread;
+136 diagnostic file opens occur exclusively on the diagnostic writer. No traced
+call remains unresolved. A later trace did not overlap the long intervals and
+therefore does not explain their cause. **Cadence acceptance remains open.**
+[Measured evidence](testing/evidence/hybrid-async-syslog-20260929.json).
 
 ## Remaining acceptance gates
 
 
-- Resolve residual capture system-logging backpressure and verify end-to-end cadence under load. Diagnostic file writes are isolated, but post-deploy intervals still reach 28/30 seconds; see the measured evidence above.
+- Identify remaining capture delays and verify end-to-end cadence under load. File and syslog I/O are now isolated, but the latest saved-frame intervals still reach 19/25 seconds.
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
 - Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.
 - Complete remaining live effects, including dedicated-data cleanup/deletion and test-destination uploads. Short mini timelapses and both cameras’ automatic day timelapse/panorama outputs are verified; other automatic/isolated tests remain separately labeled.
