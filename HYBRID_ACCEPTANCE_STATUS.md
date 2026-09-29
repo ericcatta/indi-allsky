@@ -201,6 +201,12 @@ probe and all 166 Python/compile regression entrypoints with unchanged sources;
 it is not deployed. Checkpoint lifecycle/failure tests and measured performance
 remain prerequisites to the proposed background checkpoint change.
 
+The [background checkpoint candidate](testing/evidence/hybrid-sqlite-checkpoint-20260929.json)
+is implemented and tested but not deployed or enabled. Validation covers the166
+existing Python entrypoints plus two new checkpoint tests and34 JavaScript tests;
+the report preserves the initial test-harness failure and corrected reruns.
+Fixed runtimes for all database writers and before/after live measurements remain open.
+
 ## Remaining acceptance gates
 
 

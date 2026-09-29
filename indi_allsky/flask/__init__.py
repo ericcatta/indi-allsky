@@ -140,6 +140,8 @@ def create_app():
 
         if db.engine.dialect.name == 'sqlite':
             event.listen(db.engine, 'connect', _sqlite_pragma_on_connect)
+            from ..sqlite_checkpoint import configure_checkout
+            event.listen(db.engine, 'checkout', configure_checkout)
 
         #from . import views  # noqa: F401
 

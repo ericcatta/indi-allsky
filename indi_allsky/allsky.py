@@ -27,6 +27,7 @@ from .version import __config_level__
 
 from .config import IndiAllSkyConfig
 from .camera_shared_state import CameraSharedState
+from .sqlite_checkpoint import start_for_engine
 from .capture_profiles import build_profile_config
 from .capture_profiles import derive_capture_profiles
 from .multicamera_diag import write_multicamera_diag
@@ -1019,6 +1020,7 @@ class IndiAllSky(object):
             self._expireOrphanedTasks()
 
             self._startup()
+            checkpoint = start_for_engine(db.engine)
 
 
         while True:
@@ -1039,6 +1041,9 @@ class IndiAllSky(object):
                     self._miscDb.setState('STATUS', constants.STATUS_STOPPED)
 
 
+                if checkpoint is not None:
+                    checkpoint.close()
+
                 if self.pid_lock:
                     fcntl.flock(self.pid_lock, fcntl.LOCK_UN)
 
@@ -1058,6 +1063,9 @@ class IndiAllSky(object):
                 with app.app_context():
                     self.reload_handler()
 
+
+            if checkpoint is not None:
+                checkpoint.ensure_running()
 
             # do *NOT* start workers inside of a flask context
             # doing so will cause TLS/SSL problems connecting to databases

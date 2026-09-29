@@ -1,0 +1,46 @@
+{
+  "date": "2026-09-29",
+  "status": "candidate-tested-not-deployed",
+  "change": "Supervised passive SQLite checkpoints outside capture/image commits, opt-in. Fresh database-specific heartbeat disables per-connection autocheckpoint; stale/missing/malformed/mismatched heartbeat restores1000-page fallback on checkout.",
+  "source_manifest": {
+    "files": 828,
+    "sha256": "5c360b68be2fcf2befe22710b083dd043103c93a78398ce8e4a3b779bf642f0c"
+  },
+  "runtime": "SQLite3.51.3 isolated build; production remains3.46.1 and unchanged",
+  "validation": {
+    "python_entrypoints": 168,
+    "scope": "166 existing entrypoints pass in full run; corrected new lifecycle test plus new Flask flow pass separately. Application sources unchanged between runs.",
+    "original_report": "/home/eric/hybrid-checkpoint-regression-20260929/results.json",
+    "original_sha256": "9abea0a5a1f2572687797750ce9aba0e1cf5a5d7ba059d2be2acf0268fa528e8",
+    "original_failure": "The new lifecycle test restored patch.dict too early, clearing the supervisor state environment key. Fixed only the test lifetime; original failed report retained.",
+    "combined_report": "/home/eric/hybrid-checkpoint-regression-final.json",
+    "combined_sha256": "b70b0c0982f8f2019c067b0a2c31c84f700e0ac5239aaf38e0429985b3e3c18e",
+    "javascript_entrypoints": 34,
+    "javascript_failures": 0,
+    "javascript_report": "/tmp/hybrid-checkpoint-js-20260929.json",
+    "javascript_sha256": "b62617cc7f9a1f3dc486ca351ceb11e9928b451539c80359d31d4eba8dcc4d71",
+    "local_test": "Unsupported SQLite fallback policy passed",
+    "checks": [
+      "Actual passive checkpoint with writer connection open",
+      "1100 committed rows and integrity_check",
+      "Helper kill and restart",
+      "Shutdown and environment restoration",
+      "Failed helper launch retains fallback",
+      "Heartbeat age, malformed JSON and database mismatch",
+      "Unsupported runtime and opt-out",
+      "Real Flask/SQLAlchemy pooled checkout and committed data preserved"
+    ]
+  },
+  "activation_requirements": [
+    "Fixed SQLite in all Hybrid database writers, including web and maintenance commands",
+    "Controlled deployment with backup and rollback",
+    "Before/after end-to-end frame and checkpoint measurements"
+  ],
+  "limits": [
+    "Opt-in flag is not enabled in production or installer",
+    "Does not eliminate shared storage contention",
+    "NORMAL persistence semantics unchanged; not a power-loss durability guarantee",
+    "Long readers can prevent WAL recycling;16384-page backlog warning is not a hard size cap",
+    "No claim that cadence defect or overall acceptance is closed"
+  ]
+}

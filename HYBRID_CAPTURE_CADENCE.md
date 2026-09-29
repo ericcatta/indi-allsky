@@ -200,3 +200,37 @@ The previous 17:47:25 window is closed and cannot be added to this one.
 Backup/rollback and precise live evidence are recorded in
 [the deployment report](testing/evidence/hybrid-batch-deployment-2026-09-08.json)
 and [acceptance status](HYBRID_ACCEPTANCE_STATUS.md).
+
+## Background SQLite checkpoint candidate — 2026-09-29
+
+The measured image-worker `fdatasync` stall is addressed by a supervised
+checkpoint process, currently **opt-in and not deployed**. This does not change
+exposure/gain, queue backpressure, media algorithms or the requested cadence.
+
+`INDI_ALLSKY_BACKGROUND_CHECKPOINT=1` on the capture service enables maintenance
+only with SQLite >=3.51.3. Older libraries retain automatic checkpoints. The
+capture parent starts/restarts the helper before starting workers and stops it
+after the workers shut down. The helper exits if its parent disappears. It owns
+its SQLite connection; no connection or thread is shared across a fork.
+
+The helper checks WAL progress once per second and requests a PASSIVE checkpoint
+at the existing 1000-page threshold. Capture descendants disable their automatic
+checkpoint only while a database-specific heartbeat is fresh. Every connection
+checkout re-evaluates that decision: missing, malformed, mismatched or 30-second
+stale state restores the 1000-page automatic fallback, including pooled
+connections. Web and unrelated processes keep their existing checkpoint policy.
+No installer or production environment enables this candidate yet.
+
+`synchronous=NORMAL` remains unchanged. Checkpointing moves work off frame
+commits; it cannot eliminate shared-disk contention or guarantee all commits
+survive sudden power loss. Long readers can still prevent WAL recycling, as
+with SQLite's default policy. The helper logs slow checkpoints and a backlog
+above 16384 pages; this is an observable threshold, not a hard size cap. A
+stalled helper can trigger the automatic fallback and therefore reintroduce
+latency in exchange for continued maintenance.
+
+Before activation: install a verified fixed SQLite runtime with rollback for all
+Hybrid database writers (capture, web and maintenance commands), not just the
+checkpoint helper. Verify loaded versions in each runtime and complete the candidate regression, and compare end-to-end frame intervals and
+checkpoint timings under the same workload. Do not claim the cadence defect
+resolved from unit tests or a successful helper startup.
