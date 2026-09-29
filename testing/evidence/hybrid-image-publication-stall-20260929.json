@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-29",
+  "status": "investigation-open",
+  "runtime": "4ca063a6a8da0ec116c0963a51f83fd594602b53",
+  "observations": {
+    "source": "/var/log/indi-allsky/indi-allsky.log",
+    "worker_pid": 1739167,
+    "window": "2026-09-29 16:57 Europe/Zurich",
+    "gaps": [
+      {
+        "seconds": 7.388616,
+        "before": "16:57:09.943815 addPanoramaImage",
+        "after": "16:57:17.332431 Image processed in 9.9619 s"
+      },
+      {
+        "seconds": 37.087158,
+        "before": "16:57:17.332431 Image processed",
+        "after": "16:57:54.419589 write_img compressed file size"
+      }
+    ],
+    "queue": "Depth 3 caused +7.5 second capture backoff on both cameras; later IMX708 cadence warning reached 25.048 seconds.",
+    "limits": "Receiver syslog timestamps bound an observed message gap, not a measured syscall duration. No SQLite error was observed in this second window. Regression log modification times overlap, but do not identify a causal test."
+  },
+  "trace": {
+    "path": "/home/eric/hybrid-image-sync-trace-20260929.log",
+    "sha256": "0915eedd9c0a26dedbd25caf8851e446c2e7df8a10f7f75e93e13e8d0187d634",
+    "duration_seconds": 60,
+    "syscalls": [
+      "fsync",
+      "fdatasync",
+      "rename",
+      "renameat",
+      "renameat2"
+    ],
+    "completed_calls": 45,
+    "maximum_seconds": 0.109719,
+    "maximum_target": "camera 1 realtime keogram temporary file",
+    "other_observed_sync_seconds": 0.103733,
+    "scope": "Image worker main thread, ordinary live operation, no replay workload.",
+    "completion": "Timeout 124 as expected; process detached.",
+    "result": "Long stall not reproduced; cannot attribute previous delay to fsync."
+  },
+  "next_step": "If reproducing the overlapping isolated regression cases, trace the image worker and database locks together to distinguish file publication stalls from SQLite contention. Do not remove queue backpressure or weaken persistence based only on message gaps.",
+  "runtime_changes": "None; capture stayed active."
+}

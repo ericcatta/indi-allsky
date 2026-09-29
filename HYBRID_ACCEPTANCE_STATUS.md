@@ -366,3 +366,13 @@ administrator checks cover 501 rows in both directions. Pagination, filtered
 clipboard copy and refresh also passed. Capture stayed active with the same PID.
 CSV/Excel download receipt and broader role/device coverage remain open.
 [Release evidence](testing/evidence/hybrid-task-age-sort-20260929.json).
+
+## Image worker stall investigation
+
+A second under-load episode on 29 September has a 37-second image-worker log
+gap between processing and publication, without the earlier SQLite error.
+This narrows the next trace to both file publication and database locking.
+A bounded 60-second syscall trace during normal capture did not reproduce the
+stall (maximum observed call 110 ms); no pipeline or durability change is justified
+by that sample. Queue backpressure remains enabled and cadence acceptance open.
+[Investigation evidence](testing/evidence/hybrid-image-publication-stall-20260929.json).
