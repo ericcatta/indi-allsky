@@ -170,5 +170,73 @@
     "conclusion": "Configured queue protection accounts for 22.540/25.039s command intervals (15s target plus 7.5/10s). SQLite lock error precedes queue growth; lock holder and underlying stall cause are not yet identified.",
     "preserved": "Queue protection remains enabled; no exposure/gain or scheduling changes made.",
     "next_observation": "Read-only /proc/locks sampler for current runtime database, 300s at 200ms interval, PID 1769205; no replay workload started."
+  },
+  "normal_load_observation": {
+    "start": "2026-09-29T16:35:58.573546",
+    "end": "2026-09-29T16:40:58.622807",
+    "camera1": {
+      "frames": 20,
+      "median_s": 15,
+      "max_s": 16
+    },
+    "camera2": {
+      "frames": 20,
+      "median_s": 15,
+      "max_s": 15
+    },
+    "lock_samples": 20,
+    "lock_report_sha256": "80c31ac356b9b177afd1604541099543703ca558284724760bf312e37e1157f2",
+    "lock_owner_observed": {
+      "pid": 1739157,
+      "component": "indi_allsky.sqlite_checkpoint",
+      "file": "indi-allsky.sqlite-shm",
+      "ranges": [
+        [
+          121,
+          121
+        ],
+        [
+          123,
+          123
+        ]
+      ],
+      "wait_channels": [
+        "mmc_blk_rw_wait",
+        "jbd2_log_wait_commit",
+        "folio_wait_bit_common"
+      ]
+    },
+    "limit": "200ms sampling is not exhaustive. No reproduction of the preceding 20-second SQLite lock error; observed checkpoint I/O waits do not identify its cause.",
+    "sampler_status": "completed"
+  },
+  "native_postdeploy": {
+    "page": "/modern-admin/now",
+    "role": "existing administrator session",
+    "images": [
+      {
+        "camera": 1,
+        "complete": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera": 2,
+        "complete": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ],
+    "refresh_status": {
+      "before": [
+        "2026-09-29 16:38:34",
+        "2026-09-29 16:38:31"
+      ],
+      "after": [
+        "2026-09-29 16:38:50",
+        "2026-09-29 16:38:46"
+      ],
+      "capture_status": "Running"
+    },
+    "temporary_tab": "closed"
   }
 }

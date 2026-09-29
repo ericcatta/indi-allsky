@@ -311,7 +311,11 @@ therefore does not explain their cause. **Cadence acceptance remains open.**
 The residual command delays match the existing queue protection: depths 3/4
 add 7.5/10 seconds to the 15-second target. A preceding long-term keogram INSERT
 failed with `database is locked`. The lock holder is not identified yet; the
-queue protection remains enabled. A bounded read-only lock observation is running.
+queue protection remains enabled. A completed five-minute read-only lock sample
+observed checkpoint I/O waits but did not reproduce or explain that lock error.
+At normal load, 20 frames per camera have a 15-second median and maxima of
+16/15 seconds. Native Now loads both images and Refresh status advances both
+frame timestamps. These bounded checks do not close the under-load defect.
 [Measured evidence](testing/evidence/hybrid-async-syslog-20260929.json).
 
 ## Remaining acceptance gates
