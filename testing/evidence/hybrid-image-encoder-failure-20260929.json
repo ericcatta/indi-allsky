@@ -1,6 +1,6 @@
 {
   "date": "2026-09-29",
-  "status": "tested-not-deployed",
+  "status": "deployed-bounded-acceptance-passed",
   "defect": "PNG encoder False was ignored, allowing a zero-byte temporary file to replace a valid latest preview. Encoder exceptions also left partial temporary files.",
   "fix": "Reject a false PNG encoder result before publication; remove partial encoder temporary files on exceptions and re-raise the original error. Successful encoding options and image algorithms unchanged.",
   "baseline": "New regression test fails against 4788ffc4 with Encoder failure reported as a saved image. A separate filesystem reproduction observed a valid preview replaced by zero bytes.",
@@ -27,8 +27,46 @@
     "javascript": "Previous 34 passes apply to unchanged JS/templates/CSS; not rerun."
   },
   "limits": [
-    "Not yet deployed.",
     "Does not claim to resolve MMC I/O stalls or capture cadence.",
-    "No real camera encoder failure induced."
+    "No real camera encoder failure induced.",
+    "Code-only rollback helper prepared, not exercised live; current configuration and data would be retained."
+  ],
+  "installed_commit": "2142968de05290d965f6368b630c0e3201420e98",
+  "deployment": {
+    "state": "/home/eric/hybrid-image-encoder-release-state.json",
+    "state_sha256": "fdee9450dcbe3adbacad1078c32a514a250fd82bfea883fefd37b93504371171",
+    "backup": "/home/eric/hybrid-backups/hybrid-image-encoder-20260929-113656",
+    "integrity": "ok",
+    "backup_seconds": 97.43,
+    "configuration_revision": 118,
+    "configuration_equal_to_backup": true,
+    "maintenance_start": "2026-09-29T11:36:57.205166",
+    "maintenance_end": "2026-09-29T11:39:02.632570",
+    "capture_pid": 1415308,
+    "web_pid": 1415309,
+    "capture_timer_restored": true,
+    "untracked_user_files_preserved": true,
+    "installed_manifest_matches_tested": true,
+    "bounded_post_restart_errors": []
+  },
+  "native_frames": [
+    {
+      "camera_id": 1,
+      "time": "2026-09-29 11:39:46",
+      "complete": true,
+      "size": [
+        4608,
+        2592
+      ]
+    },
+    {
+      "camera_id": 2,
+      "time": "2026-09-29 11:39:54",
+      "complete": true,
+      "size": [
+        3840,
+        2160
+      ]
+    }
   ]
 }

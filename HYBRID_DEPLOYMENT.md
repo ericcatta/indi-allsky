@@ -2,19 +2,17 @@
 
 ## Installed version
 
-Production runs `30708b3142ee279eb86d12c81ef1a4ce42ee5a96` (29 September 2026).
-Classic frontend is removed; Hybrid is the only UI. Failed output attempts without
-files no longer suppress the storage forecast. All 165 Python entrypoints passed
-in a full run with unchanged source; the 34 prior JavaScript passes apply to
-unchanged JS/templates/CSS. The tested 822-file manifest matches production.
+Production runs `2142968de05290d965f6368b630c0e3201420e98` (29 September 2026).
+Classic frontend is removed; Hybrid is the only UI. Encoder failures now preserve
+the existing latest preview and remove partial encoder temporary files. All 166
+Python entrypoints passed; 34 prior JavaScript passes apply to unchanged frontend
+code. The tested 823-file manifest matches production.
 
-Backup integrity passed in 202.75 seconds. Deployment preserved configuration 117
-and Flask settings. Only web restarted (PID 1384014); capture PID 921907 continued.
-Native Storage Protection now displays the estimate. Saving the same values created
-revision 118, with every persisted configuration value equal to revision 117.
-Both 10:56:49 Now frames decoded on 29 September. The cleanup policy is unchanged;
-this mission did not trigger cleanup or remove media.
-See [release evidence](testing/evidence/hybrid-storage-estimate-fix-20260929.json).
+Capture and web were paused for a coherent backup (integrity ok, 97.43 seconds).
+Configuration 118 and Flask settings are unchanged. Capture PID 1415308 and web
+PID 1415309 are active; the capture timer was restored. Native Now images from
+11:39:46 (IMX708) and 11:39:54 (ASI678MC) both decoded after restart.
+See [release evidence](testing/evidence/hybrid-image-encoder-failure-20260929.json).
 The retained backend moon bitmap remains in `indi_allsky/overlay/assets/`.
 
 Both camera/profile round trips through the Settings index and Exposure/Gain
@@ -30,7 +28,7 @@ is no longer selectable as a camera, while IMX708 and ASI678MC remain available.
 Both Now images decoded after deployment; configuration117 is unchanged.
 Evidence: [detection deployment](testing/evidence/hybrid-camera-detection-release-20260921.json).
 
-## Roll back the installed storage estimate release
+## Roll back the installed encoder failure release
 
 Use an authenticated SSH terminal on the Raspberry as `eric`, during a maintenance
 window. Check the installed revision and preserve any tracked edits first:
@@ -42,20 +40,18 @@ git -C /home/eric/indi-allsky rev-parse HEAD
 
 The protected helper requires exactly the installed revision above and refuses
 to discard tracked edits. Its backup is:
-`/home/eric/hybrid-backups/hybrid-storage-estimate-20260929-105107`.
+`/home/eric/hybrid-backups/hybrid-image-encoder-20260929-113656`.
 Run on the Raspberry:
 
 ```sh
-release_backup=/home/eric/hybrid-backups/hybrid-storage-estimate-20260929-105107
-maintenance_deadline="$(date --date='+15 minutes' --iso-8601=seconds)"
-python3 "$release_backup/deploy.py" --rollback "$release_backup" \
-  --maintenance-until "$maintenance_deadline"
+release_backup=/home/eric/hybrid-backups/hybrid-image-encoder-20260929-113656
+python3 "$release_backup/deploy.py" --rollback "$release_backup"
 ```
 
-This code-only rollback returns to `7ddd7378` and restarts only web,
-including its previous socket activation state. It restores neither the database
-nor configuration and does not stop capture. Classic remains removed and the
-retained backend moon bitmap remains available.
+This code-only rollback returns to `30708b31` and restarts capture and web,
+restoring the capture timer and previous web socket activation state. It restores
+neither database nor configuration. Classic remains removed and the retained
+backend moon bitmap remains available.
 The helper is prepared; this live release has not been deliberately reverted.
 Read the backup's `deployment.json`, confirm the revision and services, then
 verify HTTPS Now and new nonempty files from both cameras. Process readiness
@@ -113,9 +109,9 @@ files; do not use `git clean`. The checkout database copy is not the runtime
 database at `/var/lib/indi-allsky/indi-allsky.sqlite`.
 
 Prepare an integrity-checked backup and a rollback for that exact release.
-The current helper uses a bounded WAL read snapshot: writers can continue, but
-the read transaction delays checkpoint completion until copying ends. Monitor
-space and release the transaction immediately after the copy. Keep backups
+The current helper pauses capture and web, including timer/socket activation,
+before the consistent database copy, then restores services. Earlier online WAL
+backups coincided with acquisition stalls. Monitor space and actual frame recovery. Keep backups
 private; run code checkout/merge/reset with child umask 022 so Apache can read
 public assets. Restart only services affected by the change, then verify
 installed hashes, real UI controls, effects and camera recovery.

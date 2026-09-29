@@ -5,20 +5,21 @@ The separate 24-hour day/night observation is deferred by the user. Detector and
 
 ## Installed product
 
-The Raspberry runs `30708b3142ee279eb86d12c81ef1a4ce42ee5a96`.
+The Raspberry runs `2142968de05290d965f6368b630c0e3201420e98`.
 Settings device identity and index navigation now preserve the selected camera/profile; both native round trips passed.
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared workers, drivers, public media/API handlers and navigation redirects remain supported components.
 Later main commits document acceptance; they do not change the installed runtime.
 
-The 822-file installed source/asset manifest matches the tested snapshot:
-`92c475dfdb96a86769dd0e277489fc468f602dc25c7ca408ecafe765fde55e09`.
-All 165 Python entrypoints passed in the complete 29 September run with unchanged source. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Current regression: [storage estimate evidence](testing/evidence/hybrid-storage-estimate-fix-20260929.json).
+The 823-file installed source/asset manifest matches the tested snapshot:
+`cef4217c280a26ecd79ac98acffe7f4c249abc6af721ddb21e0c18f81f51f14a`.
+All 166 Python entrypoints passed in the complete 29 September run with unchanged source. The 34 JavaScript passes remain applicable to unchanged JS/templates/CSS. Current regression: [encoder failure evidence](testing/evidence/hybrid-image-encoder-failure-20260929.json).
 This automated result does not certify every native control or hardware effect.
 
-The deployment preserved configuration revision 117, Flask configuration and user files.
-The subsequent native same-value Storage Protection save created revision 118; all saved values equal revision 117.
-Only web restarted (PID 1384014); capture PID 921907 was preserved. The latest backup passed integrity checking in 202.75 seconds.
+The latest deployment preserved configuration revision 118, Flask configuration and user files.
+Capture and web were paused for a coherent backup (integrity ok, 97.43 seconds),
+then restarted as PIDs 1415308 and 1415309. The capture timer was restored.
+Both new Now images decoded in the native browser after restart.
 Use [current deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
 
 ## Cold-start defect corrected and deployed
@@ -108,13 +109,14 @@ mutating requests and observable effects require their own evidence.
 The full control/effect matrix is not yet certified; blocked cases are not passes.
 Absence of selected placeholder phrases is not proof that every function is implemented.
 
-## Tested candidate: encoder failure handling
+## Encoder failure handling deployed
 
 The worker could overwrite a valid latest PNG preview with an empty file when
-the encoder returned false. The candidate rejects that failure and removes
+the encoder returned false. The installed fix rejects that failure and removes
 partial encoder files on exceptions. All 166 Python entrypoints pass; the
-823-file tested manifest matches the local candidate. **Deployment is still
-pending**; the installed version above is unchanged. [Evidence](testing/evidence/hybrid-image-encoder-failure-20260929.json).
+823-file tested manifest matches production. Both cameras saved new frames and
+their Now images decoded after the controlled restart. This does not resolve
+the separate latency finding. [Evidence](testing/evidence/hybrid-image-encoder-failure-20260929.json).
 
 ## Backup space recovery — 29 September
 
