@@ -197,8 +197,9 @@ with checkpoint work; the physical cause and correction remain open. In the
 were changed.
 The installed SQLite 3.46.1 predates the upstream WAL-reset correction. A private
 3.51.3 library passed a synthetic concurrency/integrity and old-library readback
-probe; it is not deployed. Full application compatibility and checkpoint lifecycle
-verification are prerequisites to the proposed background checkpoint change.
+probe and all 166 Python/compile regression entrypoints with unchanged sources;
+it is not deployed. Checkpoint lifecycle/failure tests and measured performance
+remain prerequisites to the proposed background checkpoint change.
 
 ## Remaining acceptance gates
 
