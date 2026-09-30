@@ -1,0 +1,21 @@
+{
+  "scope": "Executed isolated Flask integration tests; not a production restore or browser click claim",
+  "regression_report": "/home/eric/hybrid-media-context-regression-20260930/results.json",
+  "report_sha256": "1a3ce39bc4e5e15a90c23e81035293199b1ebd1879d40ec23bc6fcb102fb4753",
+  "controls": [
+    {
+      "control": "Internal snapshot apply: method, CSRF, confirmation, role, stale revision, restored camera profiles and unchanged source snapshot",
+      "result": "superato",
+      "test": "testing/hybrid_settings_flow_test.py",
+      "log": "/home/eric/hybrid-media-context-regression-20260930/102.log",
+      "exit_code": 0
+    },
+    {
+      "control": "Concurrent snapshot apply from two Flask processes: one commit and one HTTP 409, preserved history",
+      "result": "superato",
+      "test": "testing/hybrid_snapshot_concurrency_test.py",
+      "log": "/home/eric/hybrid-media-context-regression-20260930/109.log",
+      "exit_code": 0
+    }
+  ]
+}

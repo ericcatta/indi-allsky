@@ -608,7 +608,20 @@
       ],
       "handler_module": "indi_allsky.flask.snapshot_restore",
       "handler": "ModernAdminSnapshotRestoreView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-snapshot-acceptance-20260930.json",
+          "record": "controls[0]",
+          "control": "Internal snapshot apply: method, CSRF, confirmation, role, stale revision, restored camera profiles and unchanged source snapshot",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-snapshot-acceptance-20260930.json",
+          "record": "controls[1]",
+          "control": "Concurrent snapshot apply from two Flask processes: one commit and one HTTP 409, preserved history",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/fits",
@@ -1397,6 +1410,12 @@
           "control": "Navigation drawer / Images",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/media/images"
+        },
+        {
+          "source": "testing/evidence/hybrid-media-detail-context-20260930.json",
+          "record": "deployment",
+          "control": "Scoped list/detail/return navigation; isolated roles/cameras and native production scope documented in source",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -1414,6 +1433,12 @@
           "source": "testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json",
           "record": "controls[3]",
           "control": "Back to results",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-media-detail-context-20260930.json",
+          "record": "deployment",
+          "control": "Scoped list/detail/return navigation; isolated roles/cameras and native production scope documented in source",
           "recorded_status": "superato"
         }
       ]
@@ -1970,6 +1995,12 @@
           "control": "Navigation drawer / Timelapses",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/media/timelapses"
+        },
+        {
+          "source": "testing/evidence/hybrid-media-detail-context-20260930.json",
+          "record": "deployment",
+          "control": "Scoped list/detail/return navigation; isolated roles/cameras and native production scope documented in source",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -1981,7 +2012,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminMediaVideoDetailView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-media-detail-context-20260930.json",
+          "record": "deployment",
+          "control": "Scoped list/detail/return navigation; isolated roles/cameras and native production scope documented in source",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/mode/<mode>",

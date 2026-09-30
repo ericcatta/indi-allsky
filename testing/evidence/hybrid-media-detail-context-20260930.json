@@ -44,6 +44,20 @@
     "web_reloaded": true,
     "capture_pid_before_after": 1565,
     "capture_state": "active",
-    "native_production": "Camera 2 / asi678mc: image 186935 Details and Back to Images preserve both query values"
+    "native_production": "Camera 2 / asi678mc: image 186935 Details and Back to Images preserve both query values",
+    "native_timelapse_round_trips": [
+      {
+        "camera_id": 1,
+        "profile_id": "imx708-wide",
+        "video_id": 68,
+        "result": "Details and Back to Timelapses preserve scope"
+      },
+      {
+        "camera_id": 2,
+        "profile_id": "asi678mc",
+        "video_id": 67,
+        "result": "Camera filter, Details and Back to Timelapses preserve scope"
+      }
+    ]
   }
 }

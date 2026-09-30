@@ -30,7 +30,7 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/config-history` | 7 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-settings-chain-20260929](../testing/evidence/hybrid-settings-chain-20260929.json), [hybrid-sqlite-checkpoint-20260929](../testing/evidence/hybrid-sqlite-checkpoint-20260929.json) |
 | `/modern-admin/config-restore` | 5 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-settings-chain-20260929](../testing/evidence/hybrid-settings-chain-20260929.json) |
 | `/modern-admin/config-restore/<int:config_id>` | 4 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-settings-chain-20260929](../testing/evidence/hybrid-settings-chain-20260929.json) |
-| `/modern-admin/config-restore/<int:config_id>/apply` | 0 | Da associare o collaudare |
+| `/modern-admin/config-restore/<int:config_id>/apply` | 2 | [hybrid-snapshot-acceptance-20260930](../testing/evidence/hybrid-snapshot-acceptance-20260930.json) |
 | `/modern-admin/fits` | 2 | [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/fits/<int:fits_id>` | 4 | [hybrid-fits-dimensions-live-20260914](../testing/evidence/hybrid-fits-dimensions-live-20260914.json), [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json) |
 | `/modern-admin/highlights` | 18 | [hybrid-product-media-navigation-20260921](../testing/evidence/hybrid-product-media-navigation-20260921.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
@@ -41,8 +41,8 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/media/fits` | 7 | [hybrid-fits-dimensions-live-20260914](../testing/evidence/hybrid-fits-dimensions-live-20260914.json), [hybrid-source-media-2026-09-06](../testing/evidence/hybrid-source-media-2026-09-06.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/media/gallery` | 2 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-gallery-state-20260929](../testing/evidence/hybrid-gallery-state-20260929.json) |
 | `/modern-admin/media/gallery/page` | 1 | [hybrid-gallery-state-20260929](../testing/evidence/hybrid-gallery-state-20260929.json) |
-| `/modern-admin/media/images` | 1 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
-| `/modern-admin/media/images/<int:image_id>` | 1 | [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json) |
+| `/modern-admin/media/images` | 2 | [hybrid-navigation-drawer-20260929](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-media-detail-context-20260930](../testing/evidence/hybrid-media-detail-context-20260930.json) |
+| `/modern-admin/media/images/<int:image_id>` | 2 | [hybrid-sky-cycle-navigation-native-20260920](../testing/evidence/hybrid-sky-cycle-navigation-native-20260920.json), [hybrid-media-detail-context-20260930](../testing/evidence/hybrid-media-detail-context-20260930.json) |
 | `/modern-admin/media/keograms` | 10 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/media/mini-timelapses` | 10 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/media/panorama` | 10 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
@@ -52,8 +52,8 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/media/raw-loop` | 1 | [hybrid-loop-post-classic-20260921](../testing/evidence/hybrid-loop-post-classic-20260921.json) |
 | `/modern-admin/media/startrail-videos` | 10 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/media/startrails` | 10 | [hybrid-generated-media-2026-09-06](../testing/evidence/hybrid-generated-media-2026-09-06.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
-| `/modern-admin/media/timelapses` | 1 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
-| `/modern-admin/media/timelapses/<int:video_id>` | 0 | Da associare o collaudare |
+| `/modern-admin/media/timelapses` | 2 | [hybrid-navigation-drawer-20260929](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-media-detail-context-20260930](../testing/evidence/hybrid-media-detail-context-20260930.json) |
+| `/modern-admin/media/timelapses/<int:video_id>` | 1 | [hybrid-media-detail-context-20260930](../testing/evidence/hybrid-media-detail-context-20260930.json) |
 | `/modern-admin/mode/<mode>` | 1 | [Contratto API/redirect isolato](../testing/evidence/hybrid-current-discovery-20260921.json) |
 | `/modern-admin/moment` | 19 | [hybrid-product-media-navigation-20260921](../testing/evidence/hybrid-product-media-navigation-20260921.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/notifications` | 35 | [hybrid-operations-2026-09-06](../testing/evidence/hybrid-operations-2026-09-06.json), [hybrid-operations-live-20260914](../testing/evidence/hybrid-operations-live-20260914.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-notification-live-20260921](../testing/evidence/hybrid-notification-live-20260921.json), [hybrid-notifications-mobile-20260929](../testing/evidence/hybrid-notifications-mobile-20260929.json) |
