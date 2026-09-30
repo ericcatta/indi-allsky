@@ -2,7 +2,7 @@
 
 ## Current application
 
-The latest application change deployed on 30 September is `a5e4b7e0`.
+The latest application change deployed on 30 September is `4d2e08fa`.
 Later documentation/test commits do not change the running application.
 Read the actual checkout revision with `git rev-parse HEAD`; do not use an older
 release heading as proof of the installed version.
@@ -12,7 +12,7 @@ compatibility handlers remain. Configuration revision is 118.
 The current application passed 174 Python/compile entrypoints and 34 JavaScript
 tests. The last deployment reloaded only Gunicorn; capture PID 1565 remained
 active with zero restarts and both images decoded in the native browser.
-[Regression and deployment](testing/evidence/hybrid-action-catalog-retirement-20260930.json).
+[Regression and deployment](testing/evidence/hybrid-full-config-input-20260930.json).
 This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 
@@ -55,8 +55,8 @@ and fresh decoded frames from both cameras. A running unit alone is insufficient
 
 For catalog retirement `a5e4b7e0`, the previous complete
 `indi_allsky/modern_safe_action.py` is at `e3c1e8fa`.
-For action-input validation `908b1f70`, the previous complete
-`indi_allsky/flask/views.py` is at `8657bbc2`.
+For Full Config input validation `4d2e08fa`, the previous complete
+`indi_allsky/flask/views.py` is at `5bb258c6`.
 These are independent web-only changes; neither migrated data or configuration.
 
 Inspect the diff against the installed version before restoring either file.

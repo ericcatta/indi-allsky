@@ -6,16 +6,16 @@ Those activities are outside this acceptance run, not passed tests.
 
 ## Current installation and regression
 
-The latest application change is `a5e4b7e0`; subsequent commits add tests and evidence.
+The latest application change is `4d2e08fa`; subsequent commits add tests and evidence.
 Hybrid is the only UI and requires login. Useful shared backend, drivers, workers,
 public media URLs and integration APIs remain. Configuration revision is 118.
 
 The unchanged application passed **174 Python/compile entrypoints and 34 JavaScript tests**.
 The latest runtime evidence includes the exact report hashes, web-only deployment,
 unchanged capture PID 1565, zero automatic restarts, and decoded frames from both
-cameras at 22:50:06 / 22:49:52. These are dated observations, not continuous monitoring.
-[Latest runtime regression and deployment](testing/evidence/hybrid-action-catalog-retirement-20260930.json).
-The later test-only cleanup extension passed separately; it did not change application sources.
+cameras at 23:21:38 / 23:21:24. These are dated observations, not continuous monitoring.
+[Latest runtime regression and deployment](testing/evidence/hybrid-full-config-input-20260930.json).
+The cleanup extension is included in this regression. All 719 Full Config fields are interpreted in Hybrid (202 through domain parsers and 517 in its orchestrator); frozen legacy fingerprints remain unchanged.
 
 ## Verified outcomes and their limits
 
@@ -30,6 +30,7 @@ The later test-only cleanup extension passed separately; it did not change appli
 | Download delivery | User-received panorama video exactly matches the Raspberry file hash. This proves that individual download, not all export families | [Received panorama](testing/evidence/hybrid-generation-followup-20260930.json) |
 | Cleanup | All four native buttons deleted exactly the expected synthetic files/rows; other camera preserved; archive reflects deletion | [Native effects](testing/evidence/hybrid-cleanup-native-effects-20260930.json) |
 | Links after cleanup | 240 download responses and 48 Image/FITS detail responses: removed entries return 404, retained downloads preserve exact bytes | [Regression](testing/evidence/hybrid-cleanup-stale-links-20260930.json) |
+| Full Config admission | Malformed/non-object JSON rejected before WTForms; no config revision, content change or queued task; valid parser semantics preserved | [Full Config](testing/evidence/hybrid-full-config-input-20260930.json) |
 | Action validation | Malformed JSON rejected before discovery, INDI startup or abort planning; role/CSRF checks and valid camera-specific abort enqueue retained | [Validation](testing/evidence/hybrid-action-input-20260930.json) |
 | Cold autostart | After orderly shutdown and physical power reconnection, web/INDI/capture start without SSH; both new images decode | [Cold start](testing/evidence/hybrid-cold-start-20260930.json) |
 | Storage settings | Capacity estimate restored; same-value native save preserved the 5 GiB / 8 GiB / 3-day policy and other configuration | [Storage](testing/evidence/hybrid-storage-estimate-fix-20260929.json) |

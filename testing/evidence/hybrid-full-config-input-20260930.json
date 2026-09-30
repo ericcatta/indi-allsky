@@ -35,7 +35,19 @@
     "javascript_sha256": "114aad9b2944ee6160d428979c03762625713f76160c7c4f884723e7fb837163"
   },
   "deployment": {
-    "status": "pending"
+    "status": "deployed",
+    "revision": "4d2e08fa",
+    "method": "Fast-forward pull and web-only reload",
+    "capture_pid_before_and_after": 1565,
+    "capture_active": true,
+    "capture_restarts": 0,
+    "native_checks": [
+      "Full Settings camera_id=2/profile_id=asi678mc retained; FISH2PANO search returns 12 settings; no save",
+      "Now IMX708 frame 23:21:38 decoded 4608x2592",
+      "Now ASI678MC frame 23:21:24 decoded 3840x2160"
+    ],
+    "observation_note": "An initial immediate image check preceded loading; the completed page was checked again and both images had complete=true and nonzero natural dimensions.",
+    "rollback": "Restore indi_allsky/flask/views.py from 5bb258c6 and reload Gunicorn; no data/configuration migration"
   },
   "limitations": [
     "No new live configuration save required or performed for this input-admission change",
