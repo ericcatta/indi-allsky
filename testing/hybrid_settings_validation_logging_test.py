@@ -22,7 +22,7 @@ class Capture(logging.Handler):
 def run(runtime_config):
     with isolated_app(runtime_config, multi_camera=True) as app:
         from indi_allsky.flask import db
-        from indi_allsky.flask.models import IndiAllSkyDbConfigTable
+        from indi_allsky.flask.models import IndiAllSkyDbConfigTable, IndiAllSkyDbTaskQueueTable
         from indi_allsky.flask.views import AjaxConfigView
         client = login_client(app, 1)
         page = client.get('/indi-allsky/modern-admin/settings/full')
@@ -36,6 +36,19 @@ def run(runtime_config):
         app.logger.addHandler(capture)
         app.logger.setLevel(logging.WARNING)
         try:
+            with app.app_context():
+                original = json.dumps(IndiAllSkyDbConfigTable.query.one().data, sort_keys=True)
+            for body in ('null', '[]', '[1]', 'true', '12', '"text"', '{bad json'):
+                rejected = client.post('/indi-allsky/ajax/config', data=body,
+                                       content_type='application/json', headers={'X-CSRFToken': token})
+                assert rejected.status_code == 400 and rejected.json['form_global'], (body, rejected.status_code)
+            rejected = client.post('/indi-allsky/ajax/config', data='not JSON',
+                                   content_type='text/plain', headers={'X-CSRFToken': token})
+            assert rejected.status_code == 400 and rejected.json['form_global']
+            assert client.post('/indi-allsky/ajax/config', json=[1]).status_code == 400
+            with app.app_context():
+                assert json.dumps(IndiAllSkyDbConfigTable.query.one().data, sort_keys=True) == original
+                assert IndiAllSkyDbTaskQueueTable.query.count() == 0
             response = client.post('/indi-allsky/ajax/config', json=payload,
                                    headers={'X-CSRFToken': token})
             assert response.status_code == 400

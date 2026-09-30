@@ -1347,6 +1347,9 @@ class AjaxConfigView(BaseView):
             )
 
     def dispatch_request(self):
+        if not isinstance(request.get_json(silent=True), dict):
+            return jsonify({'form_global': ['Configuration must be a JSON object.']}), 400
+
         form_config = IndiAllskyConfigForm(data=request.json)
 
 

@@ -1,0 +1,44 @@
+{
+  "scope": "Full Config HTTP admission before WTForms, independent of the unchanged Hybrid parser",
+  "baseline": "5bb258c6",
+  "defect": "POST /ajax/config with JSON [1] raised TypeError: cannot unpack non-iterable int object in WTForms request wrapping",
+  "before_log": "/home/eric/hybrid-full-config-input-before-20260930.log",
+  "correction": "Non-object or malformed JSON and wrong content type return 400 with form_global before constructing the form",
+  "targeted": {
+    "status": "passed",
+    "test": "testing/hybrid_settings_validation_logging_test.py",
+    "checks": [
+      "Seven malformed/non-object JSON bodies and wrong content type return structured 400",
+      "Missing CSRF remains rejected",
+      "No new configuration revision, changed config content or queued task",
+      "Validation logs retain field/type/count without submitted secrets"
+    ],
+    "log": "/home/eric/hybrid-full-config-input-after-20260930.log"
+  },
+  "parser": {
+    "status": "passed",
+    "fields": 719,
+    "domain_parser_fields": 202,
+    "orchestrator_fields": 517,
+    "inline_in_http_view": 0,
+    "test": "testing/full_config_parser_parity_test.py",
+    "legacy_fingerprints": "unchanged"
+  },
+  "regression": {
+    "status": "passed",
+    "python_entries": 174,
+    "javascript_entries": 34,
+    "source_changed": false,
+    "python_report": "/home/eric/hybrid-full-config-input-regression-20260930/results.json",
+    "python_sha256": "e08b2c6d75c1d74e1bcaa8ce8a740d9767181b55f62b73cfe78053f441805101",
+    "javascript_report": "/tmp/hybrid-full-config-input-js-20260930.json",
+    "javascript_sha256": "114aad9b2944ee6160d428979c03762625713f76160c7c4f884723e7fb837163"
+  },
+  "deployment": {
+    "status": "pending"
+  },
+  "limitations": [
+    "No new live configuration save required or performed for this input-admission change",
+    "Full parser parity is not certification of every browser control"
+  ]
+}
