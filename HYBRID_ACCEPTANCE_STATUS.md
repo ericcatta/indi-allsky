@@ -49,9 +49,19 @@ Now decodes both camera images and Config History renders 25 rows after web relo
 capture PID 1565 is unchanged. No settings, database or media migration is involved.
 [Evidence](testing/evidence/hybrid-dashboard-helper-retirement-20260930.json).
 
+## Action request validation — deployed
+
+Malformed or non-object JSON now returns an explicit 400 before camera discovery,
+INDI startup or abort planning; admin checks and CSRF remain enforced. Valid abort
+requests enqueue the exact camera/profile command in the isolated database.
+All 174 Python/compile entrypoints and 34 JavaScript tests pass; tested sources
+stayed unchanged. Only web workers were reloaded. Capture remains active with PID
+1565 and zero restarts; native Now decodes both camera frames.
+[Evidence](testing/evidence/hybrid-action-input-20260930.json).
+
 ## Installed product
 
-The Raspberry runs `af31f978` (unreachable dashboard helper chain removed).
+The Raspberry runs `908b1f70` (action request validation).
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.

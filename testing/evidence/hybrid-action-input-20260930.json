@@ -32,7 +32,29 @@
     "sha256": "30b4476e39b704d85528cfddab7fceca2ab89ad324edf0e49636eaf905699e52"
   },
   "deployment": {
-    "status": "not_deployed"
+    "status": "deployed",
+    "revision": "908b1f70",
+    "method": "git pull --ff-only; reload gunicorn-indi-allsky.service",
+    "capture_pid_before_and_after": 1565,
+    "capture_state": "active",
+    "capture_restarts": 0,
+    "native_now": {
+      "camera_1": {
+        "timestamp": "2026-09-30 22:29:05",
+        "decoded_dimensions": [
+          4608,
+          2592
+        ]
+      },
+      "camera_2": {
+        "timestamp": "2026-09-30 22:28:51",
+        "decoded_dimensions": [
+          3840,
+          2160
+        ]
+      }
+    },
+    "rollback": "Restore indi_allsky/flask/views.py from 8657bbc2 and reload gunicorn-indi-allsky.service; no database or configuration migration"
   },
   "limitations": [
     "Does not exercise a real hardware abort or INDI startup",

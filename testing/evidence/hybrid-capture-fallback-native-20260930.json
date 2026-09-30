@@ -1,0 +1,27 @@
+{
+  "scope": "Native isolated ordinary-user Capture fallback viewer; source before action-input correction, unchanged viewer",
+  "environment": "http://localhost:18118",
+  "role": "test-user-2",
+  "route": "/modern-admin/settings/capture?camera_id=2&profile_id=test-profile-2",
+  "status": "superato",
+  "checks": [
+    {
+      "control": "Seven summary expanders",
+      "result": "Each opens actual rows: Exposure Period 2, Exposure Limits 5, Night Mode 2, Moon Mode 2, Day Mode 4, ADU Control 4, Daytime Capture 2"
+    },
+    {
+      "control": "Exposure Period summary / Enter",
+      "result": "Expanded details closes; open attribute absent"
+    },
+    {
+      "control": "Open Camera Profiles",
+      "result": "Camera Management renders Test Camera 2 and settings/acquisition links"
+    }
+  ],
+  "limitations": [
+    "Read-only fallback values, no save controls or configuration mutation",
+    "Admin and production variants not tested in this check",
+    "Back to Settings Inventory not clicked",
+    "Initial keyboard attempt targeted the nested span; retargeted actual summary and verified success"
+  ]
+}

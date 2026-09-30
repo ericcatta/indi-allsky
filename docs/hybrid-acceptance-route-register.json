@@ -291,6 +291,12 @@
           "record": "controls[0]",
           "control": "Native production detection of IMX708 and ASI678MC; non-camera device rejected; historical revision and limits retained",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-action-input-20260930.json",
+          "record": "targeted",
+          "control": "Isolated HTTP malformed-input and permission checks; valid abort enqueue for both profiles; no live hardware effects",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -439,7 +445,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminIndiServerStartView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-action-input-20260930.json",
+          "record": "targeted",
+          "control": "Isolated HTTP malformed-input and permission checks; valid abort enqueue for both profiles; no live hardware effects",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/capture/abort-exposure",
@@ -449,7 +462,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminAbortExposureActionView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-action-input-20260930.json",
+          "record": "targeted",
+          "control": "Isolated HTTP malformed-input and permission checks; valid abort enqueue for both profiles; no live hardware effects",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/capture/service",
@@ -3139,7 +3159,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminSafeActionDryRunView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-action-input-20260930.json",
+          "record": "targeted",
+          "control": "Isolated HTTP malformed-input and permission checks; valid abort enqueue for both profiles; no live hardware effects",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings",
@@ -3448,7 +3475,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminCaptureSettingsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-capture-fallback-native-20260930.json",
+          "record": "checks",
+          "control": "Read-only seven sections, summary keyboard close, camera-profile navigation; isolated ordinary user",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/developer",
