@@ -409,6 +409,20 @@ The focused Highlights test did not reproduce the earlier SQLite stall; both
 cameras saved six frames at15-second intervals during that90-second sample.
 The previous under-load cadence defect remains open.
 
+## Bounded post-cleanup load observation — 30 September
+
+Eight 512-KiB writes on the media filesystem completed fsync in 10.6–12.3 ms;
+the dedicated temporary file was removed. During a separate 120-second observation,
+90 seconds of low-priority x264 encoding to null used about 283–286% CPU. Six new
+frames (excluding initial observations) became DB/file-visible in 3.31–5.35 seconds;
+camera intervals were 45 seconds for camera 1 and 45/46/45 for camera 2. There were
+no read errors; capture PID 1565 remained active with zero automatic restarts.
+The encoder was deliberately terminated at the deadline and both probe processes
+are confirmed stopped. No generated media, config changes or acquisition restarts.
+The historical long stall was not reproduced; this does not prove behavior under
+worst-case storage saturation or replace the deferred 24-hour test.
+[Measured evidence](testing/evidence/hybrid-storage-load-20260930.json).
+
 ## Remaining acceptance gates
 
 

@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-30",
+  "runtime": "af31f978",
+  "scope": "Bounded low-load storage probe and 120-second live publication observation; not worst-case storage saturation or 24-hour acceptance",
+  "storage_probe": {
+    "writes": 8,
+    "bytes_per_write": 524288,
+    "fsync_range_seconds": [
+      0.010561302000041906,
+      0.012331531000199902
+    ],
+    "temporary_file_removed": true,
+    "report": "/home/eric/hybrid-storage-probe-20260930.json",
+    "sha256": "43a6f9802d653153764c4f7c16dbbafc09ac6e7fd2486b1d72d7ed85843b798f"
+  },
+  "publication": {
+    "load": "90 seconds of nice-19 x264 encoding to null, two encoder threads; no generated media files",
+    "observed_encoder_cpu_percent": [
+      283,
+      286
+    ],
+    "observation_seconds": 120,
+    "polling": "Nominal two seconds, not a strict upper bound",
+    "new_frames_excluding_initial": 6,
+    "capture_to_observed_range_seconds": [
+      3.3116700649261475,
+      5.345265626907349
+    ],
+    "camera_1_capture_intervals_seconds": [
+      45,
+      45,
+      45
+    ],
+    "camera_2_capture_intervals_seconds": [
+      45,
+      46,
+      45
+    ],
+    "read_errors": 0,
+    "report": "/home/eric/hybrid-publication-encode-20260930.json",
+    "sha256": "687cba9c396b29d14355bc7863b1e83ee902e5954c479b3e710fa665c284fc80",
+    "encoder_log_bytes": 0,
+    "encoder_exit_code": 255,
+    "exit_explanation": "Encoder deliberately terminated after bounded load window; not a naturally completed video generation task",
+    "observer_and_encoder_confirmed_stopped": true
+  },
+  "capture_after": {
+    "pid": 1565,
+    "state": "active",
+    "automatic_restarts": 0
+  },
+  "conclusion": "Historical multi-tens-of-seconds stall not reproduced in this sample. No new performance change justified from this measurement. Historical I/O saturation risk is not declared resolved."
+}
