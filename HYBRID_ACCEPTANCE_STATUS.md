@@ -113,6 +113,15 @@ Raspberry original SHA-256. This closes that individual delivery check; other
 download controls and long-run stability remain separate.
 [Follow-up evidence](testing/evidence/hybrid-generation-followup-20260930.json).
 
+## Invalid restore files — isolated browser acceptance
+
+Native administrator submissions of malformed JSON and a JSON array both return
+400 with specific field errors and re-enable Restore. The synthetic database
+remains at its original single revision. Return to history preserves camera 2
+and its profile. No production restore was attempted; the temporary server,
+tunnel and database were removed.
+[Evidence](testing/evidence/hybrid-restore-invalid-files-native-20260930.json).
+
 ## Post-removal evidence
 
 | Scope | Verified result | Evidence |

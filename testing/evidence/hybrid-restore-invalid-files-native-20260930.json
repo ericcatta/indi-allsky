@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-30",
+  "environment": "Isolated Flask application on loopback 18118 through SSH tunnel; synthetic users/cameras/file database, Classic import/template guards enabled",
+  "fixture_source": "/home/eric/hybrid-status-publication-20260929/testing/hybrid_runtime_fixture.py",
+  "role": "administrator",
+  "camera_id": 2,
+  "profile_id": "test-profile-2",
+  "controls": [
+    {
+      "control": "CONFIG_UPLOAD + Restore configuration",
+      "input": "invalid-json.json: {not valid JSON",
+      "response": 400,
+      "feedback": "CONFIG_UPLOAD: Invalid JSON",
+      "button_reenabled": true,
+      "status": "superato"
+    },
+    {
+      "control": "CONFIG_UPLOAD + Restore configuration",
+      "input": "invalid-shape.json: []",
+      "response": 400,
+      "feedback": "CONFIG_UPLOAD: Not a valid indi-allsky config",
+      "button_reenabled": true,
+      "status": "superato"
+    },
+    {
+      "control": "Open Config History after failed restore",
+      "destination": "/indi-allsky/modern-admin/config-history?camera_id=2&profile_id=test-profile-2",
+      "visible_rows": 1,
+      "database_snapshot_count": 1,
+      "database_latest_snapshot": 1,
+      "status": "superato"
+    }
+  ],
+  "unchanged_options": [
+    "FLUSH_CONFIGS unchecked",
+    "RESET_KEYS unchecked"
+  ],
+  "cleanup": [
+    "Fixture server PID 2068783 stopped",
+    "Synthetic database directory removed",
+    "SSH tunnel closed",
+    "Agent-created fixture tab closed"
+  ],
+  "limitations": [
+    "Not a successful production restore or export-receipt test.",
+    "Only administrator role exercised in this browser session.",
+    "File chooser operations took 116/171 seconds in browser tooling; this does not measure server restore latency.",
+    "No production configuration or service changed."
+  ]
+}
