@@ -1,0 +1,232 @@
+{
+  "baseline": "3f6d7071",
+  "scope": "Bounded native production Storage controls; no media or configuration writes",
+  "controls": [
+    {
+      "page": "/modern-admin/storage",
+      "control_id": "Storage camera / IMX708 Wide",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Storage camera selection changed inventory to libcamera_imx708 and propagated camera_id=1/profile_id=imx708-wide to all nine Storage views links.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage",
+      "control_id": "Storage views / File Space Usage",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked from camera-1 Storage; destination retained camera/profile and displayed 35 day/night records.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "Search table",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "2026-09-30 produced exactly Day and Night rows; no-match-acceptance produced zero; keyboard select-all/backspace restored 35. Empty-string automation fill did not clear the input, so the keyboard interaction was used and verified.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "pagination / Next",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Moved from rows 1\u201320 to 21\u201335.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "entries per page / All",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "All selected: 35 actual table body rows and Showing 1 to 35 of 35 entries.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "Copy",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Native Copy produced Copied 35 records.; clipboard contained 36 lines including header and Total column.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "Diagnostic camera / ASI678MC",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked ASI678MC: URL camera_id=2/profile_id=asi678mc; 35 records with distinct current-night total 259.4 MiB versus camera-1 493.4 MiB at the previous snapshot.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Time",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Images",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Panoramas",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / FITS",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Raw Images",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Timelapses",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Mini Timelapses",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Keograms",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Star Trails",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Star Trail Timelapses",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Panorama Timelapses",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Thumbnails",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/storage/file-space-usage",
+      "control_id": "sort / Total",
+      "role": "administrator",
+      "camera_profile": "camera_id=1/profile_id=imx708-wide unless stated",
+      "prerequisites": "Production data; authenticated native browser; installed 3f6d7071, application 85d9f04c",
+      "request": "Client-side table interaction; camera navigation performs GET",
+      "expected_effect": "Apply the indicated interaction to displayed data without modifying media",
+      "proof": "Clicked column sort; aria-sort ascending; all 35 rendered values monotonically nondecreasing using raw byte data-order for numeric cells.",
+      "status": "superato"
+    }
+  ],
+  "limitations": [
+    "Admin desktop only; not exhaustive Storage certification",
+    "Descending/date sorting and other page-size choices not newly exercised",
+    "CSV/Excel receipt remains open; no duplicate export attempt",
+    "Other Storage destination links were inspected but not clicked in this run"
+  ]
+}

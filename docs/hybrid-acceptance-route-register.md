@@ -153,3 +153,5 @@ sul Raspberry, con destinazione e contenuto della pagina osservati. Riguarda
 soltanto la navigazione in sessione amministratore; non certifica tutte le azioni
 delle pagine o gli altri ruoli. Le voci storiche di Settings sono dentro un
 riferimento tecnico chiuso, distinto dai sei editor operativi.
+
+[Storage, verifica nativa del 30 settembre](../testing/evidence/hybrid-storage-table-native-20260930.json): cambio camera/profilo, filtro e stato vuoto, paginazione, tutte le righe, copia e tredici ordinamenti crescenti verificati sui dati di produzione. Solo amministratore desktop; ricezione CSV/Excel ancora aperta.

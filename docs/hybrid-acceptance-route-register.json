@@ -4156,6 +4156,12 @@
           "control": "Navigation drawer / Storage",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/storage"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-table-native-20260930.json",
+          "record": "controls",
+          "control": "Native scoped camera navigation; file-space filtering, empty state, paging, copy and thirteen ascending column sorts; limits in source",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4334,6 +4340,12 @@
           "control": "First Next after clearing search, Previous, camera/profile switch",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/storage/file-space-usage"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-table-native-20260930.json",
+          "record": "controls",
+          "control": "Native scoped camera navigation; file-space filtering, empty state, paging, copy and thirteen ascending column sorts; limits in source",
+          "recorded_status": "superato"
         }
       ]
     },
