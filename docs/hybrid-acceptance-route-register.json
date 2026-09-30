@@ -4516,6 +4516,12 @@
           "record": "controls[5]",
           "control": "Four native destructive button effects",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-cleanup-native-effects-20260930.json",
+          "record": "controls",
+          "control": "Four native cleanup buttons with actual synthetic file/DB effects and camera isolation",
+          "recorded_status": "superato"
         }
       ]
     },

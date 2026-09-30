@@ -98,7 +98,7 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/system` | 16 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-system-index-20260929](../testing/evidence/hybrid-system-index-20260929.json) |
 | `/modern-admin/system/config` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
 | `/modern-admin/system/gpio-control` | 2 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |
-| `/modern-admin/system/info` | 4 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |, [Native cleanup permissions; destructive clicks pending](../testing/evidence/hybrid-cleanup-native-20260930.json)
+| `/modern-admin/system/info` | 5 | [hybrid-navigation-drawer-20260929](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-cleanup-native-20260930](../testing/evidence/hybrid-cleanup-native-20260930.json), [hybrid-cleanup-native-effects-20260930](../testing/evidence/hybrid-cleanup-native-effects-20260930.json) |
 | `/modern-admin/system/log` | 7 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-log-controller-20260929](../testing/evidence/hybrid-log-controller-20260929.json) |
 | `/modern-admin/system/log/<log_name>` | 5 | [hybrid-log-controller-20260929](../testing/evidence/hybrid-log-controller-20260929.json) |
 | `/modern-admin/system/network` | 2 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |

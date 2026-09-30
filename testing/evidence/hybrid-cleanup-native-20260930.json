@@ -48,5 +48,6 @@
         "sha256": "6cb403ac71d82acf37d55065ddf02f1c9fe311b9be7b0e91146b559bac2eb9a5"
       }
     ]
-  }
+  },
+  "follow_up": "testing/evidence/hybrid-cleanup-native-effects-20260930.json"
 }

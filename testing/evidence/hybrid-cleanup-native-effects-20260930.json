@@ -1,0 +1,85 @@
+{
+  "date": "2026-09-30",
+  "source_runtime": "908b1f70 isolated source",
+  "environment": "localhost:18118; dedicated /tmp/hybrid-acceptance-_lec652_ database and synthetic .dat files",
+  "production_data_changed": false,
+  "controls": [
+    {
+      "page": "/modern-admin/system/info",
+      "control_id": "flush_16min_images",
+      "label": "Delete recent images",
+      "role": "administrator test-user-1",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "prerequisites": "Fresh disposable 40-file, ten-family fixture; required confirmation checked; explicit refresh between submissions",
+      "request": "POST /indi-allsky/ajax/system",
+      "expected_effect": "Only processed Image201 removed; older Image202/203 and all other families retained",
+      "observed_message": "1 Images Deleted",
+      "remaining_files": 39,
+      "status": "superato",
+      "verification": "Read-only SQLite query and filesystem comparison; each retained file exists and retains original fixture bytes"
+    },
+    {
+      "page": "/modern-admin/system/info",
+      "control_id": "flush_daytime",
+      "label": "Delete daytime media",
+      "role": "administrator test-user-1",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "prerequisites": "Fresh disposable 40-file, ten-family fixture; required confirmation checked; explicit refresh between submissions",
+      "request": "POST /indi-allsky/ajax/system",
+      "expected_effect": "Daytime rows removed in seven families; nighttime, mini timelapses, startrails and startrail videos retained",
+      "observed_message": "13 Files Deleted",
+      "remaining_files": 26,
+      "status": "superato",
+      "verification": "Read-only SQLite query and filesystem comparison; each retained file exists and retains original fixture bytes"
+    },
+    {
+      "page": "/modern-admin/system/info",
+      "control_id": "flush_images",
+      "label": "Delete all images",
+      "role": "administrator test-user-1",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "prerequisites": "Fresh disposable 40-file, ten-family fixture; required confirmation checked; explicit refresh between submissions",
+      "request": "POST /indi-allsky/ajax/system",
+      "expected_effect": "Remaining Image/FITS/RAW/PanoramaImage camera-2 rows/files removed",
+      "observed_message": "4 Images Deleted",
+      "remaining_files": 22,
+      "status": "superato",
+      "verification": "Read-only SQLite query and filesystem comparison; each retained file exists and retains original fixture bytes"
+    },
+    {
+      "page": "/modern-admin/system/info",
+      "control_id": "flush_timelapses",
+      "label": "Delete generated outputs",
+      "role": "administrator test-user-1",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "prerequisites": "Fresh disposable 40-file, ten-family fixture; required confirmation checked; explicit refresh between submissions",
+      "request": "POST /indi-allsky/ajax/system",
+      "expected_effect": "Remaining six generated-output families removed for camera 2",
+      "observed_message": "12 Files Deleted",
+      "remaining_files": 10,
+      "status": "superato",
+      "verification": "Read-only SQLite query and filesystem comparison; each retained file exists and retains original fixture bytes"
+    }
+  ],
+  "additional_checks": [
+    "All ten camera-1 rows/files unchanged after every phase",
+    "After completion camera-2 Library shows zero images; selecting camera 1 shows Image101.dat and one result",
+    "Successful actions keep forms disabled until explicit Refresh service state; subsequent actions then succeed",
+    "All retained files match database rows; no orphan .dat files"
+  ],
+  "raw_verification": {
+    "path": "/home/eric/hybrid-cleanup-native-results-20260930.jsonl",
+    "sha256": "a0e974e319ca881912e89718d09611d4aafe05c634287c21f3adfac94a9edb8a",
+    "scope": "Last three phases; first-phase query retained in tool transcript"
+  },
+  "cleanup": "Fixture server and SSH tunnel stopped, both synthetic fixture directories removed, agent browser tab closed",
+  "limitations": [
+    "Browser effects checked as administrator on camera 2; ordinary-user denial separately recorded",
+    "Synthetic .dat media exercise deletion, not decoding or output generation",
+    "No production media deleted"
+  ]
+}
