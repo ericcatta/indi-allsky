@@ -2,17 +2,17 @@
 
 ## Current application
 
-The latest application change deployed on 30 September is `4d2e08fa`.
+The latest application change deployed on 30 September is `85d9f04c`.
 Later documentation/test commits do not change the running application.
 Read the actual checkout revision with `git rev-parse HEAD`; do not use an older
 release heading as proof of the installed version.
 Classic frontend is removed. Hybrid requires login; shared backend and public
 compatibility handlers remain. Configuration revision is 118.
 
-The current application passed 174 Python/compile entrypoints and 34 JavaScript
+The current application passed 175 Python/compile entrypoints and 34 JavaScript
 tests. The last deployment reloaded only Gunicorn; capture PID 1565 remained
 active with zero restarts and both images decoded in the native browser.
-[Regression and deployment](testing/evidence/hybrid-full-config-input-20260930.json).
+[Regression and deployment](testing/evidence/hybrid-ajax-json-admission-20260930.json).
 This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 
@@ -52,6 +52,11 @@ Afterward verify installed source, authentication, the affected UI/request/effec
 and fresh decoded frames from both cameras. A running unit alone is insufficient.
 
 ## Rollback of the latest code-only changes
+
+For AJAX object admission `85d9f04c`, revert that code change: restore
+`indi_allsky/flask/views.py` from `306c5235` and remove its newly introduced
+`indi_allsky/flask/json_request.py` module, then reload Gunicorn. This preserves
+the preceding Full Config validation. No database/configuration rollback is needed.
 
 For catalog retirement `a5e4b7e0`, the previous complete
 `indi_allsky/modern_safe_action.py` is at `e3c1e8fa`.

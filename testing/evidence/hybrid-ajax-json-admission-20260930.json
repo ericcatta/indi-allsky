@@ -27,7 +27,18 @@
     "python_sha256": "a9088450ed5766696cef4a433fec633db899bd26ea34bb312393982b29479f2d"
   },
   "deployment": {
-    "status": "not deployed"
+    "status": "deployed",
+    "revision": "85d9f04c",
+    "method": "Fast-forward pull and web-only reload",
+    "capture_pid_before_and_after": 1565,
+    "capture_active": true,
+    "capture_restarts": 0,
+    "native_checks": [
+      "Authenticated Now page reports running",
+      "IMX708 frame 23:44:23 decoded 4608x2592",
+      "ASI678MC frame 23:44:27 decoded 3840x2160"
+    ],
+    "rollback": "Revert code change 85d9f04c (views decorators and new json_request module) and reload Gunicorn; no database/config migration"
   },
   "limitations": [
     "This validates the JSON root, not every possible invalid field inside an object",
