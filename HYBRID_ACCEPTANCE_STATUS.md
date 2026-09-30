@@ -1,559 +1,91 @@
 # Hybrid acceptance status
 
-Updated 30 September 2026. **Classic removal is deployed; whole-product acceptance remains open.**
-The separate 24-hour day/night observation is deferred by the user. Detector and AI implementation are outside this release.
+Updated 30 September 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
+The user deferred the separate 24-hour day/night test and detector/AI implementation.
+Those activities are outside this acceptance run, not passed tests.
 
-## Cold start after physical power reconnection — passed
+## Current installation and regression
 
-On 30 September, after an orderly shutdown and user-performed power disconnect/reconnect,
-web, INDI and capture started automatically. Before the first SSH login, native Now
-showed new decoded frames from both cameras (21:06:05 and 21:06:13). The new boot ID,
-enabled timers/socket, lingering user manager and zero service restarts corroborate
-the result. Configuration 118 and installed runtime are unchanged. A coherent database
-and Flask configuration backup preceded shutdown. This closes cold-start autostart;
-it does not test abrupt power-loss durability or 24-hour stability.
-[Evidence](testing/evidence/hybrid-cold-start-20260930.json).
+The latest application change is `a5e4b7e0`; subsequent commits add tests and evidence.
+Hybrid is the only UI and requires login. Useful shared backend, drivers, workers,
+public media URLs and integration APIs remain. Configuration revision is 118.
 
-## Media list detail context correction — deployed
+The unchanged application passed **174 Python/compile entrypoints and 34 JavaScript tests**.
+The latest runtime evidence includes the exact report hashes, web-only deployment,
+unchanged capture PID 1565, zero automatic restarts, and decoded frames from both
+cameras at 22:50:06 / 22:49:52. These are dated observations, not continuous monitoring.
+[Latest runtime regression and deployment](testing/evidence/hybrid-action-catalog-retirement-20260930.json).
+The later test-only cleanup extension passed separately; it did not change application sources.
 
-Image and timelapse Details links now carry camera/profile to the detail and return
-flows. Both roles and both cameras pass isolated integration tests, including wrong-camera
-404 responses. Native camera-2 image list/detail/return preserves the profile.
-The deployed candidate passes 173 Python/compile entrypoints and 34 JavaScript tests.
-Production camera-2 image 186935 passes the same native round trip; capture PID
-1565 stayed active while only web workers were reloaded.
-[Evidence](testing/evidence/hybrid-media-detail-context-20260930.json).
+## Verified outcomes and their limits
 
-## Hybrid entry and obsolete dashboard retirement — deployed
-
-`/modern-admin` now performs an authenticated redirect directly to Now, retaining
-query parameters without constructing dashboard context. The unreachable 806-line
-`modern_admin/index.html` template is removed. In an isolated five-request comparison,
-queries drop from six to one; median redirect time drops from 6.6 ms to 2.4 ms.
-This is not a measurement of full-page production latency.
-The 173-entrypoint regression is reconciled with four successful targeted reruns:
-two guards updated for the independent handler, and isolation/compile checks rerun
-after removing accidental macOS transfer sidecars. Application sources stayed
-unchanged during those reruns; all 34 JavaScript tests pass. Production redirect and
-both decoded frames pass; capture PID 1565 remained active through web reload.
-[Evidence and original/follow-up reports](testing/evidence/hybrid-entry-retirement-20260930.json).
-
-## Unreachable dashboard helpers — removed and deployed
-
-After retiring the unreachable template, the isolated call chain that built its
-context is removed: 43 methods and eight exclusive imports, 672 lines in total.
-The 17 externally referenced/shared methods and backend analytics libraries remain.
-All 173 Python/compile entrypoints pass in one unchanged-source run, as do 34
-JavaScript tests and the standalone frame-metadata/event-candidate tests. Native
-Now decodes both camera images and Config History renders 25 rows after web reload;
-capture PID 1565 is unchanged. No settings, database or media migration is involved.
-[Evidence](testing/evidence/hybrid-dashboard-helper-retirement-20260930.json).
-
-## Action request validation — deployed
-
-Malformed or non-object JSON now returns an explicit 400 before camera discovery,
-INDI startup or abort planning; admin checks and CSRF remain enforced. Valid abort
-requests enqueue the exact camera/profile command in the isolated database.
-All 174 Python/compile entrypoints and 34 JavaScript tests pass; tested sources
-stayed unchanged. Only web workers were reloaded. Capture remains active with PID
-1565 and zero restarts; native Now decodes both camera frames.
-[Evidence](testing/evidence/hybrid-action-input-20260930.json).
-
-## Unused action catalog — removed and deployed
-
-The historical default Safe Action registry and its metadata-only placeholder
-class had no application consumer; references existed only in unit tests.
-Their 43 runtime lines are removed. Shared contract/filtering/refusal tests now
-use a test-local action; real planners, effects and routes remain unchanged.
-All 174 Python/compile entrypoints and 34 JavaScript tests pass. A web-only reload
-preserved capture PID 1565; both latest frames decoded in native Now.
-[Evidence](testing/evidence/hybrid-action-catalog-retirement-20260930.json).
-
-## Installed product
-
-The Raspberry runs `a5e4b7e0` (unused action catalog removed).
-Classic frontend classes, templates and exclusive assets are physically removed.
-Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
-Later documentation commits do not change the installed runtime.
-
-The previous 835-file source/asset manifest, before the two media-detail link changes
-and their new regression test (including the capture entrypoint), is
-`afaeac3ce66de7f770d2e92c4d8dcaf627aa769c74365993ad234097713667d6`.
-172 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
-The bounded asynchronous syslog handler is deployed. Both camera files decode
-after the restart. The live 171-entrypoint replay passes. Trace confirms system-log sends and
-diagnostic log writes stay off capture. The earlier syslog load test reached
-19/25-second capture gaps; subsequent bounded observations show 15-second median
-and 16-second maximum intervals, with publication latency still varying under I/O
-load. [Latest comparison](testing/evidence/hybrid-publication-comparison-20260929.json).
-
-A private SQLite 3.51.3 runtime is loaded by capture, web and commands in the
-Hybrid virtualenv; OS packages remain unchanged. Capture supervises background
-checkpoints with automatic fallback. Config revision 118 is unchanged. Capture
-PID 2015141 and web PID 1512518 have zero automatic restarts; capture was
-restarted for status publication at 19:23. The web workers were reloaded.
-The coherent backup passed integrity_check. Now, Settings/history and Library
-passed bounded native checks; latest files from both cameras decode.
-
-In the earlier checkpoint release’s first 29 frames per camera, median spacing is 15 seconds and maximum 16,
-with no interval above 17 seconds. A 180-second trace confirms the database
-checkpoint executes in the helper; the image worker still has a short WAL sync.
-This is positive short-run evidence, not a guarantee of steady cadence under
-all loads or the deferred 24-hour acceptance.
-Use [deployment and rollback instructions](HYBRID_DEPLOYMENT.md).
-
-## Shared Settings navigation correction — deployed
-
-Timelapse and Storage Protection footer links and save redirects now retain the
-explicit camera/profile query instead of dropping it or substituting the session
-camera. Both isolated persistence/CSRF/permission flow tests pass; both camera
-pairs are covered for links. Native administrator checks on camera 2 verify two
-saves, database values, all five footer links and the correctly selected generation
-camera. Only the two intended global config domains changed in the fixture.
-All 169 Python entrypoints and 34 JavaScript tests pass with unchanged tested
-sources. The web-only deployment preserves capture PID 1512517 and configuration
-118. Production camera-2 navigation to generation, Settings, Storage Protection
-and Tasks passes; no live settings were changed.
-[Evidence](testing/evidence/hybrid-shared-settings-context-20260929.json).
-The deployed follow-up preserves context through Full Settings, history,
-restore details and return links. Isolated native administrator/camera-1 and
-ordinary-user/camera-2 round trips pass. The 169-entrypoint regression passes
-with two corrected pagination-test reruns, and all 34 JavaScript tests pass.
-Production camera-2 round trip, pagination and snapshot-118 detail pass.
-Capture remains PID 1512517, configuration 118 unchanged; both latest image files
-decode at 14:49:50. [Evidence](testing/evidence/hybrid-settings-chain-20260929.json).
-
-## Cold-start defect corrected and deployed
-
-Capture restart exposed a backend moon bitmap removed during Classic retirement.
-The bitmap now belongs to `indi_allsky/overlay/assets/`; the temporary old-path
-copy is removed. The installed cold/cached overlay test passes for four phases,
-and the release manifest now includes raster images, SVG, icons and fonts.
-The image algorithms and original bitmap bytes are unchanged.
-
-After the 22:09:58 restart both cameras saved new frames: IMX708 at 22:10:12 and
-ASI678MC at 22:10:21. Both decoded in the production browser. A bounded log sample
-contains no image-worker exception after restart. See [recovery evidence](testing/evidence/hybrid-moon-asset-recovery-20260921.json).
-No Classic frontend was restored. This closes the specific cold-start defect,
-not the remaining whole-product acceptance gates below.
-
-## Media identifier correction deployed
-
-Oversized media identifiers could reach SQLite and raise OverflowError in FITS
-preview, Hybrid downloads and public originals. Bounds are now validated before
-querying. The original FITS class fingerprint is retained around the exact added
-guard. All 165 Python entrypoints passed after a test-only guardrail correction;
-the unchanged JavaScript results remain applicable. Native production checks now
-return controlled 400/404 errors on all three corrected routes. Both Now images
-decoded (22:56:47 IMX708 and 22:56:58 ASI678MC). See [identifier validation evidence](testing/evidence/hybrid-media-id-boundary-20260921.json).
-
-## Storage estimate correction deployed
-
-Failed Startrail attempts without an output file were suppressing the capacity
-estimate. The corrected query excludes unsuccessful generated-output rows with
-no recorded size, retaining all known bytes and the checks for genuinely unknown
-sizes. All 165 Python entrypoints pass. A read-only production-data comparison
-restores the estimate (8.51 GiB/day, approximately six days capacity at observation).
-The installed page now shows the estimate. A native same-value save persisted revision 118,
-with the original 5 GiB / 8 GiB / 3-day policy and all other settings unchanged.
-Both latest frames decoded after deployment. [Evidence](testing/evidence/hybrid-storage-estimate-fix-20260929.json).
-
-## Latest scheduled generation snapshot
-
-The 29 September day/night transition completed camera-1 timelapse task 13929
-and panorama task 13930. Both output files exist and ffprobe reads their H.264
-streams: 3,013 frames at 4608×2592 and 1,505 frames at 4712×750, respectively.
-This checks output metadata, not complete decoding or browser playback.
-Camera-2 cleanup 13931 completed without deleting any assets; task 13932 was
-still running and 13933/13934 queued at the read-only snapshot. These remaining
-jobs are not marked accepted and were left running normally.
-[Task and output evidence](testing/evidence/hybrid-day-generation-snapshot-20260929.json).
-
-The authorized 30 September follow-up confirms camera-2 tasks 13932–13934
-completed. Keogram 64 decodes at 3013×700. Both videos pass complete single-thread
-FFmpeg decoding without errors (3,013 and 1,503 frames). Both cameras continue
-acquiring, with five observed 45-second intervals each after decoding. Both videos also reached natural end in the production browser after opening
-them through their task-result links. The panorama return link retained camera 2,
-profile asi678mc and the Panorama videos filter. The user then downloaded the
-panorama: the received 37,837,327-byte file in Mac Downloads has exactly the
-Raspberry original SHA-256. This closes that individual delivery check; other
-download controls and long-run stability remain separate.
-[Follow-up evidence](testing/evidence/hybrid-generation-followup-20260930.json).
-
-## Invalid restore files — isolated browser acceptance
-
-Native administrator submissions of malformed JSON and a JSON array both return
-400 with specific field errors and re-enable Restore. The synthetic database
-remains at its original single revision. Return to history preserves camera 2
-and its profile. No production restore was attempted; the temporary server,
-tunnel and database were removed.
-[Evidence](testing/evidence/hybrid-restore-invalid-files-native-20260930.json).
-
-## Post-removal evidence
-
-| Scope | Verified result | Evidence |
+| Domain | Proven result | Evidence |
 | --- | --- | --- |
-| Settings, isolated browser | Login, both camera previews, edit/save, value after reload, snapshot restore and original value recovered | [Release acceptance](testing/evidence/hybrid-retirement-final-native-20260921.json) |
-| Production UI and capture | Both Now images decoded; Full Settings search works; source manifest matches; configuration and capture process preserved | [Release acceptance](testing/evidence/hybrid-retirement-final-native-20260921.json) |
-| Notifications, production administrator | Dedicated expired notice acknowledged and retained; 198 existing acknowledgement values unchanged. Search, filters, paging, seven sort columns, copy and keyboard detail verified. Native export receipt remains open | [Native notifications](testing/evidence/hybrid-notification-live-20260921.json) |
-| Notifications, narrow viewport | At 390/320 px, search and keyboard detail navigation pass; at 320 px, acknowledgement filtering, empty state and return to list pass. No page-level horizontal overflow. Export delivery remains open | [Mobile notifications](testing/evidence/hybrid-notifications-mobile-20260929.json) |
-| Public media families | All 17 latest-media routes checked for both cameras: 30 ranged responses match on-disk camera/model files, four RAW requests show the correct empty state. Native download receipt remains open | [Live public families](testing/evidence/hybrid-public-families-live-20260921.json) |
-| Public image viewer controls | Both camera directory links open decoded images; Copy link verified by actual paste, fullscreen enter/exit and return to correctly filtered Hybrid archive | [Native public viewers](testing/evidence/hybrid-public-viewer-native-20260921.json) |
-| Production authentication boundary | All 99 Hybrid GET entries reach login for anonymous GET/HEAD on both camera/profile contexts (396 cases, including alias chains). Public latest-image range bytes match each camera file; 14 invalid API authentication requests rejected | [Live HTTPS boundary](testing/evidence/hybrid-live-auth-boundary-20260921.json) |
-| Current-release mini generation | Native submissions 12747/12748 produced five-frame, 2 FPS clips for cameras 1/2; file/DB/probe match and both played to natural end. Capture continued | [Live generation after fixes](testing/evidence/hybrid-generation-guard-live-20260921.json) |
-| Real mini timelapses | Tasks 12718/12719 succeeded for cameras 1/2. Each output has 9 frames at 2 fps, verified with ffprobe and complete browser playback | [Live generation](testing/evidence/hybrid-mini-generation-post-classic-20260921.json) |
-| Loop | Both cameras, individual filters, history, speed selection, native forward/reverse playback and return to forward playback | [Loop acceptance](testing/evidence/hybrid-loop-post-classic-20260921.json) |
-| RAW Loop with absent data | Correct empty state on both cameras and navigation back to processed Loop; the live RAW table is empty | [Loop acceptance](testing/evidence/hybrid-loop-post-classic-20260921.json) |
-| Satellite provider | Real requests validated 156 visual, 10,695 Starlink and 20 station entries; production catalog unchanged; real task outcomes visible in Hybrid. Historical 403 not reproduced | [Provider recheck](testing/evidence/hybrid-satellite-recheck-20260921.json) |
-| Mobile navigation | At 390 px, drawer focus/Escape/Enter, Settings navigation, profile search and Loop filters verified; Loop also fits 320 px with both images decoded. Profile-tab context defect found in this historical run was corrected and verified in the Settings navigation entry below | [Mobile acceptance](testing/evidence/hybrid-mobile-navigation-20260921.json) |
-| Settings camera/profile round trip | Both native profile → Settings → Exposure/Gain paths preserve the correct camera ID and profile; Now images decoded after web-only update | [Settings navigation](testing/evidence/hybrid-settings-navigation-context-20260921.json) |
-| Highlights, Moment and Output | 16 image-detail links and previews verified; seven output-type links per camera preserve filters; both completed day keograms display real files. Download delivery remains open | [Product media navigation](testing/evidence/hybrid-product-media-navigation-20260921.json) |
-| Static cleanup and VirtualSky | Five unused vendor demo assets removed (78,384 bytes); both camera overlays, fullscreen and preview reset verified; services preserved | [Static cleanup](testing/evidence/hybrid-static-cleanup-20260921.json) |
-| Complete day outputs | Four automatic tasks succeeded: both camera timelapses (3,165 frames each) and panoramas (1,581 each). Original files/probes match; all four played to natural end in the browser | [Day output playback](testing/evidence/hybrid-day-output-playback-20260921.json) |
-| System tools and Focus | Native network/drive refresh, SD metadata, complete support output and GPIO disabled-state checks; Focus crop/reset/fullscreen and both-camera preview with automatic refresh. Physical device effects remain open | [System and Focus](testing/evidence/hybrid-system-focus-native-20260921.json) |
-| Camera detection correction | Real INDI capabilities exclude Telescope Simulator from camera selection; actual driver preserved. Both cameras still acquire and decode after web-only deploy | [Detection release](testing/evidence/hybrid-camera-detection-release-20260921.json) |
-| Browser downloads | Video and empty CSV clicks returned, but no matching file was found in Mac Downloads; delivery remains unverified | [Open download checks](testing/evidence/hybrid-download-delivery-post-classic-20260921.json) |
+| Classic retirement | Frontend classes, templates and exclusive assets removed; isolated and deployed Hybrid acceptance; useful backend retained | [Retirement](testing/evidence/hybrid-retirement-final-native-20260921.json) |
+| Authentication | Anonymous Hybrid entries require login; public media/API contracts retain their own policies | [Production boundary](testing/evidence/hybrid-live-auth-boundary-20260921.json) |
+| Settings | Native isolated save/reload/history/restore; restored value verified. Concurrent snapshot restore admits one commit and rejects the stale competitor | [Native flow](testing/evidence/hybrid-retirement-final-native-20260921.json), [snapshot concurrency](testing/evidence/hybrid-snapshot-acceptance-20260930.json) |
+| Settings context | Camera/profile preserved through Settings, history, snapshot detail and return; malformed uploaded restore files rejected without new revision | [Navigation](testing/evidence/hybrid-settings-chain-20260929.json), [invalid files](testing/evidence/hybrid-restore-invalid-files-native-20260930.json) |
+| Media navigation | Image/timelapse list, detail and return retain camera/profile; wrong-camera references rejected | [Navigation](testing/evidence/hybrid-media-detail-context-20260930.json) |
+| Generation | Both cameras' day output tasks succeeded; camera-2 generated videos fully decoded and played to natural end in browser | [Generation](testing/evidence/hybrid-generation-followup-20260930.json) |
+| Download delivery | User-received panorama video exactly matches the Raspberry file hash. This proves that individual download, not all export families | [Received panorama](testing/evidence/hybrid-generation-followup-20260930.json) |
+| Cleanup | All four native buttons deleted exactly the expected synthetic files/rows; other camera preserved; archive reflects deletion | [Native effects](testing/evidence/hybrid-cleanup-native-effects-20260930.json) |
+| Links after cleanup | 240 download responses and 48 Image/FITS detail responses: removed entries return 404, retained downloads preserve exact bytes | [Regression](testing/evidence/hybrid-cleanup-stale-links-20260930.json) |
+| Action validation | Malformed JSON rejected before discovery, INDI startup or abort planning; role/CSRF checks and valid camera-specific abort enqueue retained | [Validation](testing/evidence/hybrid-action-input-20260930.json) |
+| Cold autostart | After orderly shutdown and physical power reconnection, web/INDI/capture start without SSH; both new images decode | [Cold start](testing/evidence/hybrid-cold-start-20260930.json) |
+| Storage settings | Capacity estimate restored; same-value native save preserved the 5 GiB / 8 GiB / 3-day policy and other configuration | [Storage](testing/evidence/hybrid-storage-estimate-fix-20260929.json) |
+| Hardware availability | Native GPIO and focuser controls correctly disabled with a reason when no driver is configured; no physical effects claimed | [Prerequisites](testing/evidence/hybrid-hardware-prerequisites-20260930.json) |
+| Runtime cleanup | Unreachable dashboard template/helpers and unused action catalog removed; active services and regression retained | [Entry/template](testing/evidence/hybrid-entry-retirement-20260930.json), [helpers](testing/evidence/hybrid-dashboard-helper-retirement-20260930.json), [catalog](testing/evidence/hybrid-action-catalog-retirement-20260930.json) |
 
-Earlier evidence remains useful for its stated revision, role, camera and environment.
-It is not automatically recertified against the current release.
-The [route evidence register](docs/hybrid-acceptance-route-register.md) links each recorded control to its source.
-
-## Inventory and coverage limits
-
-The isolated discovery of installed `970d1799` covers all 99 registered Hybrid GET entries in
-505 role/camera/detail contexts: 376 rendered and 129 blocked or redirected,
-with no rendering defects and no matches for the selected placeholder phrases.
-It records 43,978 control occurrences, including repetition across roles,
-cameras, aliases and shared navigation. This is not a count of unique features.
-
-The full report is `/home/eric/hybrid-current-controls-20260929.json`, SHA-256
-`7975995c8dbf32c52b99b90e9fdf55ad7291c450dc29f2b00c3a5328ff000dfa`.
-Its source manifest and limitations are recorded in `current_control_discovery`
-in the [JSON register](docs/hybrid-acceptance-route-register.json).
-
-The static identity index preserves all 43,978 references in 7,368 exact page/control groups.
-Forty role/camera contexts changed control identities since the previous index.
-Six non-page GET families link to their separately recorded isolated API/redirect tests;
-see [current discovery evidence](testing/evidence/hybrid-current-discovery-20260921.json).
-This does not certify native download receipt or hardware effects.
-
-Discovery does not mark clicks passed. JavaScript-generated controls, keyboard/mobile behavior,
-mutating requests and observable effects require their own evidence.
-The full control/effect matrix is not yet certified; blocked cases are not passes.
-Absence of selected placeholder phrases is not proof that every function is implemented.
-
-## Astropanel timeout recovery deployed
-
-A stalled request could leave Refresh disabled indefinitely. A 15-second client
-deadline now restores the control, distinguishes unavailable data from retained
-stale values, and permits retry. Native isolated 20-second delays verified initial
-failure and stale-data preservation; retry and camera switching recovered.
-Production refresh/camera selection passed without restarting capture.
-[Evidence](testing/evidence/hybrid-astropanel-timeout-20260929.json).
-
-## Users table acceptance extended
-
-A native isolated 28-account fixture verifies pagination, all ascending sort
-columns, ID reverse sorting, page sizes, combined filters, account details and
-self-account navigation. Administrator, ordinary-user and anonymous behavior
-were observed. At 320px the table scrolls horizontally without page overflow;
-Details opens after its column is made visible. Compared account fields remain
-unchanged apart from expected login metadata excluded from that comparison.
-A later production administrator check verifies exact clipboard receipt for all
-rows, one filtered row and an empty result; previous clipboard contents were restored.
-[Clipboard evidence](testing/evidence/hybrid-users-clipboard-live-20260929.json).
-A later isolated ordinary-user check also confirms exact delivery of both account
-rows with the Details column excluded and the original clipboard restored.
-[Ordinary-user evidence](testing/evidence/hybrid-settings-chain-20260929.json).
-Native CSV/Excel receipt remains open. [Evidence](testing/evidence/hybrid-users-native-controls-20260929.json).
-
-## Focused Settings controls verified on both profiles
-
-Production administrator paths through Basic/Advanced to Storage, Analytics,
-Acquisition/Save and FITS/Source were exercised for both cameras. Search,
-keyboard clear, focus checkbox off/on and return navigation produced the expected
-visible results and retained camera/profile context. The eight round trips record
-56 control occurrences; this is not whole-product coverage. Configuration 118
-remained unchanged; save/restore/download are outside this particular check.
-[Evidence](testing/evidence/hybrid-settings-domain-controls-20260929.json).
-
-## Capture image publication deployed
-
-Release `07b2098d` preserves the previous latest preview if copying or publication
-fails, publishes complete archive files, and removes encoded temporary files on
-all exits. The 166 Python entrypoints pass using the full run plus one corrected
-focus test harness rerun; all 34 JavaScript tests pass. The 824-file source manifest
-matches production. Capture restarted in a bounded 12-second maintenance window;
-web PID and configuration 118 remained unchanged. Three new saved files per camera
-decoded successfully; both Now previews decoded in the native browser. The last two
-intervals per camera were 15 seconds, which does not close the separate latency
-finding. [Evidence](testing/evidence/hybrid-image-publication-20260929.json).
-
-## Mobile management-grid correction deployed
-
-Uploads overflowed a 320px screen to 785px because of the intrinsic grid minimum.
-The CSS correction and cache version updates are installed. Native isolated and
-production checks fit Uploads, YouTube and Sensor Panel at 320px; desktop retains
-two columns. All 34 JavaScript tests and three affected Python flow tests pass.
-Production provider navigation and empty states were verified against the database.
-External transfers remain open. [Evidence](testing/evidence/hybrid-upload-management-layout-20260929.json).
-
-## Encoder failure handling deployed
-
-The worker could overwrite a valid latest PNG preview with an empty file when
-the encoder returned false. The installed fix rejects that failure and removes
-partial encoder files on exceptions. All 166 Python entrypoints pass; the
-823-file tested manifest matched that release. Both cameras saved new frames and
-their Now images decoded after the controlled restart. This does not resolve
-the separate latency finding. [Evidence](testing/evidence/hybrid-image-encoder-failure-20260929.json).
-
-## Backup space recovery — 29 September
-
-Four historical database snapshots were losslessly archived and verified, reclaiming
-approximately 3 GiB without removing media. Free space reached 8.53 GiB. The current
-release backup remains directly usable; capture was not restarted. Both cameras
-saved 30 frames in the bounded check, with one 19-second IMX708 interval. This is
-not a resolution of the latency finding below. [Evidence](testing/evidence/hybrid-backup-archival-20260929.json).
-
-## Capture latency finding — 29 September
-
-A read-only six-hour retrospective sample found transient queue backpressure,
-one IMX708 timeout during the backup window, and saved-image gaps up to 67/61
-seconds. Both cameras recovered; the last five saved frames for each were again
-15 seconds apart. Typical processing times are low, but log boundaries show
-23.9-second compression/save and 38.9-second DB/metadata gaps outside the reported
-processing metric. The cause is not established and steady cadence is not yet
-certified. [Measured evidence](testing/evidence/hybrid-capture-queue-review-20260929.json).
-A later 60-second syscall trace measured a 16.483467-second database fdatasync
-in the image worker. This identifies a blocking persistence stage, consistent
-with checkpoint work. The physical storage cause remains unproven; the checkpoint
-mitigation is now deployed as described above. In the
-12:18–13:10 sample, IMX708 had one 38-second gap and ASI678MC had no gap over
-17 seconds. This is not the deferred 24-hour acceptance. No capture settings
-were changed.
-The previously installed SQLite 3.46.1 predates the upstream WAL-reset correction. A private
-3.51.3 library passed a synthetic concurrency/integrity and old-library readback
-probe and all 166 Python/compile regression entrypoints with unchanged sources;
-it is now deployed with tested checkpoint lifecycle/failure handling.
-The first live measurements are recorded above; they do not establish all-load stability.
-
-The [background checkpoint candidate](testing/evidence/hybrid-sqlite-checkpoint-20260929.json)
-is deployed and enabled after compatibility and rollback preparation. Validation covers the 166
-existing Python entrypoints plus two new checkpoint tests and 34 JavaScript tests;
-the report preserves the initial test-harness failure and corrected reruns.
-Capture/web/CLI runtime loading is verified. The short before/after measurements
-are recorded above; broader cadence validation remains open.
-
-## Checkpoint follow-up under actual test load
-
-A 35-minute day-mode observation includes the eight-minute 169-entrypoint
-regression. Each camera received 140 exposure commands; median command spacing
-was 15.03 seconds, maximum 16.39 seconds for IMX708 and 15.25 for ZWO. No command
-interval exceeded 17 seconds. During regression, saved-image timestamp intervals
-were at most 15/16 seconds. Capture PID 1512517 had no restarts.
-
-Two IMX708 saved-record gaps of 18/19 seconds occurred before that regression.
-The libcamera path assigns the image timestamp after metadata processing, and
-logs show a 7.08-second interval between process exit and the gain metadata log.
-This distinguishes submission cadence from delayed metadata; it does not locate
-the blocking syscall or prove latency is fully resolved. An external Starlink
-HTTP 403 also recurred, with the previous catalog retained.
-[Measured evidence](testing/evidence/hybrid-checkpoint-load-observation-20260929.json).
-No acquisition settings or scheduler behavior were changed. The 24-hour test
-remains deferred.
-
-## Log viewer request ordering and recovery
-
-The viewer now aborts superseded requests, ignores late responses and prevents
-overlapping automatic polls. A 15-second deadline covers response decoding;
-failed refreshes retain prior rows with a visible warning until recovery.
-The final candidate passes 169 Python entrypoints and 34 JavaScript tests.
-Native isolated checks cover delayed responses, filter recovery, empty results
-and session expiry. Production admin filter/line-count/refresh checks pass after
-web-only deployment; capture PID and config 118 remain unchanged.
-[Evidence](testing/evidence/hybrid-log-controller-20260929.json).
-
-## System index and support verification
-
-All 15 System index links were exercised in the production administrator
-browser, verifying their destination and operational content. Support Info
-returned the real diagnostic collector output through its completion marker.
-These checks do not certify each destination effect or unavailable hardware.
-The index CPU card now reuses the existing measured-interval provider, including
-an explicit unavailable state; 169 Python and 34 JavaScript checks pass.
-The CPU correction is deployed; the refreshed native page retains the metric
-cards and all 15 links. Capture was not restarted.
-[Evidence](testing/evidence/hybrid-system-index-20260929.json).
-
-## Capture diagnostic file isolation — deployed
-
-A bounded per-process writer now handles diagnostic file I/O. A 180-second
-trace confirms all 126 diagnostic opens occur on the writer thread, none on
-capture. Both latest files decode, config 118 is unchanged, and the repeated
-170-entrypoint regression workload passes; 34 JavaScript checks also pass.
-
-**Cadence remains open.** During the 9m40s observation, both cameras had a
-15-second median but maxima of 28/30 seconds. The capture thread also has an
-unfinished `sendto` to the system logger at trace detach. Do not interpret the
-small completed-syscall maxima as proof of no blocking. The subsequent syslog release below isolates that logging path.
-[Complete measured evidence](testing/evidence/hybrid-async-diagnostics-20260929.json).
-
-## System-log isolation — deployed and measured
-
-The asynchronous syslog release passes all 171 Python entrypoints again under
-live load. During 9m45s, cameras save 38/39 frames, median 15 seconds each,
-maxima 19/25 seconds. Both final images decode, configuration 118 is unchanged,
-and task backlog is zero. Capture has no automatic restart.
-The 180-second trace shows 181 syslog sends exclusively on the sender thread;
-136 diagnostic file opens occur exclusively on the diagnostic writer. No traced
-call remains unresolved. A later trace did not overlap the long intervals and
-therefore does not explain their cause. **Cadence acceptance remains open.**
-The residual command delays match the existing queue protection: depths 3/4
-add 7.5/10 seconds to the 15-second target. A preceding long-term keogram INSERT
-failed with `database is locked`. The lock holder is not identified yet; the
-queue protection remains enabled. A completed five-minute read-only lock sample
-observed checkpoint I/O waits but did not reproduce or explain that lock error.
-At normal load, 20 frames per camera have a 15-second median and maxima of
-16/15 seconds. Native Now loads both images and Refresh status advances both
-frame timestamps. These bounded checks do not close the under-load defect.
-[Measured evidence](testing/evidence/hybrid-async-syslog-20260929.json).
-
-## Task table — native checks extended
-
-Twelve scoped administrator checks verify state/action/queue filters, empty
-results, ID search, keyboard detail opening, output camera association and loaded
-video metadata, return navigation, both ID sort directions, Next and50-row page
-size. Exports, other roles, other sort columns and full playback are outside
-this check. [Evidence](testing/evidence/hybrid-task-table-native-20260929.json).
-The focused Highlights test did not reproduce the earlier SQLite stall; both
-cameras saved six frames at15-second intervals during that90-second sample.
-The previous under-load cadence defect remains open.
-
-## Bounded post-cleanup load observation — 30 September
-
-Eight 512-KiB writes on the media filesystem completed fsync in 10.6–12.3 ms;
-the dedicated temporary file was removed. During a separate 120-second observation,
-90 seconds of low-priority x264 encoding to null used about 283–286% CPU. Six new
-frames (excluding initial observations) became DB/file-visible in 3.31–5.35 seconds;
-camera intervals were 45 seconds for camera 1 and 45/46/45 for camera 2. There were
-no read errors; capture PID 1565 remained active with zero automatic restarts.
-The encoder was deliberately terminated at the deadline and both probe processes
-are confirmed stopped. No generated media, config changes or acquisition restarts.
-The historical long stall was not reproduced; this does not prove behavior under
-worst-case storage saturation or replace the deferred 24-hour test.
-[Measured evidence](testing/evidence/hybrid-storage-load-20260930.json).
+Other bounded checks—including Loop, users, notifications, observatory tools,
+mobile layouts, provider failures and operations—remain linked in the
+[route evidence register](docs/hybrid-acceptance-route-register.md).
+Each original record states its role, revision, environment and limitations.
+A historical check is not automatically a current full-domain certification.
 
 ## Remaining acceptance gates
 
+1. **Complete the control/effect matrix.** The latest static inventory is from
+   `970d1799`: 99 GET entries, 505 contexts, 376 rendered and 129 blocked/redirected;
+   43,978 occurrences grouped into 7,368 exact page/control identities. These are
+   discovery counts, not successful clicks. The route register links evidence but
+   does not yet certify every identity, dynamic control, role, camera/profile,
+   narrow-screen variant and error path. Unobserved cases remain open.
+2. **Confirm native export receipt.** Configuration 118 and current CSV/Excel
+   exports have no verified received file. Native clicks produced no newly observed
+   matching file in Mac Downloads. Manual user verification is requested; do not
+   share configuration contents. [Latest attempts](testing/evidence/hybrid-export-receipt-20260930.json).
+3. **Resolve the historical storage/publication uncertainty.** A bounded encoding
+   load on 30 September showed 45–46-second capture intervals and 3.31–5.35-second
+   capture-to-observed latency, with no read errors. Earlier multi-tens-of-seconds
+   I/O stalls were not reproduced, but are not proven resolved. No additional
+   performance change was justified by that sample. [Measurement](testing/evidence/hybrid-storage-load-20260930.json).
+4. **Record unavailable physical/integration effects as untested.** No GPIO,
+   focuser, fan, heater or external sensor driver is assigned in configuration 118.
+   The user reports no external disks/storage or upload integrations in use.
+   S3/MQTT/Sync/YouTube are disabled; physical connections and external test
+   destinations are unavailable/unidentified. Mocked adapter tests and disabled UI
+   states do not establish physical effects. Preserve these supported functions.
+5. **Finish the remaining repository/backend review.** The existing
+   [dependency review](docs/HYBRID_DEPENDENCIES.md), installer checks and specific
+   retirements above establish their scopes, not an exhaustive absence of dead
+   code, concurrency defects or resource leaks. Clean builds on every supported
+   platform have not been performed and must not be implied.
 
-- Resolve remaining storage/publication delays and verify end-to-end frame freshness under load. The latest bounded preview-flush regression recorded 15-second median and 16-second maximum capture intervals for both cameras, but traced archive fsync and preview creation still stalled for 22.5 and 11.3 seconds. Capture timestamps alone do not establish publication latency. See [measured evidence](testing/evidence/hybrid-preview-flush-20260929.json).
-- Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
-- Panorama download delivery passes with the user-received file matching the source SHA-256. Other export families remain separate: configuration 118 has no verified native file receipt yet. Native CSV/Excel clicks on 30 September likewise produced no newly observed file in Mac Downloads; manual receipt verification is requested ([evidence](testing/evidence/hybrid-export-receipt-20260930.json)). See [generation/download evidence](testing/evidence/hybrid-generation-followup-20260930.json).
-- Complete remaining live effects and test-destination uploads. The four native camera-cleanup buttons now pass against dedicated synthetic files/database, with the other camera preserved ([evidence](testing/evidence/hybrid-cleanup-native-effects-20260930.json)). Short mini timelapses and both cameras’ automatic day timelapse/panorama outputs are verified; other automatic/isolated tests remain separately labeled.
-- The user reports no external disks/USB storage and no upload integrations in use. Their live acceptance remains unavailable for this installation; preserve supported functionality and automated coverage. Identify any additional hardware before disruptive tests; Configuration 118 has no GPIO, focuser, fan, heater or external sensor driver assigned. Native GPIO/Focus disabled states and their explanations pass; physical connections/effects remain unverified ([prerequisite evidence](testing/evidence/hybrid-hardware-prerequisites-20260930.json)).
-- Complete remaining repository/backend review and operational cleanup. The [47 core dependency review](docs/HYBRID_DEPENDENCIES.md) and installer path/syntax checks are recorded; clean platform builds and optional integration acceptance are not implied. Retain useful shared backend, public contracts, user data, migrations and supported functions.
-- Cold autostart after orderly shutdown and physical power reconnection passes ([evidence](testing/evidence/hybrid-cold-start-20260930.json)). Abrupt power-loss durability remains untested; do not conflate it with this successful start test.
+Abrupt power-loss durability is untested. The successful cold start followed an
+orderly shutdown; do not conflate the two. No abrupt-power-cut experiment or
+24-hour observation is required by the current agreed run.
 
-The 24-hour observation is explicitly excluded from this run and is not passed.
-No new detector/AI algorithms or simulated classifications belong to these closure tasks.
+## Reproduction and history
 
-## Reproducing checks and reading history
+Use [regression instructions](testing/HYBRID_REGRESSION.md), the
+[acceptance workflow](docs/HYBRID_ACCEPTANCE_WORKFLOW.md), and
+[deployment/rollback instructions](HYBRID_DEPLOYMENT.md).
+Keep synthetic databases separate from production and scope destructive checks
+to dedicated disposable data. See [capture policy](HYBRID_CAPTURE_CADENCE.md)
+for shared intervals and independent exposure/gain behavior.
 
-Use [the regression instructions](testing/HYBRID_REGRESSION.md) and
-[the acceptance workflow](docs/HYBRID_ACCEPTANCE_WORKFLOW.md).
-Run discovery and integration tests in the isolated runtime, never against production data.
-[Capture cadence documentation](HYBRID_CAPTURE_CADENCE.md) describes shared intervals and independent exposure/gain behavior.
-
-The former 4,412-line chronological status log is preserved in Git at `ad41d847`:
-`git show ad41d847:HYBRID_ACCEPTANCE_STATUS.md`.
-All individual evidence JSON files remain in `testing/evidence/`.
-Those historical entries include superseded candidates, counts, deadlines and rollback targets;
-they must not be read as the current installation state.
-
-## Task age sorting — deployed
-
-Task ages now sort numerically across minutes, hours and days. All 171 Python
-checks passed on unchanged sources; JavaScript was unchanged. Native isolated
-checks cover administrator and ordinary user (205 rows each); production
-administrator checks cover 501 rows in both directions. Pagination, filtered
-clipboard copy and refresh also passed. Capture stayed active with the same PID.
-CSV/Excel download receipt and broader role/device coverage remain open.
-[Release evidence](testing/evidence/hybrid-task-age-sort-20260929.json).
-
-## Image worker stall investigation
-
-A second under-load episode on 29 September has a 37-second image-worker log
-gap between processing and publication, without the earlier SQLite error.
-This narrows the next trace to both file publication and database locking.
-A bounded 60-second syscall trace during normal capture did not reproduce the
-stall (maximum observed call 110 ms); no pipeline or durability change is justified
-by that sample. Queue backpressure remains enabled and cadence acceptance open.
-[Investigation evidence](testing/evidence/hybrid-image-publication-stall-20260929.json).
-
-## Passive Support Info — deployed
-
-Support Info now lists I2C adapters without automatically probing bus 1.
-All 171 Python checks passed; shell syntax and the script hash were verified
-separately from the 833-file manifest. Native production collection completed
-and listed all three adapters. Capture was not restarted.
-[Evidence](testing/evidence/hybrid-support-passive-20260929.json).
-
-The simultaneous image-worker trace captured a 10.334-second preview fsync,
-5.322-second status-file open and 4.111-second preview-file creation. This is
-now direct evidence of filesystem stalls, not merely gaps in receiver logs.
-[Trace evidence](testing/evidence/hybrid-image-publication-stall-20260929.json).
-
-## Realtime preview flush — deployed and measured
-
-Removed the synchronous flush of the regenerable preview while preserving
-atomic replacement, encoded pixels and failure recovery. Archived media and
-keogram history persistence are unchanged. After abrupt power loss a preview
-may need the next frame to regenerate. All 171 checks passed; both cameras
-produced decodable new frames after six seconds of controlled maintenance.
-The 10-minute load replay passed all 171 checks. Both cameras saved 40 frames
-with a 15-second median and 16-second maximum interval, as in the matching
-before sample. No preview fsync remains. Other filesystem calls still stalled
-(up to 22.5 seconds on panorama fsync and 11.3 seconds on preview creation);
-publication latency and overall storage stability remain open.
-[Evidence](testing/evidence/hybrid-preview-flush-20260929.json).
-
-## Table filter blur correction — deployed
-
-The first pagination click after editing/clearing a search was lost because
-the unchanged filter triggered another redraw on blur. The shared controller
-now redraws only when the normalized value changes. All nine script references
-were versioned after the initial production check exposed a stale asset.
-171 Python and 34 JavaScript checks pass. The native isolated sequence passes
-for both roles; production File Space Usage passes for both camera/profile pairs,
-including Previous and camera switching. Capture was not restarted.
-[Evidence](testing/evidence/hybrid-table-blur-20260929.json).
-
-## Gallery state correction — deployed
-
-Gallery loaded counts, camera labels and accessible filter states now follow
-batch loading and camera changes. Failed older-page loading shows retry guidance.
-All 171 Python and 34 JavaScript entrypoints pass. Isolated browser checks cover
-ordinary and administrator roles. Production checks verify keyboard Load more
-(72 to 144 unique images), All Cameras and IMX708 filters. Capture PID 1862836
-remained active without restart. [Evidence](testing/evidence/hybrid-gallery-state-20260929.json).
-
-## Capture versus publication latency — bounded comparison
-
-On 29 September, 18:50–19:00 with historical-backup compression active, both
-cameras retained 15-second median/16-second maximum capture intervals. Observed
-publication maxima were 24.45/22.45 seconds. In the following five-minute window
-with compression suspended, capture intervals were unchanged and publication
-maxima were 9.45/5.45 seconds. Both cameras produced new, decoded native Now
-frames after Refresh. These short sequential observations do not prove causation
-or close intermittent storage-latency acceptance. No runtime/config changed.
-[Comparison evidence](testing/evidence/hybrid-publication-comparison-20260929.json).
-
-## Status snapshot publication — deployed
-
-The shared Telegraf status snapshot is now replaced atomically. Failed diagnostic
-I/O retains the previous complete snapshot and no longer rejects the image frame.
-Payload, formatting, primary-profile scope and permissions are preserved. All
-172 Python and 34 JavaScript entrypoints pass. Native Now decodes new frames from
-both cameras after the controlled restart; 1,197 live status reads spanning seven
-updates report no parse/read errors. This is not a disk-speed improvement or
-continuous freshness proof. [Evidence](testing/evidence/hybrid-status-publication-20260929.json).
+All individual evidence files remain in `testing/evidence/`. The preceding
+chronological status document is preserved at `a2d53040`:
+`git show a2d53040:HYBRID_ACCEPTANCE_STATUS.md`.
+Its historical process IDs, counts and intermediate open/closed states must not
+be read as the current installation status.
