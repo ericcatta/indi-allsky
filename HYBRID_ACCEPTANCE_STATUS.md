@@ -14,6 +14,14 @@ and Flask configuration backup preceded shutdown. This closes cold-start autosta
 it does not test abrupt power-loss durability or 24-hour stability.
 [Evidence](testing/evidence/hybrid-cold-start-20260930.json).
 
+## Media list detail context correction
+
+Image and timelapse Details links now carry camera/profile to the detail and return
+flows. Both roles and both cameras pass isolated integration tests, including wrong-camera
+404 responses. Native camera-2 image list/detail/return preserves the profile.
+The candidate passes 173 Python/compile entrypoints and 34 JavaScript tests.
+[Evidence](testing/evidence/hybrid-media-detail-context-20260930.json).
+
 ## Installed product
 
 The Raspberry runs `80b150d625c206e77d9fc5e5a3575b8b0d5463a4`.

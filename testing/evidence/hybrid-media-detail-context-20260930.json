@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-30",
+  "change": "Image and timelapse list Details links retain item camera and explicit profile",
+  "automated": {
+    "roles": [
+      "admin",
+      "ordinary user"
+    ],
+    "cameras": [
+      1,
+      2
+    ],
+    "flows": [
+      "list link scope",
+      "detail render",
+      "return link scope",
+      "wrong-camera detail 404"
+    ],
+    "python": {
+      "count": 173,
+      "status": "passed",
+      "source_changed": false,
+      "report": "/home/eric/hybrid-media-context-regression-20260930/results.json",
+      "sha256": "1a3ce39bc4e5e15a90c23e81035293199b1ebd1879d40ec23bc6fcb102fb4753"
+    },
+    "javascript": {
+      "count": 34,
+      "status": "passed",
+      "report": "/tmp/hybrid-media-context-js-20260930.json",
+      "sha256": "9130b92ab116be41506d5b4013457e8d3cb99df9fc5e75c7ab20a76833736dbe"
+    }
+  },
+  "native_browser": {
+    "environment": "isolated Linux fixture on Pi via localhost:18118",
+    "role": "admin",
+    "camera": 2,
+    "profile": "test-profile-2",
+    "result": "Image list \u2192 Details 201 \u2192 Back to Images preserved camera_id=2 and profile_id=test-profile-2",
+    "scope": "Navigation only; synthetic .dat media are not image playback evidence"
+  },
+  "rollback": "Restore previous media_list.html from 95e664e1 and reload web workers; no database or config migration"
+}
