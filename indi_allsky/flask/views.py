@@ -3403,18 +3403,27 @@ class ModernAdminIndiCameraDetectView(BaseView):
         if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
             return jsonify({'error' : 'Only an admin user can detect cameras.'}), 403
 
-        indi_server = request.json.get('indi_server', 'localhost').strip() or 'localhost'
-        detected_cameras, libcamera_message = detect_modern_admin_libcamera_cameras()
-        usb_detection = detect_modern_admin_usb_camera_driver()
-        driver_hint = usb_detection['driver'] or request.json.get('driver_hint', '').strip()
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({'error': 'Request must be a JSON object.'}), 400
+        if not isinstance(payload.get('indi_server', 'localhost'), str):
+            return jsonify({'error': 'INDI server must be text.'}), 400
+        if not isinstance(payload.get('driver_hint', ''), str):
+            return jsonify({'error': 'INDI driver must be text.'}), 400
+
+        indi_server = payload.get('indi_server', 'localhost').strip() or 'localhost'
 
         try:
-            indi_port = int(request.json.get('indi_port', 7624))
-        except ValueError:
+            indi_port = int(payload.get('indi_port', 7624))
+        except (TypeError, ValueError, OverflowError):
             return jsonify({'error' : 'INDI port must be a number.'}), 400
 
         if indi_port < 1 or indi_port > 65535:
             return jsonify({'error' : 'INDI port must be between 1 and 65535.'}), 400
+
+        detected_cameras, libcamera_message = detect_modern_admin_libcamera_cameras()
+        usb_detection = detect_modern_admin_usb_camera_driver()
+        driver_hint = usb_detection['driver'] or payload.get('driver_hint', '').strip()
 
         try:
             import shutil
@@ -3544,20 +3553,28 @@ class ModernAdminIndiServerStartView(ModernAdminIndiCameraDetectView):
         if not app.config['LOGIN_DISABLED'] and not current_user.is_admin:
             return jsonify({'error' : 'Only an admin user can start an INDI server.'}), 403
 
-        indi_server = request.json.get('indi_server', 'localhost').strip() or 'localhost'
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({'error': 'Request must be a JSON object.'}), 400
+        if not isinstance(payload.get('indi_server', 'localhost'), str):
+            return jsonify({'error': 'INDI server must be text.'}), 400
+        if not isinstance(payload.get('driver_hint', ''), str):
+            return jsonify({'error': 'INDI driver must be text.'}), 400
+
+        indi_server = payload.get('indi_server', 'localhost').strip() or 'localhost'
         if indi_server not in ('localhost', '127.0.0.1', '::1'):
             return jsonify({'error' : 'Starting indiserver is only supported for localhost in this first version.'}), 400
 
         try:
-            indi_port = int(request.json.get('indi_port', 7624))
-        except ValueError:
+            indi_port = int(payload.get('indi_port', 7624))
+        except (TypeError, ValueError, OverflowError):
             return jsonify({'error' : 'INDI port must be a number.'}), 400
 
         if indi_port < 1 or indi_port > 65535:
             return jsonify({'error' : 'INDI port must be between 1 and 65535.'}), 400
 
         usb_detection = detect_modern_admin_usb_camera_driver()
-        driver_hint = usb_detection['driver'] or request.json.get('driver_hint', '').strip()
+        driver_hint = usb_detection['driver'] or payload.get('driver_hint', '').strip()
         if not driver_hint:
             return jsonify({'error' : 'No USB camera driver was auto-detected. Choose a project-supported INDI driver in Advanced options.'}), 400
 
@@ -4314,7 +4331,11 @@ class ModernAdminSafeActionDryRunView(BaseView):
     decorators = [login_required]
 
     def dispatch_request(self):
-        request_data = request.get_json(silent=True) or {}
+        request_data = request.get_json(silent=True)
+        if not isinstance(request_data, dict):
+            return jsonify({'error': 'Request must be a JSON object.'}), 400
+        if request_data.get('action_id') is not None and not isinstance(request_data['action_id'], str):
+            return jsonify({'error': 'Safe action id must be text.'}), 400
         payload = request_data.get('payload') or {}
 
         if not isinstance(payload, dict):
@@ -4472,7 +4493,9 @@ class ModernAdminAbortExposureActionView(BaseView):
                 'failure-message': 'You do not have permission to abort exposure.',
             }), 403
 
-        payload = request.get_json(silent=True) or {}
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({'failure-message': 'Request must be a JSON object.'}), 400
         planner = ModernAdminAbortExposureActionPlanner(
             profile_configs=(self.indi_allsky_config.get('MULTI_CAMERA') or {}).get('profiles') or [],
             current_camera_id=payload.get('camera_id') or getattr(getattr(self, 'camera', None), 'id', None),

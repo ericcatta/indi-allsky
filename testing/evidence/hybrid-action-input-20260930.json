@@ -1,0 +1,41 @@
+{
+  "scope": "HTTP validation before camera discovery, INDI startup and capture abort; isolated database without capture workers",
+  "baseline": "8657bbc2",
+  "before": {
+    "log": "/home/eric/hybrid-action-input-before-20260930.log",
+    "result": "AttributeError: list object has no attribute get in safe-action/dry-run"
+  },
+  "targeted": {
+    "status": "passed",
+    "entrypoint": "testing/hybrid_action_input_flow_test.py",
+    "log": "/home/eric/hybrid-action-input-after-20260930.log",
+    "checks": [
+      "Malformed/non-object JSON and wrong content type return JSON 400 on four routes",
+      "Non-admin camera operations return 403 before input processing",
+      "CSRF remains enforced",
+      "No discovery, process launch or enqueue on malformed requests",
+      "Valid abort creates real isolated task for each camera/profile",
+      "Unknown dry-run action retains not_found; missing INDI driver retains actionable error"
+    ]
+  },
+  "javascript": {
+    "status": "passed",
+    "entries": 34,
+    "report": "/tmp/hybrid-action-input-js-20260930.json",
+    "sha256": "114aad9b2944ee6160d428979c03762625713f76160c7c4f884723e7fb837163"
+  },
+  "python_regression": {
+    "status": "passed",
+    "report": "/home/eric/hybrid-action-input-regression-20260930/results.json",
+    "entries": 174,
+    "source_changed": false,
+    "sha256": "30b4476e39b704d85528cfddab7fceca2ab89ad324edf0e49636eaf905699e52"
+  },
+  "deployment": {
+    "status": "not_deployed"
+  },
+  "limitations": [
+    "Does not exercise a real hardware abort or INDI startup",
+    "Does not close the whole-product control matrix"
+  ]
+}
