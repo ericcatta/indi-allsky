@@ -1,0 +1,115 @@
+{
+  "baseline": "8881a84c",
+  "application": "85d9f04c",
+  "environment": "Native production browser, administrator desktop; read-only except local form confirmation toggles",
+  "checks": [
+    {
+      "control_id": "upgrade-form",
+      "page": "/modern-admin/updates",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "Neither confirmation, then backup only: Start upgrade displays prerequisite message; unchecked backup and refreshed: Idle. Systemd inactive/dead with empty start/exit timestamps; no upgrade started.",
+      "status": "superato"
+    },
+    {
+      "control_id": "upgrade-backup",
+      "page": "/modern-admin/updates",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "Checked and unchecked using native browser; second confirmation deliberately left unchecked.",
+      "status": "superato"
+    },
+    {
+      "control_id": "Refresh upgrade status",
+      "page": "/modern-admin/updates",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "Refreshed and observed Idle.",
+      "status": "superato"
+    },
+    {
+      "control_id": "Configuration history and downloads",
+      "page": "/modern-admin/updates",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "Clicked: Config History displayed 25 snapshots, 26 table rows including header.",
+      "status": "superato"
+    },
+    {
+      "control_id": "System logs",
+      "page": "/modern-admin/updates",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "Clicked: log viewer loaded actual recent capture lines and Updated status.",
+      "status": "superato"
+    },
+    {
+      "control_id": "LINES_SELECT",
+      "page": "/modern-admin/system/log",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "Selected 100 and counted exactly 100 displayed lines.",
+      "status": "superato"
+    },
+    {
+      "control_id": "FILTER",
+      "page": "/modern-admin/system/log",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "No-match filter displayed [No matching lines]; Capture-1 filter displayed 24 lines, all matching.",
+      "status": "superato"
+    },
+    {
+      "control_id": "REFRESH_SELECT",
+      "page": "/modern-admin/system/log",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "Selected 5s; without another refresh action, newest matching timestamp advanced from 23:52:03.029449 to 23:52:19.120434 and content changed.",
+      "status": "superato"
+    },
+    {
+      "control_id": "Capture Log Detail",
+      "page": "/modern-admin/system/log",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "Clicked: Available, 77.4 MB, 200-line limit and actual recent capture text.",
+      "status": "superato"
+    },
+    {
+      "control_id": "Known log sources",
+      "page": "/modern-admin/system/log",
+      "role": "administrator",
+      "camera_profile": "System-wide",
+      "prerequisites": "Authenticated production session; existing log sources and idle upgrade service",
+      "expected_effect": "Display actual state, reject incomplete upgrade confirmation, or apply indicated log interaction",
+      "observed": "Webapp, OS System and Kernel links each opened matching source with Available and sizes 6.8 KB, 4.0 MB, 3.7 MB respectively.",
+      "status": "superato"
+    }
+  ],
+  "limitations": [
+    "No real unattended upgrade performed; service effects covered by isolated tests and historical native fixture only",
+    "No new ordinary-user, anonymous or narrow-screen browser proof",
+    "Log downloads and Check camera frames recovery link not exercised in this run",
+    "Historical evidence retains its original scope and date"
+  ],
+  "existing_effect_evidence": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+  "current_automated_evidence": "testing/evidence/hybrid-ajax-json-admission-20260930.json"
+}

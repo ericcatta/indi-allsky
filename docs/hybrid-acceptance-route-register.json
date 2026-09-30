@@ -4587,6 +4587,12 @@
           "control": "Navigation drawer / Logs",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/system/log"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-log-native-20260930.json",
+          "record": "checks",
+          "control": "Native incomplete-upgrade confirmation and idle state, history/log recovery; log line count, filter, refresh and source navigation; bounded scope in record",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4627,6 +4633,12 @@
           "source": "testing/evidence/hybrid-log-controller-20260929.json",
           "record": "controls[9]",
           "control": "Back to Log",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-log-native-20260930.json",
+          "record": "checks",
+          "control": "Native incomplete-upgrade confirmation and idle state, history/log recovery; log line count, filter, refresh and source navigation; bounded scope in record",
           "recorded_status": "superato"
         }
       ]
@@ -5546,6 +5558,66 @@
           "control": "Navigation drawer / Updates",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/updates"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-log-native-20260930.json",
+          "record": "checks",
+          "control": "Native incomplete-upgrade confirmation and idle state, history/log recovery; log line count, filter, refresh and source navigation; bounded scope in record",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[0]",
+          "control": "Historical isolated native upgrade lifecycle or recovery control; synthetic service, not real upgrade",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[1]",
+          "control": "Historical isolated native upgrade lifecycle or recovery control; synthetic service, not real upgrade",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[3]",
+          "control": "Historical isolated native upgrade lifecycle or recovery control; synthetic service, not real upgrade",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[4]",
+          "control": "Historical isolated native upgrade lifecycle or recovery control; synthetic service, not real upgrade",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[6]",
+          "control": "Historical isolated native upgrade lifecycle or recovery control; synthetic service, not real upgrade",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[7]",
+          "control": "Historical isolated native upgrade lifecycle or recovery control; synthetic service, not real upgrade",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[8]",
+          "control": "Historical isolated native upgrade lifecycle or recovery control; synthetic service, not real upgrade",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[10]",
+          "control": "Historical isolated native upgrade lifecycle or recovery control; synthetic service, not real upgrade",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[11]",
+          "control": "Historical isolated native upgrade lifecycle or recovery control; synthetic service, not real upgrade",
+          "recorded_status": "superato"
         }
       ]
     },
