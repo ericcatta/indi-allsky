@@ -2087,16 +2087,9 @@ def get_modern_admin_capture_service_status(service_name='indi-allsky.service'):
 
 
 class ModernAdminView(TemplateView):
-    # Future entry point for the modern admin UI; keep it isolated from classic admin.
+    # Shared context for Hybrid product pages.
     page_title = 'Modern Admin'
     decorators = [login_required]
-
-    def dispatch_request(self):
-        if self.__class__ is not ModernAdminView:
-            return super(ModernAdminView, self).dispatch_request()
-
-        session['admin_mode'] = 'modern'
-        return redirect(url_for('indi_allsky.modern_admin_now_view'))
 
     def get_context(self):
         context = super(ModernAdminView, self).get_context()
@@ -15133,6 +15126,7 @@ def images_folder(path):
 
 
 def register_hybrid_routes(bp_allsky):
+    from .navigation_redirects import modern_admin_entry
     from .settings_entries import register_camera_settings_entries
     register_camera_settings_entries(bp_allsky)
     bp_allsky.add_url_rule('/modern-admin/media/gallery', view_func=ModernAdminMediaGalleryView.as_view('modern_admin_media_gallery_view', template_name='modern_admin/media_list.html'))
@@ -15152,7 +15146,7 @@ def register_hybrid_routes(bp_allsky):
     bp_allsky.add_url_rule('/modern-admin/media/fits', view_func=ModernAdminMediaFitsView.as_view('modern_admin_media_fits_view', template_name='modern_admin/media_list.html'))
     bp_allsky.add_url_rule('/modern-admin/fits', view_func=ModernAdminFitsView.as_view('modern_admin_fits_view', template_name='modern_admin/fits.html'))
     bp_allsky.add_url_rule('/modern-admin/fits/<int:fits_id>', view_func=ModernAdminFitsDetailView.as_view('modern_admin_fits_detail_view', template_name='modern_admin/fits_detail.html'))
-    bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))
+    bp_allsky.add_url_rule('/modern-admin', endpoint='modern_admin_view', view_func=modern_admin_entry)
     bp_allsky.add_url_rule('/modern-admin/now', view_func=ModernAdminNowView.as_view('modern_admin_now_view', template_name='modern_admin/now.html'))
     bp_allsky.add_url_rule('/modern-admin/highlights', view_func=ModernAdminHighlightsView.as_view('modern_admin_highlights_view', template_name='modern_admin/highlights.html'))
     bp_allsky.add_url_rule('/modern-admin/moment', view_func=ModernAdminMomentDetailView.as_view('modern_admin_moment_detail_view', template_name='modern_admin/moment_detail.html'))

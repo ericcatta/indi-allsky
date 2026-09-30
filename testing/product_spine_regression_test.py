@@ -109,11 +109,17 @@ def test_product_routes_are_registered():
         'Product views should have a dedicated Hybrid Product view boundary',
     )
 
-    redirect_snippet = "return redirect(url_for('indi_allsky.modern_admin_now_view'))"
+    redirect_snippet = "bp_allsky.add_url_rule('/modern-admin', endpoint='modern_admin_view', view_func=modern_admin_entry)"
     assert_true(
         redirect_snippet in views_text,
         '/modern-admin entry should redirect to Now as the Product home',
     )
+
+    entry_source = read_text(VIEWS_PATH.with_name('navigation_redirects.py'))
+    assert_true("@login_required\ndef modern_admin_entry():" in entry_source,
+                'Hybrid entry requires authentication')
+    assert_true("destination = url_for('indi_allsky.modern_admin_now_view')" in entry_source,
+                'Hybrid entry has a fixed Now destination')
 
     for surface in PRODUCT_SPINE:
         base = {'Library': 'ModernAdminMediaArchiveView', 'Output': 'ModernAdminMediaBrowseView, TemplateView', 'Highlights': 'ModernAdminMediaBrowseView, TemplateView', 'Moment': 'ModernAdminMediaBrowseView, TemplateView'}.get(surface['name'], 'ModernAdminProductView')

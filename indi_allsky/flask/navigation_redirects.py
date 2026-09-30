@@ -4,7 +4,8 @@ Only navigation URLs belong here. Public media, JSON/AJAX, Sync and Action APIs
 keep their independent handlers and are never redirected by this registry.
 """
 from urllib.parse import urlencode
-from flask import redirect, request, url_for
+from flask import redirect, request, session, url_for
+from flask_login import login_required
 
 # Fixed destinations are endpoint names, never supplied by the request.
 NAVIGATION_GROUPS = {
@@ -64,3 +65,12 @@ def register_navigation_redirects(blueprint):
         for index, path in enumerate(paths):
             blueprint.add_url_rule(path, endpoint='hybrid_navigation_' + target + '_' + str(index),
                                    view_func=navigate, methods=['GET'])
+
+
+@login_required
+def modern_admin_entry():
+    """Authenticated entry alias without loading an unused dashboard context."""
+    session['admin_mode'] = 'modern'
+    destination = url_for('indi_allsky.modern_admin_now_view')
+    query = urlencode(list(request.args.items(multi=True)))
+    return redirect(destination + ('?' + query if query else ''))

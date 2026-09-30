@@ -1,0 +1,53 @@
+{
+  "scope": "Retire unreachable dashboard template and use an authenticated scoped entry redirect",
+  "removed_template": "indi_allsky/flask/templates/modern_admin/index.html",
+  "removed_lines": 806,
+  "behavior": [
+    "login required",
+    "fixed Now target",
+    "camera/profile and repeated query keys preserved",
+    "GET and HEAD agree",
+    "no dashboard construction or rendering"
+  ],
+  "regression": {
+    "python_entries": 173,
+    "effective_status": "passed after four targeted reruns",
+    "initial_report": "/home/eric/hybrid-entry-regression-20260930/results.json",
+    "initial_failures": [
+      "old route fingerprint registration guard",
+      "old Product Spine redirect snippet guard",
+      "Classic isolation scan encountered macOS AppleDouble file",
+      "compileall encountered macOS AppleDouble file"
+    ],
+    "followup_report": "/home/eric/hybrid-entry-regression-20260930/followup.json",
+    "followup_sha256": "564c69cff77b04275a114010405fb1e3242c04c451795222e9d808d2ba4d6e00",
+    "application_sources_unchanged_during_reruns": true,
+    "fingerprints_unchanged": true,
+    "javascript_count": 34,
+    "javascript_failures": 0,
+    "javascript_report": "/tmp/hybrid-entry-js-20260930.json",
+    "javascript_sha256": "9130b92ab116be41506d5b4013457e8d3cb99df9fc5e75c7ab20a76833736dbe"
+  },
+  "measurement": {
+    "scope": "Five requests per implementation in same isolated two-camera Flask app on Raspberry; not full page or production latency",
+    "baseline_handler_source": "Installed 36089d88 ModernAdminView.dispatch_request extracted from AST",
+    "report": "/home/eric/hybrid-entry-query-comparison-20260930.json",
+    "old_queries_per_request": [
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "new_queries_per_request": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "old_median_seconds": 0.006611408000026131,
+    "new_median_seconds": 0.0024249769999187265
+  },
+  "deployment": "pending"
+}

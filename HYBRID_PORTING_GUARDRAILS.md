@@ -1,5 +1,7 @@
 # HYBRID PORTING GUARDRAILS
 
+> Historical migration reference. For the installed product use [the Hybrid guide](docs/HYBRID_GUIDE.md) and [acceptance status](HYBRID_ACCEPTANCE_STATUS.md). The old `modern_admin/index.html` dashboard is retired; `/modern-admin` is an authenticated redirect to Now, not an analytics page.
+
 > Historical migration record. Its inventory counts and commands refer to the
 > pre-retirement frontend. Use [the current acceptance workflow](docs/HYBRID_ACCEPTANCE_WORKFLOW.md) for
 > new work. The removed static UI inventory/map/report remain available in Git

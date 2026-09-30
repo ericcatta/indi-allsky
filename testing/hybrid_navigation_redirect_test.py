@@ -29,6 +29,22 @@ def run():
                     assert location.path == expected and not location.netloc and not location.scheme
                     assert parse_qsl(location.query) == parse_qsl(query)
                     assert head.location == response.location and not head.data
+        # The Hybrid entry is authenticated but never builds a page context.
+        from indi_allsky.flask.views import ModernAdminView
+        for user_id in (1, 2):
+            entry_client = login_client(app, user_id)
+            with patch.object(ModernAdminView, '__init__', side_effect=AssertionError('Entry constructed a dashboard')), patch.object(app.jinja_env, 'get_template', side_effect=AssertionError('Entry rendered a template')):
+                entry = entry_client.get('/indi-allsky/modern-admin?' + query)
+                head = entry_client.head('/indi-allsky/modern-admin?' + query)
+            assert entry.status_code == head.status_code == 302
+            assert urlsplit(entry.location).path == '/indi-allsky/modern-admin/now'
+            assert parse_qsl(urlsplit(entry.location).query) == parse_qsl(query)
+            assert head.location == entry.location and not head.data
+            with entry_client.session_transaction() as saved:
+                assert saved['admin_mode'] == 'modern'
+        anonymous_entry = app.test_client().get('/indi-allsky/modern-admin?' + query)
+        assert anonymous_entry.status_code == 302 and urlsplit(anonymous_entry.location).path == '/indi-allsky/login'
+        assert not (Path(__file__).resolve().parents[1] / 'indi_allsky/flask/templates/modern_admin/index.html').exists()
         client = login_client(app, 1)
         for path in ('/user', '/config', '/users', '/loopraw'):
             response = client.get('/indi-allsky' + path + '?camera_id=2&profile_id=test-profile-2', follow_redirects=True)

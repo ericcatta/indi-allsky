@@ -22,6 +22,14 @@ def test_route_contract_is_unchanged():
                 and node.func.attr == 'add_url_rule'
                 and node.args[0].value not in ('/modern-admin/settings/storage-protection', '/modern-admin/config-restore/<int:config_id>/apply', '/modern-admin/settings/timelapse', '/modern-admin/media/raw-loop', '/modern-admin/updates/start', '/modern-admin/tools/focus/preview', '/media/<kind>/<int:camera_id>/<int:media_id>/original', '/modern-admin/media/archive', '/modern-admin/tools/mini-generate', '/modern-admin/tools/mini-preview', '/images/<path:path>', '/modern-admin/account', '/modern-admin/notifications/<int:notification_id>/acknowledge', '/modern-admin/operations/export', '/modern-admin/media/<kind>/<int:camera_id>/<int:media_id>/download')
             ):
+                if node.args[0].value == '/modern-admin':
+                    # Verify the authenticated entry handler, then retain the
+                    # retired dashboard registration in the historical fingerprint.
+                    assert {k.arg: ast.unparse(k.value) for k in node.keywords} == {
+                        'endpoint': "'modern_admin_view'", 'view_func': 'modern_admin_entry'}
+                    historical = "bp_allsky.add_url_rule('/modern-admin', view_func=ModernAdminView.as_view('modern_admin_view', template_name='modern_admin/index.html'))"
+                    calls.append(ast.dump(ast.parse(historical).body[0].value, include_attributes=False))
+                    continue
                 if node.args[0].value in ('/modern-admin/settings/analytics', '/modern-admin/settings/storage', '/modern-admin/settings/notifications', '/modern-admin/settings/acquisition-save', '/modern-admin/settings/fits-source'):
                     # These entries are now redirects and must not carry template arguments.
                     view = next(k for k in node.keywords if k.arg == 'view_func').value
