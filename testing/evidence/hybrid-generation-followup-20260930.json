@@ -138,5 +138,22 @@
     "method": "Native link clicks and keyboard playback; read-only DOM observations. Both videos reached natural end without seeking or playback-rate changes.",
     "cleanup": "Both agent-created tabs closed; user tab untouched.",
     "tool_issue": "Heading level option was unsupported, causing strict locator ambiguity after navigation. Exact Library heading and selected filters verified in follow-up."
+  },
+  "native_download": {
+    "status": "bloccato",
+    "control": "Download original",
+    "route": "/indi-allsky/modern-admin/media/panorama-video/2/64/download",
+    "expected_bytes": 37837327,
+    "source_sha256": "01418f67ab0acc32f0509d56ecbec4703faa88540df8d4a2ca9fd43e8b1457db",
+    "apache_request_time": "30/Sep/2026:19:58:01 +0200",
+    "apache_status": 200,
+    "apache_logged_transfer_bytes": 492386,
+    "matching_file_in_mac_downloads": false,
+    "browser_console_errors": [],
+    "apache_errors_during_request_minute": 0,
+    "user_observation": "No apparent Save dialog or download warning.",
+    "conclusion": "Request reaches handler but complete native receipt is unverified. Logged transfer size is below expected file size. Cause is not established.",
+    "next_step": "Compare with Safari/Chrome download and hash received file; request sent to user.",
+    "scope_limit": "HTTP 200 is not acceptance of download delivery."
   }
 }
