@@ -1,3 +1,4 @@
+from .json_request import json_object_required
 from .astropanel_views import AjaxAstroPanelView
 from .media_context_views import (
     HybridAduHistoryContextView, HybridLoopContextView,
@@ -1422,6 +1423,7 @@ class AjaxSetTimeView(BaseView):
     methods = ['POST']
     decorators = [login_required]
 
+    @json_object_required('form_settime_global')
     def dispatch_request(self):
         form_settime = IndiAllskySetDateTimeForm(data=request.json)
 
@@ -1507,6 +1509,7 @@ class AjaxSetTimezoneView(BaseView):
     methods = ['POST']
     decorators = [login_required]
 
+    @json_object_required('form_timezone_global')
     def dispatch_request(self):
         form_timezone = IndiAllskySetTimezoneForm(data=request.json)
 
@@ -1567,6 +1570,7 @@ class AjaxImageViewerView(BaseView):
         super(AjaxImageViewerView, self).__init__(**kwargs)
 
 
+    @json_object_required('form_global')
     def dispatch_request(self):
         camera_id  = int(request.json['CAMERA_ID'])
         form_year  = int(request.json.get('YEAR_SELECT', 0))
@@ -1701,6 +1705,7 @@ class AjaxFitsImageViewerView(BaseView):
         super(AjaxFitsImageViewerView, self).__init__(**kwargs)
 
 
+    @json_object_required('form_global')
     def dispatch_request(self):
         camera_id  = int(request.json['CAMERA_ID'])
         form_year  = int(request.json.get('YEAR_SELECT', 0))
@@ -1812,6 +1817,7 @@ class AjaxGalleryViewerView(BaseView):
         super(AjaxGalleryViewerView, self).__init__(**kwargs)
 
 
+    @json_object_required('form_global')
     def dispatch_request(self):
         camera_id  = int(request.json['CAMERA_ID'])
         form_year  = int(request.json.get('YEAR_SELECT', 0))
@@ -1946,6 +1952,7 @@ class AjaxVideoViewerView(BaseView):
         super(AjaxVideoViewerView, self).__init__(**kwargs)
 
 
+    @json_object_required('form_global')
     def dispatch_request(self):
         camera_id      = int(request.json['CAMERA_ID'])
         form_year      = int(request.json.get('YEAR_SELECT', 0))
@@ -2010,6 +2017,7 @@ class AjaxMiniVideoViewerView(BaseView):
         super(AjaxMiniVideoViewerView, self).__init__(**kwargs)
 
 
+    @json_object_required('form_global')
     def dispatch_request(self):
         camera_id      = int(request.json['CAMERA_ID'])
         form_year      = int(request.json.get('YEAR_SELECT', 0))
@@ -4634,6 +4642,7 @@ class AjaxSystemInfoView(BaseView):
     methods = ['POST']
     decorators = [login_required]
 
+    @json_object_required('form_global')
     def dispatch_request(self):
         form_system = IndiAllskySystemInfoForm(data=request.json)
 
@@ -4957,6 +4966,7 @@ class AjaxIndiServerChangeView(BaseView):
     methods = ['POST']
     decorators = [login_required]
 
+    @json_object_required('form_global')
     def dispatch_request(self):
         import shutil
 
@@ -5982,6 +5992,7 @@ class AjaxNotificationView(BaseView):
         return jsonify(data)
 
 
+    @json_object_required('form_global')
     def post(self):
         camera_id = int(request.json['camera_id'])
         ack_id = int(request.json['ack_id'])
@@ -6554,6 +6565,7 @@ class AjaxSelectCameraView(BaseView):
             return jsonify({}), 400
 
 
+    @json_object_required('form_global')
     def post(self):
         camera_id = int(request.json['camera_id'])
 
@@ -6583,6 +6595,7 @@ class AjaxImageExcludeView(BaseView):
         super(AjaxImageExcludeView, self).__init__(**kwargs)
 
 
+    @json_object_required('form_global')
     def dispatch_request(self):
         if not current_user.is_admin:
             return jsonify({}), 400
@@ -6633,6 +6646,7 @@ class AjaxUploadYoutubeView(BaseView):
         super(AjaxUploadYoutubeView, self).__init__(**kwargs)
 
 
+    @json_object_required('form_global')
     def dispatch_request(self):
         camera_id = int(request.json['CAMERA_ID'])
         video_id = int(request.json['VIDEO_ID'])

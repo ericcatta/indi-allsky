@@ -1,0 +1,36 @@
+{
+  "scope": "Object JSON admission for 13 shared AJAX handlers used by Hybrid or preserved compatibility routes",
+  "baseline": "306c5235",
+  "defect": "All 13 authenticated handlers raised TypeError for JSON [1] before admission",
+  "before_log": "/home/eric/hybrid-ajax-json-before-20260930.log",
+  "correction": "Reject malformed/non-object JSON before handler entry, preserving outer login decorators and anonymous notification behavior",
+  "targeted": {
+    "status": "passed",
+    "test": "testing/hybrid_ajax_json_admission_flow_test.py",
+    "log": "/home/eric/hybrid-ajax-json-after-20260930.log",
+    "checks": [
+      "Admin and ordinary user; seven malformed/non-object JSON bodies plus text/plain",
+      "Missing CSRF rejected; seven login-required routes still redirect anonymous requests",
+      "Anonymous notification POST retains its empty response",
+      "Camera selection, configuration contents/revision count and task count unchanged; no subprocess launched"
+    ]
+  },
+  "regression": {
+    "status": "passed",
+    "python_report": "/home/eric/hybrid-ajax-json-regression-20260930/results.json",
+    "javascript_entries": 34,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-ajax-json-js-20260930.json",
+    "javascript_sha256": "114aad9b2944ee6160d428979c03762625713f76160c7c4f884723e7fb837163",
+    "python_entries": 175,
+    "source_changed": false,
+    "python_sha256": "a9088450ed5766696cef4a433fec633db899bd26ea34bb312393982b29479f2d"
+  },
+  "deployment": {
+    "status": "not deployed"
+  },
+  "limitations": [
+    "This validates the JSON root, not every possible invalid field inside an object",
+    "No production system action or live configuration change is required for this input-admission correction"
+  ]
+}
