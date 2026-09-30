@@ -4379,6 +4379,24 @@
           "control": "Navigation drawer / System Info",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/system/info"
+        },
+        {
+          "source": "testing/evidence/hybrid-cleanup-native-20260930.json",
+          "record": "controls[0]",
+          "control": "Administrator recent-delete without confirmation",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-cleanup-native-20260930.json",
+          "record": "controls[3]",
+          "control": "Ordinary-user camera media cleanup",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-cleanup-native-20260930.json",
+          "record": "controls[5]",
+          "control": "Four native destructive button effects",
+          "recorded_status": "bloccato"
         }
       ]
     },

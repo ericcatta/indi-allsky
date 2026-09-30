@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-30",
+  "environment": "Isolated Flask fixture, localhost:18118, /tmp/hybrid-acceptance-cwptx6et; dedicated synthetic DB and media",
+  "source_runtime": "36089d88",
+  "production_data_changed": false,
+  "controls": [
+    {
+      "control": "Administrator recent-delete without confirmation",
+      "status": "superato",
+      "evidence": "Unchecked required checkbox fails native validity; no success feedback, forms remain enabled. No deletion submitted."
+    },
+    {
+      "control": "Sign out and ordinary-user sign in",
+      "status": "superato",
+      "evidence": "Sign out redirected to login; synthetic test-user-2 reached Now through actual login form."
+    },
+    {
+      "control": "Ordinary-user recovery controls",
+      "status": "superato",
+      "evidence": "Start/stop/restart, both profile abort buttons and reboot disabled; administrator access explanation visible."
+    },
+    {
+      "control": "Ordinary-user camera media cleanup",
+      "status": "superato",
+      "evidence": "All four cleanup fieldsets disabled for camera 2/test-profile-2, with administrator/network requirement shown."
+    },
+    {
+      "control": "Unreadable latest frame preview",
+      "status": "superato",
+      "evidence": "Synthetic .dat source displays explicit preview-load error on both camera cards."
+    },
+    {
+      "control": "Four native destructive button effects",
+      "status": "bloccato",
+      "evidence": "Awaiting browser action-time confirmation. No native deletion performed."
+    }
+  ],
+  "automated_cleanup": {
+    "status": "superato",
+    "scope": "Actual synthetic file/DB deletion across ten media families; four commands, day/night, 16-minute boundary, camera isolation, CSRF/role/network denial, partial failure and deliberate retry",
+    "logs": [
+      {
+        "path": "/home/eric/hybrid-cleanup-flow-20260930.log",
+        "sha256": "0426e42bebc969d4e75d79f0e493d2127be6d32b0f8c70dc018cfaf28a50c560"
+      },
+      {
+        "path": "/home/eric/hybrid-cleanup-failure-20260930.log",
+        "sha256": "6cb403ac71d82acf37d55065ddf02f1c9fe311b9be7b0e91146b559bac2eb9a5"
+      }
+    ]
+  }
+}
