@@ -86,7 +86,7 @@
     ]
   },
   "limitations": [
-    "Native download receipt remains unverified; browser playback of these two outputs is now verified.",
+    "Browser playback of both outputs and user-completed panorama download receipt are verified; other download controls remain separate.",
     "Capture interval sample does not certify continuous stability or publication latency.",
     "No configuration change, media deletion, service restart or new generation task submitted.",
     "No 24-hour trial performed."
@@ -140,7 +140,7 @@
     "tool_issue": "Heading level option was unsupported, causing strict locator ambiguity after navigation. Exact Library heading and selected filters verified in follow-up."
   },
   "native_download": {
-    "status": "bloccato",
+    "status": "superato",
     "control": "Download original",
     "route": "/indi-allsky/modern-admin/media/panorama-video/2/64/download",
     "expected_bytes": 37837327,
@@ -152,8 +152,44 @@
     "browser_console_errors": [],
     "apache_errors_during_request_minute": 0,
     "user_observation": "No apparent Save dialog or download warning.",
-    "conclusion": "Request reaches handler but complete native receipt is unverified. Logged transfer size is below expected file size. Cause is not established.",
-    "next_step": "Compare with Safari/Chrome download and hash received file; request sent to user.",
-    "scope_limit": "HTTP 200 is not acceptance of download delivery."
+    "conclusion": "Complete file receipt and byte integrity are verified for this download. Earlier automated in-app click remained inconclusive; its cause is not established.",
+    "next_step": "Other download families and browser combinations remain separate acceptance cases.",
+    "scope_limit": "Only panorama-video camera 2 / record 64 receipt is certified, not every download control.",
+    "initial_attempt_status": "bloccato",
+    "receipt": {
+      "method": "User confirmed the link works; received file independently inspected in Mac Downloads. Browser used by user was not identified.",
+      "filename": "allsky-panorama_timelapse_ccd2_20260929_day_1790705595.mp4",
+      "bytes": 37837327,
+      "sha256": "01418f67ab0acc32f0509d56ecbec4703faa88540df8d4a2ca9fd43e8b1457db",
+      "matches_raspberry_original": true
+    }
+  },
+  "publication_followup": {
+    "window": [
+      "2026-09-30T20:03:15.017291",
+      "2026-09-30T20:05:15.032365"
+    ],
+    "report": "/home/eric/hybrid-publication-resumed-20260930.jsonl",
+    "sha256": "c46737a39444ad6a3d59dd1f11d3dd0500fc8b883b4c182666ff4f7561e8d2b1",
+    "read_errors": 0,
+    "non_initial_capture_to_observed_seconds": {
+      "1": [
+        5.024595022201538,
+        7.031044960021973
+      ],
+      "2": [
+        4.01783561706543,
+        5.024790048599243,
+        8.03154706954956
+      ]
+    },
+    "hardware_snapshot": {
+      "throttled": "0x0",
+      "temperature_celsius": 74.7,
+      "selected_kernel_error_patterns_since_previous_release": 0,
+      "io_pressure_interface": "unavailable"
+    },
+    "load_snapshot": "Automatic ffmpeg process observed before sampling at 338% CPU; load not measured continuously.",
+    "conclusion": "No earlier multi-tens-of-seconds publication stall reproduced in this small sample. Does not close intermittent latency or continuous freshness acceptance."
   }
 }
