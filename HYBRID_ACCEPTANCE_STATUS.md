@@ -1,7 +1,18 @@
 # Hybrid acceptance status
 
-Updated 29 September 2026. **Classic removal is deployed; whole-product acceptance remains open.**
+Updated 30 September 2026. **Classic removal is deployed; whole-product acceptance remains open.**
 The separate 24-hour day/night observation is deferred by the user. Detector and AI implementation are outside this release.
+
+## Cold start after physical power reconnection — passed
+
+On 30 September, after an orderly shutdown and user-performed power disconnect/reconnect,
+web, INDI and capture started automatically. Before the first SSH login, native Now
+showed new decoded frames from both cameras (21:06:05 and 21:06:13). The new boot ID,
+enabled timers/socket, lingering user manager and zero service restarts corroborate
+the result. Configuration 118 and installed runtime are unchanged. A coherent database
+and Flask configuration backup preceded shutdown. This closes cold-start autostart;
+it does not test abrupt power-loss durability or 24-hour stability.
+[Evidence](testing/evidence/hybrid-cold-start-20260930.json).
 
 ## Installed product
 
@@ -367,11 +378,11 @@ The previous under-load cadence defect remains open.
 
 - Resolve remaining storage/publication delays and verify end-to-end frame freshness under load. The latest bounded preview-flush regression recorded 15-second median and 16-second maximum capture intervals for both cameras, but traced archive fsync and preview creation still stalled for 22.5 and 11.3 seconds. Capture timestamps alone do not establish publication latency. See [measured evidence](testing/evidence/hybrid-preview-flush-20260929.json).
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
-- Resolve native download delivery: establish whether the browser has a pending Save dialog or another destination, then verify the received file against its source. Do not substitute a successful HTTP request for native delivery.
+- Panorama download delivery passes with the user-received file matching the source SHA-256. Other export families remain separate: configuration 118 has no verified native file receipt yet. See [generation/download evidence](testing/evidence/hybrid-generation-followup-20260930.json).
 - Complete remaining live effects, including dedicated-data cleanup/deletion and test-destination uploads. Short mini timelapses and both cameras’ automatic day timelapse/panorama outputs are verified; other automatic/isolated tests remain separately labeled.
-- Identify devices and arrange recovery/physical presence before interrupting networking, disks or GPIO. Current user clarification is pending. Do not claim unavailable hardware as tested.
+- The user reports no external disks/USB storage and no upload integrations in use. Their live acceptance remains unavailable for this installation; preserve supported functionality and automated coverage. Identify any additional hardware before disruptive tests; GPIO inventory is not established.
 - Complete remaining repository/backend review and operational cleanup. The [47 core dependency review](docs/HYBRID_DEPENDENCIES.md) and installer path/syntax checks are recorded; clean platform builds and optional integration acceptance are not implied. Retain useful shared backend, public contracts, user data, migrations and supported functions.
-- Cold power-loss recovery has not been directly tested. The earlier warm reboot/startup evidence is in [reboot acceptance](testing/evidence/hybrid-reboot-autostart-20260914.json).
+- Cold autostart after orderly shutdown and physical power reconnection passes ([evidence](testing/evidence/hybrid-cold-start-20260930.json)). Abrupt power-loss durability remains untested; do not conflate it with this successful start test.
 
 The 24-hour observation is explicitly excluded from this run and is not passed.
 No new detector/AI algorithms or simulated classifications belong to these closure tasks.

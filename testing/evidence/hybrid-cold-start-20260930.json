@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-30",
+  "result": "passed",
+  "scope": "Orderly shutdown, user-disconnected power and reconnected power; automatic web and both-camera recovery. Not abrupt power-loss durability or 24-hour acceptance.",
+  "runtime": "80b150d625c206e77d9fc5e5a3575b8b0d5463a4",
+  "config_revision": 118,
+  "previous_boot_id": "22c3d83f-b38f-4262-846f-88077f9eb654",
+  "boot_id": "e9304131-4b55-4c7f-a958-d7c42cf8b207",
+  "boot_time": "2026-09-30T21:01:30+02:00",
+  "services": {
+    "capture": {
+      "active_since": "2026-09-30T21:03:36+02:00",
+      "restarts": 0
+    },
+    "indi": {
+      "active_since": "2026-09-30T21:02:06+02:00",
+      "restarts": 0
+    },
+    "web": {
+      "active_since": "2026-09-30T21:02:06+02:00",
+      "restarts": 0
+    },
+    "apache": "active",
+    "enabled": [
+      "indi-allsky.timer",
+      "indiserver.timer",
+      "gunicorn-indi-allsky.socket"
+    ],
+    "user_linger": true
+  },
+  "native_browser": {
+    "observed_before_first_post_boot_ssh_login": true,
+    "manual_service_start": false,
+    "capture": "Running",
+    "decoded_frames": [
+      {
+        "camera_id": 1,
+        "filename": "ccd1_20260930_210605.jpg",
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "filename": "ccd2_20260930_210613.jpg",
+        "width": 3840,
+        "height": 2160
+      }
+    ]
+  },
+  "backup": {
+    "directory": "/home/eric/hybrid-backups/hybrid-cold-start-20260930",
+    "database_bytes": 828977152,
+    "integrity_check": "ok",
+    "includes": [
+      "database",
+      "Flask configuration"
+    ],
+    "media_copied": false
+  },
+  "limitations": [
+    "No abrupt power removal while writing",
+    "No 24-hour observation",
+    "Does not close previously observed publication latency under load"
+  ]
+}
