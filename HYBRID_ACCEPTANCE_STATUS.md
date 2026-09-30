@@ -102,6 +102,13 @@ still running and 13933/13934 queued at the read-only snapshot. These remaining
 jobs are not marked accepted and were left running normally.
 [Task and output evidence](testing/evidence/hybrid-day-generation-snapshot-20260929.json).
 
+The authorized 30 September follow-up confirms camera-2 tasks 13932–13934
+completed. Keogram 64 decodes at 3013×700. Both videos pass complete single-thread
+FFmpeg decoding without errors (3,013 and 1,503 frames). Both cameras continue
+acquiring, with five observed 45-second intervals each after decoding. Native
+playback/download and long-run stability remain separate open checks.
+[Follow-up evidence](testing/evidence/hybrid-generation-followup-20260930.json).
+
 ## Post-removal evidence
 
 | Scope | Verified result | Evidence |

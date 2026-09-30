@@ -1,0 +1,94 @@
+{
+  "date": "2026-09-30",
+  "runtime": "80b150d6",
+  "environment": "Production Raspberry; user explicitly authorized resuming bounded acceptance, 24-hour test excluded",
+  "scope": "Previously pending scheduled camera-2 output tasks; full video decoding, keogram decoding and bounded capture check",
+  "tasks": [
+    {
+      "id": 13932,
+      "state": "SUCCESS",
+      "result": "Keogram generated",
+      "keogram_id": 64,
+      "decoded_size": [
+        3013,
+        700
+      ],
+      "bytes": 244516
+    },
+    {
+      "id": 13933,
+      "state": "SUCCESS",
+      "bytes": 75966998,
+      "codec": "h264",
+      "size": [
+        3840,
+        2160
+      ],
+      "frames": 3013,
+      "duration_seconds": 120.52,
+      "ffprobe_exit": 0,
+      "full_decode_exit": 0,
+      "decode_seconds": 125.61,
+      "decode_errors": ""
+    },
+    {
+      "id": 13934,
+      "state": "SUCCESS",
+      "bytes": 37837327,
+      "codec": "h264",
+      "size": [
+        4712,
+        750
+      ],
+      "frames": 1503,
+      "duration_seconds": 60.12,
+      "ffprobe_exit": 0,
+      "full_decode_exit": 0,
+      "decode_seconds": 32.11,
+      "decode_errors": ""
+    }
+  ],
+  "decode_command": "nice -n 19 ffmpeg -v error -xerror -threads 1 -i <task-result-path> -map 0:v:0 -f null -",
+  "capture": {
+    "pid": 2015141,
+    "automatic_restarts": 0,
+    "initial_latest_images": [
+      {
+        "camera_id": 1,
+        "id": 186690,
+        "created": "2026-09-30 19:48:08",
+        "decoded_size": [
+          4608,
+          2592
+        ]
+      },
+      {
+        "camera_id": 2,
+        "id": 186691,
+        "created": "2026-09-30 19:48:15",
+        "decoded_size": [
+          3840,
+          2160
+        ]
+      }
+    ],
+    "post_decode_observed": "2026-09-30T19:52:11.537904",
+    "post_decode_latest": [
+      "2026-09-30 19:51:53",
+      "2026-09-30 19:52:00"
+    ],
+    "last_five_intervals_each_camera_seconds": [
+      45,
+      45,
+      45,
+      45,
+      45
+    ]
+  },
+  "limitations": [
+    "No browser playback or native download receipt tested in this check.",
+    "Capture interval sample does not certify continuous stability or publication latency.",
+    "No configuration change, media deletion, service restart or new generation task submitted.",
+    "No 24-hour trial performed."
+  ]
+}
