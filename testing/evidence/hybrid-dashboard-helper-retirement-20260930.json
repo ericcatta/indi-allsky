@@ -66,5 +66,15 @@
     "testing/frame_metadata_analytics_test.py": "passed",
     "testing/event_candidate_test.py": "passed"
   },
-  "deployment": "pending"
+  "deployment": {
+    "revision": "af31f978",
+    "web_reloaded": true,
+    "capture_pid_before_after": 1565,
+    "capture_active": true,
+    "native_checks": [
+      "Now renders and both camera images decode",
+      "Config History camera 2/asi678mc renders 25 rows"
+    ],
+    "rollback": "Restore indi_allsky/flask/views.py from 0ada0cfc and reload web; database and configuration unchanged"
+  }
 }

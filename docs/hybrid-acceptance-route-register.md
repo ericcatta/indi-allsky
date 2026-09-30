@@ -13,7 +13,7 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 
 | Route Hybrid attuale | Record associati | Fonti |
 | --- | ---: | --- |
-| `/modern-admin` | 0 | Da associare o collaudare |
+| `/modern-admin` | 1 | [Authenticated entry redirect and production check](../testing/evidence/hybrid-entry-retirement-20260930.json) |
 | `/modern-admin/account` | 18 | [hybrid-account-native-20260914](../testing/evidence/hybrid-account-native-20260914.json), [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-native-users-2026-09-08](../testing/evidence/hybrid-native-users-2026-09-08.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/cameras` | 3 | [hybrid-camera-detection-release-20260921](../testing/evidence/hybrid-camera-detection-release-20260921.json), [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/cameras/add` | 2 | [hybrid-camera-detection-release-20260921](../testing/evidence/hybrid-camera-detection-release-20260921.json), [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |

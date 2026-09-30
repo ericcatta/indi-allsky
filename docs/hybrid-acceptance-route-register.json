@@ -18,9 +18,17 @@
       "methods": [
         "GET"
       ],
-      "handler_module": "indi_allsky.flask.views",
-      "handler": "ModernAdminView",
-      "evidence": []
+      "handler_module": "indi_allsky.flask.navigation_redirects",
+      "handler": "modern_admin_entry",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-entry-retirement-20260930.json",
+          "record": "deployment",
+          "control": "Authenticated entry redirect, preserved query, native production Now and decoded frames; isolated role and GET/HEAD tests",
+          "recorded_status": "superato"
+        }
+      ],
+      "handler_verified_revision": "0ada0cfc"
     },
     {
       "route": "/modern-admin/account",

@@ -38,9 +38,20 @@ unchanged during those reruns; all 34 JavaScript tests pass. Production redirect
 both decoded frames pass; capture PID 1565 remained active through web reload.
 [Evidence and original/follow-up reports](testing/evidence/hybrid-entry-retirement-20260930.json).
 
+## Unreachable dashboard helpers — removed and deployed
+
+After retiring the unreachable template, the isolated call chain that built its
+context is removed: 43 methods and eight exclusive imports, 672 lines in total.
+The 17 externally referenced/shared methods and backend analytics libraries remain.
+All 173 Python/compile entrypoints pass in one unchanged-source run, as do 34
+JavaScript tests and the standalone frame-metadata/event-candidate tests. Native
+Now decodes both camera images and Config History renders 25 rows after web reload;
+capture PID 1565 is unchanged. No settings, database or media migration is involved.
+[Evidence](testing/evidence/hybrid-dashboard-helper-retirement-20260930.json).
+
 ## Installed product
 
-The Raspberry runs `0ada0cfc` (independent Hybrid entry redirect and unused dashboard retirement).
+The Raspberry runs `af31f978` (unreachable dashboard helper chain removed).
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
