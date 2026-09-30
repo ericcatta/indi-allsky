@@ -1,0 +1,35 @@
+{
+  "baseline": "3c743bd3",
+  "environment": "Native production browser, administrator, camera 2/profile asi678mc",
+  "checks": [
+    {
+      "control": "LENS_SELECT / SENSOR_SELECT",
+      "status": "superato",
+      "observed": "Selected all 25 lens and 60 sensor options individually (85 native interactions); each produced finite summary, positive canvas dimensions and matching permalink selection with camera/profile retained. Not all 1500 combinations were exercised natively; automated canvas parity already covers 3000 scenarios."
+    },
+    {
+      "control": "OFFSET_X / OFFSET_Y / Update simulation / reload",
+      "status": "superato",
+      "observed": "IMX678 and 2.77mm lens, offsets 125/-250: 3840x2160, 1385px circle, 0.25/-0.50mm offsets. Reload retained values and summary."
+    },
+    {
+      "control": "geometry-fit",
+      "status": "superato",
+      "observed": "Camera-2 image 187333 preview3840x2160; Fit circle changed diameter from3000 to2160 without saving."
+    },
+    {
+      "control": "copy-simulator-link / geometry-copy",
+      "status": "bloccato",
+      "observed": "Both pages report copied but automation clipboard reading still returns previous table data; native paste into an innocent table filter returned empty. The mismatch affects both ClipboardJS and modern Clipboard API implementations, so an application defect is not established."
+    }
+  ],
+  "withdrawn_candidate": "A proposed Clipboard API replacement passed targeted tests but was withdrawn when the same observation failure appeared with the already-modern geometry copy. Full candidate regression intentionally interrupted; no production deployment or code commit.",
+  "open_findings": [
+    "Geometry Review keogram angle setting link currently omits explicit camera/profile query. Requires scoped navigation verification before any correction."
+  ],
+  "limits": [
+    "No configuration save or physical camera change",
+    "Desktop admin only; no new narrow-screen or ordinary-user certification",
+    "No claim that clipboard copy is fixed or verified"
+  ]
+}

@@ -5023,6 +5023,12 @@
           "control": "Navigation drawer / Camera Simulator",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/tools/camera-simulator?lens=zwo_f1.2_2.5mm_1-2&sensor=imx477&offset_x=0&offset_y=0"
+        },
+        {
+          "source": "testing/evidence/hybrid-image-tools-native-20260930.json",
+          "record": "checks",
+          "control": "Native catalog choices, scoped offsets/reload and geometry fit; clipboard receipt explicitly blocked",
+          "recorded_status": "mixed"
         }
       ]
     },
@@ -5331,6 +5337,12 @@
           "record": "controls[12]",
           "control": "Live production geometry/reload",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-image-tools-native-20260930.json",
+          "record": "checks",
+          "control": "Native catalog choices, scoped offsets/reload and geometry fit; clipboard receipt explicitly blocked",
+          "recorded_status": "mixed"
         }
       ]
     },
