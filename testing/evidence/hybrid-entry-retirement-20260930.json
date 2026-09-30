@@ -49,5 +49,16 @@
     "old_median_seconds": 0.006611408000026131,
     "new_median_seconds": 0.0024249769999187265
   },
-  "deployment": "pending"
+  "deployment": {
+    "revision": "0ada0cfc",
+    "web_reloaded": true,
+    "capture_pid_before_after": 1565,
+    "capture_active": true,
+    "native_browser_final_url": "https://allsky-pi.local/indi-allsky/modern-admin/now?camera_id=2&profile_id=asi678mc",
+    "decoded_frames": [
+      "ccd1_20260930_214723.jpg",
+      "ccd2_20260930_214731.jpg"
+    ],
+    "scope": "Entry redirect preserves URL parameters. Now renders both camera cards and its existing primary-camera summary; no claim that its summary selection changed."
+  }
 }

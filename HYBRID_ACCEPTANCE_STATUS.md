@@ -24,9 +24,23 @@ Production camera-2 image 186935 passes the same native round trip; capture PID
 1565 stayed active while only web workers were reloaded.
 [Evidence](testing/evidence/hybrid-media-detail-context-20260930.json).
 
+## Hybrid entry and obsolete dashboard retirement — deployed
+
+`/modern-admin` now performs an authenticated redirect directly to Now, retaining
+query parameters without constructing dashboard context. The unreachable 806-line
+`modern_admin/index.html` template is removed. In an isolated five-request comparison,
+queries drop from six to one; median redirect time drops from 6.6 ms to 2.4 ms.
+This is not a measurement of full-page production latency.
+The 173-entrypoint regression is reconciled with four successful targeted reruns:
+two guards updated for the independent handler, and isolation/compile checks rerun
+after removing accidental macOS transfer sidecars. Application sources stayed
+unchanged during those reruns; all 34 JavaScript tests pass. Production redirect and
+both decoded frames pass; capture PID 1565 remained active through web reload.
+[Evidence and original/follow-up reports](testing/evidence/hybrid-entry-retirement-20260930.json).
+
 ## Installed product
 
-The Raspberry runs `36089d88` (media-detail navigation correction on the previously tested runtime).
+The Raspberry runs `0ada0cfc` (independent Hybrid entry redirect and unused dashboard retirement).
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
