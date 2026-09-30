@@ -38,5 +38,12 @@
     "result": "Image list \u2192 Details 201 \u2192 Back to Images preserved camera_id=2 and profile_id=test-profile-2",
     "scope": "Navigation only; synthetic .dat media are not image playback evidence"
   },
-  "rollback": "Restore previous media_list.html from 95e664e1 and reload web workers; no database or config migration"
+  "rollback": "Restore previous media_list.html from 95e664e1 and reload web workers; no database or config migration",
+  "deployment": {
+    "revision": "36089d88",
+    "web_reloaded": true,
+    "capture_pid_before_after": 1565,
+    "capture_state": "active",
+    "native_production": "Camera 2 / asi678mc: image 186935 Details and Back to Images preserve both query values"
+  }
 }

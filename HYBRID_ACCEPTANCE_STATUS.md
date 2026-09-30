@@ -14,22 +14,25 @@ and Flask configuration backup preceded shutdown. This closes cold-start autosta
 it does not test abrupt power-loss durability or 24-hour stability.
 [Evidence](testing/evidence/hybrid-cold-start-20260930.json).
 
-## Media list detail context correction
+## Media list detail context correction — deployed
 
 Image and timelapse Details links now carry camera/profile to the detail and return
 flows. Both roles and both cameras pass isolated integration tests, including wrong-camera
 404 responses. Native camera-2 image list/detail/return preserves the profile.
-The candidate passes 173 Python/compile entrypoints and 34 JavaScript tests.
+The deployed candidate passes 173 Python/compile entrypoints and 34 JavaScript tests.
+Production camera-2 image 186935 passes the same native round trip; capture PID
+1565 stayed active while only web workers were reloaded.
 [Evidence](testing/evidence/hybrid-media-detail-context-20260930.json).
 
 ## Installed product
 
-The Raspberry runs `80b150d625c206e77d9fc5e5a3575b8b0d5463a4`.
+The Raspberry runs `36089d88` (media-detail navigation correction on the previously tested runtime).
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
 
-The 835-file source/asset manifest (including the capture entrypoint) is
+The previous 835-file source/asset manifest, before the two media-detail link changes
+and their new regression test (including the capture entrypoint), is
 `afaeac3ce66de7f770d2e92c4d8dcaf627aa769c74365993ad234097713667d6`.
 172 Python/compile entrypoints and 34 JavaScript tests pass with unchanged sources.
 The bounded asynchronous syslog handler is deployed. Both camera files decode
