@@ -18,7 +18,17 @@
     "sha256": "114aad9b2944ee6160d428979c03762625713f76160c7c4f884723e7fb837163"
   },
   "deployment": {
-    "status": "pending"
+    "status": "deployed",
+    "revision": "a5e4b7e0",
+    "method": "Fast-forward pull and web reload only",
+    "capture_pid": 1565,
+    "capture_active": true,
+    "capture_restarts": 0,
+    "native_frames": {
+      "camera_1": "2026-09-30 22:50:06 decoded",
+      "camera_2": "2026-09-30 22:49:52 decoded"
+    },
+    "rollback": "Restore indi_allsky/modern_safe_action.py from e3c1e8fa and reload gunicorn-indi-allsky.service; no data/configuration migration"
   },
   "limitations": [
     "This removes dead catalog scaffolding; it does not itself complete whole-product acceptance"

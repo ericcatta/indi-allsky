@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-30",
+  "installed_runtime": "908b1f70",
+  "role": "production administrator",
+  "controls": [
+    {
+      "page": "/modern-admin/users",
+      "control": "CSV",
+      "status": "bloccato",
+      "evidence": "Native click on two-row table; no new hybrid-records CSV in Mac Downloads; page remains Users"
+    },
+    {
+      "page": "/modern-admin/users",
+      "control": "Excel",
+      "status": "bloccato",
+      "evidence": "Native click on same table; no new XLSX file in Mac Downloads; no captured browser errors"
+    }
+  ],
+  "not_retried": "Configuration snapshot 118: previous supported browser attempts did not establish file receipt; no matching downloaded file found on this check",
+  "next_action": "Manual user verification requested for CSV, Excel and snapshot 118; do not request or publish configuration contents",
+  "limitations": [
+    "Older exported files are present but do not prove current button delivery",
+    "No application failure inferred from missing receipt",
+    "Server response/content tests are separate evidence"
+  ]
+}

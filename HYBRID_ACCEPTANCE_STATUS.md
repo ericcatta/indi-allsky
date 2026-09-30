@@ -59,9 +59,19 @@ stayed unchanged. Only web workers were reloaded. Capture remains active with PI
 1565 and zero restarts; native Now decodes both camera frames.
 [Evidence](testing/evidence/hybrid-action-input-20260930.json).
 
+## Unused action catalog — removed and deployed
+
+The historical default Safe Action registry and its metadata-only placeholder
+class had no application consumer; references existed only in unit tests.
+Their 43 runtime lines are removed. Shared contract/filtering/refusal tests now
+use a test-local action; real planners, effects and routes remain unchanged.
+All 174 Python/compile entrypoints and 34 JavaScript tests pass. A web-only reload
+preserved capture PID 1565; both latest frames decoded in native Now.
+[Evidence](testing/evidence/hybrid-action-catalog-retirement-20260930.json).
+
 ## Installed product
 
-The Raspberry runs `908b1f70` (action request validation).
+The Raspberry runs `a5e4b7e0` (unused action catalog removed).
 Classic frontend classes, templates and exclusive assets are physically removed.
 Hybrid is the only UI and requires login. Shared backend and public/API compatibility remain.
 Later documentation commits do not change the installed runtime.
@@ -438,7 +448,7 @@ worst-case storage saturation or replace the deferred 24-hour test.
 
 - Resolve remaining storage/publication delays and verify end-to-end frame freshness under load. The latest bounded preview-flush regression recorded 15-second median and 16-second maximum capture intervals for both cameras, but traced archive fsync and preview creation still stalled for 22.5 and 11.3 seconds. Capture timestamps alone do not establish publication latency. See [measured evidence](testing/evidence/hybrid-preview-flush-20260929.json).
 - Finish the control/effect matrix, including uncovered role, camera/profile, mobile, empty/stale-data and failure cases. Reuse applicable evidence and preserve its scope.
-- Panorama download delivery passes with the user-received file matching the source SHA-256. Other export families remain separate: configuration 118 has no verified native file receipt yet. See [generation/download evidence](testing/evidence/hybrid-generation-followup-20260930.json).
+- Panorama download delivery passes with the user-received file matching the source SHA-256. Other export families remain separate: configuration 118 has no verified native file receipt yet. Native CSV/Excel clicks on 30 September likewise produced no newly observed file in Mac Downloads; manual receipt verification is requested ([evidence](testing/evidence/hybrid-export-receipt-20260930.json)). See [generation/download evidence](testing/evidence/hybrid-generation-followup-20260930.json).
 - Complete remaining live effects and test-destination uploads. The four native camera-cleanup buttons now pass against dedicated synthetic files/database, with the other camera preserved ([evidence](testing/evidence/hybrid-cleanup-native-effects-20260930.json)). Short mini timelapses and both cameras’ automatic day timelapse/panorama outputs are verified; other automatic/isolated tests remain separately labeled.
 - The user reports no external disks/USB storage and no upload integrations in use. Their live acceptance remains unavailable for this installation; preserve supported functionality and automated coverage. Identify any additional hardware before disruptive tests; GPIO inventory is not established.
 - Complete remaining repository/backend review and operational cleanup. The [47 core dependency review](docs/HYBRID_DEPENDENCIES.md) and installer path/syntax checks are recorded; clean platform builds and optional integration acceptance are not implied. Retain useful shared backend, public contracts, user data, migrations and supported functions.
