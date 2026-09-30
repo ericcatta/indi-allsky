@@ -22,5 +22,48 @@
     "Older exported files are present but do not prove current button delivery",
     "No application failure inferred from missing receipt",
     "Server response/content tests are separate evidence"
-  ]
+  ],
+  "server_access_log": {
+    "source": "/var/log/apache2/other_vhosts_access.log",
+    "read_only": true,
+    "filtered_fields": [
+      "timestamp",
+      "request path/method",
+      "HTTP status",
+      "logged byte count"
+    ],
+    "observations": [
+      {
+        "time": "2026-09-30 20:07:21 +0200",
+        "request": "GET /indi-allsky/config/download?id=118",
+        "status": 200,
+        "logged_bytes": 34094
+      },
+      {
+        "time": "2026-09-30 20:07:51 +0200",
+        "request": "GET /indi-allsky/config/download?id=118",
+        "status": 200,
+        "logged_bytes": 34120
+      },
+      {
+        "time": "2026-09-30 21:53:23 +0200",
+        "request": "GET /indi-allsky/config/download?id=118",
+        "status": 200,
+        "logged_bytes": 34091
+      },
+      {
+        "time": "2026-09-30 22:38:09 +0200",
+        "request": "POST /indi-allsky/modern-admin/operations/export",
+        "status": 200,
+        "logged_bytes": 683
+      },
+      {
+        "time": "2026-09-30 22:38:26 +0200",
+        "request": "POST /indi-allsky/modern-admin/operations/export",
+        "status": 200,
+        "logged_bytes": 2162
+      }
+    ],
+    "interpretation": "Actual native clicks reach the server and return 200; this does not establish saved file receipt or content identity. Logged byte counts are not asserted to equal payload size."
+  }
 }
