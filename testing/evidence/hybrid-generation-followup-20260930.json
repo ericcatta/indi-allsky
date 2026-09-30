@@ -86,9 +86,57 @@
     ]
   },
   "limitations": [
-    "No browser playback or native download receipt tested in this check.",
+    "Native download receipt remains unverified; browser playback of these two outputs is now verified.",
     "Capture interval sample does not certify continuous stability or publication latency.",
     "No configuration change, media deletion, service restart or new generation task submitted.",
     "No 24-hour trial performed."
-  ]
+  ],
+  "native_browser": {
+    "environment": "Production administrator session, in-app browser",
+    "controls": [
+      {
+        "task_id": 13933,
+        "control": "Open Timelapse then keyboard Space",
+        "output_kind": "video",
+        "output_id": 64,
+        "camera_id": 2,
+        "ended": true,
+        "current_time": 120.52,
+        "duration": 120.52,
+        "dimensions": [
+          3840,
+          2160
+        ],
+        "media_error": null,
+        "status": "superato"
+      },
+      {
+        "task_id": 13934,
+        "control": "Open Panorama video then keyboard Space",
+        "output_kind": "panorama-video",
+        "output_id": 64,
+        "camera_id": 2,
+        "ended": true,
+        "current_time": 60.12,
+        "duration": 60.12,
+        "dimensions": [
+          4712,
+          750
+        ],
+        "media_error": null,
+        "status": "superato"
+      },
+      {
+        "control": "Panorama videos return link",
+        "destination": "/indi-allsky/modern-admin/library?kind=panorama-video&camera_id=2&profile_id=asi678mc",
+        "visible_heading": "Library",
+        "selected_camera": "ASI678MC",
+        "selected_kind": "Panorama videos",
+        "status": "superato"
+      }
+    ],
+    "method": "Native link clicks and keyboard playback; read-only DOM observations. Both videos reached natural end without seeking or playback-rate changes.",
+    "cleanup": "Both agent-created tabs closed; user tab untouched.",
+    "tool_issue": "Heading level option was unsupported, causing strict locator ambiguity after navigation. Exact Library heading and selected filters verified in follow-up."
+  }
 }

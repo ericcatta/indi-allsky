@@ -105,8 +105,10 @@ jobs are not marked accepted and were left running normally.
 The authorized 30 September follow-up confirms camera-2 tasks 13932–13934
 completed. Keogram 64 decodes at 3013×700. Both videos pass complete single-thread
 FFmpeg decoding without errors (3,013 and 1,503 frames). Both cameras continue
-acquiring, with five observed 45-second intervals each after decoding. Native
-playback/download and long-run stability remain separate open checks.
+acquiring, with five observed 45-second intervals each after decoding. Both videos also reached natural end in the production browser after opening
+them through their task-result links. The panorama return link retained camera 2,
+profile asi678mc and the Panorama videos filter. Native download receipt and
+long-run stability remain separate open checks.
 [Follow-up evidence](testing/evidence/hybrid-generation-followup-20260930.json).
 
 ## Post-removal evidence
