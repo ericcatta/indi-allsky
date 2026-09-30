@@ -1,0 +1,23 @@
+{
+  "runtime_revision": "a5e4b7e0",
+  "scope": "Isolated cleanup followed by actual Flask downloads and image/FITS detail requests",
+  "status": "superato",
+  "test": "testing/hybrid_camera_cleanup_flow_test.py",
+  "test_sha256": "5d7d664348394c0f507067c8bdee4e44cf84f6d6cb6cb739674c1b0c5b09a6ef",
+  "log": "/home/eric/hybrid-cleanup-download-detail-20260930.log",
+  "log_sha256": "b139f1b66e371840d50c8b24e72020b80ce10f3d5ab7846e3719dc9f7c74759b",
+  "checks": {
+    "download_responses": 240,
+    "detail_responses": 48,
+    "commands": 4,
+    "media_families": 10,
+    "retained": "HTTP 200 and exact fixture bytes; other camera untouched",
+    "deleted": "HTTP 404; no fallback to other camera",
+    "details": "Image/FITS details return 200 for preserved entries and 404 for deleted entries"
+  },
+  "regression": "Current unchanged application passed 174 Python/compile and 34 JS tests in hybrid-action-catalog-regression-20260930. Only this test was extended and rerun; no product source change or deployment.",
+  "limitations": [
+    "Tests server delivery, not native browser file receipt",
+    "Synthetic files/database only; production unchanged"
+  ]
+}

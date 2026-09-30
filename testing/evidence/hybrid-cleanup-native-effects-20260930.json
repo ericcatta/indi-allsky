@@ -81,5 +81,6 @@
     "Browser effects checked as administrator on camera 2; ordinary-user denial separately recorded",
     "Synthetic .dat media exercise deletion, not decoding or output generation",
     "No production media deleted"
-  ]
+  ],
+  "post_deletion_link_regression": "testing/evidence/hybrid-cleanup-stale-links-20260930.json"
 }

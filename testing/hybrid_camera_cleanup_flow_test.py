@@ -61,6 +61,20 @@ def run():
                         path=root/(name+str(ident)+'.dat')
                         assert path.exists()==(ident not in deleted)
                         if path.exists():assert path.read_bytes()==b'cleanup fixture'
+                        kind = {'Image':'image', 'FitsImage':'fits', 'RawImage':'raw',
+                                'PanoramaImage':'panorama', 'Video':'video', 'MiniVideo':'mini-video',
+                                'Keogram':'keogram', 'StarTrails':'startrail',
+                                'StarTrailsVideo':'startrail-video', 'PanoramaVideo':'panorama-video'}[name]
+                        camera = 1 if ident == 11 else 2
+                        url = f'/indi-allsky/modern-admin/media/{kind}/{camera}/{ident}/download'
+                        download = admin.get(url)
+                        assert download.status_code == (404 if ident in deleted else 200), (command, name, ident, download.status_code)
+                        if ident not in deleted:
+                            assert download.data == b'cleanup fixture'
+                        if name in ('Image', 'FitsImage'):
+                            route = 'media/images' if name == 'Image' else 'fits'
+                            detail = admin.get(f'/indi-allsky/modern-admin/{route}/{ident}?camera_id={camera}')
+                            assert detail.status_code == (404 if ident in deleted else 200), (command, name, ident, detail.status_code)
         for client,writable in ((admin,True),(user,False)):
             with patch.object(BaseView,'verify_admin_network',return_value=True):
                 page=client.get('/indi-allsky/modern-admin/system/info?camera_id=2&profile_id=test-profile-2')
@@ -74,6 +88,6 @@ def run():
         with patch.object(BaseView,'verify_admin_network',return_value=False):
             page=admin.get('/indi-allsky/modern-admin/system/info?camera_id=2')
         for form in page.text.split('class="system-cleanup-form"')[1:]:assert '<fieldset disabled>' in form.split('</form>',1)[0]
-        print('Cleanup: frozen legacy SQL/order/IDs, 10-family real file deletion, 16-minute boundary, day/night and camera isolation, invalid camera and UI gates: PASS')
+        print('Cleanup: frozen legacy SQL/order/IDs, 10-family real file deletion, 16-minute boundary, day/night and camera isolation, invalid camera, UI gates and post-deletion download behavior: PASS')
 
 if __name__=='__main__':run()
