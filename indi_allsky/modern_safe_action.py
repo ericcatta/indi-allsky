@@ -363,15 +363,6 @@ class ModernAdminSafeAction:
         return any(token in key_l for token in SECRET_TOKENS)
 
 
-class ModernAdminSafeActionPlaceholder(ModernAdminSafeAction):
-    def __init__(self, action_id, label, feature, risk_level, permission_check=None):
-        super().__init__(permission_check=permission_check)
-        self.action_id = action_id
-        self.label = label
-        self.feature = feature
-        self.risk_level = risk_level
-
-
 class NotificationAcknowledgeSafeAction(ModernAdminSafeAction):
     action_id = NOTIFICATION_ACKNOWLEDGE_ACTION_ID
     label = NOTIFICATION_ACKNOWLEDGE_LABEL
@@ -2028,37 +2019,3 @@ def run_modern_safe_action_dry_run(action_id=None, payload=None, actor=None, per
         actor=actor,
         dry_run=True,
     )
-
-
-def build_default_modern_safe_action_registry():
-    registry = ModernAdminSafeActionRegistry()
-
-    registry.register(NotificationAcknowledgeSafeAction(
-        permission_check=allow_no_one,
-    ))
-    registry.register(ImageExcludeSafeAction(
-        permission_check=allow_no_one,
-    ))
-    registry.register(ImageUnexcludeSafeAction(
-        permission_check=allow_no_one,
-    ))
-    registry.register(LogDownloadSafeAction(
-        permission_check=allow_no_one,
-    ))
-
-    for action_id, label, feature, risk_level in (
-        ('task.retry', 'Retry Task', 'Task Queue', 'high'),
-        ('task.cancel', 'Cancel Task', 'Task Queue', 'high'),
-        ('config.restore_preview', 'Preview Config Restore', 'Config Restore', 'critical'),
-        ('youtube.oauth_status_refresh', 'Refresh YouTube OAuth Status', 'YouTube / OAuth', 'critical'),
-        ('focus.move', 'Move Focuser', 'Focus', 'critical'),
-    ):
-        registry.register(ModernAdminSafeActionPlaceholder(
-            action_id=action_id,
-            label=label,
-            feature=feature,
-            risk_level=risk_level,
-            permission_check=allow_no_one,
-        ))
-
-    return registry

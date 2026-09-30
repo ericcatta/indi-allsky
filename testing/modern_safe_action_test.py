@@ -10,7 +10,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from indi_allsky.modern_safe_action import ModernAdminSafeAction
 from indi_allsky.modern_safe_action import ModernAdminSafeActionAuditLog
-from indi_allsky.modern_safe_action import ModernAdminSafeActionPlaceholder
 from indi_allsky.modern_safe_action import ModernAdminSafeActionAuditRecord
 from indi_allsky.modern_safe_action import ModernAdminSafeActionContract
 from indi_allsky.modern_safe_action import ModernAdminSafeActionRegistry
@@ -33,7 +32,6 @@ from indi_allsky.modern_safe_action import NotificationAcknowledgeDbAdapter
 from indi_allsky.modern_safe_action import NotificationAcknowledgeRepositoryError
 from indi_allsky.modern_safe_action import NotificationAcknowledgeSafeAction
 from indi_allsky.modern_safe_action import NotificationAcknowledgeService
-from indi_allsky.modern_safe_action import build_default_modern_safe_action_registry
 from indi_allsky.modern_safe_action import build_notification_acknowledge_dry_run_registry
 from indi_allsky.modern_safe_action import run_modern_safe_action_dry_run
 from indi_allsky.modern_admin_runtime_effects import ModernAdminServiceControlEffectAdapter
@@ -42,6 +40,15 @@ from indi_allsky.modern_admin_runtime_effects import ModernAdminTaskEnqueueEffec
 
 
 SAFE_ACTION_DRY_RUN_ROUTE = '/modern-admin/safe-action/dry-run'
+
+
+class MetadataOnlyAction(ModernAdminSafeAction):
+    def __init__(self, action_id, label, feature, risk_level, permission_check=None):
+        super().__init__(permission_check=permission_check)
+        self.action_id = action_id
+        self.label = label
+        self.feature = feature
+        self.risk_level = risk_level
 
 
 class Actor:
@@ -240,8 +247,8 @@ def test_safe_action_contract_uses_class_metadata():
     }
 
 
-def test_placeholder_contract_uses_instance_metadata():
-    action = ModernAdminSafeActionPlaceholder(
+def test_contract_uses_instance_metadata():
+    action = MetadataOnlyAction(
         action_id='placeholder.contract',
         label='Placeholder Contract',
         feature='Placeholder',
@@ -364,13 +371,13 @@ def test_registry_missing_action_returns_structured_error():
 
 def test_registry_filters_by_feature_and_risk():
     registry = ModernAdminSafeActionRegistry()
-    registry.register(ModernAdminSafeActionPlaceholder(
+    registry.register(MetadataOnlyAction(
         action_id='feature.low',
         label='Low Risk',
         feature='Feature A',
         risk_level='low',
     ))
-    registry.register(ModernAdminSafeActionPlaceholder(
+    registry.register(MetadataOnlyAction(
         action_id='feature.high',
         label='High Risk',
         feature='Feature B',
@@ -381,23 +388,8 @@ def test_registry_filters_by_feature_and_risk():
     assert [action.action_id for action in registry.list_actions(risk_level='high')] == ['feature.high']
 
 
-def test_default_placeholder_actions_do_not_execute():
-    registry = build_default_modern_safe_action_registry()
-    action_ids = [action.action_id for action in registry.list_actions()]
-
-    assert 'notification.acknowledge' in action_ids
-    assert 'image.exclude' in action_ids
-    assert 'youtube.oauth_status_refresh' in action_ids
-    assert 'focus.move' in action_ids
-
-    for action in registry.list_actions():
-        denied = action.run(actor=Actor(), dry_run=False)
-        assert denied.status == 'permission_denied'
-        assert denied.allowed is False
-
-
-def test_placeholder_dry_run_is_safe_when_permission_allows():
-    action = ModernAdminSafeActionPlaceholder(
+def test_base_action_without_effect_does_not_execute():
+    action = MetadataOnlyAction(
         action_id='placeholder.test',
         label='Placeholder',
         feature='Testing',
@@ -2725,7 +2717,7 @@ if __name__ == '__main__':
     test_result_is_structured()
     test_safe_action_contract_shape_is_stable()
     test_safe_action_contract_uses_class_metadata()
-    test_placeholder_contract_uses_instance_metadata()
+    test_contract_uses_instance_metadata()
     test_notification_acknowledge_contract_uses_domain_metadata()
     test_safe_action_contract_does_not_change_result_shape()
     test_audit_message_redacts_secret_payload()
@@ -2735,8 +2727,7 @@ if __name__ == '__main__':
     test_registry_duplicate_action_id_fails()
     test_registry_missing_action_returns_structured_error()
     test_registry_filters_by_feature_and_risk()
-    test_default_placeholder_actions_do_not_execute()
-    test_placeholder_dry_run_is_safe_when_permission_allows()
+    test_base_action_without_effect_does_not_execute()
     test_notification_acknowledge_permission_denied()
     test_notification_acknowledge_missing_notification_id()
     test_notification_acknowledge_invalid_notification_id()

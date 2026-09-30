@@ -1,0 +1,26 @@
+{
+  "scope": "Remove unused default Safe Action registry and its metadata-only placeholder class; retain all registered routes and actual effects",
+  "baseline": "e3c1e8fa",
+  "review": "Repository references to both removed symbols existed only in their definitions and unit tests; active dry-run route uses build_notification_acknowledge_dry_run_registry instead. No template, script, configuration, installer or dynamic registry consumer found.",
+  "removed_runtime_lines": 43,
+  "retained_tests": "Instance metadata, registry filtering and base-class refusal to execute without an effect now use a test-local MetadataOnlyAction; removed only the test of the retired factory.",
+  "python_regression": {
+    "status": "passed",
+    "entries": 174,
+    "source_changed": false,
+    "report": "/home/eric/hybrid-action-catalog-regression-20260930/results.json",
+    "sha256": "b5ee3bd8445f5146a2fcab8fa6a52b5cec5844a8d56b0108a0115398f11688c4"
+  },
+  "javascript": {
+    "status": "passed",
+    "entries": 34,
+    "report": "/tmp/hybrid-action-catalog-js-20260930.json",
+    "sha256": "114aad9b2944ee6160d428979c03762625713f76160c7c4f884723e7fb837163"
+  },
+  "deployment": {
+    "status": "pending"
+  },
+  "limitations": [
+    "This removes dead catalog scaffolding; it does not itself complete whole-product acceptance"
+  ]
+}
