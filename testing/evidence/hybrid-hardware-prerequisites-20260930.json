@@ -1,0 +1,57 @@
+{
+  "installed_runtime": "a5e4b7e0",
+  "config_revision": 118,
+  "method": "Read-only SQLite query restricted to driver class names and enabled flags; native administrator GPIO/Focus pages",
+  "driver_configuration": {
+    "FOCUSER": "",
+    "DEW_HEATER": "",
+    "FAN": "",
+    "GENERIC_GPIO": "",
+    "MANUAL_GPIO": "",
+    "TEMP_SENSOR_A_TO_F": "all empty"
+  },
+  "integration_configuration": {
+    "S3UPLOAD": false,
+    "MQTTPUBLISH": false,
+    "SYNCAPI": false,
+    "YOUTUBE": false,
+    "FILETRANSFER_UPLOAD_IMAGE": 0
+  },
+  "controls": [
+    {
+      "page": "/modern-admin/system/gpio-control",
+      "control": "Refresh pin states and six On/Off buttons",
+      "role": "administrator",
+      "status": "superato",
+      "proof": "Native refresh preserves No supported manual GPIO interface is configured; six buttons disabled; all three observed pin states unknown/not configured"
+    },
+    {
+      "page": "/modern-admin/tools/focus?camera_id=2&profile_id=asi678mc",
+      "control": "Movement angle and two movement buttons",
+      "role": "administrator",
+      "status": "superato",
+      "proof": "ASI678MC preview camera selected; No focuser is configured; movement controls disabled"
+    },
+    {
+      "control": "Physical GPIO, focuser, fan, heater and external sensor effects",
+      "status": "bloccato",
+      "reason": "No driver configured; physical connections not independently identified. No pin write, motor movement or discovery scan performed"
+    },
+    {
+      "control": "External integration transfer",
+      "status": "bloccato",
+      "reason": "User reports no integrations in use; listed integrations disabled and no dedicated external test destination supplied"
+    }
+  ],
+  "automated_evidence": {
+    "report": "/home/eric/hybrid-action-catalog-regression-20260930/results.json",
+    "focuser": "052.log: success/error release, input/network/CSRF checks with mocked device",
+    "gpio": "059.log: read-only GET, strict commands, pin mapping and failures with mocked GPIO",
+    "status": "passed"
+  },
+  "limitations": [
+    "Empty configuration does not prove no physical device is connected",
+    "Disabled-state acceptance is separate from physical effect acceptance",
+    "No credentials or endpoint addresses exported"
+  ]
+}
