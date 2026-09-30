@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-30",
+  "source_revision": "b7ecebcd",
+  "application_revision": "a5e4b7e0",
+  "tool": "Pyflakes 4.0.1 in disposable /tmp virtualenv",
+  "scope": "indi_allsky, misc, tools and root Python entrypoints; excludes tests/examples/vendor/platform builds",
+  "python_files": 328,
+  "source_manifest_sha256": "01176ba281ebb6e8b4c3b6215a1dbabe4086f2c8f1eacdc3453b788aff0d6655",
+  "reports": [
+    {
+      "path": "/tmp/hybrid-pyflakes-20260930.txt",
+      "sha256": "74608e68d789fd7737acc7c9f925f95d193822cd12647bc1bcea5a6568ab666c",
+      "diagnostics": 48,
+      "undefined_name_findings": 0,
+      "undefined_local_findings": 0
+    },
+    {
+      "path": "/tmp/hybrid-pyflakes-tools-20260930.txt",
+      "sha256": "7a5f0853244a13258e39cbc91e7d06d52e50fa467034ca2940374137f5ac1d33",
+      "diagnostics": 2,
+      "undefined_name_findings": 0,
+      "undefined_local_findings": 0
+    }
+  ],
+  "review": "No undefined-name or before-assignment findings. Other findings are unused imports/locals and repeated optional dependency imports. Notification imports in modern_safe_action are compatibility exports used by tests; repeated forms imports validate optional device dependencies. No automatic import removal performed.",
+  "limits": [
+    "Static analysis does not execute hardware or prove resource/concurrency correctness",
+    "Advisory diagnostics are retained, not represented as a clean zero-warning lint run",
+    "No application source or dependency manifest changed"
+  ]
+}
