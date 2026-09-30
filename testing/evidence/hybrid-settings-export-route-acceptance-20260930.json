@@ -1,0 +1,67 @@
+{
+  "scope": "Current isolated automated execution on the dashboard-retirement candidate; source assertions inspected. Not native browser clicks or real provider-effect acceptance.",
+  "report": "/home/eric/hybrid-dashboard-retirement-regression-20260930/results.json",
+  "report_sha256": "d672b25726415e18f31f66a7a984aa1884b392276dcabccd2fba2ddb4f681277",
+  "checks": [
+    {
+      "test": "testing/hybrid_authenticated_flow_test.py",
+      "source_sha256": "d3051c79abf8dbb96beffe699ff74ee894348c4633ab2809979b8e3d30ebe7aa",
+      "log": "/home/eric/hybrid-dashboard-retirement-regression-20260930/020.log",
+      "exit_code": 0,
+      "control": "Former System Config redirects to Full Settings preserving explicit camera/profile; no duplicate editor",
+      "routes": [
+        "/modern-admin/system/config"
+      ],
+      "status": "superato"
+    },
+    {
+      "test": "testing/hybrid_camera_settings_entries_flow_test.py",
+      "source_sha256": "0663b5f4ca1c13bb37bbaa8c84ab8b374be5c11b3005dbc66a3f022b8af93304",
+      "log": "/home/eric/hybrid-dashboard-retirement-regression-20260930/027.log",
+      "exit_code": 0,
+      "control": "Five former preview entries reach actual editor anchors, correct camera/profile values and return navigation; both roles and cameras, anonymous login, POST rejection and unchanged config",
+      "routes": [
+        "/modern-admin/settings/camera-profile",
+        "/modern-admin/settings/camera-connection",
+        "/modern-admin/settings/exposure-gain",
+        "/modern-admin/settings/auto-exposure-gain",
+        "/modern-admin/settings/hybrid-awb"
+      ],
+      "status": "superato"
+    },
+    {
+      "test": "testing/hybrid_daily_export_flow_test.py",
+      "source_sha256": "2f9f08e156d284d6f8014e42607c940c5b064e85a13b458ffe0ee209523eb6fb",
+      "log": "/home/eric/hybrid-dashboard-retirement-regression-20260930/036.log",
+      "exit_code": 0,
+      "control": "CSV/XLSX response contents match fourteen-column tables, including filtered/empty payloads and unknown sizes; both roles/cameras and method/authentication/CSRF/format guards. No native receipt claim",
+      "routes": [
+        "/modern-admin/operations/export"
+      ],
+      "status": "superato"
+    },
+    {
+      "test": "testing/hybrid_operations_flow_test.py",
+      "source_sha256": "0083cd2c2149a545f99fdc4042d73998c8947a55922e8840ee3c101d8a02eece",
+      "log": "/home/eric/hybrid-dashboard-retirement-regression-20260930/084.log",
+      "exit_code": 0,
+      "control": "Notifications Settings alias preserves query, reaches records, rejects POST and sends anonymous users to login; acknowledgement separately tested",
+      "routes": [
+        "/modern-admin/settings/notifications"
+      ],
+      "status": "superato"
+    },
+    {
+      "test": "testing/hybrid_settings_navigation_flow_test.py",
+      "source_sha256": "8e60db7cb75b3815825dffa993229a30b34a57120a4e9d66e14b68ed6ff35076",
+      "log": "/home/eric/hybrid-dashboard-retirement-regression-20260930/103.log",
+      "exit_code": 0,
+      "control": "Developer level links reach functional editors with scope; Ready alias reaches Settings inventory. Both roles and unchanged config, with anonymous login",
+      "routes": [
+        "/modern-admin/settings/developer",
+        "/modern-admin/settings/ready"
+      ],
+      "status": "superato"
+    }
+  ]
+}

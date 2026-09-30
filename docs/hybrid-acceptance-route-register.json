@@ -285,7 +285,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminIndiCameraDetectView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-camera-detection-release-20260921.json",
+          "record": "controls[0]",
+          "control": "Native production detection of IMX708 and ASI678MC; non-camera device rejected; historical revision and limits retained",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/cameras/image-lag",
@@ -2933,7 +2940,14 @@
       ],
       "handler_module": "indi_allsky.flask.table_export_views",
       "handler": "ModernAdminTableExportView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[2]",
+          "control": "CSV/XLSX response contents match fourteen-column tables, including filtered/empty payloads and unknown sizes; both roles/cameras and method/authentication/CSRF/format guards. No native receipt claim",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/output",
@@ -3324,7 +3338,14 @@
       ],
       "handler_module": "indi_allsky.flask.settings_entries",
       "handler": "navigate",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[1]",
+          "control": "Five former preview entries reach actual editor anchors, correct camera/profile values and return navigation; both roles and cameras, anonymous login, POST rejection and unchanged config",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/basic",
@@ -3357,7 +3378,14 @@
       ],
       "handler_module": "indi_allsky.flask.settings_entries",
       "handler": "navigate",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[1]",
+          "control": "Five former preview entries reach actual editor anchors, correct camera/profile values and return navigation; both roles and cameras, anonymous login, POST rejection and unchanged config",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/camera-profile",
@@ -3367,7 +3395,14 @@
       ],
       "handler_module": "indi_allsky.flask.settings_entries",
       "handler": "navigate",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[1]",
+          "control": "Five former preview entries reach actual editor anchors, correct camera/profile values and return navigation; both roles and cameras, anonymous login, POST rejection and unchanged config",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/cameras",
@@ -3423,7 +3458,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminDeveloperSettingsPreviewView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[4]",
+          "control": "Developer level links reach functional editors with scope; Ready alias reaches Settings inventory. Both roles and unchanged config, with anonymous login",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/exposure-gain",
@@ -3433,7 +3475,14 @@
       ],
       "handler_module": "indi_allsky.flask.settings_entries",
       "handler": "navigate",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[1]",
+          "control": "Five former preview entries reach actual editor anchors, correct camera/profile values and return navigation; both roles and cameras, anonymous login, POST rejection and unchanged config",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/fits-source",
@@ -3860,7 +3909,14 @@
       ],
       "handler_module": "indi_allsky.flask.settings_entries",
       "handler": "navigate",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[1]",
+          "control": "Five former preview entries reach actual editor anchors, correct camera/profile values and return navigation; both roles and cameras, anonymous login, POST rejection and unchanged config",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/notifications",
@@ -3870,7 +3926,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminNotificationsSettingsView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[3]",
+          "control": "Notifications Settings alias preserves query, reaches records, rejects POST and sends anonymous users to login; acknowledgement separately tested",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/ready",
@@ -3880,7 +3943,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminReadySettingsPreviewView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[4]",
+          "control": "Developer level links reach functional editors with scope; Ready alias reaches Settings inventory. Both roles and unchanged config, with anonymous login",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/settings/storage",
@@ -4348,7 +4418,14 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminConfigView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-settings-export-route-acceptance-20260930.json",
+          "record": "checks[0]",
+          "control": "Former System Config redirects to Full Settings preserving explicit camera/profile; no duplicate editor",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/system/gpio-control",
@@ -5428,7 +5505,20 @@
       ],
       "handler_module": "indi_allsky.flask.views",
       "handler": "ModernAdminUpgradeStartView",
-      "evidence": []
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[2]",
+          "control": "Native isolated upgrade submission or failed effect, synthetic service only; not a production package upgrade",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-updates-browser-2026-09-07.json",
+          "record": "checks[5]",
+          "control": "Native isolated upgrade submission or failed effect, synthetic service only; not a production package upgrade",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/modern-admin/uploads",

@@ -19,7 +19,7 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/cameras/add` | 2 | [hybrid-camera-detection-release-20260921](../testing/evidence/hybrid-camera-detection-release-20260921.json), [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
 | `/modern-admin/cameras/adu-history` | 5 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
 | `/modern-admin/cameras/dark-library` | 2 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
-| `/modern-admin/cameras/detect-indi` | 0 | Da associare o collaudare |
+| `/modern-admin/cameras/detect-indi` | 1 | [hybrid-camera-detection-release-20260921](../testing/evidence/hybrid-camera-detection-release-20260921.json) |
 | `/modern-admin/cameras/image-lag` | 12 | [hybrid-image-lag-native-20260920](../testing/evidence/hybrid-image-lag-native-20260920.json) |
 | `/modern-admin/cameras/info` | 2 | [hybrid-camera-info-navigation-20260920](../testing/evidence/hybrid-camera-info-navigation-20260920.json) |
 | `/modern-admin/cameras/mask-base` | 1 | [hybrid-camera-diagnostics-native-20260921](../testing/evidence/hybrid-camera-diagnostics-native-20260921.json) |
@@ -68,26 +68,26 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/observatory/sensor-panel` | 10 | [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-observatory-timeout-20260929](../testing/evidence/hybrid-observatory-timeout-20260929.json) |
 | `/modern-admin/observatory/sqm` | 4 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json), [hybrid-observatory-native-controls](../testing/evidence/hybrid-observatory-native-controls.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/observatory/virtualsky` | 6 | [hybrid-observatory-live-20260914](../testing/evidence/hybrid-observatory-live-20260914.json), [hybrid-static-cleanup-20260921](../testing/evidence/hybrid-static-cleanup-20260921.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
-| `/modern-admin/operations/export` | 0 | Da associare o collaudare |
+| `/modern-admin/operations/export` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
 | `/modern-admin/output` | 28 | [hybrid-generation-guard-live-20260921](../testing/evidence/hybrid-generation-guard-live-20260921.json), [hybrid-day-output-playback-20260921](../testing/evidence/hybrid-day-output-playback-20260921.json), [hybrid-download-delivery-post-classic-20260921](../testing/evidence/hybrid-download-delivery-post-classic-20260921.json), [hybrid-mini-generation-live-20260914](../testing/evidence/hybrid-mini-generation-live-20260914.json), [hybrid-mini-generation-post-classic-20260921](../testing/evidence/hybrid-mini-generation-post-classic-20260921.json), [hybrid-native-panorama-2026-09-08](../testing/evidence/hybrid-native-panorama-2026-09-08.json), [hybrid-product-media-navigation-20260921](../testing/evidence/hybrid-product-media-navigation-20260921.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/safe-action/dry-run` | 0 | Da associare o collaudare |
 | `/modern-admin/settings` | 14 | [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json), [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-settings-domain-controls-20260929](../testing/evidence/hybrid-settings-domain-controls-20260929.json), [hybrid-sqlite-checkpoint-20260929](../testing/evidence/hybrid-sqlite-checkpoint-20260929.json) |
 | `/modern-admin/settings/acquisition-save` | 2 | [hybrid-settings-domain-controls-20260929](../testing/evidence/hybrid-settings-domain-controls-20260929.json) |
 | `/modern-admin/settings/advanced` | 6 | [hybrid-settings-domain-controls-20260929](../testing/evidence/hybrid-settings-domain-controls-20260929.json) |
 | `/modern-admin/settings/analytics` | 2 | [hybrid-settings-domain-controls-20260929](../testing/evidence/hybrid-settings-domain-controls-20260929.json) |
-| `/modern-admin/settings/auto-exposure-gain` | 0 | Da associare o collaudare |
+| `/modern-admin/settings/auto-exposure-gain` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
 | `/modern-admin/settings/basic` | 2 | [hybrid-settings-domain-controls-20260929](../testing/evidence/hybrid-settings-domain-controls-20260929.json) |
-| `/modern-admin/settings/camera-connection` | 0 | Da associare o collaudare |
-| `/modern-admin/settings/camera-profile` | 0 | Da associare o collaudare |
+| `/modern-admin/settings/camera-connection` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
+| `/modern-admin/settings/camera-profile` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
 | `/modern-admin/settings/cameras` | 4 | [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json) |
 | `/modern-admin/settings/capture` | 0 | Da associare o collaudare |
-| `/modern-admin/settings/developer` | 0 | Da associare o collaudare |
-| `/modern-admin/settings/exposure-gain` | 0 | Da associare o collaudare |
+| `/modern-admin/settings/developer` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
+| `/modern-admin/settings/exposure-gain` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
 | `/modern-admin/settings/fits-source` | 2 | [hybrid-settings-domain-controls-20260929](../testing/evidence/hybrid-settings-domain-controls-20260929.json) |
 | `/modern-admin/settings/full` | 62 | [hybrid-browser-2026-09-06](../testing/evidence/hybrid-browser-2026-09-06.json), [hybrid-settings-privacy-native-20260920](../testing/evidence/hybrid-settings-privacy-native-20260920.json), [hybrid-settings-usability-20260920](../testing/evidence/hybrid-settings-usability-20260920.json), [Ricerca Settings nel browser](../testing/evidence/hybrid-full-settings-filter-native-20260929.json), [hybrid-settings-chain-20260929](../testing/evidence/hybrid-settings-chain-20260929.json), [hybrid-settings-domain-controls-20260929](../testing/evidence/hybrid-settings-domain-controls-20260929.json) |
-| `/modern-admin/settings/hybrid-awb` | 0 | Da associare o collaudare |
-| `/modern-admin/settings/notifications` | 0 | Da associare o collaudare |
-| `/modern-admin/settings/ready` | 0 | Da associare o collaudare |
+| `/modern-admin/settings/hybrid-awb` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
+| `/modern-admin/settings/notifications` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
+| `/modern-admin/settings/ready` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
 | `/modern-admin/settings/storage` | 2 | [hybrid-settings-domain-controls-20260929](../testing/evidence/hybrid-settings-domain-controls-20260929.json) |
 | `/modern-admin/settings/storage-protection` | 8 | [hybrid-shared-settings-context-20260929](../testing/evidence/hybrid-shared-settings-context-20260929.json), [hybrid-storage-estimate-fix-20260929](../testing/evidence/hybrid-storage-estimate-fix-20260929.json) |
 | `/modern-admin/settings/timelapse` | 5 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-shared-settings-context-20260929](../testing/evidence/hybrid-shared-settings-context-20260929.json) |
@@ -96,7 +96,7 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/storage/drives` | 5 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/storage/file-space-usage` | 18 | [hybrid-file-space-native-20260929](../testing/evidence/hybrid-file-space-native-20260929.json), [hybrid-table-blur-20260929](../testing/evidence/hybrid-table-blur-20260929.json) |
 | `/modern-admin/system` | 16 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-system-index-20260929](../testing/evidence/hybrid-system-index-20260929.json) |
-| `/modern-admin/system/config` | 0 | Da associare o collaudare |
+| `/modern-admin/system/config` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
 | `/modern-admin/system/gpio-control` | 2 | [hybrid-system-focus-native-20260921](../testing/evidence/hybrid-system-focus-native-20260921.json) |
 | `/modern-admin/system/info` | 4 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |, [Native cleanup permissions; destructive clicks pending](../testing/evidence/hybrid-cleanup-native-20260930.json)
 | `/modern-admin/system/log` | 7 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-log-controller-20260929](../testing/evidence/hybrid-log-controller-20260929.json) |
@@ -114,7 +114,7 @@ Indice statico: 7.368 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/tools/mini-preview` | 1 | [Contratto API/redirect isolato](../testing/evidence/hybrid-current-discovery-20260921.json) |
 | `/modern-admin/tools/process-fits` | 10 | [hybrid-fits-processing-2026-09-06](../testing/evidence/hybrid-fits-processing-2026-09-06.json) |
 | `/modern-admin/updates` | 1 | [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
-| `/modern-admin/updates/start` | 0 | Da associare o collaudare |
+| `/modern-admin/updates/start` | 2 | [hybrid-updates-browser-2026-09-07](../testing/evidence/hybrid-updates-browser-2026-09-07.json) |
 | `/modern-admin/uploads` | 8 | [Upload inspection](../testing/evidence/hybrid-upload-management-layout-20260929.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json) |
 | `/modern-admin/uploads/<provider_slug>` | 4 | [Upload inspection](../testing/evidence/hybrid-upload-management-layout-20260929.json) |
 | `/modern-admin/users` | 50 | [hybrid-native-users-2026-09-08](../testing/evidence/hybrid-native-users-2026-09-08.json), [Menu amministratore](../testing/evidence/hybrid-navigation-drawer-20260929.json), [hybrid-settings-chain-20260929](../testing/evidence/hybrid-settings-chain-20260929.json), [hybrid-users-clipboard-live-20260929](../testing/evidence/hybrid-users-clipboard-live-20260929.json), [hybrid-users-native-controls-20260929](../testing/evidence/hybrid-users-native-controls-20260929.json) |
