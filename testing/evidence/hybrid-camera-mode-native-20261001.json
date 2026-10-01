@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-01",
+  "application_commit": "ffb4335c",
+  "controls": [
+    {
+      "page": "/modern-admin/cameras",
+      "environment": "isolated native browser localhost:18120",
+      "role": "administrator fixture account",
+      "status": "superato",
+      "control": "Use this camera: libcamera",
+      "expected": "Save selected interface without restarting capture",
+      "observed": "Success message explicitly requires restart; revision 2 changes only CAMERA_INTERFACE to libcamera_imx708."
+    },
+    {
+      "page": "/modern-admin/cameras",
+      "environment": "isolated native browser localhost:18120",
+      "role": "administrator fixture account",
+      "status": "superato",
+      "control": "Repeated Use this camera",
+      "expected": "Explain already-selected state without duplicate revision",
+      "observed": "Already selected in saved configuration message; total revision count confirms no additional revision."
+    },
+    {
+      "page": "/modern-admin/cameras",
+      "environment": "isolated native browser localhost:18120",
+      "role": "administrator fixture account",
+      "status": "superato",
+      "control": "Enable multi-camera",
+      "expected": "Persist enabled mode and update UI availability",
+      "observed": "Revision 3 changes only MULTI_CAMERA_CAPTURE_ENABLE to true; enable button disabled, disable enabled; configured profile cards displayed."
+    },
+    {
+      "page": "/modern-admin/cameras",
+      "environment": "isolated native browser localhost:18120",
+      "role": "administrator fixture account",
+      "status": "superato",
+      "control": "Disable multi-camera",
+      "expected": "Persist disabled mode without changing profile settings",
+      "observed": "Revision 4 changes only mode flag to false; enable button enabled and disable disabled. Revision 4 configuration equals revision 2."
+    },
+    {
+      "page": "/modern-admin/cameras",
+      "environment": "isolated native browser localhost:18120",
+      "role": "ordinary fixture account after native sign-out/sign-in",
+      "status": "superato",
+      "control": "Ordinary-user camera controls",
+      "expected": "Explain permission requirement and prevent interaction",
+      "observed": "Both mode buttons disabled, no Use this camera buttons, administrator requirement shown."
+    }
+  ],
+  "database_verification": {
+    "path": "temporary isolated SQLite, removed on server exit",
+    "revisions": 4,
+    "new_revision_user_ids": [
+      1,
+      1,
+      1
+    ],
+    "changed_keys_by_revision": {
+      "2": [
+        "CAMERA_INTERFACE"
+      ],
+      "3": [
+        "MULTI_CAMERA_CAPTURE_ENABLE"
+      ],
+      "4": [
+        "MULTI_CAMERA_CAPTURE_ENABLE"
+      ]
+    },
+    "queued_tasks": 0,
+    "all_profile_and_cadence_values_preserved": true
+  },
+  "isolation": "Synthetic users/config/cameras; only login and Cameras POST permitted. No worker consumes tasks, no capture restart or hardware effect requested.",
+  "cleanup": {
+    "browser_tab_closed": true,
+    "server_stopped": true,
+    "tunnel_stopped": true,
+    "fixture_directory_removed": true
+  },
+  "limits": [
+    "Native save effects verified on isolated data, not a production switch of active camera or capture mode.",
+    "Physical multicamera capture and cold autostart have separate evidence.",
+    "Primary-profile editing and other profile save buttons are not certified by these checks.",
+    "CSRF, forged requests, invalid IDs and persistence failure coverage remain in hybrid_camera_management_flow_test.py, passed in the 178-check regression."
+  ]
+}

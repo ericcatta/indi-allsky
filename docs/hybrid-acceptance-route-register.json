@@ -186,6 +186,36 @@
           "control": "Navigation drawer / Cameras",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/cameras"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-mode-native-20261001.json",
+          "record": "controls[0]",
+          "control": "Use this camera: libcamera",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-mode-native-20261001.json",
+          "record": "controls[1]",
+          "control": "Repeated Use this camera",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-mode-native-20261001.json",
+          "record": "controls[2]",
+          "control": "Enable multi-camera",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-mode-native-20261001.json",
+          "record": "controls[3]",
+          "control": "Disable multi-camera",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-mode-native-20261001.json",
+          "record": "controls[4]",
+          "control": "Ordinary-user camera controls",
+          "recorded_status": "superato"
         }
       ]
     },
