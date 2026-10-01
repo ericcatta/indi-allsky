@@ -4393,7 +4393,9 @@ class ImageWorker(Process):
                 targets.append(root / ('panorama.' + self.config['IMAGE_FILE_TYPE']))
             for target in targets:
                 try:
-                    publish_panorama_file(root, target, content)
+                    # The archive is durable; these replaceable previews use
+                    # the same atomic, non-fsync policy as latest image/status.
+                    publish_panorama_file(root, target, content, durable=False)
                 except (OSError, ValueError):
                     logger.exception('[PANORAMA_PREVIEW_FAILED][camera_id=%s]', camera.id)
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace,MethodType
 from unittest.mock import patch
-import hashlib,html,io,json,logging,re,shutil,tempfile
+import hashlib,html,io,json,logging,os,re,shutil,tempfile
 from hybrid_runtime_fixture import isolated_app,login_client
 
 
@@ -75,13 +75,16 @@ def run():
         with app.app_context():
             for cid in (1,2):
                 data=processor(cid);camera=db.session.get(Camera,cid)
-                entry=ImageWorker.write_panorama_img(worker,data,reference(cid),camera,jpeg_exif=b'',write_latest=cid==1)
+                with patch('indi_allsky.panorama_publication.os.fsync', wraps=os.fsync) as synchronize:
+                    entry=ImageWorker.write_panorama_img(worker,data,reference(cid),camera,jpeg_exif=b'',write_latest=cid==1)
+                assert synchronize.call_count == 1, 'Only the archived panorama requires durable synchronization'
                 assert entry is not None
                 path=root/entry.filename
                 assert path.is_file() and entry.fileSize==path.stat().st_size and entry.camera_id==cid
                 with Image.open(path) as image:assert image.size==(data.shape[1],data.shape[0])
                 saved[cid]=(entry.id,path.read_bytes())
                 previews[cid]=(root/('ccd_test-camera-'+str(cid))/'panorama.jpg').read_bytes()
+                assert previews[cid] == saved[cid][1]
             assert (root/'panorama.jpg').read_bytes()==previews[1] and previews[1]!=previews[2]
             camera=db.session.get(Camera,2);data=processor(2)
             assert ImageWorker.write_panorama_img(worker,data,reference(2),camera,write_latest=False) is None
@@ -89,6 +92,9 @@ def run():
             assert ImageWorker.write_panorama_img(worker,data,reference(1),camera,write_latest=False) is None
             assert Panorama.query.count()==2
             before_files=set(root.rglob('panorama_ccd*'))
+            with patch('indi_allsky.panorama_publication.os.fsync', side_effect=OSError('fixture sync failure')):
+                assert ImageWorker.write_panorama_img(worker,data,reference(2,5),camera,write_latest=False) is None
+            assert Panorama.query.count()==2 and set(root.rglob('panorama_ccd*'))==before_files
             def failed_sql(*args):
                 db.session.add(Panorama(filename='invalid',camera_id=None))
                 db.session.commit()
@@ -112,7 +118,8 @@ def run():
             assert (root/'ccd_test-camera-2'/'panorama.jpg').read_bytes()==previews[2]
             count=Panorama.query.count()
             config['FOCUS_MODE']=True
-            assert ImageWorker.write_panorama_img(worker,data,reference(2,50),camera,write_latest=False) is None
+            with patch('indi_allsky.panorama_publication.os.fsync', side_effect=AssertionError('Regenerable preview synchronized')):
+                assert ImageWorker.write_panorama_img(worker,data,reference(2,50),camera,write_latest=False) is None
             config['FOCUS_MODE']=False;config['DAYTIME_CAPTURE_SAVE']=False;worker.night_av=[0,0]
             assert ImageWorker.write_panorama_img(worker,data,reference(2,60),camera,write_latest=False) is None
             assert Panorama.query.count()==count

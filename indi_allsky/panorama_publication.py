@@ -27,7 +27,8 @@ def encode_panorama(data, config, jpeg_exif=None):
         return stream.getvalue()
 
 
-def publish_panorama_file(root, target, content, *, overwrite=True):
+def publish_panorama_file(root, target, content, *, overwrite=True, durable=True):
+    """Publish atomically; archives always sync, regenerable previews may opt out."""
     root, target = Path(root).resolve(), Path(target).resolve()
     if not target.is_relative_to(root):
         raise ValueError('Panorama path is outside the media folder')
@@ -38,7 +39,8 @@ def publish_panorama_file(root, target, content, *, overwrite=True):
             temporary = Path(stream.name)
             stream.write(content)
             stream.flush()
-            os.fsync(stream.fileno())
+            if durable or not overwrite:
+                os.fsync(stream.fileno())
         temporary.chmod(0o644)
         if overwrite:
             os.replace(temporary, target)
