@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-01",
+  "checkout_commit": "5e316d64",
+  "application_commit": "ffb4335c",
+  "controls": [
+    {
+      "page": "/modern-admin/media/gallery",
+      "role": "administrator",
+      "environment": "production HTTPS native browser",
+      "status": "superato",
+      "control": "Load more via Enter; IMX708",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "expected": "Append older records without duplicates or changing camera",
+      "observed": "Initial 72 images; scrolling during pointer targeting loaded 288. Enter then yielded 360 unique IDs, strictly descending from 193012 to 192297. Thumbnail URLs before keyboard activation were unique; the first and last inspected URLs used the IMX708 prefix."
+    },
+    {
+      "page": "/modern-admin/media/gallery",
+      "role": "administrator",
+      "environment": "production HTTPS native browser",
+      "status": "superato",
+      "control": "ASI678MC filter then Load more via Enter",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "expected": "Replace previous camera records and append only the selected camera",
+      "observed": "Filter changed URL to profile_id=asi678mc. 144 items before Enter, 288 unique descending IDs afterward (193025 to 192449). Further scrolling while opening a preview yielded 360 unique thumbnail URLs, all under the ASI678MC camera UUID."
+    },
+    {
+      "page": "/modern-admin/media/gallery",
+      "role": "administrator",
+      "environment": "production HTTPS native browser",
+      "status": "superato",
+      "control": "Open dynamically appended image via Enter",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "expected": "Newly appended card opens the correct full-size preview",
+      "observed": "Card at index 144 opened ccd2_20261001_155204.jpg. Native preview completed with dimensions 3840x2160."
+    },
+    {
+      "page": "/modern-admin/media/gallery",
+      "role": "administrator",
+      "environment": "production HTTPS native browser",
+      "status": "superato",
+      "control": "Escape from appended-image preview",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "expected": "Close dialog and restore keyboard focus to its opening card",
+      "observed": "No visible Media preview dialog remained; active element aria-label returned to Open Oct 01, 15:52."
+    }
+  ],
+  "interaction_note": "Initial pointer locator click returned No node found while its scroll triggered automatic loading. This is not recorded as a successful pointer click. Subsequent Enter activation and asynchronous results were observed. Automatic scrolling and the button share modernAdminLoadOlderGalleryImages; no one-request-only claim is made.",
+  "request_contract": "Read-only GET gallery page endpoint with limit=72, before_id cursor and selected profile; contract inspected in media_list.html, not independently captured from browser network logs.",
+  "limits": [
+    "Administrator production only in this native check.",
+    "No full-gallery exhaustion, download receipt, provider failure or ordinary-user interaction certified here.",
+    "Lazy thumbnails outside the viewport are not all certified decoded; only the opened full-resolution preview is."
+  ],
+  "cleanup": "Temporary native tab closed; no configuration, tasks or media mutated."
+}
