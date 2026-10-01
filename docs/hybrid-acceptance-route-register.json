@@ -216,6 +216,18 @@
           "record": "controls[4]",
           "control": "Ordinary-user camera controls",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-config-writers-concurrency-20261001.json",
+          "record": "targeted",
+          "control": "mode: isolated concurrent HTTP write rejected without losing committed profile or queuing effects",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-config-writers-concurrency-20261001.json",
+          "record": "targeted",
+          "control": "camera: isolated concurrent HTTP write rejected without losing committed profile or queuing effects",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -660,6 +672,12 @@
           "source": "testing/evidence/hybrid-settings-chain-20260929.json",
           "record": "controls[6]",
           "control": "Details",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-config-writers-concurrency-20261001.json",
+          "record": "targeted",
+          "control": "restore: isolated concurrent HTTP write rejected without losing committed profile or queuing effects",
           "recorded_status": "superato"
         }
       ]
@@ -4235,6 +4253,12 @@
           "record": "records[4]",
           "control": "modern-admin-full-settings-filter / case-and-whitespace",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-config-writers-concurrency-20261001.json",
+          "record": "targeted",
+          "control": "full: isolated concurrent HTTP write rejected without losing committed profile or queuing effects",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4369,6 +4393,12 @@
           "record": "controls[6]",
           "control": "All settings",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-config-writers-concurrency-20261001.json",
+          "record": "targeted",
+          "control": "storage: isolated concurrent HTTP write rejected without losing committed profile or queuing effects",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4428,6 +4458,12 @@
           "source": "testing/evidence/hybrid-timelapse-nine-native-20261001.json",
           "record": "controls[2]",
           "control": "Restore recommended default",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-config-writers-concurrency-20261001.json",
+          "record": "targeted",
+          "control": "timelapse: isolated concurrent HTTP write rejected without losing committed profile or queuing effects",
           "recorded_status": "superato"
         }
       ]

@@ -1,0 +1,95 @@
+{
+  "date": "2026-10-01",
+  "defect": "Timelapse, storage protection, multi-camera mode, camera selection, Full Config and upload restore could overwrite a profile edit committed by an overlapping request.",
+  "reproduction": {
+    "log": "/home/eric/hybrid-config-writers-before-20261001.log",
+    "exit_code": 1,
+    "cases_failed": [
+      "timelapse",
+      "storage",
+      "mode",
+      "camera",
+      "full",
+      "restore"
+    ],
+    "observed": "Each competing writer created a third revision instead of rejecting its stale base."
+  },
+  "change": "Pass the request base revision through all HTTP config persistence entrypoints to the existing transactional reservation adapter. Preserve existing form/API error presentation; dedicated Timelapse and Storage pages return 409 on conflict.",
+  "targeted": {
+    "log": "/home/eric/hybrid-config-writers-after-20261001.log",
+    "exit_code": 0,
+    "cases_passed": [
+      "timelapse",
+      "storage",
+      "mode",
+      "camera",
+      "full",
+      "restore"
+    ],
+    "scope": "Two real Flask processes per case; independent temporary SQLite database, first committed profile retained, globals preserved, stale writer rejected, no queued effects."
+  },
+  "regression": {
+    "status": "passed",
+    "python_report": "/home/eric/hybrid-config-writers-regression-20261001/results.json",
+    "python_passed": 181,
+    "javascript_passed": 35,
+    "source_changed": false,
+    "python_report_sha256": "f6e47f34bfb3edd1730fb020d562d5b9ae384a2fb015891f0d4e067c976633a1",
+    "tested_source_manifest_sha256": "e3544e0d2326f74c07d62b82f3b619f13faaa999a3352558c63894b8cbd35f21",
+    "local_source_manifest_sha256": "e3544e0d2326f74c07d62b82f3b619f13faaa999a3352558c63894b8cbd35f21",
+    "javascript_report": "/tmp/hybrid-config-writers-js-20261001.json",
+    "javascript_sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc",
+    "additional_checks": [
+      "HTTP writer guardrail requires expected_config_id in persistence calls.",
+      "Rejected Full Config reload and restore cleanup requests queue no task and preserve revision history."
+    ]
+  },
+  "deployment": {
+    "status": "installed; bounded native frames passed",
+    "commit": "04388e02",
+    "backup": "/home/eric/hybrid-backups/hybrid-config-writers-20261001",
+    "rollback": "Restore flask/views.py, flask/storage_settings.py, flask/timelapse_settings.py and modern_admin_settings_runtime.py from 300d22e7 or verified backup; reload Gunicorn. No capture restart or database restore.",
+    "expected_file_sha256": {
+      "indi_allsky/flask/views.py": "7ca47a13043df997c95ace8b9f261947735ee5c4cb6a7b10991cf51e4c3b83d8",
+      "indi_allsky/flask/storage_settings.py": "5959dc5b94562c089e7f536d89297d63b278930a7fafeff054d1565d681e48dd",
+      "indi_allsky/flask/timelapse_settings.py": "a5ce4636e7aa44af3d53384f3c6a144a0884cca6a2fc205952f4e99b58bb3012",
+      "indi_allsky/modern_admin_settings_runtime.py": "29959d7836cff1bde5900298e37cc6eee456f2075787783fa958958054ca4dbf"
+    },
+    "web_only_reload": true,
+    "capture_pid_unchanged": 537392,
+    "web_pid_unchanged": 1540,
+    "automatic_restarts": 0,
+    "installed_hashes_match_tested": true,
+    "native_frames": [
+      {
+        "camera_id": 1,
+        "time": "2026-10-01 17:51:14",
+        "complete": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "time": "2026-10-01 17:51:11",
+        "complete": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ],
+    "config_revision_unchanged": 118,
+    "pending_tasks": 0,
+    "backup_sha256": {
+      "modern_admin_settings_runtime.py": "efaf2affce8652917a7b039cde482ddf8499339228a0e1686b8edcaf147a1214",
+      "storage_settings.py": "46f4da3bf05c5117b97500e02525c1ef26bca3a8a0f85528235f961089698dc0",
+      "timelapse_settings.py": "da8566c2745563e8b7013640ba13e82e870723838df05183bbf27b9090f7471e",
+      "views.py": "33e2fbf38ecec19dc875612231312f79400ecc3fcd88763f6bea9dbb55373a87"
+    }
+  },
+  "limits": [
+    "This protects overlapping HTTP requests, not sequential submissions from old open forms without a form revision token.",
+    "Snapshot restore already reserves its writer transaction and remains separately covered.",
+    "CLI and background configuration writers are outside the new HTTP guardrail.",
+    "Concurrency tested on SQLite; other databases not certified.",
+    "No production configuration changes or capture restart requested."
+  ]
+}
