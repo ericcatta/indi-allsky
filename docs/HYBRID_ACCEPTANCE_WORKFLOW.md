@@ -39,6 +39,13 @@ expected request/effect, observed result and evidence revision/environment.
 Statuses are `superato`, `difetto`, `bloccato`, or `non applicabile` with a reason.
 Unavailable hardware, blocked downloads and unobserved effects are not passes.
 
+Static discovery resolves wrapping/explicit labels and ARIA label references,
+including labels that occur after the field. Option choices and private input
+values are excluded from field names. Labels do not alter stable IDs or promote
+an interaction to passed. This is not a browser-computed accessibility name;
+JavaScript-created controls and external form ownership still need DOM evidence.
+[Collector verification](../testing/evidence/hybrid-inventory-labels-20261001.json).
+
 Test complete paths, not only HTTP status: authentication/CSRF/permissions,
 save/history/download/restore, media creation and playback, task result links,
 failed providers/effects, duplicates, expired sessions and camera isolation.

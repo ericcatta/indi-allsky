@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-01",
+  "baseline": "05d6e7d6",
+  "scope": "Acceptance collector correction only; application source and production runtime unchanged.",
+  "defect": "Controls ignored wrapping and explicit HTML labels; select option contents could become the apparent field label. This impeded reliable control-to-evidence matching.",
+  "fix": [
+    "Resolve wrapping labels and explicit for/id labels after parsing, including labels after inputs",
+    "Combine multiple labels and resolve aria-labelledby references before aria-label",
+    "Exclude option contents and private form values from label text",
+    "Keep control identities, statuses and evidence unchanged"
+  ],
+  "checks": {
+    "parser_entrypoint": "testing/hybrid_ui_inventory_parser_test.py",
+    "parser_result": "passed locally",
+    "isolated_render_report": "/home/eric/hybrid-inventory-labels-20261001.json",
+    "isolated_render_sha256": "90ce8d6ee51c32efcd5ea7e32faeb53370df1d97b0d999db073c602d85117d41",
+    "pages": [
+      "account",
+      "library"
+    ],
+    "roles": [
+      "admin",
+      "user"
+    ],
+    "camera_ids": [
+      1,
+      2
+    ],
+    "contexts": 8,
+    "corrected_labels": 48,
+    "identities_unchanged": true,
+    "all_discovery_statuses_remain": "bloccato"
+  },
+  "limits": [
+    "No functional interaction is promoted to passed.",
+    "The historical 7369-identity index is preserved, not regenerated or claimed current.",
+    "JavaScript-created controls, browser-computed accessible names and external form ownership still require native DOM inspection.",
+    "Targeted collector tests were run; the entire application regression was not repeated for this tooling-only change."
+  ],
+  "source_sha256": {
+    "testing/hybrid_ui_acceptance_test.py": "adbaed68ea4478fc099e2819889e520e565569263b281d1a8d7bf6496ab53335",
+    "testing/hybrid_ui_inventory_parser_test.py": "a0b75db56b9945db0acdda4a4675edd3b0754e419662443626365d0c194f1543"
+  }
+}

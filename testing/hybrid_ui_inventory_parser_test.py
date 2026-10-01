@@ -88,3 +88,37 @@ assert route_kind(rule('/external', endpoint='other.view'), Page, TemplateBase) 
 print('Hybrid GET discovery includes factory and redirect entries: PASS')
 
 assert route_kind(rule('/indi-allsky/modern-admin/settings/storage'), Redirect, TemplateBase) == 'settings-entry'
+
+# Actual Product forms use both wrapping labels and explicit for/id labels.
+# Choices and private field contents must not be mistaken for a field name.
+_, controls = parse('''
+<form><label>Name <input id="name" value="private-name"></label>
+<label>Period <select id="period"><option>All</option><option>Night</option></select></label>
+<label for="gain">Camera <strong>gain</strong></label><input id="gain">
+<input id="late"><label for="late">Later label</label>
+<label for="gain">in dB</label>
+<label for="secret">Configuration<textarea id="secret">private-config</textarea></label>
+<span id="prefix">Image</span><span id="suffix">rotation</span>
+<label for="rotation">Fallback</label><input id="rotation" aria-label="Other" aria-labelledby="prefix suffix">
+<label>Label <input id="override" aria-label="Explicit"></label>
+<label for="elsewhere">Not wrapping <input id="inside"></label>
+<input id="elsewhere"><label>First <input id="first"><input id="second"></label>
+</form>
+''')
+assert controls['name']['label'] == 'Name'
+assert controls['period']['label'] == 'Period'
+assert controls['gain']['label'] == 'Camera gain in dB'
+assert controls['late']['label'] == 'Later label'
+assert controls['secret']['label'] == 'Configuration'
+assert controls['rotation']['label'] == 'Image rotation'
+assert controls['override']['label'] == 'Explicit'
+assert controls['inside']['label'] == ''
+assert controls['elsewhere']['label'] == 'Not wrapping'
+assert controls['first']['label'] == 'First'
+assert controls['second']['label'] == ''
+assert 'private-' not in json.dumps(controls)
+_, a = parse('<input name="gain">')
+_, b = parse('<label>Gain<input name="gain"></label>')
+assert a['']['id'] == b['']['id'], 'Adding a label must not change control identity'
+assert all(c['status'] == 'bloccato' and not c['evidence'] for c in controls.values())
+print('Hybrid label discovery: wrapping/explicit/multiple/forward/ARIA labels, stable identity and secret exclusion: PASS')

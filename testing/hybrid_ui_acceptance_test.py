@@ -31,11 +31,18 @@ class Controls(HTMLParser):
         self.controls = []
         self.stack = []
         self.text = []
+        self.labels = []
+        self.named_nodes = {}
+        self.control_nodes = []
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
         parent = self.stack[-1] if self.stack else None
-        node = {'tag': tag, 'attrs': a, 'control': None, 'first_legend': None}
+        node = {'tag': tag, 'attrs': a, 'control': None, 'first_legend': None, 'text': [], 'wrapped_controls': []}
+        if tag == 'label':
+            self.labels.append(node)
+        if a.get('id'):
+            self.named_nodes.setdefault(a['id'], node)
         if tag == 'legend' and parent and parent['tag'] == 'fieldset' and parent['first_legend'] is None:
             parent['first_legend'] = node
         ancestors = self.stack + [node]
@@ -76,6 +83,11 @@ class Controls(HTMLParser):
                     'status': 'bloccato', 'reason': 'Interaction and effect not yet verified', 'evidence': []}
             self.controls.append(item)
             node['control'] = item
+            self.control_nodes.append(node)
+            if tag in self.DISABLABLE:
+                for ancestor in self.stack:
+                    if ancestor['tag'] == 'label':
+                        ancestor['wrapped_controls'].append(item)
         if tag not in self.VOID:
             self.stack.append(node)
 
@@ -97,6 +109,12 @@ class Controls(HTMLParser):
         value = value.strip()
         if value:
             self.text.append(value)
+            # Option text describes choices, not the surrounding field label.
+            if any(n['tag'] == 'option' for n in self.stack):
+                return
+            for node in self.stack:
+                if node['tag'] == 'label' or node['attrs'].get('id'):
+                    node['text'].append(value)
             for node in reversed(self.stack):
                 if node['control'] is not None:
                     if not node['attrs'].get('aria-label'):
@@ -106,7 +124,22 @@ class Controls(HTMLParser):
 
     def identified(self, route):
         seen = {}
-        for item in self.controls:
+        for node in self.control_nodes:
+            item = node['control']
+            attrs = node['attrs']
+            referenced = [' '.join(self.named_nodes[ref]['text'])
+                          for ref in attrs.get('aria-labelledby', '').split()
+                          if ref in self.named_nodes]
+            associated = [label for label in self.labels
+                          if (label['attrs'].get('for') == item['dom_id'] and item['dom_id'])
+                          or ('for' not in label['attrs'] and label['wrapped_controls']
+                              and label['wrapped_controls'][0] is item)]
+            if referenced:
+                item['label'] = ' '.join(referenced)
+            elif attrs.get('aria-label'):
+                item['label'] = attrs['aria-label']
+            elif associated:
+                item['label'] = ' '.join(' '.join(label['text']) for label in associated)
             # Keep previous stable keys; do not include visibility or field values.
             key = item['dom_id'] or hashlib.sha256(json.dumps({k:item[k] for k in ('tag','name','type','href','form','data')},sort_keys=True).encode()).hexdigest()[:16]
             seen[key] = seen.get(key, 0) + 1
