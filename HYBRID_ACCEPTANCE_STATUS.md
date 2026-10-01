@@ -6,21 +6,23 @@ Those activities are outside this acceptance run, not passed tests.
 
 ## Current installation and regression
 
-The latest application change is `04388e02`; subsequent commits add evidence.
-All HTTP callers of the Settings save/full-save/upload-restore services now pass
-the request's base revision into transactional persistence. Six real concurrent
-Flask cases cover Timelapse, storage protection, camera mode, camera selection,
-Full Config and upload restore: the first profile edit is retained and the stale
-competitor rejected. Rejected requests do not enqueue reload or flush history.
+The latest application change is `365f77e5`; subsequent commits add evidence.
+VirtualSky now keeps export disabled while a frame refresh is pending, including
+when preview controls, resize or reset redraw the map. The timing defect was
+reproduced before correction. Native verification confirms the disabled state,
+recovery and a received PNG after completion; the browser loads virtualsky-003.
+All seven numeric preview controls have bounded native geometry/render evidence,
+including latitude validation, empty-input rejection and reset.
 The regression passed **181 Python/compile and 35 JavaScript checks**.
 Web-only reload preserved capture PID 537392; both new frames decoded at
-17:51:14 / 17:51:11. Configuration remains 118.
-[Config writer evidence and limits](testing/evidence/hybrid-config-writers-concurrency-20261001.json).
-This protects overlapping requests, not sequential submissions of old forms
-without a form revision token. Non-HTTP writers are outside this guardrail.
-The preceding profile protection is `0afac099`; the AWB sync capability fix is
-`db205760`, whose native confirmation-dialog acceptance remains open.
-[Profile evidence](testing/evidence/hybrid-profile-concurrency-20261001.json),
+18:28:19 / 18:28:26. Configuration remains 118.
+[VirtualSky alignment, correction and limits](testing/evidence/hybrid-virtualsky-alignment-20261001.json).
+
+The preceding `04388e02` change protects overlapping HTTP Settings writes, including
+Full Config and upload restore. It does not protect sequential submissions of old
+forms without a revision token or certify non-HTTP writers.
+[Config writer evidence](testing/evidence/hybrid-config-writers-concurrency-20261001.json).
+AWB sync native confirmation-dialog acceptance remains open.
 [AWB sync evidence](testing/evidence/hybrid-profile-sync-capability-20261001.json).
 
 The preceding worker recovery change is `ffb4335c`.

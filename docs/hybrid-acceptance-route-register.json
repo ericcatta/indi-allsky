@@ -3277,6 +3277,78 @@
           "record": "controls[6]",
           "control": "reset-default-flags (camera 2; native exported result)",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[0]",
+          "control": "X Offset = 100 (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[1]",
+          "control": "Y Offset = 100 (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[2]",
+          "control": "Diameter = 1750 (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[3]",
+          "control": "azimuth-90 (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[4]",
+          "control": "latitude-plus-10 (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[5]",
+          "control": "longitude-plus-45 (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[6]",
+          "control": "magnitude-zero (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[7]",
+          "control": "Latitude Offset = 90 (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[8]",
+          "control": "Reset numeric fields (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[9]",
+          "control": "Empty X offset via keyboard (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[10]",
+          "control": "Preview input during pending refresh (camera 2, native preview)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-alignment-20261001.json",
+          "record": "controls[11]",
+          "control": "postdeploy-refresh-export (camera 2, native preview)",
+          "recorded_status": "superato"
         }
       ]
     },

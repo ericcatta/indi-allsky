@@ -1,0 +1,173 @@
+{
+  "date": "2026-10-01",
+  "installed_application_during_initial_check": "04388e02",
+  "route": "/modern-admin/observatory/virtualsky",
+  "role": "production administrator",
+  "camera_id": 2,
+  "profile_id": "asi678mc",
+  "baseline": {
+    "image_client_width": 896,
+    "source_width": 3840,
+    "overlay_css_diameter": 816.667,
+    "left": 39.6667,
+    "top": -156.333
+  },
+  "controls": [
+    {
+      "control": "X Offset = 100",
+      "status": "superato",
+      "observed": "Left changes from 39.6667px to 63px; top/size unchanged. Delta matches 100*896/3840."
+    },
+    {
+      "control": "Y Offset = 100",
+      "status": "superato",
+      "observed": "Top changes from -156.333px to -179.667px; left/size unchanged. Delta matches -100*896/3840."
+    },
+    {
+      "control": "Diameter = 1750",
+      "status": "superato",
+      "observed": "CSS canvas size halves to 408.333px; left=243.833px, top=47.8333px, preserving centering."
+    },
+    {
+      "control": "azimuth-90",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790871028.png",
+      "bytes": 699231,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "a3024e36024a1873fc003a7dd6eeb9a840fa94f940b290fbe813434b4f29ce84",
+      "status": "superato",
+      "observed": "Azimuth 90 rotates the sky relative to the camera frame; Polare and the north cardinal point move to the right side."
+    },
+    {
+      "control": "latitude-plus-10",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790871088.png",
+      "bytes": 694689,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "fdfe5197615f65ac383ecdf050d3af3a62681ab3198eb4ba790076be992faa06",
+      "status": "superato",
+      "observed": "Latitude offset +10 shifts Polare closer to the preview center while preserving overlay size."
+    },
+    {
+      "control": "longitude-plus-45",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790871103.png",
+      "bytes": 704411,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "3a66e2bf8fbad6583dbaa1d0581944801aaeb1e4772c2975bb703b3356495116",
+      "status": "superato",
+      "observed": "Longitude offset +45 changes star/planet positions (including visible Saturno) without changing overlay size."
+    },
+    {
+      "control": "magnitude-zero",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790871133.png",
+      "bytes": 684573,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "ab1592d3d987bc824bbb92dfa57d36de3c20d540d506876c8118c98f65441cd4",
+      "status": "superato",
+      "observed": "Magnitude 0 removes the fainter star points/names; Arturo remains while the constellation grid and planets remain."
+    },
+    {
+      "control": "Latitude Offset = 90",
+      "status": "superato",
+      "observed": "Adjusted-latitude range error shown and PNG export disabled."
+    },
+    {
+      "control": "Reset numeric fields",
+      "status": "superato",
+      "observed": "Live values restored to azimuth/latitude/longitude/X/Y zero, diameter 3500, magnitude 6; baseline canvas size and position restored."
+    },
+    {
+      "control": "Empty X offset via keyboard",
+      "status": "superato",
+      "observed": "Select-all/Backspace leaves live value empty, shows Enter valid overlay values., and disables PNG export. Reset restores zero and valid overlay. Native fill(empty) alone left zero and was not counted as an empty-input test."
+    },
+    {
+      "control": "Preview input during pending refresh",
+      "status": "superato",
+      "observed": "Deployed virtualsky-003: Refresh frame followed by X Offset=100 leaves Refresh and Export disabled during request. Both re-enable after frame loads."
+    },
+    {
+      "control": "postdeploy-refresh-export",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790872061.png",
+      "bytes": 723426,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "7196755a5c82e97a366b20e81e3b4ba6cf4a8645a96051e8dce975ee00620e6f",
+      "status": "superato",
+      "observed": "After deployed refresh completes, export enabled; native click produces fully decoded PNG containing the image and shifted overlay."
+    }
+  ],
+  "finding": {
+    "status": "fixed, full regression passed, deployed and native behavior verified",
+    "observed": "One native latitude-change/export attempt produced no file while the frame refreshed. Retrying after refresh produced the correct PNG.",
+    "cause": "draw() re-enabled export during pending load; the click handler correctly ignored pending exports, so the enabled button could silently do nothing.",
+    "before_test": "/tmp/hybrid-virtualsky-refresh-before-20261001.log",
+    "before_exit_code": 1,
+    "after_targeted": "hybrid_virtualsky_controller_test.js passes after keeping export disabled during load and recomputing availability on completion.",
+    "regression": "/home/eric/hybrid-virtualsky-refresh-regression-20261001/results.json",
+    "javascript_passed": 35,
+    "javascript_report": "/tmp/hybrid-virtualsky-refresh-js-20261001.json",
+    "javascript_sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc",
+    "local_source_manifest_sha256": "2419a01a87bd8dcac4bfeb1bf53fbab32fece4dbb3daa65f9d92db6117ed8cdd",
+    "python_passed": 181,
+    "source_changed": false,
+    "python_report_sha256": "15d7d2221246a3ca1c9e13f8ae23a17e096ff159e2a80f73cf3b31b9459b04e2",
+    "tested_source_manifest_sha256": "2419a01a87bd8dcac4bfeb1bf53fbab32fece4dbb3daa65f9d92db6117ed8cdd"
+  },
+  "limits": [
+    "Visual alignment checks do not certify pointing calibration or celestial calculation accuracy.",
+    "Numeric samples cover one camera/profile and administrator desktop preview, not every value combination.",
+    "The targeted JavaScript controller fixture simulates request timing; native flag/geometry/export checks are separate evidence."
+  ],
+  "cleanup": "Preview reset and temporary tab closed; no camera configuration save or hardware effect.",
+  "deployment": {
+    "commit": "365f77e5",
+    "backup": "/home/eric/hybrid-backups/hybrid-virtualsky-refresh-20261001",
+    "backup_sha256": {
+      "virtualsky.js": "dd12cacbadc4f6f5c4543f707a634ff67f6df9106d68c1c83209bfe886d90d1f",
+      "virtualsky.html": "539b68760ff01a90c36796843aa19901c58d4ad55eb32579621d3209a8679a39"
+    },
+    "rollback": "Restore only VirtualSky JS/template from 0cb132f0 or verified backup; reload Gunicorn. No capture restart or config/database restore.",
+    "expected_sha256": {
+      "indi_allsky/flask/static/modern_admin/virtualsky.js": "4f9b4bf172d9a7880701a3c37442bf12c90a4eb9b39d481e19119957001cff16",
+      "indi_allsky/flask/templates/modern_admin/virtualsky.html": "ca64e80305214a809dee912cdd837c2478bd50a414ef7616c1a4aeea8b16f748"
+    },
+    "status": "installed; native asset, invalid input, pending refresh, PNG receipt and both camera frames verified",
+    "asset_version": "virtualsky-003",
+    "web_only_reload": true,
+    "capture_pid_unchanged": 537392,
+    "web_pid_unchanged": 1540,
+    "automatic_restarts": 0,
+    "native_frames": [
+      {
+        "camera_id": 1,
+        "time": "2026-10-01 18:28:19",
+        "complete": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "time": "2026-10-01 18:28:26",
+        "complete": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ],
+    "config_revision_unchanged": 118,
+    "pending_tasks": 0,
+    "installed_hashes_match_tested": true
+  }
+}

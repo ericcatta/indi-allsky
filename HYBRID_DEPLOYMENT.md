@@ -2,10 +2,11 @@
 
 ## Current application
 
-The latest application change deployed on 1 October is `04388e02`: the remaining
-HTTP Settings writers use the transactional revision guard, including Full Config
-and upload restore. [Verification and limits](testing/evidence/hybrid-config-writers-concurrency-20261001.json).
-The preceding profile concurrency fix is `0afac099`; AWB capability validation is `db205760`.
+The latest application change deployed on 1 October is `365f77e5`: VirtualSky
+export availability follows frame loading, including preview redraws. The browser
+loads virtualsky-003 and the native refresh/export check passes.
+[Verification and rollback](testing/evidence/hybrid-virtualsky-alignment-20261001.json).
+The preceding HTTP Settings concurrency fix is `04388e02`.
 The preceding worker recovery change is `ffb4335c`.
 The previous `f21f87d5` change corrected Observatory disk usage.
 Geometry now rejects invalid azimuth before copy/review; the updated asset version is verified in production. 175 Python checks and 35 JavaScript tests passed. [Validation and deployment](testing/evidence/hybrid-geometry-validation-20261001.json).
@@ -21,7 +22,7 @@ compatibility handlers remain. Configuration revision is 118.
 The current application passed 181 Python/compile entrypoints and 35 JavaScript
 tests. The last deployment reloaded only Gunicorn; capture PID 537392 and web
 PID 1540 remained unchanged, active, with zero automatic restarts. Both recent
-camera frames decoded after deployment. [Regression and deployment](testing/evidence/hybrid-config-writers-concurrency-20261001.json).
+camera frames decoded after deployment. [Regression and deployment](testing/evidence/hybrid-virtualsky-alignment-20261001.json).
 This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 
