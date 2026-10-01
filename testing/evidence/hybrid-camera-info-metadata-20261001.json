@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-01",
+  "baseline": "fc74741d",
+  "application": "fa3df623",
+  "defect": {
+    "trigger": "Camera entries may have null geometry/lens fields before driver metadata is populated, as explicitly allowed by the model.",
+    "before": "build_context raises TypeError for lensFocalLength/lensFocalRatio both None; template numeric coercions also turn absent data into zero.",
+    "after": "Derived measurements are unavailable only when their required inputs are absent/invalid. Partial known dimensions remain usable; unknown CFA is explicit; valid zero gain remains zero. Existing valid geometry calculations and context keys retained."
+  },
+  "tests": {
+    "service": "testing/modern_admin_camera_diagnostics_service_test.py: original numerical checks plus each geometry field null, zero, negative, NaN and infinity; partial data and unknown CFA",
+    "flask": "testing/hybrid_camera_info_flow_test.py: real isolated app without Classic, two roles, all/partial missing metadata, unknown CFA, known zero gain, second-camera isolation, conflicting profile rejected, anonymous redirect and unchanged config count",
+    "python": {
+      "status": "passed",
+      "planned": 176,
+      "completed": 176,
+      "source_changed": false,
+      "report": "/home/eric/hybrid-camera-info-regression-20261001/results.json",
+      "sha256": "e8818eecbe774b8aa365c3d4259cb4e56725f7fc377a30a2902b0ac7da8d5bb1"
+    },
+    "javascript": {
+      "status": "passed",
+      "count": 35,
+      "report": "/tmp/hybrid-camera-info-js-20261001.json",
+      "sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc"
+    },
+    "diff_check": "passed"
+  },
+  "deployment": {
+    "preflight": "fc74741d, no tracked production changes; four existing untracked user entries preserved; config118; no QUEUED/RUNNING/MANUAL tasks; 12GiB available, /tmp1%; capture and web active",
+    "change": "Fast-forward pull to fa3df623; reload gunicorn only",
+    "capture": {
+      "pid": 1565,
+      "restarts": 0,
+      "state": "active"
+    },
+    "web": {
+      "pid": 1540,
+      "restarts": 0,
+      "state": "active"
+    },
+    "rollback": "Restore only indi_allsky/modern_admin_camera_diagnostics.py and indi_allsky/flask/templates/modern_admin/camera_info.html from fc74741d and reload Gunicorn. No database/configuration changes or data restore required."
+  },
+  "native_checks": [
+    {
+      "control": "Camera Info, both camera links and metadata",
+      "status": "superato",
+      "observed": "Compared all 15 displayed metadata fields before/after on each camera; only empty Owner changed to em dash. All numerical measurements unchanged; new unavailable-data explanation present."
+    },
+    {
+      "control": "Camera Info at390x844, camera navigation by Enter",
+      "status": "superato",
+      "observed": "Both camera selections reachable; document scrollWidth390 equals viewport width390; screenshot reviewed; Enter selects camera1/profile imx708-wide. Viewport reset afterward."
+    },
+    {
+      "control": "Now post-deploy frames",
+      "status": "superato",
+      "observed": "IMX708 frame2026-10-01 13:51:35 decoded4608x2592; ASI678MC frame13:51:28 decoded3840x2160; both complete."
+    }
+  ],
+  "limits": [
+    "Missing metadata exercised in isolated Flask integration, not by corrupting production camera records.",
+    "Native browser checks use the production administrator; ordinary-role coverage here is automated.",
+    "No acquisition, configuration, database schema or image-algorithm changes. No 24-hour stability claim."
+  ]
+}

@@ -417,6 +417,12 @@
           "record": "after.controls[1]",
           "control": "Diagnostic camera > Test Profile 1",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-camera-info-metadata-20261001.json",
+          "record": "tests and native_checks",
+          "control": "Missing/partial camera metadata and unknown CFA; both camera values preserved in production; narrow viewport and keyboard camera navigation",
+          "recorded_status": "superato"
         }
       ]
     },

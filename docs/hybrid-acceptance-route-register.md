@@ -163,3 +163,5 @@ riferimento tecnico chiuso, distinto dai sei editor operativi.
 [FITS reali e RAW senza dati, 1 ottobre](../testing/evidence/hybrid-fits-raw-native-20261001.json): anteprime sorgente/elaborate delle due camere decodificate a piena risoluzione, validazione rotazione, reset e stati dark/BPM/RAW assenti. Ricezione download e riproduzione RAW con dati restano non verificate.
 
 Native mask downloads for both cameras were received on 1 October and match the Raspberry files by SHA-256; CSV/Excel/snapshot receipt remains unverified. See [mask download evidence](../testing/evidence/hybrid-mask-download-native-20261001.json).
+
+Camera Info now tolerates missing driver/lens metadata. Isolated role/camera tests and native numerical parity, narrow-screen and keyboard checks are recorded in [camera metadata evidence](../testing/evidence/hybrid-camera-info-metadata-20261001.json).

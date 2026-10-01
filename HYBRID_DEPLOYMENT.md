@@ -2,7 +2,7 @@
 
 ## Current application
 
-The latest application change deployed on 1 October is `64c28b38`.
+The latest application change deployed on 1 October is `fa3df623`: Camera Info handles missing metadata while preserving valid measurements. [Verification and rollback](testing/evidence/hybrid-camera-info-metadata-20261001.json).
 Geometry now rejects invalid azimuth before copy/review; the updated asset version is verified in production. 175 Python checks and 35 JavaScript tests passed. [Validation and deployment](testing/evidence/hybrid-geometry-validation-20261001.json).
 
 The geometry-to-Keogram link now preserves camera/profile. Its 175 Python and 34 JavaScript checks passed; native source-to-Settings navigation now passes for both cameras/profiles after network recovery. Both recent frames decoded on 1 October at 13:05:00 / 13:05:07. [Latest change](testing/evidence/hybrid-geometry-scope-20261001.json).
@@ -13,10 +13,10 @@ release heading as proof of the installed version.
 Classic frontend is removed. Hybrid requires login; shared backend and public
 compatibility handlers remain. Configuration revision is 118.
 
-The current application passed 175 Python/compile entrypoints and 35 JavaScript
+The current application passed 176 Python/compile entrypoints and 35 JavaScript
 tests. The last deployment reloaded only Gunicorn; capture PID 1565 remained
 active with zero restarts and both images decoded in the native browser.
-[Regression and deployment](testing/evidence/hybrid-geometry-validation-20261001.json).
+[Regression and deployment](testing/evidence/hybrid-camera-info-metadata-20261001.json).
 This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 
