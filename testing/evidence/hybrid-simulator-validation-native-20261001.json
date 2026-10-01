@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-01",
+  "installed_application": "365f77e5",
+  "installed_checkout": "94020d4f",
+  "environment": "Production Raspberry; native in-app browser; authenticated administrator",
+  "page": "/modern-admin/tools/camera-simulator",
+  "camera_id": 2,
+  "profile_id": "asi678mc",
+  "lens": "zwo_f1.2_2.5mm_1-2",
+  "sensor": "imx477",
+  "controls": [
+    {
+      "control": "Empty X offset",
+      "status": "superato",
+      "observed": "Cleared using keyboard Select All and Backspace; live value empty. Whole-pixel validation message appeared; last valid summary and permalink retained."
+    },
+    {
+      "control": "Fractional X offset",
+      "status": "superato",
+      "observed": "Live value 1.5 rejected with whole-pixel validation; summary and permalink retained."
+    },
+    {
+      "control": "Unsafe integer X offset",
+      "status": "superato",
+      "observed": "Live value 9007199254740992 rejected with whole-pixel validation; summary and permalink retained."
+    },
+    {
+      "control": "Recovery with negative X offset",
+      "status": "superato",
+      "observed": "Value -125 clears error and changes summary to -0.19 x 0.00mm offset; permalink offset_x=-125."
+    },
+    {
+      "control": "Update simulation and reload",
+      "status": "superato",
+      "observed": "Y=250, native Update simulation click: summary -0.19 x 0.39mm. Native reload retains X=-125, Y=250, lens/sensor, camera_id=2 and profile_id=asi678mc with no error."
+    },
+    {
+      "control": "Copy simulation link",
+      "status": "bloccato",
+      "observed": "Native click followed by browser-session clipboard comparison did not match the displayed permalink. Unrelated clipboard contents were not emitted. This does not distinguish product copy failure from browser clipboard observation limitations."
+    }
+  ],
+  "limits": [
+    "Finite validation/recovery cases, not all inputs, roles or responsive layouts.",
+    "No claim of clipboard receipt; previous catalog evidence is not repeated or broadened.",
+    "No persistent camera configuration or capture effects performed."
+  ],
+  "cleanup": "Temporary tab closed.",
+  "regression": "Evidence-only change; application unchanged. Existing 181 Python/compile and 35 JavaScript regression retained without rerun."
+}
