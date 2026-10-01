@@ -193,6 +193,7 @@ from .forms import IndiAllskyIndiServerChangeForm
 
 from .notification_views import ModernAdminNotificationAcknowledgeView
 from .table_export_views import ModernAdminTableExportView
+from .history_request import history_timestamp, query_integer
 from .snapshot_restore import ModernAdminSnapshotRestoreView
 from .public_media import PublicLatestMediaView, PublicMediaViewerView, PublicMediaOriginalView
 from .media_archive import ModernAdminMediaArchive, archive_parameters, KINDS as ARCHIVE_KINDS
@@ -574,17 +575,17 @@ class JsonImageLoopView(JsonView):
 
 
     def get_objects(self):
-        history_seconds = int(request.args.get('limit_s', self.history_seconds))
-        self.limit = int(request.args.get('limit', self._limit))
-        timestamp = int(request.args.get('timestamp', 0))
-        camera_id = request.args.get('camera_id', type=int)
+        history_seconds = query_integer('limit_s', self.history_seconds)
+        self.limit = min(query_integer('limit', self._limit), self._limit)
+        timestamp = history_timestamp()
+        camera_id = query_integer('camera_id', 0, maximum=2**63 - 1)
 
         if camera_id:
             self.cameraSetup(camera_id=camera_id)
 
 
         if not timestamp:
-            timestamp = int(datetime.timestamp(self.camera_now))
+            timestamp = int(datetime.timestamp(self.camera_now if camera_id else datetime.now()))
 
         ts_dt = datetime.fromtimestamp(timestamp + 3)  # allow some jitter
 
@@ -636,7 +637,17 @@ class JsonImageLoopView(JsonView):
 
 
         local = True  # default to local assets
-        if self.web_nonlocal_images:
+        admin_network = self.verify_admin_network() if not camera_id else False
+        if not camera_id:
+            # An all-camera query has no cameraSetup context. Enforce each
+            # camera's local-media policy before applying the result limit.
+            local_allowed = IndiAllSkyDbCameraTable.web_nonlocal_images == sa_false()
+            if admin_network:
+                local_allowed = or_(local_allowed, IndiAllSkyDbCameraTable.web_local_images_admin == sa_true())
+            latest_images_q = latest_images_q.filter(or_(
+                local_allowed, and_(self.model.remote_url != sa_null(), self.model.remote_url != ''), and_(self.model.s3_key != sa_null(), self.model.s3_key != ''),
+            ))
+        elif self.web_nonlocal_images:
             if self.web_local_images_admin and self.verify_admin_network():
                 pass
             else:
@@ -646,8 +657,8 @@ class JsonImageLoopView(JsonView):
                 latest_images_q = latest_images_q\
                     .filter(
                         or_(
-                            self.model.remote_url != sa_null(),
-                            self.model.s3_key != sa_null(),
+                            and_(self.model.remote_url != sa_null(), self.model.remote_url != ''),
+                            and_(self.model.s3_key != sa_null(), self.model.s3_key != ''),
                         )
                     )
 
@@ -660,7 +671,12 @@ class JsonImageLoopView(JsonView):
         image_list = list()
         for i in latest_images:
             try:
-                url = i.getUrl(s3_prefix=self.s3_prefix, local=local)
+                if camera_id:
+                    url = i.getUrl(s3_prefix=self.s3_prefix, local=local)
+                else:
+                    camera = i.camera
+                    item_local = not camera.web_nonlocal_images or (camera.web_local_images_admin and admin_network)
+                    url = i.getUrl(s3_prefix=camera.s3_prefix, local=item_local)
             except ValueError as e:
                 app.logger.error('Error determining relative file name: %s', str(e))
                 continue
@@ -826,9 +842,9 @@ class JsonChartView(JsonView):
 
 
     def get_objects(self):
-        camera_id = int(request.args['camera_id'])
-        history_seconds = int(request.args.get('limit_s', self.chart_history_seconds))
-        timestamp = int(request.args.get('timestamp', 0))
+        camera_id = query_integer('camera_id', maximum=2**63 - 1)
+        history_seconds = query_integer('limit_s', self.chart_history_seconds)
+        timestamp = history_timestamp()
 
         self.cameraSetup(camera_id=camera_id)
 
@@ -7305,7 +7321,7 @@ class ModernAdminImageLagView(ModernAdminCameraToolView, CameraScopedTemplateMix
         context['diagnostic_camera_choices'] = self.get_media_camera_filters()[1:]
         image_lag_policy = ModernAdminImageLagPolicy()
 
-        timestamp = int(request.args.get('timestamp', 0))
+        timestamp = history_timestamp()
         ts_dt = image_lag_policy.window_end(timestamp, self.camera_now, self.camera_time_offset)
 
         if db.engine.dialect.name == 'mysql':

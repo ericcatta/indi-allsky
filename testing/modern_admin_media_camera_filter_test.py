@@ -89,7 +89,7 @@ def test_modern_loop_uses_media_camera_filter_context():
 def test_json_loop_all_cameras_does_not_require_camera_id():
     body = class_body(read_views(), 'JsonImageLoopView')
 
-    assert_true("camera_id = request.args.get('camera_id', type=int)" in body, 'JSON loop must accept missing camera_id for All Cameras')
+    assert_true("camera_id = query_integer('camera_id', 0, maximum=2**63 - 1)" in body, 'JSON loop must accept missing camera_id for All Cameras')
     assert_true('if camera_id:' in body, 'JSON loop must keep camera-specific behavior when camera_id is selected')
     assert_true("camera_id = int(request.args['camera_id'])" not in body, 'JSON loop must not require camera_id')
 

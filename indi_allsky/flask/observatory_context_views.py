@@ -7,6 +7,7 @@ from datetime import datetime
 import math
 
 from flask import request
+from .history_request import history_timestamp
 from .base_views import TemplateView
 from .forms import IndiAllskyVirtualSkyHelperForm, IndiAllskyChartHistoryForm
 from ..modern_admin_observatory_tools import ModernAdminVirtualSkyContextService
@@ -25,7 +26,7 @@ class HybridVirtualSkyContextView(TemplateView):
         context['image_loop_view'] = self.image_loop_view
 
 
-        timestamp = int(request.args.get('timestamp', 0))
+        timestamp = history_timestamp()
         context['timestamp'] = timestamp
 
 
@@ -73,7 +74,7 @@ class HybridChartContextView(TemplateView):
     def get_context(self):
         context = super(HybridChartContextView, self).get_context()
 
-        context['timestamp'] = int(request.args.get('timestamp', 0))
+        context['timestamp'] = history_timestamp()
 
         refreshInterval_ms = math.ceil(self.indi_allsky_config.get('CCD_EXPOSURE_MAX', 15.0)) * 1000
         context['refreshInterval'] = refreshInterval_ms + 1000  # additional time for exposures to download

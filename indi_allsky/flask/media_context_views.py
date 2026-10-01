@@ -4,7 +4,7 @@ Classic compatibility pages reuse these contexts without owning their queries.
 """
 import math
 from datetime import datetime
-from flask import request
+from .history_request import history_timestamp
 from flask_login import login_required
 from sqlalchemy import Integer, and_, cast, desc, func, literal_column, or_
 from sqlalchemy import null as sa_null
@@ -28,7 +28,7 @@ class HybridAduHistoryContextView(TemplateView):
         context = super(HybridAduHistoryContextView, self).get_context()
 
 
-        timestamp = int(request.args.get('timestamp', 0))
+        timestamp = history_timestamp()
         ts_dt_minus_7d, ts_dt = ModernAdminAduHistoryPolicy().window_bounds(
             timestamp, self.camera_now, self.camera_time_offset,
         )
@@ -110,7 +110,7 @@ class HybridLoopContextView(TemplateView):
 
         context['image_loop_view'] = self.image_loop_view
 
-        context['timestamp'] = int(request.args.get('timestamp', 0))
+        context['timestamp'] = history_timestamp()
 
         refreshInterval_ms = math.ceil(self.indi_allsky_config.get('CCD_EXPOSURE_MAX', 15.0)) * 1000
         context['refreshInterval'] = refreshInterval_ms + 1000  # additional time for exposures to download
