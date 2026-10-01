@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-01",
+  "application": "117d22fb",
+  "scope": "Production acquisition while automatic day-end timelapse task 14213 encodes; bounded before 20:00",
+  "under_load_frames": [
+    {
+      "camera_id": 1,
+      "latest": "2026-10-01 19:48:30",
+      "decoded_dimensions": [
+        4608,
+        2592
+      ],
+      "intervals_seconds": [
+        46,
+        44,
+        90,
+        46,
+        45,
+        44,
+        46,
+        45,
+        45,
+        45,
+        45
+      ]
+    },
+    {
+      "camera_id": 2,
+      "latest": "2026-10-01 19:48:38",
+      "decoded_dimensions": [
+        3840,
+        2160
+      ],
+      "intervals_seconds": [
+        45,
+        45,
+        46,
+        45,
+        45,
+        45,
+        45,
+        45,
+        45,
+        45,
+        45
+      ]
+    }
+  ],
+  "capture_defect": {
+    "status": "difetto",
+    "camera_id": 1,
+    "profile_id": "imx708-wide",
+    "start": "19:46:12.675533",
+    "timeout": "19:46:25.046371",
+    "requested_exposure_seconds": 0.36738735,
+    "timeout_seconds": 12.4,
+    "elapsed_seconds": 12.3711,
+    "image_exists_at_timeout": false,
+    "metadata_exists_at_timeout": false,
+    "next_capture_start": "19:46:57.702294",
+    "next_capture_exit": "19:47:00.017433",
+    "next_returncode": 0,
+    "observed_gap_seconds": 90,
+    "interpretation": "One exposure aborted by the existing per-exposure watchdog, followed by successful recovery. Not a permanently stopped camera. Root cause of the timeout under load remains unproven."
+  },
+  "resource_snapshot": {
+    "ffmpeg_pid": 773011,
+    "ffmpeg_nice": 19,
+    "ffmpeg_threads": 24,
+    "ffmpeg_rss_mib": 2945,
+    "capture_and_image_nice": 0,
+    "available_memory_mib": 3398,
+    "swap_used_mib": 0,
+    "interpretation": "FFmpeg already has low CPU priority. No scheduling or timeout settings changed from this observation."
+  },
+  "limits": [
+    "Observational coincidence with encoding does not prove that FFmpeg caused the timeout.",
+    "Existing preview-fsync correction is not presented as fixing this capture failure.",
+    "No hardware settings, memory reservation or watchdog limits changed without a demonstrated remedy.",
+    "Live acceptance ends at 20:00 Europe/Zurich; no subsequent live stability claim or 24-hour observation."
+  ],
+  "timelapse_result": {
+    "task_id": 14213,
+    "status": "SUCCESS",
+    "native_output_id": 71,
+    "camera_id": 1,
+    "frames": 3026,
+    "fps": 25,
+    "saved_bytes": 77400696,
+    "native_link_opened": true,
+    "playback_to_end_verified": false
+  },
+  "local_driver_reproduction": {
+    "source_commit": "117d22fb",
+    "script": "testing/evidence/hybrid-libcamera-pipe-reproduction-20261001.py",
+    "results": [
+      {
+        "images_only": false,
+        "completed": false,
+        "reason": "Unread output pipe prevents child completion"
+      },
+      {
+        "images_only": true,
+        "completed": true,
+        "returncode": 0
+      }
+    ],
+    "scope": "Actual output-selection AST from the driver, with a real child writing 4 MiB and a two-second bounded wait. No camera or production process involved.",
+    "conclusion": "Unread PIPE deadlock reproduced for full profiles; images_only mode completes using its existing temporary file. This does not establish that the production timeout had the same cause.",
+    "fix_status": "Not implemented or deployed"
+  }
+}

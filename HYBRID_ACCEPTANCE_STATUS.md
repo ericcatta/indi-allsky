@@ -156,6 +156,15 @@ still running/queued and are not certified by this check.
    retains archive sync and shows no call above 0.5 seconds. Other stalls are not
    proven resolved and the original long interval is not attributed exclusively
    to preview synchronization. [Measurements and limits](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
+   A later encoding-load observation found a real IMX708 timeout at 19:46:25:
+   image and metadata were absent, producing one 90-second interval before
+   automatic recovery; camera 2 retained approximately 45-second intervals.
+   This capture defect remains open. A local real-process reproduction also
+   demonstrates an unread-output-pipe deadlock in the full-profile driver path;
+   it does not prove the cause of the observed hardware timeout. No remedy has
+   been deployed for either finding. Automatic timelapse task 14213 completed
+   and its native output opened, but playback to the end was not verified.
+   [Under-load evidence and reproduction](testing/evidence/hybrid-night-load-20261001.json).
 4. **Record unavailable physical/integration effects as untested.** No GPIO,
    focuser, fan, heater or external sensor driver is assigned in configuration 118.
    The user reports no external disks/storage or upload integrations in use.
