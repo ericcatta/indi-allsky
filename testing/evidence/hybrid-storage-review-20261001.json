@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-01",
+  "application": "365f77e5",
+  "baseline_checkout": "9a35b6e2",
+  "environment": "Isolated Raspberry checkout with temporary SQLite and real disposable files; no production deletion",
+  "test": "testing/hybrid_storage_pressure_flow_test.py",
+  "new_cases": [
+    {
+      "case": "Generation queued after candidate enumeration",
+      "expected": "Deletion rejected; image, thumbnail and image row retained",
+      "status": "superato"
+    },
+    {
+      "case": "Image upload queued after candidate enumeration",
+      "expected": "Deletion rejected; image, thumbnail and image row retained",
+      "status": "superato"
+    },
+    {
+      "case": "Thumbnail upload by local path queued after enumeration",
+      "expected": "Deletion rejected; image, thumbnail and image row retained",
+      "status": "superato"
+    },
+    {
+      "case": "Thumbnail symlink resolves outside configured media root",
+      "expected": "Deletion rejected before either asset is removed; external fixture bytes, link, original thumbnail and parent row preserved",
+      "status": "superato"
+    }
+  ],
+  "review": {
+    "policy": "Default 5 GiB trigger, 8 GiB recovery target, 3-day preservation; actual free space checked after deletion. Global policy merges all cameras oldest-first.",
+    "effects": "Four image families only; candidate path constrained to media root and root device. Thumbnail path checked before deleteAsset. Pending generation or referenced upload rechecked under exclusive media lock.",
+    "error_boundary": "Video worker catches effect errors, rolls back and marks unfinished task FAILED. This review does not claim filesystem/database deletion is one atomic transaction."
+  },
+  "limits": [
+    "New cases deterministically publish work after enumeration, not simultaneous multi-process publication. Existing separate-session lock tests cover producer/deleter ordering.",
+    "No physical disk failure, abrupt power cut, external upload or 24-hour test performed.",
+    "Historical I/O latency uncertainty remains open.",
+    "No new native Settings/UI coverage is claimed."
+  ],
+  "runtime_change": false,
+  "regression": {
+    "python_compile": "181/181 passed",
+    "javascript": "35/35 passed",
+    "source_changed": false,
+    "source_manifest_sha256": "e644f587db42aef09a54e1fee2db1c06d284b05f6658b7fcea5a6851695b4352",
+    "python_report": "/home/eric/hybrid-storage-race-regression-20261001/results.json",
+    "python_report_sha256": "52843bb4c9890063937e8197c439aca2f8266ac6c801fcc52755cc970da0085a",
+    "javascript_report": "/tmp/hybrid-storage-race-js-20261001.json",
+    "javascript_report_sha256": "ea5d64e2dc830c28341d35678db7c53de60532c8b427ee2edec1d9785bce34fd"
+  }
+}

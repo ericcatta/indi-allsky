@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
+import tempfile
 from hybrid_runtime_fixture import isolated_app
 
 
@@ -44,6 +45,7 @@ def run():
         assert table.query.count() == 2003  # missing rows, protected upload, recent
         task.data = {'action':'generateVideo'}; db.session.commit()
         assert runtime.run(now)['status'] == 'generation_pending'
+
         assert files[0].exists()
         task.data = {'action':'storagePressureCleanup'}; db.session.commit()
         assert pending_storage_cleanup(runtime.pending_tasks())
@@ -118,7 +120,51 @@ def run():
         task.data = {'action':'generateVideo'}
         db.session.commit()
         assert runtime.run(now)['status'] == 'generation_pending'
+        # Work published after the scan must still protect the selected file.
+        task.setSuccess('fixture generation finished')
+        candidate = next(runtime.candidates(runtime.options.cutoff(now)))
+        for data in ({'action': 'generateVideo'},
+                     {'action': 'upload', 'model': table.__name__, 'id': 2002},
+                     {'action': 'upload', 'local_file': str(thumb_path)}):
+            task.data = data
+            task.state = models.TaskQueueState.QUEUED
+            db.session.commit()
+            try:
+                runtime.delete(candidate)
+            except RuntimeError:
+                db.session.rollback()
+            else:
+                raise AssertionError('work queued after scan lost its source image')
+            assert files[0].exists() and thumb_path.exists()
+            assert db.session.get(table, 2002) is not None
+            task.setSuccess('fixture protected work finished')
 
+        # A thumbnail resolving outside the media root must stop deletion before
+        # either part of the asset is removed, even after candidate selection.
+        with tempfile.NamedTemporaryFile(prefix='hybrid-pressure-outside-',
+                                         dir=root.parent, delete=False) as stream:
+            stream.write(b'dedicated outside-root fixture')
+            outside = Path(stream.name)
+        original_thumbnail = thumbnail.filename
+        link = root / 'pressure-thumbnail-link.jpg'
+        link.symlink_to(outside)
+        try:
+            thumbnail.filename = str(link)
+            db.session.commit()
+            try:
+                runtime.delete(candidate)
+            except ValueError:
+                db.session.rollback()
+            else:
+                raise AssertionError('outside-root thumbnail deletion allowed')
+            assert outside.read_bytes() == b'dedicated outside-root fixture'
+            assert files[0].exists() and thumb_path.exists() and link.is_symlink()
+            assert db.session.get(table, 2002) is not None
+        finally:
+            thumbnail.filename = original_thumbnail
+            db.session.commit()
+            link.unlink(missing_ok=True)
+            outside.unlink(missing_ok=True)
 
     print('Storage cleanup: real files, two cameras, missing-prefix paging, commit paging, upload/generation protection, lock and path boundary PASS')
 

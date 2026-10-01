@@ -106,6 +106,14 @@ mobile layouts, provider failures and operations—remain linked in the
 Each original record states its role, revision, environment and limitations.
 A historical check is not automatically a current full-domain certification.
 
+Storage cleanup now has additional isolated evidence for tasks published after
+candidate selection (generation, image upload and thumbnail upload) and an
+outside-root thumbnail symlink. Every case preserves the protected files and
+parent database row. The full regression passed again: 181 Python/compile and
+35 JavaScript checks, with unchanged source hashes. This is test coverage only;
+production policy and application code are unchanged. It does not close the
+historical I/O latency gate. [Storage review](testing/evidence/hybrid-storage-review-20261001.json).
+
 ## Remaining acceptance gates
 
 1. **Complete the control/effect matrix.** The latest static inventory is from
