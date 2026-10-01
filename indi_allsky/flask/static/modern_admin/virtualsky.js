@@ -59,7 +59,7 @@
                 for (const key of ['showstars','showstarlabels','showplanets','showplanetlabels']) sky[key] = options[key];
                 sky.setClock(options.clock); sky.calendarUpdate(); sky.resize(options.width, options.height); sky.draw();
             }
-            clip.hidden = false; download.disabled = exporting; fullscreen.disabled = false;
+            clip.hidden = false; download.disabled = exporting || pending; fullscreen.disabled = false;
             message.textContent = 'Frame captured ' + options.clock.toLocaleString() + '. Overlay preview updated.';
         } catch (error) {
             clip.hidden = true; download.disabled = true; message.textContent = error.message;
@@ -92,6 +92,7 @@
             message.textContent = error.name === 'AbortError' ? 'Frame request timed out. Try Refresh frame.' : error.message;
         } finally {
             clearTimeout(timeout); clearTimeout(imageTimeout); pending = false; refresh.disabled = false;
+            download.disabled = exporting || !frame || clip.hidden;
             if (!stopped) timer = setTimeout(load, Math.max(1000, Number(config.refreshInterval) || 16000));
         }
     }
