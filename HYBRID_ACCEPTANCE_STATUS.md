@@ -4,6 +4,12 @@ Updated 1 October 2026. **Classic frontend removal is deployed. Whole-product ac
 The user deferred the separate 24-hour day/night test and detector/AI implementation.
 Those activities are outside this acceptance run, not passed tests.
 
+Two further Users controls now pass native production verification (account guidance
+and Home click). All four reset/flush combinations pass real HTTP restore effects
+on disposable state; no production credentials or history changed. Native key-reset
+confirmation and post-reload login remain outside this proof.
+[Scoped evidence](testing/evidence/hybrid-remaining-controls-20261001.json).
+
 ## Current installation and regression
 
 Checkout `48c2eddb` was deployed on 1 October at 22:37 local time, after the user

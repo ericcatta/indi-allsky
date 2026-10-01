@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-01",
+  "application": "48c2eddb",
+  "source_unchanged": true,
+  "controls": [
+    {
+      "page": "users",
+      "control": "My Account guidance",
+      "role": "production administrator",
+      "status": "superato",
+      "observed": "Native rendered text says update your own name or password; no email editing claim."
+    },
+    {
+      "page": "users",
+      "control": "Home link",
+      "role": "production administrator",
+      "status": "superato",
+      "observed": "Native pointer click opens /modern-admin/now, renders Now and both current camera frame timestamps (22:44:44 / 22:44:49)."
+    },
+    {
+      "page": "config-restore",
+      "control": "RESET_KEYS/FLUSH_CONFIGS",
+      "role": "isolated administrator with real login and CSRF",
+      "status": "superato",
+      "method": "Flask HTTP acceptance, not native browser; real persistence and cleanup adapters, only fixed key-file path redirected into disposable fixture. Four combinations in fresh processes.",
+      "cases": [
+        {
+          "flush": false,
+          "reset": false,
+          "history_rows": 2,
+          "keys_changed": false,
+          "profiles_preserved": true,
+          "effects_queued": 0
+        },
+        {
+          "flush": false,
+          "reset": true,
+          "history_rows": 2,
+          "keys_changed": true,
+          "profiles_preserved": true,
+          "effects_queued": 0
+        },
+        {
+          "flush": true,
+          "reset": false,
+          "history_rows": 1,
+          "keys_changed": false,
+          "profiles_preserved": true,
+          "effects_queued": 0
+        },
+        {
+          "flush": true,
+          "reset": true,
+          "history_rows": 1,
+          "keys_changed": true,
+          "profiles_preserved": true,
+          "effects_queued": 0
+        }
+      ],
+      "script": "testing/evidence/hybrid-restore-flags-20261001.py",
+      "script_sha256": "62158391a8a03f2ccaacb46eef4b01796b0d6c12af2974bbdc368dc867dfcccd",
+      "log": "/home/eric/hybrid-restore-flags-20261001.log",
+      "log_sha256": "4e14c94ce3ecbeb3a2f45e5463960b0e2d8b6df08d166fec4b4108946e56ae7b",
+      "exit_code": 0,
+      "limitations": "Unencrypted synthetic configuration. No production keys/history changed. No native destructive confirmation, service reload or subsequent login certification."
+    }
+  ],
+  "regression": "Application/test-suite source unchanged from 182 Python/compile + 35 JavaScript combined release. The four additional disposable acceptance cases pass separately."
+}

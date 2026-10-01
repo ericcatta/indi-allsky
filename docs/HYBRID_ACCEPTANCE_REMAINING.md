@@ -29,7 +29,7 @@ this table alone does not certify all discovered controls.
 | Camera Simulator and Geometry | Actual clipboard contents after copy. A success message alone did not establish delivery. Preserve the successful geometry scope correction and numeric-validation evidence. |
 | Generated-media pages | Exact footer links and per-row downloads still require reconciliation with current templates. Old “Open read-only” observations must be mapped to the current controls, not blindly repeated or marked passed from a different Library link. |
 | Account | Admin and ordinary-user save/login flows have [isolated native evidence](../testing/evidence/hybrid-account-native-20260914.json). This does not imply a production password change was performed; do not repeat destructive credential changes merely to erase a historical record. |
-| Restore | Confirm the precise remaining reset/flush variants against isolated tests and native evidence; keep destructive variants on disposable configuration fixtures. |
+| Restore | All four reset/flush combinations now pass real HTTP persistence/cleanup on disposable fixtures. Native destructive confirmation and post-key-reset login remain separate; production keys/history were not changed. |
 | Generation and playback | Preserve successful live worker/output proofs for their exact camera/family. Camera-1 timelapse 71 now has natural-end playback evidence; mini-video 7 has generation and natural-end proof. Mini-generation recovery and other families must retain their own evidence scopes. |
 | Network | Network-changing effects require identified connections and a recovery plan in the agreed physical-access window. Read-only discovery is not evidence for reconnect/disconnect effects. |
 
@@ -37,9 +37,9 @@ this table alone does not certify all discovered controls.
 
 Use the [route register](hybrid-acceptance-route-register.json) and its linked
 control discovery, retaining role, camera/profile, prerequisites, expected
-request/effect and source revision. There are 34 historical blocked/defect
-records without a fully passed resolution after resolving the four exact generator links. That number is not
-34 current product defects: some combine scopes, refer to older controls, or
+request/effect and source revision. There are 32 historical blocked/defect
+records without a fully passed resolution after resolving the four exact generator links and two Users controls. That number is not
+32 current product defects: some combine scopes, refer to older controls, or
 already have narrower later evidence. The 7,369 static identities likewise are
 not 7,369 independently failed functions.
 

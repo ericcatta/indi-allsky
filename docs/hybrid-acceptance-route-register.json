@@ -660,7 +660,12 @@
           "source": "testing/evidence/hybrid-browser-2026-09-06.json",
           "record": "controls[19]",
           "control": "RESET_KEYS/FLUSH_CONFIGS",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "additional_evidence": {
+            "source": "testing/evidence/hybrid-remaining-controls-20261001.json",
+            "record": "controls[2]",
+            "scope": "All four real HTTP cleanup combinations pass on disposable state. Historical native-browser gap is retained; this is not a native credential-change test."
+          }
         },
         {
           "source": "testing/evidence/hybrid-settings-chain-20260929.json",
@@ -6584,13 +6589,33 @@
           "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
           "record": "cases[12]",
           "control": "My Account guidance",
-          "recorded_status": "difetto"
+          "recorded_status": "difetto",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-remaining-controls-20261001.json",
+            "records": [
+              "controls[0]"
+            ],
+            "scope": "Exact native production administrator interaction; other roles and account mutation excluded.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
           "record": "cases[13]",
           "control": "Home link",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-remaining-controls-20261001.json",
+            "records": [
+              "controls[1]"
+            ],
+            "scope": "Exact native production administrator interaction; other roles and account mutation excluded.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
