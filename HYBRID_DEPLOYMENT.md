@@ -2,7 +2,15 @@
 
 ## Current application
 
-The latest application change deployed on 1 October is `365f77e5`: VirtualSky
+The latest application change deployed on 1 October is `117d22fb`: panorama
+previews publish atomically without redundant fsync calls; archive sync remains.
+Capture was restarted after 181 Python/compile and 35 JavaScript checks passed.
+Both cameras resumed; their new images decoded in the native browser and panorama
+previews match archived bytes. [Measurement and rollback](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
+Rollback uses the two code files in `/home/eric/hybrid-backups/hybrid-panorama-sync-20261001`
+(or revision `309485f3`) followed by a capture restart; no database rollback.
+
+The preceding application change is `365f77e5`: VirtualSky
 export availability follows frame loading, including preview redraws. The browser
 loads virtualsky-003 and the native refresh/export check passes.
 [Verification and rollback](testing/evidence/hybrid-virtualsky-alignment-20261001.json).
@@ -20,9 +28,9 @@ Classic frontend is removed. Hybrid requires login; shared backend and public
 compatibility handlers remain. Configuration revision is 118.
 
 The current application passed 181 Python/compile entrypoints and 35 JavaScript
-tests. The last deployment reloaded only Gunicorn; capture PID 537392 and web
-PID 1540 remained unchanged, active, with zero automatic restarts. Both recent
-camera frames decoded after deployment. [Regression and deployment](testing/evidence/hybrid-virtualsky-alignment-20261001.json).
+tests. The last deployment restarted capture: PID 771992 is active with zero
+automatic restarts. Configuration remains 118. Both camera frames decoded after
+restart. [Regression and deployment](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
 This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 

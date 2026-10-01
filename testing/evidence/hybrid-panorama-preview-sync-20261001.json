@@ -1,0 +1,410 @@
+{
+  "date": "2026-10-01",
+  "baseline": "309485f3",
+  "problem": "Observed live storage waits; panorama previews redundantly synchronize file contents already preserved by the archive publication.",
+  "change": "Keep file fsync for archives; regenerable panorama previews explicitly opt out, retaining complete staging and atomic replacement. Default helper behavior unchanged, and non-overwrite archive publication always syncs.",
+  "before": {
+    "duration_limit_seconds": 180,
+    "source": "/tmp/hybrid-image-io-20261001.trace",
+    "source_sha256": "fd7d7a3be0ea53e42c20c46061101f9fe8c473221d9052535ffa34df0da7c7ae",
+    "first": "19:03:31.461716",
+    "last": "19:06:25.294909",
+    "groups": {
+      "archive": {
+        "count": 12,
+        "sum_seconds": 2.436213,
+        "max_seconds": 0.839391,
+        "median_seconds": 0.021075999999999998
+      },
+      "preview": {
+        "count": 18,
+        "sum_seconds": 4.408003,
+        "max_seconds": 1.413318,
+        "median_seconds": 0.0221685
+      }
+    },
+    "slow_calls": [
+      {
+        "time": "19:04:09.619063",
+        "syscall": "fsync",
+        "seconds": 0.839391
+      },
+      {
+        "time": "19:04:10.462472",
+        "syscall": "fsync",
+        "seconds": 0.551645
+      },
+      {
+        "time": "19:04:11.015230",
+        "syscall": "fsync",
+        "seconds": 0.728654
+      },
+      {
+        "time": "19:04:17.472779",
+        "syscall": "fsync",
+        "seconds": 0.584749
+      },
+      {
+        "time": "19:04:18.061621",
+        "syscall": "fsync",
+        "seconds": 0.646348
+      },
+      {
+        "time": "19:04:33.331923",
+        "syscall": "pwrite64",
+        "seconds": 4.221717
+      },
+      {
+        "time": "19:04:37.565261",
+        "syscall": "renameat",
+        "seconds": 0.659165
+      },
+      {
+        "time": "19:04:41.320222",
+        "syscall": "fsync",
+        "seconds": 0.828594
+      },
+      {
+        "time": "19:04:42.153024",
+        "syscall": "fsync",
+        "seconds": 0.727778
+      },
+      {
+        "time": "19:04:42.881944",
+        "syscall": "fsync",
+        "seconds": 1.413318
+      }
+    ],
+    "limitations": [
+      "Live ptrace observation can add overhead.",
+      "Different-time before/after samples do not isolate total storage latency causally.",
+      "Write buffer contents were not traced."
+    ]
+  },
+  "retrospective_hour": {
+    "window_start": "2026-10-01T18:00:00+02:00",
+    "window_end_exclusive": "2026-10-01T19:00:00+02:00",
+    "source": "/var/log/indi-allsky/indi-allsky.log",
+    "selected_lines": 17509,
+    "selected_lines_sha256": "be8e19a451f83ba74479635caaa560f25df662a92059f5a54f09d5b5121621c5",
+    "first_selected_timestamp": "2026-10-01T18:00:00.418333+02:00",
+    "last_selected_timestamp": "2026-10-01T18:59:58.905153+02:00",
+    "cameras": {
+      "1": {
+        "publication_delay_seconds": {
+          "count": 239,
+          "min": 1.364326,
+          "median": 2.339649,
+          "p95": 9.164108,
+          "max": 44.037471
+        },
+        "capture_interval_seconds": {
+          "count": 238,
+          "min": 14.0,
+          "median": 15.0,
+          "p95": 15.0,
+          "max": 23.0
+        },
+        "interval_histogram": {
+          "15.0": 225,
+          "16.0": 9,
+          "14.0": 2,
+          "22.0": 1,
+          "23.0": 1
+        },
+        "first": {
+          "capture": "2026-10-01T18:00:00+02:00",
+          "publication": "2026-10-01T18:00:01.780956+02:00",
+          "seconds": 1.780956
+        },
+        "last": {
+          "capture": "2026-10-01T18:59:52+02:00",
+          "publication": "2026-10-01T18:59:54.178139+02:00",
+          "seconds": 2.178139
+        },
+        "delays_over_10_seconds": [
+          {
+            "capture": "2026-10-01T18:05:31+02:00",
+            "publication": "2026-10-01T18:05:47.207308+02:00",
+            "seconds": 16.207308
+          },
+          {
+            "capture": "2026-10-01T18:13:47+02:00",
+            "publication": "2026-10-01T18:14:31.037471+02:00",
+            "seconds": 44.037471
+          },
+          {
+            "capture": "2026-10-01T18:14:02+02:00",
+            "publication": "2026-10-01T18:14:39.031171+02:00",
+            "seconds": 37.031171
+          },
+          {
+            "capture": "2026-10-01T18:14:17+02:00",
+            "publication": "2026-10-01T18:14:41.884862+02:00",
+            "seconds": 24.884862
+          },
+          {
+            "capture": "2026-10-01T18:21:03+02:00",
+            "publication": "2026-10-01T18:21:19.495992+02:00",
+            "seconds": 16.495992
+          },
+          {
+            "capture": "2026-10-01T18:34:05+02:00",
+            "publication": "2026-10-01T18:34:18.364823+02:00",
+            "seconds": 13.364823
+          },
+          {
+            "capture": "2026-10-01T18:36:05+02:00",
+            "publication": "2026-10-01T18:36:18.446039+02:00",
+            "seconds": 13.446039
+          },
+          {
+            "capture": "2026-10-01T18:36:50+02:00",
+            "publication": "2026-10-01T18:37:01.011996+02:00",
+            "seconds": 11.011996
+          },
+          {
+            "capture": "2026-10-01T18:53:06+02:00",
+            "publication": "2026-10-01T18:53:22.459936+02:00",
+            "seconds": 16.459936
+          },
+          {
+            "capture": "2026-10-01T18:53:21+02:00",
+            "publication": "2026-10-01T18:53:34.661280+02:00",
+            "seconds": 13.66128
+          },
+          {
+            "capture": "2026-10-01T18:55:07+02:00",
+            "publication": "2026-10-01T18:55:22.624580+02:00",
+            "seconds": 15.62458
+          }
+        ]
+      },
+      "2": {
+        "publication_delay_seconds": {
+          "count": 238,
+          "min": 0.984466,
+          "median": 1.7960180000000001,
+          "p95": 6.738512,
+          "max": 38.473808
+        },
+        "capture_interval_seconds": {
+          "count": 237,
+          "min": 15.0,
+          "median": 15.0,
+          "p95": 15.0,
+          "max": 25.0
+        },
+        "interval_histogram": {
+          "15.0": 228,
+          "16.0": 8,
+          "25.0": 1
+        },
+        "first": {
+          "capture": "2026-10-01T18:00:12+02:00",
+          "publication": "2026-10-01T18:00:13.193382+02:00",
+          "seconds": 1.193382
+        },
+        "last": {
+          "capture": "2026-10-01T18:59:45+02:00",
+          "publication": "2026-10-01T18:59:46.219201+02:00",
+          "seconds": 1.219201
+        },
+        "delays_over_10_seconds": [
+          {
+            "capture": "2026-10-01T18:05:28+02:00",
+            "publication": "2026-10-01T18:05:41.237010+02:00",
+            "seconds": 13.23701
+          },
+          {
+            "capture": "2026-10-01T18:13:59+02:00",
+            "publication": "2026-10-01T18:14:37.473808+02:00",
+            "seconds": 38.473808
+          },
+          {
+            "capture": "2026-10-01T18:14:14+02:00",
+            "publication": "2026-10-01T18:14:40.186616+02:00",
+            "seconds": 26.186616
+          },
+          {
+            "capture": "2026-10-01T18:14:29+02:00",
+            "publication": "2026-10-01T18:14:43.094662+02:00",
+            "seconds": 14.094662
+          },
+          {
+            "capture": "2026-10-01T18:21:10+02:00",
+            "publication": "2026-10-01T18:21:21.551679+02:00",
+            "seconds": 11.551679
+          },
+          {
+            "capture": "2026-10-01T18:34:11+02:00",
+            "publication": "2026-10-01T18:34:22.731611+02:00",
+            "seconds": 11.731611
+          },
+          {
+            "capture": "2026-10-01T18:45:13+02:00",
+            "publication": "2026-10-01T18:45:26.990464+02:00",
+            "seconds": 13.990464
+          },
+          {
+            "capture": "2026-10-01T18:48:13+02:00",
+            "publication": "2026-10-01T18:48:28.476881+02:00",
+            "seconds": 15.476881
+          },
+          {
+            "capture": "2026-10-01T18:53:14+02:00",
+            "publication": "2026-10-01T18:53:33.012534+02:00",
+            "seconds": 19.012534
+          }
+        ]
+      }
+    },
+    "processing_seconds": {
+      "count": 477,
+      "min": 0.8568,
+      "median": 1.2104,
+      "p95": 3.4983,
+      "max": 35.4466
+    },
+    "error_sites": {},
+    "warning_sites": {
+      "Image-1-537412/MainThread processing._apply_calibration()": 477,
+      "Image-1-537412/MainThread processing._debayer()": 238,
+      "MainProcess-537392/MainThread allsky._periodic_tasks()": 12,
+      "Capture-2-537408/MainThread capture._periodic_tasks()": 12,
+      "Capture-1-537404/MainThread capture._periodic_tasks()": 12,
+      "Capture-1-537404/MainThread capture.saferun()": 12,
+      "Image-1-537412/MainThread image.recalculate_exposure()": 3,
+      "Capture-2-537408/MainThread capture.saferun()": 7,
+      "Capture-1-537404/MainThread miscDb.addNotification()": 2,
+      "Capture-2-537408/MainThread miscDb.addNotification()": 1,
+      "Capture-1-537404/MainThread capture.shoot()": 2,
+      "Capture-2-537408/MainThread capture.shoot()": 1,
+      "Image-1-537412/MainThread image.calculate_exposure()": 3,
+      "MainProcess-537392/MainThread allsky._queue_video_task()": 4,
+      "Video-1-537413/MainThread aurora.download_json()": 16,
+      "Video-1-537413/MainThread aurora.processOvationLocationData()": 4,
+      "Video-1-537413/MainThread aurora.download_txt()": 4
+    },
+    "limits": [
+      "Retrospective existing logs, not new continuous observation.",
+      "Publication timing is addImage log time minus filename timestamp (one-second resolution), not fsync latency or browser visibility.",
+      "No attribution of a delay to storage without a direct measurement."
+    ]
+  },
+  "database_crosscheck": {
+    "camera_1_rows": 239,
+    "camera_2_rows": 238,
+    "window": "2026-10-01 18:00:00 <= createDate < 19:00:00 local",
+    "pending_tasks": 0,
+    "matches_logged_addImage_counts": true
+  },
+  "test_reproduction": {
+    "before": "Targeted test exit 1: redundant fsync count assertion",
+    "after": "Targeted test exit 0; six codec pixel parity, exact preview/archive bytes, archive fsync failure rollback, atomic preview failure preservation, two-camera scope and preview-only modes"
+  },
+  "rollback": {
+    "directory": "/home/eric/hybrid-backups/hybrid-panorama-sync-20261001",
+    "source_revision": "309485f3",
+    "files": [
+      "indi_allsky/image.py",
+      "indi_allsky/panorama_publication.py"
+    ],
+    "operation": "Restore these code files and restart capture; do not restore an old database over new frames."
+  },
+  "limits": [
+    "This removes measured redundant synchronization, not all storage stalls.",
+    "The 35-second historical processing interval is not attributed exclusively to preview fsync.",
+    "Regenerable previews do not guarantee content persistence across abrupt power loss; archive synchronization policy is preserved.",
+    "No algorithm, codec, cadence, saved configuration or schema change.",
+    "No 24-hour or abrupt-power-cut acceptance."
+  ],
+  "application": "117d22fb",
+  "after": {
+    "source": "/tmp/hybrid-image-io-after-20261001.trace",
+    "source_sha256": "b22e60b7af71eb100ff9cb7f2d676b4fbe3d675ac73583f285bf850571dbd9c3",
+    "first": "19:20:35.104225",
+    "last": "19:23:29.494239",
+    "groups": {
+      "archive": {
+        "count": 12,
+        "sum_seconds": 0.245949,
+        "max_seconds": 0.033658,
+        "median_seconds": 0.0195005
+      },
+      "preview": {
+        "count": 0,
+        "sum_seconds": 0,
+        "max_seconds": null,
+        "median_seconds": null
+      }
+    },
+    "slow_calls": [],
+    "panoramas": [
+      {
+        "camera_id": 1,
+        "created": "2026-10-01 19:36:29.000000",
+        "preview_matches_archive": true,
+        "size": [
+          4712,
+          750
+        ],
+        "sha256": "9dc88a738fc7af9296addbbf165e78c0227ba1a2782b59fdf86b3b680619a7be"
+      },
+      {
+        "camera_id": 2,
+        "created": "2026-10-01 19:36:37.000000",
+        "preview_matches_archive": true,
+        "size": [
+          4712,
+          750
+        ],
+        "sha256": "478e949ab67a08f6d6c9a44ad6c6b9a40d9e93859d6afc4a8c38a531ccd74f34"
+      }
+    ],
+    "config_revision": 118,
+    "pending_tasks": 7
+  },
+  "regression": {
+    "python_entries": 181,
+    "javascript_entries": 35,
+    "status": "passed",
+    "source_changed": false,
+    "source_manifest_sha256": "033ce8a2000510a1f3d6ffaa4fb361ba56ea878983926e2e7b394289a81a6955",
+    "python_report": "/home/eric/hybrid-panorama-sync-regression-20261001/results.json",
+    "python_report_sha256": "a1860da350f2f995a71bf1bafa6416ea0e3d36749c689446da5692569e0d9c56",
+    "javascript_report": "/tmp/hybrid-panorama-sync-js-20261001.json",
+    "javascript_report_sha256": "ea5d64e2dc830c28341d35678db7c53de60532c8b427ee2edec1d9785bce34fd"
+  },
+  "deployment": {
+    "capture_pid_before": 537392,
+    "capture_pid_after": 771992,
+    "image_worker_pid": 772012,
+    "active": true,
+    "automatic_restarts": 0,
+    "config_revision": 118,
+    "native_frames": [
+      {
+        "camera_id": 1,
+        "timestamp": "2026-10-01 19:20:12",
+        "dimensions": [
+          4608,
+          2592
+        ],
+        "complete": true
+      },
+      {
+        "camera_id": 2,
+        "timestamp": "2026-10-01 19:20:05",
+        "dimensions": [
+          3840,
+          2160
+        ],
+        "complete": true
+      }
+    ],
+    "new_task_observation": "At 19:36 seven VIDEO tasks pending from automatic day-end generation (created 17:34 UTC). Task 14212 actively progresses from 450 to 1000 of 3029 images by 19:37:30. No completion claimed.",
+    "tracers": "Both bounded strace processes detached; no background monitor left."
+  },
+  "conclusion": "Redundant preview fsync calls reduced from 18 to zero per three-minute sample; 12 archive sync calls retained. Before preview waits totaled 4.408003s. After sample had no traced call over 0.5s, but different-time samples cannot certify all storage stalls resolved. Latest panorama previews decode and exactly match archive bytes for each camera."
+}

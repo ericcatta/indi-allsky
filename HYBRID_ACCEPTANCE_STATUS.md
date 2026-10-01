@@ -6,7 +6,15 @@ Those activities are outside this acceptance run, not passed tests.
 
 ## Current installation and regression
 
-The latest application change is `365f77e5`; subsequent commits add evidence.
+The latest application change is `117d22fb`: panorama previews retain atomic
+replacement without redundant file synchronization. Archives still synchronize.
+A three-minute live trace changed from 18 preview fsync calls (4.408 seconds of
+wait) to zero, retaining 12 archive calls. Both cameras resumed after controlled
+capture restart (PID 771992), and their panorama previews decode and match their
+archives exactly. All 181 Python/compile and 35 JavaScript checks passed.
+[Measurement, deployment and limits](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
+
+The preceding application change is `365f77e5`.
 VirtualSky now keeps export disabled while a frame refresh is pending, including
 when preview controls, resize or reset redraw the map. The timing defect was
 reproduced before correction. Native verification confirms the disabled state,
@@ -133,11 +141,14 @@ historical I/O latency gate. [Storage review](testing/evidence/hybrid-storage-re
    exports have no verified received file. Native clicks produced no newly observed
    matching file in Mac Downloads. Manual user verification is requested; do not
    share configuration contents. [Latest attempts](testing/evidence/hybrid-export-receipt-20260930.json).
-3. **Resolve the historical storage/publication uncertainty.** A bounded encoding
-   load on 30 September showed 45–46-second capture intervals and 3.31–5.35-second
-   capture-to-observed latency, with no read errors. Earlier multi-tens-of-seconds
-   I/O stalls were not reproduced, but are not proven resolved. No additional
-   performance change was justified by that sample. [Measurement](testing/evidence/hybrid-storage-load-20260930.json).
+3. **Resolve remaining storage/publication stalls.** Existing logs from 18:00–19:00
+   on 1 October show median 15-second cadence in both cameras, but publication
+   delays up to 44/38 seconds and one 35-second processing interval. Live syscall
+   tracing subsequently measured actual write/sync waits. `117d22fb` removes the
+   redundant panorama-preview synchronization; its bounded post-deploy trace
+   retains archive sync and shows no call above 0.5 seconds. Other stalls are not
+   proven resolved and the original long interval is not attributed exclusively
+   to preview synchronization. [Measurements and limits](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
 4. **Record unavailable physical/integration effects as untested.** No GPIO,
    focuser, fan, heater or external sensor driver is assigned in configuration 118.
    The user reports no external disks/storage or upload integrations in use.
