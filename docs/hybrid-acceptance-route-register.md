@@ -5,6 +5,21 @@ Route rilevate dalla `url_map` Flask del candidato `0e6f445c`, avviato in ambien
 Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisione, ambiente, ruolo, camera/profilo e limiti quando verificati. I record storici restano storici. Il numero di record non e' una percentuale di copertura e non certifica tutti i controlli della pagina.
 
 [Registro completo con riferimenti ai singoli controlli](hybrid-acceptance-route-register.json).
+
+Riconciliazione del 1 ottobre: il campo `resolution` collega cinque esiti storici
+alle successive prove superate, senza modificare `recorded_status`:
+
+- rilevamento camere: escluso Telescope Simulator, entrambe le camere selezionabili;
+- contesto Settings: camera/profilo corretti per entrambi i profili;
+- paginazione spazio file: il primo Next dopo la cancellazione della ricerca funziona;
+- quattro azioni cleanup: effetti verificati su dati sintetici isolati, altra camera preservata;
+- copia utenti: contenuto effettivo degli appunti verificato, anche filtrato e vuoto.
+
+Ogni risoluzione specifica ambiente e limiti. Non certifica automaticamente altri
+ruoli o controlli; le ricevute CSV/Excel restano aperte. Il cleanup qui chiuso è
+il collaudo isolato precedentemente in attesa di conferma, non una cancellazione
+aggiuntiva sul Raspberry.
+
 Ultimo censimento statico, riferito a `51a248ee` (1 ottobre): 99 ingressi GET, 500 contesti, 376 rendering riusciti, 124 contesti bloccati e nessun errore di rendering. Il report contiene 43.978 occorrenze di controlli, comprese ripetizioni fra ruoli e camere; nessun click viene certificato dal solo censimento. Percorso, hash e limiti sono nel campo `current_control_discovery` del JSON.
 
 Indice statico: 7.369 identità con tutti i 43.978 riferimenti originali conservati. Non rappresenta un conteggio di funzionalità né certifica automaticamente le interazioni. Sei ingressi API/redirect sono collegati alle [prove isolate già superate sulla versione installata](../testing/evidence/hybrid-current-discovery-20260921.json); download nativi ed effetti hardware restano fuori da queste prove.

@@ -203,7 +203,17 @@
           "source": "testing/evidence/hybrid-camera-diagnostics-native-20260921.json",
           "record": "controls[9]",
           "control": "Detect cameras",
-          "recorded_status": "difetto"
+          "recorded_status": "difetto",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-camera-detection-release-20260921.json",
+            "records": [
+              "controls[0]"
+            ],
+            "scope": "Production administrator: IMX708 and ASI678MC selectable; Telescope Simulator excluded by capability. No configuration save or other hardware certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-camera-detection-release-20260921.json",
@@ -3631,7 +3641,18 @@
           "source": "testing/evidence/hybrid-mobile-navigation-20260921.json",
           "record": "controls[3]",
           "control": "Selected profile camera context",
-          "recorded_status": "difetto"
+          "recorded_status": "difetto",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-settings-navigation-context-20260921.json",
+            "records": [
+              "controls[0]",
+              "controls[1]"
+            ],
+            "scope": "Production administrator: both camera/profile pairs through profile tab, Settings index and Exposure/Gain. Save effects are outside this navigation check.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-settings-navigation-context-20260921.json",
@@ -4637,7 +4658,17 @@
           "record": "controls[16]",
           "control": "Next immediately after search clear",
           "recorded_status": "difetto",
-          "observed_page": "/modern-admin/storage/file-space-usage"
+          "observed_page": "/modern-admin/storage/file-space-usage",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-table-blur-20260929.json",
+            "records": [
+              "final_deployment.native"
+            ],
+            "scope": "Production administrator: first Next after clearing search works for both camera/profile pairs; Previous also verified for camera 2. Final deployed asset version, not the earlier cached failing version.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-table-blur-20260929.json",
@@ -4832,7 +4863,20 @@
           "source": "testing/evidence/hybrid-cleanup-native-20260930.json",
           "record": "controls[5]",
           "control": "Four native destructive button effects",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-cleanup-native-effects-20260930.json",
+            "records": [
+              "controls[0]",
+              "controls[1]",
+              "controls[2]",
+              "controls[3]"
+            ],
+            "scope": "Isolated native administrator, camera 2/test-profile-2: four cleanup effects verified against disposable database and filesystem; camera 1 preserved. This closes the isolated confirmation/test gap, not production deletion or physical hardware acceptance.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-cleanup-native-effects-20260930.json",
@@ -6284,7 +6328,19 @@
           "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
           "record": "controls[16]",
           "control": "Copy filtered records; administrator",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-users-clipboard-live-20260929.json",
+            "records": [
+              "controls[0]",
+              "controls[1]",
+              "controls[2]"
+            ],
+            "scope": "Production HTTPS administrator: actual clipboard matches all rows, filtered row and empty-result header. CSV/Excel receipt and other roles are not covered.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
