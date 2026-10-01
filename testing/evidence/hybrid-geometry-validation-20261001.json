@@ -1,0 +1,29 @@
+{
+  "baseline": "cb259f92",
+  "defect": "Native invalid azimuth360 displays validation error, then Copy values incorrectly reports Geometry values copied using previous valid Keogram angle",
+  "fix": "Common copy/review/draw value admission also rejects invalid azimuth; valid angle math unchanged",
+  "targeted": {
+    "status": "passed",
+    "javascript_cases": 35,
+    "report": "/tmp/hybrid-geometry-validation-js-20261001.json",
+    "sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc",
+    "math_cases": 480,
+    "test": "testing/hybrid_geometry_validation_test.js"
+  },
+  "regression": {
+    "status": "passed",
+    "python_report": "/home/eric/hybrid-geometry-validation-regression-20261001/results.json",
+    "python_entries": 175,
+    "source_changed": false,
+    "sha256": "4f4fb4e71364af67028d7d776eaf5b768405a702015dc31d16c40f99816189a6"
+  },
+  "native_existing_controls": [
+    "Azimuth270 synchronizes Keogram -90; fullscreen screenshot shows red circle and horizontal line with width2",
+    "Exit fullscreen and Reset restore diameter3000 offsets0 angle0 and unchecked line",
+    "Original Green/width5 style restored",
+    "Review draft retains profile asi678mc and requested helper2900/15/-20; actual offset fields show15/-20; no save"
+  ],
+  "deployment": {
+    "status": "not deployed"
+  }
+}

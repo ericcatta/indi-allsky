@@ -18,6 +18,11 @@
     let loaded = false;
     function message(text) { status.textContent = text; }
     function values() {
+        const azimuth = fields.AZIMUTH_ANGLE.value.trim();
+        if (!azimuth || !Number.isFinite(Number(azimuth)) || Number(azimuth) < 0 || Number(azimuth) >= 360) {
+            message('Azimuth must be between 0° and 359.9°.');
+            return null;
+        }
         const numbers = ['IMAGE_CIRCLE_DIAMETER', 'OFFSET_X', 'OFFSET_Y', 'LINE_WIDTH', 'KEOGRAM_ANGLE'];
         const result = Object.fromEntries(numbers.map(name => [name, fields[name].value.trim() === '' ? NaN : Number(fields[name].value)]));
         const valid = numbers.every(name => Number.isFinite(result[name]))
