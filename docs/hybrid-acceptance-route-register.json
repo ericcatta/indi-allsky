@@ -4309,6 +4309,24 @@
           "control": "Navigation drawer / Timelapse Settings",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/settings/timelapse"
+        },
+        {
+          "source": "testing/evidence/hybrid-timelapse-nine-native-20261001.json",
+          "record": "controls[0]",
+          "control": "Save 9-frame smoothing",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-timelapse-nine-native-20261001.json",
+          "record": "controls[1]",
+          "control": "Disable smoothing",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-timelapse-nine-native-20261001.json",
+          "record": "controls[2]",
+          "control": "Restore recommended default",
+          "recorded_status": "superato"
         }
       ]
     },

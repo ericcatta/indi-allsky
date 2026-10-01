@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-01",
+  "application_commit": "ffb4335c",
+  "environment": "Native browser localhost:18119 tunneled to isolated Flask fixture on Pi; temporary SQLite and synthetic accounts; mutation routes restricted to login and timelapse settings",
+  "controls": [
+    {
+      "page": "/modern-admin/settings/timelapse",
+      "control": "Save 9-frame smoothing",
+      "role": "administrator fixture account",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "request": "POST form with native CSRF and revision fields",
+      "expected": "Persist the selected shared TIMELAPSE options only",
+      "observed": "Success redirect preserves camera 2/profile 2; reopening from camera 1 shows the shared 9-frame value.",
+      "revision": 2,
+      "saved": {
+        "DEFLICKER": true,
+        "DEFLICKER_WINDOW": 9
+      },
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/settings/timelapse",
+      "control": "Disable smoothing",
+      "role": "administrator fixture account",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request": "POST form with native CSRF and revision fields",
+      "expected": "Persist the selected shared TIMELAPSE options only",
+      "observed": "Success redirect preserves camera 1/profile 1; database stores false and retains window 9.",
+      "revision": 3,
+      "saved": {
+        "DEFLICKER": false,
+        "DEFLICKER_WINDOW": 9
+      },
+      "status": "superato"
+    },
+    {
+      "page": "/modern-admin/settings/timelapse",
+      "control": "Restore recommended default",
+      "role": "administrator fixture account",
+      "camera_id": 1,
+      "profile_id": "test-profile-1",
+      "request": "POST form with native CSRF and revision fields",
+      "expected": "Persist the selected shared TIMELAPSE options only",
+      "observed": "Save then page reload shows checked filter and selected 5 frames; persisted revision agrees.",
+      "revision": 4,
+      "saved": {
+        "DEFLICKER": true,
+        "DEFLICKER_WINDOW": 5
+      },
+      "status": "superato"
+    }
+  ],
+  "encoding": {
+    "source": "Actual TIMELAPSE dictionaries read from the three browser-created config revisions",
+    "frames": 30,
+    "source_dimensions": [
+      64,
+      48
+    ],
+    "output_dimensions": [
+      32,
+      24
+    ],
+    "decoded_frames_each": 30,
+    "adjacent_brightness_rms": {
+      "enabled_9": 2.652259934210953,
+      "disabled": 16.0,
+      "enabled_5": 2.9361010975735176
+    },
+    "source_sha256_unchanged": true,
+    "other_config_domains_unchanged": true,
+    "log": "/home/eric/hybrid-timelapse-nine-20261001.log",
+    "log_sha256": "cc4a1a1631481ba46e5b454e50ab8ffab476faa7e0f42d37cfe3d60d957ef579"
+  },
+  "cleanup": {
+    "server_stopped": true,
+    "tunnel_stopped": true,
+    "temporary_database_removed": true,
+    "production_config_revision_unchanged": 118
+  },
+  "limits": [
+    "Synthetic alternating brightness proves the saved filter affects actual encoding, not subjective quality on every real sky scene.",
+    "No production setting or source image changed; no capture restart required.",
+    "Existing 3-frame, CSRF, stale-revision and ordinary-user authorization tests passed in the 178-check regression recorded in hybrid-worker-rollback-20261001.json.",
+    "No 24-hour or external integration acceptance."
+  ]
+}
