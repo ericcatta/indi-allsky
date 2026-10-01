@@ -30,8 +30,10 @@ class ObservatoryRuntime:
             result['tasks_error'] = 'Task records could not be read. Queue health is unknown.'
         try:
             usage = shutil.disk_usage(config['IMAGE_FOLDER'])
+            # Match Storage/df: reserved blocks are not available to capture.
+            usable = usage.used + usage.free
             result['storage'] = {'total': usage.total, 'used': usage.used, 'free': usage.free,
-                                 'percent': round(100 * usage.used / usage.total, 1) if usage.total else None}
+                                 'percent': round(100 * usage.used / usable, 1) if usable else None}
         except (OSError, KeyError, TypeError):
             logger.exception('Observatory media filesystem unavailable')
             result['storage_error'] = 'The configured media filesystem could not be inspected.'

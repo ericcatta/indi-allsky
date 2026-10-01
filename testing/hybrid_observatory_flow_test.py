@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import html
 import re
 from unittest.mock import patch
+from types import SimpleNamespace
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_generation_fixture import seed_generation
 from hybrid_source_media_fixture import seed_source_media
@@ -43,6 +44,11 @@ def run():
             assert all(source['latest'] for c in snapshot['cameras'] for source in c['sources'])
             assert {(r['state'],r['count']) for r in snapshot['tasks']}=={('Queued',2),('Failed',1)}
             assert snapshot['storage']['total']>0
+            for total, used, free, percent in ((100, 80, 10, 88.9), (100, 80, 20, 80.0), (100, 100, 0, 100.0), (0, 0, 0, None)):
+                with patch('indi_allsky.observatory_runtime.shutil.disk_usage',
+                           return_value=SimpleNamespace(total=total, used=used, free=free)):
+                    storage = ObservatoryRuntime().snapshot(config, now)['storage']
+                assert storage == dict(total=total, used=used, free=free, percent=percent), storage
         endpoint='/indi-allsky/modern-admin/observatory'
         for uid in (1,2):
             client=login_client(app,uid)
