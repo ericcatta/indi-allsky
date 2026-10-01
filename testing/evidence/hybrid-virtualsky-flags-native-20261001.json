@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-01",
+  "installed_application": "04388e02",
+  "installed_checkout": "99248661",
+  "route": "/modern-admin/observatory/virtualsky",
+  "role": "production administrator",
+  "camera_id": 2,
+  "profile_id": "asi678mc",
+  "method": "Native checkbox change, native PNG export, receipt and full Pillow decoding followed by visual inspection. Reset preview between independent variants.",
+  "controls": [
+    {
+      "control": "constellation-lines-off",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790870698.png",
+      "bytes": 690570,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "6db17c0c2ac418f9dc41ffff09f3091aa76071dbb3a9266b2edcd18f87b6af37",
+      "status": "superato",
+      "observed": "Constellation connecting lines absent; stellar points, star labels and planet labels remain. Galaxy outline and coordinate grid are not constellation lines."
+    },
+    {
+      "control": "constellation-labels-on",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790870713.png",
+      "bytes": 746782,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "3e94b258d0f26b1353be35b23cc337f4a3f8468851cf06294c5b09a21306505d",
+      "status": "superato",
+      "observed": "Constellation names (e.g. Orsa Maggiore, Dragone, Cigno) appear alongside the restored constellation lines."
+    },
+    {
+      "control": "stars-off",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790870743.png",
+      "bytes": 711768,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "329588e61724fb846cb57f48de9d7d711c8f091b249bef86589d36f2d453bc43",
+      "status": "superato",
+      "observed": "Stellar points absent while star labels and constellation lines remain."
+    },
+    {
+      "control": "star-labels-off",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790870758.png",
+      "bytes": 721166,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "117f1545bad215f67f8b7a0660af835502ea78869c4181d52f2c5d67a78c827c",
+      "status": "superato",
+      "observed": "Star names absent while stellar points and planet names remain."
+    },
+    {
+      "control": "planets-off",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790870788.png",
+      "bytes": 727115,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "530849697e7ee236d9f5aaf16efdda66514733b2143710564af54b2dddf4900b",
+      "status": "superato",
+      "observed": "Sun disk absent while its Sole label remains; stellar points and names remain."
+    },
+    {
+      "control": "planet-labels-off",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790870803.png",
+      "bytes": 725711,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "7e4044172f10b4a12e57d9c23ff04999cf8fd4e3a938b8fe3c4cf092ec2cfd2a",
+      "status": "superato",
+      "observed": "Sole and Mercurio labels absent while the Sun disk remains; star labels remain."
+    },
+    {
+      "control": "reset-default-flags",
+      "file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790870833.png",
+      "bytes": 728237,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "164effbc05c68ffb795d63ab2547125a7a6d6a1875898f80ed0cebe7648d83f3",
+      "status": "superato",
+      "observed": "Default checkbox values restored: lines/stars/star labels/planets/planet labels on, constellation labels off. Export again shows constellation lines, stellar points/names and Sun disk/name."
+    }
+  ],
+  "limits": [
+    "One camera/profile, role and desktop preview at the current sky time.",
+    "Live source frames updated between variants; outcomes compare specific visible overlay features, not whole-image pixel identity.",
+    "Does not certify astronomical pointing accuracy, every numeric alignment setting, or all flag combinations.",
+    "Underlying camera image has its own labels; these tests concern the VirtualSky overlay features named in each observation."
+  ],
+  "cleanup": "Final reset verified visually and by live checkbox values; temporary tab closed. Seven received PNGs remain in Mac Downloads. No configuration save or hardware effect."
+}

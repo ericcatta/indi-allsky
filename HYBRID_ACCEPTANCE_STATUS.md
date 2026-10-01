@@ -93,6 +93,11 @@ Reset preview on camera 2. CSV/Excel native clicks still return HTTP 200 without
 a verified received file; PNG success does not close that separate transport
 check. [Validation and export limits](testing/evidence/hybrid-export-validation-native-20261001.json).
 
+All six VirtualSky object switches were individually exercised on camera 2 and
+verified in received PNGs, followed by a verified default reset. This establishes
+the named display effects, not pointing accuracy or every option combination.
+[Object switches](testing/evidence/hybrid-virtualsky-flags-native-20261001.json).
+
 Other bounded checks—including Loop, users, notifications, observatory tools,
 mobile layouts, provider failures and operations—remain linked in the
 [route evidence register](docs/hybrid-acceptance-route-register.md).

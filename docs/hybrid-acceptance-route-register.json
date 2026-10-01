@@ -3235,6 +3235,48 @@
           "record": "controls[3]",
           "control": "Reset preview after invalid diameter (1 October native check)",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-flags-native-20261001.json",
+          "record": "controls[0]",
+          "control": "constellation-lines-off (camera 2; native exported result)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-flags-native-20261001.json",
+          "record": "controls[1]",
+          "control": "constellation-labels-on (camera 2; native exported result)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-flags-native-20261001.json",
+          "record": "controls[2]",
+          "control": "stars-off (camera 2; native exported result)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-flags-native-20261001.json",
+          "record": "controls[3]",
+          "control": "star-labels-off (camera 2; native exported result)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-flags-native-20261001.json",
+          "record": "controls[4]",
+          "control": "planets-off (camera 2; native exported result)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-flags-native-20261001.json",
+          "record": "controls[5]",
+          "control": "planet-labels-off (camera 2; native exported result)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-flags-native-20261001.json",
+          "record": "controls[6]",
+          "control": "reset-default-flags (camera 2; native exported result)",
+          "recorded_status": "superato"
         }
       ]
     },
